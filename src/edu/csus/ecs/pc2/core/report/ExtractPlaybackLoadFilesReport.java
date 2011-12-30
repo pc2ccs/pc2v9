@@ -72,7 +72,7 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         // remove report/ from targetdirectory to make it relative to the load list file (report file)
         outputFileName = removeUpTo(targetDirectory, File.separator).substring(1) + universalFileSeparator + mainFileName;
         
-        writeValues(printWriter, PlaybackManager.ACTION_KEY, ReplayEvent.Action.RUN_SUBMIT.toString());
+        writeValues(printWriter, PlaybackManager.ACTION_KEY, ReplayEvent.EventType.RUN_SUBMIT.toString());
         writeValues(printWriter, PlaybackManager.ID_KEY, run.getNumber());
         writeValues(printWriter, PlaybackManager.ELAPSED_KEY, run.getElapsedMins());
         writeValues(printWriter, PlaybackManager.LANGUAGE_KEY, contest.getLanguage(run.getLanguageId()).getDisplayName());
@@ -90,7 +90,7 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
     }
 
     private void writeJudgementRecord(PrintWriter printWriter, Run run, JudgementRecord judgementRecord) {
-        writeValues(printWriter, PlaybackManager.ACTION_KEY, ReplayEvent.Action.RUN_JUDGEMENT.toString());
+        writeValues(printWriter, PlaybackManager.ACTION_KEY, ReplayEvent.EventType.RUN_JUDGEMENT.toString());
         writeValues(printWriter, PlaybackManager.ID_KEY, run.getNumber());
         writeValues(printWriter, PlaybackManager.SITE_KEY, run.getSiteNumber());
         

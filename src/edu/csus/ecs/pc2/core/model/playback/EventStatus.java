@@ -1,7 +1,10 @@
 package edu.csus.ecs.pc2.core.model.playback;
 
 /**
- * Playback Event Status.
+ * List of event states.
+ * 
+ * States like: {@link #PENDING}, {@link #IN_PROGRESS}, {@link #COMPLETED}.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */

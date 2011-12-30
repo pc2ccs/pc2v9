@@ -3,14 +3,16 @@ package edu.csus.ecs.pc2.core.model.playback;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IElementObject;
-import edu.csus.ecs.pc2.core.model.ISubmission;
-import edu.csus.ecs.pc2.core.model.JudgementRecord;
-import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
- * A single playback event.
+ * Defines a playback event.
  * 
+ * A playback event {@link ReplayEvent} is tracked during playback
+ * using a {@link PlaybackRecord}.  Details (files, run info, clar info) for
+ * this event is present in the {@link ReplayEventDetails}.
+ * 
+ * @see ReplayEventDetails
+ * @see PlaybackRecord
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -19,16 +21,23 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 public class ReplayEvent implements IElementObject {
 
     /**
-     * Actions for playback.
+     * 
+     */
+    private static final long serialVersionUID = -2096823165590915352L;
+
+    /**
+     * Type of event.
+     * 
+     * {@link #RUN_SUBMIT}, {@link #RUN_JUDGEMENT}, etc.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-
+    
     // $HeadURL$
-    public enum Action {
+    public enum EventType {
         /**
-         * Undefined action.
+         * Undefined eventType.
          */
         UNDEFINED,
         /**
@@ -36,20 +45,22 @@ public class ReplayEvent implements IElementObject {
          */
         RUN_SUBMIT,
         /**
-         * Submit a run judgement.
+         * a run judgement.
          */
         RUN_JUDGEMENT,
+        /**
+         * Team submits a Clarification.
+         */
+        CLAR_SUBMIT,
+        /**
+         * A clarification answer.
+         */
+        CLAR_ANSWER
     }
 
     private ElementId elementId = null;
 
-    private Action action = Action.UNDEFINED;
-
     private int sequenceId = 0;
-
-    private Run run = null;
-
-    private ISubmission submission = null;
 
     private ClientId submitterId;
 
@@ -57,60 +68,51 @@ public class ReplayEvent implements IElementObject {
 
     private long eventTime;
 
-    private EventStatus eventStatus = EventStatus.INVALID;
+    private EventType eventType = EventType.UNDEFINED;
+    
+    private ReplayEventDetails eventDetails = null;
 
-    private SerializedFile[] files = new SerializedFile[0];
-
-    private JudgementRecord judgementRecord;
-
-    public JudgementRecord getJudgementRecord() {
-        return judgementRecord;
+    @SuppressWarnings("unused")
+    private ReplayEvent() {
+        super();
     }
-
-    public void setJudgementRecord(JudgementRecord judgementRecord) {
-        this.judgementRecord = judgementRecord;
-    }
-
-    public SerializedFile[] getFiles() {
-        return files;
-    }
-
-    public void setFiles(SerializedFile[] files) {
-        this.files = files;
-    }
-
+    
     /**
+     * Shallow clone.
      * 
+     * @param replayEvent
      */
-    private static final long serialVersionUID = -8414973988906358491L;
-
-    public ReplayEvent(Action action, ClientId clientId) {
-        this.action = action;
-        this.clientId = clientId;
-    }
-
-    public ReplayEvent(Action action, ClientId clientId, Run run) {
-        this.action = action;
-        this.run = run;
-        this.submission = run;
-        this.clientId = clientId;
-        submitterId = run.getSubmitter();
-        eventStatus = EventStatus.PENDING;
-        eventTime = run.getElapsedMins();
+    protected ReplayEvent (ReplayEvent replayEvent) {
+        this(replayEvent.getEventType(), replayEvent.getClientId());
+        setElementId(replayEvent.getElementId());
+        sequenceId = replayEvent.getSequenceId();
+        submitterId= replayEvent. getSubmitterId();
+        eventTime= replayEvent. getEventTime();
+        /**
+         * Do not clone details, thus the shallow clone.
+         */
+         eventDetails = null;
     }
     
-    public ReplayEvent(Action action, ClientId clientId, Run run, JudgementRecord judgementRecord) {
-        this(action, clientId, run);
-        this.judgementRecord = judgementRecord;
+    private void setElementId(ElementId elementId) {
+        this.elementId = elementId;
+    }
+
+    public ReplayEvent(EventType eventType, ClientId clientId) {
+        this.eventType = eventType;
+        this.clientId = clientId;
+        elementId = new ElementId("ReplayEvent");
     }
     
-
-    public long etElapsedMins() {
-        return submission.getElapsedMins();
+    public ReplayEvent(EventType eventType, ClientId clientId, int sequence) {
+        this.eventType = eventType;
+        this.clientId = clientId;
+        this.sequenceId = sequence;
+        elementId = new ElementId("ReplayEvent");
     }
-
-    public Action getAction() {
-        return action;
+    
+    public EventType getEventType() {
+        return eventType;
     }
 
     /**
@@ -126,11 +128,6 @@ public class ReplayEvent implements IElementObject {
 
     public ElementId getElementId() {
         return elementId;
-
-    }
-
-    public Run getRun() {
-        return run;
     }
 
     /**
@@ -140,10 +137,6 @@ public class ReplayEvent implements IElementObject {
      */
     public int getSequenceId() {
         return sequenceId;
-    }
-
-    public int getSiteNumber() {
-        return elementId.getSiteNumber();
     }
 
     /**
@@ -157,16 +150,16 @@ public class ReplayEvent implements IElementObject {
         return submitterId;
     }
 
-    public void setClientId(ClientId clientId) {
-        this.clientId = clientId;
-    }
-
+    /**
+     * @deprecated use constructor {@link #ReplayEvent(EventType, ClientId, int)}
+     * @param sequenceId
+     */
     public void setSequenceId(int sequenceId) {
         this.sequenceId = sequenceId;
     }
 
     public void setSiteNumber(int siteNumber) {
-        // TODO can not set site number, no visibility in ElementId
+        // TODO Arch can not set site number, no visibility in ElementId
         // elementId.setSiteNumber(siteNumber);
     }
 
@@ -178,6 +171,10 @@ public class ReplayEvent implements IElementObject {
         return elementId.getVersionNumber();
     }
 
+    public int getSiteNumber() {
+        return elementId.getSiteNumber();
+    }
+
     /**
      * Elapsed time (minutes) when this event happened.
      * 
@@ -186,20 +183,22 @@ public class ReplayEvent implements IElementObject {
     public long getEventTime() {
         return eventTime;
     }
-
-    public int getId() {
-        if (run != null) {
-            return run.getNumber();
-        } else {
-            return 0;
-        }
+    
+    public void setEventDetails(ReplayEventDetails eventDetails) {
+        this.eventDetails = eventDetails;
+    }
+    
+    public ReplayEventDetails getEventDetails() {
+        return eventDetails;
+    }
+    
+    public ReplayEvent shallowClone (ReplayEvent inEvent) {
+        return new ReplayEvent(inEvent);
+    }
+    
+    @Override
+    public String toString() {
+        return "Replay " + eventType+" at "+eventTime+" by "+clientId+" details: "+eventDetails;
     }
 
-    public EventStatus getEventStatus() {
-        return eventStatus;
-    }
-
-    public void setEventStatus(EventStatus eventStatus) {
-        this.eventStatus = eventStatus;
-    }
 }

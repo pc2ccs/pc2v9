@@ -7,7 +7,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
 
 /**
- * Information about play back event.
+ * General and status information about a playback.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$

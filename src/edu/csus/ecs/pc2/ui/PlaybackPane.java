@@ -43,10 +43,11 @@ import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.playback.EventStatus;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
+import edu.csus.ecs.pc2.core.model.playback.PlaybackRecord;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
-import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.Action;
+import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.EventType;
+import edu.csus.ecs.pc2.core.model.playback.ReplayEventDetails;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
@@ -219,43 +220,49 @@ public class PlaybackPane extends JPanePlugin {
         });
     }
 
-    public String[] buildPlayBackRow(ReplayEvent playbackEvent) {
+    public String[] buildPlayBackRow(PlaybackRecord playbackRecord) {
         String[] strings = new String[eventsListBox.getColumnCount()];
 
         // Object[] cols = { "Seq", "Site", "Who", "Event", "Id", "When", "State", "Details" };
+        
+        ReplayEvent replayEvent= playbackRecord.getReplayEvent();
+        ReplayEventDetails details =  replayEvent.getEventDetails();
 
-        strings[0] = "" + playbackEvent.getSequenceId();
-        strings[1] = Integer.toString(playbackEvent.getClientId().getSiteNumber());
-        Site site = getContest().getSite(playbackEvent.getClientId().getSiteNumber());
+        strings[0] = "" + playbackRecord.getSequenceNumber();
+        strings[1] = Integer.toString(replayEvent.getClientId().getSiteNumber());
+        Site site = getContest().getSite(replayEvent.getClientId().getSiteNumber());
         if (site != null) {
             String name = site.getDisplayName();
-            strings[1] = Integer.toString(playbackEvent.getClientId().getSiteNumber()) + " " + stringElipsis(name, 11) + " ";
+            strings[1] = Integer.toString(replayEvent.getClientId().getSiteNumber()) + " " + stringElipsis(name, 11) + " ";
         }
-        strings[2] = playbackEvent.getClientId().getName();
-        strings[3] = playbackEvent.getAction().toString();
-        strings[4] = Integer.toString(playbackEvent.getId());
-        strings[5] = Long.toString(playbackEvent.getEventTime());
-        strings[6] = "" + playbackEvent.getEventStatus();
+        strings[2] = replayEvent.getClientId().getName();
+        strings[3] = replayEvent.getEventType().toString();
+        strings[4] = Integer.toString(playbackRecord.getId());
+        strings[5] = Long.toString(replayEvent.getEventTime());
+        strings[6] = "" + playbackRecord.getEventStatus();
 
-        if (playbackEvent.getAction().equals(ReplayEvent.Action.RUN_SUBMIT)) {
+        switch (playbackRecord.getReplayEvent().getEventType()) {
+            case RUN_SUBMIT:
+                strings[7] = getDetails(playbackRecord);
+                break;
 
-            strings[7] = getDetails(playbackEvent);
+            case RUN_JUDGEMENT:
+                JudgementRecord judgementRecord = details.getJudgementRecord();
+                ElementId id = judgementRecord.getJudgementId();
+                if (id != null) {
+                    Judgement judgement = getContest().getJudgement(id);
+                    strings[7] = judgement.getDisplayName();
+                } else {
+                    strings[7] = "Undefined judgement: " + id;
 
-        } else if (playbackEvent.getAction().equals(ReplayEvent.Action.RUN_JUDGEMENT)) {
+                }
+                break;
+            default:
+                Arrays.fill(strings, "");
+                strings[0] = "" + playbackRecord.getSequenceNumber();
+                strings[3] = ReplayEvent.EventType.UNDEFINED.toString();
+                break;
 
-            JudgementRecord judgementRecord = playbackEvent.getJudgementRecord();
-            ElementId id = judgementRecord.getJudgementId();
-            if (id != null) {
-                Judgement judgement = getContest().getJudgement(id);
-                strings[7] = judgement.getDisplayName();
-            } else {
-                strings[7] = "Undefined judgement: " + id;
-
-            }
-        } else {
-            Arrays.fill(strings, "");
-            strings[0] = "" + playbackEvent.getSequenceId();
-            strings[3] = ReplayEvent.Action.UNDEFINED.toString();
         }
 
         return strings;
@@ -269,9 +276,10 @@ public class PlaybackPane extends JPanePlugin {
         }
     }
 
-    private String getDetails(ReplayEvent event) {
+    private String getDetails(PlaybackRecord record) {
 
-        Run run = event.getRun();
+        ReplayEvent event = record.getReplayEvent();
+        Run run = event.getEventDetails().getRun();
 
         String probName = "?";
         ElementId problemId = run.getProblemId();
@@ -297,10 +305,10 @@ public class PlaybackPane extends JPanePlugin {
     public void addSampleEventRows() {
 
         ClientId clientId = new ClientId(2, Type.TEAM, 22);
-        ReplayEvent playbackEvent = new ReplayEvent(Action.UNDEFINED, clientId);
+        ReplayEvent playbackEvent = new ReplayEvent(EventType.UNDEFINED, clientId);
 
-        playbackEvent.setSequenceId(eventsListBox.getRowCount());
-        String[] row = buildPlayBackRow(playbackEvent);
+        PlaybackRecord record = createNewPlayback (playbackEvent, eventsListBox.getRowCount());  
+        String[] row = buildPlayBackRow(record);
 
         eventsListBox.addRow(row);
         eventsListBox.autoSizeAllColumns();
@@ -308,6 +316,10 @@ public class PlaybackPane extends JPanePlugin {
             eventsListBox.autoSizeColumn(i);
         }
 
+    }
+
+    private PlaybackRecord createNewPlayback(ReplayEvent replayEvent, int sequenceNumber) {
+        return new PlaybackRecord(replayEvent, sequenceNumber);
     }
 
     /**
@@ -418,13 +430,15 @@ public class PlaybackPane extends JPanePlugin {
                                 }
                             });
 
-                            playbackManager.executeEvent(playbackEvent, getContest(), getController());
+                            final PlaybackRecord record = createNewPlayback (playbackEvent, playbackManager.getNextSequenceNumber());
+
+                            playbackManager.executeEvent(record, getContest(), getController());
 
                             final int rowNumber = i;
 
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
-                                    final String[] row = buildPlayBackRow(playbackEvent);
+                                    final String[] row = buildPlayBackRow(record);
                                     getEventsListBox().replaceRow(row, rowNumber - 1);
                                     getEventsListBox().autoSizeAllColumns();
                                 }
@@ -556,15 +570,14 @@ public class PlaybackPane extends JPanePlugin {
         
         int rowCount = getEventsListBox().getRowCount();
 
-        ReplayEvent [] playbacks = new ReplayEvent[rowCount];
+        PlaybackRecord [] playbacks = new PlaybackRecord[rowCount];
         Object [][] rowValues = new Object[rowCount][eventsListBox.getColumnCount()];
 
         for (int i = 0; i < rowCount; i++) {
-            ReplayEvent playbackEvent = (ReplayEvent) eventsListBox.getKeys()[i];
-            playbackEvent.setSequenceId(i+1);
-            playbackEvent.setEventStatus(EventStatus.PENDING);
-            playbacks[i] = playbackEvent;
-            rowValues[i] = buildPlayBackRow(playbackEvent);
+            PlaybackRecord record = (PlaybackRecord) eventsListBox.getKeys()[i];
+            PlaybackRecord newRecord  = createNewPlayback(record.getReplayEvent(), playbackManager.getNextSequenceNumber());
+            playbacks[i] = newRecord;
+            rowValues[i] = buildPlayBackRow(record);
         }
         
         getEventsListBox().removeAllRows();
@@ -707,12 +720,14 @@ public class PlaybackPane extends JPanePlugin {
             return;
         }
         
-        ReplayEvent playbackEvent = (ReplayEvent) eventsListBox.getKeys()[currentEventNumber - 1];
         try {
+            PlaybackRecord record = (PlaybackRecord) eventsListBox.getKeys()[currentEventNumber - 1];
+            
             currentEventLabel.setText("At event " + playbackManager.getSequenceNumber());
-            playbackManager.executeEvent(playbackEvent, getContest(), getController());
 
-            String[] row = buildPlayBackRow(playbackEvent);
+            playbackManager.executeEvent(record, getContest(), getController());
+
+            String[] row = buildPlayBackRow(record);
 
             getEventsListBox().replaceRow(row, currentEventNumber - 1);
             getEventsListBox().autoSizeAllColumns();
@@ -759,8 +774,8 @@ public class PlaybackPane extends JPanePlugin {
                     playbackInfo.setPlaybackList(playbackEvents);
                     
                     for (ReplayEvent playbackEvent : playbackEvents) {
-                        playbackEvent.setSequenceId(eventsListBox.getRowCount()+1);
-                        String[] row = buildPlayBackRow(playbackEvent);
+                        PlaybackRecord record = createNewPlayback (playbackEvent, playbackManager.getNextSequenceNumber());
+                        String[] row = buildPlayBackRow(record);
                         getEventsListBox().addRow(row, playbackEvent);
                     }
                     getEventsListBox().autoSizeAllColumns();

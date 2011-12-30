@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -16,19 +17,27 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
-import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.Action;
+import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.EventType;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 
 /**
- * Playback manager.
+ * Loads and Manages playback (events) for previous contests.
  * 
+ * A {@link PlaybackManager} has methods to load {@link ReplayEvent}s and
+ * {@link ReplayEventDetails} for events to be re-played/run.
+ * 
+ * The {@link PlaybackManager} contains methods to maage the play
+ * back of {@link ReplayEvent}s and create {@link PlaybackRecord}s that
+ * contain the state of each {@link ReplayEvent}.
+ * 
+ * @see ReplayEvent
+ * @see PlaybackRecord
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -37,7 +46,7 @@ import edu.csus.ecs.pc2.core.packet.PacketFactory;
 // $HeadURL$
 public class PlaybackManager {
 
-    public static final String ACTION_KEY = "action";
+    public static final String ACTION_KEY = "eventType";
 
     public static final String ID_KEY = "id";
 
@@ -98,7 +107,7 @@ public class PlaybackManager {
 //            Run run = new Run(clientId, language, problem);
 //            run.setElapsedMins(i + 45);
 //
-//            ReplayEvent playbackEvent = new ReplayEvent(Action.RUN_SUBMIT, clientId, run);
+//            ReplayEvent playbackEvent = new ReplayEvent(EventType.RUN_SUBMIT, clientId, run);
 //
 //            events.add(playbackEvent);
 //        }
@@ -110,6 +119,8 @@ public class PlaybackManager {
         int invalidLines = 0;
         int lineNumber = 0;
         Exception savedException = null;
+        
+        int eventCount = 1;
         
         for (String s : lines) {
             try {
@@ -123,9 +134,10 @@ public class PlaybackManager {
                     continue;
                 }
                 
-                ReplayEvent playbackEvent = createPlayBackEvent(lineNumber, contest, s, "[|]", sourceDirectory, events);
+                ReplayEvent playbackEvent = createPlayBackEvent(lineNumber, contest, s, "[|]", sourceDirectory, events, eventCount);
                 if (playbackEvent != null) {
                     events.add(playbackEvent);
+                    eventCount ++;
                 } else {
                     invalidLines++;
                     System.out.println("Line "+lineNumber+": unable to parse line: " + s);
@@ -169,7 +181,7 @@ public class PlaybackManager {
      * The string is delimited by |
      * 
      * <pre>
-     * action=submitrun|judgement##
+     * eventType=submitrun|judgement##
      * site=##
      * submitClient=team##|judge##|admin##
      * id=##
@@ -187,10 +199,12 @@ public class PlaybackManager {
      * @param s
      * @param delimit
      * @param events 
+     * @param sequenceNumber2 
      * @return
      * @throws PlaybackParseException
      */
-    protected ReplayEvent createPlayBackEvent(int lineNumber, IInternalContest contest, String s, String delimit, String sourceDir, Vector<ReplayEvent> events) throws PlaybackParseException {
+    protected ReplayEvent createPlayBackEvent(int lineNumber, IInternalContest contest, String s, String delimit, String sourceDir, Vector<ReplayEvent> events, int eventCount)
+            throws PlaybackParseException {
 
         String[] fields = s.split(delimit);
 
@@ -202,12 +216,12 @@ public class PlaybackManager {
 
         Properties properties = mapFieldsNameValuePairs(fields);
 
-        String command = getAndCheckValue(properties, ACTION_KEY, "action name/value", lineNumber);
+        String command = getAndCheckValue(properties, ACTION_KEY, "eventType name/value", lineNumber);
 
-        Action action = Action.UNDEFINED;
+        EventType eventType = EventType.UNDEFINED;
         
-        if (command.equalsIgnoreCase(Action.RUN_SUBMIT.toString())){
-            action = ReplayEvent.Action.RUN_SUBMIT;
+        if (command.equalsIgnoreCase(EventType.RUN_SUBMIT.toString())){
+            eventType = ReplayEvent.EventType.RUN_SUBMIT;
             String problemName = getAndCheckValue(properties, PROBLEM_KEY, "Problem name", lineNumber);
             String languageName = getAndCheckValue(properties, LANGUAGE_KEY, "Language name", lineNumber);
             String mainfileName = getAndCheckValue(properties, MAINFILE_KEY, "Main filename", lineNumber);
@@ -255,15 +269,15 @@ public class PlaybackManager {
             run.setElapsedMins(getIntegerValue(elapsedTimeStr));
             run.setNumber(number);
             
-            playbackEvent= new ReplayEvent(action, clientId, run);
-            playbackEvent.setClientId(clientId);
-            playbackEvent.setFiles(files);
+            playbackEvent = new ReplayEvent(eventType, clientId, eventCount);
+            ReplayEventDetails details = new ReplayEventDetails(playbackEvent, run, files);
+            playbackEvent.setEventDetails(details);
 
             // TODO aux files, someday, maybe
             
-        } else if (command.equalsIgnoreCase(Action.RUN_JUDGEMENT.toString())) {
+        } else if (command.equalsIgnoreCase(EventType.RUN_JUDGEMENT.toString())) {
             
-            action = ReplayEvent.Action.RUN_JUDGEMENT;
+            eventType = EventType.RUN_JUDGEMENT;
             String siteId = getAndCheckValue(properties, SITE_KEY, "Site number", lineNumber);
             
             String idStr = getAndCheckValue(properties, ID_KEY, "run/clar number", lineNumber);
@@ -314,14 +328,15 @@ public class PlaybackManager {
             judgementRecord.setPreliminaryJudgement(preliminaryJudged);
             judgementRecord.setSendToTeam(sendToTeam);
             
-            playbackEvent= new ReplayEvent(action, judgeClientId, run, judgementRecord);
-            playbackEvent.setClientId(clientId);
+            playbackEvent = new ReplayEvent(eventType, clientId, eventCount);
+            ReplayEventDetails details = new ReplayEventDetails(playbackEvent, run, judgementRecord);
+            playbackEvent.setEventDetails(details);
 
             
         } else {
             throw new PlaybackParseException(lineNumber, "Unknown event: " + command);
         }
-
+        
         return playbackEvent;
     }
 
@@ -360,8 +375,8 @@ public class PlaybackManager {
         int siteId = getIntegerValue(siteIdString);
         
         for (ReplayEvent event : events){
-            if (event.getAction().equals(Action.RUN_SUBMIT)){
-                Run run = event.getRun();
+            if (event.getEventType().equals(EventType.RUN_SUBMIT)){
+                Run run = event.getEventDetails().getRun();
                 if (run.getNumber() == number && (run.getSiteNumber() == siteId)){
                     return run;
                 }
@@ -483,36 +498,49 @@ public class PlaybackManager {
         System.out.print(key + "=" + value + DELIMITER + " ");
     }
 
-    private void dump(String message, ReplayEvent playbackEvent) {
+    private void dump(String message, PlaybackRecord playbackRecord) {
 
-        Run run = playbackEvent.getRun();
-
+        ReplayEventDetails details = playbackRecord.getReplayEvent().getEventDetails();
+        
         System.out.println(message);
-        writeValues(PlaybackManager.ACTION_KEY, playbackEvent.getAction().toString());
-        writeValues(PlaybackManager.ID_KEY, run.getNumber());
-        writeValues(PlaybackManager.ELAPSED_KEY, run.getElapsedMins());
-        writeValues(PlaybackManager.LANGUAGE_KEY, run.getLanguageId().toString());
-        writeValues(PlaybackManager.PROBLEM_KEY, run.getProblemId().toString());
-        writeValues(PlaybackManager.SITE_KEY, run.getSiteNumber());
-        writeValues(PlaybackManager.SUBMIT_CLIENT_KEY, run.getSubmitter().getName());
-        writeValues("File size", playbackEvent.getFiles()[0].getBuffer().length);
+        
+        if (details != null && details.getRun() != null) {
+            
+            Run run = details.getRun();
+
+            writeValues(PlaybackManager.ACTION_KEY, playbackRecord.getEventType().toString());
+            writeValues(PlaybackManager.ID_KEY, run.getNumber());
+            writeValues(PlaybackManager.ELAPSED_KEY, run.getElapsedMins());
+            writeValues(PlaybackManager.LANGUAGE_KEY, run.getLanguageId().toString());
+            writeValues(PlaybackManager.PROBLEM_KEY, run.getProblemId().toString());
+            writeValues(PlaybackManager.SITE_KEY, run.getSiteNumber());
+            writeValues(PlaybackManager.SUBMIT_CLIENT_KEY, run.getSubmitter().getName());
+            writeValues("File size", details.getFiles()[0].getBuffer().length);
+            
+        } else {
+            System.out.println(" No run details for playback event "+playbackRecord.getSequenceNumber());
+        }
         System.out.println();
+      
     }
     
-    public void executeEvent(ReplayEvent playbackEvent, IInternalContest contest, IInternalController controller) throws Exception {
+    public void executeEvent(PlaybackRecord playbackRecord, IInternalContest contest, IInternalController controller) throws Exception {
 
-        if (Utilities.isDebugMode()){
-          dump("in executeEvent", playbackEvent);
+        ReplayEvent event = playbackRecord.getReplayEvent();
+        ReplayEventDetails details = event.getEventDetails();
+
+        if (Utilities.isDebugMode()) {
+            dump("in executeEvent", playbackRecord);
         }
 
-        switch (playbackEvent.getAction()) {
+        switch (playbackRecord.getEventType()) {
             case RUN_SUBMIT:
-                SerializedFile file = playbackEvent.getFiles()[0];
+                SerializedFile file = details.getFiles()[0];
                 SerializedFile[] files = new SerializedFile[1];
                 files[0] = file;
 
-                RunFiles runFiles = new RunFiles(playbackEvent.getRun(), file, new SerializedFile[0]);
-                Run theRun = playbackEvent.getRun();
+                RunFiles runFiles = new RunFiles(details.getRun(), file, new SerializedFile[0]);
+                Run theRun = details.getRun();
 
                 long savedElapsed = theRun.getElapsedMS();
                 Run newRun = contest.acceptRun(theRun, runFiles);
@@ -522,7 +550,7 @@ public class PlaybackManager {
                 }
 
                 sequenceNumber++;
-                playbackEvent.setEventStatus(EventStatus.COMPLETED);
+                playbackRecord.setEventStatus(EventStatus.COMPLETED);
                 
                 ClientId fromId = contest.getClientId();
                 // Send to team
@@ -536,14 +564,13 @@ public class PlaybackManager {
                 
             case RUN_JUDGEMENT:
         
-               
-                Run run = playbackEvent.getRun();
+                Run run = details.getRun();
                 
                 sendStatusMessge(contest, controller, run, RunExecutionStatus.COMPILING);
                 sendStatusMessge(contest, controller, run, RunExecutionStatus.EXECUTING);
                 sendStatusMessge(contest, controller, run, RunExecutionStatus.VALIDATING);
 
-                JudgementRecord judgement = playbackEvent.getJudgementRecord();
+                JudgementRecord judgement = details.getJudgementRecord();
                 
                 Run runToUpdate = contest.getRun(run.getElementId());
                 runToUpdate.addJudgement(judgement);
@@ -566,12 +593,12 @@ public class PlaybackManager {
                 }
 
                 sequenceNumber++;
-                playbackEvent.setEventStatus(EventStatus.COMPLETED);
+                playbackRecord.setEventStatus(EventStatus.COMPLETED);
                 
                 break;
 
             default:
-                throw new Exception(playbackEvent.getAction().toString());
+                throw new Exception("Event " + playbackRecord.getEventType()+" not implemented, yet");
         }
 
     }
@@ -626,6 +653,14 @@ public class PlaybackManager {
 
     public void rewind() {
         sequenceNumber = 1;
+    }
+
+    /**
+     * @deprecate use some other new parameterized method to get next sequence
+     * @return
+     */
+    public int getNextSequenceNumber() {
+        return sequenceNumber++;
     }
 
 }
