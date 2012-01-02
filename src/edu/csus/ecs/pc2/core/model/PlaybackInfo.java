@@ -4,10 +4,17 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.model.playback.PlaybackRecord;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
 
 /**
- * General and status information about a playback.
+ * Playback Information.
+ * 
+ * Has values and methods for list of events ({@link #getReplayList()}), sequenceNumber, filename, state ({@link #isStarted()}), etc.
+ * 
+ * <br>
+ * {@link ReplayEvent}s are the data for a replay, a {@link PlaybackRecord} is the actual record/status for
+ * each playback event.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -38,19 +45,26 @@ public class PlaybackInfo implements IElementObject {
 
     private Vector<ReplayEvent> playbackList = new Vector<ReplayEvent>();
 
-    private int currentEventIndex;
+    private int sequenceNumber = 0;
 
     private String filename = "";
-    
-    public PlaybackInfo(String displayName) {
+
+    public PlaybackInfo(String displayName, ReplayEvent [] events) {
         super();
         this.displayName = displayName;
         elementId = new ElementId(displayName);
         setSiteNumber(0);
+        if (events != null) {
+            setPlaybackList (events);
+        }
     }
 
+    public PlaybackInfo(ReplayEvent [] events) {
+        this("Playback", events);
+    }
+    
     public PlaybackInfo() {
-        this("Playback");
+        this("Playback", null);
     }
 
     /**
@@ -100,7 +114,7 @@ public class PlaybackInfo implements IElementObject {
     }
 
     public String toString() {
-        return displayName + " started "+isActive()+" seq " + currentEventIndex+" file "+filename;
+        return displayName + " started " + isActive() + " seq " + sequenceNumber + " file " + filename;
     }
 
     /**
@@ -146,8 +160,13 @@ public class PlaybackInfo implements IElementObject {
         return playbackList.size();
     }
 
-    int getCurrentEventIndex() {
-        return currentEventIndex;
+    public int getSequenceNumber() {
+        return sequenceNumber;
+    }
+
+    public int incrementSequenceNumber() {
+        sequenceNumber++;
+        return sequenceNumber;
     }
 
     public Date getDateStarted() {
@@ -157,30 +176,37 @@ public class PlaybackInfo implements IElementObject {
     public boolean isStarted() {
         return started;
     }
-    
+
     public void setStarted(boolean started) {
+        if (! isStarted() && (started)) {
+            dateStarted = new Date();
+        }
         this.started = started;
     }
 
-    ReplayEvent[] getReplayList() {
+    public ReplayEvent[] getReplayList() {
         return (ReplayEvent[]) playbackList.toArray(new ReplayEvent[playbackList.size()]);
     }
-    
+
     public void setFilename(String filename) {
         this.filename = filename;
     }
-    
+
     public String getFilename() {
         return filename;
     }
-    
+
     public void setPlaybackList(Vector<ReplayEvent> playbackList) {
         this.playbackList = playbackList;
     }
-    
-    public void setPlaybackList(ReplayEvent [] list) {
+
+    public void setPlaybackList(ReplayEvent[] list) {
         this.playbackList = new Vector<ReplayEvent>();
         playbackList.addAll(Arrays.asList(list));
     }
-    
+
+    public void rewind() {
+        sequenceNumber = 0;
+    }
+
 }

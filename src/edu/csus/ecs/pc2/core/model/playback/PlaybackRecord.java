@@ -6,10 +6,17 @@ import edu.csus.ecs.pc2.core.model.ISubmission;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.EventType;
 
 /**
- * Information about re-running of {@link ReplayEvent}.
+ * Run time (re-execute) information for a {@link ReplayEvent}.
  * 
- * When a {@link ReplayEvent} is run by the {@link PlaybackManager} a
- * {@link PlaybackRecord} is created.
+ * The {@link ReplayEvent} is the data for the replay, a {@link PlaybackRecord} is
+ * created for a {@link ReplayEvent}. 
+ * 
+ * <p>
+ * Each {@link PlaybackRecord} contains a reference to a {@link ReplayEvent}, {@link EventStatus},
+ * and a sequence number.
+ * <p>
+ * 
+ * The {@link PlaybackManager} creates, manages and executes {@link PlaybackRecord}s.
  * 
  * @see ReplayEvent
  * @see PlaybackManager
@@ -37,6 +44,7 @@ public class PlaybackRecord implements IElementObject {
         super();
         this.replayEvent = replayEvent;
         this.sequenceNumber = sequenceNumber;
+        reset();
     }
     
     public void setEventStatus(EventStatus eventStatus) {
@@ -47,6 +55,10 @@ public class PlaybackRecord implements IElementObject {
         return elementId;
     }
 
+    /**
+     * 
+     * @return sequence number in the list of playback records.
+     */
     public int getSequenceNumber() {
         return sequenceNumber;
     }
@@ -76,6 +88,11 @@ public class PlaybackRecord implements IElementObject {
         return replayEvent.getEventType();
     }
 
+    /**
+     * 
+     * 
+     * @return originating run or clarification id.
+     */
     public int getId() {
         ISubmission submission = replayEvent.getEventDetails().getSubmission();
         if (submission != null) {
@@ -85,6 +102,12 @@ public class PlaybackRecord implements IElementObject {
         }
     }
 
-
-    
+    /**
+     * Reset this record, so it can be re-executed.
+     */
+    public void reset() {
+        if (replayEvent != null) {
+            eventStatus = EventStatus.PENDING; 
+        }
+    }
 }

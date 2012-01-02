@@ -97,8 +97,6 @@ public class PlaybackPane extends JPanePlugin {
 
     private JButton loadButton = null;
 
-    private PlaybackManager playbackManager = new PlaybackManager(); // @jve:decl-index=0:
-
     private JLabel currentEventLabel = null;
 
     private JTextField playbackIterationTextField = null;
@@ -109,8 +107,8 @@ public class PlaybackPane extends JPanePlugin {
     
     private boolean stillRunning = false;
     
-    private PlaybackInfo playbackInfo = new PlaybackInfo();
-    
+    private PlaybackManager manager = new PlaybackManager();
+ 
     /**
      * This method initializes
      * 
@@ -212,6 +210,8 @@ public class PlaybackPane extends JPanePlugin {
         
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addPlayBackEventListener(new PlayBackEventListener());
+        
+        manager = getContest().getPlaybackManager();
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -344,9 +344,10 @@ public class PlaybackPane extends JPanePlugin {
 
     protected void startRunningEvents() {
         
+        PlaybackInfo playbackInfo = manager.getPlaybackInfo();
+        playbackInfo.setStarted(true);
+        
         if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
-            playbackInfo.setSiteNumber(getContest().getSiteNumber());
-            playbackInfo.setStarted(true);
             getController().startPlayback(playbackInfo);
             return;
         }
@@ -358,7 +359,7 @@ public class PlaybackPane extends JPanePlugin {
             return;
         }
 
-        final int currentEventNumber = playbackManager.getSequenceNumber();
+        final int currentEventNumber = manager.getSequenceNumber();
 
         if (currentEventNumber > eventsListBox.getRowCount()) {
             JOptionPane.showMessageDialog(this, "All events executed");
@@ -395,69 +396,51 @@ public class PlaybackPane extends JPanePlugin {
             lastEventToRunTo = getEventsListBox().getRowCount();
         }
 
-        final int runToStep = lastEventToRunTo;
-        
         setRunningButtons (true);
 
         new Thread(new Runnable() {
 
             public void run() {
-                
-                int startEventNumber = currentEventNumber;
-                
+
                 setStillRunning(true);
 
-                for (int setIteratorCount = 0; setIteratorCount < maxEventSetCount && isStillRunning(); setIteratorCount++) {
-                    
-                    if (setIteratorCount > 0){
-                        resetAllEventAndWait();
-                        startEventNumber = 1;
-                    }
-                    
-                    for (int i = startEventNumber; i <= runToStep && isStillRunning(); i++) {
+                while (manager.allEventsExecuted() && isStillRunning()) {
 
-                        final ReplayEvent playbackEvent = (ReplayEvent) eventsListBox.getKeys()[i - 1];
-                        final int currentEventNumber = playbackManager.getSequenceNumber() + (setIteratorCount * runToStep);
-                        
-                        try {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                public void run() {
-                                    Integer setInfo = playbackManager.getSequenceNumber();
-                                    if (maxEventSetCount > 1){
-                                        setInfo = currentEventNumber;
-                                    }
-                                    currentEventLabel.setText("At event " + setInfo);
+                    try {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                Integer setInfo = manager.getSequenceNumber();
+                                if (maxEventSetCount > 1) {
+                                    setInfo = currentEventNumber;
                                 }
-                            });
-
-                            final PlaybackRecord record = createNewPlayback (playbackEvent, playbackManager.getNextSequenceNumber());
-
-                            playbackManager.executeEvent(record, getContest(), getController());
-
-                            final int rowNumber = i;
-
-                            SwingUtilities.invokeLater(new Runnable() {
-                                public void run() {
-                                    final String[] row = buildPlayBackRow(record);
-                                    getEventsListBox().replaceRow(row, rowNumber - 1);
-                                    getEventsListBox().autoSizeAllColumns();
-                                }
-                            });
-
-                            if (waitTime > 0) {
-                                Thread.sleep(waitTime);
+                                currentEventLabel.setText("At event " + setInfo);
                             }
+                        });
 
-                        } catch (Exception e) {
-                            setStillRunning(false);
-                            e.printStackTrace();
+                        final PlaybackRecord record = manager.executeNextEvent(getContest(), getController());
+
+                        final int rowNumber = manager.getSequenceNumber();
+
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                final String[] row = buildPlayBackRow(record);
+                                getEventsListBox().replaceRow(row, rowNumber - 1);
+                                getEventsListBox().autoSizeAllColumns();
+                            }
+                        });
+
+                        if (waitTime > 0) {
+                            Thread.sleep(waitTime);
                         }
-                        
+
+                    } catch (Exception e) {
+                        setStillRunning(false);
+                        e.printStackTrace();
                     }
                 }
-                
+
                 setStillRunning(false);
-                setRunningButtons (false);
+                setRunningButtons(false);
 
             }
         }).start();
@@ -466,7 +449,7 @@ public class PlaybackPane extends JPanePlugin {
     /**
      * Goes through list and rewinds all runs.
      */
-    protected void resetAllEventAndWait() {
+    protected void resetAllEventsAndWait() {
         
         Exception ex = null;
 
@@ -575,15 +558,13 @@ public class PlaybackPane extends JPanePlugin {
 
         for (int i = 0; i < rowCount; i++) {
             PlaybackRecord record = (PlaybackRecord) eventsListBox.getKeys()[i];
-            PlaybackRecord newRecord  = createNewPlayback(record.getReplayEvent(), playbackManager.getNextSequenceNumber());
-            playbacks[i] = newRecord;
+            record.reset();
             rowValues[i] = buildPlayBackRow(record);
         }
         
         getEventsListBox().removeAllRows();
         getEventsListBox().addRows(rowValues, playbacks);
         
-        playbackManager.rewind();
     }
 
     /**
@@ -713,7 +694,7 @@ public class PlaybackPane extends JPanePlugin {
             return;
         }
         
-        int currentEventNumber = playbackManager.getSequenceNumber();
+        int currentEventNumber = manager.getSequenceNumber();
         
         if (currentEventNumber > eventsListBox.getRowCount()){
             JOptionPane.showMessageDialog(this, "All events executed");
@@ -721,11 +702,9 @@ public class PlaybackPane extends JPanePlugin {
         }
         
         try {
-            PlaybackRecord record = (PlaybackRecord) eventsListBox.getKeys()[currentEventNumber - 1];
+            PlaybackRecord record = manager.executeNextEvent(getContest(), getController());
             
-            currentEventLabel.setText("At event " + playbackManager.getSequenceNumber());
-
-            playbackManager.executeEvent(record, getContest(), getController());
+            currentEventLabel.setText("At event " + manager.getSequenceNumber());
 
             String[] row = buildPlayBackRow(record);
 
@@ -764,23 +743,21 @@ public class PlaybackPane extends JPanePlugin {
             filename = getFileName();
             if (filename != null) {
 
-                ReplayEvent[] playbackEvents = playbackManager.loadPlayback(filename, getContest());
-                if (playbackEvents == null || playbackEvents.length == 0) {
+                PlaybackManager playbackManager = getContest().getPlaybackManager();
+                PlaybackInfo newPlaybackInfo = playbackManager.createPlaybackInfo(filename, getContest());
+                PlaybackRecord [] records = playbackManager.getPlaybackRecords();
+                
+                if (records.length == 0) {
                     JOptionPane.showMessageDialog(this, "No events found in " + filename);
                 } else {
-                    
-                    playbackInfo.setSiteNumber(getContest().getSiteNumber());
-                    playbackInfo.setFilename(filename);
-                    playbackInfo.setPlaybackList(playbackEvents);
-                    
-                    for (ReplayEvent playbackEvent : playbackEvents) {
-                        PlaybackRecord record = createNewPlayback (playbackEvent, playbackManager.getNextSequenceNumber());
+
+                    for (PlaybackRecord record : records) {
                         String[] row = buildPlayBackRow(record);
-                        getEventsListBox().addRow(row, playbackEvent);
+                        getEventsListBox().addRow(row, record);
                     }
                     getEventsListBox().autoSizeAllColumns();
                     setRunningButtons(false);
-                    JOptionPane.showMessageDialog(this, "Loaded " + playbackEvents.length + " events from " + filename);
+                    JOptionPane.showMessageDialog(this, "Loaded " + records.length + " events from " + filename);
 
                 }
             }
@@ -937,6 +914,7 @@ public class PlaybackPane extends JPanePlugin {
         public void playbackAdded(PlayBackEvent playBackEvent) {
             playbackChanged(playBackEvent);
         }
+
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
