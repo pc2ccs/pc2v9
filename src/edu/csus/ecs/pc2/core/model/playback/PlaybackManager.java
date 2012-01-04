@@ -725,7 +725,7 @@ public class PlaybackManager {
     public PlaybackInfo createPlaybackInfo(String inputFilename, IInternalContest contest) throws Exception {
 
         ReplayEvent[] list = load(inputFilename, contest);
-        playbackInfo = new PlaybackInfo("Created Playback", list);
+        playbackInfo = new PlaybackInfo("Default Playback Name", list);
         playbackInfo.setSiteNumber(contest.getSiteNumber());
 
         int nextSequence = 1;

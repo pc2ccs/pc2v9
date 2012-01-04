@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -138,7 +139,7 @@ public class ImportDataPane extends JPanePlugin {
 
         try {
              newContest = loader.fromYaml(null, directoryName);
-             contestSummary = getSummary(newContest);
+             contestSummary = getContestLoadSummary(newContest);
         } catch (Exception e) {
             logException("Unable to load contest YAML from " + filename, e);
             e.printStackTrace();
@@ -168,7 +169,7 @@ public class ImportDataPane extends JPanePlugin {
         
     }
 
-    private void addSummaryEntry(StringBuffer buf, int count, String prefix, String entryName) {
+    private static void addSummaryEntry(StringBuffer buf, int count, String prefix, String entryName) {
         if (count > 0) {
             buf.append(count);
             String pluralized = Pluralize.pluralize(entryName, count);
@@ -182,18 +183,20 @@ public class ImportDataPane extends JPanePlugin {
         }
     }
 
-    private void addSummaryEntry(StringBuffer sb, int count, String entryName) {
+    private static void addSummaryEntry(StringBuffer sb, int count, String entryName) {
         addSummaryEntry(sb, count, "", entryName);
     }
 
 
-    private String getSummary(IInternalContest newContest) throws Exception {
+    public static String getContestLoadSummary(IInternalContest newContest) throws Exception {
 
         Language[] languages = newContest.getLanguages();
         Problem[] problems = newContest.getProblems();
         Site[] sites = newContest.getSites();
         Category[] categories = newContest.getCategories();
         ClientSettings [] settings = newContest.getClientSettingsList();
+        
+        PlaybackInfo info = getPlaybackInfo(newContest);
 
         StringBuffer sb = new StringBuffer();
 
@@ -212,8 +215,25 @@ public class ImportDataPane extends JPanePlugin {
         addSummaryEntry(sb, categories.length, "clar", "category");
 
         addSummaryEntry(sb, settings.length, "AJ setting");
+        
+        if (info != null) {
+            sb.append("1 replay defined, auto started? "+info.isStarted());
+            sb.append(NL);
+            sb.append("   file: "+info.getFilename());
+            sb.append(NL);
+        }
 
         return sb.toString();
+    }
+    
+    private static PlaybackInfo getPlaybackInfo(IInternalContest newContest) {
+        
+        PlaybackInfo [] infos = newContest.getPlaybackInfos();
+        if (infos.length > 0) {
+            return infos[0];
+        } else {
+            return null;
+        }
     }
     
     private void showMessage(String string) {

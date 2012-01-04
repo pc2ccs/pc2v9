@@ -16,11 +16,7 @@ import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
 /**
@@ -204,44 +200,6 @@ public class ContestPreloadPane extends JPanePlugin {
         }
         return loadButton;
     }
-    
-
-    private String getSummary(IInternalContest newContest) {
-
-        Language[] languages = newContest.getLanguages();
-        Problem[] problems = newContest.getProblems();
-        Account[] accounts = newContest.getAccounts();
-        Site [] sites = newContest.getSites();
-
-        StringBuffer sb = new StringBuffer();
-
-        if (sites.length > 0) {
-            sb.append(sites.length);
-            sb.append(" sites");
-            sb.append(NL);
-        }
-
-        if (problems.length > 0) {
-            sb.append(problems.length);
-            sb.append(" problems");
-            sb.append(NL);
-        }
-
-        if (languages.length > 0) {
-            sb.append(languages.length);
-            sb.append(" languages");
-            sb.append(NL);
-        }
-
-        if (accounts.length > 0) {
-            sb.append(accounts.length);
-            sb.append(" accounts");
-            sb.append(NL);
-        }
-
-        return sb.toString();
-
-    }
 
     protected void loadSelectedContest() {
 
@@ -270,7 +228,7 @@ public class ContestPreloadPane extends JPanePlugin {
         try {
             ContestYAMLLoader loader = new ContestYAMLLoader();
             newContest = loader.fromYaml(null, directoryName);
-            contestSummary = getSummary(newContest);
+            contestSummary = ImportDataPane.getContestLoadSummary(newContest);
 
         } catch (Exception e) {
             logException("Unable to load contest YAML from " + filename, e);

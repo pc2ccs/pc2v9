@@ -25,11 +25,12 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
-import edu.csus.ecs.pc2.core.model.ReplaySetting;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
 /**
  * Create CCS contest.yaml and problem.yaml files.
@@ -138,7 +139,7 @@ public class ExportYAML {
         // default-clars:
         // - No comment, read problem statement.
         // - This will be answered during the answers to questions session.
-        contestWriter.println("default-clars:");
+        contestWriter.println(ContestYAMLLoader.DEFAULT_CLARS_KEY + ":");
         // TODO CCS this needs to be an array
         contestWriter.println(" - "+contest.getContestInformation().getJudgesDefaultAnswer());
         contestWriter.println();
@@ -151,7 +152,7 @@ public class ExportYAML {
         Category[] categories = contest.getCategories();
 
         if (categories.length > 0) {
-            contestWriter.println("clar-categories:");
+            contestWriter.println(ContestYAMLLoader.CLAR_CATEGORIES_KEY + ":");
             for (Category category : categories) {
                 contestWriter.println(" - " + category.getDisplayName());
             }
@@ -161,7 +162,7 @@ public class ExportYAML {
         Language[] languages = contest.getLanguages();
 
         if (languages.length > 0) {
-            contestWriter.println("languages:");
+            contestWriter.println(ContestYAMLLoader.LANGUAGE_KEY + ":");
         }
 
         // languages:
@@ -196,7 +197,7 @@ public class ExportYAML {
         Problem[] problems = contest.getProblems();
 
         if (problems.length > 0) {
-            contestWriter.println("problemset:");
+            contestWriter.println(ContestYAMLLoader.PROBLEMS_KEY + ":");
         }
 
         // problemset:
@@ -255,7 +256,7 @@ public class ExportYAML {
                 if (clientSettings.isAutoJudging() || clientSettings.getAutoJudgeFilter() != null) {
                     ajCount++;
                     if (ajCount == 1) {
-                        contestWriter.println("auto-judging:");
+                        contestWriter.println(ContestYAMLLoader.AUTO_JUDGE_KEY + ":");
                     }
 
                     ClientId clientId = account.getClientId();
@@ -270,31 +271,28 @@ public class ExportYAML {
             }
         }
         
+        PlaybackInfo [] playbackInfos = contest.getPlaybackInfos(); 
         
-        ReplaySetting [] replaySettings = contest.getReplaySettings();
-        
-        if (replaySettings.length > 0) {
+        if (playbackInfos.length > 0) {
 
-            // TODO 670          Arrays.sort(replaySettings, new ReplaySettingComparator());
-            contestWriter.println("replay:");
+            contestWriter.println(ContestYAMLLoader.REPLAY_KEY + ":");
             
-            for (ReplaySetting replaySetting : replaySettings) {
+            for (PlaybackInfo playbackInfo : playbackInfos) {
 
-                contestWriter.println("  - title: " + replaySetting.getTitle());
-                contestWriter.println("  - file: " + replaySetting.getLoadFileName());
-                contestWriter.println("  - auto_start: " + Utilities.yesNoString(replaySetting.isAutoStart()).toLowerCase());
-                contestWriter.println("  - iterations: " + replaySetting.getIterationCount());
-                contestWriter.println("  - start_at: " + replaySetting.getStartSequenceNumber());
-                contestWriter.println("  - site: " + replaySetting.getSiteNumber());
+                contestWriter.println("  - title: " + playbackInfo.getDisplayName());
+                contestWriter.println("        file: " + playbackInfo.getFilename());
+                contestWriter.println("  auto_start: " + Utilities.yesNoString(playbackInfo.isStarted()).toLowerCase());
+                contestWriter.println("   minevents: " + playbackInfo.getMinimumPlaybackRecords());
+                contestWriter.println("    pacingMS: " + playbackInfo.getWaitBetweenEventsMS());
+                contestWriter.println("        site: " + playbackInfo.getSiteNumber());
                 contestWriter.println();
-
             }
         }
         
         Site[] sites = contest.getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
 
-        contestWriter.println("sites:");
+        contestWriter.println(ContestYAMLLoader.SITES_KEY + ":");
         for (Site site : sites) {
             contestWriter.println(" - number: " + site.getSiteNumber());
             contestWriter.println("   name: " + site.getDisplayName());
@@ -319,8 +317,8 @@ public class ExportYAML {
                 if (accounts.size() > 0) {
                     if (!accountHeader) {
                         // only print it once, and only if we have some accounts to dump
-                        contestWriter.println("accounts:");
-                        accountHeader=true;
+                        contestWriter.println(ContestYAMLLoader.ACCOUNTS_KEY + ":");
+                        accountHeader = true;
                     }
                     contestWriter.println("  - account: " + type.toString());
                     contestWriter.println("    site: " + site.getSiteNumber());
@@ -440,7 +438,7 @@ public class ExportYAML {
 
         problemWriter.println();
 
-        problemWriter.println("limits: ");
+        problemWriter.println(ContestYAMLLoader.LIMITS_KEY + ":");
         problemWriter.println("   timeout: " + problem.getTimeOutInSeconds());
         problemWriter.println();
 
@@ -453,7 +451,7 @@ public class ExportYAML {
             problemWriter.println();
         }
 
-        problemWriter.println("input: ");
+        problemWriter.println(ContestYAMLLoader.INPUT_KEY + ":");
         problemWriter.println("   readFromSTDIN: " + problem.isReadInputDataFromSTDIN());
         problemWriter.println();
 

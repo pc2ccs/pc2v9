@@ -8,13 +8,14 @@ import edu.csus.ecs.pc2.core.model.playback.PlaybackRecord;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
 
 /**
- * Playback Information.
+ * Playback/Replay Information.
  * 
- * Has values and methods for list of events ({@link #getReplayList()}), sequenceNumber, filename, state ({@link #isStarted()}), etc.
+ * Contains {@link ReplayEvent}s ({@link #getReplayList()}), load file name and general information like
+ * sequenceNumber and state ({@link #isStarted()}).
  * 
  * <br>
  * {@link ReplayEvent}s are the data for a replay, a {@link PlaybackRecord} is the actual record/status for
- * each playback event.
+ * each playback event.  
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -82,7 +83,7 @@ public class PlaybackInfo implements IElementObject {
     }
 
     /**
-     * @return Returns the title for this PlaybackInfo.
+     * @return the title for this PlaybackInfo (data set)
      */
     public String getDisplayName() {
         return displayName;

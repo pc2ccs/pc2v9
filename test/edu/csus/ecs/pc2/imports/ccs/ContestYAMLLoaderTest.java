@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -359,7 +360,12 @@ public class ContestYAMLLoaderTest extends TestCase {
         key = ContestYAMLLoader.SITES_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 16, sectionLines.length);
-
+        
+        System.err.println("debug 22"+contestYamlFilename);
+        
+        key = ContestYAMLLoader.REPLAY_KEY;
+        sectionLines = loader.getSectionLines(key, contents);
+        assertEquals(key + " lines.", 8, sectionLines.length);
     }
 
     String getYamlTestDirectory() {
@@ -480,6 +486,29 @@ public class ContestYAMLLoaderTest extends TestCase {
         if (debugFlag) {
             dumpAutoJudgeSettings(contestProblems, autoJudgeSettings);
         }
+    }
+    
+    public void testReplayLoad() throws Exception {
+        
+        String contestYamlFilename = getYamlTestFileName();
+
+        assertTrue("Test file does not exist " + contestYamlFilename, Utilities.isFileThere(contestYamlFilename));
+        String[] yamlLines = Utilities.loadFile(contestYamlFilename);
+
+        if (debugFlag) {
+            System.out.println("Loading " + contestYamlFilename);
+        }
+
+        PlaybackInfo replay = loader.getReplaySettings(yamlLines);
+        
+        assertNotNull("Should have replay data", replay);
+        
+        System.out.println("debug 22 "+replay);
+        
+        assertEquals("Title for replay", "A Playback Name", replay.getDisplayName());
+        assertEquals("Min runs to replay", 230, replay.getMinimumPlaybackRecords());
+        assertEquals("Title for replay", "loadfile/replay.file.txt", replay.getFilename());
+        assertEquals("Wait between events ms", 400, replay.getWaitBetweenEventsMS());
     }
 
     void dumpAutoJudgeSettings(Problem[] contestProblems, AutoJudgeSetting[] autoJudgeSettings) {

@@ -445,18 +445,37 @@ public class PacketHandler {
         System.out.println("debug 22 - handleStartPlayback "); // TODO 673 remove debugging
         
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
-        contest.startReplayPlaybackInfo(playbackInfo);
-        contest.getPlaybackManager().startPlayback(contest, controller, new Runnable() {
+        
+        PlaybackManager manager = contest.getPlaybackManager();
+        
+        if (playbackInfo.isStarted()) {
             
-            public void run() {
-                PlaybackManager manager = contest.getPlaybackManager();
-                PlaybackRecord record = manager.getCurrentPlaybackRecord();
-                
-                controller.getLog().info("Playback running="+manager.isPlaybackRunning()
-                        + " sequence "+manager.getSequenceNumber()
-                        + " status="+record.getEventStatus()+" " +record.getReplayEvent());
-            }
-        }); 
+            contest.startReplayPlaybackInfo(playbackInfo);
+            
+            manager.startPlayback(contest, controller, new Runnable() {
+
+                public void run() {
+                    PlaybackManager manager = contest.getPlaybackManager();
+                    PlaybackRecord record = manager.getCurrentPlaybackRecord();
+
+                    controller.getLog().info("Playback running="+manager.isPlaybackRunning()
+                            + " sequence "+manager.getSequenceNumber()
+                            + " status="+record.getEventStatus()+" " +record.getReplayEvent());
+                }
+            }); 
+        } else {
+            
+            // Load replay records if necessary.
+
+            PlaybackInfo newPlay = manager.createPlaybackInfo(playbackInfo.getFilename(), contest);
+            newPlay.setWaitBetweenEventsMS(playbackInfo.getWaitBetweenEventsMS());
+
+            // create/insure playback records
+            
+            contest.getPlaybackManager().insureMinimumPlaybackRecords(playbackInfo.getMinimumPlaybackRecords());
+            
+            contest.updatePlaybackInfo(newPlay);
+        }
     }
 
     /**

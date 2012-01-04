@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -62,7 +63,9 @@ public class ContestYAMLLoader {
     public static final String ACCOUNTS_KEY = "accounts";
 
     public static final String SITES_KEY = "sites";
-    
+
+    public static final String REPLAY_KEY = "replay";
+
     /**
      * Run execution time limit, in seconds.
      */
@@ -94,6 +97,8 @@ public class ContestYAMLLoader {
     public static final int DEFAULT_TIME_OUT = 30;
 
     public static final String AUTO_JUDGE_KEY = "auto-judging";
+
+    public static final String INPUT_KEY = "input";
 
     /**
      * Load contest.yaml from directory.
@@ -201,8 +206,59 @@ public class ContestYAMLLoader {
         for (AutoJudgeSetting auto : autoJudgeSettings) {
             addAutoJudgeSetting(contest, auto);
         }
+        
+        PlaybackInfo playbackInfo = getReplaySettings(yamlLines);
+        
+        contest.addPlaybackInfo(playbackInfo);
 
         return contest;
+    }
+
+    public PlaybackInfo getReplaySettings(String[] yamlLines) {
+
+        PlaybackInfo info = new PlaybackInfo();
+        
+        String[] sectionLines = getSectionLines(REPLAY_KEY, yamlLines);
+
+        int idx = 1;
+        String[] sequenceLines = getNextSequence(sectionLines, idx);
+        
+//        replay:
+//            - title: Default Playback Name
+//              file: 
+//              auto_start: no
+//              minevents: 108
+//              site: 1
+
+        while (sequenceLines.length > 0) {
+
+            String title = getSequenceValue(sequenceLines, "- title").trim();
+            info.setDisplayName(title);
+            
+            String filename = getSequenceValue(sequenceLines, "file").trim();
+            info.setFilename(filename);
+            
+            String startedStr = getSequenceValue(sequenceLines, "auto_start");
+            boolean started = getBooleanValue(startedStr, false);
+            info.setStarted(started);
+
+            String waitString = getSequenceValue(sequenceLines, "pacingMS").trim();
+            int waitTimeBetweenEventsMS = getIntegerValue(waitString, 1000);
+            info.setWaitBetweenEventsMS(waitTimeBetweenEventsMS);
+
+            String countString = getSequenceValue(sequenceLines, "minevents").trim();
+            int minEvents = getIntegerValue(countString, 1);
+            info.setMinimumPlaybackRecords(minEvents);
+            
+            String siteString = getSequenceValue(sequenceLines, "site");
+            int siteNumber = getIntegerValue(siteString, 1);
+            info.setSiteNumber(siteNumber);
+            
+            idx += sequenceLines.length;
+            sequenceLines = getNextSequence(sectionLines, idx);
+        }
+
+        return info;
     }
 
     private void addAutoJudgeSetting(IInternalContest contest, AutoJudgeSetting auto) throws YamlLoadException {
@@ -931,7 +987,7 @@ public class ContestYAMLLoader {
             int[] out = new int[list.length];
             int i = 0;
             for (String n : list) {
-                out[i] = getIntegerValue(list[0], 0);
+                out[i] = getIntegerValue(n, 0);
 //                if (out[i] < 1) {
 //                    // TODO 669 throw invalid number in list exception
 //                }

@@ -360,10 +360,11 @@ public class PlaybackPane extends JPanePlugin {
             getController().startPlayback(playbackInfo);
             return;
         }
-        getController().startPlayback(playbackInfo);
         try {
             getContest().startReplayPlaybackInfo(playbackInfo);
+            getController().startPlayback(playbackInfo);
         } catch (Exception e1) {
+            e1.printStackTrace(System.err);
             logMessage("Unable to start playback " + e1.getMessage(), e1);
             JOptionPane.showMessageDialog(this, "Unable to start playback " + e1.getMessage());
         }
@@ -728,14 +729,14 @@ public class PlaybackPane extends JPanePlugin {
             loadButton.setMnemonic(KeyEvent.VK_L);
             loadButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    selectAndloadEventFile();
+                    loadReplayFile();
                 }
             });
         }
         return loadButton;
     }
 
-    protected void selectAndloadEventFile() {
+    protected void loadReplayFile() {
 
         String filename = null;
 
@@ -746,12 +747,15 @@ public class PlaybackPane extends JPanePlugin {
                 if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
                     PlaybackInfo playbackInfo = getPlaybackInfo();
                     playbackInfo.setFilename(filename);
+                    int waitTime = Integer.parseInt(getTimeWarpTextField().getText());
+                    playbackInfo.setWaitBetweenEventsMS(waitTime);
+                    playbackInfo.setStarted(false);
                     getController().startPlayback(playbackInfo);
                     return;
                 }
 
                 PlaybackManager playbackManager = getContest().getPlaybackManager();
-                // PlaybackInfo newPlaybackInfo = playbackManager.createPlaybackInfo(filename, getContest());
+                playbackManager.createPlaybackInfo(filename, getContest());
                 PlaybackRecord[] records = playbackManager.getPlaybackRecords();
 
                 if (records.length == 0) {

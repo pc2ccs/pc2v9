@@ -20,6 +20,14 @@ clar-categories:
   - SysOps
   - Operations
 
+replay:
+  - title: A Playback Name 
+        file: loadfile/replay.file.txt
+  auto_start: no
+   minevents: 230
+    pacingMS: 400
+        site: 1
+
 languages:
   - name: C++
     compiler: /usr/bin/g++
