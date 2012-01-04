@@ -83,6 +83,8 @@ public class PlaybackManager {
 
     private Vector<PlaybackRecord> playbackList = new Vector<PlaybackRecord>();
 
+    private boolean playbackRunning = false;
+
     /**
      * 
      * @param filename
@@ -563,7 +565,9 @@ public class PlaybackManager {
                 }
 
                 playbackRecord.setEventStatus(EventStatus.COMPLETED);
-
+                
+                contest.updatePlaybackInfo(playbackInfo);
+                
                 ClientId fromId = contest.getClientId();
                 // Send to team
                 Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, newRun);
@@ -605,7 +609,7 @@ public class PlaybackManager {
                 }
 
                 playbackRecord.setEventStatus(EventStatus.COMPLETED);
-
+                contest.updatePlaybackInfo(playbackInfo);
                 break;
 
             default:
@@ -616,6 +620,58 @@ public class PlaybackManager {
 
         return playbackRecord;
 
+    }
+    
+    /**
+     * Start a playback.
+     * 
+     * To stop the playback {@link #setPlaybackRunning(boolean)} to false.
+     * 
+     * @param contest
+     * @param controller
+     * @param callback
+     *            a runnable executed for each executed event.
+     */
+    public void startPlayback(final IInternalContest contest, final IInternalController controller, final Runnable callback) {
+
+        insureMinimumPlaybackRecords(playbackInfo.getMinimumPlaybackRecords());
+
+        new Thread(new Runnable() {
+
+            public void run() {
+
+                setPlaybackRunning(true);
+
+                int waitTime = playbackInfo.getWaitBetweenEventsMS();
+
+                while ((!allEventsExecuted()) && isPlaybackRunning()) {
+
+                    try {
+                        executeNextEvent(contest, controller);
+                        
+                        if (callback != null) {
+                            callback.run();
+                        }
+
+                        if (waitTime > 0) {
+                            Thread.sleep(waitTime);
+                        }
+
+                    } catch (Exception e) {
+                        setPlaybackRunning(false);
+                        if (callback != null) {
+                            callback.run();
+                        }
+                        e.printStackTrace();
+                    }
+                }
+
+                setPlaybackRunning(false);
+                if (callback != null) {
+                    callback.run();
+                }
+            }
+        }).start();
     }
 
     private void sendStatusMessge(IInternalContest contest, IInternalController controller, Run run, RunExecutionStatus status) {
@@ -752,5 +808,17 @@ public class PlaybackManager {
 
     public PlaybackInfo getPlaybackInfo() {
         return playbackInfo;
+    }
+    
+    public boolean isPlaybackRunning() {
+        return playbackRunning;
+    }
+
+    public void setPlaybackRunning(boolean playbackRunning) {
+        this.playbackRunning = playbackRunning;
+    }
+
+    public PlaybackRecord getCurrentPlaybackRecord() {
+        return getPlaybackRecords()[getSequenceNumber()];
     }
 }

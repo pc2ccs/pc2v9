@@ -46,8 +46,15 @@ public class PlaybackInfo implements IElementObject {
     private Vector<ReplayEvent> playbackList = new Vector<ReplayEvent>();
 
     private int sequenceNumber = 0;
+    
+    private int minimumPlaybackRecords = 0;
 
     private String filename = "";
+    
+    /**
+     * ms between events.
+     */
+    private int waitBetweenEventsMS = 200;
 
     public PlaybackInfo(String displayName, ReplayEvent [] events) {
         super();
@@ -203,10 +210,27 @@ public class PlaybackInfo implements IElementObject {
     public void setPlaybackList(ReplayEvent[] list) {
         this.playbackList = new Vector<ReplayEvent>();
         playbackList.addAll(Arrays.asList(list));
+        this.minimumPlaybackRecords = list.length;
+    }
+    
+    public void setMinimumPlaybackRecords(int minimumPlaybackRecords) {
+        this.minimumPlaybackRecords = minimumPlaybackRecords;
+    }
+    
+    public int getMinimumPlaybackRecords() {
+        return minimumPlaybackRecords;
     }
 
     public void rewind() {
         sequenceNumber = 0;
+    }
+    
+    public int getWaitBetweenEventsMS() {
+        return waitBetweenEventsMS;
+    }
+    
+    public void setWaitBetweenEventsMS(int waitBetweenEventsMS) {
+        this.waitBetweenEventsMS = waitBetweenEventsMS;
     }
 
 }

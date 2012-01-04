@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
+import edu.csus.ecs.pc2.core.exception.ServerProcessException;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -1667,7 +1668,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 
                 logException("Unable to change profile", profileException);
             }
+        } catch (ServerProcessException serverProcessException) {
+            Packet messagePacket = PacketFactory.createMessage(contest.getClientId(), PacketFactory.ALL_SERVERS, Area.SERVER_PROCESSING, serverProcessException.getProcessingMessage(),
+                    serverProcessException);
 
+            sendToAdministrators(messagePacket);
+            sendToServers(messagePacket);
+            
         } catch (ContestSecurityException contestSecurityException) {
 
             // Security Violation, someone tried to do something they weren't allowed to

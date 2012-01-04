@@ -1146,13 +1146,13 @@ public interface IInternalContest {
 
     void deletePlaybackInfo(PlaybackInfo playbackInfo);
 
-    void refreshPlaybackInfo(PlaybackInfo playbackInfo);
+    void updatePlaybackInfo(PlaybackInfo playbackInfo);
 
     void resetPlaybackInfo(PlaybackInfo playbackInfo);
 
-    void startReplayPlaybackInfo(PlaybackInfo playbackInfo);
+    void startReplayPlaybackInfo(PlaybackInfo playbackInfo) throws Exception;
 
-    void stopReplayPlaybackInfo(PlaybackInfo playbackInfo);
+    void stopReplayPlaybackInfo(PlaybackInfo playbackInfo) throws Exception;
     
     PlaybackManager getPlaybackManager();
     

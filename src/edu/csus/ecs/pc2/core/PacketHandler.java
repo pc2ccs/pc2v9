@@ -51,6 +51,8 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
+import edu.csus.ecs.pc2.core.model.playback.PlaybackRecord;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
@@ -423,25 +425,38 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
-    private void handleStopPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
-        // TODO security check
+    private void handleStopPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {
         // TODO 673 forward this start playback to other servers
         
-        System.out.println("debug 22 - handleStartPlayback "); // TODO 673
+        System.out.println("debug 22 - handleStartPlayback "); // TODO 673 remove debuggin
+        
+        securityCheck(Permission.Type.STOP_PLAYBACK, fromId, connectionHandlerID);
         
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
         contest.stopReplayPlaybackInfo(playbackInfo);
     }
 
-    private void handleStartPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
+    private void handleStartPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {
         
-        // TODO security check
+        securityCheck(Permission.Type.START_PLAYBACK, fromId, connectionHandlerID);
+        
         // TODO 673 forward this start playback to other servers
         
-        System.out.println("debug 22 - handleStartPlayback "); // TODO 673
+        System.out.println("debug 22 - handleStartPlayback "); // TODO 673 remove debugging
         
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
         contest.startReplayPlaybackInfo(playbackInfo);
+        contest.getPlaybackManager().startPlayback(contest, controller, new Runnable() {
+            
+            public void run() {
+                PlaybackManager manager = contest.getPlaybackManager();
+                PlaybackRecord record = manager.getCurrentPlaybackRecord();
+                
+                controller.getLog().info("Playback running="+manager.isPlaybackRunning()
+                        + " sequence "+manager.getSequenceNumber()
+                        + " status="+record.getEventStatus()+" " +record.getReplayEvent());
+            }
+        }); 
     }
 
     /**

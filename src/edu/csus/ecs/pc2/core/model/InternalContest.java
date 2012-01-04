@@ -524,11 +524,11 @@ public class InternalContest implements IInternalContest {
             if (playBackEvent.getAction() == PlayBackEvent.Action.ADDED) {
                 playBackEventListenerList.elementAt(i).playbackAdded(playBackEvent);
             } else if (playBackEvent.getAction() == PlayBackEvent.Action.RESET_REPLAY) {
-                playBackEventListenerList.elementAt(i).playbackEvent(playBackEvent);
+                playBackEventListenerList.elementAt(i).playbackChanged(playBackEvent);
             } else if (playBackEvent.getAction() == PlayBackEvent.Action.START_REPLAY) {
-                playBackEventListenerList.elementAt(i).playbackEvent(playBackEvent);
+                playBackEventListenerList.elementAt(i).playbackChanged(playBackEvent);
             } else if (playBackEvent.getAction() == PlayBackEvent.Action.STOP_REPLAY) {
-                playBackEventListenerList.elementAt(i).playbackEvent(playBackEvent);
+                playBackEventListenerList.elementAt(i).playbackChanged(playBackEvent);
             } else if (playBackEvent.getAction() == PlayBackEvent.Action.REFRESH_ALL) {
                 playBackEventListenerList.elementAt(i).playbackRefreshAll(playBackEvent);
             } else {
@@ -2962,19 +2962,26 @@ public class InternalContest implements IInternalContest {
         firePlaybackInfosListener(PlayBackEvent.Action.DELETE, playbackInfo);
     }
 
-    public void refreshPlaybackInfo(PlaybackInfo playbackInfo) {
-        playbackInfoList.delete(playbackInfo);
+    public void updatePlaybackInfo(PlaybackInfo playbackInfo) {
+        playbackInfoList.update(playbackInfo);
         firePlaybackInfosListener(PlayBackEvent.Action.REFRESH_ALL, playbackInfo);
     }
-
+    
     public void resetPlaybackInfo(PlaybackInfo playbackInfo) {
-        playbackInfoList.delete(playbackInfo);
+        playbackInfo.rewind();
         firePlaybackInfosListener(PlayBackEvent.Action.RESET_REPLAY, playbackInfo);
     }
 
-    public void startReplayPlaybackInfo(PlaybackInfo playbackInfo) {
-        playbackInfoList.delete(playbackInfo);
-        firePlaybackInfosListener(PlayBackEvent.Action.START_REPLAY, playbackInfo);
+    public void startReplayPlaybackInfo(PlaybackInfo playbackInfo) throws Exception {
+        String filename = playbackInfo.getFilename();
+        PlaybackInfo[] playList = playbackInfoList.getList();
+        if (playList.length > 0) {
+            filename = playList[0].getFilename();
+        }
+        PlaybackInfo newPlaybackInfo = playbackManager.createPlaybackInfo(filename, this);
+        newPlaybackInfo.setStarted(true);
+        playbackInfoList.update(newPlaybackInfo);
+        firePlaybackInfosListener(PlayBackEvent.Action.START_REPLAY, newPlaybackInfo);
     }
 
     public void stopReplayPlaybackInfo(PlaybackInfo playbackInfo) {

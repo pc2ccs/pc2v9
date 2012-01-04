@@ -27,6 +27,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -60,6 +61,8 @@ import edu.csus.ecs.pc2.core.security.Permission;
 // $HeadURL$
 public class PlaybackPane extends JPanePlugin {
 
+    // TODO 673 - add MessageListener for Area.SERVER_PROCESSING
+    
     /**
      * 
      */
@@ -104,8 +107,6 @@ public class PlaybackPane extends JPanePlugin {
     private JLabel iterateTitleLabel = null;
 
     private JLabel totalRunsLabel = null;
-    
-    private boolean stillRunning = false;
     
     private PlaybackManager manager = new PlaybackManager();
  
@@ -207,6 +208,8 @@ public class PlaybackPane extends JPanePlugin {
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
+        
+        initializePermissions();
         
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addPlayBackEventListener(new PlayBackEventListener());
@@ -343,41 +346,52 @@ public class PlaybackPane extends JPanePlugin {
     }
 
     protected void startRunningEvents() {
-        
-        PlaybackInfo playbackInfo = manager.getPlaybackInfo();
+
+        if (!isAllowed(Permission.Type.START_PLAYBACK)) {
+            logMessage("Not allowed to start playback");
+            JOptionPane.showMessageDialog(this, "Not allowed to start playback");
+            return;
+        }
+
+        final PlaybackInfo playbackInfo = manager.getPlaybackInfo();
         playbackInfo.setStarted(true);
-        
+
         if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
             getController().startPlayback(playbackInfo);
             return;
         }
         getController().startPlayback(playbackInfo);
-        getContest().startReplayPlaybackInfo(playbackInfo);
+        try {
+            getContest().startReplayPlaybackInfo(playbackInfo);
+        } catch (Exception e1) {
+            logMessage("Unable to start playback " + e1.getMessage(), e1);
+            JOptionPane.showMessageDialog(this, "Unable to start playback " + e1.getMessage());
+        }
 
         if (eventsListBox.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "No events defined");
             return;
         }
 
-        final int currentEventNumber = manager.getSequenceNumber();
-
-        if (currentEventNumber > eventsListBox.getRowCount()) {
+        if (manager.allEventsExecuted()) {
             JOptionPane.showMessageDialog(this, "All events executed");
             return;
         }
 
         String lastEventString = getStopEventNumberTextField().getText();
-        
+
         int lastEventToRunTo = Integer.MAX_VALUE;
         if (lastEventString.trim().length() > 0) {
             lastEventToRunTo = Integer.parseInt(lastEventString);
         }
-        
-        String setIteratorCount = playbackIterationTextField.getText();
-        int playbackIteratorMax = 1;
-        if (setIteratorCount.length() > 0) {
-            playbackIteratorMax = Integer.parseInt(setIteratorCount);
-        }
+
+        // String setIteratorCount = playbackIterationTextField.getText();
+        // int playbackIteratorMax = 1;
+        // if (setIteratorCount.length() > 0) {
+        // playbackIteratorMax = Integer.parseInt(setIteratorCount);
+        // }
+
+        int currentEventNumber = manager.getSequenceNumber();
 
         if (currentEventNumber == lastEventToRunTo) {
             JOptionPane.showMessageDialog(this, "Already before event " + lastEventToRunTo);
@@ -389,61 +403,55 @@ public class PlaybackPane extends JPanePlugin {
         }
 
         final int waitTime = Integer.parseInt(getTimeWarpTextField().getText());
-        
-        final int maxEventSetCount = playbackIteratorMax;
 
-        if (lastEventToRunTo > getEventsListBox().getRowCount()) {
-            lastEventToRunTo = getEventsListBox().getRowCount();
+        playbackInfo.setWaitBetweenEventsMS(waitTime);
+
+        if (lastEventToRunTo > manager.getPlaybackRecords().length) {
+            lastEventToRunTo = manager.getPlaybackRecords().length;
         }
 
-        setRunningButtons (true);
+        setRunningButtons(true);
 
-        new Thread(new Runnable() {
+        getContest().getPlaybackManager().startPlayback(getContest(), getController(), new Runnable() {
 
             public void run() {
-
-                setStillRunning(true);
-
-                while (manager.allEventsExecuted() && isStillRunning()) {
-
-                    try {
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                Integer setInfo = manager.getSequenceNumber();
-                                if (maxEventSetCount > 1) {
-                                    setInfo = currentEventNumber;
-                                }
-                                currentEventLabel.setText("At event " + setInfo);
-                            }
-                        });
-
-                        final PlaybackRecord record = manager.executeNextEvent(getContest(), getController());
-
-                        final int rowNumber = manager.getSequenceNumber();
-
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                final String[] row = buildPlayBackRow(record);
-                                getEventsListBox().replaceRow(row, rowNumber - 1);
-                                getEventsListBox().autoSizeAllColumns();
-                            }
-                        });
-
-                        if (waitTime > 0) {
-                            Thread.sleep(waitTime);
-                        }
-
-                    } catch (Exception e) {
-                        setStillRunning(false);
-                        e.printStackTrace();
-                    }
-                }
-
-                setStillRunning(false);
-                setRunningButtons(false);
-
+                updatePlaybackInfo(playbackInfo);
             }
-        }).start();
+        });
+
+    }
+    
+    protected void updatePlaybackInfo(PlaybackInfo info) {
+        
+        final int number = info.getSequenceNumber();
+        final int rowNumber = number - 1;
+        
+        final PlaybackRecord record = manager.getPlaybackRecords()[number];
+
+        getController().getLog().info(
+                "Playback running=" + manager.isPlaybackRunning() + " sequence " + number + " status=" + record.getEventStatus() + " " + record.getReplayEvent());
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+
+                currentEventLabel.setText("At event " + number);
+
+                final String[] row = buildPlayBackRow(record);
+                getEventsListBox().replaceRow(row, rowNumber);
+                getEventsListBox().autoSizeAllColumns();
+                
+                setRunningButtons(manager.isPlaybackRunning());
+            }
+        });
+        
+    }
+
+    private void logMessage(String string) {
+        getController().getLog().info (string);
+    }
+
+    private void logMessage(String string, Exception exception) {
+        getController().getLog().log(Log.WARNING, string, exception);
     }
 
     /**
@@ -496,14 +504,6 @@ public class PlaybackPane extends JPanePlugin {
         }
     }
 
-    public boolean isStillRunning() {
-        return stillRunning;
-    }
-    
-    public void setStillRunning(boolean stillRunning) {
-        this.stillRunning = stillRunning;
-    }
-
     /**
      * This method initializes stopButton
      * 
@@ -526,7 +526,7 @@ public class PlaybackPane extends JPanePlugin {
     }
 
     protected void stopEventsRunning() {
-        setStillRunning(false);
+        manager.setPlaybackRunning(false);
     }
 
     /**
@@ -694,12 +694,12 @@ public class PlaybackPane extends JPanePlugin {
             return;
         }
         
-        int currentEventNumber = manager.getSequenceNumber();
-        
-        if (currentEventNumber > eventsListBox.getRowCount()){
+        if (manager.allEventsExecuted()) {
             JOptionPane.showMessageDialog(this, "All events executed");
             return;
         }
+        
+        int currentEventNumber = manager.getSequenceNumber();
         
         try {
             PlaybackRecord record = manager.executeNextEvent(getContest(), getController());
@@ -743,10 +743,17 @@ public class PlaybackPane extends JPanePlugin {
             filename = getFileName();
             if (filename != null) {
 
+                if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
+                    PlaybackInfo playbackInfo = getPlaybackInfo();
+                    playbackInfo.setFilename(filename);
+                    getController().startPlayback(playbackInfo);
+                    return;
+                }
+
                 PlaybackManager playbackManager = getContest().getPlaybackManager();
-                PlaybackInfo newPlaybackInfo = playbackManager.createPlaybackInfo(filename, getContest());
-                PlaybackRecord [] records = playbackManager.getPlaybackRecords();
-                
+                // PlaybackInfo newPlaybackInfo = playbackManager.createPlaybackInfo(filename, getContest());
+                PlaybackRecord[] records = playbackManager.getPlaybackRecords();
+
                 if (records.length == 0) {
                     JOptionPane.showMessageDialog(this, "No events found in " + filename);
                 } else {
@@ -764,11 +771,24 @@ public class PlaybackPane extends JPanePlugin {
         } catch (FileNotFoundException notFound) {
             JOptionPane.showMessageDialog(this, "No such file: " + filename);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Unable to load file: " + filename+ " "+e.getMessage());
+            JOptionPane.showMessageDialog(this, "Unable to load file: " + filename + " " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         updateTotalRuns();
+    }
+
+    /**
+     * Get or create Playback Info.
+     * @return
+     */
+    private PlaybackInfo getPlaybackInfo() {
+        PlaybackInfo[] infos = getContest().getPlaybackInfos();
+        if (infos.length > 0) {
+            return infos[0];
+        } else {
+            return new PlaybackInfo();
+        }
     }
 
     private String getFileName() throws IOException {
@@ -820,7 +840,7 @@ public class PlaybackPane extends JPanePlugin {
     
     private void updateGUIperPermissions() {
    
-        setRunningButtons(isStillRunning());
+        setRunningButtons(manager.isPlaybackRunning());
     }
 
 
@@ -899,15 +919,17 @@ public class PlaybackPane extends JPanePlugin {
     // $HeadURL$
     protected class PlayBackEventListener implements IPlayBackEventListener{
 
-        public void playbackChanged(PlayBackEvent playBackEvent) {
+        public void playbackChanged(final PlayBackEvent playBackEvent) {
             System.out.println("PlayBackEvent " + playBackEvent.getAction() + " " + playBackEvent.getPlaybackInfo());
+            
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updatePlaybackInfo(playBackEvent.getPlaybackInfo());
+                }
+            });
         }
 
         public void playbackRefreshAll(PlayBackEvent playBackEvent) {
-            playbackChanged(playBackEvent);
-        }
-
-        public void playbackEvent(PlayBackEvent playBackEvent) {
             playbackChanged(playBackEvent);
         }
 
@@ -915,6 +937,9 @@ public class PlaybackPane extends JPanePlugin {
             playbackChanged(playBackEvent);
         }
 
+        public void playbackReset(PlayBackEvent playBackEvent) {
+            // TODO 673 code reset/rewind
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

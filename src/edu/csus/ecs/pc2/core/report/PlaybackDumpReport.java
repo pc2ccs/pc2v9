@@ -9,12 +9,18 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.playback.PlaybackRecord;
+import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
+import edu.csus.ecs.pc2.core.model.playback.ReplayEventDetails;
 
 /**
- * Dump Playback information. 
+ * Dump Playback information.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -97,20 +103,54 @@ public class PlaybackDumpReport implements IReport {
         PlaybackInfo[] playbackInfos = contest.getPlaybackInfos();
 
         printWriter.println();
-        printWriter.println("-- " + playbackInfos.length + " languages --");
+        printWriter.println("-- " + playbackInfos.length + " playbacks --");
 
         for (PlaybackInfo playbackInfo : playbackInfos) {
             printWriter.println();
             writeRow(printWriter, playbackInfo);
+
+            PlaybackRecord[] records = contest.getPlaybackManager().getPlaybackRecords();
+            dumpPlaybackRecords(printWriter, records);
         }
+    }
+
+    private void dumpPlaybackRecords(PrintWriter printWriter, PlaybackRecord[] records) {
+
+        printWriter.println("   -- " + records.length + " playback records --");
+
+        for (PlaybackRecord record : records) {
+            printWriter.print("   " + record.getSequenceNumber());
+            printWriter.print(" " + record.getEventStatus());
+            printWriter.print(" " + record.getEventType());
+
+            ReplayEvent event = record.getReplayEvent();
+            printWriter.print(" " + event.getClientId());
+
+            ReplayEventDetails details = event.getEventDetails();
+            if (details == null) {
+                printWriter.print(" (no event detail)");
+            } else {
+
+                Run run = details.getRun();
+                if (run != null) {
+                    printWriter.print(" details = " + run);
+                }
+                Clarification clar = details.getClarification();
+                if (clar != null) {
+                    printWriter.print(" details = " + clar);
+                }
+            }
+            printWriter.println();
+        }
+
     }
 
     private void writeRow(PrintWriter printWriter, PlaybackInfo playbackInfo) {
 
-        printWriter.println("   started      : " +Utilities.yesNoString(playbackInfo.isStarted()));
-        printWriter.println("   date started : " +playbackInfo.getDateStarted());
-        printWriter.println("   element id    : " +playbackInfo.getElementId());
-        
+        printWriter.println("   started      : " + Utilities.yesNoString(playbackInfo.isStarted()));
+        printWriter.println("   date started : " + playbackInfo.getDateStarted());
+        printWriter.println("   element id    : " + playbackInfo.getElementId());
+
     }
 
     private void writeContestTime(PrintWriter printWriter) {

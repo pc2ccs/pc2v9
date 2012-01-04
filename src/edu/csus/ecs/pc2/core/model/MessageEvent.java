@@ -46,6 +46,10 @@ public class MessageEvent {
         /**
          * 
          */
+        SERVER_PROCESSING,
+        /**
+         * 
+         */
         OTHER,
     }
 
