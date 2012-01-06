@@ -371,11 +371,12 @@ public class PlaybackPane extends JPanePlugin {
 
         if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
             getController().startPlayback(playbackInfo);
+            System.err.println("debug 22 started "+playbackInfo);
             return;
         }
         try {
-            getContest().startReplayPlaybackInfo(playbackInfo);
             getController().startPlayback(playbackInfo);
+            System.err.println("debug 22 started "+playbackInfo);
         } catch (Exception e1) {
             e1.printStackTrace(System.err);
             logMessage("Unable to start playback " + e1.getMessage(), e1);
@@ -426,11 +427,11 @@ public class PlaybackPane extends JPanePlugin {
                 updatePlaybackInfo(playbackInfo);
             }
         });
-
     }
     
     protected void populateGUI(PlaybackInfo info) {
 
+        getTimeWarpTextField().setText(Integer.toString(info.getWaitBetweenEventsMS()));
         getMinEventsTextField().setText(Integer.toString(info.getMinimumPlaybackRecords()));
         setRunningButtons(manager.isPlaybackRunning());
 
@@ -516,7 +517,7 @@ public class PlaybackPane extends JPanePlugin {
             getStopButton().setEnabled(running);
         }
         if (isAllowed(Permission.Type.EDIT_PLAYBACK)) {
-            getResetButton().setEnabled(getEventsListBox().getRowCount() > 0);
+            getResetButton().setEnabled(getContest().getPlaybackManager().getPlaybackInfo().getReplayList().length > 0);
         }
     }
 
@@ -586,6 +587,7 @@ public class PlaybackPane extends JPanePlugin {
 
         if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
             getController().startPlayback(playbackInfo);
+            System.err.println("debug 22 started "+playbackInfo);
             return;
         }
     }
@@ -787,6 +789,7 @@ public class PlaybackPane extends JPanePlugin {
                     playbackInfo.setWaitBetweenEventsMS(waitTime);
                     playbackInfo.setStarted(false);
                     getController().startPlayback(playbackInfo);
+                    System.err.println("debug 22 started "+playbackInfo);
                     return;
                 }
 

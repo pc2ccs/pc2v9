@@ -635,6 +635,7 @@ public class PlaybackManager {
      */
     public void startPlayback(final IInternalContest contest, final IInternalController controller, final Runnable callback) {
 
+        playbackInfo.setStarted(true);
         insureMinimumPlaybackRecords(playbackInfo.getMinimumPlaybackRecords());
 
         new Thread(new Runnable() {
@@ -728,6 +729,7 @@ public class PlaybackManager {
         ReplayEvent[] list = load(inputFilename, contest);
         playbackInfo = new PlaybackInfo("Default Playback Name", list);
         playbackInfo.setSiteNumber(contest.getSiteNumber());
+        playbackInfo.setFilename(inputFilename);
 
         int nextSequence = 1;
 

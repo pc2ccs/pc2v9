@@ -2972,18 +2972,6 @@ public class InternalContest implements IInternalContest {
         firePlaybackInfosListener(PlayBackEvent.Action.RESET_REPLAY, playbackInfo);
     }
 
-    public void startReplayPlaybackInfo(PlaybackInfo playbackInfo) throws Exception {
-        String filename = playbackInfo.getFilename();
-        PlaybackInfo[] playList = playbackInfoList.getList();
-        if (playList.length > 0) {
-            filename = playList[0].getFilename();
-        }
-        PlaybackInfo newPlaybackInfo = playbackManager.createPlaybackInfo(filename, this);
-        newPlaybackInfo.setStarted(true);
-        playbackInfoList.update(newPlaybackInfo);
-        firePlaybackInfosListener(PlayBackEvent.Action.START_REPLAY, newPlaybackInfo);
-    }
-
     public void stopReplayPlaybackInfo(PlaybackInfo playbackInfo) {
         playbackInfoList.delete(playbackInfo);
         firePlaybackInfosListener(PlayBackEvent.Action.STOP_REPLAY, playbackInfo);

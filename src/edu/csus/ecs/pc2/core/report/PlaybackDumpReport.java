@@ -147,9 +147,13 @@ public class PlaybackDumpReport implements IReport {
 
     private void writeRow(PrintWriter printWriter, PlaybackInfo playbackInfo) {
 
+        printWriter.println("   title        : " + playbackInfo.getDisplayName());
         printWriter.println("   started      : " + Utilities.yesNoString(playbackInfo.isStarted()));
         printWriter.println("   date started : " + playbackInfo.getDateStarted());
-        printWriter.println("   element id    : " + playbackInfo.getElementId());
+        printWriter.println("   pacing mx    : " + playbackInfo.getWaitBetweenEventsMS());
+        printWriter.println("   min events   : " + playbackInfo.getMinimumPlaybackRecords());
+        printWriter.println("   filename     : " + playbackInfo.getFilename());
+        printWriter.println("   element id   : " + playbackInfo.getElementId());
 
     }
 

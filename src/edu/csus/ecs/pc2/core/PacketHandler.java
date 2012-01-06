@@ -438,58 +438,59 @@ public class PacketHandler {
 
     private void handleStartPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {
         
-        securityCheck(Permission.Type.START_PLAYBACK, fromId, connectionHandlerID);
-        
-        // TODO 673 forward this start playback to other servers
-        
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
-
-        System.out.println("debug 22 - handleStartPlayback "+playbackInfo); // TODO 673 remove debugging
-
-        PlaybackManager manager = contest.getPlaybackManager();
+        System.out.println("debug 22 - handleStartPlayback " + playbackInfo); // TODO 673 remove debugging
         
-        if (playbackInfo.isStarted()) {
-            
-            contest.startReplayPlaybackInfo(playbackInfo);
-            
-            manager.startPlayback(contest, controller, new Runnable() {
+        if ( isServer()) {
 
-                public void run() {
-                    PlaybackManager manager = contest.getPlaybackManager();
-                    PlaybackRecord record = manager.getCurrentPlaybackRecord();
-
-                    controller.getLog().info("Playback running="+manager.isPlaybackRunning()
-                            + " sequence "+manager.getSequenceNumber()
-                            + " status="+record.getEventStatus()+" " +record.getReplayEvent());
-                }
-            }); 
-        } else {
-            
-            // Load replay records if necessary.
+            securityCheck(Permission.Type.START_PLAYBACK, fromId, connectionHandlerID);
+            PlaybackManager manager = contest.getPlaybackManager();
             
             PlaybackInfo currentPlaybackInfo = manager.getPlaybackInfo();
+            
             if (currentPlaybackInfo.getReplayList().length == 0) {
                 currentPlaybackInfo = manager.createPlaybackInfo(playbackInfo.getFilename(), contest);
             }
             
             currentPlaybackInfo.setWaitBetweenEventsMS(playbackInfo.getWaitBetweenEventsMS());
+            currentPlaybackInfo.setMinimumPlaybackRecords(playbackInfo.getMinimumPlaybackRecords());
 
-            // create/insure playback records
-            
-            contest.getPlaybackManager().insureMinimumPlaybackRecords(playbackInfo.getMinimumPlaybackRecords());
-            
+            contest.getPlaybackManager().insureMinimumPlaybackRecords(currentPlaybackInfo.getMinimumPlaybackRecords());
+
+            if (! manager.isPlaybackRunning() && playbackInfo.isStarted()) {
+                
+                // start if NOT running.
+                manager.startPlayback(contest, controller, new Runnable() {
+
+                    public void run() {
+                        PlaybackManager manager = contest.getPlaybackManager();
+                        PlaybackRecord record = manager.getCurrentPlaybackRecord();
+
+                        controller.getLog().info(
+                                "Playback started running=" + manager.isPlaybackRunning() + " sequence " + manager.getSequenceNumber()
+                                + " status=" + record.getEventStatus() + " " + record.getReplayEvent());
+                    }
+                });
+
+            }
+
             contest.updatePlaybackInfo(currentPlaybackInfo);
-            
+
             PlaybackInfo newPlaybackInfo = currentPlaybackInfo.cloneShallow();
-            
+
             if (currentPlaybackInfo.isStarted()) {
                 Packet startPacket = PacketFactory.createStartAllClocks(getServerClientId(), PacketFactory.ALL_SERVERS, fromId);
-                startContest (startPacket, connectionHandlerID);
+                startContest(startPacket, connectionHandlerID);
             }
-            
+
             Packet updatePacket = PacketFactory.createUpdateSetting(getServerClientId(), PacketFactory.ALL_SERVERS, newPlaybackInfo);
             controller.sendToAdministrators(updatePacket);
             controller.sendToServers(updatePacket);
+
+        } else {
+            
+            System.out.println("debug 22 - for "+contest.getClientId()+" handleStartPlayback " + playbackInfo); // TODO 673 remove debugging
+            contest.updatePlaybackInfo(playbackInfo);
         }
     }
 
