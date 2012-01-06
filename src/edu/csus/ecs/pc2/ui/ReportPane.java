@@ -776,6 +776,17 @@ public class ReportPane extends JPanePlugin {
     private JComboBox getReportsComboBox() {
         if (reportsComboBox == null) {
             reportsComboBox = new JComboBox();
+            reportsComboBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                        if (getBreakdownBySiteCheckbox().isSelected()){
+                            generateSelectedReportBySite();
+                        } else {
+                            generateSelectedReport();
+                        }
+                    }
+                }
+            });
         }
         return reportsComboBox;
     }

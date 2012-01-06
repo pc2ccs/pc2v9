@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
@@ -30,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -1153,6 +1155,39 @@ public final class PacketFormatter {
             child = new DefaultMutableTreeNode("Name: " + category.getDisplayName());
             node.add(child);
 
+            return node;
+        }
+        
+        if (object instanceof PlaybackInfo) {
+
+            DefaultMutableTreeNode child;
+
+            PlaybackInfo info = (PlaybackInfo) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + "PlaybackInfo: " + info);
+            
+            child = new DefaultMutableTreeNode("Name: " + info.getDisplayName());
+            node.add(child);
+            
+            child = new DefaultMutableTreeNode("Sequence #: " + info.getSequenceNumber());
+            node.add(child);
+            
+            child = new DefaultMutableTreeNode("Total Events: " + info.getMinimumPlaybackRecords());
+            node.add(child);
+            child = new DefaultMutableTreeNode("filename: " + info.getFilename());
+            node.add(child);
+          
+            child = new DefaultMutableTreeNode("Pace in ms: " + info.getWaitBetweenEventsMS());
+            node.add(child);
+            child = new DefaultMutableTreeNode("Started: " + Utilities.yesNoString(info.isStarted()));
+            node.add(child);
+            child = new DefaultMutableTreeNode("Date started: " + info.getDateStarted());
+            node.add(child);
+            
+            child = new DefaultMutableTreeNode("Loaded events: " + info.getReplayList().length);
+            node.add(child);
+            
+            child = new DefaultMutableTreeNode("ElementId: " + info.getElementId().toString());
+            node.add(child);
             return node;
         }
         

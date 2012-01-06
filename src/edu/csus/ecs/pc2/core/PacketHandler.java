@@ -442,10 +442,10 @@ public class PacketHandler {
         
         // TODO 673 forward this start playback to other servers
         
-        System.out.println("debug 22 - handleStartPlayback "); // TODO 673 remove debugging
-        
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
-        
+
+        System.out.println("debug 22 - handleStartPlayback "+playbackInfo); // TODO 673 remove debugging
+
         PlaybackManager manager = contest.getPlaybackManager();
         
         if (playbackInfo.isStarted()) {
@@ -466,20 +466,30 @@ public class PacketHandler {
         } else {
             
             // Load replay records if necessary.
-
-            PlaybackInfo newPlay = manager.createPlaybackInfo(playbackInfo.getFilename(), contest);
-            newPlay.setWaitBetweenEventsMS(playbackInfo.getWaitBetweenEventsMS());
+            
+            PlaybackInfo currentPlaybackInfo = manager.getPlaybackInfo();
+            if (currentPlaybackInfo.getReplayList().length == 0) {
+                currentPlaybackInfo = manager.createPlaybackInfo(playbackInfo.getFilename(), contest);
+            }
+            
+            currentPlaybackInfo.setWaitBetweenEventsMS(playbackInfo.getWaitBetweenEventsMS());
 
             // create/insure playback records
             
             contest.getPlaybackManager().insureMinimumPlaybackRecords(playbackInfo.getMinimumPlaybackRecords());
             
-            contest.updatePlaybackInfo(newPlay);
+            contest.updatePlaybackInfo(currentPlaybackInfo);
             
-            if (newPlay.isStarted()) {
+            PlaybackInfo newPlaybackInfo = currentPlaybackInfo.cloneShallow();
+            
+            if (currentPlaybackInfo.isStarted()) {
                 Packet startPacket = PacketFactory.createStartAllClocks(getServerClientId(), PacketFactory.ALL_SERVERS, fromId);
                 startContest (startPacket, connectionHandlerID);
             }
+            
+            Packet updatePacket = PacketFactory.createUpdateSetting(getServerClientId(), PacketFactory.ALL_SERVERS, newPlaybackInfo);
+            controller.sendToAdministrators(updatePacket);
+            controller.sendToServers(updatePacket);
         }
     }
 
@@ -2825,6 +2835,11 @@ public class PacketHandler {
                     }
                 }
             }
+        }
+        
+        PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
+        if (playbackInfo != null) {
+            contest.updatePlaybackInfo(playbackInfo);
         }
 
         ContestInformation contestInformation = (ContestInformation) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_INFORMATION);

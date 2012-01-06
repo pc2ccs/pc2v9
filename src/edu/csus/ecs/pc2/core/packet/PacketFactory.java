@@ -2191,5 +2191,13 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.START_PLAYBACK, source, destination, prop);
         return packet;
     }
+    
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, PlaybackInfo playbackInfo) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(PLAYBACK_INFO, playbackInfo);
+        return createPacket(PacketType.Type.UPDATE_SETTING, source, destination, prop);
+    }
 
 }

@@ -157,6 +157,7 @@ public class PlaybackManager {
 
         if (savedException != null) {
             System.out.println("Errors on " + invalidLines + " lines, loading " + filename);
+            System.err.println("Load directory: " +Utilities.getCurrentDirectory());
             savedException.printStackTrace();
             throw savedException;
         }
@@ -242,7 +243,7 @@ public class PlaybackManager {
 
             SerializedFile[] files = new SerializedFile[1];
             try {
-                SerializedFile file = new SerializedFile(sourceDir + File.separator + mainfileName);
+                SerializedFile file = new SerializedFile(mainfileName);
 
                 if (file == null || file.getBuffer() == null) {
                     throw new PlaybackParseException(lineNumber, "Could not read/find " + mainfileName);

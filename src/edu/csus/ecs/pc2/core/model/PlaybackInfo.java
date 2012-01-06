@@ -234,4 +234,22 @@ public class PlaybackInfo implements IElementObject {
         this.waitBetweenEventsMS = waitBetweenEventsMS;
     }
 
+    /**
+     * Create a clone of this class without cloning the playbackList.
+     * 
+     * @return
+     */
+    public PlaybackInfo cloneShallow() {
+        PlaybackInfo info = new PlaybackInfo();
+        info.elementId = elementId;
+        info.sequenceNumber = sequenceNumber;
+        info.minimumPlaybackRecords = minimumPlaybackRecords;
+        info.filename = new String(filename);
+        info.active = active;
+        info.started = started;
+        info.dateStarted = new Date(dateStarted.getTime());
+        // do not clone playbacklist, this is why this method is called "Shallow"
+        return info;
+    }
+
 }
