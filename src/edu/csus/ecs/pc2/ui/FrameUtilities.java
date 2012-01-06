@@ -13,6 +13,8 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Methods to center frame, change cursor, etc. <br>
@@ -288,5 +290,21 @@ public final class FrameUtilities {
      */
     public static void showMessage(Component component, String title, String message) {
         JOptionPane.showMessageDialog(component, message, title, JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    
+    /**
+     * Creates a frame with the input plugin.
+     * 
+     * @param plugin
+     * @param contest
+     * @param controller
+     * @return
+     */
+    public static JFramePlugin createPluginFrame(JPanePlugin plugin, IInternalContest contest, IInternalController controller) {
+
+        JFramePluginImpl frame = new JFramePluginImpl(plugin);
+        frame.setContestAndController(contest, controller);
+        return frame;
     }
 }

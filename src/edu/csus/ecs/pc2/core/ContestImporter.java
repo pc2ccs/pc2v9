@@ -14,12 +14,15 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Site;
 
 /**
- * Contest Loader.
+ * Send (Import) Contest settings to server.
+ * 
+ * Sends packets to server with contest configuration information.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -223,6 +226,12 @@ public class ContestImporter {
         
         ClientSettings [] settings = inContest.getClientSettingsList();
         
+        PlaybackInfo[] infos = inContest.getPlaybackInfos();
+        PlaybackInfo playbackInfo = null;
+        if (infos.length > 0) {
+            playbackInfo = infos[0];
+        }
+        
         if (noteList.size() > 0){
             /**
              * If there are elements in noteList that means there has been
@@ -261,12 +270,16 @@ public class ContestImporter {
                     theController.addNewClientSettings(setting);
                 }
             }
+
+            if (playbackInfo != null) {
+                Thread.sleep(2000);  // kludge wait for accounts and auto judge settings
+                theController.startPlayback(playbackInfo);
+            }
             
         } catch (Exception e) {
             noteList.logError("Error storing configuration Information", e);
             throw new LoadContestDataException(noteList.size()+" errors in sending contest configuration data");
         }
-
     }
 
     // TODO 669 remove after debugged

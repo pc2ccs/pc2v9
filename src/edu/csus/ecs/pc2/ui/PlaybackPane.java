@@ -50,6 +50,8 @@ import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.EventType;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEventDetails;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
+import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
 
 /**
  * Pane for Contest Playback.
@@ -67,8 +69,6 @@ public class PlaybackPane extends JPanePlugin {
      * 
      */
     private static final long serialVersionUID = -1344873174060871842L;
-
-    private static final String RUN_MESSAGE_SUFFIX = " total events/runs)";
 
     private JPanel centerPane = null;
 
@@ -102,13 +102,18 @@ public class PlaybackPane extends JPanePlugin {
 
     private JLabel currentEventLabel = null;
 
-    private JTextField playbackIterationTextField = null;
+    private JTextField minEventsTextField = null;
 
     private JLabel iterateTitleLabel = null;
 
-    private JLabel totalRunsLabel = null;
-    
     private PlaybackManager manager = new PlaybackManager();
+    
+    private JFramePlugin messageFrame = null;
+
+    private JButton reportButton = null;
+
+    private PlaybackRecord currentRecord;
+    
  
     /**
      * This method initializes
@@ -132,10 +137,6 @@ public class PlaybackPane extends JPanePlugin {
         this.add(getEventsListBox(), BorderLayout.CENTER);
         
         currentEventLabel.setText("At (start)");
-        
-        updateTotalRuns();
-        
-        // getTeamReadsFrombuttonGroup().setSelected(getFileRadioButton().getModel(), true);
     }
 
     @Override
@@ -170,6 +171,7 @@ public class PlaybackPane extends JPanePlugin {
             buttonPane.add(getStartButton(), null);
             buttonPane.add(getStopButton(), null);
             buttonPane.add(getResetButton(), null);
+            buttonPane.add(getReportButton(), null);
             buttonPane.add(getLoadButton(), null);
         }
         return buttonPane;
@@ -219,6 +221,10 @@ public class PlaybackPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateGUIperPermissions();
+                PlaybackInfo [] infos = getContest().getPlaybackInfos();
+                if (infos.length > 0) {
+                    updatePlaybackInfo(getContest().getPlaybackInfos()[0]);
+                }
             }
         });
     }
@@ -356,6 +362,13 @@ public class PlaybackPane extends JPanePlugin {
         final PlaybackInfo playbackInfo = manager.getPlaybackInfo();
         playbackInfo.setStarted(true);
 
+        String intValueString = getMinEventsTextField().getText();
+        int minEvents = 0;
+        if (intValueString.length() > 0) {
+            minEvents = Integer.parseInt(intValueString);
+        }
+        playbackInfo.setMinimumPlaybackRecords(minEvents);
+
         if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
             getController().startPlayback(playbackInfo);
             return;
@@ -385,12 +398,6 @@ public class PlaybackPane extends JPanePlugin {
         if (lastEventString.trim().length() > 0) {
             lastEventToRunTo = Integer.parseInt(lastEventString);
         }
-
-        // String setIteratorCount = playbackIterationTextField.getText();
-        // int playbackIteratorMax = 1;
-        // if (setIteratorCount.length() > 0) {
-        // playbackIteratorMax = Integer.parseInt(setIteratorCount);
-        // }
 
         int currentEventNumber = manager.getSequenceNumber();
 
@@ -422,29 +429,37 @@ public class PlaybackPane extends JPanePlugin {
 
     }
     
+    protected void populateGUI(PlaybackInfo info) {
+
+        getMinEventsTextField().setText(Integer.toString(info.getMinimumPlaybackRecords()));
+        setRunningButtons(manager.isPlaybackRunning());
+
+        // TODO load Playback Records
+    }
+    
     protected void updatePlaybackInfo(PlaybackInfo info) {
         
-        final int number = info.getSequenceNumber();
-        final int rowNumber = number - 1;
-        
-        final PlaybackRecord record = manager.getPlaybackRecords()[number];
+        populateGUI(info);
 
-        getController().getLog().info(
-                "Playback running=" + manager.isPlaybackRunning() + " sequence " + number + " status=" + record.getEventStatus() + " " + record.getReplayEvent());
-        
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
+        currentRecord = null;
 
-                currentEventLabel.setText("At event " + number);
+        String eventInfo = "";
+        if (info.getSequenceNumber() > 0) {
+            currentRecord = manager.getPlaybackRecords()[info.getSequenceNumber() - 1];
+            eventInfo = " status=" + currentRecord.getEventStatus() + " " + currentRecord.getReplayEvent();
+        }
 
-                final String[] row = buildPlayBackRow(record);
-                getEventsListBox().replaceRow(row, rowNumber);
-                getEventsListBox().autoSizeAllColumns();
-                
-                setRunningButtons(manager.isPlaybackRunning());
-            }
-        });
-        
+        getController().getLog().info("Playback running=" + manager.isPlaybackRunning() + " sequence " + info.getSequenceNumber() + eventInfo);
+
+        currentEventLabel.setText("At event " + info.getSequenceNumber());
+
+        if (currentRecord != null) {
+            int rowNumber = info.getSequenceNumber() - 1;
+            String[] row = buildPlayBackRow(currentRecord);
+            getEventsListBox().replaceRow(row, rowNumber);
+            getEventsListBox().autoSizeAllColumns();
+        }
+        setRunningButtons(manager.isPlaybackRunning());
     }
 
     private void logMessage(String string) {
@@ -544,6 +559,7 @@ public class PlaybackPane extends JPanePlugin {
             resetButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     resetAllEvents();
+                    
                 }
             });
         }
@@ -551,6 +567,30 @@ public class PlaybackPane extends JPanePlugin {
     }
 
     protected void resetAllEvents() {
+
+        if (!isAllowed(Permission.Type.START_PLAYBACK)) {
+            logMessage("Not allowed to start playback");
+            JOptionPane.showMessageDialog(this, "Not allowed to start playback");
+            return;
+        }
+
+        final PlaybackInfo playbackInfo = manager.getPlaybackInfo();
+        playbackInfo.setStarted(false);
+
+        String intValueString = getMinEventsTextField().getText();
+        int minEvents = 0;
+        if (intValueString.length() > 0) {
+            minEvents = Integer.parseInt(intValueString);
+        }
+        playbackInfo.setMinimumPlaybackRecords(minEvents);
+
+        if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
+            getController().startPlayback(playbackInfo);
+            return;
+        }
+    }
+    
+    protected void oldresetAllEvents() {
         
         int rowCount = getEventsListBox().getRowCount();
 
@@ -575,11 +615,8 @@ public class PlaybackPane extends JPanePlugin {
      */
     private JPanel getTopPane() {
         if (topPane == null) {
-            totalRunsLabel = new JLabel();
-            totalRunsLabel.setText("(no runs)");
-            totalRunsLabel.setBounds(new Rectangle(344, 85, 162, 24));
             iterateTitleLabel = new JLabel();
-            iterateTitleLabel.setText("Number of times to load events");
+            iterateTitleLabel.setText("Minimum Number of events");
             iterateTitleLabel.setBounds(new Rectangle(26, 85, 202, 24));
             iterateTitleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             currentEventLabel = new JLabel();
@@ -604,9 +641,8 @@ public class PlaybackPane extends JPanePlugin {
             topPane.add(getEveryMSEventPacing(), null);
             topPane.add(getStepButton(), null);
             topPane.add(currentEventLabel, null);
-            topPane.add(getPlaybackIterationTextField(), null);
+            topPane.add(getMinEventsTextField(), null);
             topPane.add(iterateTitleLabel, null);
-            topPane.add(totalRunsLabel, null);
         }
         return topPane;
     }
@@ -778,8 +814,6 @@ public class PlaybackPane extends JPanePlugin {
             JOptionPane.showMessageDialog(this, "Unable to load file: " + filename + " " + e.getMessage());
             e.printStackTrace();
         }
-
-        updateTotalRuns();
     }
 
     /**
@@ -806,44 +840,21 @@ public class PlaybackPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes playbackIterationTextField
+     * This method initializes minEventsTextField
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getPlaybackIterationTextField() {
-        if (playbackIterationTextField == null) {
-            playbackIterationTextField = new JTextField();
-            playbackIterationTextField.setBounds(new Rectangle(252, 85, 73, 24));
-            playbackIterationTextField.setDocument(new IntegerDocument());
-            playbackIterationTextField.setText("1");
-            playbackIterationTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                @Override
-                public void keyReleased(KeyEvent e) {
-                    super.keyReleased(e);
-                    updateTotalRuns();
-                }
-            });
+    private JTextField getMinEventsTextField() {
+        if (minEventsTextField == null) {
+            minEventsTextField = new JTextField();
+            minEventsTextField.setBounds(new Rectangle(252, 85, 73, 24));
+            minEventsTextField.setDocument(new IntegerDocument());
+            minEventsTextField.setText("");
         }
-        return playbackIterationTextField;
+        return minEventsTextField;
     }
 
-    protected void updateTotalRuns() {
-        int loadedCount = getEventsListBox().getRowCount();
-        String message = "(0 " + RUN_MESSAGE_SUFFIX;
-        String countString = getPlaybackIterationTextField().getText();
-        int iterationCount = 0;
-        if (countString.length() > 0) {
-            iterationCount = Integer.parseInt(countString);
-        }
-        int numRuns = loadedCount * iterationCount;
-        if (numRuns > 0) {
-            message = "(" + numRuns + RUN_MESSAGE_SUFFIX;
-        }
-        totalRunsLabel.setText(message);
-    }
-    
     private void updateGUIperPermissions() {
-   
         setRunningButtons(manager.isPlaybackRunning());
     }
 
@@ -944,6 +955,41 @@ public class PlaybackPane extends JPanePlugin {
         public void playbackReset(PlayBackEvent playBackEvent) {
             // TODO 673 code reset/rewind
         }
+        
     }
+    
+    public JFramePlugin getMessageFrame() {
+        if (messageFrame == null) {
+            messageFrame = new JFramePluginImpl(new MessageMonitorPane());
+        }
+        return messageFrame;
+    }
+
+    /**
+     * This method initializes reportButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getReportButton() {
+        if (reportButton == null) {
+            reportButton = new JButton();
+            reportButton.setText("Messages");
+            reportButton.setMnemonic(KeyEvent.VK_M);
+            reportButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showMessageFrame();
+                }
+            });
+        }
+        return reportButton;
+    }
+
+    protected void showMessageFrame() {
+        JFramePlugin frame = getMessageFrame();
+        frame.setLocation(getX(), getY());
+        FrameUtilities.setFramePosition(frame, HorizontalPosition.LEFT, VerticalPosition.NO_CHANGE);
+        frame.setVisible(true);
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"

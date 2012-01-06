@@ -7,18 +7,16 @@ import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.JPluginPaneNameComparator;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * Pane to allow user to choose and open/start plugin.
+ * Pane to allow user to choose and open/start plugin window or pane.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -140,19 +138,9 @@ public class PluginLoadPane extends JPanePlugin {
     }
 
     protected void addNewPluginWindow() {
-
         PluginWrapper wrapper = (PluginWrapper) getPluginComboBox().getSelectedItem();
-
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         JPanePlugin plugin = wrapper.getPlugin();
-        frame.setContentPane(plugin);
-        frame.setTitle(wrapper.getPlugin().getPluginTitle());
-        plugin.setParentFrame(frame);
-        plugin.setContestAndController(getContest(), getController());
-        frame.pack();
-        frame.setBounds(new java.awt.Rectangle(0, 0, 500, 350));
-        FrameUtilities.centerFrame(frame);
+        JFramePlugin frame = FrameUtilities.createPluginFrame(plugin, getContest(), getController());
         frame.setVisible(true);
     }
 

@@ -475,6 +475,11 @@ public class PacketHandler {
             contest.getPlaybackManager().insureMinimumPlaybackRecords(playbackInfo.getMinimumPlaybackRecords());
             
             contest.updatePlaybackInfo(newPlay);
+            
+            if (newPlay.isStarted()) {
+                Packet startPacket = PacketFactory.createStartAllClocks(getServerClientId(), PacketFactory.ALL_SERVERS, fromId);
+                startContest (startPacket, connectionHandlerID);
+            }
         }
     }
 
@@ -2403,7 +2408,7 @@ public class PacketHandler {
     }
 
     /**
-     * This starts the contest and sends notification to other servers/clients.
+     * Starts the contest clock and sends notification to other servers/clients.
      * 
      * @param connectionHandlerID
      * @param contestTime
