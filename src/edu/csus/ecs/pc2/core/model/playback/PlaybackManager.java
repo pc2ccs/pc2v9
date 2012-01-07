@@ -560,6 +560,7 @@ public class PlaybackManager {
 
                 long savedElapsed = theRun.getElapsedMS();
                 Run newRun = contest.acceptRun(theRun, runFiles);
+                newRun.setPlaybackSequenceNumber(playbackRecord.getSequenceNumber());
 
                 if (savedElapsed > 0) {
                     newRun.setElapsedMS(savedElapsed);

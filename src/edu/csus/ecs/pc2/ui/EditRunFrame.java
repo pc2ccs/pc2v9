@@ -76,7 +76,11 @@ public class EditRunFrame extends JFrame implements UIPlugin {
         if (theRun == null) {
             setTitle("Add New Run");
         } else {
-            setTitle("Edit Run " + theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ")");
+            String seqNumber = "";
+            if ( run.getPlaybackSequenceNumber() > 0) {
+                seqNumber = " Playback Seq "+run.getPlaybackSequenceNumber();
+            }
+            setTitle("Edit Run " + theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ")" + seqNumber);
             run = theRun;
             controller.checkOutRun(theRun, true, false);
         }

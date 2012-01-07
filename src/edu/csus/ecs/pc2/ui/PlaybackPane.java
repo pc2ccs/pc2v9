@@ -36,6 +36,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IPlayBackEventListener;
+import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -43,6 +44,7 @@ import edu.csus.ecs.pc2.core.model.PlayBackEvent;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackRecord;
@@ -215,6 +217,7 @@ public class PlaybackPane extends JPanePlugin {
         
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addPlayBackEventListener(new PlayBackEventListener());
+        getContest().addRunListener(new RunListenerImplementation());
         
         manager = getContest().getPlaybackManager();
         
@@ -428,14 +431,35 @@ public class PlaybackPane extends JPanePlugin {
             }
         });
     }
-    
-    protected void populateGUI(PlaybackInfo info) {
 
+    protected void populateGUI(PlaybackInfo info) {
+        populateGUI(info, false);
+    }
+        
+    protected void populateGUI(PlaybackInfo info, boolean forcePlaybackGridRefresh) {
+        
         getTimeWarpTextField().setText(Integer.toString(info.getWaitBetweenEventsMS()));
         getMinEventsTextField().setText(Integer.toString(info.getMinimumPlaybackRecords()));
         setRunningButtons(manager.isPlaybackRunning());
 
-        // TODO load Playback Records
+        PlaybackRecord[] records = manager.getPlaybackRecords();
+
+        if ((records.length > 0 && getEventsListBox().getRowCount() < records.length) || forcePlaybackGridRefresh) {
+
+            int rowCount = records.length;
+
+            Object[][] rowValues = new Object[rowCount][eventsListBox.getColumnCount()];
+
+            for (int i = 0; i < rowCount; i++) {
+                PlaybackRecord record = records[i];
+                rowValues[i] = buildPlayBackRow(record);
+            }
+
+            getEventsListBox().removeAllRows();
+            getEventsListBox().addRows(rowValues, records);
+            getEventsListBox().autoSizeAllColumns();
+            getEventsListBox().sort();
+        }
     }
     
     protected void updatePlaybackInfo(PlaybackInfo info) {
@@ -451,8 +475,11 @@ public class PlaybackPane extends JPanePlugin {
         }
 
         getController().getLog().info("Playback running=" + manager.isPlaybackRunning() + " sequence " + info.getSequenceNumber() + eventInfo);
+        
+        
 
-        currentEventLabel.setText("At event " + info.getSequenceNumber());
+        int numleft = manager.getPlaybackInfo().getMinimumPlaybackRecords() - manager.getSequenceNumber();
+        currentEventLabel.setText(numleft + " events left");
 
         if (currentRecord != null) {
             int rowNumber = info.getSequenceNumber() - 1;
@@ -460,7 +487,7 @@ public class PlaybackPane extends JPanePlugin {
             getEventsListBox().replaceRow(row, rowNumber);
             getEventsListBox().autoSizeAllColumns();
         }
-        setRunningButtons(manager.isPlaybackRunning());
+        setRunningButtons(info.isStarted());
     }
 
     private void logMessage(String string) {
@@ -544,6 +571,7 @@ public class PlaybackPane extends JPanePlugin {
 
     protected void stopEventsRunning() {
         manager.setPlaybackRunning(false);
+        populateGUI(manager.getPlaybackInfo());
     }
 
     /**
@@ -592,24 +620,6 @@ public class PlaybackPane extends JPanePlugin {
         }
     }
     
-    protected void oldresetAllEvents() {
-        
-        int rowCount = getEventsListBox().getRowCount();
-
-        PlaybackRecord [] playbacks = new PlaybackRecord[rowCount];
-        Object [][] rowValues = new Object[rowCount][eventsListBox.getColumnCount()];
-
-        for (int i = 0; i < rowCount; i++) {
-            PlaybackRecord record = (PlaybackRecord) eventsListBox.getKeys()[i];
-            record.reset();
-            rowValues[i] = buildPlayBackRow(record);
-        }
-        
-        getEventsListBox().removeAllRows();
-        getEventsListBox().addRows(rowValues, playbacks);
-        
-    }
-
     /**
      * This method initializes topPane
      * 
@@ -743,7 +753,8 @@ public class PlaybackPane extends JPanePlugin {
         try {
             PlaybackRecord record = manager.executeNextEvent(getContest(), getController());
             
-            currentEventLabel.setText("At event " + manager.getSequenceNumber());
+            int numleft = manager.getPlaybackInfo().getMinimumPlaybackRecords() - manager.getSequenceNumber();
+            currentEventLabel.setText(numleft + " events left");
 
             String[] row = buildPlayBackRow(record);
 
@@ -993,6 +1004,41 @@ public class PlaybackPane extends JPanePlugin {
         FrameUtilities.setFramePosition(frame, HorizontalPosition.LEFT, VerticalPosition.NO_CHANGE);
         frame.setVisible(true);
     }
+    
+    /**
+     * Run Listener
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
 
+    // $HeadURL$
+    public class RunListenerImplementation implements IRunListener {
 
+        public void runAdded(RunEvent event) {
+            updateAtEvent(event.getRun().getPlaybackSequenceNumber());
+        }
+
+        public void runChanged(RunEvent event) {
+            updateAtEvent(event.getRun().getPlaybackSequenceNumber());
+        }
+
+        public void runRemoved(RunEvent event) {
+
+        }
+
+        public void refreshRuns(RunEvent event) {
+        }
+    }
+
+    public void updateAtEvent(int playbackSequenceNumber) {
+        
+        final int numleft = manager.getPlaybackInfo().getMinimumPlaybackRecords() - playbackSequenceNumber;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                currentEventLabel.setText(numleft + " events left");
+            }
+        });
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"
