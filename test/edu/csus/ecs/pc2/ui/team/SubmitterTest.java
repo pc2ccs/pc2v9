@@ -3,11 +3,12 @@ package edu.csus.ecs.pc2.ui.team;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
-import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.exception.CommandLineErrorException;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test Submitter.
@@ -19,12 +20,14 @@ import edu.csus.ecs.pc2.core.util.JUnitUtilities;
  */
 
 // $HeadURL$
-public class SubmitterTest extends TestCase {
+public class SubmitterTest extends AbstractTestCase {
 
     /**
      * Tests that only work if a server is running.
      */
     private boolean serverRunning = false;
+
+    private boolean debugFlag = false;
 
     private static final String NL = System.getProperty("line.separator");
 
@@ -32,31 +35,14 @@ public class SubmitterTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        String testFilename = getTestName("Hello.java");
+        Utilities.insureDir(getDataDirectory());
+        String testFilename = getTestFilename("Hello.java");
         if (!new File(testFilename).exists()) {
             writeHelloFile(testFilename);
-            System.err.println("Created " + testFilename);
+            if (debugFlag) {
+                System.err.println("Created " + testFilename);
+            }
         }
-
-    }
-
-    private String getTestName(String filename) throws IOException {
-
-        String testDir = "testdata";
-        String projectPath = JUnitUtilities.locate(testDir);
-
-        String testPath = projectPath + File.separator + testDir;
-
-        File dir = new File(testPath);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        if (projectPath == null) {
-            throw new IOException("Unable to locate " + testDir);
-        }
-
-        return testPath + File.separator + filename;
     }
 
     public void testOne() throws Exception {
@@ -110,7 +96,7 @@ public class SubmitterTest extends TestCase {
 
             String problem = "A";
             String language = null;
-            String filename = getTestName("Hello.java");
+            String filename = getTestFilename("Hello.java");
 
             Submitter submitter = new Submitter("2");
             submitter.submitRun(filename, problem, language);
@@ -129,7 +115,7 @@ public class SubmitterTest extends TestCase {
 
             String problem = "A";
             String language = null;
-            String filename = getTestName("Hello.java");
+            String filename = getTestFilename("Hello.java");
 
             Submitter submitter = new Submitter("4");
             submitter.submitRun(filename, problem, language);
@@ -147,7 +133,7 @@ public class SubmitterTest extends TestCase {
 
         if (serverRunning) {
 
-            String filename = getTestName("Hello.java");
+            String filename = getTestFilename("Hello.java");
 
             String[] args = { "--login", "3", filename };
             Submitter submitter = new Submitter(args);
@@ -157,5 +143,79 @@ public class SubmitterTest extends TestCase {
                     " " + filename + " using " + submitter.getSubmittedLanguage().getName() + //
                     " by " + submitter.getSubmittedUser().getLoginName());
         }
+    }
+
+    /**
+     * Test if CCS options should be present.
+     * 
+     * If any CCS option is present on the command line then all required options should be on command line.
+     * 
+     */
+    public void testMissingOptions() {
+
+        String[][] testCases = { //
+        { "-p", "A" }, // <problem short-name>
+                { "-l", "Java" }, // <language name>
+                { "-u", "team4" }, // <team id>
+                { "-w", "t4Pass" }, // <team password>
+                { "-m", "hello.c" }, // <main source filename>
+                { "-d", "stTestLP" }, // <directory for main source and other source files>
+                { "-t", "4533" }, // <contest-time for submission>
+        };
+
+        try {
+            for (String[] args : testCases) {
+                Submitter submitter = new Submitter();
+                submitter.setShowAllMissingOptions(false);
+                submitter.loadVariables(args);
+                fail("Should have thrown CommandLineErrorException, missing command line option for " + Arrays.toString(args));
+            }
+        } catch (CommandLineErrorException e) {
+            assert true;
+        }
+    }
+
+    /**
+     * Tests for valid CCS submitter command line.
+     * 
+     * @throws CommandLineErrorException
+     */
+    public void testLoadPositive() throws CommandLineErrorException {
+
+        String testPath = getDataDirectory() + File.separator;
+
+        String[] args = { //
+        "-p", "A", // <problem short-name>
+                "-l", "Java", // <language name>
+                "-u", "team4", // <team id>
+                "-w", "t4Pass", // <team password>
+                "-m", "hello.c", // <main source filename>
+                "-d", testPath + "stTestLP", // <directory for main source and other source files>
+        };
+
+        Submitter submitter = new Submitter();
+
+        int numberMissingCCSArguments = submitter.numberMissingArguments(args, Submitter.CCS_REQUIRED_OPTIONS_LIST);
+        assertEquals("Expecting Number of CCS Options ", 0, numberMissingCCSArguments);
+
+        submitter.loadVariables(args);
+
+        String[] argsWithOpt = {//
+        "-p", "A", // <problem short-name>
+                "-l", "Java", // <language name>
+                "-u", "team4", // <team id>
+                "-w", "t4Pass", // <team password>
+                "-m", "hello.c", // <main source filename>
+                "-d", testPath + "stTestLP", // <directory for main source and other source files>
+                "-t", "4533", // <contest-time for submission>
+        };
+
+        submitter = new Submitter();
+
+        numberMissingCCSArguments = submitter.numberMissingArguments(args, Submitter.CCS_REQUIRED_OPTIONS_LIST);
+        assertEquals("Expecting Number of CCS Options ", 0, numberMissingCCSArguments);
+
+        submitter.loadVariables(argsWithOpt);
+
     }
 }

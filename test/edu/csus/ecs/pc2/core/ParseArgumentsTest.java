@@ -52,15 +52,23 @@ public class ParseArgumentsTest extends TestCase {
     public void testIsOptPresent() {
 
         String opt = "--login";
+        String opt2 = "--debug";
+        String optp = "-pass";
         String value = "name";
 
-        String[] required = { opt };
-        String[] args = { opt, value, "-pass" };
+        String[] required = { opt, opt2 };
+        String[] args = { opt, value, optp};
         ParseArguments parseArguments = new ParseArguments(args, required);
+        
+//        parseArguments.dumpArgs(System.out);
 
         assertTrue(opt + " option should be present", parseArguments.isOptPresent(opt));
         assertFalse("Option should not have value ", parseArguments.isOptPresent("--bogus"));
-        assertTrue("--pass option should be present", parseArguments.isOptPresent("-pass"));
+        assertTrue(optp+" option should be present", parseArguments.isOptPresent(optp));
+        assertEquals(opt + " value ", value, new String(parseArguments.getOptValue(opt)));
+        
+        assertFalse(opt2+" option should not be present", parseArguments.isOptPresent(opt2));
+        assertNull(opt2+" option should be null value", parseArguments.getOptValue(opt2));
     }
     
     /**
