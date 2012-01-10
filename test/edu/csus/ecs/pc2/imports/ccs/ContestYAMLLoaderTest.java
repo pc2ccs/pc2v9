@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
@@ -23,7 +22,7 @@ import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test for ContestYAMLLoader.
@@ -33,31 +32,17 @@ import edu.csus.ecs.pc2.core.util.JUnitUtilities;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoaderTest.java $
-public class ContestYAMLLoaderTest extends TestCase {
+public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     private boolean debugFlag = false;
 
     private ContestYAMLLoader loader;
 
-    private String testDirectory = "testdata" + File.separator + "yaml";
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         loader = new ContestYAMLLoader();
-
-        String testDir = "testdata";
-        String projectPath = JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            projectPath = "."; //$NON-NLS-1$
-            System.err.println("ContestYAMLLoaderTest: Unable to locate " + testDir);
-        }
-        testDirectory = projectPath + File.separator + "testdata" + File.separator + "yaml";
-
-        if (debugFlag) {
-            System.out.println("ContestYAMLLoaderTest: test directory: " + getYamlTestDirectory());
-            System.out.println("ContestYAMLLoaderTest: test      file: " + getYamlTestFileName());
-        }
+        new File(getDataDirectory()).mkdirs();
     }
 
     public void testGetTitle() throws IOException {
@@ -96,7 +81,7 @@ public class ContestYAMLLoaderTest extends TestCase {
 
         assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
 
-        contest = loader.fromYaml(null, contents, getYamlTestDirectory());
+        contest = loader.fromYaml(null, contents, getDataDirectory());
 
         assertNotNull(contest);
 
@@ -147,12 +132,16 @@ public class ContestYAMLLoaderTest extends TestCase {
 
     }
 
+    private String getYamlTestFileName() {
+        return getTestFilename(ExportYAML.CONTEST_FILENAME);
+    }
+
     public void testLoader() throws Exception {
 
         IInternalContest contest = loader.fromYaml(null, new String[0], "NAD");
         assertNotNull(contest);
 
-        contest = loader.fromYaml(null, getYamlTestDirectory());
+        contest = loader.fromYaml(null, getDataDirectory());
 
         assertNotNull(contest);
 
@@ -217,10 +206,10 @@ public class ContestYAMLLoaderTest extends TestCase {
 
     public void testProblemLoader() throws Exception {
 
-        IInternalContest contest = loader.fromYaml(null, getYamlTestDirectory());
+        IInternalContest contest = loader.fromYaml(null, getDataDirectory());
 
         if (debugFlag) {
-            System.out.println("Dir " + getYamlTestDirectory());
+            System.out.println("Dir " + getDataDirectory());
 
             for (Problem problem : contest.getProblems()) {
                 System.out.println(problem.getDisplayName() + " cases " + problem.getNumberTestCases());
@@ -368,20 +357,13 @@ public class ContestYAMLLoaderTest extends TestCase {
         assertEquals(key + " lines.", 8, sectionLines.length);
     }
 
-    String getYamlTestDirectory() {
-        return testDirectory;
-    }
-
-    String getYamlTestFileName() {
-        return getYamlTestDirectory() + File.separator + ExportYAML.CONTEST_FILENAME;
-    }
 
     public void testgetFileNames() throws Exception {
 
         String[] basenames = { "bozo", "smart", "sumit" };
 
         String shortName = "sumit";
-        String directoryName = getYamlTestDirectory() + File.separator + shortName + File.separator + "data" + File.separator + "secret";
+        String directoryName = getDataDirectory() + File.separator + shortName + File.separator + "data" + File.separator + "secret";
 
         String[] names = loader.getFileNames(directoryName, ".in");
         assertEquals("Number of .in files ", 3, names.length);
@@ -513,8 +495,6 @@ public class ContestYAMLLoaderTest extends TestCase {
 
     void dumpAutoJudgeSettings(Problem[] contestProblems, AutoJudgeSetting[] autoJudgeSettings) {
 
-        System.out.println("-- There are " + autoJudgeSettings.length + " Auto Judge settings ");// TODO 669 remove this
-
         for (AutoJudgeSetting auto : autoJudgeSettings) {
 
             System.out.println("-- Auto Judge setting for " + auto.getDisplayName());
@@ -532,6 +512,31 @@ public class ContestYAMLLoaderTest extends TestCase {
             System.out.println();
             System.out.println();
         }
+
+    }
+    
+    private String getLatexFilename (String problemShortName) {
+        return getDataDirectory() + File.separator + problemShortName + File.separator+ "problem_statement" + File.separator + ContestYAMLLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
+    }
+    
+    public void testLatextProblem() throws Exception {
+
+        String problemName = "channel";
+
+        String filename = getLatexFilename(problemName);
+
+        String problemTitle = loader.getProblemNameFromLaTex(filename);
+
+        assertNotNull("Expecting problem name for " + problemName + " in " + filename, problemTitle);
+        assertEquals("Problem name in " + filename, "Channel Island Navigation", problemTitle);
+        
+        problemName = "castles";
+        filename = getLatexFilename(problemName);
+
+        problemTitle = loader.getProblemNameFromLaTex(filename);
+
+        assertNotNull("Expecting problem name for " + problemName + " in " + filename, problemTitle);
+        assertEquals("Problem name in " + filename, "Castles in the Sand", problemTitle);
 
     }
 }

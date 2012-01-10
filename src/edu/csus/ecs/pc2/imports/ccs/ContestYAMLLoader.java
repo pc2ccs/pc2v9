@@ -75,9 +75,12 @@ public class ContestYAMLLoader {
 
     private static final String DELIMIT = ":";
 
-    private static final String DEFAULT_CONTEST_YAML_FILENAME = "contest.yaml";
+    public static final String DEFAULT_CONTEST_YAML_FILENAME = "contest.yaml";
 
-    private static final String DEFAULT_PROBLEM_YAML_FILENAME = "problem.yaml";
+    public static final String DEFAULT_PROBLEM_YAML_FILENAME = "problem.yaml";
+    
+    public static final String DEFAULT_PROBLEM_LATEX_FILENAME = "problem.tex";
+    
 
     /**
      * problemName key in problem.yaml
@@ -407,6 +410,15 @@ public class ContestYAMLLoader {
         String problemName = getSequenceValue(contents, PROBLEM_NAME_KEY);
         if (problemName != null) {
             problem.setDisplayName(problemName);
+        } else {
+            String problemTextFilename = directoryName + File.separator + problem.getShortName() + File.separator + DEFAULT_PROBLEM_LATEX_FILENAME;
+            if (new File(problemTextFilename).isFile()) {
+                
+                problemName = getProblemNameFromLaTex(problemTextFilename);
+                if (problemName != null) {
+                    problem.setDisplayName(problemName);
+                }
+            }
         }
 
         String[] sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
@@ -427,6 +439,53 @@ public class ContestYAMLLoader {
             }
         }
 
+    }
+
+    protected String getProblemNameFromLaTex(String filename) {
+        
+        if (! new File(filename).isFile()) {
+            System.err.println("debug 22 Can not find file " +filename);
+        } else {
+            System.err.println("debug 22 found file " +filename);
+        }
+
+        String[] lines;
+        try {
+            lines = Utilities.loadFile(filename);
+        } catch (IOException e) {
+            return null;
+        }
+
+        String name = null;
+
+        String titlePattern = "\\problemtitle{";
+        
+        String commentPattern = "%% plainproblemtitle:";
+
+        for (String line : lines) {
+            // Now create matcher object.
+            
+            if (line.indexOf("problemtitle") != -1) {
+                
+                // %% plainproblemtitle: Problem Name
+                if (line.trim().startsWith(commentPattern)) {
+                    name = line.trim().substring(commentPattern.length()).trim();
+                    break;
+                }
+
+                // \problemtitle{Problem Name}
+                
+                if (line.trim().startsWith(titlePattern)) {
+                    name = line.trim().substring(titlePattern.length()).trim();
+//                    name = name.replace(Pattern.quote(")"), "");
+//                    name = name.replace(")", "");
+                    name = name.substring(0, name.length()-1);
+                    System.out.println("debug 22 - set name "+name);
+                    break;
+                }
+            }
+        }
+        return name;
     }
 
     private void loadCCSProblem(IInternalContest contest, String dataFileBaseDirectory, Problem problem) throws Exception {
