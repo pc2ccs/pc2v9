@@ -443,7 +443,12 @@ public class PacketHandler {
         
         if ( isServer()) {
 
-            securityCheck(Permission.Type.START_PLAYBACK, fromId, connectionHandlerID);
+            if (playbackInfo.isStarted()) {
+                securityCheck(Permission.Type.START_PLAYBACK, fromId, connectionHandlerID);
+            } else {
+                securityCheck(Permission.Type.STOP_PLAYBACK, fromId, connectionHandlerID);
+            }
+            
             PlaybackManager manager = contest.getPlaybackManager();
             
             PlaybackInfo currentPlaybackInfo = manager.getPlaybackInfo();
@@ -471,7 +476,13 @@ public class PacketHandler {
                                 + " status=" + record.getEventStatus() + " " + record.getReplayEvent());
                     }
                 });
-
+            }
+            
+            if (manager.isPlaybackRunning() && (! playbackInfo.isStarted())){
+                // stop if running.
+                
+                manager.setPlaybackRunning(false);
+                currentPlaybackInfo.setStarted(false);
             }
 
             contest.updatePlaybackInfo(currentPlaybackInfo);
@@ -2840,7 +2851,23 @@ public class PacketHandler {
         
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
         if (playbackInfo != null) {
-            contest.updatePlaybackInfo(playbackInfo);
+            if (isServer()) {
+                boolean isStarted = contest.getPlaybackManager().getPlaybackInfo().isStarted();
+                PlaybackInfo currentPlaybackInfo = updatePlaybackInfo (playbackInfo);
+                
+                if (isStarted != currentPlaybackInfo.isStarted()) {
+                    if (currentPlaybackInfo.isStarted()) {
+                        contest.startReplayPlaybackInfo(currentPlaybackInfo);
+                    } else {
+                        contest.stopReplayPlaybackInfo(currentPlaybackInfo);
+                    }
+                } else {
+                    contest.updatePlaybackInfo(currentPlaybackInfo);
+                }
+                
+            } else {
+                contest.updatePlaybackInfo(playbackInfo);
+            }
         }
 
         ContestInformation contestInformation = (ContestInformation) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_INFORMATION);
@@ -2901,6 +2928,23 @@ public class PacketHandler {
                 }
             }
         }
+    }
+
+    private PlaybackInfo updatePlaybackInfo(PlaybackInfo newPlaybackInfo) {
+        
+        PlaybackInfo playbackInfo= contest.getPlaybackManager().getPlaybackInfo();
+        
+        playbackInfo.setStarted( newPlaybackInfo.isStarted());
+        
+        playbackInfo.setMinimumPlaybackRecords(newPlaybackInfo.getMinimumPlaybackRecords());
+        playbackInfo.setWaitBetweenEventsMS(newPlaybackInfo.getWaitBetweenEventsMS());
+        
+        String filename = newPlaybackInfo.getFilename();
+        if (filename != null && filename.length() > 0) {
+            playbackInfo.setFilename(newPlaybackInfo.getFilename());
+        }
+        
+        return playbackInfo;
     }
 
     private boolean isThisSite(int siteNumber) {

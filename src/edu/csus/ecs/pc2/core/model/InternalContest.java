@@ -2976,6 +2976,11 @@ public class InternalContest implements IInternalContest {
         playbackInfoList.delete(playbackInfo);
         firePlaybackInfosListener(PlayBackEvent.Action.STOP_REPLAY, playbackInfo);
     }
+    
+    public void startReplayPlaybackInfo(PlaybackInfo playbackInfo) {
+        playbackInfoList.delete(playbackInfo);
+        firePlaybackInfosListener(PlayBackEvent.Action.START_REPLAY, playbackInfo);
+    }
 
     public PlaybackInfo[] getPlaybackInfos() {
         return playbackInfoList.getList();

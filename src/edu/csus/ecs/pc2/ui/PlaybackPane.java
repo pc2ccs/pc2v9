@@ -374,12 +374,13 @@ public class PlaybackPane extends JPanePlugin {
 
         if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
             getController().startPlayback(playbackInfo);
-            System.err.println("debug 22 started "+playbackInfo);
+            System.err.println("debug 22 started " + playbackInfo);
             return;
         }
+
         try {
             getController().startPlayback(playbackInfo);
-            System.err.println("debug 22 started "+playbackInfo);
+            System.err.println("debug 22 started " + playbackInfo);
         } catch (Exception e1) {
             e1.printStackTrace(System.err);
             logMessage("Unable to start playback " + e1.getMessage(), e1);
@@ -570,8 +571,26 @@ public class PlaybackPane extends JPanePlugin {
     }
 
     protected void stopEventsRunning() {
-        manager.setPlaybackRunning(false);
-        populateGUI(manager.getPlaybackInfo());
+        
+        if (!isAllowed(Permission.Type.STOP_PLAYBACK)) {
+            logMessage("Not allowed to stop playback");
+            JOptionPane.showMessageDialog(this, "Not allowed to stop playback");
+            return;
+        }
+
+        final PlaybackInfo playbackInfo = manager.getPlaybackInfo();
+        playbackInfo.setStarted(false);
+
+        String intValueString = getMinEventsTextField().getText();
+        int minEvents = 0;
+        if (intValueString.length() > 0) {
+            minEvents = Integer.parseInt(intValueString);
+        }
+        playbackInfo.setMinimumPlaybackRecords(minEvents);
+
+        getController().startPlayback(playbackInfo);
+        System.err.println("debug 22 stopped " + playbackInfo);
+        return;
     }
 
     /**

@@ -301,10 +301,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void sendToLocalServer(Packet packet) {
         
-        if (isThisServer(packet.getSourceId())) {
+        if (isThisServer(packet.getSourceId()) && isServer()) {
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(contest.getClientId());
             processPacket(packet, connectionHandlerID);
-            log.info("Sent    packet to server " + packet);
+            log.info("Loopback send packet to server " + packet);
             return;
         } else {
             try {

@@ -1150,7 +1150,9 @@ public interface IInternalContest {
 
     void resetPlaybackInfo(PlaybackInfo playbackInfo);
 
-    void stopReplayPlaybackInfo(PlaybackInfo playbackInfo) throws Exception;
+    void stopReplayPlaybackInfo(PlaybackInfo playbackInfo);
+    
+    void startReplayPlaybackInfo(PlaybackInfo playbackInfo);
     
     PlaybackManager getPlaybackManager();
     

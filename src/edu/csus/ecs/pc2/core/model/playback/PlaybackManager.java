@@ -95,6 +95,10 @@ public class PlaybackManager {
     private ReplayEvent[] load(String filename, IInternalContest contest) throws Exception {
 
         Vector<ReplayEvent> events = new Vector<ReplayEvent>();
+        
+        if (filename == null || "".equals(filename)) {
+            throw new IllegalArgumentException("Unable to load filename, filename is null");
+        }
 
         if (!new File(filename).exists()) {
             throw new FileNotFoundException(filename);
