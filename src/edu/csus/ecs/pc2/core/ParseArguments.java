@@ -263,8 +263,12 @@ public class ParseArguments {
         }
 
         Object obj = argHash.get(argKey);
-
-        return obj != null;
+        
+        if (NULL_VALUE.equals(obj)){
+            return true;
+        }
+        
+        return obj != null; 
     }
 
     /**
