@@ -224,18 +224,22 @@ public class ContestPreloadPane extends JPanePlugin {
         IInternalContest newContest = null;
 
         String contestSummary = null;
+        
+        int result = JOptionPane.NO_OPTION;
 
+     
         try {
             ContestYAMLLoader loader = new ContestYAMLLoader();
             newContest = loader.fromYaml(null, directoryName);
             contestSummary = ImportDataPane.getContestLoadSummary(newContest);
+            
+            result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
 
         } catch (Exception e) {
             logException("Unable to load contest YAML from " + filename, e);
+            e.printStackTrace(); // TODO debug 22
             showMessage("Problem loading contest data file(s) - " + e.getMessage());
         }
-
-        int result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
 
         if (result != JOptionPane.YES_OPTION) {
             showMessage("No import done");
