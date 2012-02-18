@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
@@ -640,8 +641,9 @@ public class SampleContest {
      * @throws FileSecurityException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws RunUnavailableException 
      */
-    public Run addARun(InternalContest contest, String runInfoLine) throws IOException, ClassNotFoundException, FileSecurityException {
+    public Run addARun(InternalContest contest, String runInfoLine) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         // get last judge
         Account[] accounts = (Account[]) contest.getAccounts(Type.JUDGE).toArray(new Account[contest.getAccounts(Type.JUDGE).size()]);
@@ -723,8 +725,9 @@ public class SampleContest {
      * @throws IOException
      * @throws ClassNotFoundException
      * @throws FileSecurityException
+     * @throws RunUnavailableException 
      */
-    public Run addJudgement(IInternalContest contest, Run run, Judgement judgement, ClientId judgeId) throws IOException, ClassNotFoundException, FileSecurityException {
+    public Run addJudgement(IInternalContest contest, Run run, Judgement judgement, ClientId judgeId) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         ElementId judgementId = judgement.getElementId();
         boolean solved = isSolved(contest, judgementId);
@@ -737,12 +740,17 @@ public class SampleContest {
         return contest.getRun(run.getElementId());
     }
 
-    private void checkOutRun(IInternalContest contest, Run run, ClientId judgeId) {
-        try {
+    private void checkOutRun(IInternalContest contest, Run run, ClientId judgeId) throws RunUnavailableException, IOException, ClassNotFoundException, FileSecurityException {
+        
+            if (run == null) {
+                throw  new IllegalArgumentException("run is null");
+            }
+            
+            if (judgeId == null) {
+                throw  new IllegalArgumentException("judge id is null");
+            }
+            
             contest.checkoutRun(run, judgeId, false, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -941,8 +949,9 @@ public class SampleContest {
      * @throws IOException
      * @throws ClassNotFoundException
      * @throws FileSecurityException
+     * @throws RunUnavailableException 
      */
-    public void quickLoad(IInternalContest contest) throws IOException, ClassNotFoundException, FileSecurityException {
+    public void quickLoad(IInternalContest contest) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         SampleContest sample = new SampleContest();
 

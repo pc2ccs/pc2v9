@@ -51,6 +51,11 @@ public class AbstractTestCase extends TestCase {
     public String getDataDirectory() {
         return getTestDataDirectory() + File.separator + getShortClassName();
     }
+    
+    public String getDataDirectory(String testName) {
+        return getTestDataDirectory() + File.separator + getShortClassName() + File.separator + testName;
+    }
+    
 
     /**
      * Get test case (JUnit) test file name (full path).

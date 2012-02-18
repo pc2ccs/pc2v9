@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
@@ -136,19 +137,22 @@ public class ImportDataPane extends JPanePlugin {
         
         IInternalContest newContest = null;
         String contestSummary = "";
+        
+        int result = JOptionPane.NO_OPTION;
 
         try {
              newContest = loader.fromYaml(null, directoryName);
+             
              contestSummary = getContestLoadSummary(newContest);
+             
+             result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
+   
         } catch (Exception e) {
             logException("Unable to load contest YAML from " + filename, e);
             e.printStackTrace();
             showMessage("Problem loading file(s), check log.  " + e.getMessage());
         }
         
-        
-        int result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
-
         if (result != JOptionPane.YES_OPTION) {
             showMessage("No import done");
             return;
@@ -203,6 +207,23 @@ public class ImportDataPane extends JPanePlugin {
         addSummaryEntry(sb, sites.length, "site");
 
         addSummaryEntry(sb, problems.length, "problem");
+        
+        if (problems.length > 0) {
+            int ansCount = 0;
+            int datCount = 0;
+            
+            for (Problem problem : problems) {
+                ProblemDataFiles pdfiles = newContest.getProblemDataFile(problem);
+                if (pdfiles != null) {
+                    ansCount += pdfiles.getJudgesAnswerFiles().length;
+                    datCount += pdfiles.getJudgesDataFiles().length;
+                } else {
+                    System.err.println("debug 22 no files for "+problem);
+                }
+            }
+            addSummaryEntry(sb, datCount, "input data files");
+            addSummaryEntry(sb, ansCount, "answer data files");
+        }
 
         addSummaryEntry(sb, languages.length, "language");
 
@@ -220,6 +241,8 @@ public class ImportDataPane extends JPanePlugin {
             sb.append("1 replay defined, auto started? "+info.isStarted());
             sb.append(NL);
             sb.append("   file: "+info.getFilename());
+            sb.append(NL);
+            sb.append(info.toString());
             sb.append(NL);
         }
 

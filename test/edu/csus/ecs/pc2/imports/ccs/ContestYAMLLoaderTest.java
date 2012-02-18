@@ -135,6 +135,14 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     private String getYamlTestFileName() {
         return getTestFilename(ExportYAML.CONTEST_FILENAME);
     }
+    
+    
+    // TODO CCS use this
+    @SuppressWarnings("unused")
+    private String getYamlTestFileName(String dirname) {
+        return getTestFilename(dirname + File.separator + ExportYAML.CONTEST_FILENAME);
+    }
+
 
     public void testLoader() throws Exception {
 
@@ -537,6 +545,24 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         assertNotNull("Expecting problem name for " + problemName + " in " + filename, problemTitle);
         assertEquals("Problem name in " + filename, "Castles in the Sand", problemTitle);
+
+    }
+    
+    public void testMultipleDataSets() throws Exception {
+        
+        // TODO CCS JUnit Test Multiple Data sets.
+//        String dirname = getDataDirectory(getName());
+        
+//        String[] contents = Utilities.loadFile(getYamlTestFileName(dirname));
+//        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+
+        
+        
+//        loader.loadCCSProblem(contest, dirname, problem, contents);
+        
+
+//        contest = loader.fromYaml(null, contents, getDataDirectory());
+
 
     }
 }
