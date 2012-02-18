@@ -51,6 +51,7 @@ public class ContestSettingsReport implements IReport {
         printWriter.println("  URL   : '" + contestInformation.getContestURL() + "'");
 
         printWriter.println();
+        printWriter.println("  C.C.S. Test Mode                                    : " + Utilities.yesNoString(contestInformation.isCcsTestMode()));
         printWriter.println("  Include Preliminary Judgements in Scoring Algorithm : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
         printWriter.println("  Send Notifications for Preliminary Judgements       : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
         printWriter.println("  Send Additional Run Status Information              : " + Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));

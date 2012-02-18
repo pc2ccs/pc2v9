@@ -34,6 +34,12 @@ public class ContestInformation implements Serializable{
     private boolean sendAdditionalRunStatusInformation = false;
     
     /**
+     * Test mode allow run submission with override elapsed time.
+     * 
+     */
+    private boolean ccsTestMode = false;
+    
+    /**
      * Max output file size.
      */
     private long maxFileSize = 512000;
@@ -148,6 +154,9 @@ public class ContestInformation implements Serializable{
             if (! scoringProperties.equals(contestInformation.getScoringProperties())){
                 return false;
             }
+            if (ccsTestMode != contestInformation.isCcsTestMode()) {
+                return false;
+            }
             return true;
         } catch (Exception e) {
             // TODO log to static exception log
@@ -233,5 +242,12 @@ public class ContestInformation implements Serializable{
     public void setScoringProperties(Properties scoringProperties) {
         this.scoringProperties = scoringProperties;
     }
+
+    public boolean isCcsTestMode() {
+        return ccsTestMode;
+    }
     
+    public void setCcsTestMode(boolean ccsTestMode) {
+        this.ccsTestMode = ccsTestMode;
+    }
 }

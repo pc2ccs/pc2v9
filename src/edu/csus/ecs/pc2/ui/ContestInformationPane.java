@@ -22,10 +22,10 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
@@ -93,6 +93,8 @@ public class ContestInformationPane extends JPanePlugin {
 
     private Properties changedScoringProperties = null;
 
+    private JCheckBox ccsTestModeCheckbox = null;
+
     /**
      * This method initializes
      * 
@@ -108,7 +110,7 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(533, 407));
+        this.setSize(new Dimension(533, 461));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
     }
@@ -158,6 +160,7 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(labelMaxFileSize, null);
             centerPane.add(getMaxFieldSizeInKTextField(), null);
             centerPane.add(getScoringPropertiesButton(), null);
+            centerPane.add(getCcsTestModeCheckbox(), null);
         }
         return centerPane;
     }
@@ -243,6 +246,7 @@ public class ContestInformationPane extends JPanePlugin {
         contestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
         contestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
         contestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
+        contestInformation.setCcsTestMode(getCcsTestModeCheckbox().isSelected());
 
         String maxFileSizeString = "0" + getMaxFieldSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
@@ -301,6 +305,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
+                getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
                 getMaxFieldSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
                 setContestInformation(contestInformation);
                 setEnableButtons(false);
@@ -587,7 +592,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getJCheckBoxShowPreliminaryOnBoard() {
         if (jCheckBoxShowPreliminaryOnBoard == null) {
             jCheckBoxShowPreliminaryOnBoard = new JCheckBox();
-            jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(61, 280, 353, 21));
+            jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(60, 317, 392, 21));
             jCheckBoxShowPreliminaryOnBoard.setHorizontalAlignment(SwingConstants.LEFT);
             jCheckBoxShowPreliminaryOnBoard.setMnemonic(KeyEvent.VK_UNDEFINED);
             jCheckBoxShowPreliminaryOnBoard.setText("Include Preliminary Judgements in Scoring Algorithm");
@@ -608,7 +613,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getJCheckBoxShowPreliminaryOnNotifications() {
         if (jCheckBoxShowPreliminaryOnNotifications == null) {
             jCheckBoxShowPreliminaryOnNotifications = new JCheckBox();
-            jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(61, 310, 353, 21));
+            jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(60, 347, 392, 21));
             jCheckBoxShowPreliminaryOnNotifications.setHorizontalAlignment(SwingConstants.LEFT);
             jCheckBoxShowPreliminaryOnNotifications.setMnemonic(KeyEvent.VK_UNDEFINED);
             jCheckBoxShowPreliminaryOnNotifications.setText("Send Balloon Notifications for Preliminary Judgements");
@@ -630,8 +635,8 @@ public class ContestInformationPane extends JPanePlugin {
         if (additionalRunStatusCheckBox == null) {
             additionalRunStatusCheckBox = new JCheckBox();
             additionalRunStatusCheckBox.setHorizontalAlignment(SwingConstants.LEFT);
-            additionalRunStatusCheckBox.setSize(new Dimension(353, 21));
-            additionalRunStatusCheckBox.setLocation(new Point(61, 340));
+            additionalRunStatusCheckBox.setSize(new Dimension(392, 21));
+            additionalRunStatusCheckBox.setLocation(new Point(60, 377));
             additionalRunStatusCheckBox.setText("Send Additional Run Status Information");
             additionalRunStatusCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -716,6 +721,27 @@ public class ContestInformationPane extends JPanePlugin {
             changedScoringProperties = properties;
             enableUpdateButton();
         }
+    }
+
+    /**
+     * This method initializes ccsTestModeCheckbox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getCcsTestModeCheckbox() {
+        if (ccsTestModeCheckbox == null) {
+            ccsTestModeCheckbox = new JCheckBox();
+            ccsTestModeCheckbox.setBounds(new Rectangle(60, 281, 392, 24));
+            ccsTestModeCheckbox.setHorizontalAlignment(SwingConstants.LEFT);
+            ccsTestModeCheckbox.setText("C.C.S. Test Mode");
+            ccsTestModeCheckbox.setMnemonic(KeyEvent.VK_UNDEFINED);
+            ccsTestModeCheckbox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return ccsTestModeCheckbox;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
