@@ -310,6 +310,17 @@ public interface IContest {
     
     
     /**
+     * Returns true if in CCS Test Mode.
+     * 
+     * CCS Test mode allows the override of the elapsed (contest) time, the test mode
+     * is set in the Contest Information Tab on the Admin.
+     * 
+     * @return true if in CCS test mode, false otherwise.
+     */
+    boolean isCCSTestMode();
+    
+    
+    /**
      * Returns an {@link IStanding} describing the current standing of the specified team in the contest as
      * determined by the currently active implementation of the PC<sup>2</sup> scoring algorithm.
      * <P>

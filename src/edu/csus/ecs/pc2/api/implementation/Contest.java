@@ -266,4 +266,8 @@ public class Contest implements IContest, UIPlugin {
         Arrays.sort(list, new ProblemDetailsComparator());
         return list;
     }
+
+    public boolean isCCSTestMode() {
+        return contest.getContestInformation().isCcsTestMode();
+    }
 }
