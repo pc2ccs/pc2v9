@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.core;
 import java.util.Arrays;
 import java.util.Vector;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ProblemComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
@@ -15,10 +14,12 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.Notification;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 /**
@@ -29,9 +30,9 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  */
 
 // $HeadURL$
-public class NotificationXMLTest extends TestCase {
+public class NotificationXMLTest extends AbstractTestCase {
 
-    private final boolean debugMode = false;
+    private final boolean debugMode = true;
 
     private IInternalContest contest = null;
     
@@ -128,14 +129,14 @@ public class NotificationXMLTest extends TestCase {
         Arrays.sort(runs, new RunComparator());
         return runs[index];
     }
-
+    
     public void testNotification() throws Exception {
 
         NotificationXML notificationXML = new NotificationXML();
         Run run = getRunByIndex(0);
 
         if (debugMode) {
-            System.out.println(" -- testNotification ");
+            debugPrint(" -- testNotification ");
         }
 
         XMLMemento xmlMemento = null;
@@ -174,10 +175,10 @@ public class NotificationXMLTest extends TestCase {
         } catch (Exception e) {
             pass();
         }
-        
-//        Judgement judgement = sample.getYesJudgement(contest);
-//        System.out.println("debug 22 J = "+judgeId);
-//        sample.addJudgement(contest, run, judgement, judgeId);
+
+        Judgement judgement = sample.getYesJudgement(contest);
+        debugPrint("debug 22 J = " + judgeId);
+        sample.addJudgement(contest, run, judgement, judgeId);
 
         /**
          * Add balloon delivery information for run.
@@ -185,24 +186,22 @@ public class NotificationXMLTest extends TestCase {
 
         sample.addBalloonNotification(contest, run);
         
-//        Run [] runs = sample.cloneRun(contest, 1, run);
-//        Run run2 = runs[0];
-//        
-//        System.out.println("debug22 "+run2+" "+judgeId+" "+run2.getProblemId()+" "+run2.getLanguageId());
-//
-//        sample.addJudgement(contest, run2, judgement, judgeId);
-//        
-//        addDelivery (contest, run2);
-        
-        xmlMemento = notificationXML.createElement(contest, run);
-        
+        Notification notification = contest.getNotification(run.getSubmitter(), run.getProblemId());
+        assertNotNull("Expected notification for "+run, notification);
+
         String xml = xmlMemento.saveToString();
         if (debugMode) {
-            System.out.println(xml);
+            debugPrint(xml);
         }
 
     }
     
+    private void debugPrint(String string) {
+        if (debugMode) {
+            System.out.println(string);
+        }
+    }
+
     /**
      * a pass.
      * 

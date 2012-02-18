@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -138,8 +139,9 @@ public class NotificationListTest extends TestCase {
      * @throws IOException
      * @throws ClassNotFoundException
      * @throws FileSecurityException
+     * @throws RunUnavailableException 
      */
-    private Run createYesJudgedRun(IInternalContest contest, Account team, Account judge, Problem problem) throws IOException, ClassNotFoundException, FileSecurityException {
+    private Run createYesJudgedRun(IInternalContest contest, Account team, Account judge, Problem problem) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         SampleContest sample = new SampleContest();
 
