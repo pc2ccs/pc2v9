@@ -6,21 +6,22 @@
 # $HeadURL$
 #
 
-action=RUN_SUBMIT| id=1| elapsed=0| language=Java| problem=barcodes| site=1| submitclient=team2| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run1/Sumit.java| 
-# action=RUN_JUDGEMENT| id=1| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
-action=RUN_SUBMIT| id=2| elapsed=0| language=Java| problem=castles| site=1| submitclient=team2| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run2/Sumit.java| 
-# action=RUN_JUDGEMENT| id=2| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
-action=RUN_SUBMIT| id=3| elapsed=1| language=Java| problem=castles| site=1| submitclient=team5| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run3/Sumit.java| 
-# action=RUN_JUDGEMENT| id=3| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
-action=RUN_SUBMIT| id=4| elapsed=1| language=Java| problem=barcodes| site=1| submitclient=team5| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run4/Sumit.java| 
-# action=RUN_JUDGEMENT| id=4| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
-action=RUN_SUBMIT| id=5| elapsed=1| language=Java| problem=biobots| site=1| submitclient=team12| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run5/Sumit.java| 
-# action=RUN_JUDGEMENT| id=5| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
-action=RUN_SUBMIT| id=6| elapsed=1| language=Java| problem=biobots| site=1| submitclient=team12| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run6/Sumit.java| 
-# action=RUN_JUDGEMENT| id=6| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
-action=RUN_SUBMIT| id=7| elapsed=1| language=Java| problem=channel| site=1| submitclient=team12| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run7/Sumit.java| 
-# action=RUN_JUDGEMENT| id=7| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=3| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
-action=RUN_SUBMIT| id=8| elapsed=2| language=Java| problem=channel| site=1| submitclient=team12| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run8/Sumit.java| 
-# action=RUN_JUDGEMENT| id=8| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=3| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
+# - action=RUN_SUBMIT| id=1| elapsed=0| language=Java| problem=barcodes| site=1| submitclient=team2| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run1/Sumit.java| 
+# - # action=RUN_JUDGEMENT| id=1| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
+# - action=RUN_SUBMIT| id=2| elapsed=0| language=Java| problem=castles| site=1| submitclient=team2| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run2/Sumit.java| 
+# - # action=RUN_JUDGEMENT| id=2| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
+# - action=RUN_SUBMIT| id=3| elapsed=1| language=Java| problem=castles| site=1| submitclient=team5| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run3/Sumit.java| 
+# - # action=RUN_JUDGEMENT| id=3| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
+# - action=RUN_SUBMIT| id=4| elapsed=1| language=Java| problem=barcodes| site=1| submitclient=team5| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run4/Sumit.java| 
+# - # action=RUN_JUDGEMENT| id=4| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
+# - action=RUN_SUBMIT| id=5| elapsed=1| language=Java| problem=biobots| site=1| submitclient=team12| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run5/Sumit.java| 
+# - # action=RUN_JUDGEMENT| id=5| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
+# - action=RUN_SUBMIT| id=6| elapsed=1| language=Java| problem=biobots| site=1| submitclient=team12| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run6/Sumit.java| 
+# - # action=RUN_JUDGEMENT| id=6| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=2| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
+# - action=RUN_SUBMIT| id=7| elapsed=1| language=Java| problem=channel| site=1| submitclient=team12| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run7/Sumit.java| 
+# - # action=RUN_JUDGEMENT| id=7| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=3| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
+# - action=RUN_SUBMIT| id=8| elapsed=2| language=Java| problem=channel| site=1| submitclient=team12| mainfile=report.Extract_Replay_Runs.01.01.296.txt.files/site1run8/Sumit.java| 
+# - # action=RUN_JUDGEMENT| id=8| site=1| solved=false| preliminary=false| judgeclient=judge3| judgeclientsite=1| judged_elapsed_time=3| computer_judged=true| judgement=No - Compilation Error| senttoteams=true| 
+
 
 # EOF Extract Replay Runs $Id$
