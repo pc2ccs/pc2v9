@@ -439,15 +439,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
-        SerializedFile serializedFile = new SerializedFile(filename);
-
-        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Run run = new Run(contest.getClientId(), language, problem);
-        RunFiles runFiles = new RunFiles(run, serializedFile, otherFiles);
-
-        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles);
-
-        sendToLocalServer(packet);
+        submitRun(problem, language, filename, otherFiles, 0);
     }
 
     public void requestChangePassword(String oldPassword, String newPassword) {
@@ -3458,6 +3450,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void startPlayback(PlaybackInfo playbackInfo) {
         Packet startPacket = PacketFactory.createStartPlayback(contest.getClientId(), getServerClientId(), playbackInfo);
         sendToLocalServer(startPacket);
+    }
+
+    public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles, long overrideSubmissionTime) {
+
+        SerializedFile serializedFile = new SerializedFile(filename);
+
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Run run = new Run(contest.getClientId(), language, problem);
+        RunFiles runFiles = new RunFiles(run, serializedFile, otherFiles);
+
+        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTime);
+
+        sendToLocalServer(packet);
+
     }
 
 }

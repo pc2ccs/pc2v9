@@ -437,12 +437,16 @@ public final class PacketFactory {
      * @param destination
      * @param run
      * @param runFiles
+     * @param overrideSubmissionTime 
      * @return submitted run packet.
      */
-    public static Packet createSubmittedRun(ClientId source, ClientId destination, Run run, RunFiles runFiles) {
+    public static Packet createSubmittedRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, long overrideSubmissionTime) {
         Properties prop = new Properties();
         prop.put(RUN, run);
         prop.put(RUN_FILES, runFiles);
+        if (overrideSubmissionTime > 0) {
+            prop.put(ELAPSED_TIME, new Long(overrideSubmissionTime));
+        }
         Packet packet = new Packet(Type.RUN_SUBMISSION, source, destination, prop);
         return packet;
     }

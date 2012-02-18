@@ -629,5 +629,7 @@ public interface IInternalController {
     void addNewCategory(Category newCategory);
 
     void startPlayback(PlaybackInfo playbackInfo);
+    
+    void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS) throws Exception;
 
 }

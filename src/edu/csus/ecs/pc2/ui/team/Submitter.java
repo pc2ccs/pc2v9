@@ -76,6 +76,11 @@ public class Submitter {
 
     private boolean debugMode = false;
 
+    /**
+     * Override elapsed time for run (contest time for run), only used in test mode
+     */
+    private int timeStamp;
+
     protected Submitter() {
 
     }
@@ -163,6 +168,8 @@ public class Submitter {
 
         ParseArguments arguments = new ParseArguments(args, opts);
 
+        timeStamp = 0;
+        
         debugMode = arguments.isOptPresent("--debug");
 
         checkArg = arguments.isOptPresent("--check");
@@ -190,9 +197,7 @@ public class Submitter {
             problemTitle = arguments.getOptValue("-p");
 
             // -t <contest-time for submission>
-            // TODO CCS implement timestamp
-            @SuppressWarnings("unused")
-            int timeStamp = 0;
+          
             try {
                 if (arguments.isOptPresent("-t")){
                     timeStamp = Integer.parseInt(arguments.getOptValue("-t"));
@@ -785,7 +790,7 @@ public class Submitter {
 
         } else {
 
-            serverConnection.submitRun(problem, language, mainFileName, additionalFilenames);
+            serverConnection.submitRun(problem, language, mainFileName, additionalFilenames, timeStamp);
 
             submittedProblem = problem;
             submittedLanguage = language;

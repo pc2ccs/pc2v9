@@ -89,16 +89,23 @@ public class Run extends ISubmission {
     // TODO Judgements
 
     private boolean deleted;
-
+    
     /**
      * State for this run.
      */
     private Run.RunStates status = Run.RunStates.INITIAL;
 
     /**
-     * Operating System where Run was instanciated.
+     * Operating System where Run was instantiated.
      */
     private String systemOS = null;
+
+    /**
+     * The original elapsed time
+     */
+    private long originalElapsedMS = -1;
+
+    private long overRideElapsedTimeMS;
 
     public Run(ClientId submitter, Language languageId, Problem problemId) {
         super();
@@ -340,6 +347,47 @@ public class Run extends ISubmission {
         return "Run " + getNumber() + " " + getStatus() + " " + getElapsedMS() +" ms from " + getSubmitter() + " id " + getElementId().toString();
     }
 
+    /**
+     * The first elapsed time set for this run using {@link #setElapsedMS(long)}.
+     * @return
+     */
+    public long getOriginalElapsedMS() {
+        return originalElapsedMS;
+    }
+    
+    @Override
+    public void setElapsedMS(long elapsedMS) {
+        if (getOriginalElapsedMS() == -1) {
+            /**
+             * This code only gets exercised the first time elapsed time is
+             * set, so that subsequent calls to setElapsedMS do not overwrite
+             * the original elapsed time. 
+             */
+            originalElapsedMS = elapsedMS;
+            if (overRideElapsedTimeMS > 0) {
+                elapsedMS = overRideElapsedTimeMS;
+            }
+        }
+        super.setElapsedMS(elapsedMS);
+    }
+
+    /**
+     * Set an override time for the elapsed time.
+     * 
+     * When {@link #setElapsedMS(long)} is invoked will save that
+     * elapsed time (fetched by {@link #getOverRideElapsedTimeMS()})
+     * and set the elapsed time to this override time.  
+     * 
+     * @param overRideElapsedTimeMS
+     */
+    public void setOverRideElapsedTimeMS(long overRideElapsedTimeMS) {
+        this.overRideElapsedTimeMS = overRideElapsedTimeMS;
+    }
+
+    public long getOverRideElapsedTimeMS() {
+        return overRideElapsedTimeMS;
+    }
+    
     public boolean isSameAs(Run run) {
         try {
             if (getElapsedMins() != run.getElapsedMins()) {

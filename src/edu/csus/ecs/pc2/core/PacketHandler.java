@@ -1204,7 +1204,8 @@ public class PacketHandler {
 
     private void handleRunSubmissionConfirmation(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-        contest.addRun(run);
+        
+         contest.addRun(run);
         if (isServer()) {
             sendToJudgesAndOthers(packet, isThisSite(run));
         }
@@ -1482,6 +1483,20 @@ public class PacketHandler {
     private void runSubmission(Packet packet, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException {
         Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+        
+        Long overrideElapsedTime = (Long) PacketFactory.getObjectValue(packet, PacketFactory.ELAPSED_TIME);
+        if (overrideElapsedTime != null) {
+            if (contest.getContestInformation().isCcsTestMode()) {
+                // By setting the override time here, when acceptRun is used the elapsed time will be set
+                // to this override time. Oh, before that happens the actual elapsed time will be saved in the
+                // original elapsed time in Run.
+                submittedRun.setOverRideElapsedTimeMS(overrideElapsedTime.longValue());
+                controller.getLog().info("Elapsed time override (-t) " + overrideElapsedTime + " used for run " + submittedRun);
+            } else {
+                controller.getLog().info("Note elapsed time override not used, not in CCS test mode run=" + submittedRun);
+            }
+        }
+        
         Run run = contest.acceptRun(submittedRun, runFiles);
 
         // Send to team
@@ -2931,19 +2946,19 @@ public class PacketHandler {
     }
 
     private PlaybackInfo updatePlaybackInfo(PlaybackInfo newPlaybackInfo) {
-        
-        PlaybackInfo playbackInfo= contest.getPlaybackManager().getPlaybackInfo();
-        
-        playbackInfo.setStarted( newPlaybackInfo.isStarted());
-        
+
+        PlaybackInfo playbackInfo = contest.getPlaybackManager().getPlaybackInfo();
+
+        playbackInfo.setStarted(newPlaybackInfo.isStarted());
+
         playbackInfo.setMinimumPlaybackRecords(newPlaybackInfo.getMinimumPlaybackRecords());
         playbackInfo.setWaitBetweenEventsMS(newPlaybackInfo.getWaitBetweenEventsMS());
-        
+
         String filename = newPlaybackInfo.getFilename();
         if (filename != null && filename.length() > 0) {
             playbackInfo.setFilename(newPlaybackInfo.getFilename());
         }
-        
+
         return playbackInfo;
     }
 

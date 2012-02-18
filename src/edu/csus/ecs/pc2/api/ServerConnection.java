@@ -128,15 +128,14 @@ public class ServerConnection {
     /**
      * Submit a run.
      * 
-     * @param problem
+     * @param problem 
      * @param language
      * @param mainFileName
      * @param additionalFileNames
+     * @param overrideSubmissionTimeMS an override elapsed time in ms, only works if contest information CCS test mode is set true.
      * @throws Exception
      */
-    
-    // TODO CCS API - update the submitRun JavaDoc
-    public void submitRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames) throws Exception {
+    public void submitRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames, long overrideSubmissionTimeMS) throws Exception {
 
         Account account = getAccount(internalContest, internalContest.getClientId());
 
@@ -187,7 +186,7 @@ public class ServerConnection {
         }
 
         try {
-            controller.submitRun(submittedProblem, submittedLanguage, mainFileName, list);
+            controller.submitRun(submittedProblem, submittedLanguage, mainFileName, list, overrideSubmissionTimeMS);
         } catch (Exception e) {
             throw new Exception("Unable to submit run " + e.getLocalizedMessage());
         }
