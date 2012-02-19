@@ -15,7 +15,6 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
@@ -155,10 +154,6 @@ public class ContestPreloadPane extends JPanePlugin {
             contestsListbox.replaceRow(objects, row);
         }
         contestsListbox.autoSizeAllColumns();
-    }
-
-    private Log getLog() {
-        return getController().getLog();
     }
 
     @Override
