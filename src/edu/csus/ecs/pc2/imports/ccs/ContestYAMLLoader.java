@@ -213,8 +213,6 @@ public class ContestYAMLLoader {
 
         PlaybackInfo playbackInfo = getReplaySettings(yamlLines);
 
-        System.out.println("debug 22 playback loaded is " + playbackInfo);
-
         contest.addPlaybackInfo(playbackInfo);
 
         return contest;
@@ -466,12 +464,6 @@ public class ContestYAMLLoader {
 
     protected String getProblemNameFromLaTex(String filename) {
 
-        if (!new File(filename).isFile()) {
-            System.err.println("debug 22 Can not find file " + filename);
-        } else {
-            System.err.println("debug 22 found file " + filename);
-        }
-
         String[] lines;
         try {
             lines = Utilities.loadFile(filename);
@@ -503,7 +495,6 @@ public class ContestYAMLLoader {
                     // name = name.replace(Pattern.quote(")"), "");
                     // name = name.replace(")", "");
                     name = name.substring(0, name.length() - 1);
-                    System.out.println("debug 22 - set name " + name);
                     break;
                 }
             }
@@ -529,18 +520,13 @@ public class ContestYAMLLoader {
         String[] answerFileNames = getFileNames(dataFileBaseDirectory, ".ans");
 
         if (inputFileNames.length == 0) {
-            throw new YamlLoadException("No input file names found for " + problem.getDisplayName());
+            throw new YamlLoadException("No input file names found for " + problem.getDisplayName()+ " in dir "+dataFileBaseDirectory);
         }
 
         if (answerFileNames.length == 0) {
-            throw new YamlLoadException("No answer file names found for " + problem.getDisplayName());
+            throw new YamlLoadException("No answer file names found for " + problem.getDisplayName() + " in dir "+dataFileBaseDirectory);
         }
         
-//        System.out.println("debug 22 loading files from "+dataFileBaseDirectory);
-//        System.out.println("debug 22 number data file names "+inputFileNames.length);
-//        System.out.println("debug 22 number ans  file names "+answerFileNames.length);
-
-
         if (inputFileNames.length == answerFileNames.length) {
 
             Arrays.sort(inputFileNames);
@@ -548,9 +534,6 @@ public class ContestYAMLLoader {
             SerializedFile[] serializedFileDataFiles = new SerializedFile[inputFileNames.length];
             SerializedFile[] serializedFileAnswerFiles = new SerializedFile[answerFileNames.length];
             
-//            System.out.println("debug 22 number data files "+serializedFileDataFiles.length);
-//            System.out.println("debug 22 number ans  files "+serializedFileAnswerFiles.length);
-
             for (int idx = 0; idx < inputFileNames.length; idx++) {
 
                 problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
@@ -560,8 +543,8 @@ public class ContestYAMLLoader {
                 String answerFileName = dataFileName.replaceAll(".in$", ".ans");
                 String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
 
-                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName());
-                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName());
+                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in "+dataFileBaseDirectory );
+                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in "+dataFileBaseDirectory);
 
                 serializedFileDataFiles[idx] = new SerializedFile(dataFileName);
                 serializedFileAnswerFiles[idx] = new SerializedFile(answerFileName);
@@ -572,7 +555,7 @@ public class ContestYAMLLoader {
 
         } else {
             throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
-                    answerFileNames.length + " .ans files ");
+                    answerFileNames.length + " .ans files "+ " in "+dataFileBaseDirectory);
         }
 
         // TODO Load Validator

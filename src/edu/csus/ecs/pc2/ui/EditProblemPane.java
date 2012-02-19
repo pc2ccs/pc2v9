@@ -1,11 +1,14 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -19,14 +22,18 @@ import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
 /**
  * Add/Edit Problem Pane.
@@ -44,6 +51,8 @@ public class EditProblemPane extends JPanePlugin {
      * 
      */
     private static final long serialVersionUID = -1060536964672397704L;
+    
+    private String lastSaveDirectory = null;
 
     private JPanel messagePane = null;
 
@@ -111,7 +120,9 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * last directory where searched for files.
      */
-    private String lastDirectory;
+    private String lastDirectory;  //  @jve:decl-index=0:
+    
+    private String lastYamlLoadDirectory;
 
     private ProblemDataFiles newProblemDataFiles;
 
@@ -171,6 +182,12 @@ public class EditProblemPane extends JPanePlugin {
 
     private boolean listenersAdded = false;
 
+    private JButton loadButton = null;
+    
+    private ContestYAMLLoader loader = null;
+
+    private JButton saveButton = null;
+
     /**
      * This method initializes
      * 
@@ -201,6 +218,13 @@ public class EditProblemPane extends JPanePlugin {
         log = getController().getLog();
 
         addWindowListeners();
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                getLoadButton().setVisible(Utilities.isDebugMode());
+                getSaveButton().setVisible(Utilities.isDebugMode());
+            }
+        });
 
     }
     
@@ -267,6 +291,8 @@ public class EditProblemPane extends JPanePlugin {
             buttonPane.setLayout(flowLayout);
             buttonPane.add(getAddButton(), null);
             buttonPane.add(getUpdateButton(), null);
+            buttonPane.add(getLoadButton(), null);
+            buttonPane.add(getSaveButton(), null);
             buttonPane.add(getCancelButton(), null);
         }
         return buttonPane;
@@ -311,6 +337,7 @@ public class EditProblemPane extends JPanePlugin {
         Problem newProblem = null;
         try {
             newProblem = getProblemFromFields(null);
+            
             SerializedFile sFile;
             sFile = newProblemDataFiles.getJudgesDataFile();
             if (sFile != null) {
@@ -331,6 +358,8 @@ public class EditProblemPane extends JPanePlugin {
                     newProblemDataFiles.setValidatorFile(sFile);
                 }
             }
+            
+            
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
             return;
@@ -2118,6 +2147,186 @@ public class EditProblemPane extends JPanePlugin {
             });
         }
         return deleteProblemCheckBox;
+    }
+
+    /**
+     * This method initializes loadButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getLoadButton() {
+        if (loadButton == null) {
+            loadButton = new JButton();
+            loadButton.setText("Load");
+            loadButton.setVisible(false);
+            loadButton.setToolTipText("Load problem def from problem.yaml");
+            loadButton.setMnemonic(KeyEvent.VK_L);
+            loadButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    loadProblemInfoFile();
+                }
+            });
+        }
+        return loadButton;
+    }
+
+    protected void loadProblemInfoFile() {
+        
+        String filename = null;
+
+        try {
+            filename = selectFileName("Choose a problem.yaml file", lastYamlLoadDirectory);
+
+        } catch (IOException e) {
+            logException("Problem selecting filename", e);
+            showMessage("Problem selecting filename " + e.getMessage());
+        }
+
+        if (filename == null) {
+            showMessage("No file selected/loaded");
+        } else {
+
+            if (filename.endsWith("problem.yaml")) {
+
+                try {
+                    checkAndLoadYAML(filename);
+                } catch (Exception e) {
+                    logException("Error loading contest.xml", e);
+                    showMessage("Error loading contest.xml "+e.getMessage());
+                }
+                
+            } else {
+                showMessage("Please select a proble.yaml file");
+            }
+
+        }
+    }
+    
+    private void checkAndLoadYAML(String filename) {
+        getController().getLog().info("Loading contest.yaml from " + filename);
+
+        String directoryName = new File(filename).getParent();
+        
+        IInternalContest newContest = null;
+
+        try {
+             getLoader().loadProblemAndFiles(newContest, directoryName, null);
+             
+        } catch (Exception e) {
+            logException("Unable to load problem YAML from " + filename, e);
+            e.printStackTrace();
+            showMessage("Problem loading file(s), check log.  " + e.getMessage());
+        }
+    }
+    
+    public File selectYAMLFileDialog(Component parent, String title, String startDirectory) {
+
+        JFileChooser chooser = new JFileChooser(startDirectory);
+        chooser.setDialogTitle(title);
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        FileFilter filterYAML = new FileNameExtensionFilter("YAML document (*.yaml)", "yaml");
+        chooser.addChoosableFileFilter(filterYAML);
+
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        int action = chooser.showOpenDialog(parent);
+
+        switch (action) {
+            case JFileChooser.APPROVE_OPTION:
+                File file = chooser.getSelectedFile();
+                lastYamlLoadDirectory = chooser.getCurrentDirectory().toString();
+                return file;
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+            default:
+                break;
+        }
+        return null;
+    }
+    
+    private String selectFileName(String title, String dirname) throws IOException {
+
+        String chosenFile = null;
+        File file = selectYAMLFileDialog(this, title, lastDirectory);
+        if (file != null) {
+            chosenFile = file.getCanonicalFile().toString();
+            return chosenFile;
+        } else {
+            return null;
+        }
+    }
+    
+    public ContestYAMLLoader getLoader() {
+        if (loader == null) {
+            loader = new ContestYAMLLoader();
+        }
+        return loader;
+    }
+
+    /**
+     * This method initializes saveButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getSaveButton() {
+        if (saveButton == null) {
+            saveButton = new JButton();
+            saveButton.setText("Save");
+            saveButton.setVisible(false);
+            saveButton.setToolTipText("Save to problem.yaml");
+            saveButton.setMnemonic(KeyEvent.VK_S);
+            saveButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    saveProblemYaml();
+                }
+            });
+        }
+        return saveButton;
+    }
+
+    protected void saveProblemYaml() {
+
+        Problem newProblem = null;
+
+        try {
+            newProblem = getProblemFromFields(problem);
+        } catch (InvalidFieldValue e) {
+            showMessage(e.getMessage());
+            return;
+        }
+
+        try {
+            JFileChooser chooser = new JFileChooser(lastSaveDirectory);
+            FileFilter filterYAML = new FileNameExtensionFilter("YAML File", "yaml");
+            chooser.setDialogTitle("Save problem to problem.YAML ");
+            File file = new File("problem.yaml");
+            chooser.setSelectedFile(file);
+            chooser.setFileFilter(filterYAML);
+            int result = chooser.showSaveDialog(this);
+
+            if (result == JOptionPane.YES_OPTION) {
+                File selectedFile = chooser.getSelectedFile().getCanonicalFile();
+                // chooser.setCurrentDirectory(new File(lastSaveDirectory));
+
+                ExportYAML exportYAML = new ExportYAML();
+
+                String[] filelist = exportYAML.writeProblemYAML(getContest(), newProblem, selectedFile.getAbsolutePath(), newProblemDataFiles);
+
+                String fileComment = "";
+                if (filelist.length > 0) {
+                    fileComment = "(" + filelist.length + " data files written)";
+                }
+
+                showMessage("Wrote problem YAML to " + selectedFile.getName() + " " + fileComment);
+
+            } else {
+                showMessage("No file selected/saved");
+            }
+
+        } catch (IOException e) {
+            showMessage("Problem saving yaml file " + e.getMessage());
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

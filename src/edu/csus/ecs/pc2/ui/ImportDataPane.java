@@ -217,8 +217,7 @@ public class ImportDataPane extends JPanePlugin {
                 if (pdfiles != null) {
                     ansCount += pdfiles.getJudgesAnswerFiles().length;
                     datCount += pdfiles.getJudgesDataFiles().length;
-                } else {
-                    System.err.println("debug 22 no files for "+problem);
+//                } else { // nothing to do here, move on
                 }
             }
             addSummaryEntry(sb, datCount, "input data files");

@@ -388,6 +388,8 @@ public class ExportYAML {
         }
         return false;
     }
+    
+
 
     /**
      * Write problem yaml and data files files to directory.
@@ -403,16 +405,30 @@ public class ExportYAML {
      * @throws IOException
      */
     public String[] writeProblemYAML(IInternalContest contest, String directoryName, Problem problem, String shortName) throws IOException {
+        String targetDirectoryName = directoryName + File.separator + shortName;
+        String problemFileName = targetDirectoryName + File.separator + PROBLEM_FILENAME;
+        ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
+        return writeProblemYAML(contest, problem, problemFileName, problemDataFiles);
+    }
+
+    /**
+     * Write problem YAML to file.
+     * 
+     * @param contest
+     * @param problem
+     * @param filename
+     * @return list of files written.
+     * @throws IOException
+     */
+    public String[] writeProblemYAML(IInternalContest contest, Problem problem, String filename, ProblemDataFiles problemDataFiles) throws IOException {
 
         Vector<String> filesWritten = new Vector<String>();
 
-        String targetDirectoryName = directoryName + File.separator + shortName;
+        String parentDirectoryName = new File(filename).getParent();
 
-        new File(targetDirectoryName).mkdirs();
-
-        String problemFileName = targetDirectoryName + File.separator + PROBLEM_FILENAME;
-
-        PrintWriter problemWriter = new PrintWriter(new FileOutputStream(problemFileName, false), true);
+        new File(parentDirectoryName).mkdirs();
+   
+        PrintWriter problemWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         // PrintStream problemWriter = System.out;
 
         //
@@ -459,34 +475,28 @@ public class ExportYAML {
          * Create data files target directory.
          */
 
-        String dataFileDirectoryName = targetDirectoryName + File.separator + "data" + File.separator + "secret";
+        String dataFileDirectoryName = parentDirectoryName + File.separator + "data" + File.separator + "secret";
         new File(dataFileDirectoryName).mkdirs();
-        
-        ProblemDataFiles [] dataFileList = contest.getProblemDataFiles();
-        
+       
         boolean foundProblemFiles = false;
         
-        for (ProblemDataFiles dataFiles : dataFileList) {
-            
-            
-            if (dataFiles.getProblemId().equals(problem.getElementId())) {
-                
-                for ( SerializedFile serializedFile: dataFiles.getJudgesDataFiles()) {
-                    String  outputFileName = dataFileDirectoryName + File.separator + serializedFile.getName();
-                    createFile(serializedFile, outputFileName);
-                    problemWriter.println("#     wrote (D)" + outputFileName);
-                    filesWritten.addElement(outputFileName);
-                }
-                
-                for (SerializedFile serializedFile : dataFiles.getJudgesAnswerFiles()){
-                    String  outputFileName = dataFileDirectoryName + File.separator + serializedFile.getName();
-                    createFile(serializedFile, outputFileName);
-                    problemWriter.println("#     wrote (A)" + outputFileName);
-                    filesWritten.addElement(outputFileName);
-                }
-                
-                foundProblemFiles = true;
+        if (problemDataFiles != null){
+
+            for (SerializedFile serializedFile : problemDataFiles.getJudgesDataFiles()) {
+                String outputFileName = dataFileDirectoryName + File.separator + serializedFile.getName();
+                createFile(serializedFile, outputFileName);
+                problemWriter.println("#     wrote (D)" + outputFileName);
+                filesWritten.addElement(outputFileName);
             }
+
+            for (SerializedFile serializedFile : problemDataFiles.getJudgesAnswerFiles()) {
+                String outputFileName = dataFileDirectoryName + File.separator + serializedFile.getName();
+                createFile(serializedFile, outputFileName);
+                problemWriter.println("#     wrote (A)" + outputFileName);
+                filesWritten.addElement(outputFileName);
+            }
+
+            foundProblemFiles = true;
         }
         
         if (! foundProblemFiles) {

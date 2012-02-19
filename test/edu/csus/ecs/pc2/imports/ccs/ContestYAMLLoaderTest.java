@@ -358,8 +358,6 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 16, sectionLines.length);
         
-        System.err.println("debug 22"+contestYamlFilename);
-        
         key = ContestYAMLLoader.REPLAY_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 8, sectionLines.length);
@@ -492,9 +490,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         PlaybackInfo replay = loader.getReplaySettings(yamlLines);
         
         assertNotNull("Should have replay data", replay);
-        
-        System.out.println("debug 22 "+replay);
-        
+
         assertEquals("Title for replay", "A Playback Name", replay.getDisplayName());
         assertEquals("Min runs to replay", 230, replay.getMinimumPlaybackRecords());
         assertEquals("Title for replay", "loadfile/replay.file.txt", replay.getFilename());
