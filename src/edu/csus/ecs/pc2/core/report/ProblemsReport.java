@@ -50,7 +50,7 @@ public class ProblemsReport implements IReport {
         }
     }
 
-    private void writeRow(PrintWriter printWriter, Problem problem, ProblemDataFiles problemDataFiles) {
+    public void writeRow(PrintWriter printWriter, Problem problem, ProblemDataFiles problemDataFiles) {
         
         String deletedText = "";
         if (!problem.isActive()) {

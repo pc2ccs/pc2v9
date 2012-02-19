@@ -2,7 +2,6 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -152,10 +151,6 @@ public class OptionsPane extends JPanePlugin {
 
         getController().showLogWindow(showLogWindow);
 
-    }
-
-    private Logger getLog() {
-        return getController().getLog();
     }
 
     /**

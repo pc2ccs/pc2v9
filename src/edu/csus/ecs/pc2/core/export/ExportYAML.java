@@ -496,7 +496,7 @@ public class ExportYAML {
                 filesWritten.addElement(outputFileName);
             }
 
-            foundProblemFiles = true;
+            foundProblemFiles = filesWritten.size() > 0;
         }
         
         if (! foundProblemFiles) {

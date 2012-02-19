@@ -14,6 +14,7 @@ import javax.swing.UIManager;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -306,5 +307,13 @@ public final class FrameUtilities {
         JFramePluginImpl frame = new JFramePluginImpl(plugin);
         frame.setContestAndController(contest, controller);
         return frame;
+    }
+    
+    public static void viewFile(String filename, String title, Log log) {
+        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(log);
+        multipleFileViewer.addFilePane(title, filename);
+        multipleFileViewer.setTitle("PC^2 View File (Build " + new VersionInfo().getBuildNumber() + ")");
+        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+        multipleFileViewer.setVisible(true);
     }
 }

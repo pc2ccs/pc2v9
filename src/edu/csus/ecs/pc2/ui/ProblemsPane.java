@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -21,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
+import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
@@ -55,6 +57,8 @@ public class ProblemsPane extends JPanePlugin {
     private Log log = null;
 
     private EditProblemFrame editProblemFrame = null;
+
+    private JButton reportButton = null;
     
     /**
      * This method initializes
@@ -100,6 +104,7 @@ public class ProblemsPane extends JPanePlugin {
             problemButtonPane.add(getAddButton(), null);
             problemButtonPane.add(getCopyButton(), null);
             problemButtonPane.add(getEditButton(), null);
+            problemButtonPane.add(getReportButton(), null);
         }
         return problemButtonPane;
     }
@@ -507,6 +512,30 @@ public class ProblemsPane extends JPanePlugin {
                 }
             });
         }
+    }
+
+    /**
+     * This method initializes reportButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getReportButton() {
+        if (reportButton == null) {
+            reportButton = new JButton();
+            reportButton.setText("Report");
+            reportButton.setMnemonic(KeyEvent.VK_R);
+            reportButton.setToolTipText("View Problems Report");
+            reportButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    viewReports();
+                }
+            });
+        }
+        return reportButton;
+    }
+
+    protected void viewReports() {
+        Utilities.viewReport(new ProblemsReport() , "Problems Report ", getContest(), getController());
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

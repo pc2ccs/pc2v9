@@ -444,11 +444,13 @@ public class ContestYAMLLoader {
 
         String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
 
-        boolean pc2DatafileSection = getSequenceValue(sectionLines, "datafile") != null;
+        boolean pc2DatafileSection = getSequenceValue(sectionLines, "answerfile") != null;
         
         if (pc2DatafileSection) {
+            System.out.println("debug 22 Loading PC2 problem yaml ");
             loadPc2Problem(contest, dataFileBaseDirectory, problem, sectionLines);
         } else {
+            System.out.println("debug 22 loading CCS problem yaml");
             loadCCSProblem(contest, dataFileBaseDirectory, problem, sectionLines);
         }
 
@@ -552,7 +554,11 @@ public class ContestYAMLLoader {
 
             problemDataFiles.setJudgesDataFiles(serializedFileDataFiles);
             problemDataFiles.setJudgesAnswerFiles(serializedFileAnswerFiles);
-
+            
+            problem.setReadInputDataFromSTDIN(false);
+            problem.setAnswerFileName(serializedFileAnswerFiles[0].getName());
+            problem.setDataFileName(serializedFileDataFiles[0].getName());
+            
         } else {
             throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
                     answerFileNames.length + " .ans files "+ " in "+dataFileBaseDirectory);

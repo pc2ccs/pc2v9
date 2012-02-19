@@ -176,6 +176,9 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         return getContest().isAllowed(type);
     }
         
+    public Log getLog(){
+        return getController().getLog();
+    }
     
     /**
      * Show message to user.

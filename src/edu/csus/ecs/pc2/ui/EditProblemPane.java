@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
 /**
@@ -69,7 +70,7 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * The input problem.
      */
-    private Problem problem = null;
+    private Problem problem = null;  //  @jve:decl-index=0:
 
     private JTabbedPane mainTabbedPane = null;
 
@@ -188,6 +189,8 @@ public class EditProblemPane extends JPanePlugin {
 
     private JButton saveButton = null;
 
+    private JButton reportButton = null;
+
     /**
      * This method initializes
      * 
@@ -215,14 +218,13 @@ public class EditProblemPane extends JPanePlugin {
 
         // getContest().addProblemListener(new Proble)
 
-        log = getController().getLog();
-
         addWindowListeners();
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getLoadButton().setVisible(Utilities.isDebugMode());
                 getSaveButton().setVisible(Utilities.isDebugMode());
+                getReportButton().setVisible(Utilities.isDebugMode());
             }
         });
 
@@ -291,6 +293,7 @@ public class EditProblemPane extends JPanePlugin {
             buttonPane.setLayout(flowLayout);
             buttonPane.add(getAddButton(), null);
             buttonPane.add(getUpdateButton(), null);
+            buttonPane.add(getReportButton(), null);
             buttonPane.add(getLoadButton(), null);
             buttonPane.add(getSaveButton(), null);
             buttonPane.add(getCancelButton(), null);
@@ -453,16 +456,16 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                 } else {
-                    getController().getLog().log(Log.DEBUG, "No ProblemDataFiles for "+problem);
+                    getLog().log(Log.DEBUG, "No ProblemDataFiles for "+problem);
                 }
 
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
-                getController().getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
+                getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
                 enableButton = true;
             } catch (Exception ex){
-                getController().getLog().log(Log.DEBUG, "Edit Problem ", ex);
+                getLog().log(Log.DEBUG, "Edit Problem ", ex);
                 showMessage("Error, check logs.  "+ex.getMessage());
             }
 
@@ -1935,7 +1938,7 @@ public class EditProblemPane extends JPanePlugin {
             } // else no need to refresh, no file found.
 
         } catch (Exception ex99) {
-            getController().getLog().log(Log.DEBUG, "Exception ", ex99);
+            getLog().log(Log.DEBUG, "Exception ", ex99);
         }
 
         return false;
@@ -2158,7 +2161,6 @@ public class EditProblemPane extends JPanePlugin {
         if (loadButton == null) {
             loadButton = new JButton();
             loadButton.setText("Load");
-            loadButton.setVisible(false);
             loadButton.setToolTipText("Load problem def from problem.yaml");
             loadButton.setMnemonic(KeyEvent.VK_L);
             loadButton.addActionListener(new java.awt.event.ActionListener() {
@@ -2203,7 +2205,7 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     private void checkAndLoadYAML(String filename) {
-        getController().getLog().info("Loading contest.yaml from " + filename);
+        getLog().info("Loading contest.yaml from " + filename);
 
         String directoryName = new File(filename).getParent();
         
@@ -2273,7 +2275,6 @@ public class EditProblemPane extends JPanePlugin {
         if (saveButton == null) {
             saveButton = new JButton();
             saveButton.setText("Save");
-            saveButton.setVisible(false);
             saveButton.setToolTipText("Save to problem.yaml");
             saveButton.setMnemonic(KeyEvent.VK_S);
             saveButton.addActionListener(new java.awt.event.ActionListener() {
@@ -2308,6 +2309,14 @@ public class EditProblemPane extends JPanePlugin {
             if (result == JOptionPane.YES_OPTION) {
                 File selectedFile = chooser.getSelectedFile().getCanonicalFile();
                 // chooser.setCurrentDirectory(new File(lastSaveDirectory));
+                
+                if (selectedFile.exists()){
+                    result = FrameUtilities.yesNoCancelDialog(this, "Overwrite "+selectedFile.getName(), "Overwrite existing file?");
+                    
+                    if (result != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                }
 
                 ExportYAML exportYAML = new ExportYAML();
 
@@ -2319,6 +2328,10 @@ public class EditProblemPane extends JPanePlugin {
                 }
 
                 showMessage("Wrote problem YAML to " + selectedFile.getName() + " " + fileComment);
+                
+                if (Utilities.isDebugMode()){
+                    FrameUtilities.viewFile(selectedFile.getAbsolutePath(), selectedFile.getName(), getLog());
+                }
 
             } else {
                 showMessage("No file selected/saved");
@@ -2327,6 +2340,39 @@ public class EditProblemPane extends JPanePlugin {
         } catch (IOException e) {
             showMessage("Problem saving yaml file " + e.getMessage());
         }
+    }
+
+    /**
+     * This method initializes reportButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getReportButton() {
+        if (reportButton == null) {
+            reportButton = new JButton();
+            reportButton.setText("Report");
+            reportButton.setMnemonic(KeyEvent.VK_R);
+            reportButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    viewProblemReport();
+                }
+            });
+        }
+        return reportButton;
+    }
+
+    protected void viewProblemReport() {
+        SingleProblemReport singleProblemReport = new SingleProblemReport();
+        
+        try {
+            Problem newProblem = getProblemFromFields(problem);
+            singleProblemReport.setProblem(newProblem, newProblemDataFiles);
+            Utilities.viewReport(singleProblemReport , "Problem Report "+getProblemNameTextField().getText(), getContest(), getController());
+        } catch (InvalidFieldValue e) {
+            showMessage(e.getMessage());
+            return;
+        }
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
