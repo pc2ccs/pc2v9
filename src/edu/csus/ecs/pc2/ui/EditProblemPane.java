@@ -2212,7 +2212,7 @@ public class EditProblemPane extends JPanePlugin {
         IInternalContest newContest = null;
 
         try {
-             getLoader().loadProblemAndFiles(newContest, directoryName, null);
+             getLoader().loadProblemAndFilesAndValidators(newContest, directoryName, null);
              
         } catch (Exception e) {
             logException("Unable to load problem YAML from " + filename, e);

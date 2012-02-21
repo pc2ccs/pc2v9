@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.list.AccountList;
@@ -87,6 +88,7 @@ public class ContestYAMLLoader {
     private static final String PROBLEM_NAME_KEY = "name";
 
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+
 
     /**
      * Problem input (data files) key.
@@ -178,11 +180,7 @@ public class ContestYAMLLoader {
 
         Problem[] problems = getProblems(yamlLines, defaultTimeout);
         for (Problem problem : problems) {
-            loadProblemAndFiles(contest, diretoryName, problem);
-
-            // TODO CCS add validator(s)
-            assignDefaultValidator(problem);
-            problem.setComputerJudged(true);
+            loadProblemAndFilesAndValidators(contest, diretoryName, problem);
         }
 
         if (getSectionLines(AUTO_JUDGE_KEY, yamlLines).length == 0) {
@@ -399,11 +397,10 @@ public class ContestYAMLLoader {
      * @param contest
      * @param baseDirectoryName 
      * @param problem null or existing problem
-     * @throws YamlLoadException 
      * @throws YamlLoadException
      */
-    public void loadProblemAndFiles(IInternalContest contest, String baseDirectoryName, Problem problem) throws YamlLoadException  {
-        
+    public void loadProblemAndFilesAndValidators(IInternalContest contest, String baseDirectoryName, Problem problem) throws YamlLoadException {
+
         String problemDirectory = baseDirectoryName;
         if (problem != null) {
             problemDirectory = baseDirectoryName + File.separator + problem.getShortName();
@@ -422,11 +419,11 @@ public class ContestYAMLLoader {
         }
 
         String problemName = getSequenceValue(contents, PROBLEM_NAME_KEY);
-        
+
         if (problem == null) {
-            problem = new Problem (problemName);
+            problem = new Problem(problemName);
         }
-        
+
         if (problemName != null) {
             problem.setDisplayName(problemName);
         } else {
@@ -442,16 +439,16 @@ public class ContestYAMLLoader {
 
         String[] sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
 
+        boolean ccsStandardProblem = getSequenceValue(sectionLines, "answerfile") == null;
+
         String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
 
-        boolean pc2DatafileSection = getSequenceValue(sectionLines, "answerfile") != null;
-        
-        if (pc2DatafileSection) {
-            System.out.println("debug 22 Loading PC2 problem yaml ");
-            loadPc2Problem(contest, dataFileBaseDirectory, problem, sectionLines);
-        } else {
+        if (ccsStandardProblem) {
             System.out.println("debug 22 loading CCS problem yaml");
             loadCCSProblem(contest, dataFileBaseDirectory, problem, sectionLines);
+        } else {
+            System.out.println("debug 22 Loading PC2 problem yaml ");
+            loadPc2Problem(contest, dataFileBaseDirectory, problem, sectionLines);
         }
 
         sectionLines = getSectionLines(LIMITS_KEY, contents);
@@ -462,7 +459,23 @@ public class ContestYAMLLoader {
             }
         }
 
+        if (ccsStandardProblem) {
+            problem.setComputerJudged(true);
+            
+            // TODO CCS add CCS validator
+            
+            // add validator command (executable)
+            // add validator run script ('run')
+            
+            addDefaultCCSValidator (problem);
+        } else {
+            problem.setComputerJudged(true); 
+            addDefaultPC2Validator(problem, 1);
+        }
+        
     }
+
+
 
     protected String getProblemNameFromLaTex(String filename) {
 
@@ -666,12 +679,7 @@ public class ContestYAMLLoader {
         return !new File(name).isFile();
     }
 
-    private void assignDefaultValidator(Problem problem) {
-        addInternalValidator(problem, 1);
-
-    }
-
-    public Problem addInternalValidator(Problem problem, int optionNumber) {
+    public Problem addDefaultPC2Validator(Problem problem, int optionNumber) {
 
         problem.setValidatedProblem(true);
         problem.setUsingPC2Validator(true);
@@ -682,7 +690,18 @@ public class ContestYAMLLoader {
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
 
         return problem;
+    }
+    
+    private Problem addDefaultCCSValidator(Problem problem) {
+        
+        problem.setValidatedProblem(true);
+        problem.setUsingPC2Validator(false);
+        problem.setReadInputDataFromSTDIN(true);
 
+        problem.setValidatorProgramName(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME);
+        
+        problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        return problem;
     }
 
     /**
@@ -887,7 +906,7 @@ public class ContestYAMLLoader {
             // String colorName = getSequenceValue(sequenceLines, "color");
             // String colorRGB = getSequenceValue(sequenceLines, "rgb");
 
-            // TODO CCS add Problem set
+            // TODO CCS assign Problem variables for color and letter
             // problem.setLetter(problemLetter);
             // problem.setColorName(colorName);
             // problem.setColorRGB(colorRGB);
@@ -1154,10 +1173,8 @@ public class ContestYAMLLoader {
     public IInternalContest fromProblemYaml(IInternalContest contest, String[] yamlLines, String filename) throws YamlLoadException {
 
         String parentDirectory = new File(filename).getParent();
-
         contest = createContest(contest);
-        
-        loadProblemAndFiles(contest, parentDirectory, null);
+        loadProblemAndFilesAndValidators(contest, parentDirectory, null);
         
         return contest;
     }

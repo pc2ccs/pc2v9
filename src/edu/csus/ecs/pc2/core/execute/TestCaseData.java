@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.execute;
 
 // TODO move to pc2.core package
 
+import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.AbstractElementObject;
 import edu.csus.ecs.pc2.core.model.Run;
 
@@ -71,7 +72,7 @@ public class TestCaseData extends AbstractElementObject {
         internalErrorMessage = null;
         failure = true;
 
-        if (validatorExitCode == SingleTestCase.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE) {
+        if (validatorExitCode == CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE) {
             failure = false;
         }
     }

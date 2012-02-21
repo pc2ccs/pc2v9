@@ -16,9 +16,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 // $HeadURL$
 public class SingleTestCase {
 
-    public static final int VALIDATOR_JUDGED_SUCCESS_EXIT_CODE = 42;
-
-    public static final int VALIDATOR_JUDGED_FAILURE_EXIT_CODE = 43;
+ 
     
     private TestCaseData testCaseData = null;
     
@@ -36,8 +34,7 @@ public class SingleTestCase {
         
         // TODO 676 code execute
         
-        // validator input judgeanswer feedbackdir < teamoutput
-
+       
         // create test/validation directory
         
         // unpack data files
@@ -51,6 +48,8 @@ public class SingleTestCase {
         // TODO 
         
         // execute valiadtor command 
+        
+        // validator input judgeanswer feedbackdir < teamoutput
         
         // TODO clean up/remove directory
 
