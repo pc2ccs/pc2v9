@@ -190,6 +190,8 @@ public class EditProblemPane extends JPanePlugin {
     private JButton saveButton = null;
 
     private JButton reportButton = null;
+    
+    private MultipleDataSetPane multipleDataSetPane = null;
 
     /**
      * This method initializes
@@ -918,7 +920,8 @@ public class EditProblemPane extends JPanePlugin {
                 getAddButton().setVisible(true);
                 getUpdateButton().setVisible(false);
                 enableUpdateButtons(true);
-
+                
+                    
                 enableValidatorComponents();
                 enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
                 enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
@@ -929,6 +932,42 @@ public class EditProblemPane extends JPanePlugin {
             }
         });
     }
+    
+    /**
+     * If there are more than one test data set, add a pane.
+     * @param problemDataFiles 
+     */
+    protected void addProblemFilesTab(ProblemDataFiles problemDataFiles) {
+        
+        boolean multipleDataSets = (problemDataFiles != null && problemDataFiles.getJudgesDataFiles() != null && //
+            problemDataFiles.getJudgesAnswerFiles().length > 1);
+            
+        if (multipleDataSets) {
+
+            if (multipleDataSetPane == null) {
+                multipleDataSetPane = new MultipleDataSetPane();
+                multipleDataSetPane.setContestAndController(getContest(), getController());
+                getMainTabbedPane().addTab("Test Data Sets", multipleDataSetPane);
+            }
+            
+            getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
+            getMultipleDataSetPane().setVisible(true);
+
+        } else {
+            if (multipleDataSetPane != null) {
+                multipleDataSetPane.setVisible(false);
+            }
+        }
+    }
+    
+    public MultipleDataSetPane getMultipleDataSetPane() {
+        if (multipleDataSetPane == null) {
+            multipleDataSetPane = new MultipleDataSetPane();
+            multipleDataSetPane.setContestAndController(getContest(), getController());
+        }
+        return multipleDataSetPane;
+    }
+
     public void setProblem(final Problem problem) {
 
         this.problem = problem;
@@ -958,6 +997,9 @@ public class EditProblemPane extends JPanePlugin {
             getUpdateButton().setVisible(true);
 
             setForm(inProblem, getController().getProblemDataFiles(inProblem));
+            
+            ProblemDataFiles problemDataFiles = getController().getProblemDataFiles(inProblem);
+            addProblemFilesTab(problemDataFiles);
             
             try {
                 @SuppressWarnings("unused")
