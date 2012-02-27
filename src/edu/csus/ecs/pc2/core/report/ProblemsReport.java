@@ -61,17 +61,7 @@ public class ProblemsReport implements IReport {
         printWriter.println("       Data file name   : " + problem.getDataFileName());
         printWriter.println("       Answer file name : " + problem.getAnswerFileName());
         printWriter.println("       Number test cases: " + problem.getNumberTestCases());
-
-        if (problem.getNumberTestCases() > 1) {
-            for (int i = 0; i < problem.getNumberTestCases(); i++) {
-                int testCaseNumber = i + 1;
-                String datafile = problem.getDataFileName(testCaseNumber);
-                String answerfile = problem.getAnswerFileName(testCaseNumber);
-
-                printWriter.println("       Data File name " + testCaseNumber + " : " + datafile);
-                printWriter.println("     Answer File name " + testCaseNumber + " : " + answerfile);
-            }
-        }
+        printWriter.println();
         
         printWriter.print("   Execution time limit : " + problem.getTimeOutInSeconds() + " seconds");
         if (problem.getTimeOutInSeconds() == 0) {
@@ -105,16 +95,27 @@ public class ProblemsReport implements IReport {
                 printWriter.println("                          Warning - no data/judge files defined (null problemDataFiles) ");
             }
         }
+        
+        if (problem.getNumberTestCases() > 1) {
+            for (int i = 0; i < problem.getNumberTestCases(); i++) {
+                int testCaseNumber = i + 1;
+                String datafile = problem.getDataFileName(testCaseNumber);
+                String answerfile = problem.getAnswerFileName(testCaseNumber);
+
+                printWriter.println("       Data File name " + testCaseNumber + " : " + datafile);
+                printWriter.println("     Answer File name " + testCaseNumber + " : " + answerfile);
+            }
+        }
 
         writeProblemDataFiles(printWriter, problemDataFiles);
     }
 
     private void writeProblemDataFiles(PrintWriter printWriter, ProblemDataFiles problemDataFiles) {
+        
         if (problemDataFiles != null) {
             SerializedFile[] judgesDataFiles = problemDataFiles.getJudgesDataFiles();
             SerializedFile[] judgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles();
-            SerializedFile validatorFile = problemDataFiles.getValidatorFile();
-
+          
             if (judgesDataFiles != null) {
 
                 printWriter.println("                  " + judgesDataFiles.length + " judge data files");
@@ -147,21 +148,21 @@ public class ProblemsReport implements IReport {
             } else {
                 printWriter.println("                  * No judge's answer files *");
             }
-            
-            if (validatorFile != null) {
-                printWriter.println("                  " + 1 + " validator file");
-                int bytes = 0;
-                if (validatorFile.getBuffer() != null) {
-                    bytes = validatorFile.getBuffer().length;
-                }
-                printWriter.println("                    validator file '" + validatorFile.getName() + "' " + bytes + " bytes");
-            } else {
-                printWriter.println("                  * No validator files *");
-            }
         } else {
-            printWriter.println("                  * No judge's files *");
+            printWriter.println("                  * No judge's data or answer files *");
         }
-
+        
+        SerializedFile validatorFile = problemDataFiles.getValidatorFile();
+        if (validatorFile != null) {
+            printWriter.println("                  " + 1 + " validator file");
+            int bytes = 0;
+            if (validatorFile.getBuffer() != null) {
+                bytes = validatorFile.getBuffer().length;
+            }
+            printWriter.println("                    validator file '" + validatorFile.getName() + "' " + bytes + " bytes");
+        } else {
+            printWriter.println("                  * No validator files *");
+        }
     }
 
     public void writeReport(PrintWriter printWriter) {

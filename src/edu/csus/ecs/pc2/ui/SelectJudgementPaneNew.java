@@ -1304,13 +1304,31 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                     dataFileViewer.dispose();
                 }
                 dataFileViewer = new MultipleFileViewer(getController().getLog());
-                createAndViewFile(dataFileViewer, getProblemDataFiles().getJudgesDataFile(), "Judge's data file", true);
+
+                SerializedFile[] list = getProblemDataFiles().getJudgesDataFiles();
+                if (list.length == 1) {
+                    createAndViewFile(dataFileViewer, getProblemDataFiles().getJudgesDataFile(), "Judge's data file", true);
+                } else {
+                    createAndViewAllJudgesFiles(dataFileViewer, "Judge's data file", list, true);
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "No data file defined");
             }
         } else {
             JOptionPane.showMessageDialog(this, "No data file defined");
         }
+    }
+
+    private void createAndViewAllJudgesFiles(IFileViewer fileViewer, String title, SerializedFile[] files, boolean b) {
+        
+        if (files != null && files.length > 1) {
+            for (int i = files.length; i > 0; i--) {
+                createAndViewFile(fileViewer, files[i - 1], files[i - 1].getName(), false);
+            }
+        }
+        createAndViewFile(fileViewer, files[0], title, false);
+        fileViewer.setSelectedIndex(0);
+        fileViewer.setVisible(true);
     }
 
     protected void viewAnswerFile() {
@@ -1320,7 +1338,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                     answerFileViewer.dispose();
                 }
                 answerFileViewer = new MultipleFileViewer(getController().getLog());
-                createAndViewFile(answerFileViewer, getProblemDataFiles().getJudgesAnswerFile(), "Judge's answer file", true);
+
+                SerializedFile[] list = getProblemDataFiles().getJudgesAnswerFiles();
+                if (list.length == 1) {
+                    createAndViewFile(answerFileViewer, getProblemDataFiles().getJudgesAnswerFile(), "Judge's answer file", true);
+                } else {
+                    createAndViewAllJudgesFiles(answerFileViewer, "Judge's answer file", list, true);
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "No Answer File defined");
             }
