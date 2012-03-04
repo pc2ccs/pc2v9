@@ -84,12 +84,6 @@ public class SubmitterTest extends AbstractTestCase {
         return filename;
     }
 
-    private void writeLines(PrintWriter writer, String[] datalines) {
-        for (String s : datalines) {
-            writer.println(s);
-        }
-    }
-
     public void testSubmit() throws Exception {
 
         if (serverRunning) {
@@ -217,5 +211,20 @@ public class SubmitterTest extends AbstractTestCase {
 
         submitter.loadVariables(argsWithOpt);
 
+    }
+    
+    
+    public static void main(String[] args) {
+        
+//        String [] arguments = {"--helpCCS"};
+        String [] arguments = {"--help"};
+        
+        try {
+            Submitter submitter = new Submitter(arguments);
+        } catch (CommandLineErrorException e) {
+            e.printStackTrace();
+        }
+        
+        
     }
 }

@@ -630,6 +630,5 @@ public interface IInternalController {
 
     void startPlayback(PlaybackInfo playbackInfo);
     
-    void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS) throws Exception;
-
+    void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception;
 }

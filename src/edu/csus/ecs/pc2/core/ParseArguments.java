@@ -185,6 +185,15 @@ public class ParseArguments {
 
         return (String) filelist.elementAt(idx);
     }
+    
+    /**
+     * List of non-option command line arguments.
+     * 
+     * @return string array 
+     */
+    public String [] getArgList() {
+        return (String[]) filelist.toArray(new String[filelist.size()]);
+    }
 
     /**
      * returns number of arguments.

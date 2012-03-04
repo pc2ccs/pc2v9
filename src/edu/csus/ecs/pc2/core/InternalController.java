@@ -439,7 +439,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
-        submitRun(problem, language, filename, otherFiles, 0);
+        submitRun(problem, language, filename, otherFiles, 0, 0);
     }
 
     public void requestChangePassword(String oldPassword, String newPassword) {
@@ -3452,7 +3452,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(startPacket);
     }
 
-    public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles, long overrideSubmissionTime) {
+    public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles, long overrideSubmissionTime, long overrideRunId) {
 
         SerializedFile serializedFile = new SerializedFile(filename);
 
@@ -3460,10 +3460,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Run run = new Run(contest.getClientId(), language, problem);
         RunFiles runFiles = new RunFiles(run, serializedFile, otherFiles);
 
-        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTime);
+        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTime, overrideRunId);
 
         sendToLocalServer(packet);
 
     }
-
 }

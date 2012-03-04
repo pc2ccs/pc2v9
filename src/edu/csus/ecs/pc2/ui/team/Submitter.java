@@ -54,7 +54,7 @@ public class Submitter {
 
     private String mainSubmissionFileName;
     
-    public static final String[] CCS_REQUIRED_OPTIONS_LIST = { "-p", "-u", "-w", "-m", "-d", "-l" };
+    public static final String[] CCS_REQUIRED_OPTIONS_LIST = {"-i", "-l", "-m", "-p", "-t", "-u", "-w" };
 
     private String[] allCCSOptions = new String[0];
     
@@ -79,7 +79,9 @@ public class Submitter {
     /**
      * Override elapsed time for run (contest time for run), only used in test mode
      */
-    private int timeStamp;
+    private long timeStamp;
+
+    private long overrideRunId;
 
     protected Submitter() {
 
@@ -167,6 +169,11 @@ public class Submitter {
     private void loadCCSVariables(String[] args, String[] opts) throws CommandLineErrorException {
 
         ParseArguments arguments = new ParseArguments(args, opts);
+        
+        if (args.length == 0) {
+            usageCCS();
+            System.exit(4);
+        }
 
         timeStamp = 0;
         
@@ -200,29 +207,34 @@ public class Submitter {
           
             try {
                 if (arguments.isOptPresent("-t")){
-                    timeStamp = Integer.parseInt(arguments.getOptValue("-t"));
+                    timeStamp = Long.parseLong(arguments.getOptValue("-t"));
                 }
             } catch (Exception e) {
                 throw new CommandLineErrorException("Invalid number after -t", e);
             }
 
-            // -m <main source filename>
-            mainSubmissionFileName = arguments.getOptValue("-m");
-
-            // -d <directory for main and other files>
-            String sourceDirectory = arguments.getOptValue("-d");
-
-            requireDirectory(sourceDirectory, "source file directory");
-
-            if (!sourceDirectory.endsWith(File.separator)) {
-                sourceDirectory += File.separator;
+            // -i runid       - (optional) run id for submission
+            
+            try {
+                if (arguments.isOptPresent("-i")){
+                    overrideRunId = Long.parseLong(arguments.getOptValue("-i"));
+                }
+            } catch (Exception e) {
+                throw new CommandLineErrorException("Invalid number after -i", e);
             }
 
-            submittedFileName = sourceDirectory + mainSubmissionFileName;
+            // -m <main source filename>
+            mainSubmissionFileName = arguments.getOptValue("-m");
+            
+            otherFiles = getOtherFiles (mainSubmissionFileName, arguments.getArgList());
+            
+            submittedFileName = mainSubmissionFileName;
 
             requireFile(submittedFileName, "main source filename");
-
-            otherFiles = getAllOtherFileNames(sourceDirectory, mainSubmissionFileName);
+            
+            for (String name : otherFiles) {
+                requireFile(name, "source filename");
+            }
         }
 
         if (password == null) {
@@ -230,32 +242,48 @@ public class Submitter {
         }
     }
 
-    private String[] getAllOtherFileNames(String sourceDirectory, String mainfileName) {
-        
-        ArrayList<String> list = new ArrayList<String>();
+    /**
+     * Returns additional/other files.
+     * 
+     * if main filename in filelist then will not 
+     * 
+     * @param mainFileName
+     * @param argList
+     * @return 
+     */
+    private String[] getOtherFiles(String mainFileName, String[] argList) {
 
-        File[] listOfFiles = new File(sourceDirectory).listFiles();
-        for (File file : listOfFiles) {
-            if (file.isFile()) {
-                if (!file.getName().equals(mainfileName)) {
-                    list.add(sourceDirectory + File.separator + file.getName());
-                }
-            }
-        }
+        String [] outList = new String[0];
         
-        return (String[]) list.toArray(new String[list.size()]);
+        /** 
+         * If first argList is main file name remove main file name from list
+         */
+        if (argList.length > 0) {
+            
+            if (argList[0].equals(mainFileName)) {
+                
+                if (argList.length > 1) {
+                    // Copy rest of list (do not copy first element)
+                    
+                    outList = new String[argList.length - 1];
+                    System.arraycopy(argList, 1, outList, 0, argList.length - 1);
+                } else {
+                    outList = argList;
+                }
+                
+            } else {
+                outList = argList;
+            }
+            
+        } // else return list
+        
+        return outList;
     }
 
     private void requireFile(String sourceFile, String description) throws CommandLineErrorException {
         if (! new File(sourceFile).isFile()){
             throw new CommandLineErrorException(description+" missing ("+sourceFile+")");
         } 
-    }
-
-    private void requireDirectory(String sourceDirectory, String description) throws CommandLineErrorException {
-        if (! new File(sourceDirectory).isDirectory()){
-            throw new CommandLineErrorException(description+" missing ("+sourceDirectory+")");
-        }
     }
 
     private void loadPC2Variables(String[] args, String[] opts) {
@@ -309,8 +337,9 @@ public class Submitter {
 
         ParseArguments parseArguments = new ParseArguments(args, requiredOpts);
 
-        for (String s : requiredOpts) {
+        for (String s : args) {
             if (parseArguments.isOptPresent(s)) {
+                System.out.print("debug 22 found option "+s);
                 return true;
             }
         }
@@ -404,7 +433,7 @@ public class Submitter {
         String[] usage = { //
                 "", //
                 "Usage Submitter [--help|--list|--listruns|--check] options", //
-                "Usage Submitter [-t timestamp] -u loginname -w password -p problem -l language -d directory -m mainfile", //
+                "Usage Submitter [-t timestamp] [-i runid] -u loginname -w password -p problem -l language -m mainfile filelist", //
                 "Usage Submitter [-F propfile] [--help|--list|--listruns|--check] ", //
                 "", //
                 "Submit filename for problem and language.  ", //
@@ -421,13 +450,15 @@ public class Submitter {
                 "", //
                 "-m filename    - main source file name in directory specified by -d option", //
                 "", //
-                "-d directory   - for main source and other source files", //
+                "-i runid       - (optional) run id for submission  ", //
                 "", //
-                "-t timestamp   - (optional)  contest-time for submission  ", //
+                "-t timestamp   - (optional)  contest time for submission  ", //
                 "", //
                 "--list         - list problem and languages", //
                 "", //
                 "--listruns     - list run info for the user", //
+                "", //
+                "filelist       - list of files including main file", //
                 "", //
                 "On success exit code will be 0", //
                 "On failure exit code will be non-zero", //
@@ -790,7 +821,7 @@ public class Submitter {
 
         } else {
 
-            serverConnection.submitRun(problem, language, mainFileName, additionalFilenames, timeStamp);
+            serverConnection.submitRun(problem, language, mainFileName, additionalFilenames, timeStamp, overrideRunId);
 
             submittedProblem = problem;
             submittedLanguage = language;

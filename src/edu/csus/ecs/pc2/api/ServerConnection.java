@@ -135,7 +135,7 @@ public class ServerConnection {
      * @param overrideSubmissionTimeMS an override elapsed time in ms, only works if contest information CCS test mode is set true.
      * @throws Exception
      */
-    public void submitRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames, long overrideSubmissionTimeMS) throws Exception {
+    public void submitRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
 
         Account account = getAccount(internalContest, internalContest.getClientId());
 
@@ -186,7 +186,7 @@ public class ServerConnection {
         }
 
         try {
-            controller.submitRun(submittedProblem, submittedLanguage, mainFileName, list, overrideSubmissionTimeMS);
+            controller.submitRun(submittedProblem, submittedLanguage, mainFileName, list, overrideSubmissionTimeMS, overrideRunId);
         } catch (Exception e) {
             throw new Exception("Unable to submit run " + e.getLocalizedMessage());
         }
