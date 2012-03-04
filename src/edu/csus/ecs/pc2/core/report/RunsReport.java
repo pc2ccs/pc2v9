@@ -100,7 +100,7 @@ public class RunsReport implements IReport {
         }
         printWriter.print(run.getStatus() + " ");
         printWriter.print("s" + run.getSiteNumber() + " ");
-        printWriter.print("at " + run.getElapsedMins() + " ");
+        printWriter.print("at " + run.getElapsedMins() + " ("+run.getCreateDate()+") ");
         printWriter.print(clientId.getName() + " (" + getClientName(clientId) + ") ");
 
         printWriter.print(contest.getProblem(run.getProblemId()) + " ");

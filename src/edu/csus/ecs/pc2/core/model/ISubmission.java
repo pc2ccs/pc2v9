@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * A submission from the user.
@@ -41,6 +42,8 @@ public class ISubmission implements Serializable, IElementObject {
      * problem {@link ElementId}
      */
     private ElementId problemId = null;
+    
+    private Date createDate = new Date();
 
     /**
      * The run number, clar number. <br>
@@ -103,7 +106,7 @@ public class ISubmission implements Serializable, IElementObject {
      * @return Returns the elapsedMins.
      */
     public long getElapsedMins() {
-        return elapsedMS / 6000;
+        return elapsedMS / 60000;
     }
 
     /**
@@ -111,7 +114,7 @@ public class ISubmission implements Serializable, IElementObject {
      *            The elapsedMins to set.
      */
     public void setElapsedMins(long elapsedMins) {
-        this.elapsedMS = elapsedMins * 6000;
+        this.elapsedMS = elapsedMins * 60000;
     }
 
     public int versionNumber() {
@@ -148,6 +151,10 @@ public class ISubmission implements Serializable, IElementObject {
 
     public void setElapsedMS(long elapsedMS) {
         this.elapsedMS = elapsedMS;
+    }
+    
+    public Date getCreateDate() {
+        return createDate;
     }
 
 }
