@@ -37,7 +37,8 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * 
+ * A controller that does nothing.
+ *  
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -162,11 +163,6 @@ public class NullController implements IInternalController{
     }
 
     public void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS) throws Exception {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
         // TODO Auto-generated method stub
 
     }
@@ -584,6 +580,16 @@ public class NullController implements IInternalController{
     public void addNewAccount(Account account) {
         // TODO Auto-generated method stub
 
+    }
+
+    public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -345,6 +345,8 @@ public final class PacketFactory {
 
     public static final String PLAYBACK_INFO = "PLAYBACK_INFO";
 
+    private static final String OVERRIDE_RUN_ID = "OVERRIDE_RUN_ID";;
+
     
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -440,12 +442,15 @@ public final class PacketFactory {
      * @param overrideSubmissionTime 
      * @return submitted run packet.
      */
-    public static Packet createSubmittedRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, long overrideSubmissionTime) {
+    public static Packet createSubmittedRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, long overrideSubmissionTime, long overrideRunId) {
         Properties prop = new Properties();
         prop.put(RUN, run);
         prop.put(RUN_FILES, runFiles);
         if (overrideSubmissionTime > 0) {
             prop.put(ELAPSED_TIME, new Long(overrideSubmissionTime));
+        }
+        if (overrideRunId > 0) {
+            prop.put(OVERRIDE_RUN_ID, new Long(overrideSubmissionTime));
         }
         Packet packet = new Packet(Type.RUN_SUBMISSION, source, destination, prop);
         return packet;
