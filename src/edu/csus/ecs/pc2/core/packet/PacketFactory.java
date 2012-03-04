@@ -345,7 +345,7 @@ public final class PacketFactory {
 
     public static final String PLAYBACK_INFO = "PLAYBACK_INFO";
 
-    private static final String OVERRIDE_RUN_ID = "OVERRIDE_RUN_ID";;
+    public static final String OVERRIDE_RUN_ID = "OVERRIDE_RUN_ID";;
 
     
     /**

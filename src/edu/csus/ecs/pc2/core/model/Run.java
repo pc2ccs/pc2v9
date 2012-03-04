@@ -107,6 +107,8 @@ public class Run extends ISubmission {
 
     private long overRideElapsedTimeMS;
 
+    private int overrideNumber = 0;
+
     public Run(ClientId submitter, Language languageId, Problem problemId) {
         super();
         setSubmitter(submitter);
@@ -417,6 +419,19 @@ public class Run extends ISubmission {
             return false;
         }
 
+    }
+    
+    @Override
+    public int getNumber() {
+        if (overrideNumber > 0) {
+            return overrideNumber;
+        } else {
+            return super.getNumber();
+        }
+    }
+
+    public void setOverRideNumber(int number) {
+        overrideNumber = number;
     }
 
 }
