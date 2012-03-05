@@ -429,6 +429,15 @@ public class Run extends ISubmission {
             return super.getNumber();
         }
     }
+    
+    /**
+     * The run id assigned by a server. 
+     * 
+     * @return
+     */
+    public int internalRunId() {
+        return super.getNumber();
+    }
 
     public void setOverRideNumber(int number) {
         overrideNumber = number;
