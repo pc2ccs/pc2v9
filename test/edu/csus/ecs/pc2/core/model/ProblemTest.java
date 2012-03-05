@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.ui.EditProblemPane;
 
 /**
  * Test for Problem class.
@@ -12,8 +13,6 @@ import junit.framework.TestCase;
 
 // $HeadURL$
 public class ProblemTest extends TestCase {
-
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -37,7 +36,7 @@ public class ProblemTest extends TestCase {
         p2.setWhichPC2Validator(3);
         p2.setIgnoreSpacesOnValidation(true);
 
-        p2.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() + " " + p2.isIgnoreSpacesOnValidation());
+        p2.setValidatorCommandLine(EditProblemPane.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() + " " + p2.isIgnoreSpacesOnValidation());
         p2.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
 
         p2.setReadInputDataFromSTDIN(false);
@@ -165,4 +164,24 @@ public class ProblemTest extends TestCase {
         // TODO consider adding introspection to verify all fields were copied properly
     }
 
+    
+    // TODO when short name implemented use this test
+//    public void testValidShortName() {
+//
+//        Problem p1 = getProblemAnew();
+//
+//        String [] badPathNames = { //
+//                File.separator+ "temp",
+//                "C:temp",
+//        };
+//
+//        for (String name : badPathNames) {
+//            try {
+//                p1.setShortName(name);
+//            } catch (Exception e) {
+//                name = "ok";
+//            }
+//        }
+//    }
+    
 }

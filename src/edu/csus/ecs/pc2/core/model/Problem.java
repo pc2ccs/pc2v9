@@ -119,18 +119,16 @@ public class Problem implements IElementObject {
      */
     private boolean internationalJudgementReadMethod = true;
 
-    // TODO Implement Commands to be executed before a problem is run
-    //
-    // /**
-    // * This is the command executed before the run is executed.
-    // */
-    // private String executionPrepCommand = "";
-    //
-    // /**
-    // * This is an optional program/script used by executionPrepCommand.
-    // */
-    // private SerializedFile executionPrepFile;
-
+    /**
+     * This is the command executed before the run is executed.
+     */
+    private String executionPrepCommand = null;
+    
+    /**
+     * Is this problem to be executed and validated per the CCS specification.
+     */
+    private boolean ccsMode = false;
+     
     /**
      * PC2 option to ignore spaces on validation.
      */
@@ -668,6 +666,13 @@ public class Problem implements IElementObject {
         // TODO CCS short name must be checked to not contain invalid directory chars
         // like / \\ :  etc.
         
+//        boolean invalidName = shortName.contains(File.separator) //
+//        || shortName.contains(":");
+//
+//        if (invalidName) {
+//            throw new Exception("Illegal character found in name: " + shortName);
+//        }
+        
         this.shortName = shortName;
     }
     
@@ -713,4 +718,26 @@ public class Problem implements IElementObject {
         }
             
     }
+
+    public String getExecutionPrepCommand() {
+        return executionPrepCommand;
+    }
+
+    public void setExecutionPrepCommand(String executionPrepCommand) {
+        this.executionPrepCommand = executionPrepCommand;
+    }
+
+    /**
+     * Will this problem be executed and validated per the CCS?.
+     * @return
+     */
+    public boolean isCcsMode() {
+        return ccsMode;
+    }
+
+    public void setCcsMode(boolean ccsMode) {
+        this.ccsMode = ccsMode;
+    }
+    
+    
 }
