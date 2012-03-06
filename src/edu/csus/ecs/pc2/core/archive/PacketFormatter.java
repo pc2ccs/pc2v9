@@ -174,6 +174,11 @@ public final class PacketFormatter {
      */
     private static DefaultMutableTreeNode createTree(String key, Object object) {
         
+        if (object == null) {
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + " null ");
+            return node;
+        }
+        
         if (object instanceof Profile){
 
             Profile profile = (Profile) object;
@@ -1068,23 +1073,24 @@ public final class PacketFormatter {
             DefaultMutableTreeNode child;
 
             ProblemDataFiles data = (ProblemDataFiles) object;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + "ProblemDataFiles: " + data.getProblemId());
+            
+            String testSetString = data.getJudgesDataFiles().length + " data files" 
+                + data.getJudgesAnswerFiles().length + " answer files";
+
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + "ProblemDataFiles: " + testSetString +" "+ data.getProblemId());
 
             child = new DefaultMutableTreeNode("problem: " + data.getProblemId());
             node.add(child);
 
-            data.getJudgesDataFile();
-
-            child = createTree("Judge Data File", data.getJudgesDataFile());
-            addNonNull(node, child);
-            child = createTree("Judge Ans File", data.getJudgesAnswerFile());
-            addNonNull(node, child);
             child = createTree("Validator", data.getValidatorFile());
             addNonNull(node, child);
+            child = createTree("Validator run cmd", data.getValidatorRunCommand());
+            addNonNull(node, child);
 
-            // TODO code arrays
-            // data.getJudgesDataFiles();
-            // data.getJudgesAnswerFiles();
+            child = createTree("Judge Data Files", data.getJudgesDataFiles());
+            addNonNull(node, child);
+            child = createTree("Judge Ans Files", data.getJudgesAnswerFiles());
+            addNonNull(node, child);
 
             child = new DefaultMutableTreeNode("ElementId: " + data.getElementId().toString());
             node.add(child);
@@ -1190,7 +1196,7 @@ public final class PacketFormatter {
             node.add(child);
             return node;
         }
-        
+
         return null;
     }
 }
