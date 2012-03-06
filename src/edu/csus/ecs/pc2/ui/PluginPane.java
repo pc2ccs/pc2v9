@@ -63,6 +63,7 @@ public class PluginPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         
         PluginLoadPane pluginLoadPane = new PluginLoadPane();
+        pluginLoadPane.setParentFrame(getParentFrame());
         pluginLoadPane.setParentTabbedPane(getPluginTabbedPane());
         getPluginTabbedPane().add(pluginLoadPane.getPluginTitle(), pluginLoadPane);
         pluginLoadPane.setContestAndController(inContest, inController);
