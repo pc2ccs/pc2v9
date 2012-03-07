@@ -7,7 +7,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -15,9 +17,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.transport.EventFeedServer;
-import java.awt.event.KeyEvent;
+import edu.csus.ecs.pc2.core.util.SocketUtilities;
 
 /**
  * Event Feed Server Pane.
@@ -33,6 +36,9 @@ public class EventFeedServerPane extends JPanePlugin {
      * 
      */
     private static final long serialVersionUID = 4739343418897893446L;
+    
+    public static final int DEFAULT_EVENT_FEED_PORT_NUMBER = 4713;
+
 
     private JPanel buttonPanel = null;
 
@@ -49,6 +55,8 @@ public class EventFeedServerPane extends JPanePlugin {
     private EventFeedServer eventFeedServer = new EventFeedServer(); // @jve:decl-index=0:
 
     private JLabel eventFeedServerStatusLabel = null;
+
+    private JButton viewButton = null;
 
     /**
      * This method initializes
@@ -91,6 +99,7 @@ public class EventFeedServerPane extends JPanePlugin {
             buttonPanel.setPreferredSize(new Dimension(35, 35));
             buttonPanel.add(getStartButton(), null);
             buttonPanel.add(getStopButton(), null);
+            buttonPanel.add(getViewButton(), null);
         }
         return buttonPanel;
     }
@@ -236,7 +245,7 @@ public class EventFeedServerPane extends JPanePlugin {
         if (portTextField == null) {
             portTextField = new JTextField();
             portTextField.setDocument(new IntegerDocument());
-            portTextField.setText("4713");
+            portTextField.setText(Integer.toString(DEFAULT_EVENT_FEED_PORT_NUMBER));
         }
         return portTextField;
     }
@@ -245,6 +254,43 @@ public class EventFeedServerPane extends JPanePlugin {
         boolean serverRunning = eventFeedServer.isListening();
         getStartButton().setEnabled(! serverRunning);
         getStopButton().setEnabled(serverRunning);
+    }
+
+    /**
+     * This method initializes viewButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getViewButton() {
+        if (viewButton == null) {
+            viewButton = new JButton();
+            viewButton.setText("View");
+            viewButton.setMnemonic(KeyEvent.VK_V);
+            viewButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showEventFeedInViewer();
+                }
+            });
+        }
+        return viewButton;
+    }
+
+    protected void showEventFeedInViewer() {
+        
+        int port = Integer.parseInt(getPortTextField().getText());
+        
+        final String [] lines = SocketUtilities.readLinesFromPort(port);
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+                multipleFileViewer.addTextintoPane("Event Feed", lines);
+                multipleFileViewer.setTitle("PC^2 Event Feed at "+new Date());
+                FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+                multipleFileViewer.setVisible(true);
+            }
+        });
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
