@@ -27,11 +27,11 @@ public class ProblemDataFiles implements IElementObject {
      */
     private static final long serialVersionUID = -3590638930073985058L;
 
-    public static final String SVN_ID = "$Id$";
-
     private ElementId elementId = new ElementId("ProblemDF");
 
     private ElementId problemId = null;
+    
+    private SerializedFile validatorRunCommand;
     
     private SerializedFile validatorFile;
 
@@ -210,7 +210,27 @@ public class ProblemDataFiles implements IElementObject {
     protected void setProblemId(ElementId problemId) {
         this.problemId = problemId;
     }
+    
+    /**
+     * A program that wraps the validator.
+     * 
+     * Under CCS typically named 'run'.
+     * 
+     * @return null if not defined, else the program to run the validator.
+     */
+    public SerializedFile getValidatorRunCommand() {
+        return validatorRunCommand;
+    }
+    
+    public void setValidatorRunCommand(SerializedFile validatorRunCommand) {
+        this.validatorRunCommand = validatorRunCommand;
+    }
 
+    /**
+     * The validator program.
+     * 
+     * @return
+     */
     public SerializedFile getValidatorFile() {
         return validatorFile;
     }
@@ -297,5 +317,44 @@ public class ProblemDataFiles implements IElementObject {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    @Override
+    public String toString() {
+
+        StringBuffer buf = new StringBuffer();
+
+        buf.append(problemId);
+        buf.append(" ");
+
+        int numDataFiles = judgesDataFiles.length;
+        int numAnsFiles = judgesAnswerFiles.length;
+        
+        buf.append(numDataFiles);
+        buf.append(" data files, ");
+        
+        buf.append(numAnsFiles);
+        buf.append(" answer files. ");
+        
+        buf.append("Data: ");
+        SerializedFile [] list = judgesDataFiles;
+        for (SerializedFile file : list) {
+            buf.append(file.getName());
+            buf.append(" ");
+        }
+        
+        buf.append("Answer: ");
+        list = judgesAnswerFiles;
+        for (SerializedFile file : list) {
+            buf.append(file.getName());
+            buf.append(" ");
+        }
+
+        buf.append(" Validator: ");
+        if (validatorFile != null) {
+            buf.append(validatorFile.getName());
+        }
+
+        return buf.toString();
     }
 }
