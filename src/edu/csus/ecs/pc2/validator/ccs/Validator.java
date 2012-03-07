@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.ccs.CCSConstants;
 
 /**
  * PC<sup>2</sup> Internal CCS Validator.
@@ -88,13 +89,6 @@ public class Validator {
     private static final String IGNORE_ALL_WHITESPACE = "4";
 
     private static final String IGNORE_EMPTY_LINES = "5";
-
-    /**
-     * Validator determined succes
-     */
-    private static final int JUDGEMENT_YES_EXIT_CODE = 42;
-
-    private static final int JUDGEMENT_WRONG_ANSWER_EXIT_CODE = 0;
 
     private void usage() {
         VersionInfo vi = new VersionInfo();
@@ -452,7 +446,7 @@ public class Validator {
             numberOfArgs--;
         }
         
-        System.exit(JUDGEMENT_WRONG_ANSWER_EXIT_CODE); // TODO remove this when validator coded
+        System.exit(CCSConstants.VALIDATOR_JUDGED_FAILURE_EXIT_CODE);
 
         // TODO CCS 678 command line processing
         
@@ -513,8 +507,8 @@ public class Validator {
 //        }
         
         // TODO CCS return codes for this method.
-//      return JUDGEMENT_YES_EXIT_CODE;
-        return JUDGEMENT_WRONG_ANSWER_EXIT_CODE;
+//        return CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE;
+        return CCSConstants.VALIDATOR_JUDGED_FAILURE_EXIT_CODE;
     }
 
 

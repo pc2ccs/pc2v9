@@ -60,34 +60,11 @@ import java.util.Hashtable;
 // $HeadURL$
 public class XMLResultsParser implements IResultsParser {
 
-    public static final String SVN_ID = "$Id$";
+    
 
     private Log log = null;
 
     private Hashtable<String, String> results = new Hashtable<String, String>();
-
-    private static final String OUTCOME_KEY = "outcome";
-
-    private static final String RESULT_KEY = "result";
-
-    public static void main(String[] argv) {
-
-        if (argv.length < 1) {
-            System.out.println("Usage: java edu.csus.ecs.pc2.core.execute.XMLResultsParser filename");
-            System.exit(1);
-        }
-        Log log = new Log("edu.csus.ecs.pc2", null, "logs", "parser");
-        XMLResultsParser parser = new XMLResultsParser();
-        parser.setLog(log);
-        if (parser.parseValidatorResultsFile(argv[0])) {
-            Enumeration<String> enumeration = parser.getResults().keys();
-            while (enumeration.hasMoreElements()) {
-                String element = enumeration.nextElement();
-                System.out.println("found attribute " + element + " value=" + parser.getResults().get(element));
-
-            }
-        }
-    }
 
     /**
      * @param nodeMap
@@ -107,19 +84,12 @@ public class XMLResultsParser implements IResultsParser {
         }
     }
 
-    /**
-     * Parse input file and return true if validator results found.
-     * 
-     * Parse input XML file, if expected results found (See International Standard for validator results), will populate attributes
-     * with XML name value pairs.
-     * 
-     * returns false on error
-     * 
-     * @param resultsFileName
-     *            input XML filename
-     * @return true if found results.
-     */
     public boolean parseValidatorResultsFile(String resultsFileName) {
+
+        if (!(new File(resultsFileName).exists())) {
+            log.config("WARNING - results file " + resultsFileName + " not found");
+        }
+
         String content = "";
         try {
             DocumentBuilderFactory docBuildFactory = DocumentBuilderFactory.newInstance();
@@ -134,24 +104,24 @@ public class XMLResultsParser implements IResultsParser {
             if (rootNode.equals(RESULT_KEY)) {
                 content = doc.getDocumentElement().getTextContent();
                 if (content != null) {
-                    results.put("CONTENT", content);
+                    results.put(CONTENT_KEY , content);
                 }
                 NamedNodeMap attr = doc.getDocumentElement().getAttributes();
                 processAttributes(attr);
                 if (results.containsKey(OUTCOME_KEY)) {
                     return true;
                 } else {
-                    log.config("parseResultXML() could not find '" + OUTCOME_KEY + "' attribute");
+                    log.config("Parse error - could not find '" + OUTCOME_KEY + "' attribute");
                 }
             } else {
-                log.config("parseResultXML() looking for result rootNode, but found root node: " + rootNode);
+                log.config("Parse error expecting " + RESULT_KEY + " rootNode, but found node: " + rootNode);
             }
         } catch (SAXParseException spe) {
-            log.log(Log.CONFIG, "parseResultXML() SAX exception", spe);
+            log.log(Log.CONFIG, "XML Parse error - SAX exception", spe);
         } catch (SAXException se) {
-            log.log(Log.CONFIG, "parseResultXML() SAX exception", se);
+            log.log(Log.CONFIG, "XML Parse error - SAX exception", se);
         } catch (Throwable t) {
-            log.log(Log.CONFIG, "parseResultXML() exception", t);
+            log.log(Log.CONFIG, "XML Parse error - exception", t);
         }
         return false;
 
@@ -167,6 +137,25 @@ public class XMLResultsParser implements IResultsParser {
 
     public void setLog(Log log) {
         this.log = log;
+    }
+    
+    public static void main(String[] argv) {
+
+        if (argv.length < 1) {
+            System.out.println("Usage: java edu.csus.ecs.pc2.core.execute.XMLResultsParser filename");
+            System.exit(1);
+        }
+        Log log = new Log("edu.csus.ecs.pc2", null, "logs", "parser");
+        XMLResultsParser parser = new XMLResultsParser();
+        parser.setLog(log);
+        if (parser.parseValidatorResultsFile(argv[0])) {
+            Enumeration<String> enumeration = parser.getResults().keys();
+            while (enumeration.hasMoreElements()) {
+                String element = enumeration.nextElement();
+                System.out.println("found attribute " + element + " value=" + parser.getResults().get(element));
+
+            }
+        }
     }
 
 }

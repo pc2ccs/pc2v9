@@ -63,6 +63,8 @@ public class ExecutionData implements Serializable {
     private boolean runTimeLimitExceeded = false;
 
     private boolean failedToCompile = false;
+
+    private String additionalInformation = "";
     
     /**
      * @return Returns the validationReturnCode.
@@ -327,4 +329,15 @@ public class ExecutionData implements Serializable {
         this.runTimeLimitExceeded = runTimeLimitExceeded;
     }
     
+    public void setAdditionalInformation(String additionalInformation) {
+        this.additionalInformation = additionalInformation;
+    }
+
+    /**
+     * Additional information for validation.
+     * @return
+     */
+    public String getAdditionalInformation() {
+        return additionalInformation;
+    }
 }

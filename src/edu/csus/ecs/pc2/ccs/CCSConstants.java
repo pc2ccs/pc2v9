@@ -23,7 +23,14 @@ public final class CCSConstants {
      * Validator failure exit code.
      */
     public static final int VALIDATOR_JUDGED_FAILURE_EXIT_CODE = 43;
-
+    
+    /**
+     * An error during CCS judging/validating exit code.
+     * 
+     * {@link #VALIDATOR_JUDGED_SUCCESS_EXIT_CODE} and {@link #VALIDATOR_JUDGED_FAILURE_EXIT_CODE} are
+     * valid return codes.
+     */
+    public static final int VALIDATOR_CCS_ERROR_EXIT_CODE = 255;
     
     /**
      * The default CCS validator command line.
@@ -39,6 +46,16 @@ public final class CCSConstants {
      * The default CCS validator program name. 
      */
     public static final String INTERNAL_CCS_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.ccs.DefaultValidator";
+
+    /**
+     * Wrong answer judgment string.
+     */
+    public static final String JUDGEMENT_WRONG_ANSWER = "No - Wrong Answer";
+
+    /**
+     * Accepted/passed (Yes) judgement string.
+     */
+    public static final String JUDGEMENT_YES = "Yes";
 
 
 

@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import edu.csus.ecs.pc2.core.log.Log;
 
 /**
- * Results Parser interface.
+ * Validator results parser interface.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -15,16 +15,37 @@ import edu.csus.ecs.pc2.core.log.Log;
 public interface IResultsParser {
 
     /**
-     * parses file and populates results.
+     * XML Attribute name for validator judgement.
      * 
-     * @param string
-     * @return true if can parse file and populated results
+     * The value is the judgement itself.
      */
-    boolean parseValidatorResultsFile(String string);
+    String OUTCOME_KEY = "outcome";
+
+    /**
+     * XML element name for validator results.
+     */
+    String RESULT_KEY = "result";
+    
+    /**
+     * Extra text/information about the judgement from the validator key.
+     */
+    String CONTENT_KEY = "CONTENT";
+
+    /**
+     * Parse input XML file, populate results ({@link #getResults()}).
+     * 
+     * Parse input XML file, if expected results found (See International Standard for validator results), will populate attributes with XML name value pairs and return true.
+     * 
+     * @param filename
+     *            input International Standard results XML file.
+     * @return false if no judgement/outcome found or parse error, else true (and results can be found using {@link #getResults()}
+     */
+    boolean parseValidatorResultsFile(String filename);
 
     /**
      * The results of the parsing.
      * 
+     * Keys for results are: {@link #OUTCOME_KEY}, {@link #RESULT_KEY}, {@link #CONTENT_KEY}.
      * 
      * @return results of parsing.
      */
