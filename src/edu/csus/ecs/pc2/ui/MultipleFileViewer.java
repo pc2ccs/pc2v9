@@ -186,6 +186,60 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
 
         return loadFile(textArea, filename);
     }
+    
+    /**
+     * Add lines into new pane
+     * @param title
+     * @param lines
+     * @return
+     */
+    public boolean addTextintoPane(String title, String [] lines) {
+        
+        int numtabs = getFileTabbedPane().getTabCount() + 1;
+
+        JTextArea textArea = new JTextArea();
+        textArea.setName("JTextPane" + numtabs);
+        textArea.setBounds(0, 0, 11, 6);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setName("JScrollPane" + numtabs);
+        scrollPane.setViewportView(textArea);
+
+        JPanel jPanel = new JPanel();
+        jPanel.setName("JPanel" + numtabs);
+        jPanel.setLayout(new java.awt.BorderLayout());
+        jPanel.add(scrollPane, "Center");
+
+        ivjFileTabbedPane.insertTab(title, null, jPanel, null, 0);
+
+        return loadText(textArea, lines);
+    }
+    
+
+    /**
+     * Load text into text area.
+     * @param textArea
+     * @param lines
+     * @return
+     */
+    private boolean loadText(JTextArea textArea, String[] lines) {
+
+        try {
+            textArea.setFont(new Font("Courier", Font.PLAIN, 12));
+
+            for (String line : lines) {
+                textArea.append(line);
+                textArea.append("\n");
+            }
+
+            textArea.setCaretPosition(0);
+            return true;
+        } catch (Exception e) {
+            System.out.println("MultipleFileViewer loadText exception " + e);
+        }
+        return false;
+
+    }
 
     /**
      * Add Text Pane to viewer panes.
