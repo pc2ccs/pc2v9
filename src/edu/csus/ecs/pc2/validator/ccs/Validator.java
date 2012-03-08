@@ -421,9 +421,10 @@ public class Validator {
                 System.exit(0);
             }
         }
+        
         if (args[argNum].equals("--help")) {
             printUsage();
-            System.exit(4);
+            return 4;
         }
 
         int numberOfArgs = args.length;
@@ -445,8 +446,19 @@ public class Validator {
             argNum++;
             numberOfArgs--;
         }
+
+        /**
+         * Internal override for validator for testing purposes,
+         * return Yes as validator results.
+         */
+        if (args[argNum].equals("--testUsingYes")) {
+            return CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE;
+        }
         
-        System.exit(CCSConstants.VALIDATOR_JUDGED_FAILURE_EXIT_CODE);
+        
+        if (numberOfArgs == 0) {
+            return CCSConstants.VALIDATOR_CCS_ERROR_EXIT_CODE;
+        }
 
         // TODO CCS 678 command line processing
         

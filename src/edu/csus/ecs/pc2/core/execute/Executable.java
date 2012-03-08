@@ -1242,6 +1242,7 @@ public class Executable {
      *              {:outfile}
      *              {:ansfile}
      *              {:pc2home}
+     *              {:ccsvalrun} - run command for CCS validator
      * </pre>
      * 
      * @param inRun
@@ -1350,6 +1351,14 @@ public class Executable {
             if (pc2home != null && pc2home.length() > 0) {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
+            
+            if (problemDataFiles != null) {
+                String runCommand = problemDataFiles.getValidatorRunCommand().getName();
+                if (!"".equals(runCommand)) {
+                    newString = replaceString(newString, "{:ccsvalrun}", pc2home);
+                }
+            }
+            
         } catch (Exception e) {
             // TODO LOG
             log.log(Log.CONFIG, "Exception ", e);
