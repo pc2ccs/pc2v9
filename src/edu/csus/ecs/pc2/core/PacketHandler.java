@@ -79,7 +79,6 @@ public class PacketHandler {
     private IInternalContest contest = null;
 
     private IInternalController controller = null;
-    
   
     /**
      * Message handler for conditions where attention may be needed.
@@ -1494,8 +1493,23 @@ public class PacketHandler {
                 controller.getLog().info("Elapsed time override (-t) " + overrideElapsedTime + " used for run " + submittedRun);
             } else {
                 controller.getLog().info("Note elapsed time override not used, not in CCS test mode run=" + submittedRun);
+                throw new SecurityException("Attempted to use time override in submit run when not in CCS Test Mode");
             }
         }
+        
+        Long overrideRunId = (Long) PacketFactory.getObjectValue(packet, PacketFactory.OVERRIDE_RUN_ID);
+        if (overrideRunId != null) {
+            if (contest.getContestInformation().isCcsTestMode()) {
+                // By setting the override id, this id is used in place of the id assigned by the server.
+                submittedRun.setOverRideNumber(overrideRunId.intValue());
+                controller.getLog().info("Run id override (-i) " + overrideElapsedTime + " used for run " + submittedRun);
+            } else {
+                controller.getLog().info("Note run id override not used, not in CCS test mode run=" + submittedRun);
+                throw new SecurityException("Attempted to use run id override in submit run when not in CCS Test Mode");
+            }
+        }
+        
+        
         
         Run run = contest.acceptRun(submittedRun, runFiles);
 
