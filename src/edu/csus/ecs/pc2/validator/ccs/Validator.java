@@ -115,21 +115,52 @@ public class Validator {
     void printUsage() {
         usage();
     }
+    
+    /**
+     * Exception (fatal error) in validator. 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class ValidatorException extends Exception{
+
+        private int exitCode = CCSConstants.VALIDATOR_CCS_ERROR_EXIT_CODE;
+        
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -3945738509765205483L;
+        
+        public ValidatorException(String string, int exitCode) {
+            super(string);
+            this.exitCode = exitCode;
+        }
+
+        public ValidatorException(String string) {
+            super(string);
+        }
+
+        public int getExitCode() {
+            return exitCode;
+        }
+    }
 
     /**
      * Requires that file exists, it does not exist prints description then exit.
      * 
      * @param filename
      * @param descriptionForFile
+     * @throws ValidatorException 
      */
-    void requireFile(String filename, String descriptionForFile) {
+    void requireFile(String filename, String descriptionForFile) throws ValidatorException {
         File file = new File(filename);
         if (!file.isFile()) {
-            fatalError(descriptionForFile + " does not exist (" + filename + ")", 7);
+            throw new ValidatorException(descriptionForFile + " does not exist (" + filename + ")", 7);
         }
     }
 
-    private void checkForOutputFile() {
+    private void checkForOutputFile() throws ValidatorException {
         File checkFile = new File(outputFileName);
         if (!checkFile.isFile()) {
             // no output file created
@@ -139,7 +170,7 @@ public class Validator {
                 writeResultFile(resultFileName, JUDGEMENT_NO_WRONG_ANSWER, extraValidatorDifference);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-                fatalError("Trouble writing result file " + resultFileName, 4);
+                throw new ValidatorException("Trouble writing result file " + resultFileName, 4);
             }
         }
     }
@@ -413,114 +444,120 @@ public class Validator {
     }
 
     public int runValidator(String[] args) {
-        int argNum = 0;
-
-        if (args.length == 0) {
-            printUsage();
-            if (allowFatalExit) {
-                System.exit(0);
-            }
-        }
         
-        if (args[argNum].equals("--help")) {
-            printUsage();
-            return 4;
-        }
-
+        int argNum = 0;
         int numberOfArgs = args.length;
 
-        if (args[argNum].equals("--nofatal")) {
+        if (numberOfArgs > 0 && "--nofatal".equals(args[0])) {
             allowFatalExit = false;
             argNum++;
             numberOfArgs--;
         }
 
-        if (args[argNum].equals("--verbose")) {
+        if ("--help".equals(args[0])) {
+            printUsage();
+            if (allowFatalExit) {
+                System.exit(0);
+            }
+            return CCSConstants.VALIDATOR_CCS_ERROR_EXIT_CODE;
+        }
+
+        if ("--verbose".equals(args[0])) {
             verbose = true;
             argNum++;
             numberOfArgs--;
         }
 
-        if (args[argNum].equals("--debug")) {
+        if ("--debug".equals(args[0])) {
             debugFlag = true;
             argNum++;
             numberOfArgs--;
         }
-
-        /**
-         * Internal override for validator for testing purposes,
-         * return Yes as validator results.
-         */
-        if (args[argNum].equals("--testUsingYes")) {
+        
+        if ("--testYes".equals(args[0])) {
             return CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE;
-        }
-        
-        
-        if (numberOfArgs == 0) {
-            return CCSConstants.VALIDATOR_CCS_ERROR_EXIT_CODE;
         }
 
         // TODO CCS 678 command line processing
-        
-        if (numberOfArgs != 5 && numberOfArgs != 7) {
-            fatalError("Too few paramaters, see usage", 6);
+        try {
+            
+            switch (argNum) {
+                case 0:
+                    throw new ValidatorException("Missing inputfilename");
+                case 1:
+                    throw new ValidatorException("Missing answerfilename");
+                case 2:
+                    throw new ValidatorException("Missing feedbackdir");
+                default:
+                    // fall through
+                    break;
+            }
+             
+            inputFileName = args[argNum++];
+            outputFileName = args[argNum++];
+            answerFileName = args[argNum++];
+            resultFileName = args[argNum++];
+
+            if (!inputFileName.equals("-")) {
+                requireFile(inputFileName, "input file");
+            }
+
+            if (!outputFileName.equals("-")) {
+                checkForOutputFile();
+            }
+
+            if (!answerFileName.equals("-")) {
+                requireFile(answerFileName, "answer file");
+            }
+
+            if (resultFileName.equals("-")) {
+                throw new ValidatorException("Invalid result filename: -  is not allowed.", 7);
+            }
+
+            if (args[argNum].equalsIgnoreCase("-pc2")) {
+                argNum++;
+                pc2Option = args[argNum++];
+            }
+
+            if (args[argNum].equalsIgnoreCase("true")) {
+                ignoreCaseFlag = true;
+            } else if (args[argNum].equalsIgnoreCase("false")) {
+                ignoreCaseFlag = false;
+            } else {
+                throw new ValidatorException("Invalid icflag expecting true or false, not: " + args[argNum], 8);
+            }
+
+            // if (debugFlag) {
+            // System.out.println("Arguments: ");
+            // System.out.println("inputFileName = " + inputFileName);
+            // System.out.println("outputFileName = " + outputFileName);
+            // System.out.println("answerFileName = " + answerFileName);
+            // System.out.println("resultFileName = " + resultFileName);
+            // System.out.println("pc2Option = " + pc2Option);
+            // System.out.println("ignore case = " + ignoreCaseFlag);
+            // System.out.println();
+            // }
+            //
+            // try {
+            // writeResultFile(resultFileName, judgement, extraValidatorDifference);
+            // } catch (FileNotFoundException e) {
+            // System.out.println("Could not write result file" + resultFileName);
+            // e.printStackTrace();
+            // }
+
+            // TODO CCS return codes for this method.
+            // return CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE;
+            return CCSConstants.VALIDATOR_JUDGED_FAILURE_EXIT_CODE;
+
+        } catch (ValidatorException e) {
+            if (verbose) {
+                e.printStackTrace();
+            }
+            System.err.println(e.getMessage());
+            System.err.println("Error code "+e.getExitCode());
+            return e.getExitCode();
         }
 
-        inputFileName = args[argNum++];
-        outputFileName = args[argNum++];
-        answerFileName = args[argNum++];
-        resultFileName = args[argNum++];
-
-        if (!inputFileName.equals("-")) {
-            requireFile(inputFileName, "input file");
-        }
-
-        if (!outputFileName.equals("-")) {
-            checkForOutputFile();
-        }
-
-        if (!answerFileName.equals("-")) {
-            requireFile(answerFileName, "answer file");
-        }
-
-        if (resultFileName.equals("-")) {
-            fatalError("Invalid result filename: -  is not allowed.", 7);
-        }
-
-        if (args[argNum].equalsIgnoreCase("-pc2")) {
-            argNum++;
-            pc2Option = args[argNum++];
-        }
-
-        if (args[argNum].equalsIgnoreCase("true")) {
-            ignoreCaseFlag = true;
-        } else if (args[argNum].equalsIgnoreCase("false")) {
-            ignoreCaseFlag = false;
-        } else {
-            fatalError("Invalid icflag expecting true or false, not: " + args[argNum], 8);
-        }
-
-//        if (debugFlag) {
-//            System.out.println("Arguments: ");
-//            System.out.println("inputFileName = " + inputFileName);
-//            System.out.println("outputFileName = " + outputFileName);
-//            System.out.println("answerFileName = " + answerFileName);
-//            System.out.println("resultFileName = " + resultFileName);
-//            System.out.println("pc2Option = " + pc2Option);
-//            System.out.println("ignore case = " + ignoreCaseFlag);
-//            System.out.println();
-//        }
-//
-//        try {
-//            writeResultFile(resultFileName, judgement, extraValidatorDifference);
-//        } catch (FileNotFoundException e) {
-//            System.out.println("Could not write result file" + resultFileName);
-//            e.printStackTrace();
-//        }
-        
-        // TODO CCS return codes for this method.
-//        return CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE;
-        return CCSConstants.VALIDATOR_JUDGED_FAILURE_EXIT_CODE;
     }
 
 
@@ -549,17 +586,12 @@ public class Validator {
         this.verbose = verbose;
     }
 
-    private void fatalError(String message, int exitCode) {
-        System.err.println("Error: " + message);
-        if (allowFatalExit) {
-            System.exit(exitCode);
-        }
-    }
-
     public static void main(String[] args) {
 
         Validator validator = new Validator();
         int exitCode = validator.runValidator(args);
+        System.err.println("debug 22 Exit with code "+exitCode);
         System.exit(exitCode);
     }
 }
+

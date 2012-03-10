@@ -45,7 +45,7 @@ public final class CCSConstants {
     /**
      * The default CCS validator program name. 
      */
-    public static final String INTERNAL_CCS_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.ccs.DefaultValidator";
+    public static final String INTERNAL_CCS_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.validator.ccs.Validator";
 
     /**
      * Wrong answer judgment string.

@@ -5,9 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
-import edu.csus.ecs.pc2.core.model.SerializedFile;
-
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * A base TestCase case with utilities.
@@ -182,4 +181,49 @@ public class AbstractTestCase extends TestCase {
             writer.println(s);
         }
     }
+
+    /**
+     * File exist assertion.
+     * 
+     * @param filename
+     *            file that must exist
+     * @param message
+     *            message to show if file does not exist
+     */
+    public void assertFileExists(String filename, String message) {
+        assertTrue("Missing file " + message + ": " + filename, new File(filename).isFile());
+    }
+
+    /**
+     * File exist assertion.
+     * 
+     * @param filename
+     *            file that must exist
+     */
+    public void assertFileExists(String filename) {
+        assertTrue("Missing file: " + filename, new File(filename).isFile());
+    }
+
+    /**
+     * Directory exist assertion.
+     * 
+     * @param directoryName
+     *            directory that must exist.
+     * @param message
+     *            message to show if file does not exist
+     */
+    public void assertDirectoryExists(String directoryName, String message) {
+        assertTrue("Missing file " + message + ": " + directoryName, new File(directoryName).isDirectory());
+    }
+
+    /**
+     * Directory exist assertion.
+     * 
+     * @param directoryName
+     *            directory that must exist.
+     */
+    public void assertDirectoryExists(String directoryName) {
+        assertTrue("Missing file: " + directoryName, new File(directoryName).isDirectory());
+    }
+
 }

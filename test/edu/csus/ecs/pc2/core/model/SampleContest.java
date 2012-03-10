@@ -12,6 +12,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
@@ -1186,6 +1187,87 @@ public class SampleContest {
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
+    }
+
+    /**
+     * Turn test mode on.
+     * 
+     * @param contest
+     */
+    public void setCCSTestMode(IInternalContest contest) {
+        ContestInformation info = contest.getContestInformation();
+        if (info == null) {
+            info = new ContestInformation();
+        }
+        info.setCcsTestMode(true);
+        contest.updateContestInformation(info);
+    }
+
+    /**
+     * Set for Internal CCS validation.
+     * 
+     * @param contest
+     * @param validatorParameters
+     * @param problem
+     */
+    public void setCCSValidation(IInternalContest contest, String validatorParameters, Problem problem) {
+
+        problem.setValidatedProblem(true);
+        problem.setUsingPC2Validator(false);
+        problem.setReadInputDataFromSTDIN(true);
+
+        problem.setValidatorProgramName(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME);
+
+        if (validatorParameters == null) {
+            problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        } else {
+            problem.setValidatorCommandLine(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME+" " +validatorParameters);
+        }
+    }
+    
+    
+
+    public String createSampleJavaSource(String filename) throws FileNotFoundException  {
+        PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
+        String[] datalines = getSumitSourceLines();
+        writeLines(writer, datalines);
+        writer.close();
+        writer = null;
+        return filename;
+    }
+
+    private String[] getSumitSourceLines() {
+        String [] lines = {
+                "public class Sumit {", //
+                "", //
+                "    public void doSum(String filename) {", //
+                "        try {", //
+                "            RandomAccessFile file = new RandomAccessFile(filename, \"r\");", //
+                "            String line;", //
+                "            int sum = 0;", //
+                "            int rv = 0;", //
+                "            while ((line = file.readLine()) != null) {", //
+                "                rv = new Integer(line.trim()).intValue();", //
+                "                if (rv > 0) {", //
+                "                    sum = sum + rv;", //
+                "                    // System.out.println(line);", //
+                "                }", //
+                "            }", //
+                "            System.out.print(\"The sum of the integers is \" + sum);", //
+                "        } catch (Exception e) {", //
+                "            System.out.println(\"Possible trouble reading Sumit.dat\");", //
+                "        }", //
+                "    }", //
+                "", //
+                "    public static void main(String[] args) {", //
+                "", //
+                "        new Sumit().doSum(\"sumit.dat\");", //
+                "", //
+                "    }", //
+                "}", //
+                "", //
+        };
+        return lines;
     }
 
 }

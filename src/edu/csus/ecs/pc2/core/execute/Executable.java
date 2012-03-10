@@ -113,7 +113,7 @@ public class Executable {
      */
     private RunFiles runFiles;
 
-    private String errorString;
+    private String errorString = "";
 
     private IInternalContest contest;
 
@@ -138,6 +138,9 @@ public class Executable {
     private boolean showMessageToUser = true;
     
     private boolean usingGUI = true;
+
+    private Exception runProgramException = null;
+
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
@@ -1242,7 +1245,6 @@ public class Executable {
      *              {:outfile}
      *              {:ansfile}
      *              {:pc2home}
-     *              {:ccsvalrun} - run command for CCS validator
      * </pre>
      * 
      * @param inRun
@@ -1351,14 +1353,6 @@ public class Executable {
             if (pc2home != null && pc2home.length() > 0) {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
-            
-            if (problemDataFiles != null) {
-                String runCommand = problemDataFiles.getValidatorRunCommand().getName();
-                if (!"".equals(runCommand)) {
-                    newString = replaceString(newString, "{:ccsvalrun}", pc2home);
-                }
-            }
-            
         } catch (Exception e) {
             // TODO LOG
             log.log(Log.CONFIG, "Exception ", e);
@@ -1408,17 +1402,17 @@ public class Executable {
      */
 
     /**
-     * Run a program with ExecutionTimer.
+     * Run a program.
      * 
-     * 
-     * @param cmdline
-     * @param msg
+     * @param cmdline command lien to execute
+     * @param msg message displayed in execution timer frame (if frame not null).
      * @param autoStopExecution 
      * @return the process started.
      */
     public Process runProgram(String cmdline, String msg, boolean autoStopExecution) {
         Process process = null;
         errorString = "";
+        runProgramException = null;
         
         executeDirectoryName = getExecuteDirectoryName();
         
@@ -1442,20 +1436,38 @@ public class Executable {
                 }
 
             } else {
-                errorString = "Execute Directory does not exist";
+                errorString = "Execute Directory does not exist: "+executeDirectoryName;
                 log.config("Execute Directory does not exist");
             }
         } catch (IOException e) {
+            runProgramException = e;
             errorString = e.getMessage();
             log.config("Note: exec failed in RunProgram " + errorString);
             return null;
         } catch (Exception e) {
+            runProgramException = e;
             errorString = e.getMessage();
             log.log(Log.CONFIG, "Note: exec failed in RunProgram " + errorString, e);
             return null;
         }
 
         return process;
+    }
+    
+    /**
+     * Exception for last {@link #runProgram(String, String, boolean)}.
+     * @return null if no exception, otherwise exception for last {@link #runProgram(String, String, boolean)}.
+     */
+    public Exception getRunProgramException() {
+        return runProgramException;
+    }
+    
+    /**
+     * Error message for {@link #runProgram(String, String, boolean)}.
+     * @return error message if {@link #runProgram(String, String, boolean)} fails.
+     */
+    public String getRunProgramErrorMessage() {
+        return errorString;
     }
 
     /**
@@ -1567,7 +1579,11 @@ public class Executable {
      * @return the name of the execute directory for this client.
      */
     public String getExecuteDirectoryName() {
-        return "executesite" + contest.getClientId().getSiteNumber() + contest.getClientId().getName() + getExecuteDirectoryNameSuffix();
+        if (executeDirectoryName == null) {
+            return "executesite" + contest.getClientId().getSiteNumber() + contest.getClientId().getName() + getExecuteDirectoryNameSuffix();
+        } else {
+            return executeDirectoryName;
+        }
     }
 
     /**
