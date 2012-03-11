@@ -56,6 +56,14 @@ public class Submitter {
     
     public static final String[] CCS_REQUIRED_OPTIONS_LIST = {"-i", "-l", "-m", "-p", "-t", "-u", "-w" };
 
+    /**
+     * Successful run exit code.
+     *
+     * Using a non-zero exit code because if there is a problem in the JVM
+     * or elsewhere a zero exit code could be returned.
+     */
+    private static final int SUCCESS_EXIT_CODE = 5;
+
     private String[] allCCSOptions = new String[0];
     
     /**
@@ -194,10 +202,10 @@ public class Submitter {
 
         if (arguments.isOptPresent("--list")) {
             listInfo();
-            System.exit(0);
+            System.exit(SUCCESS_EXIT_CODE);
         } else if (arguments.isOptPresent("--listruns")) {
             listRuns();
-            System.exit(0);
+            System.exit(SUCCESS_EXIT_CODE);
         } else {
 
             // -p <problem short-name>
@@ -310,10 +318,10 @@ public class Submitter {
 
         if (arguments.isOptPresent("--list")) {
             listInfo();
-            System.exit(0);
+            System.exit(SUCCESS_EXIT_CODE);
         } else if (arguments.isOptPresent("--listruns")) {
             listRuns();
-            System.exit(0);
+            System.exit(SUCCESS_EXIT_CODE);
         } else {
 
             submittedFileName = arguments.getArg(0);
@@ -460,8 +468,8 @@ public class Submitter {
                 "", //
                 "filelist       - list of files including main file", //
                 "", //
-                "On success exit code will be 0", //
-                "On failure exit code will be non-zero", //
+                "On success exit code will be " + SUCCESS_EXIT_CODE, //
+                "Any other exit code is an error.", //
                 "", //
                 "$Id$", //
         };
@@ -491,8 +499,8 @@ public class Submitter {
                 "", //
                 "--listruns list run info for the user", //
                 "", //
-                "On success exit code will be 0", //
-                "On failure exit code will be non-zero", //
+                "On success exit code will be " + SUCCESS_EXIT_CODE, //
+                "Any other exit code is an error.", //
                 "", //
                 "$Id$", //
         };
@@ -578,7 +586,7 @@ public class Submitter {
         }
 
         if (success) {
-            System.exit(0);
+            System.exit(SUCCESS_EXIT_CODE);
         } else {
             System.exit(4);
         }
@@ -814,7 +822,7 @@ public class Submitter {
             }
             
             if (success){
-                System.exit(0);
+                System.exit(SUCCESS_EXIT_CODE);
             } else {
                 System.exit(3);
             }
