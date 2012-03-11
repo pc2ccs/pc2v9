@@ -261,8 +261,15 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ProblemsPane problemsPane = new ProblemsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Problems", problemsPane);
 
-                ProfilesPane profilesPane = new ProfilesPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
+                if (Utilities.isDebugMode()) {
+                    try {
+                        ProfilesPane profilesPane = new ProfilesPane();
+                        addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
+                
 
                 ReportPane reportPaneC = new ReportPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Reports", reportPaneC);
