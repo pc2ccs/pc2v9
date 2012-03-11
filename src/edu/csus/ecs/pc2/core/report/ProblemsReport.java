@@ -76,6 +76,8 @@ public class ProblemsReport implements IReport {
         printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
         printWriter.println("    Using pc2 validator : " + problem.isUsingPC2Validator());
         
+        printWriter.println("               CCS mode : " + problem.isCcsMode());
+        
         if (problem.getAnswerFileName() != null) {
             if (problemDataFiles != null) {
                 if (problemDataFiles.getJudgesAnswerFiles().length == 0) {

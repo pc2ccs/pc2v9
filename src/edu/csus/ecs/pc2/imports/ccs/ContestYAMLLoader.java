@@ -468,14 +468,14 @@ public class ContestYAMLLoader {
             // add validator run script ('run')
             
             addDefaultCCSValidator (problem);
+            
+            System.out.println("debug 22 CCS validator "+problem.getValidatorProgramName());
+            
         } else {
             problem.setComputerJudged(true); 
             addDefaultPC2Validator(problem, 1);
         }
-        
     }
-
-
 
     protected String getProblemNameFromLaTex(String filename) {
 
@@ -693,6 +693,8 @@ public class ContestYAMLLoader {
     }
     
     private Problem addDefaultCCSValidator(Problem problem) {
+        
+        problem.setCcsMode(true);
         
         problem.setValidatedProblem(true);
         problem.setUsingPC2Validator(false);
