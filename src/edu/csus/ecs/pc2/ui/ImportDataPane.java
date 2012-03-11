@@ -1,20 +1,28 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
+import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
 import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -51,6 +59,12 @@ public class ImportDataPane extends JPanePlugin {
 
     private static final String NL = System.getProperty("line.separator");
 
+    private JPanel buttonPane = null;
+
+    private JButton importPasswordsButton = null;
+
+    private JPanel centerPane = null;
+
     /**
      * This method initializes
      * 
@@ -65,12 +79,10 @@ public class ImportDataPane extends JPanePlugin {
      * 
      */
     private void initialize() {
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        this.setLayout(new GridBagLayout());
+        this.setLayout(new BorderLayout());
         this.setSize(new Dimension(494, 242));
-        this.add(getImportButton(), gridBagConstraints);
+        this.add(getButtonPane(), BorderLayout.SOUTH);
+        this.add(getCenterPane(), BorderLayout.CENTER);
     }
 
     @Override
@@ -102,7 +114,7 @@ public class ImportDataPane extends JPanePlugin {
         String filename = null;
 
         try {
-            filename = selectFileName(lastDirectory);
+            filename = selectYamlFileName(lastDirectory);
 
         } catch (IOException e) {
             logException("Problem selecting filename", e);
@@ -143,7 +155,7 @@ public class ImportDataPane extends JPanePlugin {
         try {
              newContest = loader.fromYaml(null, directoryName);
              
-             contestSummary = getContestLoadSummary(newContest);
+             contestSummary = getContestLoadSummary(newContest, getController());
              
              result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
    
@@ -192,8 +204,13 @@ public class ImportDataPane extends JPanePlugin {
     }
 
 
-    public static String getContestLoadSummary(IInternalContest newContest) throws Exception {
+    public static String getContestLoadSummary(IInternalContest newContest, IInternalController inController) throws Exception {
 
+        // TODO debug 22 replace getContestLoadSummary with ContestSummaryFrame
+//        ContestSummaryFrame frame = new ContestSummaryFrame();
+//        frame.setContestAndController(newContest, inController);
+//        frame.setVisible(true);
+       
         Language[] languages = newContest.getLanguages();
         Problem[] problems = newContest.getProblems();
         Site[] sites = newContest.getSites();
@@ -290,8 +307,46 @@ public class ImportDataPane extends JPanePlugin {
         return null;
 
     }
+    
+    public File selectTextFileDialog (Component parent, String startDirectory) {
 
-    private String selectFileName(String dirname) throws IOException {
+        JFileChooser chooser = new JFileChooser(startDirectory);
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        
+        FileFilter filterText = new FileNameExtensionFilter( "Text document (*.txt)", "txt");
+        chooser.addChoosableFileFilter(filterText);
+        
+        chooser.setAcceptAllFileFilterUsed(false);
+        
+        int action = chooser.showOpenDialog(parent);
+
+        switch (action) {
+            case JFileChooser.APPROVE_OPTION:
+                File file = chooser.getSelectedFile();
+                lastDirectory = chooser.getCurrentDirectory().toString();
+                return file;
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+            default:
+                break;
+        }
+        return null;
+
+    }
+
+    private String selectTextFileName(String dirname) throws IOException {
+
+        String chosenFile = null;
+        File file = selectTextFileDialog(this, lastDirectory);
+        if (file != null) {
+            chosenFile = file.getCanonicalFile().toString();
+            return chosenFile;
+        } else {
+            return null;
+        }
+    }
+    
+    private String selectYamlFileName(String dirname) throws IOException {
 
         String chosenFile = null;
         File file = selectYAMLFileDialog(this, lastDirectory);
@@ -301,6 +356,136 @@ public class ImportDataPane extends JPanePlugin {
         } else {
             return null;
         }
+    }
+
+    /**
+     * This method initializes buttonPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getButtonPane() {
+        if (buttonPane == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(35);
+            buttonPane = new JPanel();
+            buttonPane.setLayout(flowLayout);
+            buttonPane.add(getImportButton(), null);
+            buttonPane.add(getImportPasswordsButton(), null);
+        }
+        return buttonPane;
+    }
+
+    /**
+     * This method initializes importPasswordsButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getImportPasswordsButton() {
+        if (importPasswordsButton == null) {
+            importPasswordsButton = new JButton();
+         importPasswordsButton.setText("Import Passwords");
+            importPasswordsButton.setToolTipText("Import passwords.txt");
+            importPasswordsButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    selectAndImportPasswordsFile();
+                }
+            });
+        }
+        return importPasswordsButton;
+    }
+
+    protected void selectAndImportPasswordsFile() {
+
+        String filename = null;
+
+        try {
+            filename = selectTextFileName(lastDirectory);
+
+        } catch (IOException e) {
+            logException("Problem selecting filename", e);
+            showMessage("Problem selecting filename " + e.getMessage());
+        }
+
+        if (filename == null) {
+            showMessage("No file selected");
+        } else {
+
+            if (filename.endsWith("passwords.txt")) {
+
+                try {
+                    checkAndLoadPasswordsFile(filename);
+                } catch (FileNotFoundException fnfe) {
+                    fnfe.printStackTrace(); // TODO remove this, debug 22
+                    logException("File not found loading passwords.txt ", fnfe);
+                    showMessage("File not found " + fnfe.getMessage());
+                } catch (Exception e) {
+                    e.printStackTrace(); // TODO remove this, debug 22
+                    logException("Error loading passwords.txt", e);
+                    showMessage("Error loading passwords.txt " + e.getMessage());
+                }
+                
+            } else {
+                showMessage("Please select a passwords.txt file");
+            }
+
+        }
+        
+    }
+
+    private void checkAndLoadPasswordsFile(String filename) throws Exception {
+
+        String[] lines;
+        try {
+            lines = Utilities.loadFile(filename);
+        } catch (IOException e) {
+            throw new FileNotFoundException(filename);
+        }
+
+        if (lines.length < 1) {
+            throw new FileNotFoundException(filename);
+        } else {
+
+            int numberOfPasswords = lines.length;
+            Vector<Account> accounts = getContest().getAccounts(Type.TEAM, getContest().getSiteNumber());
+            int numberOfTeams = accounts.size();
+
+            if (numberOfPasswords > numberOfTeams) {
+                throw new Exception("Too few accounts, expecting " + numberOfPasswords + " accounts, found " + numberOfTeams);
+            } else {
+
+                int result = FrameUtilities.yesNoCancelDialog(this, "Update " + numberOfPasswords + " teams passwords?", "Confirm update");
+
+                if (result == JOptionPane.YES_OPTION) {
+
+                    Account[] teams = (Account[]) accounts.toArray(new Account[accounts.size()]);
+                    Arrays.sort(teams, new AccountComparator());
+                    ArrayList<Account> accountList = new ArrayList<Account>();
+
+                    for (int i = 0; i < lines.length; i++) {
+                        teams[i].setPassword(lines[i]);
+                        accountList.add(teams[i]);
+                    }
+
+                    Account[] changedAccounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
+
+                    getController().updateAccounts(changedAccounts);
+                }
+
+            }
+        }
+    }
+
+    /**
+     * This method initializes centerPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getCenterPane() {
+        if (centerPane == null) {
+            centerPane = new JPanel();
+            centerPane.setLayout(new GridBagLayout());
+        }
+        return centerPane;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
