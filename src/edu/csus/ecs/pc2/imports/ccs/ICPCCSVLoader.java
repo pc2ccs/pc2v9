@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
+import java.io.FileNotFoundException;
+
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -77,6 +79,10 @@ public final class ICPCCSVLoader {
 
         String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
 
+        if (lines.length == 0) {
+            throw new FileNotFoundException(filename);
+        }
+        
         int i = 0;
 
         String firstLine = lines[i];
@@ -87,9 +93,11 @@ public final class ICPCCSVLoader {
 
         // 1 Label teams fixed string (always same value)
         // 2 Version number 1 integer
-        if (!fields[0].trim().equals("teams")) {
-            throw new InvalidValueException("Expecting teams got '" + fields[0] + "' in " + filename);
-        }
+
+        // TODO CCS check for 'teams' when tsv file contains that value.
+//        if (!fields[0].trim().equals("teams")) {
+//            throw new InvalidValueException("Expecting 'teams' got '" + fields[0] + "' in " + filename);
+//        }
 
         i++;
 
@@ -200,6 +208,10 @@ public final class ICPCCSVLoader {
     public static Group[] loadGroups(String filename) throws Exception {
         
         String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
+        
+        if (lines.length == 0) {
+            throw new FileNotFoundException(filename);
+        }
 
         int i = 0;
 
@@ -211,9 +223,11 @@ public final class ICPCCSVLoader {
 
         // 1 Label groups fixed string (always same value)
         // 2 Version number 1 integer
-        if (!fields[0].trim().equals("groups")) {
-            throw new InvalidValueException("Expecting groups got '" + fields[0] + "' in " + filename);
-        }
+
+        // TODO CCS do check for 'groups' when tsv file contains that field.
+//        if (!fields[0].trim().equals("groups")) {
+//            throw new InvalidValueException("Expecting 'groups' got '" + fields[0] + "' in " + filename);
+//        }
 
         i++;
 

@@ -127,6 +127,7 @@ public class ICPCLoadPane extends JPanePlugin {
         if (importAccountsButton == null) {
             importAccountsButton = new JButton();
             importAccountsButton.setText("Import Accounts");
+            importAccountsButton.setToolTipText("Load ICPC accounts CVS file");
             importAccountsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // load the accounts
@@ -228,6 +229,7 @@ public class ICPCLoadPane extends JPanePlugin {
         if (importSitesButton == null) {
             importSitesButton = new JButton();
             importSitesButton.setText("Import Sites ");
+            importSitesButton.setToolTipText("Load ICPC sites CSV files");
             importSitesButton.setMnemonic(KeyEvent.VK_S);
             importSitesButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -349,6 +351,7 @@ public class ICPCLoadPane extends JPanePlugin {
         if (importTSVButton == null) {
             importTSVButton = new JButton();
             importTSVButton.setText("Import TSV ");
+            importTSVButton.setToolTipText("Load ICPC TSV teams, groups and contest files");
             importTSVButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     loadTSVFiles();
