@@ -614,7 +614,7 @@ public class Executable {
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
 
         }
-
+        
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
 
         String cmdLine = substituteAllStrings(run, commandPattern);
@@ -1353,6 +1353,12 @@ public class Executable {
             if (pc2home != null && pc2home.length() > 0) {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
+            
+            String pathToPC2Jar = findPC2JarPath ();
+            if (pathToPC2Jar != null && pathToPC2Jar.length() > 0) {
+                newString = replaceString(newString, "{:pc2jarpath}", pathToPC2Jar);
+            }
+            
         } catch (Exception e) {
             // TODO LOG
             log.log(Log.CONFIG, "Exception ", e);
