@@ -702,7 +702,7 @@ public class ContestYAMLLoader {
 
         problem.setValidatorProgramName(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME);
         
-        problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
         return problem;
     }
 
@@ -1013,6 +1013,8 @@ public class ContestYAMLLoader {
     public AutoJudgeSetting[] getAutoJudgeSettings(String[] yamlLines, Problem[] problems) throws YamlLoadException {
 
         String[] sectionLines = getSectionLines(AUTO_JUDGE_KEY, yamlLines);
+        
+        Account [] accounts = getAccounts(yamlLines);
 
         ArrayList<AutoJudgeSetting> ajList = new ArrayList<AutoJudgeSetting>();
 
@@ -1036,17 +1038,26 @@ public class ContestYAMLLoader {
 
             String activeStr = getSequenceValue(sequenceLines, "active");
             boolean active = getBooleanValue(activeStr, true);
+            
+            System.out.println("debug 22 judge account number string is "+numberString);
 
             // TODO 669 code load method
-            int[] numbers = null;
+            int[] judgeClientNumbers = null;
             if ("all".equalsIgnoreCase(numberString)) {
-                throw new YamlLoadException("'all' not allowed for judge number");
+                if (accounts.length == 0) {
+                    throw new YamlLoadException("'all' not allowed, no judge accounts defined in YAML");     
+                }
+                judgeClientNumbers = getJudgeAccountNumbers (accounts);
+               
             } else {
-                numbers = getNumberList(numberString.trim());
+                judgeClientNumbers = getNumberList(numberString.trim());
             }
+            
+            System.out.println("debug 22 judge list "+Arrays.toString(judgeClientNumbers));
+            System.out.println("debug 22 ");
 
-            for (int i = 0; i < numbers.length; i++) {
-                int clientNumber = i + 1;
+            for (int i = 0; i < judgeClientNumbers.length; i++) {
+                int clientNumber = judgeClientNumbers[i];
 
                 String name = accountType.toUpperCase() + clientNumber;
 
@@ -1069,6 +1080,8 @@ public class ContestYAMLLoader {
 
                 autoJudgeSetting.setProblemFilter(filter);
                 ajList.add(autoJudgeSetting);
+                
+                System.out.println("debug 22 added auto judge settings "+autoJudgeSetting.getClientId());
             }
 
             idx += sequenceLines.length;
@@ -1076,6 +1089,34 @@ public class ContestYAMLLoader {
         }
 
         return (AutoJudgeSetting[]) ajList.toArray(new AutoJudgeSetting[ajList.size()]);
+    }
+
+    /**
+     * Return list of judge account numbers for list, in ascending order.
+     * 
+     * @param accounts
+     * @return array of judge numbers, in ascending order.
+     */
+    private int[] getJudgeAccountNumbers(Account[] accounts) {
+        int count = 0;
+        for (Account account : accounts) {
+            if (account.getClientId().getClientType().equals(ClientType.Type.JUDGE)) {
+                count++;
+            }
+        }
+
+        int[] out = new int[count];
+        count = 0;
+        for (Account account : accounts) {
+            if (account.getClientId().getClientType().equals(ClientType.Type.JUDGE)) {
+                out[count] = account.getClientId().getClientNumber();
+                count++;
+            }
+        }
+
+        Arrays.sort(out);
+        return out;
+
     }
 
     protected Problem[] getProblemsFromLetters(Problem[] problems, String problemLettersString) throws YamlLoadException {

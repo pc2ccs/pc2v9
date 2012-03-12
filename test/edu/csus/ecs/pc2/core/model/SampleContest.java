@@ -5,9 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
@@ -171,10 +173,15 @@ public class SampleContest {
             language.setSiteNumber(siteNumber);
             contest.addLanguage(language);
         }
+        
+        char letter = 'A';
+        
         for (String probName : problems) {
             Problem problem = new Problem(probName);
+            problem.setLetter(Character.toString(letter));
             problem.setSiteNumber(siteNumber);
             contest.addProblem(problem);
+            letter ++;
         }
 
         Problem generalProblem = new Problem("General.");
@@ -1268,6 +1275,69 @@ public class SampleContest {
                 "", //
         };
         return lines;
+    }
+    
+    
+    /**
+     * Get problem letter for input integer.
+     * 
+     * getProblemLetter(1) is 'A'
+     * 
+     * @param id
+     *            a one based problem number.
+     * @return
+     */
+    public static String getProblemLetter(int id) {
+        char let = 'A';
+        let += (id - 1);
+        return Character.toString(let);
+    }
+
+    /**
+     * Get list of problem letters for filter.
+     * 
+     * @param contest
+     * @param filter
+     * @return list of letters joined by ", "
+     */
+    public static String getProblemLetters(IInternalContest contest, Filter filter) {
+
+        ArrayList<String> list = new ArrayList<String>();
+
+        Problem[] problems = contest.getProblems();
+
+        int id = 1;
+        for (Problem problem : problems) {
+            if (filter.matches(problem)) {
+                list.add(getProblemLetter(id));
+            }
+            id++;
+        }
+
+        StringBuffer buffer = join(", ", list);
+
+        return buffer.toString();
+    }
+
+    /**
+     * Join string together.
+     * 
+     * @param delimiter
+     * @param list
+     * @return buffer of list joined using delimiter.
+     */
+    public static StringBuffer join(String delimiter, List<String> list) {
+
+        StringBuffer buffer = new StringBuffer();
+
+        for (int i = 0; i < list.size() - 1; i++) {
+            buffer.append(list.get(i));
+            buffer.append(delimiter);
+        }
+        if (list.size() > 0) {
+            buffer.append(list.get(list.size() - 1));
+        }
+        return buffer;
     }
 
 }

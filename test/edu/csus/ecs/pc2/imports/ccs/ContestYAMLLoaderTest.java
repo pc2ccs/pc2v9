@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
@@ -389,19 +390,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     }
     
 
-    /**
-     * Get problem letter for input integer.
-     * 
-     * getProblemLetter(1) is 'A'
-     * 
-     * @param id a one based problem number.
-     * @return
-     */
-    protected String getProblemLetter(int id) {
-        char let = 'A';
-        let += (id - 1);
-        return Character.toString(let);
-    }
+
 
     
     public void testgetProblemsFromLetters() throws Exception {
@@ -423,19 +412,19 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
 //        int i = 0;
 //        for (Problem problem : contestProblems) {
-//            System.out.println(getProblemLetter(++i) + " " + problem);
+//            System.out.println(SampleContest.getProblemLetter(++i) + " " + problem);
 //        }
         
         try {
-            problems = loader.getProblemsFromLetters(contestProblems, getProblemLetter(contestProblems.length + 1));
-            fail("Should have thrown exception because no problem with letter "+getProblemLetter(contestProblems.length));
+            problems = loader.getProblemsFromLetters(contestProblems, SampleContest.getProblemLetter(contestProblems.length + 1));
+            fail("Should have thrown exception because no problem with letter "+SampleContest.getProblemLetter(contestProblems.length));
         } catch (YamlLoadException e) {
             // Ok, expecting this exception
             assertTrue(true);
         }
         
         try {
-            problems = loader.getProblemsFromLetters(contestProblems, getProblemLetter(-1));
+            problems = loader.getProblemsFromLetters(contestProblems, SampleContest.getProblemLetter(-1));
             fail("Should have thrown exception no problem with id = -1");
         } catch (YamlLoadException e) {
             // Ok, expecting this exception
@@ -468,7 +457,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expecting Site ", 1, firstClient.getSiteNumber());
 
         ClientId lastClient = autoJudgeSettings[autoJudgeSettings.length - 1].getClientId();
-        assertEquals("Expecting Judge Number ", "judge1", lastClient.getName());
+        assertEquals("Expecting Judge Number ", "judge7", lastClient.getName());
         assertEquals("Expecting Site ", 2, lastClient.getSiteNumber());
 
         if (debugFlag) {
@@ -476,6 +465,108 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         }
     }
     
+    public void testAutoJudgeSettingsTwo() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createContest(1, 2, 22, 12, true);
+        
+        // Test Problem.getLetter 
+        
+        char letter = 'A';
+        for (Problem problem : contest.getProblems()) {
+            assertEquals("Problem letter", Character.toString(letter), problem.getLetter());
+            letter++;
+        }
+        
+        String[] yamlLines = { //
+                "auto-judging:", //
+                "  - account: JUDGE", //
+                "     site: 1", //
+                "     number: 4", //
+                "     letters: A, B, C", //
+                "     enabled: yes", //
+        };
+        
+        AutoJudgeSetting[] autoJudgeSettings = loader.getAutoJudgeSettings(yamlLines, contest.getProblems());
+        
+        assertEquals("Auto judge settings count ", 1, autoJudgeSettings.length);
+
+        AutoJudgeSetting setting = autoJudgeSettings[0];
+        
+        Filter filter = setting.getProblemFilter();
+        
+        assertEquals("Judge 4 ", 4, setting.getClientId().getClientNumber());
+        
+        String letterList = SampleContest.getProblemLetters (contest, filter);
+        
+        assertEquals("Problem letters", "A, B, C", letterList);
+    }
+  
+    
+    public void testAutoJudgeSettingsAll() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createContest(1, 2, 22, 12, true);
+        
+        String[] yamlLines = { //
+                "auto-judging:", //
+                "  - account: JUDGE", //
+                "     site: 1", //
+                "     number: 4", //
+                "     letters: all", //
+                "     enabled: yes", //
+        };
+
+        AutoJudgeSetting[] autoJudgeSettings = loader.getAutoJudgeSettings(yamlLines, contest.getProblems());
+
+        assertEquals("Auto judge settings count ", 1, autoJudgeSettings.length);
+
+        AutoJudgeSetting setting = autoJudgeSettings[0];
+
+        Filter filter = setting.getProblemFilter();
+
+        String letterList = SampleContest.getProblemLetters(contest, filter);
+
+        assertEquals("Problem letters", "A, B, C, D, E, F", letterList);
+  
+    }
+    
+    public void testAllJudges() throws Exception {
+
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createContest(1, 2, 22, 12, true);
+
+        String[] yamlLines = { //
+        "accounts:", //
+                "  - account: JUDGE", //
+                "      site: 1", //
+                "     count: 12", //
+                "", //
+        "auto-judging:", //
+                "  - account: JUDGE", //
+                "     site: 1", //
+                "     number: all", //
+                "     letters: A, C, E", //
+                "     enabled: yes", //
+        };
+
+        AutoJudgeSetting[] autoJudgeSettings = loader.getAutoJudgeSettings(yamlLines, contest.getProblems());
+
+        int numberJudges = 12; // acccounts from yaml
+        
+        assertEquals("Auto judge settings count ", numberJudges, autoJudgeSettings.length);
+        
+        for (AutoJudgeSetting setting : autoJudgeSettings) {
+            
+            Filter filter = setting.getProblemFilter();
+            String letterList = SampleContest.getProblemLetters (contest, filter);
+            
+            assertEquals("Problem letters", "A, C, E", letterList);
+        }
+
+    }
+
+
     public void testReplayLoad() throws Exception {
         
         String contestYamlFilename = getYamlTestFileName();
@@ -508,7 +599,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
                 int num = 1;
                 for (Problem problem : contestProblems) {
                     if (problem.getElementId().equals(id)) {
-                        System.out.print(getProblemLetter(num + 1) + " " + problem.getDisplayName() + " ");
+                        System.out.print(SampleContest.getProblemLetter(num + 1) + " " + problem.getDisplayName() + " ");
                     }
                     num++;
                 }
