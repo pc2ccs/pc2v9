@@ -728,7 +728,12 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Will this problem be executed and validated per the CCS?.
+     * Is this a CCS standard problem?.
+     * 
+     * A CCS standard problem will:
+     * <li> Execute the team submission and send the test data via stdin.
+     * <li> Validate the program output by sending the team output via stdin to the validator.
+     * 
      * @return
      */
     public boolean isCcsMode() {

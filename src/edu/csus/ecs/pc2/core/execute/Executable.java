@@ -671,7 +671,7 @@ public class Executable {
             
             long startSecs = System.currentTimeMillis();
             Process process = runProgram(cmdLine, msg, false);
-
+            
             if (process == null) {
                 executionData.setValidationResults(CCSConstants.JUDGEMENT_WRONG_ANSWER);
                 executionData.setValidationSuccess(false);
@@ -682,9 +682,7 @@ public class Executable {
                 return false;
             }
             
-            returnValue = process.exitValue();
-            log.info("Validator command return value is: " + returnValue);
-
+            
             // This reads from the stdout of the child process
             BufferedReader childOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
             // The reads from the stderr of the child process
@@ -698,12 +696,26 @@ public class Executable {
 
             stdoutCollector.start();
             stderrCollector.start();
+            
+            if (problem.isCcsMode()) {
+                /**
+                 * if CCS mode send output file to process via stdin.
+                 */
+                String teamOutputFilename = executionData.getExecuteProgramOutput().getName();
+                
+                log.info("Writing file "+teamOutputFilename+ " to process "+process);
+                
+                writeToProcessStdin(process, teamOutputFilename);
+            }
 
             // // waiting for the process to finish execution...
             // executionData.setValidationReturnCode(process.waitFor());
 
             stdoutCollector.join();
             stderrCollector.join();
+            
+            returnValue = process.exitValue();
+            log.info("Validator command return value is: " + returnValue);
 
             // if(isJudge && executionTimer != null) {
             if (executionTimer != null) {
@@ -762,6 +774,32 @@ public class Executable {
         return executionData.isValidationSuccess();
     }
 
+
+    /**
+     * Output file contents into processe's stdin.
+     * 
+     * @param process
+     * @param filename
+     * @throws IOException
+     */
+    private void writeToProcessStdin(Process process, String filename) throws IOException {
+        
+        OutputStream outs = process.getOutputStream();
+        PrintWriter pwOut = new PrintWriter(outs);
+        FileReader fileReader = new FileReader(filename);
+        BufferedReader in = new BufferedReader(fileReader);
+
+        int theChar = in.read();
+        while (theChar != -1) {
+            pwOut.print((char) theChar);
+            theChar = in.read();
+        }
+
+        fileReader.close();
+        pwOut.close();
+        outs.close();
+
+    }
 
     /**
      * Sets the exception for this execute().

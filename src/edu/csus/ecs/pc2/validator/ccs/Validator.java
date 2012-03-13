@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -40,12 +42,12 @@ public class Validator {
      * results output file name.
      */
     private String resultFileName;
-
+    
     /**
-     * PC<sup>2</sup> comparison option.
+     * Directory where validator stuff goes.
      */
-    private String pc2Option = "1";
-
+    private String feedbackDirectory = null;
+    
     /**
      * Case insensitive comparison.
      */
@@ -76,19 +78,6 @@ public class Validator {
      * prints more info, like EOF line counts.
      */
     private boolean verbose = false;
-
-    /**
-     * Used by render judgements.
-     */
-    private static final String REGULAR_DIFF = "1";
-
-    private static final String IGNORE_WHITESPACE_HEAD = "2";
-
-    // private static final String IGNORE_LEADING_WHITESPACE = "3";
-
-    private static final String IGNORE_ALL_WHITESPACE = "4";
-
-    private static final String IGNORE_EMPTY_LINES = "5";
 
     private void usage() {
         VersionInfo vi = new VersionInfo();
@@ -174,8 +163,15 @@ public class Validator {
             }
         }
     }
+    
+    private String simpleDiff(InputStream in, String filename) throws IOException  {
+        InputStreamReader reader = new InputStreamReader(in);
+        FileReader fileReader = new FileReader(filename);
+        return simpleDiff(new BufferedReader(reader), new BufferedReader(fileReader));
+        
+    }
 
-    private String simpleDiff(BufferedReader outputFile, BufferedReader answerFile) throws IOException {
+     private String simpleDiff(BufferedReader outputFile, BufferedReader answerFile) throws IOException {
         int lineNo = 1;
 
         String outputLine = outputFile.readLine();
@@ -234,158 +230,6 @@ public class Validator {
 
     }
 
-    private String complexDiff(BufferedReader outputFile, BufferedReader answerFile, boolean ignoreLeadingWhitespace, boolean ignoreBlankLines, boolean ignoreWhiteSpace) throws IOException {
-        int lineNo = 1;
-
-        String outputLine;
-        String answerLine;
-
-        if (ignoreLeadingWhitespace || ignoreBlankLines) {
-            outputLine = readPastBlankLines(outputFile);
-            answerLine = readPastBlankLines(answerFile);
-        } else {
-            answerLine = answerFile.readLine();
-            outputLine = outputFile.readLine();
-        }
-
-        while (outputLine != null && answerLine != null) {
-            if (debugFlag) {
-                System.out.println();
-                System.out.println("O " + lineNo + ": " + outputLine);
-                System.out.println("A " + lineNo + ": " + answerLine);
-            }
-
-            if (ignoreWhiteSpace) {
-                outputLine = stripWhiteSpace(outputLine);
-                answerLine = stripWhiteSpace(answerLine);
-            }
-
-            if (debugFlag) {
-                System.out.println("o " + lineNo + ": " + outputLine);
-                System.out.println("a " + lineNo + ": " + answerLine);
-            }
-
-            if (ignoreCaseFlag) {
-                if (!outputLine.equalsIgnoreCase(answerLine)) {
-                    if (debugFlag) {
-                        System.out.println("  " + lineNo + "! " + compareLine(outputLine, answerLine));
-                    }
-                    extraValidatorDifference = "Answer and output file different (ignore case) at line  " + lineNo;
-                    return JUDGEMENT_NO_WRONG_ANSWER;
-                }
-            } else {
-                if (!outputLine.equals(answerLine)) {
-                    if (debugFlag) {
-                        System.out.println("  " + lineNo + "! " + compareLine(outputLine, answerLine));
-                    }
-                    extraValidatorDifference = "Answer and output file different at line  " + lineNo;
-                    return JUDGEMENT_NO_WRONG_ANSWER;
-                }
-            }
-            if (ignoreBlankLines) {
-                outputLine = readPastBlankLines(outputFile);
-                answerLine = readPastBlankLines(answerFile);
-            } else {
-                answerLine = answerFile.readLine();
-                outputLine = outputFile.readLine();
-            }
-            lineNo++;
-        }
-
-        if (outputLine != null && answerLine == null) {
-            // more team output than judge's
-            extraValidatorDifference = "Team's output file is longer than answer file, at line " + lineNo;
-            return JUDGEMENT_NO_WRONG_ANSWER;
-        }
-
-        if (answerLine != null && outputLine == null) {
-            // Not enough judgement
-            extraValidatorDifference = "Team output file shorter than answer file, at line " + lineNo;
-            return JUDGEMENT_NO_WRONG_ANSWER;
-        }
-
-        if (answerLine == null && verbose) {
-            System.out.println("EOF: answer file " + lineNo + " lines.");
-        }
-
-        if (outputLine == null && verbose) {
-            System.out.println("EOF: output file " + lineNo + " lines.");
-        }
-
-        return JUDGEMENT_YES;
-
-    }
-
-    /**
-     * returns string with no whitespace.
-     * 
-     * @see Character#isWhitespace(char)
-     * @param outputLine
-     * @return String without whitespace
-     */
-    private String stripWhiteSpace(String outputLine) {
-        String outline = outputLine.trim();
-        StringBuffer buf = new StringBuffer();
-
-        if (outline.length() == 0) {
-            return outline;
-        }
-
-        for (int i = 0; i < outputLine.length(); i++) {
-            char ch = outputLine.charAt(i);
-            if (!Character.isWhitespace(ch)) {
-                buf.append(ch);
-            }
-        }
-
-        return new String(buf);
-    }
-
-    /**
-     * Read past blank lines.
-     * 
-     * @param buffReader
-     * @param line
-     * @return
-     * @throws IOException
-     */
-    private String readPastBlankLines(BufferedReader buffReader) throws IOException {
-        String line = buffReader.readLine();
-        while (line != null && line.trim().length() == 0) {
-            line = buffReader.readLine();
-        }
-
-        return line;
-    }
-
-    /**
-     * Read team's output and judge's answer file, compare, return judgement.
-     * 
-     * @return judgement string.
-     * @throws IOException
-     */
-    private String renderJudgement() throws IOException {
-        boolean ignoreLeadingWhitespace = pc2Option.equals(IGNORE_WHITESPACE_HEAD);
-        boolean ignoreWhiteSpace = pc2Option.equals(IGNORE_ALL_WHITESPACE);
-        boolean ignoreEmptyLines = pc2Option.equals(IGNORE_EMPTY_LINES);
-
-        boolean basicDiff = pc2Option.equals(REGULAR_DIFF);
-
-        // Open files
-
-        FileReader outputFileReader = new FileReader(outputFileName);
-        BufferedReader outputFile = new BufferedReader(outputFileReader);
-
-        FileReader answerFileReader = new FileReader(answerFileName);
-        BufferedReader answerFile = new BufferedReader(answerFileReader);
-
-        if (basicDiff) {
-            return simpleDiff(outputFile, answerFile);
-        }
-
-        return complexDiff(outputFile, answerFile, ignoreLeadingWhitespace, ignoreEmptyLines, ignoreWhiteSpace);
-    }
-
     /**
      * Write result file
      * 
@@ -412,7 +256,6 @@ public class Validator {
 
     /**
      * Outputs a line of carets where line1 and line2 are different.
-     * 
      * 
      * @param line1
      * @param line2
@@ -478,7 +321,7 @@ public class Validator {
             return CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE;
         }
 
-        // TODO CCS 678 command line processing
+        // TODO CCS 678 handled feedbackdir
         try {
             
             switch (argNum) {
@@ -496,7 +339,12 @@ public class Validator {
             inputFileName = args[argNum++];
             outputFileName = args[argNum++];
             answerFileName = args[argNum++];
-            resultFileName = args[argNum++];
+  
+            // TODO CCS handle creation and writing of feedback directory.
+            
+//            if (argNum < numberOfArgs) {
+//                feedbackDirectory = args[argNum++];
+//            }
 
             if (!inputFileName.equals("-")) {
                 requireFile(inputFileName, "input file");
@@ -509,35 +357,21 @@ public class Validator {
             if (!answerFileName.equals("-")) {
                 requireFile(answerFileName, "answer file");
             }
+            
 
-            if (resultFileName.equals("-")) {
-                throw new ValidatorException("Invalid result filename: -  is not allowed.", 7);
+            if (debugFlag) {
+                System.out.println("Arguments: ");
+                System.out.println("inputFileName = " + inputFileName);
+                System.out.println("outputFileName = " + outputFileName);
+                System.out.println("answerFileName = " + answerFileName);
+                System.out.println("resultFileName = " + resultFileName);
+                
+//                System.out.println("pc2Option = " + pc2Option);
+//                System.out.println("ignore case = " + ignoreCaseFlag);
+                
+                System.out.println();
             }
-
-            if (args[argNum].equalsIgnoreCase("-pc2")) {
-                argNum++;
-                pc2Option = args[argNum++];
-            }
-
-            if (args[argNum].equalsIgnoreCase("true")) {
-                ignoreCaseFlag = true;
-            } else if (args[argNum].equalsIgnoreCase("false")) {
-                ignoreCaseFlag = false;
-            } else {
-                throw new ValidatorException("Invalid icflag expecting true or false, not: " + args[argNum], 8);
-            }
-
-            // if (debugFlag) {
-            // System.out.println("Arguments: ");
-            // System.out.println("inputFileName = " + inputFileName);
-            // System.out.println("outputFileName = " + outputFileName);
-            // System.out.println("answerFileName = " + answerFileName);
-            // System.out.println("resultFileName = " + resultFileName);
-            // System.out.println("pc2Option = " + pc2Option);
-            // System.out.println("ignore case = " + ignoreCaseFlag);
-            // System.out.println();
-            // }
-            //
+         
             // try {
             // writeResultFile(resultFileName, judgement, extraValidatorDifference);
             // } catch (FileNotFoundException e) {
@@ -547,18 +381,46 @@ public class Validator {
 
             // TODO CCS return codes for this method.
             // return CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE;
-            return CCSConstants.VALIDATOR_JUDGED_FAILURE_EXIT_CODE;
+            
+            try {
+                String results = simpleDiff(System.in, answerFileName);
+                if (JUDGEMENT_YES.equals(results)) {
+                    return CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE;
+                } else {
+                    return CCSConstants.VALIDATOR_JUDGED_FAILURE_EXIT_CODE;
+                }
+            } catch (Exception e) {
+                if (verbose) {
+                    e.printStackTrace();
+                }
+            }
 
         } catch (ValidatorException e) {
             if (verbose) {
                 e.printStackTrace();
             }
             System.err.println(e.getMessage());
-            System.err.println("Error code "+e.getExitCode());
+            System.err.println("Error code " + e.getExitCode());
             return e.getExitCode();
         }
 
+        return CCSConstants.VALIDATOR_JUDGED_FAILURE_EXIT_CODE;
     }
+    
+
+//    private int compareFiles() throws IOException {
+//
+//        // Open files
+//
+//        FileReader outputFileReader = new FileReader(outputFileName);
+//        BufferedReader outputFile = new BufferedReader(outputFileReader);
+//
+//        FileReader answerFileReader = new FileReader(answerFileName);
+//        BufferedReader answerFile = new BufferedReader(answerFileReader);
+//
+//        return simpleDiff(outputFile, answerFile);
+//
+//    }
 
 
     /**

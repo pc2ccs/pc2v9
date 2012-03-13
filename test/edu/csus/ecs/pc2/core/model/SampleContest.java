@@ -1231,19 +1231,76 @@ public class SampleContest {
             problem.setValidatorCommandLine(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME+" " +validatorParameters);
         }
     }
-    
-    
 
-    public String createSampleJavaSource(String filename) throws FileNotFoundException  {
+    /**
+     * Create ISumit class that reads from stdin, basename filename must be ISumit.java.
+     * 
+     * @param filename
+     * @return
+     * @throws FileNotFoundException
+     */
+    public String createSampleSumitStdinSource(String filename) throws FileNotFoundException  {
         PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
-        String[] datalines = getSumitSourceLines();
+        String[] datalines = getSumitStdinSource();
         writeLines(writer, datalines);
         writer.close();
         writer = null;
         return filename;
     }
 
-    private String[] getSumitSourceLines() {
+
+    private String[] getSumitStdinSource() {
+        String[] lines = {
+
+        "public class ISumit { ", //
+                "    public static void main(String[] args) { ", //
+                "        try { ", //
+                "            BufferedReader br = new BufferedReader(new InputStreamReader(System.in), 1); ", //
+                " ", //
+                "            String line; ", //
+                "            int sum = 0; ", //
+                "            int rv = 0; ", //
+                "            while ((line = br.readLine()) != null) { ", //
+                "                rv = new Integer(line.trim()).intValue(); ", //
+                "                if (rv > 0) ", //
+                "                    sum = sum + rv; ", //
+                "                // System.out.println(line); ", //
+                "            } ", //
+                "            System.out.print(\"The sum of the integers is \"); ", //
+                "            System.out.println(sum); ", //
+                "        } catch (Exception e) { ", //
+                "            System.out.println(\"Possible trouble reading stdin\"); ", //
+                "            System.out.println(\"Message: \" + e.getMessage()); ", //
+                "        } ", //
+                "    } ", //
+                "} ", //
+                " ", //
+
+        };
+
+        return lines;
+
+    }
+    
+    /**
+     * Creates sumit program, must use filename Sumit.java.
+     * 
+     * @param filename source file name.
+     * @param inputFilename file name for program to read
+     * @return
+     * @throws FileNotFoundException
+     */
+    public String createSampleSumitSource(String filename, String inputFilename) throws FileNotFoundException  {
+        PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
+        String[] datalines = getSumitSourceLines(inputFilename);
+        writeLines(writer, datalines);
+        writer.close();
+        writer = null;
+        return filename;
+    }
+    
+
+    private String[] getSumitSourceLines(String inputfilename) {
         String [] lines = {
                 "public class Sumit {", //
                 "", //
@@ -1268,7 +1325,7 @@ public class SampleContest {
                 "", //
                 "    public static void main(String[] args) {", //
                 "", //
-                "        new Sumit().doSum(\"sumit.dat\");", //
+                "       new Sumit().doSum(\"+inputfilename+\"); ", //
                 "", //
                 "    }", //
                 "}", //

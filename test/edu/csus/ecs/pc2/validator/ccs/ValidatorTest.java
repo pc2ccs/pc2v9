@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.validator.ccs;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
@@ -12,9 +13,11 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -104,13 +107,17 @@ public class ValidatorTest extends AbstractTestCase {
         IInternalController controller = new NullController(this.getName());
 
         Problem problem = contest.getProblems()[0];
+        
+        addProblemDataset (contest, problem, "sumit.in", "sumit.ans" );
 
-        sample.setCCSValidation(contest, "--testYes", problem);
+//        sample.setCCSValidation(contest, "--testYes", problem);
+        sample.setCCSValidation(contest, CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problem);
+        sample.setCCSValidation(contest, "-verbose sumit.in sumit.ans", problem);
 
         ClientId clientId = contest.getAccounts(ClientType.Type.TEAM).firstElement().getClientId();
         Run run = sample.createRun(contest, clientId, problem);
 
-        String sourcefilename = sample.createSampleJavaSource(getTestFilename("Sumit.java"));
+        String sourcefilename = sample.createSampleSumitStdinSource("ISumit.java");
         
         assertFileExists(sourcefilename, "Missing source file");
         
@@ -133,10 +140,20 @@ public class ValidatorTest extends AbstractTestCase {
         
         String commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
 
+        System.out.println("debug 22 Started proccess with: "+commandPattern);
+        
         Process process = executable.runProgram(commandPattern, null, false);
-
+        
         int exitVal = process.waitFor();
         exitVal = process.exitValue();
+        
+//        if (process.exitValue() != CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE) {
+//            /**
+//             * Write out validator output
+//             */
+//            dumpSerializedFile(System.out, executable.getExecutionData().getValidationStdout());
+//            dumpSerializedFile(System.out, executable.getExecutionData().getValidationStderr());
+//        }
         
         String message = executable.getRunProgramErrorMessage();
 
@@ -144,6 +161,38 @@ public class ValidatorTest extends AbstractTestCase {
    
         assertEquals(CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE, process.exitValue());
         assertEquals(CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE, exitVal);
+    }
+
+//    private void dumpSerializedFile(PrintStream out, SerializedFile serializedFile) {
+//        out.println("File: "+serializedFile.getName());
+//        out.println(serializedFile.getBuffer());
+//    }
+
+    /**
+     * Creates files and adds problem data set per problem to contest.
+     * 
+     * @param contest
+     * @param problem
+     * @param datafilename
+     * @param answerfilename
+     * @throws FileNotFoundException 
+     */
+    private void addProblemDataset(IInternalContest contest, Problem problem, String datafilename , String answerfilename) throws FileNotFoundException {
+        
+        problem.setDataFileName(datafilename);
+        problem.setAnswerFileName(answerfilename);
+        
+        ProblemDataFiles files = new ProblemDataFiles(problem);
+        
+        SampleContest sample = new SampleContest();
+        
+        String name1 = sample.createSampleAnswerFile(answerfilename);
+        String name2 = sample.createSampleDataFile(datafilename);
+        
+        files.setJudgesAnswerFile(new SerializedFile(name1));
+        files.setJudgesDataFile(new SerializedFile(name2));
+
+        contest.updateProblem(problem, files);
     }
     
 //    public Test suite() {
