@@ -170,6 +170,12 @@ public class Problem implements IElementObject {
     private String shortName = "";
     
     private String letter = null;
+
+    private String colorName;
+
+    private Object co;
+
+    private String colorRGB;
     
     /**
      * Create a problem with the display name.
@@ -742,6 +748,22 @@ public class Problem implements IElementObject {
 
     public void setCcsMode(boolean ccsMode) {
         this.ccsMode = ccsMode;
+    }
+
+    public void setColorName(String colorName) {
+        this.colorName = colorName;
+    }
+    
+    public String getColorName() {
+        return colorName;
+    }
+
+    public void setColorRGB(String colorRGB) {
+        this.colorRGB = colorRGB;
+    }
+    
+    public String getColorRGB() {
+        return colorRGB;
     }
     
     

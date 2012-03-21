@@ -105,6 +105,21 @@ public class ContestYAMLLoader {
     public static final String INPUT_KEY = "input";
 
     /**
+     * Contest wide validator name.
+     * 
+     * This will be overridden by the individual problem validator name.  If
+     * there is no default validator name specified the internal validator
+     * will be used.
+     * 
+     */
+    private static final String DEFAULT_VALIDATOR_KEY = "default-validator";
+
+    /**
+     * Validator per problem.
+     */
+    private static final String VALIDATOR_KEY = null;
+
+    /**
      * Load contest.yaml from directory.
      * 
      * @see #fromYaml(IInternalContest, String[], String)
@@ -167,11 +182,14 @@ public class ContestYAMLLoader {
             }
         }
 
-        // TODO CCS add settings
+        // TODO CCS add contest settings
         // short-name: ICPC WF 2011
         // start-time: 2011-02-04 01:23Z
         // duration: 5:00:00
         // scoreboard-freeze: 4:00:00
+        
+        String defaultValidatorName =  getSequenceValue(yamlLines, DEFAULT_VALIDATOR_KEY); 
+
 
         Language[] languages = getLanguages(yamlLines);
         for (Language language : languages) {
@@ -198,7 +216,7 @@ public class ContestYAMLLoader {
         }
 
         // String[] answers = getGeneralAnswers(yamlLines);
-        // TODO CCS load answers into contest
+        // TODO CCS load general answer catagories into contest
 
         Account[] accounts = getAccounts(yamlLines);
         contest.addAccounts(accounts);
@@ -221,6 +239,10 @@ public class ContestYAMLLoader {
         PlaybackInfo info = new PlaybackInfo();
 
         String[] sectionLines = getSectionLines(REPLAY_KEY, yamlLines);
+        
+        if (sectionLines.length == 0){
+            return null;
+        }
 
         int idx = 1;
         String[] sequenceLines = getNextSequence(sectionLines, idx);
@@ -458,6 +480,9 @@ public class ContestYAMLLoader {
                 problem.setTimeOutInSeconds(Integer.parseInt(timeOut.trim()));
             }
         }
+        
+        String validatorName =  getSequenceValue(sectionLines, VALIDATOR_KEY);
+        
 
         if (ccsStandardProblem) {
             problem.setComputerJudged(true);
@@ -468,9 +493,6 @@ public class ContestYAMLLoader {
             // add validator run script ('run')
             
             addDefaultCCSValidator (problem);
-            
-            System.out.println("debug 22 CCS validator "+problem.getValidatorProgramName());
-            
         } else {
             problem.setComputerJudged(true); 
             addDefaultPC2Validator(problem, 1);
@@ -904,14 +926,14 @@ public class ContestYAMLLoader {
                 throw new YamlLoadException(e);
             }
 
-            // String problemLetter = getSequenceValue(sequenceLines, "letter");
-            // String colorName = getSequenceValue(sequenceLines, "color");
-            // String colorRGB = getSequenceValue(sequenceLines, "rgb");
+             String problemLetter = getSequenceValue(sequenceLines, "letter");
+             String colorName = getSequenceValue(sequenceLines, "color");
+             String colorRGB = getSequenceValue(sequenceLines, "rgb");
 
             // TODO CCS assign Problem variables for color and letter
-            // problem.setLetter(problemLetter);
-            // problem.setColorName(colorName);
-            // problem.setColorRGB(colorRGB);
+             problem.setLetter(problemLetter);
+             problem.setColorName(colorName);
+             problem.setColorRGB(colorRGB);
 
             // debug code
             // System.out.println("Problem   : " + problemKeyName);
