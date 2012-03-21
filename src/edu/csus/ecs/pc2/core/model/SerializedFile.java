@@ -23,8 +23,6 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 // TODO complete all method comments.
 public class SerializedFile implements Serializable {
 
-    public static final String SVN_ID = "$Id$";
-
     static final long serialVersionUID = -254619749606639287L;
 
     private static File file;
@@ -105,6 +103,24 @@ public class SerializedFile implements Serializable {
                 StaticLog.log("Exception in SerializeFile for file " + fileName, e);
             }
         }
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null){
+            return false;
+        }
+        SerializedFile otherFile = (SerializedFile) obj;
+        if (sha1sum == otherFile.getSHA1sum()){
+            return absolutePath.equals(otherFile.absolutePath);
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return sha1sum.hashCode();
     }
 
     /**

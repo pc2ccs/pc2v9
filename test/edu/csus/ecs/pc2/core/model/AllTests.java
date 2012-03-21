@@ -37,6 +37,7 @@ public final class AllTests {
         suite.addTestSuite(ProblemDataFilesTest.class);
         suite.addTestSuite(NotificationSettingTest.class);
         suite.addTestSuite(FilterTest.class);
+        suite.addTestSuite(SerializedFileTest.class);
         suite.addTestSuite(RunUtilitiesTest.class);
         suite.addTestSuite(FilterFormatterTest.class);
         suite.addTestSuite(BalloonSettingsTest.class);

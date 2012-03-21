@@ -26,6 +26,14 @@ public class AbstractTestCase extends TestCase {
 
     public static final String DEFAULT_PC2_TEST_DIRECTORY = "testdata";
     
+    public AbstractTestCase() {
+        super();
+    }
+
+    public AbstractTestCase(String name) {
+        super(name);
+    }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
