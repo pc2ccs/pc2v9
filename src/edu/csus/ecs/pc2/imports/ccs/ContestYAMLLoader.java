@@ -112,12 +112,12 @@ public class ContestYAMLLoader {
      * will be used.
      * 
      */
-    private static final String DEFAULT_VALIDATOR_KEY = "default-validator";
+//    private static final String DEFAULT_VALIDATOR_KEY = "default-validator";
 
     /**
      * Validator per problem.
      */
-    private static final String VALIDATOR_KEY = null;
+//    private static final String VALIDATOR_KEY = null;
 
     /**
      * Load contest.yaml from directory.
@@ -188,7 +188,8 @@ public class ContestYAMLLoader {
         // duration: 5:00:00
         // scoreboard-freeze: 4:00:00
         
-        String defaultValidatorName =  getSequenceValue(yamlLines, DEFAULT_VALIDATOR_KEY); 
+        // TODO CCS
+//        String defaultValidatorName =  getSequenceValue(yamlLines, DEFAULT_VALIDATOR_KEY); 
 
 
         Language[] languages = getLanguages(yamlLines);
@@ -481,7 +482,8 @@ public class ContestYAMLLoader {
             }
         }
         
-        String validatorName =  getSequenceValue(sectionLines, VALIDATOR_KEY);
+        // TODO CCS
+//        String validatorName =  getSequenceValue(sectionLines, VALIDATOR_KEY);
         
 
         if (ccsStandardProblem) {

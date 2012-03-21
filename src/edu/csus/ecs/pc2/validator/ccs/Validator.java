@@ -46,7 +46,8 @@ public class Validator {
     /**
      * Directory where validator stuff goes.
      */
-    private String feedbackDirectory = null;
+    // TODO CCS 
+//    private String feedbackDirectory = null;
     
     /**
      * Case insensitive comparison.

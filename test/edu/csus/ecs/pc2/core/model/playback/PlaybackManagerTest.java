@@ -113,20 +113,20 @@ public class PlaybackManagerTest extends TestCase {
 //        assertEquals("Should all be pending playback record status'", minNum, num);
     }
 
-    private int countPlaybackTypes(PlaybackManager manager, EventStatus status) {
-
-        PlaybackRecord[] records = manager.getPlaybackRecords();
-
-        int count = 0;
-
-        for (PlaybackRecord record : records) {
-            if (record.getEventStatus().equals(status)) {
-                count++;
-            }
-        }
-
-        return count;
-    }
+//    private int countPlaybackTypes(PlaybackManager manager, EventStatus status) {
+//
+//        PlaybackRecord[] records = manager.getPlaybackRecords();
+//
+//        int count = 0;
+//
+//        for (PlaybackRecord record : records) {
+//            if (record.getEventStatus().equals(status)) {
+//                count++;
+//            }
+//        }
+//
+//        return count;
+//    }
 
     private void loadJudgements(IInternalContest contest) {
         String[] judgementNames = { "Yes", "No - Compilation Error", "No - Run-time Error", "No - Time-limit Exceeded", "No - Wrong Answer", "No - Excessive Output", "No - Output Format Error",

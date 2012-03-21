@@ -173,8 +173,6 @@ public class Problem implements IElementObject {
 
     private String colorName;
 
-    private Object co;
-
     private String colorRGB;
     
     /**
