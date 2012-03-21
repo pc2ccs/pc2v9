@@ -1,16 +1,19 @@
 package edu.csus.ecs.pc2.core.model;
 
 /**
- * Data files for a Problem.
+ * Data files and programs (validator) for a Problem.
  * 
  * Multiple data sets are supported.  
  * <P>
+ * 
  * 
  * @see #getJudgesAnswerFile()
  * @see #getJudgesDataFile()
  * 
  * @see #getJudgesAnswerFiles()
  * @see #getJudgesDataFiles()
+ * 
+ * @see #getValidatorRunCommand()
  * 
  * @see edu.csus.ecs.pc2.core.model.Problem
  * @see edu.csus.ecs.pc2.core.model.ProblemDataFilesList
@@ -34,6 +37,10 @@ public class ProblemDataFiles implements IElementObject {
     private SerializedFile validatorRunCommand;
     
     private SerializedFile validatorFile;
+    
+    private SerializedFile validatorRunFile;
+    
+    private SerializedFile [] validatorFiles;
 
     public ProblemDataFiles(Problem problem) {
         problemId = problem.getElementId();
@@ -356,5 +363,51 @@ public class ProblemDataFiles implements IElementObject {
         }
 
         return buf.toString();
+    }
+    
+    /**
+     * Get the 'run' command for the validator.
+     * 
+     * For a CCS standard validator a run script is used to invoke
+     * the validator.
+     * 
+     * This is not the validator program, use {@link #getValidatorFile()}
+     * to get the validator program.
+     * 
+     * @return the run script/program for running the CCS validator.
+     */
+    public SerializedFile getValidatorRunFile() {
+        return validatorRunFile;
+    }
+
+    /**
+     * Add/set the validator run file/command.
+     *  
+     * @see #getValidatorFile()
+     * @param validatorRunFile
+     */
+    public void setValidatorRunFile(SerializedFile validatorRunFile) {
+        this.validatorRunFile = validatorRunFile;
+    }
+    
+    /**
+     * save a set of files, one which should be the validator program. 
+     * 
+     * @param validatorFiles
+     */
+    public void setValidatorFiles(SerializedFile[] validatorFiles) {
+        this.validatorFiles = validatorFiles;
+    }
+    
+    /**
+     * A directory/set of files needed to run the validator.
+     * 
+     * The {@link #getValidatorRunCommand()} is used to invoke the validator,
+     * these are files needed to run the validator (including the validator).
+     * 
+     * @return
+     */
+    public SerializedFile[] getValidatorFiles() {
+        return validatorFiles;
     }
 }
