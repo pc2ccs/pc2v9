@@ -488,4 +488,60 @@ public class ImportDataPane extends JPanePlugin {
         return centerPane;
     }
 
+    public static String getContestLoadSummary(IInternalContest newContest) throws Exception {
+
+        Language[] languages = newContest.getLanguages();
+        Problem[] problems = newContest.getProblems();
+        Site[] sites = newContest.getSites();
+        Category[] categories = newContest.getCategories();
+        ClientSettings [] settings = newContest.getClientSettingsList();
+        
+        PlaybackInfo info = getPlaybackInfo(newContest);
+
+        StringBuffer sb = new StringBuffer();
+
+        addSummaryEntry(sb, sites.length, "site");
+
+        addSummaryEntry(sb, problems.length, "problem");
+        
+        if (problems.length > 0) {
+            int ansCount = 0;
+            int datCount = 0;
+            
+            for (Problem problem : problems) {
+                ProblemDataFiles pdfiles = newContest.getProblemDataFile(problem);
+                if (pdfiles != null) {
+                    ansCount += pdfiles.getJudgesAnswerFiles().length;
+                    datCount += pdfiles.getJudgesDataFiles().length;
+//                } else { // nothing to do here, move on
+                }
+            }
+            addSummaryEntry(sb, datCount, "input data files");
+            addSummaryEntry(sb, ansCount, "answer data files");
+        }
+
+        addSummaryEntry(sb, languages.length, "language");
+
+        for (Type type : Type.values()) {
+            Vector<Account> accounts = newContest.getAccounts(type);
+            String accountTypeName = type.toString().toLowerCase();
+            addSummaryEntry(sb, accounts.size(), accountTypeName, " account");
+        }
+
+        addSummaryEntry(sb, categories.length, "clar", "category");
+
+        addSummaryEntry(sb, settings.length, "AJ setting");
+        
+        if (info != null) {
+            sb.append("1 replay defined, auto started? "+info.isStarted());
+            sb.append(NL);
+            sb.append("   file: "+info.getFilename());
+            sb.append(NL);
+            sb.append(info.toString());
+            sb.append(NL);
+        }
+
+        return sb.toString();
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
