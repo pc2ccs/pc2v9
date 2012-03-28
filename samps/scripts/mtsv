@@ -21,6 +21,8 @@ select STDOUT; $| = 1;  # flush stdout automatically
 my $JUDGEMENT_WRONG_ANSWER = "wrong answer";
 my $JUDGEMENT_ACCEPTED = "accepted";
 
+my $JAVAOPTS = " -client -Xss8M ";
+
 # -v option
 my $verbose = 0;
 # -r option
@@ -316,14 +318,6 @@ sub run_and_validate
 
     # clear previous runs output
 
-    if ( ! -f $execute_command )
-    {
-      $validator_message = "No team program found: $execute_command";
-      $done = 1;
-    }
-    else
-    {
-
       # send input to executable via stdin
 
       my $out_filename = "${output_key}.out";
@@ -336,21 +330,18 @@ sub run_and_validate
 
       # decrement form the failures
       $failcount -- if $rc == 42;
-    }
-
-    $judgement = $JUDGEMENT_ACCEPTED if $failcount == 0 && $number_data_sets > 0;
-
-    print STDERR "Ending  test : $test_case_number\n" if $verbose;
-
   }
+  
+   $judgement = $JUDGEMENT_ACCEPTED if $failcount == 0 && $number_data_sets > 0;
+   print STDERR "Ending  test : $test_case_number\n" if $verbose;
 
-# todo - get validator results
 
 # todo - pc2, pack up log/info files
 
 # todo - pc2, be able to view validator results string which contains validator error/problems/info
 
 # todo - pc2, be able to view/look at externally defined files
+
 }
 
 # ------------------------------------------------------------
@@ -358,11 +349,29 @@ sub run_and_validate
 #
 sub do_execute
 {
-  my ($execute_cmd, $inputfile, $outfile) = @_;
+  my ($executable, $inputfile, $outfile) = @_;
+
+  my $execute_cmd = $executable;
+
+  if ( -f "${executable}.class" )
+  {
+    $execute_cmd = "java $JAVAOPTS $executable";
+  }
+  elsif ( ! -f $execute_cmd )
+  {
+    $execute_cmd = "./a.out";
+  }
+  else 
+  {
+    # TAMMY
+    $execute_cmd = "./$execute_cmd";
+  }
 
   print STDERR "Running $execute_cmd\n" if $verbose;
 
+
   `$execute_cmd < $inputfile > $outfile`;
+
 }
 
 # ------------------------------------------------------------
@@ -837,7 +846,7 @@ sub cmdLineCheck
   {
     # check for exe
 
-    $validator_message = "No executable specified" if ! -f $exename;
+    $validator_message = "No executable specified" if $exename eq "";
   }
 
   return ($validator_message eq "");
@@ -913,7 +922,7 @@ Purpose To validate/judge teams output
 where 
   letter      - the letter for the problem to be judged
   resultsfilename - output results/judgement file name (Internation Standard format in XML)
-  executable_name - team's executable
+  executable_name - team's executable or main class filename
 
 -h      this message
 -v      more information
