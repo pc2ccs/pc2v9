@@ -697,16 +697,16 @@ public class Executable {
             stdoutCollector.start();
             stderrCollector.start();
             
-            if (problem.isCcsMode()) {
-                /**
-                 * if CCS mode send output file to process via stdin.
-                 */
-                String teamOutputFilename = executionData.getExecuteProgramOutput().getName();
-                
-                log.info("Writing file "+teamOutputFilename+ " to process "+process);
-                
-                writeToProcessStdin(process, teamOutputFilename);
-            }
+//            if (problem.isCcsMode()) {
+//                /**
+//                 * if CCS mode send output file to process via stdin.
+//                 */
+//                String teamOutputFilename = executionData.getExecuteProgramOutput().getName();
+//                
+//                log.info("Writing file "+teamOutputFilename+ " to process "+process);
+//                
+//                writeToProcessStdin(process, teamOutputFilename);
+//            }
 
             // // waiting for the process to finish execution...
             // executionData.setValidationReturnCode(process.waitFor());
