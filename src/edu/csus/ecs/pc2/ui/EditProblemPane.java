@@ -551,7 +551,7 @@ public class EditProblemPane extends JPanePlugin {
         boolean deleted = getDeleteProblemCheckBox().isSelected();
         checkProblem.setActive(!deleted);
         
-        problem.setCcsMode(getCcsValidationEnabledCheckBox().isSelected());
+        checkProblem.setCcsMode(getCcsValidationEnabledCheckBox().isSelected());
 
         if (problemRequiresDataCheckBox.isSelected()) {
 
