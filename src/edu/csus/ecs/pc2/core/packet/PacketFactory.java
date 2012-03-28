@@ -450,7 +450,7 @@ public final class PacketFactory {
             prop.put(ELAPSED_TIME, new Long(overrideSubmissionTime));
         }
         if (overrideRunId > 0) {
-            prop.put(OVERRIDE_RUN_ID, new Long(overrideSubmissionTime));
+            prop.put(OVERRIDE_RUN_ID, new Long(overrideRunId));
         }
         Packet packet = new Packet(Type.RUN_SUBMISSION, source, destination, prop);
         return packet;
