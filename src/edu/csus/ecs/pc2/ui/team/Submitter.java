@@ -211,6 +211,11 @@ public class Submitter {
             // -p <problem short-name>
             problemTitle = arguments.getOptValue("-p");
 
+            // -l <language short-name> (optional)
+            if (arguments.isOptPresent("-l")) {
+                    languageTitle = arguments.getOptValue("-l");
+            }
+            
             // -t <contest-time for submission>
           
             try {
