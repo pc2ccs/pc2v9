@@ -229,21 +229,25 @@ public class ContestYAMLLoader {
         }
 
         PlaybackInfo playbackInfo = getReplaySettings(yamlLines);
-
-        contest.addPlaybackInfo(playbackInfo);
+        
+        if (playbackInfo != null){
+            contest.addPlaybackInfo(playbackInfo);
+        }
 
         return contest;
     }
 
     public PlaybackInfo getReplaySettings(String[] yamlLines) {
 
-        PlaybackInfo info = new PlaybackInfo();
-
         String[] sectionLines = getSectionLines(REPLAY_KEY, yamlLines);
         
-        if (sectionLines.length == 0){
+        if (sectionLines.length == 0) {
             return null;
         }
+        
+        System.err.println("debug 22 section lines for "+REPLAY_KEY+" are "+sectionLines.length);
+
+        PlaybackInfo info = new PlaybackInfo();
 
         int idx = 1;
         String[] sequenceLines = getNextSequence(sectionLines, idx);
