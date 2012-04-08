@@ -50,7 +50,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     private IInternalController controller;
 
-     private AutoJudgeStatusFrame autoJudgeStatusFrame = null;
+    private AutoJudgeStatusFrame autoJudgeStatusFrame = null;
     
     private AutoJudgeNotifyMessages notifyMessager = null;
 
@@ -735,7 +735,8 @@ public class AutoJudgingMonitor implements UIPlugin {
             cleanupLastAutoJudge();
         }
 
-        setAutoJudgeDisabledLocally(true);
+        // TODO handle locally disabled judging
+//        setAutoJudgeDisabledLocally(true);
 
         notifyMessager.updateStatusLabel("Auto-judging is OFF");
         notifyMessager.updateMessage("");
