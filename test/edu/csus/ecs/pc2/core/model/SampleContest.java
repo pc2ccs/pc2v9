@@ -1037,7 +1037,6 @@ public class SampleContest {
         writeLines(writer, datalines);
         writer.close();
         writer = null;
-        // System.out.println("debug 22 wrote ans to "+filename);
         return filename;
     }
 
@@ -1047,7 +1046,6 @@ public class SampleContest {
         writeLines(writer, datalines);
         writer.close();
         writer = null;
-        // System.out.println("debug 22 wrote ans to "+filename);
         return filename;
     }
 

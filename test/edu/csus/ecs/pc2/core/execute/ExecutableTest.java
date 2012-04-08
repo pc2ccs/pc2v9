@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 import edu.csus.ecs.pc2.validator.Validator;
 
 /**
@@ -51,31 +52,31 @@ public class ExecutableTest extends AbstractTestCase {
         contest = sampleContest.createContest(2, 2, 12, 12, true);
         controller = sampleContest.createController(contest, true, false);
 
-//        deriveProjectDirectory();
+        deriveProjectDirectory();
 
         sumitProblem = createSumitProblem(contest);
         // helloWorldProblem = createHelloProblem(contest);
         javaLanguage = createJavaLanguage(contest);
 
     }
-//
-//    /**
-//     * To derive the project directory.
-//     * 
-//     * @throws Exception
-//     * 
-//     */
-//    private void deriveProjectDirectory() throws Exception {
-//
-//        String sampsDir = "testdata";
-//        String projectPath = JUnitUtilities.locate(sampsDir);
-//        if (projectPath == null) {
-//            throw new Exception("Unable to locate " + sampsDir);
-//        }
-//
-//        testDirectoryName = projectPath + File.separator + sampsDir;
-//
-//    }
+
+    /**
+     * To derive the project directory.
+     * 
+     * @throws Exception
+     * 
+     */
+    private void deriveProjectDirectory() throws Exception {
+
+        String sampsDir = "testdata";
+        String projectPath = JUnitUtilities.locate(sampsDir);
+        if (projectPath == null) {
+            throw new Exception("Unable to locate " + sampsDir);
+        }
+
+        testDirectoryName = projectPath + File.separator + sampsDir;
+
+    }
 
     /**
      * Create a language using {@link LanguageAutoFill}.
@@ -178,12 +179,12 @@ public class ExecutableTest extends AbstractTestCase {
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
         problem.setDataFileName("sumit.dat");
-        String judgesDataFile = getSampsFilename(problem.getDataFileName());
+        String judgesDataFile = createSampleDataFile(problem.getDataFileName());
         checkFileExistance(judgesDataFile);
         problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile));
 
         problem.setAnswerFileName("sumit.ans");
-        String answerFileName = getSampsFilename(problem.getAnswerFileName());
+        String answerFileName = createSampleAnswerFile(problem.getAnswerFileName());
         checkFileExistance(answerFileName);
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
 
@@ -202,7 +203,10 @@ public class ExecutableTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         Run run = new Run(submitter, javaLanguage, sumitProblem);
-        RunFiles runFiles = new RunFiles(run, getSampsFilename("Sumit.java"));
+        
+        String mainfileName = getSampsFilename("Sumit.java");
+        checkFileExistance(mainfileName);
+        RunFiles runFiles = new RunFiles(run, mainfileName);
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         

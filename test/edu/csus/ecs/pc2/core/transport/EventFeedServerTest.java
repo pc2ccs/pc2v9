@@ -41,15 +41,12 @@ public class EventFeedServerTest extends TestCase {
 //                System.out.println(str);
 //                System.out.flush();
 //            }
-            System.out.println("debug 22 after while loop");
 //            reader.close();
             inputReader.close();
             
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
-        System.out.println("debug 22 readAndPrintSocketInput done");
     }
     
     /**

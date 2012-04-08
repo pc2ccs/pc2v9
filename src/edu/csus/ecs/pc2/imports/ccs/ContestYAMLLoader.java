@@ -202,10 +202,6 @@ public class ContestYAMLLoader {
             loadProblemAndFilesAndValidators(contest, diretoryName, problem);
         }
 
-        if (getSectionLines(AUTO_JUDGE_KEY, yamlLines).length == 0) {
-            System.err.println("No " + AUTO_JUDGE_KEY + " section in " + diretoryName);
-        }
-
         Site[] sites = getSites(yamlLines);
         for (Site site : sites) {
             contest.addSite(site);
@@ -245,8 +241,6 @@ public class ContestYAMLLoader {
             return null;
         }
         
-        System.err.println("debug 22 section lines for "+REPLAY_KEY+" are "+sectionLines.length);
-
         PlaybackInfo info = new PlaybackInfo();
 
         int idx = 1;
@@ -471,10 +465,8 @@ public class ContestYAMLLoader {
         String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
 
         if (ccsStandardProblem) {
-            System.out.println("debug 22 loading CCS problem yaml");
             loadCCSProblem(contest, dataFileBaseDirectory, problem, sectionLines);
         } else {
-            System.out.println("debug 22 Loading PC2 problem yaml ");
             loadPc2Problem(contest, dataFileBaseDirectory, problem, sectionLines);
         }
 
@@ -1067,8 +1059,6 @@ public class ContestYAMLLoader {
             String activeStr = getSequenceValue(sequenceLines, "active");
             boolean active = getBooleanValue(activeStr, true);
             
-            System.out.println("debug 22 judge account number string is "+numberString);
-
             // TODO 669 code load method
             int[] judgeClientNumbers = null;
             if ("all".equalsIgnoreCase(numberString)) {
@@ -1081,9 +1071,6 @@ public class ContestYAMLLoader {
                 judgeClientNumbers = getNumberList(numberString.trim());
             }
             
-            System.out.println("debug 22 judge list "+Arrays.toString(judgeClientNumbers));
-            System.out.println("debug 22 ");
-
             for (int i = 0; i < judgeClientNumbers.length; i++) {
                 int clientNumber = judgeClientNumbers[i];
 
@@ -1108,8 +1095,6 @@ public class ContestYAMLLoader {
 
                 autoJudgeSetting.setProblemFilter(filter);
                 ajList.add(autoJudgeSetting);
-                
-                System.out.println("debug 22 added auto judge settings "+autoJudgeSetting.getClientId());
             }
 
             idx += sequenceLines.length;

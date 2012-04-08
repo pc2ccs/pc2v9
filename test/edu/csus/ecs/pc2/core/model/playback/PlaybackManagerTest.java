@@ -43,12 +43,9 @@ public class PlaybackManagerTest extends TestCase {
         PlaybackManager manager = new PlaybackManager();
 
         String contestYamlDir = getTestDirectory() + File.separator + "ContestYAMLLoaderTest";
-        System.out.println("debug 22 Using "+contestYamlDir);
         missingDir(contestYamlDir, "YAML Directory");
         
         IInternalContest contest = loader.fromYaml(null,contestYamlDir );
-        
-        System.out.println("debug 22 Using contest="+contest);
         
         loadJudgements(contest);
 
@@ -60,8 +57,6 @@ public class PlaybackManagerTest extends TestCase {
         missingDir(replayDirectory, "Replay Directory");
         missingFile(replayFilename, "Replay filename");
         
-        System.out.println("debug 22 Using "+replayFilename);
-
         manager.createPlaybackInfo(replayFilename, contest);
 
         return manager;

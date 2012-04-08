@@ -115,7 +115,6 @@ public class AbstractTestCase extends TestCase {
         writeLines(writer, getSampleDataLines());
         writer.close();
         writer = null;
-        // System.out.println("debug 22 wrote ans to "+filename);
         return filename;
     }
     
@@ -133,7 +132,6 @@ public class AbstractTestCase extends TestCase {
         writeLines(writer, getSampleAnswerLines());
         writer.close();
         writer = null;
-        // System.out.println("debug 22 wrote ans to "+filename);
         return filename;
     }
 

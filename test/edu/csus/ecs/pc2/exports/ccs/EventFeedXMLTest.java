@@ -468,8 +468,7 @@ public class EventFeedXMLTest extends TestCase {
 
     public void testTestcaseElement() throws Exception {
 
-        // TODO tag: testcase run-id="1">
-        System.out.println(" -- testTestcaseElement TODO "); // TODO code testcase
+        // TODO CCS tag: testcase run-id="1">
     }
 
     public void testFinalizedElement() throws Exception {
