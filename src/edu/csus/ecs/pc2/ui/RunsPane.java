@@ -130,7 +130,7 @@ public class RunsPane extends JPanePlugin {
 
     private JButton autoJudgeButton = null;
 
-    private AutoJudgingMonitor autoJudgingMonitor = new AutoJudgingMonitor();
+    private AutoJudgingMonitor autoJudgingMonitor = new AutoJudgingMonitor(true);
 
     private boolean usingTeamColumns = false;
 
