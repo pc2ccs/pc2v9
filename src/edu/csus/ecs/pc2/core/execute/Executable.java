@@ -16,7 +16,6 @@ import java.util.StringTokenizer;
 import javax.swing.JFileChooser;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -113,7 +112,7 @@ public class Executable {
      */
     private RunFiles runFiles;
 
-    private String errorString = "";
+    private String errorString;
 
     private IInternalContest contest;
 
@@ -138,9 +137,6 @@ public class Executable {
     private boolean showMessageToUser = true;
     
     private boolean usingGUI = true;
-
-    private Exception runProgramException = null;
-
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
@@ -458,71 +454,6 @@ public class Executable {
 
         return dir.isDirectory();
     }
-    
-    /**
-     * Parse validator results file, update results/settings.
-     * 
-     * @param resultsFileName
-     */
-    private void handlePC2ValidationResults(String resultsFileName) {
-        
-        String fullResultsFileName = prefixExecuteDirname(resultsFileName);
-        
-        /**
-         * Regular PC^2 International Standard validation/results.
-         */
-        boolean fileThere = new File(fullResultsFileName).exists();
-
-        if (fileThere) {
-
-            /**
-             * Look for results file per the International Standard if the file is there
-             * and is not CCS mode.
-             */
-            IResultsParser parser = new XMLResultsParser();
-            parser.setLog(log);
-            boolean done = parser.parseValidatorResultsFile(fullResultsFileName);
-            Hashtable<String, String> results = parser.getResults();
-
-            if (done && results != null && results.containsKey(IResultsParser.OUTCOME_KEY)) {
-                // non-IJRM does not require security, but if it is IJRM it better have security.
-                if (!problem.isInternationalJudgementReadMethod() || (results.containsKey("security") && resultsFileName.equals(results.get("security")))) {
-                    // Found the string
-                    executionData.setValidationResults(results.get(IResultsParser.OUTCOME_KEY));
-                    executionData.setValidationSuccess(true);
-                } else {
-                    // TODO LOG info
-                    
-                    executionData.setAdditionalInformation("Validator did not produce security key in "+fullResultsFileName);
-
-                    setException (executionData, "validationCall - results file did not contain security");
-
-                    log.config("validationCall - results file did not contain security");
-                    log.config(resultsFileName + " != " + results.get("security"));
-                }
-            } else {
-
-                if (!done) {
-                    executionData.setAdditionalInformation("Could not read/parse results file: "+fullResultsFileName);
-                    setException (executionData, "Error parsing/reading results file, check log");
-                    log.config("Error parsing/reading results file, check log");
-                } else if (results != null && (!results.containsKey(IResultsParser.OUTCOME_KEY))) {
-                    executionData.setAdditionalInformation("Results file did not contain attribute "+IResultsParser.OUTCOME_KEY+" filename "+fullResultsFileName);
-                    setException (executionData, "Error parsing/reading results file, check log");
-                    log.config("Error could not find 'outcome' in results file ");
-                } else {
-                    executionData.setAdditionalInformation("No results produced by parsing "+fullResultsFileName);
-                    log.config("No results produced by parsing "+fullResultsFileName+" check log");
-                }
-            }
-        } else { 
-            executionData.setAdditionalInformation("No result file created, expected file: "+fullResultsFileName);
-            
-            log.config("validationCall - Did not produce output results file " + resultsFileName);
-            //                JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
-        }
-    }
-
 
     private boolean validateProgram(int dataSetNumber) {
 
@@ -554,18 +485,6 @@ public class Executable {
                  */
 
                 setExecuteBit(prefixExecuteDirname(validatorFileName));
-            }
-        }
-        
-        if (problemDataFiles.getValidatorRunCommand() != null) {
-            // Create Validation run command, typically used in CCS mode 
-            
-            String validatorRunCommand = problemDataFiles.getValidatorRunCommand().getName();
-            String validatorRunCommandFullPath = prefixExecuteDirname(validatorRunCommand);
-            if (!createFile(problemDataFiles.getValidatorRunCommand(), validatorRunCommandFullPath)) {
-                log.info("Unable to create validator RUN command program " + validatorRunCommandFullPath);
-                setException (executionData, "Unable to create validator RUN command program " + validatorRunCommandFullPath);
-                throw new SecurityException("Unable to create validator RUN command, check logs");
             }
         }
 
@@ -614,7 +533,7 @@ public class Executable {
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
 
         }
-        
+
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
 
         String cmdLine = substituteAllStrings(run, commandPattern);
@@ -654,11 +573,6 @@ public class Executable {
             throw new SecurityException(e);
         }
 
-        /**
-         * Exit code for validator.
-         */
-        int returnValue = CCSConstants.VALIDATOR_CCS_ERROR_EXIT_CODE;
-
         try {
 
             PrintWriter stdoutlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME), false), true);
@@ -673,17 +587,11 @@ public class Executable {
             Process process = runProgram(cmdLine, msg, false);
 
             if (process == null) {
-                executionData.setValidationResults(CCSConstants.JUDGEMENT_WRONG_ANSWER);
-                executionData.setValidationSuccess(false);
-                executionData.setAdditionalInformation("Validator program could not be started, command: "+cmdLine);
                 executionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
                 return false;
             }
-            
-            returnValue = process.exitValue();
-            log.info("Validator command return value is: " + returnValue);
 
             // This reads from the stdout of the child process
             BufferedReader childOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -731,37 +639,65 @@ public class Executable {
             log.log(Log.CONFIG, "Exception in validator ", ex);
         }
 
+        boolean fileThere = new File(prefixExecuteDirname(resultsFileName)).exists();
+
         try {
-            if (! problem.isCcsMode()) {
-                
-                handlePC2ValidationResults(resultsFileName);
-    
-            }  // else is CCS Mode, no parsing of output XML results file done
-            
+            if (fileThere) {
+
+                IResultsParser parser = new XMLResultsParser();
+                parser.setLog(log);
+                boolean done = parser.parseValidatorResultsFile(prefixExecuteDirname(resultsFileName));
+                Hashtable<String, String> results = parser.getResults();
+
+                if (done && results != null && results.containsKey("outcome")) {
+                    // non-IJRM does not require security, but if it is IJRM it better have security.
+                    if (!problem.isInternationalJudgementReadMethod() || (results.containsKey("security") && resultsFileName.equals(results.get("security")))) {
+                        // Found the string
+                        executionData.setValidationResults(results.get("outcome"));
+                        executionData.setValidationSuccess(true);
+                    } else {
+                        // TODO LOG info
+                        setException (executionData, "validationCall - results file did not contain security");
+
+                        log.config("validationCall - results file did not contain security");
+                        log.config(resultsFileName + " != " + results.get("security"));
+                    }
+                } else {
+                    if (!done) {
+                        // TODO LOG
+                        // TODO show user message
+                        setException (executionData, "Error parsing/reading results file, check log");
+
+                        log.config("Error parsing/reading results file, check log");
+                    } else if (results != null && (!results.containsKey("outcome"))) {
+                        // TODO LOG
+                        // TODO show user message
+                        setException (executionData, "Error parsing/reading results file, check log");
+                        log.config("Error could not find 'outcome' in results file, check log");
+                    } else {
+                        // TODO LOG
+                        // TODO show user message
+                        log.config("Error parsing results file, check log");
+                    }
+                }
+            } else {
+                // TODO LOG
+                log.config("validationCall - Did not produce output results file " + resultsFileName);
+//                JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
+            }
         } catch (Exception ex) {
             log.log(Log.INFO, "Exception in validation  ", ex);
             throw new SecurityException(ex);
         } finally {
-
-            if (problem.isCcsMode()) {
-                if (returnValue == CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE) {
-                    executionData.setValidationResults(CCSConstants.JUDGEMENT_YES);
-                    executionData.setValidationSuccess(true);
-                } else {
-                    executionData.setValidationResults(CCSConstants.JUDGEMENT_WRONG_ANSWER);
-                    executionData.setValidationSuccess(true);
-                }
-            } else {
-                if ( executionData.isRunTimeLimitExceeded()){
-                    executionData.setValidationResults("No - Time Limit Exceeded");
-                    executionData.setValidationSuccess(true);
-                }
+            
+            if ( executionData.isRunTimeLimitExceeded()){
+                executionData.setValidationResults("No - Time Limit Exceeded");
+                executionData.setValidationSuccess(true);
             }
         }
 
         return executionData.isValidationSuccess();
     }
-
 
     /**
      * Sets the exception for this execute().
@@ -1353,12 +1289,6 @@ public class Executable {
             if (pc2home != null && pc2home.length() > 0) {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
-            
-            String pathToPC2Jar = findPC2JarPath ();
-            if (pathToPC2Jar != null && pathToPC2Jar.length() > 0) {
-                newString = replaceString(newString, "{:pc2jarpath}", pathToPC2Jar);
-            }
-            
         } catch (Exception e) {
             // TODO LOG
             log.log(Log.CONFIG, "Exception ", e);
@@ -1408,17 +1338,17 @@ public class Executable {
      */
 
     /**
-     * Run a program.
+     * Run a program with ExecutionTimer.
      * 
-     * @param cmdline command lien to execute
-     * @param msg message displayed in execution timer frame (if frame not null).
+     * 
+     * @param cmdline
+     * @param msg
      * @param autoStopExecution 
      * @return the process started.
      */
     public Process runProgram(String cmdline, String msg, boolean autoStopExecution) {
         Process process = null;
         errorString = "";
-        runProgramException = null;
         
         executeDirectoryName = getExecuteDirectoryName();
         
@@ -1442,38 +1372,20 @@ public class Executable {
                 }
 
             } else {
-                errorString = "Execute Directory does not exist: "+executeDirectoryName;
+                errorString = "Execute Directory does not exist";
                 log.config("Execute Directory does not exist");
             }
         } catch (IOException e) {
-            runProgramException = e;
             errorString = e.getMessage();
             log.config("Note: exec failed in RunProgram " + errorString);
             return null;
         } catch (Exception e) {
-            runProgramException = e;
             errorString = e.getMessage();
             log.log(Log.CONFIG, "Note: exec failed in RunProgram " + errorString, e);
             return null;
         }
 
         return process;
-    }
-    
-    /**
-     * Exception for last {@link #runProgram(String, String, boolean)}.
-     * @return null if no exception, otherwise exception for last {@link #runProgram(String, String, boolean)}.
-     */
-    public Exception getRunProgramException() {
-        return runProgramException;
-    }
-    
-    /**
-     * Error message for {@link #runProgram(String, String, boolean)}.
-     * @return error message if {@link #runProgram(String, String, boolean)} fails.
-     */
-    public String getRunProgramErrorMessage() {
-        return errorString;
     }
 
     /**
@@ -1585,11 +1497,7 @@ public class Executable {
      * @return the name of the execute directory for this client.
      */
     public String getExecuteDirectoryName() {
-        if (executeDirectoryName == null) {
-            return "executesite" + contest.getClientId().getSiteNumber() + contest.getClientId().getName() + getExecuteDirectoryNameSuffix();
-        } else {
-            return executeDirectoryName;
-        }
+        return "executesite" + contest.getClientId().getSiteNumber() + contest.getClientId().getName() + getExecuteDirectoryNameSuffix();
     }
 
     /**
@@ -1707,3 +1615,4 @@ public class Executable {
         return usingGUI;
     }
 }
+

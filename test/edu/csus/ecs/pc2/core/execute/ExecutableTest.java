@@ -3,10 +3,10 @@ package edu.csus.ecs.pc2.core.execute;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
@@ -16,8 +16,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.validator.Validator;
 
 /**
@@ -28,7 +27,7 @@ import edu.csus.ecs.pc2.validator.Validator;
  */
 
 // $HeadURL$
-public class ExecutableTest extends TestCase {
+public class ExecutableTest extends AbstractTestCase {
 
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
@@ -52,31 +51,31 @@ public class ExecutableTest extends TestCase {
         contest = sampleContest.createContest(2, 2, 12, 12, true);
         controller = sampleContest.createController(contest, true, false);
 
-        deriveProjectDirectory();
+//        deriveProjectDirectory();
 
         sumitProblem = createSumitProblem(contest);
         // helloWorldProblem = createHelloProblem(contest);
         javaLanguage = createJavaLanguage(contest);
 
     }
-
-    /**
-     * To derive the project directory.
-     * 
-     * @throws Exception
-     * 
-     */
-    private void deriveProjectDirectory() throws Exception {
-
-        String sampsDir = "testdata";
-        String projectPath = JUnitUtilities.locate(sampsDir);
-        if (projectPath == null) {
-            throw new Exception("Unable to locate " + sampsDir);
-        }
-
-        testDirectoryName = projectPath + File.separator + sampsDir;
-
-    }
+//
+//    /**
+//     * To derive the project directory.
+//     * 
+//     * @throws Exception
+//     * 
+//     */
+//    private void deriveProjectDirectory() throws Exception {
+//
+//        String sampsDir = "testdata";
+//        String projectPath = JUnitUtilities.locate(sampsDir);
+//        if (projectPath == null) {
+//            throw new Exception("Unable to locate " + sampsDir);
+//        }
+//
+//        testDirectoryName = projectPath + File.separator + sampsDir;
+//
+//    }
 
     /**
      * Create a language using {@link LanguageAutoFill}.
