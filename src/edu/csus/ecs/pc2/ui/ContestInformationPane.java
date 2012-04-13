@@ -95,6 +95,10 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JCheckBox ccsTestModeCheckbox = null;
 
+    private JTextField runSubmissionInterfaceCommandTextField = null;
+
+    private JLabel runSubmissionInterfaceLabel = null;
+
     /**
      * This method initializes
      * 
@@ -110,7 +114,7 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(533, 461));
+        this.setSize(new Dimension(641, 461));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
     }
@@ -139,6 +143,12 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
+            runSubmissionInterfaceLabel = new JLabel();
+            runSubmissionInterfaceLabel.setBounds(new Rectangle(21, 257, 175, 27));
+            runSubmissionInterfaceLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
+            runSubmissionInterfaceLabel.setText("Run Submission Command");
+            runSubmissionInterfaceLabel.setToolTipText("CCS Run Submission Interface Command");
+            runSubmissionInterfaceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             labelMaxFileSize = new JLabel();
             labelMaxFileSize.setBounds(new Rectangle(21, 173, 200, 27));
             labelMaxFileSize.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -161,6 +171,8 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(getMaxFieldSizeInKTextField(), null);
             centerPane.add(getScoringPropertiesButton(), null);
             centerPane.add(getCcsTestModeCheckbox(), null);
+            centerPane.add(getRunSubmissionInterfaceCommandTextField(), null);
+            centerPane.add(runSubmissionInterfaceLabel, null);
         }
         return centerPane;
     }
@@ -246,6 +258,8 @@ public class ContestInformationPane extends JPanePlugin {
         contestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
         contestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
         contestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
+        
+        contestInformation.setRsiCommand(getRunSubmissionInterfaceCommandTextField().getText());
         contestInformation.setCcsTestMode(getCcsTestModeCheckbox().isSelected());
 
         String maxFileSizeString = "0" + getMaxFieldSizeInKTextField().getText();
@@ -307,6 +321,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
                 getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
                 getMaxFieldSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
+                getRunSubmissionInterfaceCommandTextField().setText(contestInformation.getRsiCommand());
                 setContestInformation(contestInformation);
                 setEnableButtons(false);
             }
@@ -592,7 +607,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getJCheckBoxShowPreliminaryOnBoard() {
         if (jCheckBoxShowPreliminaryOnBoard == null) {
             jCheckBoxShowPreliminaryOnBoard = new JCheckBox();
-            jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(60, 317, 392, 21));
+            jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(57, 334, 392, 21));
             jCheckBoxShowPreliminaryOnBoard.setHorizontalAlignment(SwingConstants.LEFT);
             jCheckBoxShowPreliminaryOnBoard.setMnemonic(KeyEvent.VK_UNDEFINED);
             jCheckBoxShowPreliminaryOnBoard.setText("Include Preliminary Judgements in Scoring Algorithm");
@@ -613,7 +628,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getJCheckBoxShowPreliminaryOnNotifications() {
         if (jCheckBoxShowPreliminaryOnNotifications == null) {
             jCheckBoxShowPreliminaryOnNotifications = new JCheckBox();
-            jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(60, 347, 392, 21));
+            jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(57, 364, 392, 21));
             jCheckBoxShowPreliminaryOnNotifications.setHorizontalAlignment(SwingConstants.LEFT);
             jCheckBoxShowPreliminaryOnNotifications.setMnemonic(KeyEvent.VK_UNDEFINED);
             jCheckBoxShowPreliminaryOnNotifications.setText("Send Balloon Notifications for Preliminary Judgements");
@@ -636,7 +651,7 @@ public class ContestInformationPane extends JPanePlugin {
             additionalRunStatusCheckBox = new JCheckBox();
             additionalRunStatusCheckBox.setHorizontalAlignment(SwingConstants.LEFT);
             additionalRunStatusCheckBox.setSize(new Dimension(392, 21));
-            additionalRunStatusCheckBox.setLocation(new Point(60, 377));
+            additionalRunStatusCheckBox.setLocation(new Point(57, 394));
             additionalRunStatusCheckBox.setText("Send Additional Run Status Information");
             additionalRunStatusCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -731,7 +746,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getCcsTestModeCheckbox() {
         if (ccsTestModeCheckbox == null) {
             ccsTestModeCheckbox = new JCheckBox();
-            ccsTestModeCheckbox.setBounds(new Rectangle(60, 281, 392, 24));
+            ccsTestModeCheckbox.setBounds(new Rectangle(57, 298, 392, 24));
             ccsTestModeCheckbox.setHorizontalAlignment(SwingConstants.LEFT);
             ccsTestModeCheckbox.setText("C.C.S. Test Mode");
             ccsTestModeCheckbox.setMnemonic(KeyEvent.VK_UNDEFINED);
@@ -742,6 +757,25 @@ public class ContestInformationPane extends JPanePlugin {
             });
         }
         return ccsTestModeCheckbox;
+    }
+
+    /**
+     * This method initializes runSubmissionInterfaceCommandTextField
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getRunSubmissionInterfaceCommandTextField() {
+        if (runSubmissionInterfaceCommandTextField == null) {
+            runSubmissionInterfaceCommandTextField = new JTextField();
+            runSubmissionInterfaceCommandTextField.setBounds(new Rectangle(208, 256, 404, 29));
+            runSubmissionInterfaceCommandTextField.setText("");
+            runSubmissionInterfaceCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return runSubmissionInterfaceCommandTextField;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
