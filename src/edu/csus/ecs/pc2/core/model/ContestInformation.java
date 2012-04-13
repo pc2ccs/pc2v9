@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.Serializable;
 import java.util.Properties;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 
 /**
@@ -50,6 +51,11 @@ public class ContestInformation implements Serializable{
      */
     private JudgementNotificationsList judgementNotificationsList = new JudgementNotificationsList();
     
+    private String externalYamlPath = null;
+    
+    private String rsiCommand = null;
+    
+    private int lastRunNumberSubmitted = 0;
 
     /**
      * 
@@ -157,6 +163,12 @@ public class ContestInformation implements Serializable{
             if (ccsTestMode != contestInformation.isCcsTestMode()) {
                 return false;
             }
+            if (! StringUtilities.stringSame(externalYamlPath, contestInformation.externalYamlPath)) {
+                return false;
+            }
+            if (! StringUtilities.stringSame(rsiCommand, contestInformation.rsiCommand)) {
+                return false;
+            }
             return true;
         } catch (Exception e) {
             // TODO log to static exception log
@@ -249,5 +261,44 @@ public class ContestInformation implements Serializable{
     
     public void setCcsTestMode(boolean ccsTestMode) {
         this.ccsTestMode = ccsTestMode;
+    }
+    
+    public void setRsiCommand(String rsiCommand) {
+        this.rsiCommand = rsiCommand;
+    }
+    
+    /**
+     * Get the Run Submission Interface (RSI) command.
+     * 
+     * @return the command string to run when each run is submitted.
+     */
+    public String getRsiCommand() {
+        return rsiCommand;
+    }
+    
+    public void setExternalYamlPath(String externalYamlPath) {
+        this.externalYamlPath = externalYamlPath;
+    }
+    /**
+     * Get the external YAML path.
+     * 
+     * @return the location of contest.yaml and problem data files.
+     */
+    public String getExternalYamlPath() {
+        return externalYamlPath;
+    }
+    
+    public void setLastRunNumberSubmitted(int lastRunNumberSubmitted) {
+        this.lastRunNumberSubmitted = lastRunNumberSubmitted;
+    }
+   
+    /**
+     * Get the last run that was sent to the RSI.
+     * 
+     * @see #getRsiCommand()
+     * @return
+     */
+    public int getLastRunNumberSubmitted() {
+        return lastRunNumberSubmitted;
     }
 }

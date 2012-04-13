@@ -46,6 +46,22 @@ public class ContestInformationTest extends TestCase {
         contestInformation2.setMaxFileSize(4000);
 
         assertTrue("Same max file size", contestInformation1.isSameAs(contestInformation2));
+        
+        contestInformation2.setExternalYamlPath("/home/datalogin/contest");
+
+        assertFalse("Diff YAML Path", contestInformation1.isSameAs(contestInformation2));
+
+        contestInformation1.setExternalYamlPath("/home/datalogin/contest");
+
+        assertTrue("Same YAML Path", contestInformation1.isSameAs(contestInformation2));
+        
+        contestInformation2.setRsiCommand("/usr/local/bin/sccsrs");
+        
+        assertFalse("Diff RSI command", contestInformation1.isSameAs(contestInformation2));
+        
+        contestInformation1.setRsiCommand("/usr/local/bin/sccsrs");
+        
+        assertTrue("Same RSI command", contestInformation1.isSameAs(contestInformation2));
 
     }
 
