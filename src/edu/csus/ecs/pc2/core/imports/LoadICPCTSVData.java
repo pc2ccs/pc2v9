@@ -30,9 +30,9 @@ public class LoadICPCTSVData implements UIPlugin {
      */
     private static final long serialVersionUID = 1611218320856176033L;
 
-    public static final String TEAMS_FILENAME = "teams.tsv";
+    public static final String TEAMS_FILENAME = "Teams.tsv";
 
-    public static final String GROUPS_FILENAME = "groups.tsv";
+    public static final String GROUPS_FILENAME = "Groups.tsv";
 
     private String teamsFilename = "";
 
