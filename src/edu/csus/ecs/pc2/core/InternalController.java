@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.ccs.RunSubmitterInterfaceManager;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
@@ -292,11 +293,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private Profile theProfile = null;
     
     private LogWindow logWindow = null;
+    
+    private RunSubmitterInterfaceManager runSubmitterInterfaceManager = new RunSubmitterInterfaceManager();
 
     public InternalController(IInternalContest contest) {
         super();
-        this.contest = contest;
-        packetHandler = new PacketHandler(this, contest);
+        setContest(contest);
     }
 
     public void sendToLocalServer(Packet packet) {
@@ -3171,6 +3173,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void setContest(IInternalContest newContest) {
         this.contest = newContest;
+        packetHandler = new PacketHandler(this, newContest);
+        runSubmitterInterfaceManager.setContestAndController(newContest, this);
     }
 
     public void register(UIPlugin plugin) {
@@ -3464,5 +3468,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         sendToLocalServer(packet);
 
+    }
+
+    public void sendRunToSubmissionInterface(Run run, RunFiles runFiles) {
+        runSubmitterInterfaceManager.sendRun (run, runFiles);
     }
 }

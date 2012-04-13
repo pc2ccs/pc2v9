@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -631,4 +632,11 @@ public interface IInternalController {
     void startPlayback(PlaybackInfo playbackInfo);
     
     void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception;
+    
+    /**
+     * Send submitted run to Run Submission Interface.
+     * @param run
+     * @param runFiles
+     */
+    void sendRunToSubmissionInterface (Run run, RunFiles runFiles);
 }

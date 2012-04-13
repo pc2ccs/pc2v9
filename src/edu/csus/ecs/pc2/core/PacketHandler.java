@@ -1509,8 +1509,6 @@ public class PacketHandler {
             }
         }
         
-        
-        
         Run run = contest.acceptRun(submittedRun, runFiles);
 
         // Send to team
@@ -1523,6 +1521,8 @@ public class PacketHandler {
             Packet dupSubmissionPacket = PacketFactory.createRunSubmissionConfirmation(contest.getClientId(), fromId, run, runFiles);
             controller.sendToServers(dupSubmissionPacket);
         }
+        
+        controller.sendRunToSubmissionInterface(run, runFiles);
 
     }
 
