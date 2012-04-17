@@ -2,7 +2,7 @@ package edu.csus.ecs.pc2.ccs;
 
 import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -38,16 +38,20 @@ public class RunSubmitterInterfaceManager implements UIPlugin {
         ContestInformation contestInformation = inContest.getContestInformation();
 
         if (contestInformation == null) {
-            getLog().info("No Run Submission Interface defined");
+            info("No Run Submission Interface defined");
         } else if (contestInformation.getRsiCommand() == null) {
-            getLog().info("No Run Submission Interface defined");
+            info("No Run Submission Interface defined");
         } else {
-            getLog().info("Run Submission Interface command is: " + contestInformation.getRsiCommand());
+            info("Run Submission Interface command is: " + contestInformation.getRsiCommand());
         }
     }
 
-    private Log getLog() {
-        return controller.getLog();
+    private void info(String string) {
+        if (controller != null && controller.getLog() != null) {
+            controller.getLog().info(string);
+        } else if (Utilities.isDebugMode()) {
+            System.err.println(string);
+        }
     }
 
     public String getPluginTitle() {
@@ -64,9 +68,9 @@ public class RunSubmitterInterfaceManager implements UIPlugin {
         String command = contest.getContestInformation().getRsiCommand();
 
         Problem problem = contest.getProblem(run.getProblemId());
-        getLog().info("RSI Command before: " + command);
+        info("RSI Command before: " + command);
         String newCommand = commandVariableReplacer.substituteAllStrings(contest, run, runFiles, command, null, contest.getProblemDataFile(problem));
-        getLog().info("RSI Command  after: " + newCommand);
+        info("RSI Command  after: " + newCommand);
 
         // TODO construct command
 
