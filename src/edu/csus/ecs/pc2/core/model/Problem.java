@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.core.model;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 
 /**
  * Problem Definition.
@@ -174,6 +176,17 @@ public class Problem implements IElementObject {
     private String colorName;
 
     private String colorRGB;
+
+    /**
+     * Files are not stored on pc2 server, they are at an external location 
+     * pointed to by {@link #getDataLoadYAMLPath()}.
+     */
+    private boolean usingExternalDataFiles = false;
+    
+    /**
+     * Base location where external data files are stored.
+     */
+    private String dataLoadYAMLPath = null;
     
     /**
      * Create a problem with the display name.
@@ -610,11 +623,19 @@ public class Problem implements IElementObject {
             if (! StringUtilities.stringSame(shortName, problem.getShortName())){
                 return false;
             }
+            
+            if (! StringUtilities.stringSame(dataLoadYAMLPath, problem.getDataLoadYAMLPath())){
+                return false;
+            }
+            
+            if (usingExternalDataFiles != problem.usingExternalDataFiles) {
+                return false;
+            }
 
             return true;
         } catch (Exception e) {
-            // TODO Log to static exception Log
-            e.printStackTrace();
+            StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);
+            e.printStackTrace(System.err);
             return false;
         }
     }
@@ -763,6 +784,30 @@ public class Problem implements IElementObject {
     public String getColorRGB() {
         return colorRGB;
     }
+
     
-    
+    /**
+     * @return true if not storing files on pc2 server.
+     */
+    public boolean isUsingExternalDataFiles() {
+        return usingExternalDataFiles;
+    }
+
+    /**
+     * @return location where problem.yaml was loaded from
+     */
+    public String getDataLoadYAMLPath() {
+        return dataLoadYAMLPath;
+    }
+
+    /**
+     * @param usingExternalDataFiles
+     */
+    public void setUsingExternalDataFiles(boolean usingExternalDataFiles) {
+        this.usingExternalDataFiles = usingExternalDataFiles;
+    }
+
+    public void setDataLoadYAMLPath(String dataLoadYAMLPath) {
+        this.dataLoadYAMLPath = dataLoadYAMLPath;
+    }
 }

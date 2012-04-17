@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -39,7 +40,6 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
-import java.awt.Dimension;
 
 /**
  * Add/Edit Problem Pane.
@@ -206,6 +206,10 @@ public class EditProblemPane extends JPanePlugin {
 
     private JSerializFilePicker validatorRunFilePicker = null;
 
+    private boolean usingExternalDataFiles;
+
+    private String loadPath;
+    
     /**
      * This method initializes
      * 
@@ -472,16 +476,17 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                 } else {
-                    getLog().log(Log.DEBUG, "No ProblemDataFiles for " + problem);
+                    logDebugException( "No ProblemDataFiles for " + problem);
                 }
 
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
-                getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
+                logDebugException ("Input Problem (but not saving) ", e);
+                
                 enableButton = true;
             } catch (Exception ex) {
-                getLog().log(Log.DEBUG, "Edit Problem ", ex);
+                logDebugException("Edit Problem ", ex);
                 showMessage("Error, check logs.  " + ex.getMessage());
             }
 
@@ -499,6 +504,23 @@ public class EditProblemPane extends JPanePlugin {
         }
         enableUpdateButtons(enableButton);
 
+    }
+
+    private void logDebugException(String string) {
+        if (Utilities.isDebugMode()) {
+            System.err.print("Debug message " + string);
+        }
+        getLog().log(Log.DEBUG, string);
+    }
+
+    private void logDebugException(String string, Exception e) {
+
+        if (Utilities.isDebugMode()) {
+            System.err.print("Debug message " + string);
+            e.printStackTrace(System.err);
+        }
+        getLog().log(Log.DEBUG, string, e);
+        
     }
 
     /**
@@ -722,6 +744,9 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setManualReview(false);
             checkProblem.setPrelimaryNotification(false);
         }
+        
+        checkProblem.setUsingExternalDataFiles(usingExternalDataFiles);
+        checkProblem.setDataLoadYAMLPath(loadPath);
 
         return checkProblem;
 
@@ -1024,7 +1049,8 @@ public class EditProblemPane extends JPanePlugin {
                 @SuppressWarnings("unused")
                 Problem changedProblem = getProblemFromFields(inProblem);
             } catch (InvalidFieldValue e) {
-                e.printStackTrace();
+                logException("Problem with input Problem fields", e);
+                e.printStackTrace(System.err);
             }
 
         } else {
@@ -1049,6 +1075,8 @@ public class EditProblemPane extends JPanePlugin {
      * @param problemDataFiles
      */
     private void setForm(Problem inProblem, ProblemDataFiles problemDataFiles) {
+        
+        
         problemNameTextField.setText(inProblem.getDisplayName());
         timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
         inputDataFileLabel.setText(inProblem.getDataFileName());
@@ -1122,6 +1150,9 @@ public class EditProblemPane extends JPanePlugin {
         getDeleteProblemCheckBox().setSelected(!inProblem.isActive());
 
         populateJudging(inProblem);
+        
+        usingExternalDataFiles = problem.isUsingExternalDataFiles();
+        loadPath = problem.getDataLoadYAMLPath();
     }
 
     /*
@@ -1997,7 +2028,7 @@ public class EditProblemPane extends JPanePlugin {
             } // else no need to refresh, no file found.
 
         } catch (Exception ex99) {
-            getLog().log(Log.DEBUG, "Exception ", ex99);
+            logDebugException( "Exception ", ex99);
         }
 
         return false;
@@ -2275,7 +2306,7 @@ public class EditProblemPane extends JPanePlugin {
 
         } catch (Exception e) {
             logException("Unable to load problem YAML from " + filename, e);
-            e.printStackTrace();
+            e.printStackTrace(System.err);
             showMessage("Problem loading file(s), check log.  " + e.getMessage());
         }
     }

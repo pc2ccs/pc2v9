@@ -54,7 +54,7 @@ public class ProblemTest extends TestCase {
     }
 
     // private void checkString(String string, boolean b, boolean c, Problem p1, Problem p2) {
-    public void checkString(String title, boolean expected, boolean found, Problem problem1, Problem problem2) {
+    public void checkBoolean(String title, boolean expected, boolean found, Problem problem1, Problem problem2) {
         assertFalse("Is same as, should not be:  " + title + " expected " + expected + " found " + found, problem1.isSameAs(problem2));
         assertFalse("Is same as, should not be:  " + title + " expected " + found + " found " + expected, problem2.isSameAs(problem1));
     }
@@ -109,15 +109,15 @@ public class ProblemTest extends TestCase {
 
         p2 = getProblemAnew();
         p2.setReadInputDataFromSTDIN(true);
-        checkString("setReadInputDataFromSTDIN foo", p1.isReadInputDataFromSTDIN(), p2.isReadInputDataFromSTDIN(), p1, p2);
+        checkBoolean("setReadInputDataFromSTDIN foo", p1.isReadInputDataFromSTDIN(), p2.isReadInputDataFromSTDIN(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setValidatedProblem(false);
-        checkString("setValidatedProblem foo", p1.isValidatedProblem(), p2.isValidatedProblem(), p1, p2);
+        checkBoolean("setValidatedProblem foo", p1.isValidatedProblem(), p2.isValidatedProblem(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setUsingPC2Validator(false);
-        checkString("setUsingPC2Validator", p1.isUsingPC2Validator(), p2.isUsingPC2Validator(), p1, p2);
+        checkBoolean("setUsingPC2Validator", p1.isUsingPC2Validator(), p2.isUsingPC2Validator(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setValidatorCommandLine(null);
@@ -125,19 +125,19 @@ public class ProblemTest extends TestCase {
 
         p2 = getProblemAnew();
         p2.setShowValidationToJudges(true);
-        checkString("setShowValidationToJudges", p1.isShowValidationToJudges(), p2.isShowValidationToJudges(), p1, p2);
+        checkBoolean("setShowValidationToJudges", p1.isShowValidationToJudges(), p2.isShowValidationToJudges(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setHideOutputWindow(false);
-        checkString("setHideOutputWindow", p1.isHideOutputWindow(), p2.isHideOutputWindow(), p1, p2);
+        checkBoolean("setHideOutputWindow", p1.isHideOutputWindow(), p2.isHideOutputWindow(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setShowCompareWindow(false);
-        checkString("setShowCompareWindow", p1.isShowCompareWindow(), p2.isShowCompareWindow(), p1, p2);
+        checkBoolean("setShowCompareWindow", p1.isShowCompareWindow(), p2.isShowCompareWindow(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setIgnoreSpacesOnValidation(false);
-        checkString("setIgnoreSpacesOnValidation", p1.isIgnoreSpacesOnValidation(), p2.isIgnoreSpacesOnValidation(), p1, p2);
+        checkBoolean("setIgnoreSpacesOnValidation", p1.isIgnoreSpacesOnValidation(), p2.isIgnoreSpacesOnValidation(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setWhichPC2Validator(2);
@@ -154,6 +154,14 @@ public class ProblemTest extends TestCase {
         p2 = getProblemAnew();
         p2.setDisplayName("Different Problem Name");
         checkString("setDisplayName", p1.getDisplayName(), p2.getDisplayName(), p1, p2);
+        
+        p2 = getProblemAnew();
+        p2.setDataLoadYAMLPath("/tmp");
+        checkString("setDataLoadYAMLPath", p1.getDataLoadYAMLPath(), p2.getDataLoadYAMLPath(), p1, p2);
+        
+        p2 = getProblemAnew();
+        p2.setUsingExternalDataFiles(true);
+        checkBoolean("setUsingExternalDataFiles", p1.isUsingExternalDataFiles(), p2.isUsingExternalDataFiles(), p1, p2);
     }
     
     public void testCopy() {
