@@ -67,6 +67,10 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
             setTitle("Add New Problem");
         } else {
             setTitle("Edit Problem " + problem.getDisplayName());
+            if (problem.isUsingExternalDataFiles()) {
+                setTitle("Edit Problem " + problem.getDisplayName()+" ("+problem.getDataLoadYAMLPath()+")");
+            }
+            
         }
         getProblemPane().setProblem(problem);
     }

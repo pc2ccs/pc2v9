@@ -131,6 +131,8 @@ public class ExportYAML {
         contestWriter.println("running: " + contestTime.isContestRunning());
 
         contestWriter.println("scoreboard-freeze: ");
+        
+        contestWriter.println(ContestYAMLLoader.PROBLEM_EXTERNAL_FILES_KEY + ": true");
 
         contestWriter.println();
 
@@ -229,6 +231,8 @@ public class ExportYAML {
                 contestWriter.println("    color: " + colorName);
             }
             // else no color, nothing to print.
+            
+            contestWriter.println("  " + ContestYAMLLoader.PROBLEM_EXTERNAL_FILES_KEY + ": " + problem.isUsingExternalDataFiles());
 
              String[] filesWritten = writeProblemYAML(contest, directoryName, problem, shortName);
 

@@ -105,6 +105,15 @@ public class ContestYAMLLoader {
     public static final String INPUT_KEY = "input";
 
     /**
+     * 
+     */
+    public static final String PROBLEM_EXTERNAL_FILES_KEY = "use-external-data-files";
+    
+    // SOMEDAY use loadingFromExternalFiles as default value
+    @SuppressWarnings("unused")
+    private boolean loadingFromExternalFiles = true;
+
+    /**
      * Contest wide validator name.
      * 
      * This will be overridden by the individual problem validator name.  If
@@ -181,6 +190,8 @@ public class ContestYAMLLoader {
 
             }
         }
+        
+        loadingFromExternalFiles = getBooleanValue(getSequenceValue(yamlLines, PROBLEM_EXTERNAL_FILES_KEY), true);
 
         // TODO CCS add contest settings
         // short-name: ICPC WF 2011
@@ -461,6 +472,11 @@ public class ContestYAMLLoader {
         String[] sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
 
         boolean ccsStandardProblem = getSequenceValue(sectionLines, "answerfile") == null;
+        problem.setUsingExternalDataFiles(ccsStandardProblem);
+        
+        if (problem.isUsingExternalDataFiles()) {
+            problem.setDataLoadYAMLPath(problemDirectory);
+        }
 
         String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
 
@@ -562,6 +578,12 @@ public class ContestYAMLLoader {
             throw new YamlLoadException("No answer file names found for " + problem.getDisplayName() + " in dir "+dataFileBaseDirectory);
         }
         
+        /**
+         * Data files are external so data files should not be loaded into
+         * problem data files.
+         */
+        boolean doNotLoadDataFiles = problem.isUsingExternalDataFiles();
+        
         if (inputFileNames.length == answerFileNames.length) {
 
             Arrays.sort(inputFileNames);
@@ -581,12 +603,16 @@ public class ContestYAMLLoader {
                 checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in "+dataFileBaseDirectory );
                 checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in "+dataFileBaseDirectory);
 
-                serializedFileDataFiles[idx] = new SerializedFile(dataFileName);
-                serializedFileAnswerFiles[idx] = new SerializedFile(answerFileName);
+                 if (doNotLoadDataFiles) {
+                     serializedFileDataFiles[idx] = new SerializedFile(dataFileName);
+                     serializedFileAnswerFiles[idx] = new SerializedFile(answerFileName);
+                 }
             }
 
-            problemDataFiles.setJudgesDataFiles(serializedFileDataFiles);
-            problemDataFiles.setJudgesAnswerFiles(serializedFileAnswerFiles);
+            if (doNotLoadDataFiles) {
+                problemDataFiles.setJudgesDataFiles(serializedFileDataFiles);
+                problemDataFiles.setJudgesAnswerFiles(serializedFileAnswerFiles);
+            }
             
             problem.setReadInputDataFromSTDIN(false);
             problem.setAnswerFileName(serializedFileAnswerFiles[0].getName());
@@ -932,6 +958,10 @@ public class ContestYAMLLoader {
              problem.setLetter(problemLetter);
              problem.setColorName(colorName);
              problem.setColorRGB(colorRGB);
+             
+             // SOMEDAY figure out how to override the setUsingExternalDataFiles in loadProblemAndFilesAndValidators
+//             String externalFilesUsesString = getSequenceValue(sequenceLines, PROBLEM_EXTERNAL_FILES_KEY);
+//             problem.setUsingExternalDataFiles(getBooleanValue(externalFilesUsesString, true));
 
             // debug code
             // System.out.println("Problem   : " + problemKeyName);
@@ -1178,8 +1208,8 @@ public class ContestYAMLLoader {
 
         int number = defaultNumber;
 
-        if (string != null && string.length() != 0) {
-            number = Integer.parseInt(string);
+        if (string != null && string.length() > 0) {
+            number = Integer.parseInt(string.trim());
         }
 
         return number;
@@ -1189,7 +1219,7 @@ public class ContestYAMLLoader {
 
         boolean value = defaultBoolean;
 
-        if (string != null && string.length() != 0) {
+        if (string != null && string.length() > 0) {
             string = string.trim();
             if (string.equalsIgnoreCase("yes")) {
                 value = true;
