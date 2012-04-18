@@ -664,6 +664,7 @@ public class SubmitRunPane extends JPanePlugin {
     private void selectMainFile() {
         JFileChooser chooser = new JFileChooser(lastOpenedFile);
         try {
+            chooser.setDialogTitle("Open Source Code File");
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File newFile = chooser.getSelectedFile().getCanonicalFile();
@@ -944,6 +945,7 @@ public class SubmitRunPane extends JPanePlugin {
 
         JFileChooser chooser = new JFileChooser(lastOpenedFile);
         try {
+            chooser.setDialogTitle("Open Additional Source Code File");
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File newFile = chooser.getSelectedFile().getCanonicalFile();

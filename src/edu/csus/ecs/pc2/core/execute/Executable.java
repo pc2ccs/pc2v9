@@ -734,6 +734,7 @@ public class Executable {
         String outFileName = null;
         JFileChooser chooser = new JFileChooser(mainFileDirectory);
         try {
+            chooser.setDialogTitle("Open Test Input File");
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 mainFileDirectory = chooser.getCurrentDirectory().getAbsolutePath();
@@ -794,7 +795,14 @@ public class Executable {
             executionTimer.startTimer();
 
             if (problem.getDataFileName() != null) {
-                inputDataFileName = prefixExecuteDirname(problem.getDataFileName());
+                if (problem.isReadInputDataFromSTDIN()) {
+                    // we are using createTempFile just to get a temp name, not to avoid conflicts
+                    File output = File.createTempFile("__t", ".in", new File(getExecuteDirectoryName()));
+                    inputDataFileName = prefixExecuteDirname(output.getName());
+                    output.delete(); // will be created later
+                } else {
+                    inputDataFileName = prefixExecuteDirname(problem.getDataFileName());
+                }
             }
 
             if (isTestRunOnly()) {
