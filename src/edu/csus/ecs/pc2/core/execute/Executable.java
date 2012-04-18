@@ -803,7 +803,14 @@ public class Executable {
             executionTimer.startTimer();
 
             if (problem.getDataFileName() != null) {
-                inputDataFileName = prefixExecuteDirname(problem.getDataFileName());
+                if (problem.isReadInputDataFromSTDIN()) {
+                    // we are using createTempFile just to get a temp name, not to avoid conflicts
+                    File output = File.createTempFile("__t", ".in", new File(getExecuteDirectoryName()));
+                    inputDataFileName = prefixExecuteDirname(output.getName());
+                    output.delete(); // will be created later
+                } else {
+                    inputDataFileName = prefixExecuteDirname(problem.getDataFileName());
+                }
             }
 
             if (isTestRunOnly()) {
