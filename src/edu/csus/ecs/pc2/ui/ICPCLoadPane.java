@@ -366,7 +366,8 @@ public class ICPCLoadPane extends JPanePlugin {
 
         JFileChooser chooser = new JFileChooser(startDirectory);
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        
+        chooser.setDialogTitle("Open tab-separated file");
+
         FileFilter filterYAML = new FileNameExtensionFilter( "TSV document (*.tsv)", "tsv");
         chooser.addChoosableFileFilter(filterYAML);
         

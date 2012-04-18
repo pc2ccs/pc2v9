@@ -587,6 +587,7 @@ public class AccountsPane extends JPanePlugin {
         // chooser.addChoosableFileFilter(filter);
         // or??
         // chooser.setFileFilter(filter);
+        chooser.setDialogTitle("Open tab-separated accounts file");
         showMessage("");
         int returnVal = chooser.showOpenDialog(this);
         String msg = "";
@@ -724,6 +725,7 @@ public class AccountsPane extends JPanePlugin {
 
     protected void saveAccountsToDisk() {
         JFileChooser chooser = new JFileChooser(lastDir);
+        chooser.setDialogTitle("Save accounts to file");
         FileFilter filterTAB = new FileNameExtensionFilter(TEXT_DESCRIPTION, "txt", "tab");
         chooser.addChoosableFileFilter(filterTAB);
         FileFilter filterCSV = new FileNameExtensionFilter(CSV_DESCRIPTION, "csv");

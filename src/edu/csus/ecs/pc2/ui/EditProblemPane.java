@@ -1461,7 +1461,7 @@ public class EditProblemPane extends JPanePlugin {
             selectFileButton.setText("Browse");
             selectFileButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (selectFile(inputDataFileLabel)) {
+                    if (selectFile(inputDataFileLabel, "Open Input Data File")) {
                         inputDataFileLabel.setToolTipText(inputDataFileLabel.getText());
                     }
                     enableUpdateButton();
@@ -1545,7 +1545,7 @@ public class EditProblemPane extends JPanePlugin {
             answerBrowseButton.setText("Browse");
             answerBrowseButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (selectFile(answerFileNameLabel)) {
+                    if (selectFile(answerFileNameLabel, "Open Judges Answer File")) {
                         answerFileNameLabel.setToolTipText(answerFileNameLabel.getText());
                     }
                     enableUpdateButton();
@@ -1567,10 +1567,11 @@ public class EditProblemPane extends JPanePlugin {
      * select file, if file picked updates label.
      * 
      * @param label
+     * @param dialogTitle title for file chooser
      * @return True is a file was select and label updated
      * @throws Exception
      */
-    private boolean selectFile(JLabel label) {
+    private boolean selectFile(JLabel label, String dialogTitle) {
         boolean result = false;
         // toolTip should always have the full path
         String oldFile = label.getToolTipText();
@@ -1581,6 +1582,9 @@ public class EditProblemPane extends JPanePlugin {
             startDir = oldFile;
         }
         JFileChooser chooser = new JFileChooser(startDir);
+        if (dialogTitle != null) {
+            chooser.setDialogTitle(dialogTitle);
+        }
         try {
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1871,7 +1875,7 @@ public class EditProblemPane extends JPanePlugin {
             validatorProgramJButton.setText("...");
             validatorProgramJButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (selectFile(externalValidatorLabel)) {
+                    if (selectFile(externalValidatorLabel, "Open Validator Program")) {
                         externalValidatorLabel.setToolTipText(externalValidatorLabel.getText());
                         enableUpdateButton();
                     }

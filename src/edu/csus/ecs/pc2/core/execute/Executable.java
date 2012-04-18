@@ -742,6 +742,7 @@ public class Executable {
         String outFileName = null;
         JFileChooser chooser = new JFileChooser(mainFileDirectory);
         try {
+            chooser.setDialogTitle("Open Test Input File");
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 mainFileDirectory = chooser.getCurrentDirectory().getAbsolutePath();
