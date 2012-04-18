@@ -21,6 +21,28 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 public class CommandVariableReplacer {
 
     /**
+     * CCS RSI command line options.
+     */
+    public static final String OPTIONS = "{:options}";
+
+    /**
+     * All files, main file and additional files.
+     * 
+     */
+    public static final String FILELIST = "{:filelist}";
+
+    /**
+     * Main file name.
+     * 
+     */
+    public static final String MAINFILE = "{:mainfile}";
+
+    /**
+     * Main file name without extension.
+     */
+    public static final String BASENAME = "{:basename}";
+
+    /**
      * Replace all instances of beforeString with afterString.
      * 
      * If before string is not found, then returns original string.
@@ -33,9 +55,9 @@ public class CommandVariableReplacer {
      *            string to replace beforeString
      * @return original string with all beforeString instances replaced with afterString
      */
-    protected String replaceString(String origString, String beforeString, String afterString) {
+    public static String replaceString(String origString, String beforeString, String afterString) {
 
-        if (origString == null) {
+        if (origString == null || afterString == null) {
             return origString;
         }
 
@@ -117,8 +139,8 @@ public class CommandVariableReplacer {
             throw new IllegalArgumentException("RunFiles.getMainFile is null");
         }
 
-        newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
-        newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
+        newString = replaceString(origString, MAINFILE, runFiles.getMainFile().getName());
+        newString = replaceString(newString, BASENAME, removeExtension(runFiles.getMainFile().getName()));
 
         String validatorCommand = null;
 

@@ -3244,6 +3244,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         if (StaticLog.getLog() != null) {
             StaticLog.getLog().log(Log.WARNING, "Exception - "+message, e);
+            
+            if (Utilities.isDebugMode()){
+                System.err.println("Exception - "+message);
+                e.printStackTrace(System.err);
+            }
         } else {
             System.err.println("Exception - "+message);
             e.printStackTrace(System.err);
@@ -3471,6 +3476,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void sendRunToSubmissionInterface(Run run, RunFiles runFiles) {
-        runSubmitterInterfaceManager.sendRun (run, runFiles);
+        
+        
+        try {
+            runSubmitterInterfaceManager.sendRun (run, runFiles);
+        } catch (Exception e) {
+            logException("Failure in RSI ", e);
+            e.printStackTrace();
+        }
     }
 }
