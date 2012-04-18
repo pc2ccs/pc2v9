@@ -130,8 +130,9 @@ public class RunSubmitterInterfaceManager implements UIPlugin {
                 info("RSI Command  after: " + newCommand);
 
                 String[] env = null;
-                File directory = new File(runDir);
-                info("RSI execute: " + newCommand);
+                File directory = new File(".");
+                info("RSI execute dir: " + Utilities.getCurrentDirectory());
+                info("RSI execute cmd: " + newCommand);
                 // Process process = Runtime.getRuntime().exec(newCommand, env, directory);
                 Runtime.getRuntime().exec(newCommand, env, directory);
 
