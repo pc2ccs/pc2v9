@@ -246,12 +246,12 @@ public class RunSubmitterInterfaceManager implements UIPlugin {
                 .append(run.getSubmitter().getClientNumber()) //
                 .append(" -m ") //
                 .append(mainfileName) //
-                .append(" - i ") //
+                .append(" -i ") //
                 .append(run.getNumber()) //
                 .append(" -t ") //
-                .append(run.getElapsedMS()) //
-                .append(" -w ") //
-                .append(account.getPassword());
+                .append(run.getElapsedMS()); //
+//                .append(" -w ") //
+//                .append(account.getPassword());
 
         newCommand = CommandVariableReplacer.replaceString(newCommand, CommandVariableReplacer.MAINFILE, mainfileName);
 
