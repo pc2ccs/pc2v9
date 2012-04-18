@@ -1095,9 +1095,123 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         scoreboardTest (2, runsData, alt4rankData, alt4);
 
     }
+    /**
+     * This is a test for bug 691
+     */
+    public void testDeletedProblem() throws IOException, ClassNotFoundException, FileSecurityException {
+ 
+        InternalContest contest = new InternalContest();
+
+        int numTeams = 2;
+        initData(contest, numTeams , 5);
+        String [] runsData = {
+
+                "1,1,A,1,No",  //20
+                "2,1,A,3,Yes",  //3 (first yes counts Minutes only)
+                "3,1,A,5,No",  //20
+                "4,1,A,7,Yes",  //20  
+                "5,1,A,9,No",  //20
+                
+                "6,1,B,11,No",  //20  (all runs count)
+                "7,1,B,13,No",  //20  (all runs count)
+                
+                "8,2,A,30,Yes",  //30
+                
+                "9,2,B,35,No",  //20 (all runs count)
+                "10,2,B,40,No",  //20 (all runs count)
+                "11,2,B,45,No",  //20 (all runs count)
+                "12,2,B,50,No",  //20 (all runs count)
+                "13,2,B,55,No",  //20 (all runs count)
+
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team1,0,0",
+                "1,team2,0,0"
+        };
+
+        for (String runInfoLine : runsData) {
+            addTheRun(contest, runInfoLine);
+        }
+
+        Problem probA = contest.getProblems()[0];
+        probA.setActive(false);
+        contest.updateProblem(probA);
+        Problem probA1 = contest.getProblem(probA.getElementId());
+        assertEquals("probA1 setup", false, probA1.isActive());
+        Problem probA2 = contest.getProblems()[0];
+        assertEquals("probA2 setup", false, probA2.isActive());
+        confirmRanks(contest, rankData);
+        Document document = null;
+
+        try {
+            DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+            String xmlString = defaultScoringAlgorithm.getStandings(contest, null, log);
+            if (debugMode) {
+                System.out.println(xmlString);
+            }
+            // getStandings should always return a well-formed xml
+            assertFalse("getStandings returned null ", xmlString == null);
+            assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
+
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+
+        } catch (Exception e) {
+            assertTrue("Error in XML output " + e.getMessage(), true);
+            e.printStackTrace();
+        }
+        
+        // skip past nodes to find teamStanding node
+        NodeList list = document.getDocumentElement().getChildNodes();
+        
+        int rankIndex = 0;
+        
+        for(int i=0; i<list.getLength(); i++) {
+            Node node = (Node)list.item(i);
+            String name = node.getNodeName();
+            if (name.equals("teamStanding")){
+                String [] standingsRow = fetchStanding (node);
+//              Object[] cols = { "Rank", "Name", "Solved", "Points" };
+                String [] cols = rankData[rankIndex].split(",");
+
+                if (debugMode) {
+                    System.out.println("SA rank="+standingsRow[0]+" solved="+standingsRow[2]+" points="+standingsRow[3]+" name="+standingsRow[1]);
+                    System.out.println("   rank="+cols[0]+" solved="+cols[2]+" points="+cols[3]+" name="+cols[1]);
+                    System.out.println();
+                    System.out.flush();
+                }
+                
+                compareRanking (rankIndex+1, standingsRow, cols);
+                rankIndex++;
+            } else if(name.equals("standingsHeader")) {
+                String problemCount = node.getAttributes().getNamedItem("problemCount").getNodeValue();
+                int problemCountInt = Integer.valueOf(problemCount);
+                NodeList list2 =  node.getChildNodes();
+                int foundProblemCount = -1;
+                for(int j=0; j<list2.getLength(); j++) {
+                    Node node2 = (Node)list2.item(j);
+                    String name2 = node2.getNodeName();
+                    if (name2.equals("problem")){
+                        int id = Integer.valueOf(node2.getAttributes().getNamedItem("id").getNodeValue());
+                        if (id > foundProblemCount) {
+                            foundProblemCount = id;
+                        }
+                    }
+                }
+                assertEquals("problem list max id",problemCountInt, foundProblemCount);
+                assertEquals("problemCount","4", problemCount);
+            }
+        }
+
+    }
+
     private void scoreboardTest(int numTeams, String[] runsData, String[] rankData, Properties scoreProps) {
         scoreboardTest (numTeams, runsData, rankData, false, scoreProps);
-        
+         
     }
     
     private void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo, Properties scoreProps) {
