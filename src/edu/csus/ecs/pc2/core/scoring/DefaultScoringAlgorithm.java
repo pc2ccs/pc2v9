@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -267,8 +268,24 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         IMemento summaryMememento = createSummaryMomento (theContest.getContestInformation(), mementoRoot);
         
         AccountList accountList = getAccountList(theContest);
-        Problem[] problems = theContest.getProblems();
-        // TODO are these counts off by 1?  
+        Problem[] allProblems = theContest.getProblems();
+        Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
+        int p2 = 0;
+        for (int p=1; p <= allProblems.length ; p++) {
+            Problem prob = allProblems[p-1];
+            if (prob.isActive()) {
+                p2++;
+                problemsIndexHash.put(prob.getElementId(), new Integer(p2));
+            }
+        }
+        Problem[] problems = new Problem[p2];
+        Set<ElementId> keys = problemsIndexHash.keySet();
+        for (Iterator<ElementId> iterator = keys.iterator(); iterator.hasNext();) {
+            ElementId type = (ElementId) iterator.next();
+            int p = Integer.valueOf(problemsIndexHash.get(type));
+            problems[p-1] = theContest.getProblem(type);
+        }
+
         summaryMememento.putLong("problemCount", problems.length);
         Site[] sites = theContest.getSites();
         summaryMememento.putInteger("siteCount", sites.length);
@@ -286,11 +303,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 balloonSettingsMemento.putInteger("id", id);
                 dumpBalloonSettings(balloonSettings[i], problems, balloonSettingsMemento);
             }
-        }
-
-        Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
-        for (int p=1; p <= problems.length ; p++) {
-            problemsIndexHash.put(problems[p-1].getElementId(), new Integer(p));
         }
         Run[] runs = theContest.getRuns();
         synchronized (mutex) {
