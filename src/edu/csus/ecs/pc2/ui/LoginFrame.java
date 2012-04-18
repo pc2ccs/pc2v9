@@ -25,7 +25,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
@@ -441,6 +440,10 @@ public class LoginFrame extends JFrame implements UIPlugin {
         // these are the ibm jre checksums
         byte[] csusChecksum3 = {-46, -84, -66, 55, 82, -78, 124, 88, 68, -83, -128, -110, -19, -26, 92, -3, 76, -26, 21, 30};
         byte[] icpcChecksum3 = {41, 72, 104, 75, 73, 55, 55, 93, 32, 35, -6, -12, -96, -23, -3, -17, -119, 26, 81, -2};
+        
+        // this is the jdk 1.7 checksum for icpc_banner
+        byte[] icpcChecksum4 = {35, 40, -57, -30, -7, 121, 59, 25, 3, 26, -82, -75, -65, 123, 54, -57, 39, 36, -3, 107};
+
         byte[] verifyChecksum;
         
         try {
@@ -473,11 +476,29 @@ public class LoginFrame extends JFrame implements UIPlugin {
                     case 41:
                         verifyChecksum = icpcChecksum3;
                         break;
+                    case 35:
+                        verifyChecksum = icpcChecksum4;
+                        break;
                     default:
                         verifyChecksum = icpcChecksum;
                         break;
                 } 
             }
+
+            if (edu.csus.ecs.pc2.core.Utilities.isDebugMode()) {
+                System.out.println ();
+                System.out.println (inFileName);
+                System.out.print ("byte[] ChecksumX = {");
+                 
+                for (int i = 0; i < digested.length; i++) {
+                    System.out.print(digested[i]);
+                    if (i < digested.length -1) {
+                        System.out.print(", ");
+                    }
+                }
+                System.out.println("};");
+            }
+            
             for (int i = 0; i < digested.length; i++) {
                 if (digested[i] == verifyChecksum[i]) {
                     matchedBytes++;
