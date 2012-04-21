@@ -6,12 +6,12 @@ import java.io.IOException;
 import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -125,7 +125,25 @@ public class RunSubmitterInterfaceManager implements UIPlugin {
 
             try {
 
-                String newCommand = substituteVariables(command, run, runFiles, runDir);
+                String mainfileName = commandVariableReplacer.getMainFileName(runDir, runFiles);
+
+                createFile(runFiles.getMainFile(), mainfileName);
+                info("RSI wrote " + mainfileName);
+                
+                if (runFiles.getOtherFiles() != null) {
+                    for (SerializedFile file : runFiles.getOtherFiles()) {
+                        String outfilename = runDir + File.separator + file.getName();
+                        createFile(file, outfilename);
+                        info("RSI wrote addnl file:  " + outfilename);
+                    }
+                }
+                
+                Problem problem = contest.getProblem(run.getProblemId());
+                ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
+
+                ExecutionData executionData = null;
+                
+                String newCommand = commandVariableReplacer.substituteVariables(command, contest, run, runFiles, runDir, executionData, problemDataFiles);
 
                 info("RSI Command  after: " + newCommand);
 
@@ -149,6 +167,7 @@ public class RunSubmitterInterfaceManager implements UIPlugin {
         }
     }
 
+
     /**
      * Create disk file for input SerializedFile.
      * 
@@ -168,103 +187,7 @@ public class RunSubmitterInterfaceManager implements UIPlugin {
         return false;
     }
 
-    /**
-     * Create command after substituting various variables.
-     * 
-     * See substitution constants. {@value CommandVariableReplacer#OPTIONS} will substitute:
-     * 
-     * <pre>
-     * -p &lt;problem short-name&gt;, string
-     * -l &lt;language name&gt;, string
-     * -u &lt;team id&gt;, integer
-     * -m &lt;main source filename&gt;, string
-     * -t &lt;contest-time for submission&gt;, integer
-     * -i &lt;run id&gt; unique key for the run, integer
-     * -w &lt;team password&gt;, string
-     * </pre>
-     * 
-     * @param command
-     * @param run
-     * @param runFiles
-     * @param runDir
-     * @return a file with value substituted for variables.
-     * @throws Exception
-     */
-    public String substituteVariables(String command, Run run, RunFiles runFiles, String runDir) throws Exception {
-        /**
-         * Extract files
-         */
-
-        String mainfileName = runDir + File.separator + runFiles.getMainFile().getName();
-        createFile(runFiles.getMainFile(), mainfileName);
-        info("RSI wrote " + mainfileName);
-
-        String fileList = mainfileName;
-
-        if (runFiles.getOtherFiles() != null){
-            for (SerializedFile file : runFiles.getOtherFiles()) {
-                String outfilename = runDir + File.separator + file.getName();
-                createFile(file, outfilename);
-                info("RSI wrote addnl file:  " + outfilename);
-                fileList += " " + outfilename;
-            }
-        }
-
-        Problem problem = contest.getProblem(run.getProblemId());
-        if (problem == null) {
-            throw new Exception("Could not find problem for id=" + run.getProblemId() + " " + run);
-        }
-
-        Language language = contest.getLanguage(run.getLanguageId());
-        if (language == null) {
-            throw new Exception("Could not find language for id=" + run.getLanguageId() + " " + run);
-        }
-
-        Account account = contest.getAccount(run.getSubmitter());
-        if (account == null) {
-            throw new Exception("Could not find account for id=" + run.getSubmitter() + " " + run);
-        }
-
-        String newCommand = command;
-
-        newCommand = CommandVariableReplacer.replaceString(newCommand, CommandVariableReplacer.FILELIST, fileList);
-
-        StringBuffer buffer = new StringBuffer();
-
-        // -p <problem short-name>, string
-        // -l <language name>, string
-        // -u <team id>, integer
-        // -m <main source filename>, string
-        // -t <contest-time for submission>, integer
-        // -i <run id> unique key for the run, integer
-        // -w <team password>, string
-
-        buffer.append(" -p ") //
-                .append(problem.getShortName()) //
-                .append(" -l ") //
-                .append(language.getDisplayName()) //
-                .append(" -u ") //
-                .append(run.getSubmitter().getClientNumber()) //
-                .append(" -m ") //
-                .append(mainfileName) //
-                .append(" -i ") //
-                .append(run.getNumber()) //
-                .append(" -t ") //
-                .append(run.getElapsedMS()); //
-//                .append(" -w ") //
-//                .append(account.getPassword());
-
-        newCommand = CommandVariableReplacer.replaceString(newCommand, CommandVariableReplacer.MAINFILE, mainfileName);
-
-        newCommand = CommandVariableReplacer.replaceString(newCommand, CommandVariableReplacer.BASENAME, removeExtension(mainfileName));
-
-        newCommand = CommandVariableReplacer.replaceString(newCommand, CommandVariableReplacer.OPTIONS, buffer.toString());
-
-        newCommand = commandVariableReplacer.substituteAllStrings(contest, run, runFiles, newCommand, null, contest.getProblemDataFile(problem));
-
-        return newCommand;
-    }
-
+  
     /**
      * Return string minus last extension. <br>
      * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
