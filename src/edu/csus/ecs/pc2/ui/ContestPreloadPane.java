@@ -237,7 +237,7 @@ public class ContestPreloadPane extends JPanePlugin {
         }
 
         if (result != JOptionPane.YES_OPTION) {
-            showMessage("No import done");
+            getLog().info("No YAML loaded from "+directoryName);
             return;
         }
 

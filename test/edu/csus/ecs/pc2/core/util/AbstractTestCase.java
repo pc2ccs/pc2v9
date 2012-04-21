@@ -30,8 +30,8 @@ public class AbstractTestCase extends TestCase {
         super();
     }
 
-    public AbstractTestCase(String name) {
-        super(name);
+    public AbstractTestCase(String testName) {
+        super(testName);
     }
 
     @Override

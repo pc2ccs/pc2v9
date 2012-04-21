@@ -105,14 +105,10 @@ public class ContestYAMLLoader {
     public static final String INPUT_KEY = "input";
 
     /**
-     * 
+     * Use external data files?   (if no, then no file contents loaded into pc2).  
      */
     public static final String PROBLEM_EXTERNAL_FILES_KEY = "use-external-data-files";
     
-    // SOMEDAY use loadingFromExternalFiles as default value
-    @SuppressWarnings("unused")
-    private boolean loadingFromExternalFiles = true;
-
     /**
      * Contest wide validator name.
      * 
@@ -131,8 +127,6 @@ public class ContestYAMLLoader {
     /**
      * Load contest.yaml from directory.
      * 
-     * @see #fromYaml(IInternalContest, String[], String)
-     * 
      * @param contest
      * @param diretoryName
      *            directory to load files from.
@@ -140,13 +134,27 @@ public class ContestYAMLLoader {
      * @throws YamlLoadException
      */
     public IInternalContest fromYaml(IInternalContest contest, String diretoryName) throws YamlLoadException {
+       return fromYaml(contest, diretoryName, true);
+    }
+
+    /**
+     * Load contest.yaml from directory.
+     * 
+     * @param contest
+     * @param diretoryName
+     *            directory to load files from.
+     * @param loadDataFileContents
+     * @return contest
+     * @throws YamlLoadException
+     */
+    public IInternalContest fromYaml(IInternalContest contest, String diretoryName, boolean loadDataFileContents) throws YamlLoadException {
         String[] contents;
         try {
             contents = Utilities.loadFile(diretoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME);
         } catch (IOException e) {
             throw new YamlLoadException(e);
         }
-        return fromYaml(contest, contents, diretoryName);
+        return fromYaml(contest, contents, diretoryName, loadDataFileContents);
     }
 
     /**
@@ -171,7 +179,7 @@ public class ContestYAMLLoader {
      *            lines from YAML file
      * @return
      */
-    public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String diretoryName) throws YamlLoadException {
+    public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String diretoryName, boolean loadDataFileContents) throws YamlLoadException {
 
         contest = createContest(contest);
 
@@ -191,7 +199,7 @@ public class ContestYAMLLoader {
             }
         }
         
-        loadingFromExternalFiles = getBooleanValue(getSequenceValue(yamlLines, PROBLEM_EXTERNAL_FILES_KEY), true);
+        loadDataFileContents = getBooleanValue(getSequenceValue(yamlLines, PROBLEM_EXTERNAL_FILES_KEY), loadDataFileContents);
 
         // TODO CCS add contest settings
         // short-name: ICPC WF 2011
@@ -208,7 +216,7 @@ public class ContestYAMLLoader {
             contest.addLanguage(language);
         }
 
-        Problem[] problems = getProblems(yamlLines, defaultTimeout);
+        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents);
         for (Problem problem : problems) {
             loadProblemAndFilesAndValidators(contest, diretoryName, problem);
         }
@@ -472,11 +480,8 @@ public class ContestYAMLLoader {
         String[] sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
 
         boolean ccsStandardProblem = getSequenceValue(sectionLines, "answerfile") == null;
-        problem.setUsingExternalDataFiles(ccsStandardProblem);
         
-        if (problem.isUsingExternalDataFiles()) {
-            problem.setDataLoadYAMLPath(problemDirectory);
-        }
+        problem.setDataLoadYAMLPath(problemDirectory);
 
         String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
 
@@ -612,11 +617,11 @@ public class ContestYAMLLoader {
             if (doNotLoadDataFiles) {
                 problemDataFiles.setJudgesDataFiles(serializedFileDataFiles);
                 problemDataFiles.setJudgesAnswerFiles(serializedFileAnswerFiles);
+                problem.setAnswerFileName(serializedFileAnswerFiles[0].getName());
+                problem.setDataFileName(serializedFileDataFiles[0].getName());
             }
             
             problem.setReadInputDataFromSTDIN(false);
-            problem.setAnswerFileName(serializedFileAnswerFiles[0].getName());
-            problem.setDataFileName(serializedFileDataFiles[0].getName());
             
         } else {
             throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
@@ -914,10 +919,11 @@ public class ContestYAMLLoader {
      * @param yamlLines
      * @param seconds
      *            timeout for run execution in seconds
+     * @param loadDataFileContents 
      * @return list of {@link Problem}
      * @throws YamlLoadException
      */
-    public Problem[] getProblems(String[] yamlLines, int seconds) throws YamlLoadException {
+    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents) throws YamlLoadException {
 
         String[] sectionLines = getSectionLines(PROBLEMS_KEY, yamlLines);
 
@@ -927,6 +933,18 @@ public class ContestYAMLLoader {
         String[] sequenceLines = getNextSequence(sectionLines, idx);
 
         while (sequenceLines.length > 0) {
+            
+//            if (noActualSectionDef(sequenceLines)) {
+//                idx += sequenceLines.length;
+//                sequenceLines = getNextSequence(sectionLines, idx);
+//                continue;
+//            }
+            
+            if (! sequenceLines[0].trim().startsWith("-")) {
+                idx += sequenceLines.length;
+                sequenceLines = getNextSequence(sectionLines, idx);
+                continue;
+            }
 
             String problemKeyName = getSequenceValue(sequenceLines, "short-name");
             String problemTitle = problemKeyName;
@@ -940,6 +958,13 @@ public class ContestYAMLLoader {
              * </pre>
              */
 
+            if (problemTitle == null && Utilities.isDebugMode()) {
+                // SOMEDAY use Log4j.debug for this
+                for (String s : sequenceLines) {
+                    System.out.println(s);
+                }
+            }
+            
             Problem problem = new Problem(problemTitle);
 
             problem.setTimeOutInSeconds(seconds);
@@ -955,13 +980,12 @@ public class ContestYAMLLoader {
              String colorRGB = getSequenceValue(sequenceLines, "rgb");
 
             // TODO CCS assign Problem variables for color and letter
-             problem.setLetter(problemLetter);
-             problem.setColorName(colorName);
-             problem.setColorRGB(colorRGB);
-             
-             // SOMEDAY figure out how to override the setUsingExternalDataFiles in loadProblemAndFilesAndValidators
-//             String externalFilesUsesString = getSequenceValue(sequenceLines, PROBLEM_EXTERNAL_FILES_KEY);
-//             problem.setUsingExternalDataFiles(getBooleanValue(externalFilesUsesString, true));
+            problem.setLetter(problemLetter);
+            problem.setColorName(colorName);
+            problem.setColorRGB(colorRGB);
+
+            String externalFilesUsesString = getSequenceValue(sequenceLines, PROBLEM_EXTERNAL_FILES_KEY);
+            problem.setUsingExternalDataFiles(getBooleanValue(externalFilesUsesString, loadDataFileContents));
 
             // debug code
             // System.out.println("Problem   : " + problemKeyName);
@@ -976,6 +1000,25 @@ public class ContestYAMLLoader {
         }
 
         return (Problem[]) problemList.toArray(new Problem[problemList.size()]);
+    }
+
+    /**
+     * Return true if are no actual def lines.
+     * 
+     * 
+     * 
+     * @param sequenceLines
+     * @return true if section composed of blank and comment lines only.
+     */
+    private boolean noActualSectionDef(String[] sequenceLines) {
+        int commentLines = 0;
+        
+        for (String string : sequenceLines) {
+            if ("".equals(string.trim()) || string.trim().startsWith("#")){
+                commentLines ++;
+            }
+        }
+        return commentLines == sequenceLines.length;
     }
 
     private void syntaxError(String string) throws YamlLoadException {
@@ -1002,7 +1045,7 @@ public class ContestYAMLLoader {
     public String[] getNextSequence(String[] sectionLines, int idx) {
 
         Vector<String> lines = new Vector<String>();
-
+        
         for (int i = idx; i < sectionLines.length; i++) {
             String line = sectionLines[i];
             if (i > idx && line.trim().startsWith("-")) {
@@ -1215,7 +1258,7 @@ public class ContestYAMLLoader {
         return number;
     }
 
-    private boolean getBooleanValue(String string, boolean defaultBoolean) {
+    protected boolean getBooleanValue(String string, boolean defaultBoolean) {
 
         boolean value = defaultBoolean;
 
@@ -1263,5 +1306,29 @@ public class ContestYAMLLoader {
         loadProblemAndFilesAndValidators(contest, parentDirectory, null);
         
         return contest;
+    }
+
+    
+    /**
+     * 
+     * @param contents
+     * @param defaultTimeOut
+     * @return
+     * @throws YamlLoadException
+     */
+    public Problem[] getProblems(String[] contents, int defaultTimeOut) throws YamlLoadException {
+        return getProblems(contents, defaultTimeOut, true);
+    }
+
+    /**
+     * 
+     * @param contest
+     * @param yamlLines
+     * @param diretoryName
+     * @return
+     * @throws YamlLoadException
+     */
+    public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String diretoryName) throws YamlLoadException {
+        return fromYaml(contest, yamlLines, diretoryName, true);
     }
 }

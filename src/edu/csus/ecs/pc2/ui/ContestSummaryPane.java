@@ -102,8 +102,8 @@ public class ContestSummaryPane extends PluginPane {
                     // } else { // nothing to do here, move on
                 }
             }
-            addContestRow(datCount, "input data files", null);
-            addContestRow(ansCount, "answer data files", null);
+            addContestRow(datCount, "input data file", null);
+            addContestRow(ansCount, "answer data file", null);
         }
 
         addContestRow(languages.length, "language", new LanguagesReport());

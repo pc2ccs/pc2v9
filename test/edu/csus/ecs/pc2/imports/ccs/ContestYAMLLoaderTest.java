@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -633,6 +634,77 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertNotNull("Expecting problem name for " + problemName + " in " + filename, problemTitle);
         assertEquals("Problem name in " + filename, "Castles in the Sand", problemTitle);
 
+    }
+    
+    public void testdoNotLoadExternalFile() throws Exception {
+        
+        String dirname = getDataDirectory(getName());
+        Utilities.insureDir(dirname);
+        assertDirectoryExists(dirname);
+        
+        String filename = dirname + File.separator + ContestYAMLLoader.DEFAULT_CONTEST_YAML_FILENAME;
+        System.out.println(filename);
+        assertFileExists(filename);
+        
+        IInternalContest contest;
+        
+        // Load data files
+        contest = loader.fromYaml(null, dirname, true);
+        
+        for (Problem problem : contest.getProblems()) {
+            assertTrue(problem.isUsingExternalDataFiles());
+            assertNotNull(problem.getDataLoadYAMLPath());
+            ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
+            assertEquals("Expecting loaded answer files ", 12, dataFiles.getJudgesAnswerFiles().length);
+            assertEquals("Expecting loaded data files ", 12, dataFiles.getJudgesDataFiles().length);
+        }
+        
+        // Do not load data files
+        contest = loader.fromYaml(null, dirname, false);
+        
+        for (Problem problem : contest.getProblems()) {
+            assertFalse("Expecting false using data files", problem.isUsingExternalDataFiles());
+            assertNotNull(problem.getDataLoadYAMLPath());
+            ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
+            assertEquals("Expecting no loaded answer files ", 0, dataFiles.getJudgesAnswerFiles().length);
+        }
+    }
+    
+    public void testGetBooleanValue() throws Exception {
+        
+        assertTrue(loader.getBooleanValue(null, true));
+        assertFalse(loader.getBooleanValue(null, false));
+        assertFalse(loader.getBooleanValue("boom", false));
+        assertFalse(loader.getBooleanValue("", false));
+        
+        String [] falseTestStrings = {
+                "",
+                "boom",
+                "false",
+                "no",
+                "No",
+                "NO",
+                "False",
+                "fAlSe",
+        };
+        
+        for (String s : falseTestStrings) {
+            assertFalse(loader.getBooleanValue(s, false));
+        }
+        
+        
+        String [] trueTestStrings = {
+                "Yes",
+                "YES",
+                "yEs",
+                "true",
+                "TRUE",
+                "TrUe",
+        };
+        
+        for (String s : trueTestStrings) {
+            assertTrue(loader.getBooleanValue(s, false));
+        }
     }
     
     public void testMultipleDataSets() throws Exception {

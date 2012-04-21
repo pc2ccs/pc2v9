@@ -1,0 +1,44 @@
+#
+# Contest configuration 
+# Based on CCS Spec contest.yaml
+#
+# $HeaderURL$
+---
+name:              ACM-ICPC CLI CCS Sample Two
+short-name:        ICPC WF 2011
+start-time:        2011-02-04 01:23Z
+duration:          5:00:00
+scoreboard-freeze: 4:00:00
+
+default-clars:
+  - No comment, read problem statement.
+  - This will be answered during the answers to questions session.
+
+clar-categories:
+  - General
+  - SysOps
+  - Operations
+
+languages:
+  - name: C++
+    compiler: /usr/bin/g++  
+    compiler-args: -O2 -Wall -o a.out -static {files} 
+
+  - name: C
+    compiler: /usr/bin/gcc
+    compiler-args: -O2 -Wall -std=gnu99 -o a.out -static {files} -lm
+  
+  - name: Java
+    compiler: /usr/bin/javac
+    compiler-args: -O {files}
+    runner: /usr/bin/java
+    runner-args: 
+
+problemset:
+  - letter:     D
+    short-name: channel
+    color:      blue
+    rgb:        #0000ff
+
+  
+# eof 

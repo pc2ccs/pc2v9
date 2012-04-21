@@ -1,0 +1,79 @@
+# Contest Configuration, version 1.0 
+# PC^2 Version: Version 9.2 20120420 (Friday, April 20th 2012 23:20 PDT) Java ver 1.5.0_05 build 156 Windows XP 5.1 (x86) 
+# Created: 2012-04-20 23:54:10 PDT
+--- 
+
+name: Sumit Hello Sample
+short-name: 
+elapsed: 0:00:00
+remaining: 5:00:00
+running: false
+scoreboard-freeze: 
+
+default-clars:
+ - No response, read problem statement
+
+clar-categories:
+ - General
+
+languages:
+ - name: Java
+   active: true
+   compilerCmd: javac {:mainfile}
+   exemask: {:basename}.class
+   execCmd: java {:basename}
+   runner: java
+   runner-args: {:basename}
+
+ - name: Perl
+   active: true
+   compilerCmd: perl -c {:mainfile}
+   exemask: {:noexe}
+   execCmd: perl {:mainfile}
+   runner: perl
+   runner-args: {:mainfile}
+
+ - name: GNU C++
+   active: true
+   compilerCmd: g++ -lm -o {:basename}.exe {:mainfile}
+   exemask: {:basename}.exe
+   execCmd: .\{:basename}.exe
+   runner: .\{:basename}.exe
+   runner-args: 
+
+ - name: GNU C
+   active: true
+   compilerCmd: gcc -lm -o {:basename}.exe {:mainfile}
+   exemask: {:basename}.exe
+   execCmd: .\{:basename}.exe
+   runner: .\{:basename}.exe
+   runner-args: 
+
+problemset:
+  - letter: A
+    short-name: A1PROG
+
+
+sites:
+ - number: 1
+   name: Site 1
+   password: site1
+   IP: localhost
+   port: 50002
+
+
+accounts:
+  - account: TEAM
+    site: 1
+    count: 22
+
+  - account: JUDGE
+    site: 1
+    count: 12
+
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+
+
+# EOF Contest Configuration

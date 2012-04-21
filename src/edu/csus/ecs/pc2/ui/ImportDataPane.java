@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
@@ -55,7 +56,7 @@ public class ImportDataPane extends JPanePlugin {
 
     private String lastDirectory = null;
 
-    private ContestYAMLLoader loader = new ContestYAMLLoader();
+    private ContestYAMLLoader loader = new ContestYAMLLoader();  //  @jve:decl-index=0:
 
     private static final String NL = System.getProperty("line.separator");
 
@@ -121,10 +122,7 @@ public class ImportDataPane extends JPanePlugin {
             showMessage("Problem selecting filename " + e.getMessage());
         }
 
-        if (filename == null) {
-            showMessage("No file selected");
-        } else {
-
+        if (filename != null) {
             if (filename.endsWith("contest.yaml")) {
 
                 try {
@@ -153,7 +151,9 @@ public class ImportDataPane extends JPanePlugin {
         int result = JOptionPane.NO_OPTION;
 
         try {
-             newContest = loader.fromYaml(null, directoryName);
+            // TODO CCS figure out how to determine whether to load data file contents.
+            boolean loadDataFileContents = false;
+            newContest = loader.fromYaml(null, directoryName, loadDataFileContents);
              
              contestSummary = getContestLoadSummary(newContest, getController());
              
@@ -161,12 +161,11 @@ public class ImportDataPane extends JPanePlugin {
    
         } catch (Exception e) {
             logException("Unable to load contest YAML from " + filename, e);
-            e.printStackTrace();
             showMessage("Problem loading file(s), check log.  " + e.getMessage());
         }
         
         if (result != JOptionPane.YES_OPTION) {
-            showMessage("No import done");
+            getLog().info("No YAML file selected to load");
             return;
         }
 
@@ -225,6 +224,8 @@ public class ImportDataPane extends JPanePlugin {
 
         addSummaryEntry(sb, problems.length, "problem");
         
+        long totalBytes = 0;
+        
         if (problems.length > 0) {
             int ansCount = 0;
             int datCount = 0;
@@ -234,11 +235,19 @@ public class ImportDataPane extends JPanePlugin {
                 if (pdfiles != null) {
                     ansCount += pdfiles.getJudgesAnswerFiles().length;
                     datCount += pdfiles.getJudgesDataFiles().length;
+                    for (SerializedFile serializedFile : pdfiles.getJudgesAnswerFiles()) {
+                        totalBytes += serializedFile.getBuffer().length;
+                    }
+                    for (SerializedFile serializedFile : pdfiles.getJudgesDataFiles()) {
+                        totalBytes += serializedFile.getBuffer().length;
+                    }
 //                } else { // nothing to do here, move on
                 }
             }
-            addSummaryEntry(sb, datCount, "input data files");
-            addSummaryEntry(sb, ansCount, "answer data files");
+            
+            addSummaryEntry(sb, datCount, "input data file");
+            addSummaryEntry(sb, ansCount, "answer data file");
+            
         }
 
         addSummaryEntry(sb, languages.length, "language");
@@ -259,6 +268,11 @@ public class ImportDataPane extends JPanePlugin {
             sb.append("   file: "+info.getFilename());
             sb.append(NL);
             sb.append(info.toString());
+            sb.append(NL);
+        }
+        
+        if (problems.length > 0 && totalBytes == 0) {
+            sb.append ("NO file/data contents loaded");
             sb.append(NL);
         }
 
@@ -406,10 +420,7 @@ public class ImportDataPane extends JPanePlugin {
             showMessage("Problem selecting filename " + e.getMessage());
         }
 
-        if (filename == null) {
-            showMessage("No file selected");
-        } else {
-
+        if (filename != null) {
             if (filename.endsWith("passwords.txt")) {
 
                 try {
@@ -507,6 +518,7 @@ public class ImportDataPane extends JPanePlugin {
         if (problems.length > 0) {
             int ansCount = 0;
             int datCount = 0;
+            int numberExternalDataFileProblems = 0;
             
             for (Problem problem : problems) {
                 ProblemDataFiles pdfiles = newContest.getProblemDataFile(problem);
@@ -515,9 +527,23 @@ public class ImportDataPane extends JPanePlugin {
                     datCount += pdfiles.getJudgesDataFiles().length;
 //                } else { // nothing to do here, move on
                 }
+                
+                if (problem.isUsingExternalDataFiles()) {
+                    numberExternalDataFileProblems ++;
+                }
             }
-            addSummaryEntry(sb, datCount, "input data files");
-            addSummaryEntry(sb, ansCount, "answer data files");
+
+            if (datCount > 0) {
+                addSummaryEntry(sb, datCount, "input data file");
+            } else if (numberExternalDataFileProblems == problems.length) {
+                sb.append("All data files are external");
+            }
+
+            if (ansCount > 0) {
+                addSummaryEntry(sb, ansCount, "answer data file");
+            } else if (numberExternalDataFileProblems == problems.length) {
+                sb.append("All answer files are external");
+            }
         }
 
         addSummaryEntry(sb, languages.length, "language");

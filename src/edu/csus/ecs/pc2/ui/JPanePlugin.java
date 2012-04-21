@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.NoteList;
 import edu.csus.ecs.pc2.core.NoteMessage;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -123,6 +124,9 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     
     public void logException(String message, Exception ex){
         controller.getLog().log(Log.WARNING, message,ex);
+        if (Utilities.isDebugMode()) {
+            ex.printStackTrace(System.err);
+        }
     }
     
     /**
