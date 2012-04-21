@@ -1,7 +1,11 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.File;
+
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -12,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * Replace command line variables.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -33,7 +38,6 @@ public class CommandVariableReplacer {
 
     /**
      * Main file name.
-     * 
      */
     public static final String MAINFILE = "{:mainfile}";
 
@@ -42,6 +46,99 @@ public class CommandVariableReplacer {
      */
     public static final String BASENAME = "{:basename}";
 
+    /**
+     * Run Id (or number).
+     */
+    public static final String RUNID = "{:runid}";
+    
+    /**
+     * Internal run id.
+     * 
+     * If run comes from another CCS this is the internal 
+     * pc2 submission number for this run.
+     */
+    public static final String INTERNAL_RUNID = "{:irunid}";
+    
+    /**
+     * CCS short problem name.
+     */
+    public static final String PROBLEMSHORTNAME = "{:problemshort}";
+
+    /**
+     * Language name.
+     */
+    public static final String LANGUAGENAME = "{:languagename}";
+
+    /**
+     * Client Id.
+     */
+    public static final String CLIENTID = "{:clientid}";
+
+    /**
+     * Team Id (client id).
+     * 
+     */
+    public static final String TEAMID = "{:teamid}";
+
+    /**
+     * Elapsed time in MS.
+     */
+    public static final String ELAPSEDMS = "{:elapsedms}";
+
+    /**
+     * Elapsed time in minutes.
+     */
+    public static final String ELAPSEDMINUTES = "{:elapsedmins}";
+
+    /**
+     * Elapsed time in seconds.
+     */
+    public static final String ELAPSEDSECONDS = "{:elapsedsecs}";
+
+    /**
+     * Client type.
+     * 
+     */
+    public static final String CLIENTTYPE = "{:clienttype}";
+
+    /**
+     * Language number.
+     */
+    public static final String LANGUAGE = "{:language}";
+    
+    public static final String[] VARIABLE_NAMES = {//
+            BASENAME, //
+            CLIENTID, //
+            CLIENTTYPE, //
+            ELAPSEDMINUTES, //
+            ELAPSEDMS, //
+            ELAPSEDSECONDS, //
+            FILELIST, //
+            INTERNAL_RUNID, //
+            LANGUAGE, //
+            LANGUAGENAME, //
+            MAINFILE, //
+            OPTIONS, //
+            PROBLEMSHORTNAME, //
+            RUNID, //
+            TEAMID, //
+
+            "{:ansfile}", //
+            "{:executetime}", //
+            "{:exitvalue}", //
+            "{:infile}", //
+            "{:languageletter}", //
+            "{:outfile}", //
+            "{:pc2home}", //
+            "{:problemletter}", //
+            "{:problem}", //
+            "{:siteid}", //
+            "{:timelimit}", //
+            "{:validator}", //
+
+    };
+
+    
     /**
      * Replace all instances of beforeString with afterString.
      * 
@@ -57,6 +154,8 @@ public class CommandVariableReplacer {
      */
     public static String replaceString(String origString, String beforeString, String afterString) {
 
+        // SOMEDAY replace this with Java String replace method.
+        
         if (origString == null || afterString == null) {
             return origString;
         }
@@ -123,7 +222,8 @@ public class CommandVariableReplacer {
      * @param problemDataFiles
      * @return string with values
      */
-    public String substituteAllStrings(IInternalContest contest, Run run, RunFiles runFiles, String origString, ExecutionData executionData, ProblemDataFiles problemDataFiles) {
+    public String substituteExecutableVariables(IInternalContest contest, Run run, RunFiles runFiles, String origString, // 
+            ExecutionData executionData, ProblemDataFiles problemDataFiles) {
         String newString = "";
         String nullArgument = "-"; /* this needs to change */
 
@@ -165,7 +265,8 @@ public class CommandVariableReplacer {
             Language language = contest.getLanguage(run.getLanguageId());
             int index = getLanguageIndex(contest, language);
             if (index > 0) {
-                newString = replaceString(newString, "{:language}", index);
+                
+                newString = replaceString(newString, LANGUAGE, index);
                 newString = replaceString(newString, "{:languageletter}", Utilities.convertNumber(index));
             }
         }
@@ -177,7 +278,7 @@ public class CommandVariableReplacer {
             }
         }
         if (run.getSubmitter() != null) {
-            newString = replaceString(newString, "{:teamid}", run.getSubmitter().getClientNumber());
+            newString = replaceString(newString, TEAMID, run.getSubmitter().getClientNumber());
             newString = replaceString(newString, "{:siteid}", run.getSubmitter().getSiteNumber());
         }
 
@@ -279,4 +380,153 @@ public class CommandVariableReplacer {
 
         return outString;
     }
+
+    /**
+     * Replace beforeString with integer.
+     * @param origString
+     * @param beforeString
+     * @param integer
+     * @return
+     */
+    public static String replaceInteger(String origString, String beforeString, int integer) {
+        return replaceString(origString, beforeString, Integer.toString(integer));
+    }
+
+    /**
+     * Replace beforeString with longValue.
+     * @param origString
+     * @param beforeString
+     * @param elapsedMS3
+     * @return
+     */
+    public static String replaceLong(String origString, String beforeString, long longValue) {
+        return replaceString(origString, beforeString, Long.toString(longValue));
+    }
+    
+    /**
+     * Create command after substituting various variables.
+     * 
+     * See substitution constants. {@value CommandVariableReplacer#OPTIONS} will substitute:
+     * 
+     * <pre>
+     * -p &lt;problem short-name&gt;, string
+     * -l &lt;language name&gt;, string
+     * -u &lt;team id&gt;, integer
+     * -m &lt;main source filename&gt;, string
+     * -t &lt;contest-time for submission&gt;, integer
+     * -i &lt;run id&gt; unique key for the run, integer
+     * -w &lt;team password&gt;, string
+     * </pre>
+     * 
+     * @param command
+     * @param run
+     * @param runFiles
+     * @param runDir
+     * @param contest 
+     * @return a file with value substituted for variables.
+     * @throws Exception
+     */
+    public String substituteVariables(String command, IInternalContest contest, Run run, RunFiles runFiles, String runDir, //
+            ExecutionData executionData, ProblemDataFiles problemDataFiles) throws Exception {
+    
+        String mainfileName = getMainFileName(runDir, runFiles);
+        String fileList = mainfileName;
+
+        if (runFiles.getOtherFiles() != null) {
+            for (SerializedFile file : runFiles.getOtherFiles()) {
+                String outfilename = runDir + File.separator + file.getName();
+                fileList += " " + outfilename;
+            }
+        }
+
+        Problem problem = contest.getProblem(run.getProblemId());
+        if (problem == null) {
+            throw new Exception("Could not find problem for id=" + run.getProblemId() + " " + run);
+        }
+
+        Language language = contest.getLanguage(run.getLanguageId());
+        if (language == null) {
+            throw new Exception("Could not find language for id=" + run.getLanguageId() + " " + run);
+        }
+
+        Account account = contest.getAccount(run.getSubmitter());
+        if (account == null) {
+            throw new Exception("Could not find account for id=" + run.getSubmitter() + " " + run);
+        }
+
+        String newCommand = command;
+
+        newCommand = CommandVariableReplacer.replaceString(newCommand, CommandVariableReplacer.FILELIST, fileList);
+
+        StringBuffer buffer = new StringBuffer();
+
+        // -p <problem short-name>, string
+        // -l <language name>, string
+        // -u <team id>, integer
+        // -m <main source filename>, string
+        // -t <contest-time for submission>, integer
+        // -i <run id> unique key for the run, integer
+        // -w <team password>, string
+
+        buffer.append(" -p ") //
+                .append(problem.getShortName()) //
+                .append(" -l ") //
+                .append(language.getDisplayName()) //
+                .append(" -u ") //
+                .append(run.getSubmitter().getClientNumber()) //
+                .append(" -m ") //
+                .append(mainfileName) //
+                .append(" -i ") //
+                .append(run.getNumber()) //
+                .append(" -t ") //
+                .append(run.getElapsedMS()); //
+        // .append(" -w ") //
+        // .append(account.getPassword());
+
+        newCommand = replaceString(newCommand, MAINFILE, mainfileName);
+
+        newCommand = replaceString(newCommand, BASENAME, removeExtension(mainfileName));
+
+        newCommand = replaceString(newCommand, OPTIONS, buffer.toString());
+
+        newCommand = replaceInteger(newCommand, RUNID, run.getNumber());
+
+        newCommand = replaceInteger(newCommand, INTERNAL_RUNID, run.internalRunId());
+
+        newCommand = replaceString(newCommand, PROBLEMSHORTNAME, problem.getShortName());
+
+        newCommand = replaceString(newCommand, LANGUAGENAME, language.getDisplayName());
+
+        ClientId submitter = run.getSubmitter();
+
+        newCommand = replaceInteger(newCommand, CLIENTID, submitter.getClientNumber());
+
+        newCommand = replaceString(newCommand, CLIENTTYPE, submitter.getClientType().toString());
+
+        newCommand = replaceLong(newCommand, ELAPSEDMS, run.getElapsedMS());
+
+        newCommand = replaceLong(newCommand, ELAPSEDMINUTES, run.getElapsedMins());
+
+        newCommand = replaceLong(newCommand, ELAPSEDSECONDS, run.getElapsedMS() / 1000);
+
+        newCommand = substituteExecutableVariables(contest, run, runFiles, newCommand, executionData, problemDataFiles);
+
+        return newCommand;
+    }
+    
+    /**
+     * Returns full path for main file.
+     * @param runDir if null just returns mainfilename
+     * @param runFiles 
+     * @return name of main file, if runDir is not null returns rundir + FS + mainfilename.
+     */
+    public String getMainFileName(String runDir, RunFiles runFiles) {
+        if (runDir != null) {
+            return runDir + File.separator + runFiles.getMainFile().getName();
+        } else {
+            return runFiles.getMainFile().getName();
+        }
+    }
+
+
 }
