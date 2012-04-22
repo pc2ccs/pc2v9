@@ -208,7 +208,14 @@ public class ProblemsPane extends JPanePlugin {
         c[i++] = judgingType;
         c[i++] = Integer.toString(problem.getTimeOutInSeconds());
         c[i++] = yesNoString(problem.isShowValidationToJudges());
-        c[i++] = problem.getValidatorProgramName();
+        String validatorName = problem.getValidatorProgramName();
+        if (problem.isValidatedProblem()) {
+            if (! problem.isUsingPC2Validator()) {
+                validatorName = problem.getValidatorCommandLine();
+            }
+        }
+        
+        c[i++] = validatorName;
 
         return c;
     }
