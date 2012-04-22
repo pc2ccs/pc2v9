@@ -214,6 +214,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     }
 
+
     public void testProblemLoader() throws Exception {
 
         IInternalContest contest = loader.fromYaml(null, getDataDirectory());
@@ -238,17 +239,24 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         String[] basenames = { "bozo", "smart", "sumit" };
 
-        Problem problem = contest.getProblems()[2];
+        Problem testProblem = contest.getProblems()[2];
 
         int idx = 0;
         for (String name : basenames) {
 
-            assertEquals(problem.getDataFileName(idx + 1), name + ".in");
-            assertEquals(problem.getAnswerFileName(idx + 1), name + ".ans");
+            assertEquals(testProblem.getDataFileName(idx + 1), name + ".in");
+            assertEquals(testProblem.getAnswerFileName(idx + 1), name + ".ans");
 
             idx++;
         }
-
+        
+        String[] probNames = { "apl", "barcodes", "biobots", "castles", "channel" };
+  
+        int i = 0;
+        for (Problem problem : contest.getProblems()) {
+            assertEquals(probNames[i], problem.getDisplayName());
+            i++;
+        }
     }
 
     private Object getClientCount(IInternalContest contest, Type type) {
@@ -643,7 +651,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertDirectoryExists(dirname);
         
         String filename = dirname + File.separator + ContestYAMLLoader.DEFAULT_CONTEST_YAML_FILENAME;
-        System.out.println(filename);
+//        System.out.println(filename);
         assertFileExists(filename);
         
         IInternalContest contest;
@@ -705,6 +713,30 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         for (String s : trueTestStrings) {
             assertTrue(loader.getBooleanValue(s, false));
         }
+    }
+
+    public void testValidatorKeys() throws Exception {
+        
+        String name = getDataDirectory("testValidatorKeys");
+        assertDirectoryExists(name);
+        
+        IInternalContest contest = loader.fromYaml(null, getDataDirectory(this.getName()));
+        
+        Problem[] problems = contest.getProblems();
+        
+        assertEquals("Expect custom validator" , "/usr/local/bin/mtsv", problems[0].getValidatorCommandLine());
+        assertEquals("Expect default validator", "/bin/true", problems[1].getValidatorCommandLine());
+        assertEquals("Expect custom validator", "/bin/false", problems[2].getValidatorCommandLine());
+       
+        String [] letterList = {"S", "E", "X"};
+        
+        int idx = 0;
+        for (Problem problem : problems) {
+            String shortName = problem.getLetter();
+            assertEquals("Problem letter ",letterList[idx], shortName);
+            idx ++;
+        }
+        
     }
     
     public void testMultipleDataSets() throws Exception {

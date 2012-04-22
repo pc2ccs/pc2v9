@@ -117,13 +117,13 @@ public class ContestYAMLLoader {
      * will be used.
      * 
      */
-//    private static final String DEFAULT_VALIDATOR_KEY = "default-validator";
+    private static final String DEFAULT_VALIDATOR_KEY = "default-validator";
 
     /**
      * Validator per problem.
      */
-//    private static final String VALIDATOR_KEY = null;
-
+    private static final String VALIDATOR_KEY = "validator";
+    
     /**
      * Load contest.yaml from directory.
      * 
@@ -207,16 +207,14 @@ public class ContestYAMLLoader {
         // duration: 5:00:00
         // scoreboard-freeze: 4:00:00
         
-        // TODO CCS
-//        String defaultValidatorName =  getSequenceValue(yamlLines, DEFAULT_VALIDATOR_KEY); 
-
-
         Language[] languages = getLanguages(yamlLines);
         for (Language language : languages) {
             contest.addLanguage(language);
         }
 
-        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents);
+        String defaultValidatorCommandLine = getSequenceValue(yamlLines, DEFAULT_VALIDATOR_KEY); 
+        
+        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine);
         for (Problem problem : problems) {
             loadProblemAndFilesAndValidators(contest, diretoryName, problem);
         }
@@ -499,19 +497,21 @@ public class ContestYAMLLoader {
             }
         }
         
-        // TODO CCS
-//        String validatorName =  getSequenceValue(sectionLines, VALIDATOR_KEY);
-        
+        String validatorCommandLine =  problem.getValidatorCommandLine();
 
         if (ccsStandardProblem) {
             problem.setComputerJudged(true);
             
-            // TODO CCS add CCS validator
+            // TODO CCS add CCS validator derived based on build script
             
-            // add validator command (executable)
-            // add validator run script ('run')
+            /**
+             * - Use CCS build command to build validator ('build' script name)
+             * - add validator created by build command
+             * - add CCS run script ('run' script name)
+             */
             
-            addDefaultCCSValidator (problem);
+            addCCSValidator (problem, validatorCommandLine);
+            
         } else {
             problem.setComputerJudged(true); 
             addDefaultPC2Validator(problem, 1);
@@ -743,17 +743,21 @@ public class ContestYAMLLoader {
         return problem;
     }
     
-    private Problem addDefaultCCSValidator(Problem problem) {
+    private Problem addCCSValidator(Problem problem, String validatorCommandLine) {
         
         problem.setCcsMode(true);
         
         problem.setValidatedProblem(true);
         problem.setUsingPC2Validator(false);
         problem.setReadInputDataFromSTDIN(true);
-
-        problem.setValidatorProgramName(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME);
         
-        problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        if (validatorCommandLine == null) {
+            problem.setValidatorProgramName(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME);
+            problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        } else {
+            problem.setValidatorCommandLine(validatorCommandLine);
+        }
+
         return problem;
     }
 
@@ -923,17 +927,23 @@ public class ContestYAMLLoader {
      * @return list of {@link Problem}
      * @throws YamlLoadException
      */
-    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents) throws YamlLoadException {
+    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand) throws YamlLoadException {
 
-        String[] sectionLines = getSectionLines(PROBLEMS_KEY, yamlLines);
+        String[] linesFromSection = getSectionLines(PROBLEMS_KEY, yamlLines);
 
         Vector<Problem> problemList = new Vector<Problem>();
 
         int idx = 1;
-        String[] sequenceLines = getNextSequence(sectionLines, idx);
+        String[] sequenceLines = getNextSequence(linesFromSection, idx);
 
         while (sequenceLines.length > 0) {
             
+            // TODO CCS do a proper parsing of Yaml to handle preceding comment lines 
+            /**
+             * There is a bug where the section parsing does not ignore blank and
+             * comment lines preceding a section.
+             */
+               
 //            if (noActualSectionDef(sequenceLines)) {
 //                idx += sequenceLines.length;
 //                sequenceLines = getNextSequence(sectionLines, idx);
@@ -942,7 +952,7 @@ public class ContestYAMLLoader {
             
             if (! sequenceLines[0].trim().startsWith("-")) {
                 idx += sequenceLines.length;
-                sequenceLines = getNextSequence(sectionLines, idx);
+                sequenceLines = getNextSequence(linesFromSection, idx);
                 continue;
             }
 
@@ -986,17 +996,17 @@ public class ContestYAMLLoader {
 
             String externalFilesUsesString = getSequenceValue(sequenceLines, PROBLEM_EXTERNAL_FILES_KEY);
             problem.setUsingExternalDataFiles(getBooleanValue(externalFilesUsesString, loadDataFileContents));
+            String validatorCommandLine = getSequenceValue(sequenceLines, VALIDATOR_KEY);
 
-            // debug code
-            // System.out.println("Problem   : " + problemKeyName);
-            // System.out.println(" letter   : " + problemLetter);
-            // System.out.println(" color    : " + colorName);
-            // System.out.println(" RGB      : " + colorRGB);
+            if (validatorCommandLine == null) {
+                validatorCommandLine = defaultValidatorCommand;
+            }
+            problem.setValidatorCommandLine(validatorCommandLine);
 
             problemList.addElement(problem);
 
             idx += sequenceLines.length;
-            sequenceLines = getNextSequence(sectionLines, idx);
+            sequenceLines = getNextSequence(linesFromSection, idx);
         }
 
         return (Problem[]) problemList.toArray(new Problem[problemList.size()]);
@@ -1010,16 +1020,16 @@ public class ContestYAMLLoader {
      * @param sequenceLines
      * @return true if section composed of blank and comment lines only.
      */
-    private boolean noActualSectionDef(String[] sequenceLines) {
-        int commentLines = 0;
-        
-        for (String string : sequenceLines) {
-            if ("".equals(string.trim()) || string.trim().startsWith("#")){
-                commentLines ++;
-            }
-        }
-        return commentLines == sequenceLines.length;
-    }
+//    private boolean noActualSectionDef(String[] sequenceLines) {
+//        int commentLines = 0;
+//        
+//        for (String string : sequenceLines) {
+//            if ("".equals(string.trim()) || string.trim().startsWith("#")){
+//                commentLines ++;
+//            }
+//        }
+//        return commentLines == sequenceLines.length;
+//    }
 
     private void syntaxError(String string) throws YamlLoadException {
         YamlLoadException exception = new YamlLoadException("Syntax error: " + string);
@@ -1317,7 +1327,7 @@ public class ContestYAMLLoader {
      * @throws YamlLoadException
      */
     public Problem[] getProblems(String[] contents, int defaultTimeOut) throws YamlLoadException {
-        return getProblems(contents, defaultTimeOut, true);
+        return getProblems(contents, defaultTimeOut, true, null);
     }
 
     /**

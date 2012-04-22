@@ -11,6 +11,8 @@ scoreboard-freeze: 4:00:00
 
 timeout:  20
 
+default-validator: /bin/true
+
 default-clars:
   - No comment, read problem statement.
   - This will be answered during the answers to questions session.
