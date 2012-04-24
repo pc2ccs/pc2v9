@@ -724,6 +724,10 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         Problem[] problems = contest.getProblems();
         
+        System.out.println("debug 22 "+getDataDirectory(this.getName()));
+  
+        System.out.println("debug 22 number is "+problems.length);
+        
         assertEquals("Expect custom validator" , "/usr/local/bin/mtsv", problems[0].getValidatorCommandLine());
         assertEquals("Expect default validator", "/bin/true", problems[1].getValidatorCommandLine());
         assertEquals("Expect custom validator", "/bin/false", problems[2].getValidatorCommandLine());
@@ -737,6 +741,22 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
             idx ++;
         }
         
+    }
+    
+    // SOMEDAY get this JUnit working
+    public void aTestOverRideValidator() throws Exception {
+
+        String name = getDataDirectory("testValidatorKeys");
+        assertDirectoryExists(name);
+        
+        IInternalContest contest = loader.fromYaml(null, getDataDirectory(this.getName()));
+        
+        Problem[] problems = contest.getProblems();
+        
+        String overrideMTSVCommand = "/usr/local/bin/mtsv {:problemletter} {:resfile} {:basename}";
+        for (Problem problem : problems) {
+            assertEquals("Expect custom validator", overrideMTSVCommand, problem.getValidatorCommandLine());
+        }
     }
     
     public void testMultipleDataSets() throws Exception {

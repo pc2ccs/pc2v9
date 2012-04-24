@@ -120,6 +120,14 @@ public class ContestYAMLLoader {
     private static final String DEFAULT_VALIDATOR_KEY = "default-validator";
 
     /**
+     * The override validator name, this supercedes all other validators.
+     * 
+     * No other validator def will override this value.
+     */
+    private static final String OVERRIDE_VALIDATOR_KEY = "override-validator";
+
+    
+    /**
      * Validator per problem.
      */
     private static final String VALIDATOR_KEY = "validator";
@@ -214,7 +222,9 @@ public class ContestYAMLLoader {
 
         String defaultValidatorCommandLine = getSequenceValue(yamlLines, DEFAULT_VALIDATOR_KEY); 
         
-        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine);
+        String overrideValidatorCommandLine = getSequenceValue(yamlLines, OVERRIDE_VALIDATOR_KEY); 
+        
+        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine);
         for (Problem problem : problems) {
             loadProblemAndFilesAndValidators(contest, diretoryName, problem);
         }
@@ -927,7 +937,7 @@ public class ContestYAMLLoader {
      * @return list of {@link Problem}
      * @throws YamlLoadException
      */
-    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand) throws YamlLoadException {
+    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine) throws YamlLoadException {
 
         String[] linesFromSection = getSectionLines(PROBLEMS_KEY, yamlLines);
 
@@ -1000,6 +1010,9 @@ public class ContestYAMLLoader {
 
             if (validatorCommandLine == null) {
                 validatorCommandLine = defaultValidatorCommand;
+            }
+            if (overrideValidatorCommandLine != null) {
+                validatorCommandLine = overrideValidatorCommandLine;
             }
             problem.setValidatorCommandLine(validatorCommandLine);
 
@@ -1323,11 +1336,14 @@ public class ContestYAMLLoader {
      * 
      * @param contents
      * @param defaultTimeOut
+     * @param overrideValidatorCommandLine 
+     * @param defaultValidatorCommandLine 
+     * @param loadDataFileContents 
      * @return
      * @throws YamlLoadException
      */
-    public Problem[] getProblems(String[] contents, int defaultTimeOut) throws YamlLoadException {
-        return getProblems(contents, defaultTimeOut, true, null);
+    public Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine) throws YamlLoadException {
+        return getProblems(contents, defaultTimeOut, true, defaultValidatorCommandLine, null);
     }
 
     /**
@@ -1340,5 +1356,9 @@ public class ContestYAMLLoader {
      */
     public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String diretoryName) throws YamlLoadException {
         return fromYaml(contest, yamlLines, diretoryName, true);
+    }
+
+    public Problem[] getProblems(String[] contents, int defaultTimeOut) throws YamlLoadException {
+        return getProblems(contents, defaultTimeOut, false, null, null);
     }
 }
