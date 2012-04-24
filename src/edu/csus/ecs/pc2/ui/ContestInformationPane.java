@@ -20,6 +20,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
@@ -322,6 +323,10 @@ public class ContestInformationPane extends JPanePlugin {
                 getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
                 getMaxFieldSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
                 getRunSubmissionInterfaceCommandTextField().setText(contestInformation.getRsiCommand());
+                if (contestInformation.getRsiCommand() == null || "".equals(contestInformation.getRsiCommand().trim())) {
+                    String cmd = "# /usr/local/bin/sccsrs " + CommandVariableReplacer.OPTIONS + " " + CommandVariableReplacer.FILELIST;
+                    getRunSubmissionInterfaceCommandTextField().setText(cmd);
+                }
                 setContestInformation(contestInformation);
                 setEnableButtons(false);
             }
