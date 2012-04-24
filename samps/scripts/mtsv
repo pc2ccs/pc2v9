@@ -29,6 +29,8 @@ my $verbose = 0;
 my $recurse = 0;
 # -c option 
 my $do_check = 0;
+# -l option 
+my $do_list = 0;
 # -d option 
 my $override_yaml_directory = "";
 
@@ -97,6 +99,12 @@ if ( $verbose )
   print "validator_message : $validator_message\n";
   print "judgement         : $judgement\n";
   print "override_yaml_directory: $override_yaml_directory\n";
+}
+
+if ( $do_list )
+{
+    &list_all_files();
+    exit 0;
 }
 
 if ( $do_check )
@@ -705,6 +713,33 @@ sub writeResultsFile
     }
   }
 
+}
+
+# ------------------------------------------------------------
+#
+#
+sub list_all_files
+{
+
+    my @long_filelist = ();
+
+  my $contest_yaml_filename = "$yaml_directory/$CONTEST_YAML_FILENAME";
+
+    push (@long_filelist, $contest_yaml_filename);
+
+  &load_contest_yaml();
+
+  foreach my $key ( sort keys %prob_short_names)
+  {
+    my $shortname = $prob_short_names{$key};
+    my $probyamlname = "$yaml_directory/$shortname/problem.yaml";
+        push (@long_filelist, $probyamlname );
+
+        my @filelist = &get_file_names(&getSecretPath($shortname), ".in");
+        push (@long_filelist, @filelist);
+    }
+
+    print join("\n", @long_filelist) . "\n" if $do_list ;
 }
 
 # ------------------------------------------------------------
