@@ -252,6 +252,26 @@ public class ParseArguments {
 
         return null;
     }
+    
+    /**
+     * Does the argKey match any of the required options?.
+     * 
+     * @param argKey
+     * @return
+     */
+    public boolean isRequiredOptPresent (String argKey){
+        
+        String[] keyList = getRequireArgOpts();
+        
+        for (String key : keyList) {
+            if (key.equals(argKey)){
+                return true;
+            }
+        }
+        
+        return false;
+        
+    }
 
     /**
      * Returns true of command line option is present.

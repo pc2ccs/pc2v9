@@ -69,7 +69,7 @@ public class Submitter {
     /**
      * print all missing options if command line error.
      */
-    private boolean showAllMissingOptions = false;
+    private boolean showAllMissingOptions = true;
 
     /**
      * --check option.
@@ -349,10 +349,9 @@ public class Submitter {
     protected boolean hasAnyCCSArguments(String[] args, String[] requiredOpts) {
 
         ParseArguments parseArguments = new ParseArguments(args, requiredOpts);
-
+        
         for (String s : args) {
-            if (parseArguments.isOptPresent(s)) {
-                System.out.print("debug 22 found option "+s);
+            if (parseArguments.isRequiredOptPresent(s)) {
                 return true;
             }
         }
