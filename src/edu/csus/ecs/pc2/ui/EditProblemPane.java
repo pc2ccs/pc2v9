@@ -424,6 +424,8 @@ public class EditProblemPane extends JPanePlugin {
 
             try {
                 Problem changedProblem = getProblemFromFields(null);
+                // this is not editable, so just copy it (if available)
+                changedProblem.setShortName(problem.getShortName());
                 if (!problem.isSameAs(changedProblem)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
