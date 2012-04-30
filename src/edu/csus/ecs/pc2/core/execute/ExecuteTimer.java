@@ -477,8 +477,8 @@ public class ExecuteTimer extends Thread implements
         timer.stop();
         if (usingGUI) {
             getExecuteTimerFrame().setVisible(false);
+            getExecuteTimerFrame().dispose();
         }
-        getExecuteTimerFrame().dispose();
     }
     
     private boolean isTeam (){
