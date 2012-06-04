@@ -2,10 +2,11 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
@@ -167,17 +168,14 @@ public final class Utilities {
             return new String[0];
         }
 
-        FileReader fileReader = new FileReader(filename);
-        BufferedReader in = new BufferedReader(fileReader);
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
         String line = in.readLine();
         while (line != null) {
             lines.addElement(line);
             line = in.readLine();
         }
         in.close();
-        fileReader.close();
         in = null;
-        fileReader = null;
 
         if (lines.size() == 0) {
             return new String[0];

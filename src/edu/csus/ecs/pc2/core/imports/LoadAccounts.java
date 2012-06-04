@@ -1,7 +1,8 @@
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
@@ -200,8 +201,7 @@ public class LoadAccounts {
         }
         int lineCount = 0;
         String[] columns;
-        FileReader fileReader = new FileReader(filename);
-        BufferedReader in = new BufferedReader(fileReader);
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
         String line = in.readLine();
         while (line != null && line.startsWith("#")) {
             line = in.readLine();
@@ -300,9 +300,7 @@ public class LoadAccounts {
             lineCount++;
         }
         in.close();
-        fileReader.close();
         in = null;
-        fileReader = null;
         return accountMap.values().toArray(new Account[accountMap.size()]);
     }
 }
