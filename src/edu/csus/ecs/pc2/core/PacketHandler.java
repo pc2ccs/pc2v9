@@ -1510,7 +1510,15 @@ public class PacketHandler {
         }
         
         Run run = contest.acceptRun(submittedRun, runFiles);
-        if (contest.getContestTime().isPastEndOfContest()) {
+        
+        /**
+         * There are three conditions where a run would be added to the system but not appear on the scoreboard (or team's display):
+         * 1 - past end of contest (remaining time is zero or less)
+         * 2 - contest clock is not running
+         * 3 - the override elapsed ms is more than the contest length.
+         */
+        ContestTime contestTime = contest.getContestTime();
+        if (contestTime.isPastEndOfContest() || !contestTime.isContestRunning() || submittedRun.getOverRideElapsedTimeMS() > contestTime.getContestLengthMS()) {
             run.setDeleted(true);
             submittedRun.setDeleted(true);
             contest.updateRun(run, getServerClientId());

@@ -128,45 +128,82 @@ public class PacketHandlerTest extends AbstractTestCase {
         
         Profile profile = new Profile("testDeleteRunWhenContestOver Profile");
         contest.setProfile(profile);
-        
+
         /**
-         * Test that run is not deleted if remaining time > 0.
+         * If contest is started and there is remaining time.
          */
-        
+
+        contest.startContest(contest.getSiteNumber());
         Run run = contest.getRuns()[1];
         packetHandleRun(run, contest, controller, teamId, connectionHandlerID);
-        
+
         Run newRun = contest.getRun(run.getElementId());
         assertFalse("Run should NOT be deleted", newRun.isDeleted());
 
-        // TODO test whether if contest is not running whether run is deleted.
-        
-        // TODO test whether if CCS Test mode and override elapsed time > contest length, is run deleted?
-        
         /**
-         * Test that if there is no remaining time, that run is deleted.
+         * If contest is stopped do not accept run.
          */
-        
-        contestTime.setRemainingSecs(0);
+        contest.stopContest(contest.getSiteNumber());
         run = contest.getRuns()[3];
         packetHandleRun(run, contest, controller, teamId, connectionHandlerID);
-        
+
         newRun = contest.getRun(run.getElementId());
-        assertTrue ("Run should be deleted", newRun.isDeleted());
+        assertTrue("Run should be deleted", newRun.isDeleted());
+
+        /**
+         * Test whether if override elapsed time > contest length, should delete.
+         */
+        // TODO test whether if CCS Test mode and override elapsed time > contest length, is run deleted?
+
+        contest.startContest(contest.getSiteNumber());
+
+        long overrideTime = contest.getContestTime().getContestLengthSecs() * 1000 + 5000; // 5 second beyond end of contest
+
+        contestTime.setRemainingSecs(0);
+        run = contest.getRuns()[5];
+        setCcsTestMode(contest, true);
+        packetHandleRun(run, contest, controller, teamId, connectionHandlerID, overrideTime);
+        setCcsTestMode(contest, true);
+
+        newRun = contest.getRun(run.getElementId());
+        assertTrue("Run should be deleted", newRun.isDeleted());
+
+        /**
+         * If there is no remaining time but contest running, run should be deleted.
+         */
+        contestTime.setRemainingSecs(0);
+        run = contest.getRuns()[7];
+        packetHandleRun(run, contest, controller, teamId, connectionHandlerID);
+
+        newRun = contest.getRun(run.getElementId());
+        assertTrue("Run should be deleted", newRun.isDeleted());
         
-        
+    }
+    
+    /**
+     * Set CCS test mode - ON.
+     * @param contest
+     * @param b
+     */
+    private void setCcsTestMode(IInternalContest contest, boolean b) {
+        contest.getContestInformation().setCcsTestMode(b);
     }
 
     private void packetHandleRun(Run run, IInternalContest contest, IInternalController controller, ClientId teamId, ConnectionHandlerID connectionHandlerID) throws Exception {
+        packetHandleRun(run, contest, controller, teamId, connectionHandlerID, 0);
+    }
+    
+    private void packetHandleRun(Run run, IInternalContest contest, IInternalController controller, ClientId teamId, 
+            ConnectionHandlerID connectionHandlerID, long overrideElapsedTime) throws Exception {
         RunFiles runFiles = sampleContest.createSampleRunFiles(run);
-        
+
         ClientId serverId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Packet packet = PacketFactory.createSubmittedRun(teamId, serverId, run, runFiles, 0, 0);
+        Packet packet = PacketFactory.createSubmittedRun(teamId, serverId, run, runFiles, overrideElapsedTime, 0);
         packet.setContestIdentifier(contest.getContestIdentifier());
 
         PacketHandler packetHandler = new PacketHandler(controller, contest);
         packetHandler.handlePacket(packet, connectionHandlerID);
-      
+
     }
 
     protected IInternalContest createContest (String methodName) throws IOException, ClassNotFoundException, FileSecurityException {

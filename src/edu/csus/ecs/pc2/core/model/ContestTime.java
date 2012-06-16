@@ -6,7 +6,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 /**
- * InternalContest Time Information.
+ * Internal Contest Time Information.
  * 
  * Methods used to access contest time as well as start and stop contest time. <br>
  * Start clock: {@link #startContestClock()}. <br>
@@ -187,6 +187,10 @@ public class ContestTime implements IElementObject {
     public long getContestLengthSecs() {
         return contestLengthSecs;
     }
+    
+    public long getContestLengthMS() {
+        return contestLengthSecs * 1000;
+    }
 
     /**
      * @return elapsed time in minutes.
@@ -229,6 +233,14 @@ public class ContestTime implements IElementObject {
 
     /**
      * 
+     * @return remaining seconds from contest clock.
+     */
+    public long getRemainingMS() {
+        return getContestLengthMS() - getElapsedMS();
+    }
+    
+    /**
+     * 
      * @return halt the contest at time zero ?
      */
     public boolean isHaltContestAtTimeZero() {
@@ -236,11 +248,12 @@ public class ContestTime implements IElementObject {
     }
 
     /**
+     * past end of contest?.
      * 
      * @return true if remaining seconds <= 0, false if more time left.
      */
     public boolean isPastEndOfContest() {
-
+//        return getRemainingMS() <= 0;
         return getRemainingSecs() <= 0;
     }
 
