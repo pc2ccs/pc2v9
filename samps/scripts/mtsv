@@ -9,6 +9,9 @@
 # based on # Revision 1.21  2012/03/28 02:56:32  laned
 # ----------------------------------------------------------------------
 
+# IT - Fri Apr 27 17:30:44 PDT 2012
+# Sun May 13 13:59:19 CEST 2012
+
 use strict;
 
 my $VER = '$Id$';
@@ -19,12 +22,26 @@ select STDOUT; $| = 1;  # flush stdout automatically
 # ----------------------------------------------------------------------
 
 my $JUDGEMENT_WRONG_ANSWER = "wrong answer";
+my $JUDGEMENT_IF = "Illegal Function";
+my $JUDGEMENT_CE = "Compile Error";
+my $JUDGEMENT_TLE = "Time Limit Exceeded";
 my $JUDGEMENT_ACCEPTED = "accepted";
 
+# dir(or file) present?  will not show them gvim output
+my $IS_AUTO_JUDGE = "/root/computer";
+
+# using security wrapper
+my $usingwrapper = 1;
+
+# Input type/source
+my $usingStdin = 1;
+
 my $JAVAOPTS = " -client -Xss8M ";
+# new for Finals 2012
+$JAVAOPTS = " -client -Xss8m -Xmx2048m ";
 
 # -v option
-my $verbose = 0;
+my $verbose = 1; 
 # -r option
 my $recurse = 0;
 # -c option 
@@ -34,20 +51,22 @@ my $do_list = 0;
 # -d option 
 my $override_yaml_directory = "";
 
+# Feed the input file from STDIN (else copies input file and then executes team's solution)
+my $use_STDIN = 1;
+
 # output message for this program
 my $validator_message = "";
 
 my $exit_code = 22;
 
-# Input type/source
-my $usingStdin = 1;
 
 # the command line to execute the team's solution
 
 my $judgement = "Undetermined";
 
 # Resource file
-my @RCPATH = ( ".", $ENV{'HOME'}, ".." );
+my @RCPATH = ( ".", $ENV{'HOME'}, "..", "/home/team/contestdata/bin" );
+
 my $RCNAME = ".mtsvrc";
 
 my $fullrcname = $RCNAME;
@@ -79,6 +98,12 @@ my %problem_validators = ();
 # key: letter value: short problem name
 my %prob_short_names = ();
 
+# pc2 overrides for finals2012
+$JUDGEMENT_WRONG_ANSWER = "No - Wrong Answer";
+$JUDGEMENT_IF = "No - Security Violation";
+$JUDGEMENT_TLE = "No - Time Limit Exceeded";
+# $use_STDIN = 0;
+
 &loadResourceFile();
 if ( $verbose )
 {
@@ -90,7 +115,9 @@ if ( $verbose )
 #
 # Fetch problem letter, resultsXMLfile and teamsource files from command line
 #
-my ($letter, $resultsfilename, $execute_command) = & parse_args ( @ARGV );
+my ($letter, $resultsfilename, $execute_command, $time_limit) = & parse_args ( @ARGV );
+
+$time_limit = 30 if $time_limit eq "";
 
 $yaml_directory = $override_yaml_directory if $override_yaml_directory ne "";
 
@@ -103,6 +130,11 @@ if ( $verbose )
 
 if ( $do_list )
 {
+  print "\n";
+  print "$VER\n";
+
+  &check_rc_files();
+
     &list_all_files();
     exit 0;
 }
@@ -112,7 +144,11 @@ if ( $do_check )
   print "\n";
   print "$VER\n";
 
+  &check_rc_files();
+
   &check_all_files();
+
+	&check_tex_files();
 
   if ( $validator_message ne "" )
   {
@@ -207,6 +243,79 @@ else
 &writeResultsFile();
 
 exit $exit_code;
+
+# ------------------------------------------------------------
+#
+#
+sub check_tex_files
+{
+	my $count = 0;
+
+	my $filename = "problem.tex";
+
+	my @keylist = keys %prob_short_names;
+
+	my @missing = ();
+
+  foreach my $letter ( sort @keylist )
+  {
+    my $shortname = $prob_short_names{$letter};
+
+    my $dirname = &get_problem_desc_path($shortname);
+		my $probdescfile = "$dirname$filename";
+
+		if ( ! -f $probdescfile )
+		{
+			print "Could not find description for $shortname at $probdescfile\n";
+			$validator_message = "Missing $filename at  $dirname\n" if $validator_message ne "";
+			push( @missing, $shortname);
+		}
+		else
+		{
+			print "Found problem.txt at $dirname\n" if $verbose;
+			$count ++;
+		}
+	}
+
+	if ( $count == int(@keylist) && $count > 0)
+	{
+		print "\nproblem.tex files found for all problems\n";
+	}
+	else
+	{
+		print "\n$count problem.tex files found, missing for: @missing\n";
+	}
+} 
+
+# ------------------------------------------------------------
+
+sub get_problem_desc_path
+{
+  my ($shortname) = @_;
+  return "$yaml_directory/$shortname/problem_statement/";
+}
+
+# ------------------------------------------------------------
+
+sub check_rc_files
+{
+
+  &fatal_error($validator_message, 22) if $validator_message ne "";
+  
+  if ( $yaml_directory eq "" )
+  {
+    fatal_error("No $YAMLDIR_KEY found in $RCNAME\n");
+  }
+
+  my $contest_yaml_filename = "$yaml_directory/$CONTEST_YAML_FILENAME";
+
+  if ( ! -f $contest_yaml_filename )
+  {
+    fatal_error("Missing contest.yaml files at $contest_yaml_filename\n");
+  }
+
+  &fatal_error($validator_message, 22) if $validator_message ne "";
+}
 
 # ------------------------------------------------------------
 # return list of shortnames in letter asc order
@@ -311,6 +420,9 @@ sub run_and_validate
 
   my $failcount = $number_data_sets;
 
+  my $out_filename;
+  my $ansfile;
+
   #
   # Loop through test sets
   #
@@ -318,30 +430,90 @@ sub run_and_validate
   for ( ; ! $done && $test_case_number <= $number_data_sets; $test_case_number ++)
   {
     my $inputfilename = $filelist[$test_case_number - 1];
-    my $ansfile = $inputfilename;
+    $ansfile = $inputfilename;
     $ansfile =~ s/in$/ans/;
+
+	 my $datfile = $inputfilename; 
+    $datfile =~s/in/dat/;
+	 $inputfilename = $datfile if -f $datfile;
+
     my $output_key = "testout.$$.$test_case_number";
 
     print STDERR "Starting test : $test_case_number\n" if $verbose;
+    print STDERR "input file: $inputfilename\n" if $verbose;
+    print STDERR "Ans   file: $ansfile\n" if $verbose;
 
     # clear previous runs output
 
       # send input to executable via stdin
 
-      my $out_filename = "${output_key}.out";
+      $out_filename = "${output_key}.out";
 
-      &do_execute ($execute_command, $inputfilename, $out_filename);
+      print STDERR "\n****  started at " . `/bin/date`;
+      my $beforetime = time;
 
-      my $valout_filename = "${output_key}.valout";
+      &do_execute ($execute_command, $inputfilename, $out_filename, $shortname);
+      my $xtime = time - $beforetime;
+      print STDERR "\n**** done at " . `/bin/date` . " execute time $xtime sec\n";
+      print STDERR "\n**** done at " . `/bin/date`;
+      print STDERR "Progrma execute time $xtime ms\n";
 
-      my $rc = &do_validate ($validator, $inputfilename, $ansfile, $out_filename, "./"); 
+      print STDERR "AFTER EXECUTE Validator: '$validator_message', Judgement: '$judgement' \n";
 
-      # decrement form the failures
-      $failcount -- if $rc == 42;
+		 print STDERR "out   file: $out_filename\n" if $verbose;
+
+		if ( $validator_message eq "" )
+		{
+		    print STDERR "Validator blank??: '$validator_message' \n";
+			if ( -f "timelimit.txt" )
+			{
+				$judgement = $JUDGEMENT_TLE;
+			}
+			elsif ( -z $out_filename )
+			{
+
+				$judgement = $JUDGEMENT_WRONG_ANSWER;
+				$validator_message = "No team output created";
+				print STDERR "Test case $test_case_number: $validator_message - missing file $out_filename \n";
+			}
+			else
+			{
+				my $valout_filename = "${output_key}.valout";
+
+				# sometimes this is prepended to the feedback filename, other times it needs to be a dir
+				my $feedback_dir = "feedback${test_case_number}";
+				if (! -d $feedback_dir ) {
+				    mkdir $feedback_dir;
+				}
+				my $rc = &do_validate ($validator, $inputfilename, $ansfile, $out_filename, $feedback_dir ); 
+
+				# decrement form the failures
+				$failcount -- if $rc == 42;
+			}
+		}
+		else
+		{
+			print STDERR "Failed in execute, Details: $validator_message " .
+			     "Judgement: $judgement\n";
+			# break us out if any serious failure in this test case
+			last;
+		}
   }
   
    $judgement = $JUDGEMENT_ACCEPTED if $failcount == 0 && $number_data_sets > 0;
    print STDERR "Ending  test : $test_case_number\n" if $verbose;
+   print STDERR "Judgement: '$judgement' \n";
+   print STDERR "Validator: '$validator_message' \n";
+   print STDERR "Ending returning $judgement\n" if $verbose;
+
+	#
+	# Show Judge's gvim only if /root/computer is not there
+	#
+
+	if ( ! -e "$IS_AUTO_JUDGE" )
+	{
+		`gvim -d $out_filename $ansfile`;
+	}
 
 
 # todo - pc2, pack up log/info files
@@ -357,29 +529,102 @@ sub run_and_validate
 #
 sub do_execute
 {
-  my ($executable, $inputfile, $outfile) = @_;
+  my ($executable, $inputfile, $outfile, $shortname) = @_;
 
   my $execute_cmd = $executable;
 
   if ( -f "${executable}.class" )
   {
     $execute_cmd = "java $JAVAOPTS $executable";
+
+# wrapper
+# /usr/local/pc2v9/bin/run_execute.sh a.out c policy.{:probshort}.C log
+# /usr/local/pc2v9/bin/run_execute.sh {:basename} java policy.{:probshort}.J log
+# 
+	if ( $usingwrapper )
+	{
+	 # /usr/local/pc2v9/bin/run_execute.sh {:basename} java policy.{:probshort}.J log
+    # $execute_cmd = "/usr/local/pc2v9/bin/run_execute.sh $executable java policy.$shortname.J log";
+    $execute_cmd = "/usr/local/pc2v9/bin/run_execute.sh $executable java policy.generic.J log $time_limit";
+	}
+
   }
   elsif ( ! -f $execute_cmd )
   {
     $execute_cmd = "./a.out";
+	&verify_execute_cmd($execute_cmd);
+	if ( $usingwrapper )
+	{
+	 # /usr/local/pc2v9/bin/run_execute.sh a.out c policy.{:probshort}.C log
+    # $execute_cmd = "/usr/local/pc2v9/bin/run_execute.sh a.out c policy.$shortname.C log";
+    $execute_cmd = "/usr/local/pc2v9/bin/run_execute.sh a.out c policy.generic.C log $time_limit";
+	}
   }
   else 
   {
-    # TAMMY
     $execute_cmd = "./$execute_cmd";
+	&verify_execute_cmd($execute_cmd);
   }
 
-  print STDERR "Running $execute_cmd\n" if $verbose;
+# /usr/local/pc2v9/bin/run_execute.sh {:basename} java policy.{:probshort}.J log
 
 
-  `$execute_cmd < $inputfile > $outfile`;
+	if ( $use_STDIN )
+	{
+		print STDERR "Running $execute_cmd < $inputfile > $outfile \n" if $verbose;
+		` $execute_cmd < $inputfile > $outfile `;
+	}
+	else
+	{
+		print STDERR "Running /bin/cp -f -p . \n" if $verbose;
+		`/bin/cp -f -p $inputfile .`;
+		print STDERR "Running $execute_cmd > $outfile \n" if $verbose;
+		`$execute_cmd > $outfile `;
+	}
+	if ( $usingwrapper )
+	{
+	    &check_for_security_violation("log");
+	}
+}
 
+sub check_for_security_violation
+{
+	my ($sec_logfilename) = @_;
+
+	if ( ! -f $sec_logfilename )
+	{
+		$validator_message = "Security log file '$sec_logfilename' not created by security wrapper program\n";
+	}
+
+	my @securityFileLines = load_list("log");
+
+	# print security violation log
+
+	print "\n\nSecurity file contents (file: $sec_logfilename) start: \n";
+	print join("\n", @securityFileLines);
+	print "\nSecurity file contents end: \n\n";
+
+	# should be:
+	# No Security Violation
+
+	if ( $securityFileLines[0] ne "No Security Violation" )
+	{
+		print STDERR "Message from security log file '$sec_logfilename' is: '$securityFileLines[0]'\n";
+
+		# or
+		# judge0@team7:~/PCS12/scramble$ /usr/local/pc2v9/bin/run_execute.sh scramble java
+		# +policy.words.J log
+		# judge0@team7:~/PCS12/scramble$ more log
+		# Security Violation: access denied (java.io.FilePermission scramble.in read)
+	
+		# for systrace, all of the exceptions are printed to
+		# epolicy, log only contains the 1st one.
+		if (-f "epolicy") {
+			@securityFileLines = load_list("epolicy");
+		}
+		$judgement = $JUDGEMENT_IF;
+		$validator_message = join("\n", @securityFileLines);
+	}
 }
 
 # ------------------------------------------------------------
@@ -387,11 +632,12 @@ sub do_execute
 #
 sub do_validate
 {
-  my ($validate_cmd, $inputfile, $answerfile, $teamoutput, $feedbackdir) = @_;
+  my ($validate_cmd, $inputfile, $answerfile, $teamoutput, $feedbackfile) = @_;
 
   print STDERR "Validating using $validate_cmd\n" if $verbose;
+  print STDERR "Command: $validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput \n";
 
-  `$validate_cmd $inputfile $answerfile $feedbackdir < $teamoutput `;
+  `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
   my $rtn = $?;
   $rtn >>= 8 if $rtn != -1;
   print "return code '$rtn'\n" if $verbose;
@@ -770,7 +1016,7 @@ sub check_all_files
     my $value = $prob_short_names{$key};
     my $probyamlname = "$yaml_directory/$value/problem.yaml";
 
-    $validator_message - "Missing problem.yaml for $key at $probyamlname\n" if ! -f $probyamlname;
+    $validator_message = "Missing problem.yaml for $key at $probyamlname\n" if ! -f $probyamlname;
     print STDERR "$validator_message\n" if ! -f $probyamlname;
   }
 
@@ -779,7 +1025,7 @@ sub check_all_files
   foreach my $letter ( sort keys %prob_short_names)
   {
     my $validator = &get_validator($letter);
-    $validator_message - "No validator defined for $letter \n" if $validator eq "";
+    $validator_message = "No validator defined for $letter \n" if $validator eq "";
   }
 
   if ( $validator_message ne "" )
@@ -832,10 +1078,7 @@ sub loadResourceFile
   {
       $validator_message = "Could not find resource file $RCNAME searched: @RCPATH";
   }
-  
 }
-
-
 
 sub get_ini_value
 {
@@ -960,7 +1203,8 @@ where
   executable_name - team's executable or main class filename
 
 -h      this message
--v      more information
+-s      not -v (more silent)
+-v      more information (default)
 
 -c      performs a number of checks on the yaml files, insuring
         problem dirs and files are present.
@@ -1018,9 +1262,17 @@ sub	parse_args
       &editfile ($fullrcname);
       exit 0;
 			} 
+		elsif ( $tmp_args[ 0 ] eq '-l')
+			{
+			$do_list = 1;
+			} 
 		elsif ( $tmp_args[ 0 ] eq '-c')
 			{
 			$do_check = 1;
+			} 
+		elsif ( $tmp_args[ 0 ] eq '-s')
+			{
+			$verbose = 0;
 			} 
 		elsif ( $tmp_args[ 0 ] eq '-v')
 			{
@@ -1067,6 +1319,15 @@ sub fatal_error
 
   exit $exitcode;
 
+}
+
+sub verify_execute_cmd {
+  my ($cmd) = @_;
+  if ( ! -f $cmd) {
+    $judgement=$JUDGEMENT_CE;
+    &writeResultsFile();
+    exit 0;
+  }
 }
 
 #
