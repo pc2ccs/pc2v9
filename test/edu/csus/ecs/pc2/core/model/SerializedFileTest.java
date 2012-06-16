@@ -13,10 +13,18 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 public class SerializedFileTest extends AbstractTestCase {
 
     private SampleContest sample = new SampleContest();
+    
+    @Override
+    protected void setUp() throws Exception {
+//        setCreateMissingDirectories(true);
+        super.setUp();
+    }
 
     public void testEquals() throws Exception {
+        
+        ensureDirectory(getTestingOutputDirectory());
 
-        String filename = sample.createSampleDataFile(getTestFilename("datafile"));
+        String filename = sample.createSampleDataFile(getOutputTestFilename("datafile"));
 
         SerializedFile file1 = new SerializedFile(filename);
 
@@ -26,7 +34,7 @@ public class SerializedFileTest extends AbstractTestCase {
         SerializedFile file2 = new SerializedFile(filename);
         assertFalse("a different file shold not be equal ", file1.equals(file2));
 
-        filename = sample.createSampleAnswerFile(getTestFilename("datafile3"));
+        filename = sample.createSampleAnswerFile(getOutputTestFilename("datafile3"));
 
         SerializedFile file3 = new SerializedFile(filename);
         assertFalse("a third file should not be equal to the first file", file1.equals(file3));

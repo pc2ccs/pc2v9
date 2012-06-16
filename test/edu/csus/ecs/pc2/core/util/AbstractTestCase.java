@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -54,7 +53,7 @@ public class AbstractTestCase extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        insureDirectory(getDataDirectory());
+        ensureAndCreateDirectory(getDataDirectory());
     }
     
     /**
@@ -73,7 +72,7 @@ public class AbstractTestCase extends TestCase {
             testDataDirectory = projectPath + File.separator + DEFAULT_PC2_TEST_DIRECTORY;
         }
         
-        insureDirectory(testDataDirectory);
+        ensureAndCreateDirectory(testDataDirectory);
         return testDataDirectory;
     }
     
@@ -96,7 +95,7 @@ public class AbstractTestCase extends TestCase {
             testingOutputDirectory = projectPath + File.separator + DEFAULT_PC2_TEST_DIRECTORY;
         }
         
-        insureDirectory (testingOutputDirectory);
+        ensureAndCreateDirectory (testingOutputDirectory);
         
         return testingOutputDirectory;
     }
@@ -107,11 +106,26 @@ public class AbstractTestCase extends TestCase {
      * 
      * @param directoryName
      */
-    private void insureDirectory(String directoryName) {
-        if (createMissingDirectories && ! new File(directoryName).isDirectory()) {
-            Utilities.insureDir(directoryName);
-            System.err.println("Created directory: "+directoryName);
-        } 
+    private void ensureAndCreateDirectory(String directoryName) {
+        if (createMissingDirectories && !new File(directoryName).isDirectory()) {
+            ensureDirectory(directoryName);
+            System.err.println("Created directory: " + directoryName);
+        }
+    }
+
+    /**
+     * Not quite insure, more of a attempt to create it if you can if you can't return false.
+     * 
+     * @param directoryName
+     * @return true if directory exists or was created, false otherwise.
+     */
+    public boolean ensureDirectory(String directoryName) {
+        File dir = new File(directoryName);
+        if (!dir.exists() && !dir.mkdirs()) {
+            return false;
+        }
+
+        return dir.isDirectory();
     }
 
     /**
@@ -124,7 +138,7 @@ public class AbstractTestCase extends TestCase {
     public String getTestingOutputDirectory (String directoryName) {
         
         String newDirName = getTestingOutputDirectory() + File.separator + getShortClassName() + File.separator + directoryName;
-        insureDirectory (newDirName);
+        ensureAndCreateDirectory (newDirName);
         return newDirName; 
     }
 
@@ -138,7 +152,7 @@ public class AbstractTestCase extends TestCase {
     public String getDataDirectory() {
         
         String dirname = getTestDataDirectory() + File.separator + getShortClassName();
-        insureDirectory(dirname);
+        ensureAndCreateDirectory(dirname);
         return dirname;
     }
 
@@ -151,21 +165,27 @@ public class AbstractTestCase extends TestCase {
      */
     public String getDataDirectory(String directoryName) {
         String newDirName = getDataDirectory() + File.separator + directoryName;
-        insureDirectory (newDirName);
+        ensureAndCreateDirectory (newDirName);
         return newDirName; 
     }
     
 
     /**
-     * Get test case (JUnit) test file name (full path).
+     * Get a project relative input data file name.
      * 
-     * @param testJUnitName
-     * @return
      */
-    public String getTestFilename(String filename) {
-        return getDataDirectory() + File.separator + filename;
+    public String getTestFilename(String baseFilename) {
+        return getDataDirectory() + File.separator + baseFilename;
     }
-    
+
+    /**
+     * Get a project relative output data file name.
+     * 
+     */
+    public String getOutputTestFilename(String baseFilename) {
+        return getTestingOutputDirectory() + File.separator + baseFilename;
+    }
+
     /**
      * get this class name (without package).
      * @return
