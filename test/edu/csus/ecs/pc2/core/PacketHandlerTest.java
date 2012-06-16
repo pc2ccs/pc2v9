@@ -1,20 +1,23 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
+import java.io.IOException;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * JUnit test for PacketHandler.
@@ -24,56 +27,32 @@ import edu.csus.ecs.pc2.core.util.JUnitUtilities;
  */
 
 // $HeadURL$
-public class PacketHandlerTest extends TestCase {
-
-    private IInternalContest contest;
-
-    private IInternalController controller;
-
+public class PacketHandlerTest extends AbstractTestCase {
+    
+    private SampleContest sampleContest = new SampleContest();
+    
+    private String outputTestDirectory;
+    
+    @Override
     protected void setUp() throws Exception {
+        setCreateMissingDirectories(true);
         super.setUp();
-        SampleContest sampleContest = new SampleContest();
-        contest = sampleContest.createContest(2, 4, 12, 6, true);
         
-        String testDirectory = SampleContest.getTestDirectoryName("pht");
-        
-        FileStorage storage = new FileStorage(testDirectory);
-        contest.setStorage(storage);
-        
-        controller = sampleContest.createController(contest, testDirectory, true, false);
-
-        // Directory where test data is
-        String testDir = "testdata";
-        String projectPath=JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            throw new Exception("Unable to locate "+testDir);
+        if (outputTestDirectory == null) {
+            // done just in case setup called for every JUnit method.
+            outputTestDirectory = getTestingOutputDirectory("phy");
         }
-
-        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
-        File dir = new File(loadFile);
-        if (!dir.exists()) {
-            System.err.println("could not find " + loadFile);
-            throw new Exception("Unable to locate "+loadFile);
-       } else {
-            loadFile = dir.getAbsolutePath();
-        }
-
-        // Add 22 random runs
-        Run[] runs = sampleContest.createRandomRuns(contest, 22, true, true, true);
-        sampleContest.addRuns(contest, runs, loadFile);
-
-
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
+        
     }
 
     /**
      * Test security setting in PacketHandler.
      *
      */
-    public void testSecuritySet() {
+    public void testSecuritySet() throws Exception {
+        
+        IInternalContest contest = createContest("testSecuritySet");
+        IInternalController controller = createController(contest);
 
         // Security Leve HIGH
         controller.setSecurityLevel(InternalController.SECURITY_HIGH_LEVEL);
@@ -132,20 +111,84 @@ public class PacketHandlerTest extends TestCase {
 
     }
 
-    private void failTest(String string, Exception e) {
+    
+    public void testDeleteRunWhenContestOver() throws Exception {
+        
+        IInternalContest contest = createContest("testSecuritySet");
+        IInternalController controller = createController(contest);
 
-        if (e != null) {
-            e.printStackTrace(System.err);
-        }
-        assertTrue(string, false);
+        ContestTime contestTime = contest.getContestTime();
+        
+        contest.startContest(contest.getSiteNumber());
+
+        ClientId teamId = contest.getAccounts(Type.TEAM).firstElement().getClientId();
+        
+        ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Client " + teamId.toString());
+        contest.addLogin(teamId, connectionHandlerID);
+        
+        Profile profile = new Profile("testDeleteRunWhenContestOver Profile");
+        contest.setProfile(profile);
+        
+        /**
+         * Test that run is not deleted if remaining time > 0.
+         */
+        
+        Run run = contest.getRuns()[1];
+        packetHandleRun(run, contest, controller, teamId, connectionHandlerID);
+        
+        Run newRun = contest.getRun(run.getElementId());
+        assertFalse("Run should NOT be deleted", newRun.isDeleted());
+
+        // TODO test whether if contest is not running whether run is deleted.
+        
+        // TODO test whether if CCS Test mode and override elapsed time > contest length, is run deleted?
+        
+        /**
+         * Test that if there is no remaining time, that run is deleted.
+         */
+        
+        contestTime.setRemainingSecs(0);
+        run = contest.getRuns()[3];
+        packetHandleRun(run, contest, controller, teamId, connectionHandlerID);
+        
+        newRun = contest.getRun(run.getElementId());
+        assertTrue ("Run should be deleted", newRun.isDeleted());
+        
+        
     }
 
-    /**
-     * Force a failure of the test
-     * 
-     * @param string
-     */
-    private void failTest(String string) {
-        failTest(string, null);
+    private void packetHandleRun(Run run, IInternalContest contest, IInternalController controller, ClientId teamId, ConnectionHandlerID connectionHandlerID) throws Exception {
+        RunFiles runFiles = sampleContest.createSampleRunFiles(run);
+        
+        ClientId serverId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Packet packet = PacketFactory.createSubmittedRun(teamId, serverId, run, runFiles, 0, 0);
+        packet.setContestIdentifier(contest.getContestIdentifier());
+
+        PacketHandler packetHandler = new PacketHandler(controller, contest);
+        packetHandler.handlePacket(packet, connectionHandlerID);
+      
     }
+
+    protected IInternalContest createContest (String methodName) throws IOException, ClassNotFoundException, FileSecurityException {
+      
+        IInternalContest contest = sampleContest.createContest(2, 4, 12, 6, true);
+        
+        FileStorage storage = new FileStorage(outputTestDirectory + File.separator + methodName);
+        contest.setStorage(storage);
+        
+        String testSourceFileName = getTestFilename("Sumit.java");
+        assertFileExists(testSourceFileName);
+
+        // Add 22 random runs
+        Run[] runs = sampleContest.createRandomRuns(contest, 22, true, true, true);
+        sampleContest.addRuns(contest, runs, testSourceFileName);
+        
+        return contest;
+    }
+    
+    protected IInternalController createController(IInternalContest contest) {
+        return sampleContest.createController(contest, outputTestDirectory, true, false);
+    }
+
+
 }

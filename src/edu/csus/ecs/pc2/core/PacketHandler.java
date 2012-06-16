@@ -1510,6 +1510,11 @@ public class PacketHandler {
         }
         
         Run run = contest.acceptRun(submittedRun, runFiles);
+        if (contest.getContestTime().isPastEndOfContest()) {
+            run.setDeleted(true);
+            submittedRun.setDeleted(true);
+            contest.updateRun(run, getServerClientId());
+        }
 
         // Send to team
         Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, run);

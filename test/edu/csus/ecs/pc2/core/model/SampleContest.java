@@ -831,6 +831,18 @@ public class SampleContest {
             contest.acceptRun(run, runFiles);
         }
     }
+    
+    /**
+     * Create a sample RunFiles.
+     * 
+     * Uses {@link #getSampleFile()} as the filename.
+     * 
+     * @param run
+     * @return 
+     */
+    public RunFiles createSampleRunFiles (Run run) {
+        return new RunFiles(run, getSampleFile());
+    }
 
     /**
      * Print the report to the filename.
@@ -992,10 +1004,9 @@ public class SampleContest {
          */
         ClientId judgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
         Judgement judgement;
-        String sampleFileName = sample.getSampleFile();
 
         for (Run run : runs) {
-            RunFiles runFiles = new RunFiles(run, sampleFileName);
+            RunFiles runFiles = createSampleRunFiles(run);
 
             contest.acceptRun(run, runFiles);
 

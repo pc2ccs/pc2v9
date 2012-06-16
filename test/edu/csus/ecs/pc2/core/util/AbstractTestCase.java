@@ -6,14 +6,11 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
- * A base TestCase case with utilities.
- * 
- * All PC^2 TestCase should use this to get the test directory names
- * for individual JUnits, will locate test directory under ({@link #DEFAULT_PC2_TEST_DIRECTORY}) 
- * 
+ * Test utilities.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -21,10 +18,29 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 // $HeadURL$
 public class AbstractTestCase extends TestCase {
+    
+    /**
+     * For debugging, if directories do not exist create them.
+     */
+    private boolean createMissingDirectories = false;
 
     private String testDataDirectory = null;
 
+    /**
+     * Directory under which all input testing data is located.
+     * 
+     * Do not use directly, use {@link #getDataDirectory()}.
+     */
     public static final String DEFAULT_PC2_TEST_DIRECTORY = "testdata";
+    
+    private String testingOutputDirectory = null;
+
+    /**
+     * Directory under which all testing output should be located.
+     * 
+     * Do not use directly, use {@link #getTestingOutputDirectory()}.
+     */
+    public static final String DEFAULT_PC2_OUTPUT_FOR_TESTING_DIRECTORY = "testing";
     
     public AbstractTestCase() {
         super();
@@ -38,7 +54,7 @@ public class AbstractTestCase extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        insureDataDirectory();
+        insureDirectory(getDataDirectory());
     }
     
     /**
@@ -56,23 +72,87 @@ public class AbstractTestCase extends TestCase {
             }
             testDataDirectory = projectPath + File.separator + DEFAULT_PC2_TEST_DIRECTORY;
         }
+        
+        insureDirectory(testDataDirectory);
         return testDataDirectory;
+    }
+    
+    
+    /**
+     * Return the project (with JUnit name) relative directory where test output data is located.
+     * 
+     * This returns the proper project-relative path for the input testing data directory.
+     * 
+     * @return a project-relative directory name with the JUnit classname 
+     */
+    public String getTestingOutputDirectory() {
+        if (testingOutputDirectory == null) {
+
+            String projectPath = JUnitUtilities.locate(DEFAULT_PC2_TEST_DIRECTORY);
+            if (projectPath == null) {
+                projectPath = "."; //$NON-NLS-1$
+                System.err.println("AbstractTestCase: Warning - unable to locate in project " + DEFAULT_PC2_TEST_DIRECTORY);
+            }
+            testingOutputDirectory = projectPath + File.separator + DEFAULT_PC2_TEST_DIRECTORY;
+        }
+        
+        insureDirectory (testingOutputDirectory);
+        
+        return testingOutputDirectory;
+    }
+    
+
+    /**
+     * Insure directory exists if {@link #createMissingDirectories} is true.
+     * 
+     * @param directoryName
+     */
+    private void insureDirectory(String directoryName) {
+        if (createMissingDirectories && ! new File(directoryName).isDirectory()) {
+            Utilities.insureDir(directoryName);
+            System.err.println("Created directory: "+directoryName);
+        } 
     }
 
     /**
-     * Get Data directory for the JUnit.
+     * Return the project (with JUnit name) relative directory where test output data is located.
      * 
-     * Name will be {@link #getDataDirectory()} name and extending class
-     * name.
+     * @see #getTestingOutputDirectory()
+     * @param directoryName name of directory to append to end of path
+     * @return a project-relative directory name  
+     */
+    public String getTestingOutputDirectory (String directoryName) {
+        
+        String newDirName = getTestingOutputDirectory() + File.separator + getShortClassName() + File.separator + directoryName;
+        insureDirectory (newDirName);
+        return newDirName; 
+    }
+
+    /**
+     * Return the base project relative directory where test input data is located.
      * 
-     * @return
+     * This returns the proper project-relative path for the input testing data directory.
+     * 
+     * @return a project-relative directory name, appends the JUnit name at the end of the string. 
      */
     public String getDataDirectory() {
-        return getTestDataDirectory() + File.separator + getShortClassName();
+        
+        String dirname = getTestDataDirectory() + File.separator + getShortClassName();
+        insureDirectory(dirname);
+        return dirname;
     }
-    
-    public String getDataDirectory(String testName) {
-        return getTestDataDirectory() + File.separator + getShortClassName() + File.separator + testName;
+
+    /**
+     * Return the project (with JUnit name) relative directory where test input data is located.
+     * 
+     * @eee {@link #getDataDirectory()}
+     * @param directoryName name of directory to append to end of string
+     * @return a project-relative directory name  
+     */
+    public String getDataDirectory(String directoryName) {
+        String newDirName = getDataDirectory() + File.separator + directoryName;
+        insureDirectory (newDirName);
+        return newDirName; 
     }
     
 
@@ -164,6 +244,7 @@ public class AbstractTestCase extends TestCase {
 
         return names;
     }
+    
     public SerializedFile[] createSerializedFiles(String [] filenames) {
         SerializedFile []files = new SerializedFile[filenames.length];
         for (int i = 0; i < files.length; i++) {
@@ -172,9 +253,6 @@ public class AbstractTestCase extends TestCase {
         return files;
     }
     
-    public void insureDataDirectory() {
-        new File(getDataDirectory()).mkdirs();
-    }
     
     /**
      * Write array to PrintWriter.
@@ -232,4 +310,36 @@ public class AbstractTestCase extends TestCase {
         assertTrue("Missing file: " + directoryName, new File(directoryName).isDirectory());
     }
 
+    /**
+     * Force a failure of the test
+     * 
+     * @param string
+     */
+    public void failTest(String string) {
+        failTest(string, null);
+    }
+    
+    /**
+     * Force failure, print stack trace.
+     * 
+     * @param string
+     * @param e
+     */
+    public void failTest(String string, Exception e) {
+
+        if (e != null) {
+            e.printStackTrace(System.err);
+        }
+        assertTrue(string, false);
+    }
+
+    /**
+     * Automatically create directories if they do not exist.
+     * 
+     * @param createMissingDirectories
+     */
+    public void setCreateMissingDirectories(boolean createMissingDirectories) {
+        this.createMissingDirectories = createMissingDirectories;
+    }
+    
 }
