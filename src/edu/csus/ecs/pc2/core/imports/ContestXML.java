@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Properties;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -16,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -67,18 +69,27 @@ public class ContestXML {
 
     public static final String BALLOON_COLOR_TAG = "ballooncolors";
 
-    public static final String SITES_TAG = "site";
+    public static final String SITE_TAG = "site";
 
     public static final String VERSION_TAG = "version";
 
     public static final String FILE_INFO_TAG = "fileinfo";
+
+    private static final String CONTEST_INFORMATION = "contest_information";
+
+    private static final String PROPERTIES_INFORMATION = "properties_information";
+
+    private static final String SCORING_PROPERTIES = "scoring_properties";
+
+    private static final String CONTEST_TIME = "contest_time";
     
     private boolean showPasswords = true;
 
     public String toXML(IInternalContest contest) throws IOException {
         return toXML(contest, new Filter());
     }
-
+    
+    
     public String toXML(IInternalContest contest, Filter filter) throws IOException {
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot(CONTEST_TAG);
@@ -87,9 +98,14 @@ public class ContestXML {
         
         addFileInfo (mementoRoot);
         
-        IMemento parent = mementoRoot.createChild(SETTINGS_TAG);
+        IMemento settingsParent = mementoRoot.createChild(SETTINGS_TAG);
         ContestInformation contestInformation = contest.getContestInformation();
+        
+        IMemento parent = mementoRoot.createChild(CONTEST_INFORMATION);
         addContestInfo(parent, contestInformation);
+
+        parent = settingsParent.createChild(PROPERTIES_INFORMATION);
+        addSystemProperties(parent, contestInformation);
 
         Site [] sites = contest.getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
@@ -97,6 +113,15 @@ public class ContestXML {
             if (filter.matches(site)){
                 addSiteMemento(mementoRoot, site);
             }
+        }
+        
+        for (Site site : sites){
+            if (filter.matches(site)){
+                ContestTime contestTime = contest.getContestTime(site.getSiteNumber());
+                if (contestTime != null) {
+                    addContestTimeMemento(mementoRoot, contestTime); 
+                }
+            } 
         }
 
         Language[] languages = contest.getLanguages();
@@ -148,7 +173,6 @@ public class ContestXML {
             }
         }
         
-        
         IMemento baloonsMemento = mementoRoot.createChild(BALLOON_COLORS_LIST_TAG);
         
         for (Site site : sites){
@@ -156,7 +180,6 @@ public class ContestXML {
                 addBalloonColorMemento(baloonsMemento, contest, site.getSiteNumber());
             }
         }
-
         
         // Add profiles
         
@@ -177,7 +200,28 @@ public class ContestXML {
         return mementoRoot.saveToString();
     }
 
-    public IMemento addFileInfo(XMLMemento mementoRoot) {
+    private void addContestTimeMemento(XMLMemento mementoRoot, ContestTime contestTime) {
+        IMemento memento = mementoRoot.createChild(CONTEST_TIME);
+        memento.putInteger("siteNumber", contestTime.getSiteNumber());
+
+        memento.putBoolean("contestRunning", contestTime.isContestRunning());
+        memento.putBoolean("haltContestAtTimeZero", contestTime.isHaltContestAtTimeZero());
+
+        memento.putString("elapsedTimeStr", contestTime.getElapsedTimeStr());
+        memento.putString("remainingTimeStr", contestTime.getRemainingTimeStr());
+        memento.putString("contestLengthStr", contestTime.getContestLengthStr());
+
+        memento.putLong("conestLengthMins", contestTime.getConestLengthMins());
+        memento.putLong("remainingSecs", contestTime.getRemainingSecs());
+        if (contestTime.getResumeTime() != null) {
+            memento.putLong("resumeTime", contestTime.getResumeTime().getTimeInMillis());
+        }
+        if (contestTime.getServerTransmitTime() != null) {
+            memento.putLong("serverTransmitTime", contestTime.getServerTransmitTime().getTimeInMillis());
+        }
+    }
+
+    public IMemento addFileInfo(IMemento mementoRoot) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm.ss.SSS");
         String dateString = simpleDateFormat.format(new Date());
         
@@ -193,7 +237,7 @@ public class ContestXML {
         return memento;
     }
     
-    public IMemento addVersionInfo(XMLMemento mementoRoot, IInternalContest contest) {
+    public IMemento addVersionInfo(IMemento mementoRoot, IInternalContest contest) {
         VersionInfo versionInfo = new VersionInfo();
         IMemento memento = mementoRoot.createChild(VERSION_TAG);
         memento.putString("pc2build", versionInfo.getBuildNumber());
@@ -285,9 +329,9 @@ public class ContestXML {
         return mementoRoot;
     }
 
-    public IMemento addSiteMemento (XMLMemento mementoRoot, Site site) {
+    public IMemento addSiteMemento (IMemento mementoRoot, Site site) {
         
-        IMemento memento = mementoRoot.createChild(SITES_TAG);
+        IMemento memento = mementoRoot.createChild(SITE_TAG);
         memento.putInteger("number", site.getSiteNumber());
         memento.putString("pc2id", site.getElementId().toString());
         memento.putString("name", site.getDisplayName());
@@ -302,7 +346,7 @@ public class ContestXML {
         return memento;
     }
     
-    public IMemento addFilterMemento(XMLMemento mementoRoot, Filter filter) {
+    public IMemento addFilterMemento(IMemento mementoRoot, Filter filter) {
         IMemento memento = mementoRoot.createChild(FILTER_TAG);
         memento.putString("summary", filter.toString());
         return memento;
@@ -311,9 +355,28 @@ public class ContestXML {
     public IMemento addContestInfo(IMemento memento, ContestInformation contestInformation) {
         memento.putString("title", contestInformation.getContestTitle());
         memento.putString("url", contestInformation.getContestURL());
+        return memento;
+    }
+    
+
+    public IMemento addSystemProperties(IMemento memento, ContestInformation contestInformation) {
         memento.putLong("maxFileSize", contestInformation.getMaxFileSize());
-        memento.putString("defaultAnswer", contestInformation.getJudgesDefaultAnswer());
         memento.putString("teamDisplayMode", contestInformation.getTeamDisplayMode().toString());
+        addScoringProperties (memento, contestInformation.getScoringProperties());
+        return memento;
+    }
+    
+    private void addScoringProperties(IMemento mementoRoot, Properties scoringProperties) {
+        IMemento memento = mementoRoot.createChild(SCORING_PROPERTIES);
+        String[] keys = (String[]) scoringProperties.keySet().toArray(new String[scoringProperties.keySet().size()]);
+        Arrays.sort(keys);
+        for (String key : keys) {
+            memento.putString(key, scoringProperties.getProperty(key));
+        }
+    }
+
+    public IMemento addClarificationCategories(IMemento memento, ContestInformation contestInformation) {
+        memento.putString("defaultAnswer", contestInformation.getJudgesDefaultAnswer());
         return memento;
     }
     
