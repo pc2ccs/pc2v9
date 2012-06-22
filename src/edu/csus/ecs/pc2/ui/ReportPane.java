@@ -63,6 +63,7 @@ import edu.csus.ecs.pc2.core.report.FinalizeReport;
 import edu.csus.ecs.pc2.core.report.GroupsReport;
 import edu.csus.ecs.pc2.core.report.HTMLReport;
 import edu.csus.ecs.pc2.core.report.IReport;
+import edu.csus.ecs.pc2.core.report.IReportFile;
 import edu.csus.ecs.pc2.core.report.InternalDumpReport;
 import edu.csus.ecs.pc2.core.report.JudgementNotificationsReport;
 import edu.csus.ecs.pc2.core.report.JudgementReport;
@@ -81,6 +82,7 @@ import edu.csus.ecs.pc2.core.report.RunStatisticsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
+import edu.csus.ecs.pc2.core.report.RunsTSVReport;
 import edu.csus.ecs.pc2.core.report.SitesReport;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
@@ -244,7 +246,9 @@ public class ReportPane extends JPanePlugin {
         reports.add(new CategoryReport());
         
         reports.add(new RunStatisticsReport());
-        
+
+        reports.add(new RunsTSVReport());
+
         reports.add(new PlaybackDumpReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
@@ -465,14 +469,16 @@ public class ReportPane extends JPanePlugin {
  
     }
     
-    public void createReportFile(IReport report, String filename, Filter inFilter) throws IOException {
+    public void createReportFile(IReport report, boolean suppressHeaderFooter, String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         filter = inFilter;
 
         try {
 
-            createHeader(printWriter, report);
+            if ( ! suppressHeaderFooter) {
+                createHeader(printWriter, report);
+            }
 
             try {
                 if (report instanceof ExtractPlaybackLoadFilesReport){
@@ -485,7 +491,9 @@ public class ReportPane extends JPanePlugin {
                 e.printStackTrace(printWriter);
             }
 
-            report.printFooter(printWriter);
+            if ( ! suppressHeaderFooter) {
+                report.printFooter(printWriter);
+            }
 
             printWriter.close();
             printWriter = null;
@@ -534,17 +542,19 @@ public class ReportPane extends JPanePlugin {
 
             selectedReport.setContestAndController(getContest(), getController());
             
-            // TODO insure that each report createReportFile sets the filter too
+            // SOMEDAY insure that each report createReportFile sets the filter too
             /**
              * Using setFilter because createReportFile may not set the filter
              */
-            
-            
             selectedReport.setFilter(filter);
             if (writeXML){
                 createXMLFile(selectedReport, filename, filter);
             } else {
-                createReportFile(selectedReport, filename, filter);
+                boolean defaultSuppressHeaderFooter = false;
+                if (selectedReport instanceof IReportFile) {
+                    defaultSuppressHeaderFooter = true;
+                }
+                createReportFile(selectedReport, defaultSuppressHeaderFooter, filename, filter);
             }
             
             viewFile(filename, selectedReport.getReportTitle());

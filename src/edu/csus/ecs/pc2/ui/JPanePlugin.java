@@ -111,7 +111,7 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
             }
         }
 
-        reportPane.createReportFile(report, filename, filter);
+        reportPane.createReportFile(report, false, filename, filter);
 
         String title = report.getReportTitle();
 

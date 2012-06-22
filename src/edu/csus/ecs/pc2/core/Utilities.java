@@ -581,11 +581,11 @@ public final class Utilities {
      * 
      * @see #viewReport(IReport, String, IInternalContest, IInternalController, boolean)
      * @param report
-     * @param string
+     * @param title
      * @param contest
      * @param controller
      */
-    public static void viewReport(IReport report, String string, IInternalContest contest, IInternalController controller) {
-       viewReport(report, string, contest, controller, true);
+    public static void viewReport(IReport report, String title, IInternalContest contest, IInternalController controller) {
+       viewReport(report, title, contest, controller, true);
     }
 }

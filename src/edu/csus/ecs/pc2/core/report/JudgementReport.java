@@ -49,7 +49,9 @@ public class JudgementReport implements IReport {
                 continue;
             }
             printWriter.print("  '" + judgement );
-            printWriter.println("' id=" + judgement.getElementId());
+            printWriter.print("' id=" + judgement.getElementId());
+            printWriter.print(" acronym=" + judgement.getAcronym());
+            printWriter.println();
         }
         
         printWriter.println("     All Judgements");
@@ -59,7 +61,9 @@ public class JudgementReport implements IReport {
                 hiddenText = "[HIDDEN] ";
             }
             printWriter.print("  '" + judgement );
-            printWriter.println("' "+hiddenText+"id=" + judgement.getElementId());
+            printWriter.print("' "+hiddenText+"id=" + judgement.getElementId());
+            printWriter.print(" acronym=" + judgement.getAcronym());
+            printWriter.println();
         }
     }
 

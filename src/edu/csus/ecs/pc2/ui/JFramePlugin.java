@@ -108,7 +108,7 @@ public abstract class JFramePlugin extends JFrame implements UIPlugin {
             }
         }
 
-        reportPane.createReportFile(report, filename, filter);
+        reportPane.createReportFile(report, false, filename, filter);
 
         String title = report.getReportTitle();
 

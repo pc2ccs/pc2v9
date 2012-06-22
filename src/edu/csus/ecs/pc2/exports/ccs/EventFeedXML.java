@@ -736,8 +736,11 @@ public class EventFeedXML {
         
         if (run.isJudged()){
             ElementId judgementId = run.getJudgementRecord().getJudgementId();
-            String judgement = contest.getJudgement(judgementId).getAcronym();
-            XMLUtilities.addChild(memento, "judgement", judgement.toUpperCase().substring(0, 2));
+            String acronym = contest.getJudgement(judgementId).getAcronym();
+            if (acronym == null) {
+                acronym = "?";
+            }
+            XMLUtilities.addChild(memento, "judgement", acronym);
 
             // old XML name/values result and solved.
             // XMLUtilities.addChild(memento, "result", judgement.toUpperCase().substring(0, 2));
@@ -934,7 +937,11 @@ public class EventFeedXML {
         // </judgement>
         String name = judgement.getDisplayName();
 
-        XMLUtilities.addChild(memento, "acronym", judgement.getAcronym());
+        String acronym = judgement.getAcronym();
+        if (acronym == null) {
+            acronym = "?";
+        }
+        XMLUtilities.addChild(memento, "acronym", acronym); 
         XMLUtilities.addChild(memento, "name", name);
         return memento;
     }

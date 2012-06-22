@@ -15,16 +15,17 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileFilter;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
+import edu.csus.ecs.pc2.core.report.RunsTSVReport;
 import edu.csus.ecs.pc2.exports.ccs.Groupdata;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
 import edu.csus.ecs.pc2.exports.ccs.Teamdata;
 import edu.csus.ecs.pc2.exports.ccs.Userdata;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 
 /**
  * Export Data Pane.
@@ -60,6 +61,8 @@ public class ExportDataPane extends JPanePlugin {
     private JButton exportYamlButton = null;
 
     private String lastDirectory = ".";
+
+    private JButton exportRunTSVButton = null;
 
     /**
      * This method initializes
@@ -312,12 +315,12 @@ public class ExportDataPane extends JPanePlugin {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
-            GridBagConstraints gridBagConstraints = new GridBagConstraints();
-            gridBagConstraints.gridx = 0;
-            gridBagConstraints.gridy = 0;
+            FlowLayout flowLayout1 = new FlowLayout();
+            flowLayout1.setHgap(25);
             centerPane = new JPanel();
-            centerPane.setLayout(new GridBagLayout());
-            centerPane.add(getExportYamlButton(), gridBagConstraints);
+            centerPane.setLayout(flowLayout1);
+            centerPane.add(getExportYamlButton(), null);
+            centerPane.add(getExportRunTSVButton(), null);
         }
         return centerPane;
     }
@@ -360,6 +363,38 @@ public class ExportDataPane extends JPanePlugin {
         return null;
 
     }
+    
+    public File saveAsFileDialog (Component parent, String startDirectory, String defaultFileName) {
+
+        File inFile = new File(startDirectory + File.separator + defaultFileName);
+        System.out.println("debug 22 filename is "+inFile.getAbsolutePath());
+        JFileChooser chooser = new JFileChooser(startDirectory);
+        
+        chooser.setSelectedFile(inFile);
+        
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        
+        FileFilter filterText = new FileNameExtensionFilter( "TSV file (*.tsv)", "tsv");
+//        FileFilter filterText = new FileNameExtensionFilter( "Text document (*.txt)", "txt");
+        chooser.addChoosableFileFilter(filterText);
+        
+        chooser.setAcceptAllFileFilterUsed(false);
+        
+        int action = chooser.showSaveDialog(parent);
+
+        switch (action) {
+            case JFileChooser.APPROVE_OPTION:
+                File file = chooser.getSelectedFile();
+                lastDirectory = chooser.getCurrentDirectory().toString();
+                return file;
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+            default:
+                break;
+        }
+        return null;
+
+    }
 
     protected void exportContestYaml() {
 
@@ -374,6 +409,35 @@ public class ExportDataPane extends JPanePlugin {
                 FrameUtilities.showMessage(this, "Error exporting contest.yaml", "Error exporting YAML " + e.getMessage());
                 e.printStackTrace();
             }
+        }
+    }
+
+    /**
+     * This method initializes exportRunTSVButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getExportRunTSVButton() {
+        if (exportRunTSVButton == null) {
+            exportRunTSVButton = new JButton();
+            exportRunTSVButton.setText("Export runs.tsv");
+            exportRunTSVButton.setMnemonic(KeyEvent.VK_R);
+            exportRunTSVButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    exportRunTSVFile();
+                }
+            });
+        }
+        return exportRunTSVButton;
+    }
+
+    protected void exportRunTSVFile() {
+        
+        File file = saveAsFileDialog(this, lastDirectory, "runs.tsv");
+        
+        if (file != null) {
+            RunsTSVReport runsTSVReport = new RunsTSVReport();
+            Utilities.viewReport(runsTSVReport, "runs.tsv file", getContest(), getController(), ! runsTSVReport.suppressHeaderFooter());
         }
     }
 

@@ -31,7 +31,7 @@ public class Judgement implements IElementObject, Serializable {
     private String acronym;
 
     public Judgement(String displayName) {
-        this(displayName, displayName.toUpperCase().substring(0,2));
+        this(displayName, null);
     }
     
     public Judgement(String displayName, String acronym) {

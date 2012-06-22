@@ -43,6 +43,7 @@ public final class AllTests {
         suite.addTestSuite(BalloonSettingsTest.class);
         suite.addTestSuite(ClarificationAnswerTest.class);
         suite.addTestSuite(DisplayTeamNameTest.class);
+        suite.addTestSuite(JudgementTest.class);
         //$JUnit-END$
         return suite;
     }

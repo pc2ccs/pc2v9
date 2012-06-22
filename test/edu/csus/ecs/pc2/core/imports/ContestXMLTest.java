@@ -101,8 +101,66 @@ public class ContestXMLTest extends TestCase {
         showVersion(versionString);
         triplet = contestXML.getVersionTriplet(versionString);
         assertEquals("9.0.0", triplet);
-
+        
     }
+    
+//    /**
+//     * Get nodelist based on XPath expression.
+//     * @param contest
+//     * @param xPathExpression
+//     * @return
+//     */
+//    private NodeList getXMLNodeList (IInternalContest contest, String xPathExpression) {
+//        
+//        try {
+//            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//            DocumentBuilder builder = factory.newDocumentBuilder();
+//            
+//            String xmlString = contestXML.toXML(contest);
+//            
+//            Document doc = builder.parse(xmlString);
+//            XPathFactory xPathfactory = XPathFactory.newInstance();
+//            XPath xpath = xPathfactory.newXPath();
+//            XPathExpression expr = xpath.compile(xPathExpression);
+//            NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+//            return nl;
+//            
+//        } catch (Exception e) {
+//                e.printStackTrace();
+//            return null;
+//        }
+//    }
+//    
+//    public void testXMLParts() throws IOException {
+//        
+//        SampleContest sample = new SampleContest();
+//
+//        IInternalContest contest = sample.createContest(3, 6, 22, 12, true);
+//
+//        String xmlString = contestXML.toXML(contest);
+//        assertNotNull("Contest XML should not be null ", xmlString);
+//        
+//        String contestRoot = "/"+ContestXML.CONTEST_TAG ;
+//        
+//        // /howto/topic[@name='PowerBuilder']/url[2]/text()
+//        
+//        System.out.println("XML =" + xmlString);
+//        System.out.println();
+//        
+//        String path = contestRoot + "/profiles[@contestid]";
+//        path = contestRoot + "/profiles";
+//        path = contestRoot + "/profiles[0]/name";
+//        
+//        NodeList nodeList = getXMLNodeList(contest, path);
+//        System.out.println("Searching for "+path+ " found "+nodeList);
+//        
+//        // SOMEDAY fix java.net.MalformedURLException
+//        /**
+//         * java.net.MalformedURLException: no protocol: <?xml version="1.0" encoding="UTF-8"?>
+//         */
+//        
+////        assertNotNull (nodeList);
+//    }
 
     private void showVersion(String vernum) {
         if (debugMode) {
