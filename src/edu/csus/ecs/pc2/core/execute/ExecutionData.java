@@ -308,11 +308,17 @@ public class ExecutionData implements Serializable {
     /**
      * Did team's submission fail to compile?.
      * @return
+     * @deprecated use {@link #isCompileSuccess()}.
      */
     public boolean isFailedToCompile() {
         return failedToCompile;
     }
 
+    /**
+     * 
+     * @param failedToCompile
+     * @deprecated use {@link #setCompileSuccess(boolean)}
+     */
     public void setFailedToCompile(boolean failedToCompile) {
         this.failedToCompile = failedToCompile;
     }

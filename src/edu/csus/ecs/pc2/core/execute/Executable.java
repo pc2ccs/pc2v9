@@ -50,6 +50,8 @@ import edu.csus.ecs.pc2.ui.NullViewer;
 
 // $HeadURL$
 public class Executable {
+    
+    private static final String NL = System.getProperty("line.separator");
 
     private Run run = null;
 
@@ -288,7 +290,18 @@ public class Executable {
                      * If there is compiler stderr or stdout we should not add the
                      * textPane saying there was an error.
                      */ 
-                    if (executionData.getCompileStderr() == null && executionData.getCompileStdout() == null) {
+                    if (! executionData.isCompileSuccess()) {
+
+                        String errorMessage = "Unable to find/execute compiler using command: "+language.getCompileCommandLine();
+                        if (executionData.getExecutionException() != null) {
+                            errorMessage += NL + executionData.getExecutionException().getMessage();
+                        }
+                        
+                        showDialogToUser(errorMessage);
+                        fileViewer.addTextPane("Error executing compiler", errorMessage);
+                        
+                    } else if (executionData.getCompileStderr() == null && executionData.getCompileStdout() == null) {
+                        
                         int errnoIndex = errorString.indexOf('=') + 1;
                         String errorMessage;
                         if (errorString.substring(errnoIndex).equals("2")) {
@@ -332,11 +345,21 @@ public class Executable {
                 /**
                  * compileProgram returns false if
                  * 1) runProgram failed (errorString set)
-                 * 2) compiler fails to create expecte output file (errorString empty)
+                 * 2) compiler fails to create expected output file (errorString empty)
                  * If there is compiler stderr or stdout we should not add the
                  * textPane saying there was an error.
                  */ 
-                if (executionData.getCompileStderr() == null && executionData.getCompileStdout() == null) {
+                if (! executionData.isCompileSuccess()) {
+
+                    String errorMessage = "Unable to find/execute compiler using command: "+language.getCompileCommandLine();
+                    if (executionData.getExecutionException() != null) {
+                        errorMessage += NL + executionData.getExecutionException().getMessage();
+                    }
+                    
+                    showDialogToUser(errorMessage);
+                    fileViewer.addTextPane("Error executing compiler", errorMessage);
+                    
+                } else if (executionData.getCompileStderr() == null && executionData.getCompileStdout() == null) {
                     int errnoIndex = errorString.indexOf('=') + 1;
                     String errorMessage;
                     if (errorString.substring(errnoIndex).equals("2")) {
@@ -372,8 +395,19 @@ public class Executable {
             }
 
             if (!programGeneratedOutput) {
-                fileViewer.addTextPane("Program output", "PC2: execution of program did not generate any output");
+                String message = "PC2: execution of program did not generate any output";
+
+                if (!executionData.isCompileSuccess()) {
+                    String errorMessage = "Unable to find/execute compiler using command: " + language.getCompileCommandLine();
+                    if (executionData.getExecutionException() != null) {
+                        errorMessage += NL + executionData.getExecutionException().getMessage();
+                    }
+                    message += NL + errorMessage;
+                }
+
+                fileViewer.addTextPane("Program output", message);
             }
+
             outputFile = prefixExecuteDirname(COMPILER_STDOUT_FILENAME);
             file = new File(outputFile);
             if (file.isFile() && file.length() > 0) {
@@ -1386,10 +1420,12 @@ public class Executable {
         } catch (IOException e) {
             errorString = e.getMessage();
             log.config("Note: exec failed in RunProgram " + errorString);
+            executionData.setExecutionException(e);
             return null;
         } catch (Exception e) {
             errorString = e.getMessage();
             log.log(Log.CONFIG, "Note: exec failed in RunProgram " + errorString, e);
+            executionData.setExecutionException(e);
             return null;
         }
 

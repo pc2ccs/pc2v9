@@ -346,50 +346,21 @@ public class SubmitRunPane extends JPanePlugin {
                 languageComboBox.setSelectedIndex(i);
             }
         }
-
-        // Current Dir
-        try {
-            String filename = "Sumit.java";
-            File file = new File(filename);
-            if (file.exists()) {
-                fileNameLabel.setText(filename);
-            }
-        } catch (Exception e) {
-            log.log(Log.WARNING, "Exception logged ", e);
-        }
         
-        // Samps dir
-        try {
-            String filename = "samps/Sumit.java";
-            File file = new File(filename);
-            if (file.exists()) {
-                fileNameLabel.setText(filename);
-            }
-        } catch (Exception e) {
-            log.log(Log.WARNING, "Exception logged ", e);
-        }
-
-        try {
-            String filename = "/pc2/samps/sumit.java";
-            File file = new File(filename);
-            if (file.exists()) {
-                fileNameLabel.setText(filename);
-            }
-        } catch (Exception e) {
-            log.log(Log.WARNING, "Exception logged ", e);
-        }
+        String [] paths = {"", "samps", "samps/src", "/usr/pc2/samps/src" };
         
-        try {
-            String filename = "/usr/pc2/samps/sumit.java";
-            File file = new File(filename);
-            if (file.exists()) {
-                fileNameLabel.setText(filename);
+        for (String dirname : paths) {
+            String fullpath = dirname + "/" + "Sumit.java"; 
+            if ("".equals(dirname)) {
+                fullpath = "Sumit.java";
             }
-        } catch (Exception e) {
-            log.log(Log.WARNING, "Exception logged ", e);
+            File file = new File(fullpath);
+            if (file.exists()) {
+                fileNameLabel.setText(fullpath);
+            }
         }
     }
-
+        
     /**
      * This method initializes mainViewPane
      * 
