@@ -509,5 +509,72 @@ public class InternalContestTest extends TestCase {
             assertTrue("Contests NOT the same " + comment, differences.length == 0);
         }
     }
+    
+    /**
+     * Test whether elapsed time start/stop.
+     * Bug 707 JUnit.
+     * @throws Exception
+     */
+    public void testElapsedStartStop() throws Exception {
+        
+        /**
+         * Number of second to wait before starting and stopping contest clock.
+         */
+        int secondsToWait = 10;
+        int siteNumber = 2;
+        
+        long ms = secondsToWait * 1000;
+        
+        IInternalContest contest = sampleContest.createContest(siteNumber, siteNumber, 12, 12, true);
+        
+        contest.startContest(siteNumber);
+
+        System.out.println("Sleep for " + secondsToWait + " seconds.");
+        Thread.sleep(ms);
+
+        contest.stopContest(siteNumber);
+        long actualSecs = contest.getContestTime().getElapsedSecs();
+        assertTrue("After stop, expecting elapsed time secs > " + secondsToWait + ", was=" + secondsToWait, actualSecs >= secondsToWait);
+
+        long actualMS = contest.getContestTime().getElapsedMS();
+        assertTrue("After stop, expecting elapsed time ms > " + ms + ", was=" + actualMS, actualMS >= ms);
+
+        contest.startContest(siteNumber);
+        actualSecs = contest.getContestTime().getElapsedSecs();
+        assertTrue("After stop, expecting elapsed time secs > " + secondsToWait + ", was=" + secondsToWait, actualSecs >= secondsToWait);
+
+        actualMS = contest.getContestTime().getElapsedMS();
+        assertTrue("After start, expecting elapsed time ms > " + ms + ", was=" + actualMS, actualMS >= ms);
+    }
+    
+    String toString(ContestTime contestTime) {
+
+        StringBuffer buffer = new StringBuffer().append(", getConestLengthMins=" + contestTime.getConestLengthMins()) //
+                .append(", getContestLengthStr=" + contestTime.getContestLengthStr()) //
+                .append(", isContestRunning=" + contestTime.isContestRunning()) //
+                .append(", getElapsedTimeStr=" + contestTime.getElapsedTimeStr()) //
+                .append(", getRemainingTimeStr=" + contestTime.getRemainingTimeStr()) //
+                .append(", getRemainingMinStr=" + contestTime.getRemainingMinStr()) //
+                .append(", getContestLengthSecs=" + contestTime.getContestLengthSecs()) //
+                .append(", getContestLengthMS=" + contestTime.getContestLengthMS()) //
+                .append(", getElapsedMins=" + contestTime.getElapsedMins()) //
+                .append(", getElapsedSecs=" + contestTime.getElapsedSecs()) //
+                .append(", getElapsedMS=" + contestTime.getElapsedMS()) //
+                .append(", getElapsedTime=" + contestTime.getElapsedTime()) //
+                .append(", getRemainingSecs=" + contestTime.getRemainingSecs()) //
+                .append(", getRemainingMS=" + contestTime.getRemainingMS()) //
+                .append(", isHaltContestAtTimeZero=" + contestTime.isHaltContestAtTimeZero()) //
+                .append(", isPastEndOfContest=" + contestTime.isPastEndOfContest()) //
+                .append(", remTimeStr=" + contestTime.remTimeStr()) //
+                .append(", getResumeTime=" + contestTime.getResumeTime()) // GregorianCalendar
+                .append(", getLocalClockOffset=" + contestTime.getLocalClockOffset()) //
+                .append(", getServerTransmitTime=" + contestTime.getServerTransmitTime()) // GregorianCalendar
+                .append(", getElementId=" + contestTime.getElementId()) //
+                .append(", getSiteNumber=" + contestTime.getSiteNumber()) //
+                .append(", getContestStartTime=" + contestTime.getContestStartTime()) // Calendar
+        ;
+
+        return (buffer.toString());
+    }
 
 }
