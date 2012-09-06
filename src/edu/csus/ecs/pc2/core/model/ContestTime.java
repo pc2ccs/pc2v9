@@ -6,7 +6,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 /**
- * InternalContest Time Information.
+ * Internal Contest Time Information.
  * 
  * Methods used to access contest time as well as start and stop contest time. <br>
  * Start clock: {@link #startContestClock()}. <br>
@@ -54,7 +54,7 @@ public class ContestTime implements IElementObject {
     /**
      * Elapsed seconds since start of contest.
      */
-    private long elapsedSecs = 0;
+//    private long elapsedSecs = 0;
     
     /**
      * Elapsed milli-seconds since start of contest.
@@ -187,6 +187,10 @@ public class ContestTime implements IElementObject {
     public long getContestLengthSecs() {
         return contestLengthSecs;
     }
+    
+    public long getContestLengthMS() {
+        return contestLengthSecs * 1000;
+    }
 
     /**
      * @return elapsed time in minutes.
@@ -199,7 +203,7 @@ public class ContestTime implements IElementObject {
      * @return elapsed time in seconds.
      */
     public long getElapsedSecs() {
-        return elapsedSecs + secsSinceContestStart();
+        return getElapsedMS() / 1000;
     }
     
     /**
@@ -224,9 +228,17 @@ public class ContestTime implements IElementObject {
      */
     public long getRemainingSecs() {
         // compute remaining time.
-        return contestLengthSecs - (elapsedSecs + secsSinceContestStart());
+        return contestLengthSecs - (getElapsedSecs() + secsSinceContestStart());
     }
 
+    /**
+     * 
+     * @return remaining seconds from contest clock.
+     */
+    public long getRemainingMS() {
+        return getContestLengthMS() - getElapsedMS();
+    }
+    
     /**
      * 
      * @return halt the contest at time zero ?
@@ -236,11 +248,12 @@ public class ContestTime implements IElementObject {
     }
 
     /**
+     * past end of contest?.
      * 
      * @return true if remaining seconds <= 0, false if more time left.
      */
     public boolean isPastEndOfContest() {
-
+//        return getRemainingMS() <= 0;
         return getRemainingSecs() <= 0;
     }
 
@@ -285,11 +298,11 @@ public class ContestTime implements IElementObject {
     }
 
     public void setElapsedMins(long minutes) {
-        elapsedSecs = minutes * 60;
+        setElapsedSecs(minutes * 60);
     }
 
     public void setElapsedSecs(long eSecs) {
-        elapsedSecs = eSecs;
+        elapsedMS = eSecs * 1000;
     }
 
     public void setHaltContestAtTimeZero(boolean newHaltContestAtTimeZero) {
@@ -328,7 +341,7 @@ public class ContestTime implements IElementObject {
      */
     public void stopContestClock() {
         if (contestRunning) {
-            elapsedSecs = elapsedSecs + secsSinceContestStart();
+            elapsedMS = elapsedMS + msSinceContestStart();
             contestRunning = false;
         }
     }
@@ -457,7 +470,7 @@ public class ContestTime implements IElementObject {
         resumeTime = null;
         serverTransmitTime = null;
         localClockOffset = 0;
-        elapsedSecs = 0;
+        elapsedMS = 0;
         contestRunning = false;
     }
 

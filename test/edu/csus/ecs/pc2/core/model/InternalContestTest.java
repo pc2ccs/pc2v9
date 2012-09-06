@@ -469,5 +469,42 @@ public class InternalContestTest extends TestCase {
             assertTrue("Contests NOT the same " + comment, differences.length == 0);
         }
     }
+    
+    /**
+     * Test whether elapsed time start/stop.
+     * Bug 707 JUnit.
+     * @throws Exception
+     */
+    public void testElapsedStartStop() throws Exception {
+        
+        /**
+         * Number of second to wait before starting and stopping contest clock.
+         */
+        int secondsToWait = 10;
+        int siteNumber = 2;
+        
+        long ms = secondsToWait * 1000;
+        
+        IInternalContest contest = sampleContest.createContest(siteNumber, siteNumber, 12, 12, true);
+        
+        contest.startContest(siteNumber);
+
+        System.out.println("Sleep for " + secondsToWait + " seconds.");
+        Thread.sleep(ms);
+
+        contest.stopContest(siteNumber);
+        long actualSecs = contest.getContestTime().getElapsedSecs();
+        assertTrue("After stop, expecting elapsed time secs > " + secondsToWait + ", was=" + secondsToWait, actualSecs >= secondsToWait);
+
+        long actualMS = contest.getContestTime().getElapsedMS();
+        assertTrue("After stop, expecting elapsed time ms > " + ms + ", was=" + actualMS, actualMS >= ms);
+
+        contest.startContest(siteNumber);
+        actualSecs = contest.getContestTime().getElapsedSecs();
+        assertTrue("After stop, expecting elapsed time secs > " + secondsToWait + ", was=" + secondsToWait, actualSecs >= secondsToWait);
+
+        actualMS = contest.getContestTime().getElapsedMS();
+        assertTrue("After start, expecting elapsed time ms > " + ms + ", was=" + actualMS, actualMS >= ms);
+    }
 
 }
