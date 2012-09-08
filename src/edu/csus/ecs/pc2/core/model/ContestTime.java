@@ -6,7 +6,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 /**
- * Internal Contest Time Information.
+ * Contest Time.
  * 
  * Methods used to access contest time as well as start and stop contest time. <br>
  * Start clock: {@link #startContestClock()}. <br>
@@ -25,7 +25,33 @@ public class ContestTime implements IElementObject {
     /**
      * 
      */
-    private static final long serialVersionUID = 6967329985187819728L;
+    public static final long serialVersionUID = 6967329985187819728L;
+    
+    /**
+     * number of ms in a second.
+     */
+    public static final long MS_PER_SECONDS = 1000;
+
+    /**
+     * number of seconds in a minute.
+     */
+    public static final long SECONDS_PER_MINUTE = 60;
+
+    /**
+     * number of ms in a minute.
+     */
+    public static final long MS_PER_MINUTE = SECONDS_PER_MINUTE * MS_PER_SECONDS;
+
+    /**
+     * number of minutes in an hour.
+     */
+    public static final long MINUTES_PER_HOUR = 60;
+    
+    /**
+     * number of seconds in an hour.
+     */
+    public static final long SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+
 
     /**
      * Default contest length.
@@ -54,7 +80,7 @@ public class ContestTime implements IElementObject {
     /**
      * Elapsed seconds since start of contest.
      */
-//    private long elapsedSecs = 0;
+    private long elapsedSecs = 0;
     
     /**
      * Elapsed milli-seconds since start of contest.
@@ -203,7 +229,7 @@ public class ContestTime implements IElementObject {
      * @return elapsed time in seconds.
      */
     public long getElapsedSecs() {
-        return getElapsedMS() / 1000;
+        return elapsedSecs + secsSinceContestStart();
     }
     
     /**
@@ -228,17 +254,9 @@ public class ContestTime implements IElementObject {
      */
     public long getRemainingSecs() {
         // compute remaining time.
-        return contestLengthSecs - (getElapsedSecs() + secsSinceContestStart());
+        return contestLengthSecs - (elapsedSecs + secsSinceContestStart());
     }
 
-    /**
-     * 
-     * @return remaining seconds from contest clock.
-     */
-    public long getRemainingMS() {
-        return getContestLengthMS() - getElapsedMS();
-    }
-    
     /**
      * 
      * @return halt the contest at time zero ?
@@ -248,12 +266,11 @@ public class ContestTime implements IElementObject {
     }
 
     /**
-     * past end of contest?.
      * 
      * @return true if remaining seconds <= 0, false if more time left.
      */
     public boolean isPastEndOfContest() {
-//        return getRemainingMS() <= 0;
+
         return getRemainingSecs() <= 0;
     }
 
@@ -298,11 +315,12 @@ public class ContestTime implements IElementObject {
     }
 
     public void setElapsedMins(long minutes) {
-        setElapsedSecs(minutes * 60);
+        setElapsedSecs(minutes * SECONDS_PER_MINUTE);
     }
 
     public void setElapsedSecs(long eSecs) {
-        elapsedMS = eSecs * 1000;
+        elapsedSecs = eSecs;
+        elapsedMS = eSecs * MS_PER_SECONDS;
     }
 
     public void setHaltContestAtTimeZero(boolean newHaltContestAtTimeZero) {
@@ -341,6 +359,7 @@ public class ContestTime implements IElementObject {
      */
     public void stopContestClock() {
         if (contestRunning) {
+            elapsedSecs = elapsedSecs + secsSinceContestStart();
             elapsedMS = elapsedMS + msSinceContestStart();
             contestRunning = false;
         }
@@ -470,11 +489,17 @@ public class ContestTime implements IElementObject {
         resumeTime = null;
         serverTransmitTime = null;
         localClockOffset = 0;
-        elapsedMS = 0;
+        setElapsedSecs(0);
         contestRunning = false;
     }
 
     public Calendar getContestStartTime() {
         return contestStartTime;
     }
+
+    public long getRemainingMS() {
+        return getContestLengthMS() - getElapsedMS();
+    }
+
+ 
 }
