@@ -285,11 +285,12 @@ public class ContestTime implements IElementObject {
     }
 
     public void setElapsedMins(long minutes) {
-        elapsedSecs = minutes * 60;
+        setElapsedSecs(minutes * 60);
     }
 
     public void setElapsedSecs(long eSecs) {
         elapsedSecs = eSecs;
+        elapsedMS = eSecs * 1000;
     }
 
     public void setHaltContestAtTimeZero(boolean newHaltContestAtTimeZero) {
@@ -458,11 +459,19 @@ public class ContestTime implements IElementObject {
         resumeTime = null;
         serverTransmitTime = null;
         localClockOffset = 0;
-        elapsedSecs = 0;
+        setElapsedSecs(0);
         contestRunning = false;
     }
 
     public Calendar getContestStartTime() {
         return contestStartTime;
+    }
+    
+    public long getRemainingMS() {
+        return getContestLengthMS() - getElapsedMS();
+    }
+    
+    public long getContestLengthMS() {
+        return contestLengthSecs * 1000;
     }
 }
