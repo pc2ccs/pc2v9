@@ -47,6 +47,8 @@ public class LoginFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -6389607881992853161L;
 
+    private static final String AUTO_REGISTRATION_LOGIN = "auto";
+
     private IInternalContest contest;
 
     private IInternalController controller;
@@ -90,6 +92,8 @@ public class LoginFrame extends JFrame implements UIPlugin {
     private JLabel spacerLabel = null;
 
     private Boolean bAlreadyLoggingIn = false;
+    
+    private AutoRegistrationFrame autoRegistrationFrame = null;
 
     /**
      * This method initializes
@@ -292,11 +296,19 @@ public class LoginFrame extends JFrame implements UIPlugin {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         passwordTextField.requestFocus();
+                        checkToShowAutoRegForm();
                     }
                 }
             });
         }
         return loginTextField;
+    }
+
+    protected void checkToShowAutoRegForm() {
+        if (AUTO_REGISTRATION_LOGIN.equalsIgnoreCase(loginTextField.getText())) {
+            getAutoRegistrationFrame().setVisible(true);
+            setVisible(false);
+        }
     }
 
     /**
@@ -652,6 +664,15 @@ public class LoginFrame extends JFrame implements UIPlugin {
 
     public void disableLoginButton() {
         getLoginButton().setEnabled(false);
+    }
+    
+    public AutoRegistrationFrame getAutoRegistrationFrame() {
+        if (autoRegistrationFrame == null) {
+            autoRegistrationFrame = new AutoRegistrationFrame();
+            autoRegistrationFrame.setParentFrame(this);
+            autoRegistrationFrame.setController(controller);
+        }
+        return autoRegistrationFrame;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

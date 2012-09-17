@@ -119,46 +119,73 @@ public class AccountsReport implements IReport {
                 Arrays.sort(sortedAccounts, new AccountComparator());
 
                 for (Account account : sortedAccounts){
-                    printWriter.print("   Site " + account.getSiteNumber());
-                    printWriter.format(" %-15s", account.getClientId().getName());
-                    printWriter.println(" id=" + account.getElementId());
                     
-                    printWriter.format("%22s"," ");
-                    printWriter.print("'"+account.getDisplayName()+"' ");
-                    
-                    if (contest.isAllowed (edu.csus.ecs.pc2.core.security.Permission.Type.VIEW_PASSWORDS)) {
-                        printWriter.print("password '" + account.getPassword() + "' ");
-                    }
-                    
-                    Permission.Type type = Permission.Type.LOGIN;
-                    if (account.isAllowed(type)){
-                        printWriter.print(type+" ");
-                    }
-                    type = Permission.Type.DISPLAY_ON_SCOREBOARD;
-                    if (account.isAllowed(type)){
-                        printWriter.print(type+" ");
-                    }
-                    printWriter.println();
-
-                    printWriter.format("%22s"," ");
-                    printWriter.print("alias '" + account.getAliasName()+"' ");
-                    ElementId groupId = account.getGroupId();
-                    if (groupId != null) {
-                        Group group = contest.getGroup(groupId);
-                        if (group != null) {
-                            printWriter.print("group '"+group+"' ("+groupId+")");
-                        } else {
-                            printWriter.print("group invalid ("+groupId+")");
-                        }
-                    } else {
-                        printWriter.print("group ''");
-                    }
-                    printWriter.println();
+                    printAccount(printWriter, account);
                 }
             }
         }
     }
     
+    private void printAccount(PrintWriter printWriter, Account account) {
+        printWriter.print("   Site " + account.getSiteNumber());
+        printWriter.format(" %-15s", account.getClientId().getName());
+        printWriter.println(" id=" + account.getElementId());
+        
+        printWriter.format("%22s"," ");
+        printWriter.print("'"+account.getDisplayName()+"' ");
+        
+        if (contest.isAllowed (edu.csus.ecs.pc2.core.security.Permission.Type.VIEW_PASSWORDS)) {
+            printWriter.print("password '" + account.getPassword() + "' ");
+        }
+        
+        Permission.Type type = Permission.Type.LOGIN;
+        if (account.isAllowed(type)){
+            printWriter.print(type+" ");
+        }
+        type = Permission.Type.DISPLAY_ON_SCOREBOARD;
+        if (account.isAllowed(type)){
+            printWriter.print(type+" ");
+        }
+        printWriter.println();
+
+        printWriter.format("%22s"," ");
+        printWriter.print("alias '" + account.getAliasName()+"' ");
+        ElementId groupId = account.getGroupId();
+        if (groupId != null) {
+            Group group = contest.getGroup(groupId);
+            if (group != null) {
+                printWriter.print("group '"+group+"' ("+groupId+")");
+            } else {
+                printWriter.print("group invalid ("+groupId+")");
+            }
+        } else {
+            printWriter.print("group ''");
+        }
+        printWriter.println();
+        
+        printWriter.print("       Member Names: ");
+        
+        String [] names = account.getMemberNames();
+        
+        if (names.length == 0) {
+            printWriter.print(" NO member names assigned ");
+        } else {
+            printWriter.print(" " + join (", ", names));
+        }
+        printWriter.println();
+    }
+
+    private String join(String delimit, String[] names) {
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < names.length; i++) {
+            buffer.append(names[i]);
+            if (i < names.length - 1) {
+                buffer.append(delimit);
+            }
+        }
+        return buffer.toString();
+    }
+
     public void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());

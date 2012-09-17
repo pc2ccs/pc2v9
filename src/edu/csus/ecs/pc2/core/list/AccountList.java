@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.list;
 
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -7,8 +8,8 @@ import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
@@ -335,6 +336,43 @@ public class AccountList extends BaseElementList {
      */
     public Account[] getList() {
         return (Account[]) values().toArray(new Account[size()]);
+    }
+
+    public Account assignNewTeam(int siteNumber, String teamName, String[] memberNames, String password) {
+            Account newAccount = findOrCreateNewAccount(siteNumber, Type.TEAM, teamName);
+            newAccount.setDisplayName(teamName);
+            newAccount.setMemberNames(memberNames);
+            newAccount.setPassword(password);
+            return newAccount;
+    }
+    
+    private Account findOrCreateNewAccount(int siteNumber, Type type, String teamName) {
+
+        /**
+         * Synchronize to insure that only one team is assigned/registered, otherwise
+         * could have problem with two teams assigned the same account.
+         */
+        synchronized (this) {
+            Vector <Account> vector = getAccounts(type, siteNumber);
+            Account[] accounts = (Account[]) vector.toArray(new Account[vector.size()]);
+            Arrays.sort(accounts, new AccountComparator());
+            for (Account account : accounts) {
+                if (isNotAssigned(account)) {
+                    return account;
+                }
+            }
+            
+            /**
+             * Not found must generate a new account
+             */
+            
+            Vector<Account> newAccounts = generateNewAccounts(type, 1, PasswordType.JOE, siteNumber, true);
+            return newAccounts.firstElement();
+        }
+    }
+
+    private boolean isNotAssigned(Account account) {
+        return account.getDefaultDisplayName(account.getClientId()).equals(account.getDisplayName());
     }
 
 }

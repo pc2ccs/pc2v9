@@ -2998,4 +2998,7 @@ public class InternalContest implements IInternalContest {
         this.playbackManager = playbackManager;
     }
 
+    public Account autoRegisterTeam(String displayName, String[] memberNames, String password) {
+        return accountList.assignNewTeam (siteNumber, displayName, memberNames, password);
+    }
 }

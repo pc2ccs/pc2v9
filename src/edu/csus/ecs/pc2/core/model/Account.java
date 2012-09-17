@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
@@ -65,7 +67,8 @@ public class Account implements IElementObject {
     private String externalName = "";
 
     private String countryCode = "";
-
+    
+    private String [] memberNames = new String[0];
 
     /**
      * Create an account
@@ -83,10 +86,13 @@ public class Account implements IElementObject {
         this.clientId = clientId;
         setPassword(password);
         elementId.setSiteNumber(siteNumber);
-        displayName = clientId.getClientType().toString().toLowerCase()
-                + clientId.getClientNumber();
+        displayName = getDefaultDisplayName(clientId);
     }
-
+    
+    public String getDefaultDisplayName(ClientId inClientId) {
+        return inClientId.getClientType().toString().toLowerCase() + inClientId.getClientNumber();
+    }
+    
     public String toString() {
         return displayName;
     }
@@ -213,7 +219,8 @@ public class Account implements IElementObject {
             }
             return true;
         } catch (Exception e) {
-            // TODO log to static exception log
+            StaticLog.getLog().log(Log.WARNING, "Exception in isSameAs", e);
+            e.printStackTrace(System.err);
             return false;
         }
     }
@@ -319,4 +326,14 @@ public class Account implements IElementObject {
         this.countryCode = countryCode;
     }
 
+    public String[] getMemberNames() {
+        return memberNames;
+    }
+
+    public void setMemberNames(String[] names) {
+        if (names == null) {
+            names = new String[0];
+        }
+        this.memberNames = names;
+    }
 }

@@ -1157,5 +1157,14 @@ public interface IInternalContest {
     PlaybackManager getPlaybackManager();
     
     void setPlaybackManager(PlaybackManager playbackManager);
+    
+    /**
+     * Create and assign team names and password to a new account.
+     * 
+     * @param displayName
+     * @param memberNames
+     * @return
+     */
+    Account autoRegisterTeam (String displayName, String [] memberNames, String password);
 
 }
