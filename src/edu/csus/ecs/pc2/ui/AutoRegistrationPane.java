@@ -5,12 +5,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -85,9 +85,9 @@ public class AutoRegistrationPane extends JPanePlugin {
     private JPanel getCenterFrame() {
         if (centerFrame == null) {
             centerFrame = new JPanel();
-            centerFrame.setLayout(null);
-            centerFrame.add(getMemberNamesPanel(), null);
-            centerFrame.add(getTeamMemberTitle(), null);
+            centerFrame.setLayout(new BorderLayout());
+            centerFrame.add(getMemberNamesPanel(), BorderLayout.CENTER);
+            centerFrame.add(getTeamMemberTitle(), BorderLayout.NORTH);
         }
         return centerFrame;
     }
@@ -150,6 +150,8 @@ public class AutoRegistrationPane extends JPanePlugin {
 
     protected void sendRegistrationRequest() {
         // TODO BUG 572 - do registration button
+        
+        JOptionPane.showMessageDialog(this, "TODO: register client");
     }
 
     /**
@@ -196,7 +198,6 @@ public class AutoRegistrationPane extends JPanePlugin {
         if (memberNamesPanel == null) {
             memberNamesPanel = new JPanel();
             memberNamesPanel.setLayout(new BorderLayout());
-            memberNamesPanel.setBounds(new Rectangle(29, 67, 370, 109));
             memberNamesPanel.setBorder(BorderFactory.createTitledBorder(null, "Team Member Names", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
                     new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
             memberNamesPanel.add(getTeamNameMCLB(), BorderLayout.CENTER);
@@ -213,7 +214,6 @@ public class AutoRegistrationPane extends JPanePlugin {
         if (teamMemberTitle == null) {
             teamMemberTitle = new JPanel();
             teamMemberTitle.setLayout(new BorderLayout());
-            teamMemberTitle.setBounds(new Rectangle(27, 9, 389, 52));
             teamMemberTitle.setBorder(BorderFactory.createTitledBorder(null, "Team Name", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12),
                     new Color(51, 51, 51)));
             teamMemberTitle.add(getAccountNameTitle(), BorderLayout.CENTER);
@@ -229,8 +229,37 @@ public class AutoRegistrationPane extends JPanePlugin {
     private MCLB getTeamNameMCLB() {
         if (teamNameMCLB == null) {
             teamNameMCLB = new MCLB();
+            Object[] cols = { "Name" };
+
+            teamNameMCLB.addColumns(cols);
+            teamNameMCLB.addRow(buildRow());
         }
         return teamNameMCLB;
+    }
+    
+    private Object[] buildRow () {
+        // Object[] cols = { "Name"};
+        Object[] objects = new Object[teamNameMCLB.getColumnCount()];
+        objects[0] = createJTextField(); 
+        return objects;
+    }
+
+    private Object createJTextField() {
+        JTextField textField = new JTextField();
+        textField.setText("");
+
+        textField.setEditable(true);
+
+        textField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    teamNameMCLB.addRow(buildRow());
+                }
+            }
+        });
+        
+        textField.requestFocus();
+        return textField;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

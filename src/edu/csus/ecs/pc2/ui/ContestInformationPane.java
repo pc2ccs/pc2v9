@@ -100,6 +100,8 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JLabel runSubmissionInterfaceLabel = null;
 
+    private JCheckBox autoRegistrationCheckbox = null;
+
     /**
      * This method initializes
      * 
@@ -174,6 +176,7 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(getCcsTestModeCheckbox(), null);
             centerPane.add(getRunSubmissionInterfaceCommandTextField(), null);
             centerPane.add(runSubmissionInterfaceLabel, null);
+            centerPane.add(getAutoRegistrationCheckbox(), null);
         }
         return centerPane;
     }
@@ -262,6 +265,7 @@ public class ContestInformationPane extends JPanePlugin {
         
         contestInformation.setRsiCommand(getRunSubmissionInterfaceCommandTextField().getText());
         contestInformation.setCcsTestMode(getCcsTestModeCheckbox().isSelected());
+        contestInformation.setEnableAutoRegistration(getAutoRegistrationCheckbox().isSelected());
 
         String maxFileSizeString = "0" + getMaxFieldSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
@@ -327,6 +331,7 @@ public class ContestInformationPane extends JPanePlugin {
                     String cmd = "# /usr/local/bin/sccsrs " + CommandVariableReplacer.OPTIONS + " " + CommandVariableReplacer.FILELIST;
                     getRunSubmissionInterfaceCommandTextField().setText(cmd);
                 }
+                getAutoRegistrationCheckbox().setSelected(contestInformation.isEnableAutoRegistration());
                 setContestInformation(contestInformation);
                 setEnableButtons(false);
             }
@@ -557,6 +562,7 @@ public class ContestInformationPane extends JPanePlugin {
             cancelButton = new JButton();
             cancelButton.setText("Cancel");
             cancelButton.setToolTipText("Discard changes");
+            cancelButton.setMnemonic(KeyEvent.VK_C);
             cancelButton.setPreferredSize(new java.awt.Dimension(100, 26));
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -709,6 +715,7 @@ public class ContestInformationPane extends JPanePlugin {
             scoringPropertiesButton = new JButton();
             scoringPropertiesButton.setBounds(new Rectangle(370, 173, 200, 30));
             scoringPropertiesButton.setToolTipText("Edit Scoring Properties");
+            scoringPropertiesButton.setMnemonic(KeyEvent.VK_S);
             scoringPropertiesButton.setText("Edit Scoring Properties");
             scoringPropertiesButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -751,10 +758,10 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getCcsTestModeCheckbox() {
         if (ccsTestModeCheckbox == null) {
             ccsTestModeCheckbox = new JCheckBox();
-            ccsTestModeCheckbox.setBounds(new Rectangle(57, 298, 392, 24));
+            ccsTestModeCheckbox.setBounds(new Rectangle(57, 298, 253, 24));
             ccsTestModeCheckbox.setHorizontalAlignment(SwingConstants.LEFT);
             ccsTestModeCheckbox.setText("C.C.S. Test Mode");
-            ccsTestModeCheckbox.setMnemonic(KeyEvent.VK_UNDEFINED);
+            ccsTestModeCheckbox.setMnemonic(KeyEvent.VK_T);
             ccsTestModeCheckbox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -781,6 +788,27 @@ public class ContestInformationPane extends JPanePlugin {
             });
         }
         return runSubmissionInterfaceCommandTextField;
+    }
+
+    /**
+     * This method initializes autoRegistrationCheckbox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getAutoRegistrationCheckbox() {
+        if (autoRegistrationCheckbox == null) {
+            autoRegistrationCheckbox = new JCheckBox();
+            autoRegistrationCheckbox.setBounds(new Rectangle(372, 300, 243, 24));
+            autoRegistrationCheckbox.setHorizontalAlignment(SwingConstants.LEFT);
+            autoRegistrationCheckbox.setText("Auto Registration");
+            autoRegistrationCheckbox.setMnemonic(KeyEvent.VK_A);
+            autoRegistrationCheckbox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return autoRegistrationCheckbox;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

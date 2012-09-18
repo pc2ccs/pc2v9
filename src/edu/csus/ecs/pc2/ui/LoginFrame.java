@@ -304,11 +304,13 @@ public class LoginFrame extends JFrame implements UIPlugin {
         return loginTextField;
     }
 
-    protected void checkToShowAutoRegForm() {
+    protected boolean checkToShowAutoRegForm() {
         if (AUTO_REGISTRATION_LOGIN.equalsIgnoreCase(loginTextField.getText())) {
             getAutoRegistrationFrame().setVisible(true);
             setVisible(false);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -337,6 +339,11 @@ public class LoginFrame extends JFrame implements UIPlugin {
     protected void attemptToLogin() {
 
         setStatusMessage("");
+        
+        if (checkToShowAutoRegForm()) {
+            return;
+        }
+        
         if (getLoginName() == null || getLoginName().length() < 1) {
             setStatusMessage("Please enter a login");
         } else {
