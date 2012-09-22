@@ -6,17 +6,27 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IMessageListener;
+import edu.csus.ecs.pc2.core.model.MessageEvent;
+import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
+import edu.csus.ecs.pc2.core.packet.PacketType;
+
 /**
+ * Auto Registration Pane.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -70,6 +80,12 @@ public class AutoRegistrationPane extends JPanePlugin {
         this.add(getCenterFrame(), BorderLayout.CENTER);
         this.add(getTitlePane(), BorderLayout.NORTH);
 
+    }
+    
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        super.setContestAndController(inContest, inController);
+        inContest.addMessageListener(new MessageListenerImplementation());
     }
 
     @Override
@@ -149,9 +165,58 @@ public class AutoRegistrationPane extends JPanePlugin {
     }
 
     protected void sendRegistrationRequest() {
-        // TODO BUG 572 - do registration button
+
+        if (getAccountNameTitle().getText().trim().length() == 0) {
+            showMessage(getParentFrame(), "Enter missing information", "Enter a Team Name/title");
+            return;
+        }
+
+        String teamName = getAccountNameTitle().getText().trim();
+
+        String[] teamMemberNames = getTeamNamesFromFields();
+
+        if (teamMemberNames.length == 0) {
+            showMessage(getParentFrame(), "Enter missing information", "Enter a Team Member Name");
+            return;
+        }
+
+        String delimit = PacketType.FIELD_DELIMIT;
+        String names = StringUtilities.join(delimit, teamMemberNames);
+
+        try {
+            String autoRegisterInformation = teamName + delimit + names;
+            System.out.println("debug 22 " + autoRegisterInformation);
+            getController().autoRegister(autoRegisterInformation);
+        } catch (Exception e) {
+            e.printStackTrace(); // debug 22
+            getLog().log(Log.WARNING, "Unable to send auto registration ", e);
+            showMessage(getParent(), "Unable to send auto registration", "Internal error " + e.getMessage());
+        }
+    }
+
+    /**
+     * Fetch names from frame.
+     * @return
+     */
+    private String[] getTeamNamesFromFields() {
         
-        JOptionPane.showMessageDialog(this, "TODO: register client");
+        MCLB mclb = getTeamNameMCLB();
+        
+        if ( mclb.getRowCount() == 0) {
+            return new String[0];
+        }
+        
+        ArrayList<String> list = new ArrayList<String>();
+        
+        for (int row = 0; row < mclb.getRowCount(); row ++) {
+            JTextField jTextField = (JTextField) mclb.getRow(row)[0];
+            String name = jTextField.getText();
+            if (name != null && name.trim().length() > 0) {
+                list.add(name);
+            }
+        }
+        
+        return (String[]) list.toArray(new String[list.size()]);
     }
 
     /**
@@ -173,6 +238,9 @@ public class AutoRegistrationPane extends JPanePlugin {
         return cancelButton;
     }
 
+    /**
+     * Hide this window.
+     */
     protected void returnToParent() {
         getParentFrame().setVisible(true);
     }
@@ -260,6 +328,52 @@ public class AutoRegistrationPane extends JPanePlugin {
         
         textField.requestFocus();
         return textField;
+    }
+    
+    /**
+     * Message Listener for auto reg.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    // $HeadURL$
+    class MessageListenerImplementation implements IMessageListener {
+
+        public void messageAdded(MessageEvent event) {
+            if (Area.AUTOREG.equals(event.getArea())) {
+                String[] loginInfo = event.getMessage().split(PacketType.FIELD_DELIMIT);
+                String teamName = loginInfo[0];
+                String login = loginInfo[1];
+                String password = loginInfo[2];
+                showUserAccountAndPassword(teamName, login, password);
+            }
+        }
+
+        public void messageRemoved(MessageEvent event) {
+            // not used
+        }
+    }
+
+    public void showUserAccountAndPassword(String teamName, String login, String password) {
+
+        StringBuffer buffer = new StringBuffer() //
+                .append("<HTML><FONT SIZE=+1> ") //
+                .append("Automantic Registration Information<BR>") //
+                .append("for team ") //
+                .append(teamName) //
+                .append("<BR><BR>") //
+                .append("Login: ") //
+                .append(login) //
+                .append("<BR><BR>") //
+                .append("Password: ") //
+                .append(password) //
+                .append("<BR><BR>") //
+                .append("</FONT></HTML>");
+
+        FrameUtilities.showMessage(getParentFrame(), "Automatic Registration Information", buffer.toString());
+        
+        returnToParent();
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

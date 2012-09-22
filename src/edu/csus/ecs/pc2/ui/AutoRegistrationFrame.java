@@ -2,7 +2,11 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Dimension;
 
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+
 /**
+ * Auto Registration Form.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -34,6 +38,7 @@ public class AutoRegistrationFrame extends JFramePlugin {
     private void initialize() {
         this.setSize(new Dimension(477, 284));
         this.setContentPane(getAutoRegistrationPane());
+        this.setTitle("Automatic Registration Form");
 
         getAutoRegistrationPane().setParentFrame(this);
         FrameUtilities.centerFrame(this);
@@ -54,6 +59,13 @@ public class AutoRegistrationFrame extends JFramePlugin {
             autoRegistrationPane = new AutoRegistrationPane();
         }
         return autoRegistrationPane;
+    }
+    
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        super.setContestAndController(inContest, inController);
+        getAutoRegistrationPane().setContestAndController(inContest, inController);
+        getAutoRegistrationPane().setParentFrame(this);
     }
 
     public void processCancel() {

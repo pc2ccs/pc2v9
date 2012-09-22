@@ -662,6 +662,8 @@ public class LoginFrame extends JFrame implements UIPlugin {
 
         contest.addLoginListener(new LoginListenerImplementation());
 
+        getAutoRegistrationFrame().setContestAndController(inContest, inController);
+        
         setVisible(true);
     }
 

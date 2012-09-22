@@ -51,6 +51,10 @@ public class MessageEvent {
          * 
          */
         OTHER,
+        /**
+         * Auto registration success message
+         */
+        AUTOREG,
     }
 
     /**

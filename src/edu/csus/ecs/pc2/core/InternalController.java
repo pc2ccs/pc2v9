@@ -232,7 +232,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private PacketArchiver packetArchiver = null;
 
-    // TODO change this to UIPlugin
+    // SOMEDAY change this to UIPlugin
     /*
      * Note: Difficulty with changing LoginFrame to UIPlugin, there is no way to setVisible(false) a UIPlugin or make the GUI cursor change for a UIPlugin. dal.
      */
@@ -593,7 +593,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void login(String id, String password) {
 
         if (!isStarted) {
-            // TODO get rid of this by not allowing this condition dal
+            // SOMEDAY get rid of this by not allowing this condition dal
             throw new SecurityException("Invalid sequence, must call start(String[]) method before login(String, String).");
         }
         ClientId clientId = loginShortcutExpansion(0, id);
@@ -718,12 +718,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
 
         public void loginAdded(LoginEvent event) {
-            // TODO Auto-generated method stub
+            // no action
 
         }
 
         public void loginRemoved(LoginEvent event) {
-            // TODO Auto-generated method stub
+            // no action
 
         }
 
@@ -732,14 +732,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         
         public void loginRefreshAll(LoginEvent event) {
-            // TODO Auto-generated method stub
+            // no action
         }
     }
 
     public IInternalContest clientLogin(IInternalContest internalContest, String loginName, String password) throws Exception {
 
         if (!isStarted) {
-            // TODO review this message
+            // SOMEDAY review this message
             throw new SecurityException("Invalid sequence, must call start(String[]) method before login(String, String).");
         }
 
@@ -1004,13 +1004,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // XXX is there a better place to initialize them?
             contest.setupDefaultCategories();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            // SOMEDAY Handle exception better
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
+            // SOMEDAY Handle exception better
             e.printStackTrace();
         } catch (FileSecurityException e) {
-            // TODO Auto-generated catch block
+            // SOMEDAY Handle exception better
             e.printStackTrace();
         }
 
@@ -1183,7 +1183,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     public void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID) {
 
-        // TODO code check the input connection to insure they are valid connection
+        // SOMEDAY SECURITY code check the input connection to insure they are valid connection
         info("receiveObject start got " + object);
 
         try {
@@ -1197,7 +1197,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 
                 incomingPacket(packet);
                 
-                if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
+                if (PacketType.Type.AUTO_REGISTRATION_LOGIN_REQUEST.equals(packet.getType())){
+                    
+                    packetArchiver.writeNextPacket(packet);
+                    
+                    String loginName = PacketFactory.getStringValue(packet, PacketFactory.LOGIN);
+                    
+                    if (isEnableAutoRegistration()){
+
+                        handleAutoRegistration (packet, connectionHandlerID);
+                        
+                    } else {
+                        info("Client attempted to auto register, auto registration not enabled, tried to use '"+loginName+"' "+ connectionHandlerID);
+                        String message = "Auto Registration not allowed";
+                        sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
+                    }
+                    
+                    
+                } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
                     String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
                     try {
 
@@ -1279,7 +1296,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                              * and need information from the server we logged into.
                              */
 
-                            // TODO add a security check that this connection id matches the one we
+                            // SOMEDAY SECURITY add a security check that this connection id matches the one we
                             // sent the login request packet to. If we don't add this, then some other
                             // server could send us a LOGIN_SUCCESS packet, which would be bad. Highly
                             // unlikely but potentially bad.
@@ -1314,8 +1331,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         return;
                     } else if (clientId.getClientType().equals(Type.ADMINISTRATOR)) {
 
-                        // TODO code security kluge admin
-                        // TODO KLUDGE HUGE KLUDGE - this block allows any admin to update stuff.
+                        // SOMEDAY SECURITY code security kluge admin
+                        // SOMEDAY SECURITY KLUDGE HUGE KLUDGE - this block allows any admin to update stuff.
 
                         
 //                        securityCheck(packet, connectionHandlerID);
@@ -1324,31 +1341,107 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                     } else {
 
-                        // TODO warning got packet but client is not logged in
-
                         log.log(Log.WARNING, "Packet from non-logged in user, processed anyways " + packet);
 
                         securityCheck(packet, connectionHandlerID);
 
-                        // TODO remove processPacket when security is in place.
+                        // SOMEDAY SECURITY remove processPacket when security is in place.
                         processPacket(packet, connectionHandlerID);
 
                     }
                 }
             } else {
-                // TODO code archive packet, send security violation to notification system.
+                // SOMEDAY code archive packet, send security violation to notification system.
 
                 info("receiveObject(S,C): Unsupported class received: " + object);
             }
 
         } catch (Exception e) {
 
-            // TODO code archive packet, send security violation to notification system.
+            // SOMEDAY code archive packet, send security violation to notification system.
 
             info("Exception in receiveObject(S,C): " + e.getMessage(), e);
             info("Exception in receiveObject ", e);
         }
         info("receiveObject end   got " + object.getClass().getName());
+    }
+
+    private String[] removeFirstElement(String[] stringArray) {
+        String[] newArray = new String[stringArray.length - 1];
+        System.arraycopy(stringArray, 1, newArray, 0, newArray.length);
+        return newArray;
+    }
+    
+    
+    
+    /**
+     * Handle client attempt to auto register.
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     */
+    private void handleAutoRegistration(Packet packet, ConnectionHandlerID connectionHandlerID) {
+       
+        String autoLoginInformation = PacketFactory.getStringValue(packet, PacketFactory.AUTO_REG_REQUEST_INFO);
+        
+        String delimit = PacketType.FIELD_DELIMIT;
+        String [] fields = autoLoginInformation.split(delimit);
+
+        String errorMessage = null;
+        
+        if (fields.length == 0) {
+            errorMessage = "Missing team name, enter a team name";
+        } else if (fields.length == 1) {
+            errorMessage = "Missing team member name(s), enter team member name";
+        } else {
+            String teamName = fields[0];
+            String[] teamMemberNames = removeFirstElement(fields);
+            Account account = contest.autoRegisterTeam(teamName, teamMemberNames, null);
+            
+            try {
+                Packet newAccountPacket = PacketFactory.createAutoRegReply(getServerClientId(), account.getClientId(), account);            
+                sendToClient(connectionHandlerID, newAccountPacket);
+                
+                contest.storeConfiguration(getLog());
+                Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, account);
+                sendToJudgesAndOthers(newAccountsPacket, true);
+            } catch (Exception e) {
+                logException(e);
+            }
+        }
+        
+        if (errorMessage != null){
+            info("Client attempted to auto register, auto registration not enabled, tried to use '"+autoLoginInformation+"' "+ connectionHandlerID);
+            String message = "Auto Registration not allowed";
+            sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
+        }
+    }
+
+    public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
+
+        if (isServer()) {
+            // If I am a server forward to clients on this site.
+
+            sendToAdministrators(packet);
+            sendToJudges(packet);
+            sendToScoreboards(packet);
+            if (sendToServers) {
+                sendToServers(packet);
+            }
+        } else {
+            info("Warning - tried to send packet to others (as non server) " + packet);
+            Exception ex = new Exception("User " + packet.getSourceId() + " tried to send packet to judges and others");
+            getLog().log(Log.WARNING, "Warning - tried to send packet to others (as non server) " + packet, ex);
+        }
+    }
+
+    private boolean isEnableAutoRegistration() {
+        try {
+            return contest.getContestInformation().isEnableAutoRegistration();
+        } catch (Exception e) {
+            getLog().log(Log.WARNING, "Unable to determine auto reg value", e);
+            return false;
+        }
     }
 
     /**
@@ -1407,7 +1500,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (!isLoggedIn(packet.getSourceId())) {
             log.info("Security Violation for packet " + packet);
             log.info("User " + packet.getSourceId() + " not logged in ");
-            // TODO code throw an exception if the security fails.
+            // SOMEDAY code throw an exception if the security fails.
         }
 
         ConnectionHandlerID connectionHandlerIDAuthen = contest.getConnectionHandleID(packet.getSourceId());
@@ -1438,8 +1531,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
     
+    /**
+     * Handle incoming invalid login and message.
+     * @param packet
+     */
     private void handleServerLoginFailure(Packet packet) {
-        // TODO rewrite handle this failure better
+        // SOMEDAY rewrite handle this failure better
 
         try {
             packetArchiver.writeNextPacket(packet);
@@ -1454,7 +1551,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             fatalError("Login Failed: " + message);
         }
 
-        // TODO Handle this better via new login code.
+        // SOMEDAY Handle this better via new login code.
         info("Login Failed: " + message);
         info("Login Failure");
         PacketFactory.dumpPacket(System.err, packet, "Login Failed");
@@ -1675,11 +1772,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             log.log(Log.SEVERE, "SECURITY Violation  " + contestSecurityException.getSecurityMessage() + packet);
 
-            // TODO code fire trigger in Contest
+            // SOMEDAY code fire trigger in Contest
 
             contest.newSecurityMessage(packet.getSourceId(), "Security violation", packet.getType().toString(), contestSecurityException);
 
-            // TODO use sendSecurityMessage method in place of createSecurityMessagePacket and sendToAdministrators, sendToServers
+            // SOMEDAY use sendSecurityMessage method in place of createSecurityMessagePacket and sendToAdministrators, sendToServers
             Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, contestSecurityException.getSecurityMessage(), null,
                     connectionHandlerID, contestSecurityException, packet);
 
@@ -1764,13 +1861,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 try {
                     packetHandler.cancelClarificationCheckOut(packet, null);
                 } catch (IOException e) {
-                    // TODO dal Auto-generated catch block
+                    // SOMEDAY dal Auto-generated catch block
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
-                    // TODO Auto-generated catch block
+                    // SOMEDAY Handle exception better
                     e.printStackTrace();
                 } catch (FileSecurityException e) {
-                    // TODO Auto-generated catch block
+                    // SOMEDAY Handle exception better
                     e.printStackTrace();
                 }
             }
@@ -1801,13 +1898,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 try {
                     packetHandler.cancelRun(packet, run, judgeId, null);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
+                    // SOMEDAY Handle exception better
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
-                    // TODO Auto-generated catch block
+                    // SOMEDAY Handle exception better
                     e.printStackTrace();
                 } catch (FileSecurityException e) {
-                    // TODO Auto-generated catch block
+                    // SOMEDAY Handle exception better
                     e.printStackTrace();
                 }
             }
@@ -1846,9 +1943,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     
     public void connectionError(Serializable object, ConnectionHandlerID connectionHandlerID, String causeDescription) {
 
-        // TODO code create a packet and send it to servers and admins
+        // SOMEDAY code create a packet and send it to servers and admins
 
-        // TODO code connectionError
+        // SOMEDAY code connectionError
         info("connectionError: " + contest.getTitle() + " " + connectionHandlerID + " " + causeDescription + " " + object.getClass().getName());
 
     }
@@ -1870,7 +1967,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 
                 PacketFactory.dumpPacket(log, packet, "recieveObject");
 
-                // TODO code put the server's connection handler id as 4th parameter
+                // SOMEDAY code put the server's connection handler id as 4th parameter
                 packetHandler.handlePacket(packet, null);
             } else {
                 info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
@@ -2157,7 +2254,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
         } catch (Exception e) {
-            // TODO separate the showing main Frame and listening to port exception messages
+            // SOMEDAY separate the showing main Frame and listening to port exception messages
             
             info("Error showing frame or listening to port ", e);
             if (loginUI != null) {
@@ -2255,7 +2352,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
         
-        // TODO code add NO_SAVE_OPTION_STRING
+        // SOMEDAY code add NO_SAVE_OPTION_STRING
         if (parseArguments.isOptPresent("--nosave")) {
             saveCofigurationToDisk = false;
         }
@@ -2376,7 +2473,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private Profile getCurrentProfile() {
         
-        // TODO handle startup for when not starting with site 1 profile.setSiteNumber 
+        // SOMEDAY handle startup for when not starting with site 1 profile.setSiteNumber 
 
         try {
             ProfileManager manager = new ProfileManager();
@@ -2501,7 +2598,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     private ClientId getServerClientId() {
-        // TODO s/new ClientId(contest.getSiteNumber(), Type.SERVER, 0);/getServerClientId()/
+        // SOMEDAY for all in this class, s/new ClientId(contest.getSiteNumber(), Type.SERVER, 0);/getServerClientId()/
         return new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
     }
     
@@ -2610,13 +2707,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 sendToScoreboards(packet);
                 
             } catch (IOException e) {
-                // TODO dal Auto-generated catch block
+                // SOMEDAY dal Auto-generated catch block
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
-                // TODO dal Auto-generated catch block
+                // SOMEDAY dal Auto-generated catch block
                 e.printStackTrace();
             } catch (FileSecurityException e) {
-                // TODO dal Auto-generated catch block
+                // SOMEDAY dal Auto-generated catch block
                 e.printStackTrace();
             }
  
@@ -2660,7 +2757,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             ConnectionHandlerID connectionHandlerID = connectionManager.connectToServer(hostName, portNumber);
 
             info("Contacted Site " + remoteSite.getSiteNumber() + " using connection id " + connectionHandlerID);
-            info("Sending login request to Site " + remoteSite.getSiteNumber() + " " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
             sendLoginRequestFromServerToServer(connectionManager, connectionHandlerID, getServerClientId(), localPassword);
         } else if (contest.isAllowed(Permission.Type.ALLOWED_TO_RECONNECT_SERVER)) {
             // Send the reconnection request to our server
@@ -2668,7 +2764,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             Packet reconnectPacket = PacketFactory.createReconnectPacket(contest.getClientId(), getServerClientId(), inSiteNumber);
             sendToLocalServer(reconnectPacket);
         } else {
-            // TODO security problem
+            // SOMEDAY SECURITY security problem
             System.err.println(" Non-admin Tried to send reconnection request " + inSiteNumber + ", ignored");
             log.log(Log.DEBUG, " Non-admin Tried to send reconnection request " + inSiteNumber + ", ignored");
             return;
@@ -2728,13 +2824,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 sendToScoreboards(packet);
                 
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                // SOMEDAY Handle exception better
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
+                // SOMEDAY Handle exception better
                 e.printStackTrace();
             } catch (FileSecurityException e) {
-                // TODO Auto-generated catch block
+                // SOMEDAY Handle exception better
                 e.printStackTrace();
             }
 
@@ -3470,19 +3566,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         RunFiles runFiles = new RunFiles(run, serializedFile, otherFiles);
 
         Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTime, overrideRunId);
-
         sendToLocalServer(packet);
-
     }
 
     public void sendRunToSubmissionInterface(Run run, RunFiles runFiles) {
-        
-        
         try {
             runSubmitterInterfaceManager.sendRun (run, runFiles);
         } catch (Exception e) {
             logException("Failure in RSI ", e);
             e.printStackTrace();
         }
+    }
+
+    public void autoRegister(String loginName) {
+        
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        ClientId fauxClientId = new ClientId(0, Type.OTHER, 0);
+        Packet packet = PacketFactory.createAutoRegisterRequest(fauxClientId, serverClientId, loginName);
+        sendToLocalServer(packet);
     }
 }

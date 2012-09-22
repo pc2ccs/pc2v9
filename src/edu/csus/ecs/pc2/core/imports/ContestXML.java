@@ -371,7 +371,9 @@ public class ContestXML {
         String[] keys = (String[]) scoringProperties.keySet().toArray(new String[scoringProperties.keySet().size()]);
         Arrays.sort(keys);
         for (String key : keys) {
-            memento.putString(key, scoringProperties.getProperty(key));
+            key = key.replaceAll(" ", "_");
+            String s = scoringProperties.getProperty(key);
+            memento.putString(key,s); 
         }
     }
 
@@ -455,6 +457,17 @@ public class ContestXML {
         accountMemento.putBoolean("allowlogin", account.isAllowed(Permission.Type.LOGIN));
         accountMemento.putBoolean("showonscoreboard", account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD));
         accountMemento.putString("pc2triplet", clientId.getTripletKey());
+        
+        String [] teamMemberNames = account.getMemberNames();
+        
+        int cnt = 1;
+        if (teamMemberNames != null && teamMemberNames.length > 0){
+            
+            for (String name : teamMemberNames) {
+                accountMemento.putString("member"+cnt, name);
+                cnt++;
+            }
+        }
 
         return accountMemento;
     }

@@ -55,6 +55,7 @@ import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackRecord;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
+import edu.csus.ecs.pc2.core.packet.PacketType;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -92,7 +93,7 @@ public class PacketHandler {
     }
 
     public PacketHandler(InternalController controller, IInternalContest contest) {
-        // TODO remove this constructor and keep IInternalController one, at
+        // SOMEDAY  remove this constructor and keep IInternalController one, at
         // this time that change causes a NoSuchMethodException
 
         this.controller = controller;
@@ -152,7 +153,7 @@ public class PacketHandler {
                 clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
                 contest.addClarification(clarification);
                 if (isServer()) {
-                    sendToJudgesAndOthers(packet, isThisSite(clarification));
+                    controller.sendToJudgesAndOthers(packet, isThisSite(clarification));
                 }
                 break;
             case CLARIFICATION_UNCHECKOUT:
@@ -176,7 +177,7 @@ public class PacketHandler {
                 Clarification clar = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
                 contest.clarificationNotAvailable(clar);
                 if (isServer()) {
-                    sendToJudgesAndOthers(packet, isThisSite(clar));
+                    controller.sendToJudgesAndOthers(packet, isThisSite(clar));
                 }
                 break;
             case RUN_NOTAVAILABLE:
@@ -414,6 +415,10 @@ public class PacketHandler {
             case STOP_PLAYBACK:
                 handleStopPlayback (packet, connectionHandlerID, fromId);
                 break;
+                
+            case AUTO_REGISTRATION_SUCCESS:
+                handleAutoRegistratioSuccess(packet, connectionHandlerID);
+                break;
           
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
@@ -424,10 +429,17 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
+    private void handleAutoRegistratioSuccess(Packet packet, ConnectionHandlerID connectionHandlerID) {
+
+        Account account = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
+        String message = account.getDisplayName() + PacketType.FIELD_DELIMIT + account.getClientId().getName() + PacketType.FIELD_DELIMIT + account.getPassword();
+        sendMessage(Area.AUTOREG, message, null);
+    }
+
     private void handleStopPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {
-        // TODO 673 forward this start playback to other servers
+        // SOMEDAY  673 forward this start playback to other servers
         
-        System.out.println("debug 22 - handleStartPlayback "); // TODO 673 remove debuggin
+        System.out.println("debug 22 - handleStartPlayback "); // SOMEDAY  673 remove debuggin
         
         securityCheck(Permission.Type.STOP_PLAYBACK, fromId, connectionHandlerID);
         
@@ -438,7 +450,7 @@ public class PacketHandler {
     private void handleStartPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {
         
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
-        System.out.println("debug 22 - handleStartPlayback " + playbackInfo); // TODO 673 remove debugging
+        System.out.println("debug 22 - handleStartPlayback " + playbackInfo); // SOMEDAY  673 remove debugging
         
         if ( isServer()) {
 
@@ -499,7 +511,7 @@ public class PacketHandler {
 
         } else {
             
-            System.out.println("debug 22 - for "+contest.getClientId()+" handleStartPlayback " + playbackInfo); // TODO 673 remove debugging
+            System.out.println("debug 22 - for "+contest.getClientId()+" handleStartPlayback " + playbackInfo); // SOMEDAY  673 remove debugging
             contest.updatePlaybackInfo(playbackInfo);
         }
     }
@@ -543,7 +555,7 @@ public class PacketHandler {
             
             if (isServer()) {
                 Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, run);
-                sendToJudgesAndOthers(confirmPacket, false);
+                controller.sendToJudgesAndOthers(confirmPacket, false);
             } else {
                 if (Utilities.isDebugMode()){
                     Exception ex = new Exception("Non server was send a "+packet.getType()+" packet");
@@ -812,7 +824,7 @@ public class PacketHandler {
             } else {
                 // Account/user does not exist in new profile/config
                 controller.getLog().info("Not sending UPDATE_CLIENT_PROFILE to client not found in new profile/account list " + clientId);
-                // TODO logoff/disconnect client
+                // SOMEDAY  logoff/disconnect client
             }
 
         }
@@ -847,7 +859,7 @@ public class PacketHandler {
                     controller.sendToClient(packet);
                 } else {
                     controller.getLog().info("Not sending UPDATE_CLIENT_PROFILE to client not found in new profile/account list " + clientId);
-                    // TODO logoff/disconnect client
+                    // SOMEDAY  logoff/disconnect client
                 }
             } catch (Exception e) {
                 controller.logWarning("Trouble sending clone packet to "+clientId, e);
@@ -1174,7 +1186,7 @@ public class PacketHandler {
         info(" handlePacket SERVER_SETTINGS - from another site -- all settings loaded " + packet);
 
         if (isServer()) {
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         }
     }
 
@@ -1206,7 +1218,7 @@ public class PacketHandler {
         
          contest.addRun(run);
         if (isServer()) {
-            sendToJudgesAndOthers(packet, isThisSite(run));
+            controller.sendToJudgesAndOthers(packet, isThisSite(run));
         }
     }
 
@@ -1238,7 +1250,7 @@ public class PacketHandler {
             // Only servers are allowed to reset client or other server contest
             Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
 
-            // TODO insure that the profile that they are resettings is THIS profile
+            // SOMEDAY  insure that the profile that they are resettings is THIS profile
 
             resetContest(packet, profile);
         } else {
@@ -1327,7 +1339,7 @@ public class PacketHandler {
             
         } else {
             
-            // TODO remove this unused code (with profiles this code is no longer used)
+            // SOMEDAY  remove this unused code (with profiles this code is no longer used)
             
             // Set Contest Profile
             contest.setProfile(profile);
@@ -1343,7 +1355,7 @@ public class PacketHandler {
         contest.addProfile(newProfile);
 
         Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, newProfile);
-        sendToJudgesAndOthers(addPacket, false);
+        controller.sendToJudgesAndOthers(addPacket, false);
         
         if (isThisSite(packet.getSourceId())) {
             // Only send to other servers if this server originated the clone.
@@ -1475,7 +1487,7 @@ public class PacketHandler {
         contest.availableRun(run);
 
         if (isServer()) {
-            sendToJudgesAndOthers(packet, isThisSite(run));
+            controller.sendToJudgesAndOthers(packet, isThisSite(run));
         }
     }
 
@@ -1530,7 +1542,7 @@ public class PacketHandler {
 
         // Send to clients and servers
         if (isServer()) {
-            sendToJudgesAndOthers(confirmPacket, false);
+            controller.sendToJudgesAndOthers(confirmPacket, false);
             Packet dupSubmissionPacket = PacketFactory.createRunSubmissionConfirmation(contest.getClientId(), fromId, run, runFiles);
             controller.sendToServers(dupSubmissionPacket);
         }
@@ -1550,7 +1562,7 @@ public class PacketHandler {
 
         // Send to clients and other servers
         if (isServer()) {
-            sendToJudgesAndOthers(confirmPacket, true);
+            controller.sendToJudgesAndOthers(confirmPacket, true);
         }
     }
 
@@ -1577,7 +1589,7 @@ public class PacketHandler {
 
         if (isServer()) {
             controller.sendToTeams(packet);
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         }
     }
 
@@ -1590,7 +1602,7 @@ public class PacketHandler {
 
         if (isServer()) {
             controller.sendToTeams(packet);
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         }
     }
 
@@ -1629,7 +1641,7 @@ public class PacketHandler {
         String newPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PASSWORD);
 
         if (clientId == null || password == null || newPassword == null) {
-            // TODO invalid request, send it back
+            // SOMEDAY  invalid request, send it back
             String mess = "Invalid request ";
             if (password == null) {
                 mess += " password not specified";
@@ -1703,7 +1715,7 @@ public class PacketHandler {
             if (isThisSite(packet.getSourceId())) {
                 controller.sendToServers(packet);
             }
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
             contest.connectionDropped(inConnectionHandlerID);
         } else {
             contest.connectionDropped(inConnectionHandlerID);
@@ -1754,7 +1766,7 @@ public class PacketHandler {
 
         contest.updateClarification(clarification, whoCheckedOut);
         if (isServer()) {
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         }
     }
 
@@ -1827,7 +1839,7 @@ public class PacketHandler {
         }
 
         if (isServer()) {
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         }
 
     }
@@ -1889,9 +1901,9 @@ public class PacketHandler {
                     Packet checkOutPacket = PacketFactory.createRejudgeCheckedOut(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
                     controller.sendToClient(checkOutPacket);
 
-                    // TODO change this packet type so it is not confused with the actual checked out run.
+                    // SOMEDAY  change this packet type so it is not confused with the actual checked out run.
 
-                    sendToJudgesAndOthers(checkOutPacket, true);
+                    controller.sendToJudgesAndOthers(checkOutPacket, true);
                 } catch (RunUnavailableException runUnavailableException) {
                     theRun = contest.getRun(run.getElementId());
                     Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
@@ -2140,7 +2152,7 @@ public class PacketHandler {
         if (isServer()) {
             if (isThisSite(contestTime.getSiteNumber())) {
 
-                // TODO securityCheck updateContestClock
+                // TODO SECURITY  Check updateContestClock
 
                 contest.updateContestTime(contestTime);
                 ContestTime updatedContestTime = contest.getContestTime(siteNumber);
@@ -2149,7 +2161,7 @@ public class PacketHandler {
                                 + updatedContestTime.getRemainingTimeStr() + " length=" + updatedContestTime.getContestLengthStr());
                 Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
                 controller.sendToTeams(updatePacket);
-                sendToJudgesAndOthers(updatePacket, true);
+                controller.sendToJudgesAndOthers(updatePacket, true);
             } else {
                 controller.sendToRemoteServer(siteNumber, packet);
             }
@@ -2157,7 +2169,7 @@ public class PacketHandler {
         } else {
             controller.sendToTeams(packet);
             if (isServer()) {
-                sendToJudgesAndOthers(packet, true);
+                controller.sendToJudgesAndOthers(packet, true);
             }
         }
 
@@ -2218,14 +2230,14 @@ public class PacketHandler {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
 
-        // TODO add runResultsFiles to updated run results.
+        // SOMEDAY  add runResultsFiles to updated run results.
         // RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
         ClientId whoChangedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
         if (isServer()) {
             if (isThisSite(run)) {
 
-                // TODO security check updateRun
+                // TODO SECURITY   check updateRun
 
                 // Account account = contest.getAccount(packet.getSourceId());
                 // if (account.isAllowed(Permission.Type.EDIT_RUN)){
@@ -2237,7 +2249,7 @@ public class PacketHandler {
                 if (isSuperUser(packet.getSourceId())) {
                     info("updateRun by " + packet.getSourceId() + " " + run);
                     if (judgementRecord != null) {
-                        // TODO code add runResultsFiles
+                        // SOMEDAY  code add runResultsFiles
                         run.addJudgement(judgementRecord);
                         contest.updateRun(run, whoChangedRun);
 
@@ -2251,7 +2263,7 @@ public class PacketHandler {
 
                 Run theRun = contest.getRun(run.getElementId());
                 Packet runUpdatedPacket = PacketFactory.createRunUpdateNotification(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoChangedRun);
-                sendToJudgesAndOthers(runUpdatedPacket, true);
+                controller.sendToJudgesAndOthers(runUpdatedPacket, true);
                 
                 /**
                  * Send Judgement Notification to Team or not.
@@ -2271,7 +2283,7 @@ public class PacketHandler {
             if (contest.isLocalLoggedIn(run.getSubmitter())) {
                 controller.sendToClient(packet);
             }
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         }
     }
 
@@ -2298,11 +2310,11 @@ public class PacketHandler {
                             if (!contest.isRemoteLoggedIn(whoLoggedIn)) {
                                 // Add to remote login list if not in list
                                 contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
-                                sendToJudgesAndOthers(packet, false);
+                                controller.sendToJudgesAndOthers(packet, false);
                             }
                         } else {
                             contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
-                            sendToJudgesAndOthers(packet, false);
+                            controller.sendToJudgesAndOthers(packet, false);
                         }
                         contest.addClientSettings(clientSettings);
                     }
@@ -2330,7 +2342,7 @@ public class PacketHandler {
         ClientId whoLoggedOff = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         if (isServer()) {
 
-            // TODO Security code - only allow certain users to logoff other users
+            // TODO SECURITY  code - only allow certain users to logoff other users
             // TEST CASE - attempt to logoff client as say a team 
 //            throw new SecurityException("Client " + contest.getClientId() + " attempted to logoff another client "+whoLoggedOff);
             
@@ -2353,7 +2365,7 @@ public class PacketHandler {
                      * and notify local clients
                      */
                     contest.removeRemoteLogin(whoLoggedOff);
-                    sendToJudgesAndOthers(packet, false);
+                    controller.sendToJudgesAndOthers(packet, false);
                 } else {
                     /**
                      * In this block, client is not logged in locally, client is not a notification
@@ -2383,7 +2395,7 @@ public class PacketHandler {
 
         if (isServer()) {
             contest.updateRun(run, whoModifiedRun);
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         } else {
             contest.updateRun(run, whoModifiedRun);
         }
@@ -2395,7 +2407,7 @@ public class PacketHandler {
 
         if (isServer()) {
             contest.answerClarification(clarification, clarification.getAnswer(), whoModifiedClarification, clarification.isSendToAll());
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
 
             if (clarification.isSendToAll()) {
                 // Send to all teams
@@ -2426,7 +2438,7 @@ public class PacketHandler {
 
         if (isServer()) {
             contest.updateRun(run, whoModifiedRun);
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         } else {
             contest.updateRun(run, whoModifiedRun);
         }
@@ -2459,7 +2471,7 @@ public class PacketHandler {
                 contest.storeConfiguration(controller.getLog());
 
                 Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, accounts);
-                sendToJudgesAndOthers(newAccountsPacket, true);
+                controller.sendToJudgesAndOthers(newAccountsPacket, true);
 
             } else {
 
@@ -2499,7 +2511,7 @@ public class PacketHandler {
             controller.getLog().info("Clock STARTED by " + who + " elapsed = " + updatedContestTime.getElapsedTimeStr());
             Packet startContestPacket = PacketFactory.createContestStarted(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
             controller.sendToTeams(startContestPacket);
-            sendToJudgesAndOthers(startContestPacket, true);
+            controller.sendToJudgesAndOthers(startContestPacket, true);
 
         } else {
             if (packet.getType().equals(Type.START_ALL_CLOCKS)) {
@@ -2543,7 +2555,7 @@ public class PacketHandler {
             controller.getLog().info("Clock STOPPED by " + who + " elapsed = " + updatedContestTime.getElapsedTimeStr());
             Packet stopContestPacket = PacketFactory.createContestStopped(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
             controller.sendToTeams(stopContestPacket);
-            sendToJudgesAndOthers(stopContestPacket, true);
+            controller.sendToJudgesAndOthers(stopContestPacket, true);
 
         } else {
 
@@ -2565,7 +2577,7 @@ public class PacketHandler {
 
     private void deleteSetting(Packet packet) {
 
-        // TODO code deleteSetting
+        // SOMEDAY  code deleteSetting
 
     }
 
@@ -2673,7 +2685,7 @@ public class PacketHandler {
 
         Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
         if (accounts != null) {
-            // TODO change these from Vector to something lightweight
+            // SOMEDAY  change these from Vector to something lightweight
             Vector<Account> addAccountsVector = new Vector<Account>();
             for (Account account : accounts) {
                 // split the incoming list between add and no-op updates
@@ -2709,7 +2721,7 @@ public class PacketHandler {
                 try {
                     // Only send to other servers if this client is at this site
                     // otherwise just send to judges and admins
-                    sendToJudgesAndOthers(packet, isThisSite(toId));
+                    controller.sendToJudgesAndOthers(packet, isThisSite(toId));
                 } catch (Exception e) {
                     controller.getLog().log(Log.WARNING, "Exception logged ", e);
                 }
@@ -2734,10 +2746,10 @@ public class PacketHandler {
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
 
             if (updatePacket != null) {
-                sendToJudgesAndOthers(updatePacket, sendToOtherServers);
+                controller.sendToJudgesAndOthers(updatePacket, sendToOtherServers);
             } else {
                 Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
-                sendToJudgesAndOthers(addPacket, sendToOtherServers);
+                controller.sendToJudgesAndOthers(addPacket, sendToOtherServers);
                 if (sendToTeams) {
                     controller.sendToTeams(addPacket);
                 }
@@ -2858,7 +2870,7 @@ public class PacketHandler {
         }
         Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
         if (accounts != null) {
-            // TODO change these from Vector to something lightweight
+            // SOMEDAY  change these from Vector to something lightweight
             Vector<Account> addAccountsVector = new Vector<Account>();
             Vector<Account> updateAccountsVector = new Vector<Account>();
             for (Account account : accounts) {
@@ -2960,10 +2972,10 @@ public class PacketHandler {
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
             
             if (oneUpdatePacket != null) {
-                sendToJudgesAndOthers(oneUpdatePacket, sendToOtherServers);
+                controller.sendToJudgesAndOthers(oneUpdatePacket, sendToOtherServers);
             } else {
                 Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
-                sendToJudgesAndOthers(updatePacket, sendToOtherServers);
+                controller.sendToJudgesAndOthers(updatePacket, sendToOtherServers);
 
                 if (sendToTeams) {
                     controller.sendToTeams(updatePacket);
@@ -2995,33 +3007,6 @@ public class PacketHandler {
 
     private boolean isThisSite(ISubmission submission) {
         return submission.getSiteNumber() == contest.getSiteNumber();
-    }
-
-    /**
-     * Send to all logged in Judges, Admins, Boards and optionally to other sites.
-     * 
-     * This sends all sorts of packets to all logged in clients (other than teams). Typically sendToServers is set if this is the originating site, if not done then a nasty circular path will occur.
-     * 
-     * @param packet
-     * @param sendToServers
-     *            send To other server.
-     */
-    public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
-
-        if (isServer()) {
-            // If I am a server forward to clients on this site.
-
-            controller.sendToAdministrators(packet);
-            controller.sendToJudges(packet);
-            controller.sendToScoreboards(packet);
-            if (sendToServers) {
-                controller.sendToServers(packet);
-            }
-        } else {
-            info("Warning - tried to send packet to others (as non server) " + packet);
-            Exception ex = new Exception("User " + packet.getSourceId() + " tried to send packet to judges and others");
-            controller.getLog().log(Log.WARNING, "Warning - tried to send packet to others (as non server) " + packet, ex);
-        }
     }
 
     /**
@@ -3060,18 +3045,18 @@ public class PacketHandler {
 
             } else {
 
-                // TODO handle Security violation
+                // SOMEDAY  handle Security violation
 
                 /**
                  * If there is a problem then there is no requirement (due to lack of analysis) to notify the client canceling the run.
                  */
 
-                // TODO do we send something back to client if unable to cancel run ? Or just be silent?
+                // SOMEDAY  do we send something back to client if unable to cancel run ? Or just be silent?
                 try {
                     contest.cancelRunCheckOut(run, whoCanceledRun);
                     Run availableRun = contest.getRun(run.getElementId());
                     Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoCanceledRun, availableRun);
-                    sendToJudgesAndOthers(availableRunPacket, true);
+                    controller.sendToJudgesAndOthers(availableRunPacket, true);
 
                 } catch (UnableToUncheckoutRunException e) {
 
@@ -3117,7 +3102,7 @@ public class PacketHandler {
             } else {
                 // This site's clarification
 
-                // TODO securityCheck cancelClarificationCheckOut
+                // TODO SECURITY Check cancelClarificationCheckOut
                 // securityCheck(Permission.Type.ANSWER_CLARIFICATION, whoCancelledIt, connectionHandlerID);
 
                 contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
@@ -3127,7 +3112,7 @@ public class PacketHandler {
                 Packet cancelPacket = PacketFactory.createClarificationAvailable(contest.getClientId(), PacketFactory.ALL_SERVERS, theClarification);
 
                 if (isServer()) {
-                    sendToJudgesAndOthers(cancelPacket, true);
+                    controller.sendToJudgesAndOthers(cancelPacket, true);
                 }
             }
         } else {
@@ -3141,7 +3126,7 @@ public class PacketHandler {
 
         if (isServer()) {
             contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         } else {
             contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
         }
@@ -3170,7 +3155,7 @@ public class PacketHandler {
                 Clarification theClarification = contest.getClarification(clarification.getElementId());
                 Packet answerPacket = PacketFactory.createAnsweredClarificationUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theClarification, theClarification.getAnswer(), whoAnsweredIt);
 
-                sendToJudgesAndOthers(answerPacket, true);
+                controller.sendToJudgesAndOthers(answerPacket, true);
                 if (clarification.isSendToAll()) {
                     controller.sendToTeams(answerPacket);
                 } else {
@@ -3254,7 +3239,7 @@ public class PacketHandler {
                 }
 
                 Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);
-                sendToJudgesAndOthers(judgementUpdatePacket, true);
+                controller.sendToJudgesAndOthers(judgementUpdatePacket, true);
             }
 
         } else {
@@ -3332,7 +3317,7 @@ public class PacketHandler {
                 if (readOnly) {
                     // just get run and sent it to them.
 
-                    // TODO send read only clar to them
+                    // SOMEDAY  send read only clar to them
                     info("requestClarification read-only not implemented, yet");
                 } else {
                     try {
@@ -3344,9 +3329,9 @@ public class PacketHandler {
                         Packet checkOutPacket = PacketFactory.createCheckedOutClarification(contest.getClientId(), requestFromId, theClarification, requestFromId);
                         controller.sendToClient(checkOutPacket);
 
-                        // TODO change this packet type so it is not confused with the actual checked out run.
+                        // SOMEDAY  change this packet type so it is not confused with the actual checked out run.
 
-                        sendToJudgesAndOthers(checkOutPacket, true);
+                        controller.sendToJudgesAndOthers(checkOutPacket, true);
                     } catch (ClarificationUnavailableException clarUnavailableException) {
                         controller.getLog().info("clarUnavailableException " + clarUnavailableException.getMessage());
                         Packet notAvailableRunPacket = PacketFactory.createClarificationNotAvailable(contest.getClientId(), requestFromId, clarification, requestFromId);
@@ -3441,7 +3426,7 @@ public class PacketHandler {
                         controller.sendToClient(checkOutPacket);
 
                         Packet checkOutNotificationPacket = PacketFactory.createCheckedOutRunNotification(contest.getClientId(), whoRequestsRunId, theRun, whoRequestsRunId);
-                        sendToJudgesAndOthers(checkOutNotificationPacket, true);
+                        controller.sendToJudgesAndOthers(checkOutNotificationPacket, true);
                         
                     } catch (RunUnavailableException runUnavailableException) {
                         controller.getLog().info("runUnavailableException " + runUnavailableException.getMessage());
@@ -3937,7 +3922,7 @@ public class PacketHandler {
         contest.updateSiteStatus(site, inProfile, status);
         
         if (isServer()){
-            sendToJudgesAndOthers(packet, false);
+            controller.sendToJudgesAndOthers(packet, false);
         }
     }
 

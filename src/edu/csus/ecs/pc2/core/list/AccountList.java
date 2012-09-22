@@ -342,7 +342,9 @@ public class AccountList extends BaseElementList {
             Account newAccount = findOrCreateNewAccount(siteNumber, Type.TEAM, teamName);
             newAccount.setDisplayName(teamName);
             newAccount.setMemberNames(memberNames);
-            newAccount.setPassword(password);
+            if (password != null){
+                newAccount.setPassword(password);
+            }
             return newAccount;
     }
     

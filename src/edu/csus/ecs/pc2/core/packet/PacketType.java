@@ -14,12 +14,12 @@ import java.io.Serializable;
  * @version $Id$
  */
 
-// TODO: Settings update from admin 
-// TODO: Clar update from admin 
-// TODO: import 
-// TODO: export 
-// TODO: force logoff 
-// TODO: force transport disconnection 
+// SOMEDAY  Settings update from admin 
+// SOMEDAY  Clar update from admin 
+// SOMEDAY  import 
+// SOMEDAY  export 
+// SOMEDAY  force logoff 
+// SOMEDAY  force transport disconnection 
 
 // $HeadURL$
 public final class PacketType implements Serializable {
@@ -69,6 +69,13 @@ public final class PacketType implements Serializable {
     public static final String CONNECTIONS = "CONNECTIONS";
 
     public static final String CONTEST_TIME_LIST = "CONTEST_TIME_LIST";
+
+    /**
+     * A delimiter for fields within a packet field.
+     * 
+     * This can be used to delimit fields within fields.
+     */
+    public static final String FIELD_DELIMIT = ":;";
 
     /**
      * All defined packet types.
@@ -149,7 +156,7 @@ public final class PacketType implements Serializable {
         RUN_CHECKOUT,
 
         /**
-         * Run returned to judge cooresponding to a RUN_REJUDGED_REQUEST.
+         * Run returned to judge corresponding to a RUN_REJUDGED_REQUEST.
          * <P>
          * From judge to server<br>
          * Contents: Properties (Run and RunFiles)
@@ -157,7 +164,7 @@ public final class PacketType implements Serializable {
         RUN_REJUDGE_CHECKOUT,
 
         /**
-         * Could not get run, from server to requestor.
+         * Could not get run, from server to requester.
          * <P>
          * When a judge requests a run (RUN_REQUEST) and the run is not available, this packet is sent to the judge.<br>
          * 
@@ -323,6 +330,16 @@ public final class PacketType implements Serializable {
          * Contents: Login information SessionId (partially filled in)
          */
         LOGIN_REQUEST,
+        
+        /**
+         * Auto Registration Login Request.
+         * <P>
+         * Send when a client/team is allowed to request a new login 
+         * and password.   
+         * From client to server<br>
+         * Contents: auto login name, team member names.
+         */
+        AUTO_REGISTRATION_LOGIN_REQUEST,
 
         /**
          * Logoff of a client or server.
@@ -454,7 +471,7 @@ public final class PacketType implements Serializable {
          * An update of a run from Admin.
          * <P>
          * An Admin has changed/updated a run and that information needs to be updated on the server (db). This is information
-         * beyond a rejudgement (like delete, change submission time, etc). It may also include a run re-judgement.
+         * beyond a re-judgement (like delete, change submission time, etc). It may also include a run re-judgement.
          */
         RUN_UPDATE,
         
@@ -732,6 +749,10 @@ public final class PacketType implements Serializable {
          * Start Playback 
          */
         RESET_PLAYBACK,
+        /**
+         * 
+         */
+        AUTO_REGISTRATION_SUCCESS,
     }
 
     /**

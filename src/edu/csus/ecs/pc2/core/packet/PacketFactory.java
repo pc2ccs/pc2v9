@@ -345,7 +345,9 @@ public final class PacketFactory {
 
     public static final String PLAYBACK_INFO = "PLAYBACK_INFO";
 
-    public static final String OVERRIDE_RUN_ID = "OVERRIDE_RUN_ID";;
+    public static final String OVERRIDE_RUN_ID = "OVERRIDE_RUN_ID";
+
+    public static final String AUTO_REG_REQUEST_INFO = "AUTO_REG_REQUEST_INFO";
 
     
     /**
@@ -2209,4 +2211,17 @@ public final class PacketFactory {
         return createPacket(PacketType.Type.UPDATE_SETTING, source, destination, prop);
     }
 
+    public static Packet createAutoRegisterRequest(ClientId source, ClientId destination, String autoRegistrationInfo) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(AUTO_REG_REQUEST_INFO, autoRegistrationInfo);
+        return createPacket(Type.AUTO_REGISTRATION_LOGIN_REQUEST, source, destination, prop);
+    }
+
+    public static Packet createAutoRegReply(ClientId source, ClientId destination, Account account) {
+        Properties prop = new Properties();
+        prop.put(ACCOUNT, account);
+        return createPacket(Type.AUTO_REGISTRATION_SUCCESS, source, destination, prop);
+    }
 }

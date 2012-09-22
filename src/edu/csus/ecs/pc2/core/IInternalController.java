@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.core.packet.PacketType;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
@@ -639,4 +640,22 @@ public interface IInternalController {
      * @param runFiles
      */
     void sendRunToSubmissionInterface (Run run, RunFiles runFiles);
+
+    /**
+     * Send auto registration request.
+     * 
+     * @param teamInformation - a list of team name and team member names delimited by {@link PacketType#FIELD_DELIMIT}
+     */
+    void autoRegister(String teamInformation);
+
+    /**
+     * Send to all logged in Judges, Admins, Boards and optionally to other sites.
+     * 
+     * This sends all sorts of packets to all logged in clients (except teams). 
+     * Typically sendToServers is set if this is the originating site, if not done then a nasty circular path will occur.
+     * 
+     * @param packet
+     * @param sendToServer if true then send to other server.
+     */
+    void sendToJudgesAndOthers(Packet packet, boolean sendToServers);
 }

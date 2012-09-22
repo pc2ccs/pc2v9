@@ -46,4 +46,23 @@ public final class StringUtilities {
             return s;
         }
     }
+
+    /**
+     * Join a set of string together delimited by delimit.
+     * 
+     * @param delimit delimiter inserted between strings. 
+     * @param strings list of names
+     * @return
+     */
+    public static String join(String delimit, String[] strings) {
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < strings.length; i++) {
+            buffer.append(strings[i]);
+            if (i < strings.length - 1) {
+                buffer.append(delimit);
+            }
+        }
+        return buffer.toString();
+    }
+
 }

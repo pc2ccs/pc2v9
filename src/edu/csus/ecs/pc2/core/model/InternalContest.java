@@ -2999,6 +2999,8 @@ public class InternalContest implements IInternalContest {
     }
 
     public Account autoRegisterTeam(String displayName, String[] memberNames, String password) {
-        return accountList.assignNewTeam (siteNumber, displayName, memberNames, password);
+        Account account = accountList.assignNewTeam (siteNumber, displayName, memberNames, password);
+        addAccount(account);
+        return account;
     }
 }

@@ -598,4 +598,14 @@ public class NullController implements IInternalController{
         
     }
 
+    public void autoRegister(String teamInformation) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
