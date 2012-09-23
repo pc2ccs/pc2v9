@@ -36,7 +36,7 @@ public class AutoRegistrationFrame extends JFramePlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(477, 284));
+        this.setSize(new Dimension(477, 391));
         this.setContentPane(getAutoRegistrationPane());
         this.setTitle("Automatic Registration Form");
 
@@ -68,16 +68,18 @@ public class AutoRegistrationFrame extends JFramePlugin {
         getAutoRegistrationPane().setParentFrame(this);
     }
 
-    public void processCancel() {
-        setVisible(false);
-        getParentFrame().setVisible(true);
-    }
-    
     @Override
     public void setVisible(boolean b) {
+        
+        /**
+         * Special processing, if this frame is set visible false then
+         * hide this frame and show the parent frame.
+         */
         super.setVisible(b);
-        if (getParentFrame() != null) {
-            getParentFrame().setVisible(! b);
+        getAutoRegistrationPane().resetFields();
+        if (! b){
+            getParentFrame().setVisible(true);
         }
     }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

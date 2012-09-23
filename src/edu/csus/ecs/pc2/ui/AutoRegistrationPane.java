@@ -16,14 +16,20 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
+import com.ibm.webrunner.j2mclb.ListboxColumn;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IMessageListener;
+import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.MessageEvent;
 import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.packet.PacketType;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * Auto Registration Pane.
@@ -52,13 +58,21 @@ public class AutoRegistrationPane extends JPanePlugin {
 
     private JButton cancelButton = null;
 
-    private JTextField accountNameTitle = null;
+    private JTextField teamNameJTextField = null;
 
     private JPanel memberNamesPanel = null;
 
     private JPanel teamMemberTitle = null;
 
     private MCLB teamNameMCLB = null;
+
+    private JPanel southPane;
+
+    private JPanel buttonPaneTwo;
+
+    private JButton btnRemoveMember;
+
+    private JButton btnAddMember;
 
     /**
      * This method initializes
@@ -76,16 +90,16 @@ public class AutoRegistrationPane extends JPanePlugin {
     private void initialize() {
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(451, 281));
-        this.add(getButtonPane(), BorderLayout.SOUTH);
         this.add(getCenterFrame(), BorderLayout.CENTER);
         this.add(getTitlePane(), BorderLayout.NORTH);
-
+        add(getSouthPane(), BorderLayout.SOUTH);
     }
-    
+
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         inContest.addMessageListener(new MessageListenerImplementation());
+        inContest.addLoginListener(new LoginListenerImplementation());
     }
 
     @Override
@@ -119,7 +133,7 @@ public class AutoRegistrationPane extends JPanePlugin {
             flowLayout.setHgap(45);
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
-            buttonPane.setPreferredSize(new Dimension(40, 40));
+            buttonPane.setPreferredSize(new Dimension(35, 35));
             buttonPane.add(getRegisterButton(), null);
             buttonPane.add(getCancelButton(), null);
         }
@@ -154,6 +168,7 @@ public class AutoRegistrationPane extends JPanePlugin {
         if (registerButton == null) {
             registerButton = new JButton();
             registerButton.setText("Register");
+            registerButton.setMnemonic('R');
             registerButton.setMnemonic(KeyEvent.VK_R);
             registerButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -185,10 +200,8 @@ public class AutoRegistrationPane extends JPanePlugin {
 
         try {
             String autoRegisterInformation = teamName + delimit + names;
-            System.out.println("debug 22 " + autoRegisterInformation);
             getController().autoRegister(autoRegisterInformation);
         } catch (Exception e) {
-            e.printStackTrace(); // debug 22
             getLog().log(Log.WARNING, "Unable to send auto registration ", e);
             showMessage(getParent(), "Unable to send auto registration", "Internal error " + e.getMessage());
         }
@@ -196,26 +209,27 @@ public class AutoRegistrationPane extends JPanePlugin {
 
     /**
      * Fetch names from frame.
+     * 
      * @return
      */
     private String[] getTeamNamesFromFields() {
-        
+
         MCLB mclb = getTeamNameMCLB();
-        
-        if ( mclb.getRowCount() == 0) {
+
+        if (mclb.getRowCount() == 0) {
             return new String[0];
         }
-        
+
         ArrayList<String> list = new ArrayList<String>();
-        
-        for (int row = 0; row < mclb.getRowCount(); row ++) {
+
+        for (int row = 0; row < mclb.getRowCount(); row++) {
             JTextField jTextField = (JTextField) mclb.getRow(row)[0];
             String name = jTextField.getText();
             if (name != null && name.trim().length() > 0) {
                 list.add(name);
             }
         }
-        
+
         return (String[]) list.toArray(new String[list.size()]);
     }
 
@@ -242,19 +256,19 @@ public class AutoRegistrationPane extends JPanePlugin {
      * Hide this window.
      */
     protected void returnToParent() {
-        getParentFrame().setVisible(true);
+        getParentFrame().setVisible(false); // hide the parent frame, show the parent parent's (LoginFrame).
     }
 
     /**
-     * This method initializes accountNameTitle
+     * This method initializes teamNameJTextField
      * 
      * @return javax.swing.JTextField
      */
     private JTextField getAccountNameTitle() {
-        if (accountNameTitle == null) {
-            accountNameTitle = new JTextField();
+        if (teamNameJTextField == null) {
+            teamNameJTextField = new JTextField();
         }
-        return accountNameTitle;
+        return teamNameJTextField;
     }
 
     /**
@@ -301,35 +315,58 @@ public class AutoRegistrationPane extends JPanePlugin {
 
             teamNameMCLB.addColumns(cols);
             teamNameMCLB.addRow(buildRow());
+
+            int width = 500;
+            ListboxColumn column = teamNameMCLB.getColumnInfo(0);
+            column.setWidth(width);
         }
         return teamNameMCLB;
     }
-    
-    private Object[] buildRow () {
+
+    private Object[] buildRow() {
         // Object[] cols = { "Name"};
         Object[] objects = new Object[teamNameMCLB.getColumnCount()];
-        objects[0] = createJTextField(); 
+        objects[0] = createJTextField();
         return objects;
     }
 
     private Object createJTextField() {
         JTextField textField = new JTextField();
         textField.setText("");
-
         textField.setEditable(true);
-
-        textField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent e) {
-                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-                    teamNameMCLB.addRow(buildRow());
-                }
-            }
-        });
-        
         textField.requestFocus();
         return textField;
     }
-    
+
+    /**
+     * Login Listener for auto reg.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    // $HeadURL$
+    class LoginListenerImplementation implements ILoginListener {
+
+        public void loginAdded(LoginEvent event) {
+            // not used
+        }
+
+        public void loginRemoved(LoginEvent event) {
+            // not used
+        }
+
+        public void loginDenied(LoginEvent event) {
+            String message = event.getMessage();
+            showMessage(getParent(), "Not Allowed", message);
+            returnToParent();
+        }
+
+        public void loginRefreshAll(LoginEvent event) {
+            // not used
+        }
+    }
+
     /**
      * Message Listener for auto reg.
      * 
@@ -342,11 +379,9 @@ public class AutoRegistrationPane extends JPanePlugin {
 
         public void messageAdded(MessageEvent event) {
             if (Area.AUTOREG.equals(event.getArea())) {
-                String[] loginInfo = event.getMessage().split(PacketType.FIELD_DELIMIT);
-                String teamName = loginInfo[0];
-                String login = loginInfo[1];
-                String password = loginInfo[2];
-                showUserAccountAndPassword(teamName, login, password);
+                String accountMessage = event.getMessage();
+                showAccountMessage(accountMessage);
+
             }
         }
 
@@ -355,7 +390,18 @@ public class AutoRegistrationPane extends JPanePlugin {
         }
     }
 
-    public void showUserAccountAndPassword(String teamName, String login, String password) {
+    /**
+     * Parse message into parts and display to user.
+     * 
+     * @param accountMessage
+     */
+    public void showAccountMessage(String accountMessage) {
+
+        String[] loginInfo = accountMessage.split(PacketType.FIELD_DELIMIT);
+
+        String teamName = loginInfo[0];
+        String login = loginInfo[1];
+        String password = loginInfo[2];
 
         StringBuffer buffer = new StringBuffer() //
                 .append("<HTML><FONT SIZE=+1> ") //
@@ -372,8 +418,69 @@ public class AutoRegistrationPane extends JPanePlugin {
                 .append("</FONT></HTML>");
 
         FrameUtilities.showMessage(getParentFrame(), "Automatic Registration Information", buffer.toString());
-        
+
         returnToParent();
     }
 
+    private JPanel getSouthPane() {
+        if (southPane == null) {
+            southPane = new JPanel();
+            southPane.setName("southPane");
+            southPane.setLayout(new BorderLayout(0, 0));
+            southPane.add(getButtonPaneTwo());
+            southPane.add(getButtonPane(), BorderLayout.SOUTH);
+        }
+        return southPane;
+    }
+
+    private JPanel getButtonPaneTwo() {
+        if (buttonPaneTwo == null) {
+            buttonPaneTwo = new JPanel();
+            FlowLayout flowLayout = (FlowLayout) buttonPaneTwo.getLayout();
+            flowLayout.setHgap(100);
+            buttonPaneTwo.setPreferredSize(new Dimension(35, 35));
+            buttonPaneTwo.add(getBtnAddMember());
+            buttonPaneTwo.add(getBtnRemoveMember());
+        }
+        return buttonPaneTwo;
+    }
+
+    private JButton getBtnRemoveMember() {
+        if (btnRemoveMember == null) {
+            btnRemoveMember = new JButton("Remove Member");
+            btnRemoveMember.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+
+                    int lastRow = teamNameMCLB.getRowCount();
+                    if (lastRow > 1) {
+                        teamNameMCLB.removeRow(lastRow - 1);
+                    } else {
+                        teamNameMCLB.removeRow(lastRow - 1);
+                        teamNameMCLB.addRow(buildRow());
+                    }
+                }
+            });
+            btnRemoveMember.setMnemonic(KeyEvent.VK_E);
+        }
+        return btnRemoveMember;
+    }
+
+    private JButton getBtnAddMember() {
+        if (btnAddMember == null) {
+            btnAddMember = new JButton("Add Member");
+            btnAddMember.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    teamNameMCLB.addRow(buildRow());
+                }
+            });
+            btnAddMember.setMnemonic(KeyEvent.VK_A);
+        }
+        return btnAddMember;
+    }
+
+    public void resetFields() {
+        teamNameMCLB.removeAllRows();
+        teamNameMCLB.addRow(buildRow());
+        teamNameJTextField.setText("");
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"
