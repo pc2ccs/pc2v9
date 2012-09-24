@@ -717,6 +717,7 @@ public class Problem implements IElementObject {
     /**
      * Add data and answer filenames to list of test cases.
      *  
+     * @see #removeAllTestCaseFilenames()
      * @param datafile
      * @param answerfile
      */
@@ -735,13 +736,22 @@ public class Problem implements IElementObject {
         testCaseAnswerFilenames = newArray;
     }
     
-    public int getNumberTestCases (){
-        if (testCaseDataFilenames != null){
+    /**
+     * Remove all test case filenames.
+     */
+    public void removeAllTestCaseFilenames(){
+        testCaseDataFilenames = new String[0];
+        testCaseAnswerFilenames = new String[0];;
+    }
+    
+    public int getNumberTestCases() {
+        if (testCaseDataFilenames != null && testCaseDataFilenames.length > 0) {
             return testCaseDataFilenames.length;
-        } else {
+        } else if (getAnswerFileName() != null && getDataFileName() != null) {
             return 1;
+        } else {
+            return 0;
         }
-            
     }
 
     public String getExecutionPrepCommand() {

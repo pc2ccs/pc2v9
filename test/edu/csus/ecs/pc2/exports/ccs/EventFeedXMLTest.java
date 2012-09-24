@@ -1,14 +1,25 @@
 package edu.csus.ecs.pc2.exports.ccs;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import junit.framework.TestCase;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.BalloonDeliveryComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -28,9 +39,12 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.NotificationUtilities;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
@@ -43,7 +57,11 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  */
 
 // $HeadURL$
-public class EventFeedXMLTest extends TestCase {
+public class EventFeedXMLTest extends AbstractTestCase {
+
+    private static final String CONTEST_END_TAG = "</contest>";
+
+    private static final String CONTEST_START_TAG = "<contest>";
 
     private final boolean debugMode = false;
 
@@ -59,12 +77,6 @@ public class EventFeedXMLTest extends TestCase {
 
         int siteNumber = 1;
         contest = sample.createContest(siteNumber, 1, 22, 12, true);
-
-        /**
-         * Add random runs
-         */
-
-        Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
         
         addContestInfo (contest, "Contest Title");
         
@@ -82,21 +94,33 @@ public class EventFeedXMLTest extends TestCase {
         assignTeamGroup(group2, teams.length / 2, teams.length - 1);
 
         /**
+         * Add random runs
+         */
+        
+        Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
+        
+        /**
          * Add Run Judgements.
          */
-        ClientId judgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
+        addRunJudgements(contest, runs);
+     
+    }
+    
+    private void addRunJudgements (IInternalContest inContest, Run[] runs) throws Exception {
+
+        ClientId judgeId = inContest.getAccounts(Type.JUDGE).firstElement().getClientId();
         Judgement judgement;
         String sampleFileName = sample.getSampleFile();
 
         for (Run run : runs) {
             RunFiles runFiles = new RunFiles(run, sampleFileName);
 
-            contest.acceptRun(run, runFiles);
+            inContest.acceptRun(run, runFiles);
 
             run.setElapsedMins((run.getNumber() - 1) * 9);
 
-            judgement = sample.getRandomJudgement(contest, run.getNumber() % 2 == 0); // ever other run is judged Yes.
-            sample.addJudgement(contest, run, judgement, judgeId);
+            judgement = sample.getRandomJudgement(inContest, run.getNumber() % 2 == 0); // ever other run is judged Yes.
+            sample.addJudgement(inContest, run, judgement, judgeId);
         }
     }
 
@@ -167,6 +191,9 @@ public class EventFeedXMLTest extends TestCase {
             System.out.println();
         }
         testForValidXML (xml);
+
+        assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
+        assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
     }
 
     /**
@@ -361,6 +388,7 @@ public class EventFeedXMLTest extends TestCase {
         return count;
     }
     
+    
     /**
      * Create a notification if needed.
      * 
@@ -406,8 +434,10 @@ public class EventFeedXMLTest extends TestCase {
                 System.out.println(xml);
             }
             testForValidXML (xml);
+            assertXMLCounts(xml, EventFeedXML.PROBLEM_TAG, 1);
             idx++;
         }
+
     }
 
     public void testTeamElement() throws Exception {
@@ -486,7 +516,8 @@ public class EventFeedXMLTest extends TestCase {
             System.out.println(" -- testFinalizedElement ");
             System.out.println(xml);
         }
-        testForValidXML (xml);
+
+        testForValidXML (CONTEST_START_TAG + xml);
     }
 
     public void testStartupElement() throws Exception {
@@ -498,8 +529,43 @@ public class EventFeedXMLTest extends TestCase {
             System.out.println(" -- testStartupElement ");
             System.out.println(xml);
         }
-        testForValidXML (xml);
+        testForValidXML (xml + CONTEST_END_TAG);
+                
 
+    }
+
+    
+    /**
+     * Print counts in xml string for EventFeed elements.
+     * 
+     * @param comment
+     * @param xmlString
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public void printElemntCounts(String comment, String xmlString) throws ParserConfigurationException, SAXException, IOException {
+
+        // printElemntCounts(getName(), xml + "</contest>");
+
+        System.out.println("printElemntCounts " + comment);
+
+        String[] tagnames = getAllEventFeedTagNames();
+        
+        Arrays.sort(tagnames);
+        for (String tagName : tagnames) {
+            System.out.println(tagName + " count = " + getTagCount(xmlString, tagName));
+        }
+    }
+    
+    public String [] getAllEventFeedTagNames (){
+        String[] tagnames = { //
+        EventFeedXML.CONTEST_TAG, EventFeedXML.INFO_TAG, EventFeedXML.REGION_TAG, EventFeedXML.PROBLEM_TAG, EventFeedXML.LANGUAGE_TAG, EventFeedXML.TEAM_TAG, EventFeedXML.CLARIFICATION_TAG,
+                EventFeedXML.TESTCASE_TAG, EventFeedXML.RUN_TAG, EventFeedXML.JUDGEMENT_TAG, EventFeedXML.FINALIZE_TAG, EventFeedXML.JUDGEMENT_RECORD_TAG, EventFeedXML.BALLOON_TAG,
+                EventFeedXML.BALLOON_LIST_TAG, EventFeedXML.NOTIFICATION_TAG
+        //
+        };
+        return tagnames;
     }
 
     public void testToXML() throws Exception {
@@ -511,8 +577,6 @@ public class EventFeedXMLTest extends TestCase {
             System.out.println(xml);
         }
         testForValidXML (xml);
-
-
     }
     
     /**
@@ -520,15 +584,12 @@ public class EventFeedXMLTest extends TestCase {
      * 
      * @param xml
      */
-    private void testForValidXML(String xml) {
+    private void testForValidXML(String xml) throws Exception {
         
         assertFalse("Expected XML, found null", xml == null);
         assertFalse("Expected XML, found empty string", xml.length() == 0);
         
-//        System.out.println("XML length is "+xml.length());
-        
-        // TODO CCS test for well formed XML
-        
+        getDocument(xml);
     }
 
     protected void startEventFeed(int port) throws IOException {
@@ -558,6 +619,155 @@ public class EventFeedXMLTest extends TestCase {
             }
         }
 
+    }
+
+    public void testTestCase() throws Exception {
+        
+        EventFeedXML eventFeedXML = new EventFeedXML();
+        
+        int siteNumber = 2;
+        
+         IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+        
+        /**
+         * Add random runs
+         */
+        
+        Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
+        
+        createDataFilesForContest (testCaseContest);
+        
+        /**
+         * Add Run Judgements.
+         */
+        addRunJudgements(testCaseContest, runs);
+        
+        String xml = eventFeedXML.toXML(testCaseContest);
+        
+        if (debugMode){
+            System.out.println(" -- testTestCase ");
+            System.out.println(xml);
+        }
+        testForValidXML (xml);
+        
+        assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
+        assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
+        assertXMLCounts(xml, EventFeedXML.JUDGEMENT_TAG, 21);
+        assertXMLCounts(xml, EventFeedXML.LANGUAGE_TAG, 18);
+        assertXMLCounts(xml, EventFeedXML.NOTIFICATION_TAG, 0);
+        assertXMLCounts(xml, EventFeedXML.PROBLEM_TAG, 6);
+        assertXMLCounts(xml, EventFeedXML.REGION_TAG, 22);
+        assertXMLCounts(xml, EventFeedXML.RUN_TAG, 12);
+        assertXMLCounts(xml, EventFeedXML.TEAM_TAG, 34);
+        assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, 12);
+
+        /**
+         * Test FINALIZE
+         */
+        
+        FinalizeData data = new FinalizeData();
+        data.setCertified(true);
+        data.setComment(getName()+" test");
+        testCaseContest.setFinalizeData(data);
+        
+        xml = eventFeedXML.toXML(testCaseContest);
+        
+        testForValidXML (xml);
+        
+        assertXMLCounts(xml, EventFeedXML.FINALIZE_TAG, 1);
+        assertXMLCounts(xml, "comment", 1);
+
+    }
+    
+    /**
+     * A very simple
+     * 
+     * @param xml
+     * @param string
+     * @param i
+     * @throws IOException
+     * @throws Exception
+     */
+    private void assertXMLCounts(String xmlString, String string, int count) throws Exception {
+        assertEquals("Expecting occurances (for" + string + ")", count, getTagCount(xmlString, string));
+    }
+    
+    private int getTagCount(String xmlString, String string) throws ParserConfigurationException, SAXException, IOException {
+
+        Document document = getDocument(xmlString);
+        
+        NodeList nodes = document.getElementsByTagName(string);
+
+        // for (int i = 0; i < nodes.getLength(); i++) {
+        // Node node = (Node) nodes.item(i);
+        // String name = node.getNodeName();
+        // System.out.println("debug 22 name = " + name);
+        // }
+
+        return nodes.getLength();
+    }
+
+    /**
+     * Parse input string and return a Document.
+     * 
+     * @param xmlString
+     * @return
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    private Document getDocument(String xmlString) throws ParserConfigurationException, SAXException, IOException {
+        
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+
+        return  documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+    }
+
+    /**
+     * Creates a single sample testcase (data and answer file) for each problem.
+     * 
+     * @param inContest
+     * @throws FileNotFoundException
+     */
+    private void createDataFilesForContest(IInternalContest inContest) throws FileNotFoundException {
+
+        Problem[] problems = inContest.getProblems();
+        for (Problem problem : problems) {
+
+            int numProblemDataFiles = problem.getNumberTestCases();
+
+            if (numProblemDataFiles < 1) {
+
+                String shortname = problem.getShortName();
+                if (shortname == null) {
+                    shortname = problem.getLetter();
+                }
+                String filename = getTestFilename(shortname + ".dat");
+                String answerName = getTestFilename(shortname + ".ans");
+
+                if (new File(filename).exists()) {
+                    if (debugMode){
+                        System.out.println("Data file exists: " + filename);
+                    }
+                } else {
+                    ensureDirectory(getDataDirectory());
+                    createSampleDataFile(filename);
+                    createSampleAnswerFile(answerName);
+                }
+
+                ProblemDataFiles dataFiles = new ProblemDataFiles(problem);
+                dataFiles.setJudgesDataFile(new SerializedFile(filename));
+                dataFiles.setJudgesAnswerFile(new SerializedFile(answerName));
+
+                problem.setDataFileName(shortname + ".dat");
+                problem.setAnswerFileName(shortname + ".ans");
+
+                inContest.updateProblem(problem, dataFiles);
+
+                assertEquals("Expecting test data set", 1, problem.getNumberTestCases());
+            }
+        }
     }
     
     /**

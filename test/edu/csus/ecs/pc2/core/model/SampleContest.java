@@ -178,6 +178,12 @@ public class SampleContest {
         
         for (String probName : problems) {
             Problem problem = new Problem(probName);
+            String shortName = probName.split(" ")[0];
+            try {
+                problem.setShortName(shortName.toLowerCase());
+            } catch (Exception e) {
+                // not used
+            }
             problem.setLetter(Character.toString(letter));
             problem.setSiteNumber(siteNumber);
             contest.addProblem(problem);

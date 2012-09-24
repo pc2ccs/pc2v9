@@ -154,16 +154,16 @@ public class ProblemTest extends TestCase {
         p2 = getProblemAnew();
         p2.setDisplayName("Different Problem Name");
         checkString("setDisplayName", p1.getDisplayName(), p2.getDisplayName(), p1, p2);
-        
+
         p2 = getProblemAnew();
         p2.setDataLoadYAMLPath("/tmp");
         checkString("setDataLoadYAMLPath", p1.getDataLoadYAMLPath(), p2.getDataLoadYAMLPath(), p1, p2);
-        
+
         p2 = getProblemAnew();
         p2.setUsingExternalDataFiles(true);
         checkBoolean("setUsingExternalDataFiles", p1.isUsingExternalDataFiles(), p2.isUsingExternalDataFiles(), p1, p2);
     }
-    
+
     public void testCopy() {
         Problem p1 = getProblemAnew();
         // if display name is different isSameAs will fail
@@ -172,24 +172,60 @@ public class ProblemTest extends TestCase {
         // TODO consider adding introspection to verify all fields were copied properly
     }
 
-    
-    // TODO when short name implemented use this test
-//    public void testValidShortName() {
-//
-//        Problem p1 = getProblemAnew();
-//
-//        String [] badPathNames = { //
-//                File.separator+ "temp",
-//                "C:temp",
-//        };
-//
-//        for (String name : badPathNames) {
-//            try {
-//                p1.setShortName(name);
-//            } catch (Exception e) {
-//                name = "ok";
-//            }
-//        }
-//    }
-    
+    public void testgetNumberTestCases() {
+
+        Problem probTestCase = new Problem("one");
+
+        assertEquals("Test Cases count expected ", 0, probTestCase.getNumberTestCases());
+
+        probTestCase.addTestCaseFilenames("data", "ansa");
+
+        assertEquals("Test Cases count expected ", 1, probTestCase.getNumberTestCases());
+
+        int count = 5;
+        for (int i = probTestCase.getNumberTestCases(); i < count; i++) {
+            probTestCase.addTestCaseFilenames("data" + i, "ansa" + i);
+        }
+        assertEquals("Test Cases count expected ", count, probTestCase.getNumberTestCases());
+
+        probTestCase.removeAllTestCaseFilenames();
+        assertEquals("Test Cases count expected ", 0, probTestCase.getNumberTestCases());
+
+        Problem prob = new Problem("two");
+
+        assertEquals("Test Cases count expected ", 0, prob.getNumberTestCases());
+
+        prob.setDataFileName("data.dat");
+
+        assertEquals("Test Cases count expected ", 0, prob.getNumberTestCases());
+
+        prob.setAnswerFileName("data.ans");
+
+        assertEquals("Test Cases count expected ", 1, prob.getNumberTestCases());
+        
+        Problem prob3 = getProblemAnew();
+        
+        assertEquals("Test Cases count expected ", 1, prob3.getNumberTestCases());
+
+    }
+
+    // TODO CCS when short name implemented use this test
+    // public void testValidShortName() {
+    //
+    // Problem p1 = getProblemAnew();
+    //
+    // String [] badPathNames = { //
+    // File.separator+ "temp",
+    // "C:temp",
+    // };
+    //
+    // for (String name : badPathNames) {
+    // try {
+    // p1.setShortName(name);
+    // } catch (Exception e) {
+    // name = "ok";
+    // }
+    // }
+    // }
+
 }

@@ -346,7 +346,7 @@ public class Run extends ISubmission {
     }
 
     public String toString() {
-        return "Run " + getNumber() + " " + getStatus() + " " + getElapsedMS() +" ms from " + getSubmitter() + " id " + getElementId().toString();
+        return "Run " + getNumber() + " " + getStatus() + " " + getElapsedMins()+ " min " + getElapsedMS() +"ms from " + getSubmitter() + " id " + getElementId().toString();
     }
 
     /**
