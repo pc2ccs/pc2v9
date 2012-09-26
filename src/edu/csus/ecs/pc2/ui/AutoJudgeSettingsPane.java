@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -176,7 +178,7 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
 
         Filter filter = new Filter();
 
-        int[] selectedIndex = getProblemListMCLB().getSelectedIndexes();
+        int[] selectedIndex = getSelectedProblemsIndex ();
         for (int row : selectedIndex) {
             Problem problem = (Problem) getProblemListMCLB().getRowKey(row);
             if (problem != null) {
@@ -192,6 +194,32 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
 
         checkSettings.setAutoJudgeFilter(filter);
         return checkSettings;
+    }
+
+    private int[] getSelectedProblemsIndex() {
+        
+        int numberSelected = 0;
+        for (int i = 0; i < getProblemListMCLB().getRowCount(); i++) {
+            JCheckBox jCheckBox = (JCheckBox) getProblemListMCLB().getRow(i)[0];
+            if (jCheckBox.isSelected()){
+                numberSelected ++;
+            }
+        }
+        
+        if (numberSelected > 0){
+            int [] selected = new int[numberSelected];
+            int count = 0;
+            for (int i = 0; i < getProblemListMCLB().getRowCount(); i++) {
+                JCheckBox jCheckBox = (JCheckBox) getProblemListMCLB().getRow(i)[0];
+                if (jCheckBox.isSelected()){
+                    selected[count] = i;
+                    count ++;
+                }
+            }
+            return selected;
+        } else {
+            return new int[0];
+        }
     }
 
     /**
@@ -403,24 +431,18 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
         if (filter == null){
             filter = new Filter();
         }
-            
-        int rowNumber = 0;
+        
         for (Problem problem : problems) {
             if (canBeAutoJudged(problem)) {
-                Object[] row = buildProblemRow(problem);
+                boolean problemSelected = filter.isFilteringProblems() && filter.matchesProblem(problem.getElementId());
+                Object[] row = buildProblemRow(problem, problemSelected);
                 getProblemListMCLB().addRow(row, problem);
-                if (filter.isFilteringProblems() && filter.matchesProblem(problem.getElementId())) {
-                    
-                    getProblemListMCLB().selectRow(rowNumber);
-                }
-                rowNumber++;
             }
         }
         
         getAddButton().setVisible(false);
         getUpdateButton().setVisible(true);
         
-        getProblemListMCLB().autoSizeAllColumns();
         populatingGUI = false;
     }
     
@@ -456,15 +478,29 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
         }
         return judgingTypeName;
     }
-
-    private Object[] buildProblemRow(Problem problem) {
+    /**
+     * 
+     * @param problem
+     * @param problemSelected set checkbox if selected
+     * @return
+     */
+    private Object[] buildProblemRow(Problem problem, boolean problemSelected) {
         
 //        Object[] cols = { "Problem", "Judging Type" };
 
         int numberColumns = getProblemListMCLB().getColumnCount();
-        Object[] c = new String[numberColumns];
+        Object[] c = new Object[numberColumns];
+        
+        JCheckBox jCheckBox = new JCheckBox(problem.getDisplayName());
+        jCheckBox.addActionListener(new ActionListener() {
+            
+            public void actionPerformed(ActionEvent e) {
+                enableUpdateButton();
+            }
+        });
+        jCheckBox.setSelected(problemSelected);
 
-        c[0] = problem.getDisplayName();
+        c[0] = jCheckBox;
         c[1] = getJudgingTypeName(problem);
         return c;
     }
@@ -517,7 +553,6 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
                 public void rowDeselected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
                     enableUpdateButton();
                 }
-
                 public void rowSelected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
                     enableUpdateButton();
                 }
@@ -526,7 +561,9 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
             Object[] cols = { "Problem", "Judging Type" };
 
             problemListMCLB.addColumns(cols);
-            problemListMCLB.autoSizeAllColumns();
+            problemListMCLB.getColumnInfo(0).setWidth(200);
+            // SOMEDAY make autoSizeAllColumns work with JCheckBoxes
+//            problemListMCLB.autoSizeAllColumns()
 
         }
         return problemListMCLB;
