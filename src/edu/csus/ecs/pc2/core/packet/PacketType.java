@@ -340,6 +340,14 @@ public final class PacketType implements Serializable {
          * Contents: auto login name, team member names.
          */
         AUTO_REGISTRATION_LOGIN_REQUEST,
+        
+        /**
+         * Response from Server to {@link #AUTO_REGISTRATION_LOGIN_REQUEST}.
+         * 
+         * Sent back from server to auto reg request.
+         * 
+         */
+        AUTO_REGISTRATION_SUCCESS,
 
         /**
          * Logoff of a client or server.
@@ -749,10 +757,7 @@ public final class PacketType implements Serializable {
          * Start Playback 
          */
         RESET_PLAYBACK,
-        /**
-         * 
-         */
-        AUTO_REGISTRATION_SUCCESS,
+    
     }
 
     /**

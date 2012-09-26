@@ -433,7 +433,8 @@ public class PacketHandler {
 
         Account account = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
         String message = account.getDisplayName() + PacketType.FIELD_DELIMIT + account.getClientId().getName() + PacketType.FIELD_DELIMIT + account.getPassword();
-        sendMessage(Area.AUTOREG, message, null);
+        
+        contest.addMessage(Area.AUTOREG, packet.getSourceId(), packet.getDestinationId(), message);
     }
 
     private void handleStopPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {

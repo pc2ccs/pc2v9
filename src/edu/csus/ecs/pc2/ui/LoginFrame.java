@@ -683,5 +683,12 @@ public class LoginFrame extends JFrame implements UIPlugin {
         }
         return autoRegistrationFrame;
     }
+    
+    @Override
+    public void setVisible(boolean b) {
+        super.setVisible(b);
+        getLoginTextField().setText("");
+        getLoginTextField().requestFocus();
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
