@@ -217,12 +217,9 @@ public class GenerateStandings {
 
                 ProblemDetailsImplementation problemDetails = getClientProblemDetails(node, clientId);
 
-                /**
-                 * A bit of code to set the IProblem via .setProblem
-                 */
-                if (problemDetails.getProblemId() != -1 && problemDetails.getProblemId() < problems.length - 1){
-                        
-                    ElementId elementId = problems[problemDetails.getProblemId()].getElementId();
+                if (problemDetails.getProblemId() != -1) {
+                    int problemIndex = problemDetails.getProblemId() - 1;
+                    ElementId elementId = problems[problemIndex].getElementId();
                     ProblemImplementation problemImplementation = new ProblemImplementation(elementId, contest);
                     problemDetails.setProblem(problemImplementation);
                     detailsList.add(problemDetails);

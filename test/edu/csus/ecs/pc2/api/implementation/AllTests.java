@@ -20,10 +20,10 @@ public final class AllTests {
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.api.implementation");
         //$JUnit-BEGIN$
+        suite.addTestSuite(ContestTest.class);
         suite.addTestSuite(RunImplementationTest.class);
-        suite.addTestSuite(TeamImplementationTest.class);
         suite.addTestSuite(StandingImplementationTest.class);
-        
+        suite.addTestSuite(TeamImplementationTest.class);
         //$JUnit-END$
         return suite;
     }

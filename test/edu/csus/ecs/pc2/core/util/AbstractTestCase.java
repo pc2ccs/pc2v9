@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -114,13 +115,29 @@ public class AbstractTestCase extends TestCase {
     }
 
     /**
-     * Not quite insure, more of a attempt to create it if you can if you can't return false.
+     * Ensure directory exists under {@link #getDataDirectory()}.
+     * 
+     * Not quite ensure, more of a attempt to create it if you can if you can't return false.
      * 
      * @param directoryName
      * @return true if directory exists or was created, false otherwise.
      */
     public boolean ensureDirectory(String directoryName) {
         File dir = new File(directoryName);
+        if (!dir.exists() && !dir.mkdirs()) {
+            return false;
+        }
+
+        return dir.isDirectory();
+    }
+    
+    /**
+     * Ensure {@link #getDataDirectory()}.
+     * 
+     * @return true if directory exists or was created, false otherwise.
+     */
+    public boolean ensureDirectory() {
+        File dir = new File(getDataDirectory());
         if (!dir.exists() && !dir.mkdirs()) {
             return false;
         }
@@ -143,7 +160,7 @@ public class AbstractTestCase extends TestCase {
     }
 
     /**
-     * Return the base project relative directory where test input data is located.
+     * Return a test data directory for the current JUnit.
      * 
      * This returns the proper project-relative path for the input testing data directory.
      * 
@@ -171,13 +188,18 @@ public class AbstractTestCase extends TestCase {
     
 
     /**
-     * Get a project relative input data file name.
+     * Get a project relative input data file name, in dir {{@link #getDataDirectory()}.
      * 
      */
     public String getTestFilename(String baseFilename) {
         return getDataDirectory() + File.separator + baseFilename;
     }
 
+    public Log createLog(String logFileBaseName) {
+        String logfilename = logFileBaseName + ".log";
+        return new Log(getDataDirectory(), logfilename);
+    }
+    
     /**
      * Get a project relative output data file name.
      * 

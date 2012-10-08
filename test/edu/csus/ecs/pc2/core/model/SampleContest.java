@@ -474,8 +474,7 @@ public class SampleContest {
             }
 
             if (randomTeam) {
-                int randomTeamIndex = random.nextInt(accounts.length);
-                teamId = accounts[randomTeamIndex].getClientId();
+                teamId = getRandomAccount(contest, Type.TEAM).getClientId();
             }
 
             Run run = new Run(teamId, language, problem);
@@ -666,7 +665,6 @@ public class SampleContest {
         Problem[] problemList = contest.getProblems();
         Language languageId = contest.getLanguages()[0];
 
-        Judgement yesJudgement = contest.getJudgements()[0];
         Judgement noJudgement = contest.getJudgements()[1];
 
         String[] data = runInfoLine.split(",");
@@ -697,7 +695,7 @@ public class SampleContest {
         ElementId judgementId = noJudgement.getElementId();
 
         if (solved) {
-            judgementId = yesJudgement.getElementId();
+            judgementId = getYesJudgement(contest).getElementId();
         } else {
 
             // Try to find No judgement
@@ -876,6 +874,11 @@ public class SampleContest {
 
     }
 
+    /**
+     * 
+     * @param contest
+     * @return Yes/Solved judgement
+     */
     public Judgement getYesJudgement(IInternalContest contest) {
         return contest.getJudgements()[0];
     }
@@ -1410,6 +1413,31 @@ public class SampleContest {
             buffer.append(list.get(list.size() - 1));
         }
         return buffer;
+    }
+
+    /**
+     * Create a new judged run with a Yes judgement.
+     * 
+     * @param contest
+     * @return
+     * @throws RunUnavailableException 
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
+     */
+    public Run createRandomJudgedRunSolved(IInternalContest contest) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
+        
+        Run run = createRandomRuns(contest, 1, true, true, true)[0];
+        ClientId judge = getRandomAccount(contest,Type.JUDGE).getClientId();
+        Judgement yes = getYesJudgement(contest);
+        contest.addRun(run);
+        return addJudgement(contest, run, yes, judge); 
+    }
+
+    private Account getRandomAccount(IInternalContest contest, Type type) {
+        Account[] accounts = getAccounts(contest, type);
+        int randomIndex = random.nextInt(accounts.length);
+        return accounts[randomIndex];
     }
 
 }
