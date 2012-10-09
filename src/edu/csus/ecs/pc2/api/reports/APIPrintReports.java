@@ -1,28 +1,6 @@
-package edu.csus.ecs.pc2.api;
+package edu.csus.ecs.pc2.api.reports;
 
-import edu.csus.ecs.pc2.api.apireports.PrintAllProblemDetails;
-import edu.csus.ecs.pc2.api.apireports.PrintClarification;
-import edu.csus.ecs.pc2.api.apireports.PrintClarifications;
-import edu.csus.ecs.pc2.api.apireports.PrintClockInfo;
-import edu.csus.ecs.pc2.api.apireports.PrintContestRunning;
-import edu.csus.ecs.pc2.api.apireports.PrintContestTitle;
-import edu.csus.ecs.pc2.api.apireports.PrintGetContestSC;
-import edu.csus.ecs.pc2.api.apireports.PrintGroups;
-import edu.csus.ecs.pc2.api.apireports.PrintJudgements;
-import edu.csus.ecs.pc2.api.apireports.PrintLanguages;
-import edu.csus.ecs.pc2.api.apireports.PrintLocalHostName;
-import edu.csus.ecs.pc2.api.apireports.PrintLocalPortNumber;
-import edu.csus.ecs.pc2.api.apireports.PrintLoggedInSC;
-import edu.csus.ecs.pc2.api.apireports.PrintMyClient;
-import edu.csus.ecs.pc2.api.apireports.PrintMyClientSC;
-import edu.csus.ecs.pc2.api.apireports.PrintProblems;
-import edu.csus.ecs.pc2.api.apireports.PrintRun;
-import edu.csus.ecs.pc2.api.apireports.PrintRuns;
-import edu.csus.ecs.pc2.api.apireports.PrintSiteName;
-import edu.csus.ecs.pc2.api.apireports.PrintSites;
-import edu.csus.ecs.pc2.api.apireports.PrintStandingForUser;
-import edu.csus.ecs.pc2.api.apireports.PrintStandings;
-import edu.csus.ecs.pc2.api.apireports.PrintTeams;
+import edu.csus.ecs.pc2.api.IClient;
 
 /**
  * List of API Reports.

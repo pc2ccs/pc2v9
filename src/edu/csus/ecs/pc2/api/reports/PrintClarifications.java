@@ -1,9 +1,7 @@
-package edu.csus.ecs.pc2.api.apireports;
+package edu.csus.ecs.pc2.api.reports;
 
 import java.util.Arrays;
 
-import edu.csus.ecs.pc2.api.APIAbstractTest;
-import edu.csus.ecs.pc2.api.APIPrintReports;
 import edu.csus.ecs.pc2.api.IClarification;
 import edu.csus.ecs.pc2.api.IClarificationComparator;
 

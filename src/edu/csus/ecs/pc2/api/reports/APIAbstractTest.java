@@ -1,4 +1,8 @@
-package edu.csus.ecs.pc2.api;
+package edu.csus.ecs.pc2.api.reports;
+
+import edu.csus.ecs.pc2.api.IContest;
+import edu.csus.ecs.pc2.api.ServerConnection;
+import edu.csus.ecs.pc2.api.implementation.ScrollyFrame;
 
 /**
  * Class that supports test (print reports and other) classes.

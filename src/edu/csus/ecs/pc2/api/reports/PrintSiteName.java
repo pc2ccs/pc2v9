@@ -1,6 +1,5 @@
-package edu.csus.ecs.pc2.api.apireports;
+package edu.csus.ecs.pc2.api.reports;
 
-import edu.csus.ecs.pc2.api.APIAbstractTest;
 
 /**
  * Site Name.

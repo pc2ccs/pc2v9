@@ -1,6 +1,5 @@
-package edu.csus.ecs.pc2.api.apireports;
+package edu.csus.ecs.pc2.api.reports;
 
-import edu.csus.ecs.pc2.api.APIAbstractTest;
 import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IProblemDetails;
 import edu.csus.ecs.pc2.api.IStanding;

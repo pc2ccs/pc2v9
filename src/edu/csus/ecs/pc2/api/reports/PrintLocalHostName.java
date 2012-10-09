@@ -1,6 +1,5 @@
-package edu.csus.ecs.pc2.api.apireports;
+package edu.csus.ecs.pc2.api.reports;
 
-import edu.csus.ecs.pc2.api.APIAbstractTest;
 
 /**
  * Print Local Host name and port.
@@ -8,7 +7,7 @@ import edu.csus.ecs.pc2.api.APIAbstractTest;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
-public class PrintLocalPortNumber extends APIAbstractTest {
+public class PrintLocalHostName extends APIAbstractTest {
 
     @Override
     public void printTest() {
@@ -17,6 +16,6 @@ public class PrintLocalPortNumber extends APIAbstractTest {
 
     @Override
     public String getTitle() {
-        return "getLocalContactedPortNumber";
+        return "getLocalContactedHostName";
     }
 }

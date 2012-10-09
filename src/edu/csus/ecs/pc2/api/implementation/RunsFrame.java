@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.api;
+package edu.csus.ecs.pc2.api.implementation;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -12,6 +12,10 @@ import javax.swing.SwingUtilities;
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
+import edu.csus.ecs.pc2.api.IClient;
+import edu.csus.ecs.pc2.api.IContest;
+import edu.csus.ecs.pc2.api.IRun;
+import edu.csus.ecs.pc2.api.IRunJudgement;
 import edu.csus.ecs.pc2.api.listener.ContestEvent;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
