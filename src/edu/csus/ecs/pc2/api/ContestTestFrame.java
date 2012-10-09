@@ -40,6 +40,7 @@ import edu.csus.ecs.pc2.api.reports.PrintRun;
 import edu.csus.ecs.pc2.api.reports.PrintStandings;
 import edu.csus.ecs.pc2.api.reports.PrintTeams;
 import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
@@ -62,6 +63,8 @@ public class ContestTestFrame extends JFrame {
      */
     private static final long serialVersionUID = -3146831894495294017L;
 
+    private static final String DEFAULT_TITLE = "PC^2 API Test Frame [NOT LOGGED IN]";
+    
     private JPanel mainPain = null;
 
     private JPanel centerPane = null;
@@ -167,7 +170,7 @@ public class ContestTestFrame extends JFrame {
         this.setSize(new java.awt.Dimension(609, 552));
         this.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
         this.setContentPane(getMainPain());
-        this.setTitle("Contest Test Frame [NOT LOGGED IN]");
+        this.setTitle(DEFAULT_TITLE);
 
         FrameUtilities.setFramePosition(this, FrameUtilities.HorizontalPosition.LEFT, FrameUtilities.VerticalPosition.CENTER);
 
@@ -653,7 +656,7 @@ public class ContestTestFrame extends JFrame {
         serverConnection.logoff();
         contest = null;
         showMessage("No longer logged in");
-        this.setTitle("Contest Test Frame [NOT LOGGED IN]");
+        this.setTitle(DEFAULT_TITLE);
         getLoginButton().setEnabled(true);
     }
 
@@ -1377,10 +1380,41 @@ public class ContestTestFrame extends JFrame {
         }
         return runsFrame;
     }
+    
+    /**
+     * Prints usage to stdout.
+     */
+    public static void usage() {
+
+        String[] lines = { // 
+                "Usage: [--help] ", //
+                "", // 
+                "Purpose: a API test frame", // 
+                "", // 
+                "--help    this message", // 
+                "", // 
+        };
+
+        for (String s : lines) {
+            System.out.println(s);
+        }
+
+        VersionInfo info = new VersionInfo();
+        System.out.println(info.getSystemVersionInfo());
+
+    }
 
     public static void main(String[] args) {
         
-        // TODO 713 add usage and --help 
+        ParseArguments arguments = new ParseArguments(args);
+
+        if (arguments.isOptPresent("--help")) {
+            usage();
+            System.exit(0);
+        }
+        
+        VersionInfo info = new VersionInfo();
+        System.out.println(info.getSystemVersionInfo());
         
         new ContestTestFrame().setVisible(true);
     }
