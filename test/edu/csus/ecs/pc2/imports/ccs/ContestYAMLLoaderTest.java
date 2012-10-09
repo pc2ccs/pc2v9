@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
- * Test for ContestYAMLLoader.
+ * Unit tests.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id: ContestYAMLLoaderTest.java 225 2011-09-02 05:22:43Z laned $
@@ -661,7 +661,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         for (Problem problem : contest.getProblems()) {
             assertTrue(problem.isUsingExternalDataFiles());
-            assertNotNull(problem.getDataLoadYAMLPath());
+            assertNotNull(problem.getExternalDataFileLocation());
             ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
             assertEquals("Expecting loaded answer files ", 12, dataFiles.getJudgesAnswerFiles().length);
             assertEquals("Expecting loaded data files ", 12, dataFiles.getJudgesDataFiles().length);
@@ -672,7 +672,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         for (Problem problem : contest.getProblems()) {
             assertFalse("Expecting false using data files", problem.isUsingExternalDataFiles());
-            assertNotNull(problem.getDataLoadYAMLPath());
+            assertNotNull(problem.getExternalDataFileLocation());
             ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
             assertEquals("Expecting no loaded answer files ", 0, dataFiles.getJudgesAnswerFiles().length);
         }

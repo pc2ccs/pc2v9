@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -38,9 +39,13 @@ public class ExecutableTest extends AbstractTestCase {
 
     private IInternalController controller;
 
-    private String testDirectoryName = null;
+    public String testDirectoryName = null;
 
     private Problem sumitProblem = null;
+
+    // TODO add test for hello
+    @SuppressWarnings("unused")
+    private Problem helloWorldProblem = null;
 
     private Language javaLanguage = null;
 
@@ -55,7 +60,7 @@ public class ExecutableTest extends AbstractTestCase {
         deriveProjectDirectory();
 
         sumitProblem = createSumitProblem(contest);
-        // helloWorldProblem = createHelloProblem(contest);
+        helloWorldProblem = createHelloProblem(contest);
         javaLanguage = createJavaLanguage(contest);
 
     }
@@ -78,11 +83,14 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
 
+    public void testSetup() throws Exception {
+        deriveProjectDirectory();
+    }
+
     /**
      * Create a language using {@link LanguageAutoFill}.
      * 
-     * @param autoFillLanguageTitle
-     *            title for language from {@link LanguageAutoFill}.
+     * @param autoFillLanguageTitle title for language from {@link LanguageAutoFill}.
      * @return
      */
     private Language createLanguage(String autoFillLanguageTitle) {
@@ -126,7 +134,8 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setUsingPC2Validator(true);
         problem.setWhichPC2Validator(1);
         problem.setIgnoreSpacesOnValidation(true);
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
+        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
+                + problem.isIgnoreSpacesOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
     }
 
@@ -137,8 +146,6 @@ public class ExecutableTest extends AbstractTestCase {
      * @return
      * @throws FileNotFoundException
      */
-    // TODO test for hello Problem
-    @SuppressWarnings("unused")
     private Problem createHelloProblem(IInternalContest contest2) throws FileNotFoundException {
 
         Problem problem = new Problem("Hello world");
@@ -179,12 +186,12 @@ public class ExecutableTest extends AbstractTestCase {
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
         problem.setDataFileName("sumit.dat");
-        String judgesDataFile = createSampleDataFile(problem.getDataFileName());
+        String judgesDataFile = getSampsFilename(problem.getDataFileName());
         checkFileExistance(judgesDataFile);
         problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile));
 
         problem.setAnswerFileName("sumit.ans");
-        String answerFileName = createSampleAnswerFile(problem.getAnswerFileName());
+        String answerFileName = getSampsFilename(problem.getAnswerFileName());
         checkFileExistance(answerFileName);
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
 
@@ -197,29 +204,7 @@ public class ExecutableTest extends AbstractTestCase {
         return contest.getAccounts(type).lastElement();
     }
 
-    
-    public void testUsingGUI() throws Exception {
-        
-        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
-
-        Run run = new Run(submitter, javaLanguage, sumitProblem);
-        
-        String mainfileName = getSampsFilename("Sumit.java");
-        checkFileExistance(mainfileName);
-        RunFiles runFiles = new RunFiles(run, mainfileName);
-
-        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
-        
-        Executable executable = new Executable(contest, controller, run, runFiles);
-        executable.setUsingGUI(false);
-        
-        assertFalse(executable.isUsingGUI());
-    }
-    
-
-    // TODO CCS fix executable test, runExecutableTest was spinning under ant
-    
-    public void debugTTtestSumit() {
+    public void testSumit() {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
@@ -227,29 +212,23 @@ public class ExecutableTest extends AbstractTestCase {
         RunFiles runFiles = new RunFiles(run, getSampsFilename("Sumit.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
-        runExecutableTest(run, runFiles, true, yesJudgement, false);
+        runExecutableTest(run, runFiles, true, yesJudgement);
+
     }
 
     /**
-     * Runs test on
-     * 
+     * Invoke a executable test.
      * @param run
      * @param runFiles
      * @param solved
      * @param expectedJudgement
      */
-    protected void runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement, boolean usingGUI) {
+    protected void runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement) {
 
         Executable executable = new Executable(contest, controller, run, runFiles);
-        executable.setUsingGUI(usingGUI);
-        
-        try {
-            
-            executable.execute();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
+        executable.setUsingGUI(false);
+        executable.execute();
+
         ExecutionData executionData = executable.getExecutionData();
 
         // System.out.println("expectedJudgement  = " + expectedJudgement);
@@ -257,14 +236,13 @@ public class ExecutableTest extends AbstractTestCase {
 
         assertTrue("Souce file not compiled " + run.getProblemId(), executionData.isCompileSuccess());
         assertTrue("Run not executed " + run.getProblemId(), executionData.isExecuteSucess());
-
-        // If this test fails - there may not be a Validator in the path, check vstderr.pc2 for
+        
+        // If this test fails - there may not be a Validator in the path, check vstderr.pc2 for  
         // java.lang.NoClassDefFoundError: edu/csus/ecs/pc2/validator/Validator
         assertTrue("Run not validated " + run.getProblemId(), executionData.isValidationSuccess());
 
         assertTrue("Judgement should be solved ", solved);
         assertEquals(expectedJudgement, executionData.getValidationResults());
-        
     }
 
     protected void tearDown() throws Exception {
@@ -274,7 +252,8 @@ public class ExecutableTest extends AbstractTestCase {
     /**
      * Executable class with override for executable directory.
      * 
-     * Executable creates a directory based on execute site and client id, this class allows for an override of that execute directory, especially for testing purposes with multi-threaded tests.
+     * Executable creates a directory based on execute site and client id, this class allows for an override of that execute
+     * directory, especially for testing purposes with multi-threaded tests.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
@@ -283,9 +262,10 @@ public class ExecutableTest extends AbstractTestCase {
     // $HeadURL$
     class ExecutableOverride extends Executable {
 
-        private String executableDir = null;
+        String executableDir = null;
 
-        public ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, String executionDir) {
+        public ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles,
+                String executionDir) {
             super(inContest, inController, run, runFiles);
             setExecuteDirectoryName(executionDir);
         }
@@ -295,10 +275,62 @@ public class ExecutableTest extends AbstractTestCase {
             return executableDir;
         }
 
-        public void setExecuteDirectoryName(String dirname) {
-            this.executableDir = "execute" + dirname;
+        public void setExecuteDirectoryName(String executableDir) {
+            this.executableDir = "execute" + executableDir;
         }
 
+    }
+
+    public void testStripSpace() throws Exception {
+        String[] data = {
+                // input,expected
+//                "  cmd ,cmd", //
+                "cmd foo boo,cmd foo boo", //
+                "samps/src/sumit.dat    chew    ,execute;samps;src;sumit.dat    chew", //
+                
+        };
+
+        for (String line : data) {
+            String[] fields = line.split(",");
+            String string = stripSpace(fields[0]);
+            String expected = fields[0];
+            if (expected.indexOf(';') > -1){
+                expected = expected.replaceAll(";", File.separator);
+            }
+            
+//            System.out.println("testStripSpace: '" + expected + "," + string + "'");
+            
+            assertEquals("Expected matching strings", expected, string);
+        }
+        
+    }
+    
+     private String stripSpace(String cmdline) throws IOException {
+        /**
+         * Check for a space in the command line, if there is a space then
+         */
+
+        int i; // location of first space in command line.
+        String actFilename = new String(cmdline);
+
+        i = actFilename.trim().indexOf(" ");
+        if (i > -1) {
+            actFilename = prefixExecuteDirname(actFilename.trim().substring(0, i));
+        } else {
+            actFilename = prefixExecuteDirname(actFilename.trim());
+        }
+        
+        File f = new File(actFilename);
+        if (f.exists()) {
+            cmdline = f.getCanonicalPath();
+        }
+        
+        return cmdline;
+
+    }
+
+    private String prefixExecuteDirname(String string) {
+        return "execute/"+string;
     }
 
     protected String getTestDirectoryName() {

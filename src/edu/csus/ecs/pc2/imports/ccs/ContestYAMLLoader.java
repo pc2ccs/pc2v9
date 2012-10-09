@@ -489,7 +489,7 @@ public class ContestYAMLLoader {
 
         boolean ccsStandardProblem = getSequenceValue(sectionLines, "answerfile") == null;
         
-        problem.setDataLoadYAMLPath(problemDirectory);
+        problem.setExternalDataFileLocation(problemDirectory);
 
         String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
 

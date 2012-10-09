@@ -156,8 +156,8 @@ public class ProblemTest extends TestCase {
         checkString("setDisplayName", p1.getDisplayName(), p2.getDisplayName(), p1, p2);
 
         p2 = getProblemAnew();
-        p2.setDataLoadYAMLPath("/tmp");
-        checkString("setDataLoadYAMLPath", p1.getDataLoadYAMLPath(), p2.getDataLoadYAMLPath(), p1, p2);
+        p2.setExternalDataFileLocation("/tmp");
+        checkString("setDataLoadYAMLPath", p1.getExternalDataFileLocation(), p2.getExternalDataFileLocation(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setUsingExternalDataFiles(true);

@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
+
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -186,7 +188,7 @@ public class Problem implements IElementObject {
     /**
      * Base location where external data files are stored.
      */
-    private String dataLoadYAMLPath = null;
+    private String externalDataFileLocation = null;
     
     /**
      * Create a problem with the display name.
@@ -624,7 +626,7 @@ public class Problem implements IElementObject {
                 return false;
             }
             
-            if (! StringUtilities.stringSame(dataLoadYAMLPath, problem.getDataLoadYAMLPath())){
+            if (! StringUtilities.stringSame(externalDataFileLocation, problem.getExternalDataFileLocation())){
                 return false;
             }
             
@@ -723,18 +725,13 @@ public class Problem implements IElementObject {
      */
     public void addTestCaseFilenames (String datafile, String answerfile){
         
-        String[] newArray = new String[testCaseDataFilenames.length + 1];
-
-        System.arraycopy(testCaseDataFilenames, 0, newArray, 0, testCaseDataFilenames.length);
-        newArray[testCaseDataFilenames.length] = datafile;
+        String[] newArray = StringUtilities.appendString(testCaseDataFilenames, datafile);
         testCaseDataFilenames = newArray;
         
-        newArray = new String[testCaseAnswerFilenames.length + 1];
-
-        System.arraycopy(testCaseAnswerFilenames, 0, newArray, 0, testCaseAnswerFilenames.length);
-        newArray[testCaseAnswerFilenames.length] = answerfile;
+        newArray = StringUtilities.appendString(testCaseAnswerFilenames, answerfile);
         testCaseAnswerFilenames = newArray;
     }
+    
     
     /**
      * Remove all test case filenames.
@@ -804,20 +801,88 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @return location where problem.yaml was loaded from
-     */
-    public String getDataLoadYAMLPath() {
-        return dataLoadYAMLPath;
-    }
-
-    /**
      * @param usingExternalDataFiles
      */
     public void setUsingExternalDataFiles(boolean usingExternalDataFiles) {
         this.usingExternalDataFiles = usingExternalDataFiles;
     }
 
-    public void setDataLoadYAMLPath(String dataLoadYAMLPath) {
-        this.dataLoadYAMLPath = dataLoadYAMLPath;
+    /**
+     * Local file path for external data files.
+     * 
+     * @param dataLoadYAMLPath
+     */
+    public void setExternalDataFileLocation(String externalDataFileLocation) {
+        this.externalDataFileLocation = externalDataFileLocation;
+    }
+    
+    public String getExternalDataFileLocation() {
+        return externalDataFileLocation;
+    }
+    
+    /**
+     * Return external judges data file (location).
+     * 
+     * Searches both the dir found in {@link #getExternalDataFileLocation()} or
+     * in that location plus the CCS standard location for that file.
+     * 
+     * @param dataSetNumber 
+     * @return null if not found, else the path for the file.
+     */
+    public File locateJudgesDataFile (int dataSetNumber){
+        return locateDataFile(getDataFileName(dataSetNumber));
+    }
+
+    /**
+     * Return external judges answer file (location).
+     * 
+     * Searches both the dir found in {@link #getExternalDataFileLocation()} or
+     * in that location plus the CCS standard location for that file.
+     * 
+     * @param dataSetNumber
+     * @return
+     */
+    public File locateJudgesAnswerFile (int dataSetNumber){
+        return locateDataFile(getDataFileName(dataSetNumber));
+    }
+    
+    /**
+     * Get external CCS standard location for data files.
+     * 
+     * @return
+     */
+    public String getCCSfileDirectory() {
+        if (getExternalDataFileLocation() == null){
+            return null;
+        } else {
+            return getExternalDataFileLocation() + File.separator + "data" + File.separator + "secret";
+        }
+    }
+    
+    private File locateDataFile(String filename) {
+        String directoryName = getExternalDataFileLocation();
+        if (directoryName == null) {
+            return null;
+        }
+        File dir = new File(directoryName);
+        if (!dir.isDirectory()) {
+            return null;
+        }
+
+        String name = getCCSfileDirectory() + File.separator + filename;
+        File file = new File(name);
+
+        if (file.isFile()) {
+            return file;
+        }
+
+        name = directoryName + File.separator + filename;
+        file = new File(name);
+
+        if (file.isFile()) {
+            return file;
+        }
+
+        return null;
     }
 }

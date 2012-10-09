@@ -44,9 +44,9 @@ import edu.csus.ecs.pc2.ui.NullViewer;
  * @author pc2@ecs.csus.edu
  */
 
-// TODO this class contains a number of Utility methods like: baseName, replaceString... etc
+// SOMEDAY this class contains a number of Utility methods like: baseName, replaceString... etc
 // should these routines be placed in a static way in a static class ?
-// TODO design decision how to handle MultipleFileViewer, display here, on TeamClient??
+// SOMEDAY design decision how to handle MultipleFileViewer, display here, on TeamClient??
 
 // $HeadURL$
 public class Executable {
@@ -252,7 +252,7 @@ public class Executable {
 
                 boolean cleared = clearDirectory(executeDirectoryName);
                 if (!cleared) {
-                    // TODO LOG error Directory could not be cleared, other process running?
+                    // SOMEDAY LOG error Directory could not be cleared, other process running?
                     log.config("Directory could not be cleared, other process running? ");
 
                     showDialogToUser("Unable to remove all files from directory " + executeDirectoryName);
@@ -455,6 +455,39 @@ public class Executable {
 
         return fileViewer;
     }
+    
+    /**
+     * Extracts file setNumber from list of files (fileList).
+     * 
+     * @param fileList -
+     *            list of SerializedFile's
+     * @param setNumber -
+     *            index in list of file to write, zero based.
+     * @param outputFileName -
+     *            output file name.
+     * @return true if file written to disk.
+     * @throws IOException 
+     */
+    public boolean createFile(SerializedFile[] fileList, int setNumber, String outputFileName) throws IOException {
+
+        if (fileList != null) {
+            if (setNumber < fileList.length) {
+                return createFile(fileList[setNumber], outputFileName);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean createFile(SerializedFile file, String filename) {
+        try {
+            Utilities.createFile(file, filename);
+            return true;
+        } catch (IOException e) {
+            log.log(Log.INFO, "Could not create "+filename, e);
+            return false;
+        }
+    }
 
     /**
      * Show pop up mesage to user.
@@ -491,7 +524,7 @@ public class Executable {
 
     private boolean validateProgram(int dataSetNumber) {
 
-        // TODO Handle the error messages better, log and put them before the user to
+        // SOMEDAY Handle the error messages better, log and put them before the user to
         // help with debugging
 
         executionData.setValidationReturnCode(-1);
@@ -524,16 +557,22 @@ public class Executable {
 
         if (overwriteJudgesDataFiles) {
 
-            // Create the input data file
-            createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, prefixExecuteDirname(problem.getDataFileName()));
-
-            // Create the correct output file, aka answer file
-            createFile(problemDataFiles.getJudgesAnswerFiles(), dataSetNumber, prefixExecuteDirname(problem.getAnswerFileName()));
+            if (! problem.isUsingExternalDataFiles()){
+                /**
+                 * If not external files, must unpack files.
+                 */
+                // Create the input data file
+                createFile(problemDataFiles.getJudgesDataFiles()[dataSetNumber], prefixExecuteDirname(problem.getDataFileName()));
+                
+                // Create the correct output file, aka answer file
+                createFile(problemDataFiles.getJudgesAnswerFiles()[dataSetNumber], prefixExecuteDirname(problem.getAnswerFileName()));
+            } // else no need to create external data files.
 
         }
 
         // teams output file
         SerializedFile userOutputFile = executionData.getExecuteProgramOutput();
+        
         createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
 
         String secs = new Long((new Date().getTime()) % 100).toString();
@@ -651,7 +690,7 @@ public class Executable {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
             } else {
-                // TODO LOG - why are we logging this ?
+                // SOMEDAY LOG - why are we logging this ?
                 log.config("validatorCall() executionTimer == null");
             }
 
@@ -677,45 +716,11 @@ public class Executable {
 
         try {
             if (fileThere) {
-
-                IResultsParser parser = new XMLResultsParser();
-                parser.setLog(log);
-                boolean done = parser.parseValidatorResultsFile(prefixExecuteDirname(resultsFileName));
-                Hashtable<String, String> results = parser.getResults();
-
-                if (done && results != null && results.containsKey("outcome")) {
-                    // non-IJRM does not require security, but if it is IJRM it better have security.
-                    if (!problem.isInternationalJudgementReadMethod() || (results.containsKey("security") && resultsFileName.equals(results.get("security")))) {
-                        // Found the string
-                        executionData.setValidationResults(results.get("outcome"));
-                        executionData.setValidationSuccess(true);
-                    } else {
-                        // TODO LOG info
-                        setException (executionData, "validationCall - results file did not contain security");
-
-                        log.config("validationCall - results file did not contain security");
-                        log.config(resultsFileName + " != " + results.get("security"));
-                    }
-                } else {
-                    if (!done) {
-                        // TODO LOG
-                        // TODO show user message
-                        setException (executionData, "Error parsing/reading results file, check log");
-
-                        log.config("Error parsing/reading results file, check log");
-                    } else if (results != null && (!results.containsKey("outcome"))) {
-                        // TODO LOG
-                        // TODO show user message
-                        setException (executionData, "Error parsing/reading results file, check log");
-                        log.config("Error could not find 'outcome' in results file, check log");
-                    } else {
-                        // TODO LOG
-                        // TODO show user message
-                        log.config("Error parsing results file, check log");
-                    }
-                }
+                
+                storeValidatorResults(resultsFileName, log);
+                
             } else {
-                // TODO LOG
+                // SOMEDAY LOG
                 log.config("validationCall - Did not produce output results file " + resultsFileName);
 //                JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
             }
@@ -731,6 +736,53 @@ public class Executable {
         }
 
         return executionData.isValidationSuccess();
+    }
+
+    /**
+     * Set results of validation into executionData.
+     * 
+     * @param resultsFileName
+     * @param logger
+     */
+    private void storeValidatorResults(String resultsFileName, Log logger) {
+
+        IResultsParser parser = new XMLResultsParser();
+        parser.setLog(log);
+        boolean done = parser.parseValidatorResultsFile(prefixExecuteDirname(resultsFileName));
+        Hashtable<String, String> results = parser.getResults();
+
+        if (done && results != null && results.containsKey("outcome")) {
+            // non-IJRM does not require security, but if it is IJRM it better have security.
+            if (!problem.isInternationalJudgementReadMethod() || (results.containsKey("security") && resultsFileName.equals(results.get("security")))) {
+                // Found the string
+                executionData.setValidationResults(results.get("outcome"));
+                executionData.setValidationSuccess(true);
+            } else {
+                // SOMEDAY LOG info
+                setException(executionData, "validationCall - results file did not contain security");
+
+                logger.config("validationCall - results file did not contain security");
+                logger.config(resultsFileName + " != " + results.get("security"));
+            }
+        } else {
+            if (!done) {
+                // SOMEDAY LOG
+                // SOMEDAY show user message
+                setException(executionData, "Error parsing/reading results file, check log");
+
+                logger.config("Error parsing/reading results file, check log");
+            } else if (results != null && (!results.containsKey("outcome"))) {
+                // SOMEDAY LOG
+                // SOMEDAY show user message
+                setException(executionData, "Error parsing/reading results file, check log");
+                logger.config("Error could not find 'outcome' in results file, check log");
+            } else {
+                // SOMEDAY LOG
+                // SOMEDAY show user message
+                logger.config("Error parsing results file, check log");
+            }
+        }
+
     }
 
     /**
@@ -783,7 +835,7 @@ public class Executable {
                 outFileName = chooser.getSelectedFile().getCanonicalFile().toString();
             }
         } catch (Exception e) {
-            // TODO log this exception
+            // SOMEDAY log this exception
             log.log(Log.CONFIG, "Error getting selected file, try again.", e);
         }
         chooser = null;
@@ -820,17 +872,24 @@ public class Executable {
     /**
      * Execute the submission.
      * 
-     * @param dataSetNumber
+     * @param dataSetNumber a zero based data set number
      * @param writeJudgesDataFiles
      * @return true if execution worked.
      */
     private boolean executeProgram(int dataSetNumber) {
         boolean passed = false;
         String inputDataFileName = null;
+        
+        // a one-based test data set number
+        int testSetNumber = dataSetNumber + 1;
 
         try {
             if (isJudge()){
                 controller.sendExecutingMessage(run);
+            }
+            
+            if (!isTestRunOnly()) {
+                log.log(Log.INFO, "Executing run " + run.getNumber() + " from " + run.getSubmitter().getTripletKey() + " test set " + testSetNumber);
             }
             
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
@@ -875,19 +934,39 @@ public class Executable {
 
             } else {
                 // Extract the judge data file for this problem and dataSetNumber.
-                if (inputDataFileName != null && problemDataFiles.getJudgesDataFiles() != null) {
+                if ( ! problem.isUsingExternalDataFiles() ){
+                    /**
+                     * Only extract internal data files.
+                     */
+                    if (inputDataFileName != null && problemDataFiles.getJudgesDataFiles() != null) {
 
-                    if (overwriteJudgesDataFiles) {
-                        // create the judges data file on disk.
-                        if (!createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, inputDataFileName)) {
-                            throw new SecurityException("Unable to create data file " + inputDataFileName);
+                        if (overwriteJudgesDataFiles) {
+                            // create the judges data file on disk.
+
+                            if (!createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, inputDataFileName)) {
+                                throw new SecurityException("Unable to create data file " + inputDataFileName);
+                            }
                         }
+
                     }
                     // Else, leave whatever data file is present.
+                } else {
+                    
+                    /*
+                     * External data files (not inside of pc2).  On local disk.
+                     */
+                    
+                    File dataFile = problem.locateJudgesDataFile(testSetNumber);
+                    if (dataFile == null){
+                        String name = problem.getDataFileName(testSetNumber);
+                        log.log(Log.DEBUG,"For problem "+problem+" test number "+testSetNumber+" expecting file "+name+" in dir "+problem.getCCSfileDirectory());
+                        throw new SecurityException("Unable to find/extract data file "+name+" for data set "+dataSetNumber+" check log");
+                    }
+                    inputDataFileName = dataFile.getCanonicalPath();
                 }
             }
 
-            // TODO execute the language.getProgramExecuteCommandLine();
+            // SOMEDAY execute the language.getProgramExecuteCommandLine();
 
             PrintWriter stdoutlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME), false), true);
             PrintWriter stderrlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDERR_FILENAME), false), true);
@@ -898,8 +977,12 @@ public class Executable {
             cmdline = substituteAllStrings(run, cmdline);
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
-            // TODO comment why actfilename code is needed.
-
+            /**
+             * Insure that the first command in the command
+             * line can be executed by prepending the execute
+             * directory name. 
+             */
+            
             int i; // location of first space in command line.
             String actFilename = new String(cmdline);
 
@@ -912,6 +995,11 @@ public class Executable {
 
             File f = new File(actFilename);
             if (f.exists()) {
+                /**
+                 * If the first word is a existing file, use
+                 * the full path
+                 */
+                // TODO is this a bug in that the rest of the command line is thrown away?
                 cmdline = f.getCanonicalPath();
             }
             
@@ -1005,13 +1093,14 @@ public class Executable {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
             }
-            // TODO: handle exception
+            // SOMEDAY  handle exception
             log.log(Log.INFO, "executeProgram() Exception ", e);
             throw new SecurityException(e);
         }
 
         return passed;
     }
+
 
     private boolean isValidDataFile(Problem inProblem) {
         boolean result = false;
@@ -1046,7 +1135,7 @@ public class Executable {
             File program = new File(prefixExecuteDirname(programName));
             if (program.exists()) {
 
-                // TODO log Security Warning ?
+                // SOMEDAY log Security Warning ?
                 log.config("Team submitted an executable " + programName);
                 program.delete();
             }
@@ -1098,7 +1187,7 @@ public class Executable {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
             } else {
-                // TODO why do we care??
+                // SOMEDAY why do we care??
                 log.config("compileCall() executionTimer == null");
             }
 
@@ -1138,7 +1227,7 @@ public class Executable {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
             }
-            // TODO: handle exception
+            // SOMEDAY handle exception
             log.log(Log.INFO, "Exception ", e);
             throw new SecurityException(e);
         }
@@ -1264,7 +1353,7 @@ public class Executable {
                 newString = replaceString(newString, "{:validator}", validatorCommand);
             }
 
-            // TODO LanguageId and ProblemId are now a long string not an int,
+            // SOMEDAY LanguageId and ProblemId are now a long string not an int,
             // what should we do?
 
             if (inRun.getLanguageId() != null) {
@@ -1332,7 +1421,7 @@ public class Executable {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
         } catch (Exception e) {
-            // TODO LOG
+            // SOMEDAY LOG
             log.log(Log.CONFIG, "Exception ", e);
         }
 
@@ -1459,50 +1548,7 @@ public class Executable {
         }
     }
 
-    /**
-     * Extracts file setNumber from list of files (fileList).
-     * 
-     * @param fileList -
-     *            list of SerializedFile's
-     * @param setNumber -
-     *            index in list of file to write.
-     * @param outputFileName -
-     *            output file name.
-     * @return true if file written to disk.
-     */
-    boolean createFile(SerializedFile[] fileList, int setNumber, String outputFileName) {
 
-        if (fileList != null) {
-            if (setNumber < fileList.length) {
-                return createFile(fileList[setNumber], outputFileName);
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Create disk file for input SerializedFile.
-     * 
-     * Returns true if file is written to disk and is not null.
-     * 
-     * @param file
-     * @param outputFileName
-     * @return true if file written to disk.
-     * @throws IOException
-     */
-    boolean createFile(SerializedFile file, String outputFileName) {
-        try {
-            if (file != null && outputFileName != null) {
-                file.writeFile(outputFileName);
-                return new File(outputFileName).isFile();
-            }
-        } catch (Exception e) {
-            log.log(Log.INFO, "Exception creating file " + outputFileName, e);
-        }
-
-        return false;
-    }
 
     public String getValidationResults() {
         return executionData.getValidationResults();

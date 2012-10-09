@@ -65,4 +65,18 @@ public final class StringUtilities {
         return buffer.toString();
     }
 
+    /**
+     * Clone array and add string as last element.
+     * 
+     * @param originalArray
+     * @param string
+     * @return
+     */
+    public static String [] appendString (String [] originalArray, String string){
+        String[] newArray = new String[originalArray.length + 1];
+        System.arraycopy(originalArray, 0, newArray, 0, originalArray.length);
+        newArray[originalArray.length] = string;
+        return newArray;
+    }
+
 }

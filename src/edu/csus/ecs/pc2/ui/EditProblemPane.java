@@ -748,7 +748,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         checkProblem.setUsingExternalDataFiles(usingExternalDataFiles);
-        checkProblem.setDataLoadYAMLPath(loadPath);
+        checkProblem.setExternalDataFileLocation(loadPath);
 
         return checkProblem;
 
@@ -1154,7 +1154,7 @@ public class EditProblemPane extends JPanePlugin {
         populateJudging(inProblem);
         
         usingExternalDataFiles = problem.isUsingExternalDataFiles();
-        loadPath = problem.getDataLoadYAMLPath();
+        loadPath = problem.getExternalDataFileLocation();
     }
 
     /*

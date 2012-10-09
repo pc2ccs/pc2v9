@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
@@ -587,5 +588,26 @@ public final class Utilities {
      */
     public static void viewReport(IReport report, String title, IInternalContest contest, IInternalController controller) {
        viewReport(report, title, contest, controller, true);
+    }
+    
+
+
+    /**
+     * Create disk file for input SerializedFile.
+     * 
+     * Returns true if file is written to disk and is not null.
+     * 
+     * @param file
+     * @param outputFileName
+     * @return true if file written to disk.
+     * @throws IOException
+     */
+    public static boolean createFile(SerializedFile file, String outputFileName) throws IOException {
+        if (file != null && outputFileName != null) {
+            file.writeFile(outputFileName);
+            return new File(outputFileName).isFile();
+        }
+
+        return false;
     }
 }
