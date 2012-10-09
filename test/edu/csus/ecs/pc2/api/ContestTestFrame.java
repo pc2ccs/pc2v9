@@ -35,6 +35,8 @@ import edu.csus.ecs.pc2.api.listener.ContestEvent;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
+import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
 import java.awt.Rectangle;
@@ -499,6 +501,9 @@ public class ContestTestFrame extends JFrame {
         FrameUtilities.waitCursor(this);
 
         String login = getLoginTextField().getText();
+        
+        login = getShortCut(login);
+        
         String password = getPasswordTextField().getText();
         if (password == null || password.length() == 0) {
             password = login;
@@ -537,6 +542,15 @@ public class ContestTestFrame extends JFrame {
 
     }
 
+    private String getShortCut(String login) {
+        ClientId id = InternalController.loginShortcutExpansion(1, login);
+        if (id != null){
+            return id.getName();
+        } else {
+            return login;
+        }
+    }
+
     private void info(String string) {
         System.out.println(new Date() + " " + Thread.currentThread().getName() + " " + string);
         System.out.flush();
@@ -558,27 +572,10 @@ public class ContestTestFrame extends JFrame {
     private JTextField getLoginTextField() {
         if (loginTextField == null) {
             loginTextField = new JTextField();
-            loginTextField.setText("s1");
+            loginTextField.setText("b1");
             loginTextField.setBounds(new java.awt.Rectangle(153, 11, 127, 20));
-            loginTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyPressed(java.awt.event.KeyEvent e) {
-                    if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-                        updateLoginPasswordShortCut();
-                    }
-                }
-            });
-
         }
         return loginTextField;
-    }
-
-    protected void updateLoginPasswordShortCut() {
-        String name = loginShortcutName(loginTextField.getText());
-        if (! name.equals(loginTextField.getText())){
-            loginTextField.setText(name);
-            passwordTextField.setText(name);
-            passwordTextField.requestFocus();
-        }
     }
 
     /**
@@ -955,8 +952,6 @@ public class ContestTestFrame extends JFrame {
     }
 
     protected void clarListenerChanged(boolean listenerON) {
-        // TODO Auto-generated method stub
-
         if (contest == null) {
             showMessage("Not logged in");
             return;
@@ -1380,6 +1375,9 @@ public class ContestTestFrame extends JFrame {
     }
 
     public static void main(String[] args) {
+        
+        // TODO 713 add usage and --help 
+        
         new ContestTestFrame().setVisible(true);
     }
 
@@ -1433,34 +1431,5 @@ public class ContestTestFrame extends JFrame {
         });
     }
     
-    public String loginShortcutName(String loginName) {
-        if (loginName.equals("t")) {
-            loginName = "team1";
-        }
-
-        if (loginName.equals("r") || loginName.equals("root")) {
-            loginName = "administrator1";
-        } else if (loginName.startsWith("b") && loginName.length() > 1) {
-            int number = getIntegerValue(loginName.substring(1));
-            loginName = "scoreboard" + number;
-        } else if (loginName.startsWith("a") && loginName.length() > 1) {
-            int number = getIntegerValue(loginName.substring(1));
-            loginName = "administrator" + number;
-        } else if (loginName.startsWith("j") && loginName.length() > 1) {
-            int number = getIntegerValue(loginName.substring(1));
-            loginName = "judge" + number;
-        } else if (loginName.startsWith("s") && loginName.length() > 1) {
-            int number = getIntegerValue(loginName.substring(1));
-            loginName = "spectator" + number;            
-        } else if (loginName.startsWith("t") && loginName.length() > 1) {
-            int number = getIntegerValue(loginName.substring(1));
-            loginName = "team" + number;
-        } else if (Character.isDigit(loginName.charAt(0))) {
-            int number = getIntegerValue(loginName);
-            loginName = "team" + number;
-        }
-        
-        return loginName;
-    }
 
 } // @jve:decl-index=0:visual-constraint="21,23"
