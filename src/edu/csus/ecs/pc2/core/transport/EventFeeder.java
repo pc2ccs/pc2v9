@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.GroupEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
+import edu.csus.ecs.pc2.core.model.IEventFeedRunnable;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IJudgementListener;
@@ -36,7 +37,14 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
 
 /**
- * Sends Event Feed XML to socket.
+ * Send live event feed XML.
+ * 
+ * Create XML event feed elements and writes them to an outputstream
+ * or sends them to the class implementing {@link IEventFeedRunnable}.
+ * 
+ *  Each time an event feed XML element is triggered will send that
+ *  XML.
+ *  
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -52,6 +60,11 @@ import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
 class EventFeeder implements Runnable {
 
     private IInternalContest contest;
+    
+    /**
+     * Runnable used to send XML to socket or other output.
+     */
+    private IEventFeedRunnable eventFeedRunnable = null;
 
     private OutputStreamWriter out;
 
@@ -66,9 +79,43 @@ class EventFeeder implements Runnable {
     private JudgementListener        judgementListener = new JudgementListener();
     private ContestInformationListener   contestInformationListener = new ContestInformationListener();
 
+    /**
+     * Write Event Feed XML to output stream.
+     * 
+     * @param contest
+     * @param out
+     */
     public EventFeeder(IInternalContest contest, OutputStreamWriter out) {
         this.contest = contest;
         this.out = out;
+        this.eventFeedRunnable = new EventFeedRunner();
+    }
+    
+    /**
+     * Invoke send method with Event Feed XML.
+     * 
+     * @see IEventFeedRunnable#send(String).
+     * 
+     * @param contest
+     * @param runnable
+     */
+    public EventFeeder(IInternalContest contest, IEventFeedRunnable runnable) {
+        this.contest = contest;
+        this.eventFeedRunnable = runnable;
+    }
+    
+    /**
+     * Default event feed runner.
+     * 
+     * @author Doug
+     *
+     */
+    private class EventFeedRunner implements IEventFeedRunnable {
+
+        public void send(String xmlString) {
+            sendToSocket(xmlString);
+        }
+
     }
 
     public void run() {
@@ -77,7 +124,7 @@ class EventFeeder implements Runnable {
          * Write startup xml to socket
          */
         String xml = eventFeedXML.createStartupXML(contest);
-        sendToSocket(xml);
+        eventFeedRunnable.send(xml);
         
         /**
          * Register to listen to events.
@@ -162,8 +209,8 @@ class EventFeeder implements Runnable {
      * 
      * @param memento
      */
-    protected void sendToSocket(String xmlString) {
-
+    public void sendToSocket(String xmlString) {
+        
         try {
             out.write(xmlString);
             out.flush();
@@ -183,7 +230,7 @@ class EventFeeder implements Runnable {
      */
     private void sendXML(XMLMemento memento) {
         try {
-            sendToSocket(memento.saveToString(true));
+            eventFeedRunnable.send(memento.saveToString(true));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -459,12 +506,11 @@ class EventFeeder implements Runnable {
 
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
             // SOMEDAY refresh all
-
         }
 
         public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
             FinalizeData data = contestInformationEvent.getFinalizeData();
-            sendToSocket(eventFeedXML.createFinalizeXML(contest, data));
+            eventFeedRunnable.send(eventFeedXML.createFinalizeXML(contest, data));
         }
     }
 }

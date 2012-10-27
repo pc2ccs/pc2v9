@@ -17,10 +17,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.transport.EventFeedServer;
-import edu.csus.ecs.pc2.core.util.SocketUtilities;
+import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
 
 /**
  * Event Feed Server Pane.
@@ -274,23 +273,33 @@ public class EventFeedServerPane extends JPanePlugin {
         }
         return viewButton;
     }
+    
+    private void showSnapshotOfEventViewer (){
+        
+        EventFeedXML eventFeedXML = new EventFeedXML();
+        String [] lines = { eventFeedXML.toXML(getContest()) };
+        
+        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+        multipleFileViewer.addTextintoPane("Event Feed", lines);
+        multipleFileViewer.setTitle("PC^2 Event Feed at "+new Date());
+        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+        multipleFileViewer.setVisible(true);
+    }
+
+    // SOMEDAY a live updated event feed viewer.
+//    private void showLiveEventViewer (){
+//        int port = Integer.parseInt(getPortTextField().getText());
+//        String [] lines = SocketUtilities.readLinesFromPort(port);
+//        
+//        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+//        multipleFileViewer.addTextintoPane("Event Feed", lines);
+//        multipleFileViewer.setTitle("PC^2 Event Feed at "+new Date());
+//        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+//        multipleFileViewer.setVisible(true);
+//    }
 
     protected void showEventFeedInViewer() {
-        
-        int port = Integer.parseInt(getPortTextField().getText());
-        
-        final String [] lines = SocketUtilities.readLinesFromPort(port);
-        
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
-                multipleFileViewer.addTextintoPane("Event Feed", lines);
-                multipleFileViewer.setTitle("PC^2 Event Feed at "+new Date());
-                FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
-                multipleFileViewer.setVisible(true);
-            }
-        });
-        
+        showSnapshotOfEventViewer();
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
