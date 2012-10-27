@@ -145,7 +145,7 @@ public class JudgementsPane extends JPanePlugin {
             judgementListBox = new MCLB();
 
             judgementListBox.add(getStatusPanel(), java.awt.BorderLayout.NORTH);
-            Object[] cols = { "Judgement" };
+            Object[] cols = { "Judgement", "Acronym" };
             judgementListBox.addColumns(cols);
         }
         return judgementListBox;
@@ -230,7 +230,7 @@ public class JudgementsPane extends JPanePlugin {
 
     private Object[] buildJudgementRow(Judgement judgement) {
 
-        // Object[] cols = { "Judgement" };
+        // Object[] cols = { "Judgement", "Acronym"};
 
         try {
             int cols = judgementListBox.getColumnCount();
@@ -240,6 +240,9 @@ public class JudgementsPane extends JPanePlugin {
             if (!judgement.isActive()) {
                 s[0] = "[HIDDEN] " + judgement.toString();
             }
+            
+            s[1] = judgement.getAcronym();
+            
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildJudgementRow()", exception);

@@ -48,8 +48,6 @@ public class EditJudgementPane extends JPanePlugin {
 
     private JTextField displayNameTextField = null;
 
-    private JTextField jTextField3 = null;
-
     private Judgement savedJudgement = null;  //  @jve:decl-index=0:
 
     private boolean populatingGUI = true;
@@ -57,6 +55,7 @@ public class EditJudgementPane extends JPanePlugin {
     private JCheckBox deleteCheckBox = null;
 
     private JLabel judgementNameTitle = null;
+    private JTextField acronymNameTextField;
 
     /**
      * This method initializes
@@ -73,7 +72,7 @@ public class EditJudgementPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(422, 144));
+        this.setSize(new Dimension(422, 179));
 
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -167,9 +166,11 @@ public class EditJudgementPane extends JPanePlugin {
         Judgement judgement;
         if (savedJudgement == null){
             judgement = new Judgement(displayNameTextField.getText());
+            judgement.setAcronym(acronymNameTextField.getText());
         } else {
             judgement = savedJudgement;
             judgement.setDisplayName(displayNameTextField.getText());
+            judgement.setAcronym(acronymNameTextField.getText());
         }
         judgement.setActive(!getDeleteCheckBox().isSelected());
         return judgement;
@@ -286,9 +287,27 @@ public class EditJudgementPane extends JPanePlugin {
             centerPane.setName("advancedEdit");
             centerPane.add(jLabel2, jLabel2.getName());
             centerPane.add(getDisplayNameTextField(), getDisplayNameTextField().getName());
-            centerPane.add(getJTextField3(), getJTextField3().getName());
             centerPane.add(getDeleteCheckBox(), null);
             centerPane.add(judgementNameTitle, null);
+            
+            JLabel lblAcronym = new JLabel();
+            lblAcronym.setText("Acronym");
+            lblAcronym.setHorizontalAlignment(SwingConstants.RIGHT);
+            lblAcronym.setBounds(new Rectangle(14, 18, 99, 24));
+            lblAcronym.setBounds(24, 58, 99, 24);
+            centerPane.add(lblAcronym);
+            
+            acronymNameTextField = new JTextField();
+            acronymNameTextField.setToolTipText("Acronym for Judgement");
+            acronymNameTextField.setName("acronymNameTextField");
+            acronymNameTextField.setBounds(new Rectangle(126, 20, 263, 20));
+            acronymNameTextField.setBounds(136, 60, 263, 20);
+            acronymNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+            centerPane.add(acronymNameTextField);
         }
         return centerPane;
     }
@@ -301,7 +320,7 @@ public class EditJudgementPane extends JPanePlugin {
     private JTextField getDisplayNameTextField() {
         if (displayNameTextField == null) {
             displayNameTextField = new JTextField();
-            displayNameTextField.setBounds(new Rectangle(126, 20, 263, 20));
+            displayNameTextField.setBounds(new Rectangle(136, 20, 263, 20));
             displayNameTextField.setToolTipText("Name to display to users");
             displayNameTextField.setName("displayNameTextField");
             displayNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -311,22 +330,6 @@ public class EditJudgementPane extends JPanePlugin {
             });
         }
         return displayNameTextField;
-    }
-
-    /**
-     * This method initializes jTextField3
-     * 
-     * @return javax.swing.JTextField
-     */
-    private JTextField getJTextField3() {
-        if (jTextField3 == null) {
-            jTextField3 = new JTextField();
-            jTextField3.setBounds(new java.awt.Rectangle(0, 0, 0, 0));
-            jTextField3.setName("sourceExtTextField");
-            jTextField3.setToolTipText("Form: *.cpp;*.c");
-            jTextField3.setVisible(false);
-        }
-        return jTextField3;
     }
 
     /**
@@ -431,7 +434,7 @@ public class EditJudgementPane extends JPanePlugin {
     private JCheckBox getDeleteCheckBox() {
         if (deleteCheckBox == null) {
             deleteCheckBox = new JCheckBox();
-            deleteCheckBox.setBounds(new Rectangle(124, 61, 208, 21));
+            deleteCheckBox.setBounds(new Rectangle(136, 100, 208, 21));
             deleteCheckBox.setText("Hide Judgement");
             deleteCheckBox.setToolTipText("Hide this judgement from judges");
             deleteCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -442,5 +445,4 @@ public class EditJudgementPane extends JPanePlugin {
         }
         return deleteCheckBox;
     }
-
 } // @jve:decl-index=0:visual-constraint="10,10"

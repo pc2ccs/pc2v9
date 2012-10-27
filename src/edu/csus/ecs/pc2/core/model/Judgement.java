@@ -19,6 +19,24 @@ public class Judgement implements IElementObject, Serializable {
      */
     private static final long serialVersionUID = -8252588018410124478L;
 
+    public static final String ACRONYM_ACCEPTED = "AC";
+
+    public static final String ACRONYM_JUDGING_ERROR = "JE";
+
+    public static final String ACRONYM_COMPILATION_ERROR = "CE";
+
+    public static final String ACRONYM_RUN_TIME_ERROR = "RTE";
+
+    public static final String ACRONYM_TIME_LIMIT_EXCEEDED = "TLE";
+
+    public static final String ACRONYM_WRONG_ANSWER = "WA";
+
+    public static final String ACRONYM_EXCESSIVE_OUTPUT = "EO";
+
+    public static final String ACRONYM_OUTPUT_FORMAT_ERROR = "OFE";
+
+    public static final String ACRONYM_OTHER_CONTACT_STAFF = "OCS";
+
     private ElementId elementId = null;
 
     /**
@@ -31,7 +49,7 @@ public class Judgement implements IElementObject, Serializable {
     private String acronym;
 
     public Judgement(String displayName) {
-        this(displayName, null);
+        this(displayName, "NA");
     }
     
     public Judgement(String displayName, String acronym) {
@@ -115,7 +133,7 @@ public class Judgement implements IElementObject, Serializable {
             }
             return true;
         } catch (Exception e) {
-            // TODO log to static Exception log
+            // SOMEDAY log to static Exception log
             return false;
         }
     }
