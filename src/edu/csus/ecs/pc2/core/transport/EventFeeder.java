@@ -38,11 +38,6 @@ import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
 /**
  * Sends Event Feed XML to socket.
  * 
- * Sends startup Event Feed XML to socket.
- * <br><br>
- * Registers for contest listeners and upon event sends XML
- * to socket.
- * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -59,8 +54,6 @@ class EventFeeder implements Runnable {
     private IInternalContest contest;
 
     private OutputStreamWriter out;
-
-    private boolean running = true;
 
     private EventFeedXML eventFeedXML = new EventFeedXML();
     
@@ -80,21 +73,16 @@ class EventFeeder implements Runnable {
 
     public void run() {
         
+        /**
+         * Write startup xml to socket
+         */
         String xml = eventFeedXML.createStartupXML(contest);
         sendToSocket(xml);
+        
+        /**
+         * Register to listen to events.
+         */
         registerListeners(contest);
-
-        while (running) {
-
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                running = false;
-                dispose();
-            }
-        }
         
         System.out.println("EventFeeder done");
     }
@@ -159,13 +147,12 @@ class EventFeeder implements Runnable {
      * Halt this thread.
      */
     public void halt() {
-        running = false;
         dispose();
         
         try {
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();  // TODO CCS 
+            e.printStackTrace();  // TODO CCS log this excetion.
         }
         
     }
@@ -438,15 +425,13 @@ class EventFeeder implements Runnable {
         }
 
         public void judgementRemoved(JudgementEvent event) {
-            // TODO Auto-generated method stub
+            // ignored
 
         }
 
         public void judgementRefreshAll(JudgementEvent judgementEvent) {
-            // TODO Auto-generated method stub
-
+            // SOMEDAY refresh all judgements on event feed
         }
-
     }
     
     /**
@@ -469,11 +454,11 @@ class EventFeeder implements Runnable {
         }
 
         public void contestInformationRemoved(ContestInformationEvent event) {
-            //
+            // ignored
         }
 
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
-            // TODO Auto-generated method stub
+            // SOMEDAY refresh all
 
         }
 

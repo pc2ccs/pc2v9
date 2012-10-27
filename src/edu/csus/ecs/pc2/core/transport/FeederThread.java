@@ -8,11 +8,7 @@ import java.net.SocketException;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * A Feeder server that services new socket connections.
- * 
- * Listens for new Event Feed socket connections, starts feeder
- * thread for each socket.
- * 
+ * A service which will write events to the input socket.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
