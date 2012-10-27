@@ -20,10 +20,10 @@ import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
  * CCS Extractor.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: Extractor.java 270 2012-10-16 13:15:18Z laned $
+ * @version $Id$
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/core/Extractor.java $
+// $HeadURL$
 public class Extractor {
 
     // private static final String DEBUG_OPTION_STRING = "--debug";
@@ -135,10 +135,10 @@ public class Extractor {
      * results.tsv report.
      * 
      * @author pc2@ecs.csus.edu
-     * @version $Id: Extractor.java 270 2012-10-16 13:15:18Z laned $
+     * @version $Id$
      */
 
-    // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/core/Extractor.java $
+    // $HeadURL$
     class ResultsTSVReport extends EmptyReport {
         /**
          * 
@@ -172,10 +172,10 @@ public class Extractor {
      * scoreboard.tsv report.
      * 
      * @author pc2@ecs.csus.edu
-     * @version $Id: Extractor.java 270 2012-10-16 13:15:18Z laned $
+     * @version $Id$
      */
 
-    // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/core/Extractor.java $
+    // $HeadURL$
     class ScoreboardTSVReport extends EmptyReport {
         /**
          * 
@@ -209,10 +209,10 @@ public class Extractor {
      * empty report (stub).
      * 
      * @author pc2@ecs.csus.edu
-     * @version $Id: Extractor.java 270 2012-10-16 13:15:18Z laned $
+     * @version $Id$
      */
 
-    // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/core/Extractor.java $
+    // $HeadURL$
     class EmptyReport implements IReport {
 
         /**
