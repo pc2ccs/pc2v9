@@ -349,6 +349,7 @@ public class EditJudgementPane extends JPanePlugin {
             Judgement judgement = new Judgement(displayNameTextField.getText());
             judgement.setDisplayName(displayNameTextField.getText());
             judgement.setActive(!getDeleteCheckBox().isSelected());
+            judgement.setAcronym(acronymNameTextField.getText());
             enableButton = ! savedJudgement.isSameAs(judgement);
             
         } else {
@@ -400,9 +401,11 @@ public class EditJudgementPane extends JPanePlugin {
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
             getDeleteCheckBox().setSelected(! judgement2.isActive());
+            acronymNameTextField.setText(judgement2.getAcronym());
 
         } else {
             displayNameTextField.setText("");
+            acronymNameTextField.setText("");
 
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
