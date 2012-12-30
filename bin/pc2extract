@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Purpose: run pc2 extractor
+# Author : pc2@ecs.csus.edu
+# $HeadURL$
+#
+
+. `dirname $0`/pc2env
+
+# MacOS or not
+if [ -f /mach_kernel ]; then
+  # set our dock name (otherwise defaults to Starter)
+  PC2XOPS="-Xdock:name=`basename $0`"
+else
+  PC2XOPS=""
+fi
+
+java $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath edu.csus.ecs.pc2.Starter $*
+
+# eof pc2extract $Id$
