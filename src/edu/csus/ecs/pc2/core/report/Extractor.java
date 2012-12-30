@@ -15,9 +15,12 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * CCS Extractor.
+ * CCS Contest Data Extractor.
+ * 
+ * Extracts information from a contest, see usage.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -39,12 +42,12 @@ public class Extractor {
     public static final String RESULTS_TSV_FILENAME = "results";
 
     public static final String SUBMISSION_TSV_FILENAME = "submission";
-
-    public Extractor(String[] args) {
-        initialize(args);
-    }
-
-    private void initialize(String[] args) {
+    
+    /**
+     * Run extractor program.
+     * @param args
+     */
+    public void run(String[] args) {
 
         try {
 
@@ -103,7 +106,7 @@ public class Extractor {
 
             IReport report = getReportForFilename(cccFilename);
 
-            Plugin plugin = login(loginName, password);
+            Plugin plugin = logInToContest(loginName, password);
             report.setContestAndController(plugin.getContest(), plugin.getController());
             String[] lines = report.createReport(null);
 
@@ -128,7 +131,6 @@ public class Extractor {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -139,7 +141,7 @@ public class Extractor {
      */
 
     // $HeadURL$
-    class ResultsTSVReport extends EmptyReport {
+    protected class ResultsTSVReport extends EmptyReport {
         /**
          * 
          */
@@ -176,7 +178,7 @@ public class Extractor {
      */
 
     // $HeadURL$
-    class ScoreboardTSVReport extends EmptyReport {
+    protected class ScoreboardTSVReport extends EmptyReport {
         /**
          * 
          */
@@ -205,19 +207,21 @@ public class Extractor {
         }
     }
 
+    /*
+     * EmptyReport is a stub report  extended by all reports printed by this class.
+     * It is used to avoid having to implement all IReport methods in
+     * all child classes.   
+     */
     /**
      * empty report (stub).
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-
     // $HeadURL$
     class EmptyReport implements IReport {
 
-        /**
-         * 
-         */
+        
         private static final long serialVersionUID = -7612441954778315221L;
 
         private IInternalContest contest = null;
@@ -294,7 +298,20 @@ public class Extractor {
         }
     }
 
-    class Plugin {
+    /**
+     * A class that contains contest and controller instances. 
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class Plugin implements UIPlugin {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -6457070609026348869L;
+
         private IInternalController controller;
 
         private IInternalContest contest;
@@ -312,6 +329,10 @@ public class Extractor {
             return contest;
         }
 
+        public String getPluginTitle() {
+            return "Stub Plugin";
+        }
+
     }
 
     /**
@@ -319,10 +340,10 @@ public class Extractor {
      * 
      * @param login
      * @param password
-     * @return
+     * @return a class with contest and controller fields.
      * @throws LoginFailureException
      */
-    private Plugin login(String login, String password) throws LoginFailureException {
+    private Plugin logInToContest(String login, String password) throws LoginFailureException {
 
         IInternalContest internalContest = new InternalContest();
         InternalController controller = new InternalController(internalContest);
@@ -353,6 +374,9 @@ public class Extractor {
                 "", //
                 "CCS_reportname - one of the following submissions, scoreboard, results", //
                 "", //
+                "Example: Extractor " + LOGIN_OPTION_STRING + " scoreboard1 " + PASSWORD_OPTION_STRING + " scoreboard1 scoreboard", //
+                "", //
+                "", //
         };
 
         for (String s : lines) {
@@ -364,6 +388,6 @@ public class Extractor {
     }
 
     public static void main(String[] args) {
-        new Extractor(args);
+        new Extractor().run(args);
     }
 }
