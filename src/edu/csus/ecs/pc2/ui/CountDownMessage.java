@@ -11,26 +11,25 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import edu.csus.ecs.pc2.core.ICountDownMessage;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.RomanNumeral;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * Countdown and halt timer.
- *
+ * GUI Countdown timer with option to halt program.
+ * 
  * @version $Id$
  * @author pc2@ecs.csus.edu
- *
- *
  */
 
 // $HeadURL$
-public class CountDownMessage extends JDialog implements ActionListener {
+public class CountDownMessage extends JDialog implements ActionListener, ICountDownMessage {
 
     /**
      *
      */
     private static final long serialVersionUID = -1066929023214360936L;
-
-    public static final String SVN_ID = "$Id$";
 
     private JPanel contentsPanel = null;
 
@@ -55,35 +54,26 @@ public class CountDownMessage extends JDialog implements ActionListener {
     public CountDownMessage() {
         super();
         initialize();
-        startCountdown();
     }
 
-    /**
-     * Shows message and halts JVM (System.exit) after N seconds.
-     *
-     * @param secondsBeforeExit
-     * @param prefixToTime
-     */
-    public CountDownMessage(String prefixToTime, int secondsBeforeExit) {
-        super();
-        initialize();
-        setRemainingSeconds(secondsBeforeExit);
-        String remainSring = prefixToTime
-                + new RomanNumeral(secondsBeforeExit).toString() + " seconds";
-        countdownTimerLabel.setText(remainSring);
-        setEnabled(true);
-        setPrefixToTime(prefixToTime);
-        startCountdown();
-    }
+    public void start(String prefixForCount, int seconds) {
 
-    private void startCountdown() {
+        System.out.println("debug 22 START ");
+        setRemainingSeconds(seconds);
         endMilliSeconds = new Date().getTime() + inputRemainingSeconds * 1000;
+
+        setPrefixToTime(prefixForCount);
+        String remainSring = prefixToTime + new RomanNumeral(seconds).toString() + " seconds";
+        countdownTimerLabel.setText(remainSring);
+        setEnabled(true); // SOMEDAY remove this redundant method call and test.
+        setVisible(true);
+        System.out.println("debug 22 timer started ");
         timer.start();
     }
 
     /**
      * This method initializes this
-     *
+     * 
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(503, 135));
@@ -95,12 +85,12 @@ public class CountDownMessage extends JDialog implements ActionListener {
             }
         });
 
-        centerFrameTop();
+        FrameUtilities.centerFrameTop(this);
     }
 
     /**
      * This method initializes mainPane
-     *
+     * 
      * @return javax.swing.JPanel
      */
     private JPanel getContentsPanel() {
@@ -115,7 +105,7 @@ public class CountDownMessage extends JDialog implements ActionListener {
 
     /**
      * This method initializes southPane
-     *
+     * 
      * @return javax.swing.JPanel
      */
     private JPanel getSouthPane() {
@@ -128,17 +118,15 @@ public class CountDownMessage extends JDialog implements ActionListener {
 
     /**
      * This method initializes centerPane
-     *
+     * 
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
             countdownTimerLabel = new JLabel();
             countdownTimerLabel.setText("");
-            countdownTimerLabel.setFont(new java.awt.Font("Dialog",
-                    java.awt.Font.PLAIN, 18));
-            countdownTimerLabel
-                    .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            countdownTimerLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 18));
+            countdownTimerLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             centerPane = new JPanel();
             centerPane.setLayout(new BorderLayout());
             centerPane.add(countdownTimerLabel, java.awt.BorderLayout.CENTER);
@@ -148,7 +136,7 @@ public class CountDownMessage extends JDialog implements ActionListener {
 
     /**
      * This method initializes closeButton
-     *
+     * 
      * @return javax.swing.JButton
      */
     private JButton getCloseButton() {
@@ -166,32 +154,13 @@ public class CountDownMessage extends JDialog implements ActionListener {
     }
 
     public void actionOnClose() {
+        System.out.println("debug 22 actionOnClose");
         if (exitOnClose) {
             System.exit(4);
         } else {
             timer.stop();
             dispose();
         }
-    }
-
-    /**
-     * Center this frame on the screen.
-     */
-    protected void centerFrame() {
-        java.awt.Dimension screenDim = java.awt.Toolkit.getDefaultToolkit()
-                .getScreenSize();
-        setLocation(screenDim.width / 2 - getSize().width / 2, screenDim.height
-                / 2 - getSize().height / 2);
-    }
-
-    /**
-     * Center frame at top of screen.
-     *
-     */
-    protected void centerFrameTop() {
-        java.awt.Dimension screenDim = java.awt.Toolkit.getDefaultToolkit()
-                .getScreenSize();
-        setLocation(screenDim.width / 2 - getSize().width / 2, 20);
     }
 
     public boolean isExitOnClose() {
@@ -213,17 +182,16 @@ public class CountDownMessage extends JDialog implements ActionListener {
     public void actionPerformed(ActionEvent arg0) {
 
         long remainingSeconds = (endMilliSeconds - new Date().getTime()) / 1000;
-        String remainSring = new String();
+        String message = new String();
 
         if (remainingSeconds >= 1) {
-            remainSring = prefixToTime
-                    + new RomanNumeral(remainingSeconds).toString()
-                    + " seconds";
+            message = prefixToTime + new RomanNumeral(remainingSeconds).toString() + " seconds";
         } else {
-            remainSring = prefixToTime + "0 seconds";
+            message = prefixToTime + "0 seconds";
         }
 
-        countdownTimerLabel.setText(remainSring);
+        countdownTimerLabel.setText(message);
+        System.out.println("debug 22 remaining = "+message);
 
         if (remainingSeconds < 1) {
             actionOnClose();
@@ -238,6 +206,14 @@ public class CountDownMessage extends JDialog implements ActionListener {
         if (prefixToTime != null) {
             this.prefixToTime = prefixToTime;
         }
+    }
+
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        // unused
+    }
+
+    public String getPluginTitle() {
+        return "Countdown timer";
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

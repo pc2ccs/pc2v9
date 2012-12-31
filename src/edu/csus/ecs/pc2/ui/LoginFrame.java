@@ -25,6 +25,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
@@ -40,7 +41,7 @@ import edu.csus.ecs.pc2.core.model.LoginEvent;
  * @version $Id$
  */
 // $HeadURL$
-public class LoginFrame extends JFrame implements UIPlugin {
+public class LoginFrame extends JFrame implements ILoginUI {
 
     /**
      * 
@@ -689,6 +690,10 @@ public class LoginFrame extends JFrame implements UIPlugin {
         super.setVisible(b);
         getLoginTextField().setText("");
         getLoginTextField().requestFocus();
+    }
+
+    public void regularCursor() {
+        FrameUtilities.regularCursor(this);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

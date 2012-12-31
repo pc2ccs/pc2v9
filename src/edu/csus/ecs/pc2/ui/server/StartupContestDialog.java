@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui.server;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
@@ -17,13 +18,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.text.html.HTMLEditorKit;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
@@ -31,8 +35,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileLoadException;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
-import javax.swing.JScrollPane;
-import java.awt.Point;
+import edu.csus.ecs.pc2.ui.IStartupContestDialog;
 
 /**
  * Contest Password and Profile login screen.
@@ -44,7 +47,7 @@ import java.awt.Point;
  */
 
 // $HeadURL$
-public class StartupContestDialog extends JDialog {
+public class StartupContestDialog extends JDialog implements IStartupContestDialog {
 
     /**
      * 
@@ -623,6 +626,14 @@ public class StartupContestDialog extends JDialog {
             descriptionScrollpane.setViewportView(getTopTextPane());
         }
         return descriptionScrollpane;
+    }
+
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        // not used.
+    }
+
+    public String getPluginTitle() {
+        return "Startup contest password dialog";
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

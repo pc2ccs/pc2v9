@@ -438,9 +438,7 @@ public class ServerView extends JFrame implements UIPlugin {
         
         populateUI();
 
-
-        controller.startLogWindow(model);
-        
+        inController.startLogWindow(model);
         
         initializeSecurityAlertWindow(inContest);
 

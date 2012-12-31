@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
-import edu.csus.ecs.pc2.ui.LogWindow;
+import edu.csus.ecs.pc2.ui.ILogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -198,7 +198,7 @@ public class NullController implements IInternalController{
 
     }
 
-    public LogWindow startLogWindow(IInternalContest contest) {
+    public ILogWindow startLogWindow(IInternalContest contest) {
         getLog().log(Level.WARNING, "Attempted to use startLogWindow ", new Exception("Attempted to use startLogWindow"));
         return null;
     }

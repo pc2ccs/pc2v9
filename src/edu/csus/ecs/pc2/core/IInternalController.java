@@ -33,7 +33,7 @@ import edu.csus.ecs.pc2.core.packet.PacketType;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
-import edu.csus.ecs.pc2.ui.LogWindow;
+import edu.csus.ecs.pc2.ui.ILogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -548,7 +548,7 @@ public interface IInternalController {
      * 
      * @param contest
      */
-    LogWindow startLogWindow(IInternalContest contest);
+    ILogWindow startLogWindow(IInternalContest contest);
 
     /**
      * Show log Window.

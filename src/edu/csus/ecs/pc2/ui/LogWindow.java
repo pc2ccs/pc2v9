@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 //$HeadURL$$
 
-public class LogWindow extends JFrame implements UIPlugin {
+public class LogWindow extends JFrame implements ILogWindow {
 
     /**
      * 
@@ -221,5 +221,4 @@ public class LogWindow extends JFrame implements UIPlugin {
             streamListener = null;
         }
     }
-
 }
