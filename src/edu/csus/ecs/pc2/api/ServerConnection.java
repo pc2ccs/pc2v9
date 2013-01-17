@@ -124,6 +124,53 @@ public class ServerConnection {
          */
         throw new Exception("Internal Error (SC.getAccount) No account found for " + clientId);
     }
+    
+    /**
+     * Submit a clarification.
+     * 
+     * @param problem 
+     * @param question text of question
+     * @throws Exception
+     */
+    public void submitClarification(IProblem problem, String question) throws Exception {
+
+        checkWhetherLoggedIn();
+        
+        Account account = getAccount(internalContest, internalContest.getClientId());
+
+        if (!account.isAllowed(Permission.Type.SUBMIT_RUN)) {
+            throw new Exception("User not allowed to submit run");
+        }
+
+        Problem submittedProblem = null;
+
+        Problem[] problems = internalContest.getProblems();
+        for (Problem problem2 : problems) {
+            if (problem2.getDisplayName().equals(problem.getName())) {
+                submittedProblem = problem2;
+            }
+        }
+
+        if (submittedProblem == null) {
+            throw new Exception("Could not find any problem matching: '" + problem.getName());
+        }
+        
+        if (!contest.isContestClockRunning()) {
+            throw new Exception("Contest is STOPPED - no clarifications accepted.");
+        }
+
+        try {
+            controller.submitClarification(submittedProblem, question);
+        } catch (Exception e) {
+            throw new Exception("Unable to submit clarifications " + e.getLocalizedMessage());
+        }
+    }
+
+    private void checkWhetherLoggedIn() throws NotLoggedInException {
+        if (contest == null || internalContest == null){
+            throw new NotLoggedInException ("Not logged in");
+        }
+    }
 
     /**
      * Submit a run.
@@ -137,6 +184,8 @@ public class ServerConnection {
      */
     public void submitRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
 
+        checkWhetherLoggedIn();
+        
         Account account = getAccount(internalContest, internalContest.getClientId());
 
         if (!account.isAllowed(Permission.Type.SUBMIT_RUN)) {
