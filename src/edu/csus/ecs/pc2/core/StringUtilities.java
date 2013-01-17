@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+
 /**
  * String utilities.
  *
@@ -10,6 +11,11 @@ package edu.csus.ecs.pc2.core;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/core/Utilities.java $
 public final class StringUtilities {
     
+    /**
+     * A constant containing three dots.
+     */
+    private static final String ELLIPSIS = "...";
+
     private StringUtilities() {
         super();
     }
@@ -77,6 +83,15 @@ public final class StringUtilities {
         System.arraycopy(originalArray, 0, newArray, 0, originalArray.length);
         newArray[originalArray.length] = string;
         return newArray;
+    }
+
+    public static String trunc(String string, int maxlen) {
+
+        if (string.length() <= maxlen ){
+            return string;
+        } else {
+            return string.substring(0,maxlen-ELLIPSIS.length())+ELLIPSIS;
+        }
     }
 
 }

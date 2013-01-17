@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui.team;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -16,6 +17,7 @@ import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.ParseArguments;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.CommandLineErrorException;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -64,6 +66,8 @@ public class Submitter {
      */
     private static final int SUCCESS_EXIT_CODE = 5;
 
+    private static final String NL = System.getProperty("line.separator");
+
     private String[] allCCSOptions = new String[0];
     
     /**
@@ -90,6 +94,13 @@ public class Submitter {
     private long timeStamp;
 
     private long overrideRunId;
+
+    /**
+     * Submit a clarification flag.
+     */
+    private boolean submittingClarification = false;
+
+    private String questionText;
 
     protected Submitter() {
 
@@ -307,6 +318,8 @@ public class Submitter {
 
         checkArg = arguments.isOptPresent("--check");
         
+        submittingClarification = arguments.isOptPresent("--clar");
+        
         String cmdLineLogin = null;
         
         String cmdLinePassword = null;
@@ -320,8 +333,24 @@ public class Submitter {
         }
 
         setLoginPassword(cmdLineLogin, cmdLinePassword);
-
-        if (arguments.isOptPresent("--list")) {
+        
+        if (submittingClarification) {
+            problemTitle =  arguments.getArg(0);
+            if (arguments.getArgCount() > 1) {
+                questionText = arguments.getArg(1);
+                if (questionText.startsWith("@")){
+                    questionText = loadQuestionFile (questionText.substring(1));
+                    if (questionText == null){
+                        System.err.println("Error - could not read question from file '"+questionText.substring(1));
+                        System.exit(4);
+                    }
+                }
+            } else {
+                System.err.println("Error - missing question");
+                System.exit(4);
+            }
+        }
+        else if (arguments.isOptPresent("--list")) {
             listInfo();
             System.exit(SUCCESS_EXIT_CODE);
         } else if (arguments.isOptPresent("--listruns")) {
@@ -344,6 +373,25 @@ public class Submitter {
             }
         }
 
+    }
+
+    /**
+     * Load a file into a string, add line.separator between lines.
+     * 
+     * @param filename
+     * @return null if cannot load file, else a single string with line.separator between lines.
+     */
+    private String loadQuestionFile(String filename) {
+        
+        try {
+            String [] lines = Utilities.loadFile(filename);
+            if (lines.length == 0){
+                return null;
+            }
+            return StringUtilities.join(NL, lines);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     protected boolean hasAnyCCSArguments(String[] args, String[] requiredOpts) {
@@ -487,6 +535,7 @@ public class Submitter {
         String[] usage = { //
         "Usage Submitter [--help|--list|--listruns|--check] --login loginname [--password password] filename [problem [language]]", //
                 "Usage Submitter [-F propfile] [--help|--list|--listruns|--check] filename [problem [language]]", //
+                "Usage Submitter [-F propfile] [--clar] problem question", //
                 "Usage Submitter [options] filename1[,filename2[,filename3[,...]]] [problem [language]]", //
                   "", //
                 "Submit filename for problem and language.  If problem or language", //
@@ -496,6 +545,8 @@ public class Submitter {
                 "--help   this listing", //
                 "", //      
                 "--helpCCS  CCS testing usage info", //
+                "", //
+                "--clar   submit a clarification (by default submits a run)", //
                 "", //
                 "--check  login and check parameters: list problem, language and files that would be submitted.", //
                 "", //
@@ -969,7 +1020,11 @@ public class Submitter {
         
         try {
             Submitter submitter = new Submitter(args);
-            submitter.submitRun();
+            if (submitter.isSubmittingClarification()){
+                submitter.submitClarification();
+            } else {
+                submitter.submitRun();
+            }
         } catch (CommandLineErrorException e) {
             System.err.println("Error on command line: "+e.getMessage());
         } catch (Exception e){
@@ -979,6 +1034,106 @@ public class Submitter {
         
     }
     
+    private boolean isSubmittingClarification() {
+        return submittingClarification;
+    }
+    
+    private void submitClarification() {
+
+        boolean success = false;
+
+        try {
+
+            checkRequiredParams();
+
+            serverConnection = new ServerConnection();
+
+            contest = serverConnection.login(login, password);
+            
+            System.out.println("For: " + contest.getMyClient().getDisplayName() + " (" + contest.getMyClient().getLoginName() + ")");
+            System.out.println();
+
+            try {
+
+                submitTheClarification (problemTitle, questionText);
+                
+                success = true;
+                
+                serverConnection.logoff();
+
+            } catch (Exception e) {
+                System.err.println("Unable to submit clarification: " + e.getMessage());
+                if (debugMode){
+                    e.printStackTrace();
+                }
+            }
+  
+        } catch (LoginFailureException e) {
+            System.out.println("Unable to login: " + e.getMessage());
+            if (debugMode){
+                e.printStackTrace();
+            }
+        }
+
+        if (success) {
+            System.exit(SUCCESS_EXIT_CODE);
+        } else {
+            System.exit(4);
+        }
+    }
+
+    private void submitTheClarification(String problemTitle2, String question) throws Exception {
+
+        submittedProblem = null;
+
+        if (problemTitle2 != null && problemTitle2.length() == 1) {
+            problemTitle2 = getProblemNameFromLetter(problemTitle2.charAt(0));
+        }
+
+        IProblem problem = matchProblem(problemTitle2);
+
+        if (problem == null) {
+            throw new Exception("Could not match problem '" + problemTitle2 + "'");
+        }
+
+        if (checkArg) {
+
+            System.out.println("For   : " + contest.getMyClient().getLoginName() + " - " + contest.getMyClient().getDisplayName());
+            System.out.println("Prob  : " + problem.getName());
+            System.out.println();
+            
+            boolean success = true;
+            
+            if (question == null){
+                System.err.println("Error - no question specified ");
+                success = false;
+            } else {
+                System.out.println("Question : "+question);
+                System.out.println();
+            }
+            
+            if (success){
+                System.out.println("Clarification submitted");
+                System.exit(SUCCESS_EXIT_CODE);
+            } else {
+                System.exit(3);
+            }
+
+        } else {
+            System.out.println("Prob  : " + problem.getName());
+            System.out.println();
+            System.out.println("Question : "+StringUtilities.trunc(question, 55));
+            System.out.println();
+            
+            if (question == null){
+                System.err.println("Error - no question specified ");
+            } else {
+                serverConnection.submitClarification(problem, question);
+            }
+
+        }
+    }
+
     public String[] getAllCCSOptions() {
         ArrayList<String> list = new ArrayList<String>(Arrays.asList(CCS_REQUIRED_OPTIONS_LIST));
         list.add("-t");
