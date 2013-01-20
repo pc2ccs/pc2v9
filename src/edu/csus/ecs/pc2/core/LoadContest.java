@@ -342,7 +342,7 @@ public class LoadContest {
     public Judgement createJudgement(IInternalContest contest, String judgementName) {
 
         if (contest.getJudgements().length == 0) {
-            contest.addJudgement(new Judgement("Yes"));
+            contest.addJudgement(new Judgement("Yes", Judgement.ACRONYM_ACCEPTED));
         }
 
         for (Judgement judgement : contest.getJudgements()) {

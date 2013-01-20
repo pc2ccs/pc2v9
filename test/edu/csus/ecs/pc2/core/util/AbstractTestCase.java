@@ -383,5 +383,53 @@ public class AbstractTestCase extends TestCase {
     public void setCreateMissingDirectories(boolean createMissingDirectories) {
         this.createMissingDirectories = createMissingDirectories;
     }
-    
+
+    /**
+     * Recursively remove directory and all sub directories/files.
+     * 
+     * @param dirName
+     * @return true if all directories removed.
+     */
+    public boolean removeDirectory(String dirName) {
+        boolean result = true;
+        File dir = new File(dirName);
+        
+        if (! dir.exists()){
+            // If not there then it is removed !! :)
+            return true;
+        }
+        
+        String[] filesToRemove = dir.list();
+        for (int i = 0; i < filesToRemove.length; i++) {
+            File fn1 = new File(dirName + File.separator + filesToRemove[i]);
+            if (fn1.isDirectory()) {
+                // recurse through any directories
+                result &= removeDirectory(dirName + File.separator + filesToRemove[i]);
+            }
+            result &= fn1.delete();
+        }
+        return (result);
+    }
+
+    /**
+     * remove a file.
+     * @param filename
+     * @throws RuntimeException if cannot remove the directory entry/file
+     */
+    public void removeFile(String filename) {
+
+        File file = new File(filename);
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                throw new RuntimeException("Unable to remove directory " + filename);
+            } else {
+                file.delete();
+            }
+        } // no else if it does not iexst, then it iss delete
+
+        file = new File(filename);
+        if (file.exists()) {
+            throw new RuntimeException("Unable to remove file " + filename);
+        }
+    }
 }

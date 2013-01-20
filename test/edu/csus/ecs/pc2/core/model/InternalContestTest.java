@@ -4,15 +4,18 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Vector;
 
-import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.FileStorage;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
@@ -23,7 +26,7 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
  */
 
 // $HeadURL$
-public class InternalContestTest extends TestCase {
+public class InternalContestTest extends AbstractTestCase {
     
     private boolean debugMode = false;
 
@@ -71,6 +74,10 @@ public class InternalContestTest extends TestCase {
     
     private SampleContest sampleContest = new SampleContest();
     
+    public InternalContestTest(String name) {
+        super(name);
+    }
+
     protected String getTestDirectoryName(){
         String testDir = "testing";
         
@@ -478,6 +485,45 @@ public class InternalContestTest extends TestCase {
             vector.add(contestConfigArea + ": " + comment + " (" + string1 + " vs " + string2 + ")");
         }
     }
+
+    /**
+     * Ensure judgement acronyms are automatically created.
+     * 
+     * @throws Exception
+     */
+    public void testJudgementAcronymsPopulated() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        removeDirectory(testDirectory);
+        
+        Log log = new Log(getName()+"static.log");
+        
+        StaticLog.setLog(log);
+        
+        InternalContest contest = new InternalContest();
+        contest.setContestPassword(getName());
+        
+        Profile profile = new Profile (getName());
+        profile.setProfilePath(testDirectory);
+        
+        InternalController internalController = new InternalController(contest);
+        internalController.setContactingRemoteServer(false);
+        internalController.setLog(log);
+        internalController.setTheProfile(profile);
+//        internalController.addConsoleLogging();
+        internalController.setUsingGUI(false);
+        internalController.initializeServer(contest);
+        
+        Judgement[] judgements = contest.getJudgements();
+        
+        assertEquals("Expecting judgement count ", 8, judgements.length);
+        
+        for (Judgement judgement : judgements) {
+//            System.out.println(" judgements "+judgement+" "+judgement.getAcronym());
+            assertNotNull("Expected acronym "+judgement.getAcronym());
+        }
+        
+    }
     
     /**
      * Compare InternContests.
@@ -538,4 +584,38 @@ public class InternalContestTest extends TestCase {
         return (buffer.toString());
     }
 
+    /**
+     * Test Suite.
+     * 
+     * This only works under JUnit 3.
+     * 
+     * @return suite of tests.
+     */
+    public static TestSuite suite() {
+
+        // HOWTO Create a test suite
+
+        TestSuite suite = new TestSuite("InternalContestTest");
+
+        String singletonTestName = "";
+//        singletonTestName = "testJudgementAcronymsPopulated";
+
+        if (!"".equals(singletonTestName)) {
+            suite.addTest(new InternalContestTest("testJudgementAcronymsPopulated"));
+
+        } else {
+            suite.addTest(new InternalContestTest("testGeneralCategoryCreation"));
+            suite.addTest(new InternalContestTest("testClone"));
+            suite.addTest(new InternalContestTest("testCloneComplex"));
+            suite.addTest(new InternalContestTest("testDoubleClone"));
+            suite.addTest(new InternalContestTest("testRunsClone"));
+            suite.addTest(new InternalContestTest("testGeneralCategoryCreation"));
+            suite.addTest(new InternalContestTest("testClone"));
+            suite.addTest(new InternalContestTest("testCloneComplex"));
+            suite.addTest(new InternalContestTest("testDoubleClone"));
+            suite.addTest(new InternalContestTest("testRunsClone"));
+            suite.addTest(new InternalContestTest("testJudgementAcronymsPopulated"));
+        }
+        return suite;
+    }
 }

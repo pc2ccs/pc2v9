@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -304,6 +305,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private UIPluginList pluginList = new UIPluginList();
 
+    // SOMEDAY fix so theProfile is only populated from the ProfileManager
     private Profile theProfile = null;
 
     private ILogWindow logWindow = null;
@@ -985,11 +987,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 return false;
             }
 
-            Judgement judgement = new Judgement("Yes");
+            Judgement judgement = new Judgement("Yes", Judgement.ACRONYM_ACCEPTED);
             contest.addJudgement(judgement);
 
             for (String judgementName : lines) {
-                judgement = new Judgement("No - " + judgementName);
+                judgement = new Judgement("No - " + judgementName, "JE");
                 contest.addJudgement(judgement);
             }
 
@@ -998,13 +1000,34 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return false;
     }
 
-    private void loadDefaultJudgements() {
-        String[] judgementNames = { "Yes", "No - Compilation Error", "No - Run-time Error", "No - Time-limit Exceeded", "No - Wrong Answer", "No - Excessive Output", "No - Output Format Error",
-                "No - Other - Contact Staff" };
+    protected void loadDefaultJudgements() {
 
+        String[] judgementNames = { //
+                "Yes", // 
+                "No - Compilation Error", // 
+                "No - Run-time Error", // 
+                "No - Time-limit Exceeded", // 
+                "No - Wrong Answer", // 
+                "No - Excessive Output", // 
+                "No - Output Format Error", // 
+                "No - Other - Contact Staff" //
+        };
+        String [] judgementAcronyms = {
+                Judgement.ACRONYM_ACCEPTED, // 
+                Judgement.ACRONYM_COMPILATION_ERROR, //
+                Judgement.ACRONYM_RUN_TIME_ERROR, //
+                Judgement.ACRONYM_TIME_LIMIT_EXCEEDED, //
+                Judgement.ACRONYM_WRONG_ANSWER, //
+                Judgement.ACRONYM_EXCESSIVE_OUTPUT, //
+                Judgement.ACRONYM_OUTPUT_FORMAT_ERROR, //
+                Judgement.ACRONYM_OTHER_CONTACT_STAFF, //
+        };
+        
+        int i = 0;
         for (String judgementName : judgementNames) {
-            Judgement judgement = new Judgement(judgementName);
+            Judgement judgement = new Judgement(judgementName, judgementAcronyms[i]);
             contest.addJudgement(judgement);
+            i++;
         }
     }
 
@@ -1564,6 +1587,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         info("Login Failed: " + message);
         info("Login Failure");
         PacketFactory.dumpPacket(System.err, packet, "Login Failed");
+        // SOMEDAY output dumppacket to a log
 
         if (loginUI != null) {
             loginUI.regularCursor();
@@ -1793,7 +1817,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendToServers(violationPacket);
 
         } catch (Exception e) {
-            e.printStackTrace(System.err);
             info("Exception in processPacket, check logs ", e);
             info("Exception in processPacket for " + packet);
         }
@@ -2074,14 +2097,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void info(String s) {
-        // log.warning(s);
-        // System.err.println(Thread.currentThread().getName() + " " + s);
-        // System.err.flush();
         log.log(Log.INFO, s);
     }
 
     public void info(String s, Exception exception) {
-        // log.log(Log.WARNING, s, exception);
+        // HOWTO print thread name to output println
         // System.err.println(Thread.currentThread().getName() + " " + s);
         // System.err.flush();
         // exception.printStackTrace(System.err);
@@ -2205,40 +2225,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         throw new SecurityException("Could not find site " + inSiteNumber + " in site list, there are " + contest.getSites().length + " sites.");
     }
-
-    // private void checkProfile(String s) {
-    //
-    // Profile aProfile = contest.getProfile();
-    // Profile check = null;
-    // if (aProfile == null) {
-    // System.err.println("checkProfile: did NOT match " + s + " " + aProfile + " " + check);
-    // return;
-    // }
-    //
-    // ProfileManager manager = new ProfileManager();
-    //
-    // if (manager.hasDefaultProfile()) {
-    // try {
-    // check = manager.getDefaultProfile();
-    // } catch (Exception e) {
-    // e.printStackTrace(System.err);
-    // }
-    // }
-    //
-    // if (check == null) {
-    // System.err.println("checkProfile: did NOT match " + s + " " + aProfile + " " + check);
-    // return;
-    // }
-    //
-    // if (!aProfile.getProfilePath().equals(check.getProfilePath())) {
-    // System.err.println("checkProfile: did NOT match " + s + " " + aProfile + " " + check);
-    // System.err.println("checkProfile: paths         " + s + " " + aProfile.getProfilePath() + " " + check.getProfilePath());
-    // } else {
-    // System.err.println("checkProfile: DOES match " + s + " " + aProfile + " " + check);
-    // }
-    // System.err.println();
-    // System.err.flush();
-    // }
 
     /**
      * Client has successfully logged in, show them UI.
@@ -2541,6 +2527,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private Profile getCurrentProfile() {
 
         // SOMEDAY handle startup for when not starting with site 1 profile.setSiteNumber
+        // SOMEDAY handle this exclusively in ProfileManager
 
         try {
             ProfileManager manager = new ProfileManager();
@@ -2628,14 +2615,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             Utilities.setDebugMode(true);
 
             log.info("Debug mode ON");
-            System.out.println("Debug mode ON");
+            printDebug("Debug mode ON");
 
-            System.out.println("debug: " + new VersionInfo().getSystemName() + " Build " + new VersionInfo().getBuildNumber());
+            printDebug(new VersionInfo().getSystemName() + " Build " + new VersionInfo().getBuildNumber());
 
             try {
-                System.out.println("debug: Working directory is " + new File(".").getCanonicalPath());
+                printDebug("Working directory is " + new File(".").getCanonicalPath());
             } catch (IOException e1) {
-                System.out.println("debug: Could not determine working directory " + e1.getMessage());
+                System.err.println("debug: Could not determine working directory " + e1.getMessage());
                 e1.printStackTrace(System.err);
             }
         }
@@ -2657,6 +2644,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             overRideUIName = overrideClassName;
         }
 
+    }
+
+    /**
+     * Print debug message to stdout.
+     * 
+     * @param string
+     */
+    protected void printDebug(String message) {
+        System.out.println("debug: "+message);
+        
     }
 
     private boolean isJudge(ClientId clientId) {
@@ -3663,6 +3660,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    public void addConsoleLogging() {
+
+        if (log != null) {
+            // HOWTO add a console logger (console handler) to the StaticLog
+
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            log.addHandler(consoleHandler);
+        } else {
+            System.err.println("Unable to add console logging, log is null");
+        }
+    }
+    
+    public Profile getTheProfile() {
+        return theProfile;
+    }
+    
+    public void setTheProfile(Profile theProfile) {
+        this.theProfile = theProfile;
+    }
+    
     public void autoRegister(String loginName) {
 
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
