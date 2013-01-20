@@ -401,7 +401,7 @@ public class Validator {
                 e.printStackTrace();
             }
             System.err.println("Validator: "+e.getMessage());
-            System.err.println("Validaotor error code " + e.getExitCode());
+            System.err.println("Validator error code " + e.getExitCode());
             return e.getExitCode();
         }
 
