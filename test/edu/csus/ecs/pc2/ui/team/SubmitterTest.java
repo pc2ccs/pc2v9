@@ -220,7 +220,7 @@ public class SubmitterTest extends AbstractTestCase {
         String [] arguments = {"--help"};
         
         try {
-            Submitter submitter = new Submitter(arguments);
+            new Submitter(arguments);
         } catch (CommandLineErrorException e) {
             e.printStackTrace();
         }

@@ -39,7 +39,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     private IInternalController controller;
 
-    public String testDirectoryName = null;
+    private String testDirectoryName = null;
 
     private Problem sumitProblem = null;
 
@@ -262,7 +262,7 @@ public class ExecutableTest extends AbstractTestCase {
     // $HeadURL$
     class ExecutableOverride extends Executable {
 
-        String executableDir = null;
+        private String executeDirectoryName = null;
 
         public ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles,
                 String executionDir) {
@@ -272,13 +272,12 @@ public class ExecutableTest extends AbstractTestCase {
 
         @Override
         public String getExecuteDirectoryName() {
-            return executableDir;
+            return executeDirectoryName;
         }
 
-        public void setExecuteDirectoryName(String executableDir) {
-            this.executableDir = "execute" + executableDir;
+        public void setExecuteDirectoryName(String directory) {
+            this.executeDirectoryName = "execute" + directory;
         }
-
     }
 
     public void testStripSpace() throws Exception {

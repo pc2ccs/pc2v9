@@ -1,16 +1,11 @@
 package edu.csus.ecs.pc2.validator.ccs;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
+import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.ccs.CCSConstants;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
-import edu.csus.ecs.pc2.core.model.SampleContest;
-import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -24,6 +19,10 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 public class ValidatorTest extends AbstractTestCase {
 
     private static final String PC2_JARNAME = "pc2.jar";
+
+    public ValidatorTest(String name) {
+        super(name);
+    }
 
     public void testYesArgument() throws Exception {
 
@@ -161,44 +160,49 @@ public class ValidatorTest extends AbstractTestCase {
 ////        out.println(serializedFile.getBuffer());
 ////    }
 
-    /**
-     * Creates files and adds problem data set per problem to contest.
-     * 
-     * @param contest
-     * @param problem
-     * @param datafilename
-     * @param answerfilename
-     * @throws FileNotFoundException 
-     */
-    private void addProblemDataset(IInternalContest contest, Problem problem, String datafilename , String answerfilename) throws FileNotFoundException {
-        
-        problem.setDataFileName(datafilename);
-        problem.setAnswerFileName(answerfilename);
-        
-        ProblemDataFiles files = new ProblemDataFiles(problem);
-        
-        SampleContest sample = new SampleContest();
-        
-        String name1 = sample.createSampleAnswerFile(answerfilename);
-        String name2 = sample.createSampleDataFile(datafilename);
-        
-        files.setJudgesAnswerFile(new SerializedFile(name1));
-        files.setJudgesDataFile(new SerializedFile(name2));
-
-        contest.updateProblem(problem, files);
-    }
-    
-//    public Test suite() {
+//    /**
+//     * Creates files and adds problem data set per problem to contest.
+//     * 
+//     * @param contest
+//     * @param problem
+//     * @param datafilename
+//     * @param answerfilename
+//     * @throws FileNotFoundException 
+//     */
+//    private void addProblemDataset(IInternalContest contest, Problem problem, String datafilename , String answerfilename) throws FileNotFoundException {
+//        
+//        problem.setDataFileName(datafilename);
+//        problem.setAnswerFileName(answerfilename);
+//        
+//        ProblemDataFiles files = new ProblemDataFiles(problem);
+//        
+//        SampleContest sample = new SampleContest();
+//        
+//        String name1 = sample.createSampleAnswerFile(answerfilename);
+//        String name2 = sample.createSampleDataFile(datafilename);
+//        
+//        files.setJudgesAnswerFile(new SerializedFile(name1));
+//        files.setJudgesDataFile(new SerializedFile(name2));
 //
-//        TestSuite s = new TestSuite();
-//
-//        s.addTest(new ValidatorTest("testYesArgument"));
-//        s.addTest(new ValidatorTest("testMissingInfilename"));
-//        s.addTest(new ValidatorTest("testMissingAnswerFile"));
-//        s.addTest(new ValidatorTest("testMissingFeedbackDir"));
-//        s.addTest(new ValidatorTest("testRunValidator"));
-//
-//        return s;
+//        contest.updateProblem(problem, files);
 //    }
+    
+    public static TestSuite suite() {
+
+        TestSuite suite = new TestSuite();
+
+//        public void testYesArgument() throws Exception {
+//            public void testMissingInfilename() throws Exception {
+//            public void testMissingAnswerFile() throws Exception {
+//            public void testMissingFeedbackDir() {
+
+        
+        suite.addTest(new ValidatorTest("testYesArgument"));
+//        suite.addTest(new ValidatorTest("testMissingInfilename"));
+//        suite.addTest(new ValidatorTest("testMissingAnswerFile"));
+        suite.addTest(new ValidatorTest("testMissingFeedbackDir"));
+
+        return suite;
+    }
 
 }

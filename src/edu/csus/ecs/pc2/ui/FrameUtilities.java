@@ -47,11 +47,6 @@ public final class FrameUtilities {
         TOP, CENTER, BOTTOM, NO_CHANGE
     }
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -1342163314986200464L;
-
     private FrameUtilities() {
         // Constructor required by CheckEclipse
     }

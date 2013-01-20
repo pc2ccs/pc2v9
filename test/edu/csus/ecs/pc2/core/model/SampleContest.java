@@ -183,6 +183,7 @@ public class SampleContest {
                 problem.setShortName(shortName.toLowerCase());
             } catch (Exception e) {
                 // not used
+                shortName = ""; // added for checkstyle warning.
             }
             problem.setLetter(Character.toString(letter));
             problem.setSiteNumber(siteNumber);

@@ -738,7 +738,7 @@ public class Problem implements IElementObject {
      */
     public void removeAllTestCaseFilenames(){
         testCaseDataFilenames = new String[0];
-        testCaseAnswerFilenames = new String[0];;
+        testCaseAnswerFilenames = new String[0];
     }
     
     public int getNumberTestCases() {

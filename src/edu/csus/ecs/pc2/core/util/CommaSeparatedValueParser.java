@@ -38,6 +38,7 @@ public final class CommaSeparatedValueParser {
         char current;
         char next;
         int length = line.length();
+        @SuppressWarnings("unused")
         int ignoredTerminatingQuote = 0;
         for (i = 0; i < line.length(); i++) {
             current = line.charAt(i);

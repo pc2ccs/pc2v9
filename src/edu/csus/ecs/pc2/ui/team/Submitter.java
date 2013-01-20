@@ -349,8 +349,7 @@ public class Submitter {
                 System.err.println("Error - missing question");
                 System.exit(4);
             }
-        }
-        else if (arguments.isOptPresent("--list")) {
+        } else if (arguments.isOptPresent("--list")) {
             listInfo();
             System.exit(SUCCESS_EXIT_CODE);
         } else if (arguments.isOptPresent("--listruns")) {

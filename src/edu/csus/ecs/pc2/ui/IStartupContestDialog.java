@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.ui;
 
 import edu.csus.ecs.pc2.core.model.Profile;
-import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Contest password dialog.

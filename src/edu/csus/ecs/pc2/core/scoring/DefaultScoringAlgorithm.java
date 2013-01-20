@@ -53,10 +53,6 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  */
 // $HeadURL$
 public class DefaultScoringAlgorithm implements IScoringAlgorithm {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -2471349413867745412L;
 
     public static final String POINTS_PER_NO = "Points per No";
 

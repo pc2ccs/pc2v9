@@ -24,7 +24,7 @@ public class TextCountDownMessage extends TimerTask implements ICountDownMessage
      */
     private static final long serialVersionUID = -1864153362739487599L;
 
-    private final long ONE_SECOND_IN_MS = 1000;
+    private static final long ONE_SECOND_IN_MS = 1000;
 
     private boolean exitOnClose = false;
 

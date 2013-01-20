@@ -9,8 +9,11 @@ import java.io.File;
  * @version $Id$
  */
 // $HeadURL$
-public class ProblemFilesUtilities {
+public final class ProblemFilesUtilities {
 
+    private ProblemFilesUtilities(){
+        
+    }
     /**
      * Verifies that all judge's data and answer files are present.
      * 

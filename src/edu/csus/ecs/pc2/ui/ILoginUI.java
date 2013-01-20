@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.ui;
 
-import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Login UI.

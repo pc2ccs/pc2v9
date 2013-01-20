@@ -300,17 +300,13 @@ public class ServerView extends JFrame implements UIPlugin {
      */
     public class ContestTimeListenerImplementation implements IContestTimeListener {
 
-        private int ignoreEvent = 0;
         public void contestTimeAdded(ContestTimeEvent event) {
-            ignoreEvent++;
         }
 
         public void contestTimeRemoved(ContestTimeEvent event) {
-            ignoreEvent++;
         }
 
         public void contestTimeChanged(ContestTimeEvent event) {
-            ignoreEvent++;
         }
 
         public void contestStarted(ContestTimeEvent event) {

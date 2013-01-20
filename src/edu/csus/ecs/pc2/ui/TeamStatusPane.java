@@ -263,7 +263,6 @@ public class TeamStatusPane extends JPanePlugin {
         
         boolean showTeamsOnBoardOnly = getShowTeamsCheckBox().isSelected();
 
-        int counter = 0;
         for (Account account : accounts) {
             
             if (showTeamsOnBoardOnly) {
@@ -275,7 +274,6 @@ public class TeamStatusPane extends JPanePlugin {
                 }
             }
             
-            counter++;
             JLabel teamLabel = new JLabel();
             ClientId clientId = account.getClientId();
             String teamName = clientId.getName();

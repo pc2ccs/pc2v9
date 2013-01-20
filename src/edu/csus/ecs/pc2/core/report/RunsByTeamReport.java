@@ -158,6 +158,9 @@ public class RunsByTeamReport implements IReport {
         int attempts = 0;
         int deleteCount = 0;
         
+        
+        // SOMEDAY review why totalSolve is unused
+        @SuppressWarnings("unused")
         int totalSolved = 0;
         
         Problem [] problems = contest.getProblems();
