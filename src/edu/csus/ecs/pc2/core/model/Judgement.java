@@ -49,7 +49,7 @@ public class Judgement implements IElementObject, Serializable {
     private String acronym;
 
     public Judgement(String displayName) {
-        this(displayName, "NA");
+        this(displayName, "WA");
     }
     
     public Judgement(String displayName, String acronym) {

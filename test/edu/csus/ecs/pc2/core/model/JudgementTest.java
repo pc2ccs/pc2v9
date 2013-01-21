@@ -15,7 +15,7 @@ public class JudgementTest extends AbstractTestCase {
 
         // bug 704
         Judgement judgement = new Judgement("Accepted");
-        assertNull(judgement.getAcronym());
+        assertNotNull(judgement.getAcronym());
         
         judgement = new Judgement("Accepted", "AC");
         assertEquals("AC", judgement.getAcronym());

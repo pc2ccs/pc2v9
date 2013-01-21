@@ -1306,7 +1306,7 @@ public class SampleContest {
      * 
      * @param filename source file name.
      * @param inputFilename file name for program to read
-     * @return
+     * @return name of filename
      * @throws FileNotFoundException
      */
     public String createSampleSumitSource(String filename, String inputFilename) throws FileNotFoundException  {

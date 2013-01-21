@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.core.util;
 
 import java.io.File;
@@ -8,9 +5,13 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 
 /**
- * @author pc2@ecs.csus.edu
+ * 
  *
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+// $HeadURL$
 public final class JUnitUtilities {
     private static String baseDir = "."; //$NON-NLS-1$
     private static final String SEP = File.separator;

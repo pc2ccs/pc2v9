@@ -54,7 +54,7 @@ public class AbstractTestCase extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        ensureAndCreateDirectory(getDataDirectory());
+        ensureDirectory(getDataDirectory());
     }
     
     /**
