@@ -18,9 +18,10 @@ public final class AllTests {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.model");
+        TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.report");
         //$JUnit-BEGIN$
         suite.addTestSuite(ExportYamlReportTest.class);
+        suite.addTestSuite(ExtractorTest.class);
         //$JUnit-END$
         return suite;
     }

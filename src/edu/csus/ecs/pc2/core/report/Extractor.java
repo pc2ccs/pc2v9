@@ -42,6 +42,8 @@ public class Extractor {
     public static final String RESULTS_TSV_FILENAME = "results";
 
     public static final String SUBMISSION_TSV_FILENAME = "submission";
+
+    public static final String ACCOUNTS_TSV_FILENAME = "accounts";
     
     /**
      * Run extractor program.
@@ -99,16 +101,13 @@ public class Extractor {
                 outputFilename = argList[1];
             }
 
-            System.out.println("loginName " + loginName);
-            System.out.println("password " + password);
-            System.out.println("cccFilename " + cccFilename);
-            System.out.println("outputFilename " + outputFilename);
-
-            IReport report = getReportForFilename(cccFilename);
+//            System.out.println("loginName " + loginName);
+//            System.out.println("password " + password);
+//            System.out.println("cccFilename " + cccFilename);
+//            System.out.println("outputFilename " + outputFilename);
 
             Plugin plugin = logInToContest(loginName, password);
-            report.setContestAndController(plugin.getContest(), plugin.getController());
-            String[] lines = report.createReport(null);
+            String[] lines = getReportLines (cccFilename, plugin.getContest(), plugin.getController());
 
             if (outputFilename == null || outputFilename.trim().length() == 0) {
                 /*
@@ -131,6 +130,14 @@ public class Extractor {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    protected String[] getReportLines(String cccFilename, IInternalContest inContest, IInternalController inController) {
+
+        IReport report = getReportForFilename(cccFilename);
+
+        report.setContestAndController(inContest, inController);
+        return report.createReport(null);
     }
 
     /**
@@ -291,6 +298,8 @@ public class Extractor {
             return new RunsTSVReport();
         } else if (SCOREBOARD_TSV_FILENAME.equals(name)) {
             return new ScoreboardTSVReport();
+        } else if (ACCOUNTS_TSV_FILENAME.equals(name)) {
+            return new AccountsTSVReportTeamAndJudges();
         } else if (RESULTS_TSV_FILENAME.equals(name)) {
             return new ResultsTSVReport();
         } else {
@@ -372,7 +381,7 @@ public class Extractor {
                 LOGIN_OPTION_STRING + " loginName - login name (or use -u)", //
                 PASSWORD_OPTION_STRING + " password - login password (or use -w) ", //
                 "", //
-                "CCS_reportname - one of the following submissions, scoreboard, results", //
+                "CCS_reportname - one of the following submissions, scoreboard, results, accounts", //
                 "", //
                 "Example: Extractor " + LOGIN_OPTION_STRING + " scoreboard1 " + PASSWORD_OPTION_STRING + " scoreboard1 scoreboard", //
                 "", //
