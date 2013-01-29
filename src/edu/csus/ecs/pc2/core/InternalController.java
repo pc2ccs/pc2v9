@@ -2024,7 +2024,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         if (clientAutoShutdown) {
 
-            doCountDown();
+            shutdown();
 
             if (contest.getClientId() != null) {
                 fatalError("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
@@ -2063,7 +2063,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return startupDialogClassName;
     }   
 
-    private void doCountDown() {
+    private void shutdown() {
 
         ICountDownMessage countDownMessage = null;
         if (usingGUI) {
@@ -2080,8 +2080,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             countDownMessage = new TextCountDownMessage();
         }
         
-        System.out.println("debug 22 using start "+countDownMessage.getPluginTitle());
-        
         if (contest.getClientId() != null) {
             info("connectionDropped: shutting down " + contest.getClientId());
             countDownMessage.setTitle("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
@@ -2091,9 +2089,27 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         countDownMessage.setExitOnClose(true);
         countDownMessage.start("Shutting down PC^2 in ", 10);
-        System.out.println("debug 22 using stop  "+countDownMessage.getPluginTitle());
         
-        new Exception("Filly purgentory").printStackTrace();
+        /**
+         * This is needed to allow the countdown timer threads to 
+         * actually run, otherwise the JVM ends before the timer starts. 
+         */
+        sleep (12);
+        
+    }
+
+    /**
+     * Sleep for a number of seconds.
+     * @param secs
+     */
+    private void sleep(int secs) {
+        
+        try {
+            Thread.sleep(secs * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
     }
 
     public void info(String s) {
@@ -3299,9 +3315,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     private void showErrorMessage(String message, String title) {
-
-        // TODO fix this to show GUI message
-
+        // TODO 736 fix this to show GUI message
+        System.err.println(title+": "+message); // TODO 736 remove this
     }
 
     /**
