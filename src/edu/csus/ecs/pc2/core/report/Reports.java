@@ -111,6 +111,8 @@ public final class Reports {
         reports.add(new FinalizeReport());
         
         reports.add(new InternalDumpReport());
+        
+        reports.add(new PasswordsReport());
 
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
