@@ -18,7 +18,6 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 import edu.csus.ecs.pc2.validator.Validator;
 
 /**
@@ -39,11 +38,9 @@ public class ExecutableTest extends AbstractTestCase {
 
     private IInternalController controller;
 
-    private String testDirectoryName = null;
-
     private Problem sumitProblem = null;
 
-    // TODO add test for hello
+    // SOMEDAY add test for hello
     @SuppressWarnings("unused")
     private Problem helloWorldProblem = null;
 
@@ -57,34 +54,10 @@ public class ExecutableTest extends AbstractTestCase {
         contest = sampleContest.createContest(2, 2, 12, 12, true);
         controller = sampleContest.createController(contest, true, false);
 
-        deriveProjectDirectory();
-
         sumitProblem = createSumitProblem(contest);
         helloWorldProblem = createHelloProblem(contest);
         javaLanguage = createJavaLanguage(contest);
 
-    }
-
-    /**
-     * To derive the project directory.
-     * 
-     * @throws Exception
-     * 
-     */
-    private void deriveProjectDirectory() throws Exception {
-
-        String sampsDir = "testdata";
-        String projectPath = JUnitUtilities.locate(sampsDir);
-        if (projectPath == null) {
-            throw new Exception("Unable to locate " + sampsDir);
-        }
-
-        testDirectoryName = projectPath + File.separator + sampsDir;
-
-    }
-
-    public void testSetup() throws Exception {
-        deriveProjectDirectory();
     }
 
     /**
@@ -123,7 +96,7 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     public String getSampsFilename(String filename) {
-        return getTestDirectoryName() + File.separator + filename;
+        return getDataDirectory() + File.separator + filename;
     }
 
     protected void setPC2Validator(Problem problem) {
@@ -225,7 +198,11 @@ public class ExecutableTest extends AbstractTestCase {
      */
     protected void runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement) {
 
+        String executeDirectoryName = getTestingOutputDirectory(getName());
+        ensureDirectory(executeDirectoryName);
+        
         Executable executable = new Executable(contest, controller, run, runFiles);
+        executable.setExecuteDirectoryName(executeDirectoryName);
         executable.setUsingGUI(false);
         executable.execute();
 
@@ -332,7 +309,4 @@ public class ExecutableTest extends AbstractTestCase {
         return "execute/"+string;
     }
 
-    protected String getTestDirectoryName() {
-        return testDirectoryName;
-    }
 }

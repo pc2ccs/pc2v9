@@ -18,8 +18,9 @@ public class ExtractorTest extends TestCase {
 
     /**
      * Test accounts.tsv report
+     * @throws Exception 
      */
-    public void testAccountsReport() {
+    public void testAccountsReport() throws Exception {
 
         SampleContest sample = new SampleContest();
 

@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -35,8 +36,6 @@ public class RunsTSVReport implements IReportFile {
 
     private static final String DELIMITER = "\t";
     
-    private boolean bug704WORKAROUND = true; // TODO Bug 704 SOMEDAY remove this workaround
-
     /**
      * Default judgment "unknown" acronym.
      */
@@ -67,8 +66,10 @@ public class RunsTSVReport implements IReportFile {
             "Accepted;AC", //
             "Wrong Answer;WA", //
     };
+    
+    String createLine(Run run) {
 
-    private void writeRow(PrintWriter printWriter, Run run) {
+        StringBuffer buf = new StringBuffer();
 
         ClientId clientId = run.getSubmitter();
 
@@ -81,26 +82,26 @@ public class RunsTSVReport implements IReportFile {
         // 5: result/judgement, 2 letter judgement acronym.
 
         // 1: RunId, integer
-        printWriter.print(run.getNumber());
-        printWriter.print(DELIMITER);
+        buf.append(run.getNumber());
+        buf.append(DELIMITER);
 
         // 2: User, integer (team number)
-        printWriter.print(clientId.getClientNumber());
-        printWriter.print(DELIMITER);
+        buf.append(clientId.getClientNumber());
+        buf.append(DELIMITER);
 
         // 3: Problem short name
         Problem problem = contest.getProblem(run.getProblemId());
-        printWriter.print(problem.getShortName());
-        printWriter.print(DELIMITER);
+        buf.append(problem.getShortName());
+        buf.append(DELIMITER);
 
         // 4: submission time, in ms
-        printWriter.print(run.getElapsedMS());
-        printWriter.print(DELIMITER);
+        buf.append(run.getElapsedMS());
+        buf.append(DELIMITER);
 
         // 5: result/judgement, 2 letter judgement acronym.
-        printWriter.print(getJudgementAcronym(run));
+        buf.append(getJudgementAcronym(run));
 
-        printWriter.println();
+        return buf.toString();
     }
 
     private String getJudgementAcronym(Run run) {
@@ -117,7 +118,7 @@ public class RunsTSVReport implements IReportFile {
                 judgementText = judgement.getDisplayName();
             }
 
-            if (bug704WORKAROUND ||acronym == null || "".equals(acronym.trim())) {
+            if (acronym == null || "".equals(acronym.trim())) {
                 // Not defined, do a "guess"
 
                 if (run.isSolved()) {
@@ -157,11 +158,21 @@ public class RunsTSVReport implements IReportFile {
 
         // Runs
         printWriter.println();
+
+        String[] lines = getReportLines();
+        for (String string : lines) {
+            printWriter.println(string);
+        }
+    }
+
+    private String[] getReportLines() {
+
+        ArrayList<String> list = new ArrayList<String>();
+
         Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
 
-        if (filter.isFilterOn()) {
-            printWriter.println("Filter: " + filter.toString());
+        if (filter != null && filter.isFilterOn()) {
 
             int count = 0;
             for (Run run : runs) {
@@ -175,12 +186,7 @@ public class RunsTSVReport implements IReportFile {
                 // " runs (filtered) --");
                 for (Run run : runs) {
                     if (filter.matches(run)) {
-                        try {
-                            writeRow(printWriter, run);
-                        } catch (Exception e) {
-                            printWriter.println("Exception in report: " + e.getMessage());
-                            e.printStackTrace(printWriter);
-                        }
+                        list.add(createLine(run));
                     }
                 }
             }
@@ -188,15 +194,10 @@ public class RunsTSVReport implements IReportFile {
         } else {
             // printWriter.println("-- " + runs.length + " runs --");
             for (Run run : runs) {
-                try {
-                    writeRow(printWriter, run);
-                } catch (Exception e) {
-                    printWriter.println("Exception in report: " + e.getMessage());
-                    e.printStackTrace(printWriter);
-                }
+                list.add(createLine(run));
             }
-
         }
+        return (String[]) list.toArray(new String[list.size()]);
     }
 
     public void printHeader(PrintWriter printWriter) {
@@ -238,7 +239,8 @@ public class RunsTSVReport implements IReportFile {
     }
 
     public String[] createReport(Filter inFilter) {
-        throw new SecurityException("Not implemented");
+        filter = inFilter;
+        return getReportLines();
     }
 
     public String createReportXML(Filter inFilter) {
@@ -271,7 +273,4 @@ public class RunsTSVReport implements IReportFile {
         return true;
     }
     
-    public void setBug704WORKAROUND(boolean bug704workaround) {
-        bug704WORKAROUND = bug704workaround;
-    }
 }

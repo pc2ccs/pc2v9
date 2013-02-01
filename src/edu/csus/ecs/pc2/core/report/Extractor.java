@@ -53,7 +53,7 @@ public class Extractor {
 
         try {
 
-            String[] requireArguementArgs = {};
+            String[] requireArguementArgs = { LOGIN_OPTION_STRING, PASSWORD_OPTION_STRING, "-w", "-u" };
 
             ParseArguments arguments = new ParseArguments(args, requireArguementArgs);
 
@@ -93,6 +93,10 @@ public class Extractor {
             if (arguments.isOptPresent("-w")) {
                 password = arguments.getOptValue("-w");
             }
+            
+            if (loginName == null || "".equals(loginName)){
+                throw new LoginFailureException("No login specified");
+            }
 
             String[] argList = arguments.getArgList();
             String cccFilename = argList[0];
@@ -124,17 +128,29 @@ public class Extractor {
                 printWriter.close();
                 printWriter = null;
             }
+            System.exit(0);
 
         } catch (LoginFailureException e) {
+            if (e.getMessage() == null){
+                e.printStackTrace(System.err);
+            }
             System.err.println(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            if (e.getMessage() == null){
+                e.printStackTrace(System.err);
+            }
+            System.err.println(e.getMessage());
         }
+        System.exit(2);
     }
 
-    protected String[] getReportLines(String cccFilename, IInternalContest inContest, IInternalController inController) {
+    protected String[] getReportLines(String cccFilename, IInternalContest inContest, IInternalController inController) throws Exception {
 
         IReport report = getReportForFilename(cccFilename);
+        
+        if (report == null){
+            throw new Exception("No such report for "+cccFilename);
+        }
 
         report.setContestAndController(inContest, inController);
         return report.createReport(null);
