@@ -30,8 +30,8 @@ public class ContestTest extends AbstractTestCase {
 
         IInternalContest contest = sampleContest.createContest(1, 3, 12, 12, true);
 
-        ensureDirectory();
-        String storageDirectory = getDataDirectory();
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
 
         IInternalController controller = sampleContest.createController(contest, storageDirectory, true, false);
         Log log = createLog(getName());

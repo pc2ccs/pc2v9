@@ -1,13 +1,11 @@
 package edu.csus.ecs.pc2.core.model;
 
-import java.io.File;
 import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
-import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test InternalContest class. 
@@ -16,22 +14,10 @@ import junit.framework.TestCase;
  */
 
 // $HeadURL$
-public class ContestTest extends TestCase {
+public class ContestTest extends AbstractTestCase {
     
     private boolean debugMode = false;
 
-    public ContestTest(String arg0) {
-        super(arg0);
-    }
-
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-    
     /**
      * Create a new run in the contest.
      * 
@@ -65,20 +51,12 @@ public class ContestTest extends TestCase {
         ClientId id = account.getClientId();
 
         Run submittedRun = createRun (contest, id);
-        // Directory where test data is
-        String testDir = "testdata";
-        String projectPath=JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            throw new IOException("Unable to locate "+testDir);
-        }
 
-        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
-        File dir = new File(loadFile);
-        if (!dir.exists()) {
-            System.err.println("could not find " + loadFile);
-            throw new IOException("Unable to locate "+loadFile);
-        }
-        RunFiles runFiles = new RunFiles(submittedRun, dir.getAbsolutePath());
+        String loadFile = getSamplesSourceFilename(SUMIT_SOURCE_FILENAME);
+        
+        assertFileExists(loadFile);
+        
+        RunFiles runFiles = new RunFiles(submittedRun, loadFile);
         
         contest.acceptRun(submittedRun, runFiles);
         

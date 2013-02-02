@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.core;
 
-import java.io.File;
 import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
@@ -31,20 +30,8 @@ public class PacketHandlerTest extends AbstractTestCase {
     
     private SampleContest sampleContest = new SampleContest();
     
-    private String outputTestDirectory;
+//    private String outputTestDirectory;
     
-    @Override
-    protected void setUp() throws Exception {
-        setCreateMissingDirectories(true);
-        super.setUp();
-        
-        if (outputTestDirectory == null) {
-            // done just in case setup called for every JUnit method.
-            outputTestDirectory = getTestingOutputDirectory("phy");
-        }
-        
-    }
-
     /**
      * Test security setting in PacketHandler.
      *
@@ -210,10 +197,10 @@ public class PacketHandlerTest extends AbstractTestCase {
       
         IInternalContest contest = sampleContest.createContest(2, 4, 12, 6, true);
         
-        FileStorage storage = new FileStorage(outputTestDirectory + File.separator + methodName);
+        FileStorage storage = new FileStorage(getOutputTestFilename(methodName));
         contest.setStorage(storage);
         
-        String testSourceFileName = getTestFilename("Sumit.java");
+        String testSourceFileName = getSamplesSourceFilename("Sumit.java");
         assertFileExists(testSourceFileName);
 
         // Add 22 random runs
@@ -224,6 +211,7 @@ public class PacketHandlerTest extends AbstractTestCase {
     }
     
     protected IInternalController createController(IInternalContest contest) {
+        String outputTestDirectory = getOutputDataDirectory();
         return sampleContest.createController(contest, outputTestDirectory, true, false);
     }
 

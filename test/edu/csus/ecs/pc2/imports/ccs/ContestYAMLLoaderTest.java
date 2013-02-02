@@ -44,7 +44,6 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         loader = new ContestYAMLLoader();
-        new File(getDataDirectory()).mkdirs();
     }
 
     public void testGetTitle() throws IOException {
@@ -646,7 +645,9 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     
     public void testdoNotLoadExternalFile() throws Exception {
         
-        String dirname = getDataDirectory(getName());
+         String dirname = getDataDirectory(getName());
+//        String dirname = getDataDirectory("testValidatorKeys");
+//        String dirname = getDataDirectory();
         Utilities.insureDir(dirname);
         assertDirectoryExists(dirname);
         
@@ -717,16 +718,12 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     public void testValidatorKeys() throws Exception {
         
-        String name = getDataDirectory("testValidatorKeys");
-        assertDirectoryExists(name);
+        String directoryName = getDataDirectory("testValidatorKeys");
+        assertDirectoryExists(directoryName);
         
-        IInternalContest contest = loader.fromYaml(null, getDataDirectory(this.getName()));
+        IInternalContest contest = loader.fromYaml(null, directoryName);
         
         Problem[] problems = contest.getProblems();
-        
-        System.out.println("debug 22 "+getDataDirectory(this.getName()));
-  
-        System.out.println("debug 22 number is "+problems.length);
         
         assertEquals("Expect custom validator" , "/usr/local/bin/mtsv", problems[0].getValidatorCommandLine());
         assertEquals("Expect default validator", "/bin/true", problems[1].getValidatorCommandLine());
@@ -746,10 +743,11 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     // SOMEDAY get this JUnit working
     public void aTestOverRideValidator() throws Exception {
 
-        String name = getDataDirectory("testValidatorKeys");
-        assertDirectoryExists(name);
+        String directoryName = getDataDirectory("testValidatorKeys");
         
-        IInternalContest contest = loader.fromYaml(null, getDataDirectory(this.getName()));
+        assertDirectoryExists(directoryName);
+        
+        IInternalContest contest = loader.fromYaml(null, directoryName);
         
         Problem[] problems = contest.getProblems();
         

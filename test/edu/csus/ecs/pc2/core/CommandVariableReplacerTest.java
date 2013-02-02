@@ -80,8 +80,7 @@ public class CommandVariableReplacerTest extends AbstractTestCase {
         run.setElapsedMS(elapsed);
         
         ExecutionData executionData = null;
-        String filename = getTestFilename("Sumit.java");
-        sample.createSampleSumitSource(filename, "sumit.dat");
+        String filename = getSamplesSourceFilename("Sumit.java");
         
         RunFiles runFiles = new RunFiles(run, filename);
         ProblemDataFiles problemDataFiles = null;
@@ -151,8 +150,7 @@ public class CommandVariableReplacerTest extends AbstractTestCase {
         executionData.setExecuteExitValue(999);
         executionData.setExecuteTimeMS(112233);
         
-        String filename = getTestFilename("Sumit.java");
-        sample.createSampleSumitSource(filename, "sumit.dat");
+        String filename = getSamplesSourceFilename("Sumit.java");
         
         RunFiles runFiles = new RunFiles(run, filename);
         ProblemDataFiles problemDataFiles = null;

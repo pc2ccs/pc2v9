@@ -11,8 +11,6 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import junit.framework.TestCase;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -26,10 +24,11 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestTime;
-import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -37,10 +36,10 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunFiles;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
@@ -53,7 +52,7 @@ import edu.csus.ecs.pc2.core.util.JUnitUtilities;
  */
 
 // $HeadURL$
-public class DefaultScoringAlgorithmTest extends TestCase {
+public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     
     private Log log = null;
     
@@ -72,16 +71,12 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
     
-        log = new Log("DefaultScoringAlgorithmTest");
+        log = createLog("DefaultScoringAlgorithmTest");
+        
         StaticLog.setLog(log);
-        // Directory where test data is
-        String testDir = "testdata";
-        String projectPath=JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            throw new Exception("Unable to locate "+testDir);
-        }
 
-        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
+//        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
+        String loadFile = getSamplesSourceFilename(SUMIT_SOURCE_FILENAME);
         loadData = new File(loadFile);
         if (!loadData.exists()) {
             System.err.println("could not find " + loadFile);

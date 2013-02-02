@@ -1,29 +1,27 @@
 package edu.csus.ecs.pc2.core.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test for InternalController.
@@ -33,7 +31,7 @@ import edu.csus.ecs.pc2.core.util.JUnitUtilities;
  */
 
 // $HeadURL$
-public class ControllerTest extends TestCase {
+public class ControllerTest extends AbstractTestCase {
 
     private IInternalContest contest;
 
@@ -47,20 +45,22 @@ public class ControllerTest extends TestCase {
         contest = sampleContest.createContest(2, 4, 12, 6, true);
         controller = sampleContest.createController(contest, true, false);
 
-        // Directory where test data is
-        String testDir = "testdata";
-        String projectPath=JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            throw new Exception("Unable to locate "+testDir);
-        }
+//        // Directory where test data is
+//        String testDir = "testdata";
+//        String projectPath=JUnitUtilities.locate(testDir);
+//        if (projectPath == null) {
+//            throw new Exception("Unable to locate "+testDir);
+//        }
+//
+//        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
+//        File dir = new File(loadFile);
+//        if (!dir.exists()) {
+//            System.err.println("could not find " + loadFile);
+//            throw new Exception("Unable to locate "+loadFile);
+//        }
 
-        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
-        File dir = new File(loadFile);
-        if (!dir.exists()) {
-            System.err.println("could not find " + loadFile);
-            throw new Exception("Unable to locate "+loadFile);
-        }
-
+        String loadFile = getSamplesSourceFilename("Sumit.java");
+        
         // Add 22 random runs
         Run[] runs = sampleContest.createRandomRuns(contest, 22, true, true, true);
         sampleContest.addRuns(contest, runs, loadFile);
@@ -71,23 +71,6 @@ public class ControllerTest extends TestCase {
 
     protected void tearDown() throws Exception {
         super.tearDown();
-    }
-
-    private void failTest(String string, Exception e) {
-
-        if (e != null) {
-            e.printStackTrace(System.err);
-        }
-        assertTrue(string, false);
-    }
-
-    /**
-     * Force a failure of the test
-     * 
-     * @param string
-     */
-    private void failTest(String string) {
-        failTest(string, null);
     }
 
     public void testSecuritySet() {

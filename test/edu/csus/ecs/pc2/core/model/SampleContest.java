@@ -52,6 +52,8 @@ public class SampleContest {
     private int defaultPortNumber = DEFAULT_PORT_NUMBER;
 
     private NotificationUtilities notificationUtilities = new NotificationUtilities();
+
+    private String samplesDirectory;
     
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
@@ -923,13 +925,16 @@ public class SampleContest {
      * @return filename with path to test data.
      */
     public String getSampleFile(String filename) {
-        String testDir = "testdata";
-        String projectPath = JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            new Exception("Unable to locate " + testDir).printStackTrace(System.err);
+        if (samplesDirectory == null){
+            String samps = "samps";
+            String projectPath = JUnitUtilities.locate(samps);
+            if (projectPath == null) {
+                new Exception("Unable to locate " + samps).printStackTrace(System.err);
+            }
+            samplesDirectory = projectPath + File.separator + samps + File.separator;
         }
-        testDir = projectPath + File.separator + testDir + File.separator;
-        String testfilename = testDir + filename;
+        
+        String testfilename = samplesDirectory + File.separator + "src" + File.separator + filename;
 
         if (!new File(testfilename).isFile()) {
             new Exception("No sample file found " + testfilename).printStackTrace(System.err);
@@ -1304,6 +1309,7 @@ public class SampleContest {
     /**
      * Creates sumit program, must use filename Sumit.java.
      * 
+     * @deprecated use getSamplesSourceFilename from AbstractTestCase
      * @param filename source file name.
      * @param inputFilename file name for program to read
      * @return name of filename

@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.core.list;
 
-import java.io.File;
 import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -8,8 +7,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
-import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test the RunFilesList class.
@@ -19,30 +17,34 @@ import junit.framework.TestCase;
  */
 
 // $HeadURL$
-public class RunFilesListTest extends TestCase {
+public class RunFilesListTest extends AbstractTestCase {
 
-    private File loadData;
-    private String testDir;
+//    private File sumitSourceFilename;
+//    private String testDir;
 
-    protected void setUp() throws Exception {
-        testDir = "testdata";
-        String projectPath = JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            throw new Exception("Unable to locate "+testDir);
-        }
-        testDir=projectPath+File.separator+testDir+File.separator;
-        String loadFile = testDir + "Sumit.java";
-        loadData = new File(loadFile);
-        if (!loadData.exists()) {
-            System.err.println("Could not find " + loadFile);
-            throw new Exception("Could not find "+ loadFile+" in "+testDir);
-        }
-       super.setUp();
-    }
+//    protected void setUp() throws Exception {
+//        super.setUp();
+//        
+//        testDir = "testdata";
+//        String projectPath = JUnitUtilities.locate(testDir);
+//        if (projectPath == null) {
+//            throw new Exception("Unable to locate "+testDir);
+//        }
+//        testDir=projectPath+File.separator+testDir+File.separator;
+//        String loadFile = testDir + "Sumit.java";
+//        sumitSourceFilename = new File(loadFile);
+//        if (!sumitSourceFilename.exists()) {
+//            System.err.println("Could not find " + loadFile);
+//            throw new Exception("Could not find "+ loadFile+" in "+testDir);
+//        }
+//        
+//        getSamplesSourceFilename()
+//        
+//    }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
+//    protected void tearDown() throws Exception {
+//        super.tearDown();
+//    }
 
     public void testSingleFile() throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -56,9 +58,12 @@ public class RunFilesListTest extends TestCase {
 
         Run theRun = runs[0];
         Run secondRun = runs[1];
+        
+        
+        String sumitFilename = getSamplesSourceFilename("Sumit.java");
 
 
-        RunFiles runFiles = new RunFiles(theRun, loadData.getAbsolutePath());
+        RunFiles runFiles = new RunFiles(theRun, sumitFilename);
         filesList.add(theRun, runFiles);
 
         RunFiles runFiles2 = filesList.getRunFiles(theRun);
@@ -69,7 +74,7 @@ public class RunFilesListTest extends TestCase {
         assertNull(runFiles2);
 
         // Add first
-        runFiles = new RunFiles(theRun, loadData.getAbsolutePath());
+        runFiles = new RunFiles(theRun, sumitFilename);
         filesList.add(theRun, runFiles);
 
         /**
@@ -78,8 +83,11 @@ public class RunFilesListTest extends TestCase {
          * In other tests it will test the cache which will contain all runFiles added.
          */
 
-        String filename = "hello.java";
-        RunFiles secondRunFiles = new RunFiles(secondRun, testDir+filename);
+//        String filename = "hello.java";
+        
+        String helloFilename = getSamplesSourceFilename(HELLO_SOURCE_FILENAME);
+        
+        RunFiles secondRunFiles = new RunFiles(secondRun, helloFilename);
         filesList.add(secondRun, secondRunFiles);
 
         runFiles2 = filesList.getRunFiles(theRun);
@@ -89,7 +97,7 @@ public class RunFilesListTest extends TestCase {
         runFiles2 = filesList.getRunFiles(secondRun);
 
         assertNotNull(runFiles2);
-        assertEquals (runFiles2.getMainFile().getName(), filename);
+        assertEquals (runFiles2.getMainFile().getName(), HELLO_SOURCE_FILENAME);
 
     }
 
@@ -107,8 +115,10 @@ public class RunFilesListTest extends TestCase {
 
         Run theRun = runs[0];
         Run secondRun = runs[1];
+        
+        String sumitFilename = getSamplesSourceFilename(SUMIT_SOURCE_FILENAME);
 
-        RunFiles runFiles = new RunFiles(theRun, loadData.getAbsolutePath());
+        RunFiles runFiles = new RunFiles(theRun, sumitFilename);
         filesList.add(theRun, runFiles);
 
         RunFiles runFiles2 = filesList.getRunFiles(theRun);
@@ -119,29 +129,28 @@ public class RunFilesListTest extends TestCase {
         assertNull(runFiles2);
 
         // Add first run files
-        String filename1 = "Sumit.java"; 
-        runFiles = new RunFiles(theRun, testDir+filename1);
+        runFiles = new RunFiles(theRun, sumitFilename);
         filesList.add(theRun, runFiles);
 
         // Add second run files
-        String filename2 = "hello.java";
-        RunFiles secondRunFiles = new RunFiles(secondRun, testDir+filename2);
+        String helloFilename = getSamplesSourceFilename(HELLO_SOURCE_FILENAME);
+        RunFiles secondRunFiles = new RunFiles(secondRun, helloFilename);
         filesList.add(secondRun, secondRunFiles);
 
         runFiles2 = filesList.getRunFiles(theRun);
 
-        assertNotNull(runFiles2); 
-        assertEquals (runFiles2.getMainFile().getName(), filename1);
-        
+        assertNotNull(runFiles2);
+        assertEquals(runFiles2.getMainFile().getName(), SUMIT_SOURCE_FILENAME);
+
         runFiles2 = filesList.getRunFiles(secondRun);
 
         assertNotNull(runFiles2);
-        assertEquals (runFiles2.getMainFile().getName(), filename2);
-        
+        assertEquals(runFiles2.getMainFile().getName(), HELLO_SOURCE_FILENAME);
+
         runFiles2 = filesList.getRunFiles(theRun);
 
-        assertNotNull(runFiles2); 
-        assertEquals (runFiles2.getMainFile().getName(), filename1);
+        assertNotNull(runFiles2);
+        assertEquals(runFiles2.getMainFile().getName(), SUMIT_SOURCE_FILENAME);
 
     }
 }

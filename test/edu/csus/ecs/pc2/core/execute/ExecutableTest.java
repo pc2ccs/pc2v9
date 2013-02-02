@@ -95,9 +95,6 @@ public class ExecutableTest extends AbstractTestCase {
         }
     }
 
-    public String getSampsFilename(String filename) {
-        return getDataDirectory() + File.separator + filename;
-    }
 
     protected void setPC2Validator(Problem problem) {
 
@@ -131,7 +128,7 @@ public class ExecutableTest extends AbstractTestCase {
         setPC2Validator(problem);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
-        String answerFileName = getSampsFilename(problem.getAnswerFileName());
+        String answerFileName = super.getSamplesSourceFilename(problem.getAnswerFileName());
         checkFileExistance(answerFileName);
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
 
@@ -159,12 +156,12 @@ public class ExecutableTest extends AbstractTestCase {
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
         problem.setDataFileName("sumit.dat");
-        String judgesDataFile = getSampsFilename(problem.getDataFileName());
+        String judgesDataFile = getSamplesSourceFilename(problem.getDataFileName());
         checkFileExistance(judgesDataFile);
         problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile));
 
         problem.setAnswerFileName("sumit.ans");
-        String answerFileName = getSampsFilename(problem.getAnswerFileName());
+        String answerFileName = getSamplesSourceFilename(problem.getAnswerFileName());
         checkFileExistance(answerFileName);
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
 
@@ -182,7 +179,7 @@ public class ExecutableTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         Run run = new Run(submitter, javaLanguage, sumitProblem);
-        RunFiles runFiles = new RunFiles(run, getSampsFilename("Sumit.java"));
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Sumit.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, yesJudgement);
@@ -198,7 +195,7 @@ public class ExecutableTest extends AbstractTestCase {
      */
     protected void runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement) {
 
-        String executeDirectoryName = getTestingOutputDirectory(getName());
+        String executeDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(executeDirectoryName);
         
         Executable executable = new Executable(contest, controller, run, runFiles);

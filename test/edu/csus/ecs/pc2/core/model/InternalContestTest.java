@@ -493,8 +493,7 @@ public class InternalContestTest extends AbstractTestCase {
      */
     public void testJudgementAcronymsPopulated() throws Exception {
 
-        String testDirectory = getDataDirectory(this.getName());
-        ensureDirectory(testDirectory);
+        String testDirectory = getOutputDataDirectory();
         
         Log log = new Log(getName()+"static.log");
         

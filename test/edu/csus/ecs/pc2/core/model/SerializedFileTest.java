@@ -22,8 +22,6 @@ public class SerializedFileTest extends AbstractTestCase {
 
     public void testEquals() throws Exception {
         
-        ensureDirectory(getTestingOutputDirectory());
-
         String filename = sample.createSampleDataFile(getOutputTestFilename("datafile"));
 
         SerializedFile file1 = new SerializedFile(filename);

@@ -86,6 +86,32 @@ public class ValidatorTest extends AbstractTestCase {
         return jarDir + File.separator;
     }
     
+    // SOMEDAY fix testValidatorSuccess
+    public void atestValidatorSuccess() throws Exception {
+        
+        String answerFilename = getSamplesSourceFilename("sumit.ans");
+        String outFilename = answerFilename;
+        String inputFilename = getSamplesSourceFilename("sumit.dat");
+        
+        
+        String[] args = { inputFilename, answerFilename };
+        
+        int code = runValidator (outFilename, args);
+        
+        assertEquals(CCSConstants.VALIDATOR_JUDGED_SUCCESS_EXIT_CODE, code);
+        
+        
+    }
+    
+    private int runValidator(String outFilename, String[] args) {
+        
+        Validator ccsValidator = new Validator();
+        
+        int code = ccsValidator.runValidator(args);
+        // TODO foo
+        return code;
+    }
+
     // TODO CCS add this test back
 //    /**
 //     * Test run the validator.
@@ -133,7 +159,7 @@ public class ValidatorTest extends AbstractTestCase {
 //        
 //        String commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
 //
-//        System.out.println("debug 22 Started proccess with: "+commandPattern);
+//        System.out.println("debug Started process with: "+commandPattern);
 //        
 //        Process process = executable.runProgram(commandPattern, null, false);
 //        

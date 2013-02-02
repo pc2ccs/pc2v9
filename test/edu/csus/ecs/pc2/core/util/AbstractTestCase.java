@@ -12,6 +12,26 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 /**
  * Test utilities.
  * 
+ * <br>
+ * 
+ * Fetch directory or filename relative to directory methods.  These should
+ * be used to find source filenames as well as test filenames.
+ * <ol>
+ * <li>Get test input data filename - {@link #getTestFilename(String)}
+ * <li>Get test output filename = {@link #getOutputTestFilename(String)}
+ * <li>Get a data/source file name - {@link #getSamplesSourceFilename(String)}
+ * </ol>
+ * 
+ * Other locations/directories, instead of using these directly use 
+ * {@link #getTestFilename(String)}, {@link #getOutputTestFilename(String)} and
+ * {@link #getSamplesSourceFilename(String)}.
+ * <ol>
+ * <li>Project Root directory - {@link #getProjectRootDirectory()}
+ * <li>The root testdata directory - {@link #getRootInputTestDataDirectory()}
+ * <li>Input JUnit method test directories - {@link #getDataDirectory()} and {@link #getDataDirectory(String)} 
+ * <li>Get directory where sample source files are - {@link #getTestSamplesSourceDirectory()}
+ * </ol>
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -19,11 +39,6 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 // $HeadURL$
 public class AbstractTestCase extends TestCase {
     
-    /**
-     * For debugging, if directories do not exist create them.
-     */
-    private boolean createMissingDirectories = false;
-
     private String testDataDirectory = null;
 
     /**
@@ -40,29 +55,38 @@ public class AbstractTestCase extends TestCase {
      * 
      * Do not use directly, use {@link #getTestingOutputDirectory()}.
      */
-    public static final String DEFAULT_PC2_OUTPUT_FOR_TESTING_DIRECTORY = "testing";
+    public static final String DEFAULT_PC2_OUTPUT_FOR_TESTING_DIRECTORY = "testout";
+    
+    public static final String HELLO_SOURCE_FILENAME = "Hello.java";
+    
+    public static final String SUMIT_SOURCE_FILENAME = "Sumit.java";
     
     public AbstractTestCase() {
         super();
+        ensureOutputDirectory();
     }
 
     public AbstractTestCase(String testName) {
         super(testName);
+        ensureOutputDirectory();
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
-        ensureDirectory(getDataDirectory());
+        ensureOutputDirectory();
     }
     
     /**
-     * Get full path to test directory name.
+     * Get the full path to the input test directory under the project.
      * 
-     * @return
+     * @see {@link #getTestFilename(String)}
+     * @see {@link #getOutputTestFilename(String)}
+     * @see {@link #getSamplesSourceFilename(String)}
+     * @return full path to the project test directory.
      */
-    private String getTestDataDirectory() {
+    // SOMEDAY deprecated this method and use test method directory names for test data input
+     public String getRootInputTestDataDirectory() {
         if (testDataDirectory == null) {
 
             String projectPath = JUnitUtilities.locate(DEFAULT_PC2_TEST_DIRECTORY);
@@ -73,51 +97,70 @@ public class AbstractTestCase extends TestCase {
             testDataDirectory = projectPath + File.separator + DEFAULT_PC2_TEST_DIRECTORY;
         }
         
-        ensureAndCreateDirectory(testDataDirectory);
+        assertDirectoryExists(testDataDirectory);
         return testDataDirectory;
     }
+     
+     /**
+      * Project root directory.
+      * 
+      * @see {@link #getTestFilename(String)}
+      * @see {@link #getOutputTestFilename(String)}
+      * @see {@link #getSamplesSourceFilename(String)}
+      * 
+      * @return directory
+      */
+    public String getProjectRootDirectory() {
+
+        String dirname = getRootInputTestDataDirectory();
+        assertDirectoryExists(dirname);
+
+        // remove default test dir and dir sep off end of string
+        dirname = trimFromEnd  (dirname, 1 + DEFAULT_PC2_TEST_DIRECTORY.length());
+
+        return dirname;
+    }
     
-    
+
+    /**
+     * Remove len characters off end of string.
+     * 
+     * @param string
+     * @param len
+     * @return shorter string.
+     */
+    private String trimFromEnd(String string, int len) {
+        return string.substring(0, string.length() - len);
+    }
+
     /**
      * Return the project (with JUnit name) relative directory where test output data is located.
      * 
      * This returns the proper project-relative path for the input testing data directory.
      * 
+     * @see #getOutputTestFilename(String)
      * @return a project-relative directory name with the JUnit classname 
      */
-    public String getTestingOutputDirectory() {
+    protected String getRootOutputTestDataDirectory() {
         if (testingOutputDirectory == null) {
 
-            String projectPath = JUnitUtilities.locate(DEFAULT_PC2_TEST_DIRECTORY);
+            String outputDirectoryName = DEFAULT_PC2_OUTPUT_FOR_TESTING_DIRECTORY;
+            
+            String projectPath = JUnitUtilities.locate(outputDirectoryName);
             if (projectPath == null) {
                 projectPath = "."; //$NON-NLS-1$
-                System.err.println("AbstractTestCase: Warning - unable to locate in project " + DEFAULT_PC2_TEST_DIRECTORY);
+                System.err.println("AbstractTestCase: Warning - unable to locate in project " + outputDirectoryName);
             }
-            testingOutputDirectory = projectPath + File.separator + DEFAULT_PC2_TEST_DIRECTORY;
+            testingOutputDirectory = projectPath + File.separator + outputDirectoryName;
         }
-        
-        ensureAndCreateDirectory (testingOutputDirectory);
         
         return testingOutputDirectory;
     }
     
-
     /**
-     * Insure directory exists if {@link #createMissingDirectories} is true.
+     * Ensures directory.
      * 
-     * @param directoryName
-     */
-    private void ensureAndCreateDirectory(String directoryName) {
-        if (createMissingDirectories && !new File(directoryName).isDirectory()) {
-            ensureDirectory(directoryName);
-            System.err.println("Created directory: " + directoryName);
-        }
-    }
-
-    /**
-     * Ensure directory exists under {@link #getDataDirectory()}.
-     * 
-     * Not quite ensure, more of a attempt to create it if you can if you can't return false.
+     * If directory cannot be created then returns false.
      * 
      * @param directoryName
      * @return true if directory exists or was created, false otherwise.
@@ -132,85 +175,116 @@ public class AbstractTestCase extends TestCase {
     }
     
     /**
-     * Ensure {@link #getDataDirectory()}.
+     * Ensure output directory exists.
      * 
+     * @see #getOutputDataDirectory()
      * @return true if directory exists or was created, false otherwise.
      */
-    public boolean ensureDirectory() {
-        File dir = new File(getDataDirectory());
-        if (!dir.exists() && !dir.mkdirs()) {
-            return false;
-        }
-
-        return dir.isDirectory();
+    public boolean ensureOutputDirectory() {
+        return ensureDirectory(getOutputDataDirectory());
     }
 
     /**
      * Return the project (with JUnit name) relative directory where test output data is located.
      * 
-     * @see #getTestingOutputDirectory()
      * @param directoryName name of directory to append to end of path
      * @return a project-relative directory name  
      */
-    public String getTestingOutputDirectory (String directoryName) {
-        
-        String newDirName = getTestingOutputDirectory() + File.separator + getShortClassName() + File.separator + directoryName;
-        ensureAndCreateDirectory (newDirName);
-        return newDirName; 
+    protected String getOutputDataDirectory(String directoryName) {
+
+        String newDirName = getRootOutputTestDataDirectory() + File.separator + getShortClassName() + File.separator + directoryName;
+        return newDirName;
     }
 
     /**
-     * Return a test data directory for the current JUnit.
+     * Return a test data directory for the current JUnit/class.
      * 
-     * This returns the proper project-relative path for the input testing data directory.
+     * @see {@link #getTestFilename(String)}
+     * @see {@link #getOutputTestFilename(String)}
+     * @see {@link #getSamplesSourceFilename(String)}
      * 
      * @return a project-relative directory name, appends the JUnit name at the end of the string. 
      */
     public String getDataDirectory() {
         
-        String dirname = getTestDataDirectory() + File.separator + getShortClassName();
-        ensureAndCreateDirectory(dirname);
+        String dirname = getRootInputTestDataDirectory() + File.separator + getShortClassName();
+        assertDirectoryExists(dirname);
         return dirname;
     }
 
     /**
      * Return the project (with JUnit name) relative directory where test input data is located.
      * 
-     * @eee {@link #getDataDirectory()}
+     * @see {@link #getTestFilename(String)}
+     * @see {@link #getOutputTestFilename(String)}
+     * @see {@link #getSamplesSourceFilename(String)}
+     * 
+     * @deprecated use {@link #getOutputDataDirectory(String)}
      * @param directoryName name of directory to append to end of string
      * @return a project-relative directory name  
      */
     public String getDataDirectory(String directoryName) {
         String newDirName = getDataDirectory() + File.separator + directoryName;
-        ensureAndCreateDirectory (newDirName);
+        assertDirectoryExists(newDirName);
         return newDirName; 
     }
     
 
-    /**
-     * Get a project relative input data file name, in dir {{@link #getDataDirectory()}.
-     * 
-     */
+   /**
+    * Get input data file name.
+    * 
+    * Use this method to get JUnit test specific input filenames.
+    * 
+    * @param baseFilename
+    * @return project and JUnit method relative filename.
+    */
     public String getTestFilename(String baseFilename) {
         return getDataDirectory() + File.separator + baseFilename;
     }
 
+    /**
+     * Create log relative to the output data directory.
+     * 
+     * @see #getOutputDataDirectory()
+     * 
+     * @param logFileBaseName
+     * @return
+     */
     public Log createLog(String logFileBaseName) {
         String logfilename = logFileBaseName + ".log";
-        return new Log(getDataDirectory(), logfilename);
+        return new Log(getOutputDataDirectory(), logfilename);
     }
     
     /**
-     * Get a project relative output data file name.
+     * Get output file name relative to the output directory/
      * 
+     * Use this method to get JUnit test specific output filename.
+     * 
+     * @see #getOutputDataDirectory().
+     * @param baseFilename
+     * @return
      */
     public String getOutputTestFilename(String baseFilename) {
-        return getTestingOutputDirectory() + File.separator + baseFilename;
+        return getOutputDataDirectory() + File.separator + baseFilename;
+    }
+    
+    
+    /**
+     * Return an output data directory for the current JUnit/class.
+     * 
+     * Creates directory if needed.
+     * 
+     * @return a test output directory for the current JUnit/class.the output
+     */
+    public String getOutputDataDirectory() {
+        String dirname = getRootOutputTestDataDirectory() + File.separator + getShortClassName();
+        return dirname;
     }
 
     /**
      * get this class name (without package).
-     * @return
+     * 
+     * @return class name for the current JUnit test class.
      */
     protected String getShortClassName() {
         String className = this.getClass().getName();
@@ -349,7 +423,7 @@ public class AbstractTestCase extends TestCase {
      *            directory that must exist.
      */
     public void assertDirectoryExists(String directoryName) {
-        assertTrue("Missing file: " + directoryName, new File(directoryName).isDirectory());
+        assertTrue("Missing directory: " + directoryName, new File(directoryName).isDirectory());
     }
 
     /**
@@ -373,15 +447,6 @@ public class AbstractTestCase extends TestCase {
             e.printStackTrace(System.err);
         }
         assertTrue(string, false);
-    }
-
-    /**
-     * Automatically create directories if they do not exist.
-     * 
-     * @param createMissingDirectories
-     */
-    public void setCreateMissingDirectories(boolean createMissingDirectories) {
-        this.createMissingDirectories = createMissingDirectories;
     }
 
     /**
@@ -432,4 +497,36 @@ public class AbstractTestCase extends TestCase {
             throw new RuntimeException("Unable to remove file " + filename);
         }
     }
+
+    /**
+     * Get sample source or data filename.
+     * 
+     * Examples.
+     * <pre>
+     * String filename = getSamplesSourceFilename("Sumit.java");
+     * 
+     * String filename = getSamplesSourceFilename(HELLO_SOURCE_FILENAME);
+     * 
+     * </pre>
+     *  
+     * @param filename
+     * @return
+     */
+    public String getSamplesSourceFilename(String filename) {
+
+        String name = getTestSamplesSourceDirectory() + File.separator + filename;
+        assertFileExists(name);
+        return name;
+    }
+
+    /**
+     * Directory for pc2 samples.
+     * 
+     * @see #getSamplesSourceFilename(String)
+     * @return directory
+     */
+    public String getTestSamplesSourceDirectory() {
+        return getProjectRootDirectory() + File.separator + "samps" + File.separator + "src";
+    }
+
 }

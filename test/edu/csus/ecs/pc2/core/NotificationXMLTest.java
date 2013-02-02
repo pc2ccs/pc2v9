@@ -176,10 +176,9 @@ public class NotificationXMLTest extends AbstractTestCase {
             pass();
         }
         
-        // TODO CCS fix this JUnit 
+        // TODO CCS add code to handle judgements and notifications
 
 //        Judgement judgement = sample.getYesJudgement(contest);
-//        debugPrint("debug 22 J = " + judgeId);
 //        sample.addJudgement(contest, run, judgement, judgeId);
 
         /**
@@ -188,7 +187,7 @@ public class NotificationXMLTest extends AbstractTestCase {
 
         sample.addBalloonNotification(contest, run);
         
-        // TODO FIX this
+        // TODO CCS add code to handle judgements and notifications
 //        Notification notification = contest.getNotification(run.getSubmitter(), run.getProblemId());
 //        assertNotNull("Expected notification for "+run, notification);
 //

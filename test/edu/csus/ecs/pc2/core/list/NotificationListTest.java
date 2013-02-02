@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -19,7 +18,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.FileStorage;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
 
@@ -31,38 +30,37 @@ import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
  */
 
 // $HeadURL$
-public class NotificationListTest extends TestCase {
+public class NotificationListTest extends AbstractTestCase {
 
-    private String sampleFileName;
+//    private String sampleFileName 
 
-    private String projectPath;
 
-    @Override
-    protected void setUp() throws Exception {
-        // TODO Auto-generated method stub
-        super.setUp();
-
-        // Directory where test data is
-        String testDir = "testdata";
-        projectPath = JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            throw new Exception("Unable to locate " + testDir);
-        }
-
-        String loadFile = projectPath + File.separator + testDir + File.separator + "Sumit.java";
-        File dir = new File(loadFile);
-        if (!dir.exists()) {
-            System.err.println("could not find " + loadFile);
-            throw new Exception("Unable to locate " + loadFile);
-        }
-
-        sampleFileName = loadFile;
-
-    }
+//    @Override
+//    protected void setUp() throws Exception {
+//        // TODO Auto-generated method stub
+//        super.setUp();
+//
+//        // Directory where test data is
+//        String testDir = "testdata";
+//        projectPath = JUnitUtilities.locate(testDir);
+//        if (projectPath == null) {
+//            throw new Exception("Unable to locate " + testDir);
+//        }
+//
+//        String loadFile = projectPath + File.separator + testDir + File.separator + "Sumit.java";
+//        File dir = new File(loadFile);
+//        if (!dir.exists()) {
+//            System.err.println("could not find " + loadFile);
+//            throw new Exception("Unable to locate " + loadFile);
+//        }
+//
+//        sampleFileName = loadFile;
+//
+//    }
 
     public void testSaveToDisk() throws Exception {
 
-        String dirname = projectPath + File.separator + "testing" + File.separator + "NotifListTest";
+        String dirname = getOutputDataDirectory();
 
         new File(dirname).mkdirs();
 
@@ -147,16 +145,12 @@ public class NotificationListTest extends TestCase {
 
         Run run = sample.createRun(contest, team.getClientId(), problem);
 
-        RunFiles runFiles = new RunFiles(run, getSampleFileName());
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename(SUMIT_SOURCE_FILENAME));
         Run newRun = contest.acceptRun(run, runFiles);
 
         Run run2 = sample.addJudgement(contest, newRun, sample.getYesJudgement(contest), judge.getClientId());
         contest.updateRun(run2, judge.getClientId());
         return run2;
-    }
-
-    public String getSampleFileName() {
-        return sampleFileName;
     }
 
     private Notification[] createNotifications(IInternalContest contest, ClientId judgeClient) {

@@ -698,12 +698,6 @@ public class EventFeedXMLTest extends AbstractTestCase {
         
         NodeList nodes = document.getElementsByTagName(string);
 
-        // for (int i = 0; i < nodes.getLength(); i++) {
-        // Node node = (Node) nodes.item(i);
-        // String name = node.getNodeName();
-        // System.out.println("debug 22 name = " + name);
-        // }
-
         return nodes.getLength();
     }
 
@@ -743,15 +737,15 @@ public class EventFeedXMLTest extends AbstractTestCase {
                 if (shortname == null) {
                     shortname = problem.getLetter();
                 }
-                String filename = getTestFilename(shortname + ".dat");
-                String answerName = getTestFilename(shortname + ".ans");
+                String filename = getOutputTestFilename(shortname + ".dat");
+                String answerName = getOutputTestFilename(shortname + ".ans");
 
                 if (new File(filename).exists()) {
                     if (debugMode){
                         System.out.println("Data file exists: " + filename);
                     }
                 } else {
-                    ensureDirectory(getDataDirectory());
+                    ensureOutputDirectory();
                     createSampleDataFile(filename);
                     createSampleAnswerFile(answerName);
                 }
