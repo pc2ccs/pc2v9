@@ -219,7 +219,6 @@ public class AbstractTestCase extends TestCase {
      * @see {@link #getOutputTestFilename(String)}
      * @see {@link #getSamplesSourceFilename(String)}
      * 
-     * @deprecated use {@link #getOutputDataDirectory(String)}
      * @param directoryName name of directory to append to end of string
      * @return a project-relative directory name  
      */
@@ -527,6 +526,28 @@ public class AbstractTestCase extends TestCase {
      */
     public String getTestSamplesSourceDirectory() {
         return getProjectRootDirectory() + File.separator + "samps" + File.separator + "src";
+    }
+    
+    
+    /**
+     * Remove every ch from string.
+     * @param string
+     * @param ch
+     * @return
+     */
+    public String stripChar(String string, char ch) {
+        int idx = string.indexOf(ch);
+        while (idx > -1) {
+            // only strip out if ch is in string.
+            StringBuffer sb = new StringBuffer(string);
+            idx = sb.indexOf(ch + "");
+            while (idx > -1) {
+                sb.deleteCharAt(idx);
+                idx = sb.indexOf(ch + "");
+            }
+            return sb.toString();
+        }
+        return string;
     }
 
 }

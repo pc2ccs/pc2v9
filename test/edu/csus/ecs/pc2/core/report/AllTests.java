@@ -22,6 +22,7 @@ public final class AllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(ExportYamlReportTest.class);
         suite.addTestSuite(ExtractorTest.class);
+        suite.addTestSuite(ExtractRunsTest.class);
         //$JUnit-END$
         return suite;
     }

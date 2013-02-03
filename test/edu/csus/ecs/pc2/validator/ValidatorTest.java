@@ -1,15 +1,12 @@
 package edu.csus.ecs.pc2.validator;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Hashtable;
 import java.util.UUID;
 
-import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.IResultsParser;
 import edu.csus.ecs.pc2.core.execute.XMLResultsParser;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * JUnit test cases for Validator.
@@ -19,7 +16,7 @@ import edu.csus.ecs.pc2.core.util.JUnitUtilities;
  */
 
 // $HeadURL$
-public class ValidatorTest extends TestCase {
+public class ValidatorTest extends AbstractTestCase {
 
     private boolean unitDebug = true;
 
@@ -27,38 +24,30 @@ public class ValidatorTest extends TestCase {
 
     private String testOutputDirectoryName = null;
 
-    private static final String DATA_DIR_PATH = "testdata" + File.separator + "validator";
+    private static final String DATA_DIR_PATH = "validator";
 
-    private static final String OUT_DIR_PATH = "testing" + File.separator + "validator" + File.separator + "output";
+//    private static final String OUT_DIR_PATH = "testing" + File.separator + "validator" + File.separator + "output";
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
         // Directory where test data is
-        String testDir = "testdata";
-        String projectPath = JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            throw new Exception("Unable to locate " + testDir);
-        }
+//        String testDir = "testdata";
+//        String projectPath = JUnitUtilities.locate(testDir);
+//        if (projectPath == null) {
+//            throw new Exception("Unable to locate " + testDir);
+//        }
 
-        testDataDirectoryName = projectPath + File.separator + DATA_DIR_PATH;
-        testOutputDirectoryName = projectPath + File.separator + OUT_DIR_PATH;
-        
-        if (! new File(testOutputDirectoryName).isDirectory()) {
-            new File(testOutputDirectoryName).mkdirs();
-        }
+//        testDataDirectoryName = projectPath + File.separator + DATA_DIR_PATH;
+//        testOutputDirectoryName = projectPath + File.separator + OUT_DIR_PATH;
 
-        Utilities.insureDir(testDataDirectoryName);
-        Utilities.insureDir(testOutputDirectoryName);
-        
-        if (! new File(testDataDirectoryName).isDirectory()) {
-            throw new FileNotFoundException("Could not create dir: "+testDataDirectoryName);
-        }
-        
-        if (! new File(testOutputDirectoryName).isDirectory()) {
-            throw new FileNotFoundException("Could not create dir: "+testOutputDirectoryName);
-        }
+        testDataDirectoryName = getRootInputTestDataDirectory() + File.separator + DATA_DIR_PATH;
+        testOutputDirectoryName = getOutputDataDirectory();
+        ensureOutputDirectory();
+
+        assertDirectoryExists(testDataDirectoryName);
+        assertDirectoryExists(testOutputDirectoryName);
         
     }
 
@@ -66,7 +55,6 @@ public class ValidatorTest extends TestCase {
      * Return full path and filename to test data directory.
      * 
      * @param filename
-     * @return
      */
     private String getFullPathName(String filename) {
         return testDataDirectoryName + File.separator + filename;

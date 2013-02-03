@@ -40,7 +40,6 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
  * Test Scoring Algorithm.
@@ -273,16 +272,15 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         initContestData(contest);
         Run run = getARun(contest);
         // Directory where test data is
-        String testDir = "testdata";
-        String projectPath=JUnitUtilities.locate(testDir);
-        if (projectPath == null) {
-            throw new IOException("Unable to locate "+testDir);
-        }
+//        String testDir = "testdata";
+//        String projectPath=JUnitUtilities.locate(testDir);
+//        if (projectPath == null) {
+//            throw new IOException("Unable to locate "+testDir);
+//        }
 
         RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
         
         contest.addRun(run, runFiles, null);
-        
         
         checkOutputXML(contest);
     }
