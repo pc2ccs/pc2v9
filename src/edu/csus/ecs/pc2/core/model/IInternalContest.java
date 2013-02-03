@@ -1193,4 +1193,11 @@ public interface IInternalContest {
      */
     void updateEventFeedDefinition(EventFeedDefinition eventFeedDefinition);
 
+    /**
+     * 
+     * @param elementId
+     * @return single contest event def.
+     */
+    EventFeedDefinition getEventFeedDefinition(ElementId elementId);
+
 }

@@ -112,6 +112,8 @@ public class InternalContest implements IInternalContest {
 
     private Vector<IMessageListener> messageListenerList = new Vector<IMessageListener>();
     
+    private Vector<IEventFeedDefinitionListener> eventFeedDefinitionListenerList =new Vector<IEventFeedDefinitionListener>(); 
+    
     /**
      * Contains name of client (judge or admin) who checks out the run.
      */
@@ -467,6 +469,21 @@ public class InternalContest implements IInternalContest {
         }
     }
     
+    private void fireEventFeedDefinitionListener(EventFeedDefinitionEvent eventFeedDefinitionEvent) {
+        for (int i = 0; i < problemListenerList.size(); i++) {
+
+            if (eventFeedDefinitionEvent.getAction() == EventFeedDefinitionEvent.Action.ADDED) {
+                eventFeedDefinitionListenerList.elementAt(i).eventFeedDefinitionAdded(eventFeedDefinitionEvent);
+            } else if (eventFeedDefinitionEvent.getAction() == EventFeedDefinitionEvent.Action.DELETED) {
+                eventFeedDefinitionListenerList.elementAt(i).eventFeedDefinitionRemoved(eventFeedDefinitionEvent);
+            } else if (eventFeedDefinitionEvent.getAction() == EventFeedDefinitionEvent.Action.REFRESH_ALL) {
+                eventFeedDefinitionListenerList.elementAt(i).eventFeedDefinitionRefreshAll(eventFeedDefinitionEvent);
+            } else {
+                eventFeedDefinitionListenerList.elementAt(i).eventFeedDefinitionChanged(eventFeedDefinitionEvent);
+            }
+        }
+    }
+    
     private void fireCategoryListener(Category category, CategoryEvent.Action action) {
         
         CategoryEvent categoryEvent = new CategoryEvent(action, category);
@@ -499,9 +516,6 @@ public class InternalContest implements IInternalContest {
                 notificationListenerList.elementAt(i).notificationChanged(notificationEvent);
             }
         }
-
-
-        
     }
 
     private void fireLanguageListener(LanguageEvent languageEvent) {
@@ -3014,22 +3028,23 @@ public class InternalContest implements IInternalContest {
     public void addEventFeedDefinition(EventFeedDefinition eventFeedDefinition) {
 
         eventFeedDefinitionsList.add(eventFeedDefinition);
-        // TODO CCS add EventFeedDefinitionEvent and fireEventFeedDefinitionListener
-        //        EventFeedDefinitionEvent eventFeedDefinitionEvent = new EventFeedDefinitionEvent(EventFeedDefinitionEvent.Action.ADDED, eventFeedDefinition);
-        //        fireEventFeedDefinitionListener(eventFeedDefinitionEvent);
+        EventFeedDefinitionEvent eventFeedDefinitionEvent = new EventFeedDefinitionEvent(EventFeedDefinitionEvent.Action.ADDED, eventFeedDefinition);
+        fireEventFeedDefinitionListener(eventFeedDefinitionEvent);
     }
 
     public void deleteEventFeedDefinition(EventFeedDefinition eventFeedDefinition) {
         eventFeedDefinitionsList.delete(eventFeedDefinition);
-        // TODO CCS add EventFeedDefinitionEvent and fireEventFeedDefinitionListener
-        //        EventFeedDefinitionEvent problemEvent = new EventFeedDefinitionEvent(EventFeedDefinitionEvent.Action.DELETED, eventFeedDefinition);
-        //        fireEventFeedDefinitionListener(eventFeedDefinition);
+        EventFeedDefinitionEvent eventFeedDefinitionEvent = new EventFeedDefinitionEvent(EventFeedDefinitionEvent.Action.DELETED, eventFeedDefinition);
+        fireEventFeedDefinitionListener(eventFeedDefinitionEvent);
     }
 
     public void updateEventFeedDefinition(EventFeedDefinition eventFeedDefinition) {
         eventFeedDefinitionsList.update(eventFeedDefinition);
-        // TODO CCS add EventFeedDefinitionEvent and fireEventFeedDefinitionListener
-        //        EventFeedDefinitionEvent problemEvent = new EventFeedDefinitionEvent(EventFeedDefinitionEvent.Action.CHANGED, eventFeedDefinition);
-        //        fireProblemListener(problemEvent);  
+        EventFeedDefinitionEvent problemEvent = new EventFeedDefinitionEvent(EventFeedDefinitionEvent.Action.CHANGED, eventFeedDefinition);
+        fireEventFeedDefinitionListener(problemEvent);
+    }
+
+    public EventFeedDefinition getEventFeedDefinition(ElementId elementId) {
+        return (EventFeedDefinition) eventFeedDefinitionsList.get(elementId);
     }
 }
