@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.list.ClarificationList;
 import edu.csus.ecs.pc2.core.list.ClientSettingsList;
 import edu.csus.ecs.pc2.core.list.ConnectionHandlerList;
 import edu.csus.ecs.pc2.core.list.ContestTimeList;
+import edu.csus.ecs.pc2.core.list.EventFeedDefinitionsList;
 import edu.csus.ecs.pc2.core.list.GroupDisplayList;
 import edu.csus.ecs.pc2.core.list.GroupList;
 import edu.csus.ecs.pc2.core.list.JudgementDisplayList;
@@ -249,6 +250,8 @@ public class InternalContest implements IInternalContest {
     private ReplaySetting replaySettingTemp = null;
     
     private PlaybackManager playbackManager = new PlaybackManager();
+
+    private EventFeedDefinitionsList eventFeedDefinitionsList = null;
 
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
@@ -2935,7 +2938,7 @@ public class InternalContest implements IInternalContest {
         
         if (replaySettingTemp == null) {
             // TODO 6670 remove this debugging code
-            replaySettingTemp = new ReplaySetting("debug 22 - Sample Replay Title");
+            replaySettingTemp = new ReplaySetting("Sample Replay Title");
 //            replaySettingTemp.setAutoStart(true);
 //            replaySettingTemp.setIterationCount(42);
 //            replaySettingTemp.setSiteNumber(2);
@@ -3002,5 +3005,31 @@ public class InternalContest implements IInternalContest {
         Account account = accountList.assignNewTeam (siteNumber, displayName, memberNames, password);
         addAccount(account);
         return account;
+    }
+
+    public EventFeedDefinition[] getEventFeedDefinitions() {
+        return eventFeedDefinitionsList.getList();
+    }
+
+    public void addEventFeedDefinition(EventFeedDefinition eventFeedDefinition) {
+
+        eventFeedDefinitionsList.add(eventFeedDefinition);
+        // TODO CCS add EventFeedDefinitionEvent and fireEventFeedDefinitionListener
+        //        EventFeedDefinitionEvent eventFeedDefinitionEvent = new EventFeedDefinitionEvent(EventFeedDefinitionEvent.Action.ADDED, eventFeedDefinition);
+        //        fireEventFeedDefinitionListener(eventFeedDefinitionEvent);
+    }
+
+    public void deleteEventFeedDefinition(EventFeedDefinition eventFeedDefinition) {
+        eventFeedDefinitionsList.delete(eventFeedDefinition);
+        // TODO CCS add EventFeedDefinitionEvent and fireEventFeedDefinitionListener
+        //        EventFeedDefinitionEvent problemEvent = new EventFeedDefinitionEvent(EventFeedDefinitionEvent.Action.DELETED, eventFeedDefinition);
+        //        fireEventFeedDefinitionListener(eventFeedDefinition);
+    }
+
+    public void updateEventFeedDefinition(EventFeedDefinition eventFeedDefinition) {
+        eventFeedDefinitionsList.update(eventFeedDefinition);
+        // TODO CCS add EventFeedDefinitionEvent and fireEventFeedDefinitionListener
+        //        EventFeedDefinitionEvent problemEvent = new EventFeedDefinitionEvent(EventFeedDefinitionEvent.Action.CHANGED, eventFeedDefinition);
+        //        fireProblemListener(problemEvent);  
     }
 }

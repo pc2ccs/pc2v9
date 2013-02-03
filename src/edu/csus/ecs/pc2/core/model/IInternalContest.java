@@ -1167,4 +1167,30 @@ public interface IInternalContest {
      */
     Account autoRegisterTeam (String displayName, String [] memberNames, String password);
 
+    /**
+     * 
+     * @return event feed defs.
+     */
+    EventFeedDefinition[] getEventFeedDefinitions();
+    
+    /**
+     * Add Event Feed Definition.
+     * @param eventFeedDefinition
+     */
+    void addEventFeedDefinition(EventFeedDefinition eventFeedDefinition);
+
+    /**
+     * Delete Event Feed Definition.
+     * 
+     * @param eventFeedDefinition
+     */
+    void deleteEventFeedDefinition(EventFeedDefinition eventFeedDefinition);
+
+    /**
+     * Update Event Feed Definition.
+     * 
+     * @param eventFeedDefinition
+     */
+    void updateEventFeedDefinition(EventFeedDefinition eventFeedDefinition);
+
 }

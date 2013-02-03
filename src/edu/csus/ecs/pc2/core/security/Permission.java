@@ -304,6 +304,14 @@ public class Permission implements Serializable {
          * Change settings for a replay playback
          */
         EDIT_PLAYBACK,
+        /**
+         * Change or add event feed
+         */
+        EDIT_EVENT_FEED, 
+        /**
+         * View event feed
+         */
+        VIEW_EVENT_FEED,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -403,6 +411,9 @@ public class Permission implements Serializable {
         hash.put(Type.START_PLAYBACK,"Start Playback");
         hash.put(Type.STOP_PLAYBACK,"Stop Playback");
         hash.put(Type.EDIT_PLAYBACK,"Edit Playback Settings");
+        
+        hash.put(Type.EDIT_EVENT_FEED,"Edit Event Feeds");
+        hash.put(Type.VIEW_EVENT_FEED,"View Event Feeds");
     }
 
     /**
