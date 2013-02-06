@@ -36,7 +36,7 @@ public class SubmitterTest extends AbstractTestCase {
         super.setUp();
 
         Utilities.insureDir(getDataDirectory());
-        String testFilename = getTestFilename("Hello.java");
+        String testFilename = getTestFilename(HELLO_SOURCE_FILENAME);
         if (!new File(testFilename).exists()) {
             writeHelloFile(testFilename);
             if (debugFlag) {
@@ -90,7 +90,7 @@ public class SubmitterTest extends AbstractTestCase {
 
             String problem = "A";
             String language = null;
-            String filename = getTestFilename("Hello.java");
+            String filename = getTestFilename(HELLO_SOURCE_FILENAME);
 
             Submitter submitter = new Submitter("2");
             submitter.submitRun(filename, problem, language);
@@ -109,7 +109,7 @@ public class SubmitterTest extends AbstractTestCase {
 
             String problem = "A";
             String language = null;
-            String filename = getTestFilename("Hello.java");
+            String filename = getTestFilename(HELLO_SOURCE_FILENAME);
 
             Submitter submitter = new Submitter("4");
             submitter.submitRun(filename, problem, language);
@@ -127,7 +127,7 @@ public class SubmitterTest extends AbstractTestCase {
 
         if (serverRunning) {
 
-            String filename = getTestFilename("Hello.java");
+            String filename = getTestFilename(HELLO_SOURCE_FILENAME);
 
             String[] args = { "--login", "3", filename };
             Submitter submitter = new Submitter(args);
