@@ -42,7 +42,7 @@ public abstract class APIAbstractTest {
     /**
      * Get title for this test.
      * 
-     * @return
+     * @return the title
      */
     public abstract String getTitle();
 
