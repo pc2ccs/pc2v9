@@ -86,8 +86,8 @@ public class Run extends ISubmission {
 
     private Vector<JudgementRecord> judgementList = new Vector <JudgementRecord>();
 
-    // TODO Judgements
-
+    private Vector<RunTestCase> testcases = new Vector <RunTestCase>();
+    
     private boolean deleted;
     
     /**
@@ -171,12 +171,10 @@ public class Run extends ISubmission {
      */
     public JudgementRecord getJudgementRecord() {
         if (judgementList.size() == 0) {
-            // TODO should thow an Exception? JudgmentNotFound
             return null;
         }
 
         if (judgementList.size() == 1) {
-            // TODO should thow an Exception? JudgmentNotFound
             return judgementList.elementAt(0);
         }
 
@@ -189,7 +187,6 @@ public class Run extends ISubmission {
             }
         }
 
-        // TODO should thow an Exception? JudgmentNotFound
         return null;
     }
     
@@ -207,24 +204,12 @@ public class Run extends ISubmission {
     }
 
     /**
-     * Return list of all JudgementRecords. <br>
-     * 
-     * 
-     * @return JudgementRecord[] - list of all JudgementRecord
+     * Return list of all JudgementRecords.
+     *  
+     * @return JudgementRecord[] - list of all active and inactive JudgementRecord
      */
     public JudgementRecord[] getAllJudgementRecords() {
-        if (judgementList.size() == 0) {
-            // TODO should thow an Exception? JudgmentNotFound
-            return new JudgementRecord[0];
-        }
-
-        JudgementRecord[] judgementRecordArray = new JudgementRecord[judgementList.size()];
-        for (int i = judgementList.size() - 1; i >= 0; i--) {
-            JudgementRecord judgementRecord = judgementList.elementAt(i);
-            judgementRecordArray[i] = judgementRecord;
-        }
-
-        return judgementRecordArray;
+        return (JudgementRecord[]) judgementList.toArray(new JudgementRecord[judgementList.size()]);
     }
 
     /**
@@ -256,15 +241,17 @@ public class Run extends ISubmission {
 
     }
     
+    /**
+     * 
+     * @return null if no judgement found, else the judgement
+     */
     public JudgementRecord getComputerJudgementRecord(){
 
         if (judgementList.size() == 0) {
-            // TODO should thow an Exception? JudgmentNotFound
             return null;
         }
 
         if (judgementList.size() == 1) {
-            // TODO should thow an Exception? JudgmentNotFound
             JudgementRecord judgementRecord = judgementList.elementAt(0);
             if (judgementRecord.isComputerJudgement()) {
                 return judgementRecord;
@@ -280,22 +267,20 @@ public class Run extends ISubmission {
             }
         }
 
-        // TODO should thow an Exception? JudgmentNotFound
         return null;
     }
 
     /**
      * 
-     * @return number of minutes to judge run.
+     * @return 0 if not judged, else number of minutes to judge run.
      */
     public long getJudgedMinutes() {
         JudgementRecord judgement = getJudgementRecord();
         if (judgement == null) {
-            return 0; // TODO throw exception ??
+            return 0;
         }
 
         return judgement.getJudgedMinutes();
-
     }
 
     public String getCommentsForTeam() {
@@ -311,6 +296,10 @@ public class Run extends ISubmission {
         return judgementRecord.getCommentForTeam().getComment();
     }
 
+    /**
+     * 
+     * @return empty string if no judgement, else comment
+     */
     public String getCommentsForJudge() {
         JudgementRecord judgementRecord = getJudgementRecord();
         if (judgementRecord == null) {
@@ -327,7 +316,7 @@ public class Run extends ISubmission {
     /**
      * Show this judgement to teams ?
      * 
-     * @return if the judgement can be shown to the team return true, otherwise return false
+     * @return true if the judgement can be shown to the team, else false
      */
     public boolean isSendToTeams() {
         JudgementRecord judgementRecord = getJudgementRecord();
@@ -350,8 +339,13 @@ public class Run extends ISubmission {
     }
 
     /**
-     * The first elapsed time set for this run using {@link #setElapsedMS(long)}.
-     * @return
+     * The  elapsed time when this run was added.
+     * 
+     * This is always the actual server submission time. The submission
+     * time can be 'overridden' using {@link #setElapsedMS(long)} and
+     * that elapsed MS will be used for scoring, esp. in CCS Test Mode.
+     * 
+     * @return the server timestamp for this submission
      */
     public long getOriginalElapsedMS() {
         return originalElapsedMS;
@@ -415,10 +409,9 @@ public class Run extends ISubmission {
             }
             return true;
         } catch (Exception e) {
-            // TODO add to static Exception Log
+            // TODO logger.debug("Exception while comparing runs", e);
             return false;
         }
-
     }
     
     @Override
@@ -441,6 +434,14 @@ public class Run extends ISubmission {
 
     public void setOverRideNumber(int number) {
         overrideNumber = number;
+    }
+
+    /**
+     * 
+     * @return a list of the testcase results
+     */
+    public RunTestCase[] getRunTestCases() {
+        return (RunTestCase[]) testcases.toArray(new RunTestCase[testcases.size()]);
     }
 
 }

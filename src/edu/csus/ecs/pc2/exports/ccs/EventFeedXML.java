@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.ProblemComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
+import edu.csus.ecs.pc2.core.list.RunTestCaseComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
@@ -37,6 +38,7 @@ import edu.csus.ecs.pc2.core.model.Notification;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.IMemento;
@@ -193,14 +195,14 @@ public class EventFeedXML {
         for (Run run : runs) {
             if (filter.matches(run)) {
                 memento = mementoRoot.createChild(RUN_TAG);
-                addMemento(memento, contest, run);
-            }
-        }
-        
-        for (Run run : runs) {
-            if (run.getAllJudgementRecords().length > 0) {
-                memento = mementoRoot.createChild(TESTCASE_TAG);
-                addMementoAllTestCases(memento, contest, run);
+                addMemento(memento, contest, run); // add RUN
+                
+                RunTestCase[] runTestCases = getLastJudgementTestCases(run);
+                Arrays.sort(runTestCases, new RunTestCaseComparator());
+                for (RunTestCase runTestCase : runTestCases) {
+                    memento = mementoRoot.createChild(TESTCASE_TAG);
+                    addMemento(memento, contest, runTestCase, run); // add TESTCASE
+                }
             }
         }
 
@@ -237,24 +239,6 @@ public class EventFeedXML {
         }
 
         return toXML(mementoRoot);
-    }
-
-    private void addMementoAllTestCases(IMemento memento, IInternalContest contest, Run run) {
-        
-        memento.putInteger("id", run.getNumber());
-
-        JudgementRecord[] judgementRecords = run.getAllJudgementRecords();
-
-        if (judgementRecords.length > 0) {
-            
-            Problem problem = contest.getProblem(run.getProblemId());
-            
-            for (int i = 0; i < judgementRecords.length; i++) {
-                int testNumber = i + 1;
-                addMemento(memento, contest, testNumber, run, problem, judgementRecords[i]);
-            }
-        }
-        
     }
 
     /**
@@ -725,89 +709,61 @@ public class EventFeedXML {
         return memento;
     }
 
-    /**
-     * Create a TESTCASE for the last judgemente for a run.
-     * 
-     * This returns the last testcase result.
-     * 
-     * <pre>
-     * <testcase run-id="1">
-     * <i>1</i>
-     * <n>1</n>
-     * <judgement>WA</judgement>
-     * <contest-time>939.75</contest-time>
-     * <timestamp>1265336078.01</timestamp>
-     * </testcase>
-     * </pre>
-     * 
-     * @param contest
-     * @param run
-     * @return
-     */
-    public XMLMemento createTestCaseElement(IInternalContest contest, Run run, Problem problem) {
+    public XMLMemento createElement(IInternalContest contest, RunTestCase testCase, Run run) {
         XMLMemento memento = XMLMemento.createWriteRoot(TESTCASE_TAG);
-
-        memento.putInteger("id", run.getNumber());
-
-        JudgementRecord judgementRecord = run.getJudgementRecord();
-
-        if (judgementRecord != null) {
-            int lastTestNumber = run.getAllJudgementRecords().length;
-            addMemento(memento, contest, lastTestNumber, run, problem, judgementRecord);
-        }
-
+        addMemento(memento, contest, testCase, run);
         return memento;
     }
-    
-    /**
-     * Create all TESTCASE elements for a run.
-     * @param contest
-     * @param run
-     * @return
-     */
-    public XMLMemento createAllTestCaseElements(IInternalContest contest, Run run) {
-        XMLMemento memento = XMLMemento.createWriteRoot(TESTCASE_TAG);
-        addMementoAllTestCases(memento, contest, run);
-        
-//        memento.putInteger("id", run.getNumber());
-//
-//        JudgementRecord[] judgementRecords = run.getAllJudgementRecords();
-//
-//        if (judgementRecords.length > 0) {
-//            
-//            Problem problem = contest.getProblem(run.getProblemId());
-//            
-//            for (int i = 0; i < judgementRecords.length; i++) {
-//                int testNumber = i + 1;
-//                addMemento(memento, contest, testNumber, run, problem, judgementRecords[i]);
-//            }
-//        }
 
-        return memento;
-    }
-    
     /**
-     * Create a TESTCASE element.
+     * RunTestCase/TESTCASE memento.
      * @param memento
      * @param contest
-     * @param testNumber
+     * @param testCase
      * @param run
      * @param problem
-     * @param judgementRecord
-     * @return
      */
-    public IMemento addMemento(IMemento memento, IInternalContest contest, int testNumber, Run run, Problem problem, JudgementRecord judgementRecord) {
+    public IMemento addMemento(IMemento memento, IInternalContest contest, RunTestCase testCase, Run run) {
 
-        XMLUtilities.addChild(memento, "i", testNumber);
+//        <testcase>
+//        <i>4</i>
+//        <judged>True</judged>
+//        <judgement_id>2</judgement_id>
+//        <n>51</n>
+        
+        Problem problem = contest.getProblem(run.getProblemId());
+        
+        XMLUtilities.addChild(memento, "i", testCase.getTestNumber());
+        XMLUtilities.addChild(memento, "judged", run.isJudged());
+        XMLUtilities.addChild(memento, "judgement_id", testCase.getTestNumber());
         XMLUtilities.addChild(memento, "n", problem.getNumberTestCases());
-
-        ElementId judgementId = judgementRecord.getJudgementId();
-        String acronym = contest.getJudgement(judgementId).getAcronym();
-        if (acronym == null) {
-            acronym = "?";
-        }
-
-        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMins() * 1000));
+        
+//        <result>AC</result>
+//        <run-id>2</run-id>
+//        <solved>True</solved>
+        
+        // TODO is result really the judgement acronym?
+        XMLUtilities.addChild(memento, "result", "TBD");
+        XMLUtilities.addChild(memento, "run-id", run.getNumber());
+        
+        // TODO CCS is solve whether the run or the test case was solved?
+        /**
+         * There may be an implication that if there is no testcase output then
+         * the test failed and all remaining test cases failed.
+         */
+        XMLUtilities.addChild(memento, "solved", testCase.isSolved());
+  
+//        <time>157.614985</time>
+//        <timestamp>1337173290.16</timestamp>
+//       </testcase>
+//        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMins() * 1000));
+        XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(run.getElapsedMS()));
+        
+        /**
+         * Real time time stamp.
+         * TODO is this the time stamp for the end of the judgement or the time stamp
+         * for the wall clock?
+         */
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
 
         return memento;
@@ -941,7 +897,7 @@ public class EventFeedXML {
     /**
      * @throws IOException
      */
-    private String toXML(XMLMemento mementoRoot)  {
+    protected String toXML(XMLMemento mementoRoot)  {
         try {
             return mementoRoot.saveToString(true);
         } catch (IOException e) {
@@ -995,23 +951,45 @@ public class EventFeedXML {
         Arrays.sort(runs, new RunComparator());
 
         for (Run run : runs) {
-            sb.append(toXML(createElement(contest, run)));
-        }
-        
-        for (Run run : runs) {
-            if (run.getAllJudgementRecords().length > 0) {
-                sb.append(toXML(createAllTestCaseElements(contest, run)));
+
+            sb.append(toXML(createElement(contest, run))); // add RUN
+
+            if (run.isJudged()) {
+                RunTestCase[] runTestCases = getLastJudgementTestCases(run);
+                Arrays.sort(runTestCases, new RunTestCaseComparator());
+                for (RunTestCase runTestCase : runTestCases) {
+                    sb.append(toXML(createElement(contest, runTestCase, run))); // add TESTCASE
+                }
             }
         }
-
         return sb.toString();
     }
 
     /**
-     * Get all sites' teams sorted by site then team number.
-     * 
+     * Get the list of run cases for the last judgement.
+     * @param run
+     */
+    protected RunTestCase[] getLastJudgementTestCases(Run run) {
+        
+        ArrayList <RunTestCase> cases = new ArrayList<RunTestCase>();
+        
+        if (run.isJudged()){
+            RunTestCase[] runTestCases = run.getRunTestCases();
+            JudgementRecord judgementRecord = run.getJudgementRecord();
+            
+            for (RunTestCase runTestCase : runTestCases) {
+                if (runTestCase.matchesJudgement(judgementRecord)){
+                    cases.add(runTestCase);
+                }
+            }
+        }
+        
+        return (RunTestCase[]) cases.toArray(new RunTestCase[cases.size()]);
+    }
+
+    /**
      * @param contest
-     * @return
+     * @return team accounts sorted by site, team number
      */
     public Account[] getTeamAccounts(IInternalContest inContest) {
         Vector<Account> accountVector = inContest.getAccounts(ClientType.Type.TEAM);
