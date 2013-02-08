@@ -1447,4 +1447,24 @@ public class SampleContest {
         return accounts[randomIndex];
     }
 
+    /**
+     * Add run test cases.
+     * 
+     * @param inContest
+     * @param run
+     * @param count
+     */
+    public void addTestCase(IInternalContest inContest, Run run, int count) {
+        
+        JudgementRecord judgementRecord = run.getJudgementRecord();
+        if (judgementRecord == null){
+            throw new RuntimeException("Run has no judgement records "+run);
+        }
+        
+        for (int i = 0; i < count; i++) {
+            RunTestCase runTestCase = new RunTestCase(run, judgementRecord, i+1, run.isSolved());
+            run.addTestCase (runTestCase);
+        }
+    }
+
 }

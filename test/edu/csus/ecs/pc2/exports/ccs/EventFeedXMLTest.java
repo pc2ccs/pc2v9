@@ -105,8 +105,12 @@ public class EventFeedXMLTest extends AbstractTestCase {
         addRunJudgements(contest, runs);
      
     }
-    
+ 
     private void addRunJudgements (IInternalContest inContest, Run[] runs) throws Exception {
+        addRunJudgements(inContest, runs, 0);
+    }
+    
+    private void addRunJudgements (IInternalContest inContest, Run[] runs, int numberOfTestCases) throws Exception {
 
         ClientId judgeId = inContest.getAccounts(Type.JUDGE).firstElement().getClientId();
         Judgement judgement;
@@ -121,6 +125,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
             judgement = sample.getRandomJudgement(inContest, run.getNumber() % 2 == 0); // ever other run is judged Yes.
             sample.addJudgement(inContest, run, judgement, judgeId);
+            sample.addTestCase (inContest,run, numberOfTestCases);
         }
     }
 
@@ -640,7 +645,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         /**
          * Add Run Judgements.
          */
-        addRunJudgements(testCaseContest, runs);
+        addRunJudgements(testCaseContest, runs, 5);
         
         String xml = eventFeedXML.toXML(testCaseContest);
         
@@ -659,7 +664,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         assertXMLCounts(xml, EventFeedXML.REGION_TAG, 22);
         assertXMLCounts(xml, EventFeedXML.RUN_TAG, 12);
         assertXMLCounts(xml, EventFeedXML.TEAM_TAG, 34);
-        assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, 12);
+        assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, 12 * 5); 
 
         /**
          * Test FINALIZE

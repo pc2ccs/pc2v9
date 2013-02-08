@@ -444,4 +444,8 @@ public class Run extends ISubmission {
         return (RunTestCase[]) testcases.toArray(new RunTestCase[testcases.size()]);
     }
 
+    public void addTestCase(RunTestCase runTestCase) {
+        testcases.add(runTestCase);
+    }
+
 }
