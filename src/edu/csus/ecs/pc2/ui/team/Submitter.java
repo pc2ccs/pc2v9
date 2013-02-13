@@ -84,7 +84,7 @@ public class Submitter {
     /**
      * Filename for source to be submitted.
      */
-    private String submittedFileName;
+//    private String submittedFileName;
 
     private boolean debugMode = false;
 
@@ -252,9 +252,7 @@ public class Submitter {
             
             otherFiles = getOtherFiles (mainSubmissionFileName, arguments.getArgList());
             
-            submittedFileName = mainSubmissionFileName;
-
-            requireFile(submittedFileName, "main source filename");
+            requireFile(mainSubmissionFileName, "main source filename");
             
             for (String name : otherFiles) {
                 requireFile(name, "source filename");
@@ -356,9 +354,10 @@ public class Submitter {
             listRuns();
             System.exit(SUCCESS_EXIT_CODE);
         } else {
+            
+            mainSubmissionFileName = arguments.getArg(0);
 
-            submittedFileName = arguments.getArg(0);
-            if (submittedFileName == null) {
+            if (mainSubmissionFileName == null) {
                 System.err.println("Error - missing filename");
                 System.exit(4);
             }
@@ -565,7 +564,7 @@ public class Submitter {
     }
 
     public void submitRun(String mainfilename, String problemName, String languageName) {
-        submittedFileName = mainfilename;
+        mainSubmissionFileName = mainfilename;
         problemTitle = problemName;
         languageTitle = languageName;
         submitRun();
@@ -659,6 +658,7 @@ public class Submitter {
         if (password == null) {
             throw new LoginFailureException("No password specified");
         }
+        
     }
 
     /**
