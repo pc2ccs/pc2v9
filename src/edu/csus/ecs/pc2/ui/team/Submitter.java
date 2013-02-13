@@ -56,7 +56,7 @@ public class Submitter {
 
     private String mainSubmissionFileName;
     
-    public static final String[] CCS_REQUIRED_OPTIONS_LIST = {"-i", "-l", "-m", "-p", "-t", "-u", "-w" };
+    public static final String[] CCS_REQUIRED_OPTIONS_LIST = {"-l", "-m", "-p", "-u", "-w" };
 
     /**
      * Successful run exit code.
@@ -194,9 +194,13 @@ public class Submitter {
             System.exit(4);
         }
 
-        timeStamp = 0;
-        
         debugMode = arguments.isOptPresent("--debug");
+
+        if (debugMode) {
+            arguments.dumpArgs(System.err);
+        }
+        
+        timeStamp = 0;
 
         checkArg = arguments.isOptPresent("--check");
 
@@ -218,6 +222,7 @@ public class Submitter {
             listRuns();
             System.exit(SUCCESS_EXIT_CODE);
         } else {
+            
 
             // -p <problem short-name>
             problemTitle = arguments.getOptValue("-p");
@@ -227,24 +232,26 @@ public class Submitter {
                     languageTitle = arguments.getOptValue("-l");
             }
             
-            // -t <contest-time for submission>
+            // -t (optional) <contest-time for submission>
           
+            String runTimeString = arguments.getOptValue("-t");
             try {
                 if (arguments.isOptPresent("-t")){
-                    timeStamp = Long.parseLong(arguments.getOptValue("-t"));
+                    timeStamp = Long.parseLong(runTimeString);
                 }
             } catch (Exception e) {
-                throw new CommandLineErrorException("Invalid number after -t", e);
+                throw new CommandLineErrorException("Invalid number after -t '"+runTimeString+"'", e);
             }
 
             // -i runid       - (optional) run id for submission
             
+            String runIdString = arguments.getOptValue("-i");
             try {
                 if (arguments.isOptPresent("-i")){
-                    overrideRunId = Long.parseLong(arguments.getOptValue("-i"));
+                    overrideRunId = Long.parseLong(runIdString);
                 }
             } catch (Exception e) {
-                throw new CommandLineErrorException("Invalid number after -i", e);
+                throw new CommandLineErrorException("Invalid number after -i '"+runIdString+"'", e);
             }
 
             // -m <main source filename>
@@ -313,7 +320,11 @@ public class Submitter {
         ParseArguments arguments = new ParseArguments(args, opts);
         
         debugMode = arguments.isOptPresent("--debug");
-
+        
+        if (debugMode){
+            arguments.dumpArgs(System.err);
+        }
+        
         checkArg = arguments.isOptPresent("--check");
         
         submittingClarification = arguments.isOptPresent("--clar");
@@ -608,7 +619,7 @@ public class Submitter {
 
                 submitTheRun(problemTitle, languageTitle, mainSubmissionFileName, otherFiles);
 
-                waitForRunSubmissionConfirmation(runliEventListener, 3);
+                waitForRunSubmissionConfirmation(runliEventListener, 6);
 
                 IRun run = runliEventListener.getRun();
 
@@ -619,6 +630,9 @@ public class Submitter {
                     System.out.println("Submission confirmation: Run " + run.getNumber() + ", problem " + run.getProblem().getName() + //
                             ", for team " + run.getTeam().getDisplayName() + //
                             " (" + run.getTeam().getLoginName() + ")");
+                    if (debugMode){
+                        System.out.println("Run "+run.getNumber()+" submitted at "+run.getSubmissionTime()+" minutes");
+                    }
                 } 
                 // no else
                 
@@ -691,11 +705,13 @@ public class Submitter {
 
         long totalTime = new Date().getTime() - startTime;
 
-        System.out.println(totalTime + " ms");
-        System.out.println();
+        if (debugMode){
+            System.out.println(totalTime + " ms");
+            System.out.println();
+        }
 
         if (!done) {
-            throw new Exception("Timed out waiting for run submission confirm ");
+            throw new Exception("Timed out ("+totalTime+" ms) waiting for run submission confirm - contact staff ");
         }
     }
 
@@ -1133,9 +1149,15 @@ public class Submitter {
         }
     }
 
+    /**
+     * Return all optional and required CCS options.
+     * 
+     * @return list of -t, -i, -w, etc.
+     */
     public String[] getAllCCSOptions() {
         ArrayList<String> list = new ArrayList<String>(Arrays.asList(CCS_REQUIRED_OPTIONS_LIST));
         list.add("-t");
+        list.add("-i");
         allCCSOptions = (String[]) list.toArray(new String[list.size()]);
         return allCCSOptions;
     }
