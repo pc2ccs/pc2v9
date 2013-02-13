@@ -295,7 +295,8 @@ class EventFeeder implements Runnable {
     protected class RunListener implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            // ignore
+            Run run = event.getRun();
+            sendXML(eventFeedXML.createElement(contest, run));
         }
 
         public void runChanged(RunEvent event) {
