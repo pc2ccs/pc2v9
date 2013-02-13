@@ -74,7 +74,9 @@ public class RunList implements Serializable {
      * @throws IOException 
      */
     public Run addNewRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
-        run.setNumber(nextRunNumber++);
+        synchronized (runHash) {
+            run.setNumber(nextRunNumber++);
+        }
         add(run);
         return run;
     }
