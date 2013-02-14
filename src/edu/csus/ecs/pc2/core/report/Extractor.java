@@ -397,7 +397,8 @@ public class Extractor {
                 LOGIN_OPTION_STRING + " loginName - login name (or use -u)", //
                 PASSWORD_OPTION_STRING + " password - login password (or use -w) ", //
                 "", //
-                "CCS_reportname - one of the following submissions, scoreboard, results, accounts", //
+                "CCS_reportname - one of the following " + SUBMISSION_TSV_FILENAME + ", " + SCOREBOARD_TSV_FILENAME + //
+                    ", " + RESULTS_TSV_FILENAME + ", " + ACCOUNTS_TSV_FILENAME, //
                 "", //
                 "Example: Extractor " + LOGIN_OPTION_STRING + " scoreboard1 " + PASSWORD_OPTION_STRING + " scoreboard1 scoreboard", //
                 "", //
