@@ -42,6 +42,8 @@ import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.report.AccountPermissionReport;
 import edu.csus.ecs.pc2.core.report.AccountsReport;
+import edu.csus.ecs.pc2.core.report.AccountsTSVReport;
+import edu.csus.ecs.pc2.core.report.AccountsTSVReportTeamAndJudges;
 import edu.csus.ecs.pc2.core.report.AllReports;
 import edu.csus.ecs.pc2.core.report.BalloonDeliveryReport;
 import edu.csus.ecs.pc2.core.report.BalloonSettingsReport;
@@ -253,7 +255,13 @@ public class ReportPane extends JPanePlugin {
         reports.add(new PlaybackDumpReport());
         
         reports.add(new PasswordsReport());
-
+        
+        reports.add(new AccountsTSVReportTeamAndJudges());
+        
+        reports.add(new AccountsTSVReport());
+        
+        reports.add(new RunsTSVReport());
+        
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());
     }

@@ -113,6 +113,12 @@ public final class Reports {
         reports.add(new InternalDumpReport());
         
         reports.add(new PasswordsReport());
+        
+        reports.add(new AccountsTSVReportTeamAndJudges());
+
+        reports.add(new AccountsTSVReport());
+        
+        reports.add(new RunsTSVReport());
 
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 

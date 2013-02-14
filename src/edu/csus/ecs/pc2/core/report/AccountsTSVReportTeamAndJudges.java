@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * @version $Id$
  */
 // $HeadURL$
-class AccountsTSVReportTeamAndJudges extends AccountsTSVReport {
+public class AccountsTSVReportTeamAndJudges extends AccountsTSVReport {
 
     /**
      * 
@@ -47,5 +47,15 @@ class AccountsTSVReportTeamAndJudges extends AccountsTSVReport {
     private Account[] getAccounts(Type type) {
         Vector<Account> vector = contest.getAccounts(type);
         return (Account[]) vector.toArray(new Account[vector.size()]);
+    }
+    
+    @Override
+    public String getReportTitle() {
+        return "accounts.tsv (team and judges)";
+    }
+    
+    @Override
+    public String getPluginTitle() {
+        return "accounts.tsv Report (team and judges)";
     }
 }

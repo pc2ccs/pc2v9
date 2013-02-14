@@ -218,7 +218,7 @@ public class AccountsTSVReport implements IReportFile {
     }
 
     public String getReportTitle() {
-        return "accounts.tsv";
+        return "accounts.tsv (all accounts)";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -228,7 +228,7 @@ public class AccountsTSVReport implements IReportFile {
     }
 
     public String getPluginTitle() {
-        return "accounts.tsv Report";
+        return "accounts.tsv Report (all accounts)";
     }
 
     public Filter getFilter() {
