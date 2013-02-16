@@ -2000,17 +2000,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 // SOMEDAY code put the server's connection handler id as 4th parameter
                 packetHandler.handlePacket(packet, null);
+                
             } else {
                 info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
             }
         } catch (Exception e) {
-            String message = "Unable to start main UI, contact staff";
-
+            
+            error(e.toString(),e);
+            
             if (loginUI != null) {
                 loginUI.regularCursor();
             }
-            contest.loginDenied(null, null, message);
-            info("Exception ", e);
         }
         info(" receiveObject(S) end   got " + object);
     }
@@ -2111,9 +2111,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         
     }
-
+    
     public void info(String s) {
         log.log(Log.INFO, s);
+    }
+    
+    public void error(String message, Exception ex){
+        log.log(Log.SEVERE, message, ex);
     }
 
     public void info(String s, Exception exception) {

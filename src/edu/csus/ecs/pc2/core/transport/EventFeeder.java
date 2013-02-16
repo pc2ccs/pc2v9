@@ -264,9 +264,11 @@ class EventFeeder implements Runnable {
         }
 
         public void accountsAdded(AccountEvent accountEvent) {
-            Account account = accountEvent.getAccount();
-            if (isTeam(account)) {
-                sendXML(eventFeedXML.createElement(contest, account));
+            Account[] accounts = accountEvent.getAccounts();
+            for (Account account : accounts) {
+                if (isTeam(account)) {
+                    sendXML(eventFeedXML.createElement(contest, account));
+                }
             }
         }
 
