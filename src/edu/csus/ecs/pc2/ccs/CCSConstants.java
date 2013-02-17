@@ -59,4 +59,9 @@ public final class CCSConstants {
 
 
 
+    /**
+     * Default program name for CCS valdator.
+     */
+    public static final String DEFAULT_CCS_VALIATOR_NAME = "default_validator";
+
 }

@@ -132,7 +132,7 @@ public class ExportYAML {
 
         contestWriter.println("scoreboard-freeze: ");
         
-        contestWriter.println(ContestYAMLLoader.PROBLEM_EXTERNAL_FILES_KEY + ": true");
+        contestWriter.println("# " + ContestYAMLLoader.PROBLEM_EXTERNAL_FILES_KEY + ": true");
 
         contestWriter.println();
 
@@ -225,7 +225,8 @@ public class ExportYAML {
                 shortName = problem.getShortName();
             }
             contestWriter.println("    short-name: " + shortName);
-
+            contestWriter.println("          name: " + name);
+            
             String colorName = getProblemBalloonColor(contest, problem);
             if (colorName != null) {
                 contestWriter.println("    color: " + colorName);

@@ -7,7 +7,7 @@ package edu.csus.ecs.pc2.core.exception;
  */
 
 // $HeadURL$
-public class YamlLoadException extends Exception {
+public class YamlLoadException extends RuntimeException {
 
     /**
      * 

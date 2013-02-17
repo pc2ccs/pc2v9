@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.ccs.CCSConstants;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.list.AccountList;
@@ -42,10 +43,12 @@ import edu.csus.ecs.pc2.core.model.Site;
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoader.java $
 public class ContestYAMLLoader {
+    
+//    private boolean debugMode = true;
 
     public static final String CONTEST_NAME_KEY = "name";
 
-    public static final String CONTEST_SHORT_NAME = "short-name";
+    public static final String SHORT_NAME_KEY = "short-name";
 
     public static final String CONTEST_START_TIME = "start-time";
 
@@ -87,9 +90,6 @@ public class ContestYAMLLoader {
      */
     private static final String PROBLEM_NAME_KEY = "name";
 
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
-
-
     /**
      * Problem input (data files) key.
      */
@@ -107,7 +107,7 @@ public class ContestYAMLLoader {
     /**
      * Use external data files?   (if no, then no file contents loaded into pc2).  
      */
-    public static final String PROBLEM_EXTERNAL_FILES_KEY = "use-external-data-files";
+    public static final String PROBLEM_EXTERNAL_FILES_KEY = "external-data-files";
     
     /**
      * Contest wide validator name.
@@ -131,6 +131,7 @@ public class ContestYAMLLoader {
      * Validator per problem.
      */
     private static final String VALIDATOR_KEY = "validator";
+
     
     /**
      * Load contest.yaml from directory.
@@ -139,9 +140,9 @@ public class ContestYAMLLoader {
      * @param diretoryName
      *            directory to load files from.
      * @return contest
-     * @throws YamlLoadException
+     * 
      */
-    public IInternalContest fromYaml(IInternalContest contest, String diretoryName) throws YamlLoadException {
+    public IInternalContest fromYaml(IInternalContest contest, String diretoryName)  {
        return fromYaml(contest, diretoryName, true);
     }
 
@@ -153,9 +154,9 @@ public class ContestYAMLLoader {
      *            directory to load files from.
      * @param loadDataFileContents
      * @return contest
-     * @throws YamlLoadException
+     * 
      */
-    public IInternalContest fromYaml(IInternalContest contest, String diretoryName, boolean loadDataFileContents) throws YamlLoadException {
+    public IInternalContest fromYaml(IInternalContest contest, String diretoryName, boolean loadDataFileContents)  {
         String[] contents;
         try {
             contents = Utilities.loadFile(diretoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME);
@@ -182,12 +183,19 @@ public class ContestYAMLLoader {
      * Load/Create contest from YAML lines.
      * 
      * @param contest
-     *            update/overwrite contest, if null creates new contest.
+     *            
      * @param yamlLines
      *            lines from YAML file
      * @return
      */
-    public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String diretoryName, boolean loadDataFileContents) throws YamlLoadException {
+    /**
+     * @param contest update/overwrite contest, if null creates new contest.
+     * @param yamlLines input YAML lines from contest.yaml
+     * @param directoryName location for contest.yaml and problem data files 
+     * @param loadDataFileContents
+     * @return
+     */
+    public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName, boolean loadDataFileContents)  {
 
         contest = createContest(contest);
 
@@ -210,10 +218,10 @@ public class ContestYAMLLoader {
         loadDataFileContents = getBooleanValue(getSequenceValue(yamlLines, PROBLEM_EXTERNAL_FILES_KEY), loadDataFileContents);
 
         // TODO CCS add contest settings
-        // short-name: ICPC WF 2011
-        // start-time: 2011-02-04 01:23Z
-        // duration: 5:00:00
-        // scoreboard-freeze: 4:00:00
+        // TODO CCS short-name: ICPC WF 2011
+        // TODO CCS start-time: 2011-02-04 01:23Z
+        // TODO CCS duration: 5:00:00
+        // TODO CCS scoreboard-freeze: 4:00:00
         
         Language[] languages = getLanguages(yamlLines);
         for (Language language : languages) {
@@ -225,8 +233,10 @@ public class ContestYAMLLoader {
         String overrideValidatorCommandLine = getSequenceValue(yamlLines, OVERRIDE_VALIDATOR_KEY); 
         
         Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine);
-        for (Problem problem : problems) {
-            loadProblemAndFilesAndValidators(contest, diretoryName, problem);
+        if (loadDataFileContents){
+            for (Problem problem : problems) {
+                loadProblemInformationAndDataFiles(contest, directoryName, problem);
+            }
         }
 
         Site[] sites = getSites(yamlLines);
@@ -259,6 +269,8 @@ public class ContestYAMLLoader {
 
         return contest;
     }
+
+ 
 
     public PlaybackInfo getReplaySettings(String[] yamlLines) {
 
@@ -311,7 +323,7 @@ public class ContestYAMLLoader {
         return info;
     }
 
-    private void addAutoJudgeSetting(IInternalContest contest, AutoJudgeSetting auto) throws YamlLoadException {
+    private void addAutoJudgeSetting(IInternalContest contest, AutoJudgeSetting auto)  {
 
         Account account = contest.getAccount(auto.getClientId());
         if (account == null) {
@@ -437,22 +449,23 @@ public class ContestYAMLLoader {
     }
 
     /**
-     * Read problem.yaml file load contents into contest, create problem if necessary.
+     * Loads problem data files and validator from problem.yaml file.
      * 
      * The problem.yaml is found at baseDirectoryName, unless problem is not null then
      * the problem.yaml is found at the problem.getShortName() under baseDirectoryName.
      * 
      * @param contest
-     * @param baseDirectoryName 
-     * @param problem null or existing problem
-     * @throws YamlLoadException
+     * @param baseDirectoryName location for contest.yaml and problem short names
+     * @param problem
+     * @param dataFiles
      */
-    public void loadProblemAndFilesAndValidators(IInternalContest contest, String baseDirectoryName, Problem problem) throws YamlLoadException {
+    public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem) {
 
-        String problemDirectory = baseDirectoryName;
-        if (problem != null) {
-            problemDirectory = baseDirectoryName + File.separator + problem.getShortName();
-        }
+        // TODO CCS code this: do not add problem to contest model, new new parameter flag
+
+        String problemDirectory = baseDirectoryName + File.separator + problem.getShortName();
+
+        problem.setExternalDataFileLocation(problemDirectory);
 
         String problemYamlFilename = problemDirectory + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
         String[] contents;
@@ -468,35 +481,37 @@ public class ContestYAMLLoader {
 
         String problemName = getSequenceValue(contents, PROBLEM_NAME_KEY);
 
-        if (problem == null) {
-            problem = new Problem(problemName);
-        }
-
-        if (problemName != null) {
-            problem.setDisplayName(problemName);
-        } else {
-            String problemTextFilename = problemDirectory + File.separator + DEFAULT_PROBLEM_LATEX_FILENAME;
+        if (problemName == null) {
+            String problemTextFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_PROBLEM_LATEX_FILENAME;
             if (new File(problemTextFilename).isFile()) {
 
                 problemName = getProblemNameFromLaTex(problemTextFilename);
-                if (problemName != null) {
-                    problem.setDisplayName(problemName);
-                }
             }
         }
 
         String[] sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
+        boolean pc2FormatProblemYamlFile = getSequenceValue(sectionLines, "answerfile") != null;
 
-        boolean ccsStandardProblem = getSequenceValue(sectionLines, "answerfile") == null;
+        if (problemName == null && (pc2FormatProblemYamlFile)) {
+            problemName = getSequenceValue(sectionLines, "name");
+        }
         
-        problem.setExternalDataFileLocation(problemDirectory);
+        if (problemName == null ){
+            problemName = problem.getShortName();
+        }
+        
+        if (problemName == null) {
+            syntaxError("No problem name found for " + problem.getShortName());
+        }
 
         String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
 
-        if (ccsStandardProblem) {
-            loadCCSProblem(contest, dataFileBaseDirectory, problem, sectionLines);
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+
+        if (pc2FormatProblemYamlFile) {
+            loadPc2ProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, sectionLines);
         } else {
-            loadPc2Problem(contest, dataFileBaseDirectory, problem, sectionLines);
+            loadCCSProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, sectionLines);
         }
 
         sectionLines = getSectionLines(LIMITS_KEY, contents);
@@ -506,26 +521,31 @@ public class ContestYAMLLoader {
                 problem.setTimeOutInSeconds(Integer.parseInt(timeOut.trim()));
             }
         }
-        
-        String validatorCommandLine =  problem.getValidatorCommandLine();
 
-        if (ccsStandardProblem) {
+        if (!pc2FormatProblemYamlFile) {
             problem.setComputerJudged(true);
-            
+
             // TODO CCS add CCS validator derived based on build script
-            
+
             /**
-             * - Use CCS build command to build validator ('build' script name)
-             * - add validator created by build command
-             * - add CCS run script ('run' script name)
+             * - Use CCS build command to build validator ('build' script name) - add validator created by build command - add CCS run script ('run' script name)
              */
-            
-            addCCSValidator (problem, validatorCommandLine);
-            
+
+            // default-validator: /home/pc2/Desktop/codequest12_problems/default_validator
+            // override-validator: /usr/local/bin/mtsv {:problemletter} {:resfile} {:basename}
+
+            // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
+
+            addCCSValidator(problem, problemDataFiles, baseDirectoryName);
+
         } else {
-            problem.setComputerJudged(true); 
+            problem.setComputerJudged(true);
             addDefaultPC2Validator(problem, 1);
         }
+    }
+
+    private void syntaxWarning(String message) {
+        System.err.println("Warning - "+message);
     }
 
     protected String getProblemNameFromLaTex(String filename) {
@@ -569,83 +589,104 @@ public class ContestYAMLLoader {
     }
 
     /**
-     * Load CCS problem into contest.
+     * Load CCS data files, and validator into contest.
      * 
      * @param contest
      * @param dataFileBaseDirectory
      * @param problem
+     * @param problemDataFiles 
      * @param sectionLines
-     * @throws YamlLoadException
+     * 
      */
-    protected void loadCCSProblem(IInternalContest contest, String dataFileBaseDirectory, Problem problem, String[] sectionLines) throws YamlLoadException {
+    protected Problem loadCCSProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles, String[] sectionLines)  {
 
-        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+        if (problem.getShortName() == null) {
+            throw new YamlLoadException("  For " + problem + " missing problem short name");
+        }
 
         String[] inputFileNames = getFileNames(dataFileBaseDirectory, ".in");
 
         String[] answerFileNames = getFileNames(dataFileBaseDirectory, ".ans");
 
         if (inputFileNames.length == 0) {
-            throw new YamlLoadException("No input file names found for " + problem.getDisplayName()+ " in dir "+dataFileBaseDirectory);
+            throw new YamlLoadException("No input file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
         }
 
         if (answerFileNames.length == 0) {
-            throw new YamlLoadException("No answer file names found for " + problem.getDisplayName() + " in dir "+dataFileBaseDirectory);
+            throw new YamlLoadException("No answer file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
         }
-        
+
         /**
-         * Data files are external so data files should not be loaded into
-         * problem data files.
+         * Data files are external so data files should not be loaded into problem data files.
          */
-        boolean doNotLoadDataFiles = problem.isUsingExternalDataFiles();
-        
+        boolean loadDataFiles = !problem.isUsingExternalDataFiles();
+
         if (inputFileNames.length == answerFileNames.length) {
 
             Arrays.sort(inputFileNames);
 
             SerializedFile[] serializedFileDataFiles = new SerializedFile[inputFileNames.length];
             SerializedFile[] serializedFileAnswerFiles = new SerializedFile[answerFileNames.length];
-            
+
             for (int idx = 0; idx < inputFileNames.length; idx++) {
 
                 problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
 
                 String dataFileName = dataFileBaseDirectory + File.separator + inputFileNames[idx];
-
                 String answerFileName = dataFileName.replaceAll(".in$", ".ans");
+                
+                if (idx == 0){
+                    problem.setDataFileName(Utilities.basename (dataFileName));
+                    problem.setAnswerFileName(Utilities.basename (answerFileName));
+                }
+                
                 String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
 
-                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in "+dataFileBaseDirectory );
-                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in "+dataFileBaseDirectory);
+                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
+                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
 
-                 if (doNotLoadDataFiles) {
-                     serializedFileDataFiles[idx] = new SerializedFile(dataFileName);
-                     serializedFileAnswerFiles[idx] = new SerializedFile(answerFileName);
-                 }
+                if (loadDataFiles) {
+                    serializedFileDataFiles[idx] = new SerializedFile(dataFileName);
+                    serializedFileAnswerFiles[idx] = new SerializedFile(answerFileName);
+                } // else no validators add empty serializedFile
+
             }
 
-            if (doNotLoadDataFiles) {
-                problemDataFiles.setJudgesDataFiles(serializedFileDataFiles);
-                problemDataFiles.setJudgesAnswerFiles(serializedFileAnswerFiles);
-                problem.setAnswerFileName(serializedFileAnswerFiles[0].getName());
-                problem.setDataFileName(serializedFileDataFiles[0].getName());
-            }
-            
+            problemDataFiles.setJudgesDataFiles(serializedFileDataFiles);
+            problemDataFiles.setJudgesAnswerFiles(serializedFileAnswerFiles);
+
             problem.setReadInputDataFromSTDIN(false);
-            
+
         } else {
             throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
-                    answerFileNames.length + " .ans files "+ " in "+dataFileBaseDirectory);
+                    answerFileNames.length + " .ans files " + " in " + dataFileBaseDirectory);
         }
 
-        // TODO Load Validator
+
+        if (inputFileNames.length == 0) {
+            throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
+                    answerFileNames.length + " .ans files " + " in " + dataFileBaseDirectory);
+        }
+
+        contest.addProblem(problem, problemDataFiles);
+        
+        validateCCSData(contest, problem);
+
+        return problem;
+    }
+
+    private void validateCCSData(IInternalContest contest, Problem problem) {
+        
+        // TODO CCS Load Validator
+        
+        // TODO CCS somehow find validator, compile, and test.
+        // the somehow is because there may be more than one validator in the validator directory
 
         // TODO 1. Check files (all files present as required + check problem.yaml)
         // TODO 2. Check compile (check that all programs compile)
         // TODO 3. Check input (run input validators)
         // TODO 4. Check solutions (run all solutions check that they get the expected verdicts)
-
-        contest.addProblem(problem, problemDataFiles);
+        
     }
 
     /**
@@ -653,9 +694,9 @@ public class ContestYAMLLoader {
      * 
      * @param filename
      * @param message
-     * @throws YamlLoadException
+     * 
      */
-    private void checkForFile(String filename, String message) throws YamlLoadException {
+    private void checkForFile(String filename, String message)  {
 
         if (!(new File(filename).isFile())) {
             throw new YamlLoadException(message);
@@ -686,26 +727,35 @@ public class ContestYAMLLoader {
         return (String[]) list.toArray(new String[list.size()]);
     }
 
-    private void loadPc2Problem(IInternalContest contest, String dataFileBaseDirectory, Problem problem, String[] sectionLines) throws YamlLoadException {
+    /**
+     * Load pc2 data files.
+     * 
+     * @param contest
+     * @param dataFileBaseDirectory
+     * @param problem
+     * @param problemDataFiles2 
+     * @param sectionLines
+     */
+    private void loadPc2ProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles2, String[] sectionLines)  {
 
         String dataFileName = getSequenceValue(sectionLines, "datafile");
         String answerFileName = getSequenceValue(sectionLines, "answerfile");
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
-
-        if (dataFileName != null || answerFileName != null) {
-
-            addDataFiles(problem, problemDataFiles, dataFileBaseDirectory, dataFileName, answerFileName);
-
-            contest.addProblem(problem, problemDataFiles);
-
-        } else {
-            contest.addProblem(problem);
+        
+        if (dataFileName == null){
+            syntaxError("Missing datafile for problem "+problem.getShortName());
         }
 
+        if (dataFileName == null){
+            syntaxError("Missing datafile for problem "+problem.getShortName());
+        }
+        
+        addDataFiles(problem, problemDataFiles, dataFileBaseDirectory, dataFileName, answerFileName);
+        contest.addProblem(problem, problemDataFiles);
     }
 
-    private void addDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String dataFileBaseDirectory, String dataFileName, String answerFileName) throws YamlLoadException {
+    private void addDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String dataFileBaseDirectory, String dataFileName, String answerFileName)  {
 
         // load judge data file
         if (dataFileName != null) {
@@ -747,26 +797,34 @@ public class ContestYAMLLoader {
         problem.setWhichPC2Validator(optionNumber);
         problem.setIgnoreSpacesOnValidation(true);
 
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
+        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
 
         return problem;
     }
-    
-    private Problem addCCSValidator(Problem problem, String validatorCommandLine) {
-        
+
+    private Problem addCCSValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
+
         problem.setCcsMode(true);
-        
+
         problem.setValidatedProblem(true);
         problem.setUsingPC2Validator(false);
         problem.setReadInputDataFromSTDIN(true);
-        
-        if (validatorCommandLine == null) {
-            problem.setValidatorProgramName(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME);
-            problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
-        } else {
-            problem.setValidatorCommandLine(validatorCommandLine);
+
+        // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+
+        problem.setValidatorProgramName(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+
+        String validatorName = baseDirectoryName + File.separator + problem.getValidatorProgramName();
+
+        try {
+            problemDataFiles.setValidatorFile(new SerializedFile(validatorName));
+        } catch (Exception e) {
+            throw new YamlLoadException("Unable to load validator for problem " + problem.getShortName() + ": " + validatorName, e);
         }
+
+        // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
 
         return problem;
     }
@@ -838,9 +896,8 @@ public class ContestYAMLLoader {
      * 
      * @param yamlLines
      * @return list of {@link Language}s
-     * @throws YamlLoadException
      */
-    public Language[] getLanguages(String[] yamlLines) throws YamlLoadException {
+    public Language[] getLanguages(String[] yamlLines)  {
 
         String[] sectionLines = getSectionLines(LANGUAGE_KEY, yamlLines);
 
@@ -913,13 +970,13 @@ public class ContestYAMLLoader {
         return (Language[]) languageList.toArray(new Language[languageList.size()]);
     }
 
-    private boolean valid(Language language, String prefix) throws YamlLoadException {
+    private boolean valid(Language language, String prefix)  {
         checkField(language.getDisplayName(), prefix + " Compiler Display name");
         checkField(language.getCompileCommandLine(), prefix + " Compile Command line");
         return true;
     }
 
-    private void checkField(String field, String fieldName) throws YamlLoadException {
+    private void checkField(String field, String fieldName)  {
         if (field == null) {
             throw new YamlLoadException("Missing " + fieldName);
         } else if (field.trim().length() == 0) {
@@ -928,16 +985,16 @@ public class ContestYAMLLoader {
     }
 
     /**
-     * Get {@link Problem}s from YAML file.
+     * Get/Load {@link Problem}s from YAML lines.
      * 
      * @param yamlLines
      * @param seconds
      *            timeout for run execution in seconds
      * @param loadDataFileContents 
      * @return list of {@link Problem}
-     * @throws YamlLoadException
+     * 
      */
-    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine) throws YamlLoadException {
+    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine)  {
 
         String[] linesFromSection = getSectionLines(PROBLEMS_KEY, yamlLines);
 
@@ -965,9 +1022,26 @@ public class ContestYAMLLoader {
                 sequenceLines = getNextSequence(linesFromSection, idx);
                 continue;
             }
+            
+//            for (String string : sequenceLines) {
+//                System.out.println("debug 22 seq: "+string);
+//                if (string.indexOf(SHORT_NAME_KEY+":") > 0){
+//                    System.err.println("debug 22 found it: "+string);
+//                }
+//            }
 
-            String problemKeyName = getSequenceValue(sequenceLines, "short-name");
-            String problemTitle = problemKeyName;
+            String problemKeyName = getSequenceValue(sequenceLines, SHORT_NAME_KEY);
+            
+            if (problemKeyName == null){
+                syntaxError("Missing "+SHORT_NAME_KEY+" in probset section");
+            }
+
+            String problemTitle = getSequenceValue(sequenceLines, "name");
+            
+            if (problemTitle == null){
+                problemTitle = problemKeyName;
+            }
+            
             /**
              * <pre>
              *  problemset:
@@ -1044,7 +1118,7 @@ public class ContestYAMLLoader {
 //        return commentLines == sequenceLines.length;
 //    }
 
-    private void syntaxError(String string) throws YamlLoadException {
+    private void syntaxError(String string)  {
         YamlLoadException exception = new YamlLoadException("Syntax error: " + string);
         exception.printStackTrace();
         throw exception;
@@ -1126,7 +1200,7 @@ public class ContestYAMLLoader {
         contestInformation.setContestTitle(title);
     }
 
-    public AutoJudgeSetting[] getAutoJudgeSettings(String[] yamlLines, Problem[] problems) throws YamlLoadException {
+    public AutoJudgeSetting[] getAutoJudgeSettings(String[] yamlLines, Problem[] problems)  {
 
         String[] sectionLines = getSectionLines(AUTO_JUDGE_KEY, yamlLines);
         
@@ -1228,7 +1302,7 @@ public class ContestYAMLLoader {
 
     }
 
-    protected Problem[] getProblemsFromLetters(Problem[] problems, String problemLettersString) throws YamlLoadException {
+    protected Problem[] getProblemsFromLetters(Problem[] problems, String problemLettersString)  {
 
         String[] list = problemLettersString.split(",");
         Problem[] out = new Problem[list.length];
@@ -1301,11 +1375,6 @@ public class ContestYAMLLoader {
         return value;
     }
 
-    public IInternalContest fromProblemYaml(IInternalContest newContest, String filename) throws IOException, YamlLoadException {
-        String[] contents = Utilities.loadFile(filename);
-        return fromProblemYaml(newContest, contents, filename);
-    }
-    
     /**
      * Insures that contest is instantiated.
      * 
@@ -1322,16 +1391,6 @@ public class ContestYAMLLoader {
         return contest;
     }
     
-    public IInternalContest fromProblemYaml(IInternalContest contest, String[] yamlLines, String filename) throws YamlLoadException {
-
-        String parentDirectory = new File(filename).getParent();
-        contest = createContest(contest);
-        loadProblemAndFilesAndValidators(contest, parentDirectory, null);
-        
-        return contest;
-    }
-
-    
     /**
      * 
      * @param contents
@@ -1340,9 +1399,9 @@ public class ContestYAMLLoader {
      * @param defaultValidatorCommandLine 
      * @param loadDataFileContents 
      * @return
-     * @throws YamlLoadException
+     * 
      */
-    public Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine) throws YamlLoadException {
+    public Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine)  {
         return getProblems(contents, defaultTimeOut, true, defaultValidatorCommandLine, null);
     }
 
@@ -1352,13 +1411,13 @@ public class ContestYAMLLoader {
      * @param yamlLines
      * @param diretoryName
      * @return
-     * @throws YamlLoadException
+     * 
      */
-    public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String diretoryName) throws YamlLoadException {
+    public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String diretoryName)  {
         return fromYaml(contest, yamlLines, diretoryName, true);
     }
 
-    public Problem[] getProblems(String[] contents, int defaultTimeOut) throws YamlLoadException {
+    public Problem[] getProblems(String[] contents, int defaultTimeOut)  {
         return getProblems(contents, defaultTimeOut, false, null, null);
     }
 }

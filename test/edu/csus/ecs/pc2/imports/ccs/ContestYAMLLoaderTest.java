@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
@@ -39,6 +42,10 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     private boolean debugFlag = false;
 
     private ContestYAMLLoader loader;
+
+    public ContestYAMLLoaderTest(String string) {
+        super(string);
+    }
 
     @Override
     protected void setUp() throws Exception {
@@ -217,12 +224,14 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     public void testProblemLoader() throws Exception {
 
         IInternalContest contest = loader.fromYaml(null, getDataDirectory());
-
+        
         if (debugFlag) {
             System.out.println("Dir " + getDataDirectory());
 
+            int problemNumber = 0;
             for (Problem problem : contest.getProblems()) {
-                System.out.println(problem.getDisplayName() + " cases " + problem.getNumberTestCases());
+                System.out.println("Problem "+problemNumber+" - " +problem.getDisplayName() + " cases " + problem.getNumberTestCases());
+                problemNumber ++;
                 if (problem.getNumberTestCases() > 1) {
                     for (int i = 0; i < problem.getNumberTestCases(); i++) {
                         int testCaseNumber = i + 1;
@@ -240,11 +249,11 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         Problem testProblem = contest.getProblems()[2];
 
-        int idx = 0;
+        int idx = 1;
         for (String name : basenames) {
 
-            assertEquals(testProblem.getDataFileName(idx + 1), name + ".in");
-            assertEquals(testProblem.getAnswerFileName(idx + 1), name + ".ans");
+            assertEquals("name: "+testProblem.getShortName()+ " data in name", name + ".in", testProblem.getDataFileName(idx));
+            assertEquals("name: "+testProblem.getShortName()+ "data ans name", name + ".ans", testProblem.getAnswerFileName(idx));
 
             idx++;
         }
@@ -725,10 +734,10 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         Problem[] problems = contest.getProblems();
         
-        assertEquals("Expect custom validator" , "/usr/local/bin/mtsv", problems[0].getValidatorCommandLine());
-        assertEquals("Expect default validator", "/bin/true", problems[1].getValidatorCommandLine());
-        assertEquals("Expect custom validator", "/bin/false", problems[2].getValidatorCommandLine());
-       
+        assertEquals("Expect custom validator", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problems[0].getValidatorCommandLine());
+        assertEquals("Expect default validator", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problems[1].getValidatorCommandLine());
+        assertEquals("Expect custom validator", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problems[2].getValidatorCommandLine());
+
         String [] letterList = {"S", "E", "X"};
         
         int idx = 0;
@@ -764,14 +773,26 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
 //        String[] contents = Utilities.loadFile(getYamlTestFileName(dirname));
 //        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
-
-        
-        
 //        loader.loadCCSProblem(contest, dirname, problem, contents);
-        
-
 //        contest = loader.fromYaml(null, contents, getDataDirectory());
 
+    }
 
+    public static Test suiteAmatic() {
+        TestSuite suite = new TestSuite("YAML loader test");
+
+        String singletonTestName = "";
+
+        singletonTestName = "testLoader";
+         singletonTestName = "testValidatorKeys";
+
+        if (!"".equals(singletonTestName)) {
+            suite.addTest(new ContestYAMLLoaderTest(singletonTestName));
+        } else {
+
+            suite.addTest(new ContestYAMLLoaderTest("testLoader"));
+        }
+
+        return suite;
     }
 }
