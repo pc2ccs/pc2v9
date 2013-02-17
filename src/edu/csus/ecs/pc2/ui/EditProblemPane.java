@@ -2305,10 +2305,8 @@ public class EditProblemPane extends JPanePlugin {
 
         String directoryName = new File(filename).getParent();
 
-        IInternalContest newContest = null;
-
         try {
-            getLoader().loadProblemAndFilesAndValidators(newContest, directoryName, null);
+            getLoader().fromYaml(null, directoryName);
 
         } catch (Exception e) {
             logException("Unable to load problem YAML from " + filename, e);

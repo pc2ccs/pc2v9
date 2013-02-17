@@ -96,9 +96,9 @@ public class Filter implements Serializable {
 
     private boolean filteringElapsedTime = false;
 
-    private long startElapsedTime = -1;
+    private long startElapsedTimeMinutes = -1;
 
-    private long endElapsedTime = -1;
+    private long endElapsedTimeMinutes = -1;
 
     /**
      * collection of chosen clarification states
@@ -956,22 +956,25 @@ public class Filter implements Serializable {
         return matchesElapsedTimeSubmission(clarification);
     }
 
-    protected boolean matchesElapsedTimeSubmission(ISubmission submission) {
+    public boolean matchesElapsedTimeSubmission(ISubmission submission) {
+        long elapsedTime = submission.getElapsedMins();
+        return matchesElapsedTime(elapsedTime);
+    }
+    
+    protected boolean matchesElapsedTime(long elapsedTimeMinutes) {
         if (filteringElapsedTime) {
-
-            long elapsedTime = submission.getElapsedMins();
-
-            if (startElapsedTime != -1) {
-                if (elapsedTime < startElapsedTime) {
+            if (startElapsedTimeMinutes != -1) {
+                if (elapsedTimeMinutes < startElapsedTimeMinutes) {
                     return false;
                 }
             }
 
-            if (endElapsedTime != -1) {
-                if (elapsedTime > endElapsedTime) {
+            if (endElapsedTimeMinutes != -1) {
+                if (elapsedTimeMinutes > endElapsedTimeMinutes) {
                     return false;
                 }
             }
+
             return true;
 
         } else {
@@ -1081,22 +1084,34 @@ public class Filter implements Serializable {
         }
     }
 
+    /**
+     * Start time range time.
+     * @return start time in minutes
+     */
     public long getStartElapsedTime() {
-        return startElapsedTime;
+        return startElapsedTimeMinutes;
     }
 
-    public void setStartElapsedTime(long startElapsedTime) {
+    /**
+     * Set the start time for the elapsed time range.
+     * @param startElapsedTimeMinutes
+     */
+    public void setStartElapsedTime(long startElapsedTimeMinutes) {
         filteringElapsedTime = true;
-        this.startElapsedTime = startElapsedTime;
+        this.startElapsedTimeMinutes = startElapsedTimeMinutes;
     }
 
     public long getEndElapsedTime() {
-        return endElapsedTime;
+        return endElapsedTimeMinutes;
     }
 
-    public void setEndElapsedTime(long endElapsedTime) {
+    /**
+     * Set the endtime time for the elapsed time range.
+     * @param endElapsedTimeMS end elapsed time in MS.
+     */
+    public void setEndElapsedTime(long endElapsedTimeMS) {
         filteringElapsedTime = true;
-        this.endElapsedTime = endElapsedTime;
+        this.endElapsedTimeMinutes = endElapsedTimeMS;
     }
 
     public boolean isFilteringElapsedTime() {
@@ -1147,9 +1162,12 @@ public class Filter implements Serializable {
         return filteringClarificationStates;
     }
 
-    public void clearElapsedTime() {
-        startElapsedTime = -1;
-        endElapsedTime = -1;
+    /**
+     * Clear elapsed time range (filtering on time range)
+     */
+    public void clearElapsedTimeRange() {
+        startElapsedTimeMinutes = -1;
+        endElapsedTimeMinutes = -1;
         filteringElapsedTime = false;
     }
     
@@ -1252,6 +1270,10 @@ public class Filter implements Serializable {
         return (Clarification[]) list.toArray(new Clarification[list.size()]);
     }
 
-    
+    public boolean matchesElapsedTime(RunTestCase runTestCase) {
+        long elapsedTime = runTestCase.getElapsedMins();
+        return matchesElapsedTime(elapsedTime);
+    }
+
 }
 

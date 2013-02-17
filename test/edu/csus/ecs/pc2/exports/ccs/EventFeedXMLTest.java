@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -42,12 +43,13 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.util.NotificationUtilities;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
-
 
 /**
  * Test Event Feed XML.
@@ -493,7 +495,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         Arrays.sort(runs, new RunComparator());
 
         for (Run run : runs) {
-            String xml = toContestXML(eventFeedXML.createElement(contest, run));
+            String xml = toContestXML(eventFeedXML.createElement(contest, run, true));
             if (debugMode){
                 System.out.println(xml);
             }
@@ -681,6 +683,28 @@ public class EventFeedXMLTest extends AbstractTestCase {
         
         assertXMLCounts(xml, EventFeedXML.FINALIZE_TAG, 1);
         assertXMLCounts(xml, "comment", 1);
+        
+
+        for (Run run : runs) {
+            run.setElapsedMins(100); /// set all runs to elapsed time 100
+        }
+        
+        int numruns = 5;
+        
+        for (int i = runs.length - numruns; i < runs.length; i++) {
+            runs[i].setElapsedMins(300); /// set all runs to elapsed time 100
+            RunTestCase[] testCases = runs[i].getRunTestCases();
+            for (RunTestCase runTestCase : testCases) {
+                runTestCase.setElapsedMS(300 * Constants.MS_PER_MINUTE);
+            }
+        }
+        
+         Filter filter = new Filter();
+         filter.setStartElapsedTime(200);
+        xml = eventFeedXML.toXML(testCaseContest, filter);
+        
+        assertXMLCounts(xml, EventFeedXML.RUN_TAG, numruns);
+        assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, numruns * 5); 
 
     }
     
@@ -786,4 +810,3 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
     }
 }
-

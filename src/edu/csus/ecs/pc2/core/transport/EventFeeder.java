@@ -12,6 +12,8 @@ import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
+import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.GroupEvent;
@@ -42,6 +44,9 @@ import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
  * Create XML event feed elements and writes them to an outputstream
  * or sends them to the class implementing {@link IEventFeedRunnable}.
  * 
+ * To create a "freeze" event feed, use the {@link #setFreezeTimeMinutes(long)}
+ * method, see that method for details.
+ * 
  *  Each time an event feed XML element is triggered will send that
  *  XML.
  *  
@@ -61,6 +66,8 @@ class EventFeeder implements Runnable {
 
     private IInternalContest contest;
     
+    private Filter filter = null;
+    
     /**
      * Runnable used to send XML to socket or other output.
      */
@@ -70,14 +77,38 @@ class EventFeeder implements Runnable {
 
     private EventFeedXML eventFeedXML = new EventFeedXML();
     
-    private AccountListener          accountListener = new AccountListener();
-    private RunListener              runListener = new RunListener();
-    private ClarificationListener    clarificationListener = new ClarificationListener();
-    private ProblemListener          problemListener = new ProblemListener();
-    private LanguageListener         languageListener = new LanguageListener();
-    private GroupListener            groupListener = new GroupListener();
-    private JudgementListener        judgementListener = new JudgementListener();
-    private ContestInformationListener   contestInformationListener = new ContestInformationListener();
+    private AccountListener accountListener = null;
+
+    private RunListener runListener = null;
+
+    private ClarificationListener clarificationListener = null;
+
+    private ProblemListener problemListener = null;
+
+    private LanguageListener languageListener = null;
+
+    private GroupListener groupListener = null;
+
+    private JudgementListener judgementListener = null;
+
+    private ContestInformationListener contestInformationListener = null;
+    
+    public EventFeeder() {
+        initListeners();
+    }
+    
+    private void initListeners() {
+
+        accountListener = new AccountListener();
+        runListener = new RunListener();
+        clarificationListener = new ClarificationListener();
+        problemListener = new ProblemListener();
+        languageListener = new LanguageListener();
+        groupListener = new GroupListener();
+        judgementListener = new JudgementListener();
+        contestInformationListener = new ContestInformationListener();
+
+    }
 
     /**
      * Write Event Feed XML to output stream.
@@ -86,6 +117,8 @@ class EventFeeder implements Runnable {
      * @param out
      */
     public EventFeeder(IInternalContest contest, OutputStreamWriter out) {
+        this();
+        
         this.contest = contest;
         this.out = out;
         this.eventFeedRunnable = new EventFeedRunner();
@@ -100,6 +133,8 @@ class EventFeeder implements Runnable {
      * @param runnable
      */
     public EventFeeder(IInternalContest contest, IEventFeedRunnable runnable) {
+        this();
+
         this.contest = contest;
         this.eventFeedRunnable = runnable;
     }
@@ -191,6 +226,20 @@ class EventFeeder implements Runnable {
     }
 
     /**
+     * This sets the minute when the contest freezes.
+     * <br><br>
+     * 
+     * <code>setFreezeTimeMinutes ({@link ContestTime#getConestLengthMins()} - 60);</code>
+     * // will set the freeze time at one hours before end of contest.
+     * 
+     * @param contestTimeWhenJudgementsNoLongerSentMinutes
+     */
+    public void setFreezeTimeMinutes(long contestTimeWhenJudgementsNoLongerSentMinutes) {
+        filter = new Filter();
+        filter.setStartElapsedTime(contestTimeWhenJudgementsNoLongerSentMinutes);
+    }
+
+    /**
      * Halt this thread.
      */
     public void halt() {
@@ -199,7 +248,7 @@ class EventFeeder implements Runnable {
         try {
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();  // TODO CCS log this excetion.
+            e.printStackTrace();  // TODO CCS log this exception
         }
         
     }
@@ -214,9 +263,6 @@ class EventFeeder implements Runnable {
         try {
             out.write(xmlString);
             out.flush();
-            
-//            System.err.println();
-//            System.err.println("debug 22 " + xmlString);
             
         } catch (IOException e) {
             e.printStackTrace();
@@ -297,18 +343,24 @@ class EventFeeder implements Runnable {
     protected class RunListener implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            Run run = event.getRun();
-            sendXML(eventFeedXML.createElement(contest, run));
+            runChanged(event);
         }
 
         public void runChanged(RunEvent event) {
             Run run = event.getRun();
-            sendXML(eventFeedXML.createElement(contest, run));
+            if (filter == null) {
+                sendXML(eventFeedXML.createElement(contest, run, false));
+            } else {
+                /**
+                 * matches filter, assumes that the filter matches runs that
+                 * should have a judgement.
+                 */
+                sendXML(eventFeedXML.createElement(contest, run, ! filter.matches(run)));
+            }
         }
 
         public void runRemoved(RunEvent event) {
-            Run run = event.getRun();
-            sendXML(eventFeedXML.createElement(contest, run));
+            runChanged(event);
         }
 
         public void refreshRuns(RunEvent event) {

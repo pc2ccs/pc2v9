@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 
@@ -93,28 +94,83 @@ public class FilterTest extends TestCase {
         
     }
     
+    /**
+     * Test match for the elapsed time range in filter.
+     * 
+     */
     public void testElapsedTime(){
         
         Problem problem = new Problem("First Problem");
         Language language = new Language("LangName");
-        
-        ClientId clientId = new ClientId(1,ClientType.Type.TEAM, 4);
-        
+
+        ClientId clientId = new ClientId(1, ClientType.Type.TEAM, 4);
+
         Run run = new Run(clientId, language, problem);
-        
+
+        /**
+         * Set submission time to 220 minutes.
+         */
         run.setElapsedMins(220);
-        
+
+        Judgement judgementYes = new Judgement("Yes");
+        judgementYes.setAcronym(Judgement.ACRONYM_ACCEPTED);
+
+        ElementId judgementId = judgementYes.getElementId();
+
+        ClientId judgerClientId = new ClientId(1, Type.JUDGE, 4);
+        boolean solved = true;
+        JudgementRecord record = new JudgementRecord(judgementId, judgerClientId, solved, false);
+        int testNumber = 1;
+
+        RunTestCase testCase = new RunTestCase(run, record, testNumber, solved);
+        testCase.setElapsedMS(run.getElapsedMS());
+
         Filter filter = new Filter();
         
+        /**
+         * Set start elapsed time to 200, 220 > 200 so should 'match'
+         */
         filter.setStartElapsedTime(200);
         
-        assertTrue("Should filter ", filter.matchesElapsedTime(run));
+        assertTrue("Should match time range ", filter.matchesElapsedTime(run));
+        assertTrue("Should match time range ", filter.matchesElapsedTime(testCase));
         
+        /**
+         * Set end time, range is no 200 - 220, 220 <= 220
+         */
         filter.setEndElapsedTime(220);
-        assertTrue("Should filter ", filter.matchesElapsedTime(run));
+        assertTrue("Should match time range ", filter.matchesElapsedTime(run));
+        assertTrue("Should match time range ", filter.matchesElapsedTime(testCase));
+        
+        /**
+         * Set time to 22, 22 is not between range of 200 - 220 
+         */
         
         run.setElapsedMins(22);
-        assertFalse("Should filter ", filter.matchesElapsedTime(run));
+        testCase.setElapsedMS(run.getElapsedMS());
+        
+//        System.out.println("debug 22 - run      "+run.getElapsedMS());
+//        System.out.println("debug 22 - testcase "+testCase.getElapsedMS());
+        
+        assertFalse("Should NOT match time range ", filter.matchesElapsedTime(run));
+        assertFalse("Should NOT match time range ", filter.matchesElapsedTime(testCase));
+        
+        /**
+         * Set range to 4 - 5 hours.
+         */
+        long mins = Constants.MINUTES_PER_HOUR * 4;
+        filter.setStartElapsedTime(mins);
+        filter.setEndElapsedTime(mins + Constants.MINUTES_PER_HOUR);
+        
+        /**
+         * 
+         */
+        run.setElapsedMins(mins + 30);
+        testCase.setElapsedMS(run.getElapsedMS());
+        
+        assertTrue("Should match time range ", filter.matchesElapsedTime(run));
+        assertTrue("Should match time range ", filter.matchesElapsedTime(testCase));
+        
         
     }
     
@@ -187,4 +243,7 @@ public class FilterTest extends TestCase {
         assertEquals("Filtered Accounts should match", numAdmins + numJudges, filter.countAccounts(accounts));
 
     }
+    
+    
+    
 }

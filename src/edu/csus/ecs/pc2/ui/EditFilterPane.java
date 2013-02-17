@@ -868,7 +868,7 @@ public class EditFilterPane extends JPanePlugin {
             }
         }
 
-        filter.clearElapsedTime();
+        filter.clearElapsedTimeRange();
         if (getFromTimeTextField().getText().length() > 0){
             filter.setStartElapsedTime(Long.parseLong(getFromTimeTextField().getText()));
         }

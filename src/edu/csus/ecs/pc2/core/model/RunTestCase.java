@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.Constants;
+
 /**
  * Test Case results.
  *  
@@ -35,6 +37,11 @@ public class RunTestCase implements IElementObject{
     private int testNumber;
     
     private boolean solved = false;
+    
+    /**
+     * Number of elapsed MS.
+     */
+    private long elapsedMS;
     
     public RunTestCase(Run run, JudgementRecord record, int testNumber, boolean solved) {
         runElementId = run.getElementId();
@@ -85,5 +92,17 @@ public class RunTestCase implements IElementObject{
     
     public ElementId getRunElementId() {
         return runElementId;
+    }
+
+    public long getElapsedMins() {
+        return elapsedMS / Constants.MS_PER_MINUTE;
+    }
+    
+    public void setElapsedMS(long elapsedMS) {
+        this.elapsedMS = elapsedMS;
+    }
+    
+    public long getElapsedMS() {
+        return elapsedMS;
     }
 }

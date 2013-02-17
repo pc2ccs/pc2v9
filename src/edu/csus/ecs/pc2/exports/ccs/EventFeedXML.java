@@ -100,7 +100,7 @@ public class EventFeedXML {
     private Log log = null;
     
     private static final String DEFAULT_ACRONYM = "??";
-
+    
     private String[] acronymList = { //
             "No - Compilation Error;CE", //
             "No - Security Violation;SV", //
@@ -131,11 +131,27 @@ public class EventFeedXML {
         return DEFAULT_ACRONYM;
     }
 
-
-
     public String toXML(IInternalContest contest) {
         return toXML(contest, new Filter());
     }
+    
+    /**
+     * Return freeze XML.
+     * @param contest
+     * @param minutesFromEnd minutes from the end of the contest.
+     * @return
+     */
+    public String toXMLFreeze(IInternalContest contest, long minutesFromEnd) {
+        
+        long mins = contest.getContestTime().getConestLengthMins() - minutesFromEnd;
+        
+        Filter filter = new Filter();
+        // only get XML elements for events before mins
+        filter.setEndElapsedTime(mins);
+        
+        return toXML(contest, filter);
+    }
+
 
     public String toXML(IInternalContest contest, Filter filter) {
 
@@ -195,14 +211,23 @@ public class EventFeedXML {
         for (Run run : runs) {
             if (filter.matches(run)) {
                 memento = mementoRoot.createChild(RUN_TAG);
-                addMemento(memento, contest, run); // add RUN
+                addMemento(memento, contest, run, false); // add RUN
                 
                 RunTestCase[] runTestCases = getLastJudgementTestCases(run);
                 Arrays.sort(runTestCases, new RunTestCaseComparator());
                 for (RunTestCase runTestCase : runTestCases) {
-                    memento = mementoRoot.createChild(TESTCASE_TAG);
-                    addMemento(memento, contest, runTestCase, run); // add TESTCASE
+                    if (filter.matchesElapsedTime(runTestCase)){
+                        memento = mementoRoot.createChild(TESTCASE_TAG);
+                        addMemento(memento, contest, runTestCase, run); // add TESTCASE
+                    }
                 }
+            } else if ( ! filter.matchesElapsedTime(run)) {
+                /**
+                 * This is for a frozen event feed.  We will send out
+                 * run information without judgement information, essentially
+                 * we sent out that the run is 'NEW'.
+                 */
+                addMemento(memento, contest, run, false); // add RUN
             }
         }
 
@@ -270,6 +295,8 @@ public class EventFeedXML {
      */
     public BalloonDeliveryInfo[] getBalloonDeliveries(IInternalContest contest) {
 
+        // TODO CCS code frozen restriction
+        
         BalloonDeliveryInfo[] deliveries = new BalloonDeliveryInfo[0];
 
         BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
@@ -742,8 +769,12 @@ public class EventFeedXML {
 //        <run-id>2</run-id>
 //        <solved>True</solved>
         
-        // TODO is result really the judgement acronym?
-        XMLUtilities.addChild(memento, "result", "TBD");
+        // TODO CCS is result really the judgement acronym?
+        String result = Judgement.ACRONYM_OTHER_CONTACT_STAFF;
+        if (testCase.isSolved()){
+            result = Judgement.ACRONYM_ACCEPTED;
+        }
+        XMLUtilities.addChild(memento, "result", result);
         XMLUtilities.addChild(memento, "run-id", run.getNumber());
         
         // TODO CCS is solve whether the run or the test case was solved?
@@ -823,13 +854,30 @@ public class EventFeedXML {
         return -1;
     }
 
-    public XMLMemento createElement(IInternalContest contest, Run run) {
+    /**
+     * Create RUN XML element.
+     * 
+     * @param contest
+     * @param run
+     * @param suppressJudgement if true, do not output judgement information.
+     * @return
+     */
+    public XMLMemento createElement(IInternalContest contest, Run run, boolean suppressJudgement) {
         XMLMemento memento = XMLMemento.createWriteRoot(RUN_TAG);
-        addMemento(memento, contest, run);
+        addMemento(memento, contest, run, suppressJudgement);
         return memento;
     }
 
-    public IMemento addMemento(IMemento memento, IInternalContest contest, Run run) {
+    /**
+     * Add RUN element.
+     * 
+     * @param memento
+     * @param contest
+     * @param run
+     * @param suppressJudgement if true, do not output judgement information.
+     * @return
+     */
+    public IMemento addMemento(IMemento memento, IInternalContest contest, Run run, boolean suppressJudgement) {
 
         // OLD
         // <run time="1265353100290">
@@ -865,15 +913,19 @@ public class EventFeedXML {
         Problem problem = contest.getProblem(run.getProblemId());
         int problemIndex = getProblemIndex(contest, problem);
         memento.putInteger("problem-id", problemIndex);
-
-        XMLUtilities.addChild(memento, "judged", run.isJudged());
+        
+        if (suppressJudgement) {
+            XMLUtilities.addChild(memento, "judged", false);
+        } else {
+            XMLUtilities.addChild(memento, "judged", run.isJudged());
+        }
 
         Language language = contest.getLanguage(run.getLanguageId());
         XMLUtilities.addChild(memento, "language", language.getDisplayName());
 
         XMLUtilities.addChild(memento, "penalty", "TODO"); // TODO CCS What is penalty ??
 
-        if (run.isJudged()){
+        if ((!suppressJudgement) && run.isJudged()) {
             ElementId judgementId = run.getJudgementRecord().getJudgementId();
             String acronym = contest.getJudgement(judgementId).getAcronym();
             if (acronym == null) {
@@ -905,6 +957,10 @@ public class EventFeedXML {
             return "";
         }
     }
+    
+    public String createStartupXML(IInternalContest contest) {
+        return createStartupXML(contest, new Filter());
+    }
 
     /**
      * Starts contest XML and adds all configuration data/values.
@@ -913,7 +969,7 @@ public class EventFeedXML {
      * @param judgement
      * @return
      */
-    public String createStartupXML(IInternalContest contest) {
+    public String createStartupXML(IInternalContest contest, Filter filter) {
 
         StringBuffer sb = new StringBuffer("<" + CONTEST_TAG + ">");
 
@@ -929,7 +985,9 @@ public class EventFeedXML {
 
         idx = 0;
         for (Problem problem : contest.getProblems()) {
-            sb.append(toXML(createElement(contest, problem, idx)));
+            if (filter.matches(problem)){
+                sb.append(toXML(createElement(contest, problem, idx)));
+            }
             idx++;
         }
 
@@ -939,7 +997,9 @@ public class EventFeedXML {
 
         Account [] teamAccounts = getTeamAccounts(contest);
         for (Account account : teamAccounts){
-            sb.append(toXML(createElement(contest, account)));
+            if (filter.matches(account)){
+                sb.append(toXML(createElement(contest, account)));
+            }
         }
 
         Clarification[] clarifications = contest.getClarifications();
@@ -952,14 +1012,23 @@ public class EventFeedXML {
 
         for (Run run : runs) {
 
-            sb.append(toXML(createElement(contest, run))); // add RUN
-
-            if (run.isJudged()) {
+            if (filter.matches(run)) {
+                sb.append(toXML(createElement(contest, run, false))); // add RUN
+                
                 RunTestCase[] runTestCases = getLastJudgementTestCases(run);
                 Arrays.sort(runTestCases, new RunTestCaseComparator());
                 for (RunTestCase runTestCase : runTestCases) {
-                    sb.append(toXML(createElement(contest, runTestCase, run))); // add TESTCASE
+                    if (filter.matchesElapsedTime(runTestCase)){
+                        sb.append(toXML(createElement(contest, runTestCase, run))); // add TESTCASE
+                    }
                 }
+            } else if ( ! filter.matchesElapsedTime(run)) {
+                /**
+                 * This is for a frozen event feed.  We will send out
+                 * run information without judgement information, essentially
+                 * we sent out that the run is 'NEW'.
+                 */
+                sb.append(toXML(createElement(contest, run, false))); // add RUN
             }
         }
         return sb.toString();
