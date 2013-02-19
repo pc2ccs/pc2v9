@@ -125,11 +125,13 @@ public class ProblemsReport implements IReport {
 
                 if (judgesDataFiles.length > 0) {
                     for (SerializedFile serializedFile : judgesDataFiles) {
-                        int bytes = 0;
-                        if (serializedFile.getBuffer() != null) {
+                        Integer bytes = null;
+                        String name = null;
+                        if (serializedFile != null && serializedFile.getBuffer() != null) {
                             bytes = serializedFile.getBuffer().length;
+                            name = serializedFile.getName();
                         }
-                        printWriter.println("                    judge data file '" + serializedFile.getName() + "' " + bytes + " bytes");
+                        printWriter.println("                    judge data file '" + name + "' " + bytes + " bytes");
                     }
                 }
             } else {
@@ -141,11 +143,13 @@ public class ProblemsReport implements IReport {
                 printWriter.println("                  " + judgesAnswerFiles.length + " judge answer files");
                 if (judgesAnswerFiles.length > 0) {
                     for (SerializedFile serializedFile : judgesAnswerFiles) {
-                        int bytes = 0;
-                        if (serializedFile.getBuffer() != null) {
+                        Integer bytes = null;
+                        String name = null;
+                        if (serializedFile != null && serializedFile.getBuffer() != null) {
                             bytes = serializedFile.getBuffer().length;
+                            name = serializedFile.getName();
                         }
-                        printWriter.println("                    judge ans. file '" + serializedFile.getName() + "' " + bytes + " bytes");
+                        printWriter.println("                    judge ans. file '" + name + "' " + bytes + " bytes");
                     }
                 }
             } else {

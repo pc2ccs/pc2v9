@@ -35,7 +35,10 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.report.InternalDumpReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
+import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
 
 /**
  * Import YAML and other data into contest.
@@ -65,6 +68,8 @@ public class ImportDataPane extends JPanePlugin {
     private JButton importPasswordsButton = null;
 
     private JPanel centerPane = null;
+
+    private ReportFrame reportFrame = null;
 
     /**
      * This method initializes
@@ -139,6 +144,15 @@ public class ImportDataPane extends JPanePlugin {
         }
     }
 
+    protected void showReportFrame(IInternalContest inContest) {
+        if (reportFrame == null) {
+            reportFrame  = new ReportFrame();
+            reportFrame.setContestAndController(inContest, getController());
+        }
+        FrameUtilities.setFramePosition(reportFrame, HorizontalPosition.RIGHT, VerticalPosition.CENTER);
+        reportFrame.setVisible(true);
+    }
+    
     private void checkAndLoadYAML(String filename) {
 
         getController().getLog().info("Loading contest.yaml from " + filename);
@@ -152,10 +166,20 @@ public class ImportDataPane extends JPanePlugin {
 
         try {
             // TODO CCS figure out how to determine whether to load data file contents.
-            boolean loadDataFileContents = false;
+            boolean loadDataFileContents = true;
             newContest = loader.fromYaml(null, directoryName, loadDataFileContents);
              
              contestSummary = getContestLoadSummary(newContest, getController());
+             
+             if (Utilities.isDebugMode()){
+                 newContest.generateNewAccounts(Type.ADMINISTRATOR.toString(), 1, true);
+                 newContest.setClientId(newContest.getAccounts(Type.ADMINISTRATOR).firstElement().getClientId());
+                 if (newContest.getClientId() == null){
+                     showReportFrame(newContest);
+                 } else {
+                     Utilities.viewReport(new InternalDumpReport(), "Title: "+newContest.getTitle(), newContest, getController());
+                 }
+             }
              
              result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
    
@@ -201,7 +225,11 @@ public class ImportDataPane extends JPanePlugin {
     private static void addSummaryEntry(StringBuffer sb, int count, String entryName) {
         addSummaryEntry(sb, count, "", entryName);
     }
-
+    
+    private static void addSummaryEntry(StringBuffer buf, String entryName) {
+        buf.append(entryName);
+        buf.append(NL);
+    }
 
     public static String getContestLoadSummary(IInternalContest newContest, IInternalController inController) throws Exception {
 
@@ -247,7 +275,8 @@ public class ImportDataPane extends JPanePlugin {
             
             addSummaryEntry(sb, datCount, "input data file");
             addSummaryEntry(sb, ansCount, "answer data file");
-            
+        } else {
+            addSummaryEntry(sb, "No problems to be added");
         }
 
         addSummaryEntry(sb, languages.length, "language");
@@ -272,7 +301,7 @@ public class ImportDataPane extends JPanePlugin {
         }
         
         if (problems.length > 0 && totalBytes == 0) {
-            sb.append ("NO file/data contents loaded");
+            sb.append ("NO file/data contents loaded for any Problems");
             sb.append(NL);
         }
 

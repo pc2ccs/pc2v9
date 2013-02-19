@@ -36,6 +36,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -452,8 +453,10 @@ public class InternalDumpReport implements IReport {
         Profile profile = contest.getProfile();
         String password = contest.getContestPassword();
 
-        printWriter.println("Profile name  : " + profile.getName());
-        printWriter.println("  description : " + profile.getDescription());
+        if (profile != null){
+            printWriter.println("Profile name  : " + profile.getName());
+            printWriter.println("  description : " + profile.getDescription());
+        }
         printWriter.println("     password : " + password);
     }
 
@@ -467,7 +470,9 @@ public class InternalDumpReport implements IReport {
     private void writeActiveProfile(PrintWriter printWriter) {
 
         Profile profile = contest.getProfile();
-        writeProfile(printWriter, profile);
+        if (profile != null){
+            writeProfile(printWriter, profile);
+        }
     }
     
     private void printProfile(PrintWriter printWriter) {
@@ -498,12 +503,17 @@ public class InternalDumpReport implements IReport {
         printWriter.println();
         printWriter.println("-- Client Info --");
         printWriter.println();
-        Account account = contest.getAccount(contest.getClientId());
-        String name = contest.getClientId().getName();
-        if (account != null){
-            name = account.getDisplayName();
+        
+        String name = null;
+        ClientId clientId = contest.getClientId();
+        if (clientId != null){
+            Account account = contest.getAccount(contest.getClientId());
+            name = contest.getClientId().getName();
+            if (account != null){
+                name = account.getDisplayName();
+            }
         }
-        printWriter.println("* Client Id = "+contest.getClientId()+" "+name);
+        printWriter.println("* Client Id = "+clientId+" "+name);
     }
 
     private void printLocalContestTime(PrintWriter printWriter) {
@@ -586,7 +596,46 @@ public class InternalDumpReport implements IReport {
         printWriter.println("-- " + contest.getProblems().length + " problems --");
         for (Problem problem : contest.getProblems()) {
             printWriter.println("  '" + problem + "' id=" + problem.getElementId());
+            ProblemDataFiles files = contest.getProblemDataFile(problem);
+            if (files == null){
+                printWriter.println("  '" + problem + "' has no local data files (may be on server though)");
+            } else {
+                printDataFileInfo (printWriter, problem, files);
+            }
 
+        }
+    }
+
+    private void printDataFileInfo(PrintWriter printWriter, Problem problem, ProblemDataFiles problemDataFiles) {
+        if (problem.getAnswerFileName() != null) {
+            if (problemDataFiles != null) {
+                if (problemDataFiles.getJudgesAnswerFiles().length == 0) {
+                    printWriter.println("                          Warning - no answer files defined (no contents) ");
+                }
+            } else {
+                printWriter.println("                          Warning - no data/answer files defined (null problemDataFiles) ");
+            }
+        }
+
+        if (problem.getAnswerFileName() != null) {
+            if (problemDataFiles != null) {
+                if (problemDataFiles.getJudgesDataFiles().length == 0) {
+                    printWriter.println("                          Warning - no judges data files defined (no contents) ");
+                }
+            } else {
+                printWriter.println("                          Warning - no data/judge files defined (null problemDataFiles) ");
+            }
+        }
+        
+        if (problem.getNumberTestCases() > 1) {
+            for (int i = 0; i < problem.getNumberTestCases(); i++) {
+                int testCaseNumber = i + 1;
+                String datafile = problem.getDataFileName(testCaseNumber);
+                String answerfile = problem.getAnswerFileName(testCaseNumber);
+
+                printWriter.println("       Data File name " + testCaseNumber + " : " + datafile);
+                printWriter.println("     Answer File name " + testCaseNumber + " : " + answerfile);
+            }
         }
     }
 

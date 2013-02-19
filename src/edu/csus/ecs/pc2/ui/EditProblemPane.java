@@ -192,7 +192,7 @@ public class EditProblemPane extends JPanePlugin {
 
     private ContestYAMLLoader loader = null;
 
-    private JButton saveButton = null;
+    private JButton exportButton = null;
 
     private JButton reportButton = null;
 
@@ -242,8 +242,9 @@ public class EditProblemPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getLoadButton().setVisible(Utilities.isDebugMode());
-                getSaveButton().setVisible(Utilities.isDebugMode());
+                getExportButton().setVisible(Utilities.isDebugMode());
                 getReportButton().setVisible(Utilities.isDebugMode());
+                addProblemFilesTab(null);
             }
         });
 
@@ -316,7 +317,7 @@ public class EditProblemPane extends JPanePlugin {
             buttonPane.add(getUpdateButton(), null);
             buttonPane.add(getReportButton(), null);
             buttonPane.add(getLoadButton(), null);
-            buttonPane.add(getSaveButton(), null);
+            buttonPane.add(getExportButton(), null);
             buttonPane.add(getCancelButton(), null);
         }
         return buttonPane;
@@ -981,26 +982,14 @@ public class EditProblemPane extends JPanePlugin {
      * @param problemDataFiles
      */
     protected void addProblemFilesTab(ProblemDataFiles problemDataFiles) {
-
-        boolean multipleDataSets = (problemDataFiles != null && problemDataFiles.getJudgesDataFiles() != null && //
-        problemDataFiles.getJudgesAnswerFiles().length > 1);
-
-        if (multipleDataSets) {
-
-            if (multipleDataSetPane == null) {
-                multipleDataSetPane = new MultipleDataSetPane();
-                multipleDataSetPane.setContestAndController(getContest(), getController());
-                getMainTabbedPane().addTab("Test Data Sets", multipleDataSetPane);
-            }
-
-            getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
-            getMultipleDataSetPane().setVisible(true);
-
-        } else {
-            if (multipleDataSetPane != null) {
-                multipleDataSetPane.setVisible(false);
-            }
+        
+        if (multipleDataSetPane == null) {
+            multipleDataSetPane = getMultipleDataSetPane();
+            getMainTabbedPane().addTab("Test Data Sets", multipleDataSetPane);
         }
+
+        getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
+        getMultipleDataSetPane().setVisible(true);
     }
 
     public MultipleDataSetPane getMultipleDataSetPane() {
@@ -2361,23 +2350,23 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes saveButton
+     * This method initializes exportButton
      * 
      * @return javax.swing.JButton
      */
-    private JButton getSaveButton() {
-        if (saveButton == null) {
-            saveButton = new JButton();
-            saveButton.setText("Save");
-            saveButton.setToolTipText("Save to problem.yaml");
-            saveButton.setMnemonic(KeyEvent.VK_S);
-            saveButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getExportButton() {
+        if (exportButton == null) {
+            exportButton = new JButton();
+            exportButton.setText("Export");
+            exportButton.setToolTipText("Export problem and files");
+            exportButton.setMnemonic(KeyEvent.VK_X);
+            exportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     saveProblemYaml();
                 }
             });
         }
-        return saveButton;
+        return exportButton;
     }
 
     protected void saveProblemYaml() {

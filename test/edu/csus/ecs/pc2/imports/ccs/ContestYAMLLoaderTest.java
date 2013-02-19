@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -39,7 +40,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoaderTest.java $
 public class ContestYAMLLoaderTest extends AbstractTestCase {
 
-    private boolean debugFlag = false;
+    private boolean debugFlag = true;
 
     private ContestYAMLLoader loader;
 
@@ -225,23 +226,46 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         IInternalContest contest = loader.fromYaml(null, getDataDirectory());
         
-        if (debugFlag) {
-            System.out.println("Dir " + getDataDirectory());
+        debugPrint("Dir " + getDataDirectory());
 
-            int problemNumber = 0;
-            for (Problem problem : contest.getProblems()) {
-                System.out.println("Problem "+problemNumber+" - " +problem.getDisplayName() + " cases " + problem.getNumberTestCases());
-                problemNumber ++;
-                if (problem.getNumberTestCases() > 1) {
-                    for (int i = 0; i < problem.getNumberTestCases(); i++) {
-                        int testCaseNumber = i + 1;
-                        String datafile = problem.getDataFileName(testCaseNumber);
-                        String answerfile = problem.getAnswerFileName(testCaseNumber);
+        int problemNumber = 0;
+        for (Problem problem : contest.getProblems()) {
+            debugPrint("Problem "+problemNumber+" - " +problem.getDisplayName() + " cases " + problem.getNumberTestCases());
 
-                        System.out.println("       Data File name " + testCaseNumber + " : " + datafile);
-                        System.out.println("     Answer File name " + testCaseNumber + " : " + answerfile);
-                    }
+            ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
+
+            problemNumber ++;
+            if (problem.getNumberTestCases() > 1) {
+                for (int i = 0; i < problem.getNumberTestCases(); i++) {
+                    int testCaseNumber = i + 1;
+                    String datafile = problem.getDataFileName(testCaseNumber);
+                    String answerfile = problem.getAnswerFileName(testCaseNumber);
+
+                    debugPrint("       Data File name " + testCaseNumber + " : " + datafile);
+                    debugPrint("     Answer File name " + testCaseNumber + " : " + answerfile);
+
+                    SerializedFile sdatafile = problemDataFiles.getJudgesDataFiles()[problemNumber - 1];
+                    assertNotNull("Should find data file ", sdatafile);
+                    assertNotNull("Data file should have contents ", sdatafile.getBuffer());
+
+                    SerializedFile sanswerfile = problemDataFiles.getJudgesDataFiles()[problemNumber - 1];
+                    assertNotNull("Should find answer file ", sanswerfile);
+                    assertNotNull("Answer file should have contents ", sanswerfile.getBuffer());
+
+                    debugPrint("       Data File name " + testCaseNumber + " : " + datafile+ " size "+sdatafile.getBuffer().length);
+                    debugPrint("     Answer File name " + testCaseNumber + " : " + answerfile+ " size "+sanswerfile.getBuffer().length);
+
                 }
+
+                assertNotNull("Expecting judges data file ", problemDataFiles.getJudgesDataFile());
+                assertNotNull("Expecting judges answer file ", problemDataFiles.getJudgesAnswerFile());
+
+                assertNotNull("Expecting judges data file non empty ", problemDataFiles.getJudgesDataFile().getBuffer());
+                assertNotNull("Expecting judges answer file non empty ", problemDataFiles.getJudgesAnswerFile().getBuffer());
+
+                assertNotNull("Expecting judges data file name ", problem.getDataFileName());
+                assertNotNull("Expecting judges answer file name ", problem.getAnswerFileName());
+
             }
         }
 
@@ -259,11 +283,22 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         }
         
         String[] probNames = { "apl", "barcodes", "biobots", "castles", "channel" };
-  
+        int[] dataSetCount = { 1, 1, 3, 1, 1 };
+
         int i = 0;
         for (Problem problem : contest.getProblems()) {
-            assertEquals(probNames[i], problem.getDisplayName());
+            assertEquals("Expecting same problem names", probNames[i], problem.getDisplayName());
+            ProblemDataFiles files = contest.getProblemDataFile(problem);
+            assertNotNull("Expected data sets for " + problem.getShortName(), files);
+            int dataSets = files.getJudgesDataFiles().length;
+            assertEquals("Expecting same number data sets " + problem.getShortName(), dataSetCount[i], dataSets);
             i++;
+        }
+    }
+
+    private void debugPrint(String string) {
+        if (debugFlag){
+            System.out.println(string);
         }
     }
 
@@ -652,41 +687,41 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     }
     
-    public void testdoNotLoadExternalFile() throws Exception {
-        
-         String dirname = getDataDirectory(getName());
-//        String dirname = getDataDirectory("testValidatorKeys");
-//        String dirname = getDataDirectory();
-        Utilities.insureDir(dirname);
-        assertDirectoryExists(dirname);
-        
-        String filename = dirname + File.separator + ContestYAMLLoader.DEFAULT_CONTEST_YAML_FILENAME;
-//        System.out.println(filename);
-        assertFileExists(filename);
-        
-        IInternalContest contest;
-        
-        // Load data files
-        contest = loader.fromYaml(null, dirname, true);
-        
-        for (Problem problem : contest.getProblems()) {
-            assertTrue(problem.isUsingExternalDataFiles());
-            assertNotNull(problem.getExternalDataFileLocation());
-            ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
-            assertEquals("Expecting loaded answer files ", 12, dataFiles.getJudgesAnswerFiles().length);
-            assertEquals("Expecting loaded data files ", 12, dataFiles.getJudgesDataFiles().length);
-        }
-        
-        // Do not load data files
-        contest = loader.fromYaml(null, dirname, false);
-        
-        for (Problem problem : contest.getProblems()) {
-            assertFalse("Expecting false using data files", problem.isUsingExternalDataFiles());
-            assertNotNull(problem.getExternalDataFileLocation());
-            ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
-            assertEquals("Expecting no loaded answer files ", 0, dataFiles.getJudgesAnswerFiles().length);
-        }
-    }
+//    public void testdoNotLoadExternalFile() throws Exception {
+//        
+//         String dirname = getDataDirectory(getName());
+////        String dirname = getDataDirectory("testValidatorKeys");
+////        String dirname = getDataDirectory();
+//        Utilities.insureDir(dirname);
+//        assertDirectoryExists(dirname);
+//        
+//        String filename = dirname + File.separator + ContestYAMLLoader.DEFAULT_CONTEST_YAML_FILENAME;
+////        System.out.println(filename);
+//        assertFileExists(filename);
+//        
+//        IInternalContest contest;
+//        
+//        // Load data files
+//        contest = loader.fromYaml(null, dirname, true);
+//        
+//        for (Problem problem : contest.getProblems()) {
+//            assertTrue(problem.isUsingExternalDataFiles());
+//            assertNotNull(problem.getExternalDataFileLocation());
+//            ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
+//            assertEquals("Expecting loaded answer files ", 12, dataFiles.getJudgesAnswerFiles().length);
+//            assertEquals("Expecting loaded data files ", 12, dataFiles.getJudgesDataFiles().length);
+//        }
+//        
+//        // Do not load data files
+//        contest = loader.fromYaml(null, dirname, false);
+//        
+//        for (Problem problem : contest.getProblems()) {
+//            assertFalse("Expecting false using data files", problem.isUsingExternalDataFiles());
+//            assertNotNull(problem.getExternalDataFileLocation());
+//            ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
+//            assertEquals("Expecting no loaded answer files ", 0, dataFiles.getJudgesAnswerFiles().length);
+//        }
+//    }
     
     public void testGetBooleanValue() throws Exception {
         
@@ -784,7 +819,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         String singletonTestName = "";
 
         singletonTestName = "testLoader";
-         singletonTestName = "testValidatorKeys";
+         singletonTestName = "testProblemLoader";
 
         if (!"".equals(singletonTestName)) {
             suite.addTest(new ContestYAMLLoaderTest(singletonTestName));

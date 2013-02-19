@@ -1100,7 +1100,11 @@ public final class PacketFormatter {
 
         if (object instanceof SerializedFile) {
             SerializedFile file = (SerializedFile) object;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + "File: " + file.getName() + " " + file.getBuffer().length + " bytes");
+            
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + "File: ??  nuull bytes");
+            if (file != null){
+                node = new DefaultMutableTreeNode(key + "File: " + file.getName() + " " + file.getBuffer().length + " bytes");
+            }
             return node;
         }
 

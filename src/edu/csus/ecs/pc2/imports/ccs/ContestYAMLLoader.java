@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,7 +108,7 @@ public class ContestYAMLLoader {
     /**
      * Use external data files?   (if no, then no file contents loaded into pc2).  
      */
-    public static final String PROBLEM_EXTERNAL_FILES_KEY = "external-data-files";
+    public static final String PROBLEM_EXTERNAL_FILES_KEY = "use-external-data-files";
     
     /**
      * Contest wide validator name.
@@ -134,7 +135,7 @@ public class ContestYAMLLoader {
 
     
     /**
-     * Load contest.yaml from directory.
+     * Load contest data from contest.yaml.
      * 
      * @param contest
      * @param diretoryName
@@ -147,12 +148,12 @@ public class ContestYAMLLoader {
     }
 
     /**
-     * Load contest.yaml from directory.
+     * Load contest, optionally load problem data files.
      * 
      * @param contest
      * @param diretoryName
      *            directory to load files from.
-     * @param loadDataFileContents
+     * @param loadDataFileContents true - load files, false do not load files (files considered external). 
      * @return contest
      * 
      */
@@ -216,7 +217,7 @@ public class ContestYAMLLoader {
         }
         
         loadDataFileContents = getBooleanValue(getSequenceValue(yamlLines, PROBLEM_EXTERNAL_FILES_KEY), loadDataFileContents);
-
+        
         // TODO CCS add contest settings
         // TODO CCS short-name: ICPC WF 2011
         // TODO CCS start-time: 2011-02-04 01:23Z
@@ -233,10 +234,9 @@ public class ContestYAMLLoader {
         String overrideValidatorCommandLine = getSequenceValue(yamlLines, OVERRIDE_VALIDATOR_KEY); 
         
         Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine);
-        if (loadDataFileContents){
-            for (Problem problem : problems) {
-                loadProblemInformationAndDataFiles(contest, directoryName, problem);
-            }
+        
+        for (Problem problem : problems) {
+            loadProblemInformationAndDataFiles(contest, directoryName, problem);
         }
 
         Site[] sites = getSites(yamlLines);
@@ -603,7 +603,12 @@ public class ContestYAMLLoader {
         if (problem.getShortName() == null) {
             throw new YamlLoadException("  For " + problem + " missing problem short name");
         }
-
+        
+        /**
+         * Data files are external so data files should not be loaded into problem data files.
+         */
+        boolean loadDataFiles = !problem.isUsingExternalDataFiles();
+        
         String[] inputFileNames = getFileNames(dataFileBaseDirectory, ".in");
 
         String[] answerFileNames = getFileNames(dataFileBaseDirectory, ".ans");
@@ -616,17 +621,12 @@ public class ContestYAMLLoader {
             throw new YamlLoadException("No answer file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
         }
 
-        /**
-         * Data files are external so data files should not be loaded into problem data files.
-         */
-        boolean loadDataFiles = !problem.isUsingExternalDataFiles();
-
         if (inputFileNames.length == answerFileNames.length) {
 
             Arrays.sort(inputFileNames);
 
-            SerializedFile[] serializedFileDataFiles = new SerializedFile[inputFileNames.length];
-            SerializedFile[] serializedFileAnswerFiles = new SerializedFile[answerFileNames.length];
+            ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
+            ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
 
             for (int idx = 0; idx < inputFileNames.length; idx++) {
 
@@ -634,28 +634,39 @@ public class ContestYAMLLoader {
 
                 String dataFileName = dataFileBaseDirectory + File.separator + inputFileNames[idx];
                 String answerFileName = dataFileName.replaceAll(".in$", ".ans");
-                
-                if (idx == 0){
-                    problem.setDataFileName(Utilities.basename (dataFileName));
-                    problem.setAnswerFileName(Utilities.basename (answerFileName));
+
+                if (idx == 0) {
+                    problem.setDataFileName(Utilities.basename(dataFileName));
+                    problem.setAnswerFileName(Utilities.basename(answerFileName));
                 }
-                
+
                 String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
 
                 checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
                 checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
 
                 if (loadDataFiles) {
-                    serializedFileDataFiles[idx] = new SerializedFile(dataFileName);
-                    serializedFileAnswerFiles[idx] = new SerializedFile(answerFileName);
-                } // else no validators add empty serializedFile
+                    dataFiles.add(new SerializedFile(dataFileName));
+                    answerFiles.add(new SerializedFile(answerFileName));
+                    
+                } // else nada, add no files.
 
             }
 
-            problemDataFiles.setJudgesDataFiles(serializedFileDataFiles);
-            problemDataFiles.setJudgesAnswerFiles(serializedFileAnswerFiles);
+            if (dataFiles.size() > 0) {
 
-            problem.setReadInputDataFromSTDIN(false);
+                SerializedFile[] data = (SerializedFile[]) dataFiles.toArray(new SerializedFile[dataFiles.size()]);
+                SerializedFile[] answer = (SerializedFile[]) answerFiles.toArray(new SerializedFile[answerFiles.size()]);
+                problemDataFiles.setJudgesDataFiles(data);
+                problemDataFiles.setJudgesAnswerFiles(answer);
+                
+                problem.setDataFileName(inputFileNames[0]);
+                problem.setAnswerFileName(inputFileNames[0].replaceAll(".in$", ".ans"));
+            } else {
+                syntaxWarning("There were no data files found/loaded for " + problem.getShortName());
+            }
+
+            problem.setReadInputDataFromSTDIN(true);
 
         } else {
             throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
@@ -669,7 +680,7 @@ public class ContestYAMLLoader {
         }
 
         contest.addProblem(problem, problemDataFiles);
-        
+
         validateCCSData(contest, problem);
 
         return problem;
@@ -744,11 +755,11 @@ public class ContestYAMLLoader {
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
         
         if (dataFileName == null){
-            syntaxError("Missing datafile for problem "+problem.getShortName());
+            syntaxError("Missing datafile for pc2 problem "+problem.getShortName());
         }
 
         if (dataFileName == null){
-            syntaxError("Missing datafile for problem "+problem.getShortName());
+            syntaxError("Missing datafile for pc2 problem "+problem.getShortName());
         }
         
         addDataFiles(problem, problemDataFiles, dataFileBaseDirectory, dataFileName, answerFileName);
@@ -792,6 +803,8 @@ public class ContestYAMLLoader {
 
     public Problem addDefaultPC2Validator(Problem problem, int optionNumber) {
 
+        problem.setCcsMode(false);
+        
         problem.setValidatedProblem(true);
         problem.setUsingPC2Validator(true);
         problem.setWhichPC2Validator(optionNumber);
@@ -813,12 +826,15 @@ public class ContestYAMLLoader {
 
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
 
-        problem.setValidatorProgramName(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        problem.setValidatorProgramName(CCSConstants.DEFAULT_CCS_VALIATOR_NAME);
         problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
 
         String validatorName = baseDirectoryName + File.separator + problem.getValidatorProgramName();
 
         try {
+            if (! (new File(validatorName).isFile())){
+                throw new FileNotFoundException(validatorName);
+            }
             problemDataFiles.setValidatorFile(new SerializedFile(validatorName));
         } catch (Exception e) {
             throw new YamlLoadException("Unable to load validator for problem " + problem.getShortName() + ": " + validatorName, e);
@@ -1011,25 +1027,12 @@ public class ContestYAMLLoader {
              * comment lines preceding a section.
              */
                
-//            if (noActualSectionDef(sequenceLines)) {
-//                idx += sequenceLines.length;
-//                sequenceLines = getNextSequence(sectionLines, idx);
-//                continue;
-//            }
-            
             if (! sequenceLines[0].trim().startsWith("-")) {
                 idx += sequenceLines.length;
                 sequenceLines = getNextSequence(linesFromSection, idx);
                 continue;
             }
             
-//            for (String string : sequenceLines) {
-//                System.out.println("debug 22 seq: "+string);
-//                if (string.indexOf(SHORT_NAME_KEY+":") > 0){
-//                    System.err.println("debug 22 found it: "+string);
-//                }
-//            }
-
             String problemKeyName = getSequenceValue(sequenceLines, SHORT_NAME_KEY);
             
             if (problemKeyName == null){
@@ -1079,7 +1082,20 @@ public class ContestYAMLLoader {
             problem.setColorRGB(colorRGB);
 
             String externalFilesUsesString = getSequenceValue(sequenceLines, PROBLEM_EXTERNAL_FILES_KEY);
-            problem.setUsingExternalDataFiles(getBooleanValue(externalFilesUsesString, loadDataFileContents));
+            problem.setUsingExternalDataFiles(getBooleanValue(externalFilesUsesString, ! loadDataFileContents));
+            
+//            if (problem.isUsingExternalDataFiles()){
+//
+//                System.out.println("");
+//                System.out.println("************************************************************************");
+//                System.out.println("************************************************************************");
+//                System.out.println("Problem "+problem.getShortName()+" is USING EXTERNAL DATA FILES (not loading file contents)");
+//                System.out.println("Load data file contents = "+loadDataFileContents+" override is "+externalFilesUsesString);
+//                System.out.println("************************************************************************");
+//                System.out.println("************************************************************************");
+//                System.out.println("");
+//            }
+            
             String validatorCommandLine = getSequenceValue(sequenceLines, VALIDATOR_KEY);
 
             if (validatorCommandLine == null) {
@@ -1089,7 +1105,7 @@ public class ContestYAMLLoader {
                 validatorCommandLine = overrideValidatorCommandLine;
             }
             problem.setValidatorCommandLine(validatorCommandLine);
-
+            
             problemList.addElement(problem);
 
             idx += sequenceLines.length;
@@ -1361,13 +1377,13 @@ public class ContestYAMLLoader {
 
         if (string != null && string.length() > 0) {
             string = string.trim();
-            if (string.equalsIgnoreCase("yes")) {
+            if ("yes".equalsIgnoreCase(string)) {
                 value = true;
-            } else if (string.equalsIgnoreCase("no")) {
+            } else if ("no".equalsIgnoreCase(string)) {
                 value = false;
-            } else if (string.equalsIgnoreCase("true")) {
+            } else if ("true".equalsIgnoreCase(string)) {
                 value = true;
-            } else if (string.equalsIgnoreCase("false")) {
+            } else if ("false".equalsIgnoreCase(string)) {
                 value = false;
             }
         }
@@ -1402,7 +1418,7 @@ public class ContestYAMLLoader {
      * 
      */
     public Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine)  {
-        return getProblems(contents, defaultTimeOut, true, defaultValidatorCommandLine, null);
+        return getProblems(contents, defaultTimeOut, loadDataFileContents, defaultValidatorCommandLine, null);
     }
 
     /**
@@ -1418,6 +1434,6 @@ public class ContestYAMLLoader {
     }
 
     public Problem[] getProblems(String[] contents, int defaultTimeOut)  {
-        return getProblems(contents, defaultTimeOut, false, null, null);
+        return getProblems(contents, defaultTimeOut, true, null, null);
     }
 }
