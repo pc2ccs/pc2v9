@@ -24,6 +24,7 @@ public final class AllTests {
         suite.addTestSuite(CommaSeparatedValueParserTest.class);
         suite.addTestSuite(TabSeparatedValueParserTest.class);
         suite.addTestSuite(XMLMementoTest.class);
+        suite.addTestSuite(TestAbstractTestCase.class);
         //$JUnit-END$
         return suite;
     }

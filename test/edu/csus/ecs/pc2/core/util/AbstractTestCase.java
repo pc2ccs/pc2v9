@@ -3,11 +3,27 @@ package edu.csus.ecs.pc2.core.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.report.IReport;
 
 /**
  * Test utilities.
@@ -57,8 +73,7 @@ public class AbstractTestCase extends TestCase {
      */
     public static final String DEFAULT_PC2_OUTPUT_FOR_TESTING_DIRECTORY = "testout";
     
-    // XXX samps/src/hello.java should probably be renamed to Hello.java
-    public static final String HELLO_SOURCE_FILENAME = "hello.java";
+    public static final String HELLO_SOURCE_FILENAME = "Hello.java";
     
     public static final String SUMIT_SOURCE_FILENAME = "Sumit.java";
     
@@ -551,4 +566,62 @@ public class AbstractTestCase extends TestCase {
         return string;
     }
 
+    /**
+     * Get nodelist based on XPath expression.
+     * 
+     * @param contest
+     * @param xPathExpression
+     * @param filter
+     * @return
+     * @throws SAXException
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     */
+    public NodeList getXMLNodeList(IReport report, String xPathExpression, Filter filter) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+        Document doc = createDocument(report, filter);
+        XPathFactory xPathfactory = XPathFactory.newInstance();
+        XPath xpath = xPathfactory.newXPath();
+        XPathExpression expr = xpath.compile(xPathExpression);
+        NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+        return nl;
+    }
+
+    /**
+     * Create document for report.
+     * 
+     * @param contest
+     * @param report
+     * @param filter
+     * @return
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
+     */
+    public Document createDocument(IReport report, Filter filter) throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+
+        String xmlString = report.createReportXML(filter);
+        Document doc = builder.parse(xmlString);
+
+        return doc;
+    }
+
+    /**
+     * Checks whether report creates valid XML, throws Exception if not.
+     * @param report
+     * @param filter
+     * @return
+     */
+    public Exception isValidXML(IReport report, Filter filter) {
+        try {
+            createDocument(report, filter);
+            return null;
+        } catch (Exception e) {
+            return e;
+        }
+    }
+    
+    
 }

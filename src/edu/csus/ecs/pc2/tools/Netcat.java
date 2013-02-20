@@ -1,4 +1,4 @@
-package edu.csus.edu.pc2.tools;
+package edu.csus.ecs.pc2.tools;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
