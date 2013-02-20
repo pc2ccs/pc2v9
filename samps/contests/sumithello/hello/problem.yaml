@@ -22,5 +22,3 @@ validator:
 input: 
    readFromSTDIN: false
 
-   answerfile: hello.ans
-

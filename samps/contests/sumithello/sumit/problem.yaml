@@ -22,6 +22,3 @@ validator:
 input: 
    readFromSTDIN: false
 
-   datafile: sumit.dat
-   answerfile: sumit.ans
-
