@@ -28,13 +28,17 @@ public class ClientImplementation implements IClient {
 
     private ElementId elementId;
 
-    private boolean displayableOnScoreboard;
+    private boolean displayableOnScoreboard = false;
     
     public ClientImplementation(ClientId clientId, IInternalContest contest) {
         Account account = contest.getAccount(clientId);
         if (account != null) {
             shortName = clientId.getName();
             title = account.getDisplayName();
+            elementId = account.getElementId();
+            displayableOnScoreboard = account.isAllowed(Type.DISPLAY_ON_SCOREBOARD);
+        } else {
+            elementId = new ElementId(clientId.getTripletKey());
         }
         number = clientId.getClientNumber();
         siteNumber = clientId.getSiteNumber();
@@ -50,8 +54,6 @@ public class ClientImplementation implements IClient {
                 clientType = ClientType.TEAM_CLIENT;
                 break;
         }
-        elementId = account.getElementId();
-        displayableOnScoreboard = account.isAllowed(Type.DISPLAY_ON_SCOREBOARD);
     }
 
     public String getLoginName() {

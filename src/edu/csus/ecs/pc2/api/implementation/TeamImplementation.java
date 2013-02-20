@@ -23,17 +23,28 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
     private IGroup group = null;
 
     public TeamImplementation(ClientId submitter, IInternalContest internalContest) {
-        this(internalContest.getAccount(submitter), internalContest);
+        super(submitter, internalContest);
+
+        Account account = internalContest.getAccount(submitter);
+        if (account != null) {
+            setAccountValues(account, internalContest);
+        } else {
+            displayName = submitter.getName();
+            shortName = submitter.getName();
+        }
     }
 
-    public TeamImplementation(Account account, IInternalContest internalContest) {
-        super(account.getClientId(), internalContest);
-        
+    private void setAccountValues(Account account, IInternalContest contest) {
         displayName = account.getDisplayName();
         shortName = account.getClientId().getName();
         if (account.getGroupId() != null) {
-            group = new GroupImplementation(account.getGroupId(), internalContest);
+            group = new GroupImplementation(account.getGroupId(), contest);
         }
+    }
+
+    public TeamImplementation(Account account, IInternalContest contest) {
+        super(account.getClientId(), contest);
+        setAccountValues(account, contest);
     }
 
     public String getDisplayName() {
