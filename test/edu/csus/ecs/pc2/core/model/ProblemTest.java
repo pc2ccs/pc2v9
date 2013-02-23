@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
+
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.ui.EditProblemPane;
 
@@ -202,30 +204,49 @@ public class ProblemTest extends TestCase {
         prob.setAnswerFileName("data.ans");
 
         assertEquals("Test Cases count expected ", 1, prob.getNumberTestCases());
-        
+
         Problem prob3 = getProblemAnew();
-        
+
         assertEquals("Test Cases count expected ", 1, prob3.getNumberTestCases());
 
     }
 
-    // TODO CCS when short name implemented use this test
-    // public void testValidShortName() {
-    //
-    // Problem p1 = getProblemAnew();
-    //
-    // String [] badPathNames = { //
-    // File.separator+ "temp",
-    // "C:temp",
-    // };
-    //
-    // for (String name : badPathNames) {
-    // try {
-    // p1.setShortName(name);
-    // } catch (Exception e) {
-    // name = "ok";
-    // }
-    // }
-    // }
+    public void testInValidShortNames() {
+
+        Problem p1 = getProblemAnew();
+
+        String[] badPathNames = { //
+                File.separator + "temp", //
+                "C:temp", //
+                "/tmp/name", //
+                "\\tmp\\name", //
+                null, //
+        };
+
+        for (String name : badPathNames) {
+            p1.setShortName(name);
+            assertFalse("Expecting bad problem short name '" + name + "'", p1.isValidShortName());
+        }
+    }
+
+    public void testValidShortNames() {
+
+        Problem p1 = getProblemAnew();
+
+        String[] dataFile = { //
+                "", //
+                "A", //
+                "_", //
+                "()!@#$%^&{}|;',.?", //
+                "sumit", //
+                "FOO", //
+
+        };
+
+        for (String name : dataFile) {
+            p1.setShortName(name);
+            assertTrue ("Expecting good problem short name '"+name+"'", p1.isValidShortName());
+        }
+    }
 
 }

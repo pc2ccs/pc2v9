@@ -118,7 +118,7 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Time Limit", "SVTJ", "Validator" };
+            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
             problemListBox.addColumns(cols);
 
             /**
@@ -169,7 +169,7 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected Object[] buildProblemRow(Problem problem) {
-        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Time Limit", "SVTJ", "Validator" };
+        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -206,6 +206,7 @@ public class ProblemsPane extends JPanePlugin {
             judgingType = "Manual";
         }
         c[i++] = judgingType;
+        c[i++] = problem.getShortName();
         c[i++] = Integer.toString(problem.getTimeOutInSeconds());
         c[i++] = yesNoString(problem.isShowValidationToJudges());
         String validatorName = problem.getValidatorProgramName();

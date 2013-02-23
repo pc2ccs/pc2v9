@@ -634,6 +634,10 @@ public class Problem implements IElementObject {
                 return false;
             }
 
+            if (! StringUtilities.stringSame(shortName, problem.getShortName())){
+                return false;
+            }
+            
             return true;
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);
@@ -682,25 +686,27 @@ public class Problem implements IElementObject {
     public String getShortName() {
         return shortName;
     }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
     
     /**
+     * Valid short name?. <br>
      * 
-     * @param shortName
-     * @throws Exception
+     * A valid short name does not contain path or drive delimiters, these symbols : / \
+     * 
+     * @param name
+     * @return true if valid, false otherwise.
      */
-    public void setShortName(String shortName) throws Exception {
-        
-        // TODO CCS short name must be checked to not contain invalid directory chars
-        // like / \\ :  etc.
-        
-//        boolean invalidName = shortName.contains(File.separator) //
-//        || shortName.contains(":");
-//
-//        if (invalidName) {
-//            throw new Exception("Illegal character found in name: " + shortName);
-//        }
-        
-        this.shortName = shortName;
+    public boolean isValidShortName(String name) {
+        boolean invalidName = name == null || name.contains(File.separator) || //
+                name.contains(":") || name.contains("/") || name.contains("\\");
+        return !invalidName;
+    }
+
+    public boolean isValidShortName() {
+        return isValidShortName(shortName);
     }
     
     /**

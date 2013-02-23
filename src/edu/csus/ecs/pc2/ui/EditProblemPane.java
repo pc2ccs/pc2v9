@@ -40,6 +40,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import java.awt.Point;
 
 /**
  * Add/Edit Problem Pane.
@@ -209,6 +210,7 @@ public class EditProblemPane extends JPanePlugin {
     private boolean usingExternalDataFiles;
 
     private String loadPath;
+    private JTextField shortNameTextfield;
     
     /**
      * This method initializes
@@ -425,8 +427,6 @@ public class EditProblemPane extends JPanePlugin {
 
             try {
                 Problem changedProblem = getProblemFromFields(null);
-                // this is not editable, so just copy it (if available)
-                changedProblem.setShortName(problem.getShortName());
                 if (!problem.isSameAs(changedProblem)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
@@ -554,7 +554,7 @@ public class EditProblemPane extends JPanePlugin {
      * @return Problem based on fields
      * @throws InvalidFieldValue
      */
-    public Problem getProblemFromFields(Problem checkProblem) throws InvalidFieldValue {
+    public Problem getProblemFromFields(Problem checkProblem) {
         boolean isAdding = true;
 
         if (checkProblem == null) {
@@ -577,6 +577,11 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setActive(!deleted);
         
         checkProblem.setCcsMode(getCcsValidationEnabledCheckBox().isSelected());
+        
+        checkProblem.setShortName(shortNameTextfield.getText());
+        if (! checkProblem.isValidShortName()){
+            throw new InvalidFieldValue("Invalid problem short name");
+        }
 
         if (problemRequiresDataCheckBox.isSelected()) {
 
@@ -982,7 +987,7 @@ public class EditProblemPane extends JPanePlugin {
      * @param problemDataFiles
      */
     protected void addProblemFilesTab(ProblemDataFiles problemDataFiles) {
-        
+
         if (multipleDataSetPane == null) {
             multipleDataSetPane = getMultipleDataSetPane();
             getMainTabbedPane().addTab("Test Data Sets", multipleDataSetPane);
@@ -1067,27 +1072,26 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void setForm(Problem inProblem, ProblemDataFiles problemDataFiles) {
         
-        
         problemNameTextField.setText(inProblem.getDisplayName());
         timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
+
         inputDataFileLabel.setText(inProblem.getDataFileName());
+        answerFileNameLabel.setText(inProblem.getAnswerFileName());
+        /**
+         * Set tool tip with complete paths.
+         */
 
         inputDataFileLabel.setToolTipText("");
-
-        if (problemDataFiles != null) {
-            SerializedFile sFile = problemDataFiles.getJudgesDataFile();
-            if (sFile != null) {
-                inputDataFileLabel.setToolTipText(sFile.getAbsolutePath());
-            }
-        }
-
-        answerFileNameLabel.setText(inProblem.getAnswerFileName());
         answerFileNameLabel.setToolTipText("");
 
         if (problemDataFiles != null) {
-            SerializedFile sFile = problemDataFiles.getJudgesAnswerFile();
-            if (sFile != null) {
-                answerFileNameLabel.setToolTipText(sFile.getAbsolutePath());
+            SerializedFile[] files = problemDataFiles.getJudgesDataFiles();
+            if (files.length > 0){
+                inputDataFileLabel.setToolTipText(files[0].getAbsolutePath());
+            }
+            files = problemDataFiles.getJudgesAnswerFiles();
+            if (files.length > 0){
+                answerFileNameLabel.setToolTipText(files[0].getAbsolutePath());
             }
         }
 
@@ -1144,6 +1148,15 @@ public class EditProblemPane extends JPanePlugin {
         
         usingExternalDataFiles = problem.isUsingExternalDataFiles();
         loadPath = problem.getExternalDataFileLocation();
+        
+        addProblemFilesTab (problemDataFiles);
+        
+        /**
+         * Short problem name
+         */
+        
+        shortNameTextfield.setText(problem.getShortName());
+        
     }
 
     /*
@@ -1231,10 +1244,10 @@ public class EditProblemPane extends JPanePlugin {
     private JPanel getGeneralPane() {
         if (generalPane == null) {
             timeoutLabel = new JLabel();
-            timeoutLabel.setBounds(new java.awt.Rectangle(23, 46, 175, 16));
+            timeoutLabel.setBounds(new Rectangle(23, 46, 150, 16));
             timeoutLabel.setText("Run Timeout Limit (Secs)");
             problemNameLabel = new JLabel();
-            problemNameLabel.setBounds(new java.awt.Rectangle(23, 14, 179, 16));
+            problemNameLabel.setBounds(new Rectangle(23, 14, 150, 16));
             problemNameLabel.setText("Problem name");
             generalPane = new JPanel();
             generalPane.setLayout(null);
@@ -1249,6 +1262,23 @@ public class EditProblemPane extends JPanePlugin {
             generalPane.add(getShowCompareCheckBox(), null);
             generalPane.add(getDoShowOutputWindowCheckBox(), null);
             generalPane.add(getDeleteProblemCheckBox(), null);
+            
+            JLabel lblShortName = new JLabel();
+            lblShortName.setText("Short Name");
+            lblShortName.setBounds(new Rectangle(23, 14, 179, 16));
+            lblShortName.setBounds(285, 46, 84, 16);
+            generalPane.add(lblShortName);
+            
+            shortNameTextfield = new JTextField();
+            shortNameTextfield.setPreferredSize(new Dimension(120, 20));
+            shortNameTextfield.setBounds(new Rectangle(220, 44, 120, 20));
+            shortNameTextfield.setBounds(379, 44, 97, 20);
+            shortNameTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+            generalPane.add(shortNameTextfield);
         }
         return generalPane;
     }
@@ -1262,8 +1292,8 @@ public class EditProblemPane extends JPanePlugin {
         if (problemNameTextField == null) {
             problemNameTextField = new JTextField();
             problemNameTextField.setPreferredSize(new java.awt.Dimension(120, 20));
-            problemNameTextField.setSize(new java.awt.Dimension(273, 20));
-            problemNameTextField.setLocation(new java.awt.Point(220, 12));
+            problemNameTextField.setSize(new Dimension(293, 20));
+            problemNameTextField.setLocation(new Point(183, 12));
             problemNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -1281,7 +1311,7 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField getJTextField() {
         if (timeOutSecondTextField == null) {
             timeOutSecondTextField = new JTextField();
-            timeOutSecondTextField.setBounds(new java.awt.Rectangle(220, 44, 120, 20));
+            timeOutSecondTextField.setBounds(new Rectangle(183, 44, 74, 20));
             timeOutSecondTextField.setPreferredSize(new java.awt.Dimension(120, 20));
             timeOutSecondTextField.setDocument(new IntegerDocument());
             timeOutSecondTextField.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1902,7 +1932,7 @@ public class EditProblemPane extends JPanePlugin {
     private JCheckBox getShowCompareCheckBox() {
         if (showCompareCheckBox == null) {
             showCompareCheckBox = new JCheckBox();
-            showCompareCheckBox.setBounds(new java.awt.Rectangle(44, 372, 207, 21));
+            showCompareCheckBox.setBounds(new Rectangle(23, 374, 207, 21));
             showCompareCheckBox.setText("Show Compare");
             showCompareCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1921,7 +1951,7 @@ public class EditProblemPane extends JPanePlugin {
     private JCheckBox getDoShowOutputWindowCheckBox() {
         if (doShowOutputWindowCheckBox == null) {
             doShowOutputWindowCheckBox = new JCheckBox();
-            doShowOutputWindowCheckBox.setBounds(new java.awt.Rectangle(23, 338, 303, 24));
+            doShowOutputWindowCheckBox.setBounds(new Rectangle(23, 338, 225, 24));
             doShowOutputWindowCheckBox.setSelected(true);
             doShowOutputWindowCheckBox.setText("Show the output window");
             doShowOutputWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1957,7 +1987,7 @@ public class EditProblemPane extends JPanePlugin {
      * @return
      * @throws InvalidFieldValue
      */
-    private SerializedFile freshenIfNeeded(SerializedFile serializedFile, String fileName) throws InvalidFieldValue {
+    private SerializedFile freshenIfNeeded(SerializedFile serializedFile, String fileName) {
 
         if (serializedFile == null) {
             return null;
@@ -2033,7 +2063,7 @@ public class EditProblemPane extends JPanePlugin {
      * @param newFile
      * @return true if the file was converted
      */
-    public boolean checkFileFormat(SerializedFile newFile) throws InvalidFieldValue {
+    public boolean checkFileFormat(SerializedFile newFile) {
 
         /*
          * DOS FILE 0x0D 0x0A UNIX FILE 0xA MAC FILE 0xD
@@ -2226,7 +2256,7 @@ public class EditProblemPane extends JPanePlugin {
     private JCheckBox getDeleteProblemCheckBox() {
         if (deleteProblemCheckBox == null) {
             deleteProblemCheckBox = new JCheckBox();
-            deleteProblemCheckBox.setBounds(new Rectangle(324, 372, 182, 21));
+            deleteProblemCheckBox.setBounds(new Rectangle(285, 340, 182, 21));
             deleteProblemCheckBox.setText("Hide Problem");
             deleteProblemCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -2521,5 +2551,4 @@ public class EditProblemPane extends JPanePlugin {
         }
         return validatorRunFilePicker;
     }
-
 } // @jve:decl-index=0:visual-constraint="10,10"

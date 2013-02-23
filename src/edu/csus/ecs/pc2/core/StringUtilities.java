@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.Serializable;
+
 
 /**
  * String utilities.
@@ -9,8 +11,12 @@ package edu.csus.ecs.pc2.core;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/core/Utilities.java $
-public final class StringUtilities {
+public final class StringUtilities implements Serializable {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -4197938292232525730L;
     /**
      * A constant containing three dots.
      */
@@ -94,4 +100,16 @@ public final class StringUtilities {
         }
     }
 
+    /**
+     * Is string empty or null?.
+     * 
+     * @param name
+     * @return true if string is null or trimmed string is length 0
+     */
+    public static boolean isEmpty(String name) {
+        return name == null || "".equals(name.trim());
+    }
+
+    
+    
 }

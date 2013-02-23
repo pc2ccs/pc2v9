@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 import edu.csus.ecs.pc2.core.util.NotificationUtilities;
+import edu.csus.ecs.pc2.ui.InvalidFieldValue;
 
 /**
  * Create Sample contest and controller.
@@ -181,11 +182,9 @@ public class SampleContest {
         for (String probName : problems) {
             Problem problem = new Problem(probName);
             String shortName = probName.split(" ")[0];
-            try {
-                problem.setShortName(shortName.toLowerCase());
-            } catch (Exception e) {
-                // not used
-                shortName = ""; // added for checkstyle warning.
+            problem.setShortName(shortName.toLowerCase());
+            if (! problem.isValidShortName()){
+                throw new InvalidFieldValue("Invalid short name '"+problem.getShortName()+"'");
             }
             problem.setLetter(Character.toString(letter));
             problem.setSiteNumber(siteNumber);

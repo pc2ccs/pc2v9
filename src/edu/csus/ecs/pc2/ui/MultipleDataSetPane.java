@@ -130,7 +130,7 @@ public class MultipleDataSetPane extends JPanePlugin {
     public void setProblemDataFiles(ProblemDataFiles problemDataFiles) {
 
         this.problemDataFiles = problemDataFiles;
-        
+
         if (problemDataFiles == null){
             intialNumberOfRows = 0;
         } else {
@@ -155,26 +155,25 @@ public class MultipleDataSetPane extends JPanePlugin {
     protected void populateUI() {
 
         testDataSetsListBox.removeAllRows();
-        
-        if (problemDataFiles != null){
-            
-            
+
+        if (problemDataFiles != null) {
+
             SerializedFile[] judgeFiles = problemDataFiles.getJudgesDataFiles();
             SerializedFile[] answerFiles = problemDataFiles.getJudgesAnswerFiles();
-            
-            if (judgeFiles == null || judgeFiles.length == 0){
+
+            if (judgeFiles == null || judgeFiles.length == 0) {
                 // No data in the data set.
                 judgeFiles = new SerializedFile[1];
                 answerFiles = new SerializedFile[1];
-                
+
                 judgeFiles[0] = problemDataFiles.getJudgesDataFile();
                 answerFiles[0] = problemDataFiles.getJudgesAnswerFile();
-            } 
-            
+            }
+
             for (int i = 0; i < judgeFiles.length; i++) {
                 addSetRow(i + 1, judgeFiles[i], answerFiles[i]);
             }
-            
+
         }
 
         testDataSetsListBox.autoSizeAllColumns();
@@ -208,9 +207,9 @@ public class MultipleDataSetPane extends JPanePlugin {
         if (buttonPane == null) {
             buttonPane = new JPanel();
             buttonPane.setMinimumSize(new Dimension(25, 25));
-            FlowLayout fl_buttonPane = new FlowLayout();
-            fl_buttonPane.setHgap(45);
-            buttonPane.setLayout(fl_buttonPane);
+            FlowLayout flbuttonPane = new FlowLayout();
+            flbuttonPane.setHgap(45);
+            buttonPane.setLayout(flbuttonPane);
             buttonPane.add(getBtnAddSet());
             buttonPane.add(getBtnRemoveRow());
         }
@@ -236,23 +235,23 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     private JButton getBtnAddSet() {
         if (btnAddSet == null) {
-        	btnAddSet = new JButton("Add Row");
-        	btnAddSet.setToolTipText("Add row of data files");
-        	btnAddSet.setMnemonic(java.awt.event.KeyEvent.VK_D);
-        	btnAddSet.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        addSetRow(getTestDataSetsListBox().getRowCount()+1, null, null);
-        	    }
-        	});
+            btnAddSet = new JButton("Add Row");
+            btnAddSet.setToolTipText("Add row of data files");
+            btnAddSet.setMnemonic(java.awt.event.KeyEvent.VK_D);
+            btnAddSet.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    addSetRow(getTestDataSetsListBox().getRowCount()+1, null, null);
+                }
+            });
         }
         return btnAddSet;
     }
     private JButton getBtnRemoveRow() {
         if (btnRemoveRow == null) {
-        	btnRemoveRow = new JButton("Remove Row");
-        	btnRemoveRow.setToolTipText("Remove selectec row");
-        	btnRemoveRow.setMnemonic(java.awt.event.KeyEvent.VK_R);
-        	btnRemoveRow.addActionListener(new ActionListener() {
+            btnRemoveRow = new JButton("Remove Row");
+            btnRemoveRow.setToolTipText("Remove selectec row");
+            btnRemoveRow.setMnemonic(java.awt.event.KeyEvent.VK_R);
+            btnRemoveRow.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     int rowNumber = getTestDataSetsListBox().getSelectedColumnIndex();
                     if (rowNumber != -1){
