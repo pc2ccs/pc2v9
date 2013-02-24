@@ -40,7 +40,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoaderTest.java $
 public class ContestYAMLLoaderTest extends AbstractTestCase {
 
-    private boolean debugFlag = true;
+    private boolean debugFlag = false;
 
     private ContestYAMLLoader loader;
 
