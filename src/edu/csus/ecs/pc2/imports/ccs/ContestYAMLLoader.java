@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -614,11 +613,11 @@ public class ContestYAMLLoader {
         String[] answerFileNames = getFileNames(dataFileBaseDirectory, ".ans");
 
         if (inputFileNames.length == 0) {
-            throw new YamlLoadException("No input file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
+            throw new YamlLoadException("No input (.in) file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
         }
 
         if (answerFileNames.length == 0) {
-            throw new YamlLoadException("No answer file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
+            throw new YamlLoadException("No answer (.ans) file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
         }
 
         if (inputFileNames.length == answerFileNames.length) {
@@ -824,18 +823,24 @@ public class ContestYAMLLoader {
         problem.setUsingPC2Validator(false);
         problem.setReadInputDataFromSTDIN(true);
 
-        // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
 
-        problem.setValidatorProgramName(CCSConstants.DEFAULT_CCS_VALIATOR_NAME);
+        if (problem.getValidatorProgramName() == null){
+            problem.setValidatorProgramName(CCSConstants.DEFAULT_CCS_VALIATOR_NAME);
+        }
+
+        // if we use the internal Java CCS validator use this.
+        // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
         problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
 
         String validatorName = baseDirectoryName + File.separator + problem.getValidatorProgramName();
 
         try {
-            if (! (new File(validatorName).isFile())){
-                throw new FileNotFoundException(validatorName);
+            /**
+             * If file is there load it 
+             */
+            if (new File(validatorName).isFile()){
+                problemDataFiles.setValidatorFile(new SerializedFile(validatorName));
             }
-            problemDataFiles.setValidatorFile(new SerializedFile(validatorName));
         } catch (Exception e) {
             throw new YamlLoadException("Unable to load validator for problem " + problem.getShortName() + ": " + validatorName, e);
         }
@@ -1066,10 +1071,9 @@ public class ContestYAMLLoader {
 
             problem.setTimeOutInSeconds(seconds);
 
-            try {
-                problem.setShortName(problemKeyName);
-            } catch (Exception e) {
-                throw new YamlLoadException(e);
+            problem.setShortName(problemKeyName);
+            if (! problem.isValidShortName()) {
+                throw new YamlLoadException("Invalid short problem name '"+problemKeyName+"'");
             }
 
              String problemLetter = getSequenceValue(sequenceLines, "letter");
