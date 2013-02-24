@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.core.model;
 
 /**
@@ -16,7 +13,6 @@ public class Group implements IElementObject {
      * 
      */
     private static final long serialVersionUID = -9039235537777735642L;
-    public static final String SVN_ID = "$Id$";
     /**
      * Unique id, version and site number.
      * 
@@ -44,6 +40,13 @@ public class Group implements IElementObject {
         return elementId.getVersionNumber();
     }
 
+    /**
+     * External Id.
+     * 
+     * CMS assigned id for group/region.
+     * 
+     * @return id for region/group.
+     */
     public int getGroupId() {
         return groupId;
     }
@@ -119,8 +122,8 @@ public class Group implements IElementObject {
      * @param s2
      * @return true if both null or equal, false otherwise
      */
-    // TODO move this into a string utility class.
     private boolean stringSame (String s1, String s2){
+        // SOMEDAY  use  return StringUtilities.stringSame(s1,s2);
         if (s1 == null && s2 == null) {
             return true;
         }
@@ -130,7 +133,6 @@ public class Group implements IElementObject {
         }
         
         return s1.equals(s2);
-            
     }
 
     public boolean isSameAs(Group newGroup) {
@@ -163,10 +165,25 @@ public class Group implements IElementObject {
 
             return true;
         } catch (Exception e) {
-            // TODO Log to static exception Log
+            // SOMEDAY properly Log this as a debug log exception
             e.printStackTrace();
             return false;
         }
 
+    }
+
+    /**
+     * Update fields from another group.
+     * 
+     * clone certain settings.
+     * 
+     * @param newGroup
+     */
+    public void updateFrom(Group newGroup) {
+        
+        groupId = newGroup.getGroupId();
+        displayName = newGroup.getDisplayName();
+        site = newGroup.getSite();
+        displayOnScoreboard = newGroup.displayOnScoreboard;
     }
 }

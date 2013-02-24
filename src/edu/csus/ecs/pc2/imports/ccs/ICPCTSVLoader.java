@@ -20,9 +20,9 @@ import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
  */
 
 // $HeadURL$
-public final class ICPCCSVLoader {
+public final class ICPCTSVLoader {
 
-    private ICPCCSVLoader() {
+    private ICPCTSVLoader() {
         super();
     }
 
@@ -62,12 +62,17 @@ public final class ICPCCSVLoader {
 
     private static final int GROUP_TSV_FIELDS = 2;
 
+    /**
+     * Null string value.
+     */
+    private static final String NULL_STRING = "null";
+
     private static int siteNumber = 1;
 
     private static Group[] groups = new Group[0];
 
     /**
-     * Load teams.tsv.
+     * Load teams.tsv, use {@link #loadGroups(String)} first.
      * 
      * {@link #setGroups(Group[])} must be invoked before using this method so groupIds are assigned.
      * 
@@ -87,14 +92,17 @@ public final class ICPCCSVLoader {
 
         String firstLine = lines[i];
 
-        // validate first line
-        // String[] fields = firstLine.split("\t");
-        String[] fields = TabSeparatedValueParser.parseLine(firstLine);
-
+        /**
+         * Read first line, header/version info
+         */
         // 1 Label teams fixed string (always same value)
         // 2 Version number 1 integer
+        String[] fields = TabSeparatedValueParser.parseLine(firstLine);
 
         // TODO CCS check for 'teams' when tsv file contains that value.
+        // validate first line
+        // String[] fields = firstLine.split("\t");
+        
 //        if (!fields[0].trim().equals("teams")) {
 //            throw new InvalidValueException("Expecting 'teams' got '" + fields[0] + "' in " + filename);
 //        }
@@ -113,64 +121,86 @@ public final class ICPCCSVLoader {
             if (fields.length != TEAM_TSV_FIELDS && i == 1) {
                 throw new InvalidFileFormat("Expected " + TEAM_TSV_FIELDS + " fields, found " + fields.length + " is this a valid team.tsv file? (" + filename + ")");
             }
-            if (fields.length != TEAM_TSV_FIELDS) {
-                throw new InvaildNumberFields("Expected " + TEAM_TSV_FIELDS + " fields, found " + fields.length + " invalid team.tsv line " + lines[i]);
-            }
 
-            int fieldnum = 0;
-            String numberStr = fields[fieldnum++];
-            String reservationIdStr = fields[fieldnum++];
-            String groupIDStr = fields[fieldnum++];
-            String teamName = fields[fieldnum++];
-            String schoolName = fields[fieldnum++];
-            String schoolShortName = fields[fieldnum++];
-            String countryCode = fields[fieldnum++];
-
-            // 1 Team number 22 integer
-            // 2 Reservation ID 24314 integer
-            // 3 Group ID 4 integer
-            // 4 Team name Hoos string
-            // 5 Institution name University of Virginia string
-            // 6 Institution short name U Virginia string
-            // 7 Country USA string ISO 3166-1 alpha-3
-
-            int number = 0;
-
-            try {
-                number = Integer.parseInt(numberStr);
-            } catch (NumberFormatException e) {
-                throw new InvalidValueException("Expecting team number got '" + numberStr + "' on line " + lines[i], e);
-            }
-
-            int groupNumber = 0; // TODO somehow need to pre-assign group
-            try {
-                groupNumber = Integer.parseInt(groupIDStr);
-            } catch (NumberFormatException e) {
-                throw new InvalidValueException("Expecting group number got '" + numberStr + "' on line " + lines[i], e);
-            }
-
-            ClientId clientId = new ClientId(siteNumber, Type.TEAM, number);
-            Account account = new Account(clientId, getJoePassword(clientId), siteNumber);
-
-            account.setDisplayName(teamName);
-            account.setShortSchoolName(schoolShortName);
-            account.setLongSchoolName(schoolName);
-            account.setExternalId(reservationIdStr);
-            account.setCountryCode(countryCode);
-
-            ElementId groupId = getGroupForNumber(groupNumber);
-
-            if (groupId != null) {
-                account.setGroupId(groupId);
-            } else {
-                throw  new InvalidValueException("Unknown group number '" + groupNumber + "' on line " + lines[i]);
-            }
-
-            accounts[accountCount] = account;
+            accounts[accountCount] = accountFromFields(fields, accountCount, lines[i]);
             accountCount++;
         }
 
         return accounts;
+    }
+
+    private static Account accountFromFields(String[] fields, int accountCount, String originalLine) throws InvaildNumberFields, InvalidValueException {
+        
+        if (fields.length != TEAM_TSV_FIELDS) {
+            throw new InvaildNumberFields("Expected " + TEAM_TSV_FIELDS + " fields, found " + fields.length + " invalid team.tsv line: " + originalLine);
+        }
+        
+        int fieldnum = 0;
+        String numberStr = fields[fieldnum++];
+        String reservationIdStr = fields[fieldnum++];
+        String groupIDStr = fields[fieldnum++];
+        String teamName = fields[fieldnum++];
+        String schoolName = fields[fieldnum++];
+        String schoolShortName = fields[fieldnum++];
+        String countryCode = fields[fieldnum++];
+
+        // 1 Team number 22 integer
+        // 2 Reservation ID 24314 integer
+        // 3 Group ID 4 integer
+        // 4 Team name Hoos string
+        // 5 Institution name University of Virginia string
+        // 6 Institution short name U Virginia string
+        // 7 Country USA string ISO 3166-1 alpha-3
+
+        int number = 0;
+        
+        if (numberStr != null && NULL_STRING.equalsIgnoreCase(numberStr.trim())){
+            /**
+             * If team number field is 'null' then assign a team number.
+             * The input teams.tsv from the CMS as of 2/24/2013 contains a constant
+             * string 'null' where the team number should be.
+             */
+            number = accountCount + 1;
+        } else {
+            try {
+                number = Integer.parseInt(numberStr);
+            } catch (NumberFormatException e) {
+                throw new InvalidValueException("Expecting team number got '" + numberStr + "' on line " + originalLine, e);
+            }
+        }
+
+        int groupNumber = 0; 
+        try {
+            groupNumber = Integer.parseInt(groupIDStr);
+        } catch (NumberFormatException e) {
+            throw new InvalidValueException("Expecting group number got '" + numberStr + "' on line " + originalLine, e);
+        }
+
+        ClientId clientId = new ClientId(siteNumber, Type.TEAM, number);
+        Account account = new Account(clientId, getJoePassword(clientId), siteNumber);
+
+        account.setDisplayName(schoolName);
+        account.setShortSchoolName(schoolShortName);
+        account.setLongSchoolName(schoolName);
+        account.setExternalName(schoolName);
+        account.setTeamName(teamName);
+        account.setExternalId(reservationIdStr);
+        account.setCountryCode(countryCode);
+        
+        if (groupNumber != 0){
+            /**
+             * Only lookup group number if not zero.
+             */
+            ElementId groupId = getGroupForNumber(groupNumber);
+            
+            if (groupId != null) {
+                account.setGroupId(groupId);
+            } else {
+                throw new InvalidValueException("Unknown group number '" + groupNumber + "' on line " + originalLine);
+            }
+        }
+
+        return account;
     }
 
     private static ElementId getGroupForNumber(int groupId) {
@@ -195,7 +225,7 @@ public final class ICPCCSVLoader {
     }
 
     public static void setGroups(Group[] groups) {
-        ICPCCSVLoader.groups = groups;
+        ICPCTSVLoader.groups = groups;
     }
 
     /**

@@ -110,6 +110,26 @@ public final class StringUtilities implements Serializable {
         return name == null || "".equals(name.trim());
     }
 
+    /**
+     * Create new array for input strings, creates new String array elements instances.
+     * 
+     * Uses {@link #cloneString(String)}
+     * 
+     * @param strings
+     * @return exact clone/copy of input
+     */
+    public static String[] cloneStringArray(String[] strings) {
+        
+        String [] names = new String[strings.length];
+        int i = 0;
+        for (String name : strings) {
+            names[i] = cloneString(name);
+            i++;
+        }
+        
+        return names;
+    }
+
     
     
 }

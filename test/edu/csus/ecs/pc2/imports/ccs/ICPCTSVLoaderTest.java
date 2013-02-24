@@ -7,14 +7,14 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
- * Unit Test ICPCCSVLoader.
+ * Unit Test ICPCTSVLoader.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class ICPCCSVLoaderTest extends AbstractTestCase {
+public class ICPCTSVLoaderTest extends AbstractTestCase {
 
     private boolean debugMode = false;
 
@@ -28,9 +28,9 @@ public class ICPCCSVLoaderTest extends AbstractTestCase {
 
     private void testTeamFile(String groupFile, String teamFileName, int expectedAccounts) throws Exception {
         if (groupFile != null) {
-            ICPCCSVLoader.loadGroups(findTestDataFile(groupFile));
+            ICPCTSVLoader.loadGroups(findTestDataFile(groupFile));
         }
-        Account[] accounts = ICPCCSVLoader.loadAccounts(findTestDataFile(teamFileName));
+        Account[] accounts = ICPCTSVLoader.loadAccounts(findTestDataFile(teamFileName));
 
         assertEquals("Expected accounts in " + teamFileName, expectedAccounts, accounts.length);
     }

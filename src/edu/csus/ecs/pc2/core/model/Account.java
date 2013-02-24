@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -68,6 +69,8 @@ public class Account implements IElementObject {
 
     private String countryCode = "";
     
+    private String teamName = "";
+    
     private String [] memberNames = new String[0];
 
     /**
@@ -115,8 +118,7 @@ public class Account implements IElementObject {
     }
 
     /**
-     * Get Team name 
-     * @return Team name.
+     * Get Team title for display on the scoreboard.
      */
     public String getDisplayName() {
         return displayName;
@@ -191,7 +193,7 @@ public class Account implements IElementObject {
                     return false;
                 }
             }
-            // TODO consider implementing a Class.getDeclaredFields to cover the strings
+            // SOMEDAY consider implementing a Class.getDeclaredFields to cover the strings
             if (!aliasName.equals(account.getAliasName())) {
                 return false;
             }
@@ -245,6 +247,9 @@ public class Account implements IElementObject {
         return permissionList;
     }
 
+    /**
+     * Alias or alternative login name.
+     */
     public String getAliasName() {
         return aliasName;
     }
@@ -266,6 +271,9 @@ public class Account implements IElementObject {
         this.externalId = externalId;
     }
 
+    /**
+     * Group element id.
+     */
     public ElementId getGroupId() {
         return groupId;
     }
@@ -282,15 +290,13 @@ public class Account implements IElementObject {
         this.longSchoolName = longSchoolName;
     }
 
-    /**
-     * E.g. the team name from the icpc data
-     * 
-     * @param externalName
-     */
     public void setExternalName(String externalName) {
         this.externalName = externalName;
     }
 
+    /**
+     * University Name from ICPC CMS data. 
+     */
     public String getExternalName() {
         return externalName;
     }
@@ -306,17 +312,13 @@ public class Account implements IElementObject {
 
     /**
      * Get Institution short name.
-     * @return
      */
     public String getShortSchoolName() {
         return shortSchoolName;
     }
 
-
     /**
-     * Get Nationality (Country Code).
-     * 
-     * @return Nationality (Country Code).
+     * The Nationality as ISO 3166-1 alpha-3, per CCS spec.
      */
     public String getCountryCode() {
         return countryCode;
@@ -326,6 +328,9 @@ public class Account implements IElementObject {
         this.countryCode = countryCode;
     }
 
+    /**
+     * Team member names.
+     */
     public String[] getMemberNames() {
         return memberNames;
     }
@@ -335,5 +340,38 @@ public class Account implements IElementObject {
             names = new String[0];
         }
         this.memberNames = names;
+    }
+
+    /**
+     * Update certain fields.
+     * 
+     * @param account
+     */
+    public void updateFrom(Account account) {
+        aliasName = account.aliasName;
+        countryCode = account.countryCode;
+        displayName = account.displayName;
+        externalId = account.externalId;
+        externalName = account.externalName;
+        groupId = account.getGroupId();
+        longSchoolName = account.longSchoolName;
+        password = account.password;
+        shortSchoolName = account.shortSchoolName;
+        teamName = account.getTeamName();
+
+        permissionList = account.permissionList;
+
+        memberNames = StringUtilities.cloneStringArray(account.memberNames);
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
+    }
+    
+    /**
+     * Team name, ex. Hornets.
+     */
+    public String getTeamName() {
+        return teamName;
     }
 }
