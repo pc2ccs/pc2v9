@@ -36,6 +36,7 @@ public class TestAbstractTestCase extends AbstractTestCase {
         assertDirectoryExists(dir);
         
         filename = getOutputTestFilename("atestfile");
+        createSampleAnswerFile(filename);
         assertFileExists(filename);
 
     }
