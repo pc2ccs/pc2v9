@@ -199,7 +199,7 @@ public class ProfileSavePane extends JPanePlugin {
         setCheckBoxesSelected(true);
     }
 
-    protected void takeProfileAction(String actionText) throws InvalidFieldValue {
+    protected void takeProfileAction(String actionText) {
 
         if (actionText.equalsIgnoreCase(CLONE_BUTTON_NAME)) {
             cloneProfile();
@@ -213,7 +213,7 @@ public class ProfileSavePane extends JPanePlugin {
 
     }
 
-    private void createNewProfile() throws InvalidFieldValue {
+    private void createNewProfile() {
         ProfileCloneSettings settings = getProfileCloneSettingsFromFields();
 
         settings.setCopyLanguages(false);
@@ -234,14 +234,14 @@ public class ProfileSavePane extends JPanePlugin {
 
     }
 
-    private void exportProfile() throws InvalidFieldValue {
+    private void exportProfile() {
 
         throw new InvalidFieldValue("Export not implemented");
         // TODO Export Profile
         // closeWindow();
     }
 
-    private void cloneProfile() throws InvalidFieldValue {
+    private void cloneProfile() {
         ProfileCloneSettings settings = getProfileCloneSettingsFromFields();
         
         if (isDupProfileName(settings.getName())) {
@@ -286,13 +286,13 @@ public class ProfileSavePane extends JPanePlugin {
      * @param message
      * @throws InvalidFieldValue
      */
-    private void requireSetting(boolean found, String message) throws InvalidFieldValue {
+    private void requireSetting(boolean found, String message) {
         if (!found) {
             throw new InvalidFieldValue(message);
         }
     }
 
-    private ProfileCloneSettings getProfileCloneSettingsFromFields() throws InvalidFieldValue {
+    private ProfileCloneSettings getProfileCloneSettingsFromFields() {
 
         String name = getProfileNameTextField().getText();
         
@@ -345,9 +345,9 @@ public class ProfileSavePane extends JPanePlugin {
      * 
      * @param string
      * @param comment
-     * @throws InvalidFieldValue if string is null or empty 
+     * @if string is null or empty 
      */
-    private void checkField(String string, String comment)  throws InvalidFieldValue {
+    private void checkField(String string, String comment)  {
         if (string == null || string.trim().length() == 0){
             throw new InvalidFieldValue(comment);
         }

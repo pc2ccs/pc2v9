@@ -821,7 +821,7 @@ public class EditAccountPane extends JPanePlugin {
 
     }
 
-    private Account getAccountFromFields(Account checkAccount) throws InvalidFieldValue {
+    private Account getAccountFromFields(Account checkAccount) {
 
         Site site = (Site) getSiteSelectionComboBox().getSelectedItem();
         

@@ -168,7 +168,7 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
         }
     }
 
-    private ClientSettings getClientSettingsFromFields(ClientSettings checkSettings) throws InvalidFieldValue {
+    private ClientSettings getClientSettingsFromFields(ClientSettings checkSettings) {
 
         if (checkSettings == null) {
             checkSettings = new ClientSettings();

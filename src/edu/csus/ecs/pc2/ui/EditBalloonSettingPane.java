@@ -267,7 +267,7 @@ public class EditBalloonSettingPane extends JPanePlugin {
      * @return BalloonSettings as retrieved from UI
      * @throws InvalidFieldValue
      */
-    public BalloonSettings getBalloonSettingsFromFields(BalloonSettings checkBalloonSettings) throws InvalidFieldValue {
+    public BalloonSettings getBalloonSettingsFromFields(BalloonSettings checkBalloonSettings) {
 
         if (checkBalloonSettings == null){
             if (getSiteComboBox().getSelectedIndex() == 0) {

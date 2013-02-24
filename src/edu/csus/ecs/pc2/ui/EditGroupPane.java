@@ -179,7 +179,7 @@ public class EditGroupPane extends JPanePlugin {
         }
     }
 
-    private Group getGroupFromFields(Group checkGroup) throws InvalidFieldValue {
+    private Group getGroupFromFields(Group checkGroup) {
         if (checkGroup == null) {
             checkGroup = new Group(getDisplayNameTextField().getText());
         } else {

@@ -193,7 +193,7 @@ public class EditLanguagePane extends JPanePlugin {
         }
     }
 
-    private Language getLanguageFromFields() throws InvalidFieldValue {
+    private Language getLanguageFromFields() {
         if (language == null) {
             language = new Language(displayNameTextField.getText());
         } else {
@@ -220,7 +220,7 @@ public class EditLanguagePane extends JPanePlugin {
      * @param comment
      * @throws InvalidFieldValue
      */
-    private void checkForEmptyField(String value, String comment)  throws InvalidFieldValue {
+    private void checkForEmptyField(String value, String comment)  {
         if (value == null || value.trim().length() == 0){
             throw new InvalidFieldValue(comment);
         }

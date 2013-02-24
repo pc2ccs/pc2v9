@@ -186,7 +186,7 @@ public class EditContestTimePane extends JPanePlugin {
      * @return ContestTime based on fields
      * @throws InvalidFieldValue
      */
-    public ContestTime getContestTimeFromFields(ContestTime checkContestTime) throws InvalidFieldValue {
+    public ContestTime getContestTimeFromFields(ContestTime checkContestTime) {
 
         long secs = stringToLongSecs(getElapsedTimeTextBox().getText());
         if (secs == -1) {

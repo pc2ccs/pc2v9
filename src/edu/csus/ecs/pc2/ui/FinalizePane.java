@@ -329,7 +329,7 @@ public class FinalizePane extends JPanePlugin {
      * 
      * @param data
      */
-    private void validateData(FinalizeData data) throws InvalidFieldValue {
+    private void validateData(FinalizeData data) {
 
         if (data.getGoldRank() == 0) {
             throw new InvalidFieldValue("Gold rank must be greater than zero");
