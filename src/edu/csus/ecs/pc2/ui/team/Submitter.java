@@ -164,7 +164,7 @@ public class Submitter {
          */
         
         if (hasAnyCCSArguments (args, getAllCCSOptions())){
-            int numberMissingCCSArguments = numberMissingArguments(args, CCS_REQUIRED_OPTIONS_LIST);
+            int numberMissingCCSArguments = numberMissingArguments(args, getAllCCSOptions(), CCS_REQUIRED_OPTIONS_LIST);
             
             if (numberMissingCCSArguments > 0){
                 
@@ -424,15 +424,17 @@ public class Submitter {
      * 
      * @param args
      * @param requiredOpts
+     * @param requiredOptions 
      * @return if any option is present, and any other is not present return count.
      */
-    protected int numberMissingArguments(String[] args, String[] requiredOpts) {
+    protected int numberMissingArguments(String[] args, String[] allOptions, String[] requiredOptions) {
         
         int count = 0;
         
-        ParseArguments parseArguments = new ParseArguments(args, requiredOpts);
+        ParseArguments parseArguments = new ParseArguments(args, allOptions);
+        parseArguments.dumpArgs(System.err);
         
-        for (String s : requiredOpts){
+        for (String s : requiredOptions){
             if (! parseArguments.isOptPresent(s)){
                 count ++;
             } else if (! parseArguments.optHasValue(s)){
