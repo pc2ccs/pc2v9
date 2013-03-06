@@ -179,6 +179,7 @@ public class PluginLoadPane extends JPanePlugin {
     private JPanePlugin[] getPluginList() {
         Vector<JPanePlugin> plugins = new Vector<JPanePlugin>();
 
+        plugins.add(new EventFeedServerPane());
         plugins.add(new AccountsPane());
         plugins.add(new BalloonColorListPane());
         plugins.add(new ClarificationsPane());

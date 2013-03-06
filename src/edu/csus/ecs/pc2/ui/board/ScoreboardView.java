@@ -199,7 +199,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 
-                if (Utilities.isDebugMode()){
+                if (Utilities.isDebugMode()) {
                     
                     try {
                         PacketMonitorPane pane = new PacketMonitorPane();
@@ -207,9 +207,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                     } catch (Exception e) {
                         logException(e);
                     }
-                }
                 
-                if (Utilities.isDebugMode()) {
                     try {
                         PluginLoadPane pane = new PluginLoadPane();
                         pane.setParentTabbedPane(getMainTabbedPane());
