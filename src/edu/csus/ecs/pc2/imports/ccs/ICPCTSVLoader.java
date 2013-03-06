@@ -2,12 +2,14 @@ package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.FileNotFoundException;
 
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
 /**
@@ -112,6 +114,8 @@ public final class ICPCTSVLoader {
         Account[] accounts = new Account[lines.length - 1];
 
         int accountCount = 0;
+        ClientType.Type team = ClientType.Type.TEAM;
+        PermissionList teamPermissionList = new PermissionGroup().getPermissionList (team);
 
         for (; i < lines.length; i++) {
 
@@ -123,6 +127,7 @@ public final class ICPCTSVLoader {
             }
 
             accounts[accountCount] = accountFromFields(fields, accountCount, lines[i]);
+            accounts[accountCount].clearListAndLoadPermissions(teamPermissionList);
             accountCount++;
         }
 
@@ -176,7 +181,7 @@ public final class ICPCTSVLoader {
             throw new InvalidValueException("Expecting group number got '" + numberStr + "' on line " + originalLine, e);
         }
 
-        ClientId clientId = new ClientId(siteNumber, Type.TEAM, number);
+        ClientId clientId = new ClientId(siteNumber, ClientType.Type.TEAM, number);
         Account account = new Account(clientId, getJoePassword(clientId), siteNumber);
 
         account.setDisplayName(schoolName);
