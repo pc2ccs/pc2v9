@@ -38,7 +38,11 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
         displayName = account.getDisplayName();
         shortName = account.getClientId().getName();
         if (account.getGroupId() != null) {
-            group = new GroupImplementation(account.getGroupId(), contest);
+            // SOMEDAY ensure that groupId is not null
+            // this happened on load of teams.tsv and groups.tsv
+            if (contest.getGroup(account.getGroupId()) != null){
+                group = new GroupImplementation(account.getGroupId(), contest);
+            }
         }
     }
 
