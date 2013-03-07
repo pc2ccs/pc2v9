@@ -125,13 +125,23 @@ public class ContestYAMLLoader {
      * No other validator def will override this value.
      */
     private static final String OVERRIDE_VALIDATOR_KEY = "override-validator";
-
+    
+//  default-validator: /home/pc2/yaml/default_validator
+    /**
+     * mtsv command line args.
+     */
+//  override-validator: /home/pc2/mtsv {:problemletter} {:resfile} {:basename} {:timelimit}
+    private static final String MTSV_OVERRIDE_VALIDATOR_ARGS = "{:problemletter} {:resfile} {:basename} {:timelimit}";
+    
+    /**
+     * mtsv program name.
+     */
+    private static final String MTSV_PROGRAM_NAME = "mtsv";
     
     /**
      * Validator per problem.
      */
     private static final String VALIDATOR_KEY = "validator";
-
     
     /**
      * Load contest data from contest.yaml.
@@ -230,7 +240,20 @@ public class ContestYAMLLoader {
 
         String defaultValidatorCommandLine = getSequenceValue(yamlLines, DEFAULT_VALIDATOR_KEY); 
         
-        String overrideValidatorCommandLine = getSequenceValue(yamlLines, OVERRIDE_VALIDATOR_KEY); 
+        String overrideValidatorCommandLine = getSequenceValue(yamlLines, OVERRIDE_VALIDATOR_KEY);
+        
+        if (overrideValidatorCommandLine == null){
+
+            // if no override defined, then maybe use mtsv
+            
+            File mtsvFile = new File(directoryName + File.separator + MTSV_PROGRAM_NAME);
+            if (mtsvFile.exists()) {
+                /**
+                 * If mtsv is in the same directory as the contest.yaml, then use the mtsv command line.
+                 */
+                overrideValidatorCommandLine = mtsvFile.getAbsolutePath() + " " + MTSV_OVERRIDE_VALIDATOR_ARGS;
+            }
+        }
         
         Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine);
         
@@ -830,7 +853,9 @@ public class ContestYAMLLoader {
 
         // if we use the internal Java CCS validator use this.
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
-        problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        if (problem.getValidatorCommandLine() == null){
+            problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        }
 
         String validatorName = baseDirectoryName + File.separator + problem.getValidatorProgramName();
 
