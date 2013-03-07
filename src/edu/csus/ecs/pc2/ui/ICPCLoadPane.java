@@ -142,7 +142,12 @@ public class ICPCLoadPane extends JPanePlugin {
         try {
             JFileChooser chooser = new JFileChooser(lastDir);
             chooser.setDialogTitle("Select PC2_Team.tab");
-            chooser.setFileFilter(new TabFileFilter());
+            TabFileFilter tff = new TabFileFilter();
+            chooser.setFileFilter(tff);
+            chooser.setAcceptAllFileFilterUsed(false);
+            // bug 759 java7 requires us to select it, otherwise the default choice would be empty
+            chooser.setFileFilter(tff);
+
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File newFile = chooser.getSelectedFile().getCanonicalFile();
@@ -244,7 +249,11 @@ public class ICPCLoadPane extends JPanePlugin {
         try {
             JFileChooser chooser = new JFileChooser(lastDir);
             chooser.setDialogTitle("Select PC2_Site.tab");
-            chooser.setFileFilter(new TabFileFilter());
+            TabFileFilter tff = new TabFileFilter();
+            chooser.setFileFilter(tff);
+            chooser.setAcceptAllFileFilterUsed(false);
+            // bug 759 java7 requires us to select it, otherwise the default choice would be empty
+            chooser.setFileFilter(tff);
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File newFile = chooser.getSelectedFile().getCanonicalFile();
@@ -372,6 +381,8 @@ public class ICPCLoadPane extends JPanePlugin {
         chooser.addChoosableFileFilter(filterYAML);
         
         chooser.setAcceptAllFileFilterUsed(false);
+        // bug 759 java7 requires us to select it, otherwise the default choice would be empty
+        chooser.setFileFilter(filterYAML);
         
         int action = chooser.showOpenDialog(parent);
 

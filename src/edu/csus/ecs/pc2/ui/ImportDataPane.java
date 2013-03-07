@@ -334,6 +334,8 @@ public class ImportDataPane extends JPanePlugin {
         chooser.addChoosableFileFilter(filterYAML);
         
         chooser.setAcceptAllFileFilterUsed(false);
+        // bug 759 java7 requires us to select it, otherwise the default choice would be empty
+        chooser.setFileFilter(filterYAML);
         
         int action = chooser.showOpenDialog(parent);
 
@@ -360,6 +362,8 @@ public class ImportDataPane extends JPanePlugin {
         chooser.addChoosableFileFilter(filterText);
         
         chooser.setAcceptAllFileFilterUsed(false);
+        // bug 759 java7 requires us to select it, otherwise the default choice would be empty
+        chooser.setFileFilter(filterText);
         
         int action = chooser.showOpenDialog(parent);
 
