@@ -19,8 +19,6 @@ public class GroupDisplayList extends ElementDisplayList {
      */
     private static final long serialVersionUID = -289689878049427570L;
 
-    public static final String SVN_ID = "$Id$";
-
     public void addElement(Group group) {
         super.addElement(group);
     }
@@ -28,14 +26,23 @@ public class GroupDisplayList extends ElementDisplayList {
     public void insertElementAt(Group group, int idx) {
         super.insertElementAt(group, idx);
     }
-
+    
     public void update(Group group) {
+        
+        int idx = -1;
+        
         for (int i = 0; i < size(); i++) {
             Group listGroup = (Group) elementAt(i);
 
             if (listGroup.getElementId().equals(group.getElementId())) {
-                setElementAt(group, i);
+                idx = i;
             }
+        }
+        
+        if (idx == -1){
+            addElement(group);
+        } else {
+            setElementAt(group, idx);
         }
     }
 
