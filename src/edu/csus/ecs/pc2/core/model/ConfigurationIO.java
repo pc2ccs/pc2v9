@@ -520,12 +520,12 @@ public class ConfigurationIO {
          * @throws FileSecurityException 
          * @throws ClassNotFoundException 
          */
-        public boolean writeToDisk(String fileName) throws IOException, ClassNotFoundException, FileSecurityException {
+        public synchronized boolean writeToDisk(String fileName) throws IOException, ClassNotFoundException, FileSecurityException {
             return storage.store(getFileName(), configItemHash);
         }
 
         @SuppressWarnings("unchecked")
-        public boolean loadFromDisk(String filename) throws IOException, ClassNotFoundException, FileSecurityException {
+        public synchronized boolean loadFromDisk(String filename) throws IOException, ClassNotFoundException, FileSecurityException {
             Object readObject = storage.load(filename);
             if (readObject instanceof Hashtable) {
                 configItemHash = (Hashtable<String, Object>) readObject;
