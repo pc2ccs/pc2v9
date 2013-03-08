@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -31,7 +32,12 @@ public class ICPCTSVLoaderTest extends AbstractTestCase {
             ICPCTSVLoader.loadGroups(findTestDataFile(groupFile));
         }
         Account[] accounts = ICPCTSVLoader.loadAccounts(findTestDataFile(teamFileName));
-
+        
+        edu.csus.ecs.pc2.core.security.Permission.Type[] permList = getPermList(Type.TEAM);
+        for (Account account : accounts) {
+            assertEquals("Expecting same permissions ",  permList.length, account.getPermissionList().getList().length);
+        }
+        
         assertEquals("Expected accounts in " + teamFileName, expectedAccounts, accounts.length);
     }
 

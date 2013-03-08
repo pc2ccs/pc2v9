@@ -20,9 +20,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.report.IReport;
 
 /**
@@ -76,6 +78,8 @@ public class AbstractTestCase extends TestCase {
     public static final String HELLO_SOURCE_FILENAME = "Hello.java";
     
     public static final String SUMIT_SOURCE_FILENAME = "Sumit.java";
+    
+    private PermissionGroup permissionGroup = new PermissionGroup();
     
     public AbstractTestCase() {
         super();
@@ -623,5 +627,8 @@ public class AbstractTestCase extends TestCase {
         }
     }
     
+    public edu.csus.ecs.pc2.core.security.Permission.Type[] getPermList(Type type) {
+        return permissionGroup.getPermissionList(type).getList();
+    }
     
 }

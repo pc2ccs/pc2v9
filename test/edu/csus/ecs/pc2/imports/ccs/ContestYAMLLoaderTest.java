@@ -207,7 +207,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Number of problems", 5, problems.length);
 
         Account[] accounts = contest.getAccounts();
-
+        
         ClientType.Type type = ClientType.Type.TEAM;
         assertEquals("Number of accounts " + type.toString(), 35, getClientCount(contest, type));
         type = ClientType.Type.JUDGE;
@@ -219,8 +219,16 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         assertEquals("Number of accounts", 55, accounts.length);
 
+        checkPermissions (accounts);
     }
 
+    private void checkPermissions(Account[] accounts) {
+        for (Account account : accounts) {
+
+            assertEquals("Expecting same permissions for " + account, account.getPermissionList().getList().length, getPermList(account.getClientId().getClientType()).length);
+        }
+
+    }
 
     public void testProblemLoader() throws Exception {
 
