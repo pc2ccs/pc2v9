@@ -125,6 +125,7 @@ public class LoadICPCTSVData implements UIPlugin {
             
             groupList.set(i, existingGroup);
             
+            i++;
         }
         
         i = 0;
