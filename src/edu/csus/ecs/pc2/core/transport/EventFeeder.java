@@ -115,13 +115,15 @@ class EventFeeder implements Runnable {
      * 
      * @param contest
      * @param out
+     * @param contestTimeWhenJudgementsNoLongerSentMinutes 0 fro no filtered free, else the freeze time.
      */
-    public EventFeeder(IInternalContest contest, OutputStreamWriter out) {
+    public EventFeeder(IInternalContest contest, OutputStreamWriter out, long contestTimeWhenJudgementsNoLongerSentMinutes) {
         this();
         
         this.contest = contest;
         this.out = out;
         this.eventFeedRunnable = new EventFeedRunner();
+        setFreezeTimeMinutes(contestTimeWhenJudgementsNoLongerSentMinutes);
     }
     
     /**
@@ -236,7 +238,9 @@ class EventFeeder implements Runnable {
      */
     public void setFreezeTimeMinutes(long contestTimeWhenJudgementsNoLongerSentMinutes) {
         filter = new Filter();
-        filter.setStartElapsedTime(contestTimeWhenJudgementsNoLongerSentMinutes);
+        if (contestTimeWhenJudgementsNoLongerSentMinutes != 0) {
+            filter.setStartElapsedTime(contestTimeWhenJudgementsNoLongerSentMinutes);
+        }
     }
 
     /**

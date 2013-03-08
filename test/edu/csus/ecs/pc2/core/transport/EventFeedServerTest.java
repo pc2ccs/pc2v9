@@ -85,7 +85,7 @@ public class EventFeedServerTest extends TestCase {
             SampleContest sample = new SampleContest();
 
             IInternalContest contest = sample.createContest(1, 1, 12, 6, true);
-            sock.startSocketListener(port, contest);
+            sock.startSocketListener(port, contest, false);
 
         } catch (Exception e) {
             e.printStackTrace();

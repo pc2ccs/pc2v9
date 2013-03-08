@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -30,10 +31,17 @@ class FeederThread implements Runnable {
 
     private IInternalContest contest;
 
-    public FeederThread(ServerSocket server, IInternalContest contest) {
+    private boolean filteredFeed = false;
+
+    public FeederThread(ServerSocket server, IInternalContest contest, boolean filteredFeed) {
         super();
         this.server = server;
         this.contest = contest;
+        this.filteredFeed = filteredFeed;
+    }
+    
+    public IInternalContest getContest() {
+        return contest;
     }
 
     public void run() {
@@ -44,11 +52,20 @@ class FeederThread implements Runnable {
                 Socket connection = server.accept();
                 OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
 
-                eventFeeder = new EventFeeder(contest, out);
+                if (filteredFeed){
+                    System.out.println("debug 22 - starting a filtered feed");
+                    // freeze time 1 hour before end of contest.
+                    long freezeTimeMins = (getContest().getContestTime().getContestLengthSecs() / Constants.SECONDS_PER_MINUTE) - (Constants.MINUTES_PER_HOUR);
+                    eventFeeder = new EventFeeder(contest, out, freezeTimeMins);
+                } else {
+                    System.out.println("debug 22 - starting a un-filtered feed");
+                    // no freeze time
+                    eventFeeder = new EventFeeder(contest, out, 0);
+                }
                 new Thread(eventFeeder).start();
 
                 if (debugFlag) {
-                    System.out.println("Opened and sent event feed.");
+                    System.out.println("Opened and sent event feed. filtered="+filteredFeed);
                 }
             } catch (SocketException ex) {
                 running = false; // NOP, needed to avoid CC warning.

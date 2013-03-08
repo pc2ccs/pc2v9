@@ -290,14 +290,15 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
 
-                if (Utilities.isDebugMode()) {
-                    try {
-                        EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
-                        addUIPlugin(getRunContestTabbedPane(), "Event Feed Server", eventFeedServerPane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
+                try {
+                    EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
+                    addUIPlugin(getRunContestTabbedPane(), "Event Feed Server", eventFeedServerPane);
+                } catch (Exception e) {
+                    logException(e);
                 }
+                
+//                EventFeedsPane eventFeedsPane = new EventFeedsPane();
+//                addUIPlugin(getRunContestTabbedPane(), "Event Feeds", eventFeedsPane);
 
                 ExportDataPane exportPane = new ExportDataPane();
                 addUIPlugin(getRunContestTabbedPane(), "Export", exportPane);
@@ -307,6 +308,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 LoginsPane loginsPane = new LoginsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
+                
                 
                 try {
                     MessageMonitorPane messageMonitorPane = new MessageMonitorPane();

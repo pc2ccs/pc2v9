@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.core.transport;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -19,8 +21,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 // $HeadURL$
 public class EventFeedServer {
 
-    private boolean debugFlag = true;
-
     private FeederThread feederThread = null;
 
     private ServerSocket server = null;
@@ -36,7 +36,7 @@ public class EventFeedServer {
      * @param contest
      * @throws IOException
      */
-    public void startSocketListener(int port, IInternalContest contest) throws IOException {
+    public void startSocketListener(int port, IInternalContest contest, boolean filteredFeed) throws IOException {
 
         if (server != null) {
             throw new IOException("EventFeedServer already running (on port " + portUsed + ")");
@@ -46,11 +46,11 @@ public class EventFeedServer {
 
         server = new ServerSocket(portUsed);
 
-        if (debugFlag) {
-            System.out.println("Started socket on port " + portUsed);
+        if (Utilities.isDebugMode()) {
+            log("Started socket on port " + portUsed);
         }
 
-        feederThread = new FeederThread(server, contest);
+        feederThread = new FeederThread(server, contest, filteredFeed);
         new Thread(feederThread).start();
 
         started = true;
@@ -80,7 +80,15 @@ public class EventFeedServer {
             server.close();
             server = null;
             started = false;
+            if (Utilities.isDebugMode()) {
+                log("Stopped socket on port " + portUsed);
+            }
         }
+    }
+
+    private void log(String string) {
+        System.out.println("debug - "+string);
+        StaticLog.info(string);
     }
 
     public int getPort() {
