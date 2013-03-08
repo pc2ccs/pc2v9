@@ -1094,11 +1094,11 @@ public class Filter implements Serializable {
 
     /**
      * Set the start time for the elapsed time range.
-     * @param startElapsedTimeMinutes
+     * @param newStartElapsedTimeMinutes
      */
-    public void setStartElapsedTime(long startElapsedTimeMinutes) {
+    public void setStartElapsedTime(long newStartElapsedTimeMinutes) {
         filteringElapsedTime = true;
-        this.startElapsedTimeMinutes = startElapsedTimeMinutes;
+        this.startElapsedTimeMinutes = newStartElapsedTimeMinutes;
     }
 
     public long getEndElapsedTime() {
