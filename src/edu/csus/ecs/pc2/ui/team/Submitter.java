@@ -262,7 +262,7 @@ public class Submitter {
             requireFile(mainSubmissionFileName, "main source filename");
             
             for (String name : otherFiles) {
-                requireFile(name, "source filename");
+                requireFile(name, "other source filename");
             }
         }
 
@@ -432,7 +432,6 @@ public class Submitter {
         int count = 0;
         
         ParseArguments parseArguments = new ParseArguments(args, allOptions);
-        parseArguments.dumpArgs(System.err);
         
         for (String s : requiredOptions){
             if (! parseArguments.isOptPresent(s)){
