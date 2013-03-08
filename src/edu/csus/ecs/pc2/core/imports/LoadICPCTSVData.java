@@ -48,17 +48,27 @@ public class LoadICPCTSVData implements UIPlugin {
         contest = inContest;
         controller = inController;
     }
+    
+    public IInternalContest getContest() {
+        return contest;
+    }
 
     public boolean loadFiles(String filename) throws Exception {
 
         if (checkFiles(filename)) {
 
             Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename);
+            
+            for (Group group : groups) {
+                group.setSite(getContest().getSites()[0].getElementId());
+            }
+            
             Account[] accounts = ICPCTSVLoader.loadAccounts(teamsFilename);
 
             String nl = System.getProperty("line.separator");
 
             String message = "Add " + nl + accounts.length + " accounts and " + nl + groups.length + " groups?";
+            
 
             int result = FrameUtilities.yesNoCancelDialog(null, message, "Load TSV files");
             
@@ -87,6 +97,10 @@ public class LoadICPCTSVData implements UIPlugin {
 
                 getController().updateAccounts(updatedAccounts);
 
+                info("Load from file " + groupsFilename);
+                info("Load from file " + teamsFilename);
+                info("Added " + accounts.length + " accounts and " + groups.length + " groups.");
+
                 return true;
             } else {
                 return false;
@@ -97,7 +111,9 @@ public class LoadICPCTSVData implements UIPlugin {
         }
     }
 
-
+    private void info(String message) {
+        getController().getLog().info(message);
+    }
 
     /**
      * Merge/update groups and account into existing groups and accounts, create if necessary
