@@ -44,9 +44,14 @@ public class AccountsTSVReport implements IReportFile {
     }
 
     public void writeReport(PrintWriter printWriter) {
+        
+        printWriter.print("accounts");
+        printWriter.print(DELIMITER);
+        printWriter.print("1");
+        printWriter.print(DELIMITER);
+        printWriter.println();
 
         // Accounts
-        printWriter.println();
         Account[] accounts = contest.getAccounts();
         Arrays.sort(accounts, new AccountComparator());
 
@@ -95,11 +100,7 @@ public class AccountsTSVReport implements IReportFile {
         // printWriter.println();
         // printWriter.println(getReportTitle() + " Report");
 
-        printWriter.print("accounts");
-        printWriter.print(DELIMITER);
-        printWriter.print("1");
-        printWriter.print(DELIMITER);
-        printWriter.println();
+
 
     }
 
@@ -194,7 +195,7 @@ public class AccountsTSVReport implements IReportFile {
         buf.append(DELIMITER);
 
         // 3 Full Name Per Austrin string
-        buf.append(clientId.getClientNumber());
+        buf.append(account.getDisplayName());
         buf.append(DELIMITER);
 
         // 4 Username austrin string
