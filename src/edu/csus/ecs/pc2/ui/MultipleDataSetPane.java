@@ -3,15 +3,17 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.ibm.webrunner.j2mclb.util.event.TableListener;
+
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 /**
  * Multiple Test Data set UI.
@@ -233,6 +235,30 @@ public class MultipleDataSetPane extends JPanePlugin {
         return testDataSetsListBox;
     }
 
+    public void addTableListener(TableListener listener) {
+        getTestDataSetsListBox().getModel().addTableListener(listener);
+    }
+
+    public String[] getTestDataList() {
+        int rowCount = getTestDataSetsListBox().getRowCount();
+        String[] data = new String[rowCount];
+        for (int i = 0; i < rowCount; i++) {
+            Object[] o = getTestDataSetsListBox().getRow(i);
+            data[i] = ((JTextFieldSerializedFile)o[1]).getText();
+        }
+        return data;
+    }
+
+    public String[] getTestAnswerList() {
+        int rowCount = getTestDataSetsListBox().getRowCount();
+        String[] data = new String[rowCount];
+        for (int i = 0; i < rowCount; i++) {
+            Object[] o = getTestDataSetsListBox().getRow(i);
+            data[i] = ((JTextFieldSerializedFile)o[2]).getText();
+        }
+        return data;
+    }
+
     private JButton getBtnAddSet() {
         if (btnAddSet == null) {
             btnAddSet = new JButton("Add Row");
@@ -253,7 +279,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             btnRemoveRow.setMnemonic(java.awt.event.KeyEvent.VK_R);
             btnRemoveRow.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    int rowNumber = getTestDataSetsListBox().getSelectedColumnIndex();
+                    int rowNumber = getTestDataSetsListBox().getSelectedIndex();
                     if (rowNumber != -1){
                         getTestDataSetsListBox().removeRow(rowNumber);
                     }

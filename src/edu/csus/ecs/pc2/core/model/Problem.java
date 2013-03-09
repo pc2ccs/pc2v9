@@ -638,6 +638,12 @@ public class Problem implements IElementObject {
                 return false;
             }
             
+            if (! StringUtilities.stringArraySame(testCaseDataFilenames, problem.getTestCaseDataFilenames())) {
+                return false;
+            }
+            if (! StringUtilities.stringArraySame(testCaseAnswerFilenames, problem.getTestCaseAnswerFilenames())) {
+                return false;
+            }
             return true;
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);
@@ -890,5 +896,19 @@ public class Problem implements IElementObject {
         }
 
         return null;
+    }
+
+    /**
+     * @return the testCaseDataFilenames
+     */
+    private String[] getTestCaseDataFilenames() {
+        return testCaseDataFilenames;
+    }
+
+    /**
+     * @return the testCaseAnswerFilenames
+     */
+    private String[] getTestCaseAnswerFilenames() {
+        return testCaseAnswerFilenames;
     }
 }

@@ -47,6 +47,34 @@ public final class StringUtilities implements Serializable {
     }
 
     /**
+     * Compares string arrays, handles if either array is null.
+     * 
+     * @param s1[]
+     * @param s2[]
+     * @return true if both null or equal, false otherwise
+     */
+    public static boolean stringArraySame (String[] s1, String[] s2){
+        if (s1 == null && s2 == null) {
+            return true;
+        }
+        
+        if (s1 == null && s2 != null){
+            return false;
+        }
+        
+        if (s1.length != s2.length) {
+            return false;
+        }
+        for (int i = 0; i < s1.length; i++) {
+            if (!stringSame(s1[i], s2[i])) {
+                return false;
+            }
+        }
+        return true;
+            
+    }
+
+    /**
      * Clone a string.
      * @param s
      * @return

@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
@@ -29,6 +30,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
+import com.ibm.webrunner.j2mclb.util.event.TableEvent;
+
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -40,7 +43,6 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
-import java.awt.Point;
 
 /**
  * Add/Edit Problem Pane.
@@ -756,6 +758,14 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setUsingExternalDataFiles(usingExternalDataFiles);
         checkProblem.setExternalDataFileLocation(loadPath);
 
+        String[] dataList = getMultipleDataSetPane().getTestDataList();
+        String[] answerList = getMultipleDataSetPane().getTestAnswerList();
+        checkProblem.removeAllTestCaseFilenames();
+        if (dataList != null) {
+            for (int i = 0; i < dataList.length; i++) {
+                checkProblem.addTestCaseFilenames(dataList[i], answerList[i]);
+            }
+        }
         return checkProblem;
 
     }
@@ -1001,6 +1011,72 @@ public class EditProblemPane extends JPanePlugin {
         if (multipleDataSetPane == null) {
             multipleDataSetPane = new MultipleDataSetPane();
             multipleDataSetPane.setContestAndController(getContest(), getController());
+            multipleDataSetPane.addTableListener(new com.ibm.webrunner.j2mclb.util.event.TableListener(){
+
+                public void columnAdded(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void columnChanged(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void columnInfoChanged(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void columnInserted(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void columnRemoved(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void elementChanged(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void rowAdded(TableEvent arg0) {
+                    enableUpdateButton();
+                }
+
+                public void rowChanged(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void rowInfoChanged(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void rowInserted(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void rowRemoved(TableEvent arg0) {
+                    enableUpdateButton();
+                }
+
+                public void tableChanged(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                public void tableRefreshed(TableEvent arg0) {
+                    // TODO Auto-generated method stub
+                    
+                }
+                
+            });
         }
         return multipleDataSetPane;
     }
