@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.report.InternalDumpReport;
+import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
 import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
@@ -177,7 +177,7 @@ public class ImportDataPane extends JPanePlugin {
                  if (newContest.getClientId() == null){
                      showReportFrame(newContest);
                  } else {
-                     Utilities.viewReport(new InternalDumpReport(), "Title: "+newContest.getTitle(), newContest, getController());
+                     Utilities.viewReport(new ProblemsReport(), "Title: "+newContest.getTitle(), newContest, getController());
                  }
              }
              

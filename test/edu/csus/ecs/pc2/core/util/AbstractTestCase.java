@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,7 +29,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.report.IReport;
 
 /**
- * Test utilities.
+ * Test utility methods.
  * 
  * <br>
  * 
@@ -80,6 +81,8 @@ public class AbstractTestCase extends TestCase {
     public static final String SUMIT_SOURCE_FILENAME = "Sumit.java";
     
     private PermissionGroup permissionGroup = new PermissionGroup();
+
+    private boolean debugMode = false;
     
     public AbstractTestCase() {
         super();
@@ -228,6 +231,9 @@ public class AbstractTestCase extends TestCase {
     public String getDataDirectory() {
         
         String dirname = getRootInputTestDataDirectory() + File.separator + getShortClassName();
+        if (debugMode){
+            ensureDirectory(dirname);
+        }
         assertDirectoryExists(dirname);
         return dirname;
     }
@@ -247,7 +253,6 @@ public class AbstractTestCase extends TestCase {
         assertDirectoryExists(newDirName);
         return newDirName; 
     }
-    
 
    /**
     * Get input data file name.
@@ -630,5 +635,48 @@ public class AbstractTestCase extends TestCase {
     public edu.csus.ecs.pc2.core.security.Permission.Type[] getPermList(Type type) {
         return permissionGroup.getPermissionList(type).getList();
     }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
+    
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+    
+    public void editFile(String filename) {
+
+        String viFile = findViExecutable();
+
+        String[] command = { viFile, filename };
+        try {
+            Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            System.out.println("Could not run command " + Arrays.toString(command));
+            e.printStackTrace(System.err);
+        }
+    }
+    
+    private String findViExecutable() {
+
+        String[] names = //
+        { //
+        File.separator + "windows" + File.separator + "vi.bat", //
+                File.separator + "windows" + File.separator + "vi.exe",//
+                File.separator + "windows" + File.separator + "gvim.exe",//
+                //
+                File.separator + "bin" + File.separator + "vi",//
+        };
+
+        for (String name : names) {
+            if (new File(name).isFile()) {
+                return name;
+            }
+        }
+
+        return "vi";
+    }
+
+
     
 }

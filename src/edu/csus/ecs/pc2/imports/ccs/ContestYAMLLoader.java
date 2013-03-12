@@ -147,33 +147,64 @@ public class ContestYAMLLoader {
      * Load contest data from contest.yaml.
      * 
      * @param contest
-     * @param diretoryName
+     * @param directoryName
      *            directory to load files from.
      * @return contest
      * 
      */
-    public IInternalContest fromYaml(IInternalContest contest, String diretoryName)  {
-       return fromYaml(contest, diretoryName, true);
+    public IInternalContest fromYaml(IInternalContest contest, String directoryName)  {
+       return fromYaml(contest, directoryName, true);
     }
 
     /**
      * Load contest, optionally load problem data files.
      * 
      * @param contest
-     * @param diretoryName
+     * @param directoryName
      *            directory to load files from.
      * @param loadDataFileContents true - load files, false do not load files (files considered external). 
      * @return contest
      * 
      */
-    public IInternalContest fromYaml(IInternalContest contest, String diretoryName, boolean loadDataFileContents)  {
+    public IInternalContest fromYaml(IInternalContest contest, String directoryName, boolean loadDataFileContents)  {
         String[] contents;
         try {
-            contents = Utilities.loadFile(diretoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME);
+            contents = loadFileWithIncludes(directoryName, directoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME);
         } catch (IOException e) {
             throw new YamlLoadException(e);
         }
-        return fromYaml(contest, contents, diretoryName, loadDataFileContents);
+        return fromYaml(contest, contents, directoryName, loadDataFileContents);
+    }
+    
+    
+    /**
+     * Load files with #include.
+     * 
+     * @param dirname if null will ignore #include files.
+     * @param filename YAML input file
+     * @throws IOException
+     */
+    public String[] loadFileWithIncludes(String dirname, String filename) throws IOException {
+
+        ArrayList<String> outs = new ArrayList<String>();
+
+        String[] lines = Utilities.loadFile(filename);
+
+        for (String line : lines) {
+
+            outs.add(line);
+            if (dirname != null && line.trim().startsWith("#include")) {
+                String [] parts = line.split("\"");
+                String includeFilename = dirname + File.separator + parts[1];
+                String [] includeLines =  Utilities.loadFile(includeFilename);
+                for (String string : includeLines) {
+                    outs.add(string);
+                }
+                outs.add("# end include "+includeFilename);
+            }
+        }
+
+        return (String[]) outs.toArray(new String[outs.size()]);
     }
 
     /**
@@ -184,7 +215,7 @@ public class ContestYAMLLoader {
      * @throws IOException
      */
     public String getContestTitle(String contestYamlFilename) throws IOException {
-        String[] contents = Utilities.loadFile(contestYamlFilename);
+        String[] contents = loadFileWithIncludes(null, contestYamlFilename);
         String contestTitle = getSequenceValue(contents, CONTEST_NAME_KEY);
         return contestTitle;
     }
@@ -260,7 +291,7 @@ public class ContestYAMLLoader {
         for (Problem problem : problems) {
             loadProblemInformationAndDataFiles(contest, directoryName, problem);
         }
-
+        
         Site[] sites = getSites(yamlLines);
         for (Site site : sites) {
             contest.addSite(site);
@@ -277,7 +308,18 @@ public class ContestYAMLLoader {
         Account[] accounts = getAccounts(yamlLines);
         contest.addAccounts(accounts);
 
-        AutoJudgeSetting[] autoJudgeSettings = getAutoJudgeSettings(yamlLines, problems);
+        AutoJudgeSetting[] autoJudgeSettings = null;
+        if (problems.length == 0){
+            /**
+             * If no problems in input YAML assume problems are already defined
+             * in contest/model.
+             */
+           autoJudgeSettings = getAutoJudgeSettings(yamlLines, contest.getProblems());
+            
+        } else{
+           autoJudgeSettings = getAutoJudgeSettings(yamlLines, problems);
+
+        }
 
         for (AutoJudgeSetting auto : autoJudgeSettings) {
             addAutoJudgeSetting(contest, auto);
@@ -492,7 +534,7 @@ public class ContestYAMLLoader {
         String problemYamlFilename = problemDirectory + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
         String[] contents;
         try {
-            contents = Utilities.loadFile(problemYamlFilename);
+            contents = loadFileWithIncludes(baseDirectoryName, problemYamlFilename);
         } catch (IOException e) {
             throw new YamlLoadException(e);
         }
@@ -574,7 +616,7 @@ public class ContestYAMLLoader {
 
         String[] lines;
         try {
-            lines = Utilities.loadFile(filename);
+            lines = loadFileWithIncludes(null, filename);
         } catch (IOException e) {
             return null;
         }
@@ -1043,6 +1085,13 @@ public class ContestYAMLLoader {
     public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine)  {
 
         String[] linesFromSection = getSectionLines(PROBLEMS_KEY, yamlLines);
+        
+        if (linesFromSection.length == 0){
+            /**
+             * No problems defined, no point in finding them.
+             */
+            return new Problem[0];
+        }
 
         Vector<Problem> problemList = new Vector<Problem>();
 
@@ -1454,12 +1503,12 @@ public class ContestYAMLLoader {
      * 
      * @param contest
      * @param yamlLines
-     * @param diretoryName
+     * @param directoryName
      * @return
      * 
      */
-    public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String diretoryName)  {
-        return fromYaml(contest, yamlLines, diretoryName, true);
+    public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName)  {
+        return fromYaml(contest, yamlLines, directoryName, true);
     }
 
     public Problem[] getProblems(String[] contents, int defaultTimeOut)  {

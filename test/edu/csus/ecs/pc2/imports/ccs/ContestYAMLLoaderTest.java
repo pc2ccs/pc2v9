@@ -7,7 +7,6 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
@@ -42,7 +41,10 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     private boolean debugFlag = false;
 
-    private ContestYAMLLoader loader;
+    private ContestYAMLLoader loader = new ContestYAMLLoader();
+    
+    private SampleContest sampleContest = new SampleContest();
+
 
     public ContestYAMLLoaderTest(String string) {
         super(string);
@@ -51,7 +53,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        loader = new ContestYAMLLoader();
+        
     }
 
     public void testGetTitle() throws IOException {
@@ -777,9 +779,9 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         Problem[] problems = contest.getProblems();
         
-        assertEquals("Expect custom validator", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problems[0].getValidatorCommandLine());
-        assertEquals("Expect default validator", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problems[1].getValidatorCommandLine());
-        assertEquals("Expect custom validator", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problems[2].getValidatorCommandLine());
+//        assertEquals("Expect custom validator", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problems[0].getValidatorCommandLine());
+//        assertEquals("Expect default validator", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problems[1].getValidatorCommandLine());
+//        assertEquals("Expect custom validator", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problems[2].getValidatorCommandLine());
 
         String [] letterList = {"S", "E", "X"};
         
@@ -822,6 +824,9 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     }
 
     public static Test suiteAmatic() {
+        /**
+         * This is a way to test a single test methdod 
+         */
         TestSuite suite = new TestSuite("YAML loader test");
 
         String singletonTestName = "";
@@ -837,5 +842,70 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         }
 
         return suite;
+    }
+    
+    public void testSuppContestYaml () throws Exception {
+        
+        String dirname = getDataDirectory("supp");
+        
+//        System.out.println("dir "+dirname);
+        
+        IInternalContest origContest = sampleContest.createContest(1, 1, 25, 12, true);
+        String[] problemNames = { "Nike", "Athena", "Gaia", "Orion", 
+                "Jasmin", "Calliope", "Aphrodite" };
+        char letter = 'A';
+        letter += origContest.getProblems().length;
+        
+        Problem[] problems = sampleContest.createProblems(problemNames, letter, 1);
+        for (Problem problem : problems) {
+            origContest.addProblem(problem);
+        }
+        
+        IInternalContest contest = loader.fromYaml(origContest, dirname);
+        assertNotNull(contest);
+    }
+    
+    public void testIncludeFile() throws Exception {
+
+        String dirname = getDataDirectory("inctest");
+        System.out.println("dir " + dirname);
+
+        String loadfile = dirname + File.separator + "contest.yaml";
+        assertFileExists(loadfile, "contest.yaml for test");
+
+        String[] lines = loader.loadFileWithIncludes(dirname, dirname + File.separator + "contest.yaml");
+
+        // dumpLines ("", lines, true);
+
+        assertEquals("expected number of lines ", 51, lines.length);
+
+        // IInternalContest contest = sampleContest.createContest(1, 1, 12, 12, true);
+        // AutoJudgeSetting[] autoJudgeSettings = loader.getAutoJudgeSettings(lines, contest.getProblems());
+        // assertEquals ("Auto judge settings ", 1, autoJudgeSettings.length);
+
+        String[] other = loader.getSectionLines(ContestYAMLLoader.AUTO_JUDGE_KEY, lines);
+        // dumpLines("", other, true);
+        assertEquals("expected number of AJ lines ", 21, other.length);
+    }
+
+    /**
+     * Dump lines to stdout.
+     * 
+     * @param comment phrase that identifis these lines
+     * @param lines array o' string
+     * @param autoNumberLines true to prefix with numbers 
+     */
+    protected void dumpLines(String comment, String[] lines, boolean autoNumberLines) {
+
+        System.out.println(comment + " number of liens " + lines.length);
+
+        int i = 1;
+        for (String string : lines) {
+            if (autoNumberLines) {
+                System.out.print(i + ": ");
+            }
+            System.out.println(string);
+            i++;
+        }
     }
 }

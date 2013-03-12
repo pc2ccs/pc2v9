@@ -149,7 +149,7 @@ public class SampleContest {
     public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer, Profile profile, String contestPassword) {
 
         String[] languages = { LanguageAutoFill.JAVATITLE, LanguageAutoFill.DEFAULTTITLE, LanguageAutoFill.GNUCPPTITLE, LanguageAutoFill.PERLTITLE, LanguageAutoFill.MSCTITLE, "APL" };
-        String[] problems = { "Sumit", "Quadrangles", "Routing", "Faulty Towers", "London Bridge", "Finnigans Bluff" };
+        String[] problemsNames = { "Sumit", "Quadrangles", "Routing", "Faulty Towers", "London Bridge", "Finnigans Bluff" };
         String[] judgements = { "Stupid programming error", "Misread problem statement", "Almost there", "You have no clue", "Give up and go home", "Consider switching to another major",
                 "How did you get into this place ?", "Contact Staff - you have no hope" };
 
@@ -177,19 +177,9 @@ public class SampleContest {
             contest.addLanguage(language);
         }
         
-        char letter = 'A';
-        
-        for (String probName : problems) {
-            Problem problem = new Problem(probName);
-            String shortName = probName.split(" ")[0];
-            problem.setShortName(shortName.toLowerCase());
-            if (! problem.isValidShortName()){
-                throw new InvalidFieldValue("Invalid short name '"+problem.getShortName()+"'");
-            }
-            problem.setLetter(Character.toString(letter));
-            problem.setSiteNumber(siteNumber);
+        Problem[] problems = createProblems(problemsNames, 'A', siteNumber);
+        for (Problem problem : problems) {
             contest.addProblem(problem);
-            letter ++;
         }
 
         Problem generalProblem = new Problem("General.");
@@ -227,6 +217,29 @@ public class SampleContest {
         return contest;
     }
 
+    public Problem createProblem(String probName, char letter, int siteNumber) {
+        Problem problem = new Problem(probName);
+        String shortName = probName.split(" ")[0];
+        problem.setShortName(shortName.toLowerCase());
+        if (! problem.isValidShortName()){
+            throw new InvalidFieldValue("Invalid short name '"+problem.getShortName()+"'");
+        }
+        problem.setLetter(Character.toString(letter));
+        problem.setSiteNumber(siteNumber);
+        return problem;
+    }
+
+    public Problem[] createProblems(String [] problemNames, char startLetter, int siteNumber) {
+        Problem [] problems = new Problem[problemNames.length];
+        char letter = startLetter;
+        int i = 0;
+        for (String name : problemNames) {
+            problems[i++] = createProblem(name, letter, siteNumber);
+            letter ++;
+        }
+        return problems;
+    }
+    
     /**
      * Assign colors.
      * 
@@ -1464,6 +1477,10 @@ public class SampleContest {
             RunTestCase runTestCase = new RunTestCase(run, judgementRecord, i+1, run.isSolved());
             run.addTestCase (runTestCase);
         }
+    }
+
+    public IInternalContest createStandardContest() {
+        return createContest(3, 3, 120, 12, true);
     }
 
 }

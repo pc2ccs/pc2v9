@@ -421,22 +421,28 @@ public class ICPCLoadPane extends JPanePlugin {
         LoadICPCTSVData loader = new LoadICPCTSVData();
         loader.setContestAndController(getContest(), getController());
         
-        String filename;
+        String filename = null;
         try {
             filename = selectFileName();
             
             boolean loaded = loader.loadFiles(filename);
             
             if (loaded){
-                showMessage(this,"Data Loaded", "DEBUG Data Loaded");
+                info ("Loaded data from file "+filename);
             }
         } catch (IOException e) {
-            showMessage(this,"Error", "Data not loaded: "+e.getMessage());
-            e.printStackTrace(); // TODO CLEANUP
+            if (filename != null){
+                info ("Did not load data from file "+filename);
+            }
         } catch (Exception e) {
-            showMessage(this,"Error", "Data not loaded: "+e.getMessage());
-            e.printStackTrace(); // TODO CLEANUP
+            if (filename != null){
+                info ("Did not load data from file "+filename);
+            }
         }
+    }
+
+    private void info(String message) {
+        log.info(message);
     }
 
     /**
@@ -542,5 +548,7 @@ public class ICPCLoadPane extends JPanePlugin {
         }
         return icpcAccountFrame;
     }
+    
+    
 
 } // @jve:decl-index=0:visual-constraint="10,10"
