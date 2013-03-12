@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
+import edu.csus.ecs.pc2.ui.EventFeedServerPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPane;
@@ -212,6 +213,19 @@ public class JudgeView extends JFrame implements UIPlugin {
                 controller.register(contestClockDisplay);
                 
                 if (Utilities.isDebugMode()) {
+
+                    try {
+                        EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
+                        addUIPlugin(getMainTabbedPane(), "Event Server", eventFeedServerPane);
+                    } catch (Exception e) {
+                        if (StaticLog.getLog() != null) {
+                            StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                            e.printStackTrace(System.err);
+                        } else {
+                            e.printStackTrace(System.err);
+                        }
+                    }
+
                     try {
                         PluginLoadPane pane = new PluginLoadPane();
                         pane.setParentTabbedPane(getMainTabbedPane());
