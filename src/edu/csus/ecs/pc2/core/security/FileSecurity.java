@@ -446,8 +446,10 @@ public class FileSecurity implements IStorage {
         if (!readyToReadWrite) {
             throw new FileSecurityException(NOT_READY_TO_READ);
         }
-        
-        sealedObjectFromDisk = (SealedObject) readObjectFromFile(fileName);
+
+        synchronized (this) {
+            sealedObjectFromDisk = (SealedObject) readObjectFromFile(fileName);
+        }
 
         try {
             objectToReturn = fileCrypt.decrypt(sealedObjectFromDisk);
@@ -581,14 +583,16 @@ public class FileSecurity implements IStorage {
     * @return true, otherwise throws an exception
     * @throws IOException
     */
-   public boolean writeObjectToFile(String filename,
-           Serializable serializable) throws IOException {
-       FileOutputStream f = new FileOutputStream(filename);
-       ObjectOutputStream s = new ObjectOutputStream(f);
-       s.writeObject(serializable);
-       s.flush();
-       s.close();
-       s = null;
+    private boolean writeObjectToFile(String filename, Serializable serializable) throws IOException {
+       
+       synchronized (this) {
+           FileOutputStream f = new FileOutputStream(filename);
+           ObjectOutputStream s = new ObjectOutputStream(f);
+           s.writeObject(serializable);
+           s.flush();
+           s.close();
+           s = null;
+       }
        return true;
 
    }
@@ -601,7 +605,7 @@ public class FileSecurity implements IStorage {
     * @throws ClassNotFoundException
     * @throws IOException
     */
-   public Object readObjectFromFile(String filename)
+   private Object readObjectFromFile(String filename)
            throws IOException, ClassNotFoundException {
        Object object = new Object();
 
