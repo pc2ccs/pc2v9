@@ -331,7 +331,8 @@ public class Executable {
                     // getting here when not in validator mode results in a blank execute results window
                     boolean passed = true;
 
-                    while (passed && dataSetNumber < dataFiles.length) {
+                    // SOMEDAY make this work properly - aka not depend on mtsv
+//                    while (passed && dataSetNumber < dataFiles.length) {
                         if (executeProgram(dataSetNumber) && isValidated()) {
                             passed = validateProgram(dataSetNumber);
                         } else {
@@ -339,7 +340,7 @@ public class Executable {
                         }
 
                         dataSetNumber++;
-                    }
+//                    }
                 }
             } else {
                 /**
