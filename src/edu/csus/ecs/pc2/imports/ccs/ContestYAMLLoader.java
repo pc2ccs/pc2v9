@@ -1143,7 +1143,8 @@ public class ContestYAMLLoader {
             
             Problem problem = new Problem(problemTitle);
 
-            problem.setTimeOutInSeconds(seconds);
+            int actSeconds = getIntegerValue(getSequenceValue(sequenceLines, TIMEOUT_KEY), seconds);
+            problem.setTimeOutInSeconds(actSeconds);
 
             problem.setShortName(problemKeyName);
             if (! problem.isValidShortName()) {

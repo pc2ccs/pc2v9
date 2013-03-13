@@ -55,16 +55,19 @@ problemset:
     short-name: barcodes
     color:      red
     rgb:        #ff0000
+    timeout:    10
 
   - letter:     C
     short-name: biobots
     color:      green
     rgb:        #00ff00
+    timeout:    23
 
   - letter:     D
     short-name: castles
     color:      blue
     rgb:        #0000ff
+    timeout:    4
 
   - letter:     E
     short-name: channel
