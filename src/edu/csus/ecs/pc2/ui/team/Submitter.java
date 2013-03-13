@@ -57,6 +57,8 @@ public class Submitter {
     private String mainSubmissionFileName;
     
     public static final String[] CCS_REQUIRED_OPTIONS_LIST = {"-l", "-m", "-p", "-u", "-w" };
+    
+    private RunEventListener runliEventListener = new RunEventListener();
 
     /**
      * Successful run exit code.
@@ -607,20 +609,18 @@ public class Submitter {
             serverConnection = new ServerConnection();
 
             contest = serverConnection.login(login, password);
+            contest.addRunListener(runliEventListener);
             
             System.out.println("For: " + contest.getMyClient().getDisplayName() + " (" + contest.getMyClient().getLoginName() + ")");
             System.out.println();
 
             try {
-
-                // Register for run event.
-
-                RunEventListener runliEventListener = new RunEventListener();
-                contest.addRunListener(runliEventListener);
+                
+                Thread.sleep(100);
 
                 submitTheRun(problemTitle, languageTitle, mainSubmissionFileName, otherFiles);
 
-                waitForRunSubmissionConfirmation(runliEventListener, 0);
+                waitForRunSubmissionConfirmation(runliEventListener, 2);
 
                 IRun run = runliEventListener.getRun();
 
@@ -698,7 +698,7 @@ public class Submitter {
                 done = true;
             }
 
-            if (new Date().getTime() > timeLimit) {
+            if (! done && (new Date().getTime() > timeLimit)) {
                 Thread.sleep(500);
                 break;
             }
