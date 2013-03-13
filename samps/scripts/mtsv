@@ -28,7 +28,7 @@ my $JUDGEMENT_TLE = "Time Limit Exceeded";
 my $JUDGEMENT_ACCEPTED = "accepted";
 
 # dir(or file) present?  will not show them gvim output
-my $IS_AUTO_JUDGE = "/root/computer";
+my $IS_AUTO_JUDGE = "/home/pc2/computer";
 
 # using security wrapper
 my $usingwrapper = 1;
