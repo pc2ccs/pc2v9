@@ -620,7 +620,7 @@ public class Submitter {
 
                 submitTheRun(problemTitle, languageTitle, mainSubmissionFileName, otherFiles);
 
-                waitForRunSubmissionConfirmation(runliEventListener, 6);
+                waitForRunSubmissionConfirmation(runliEventListener, 0);
 
                 IRun run = runliEventListener.getRun();
 
