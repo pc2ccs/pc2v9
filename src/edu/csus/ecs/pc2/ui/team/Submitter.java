@@ -616,8 +616,6 @@ public class Submitter {
 
             try {
                 
-                Thread.sleep(100);
-
                 submitTheRun(problemTitle, languageTitle, mainSubmissionFileName, otherFiles);
 
                 waitForRunSubmissionConfirmation(runliEventListener, 2);
@@ -699,9 +697,9 @@ public class Submitter {
             }
 
             if (! done && (new Date().getTime() > timeLimit)) {
-                Thread.sleep(500);
                 break;
             }
+            System.out.print("");
         }
 
         long totalTime = new Date().getTime() - startTime;
