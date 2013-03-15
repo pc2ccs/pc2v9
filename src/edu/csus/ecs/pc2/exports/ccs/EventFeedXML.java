@@ -399,6 +399,7 @@ public class EventFeedXML {
         // </language>
 
         memento.putInteger("id", id);
+        XMLUtilities.addChild(memento, "id", id);
         XMLUtilities.addChild(memento, "name", language.toString());
         return memento;
     }
@@ -428,8 +429,8 @@ public class EventFeedXML {
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Problem problem, int id) {
 
-
-        memento.putInteger("id", id);
+        // memento.putInteger("id", id);
+        XMLUtilities.addChild(memento, "id", id);
         memento.putBoolean("enabled", problem.isActive());
 
         String problemLetter = getProblemLetter(id);
@@ -595,9 +596,12 @@ public class EventFeedXML {
         ClientId clientId = notification.getSubmitter();
 
         memento.putInteger("id", notification.getNumber());
+        XMLUtilities.addChild(memento, "id", notification.getNumber());
+
         memento.putInteger("team-id", clientId.getClientNumber());
 
         XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(notification.getElapsedMS()));
+        XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(notification.getElapsedMS()));
         XMLUtilities.addChild(memento, "timestamp", notification.getTimeSent());
         XMLUtilities.addChild(memento, "team", contest.getAccount(clientId).getDisplayName());
 
@@ -657,6 +661,7 @@ public class EventFeedXML {
         memento.putInteger("team-id", clientId.getClientNumber());
 
         XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMins() * 1000));
+        XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(run.getElapsedMins() * 1000));
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
         XMLUtilities.addChild(memento, "team", contest.getAccount(clientId).getDisplayName());
 
@@ -719,6 +724,8 @@ public class EventFeedXML {
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Account account) {
 
+//        memento.putInteger("id", account.getClientId().getClientNumber());
+        XMLUtilities.addChild(memento, "id", account.getClientId().getClientNumber());
         memento.putInteger("id", account.getClientId().getClientNumber());
         memento.putString("external-id", account.getExternalId());
 
@@ -768,6 +775,8 @@ public class EventFeedXML {
 //        <result>AC</result>
 //        <run-id>2</run-id>
 //        <solved>True</solved>
+        
+        XMLUtilities.addChild(memento, "solved", run.isSolved());
         
         // TODO CCS is result really the judgement acronym?
         String result = Judgement.ACRONYM_OTHER_CONTACT_STAFF;
@@ -819,6 +828,8 @@ public class EventFeedXML {
         // </clar>
 
         memento.putInteger("id", clarification.getNumber());
+        XMLUtilities.addChild(memento, "id", clarification.getNumber());
+
         memento.putInteger("team-id", clarification.getNumber());
 
         Problem problem = contest.getProblem(clarification.getProblemId());
@@ -832,6 +843,7 @@ public class EventFeedXML {
         XMLUtilities.addChild(memento, "question", clarification.getQuestion());
         XMLUtilities.addChild(memento, "to-all", clarification.isSendToAll());
         XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(clarification.getElapsedMins() * 1000));
+        XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(clarification.getElapsedMins() * 1000));
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
         return memento;
     }
@@ -908,11 +920,14 @@ public class EventFeedXML {
         // <timestamp>1265353100.29</timestamp>
         // </run>
 
-        memento.putInteger("id", run.getNumber());
+//        memento.putInteger("id", run.getNumber());
+        XMLUtilities.addChild(memento, "id", run.getNumber());
+
         memento.putInteger("team-id", run.getSubmitter().getClientNumber());
         Problem problem = contest.getProblem(run.getProblemId());
         int problemIndex = getProblemIndex(contest, problem);
-        memento.putInteger("problem-id", problemIndex);
+//        memento.putInteger("problem", problemIndex);
+        XMLUtilities.addChild(memento, "problem", problemIndex);
         
         if (suppressJudgement) {
             XMLUtilities.addChild(memento, "judged", false);
@@ -923,7 +938,7 @@ public class EventFeedXML {
         Language language = contest.getLanguage(run.getLanguageId());
         XMLUtilities.addChild(memento, "language", language.getDisplayName());
 
-        XMLUtilities.addChild(memento, "penalty", "TODO"); // TODO CCS What is penalty ??
+        XMLUtilities.addChild(memento, "penalty", "20"); // TODO CCS What is penalty ??
 
         if ((!suppressJudgement) && run.isJudged()) {
             ElementId judgementId = run.getJudgementRecord().getJudgementId();
@@ -940,7 +955,8 @@ public class EventFeedXML {
 
         XMLUtilities.addChild(memento, "team", run.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "elapsed-Mins", run.getElapsedMins());
-        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMS()));
+//        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMS()));
+        XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(run.getElapsedMS()));
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
 
         return memento;
@@ -1113,6 +1129,8 @@ public class EventFeedXML {
         // </region>
 
         memento.putInteger("id", group.getGroupId());
+        XMLUtilities.addChild(memento, "external-did", group.getGroupId());
+
         XMLUtilities.addChild(memento, "name", group.getDisplayName());
     }
 
