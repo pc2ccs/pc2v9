@@ -442,7 +442,7 @@ public class EventFeedXML {
         XMLUtilities.addChild(memento, "id", id);
         memento.putBoolean("enabled", problem.isActive());
 
-        String problemLetter = getProblemLetter(id + 1);
+        String problemLetter = getProblemLetter(id);
         memento.createChildNode("label", problemLetter);
         memento.createChildNode("name", problem.toString());
 
