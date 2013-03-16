@@ -20,6 +20,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.BalloonDeliveryComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -27,6 +28,7 @@ import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
+import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -47,7 +49,6 @@ import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.util.NotificationUtilities;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
@@ -536,8 +537,13 @@ public class EventFeedXMLTest extends AbstractTestCase {
             System.out.println(" -- testStartupElement ");
             System.out.println(xml);
         }
-        testForValidXML (xml + CONTEST_END_TAG);
+        xml = xml + CONTEST_END_TAG;
+        testForValidXML (xml);
                 
+        assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
+        assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
+        assertXMLCounts(xml, EventFeedXML.JUDGEMENT_TAG, 9);
+        assertXMLCounts(xml, EventFeedXML.REGION_TAG, 24);
 
     }
 
@@ -659,13 +665,13 @@ public class EventFeedXMLTest extends AbstractTestCase {
         
         assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
         assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
-        assertXMLCounts(xml, EventFeedXML.JUDGEMENT_TAG, 21);
+        assertXMLCounts(xml, EventFeedXML.JUDGEMENT_TAG, 9);
         assertXMLCounts(xml, EventFeedXML.LANGUAGE_TAG, 18);
         assertXMLCounts(xml, EventFeedXML.NOTIFICATION_TAG, 0);
-        assertXMLCounts(xml, EventFeedXML.PROBLEM_TAG, 6);
+        assertXMLCounts(xml, EventFeedXML.PROBLEM_TAG, 18);
         assertXMLCounts(xml, EventFeedXML.REGION_TAG, 22);
         assertXMLCounts(xml, EventFeedXML.RUN_TAG, 12);
-        assertXMLCounts(xml, EventFeedXML.TEAM_TAG, 34);
+        assertXMLCounts(xml, EventFeedXML.TEAM_TAG, 46);
         assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, 12 * 5); 
 
         /**
@@ -792,6 +798,73 @@ public class EventFeedXMLTest extends AbstractTestCase {
             }
         }
     }
+    
+    
+    public void testgetColorSettings() throws Exception {
+
+        EventFeedXML eventFeedXML = new EventFeedXML();
+        IInternalContest aContest = sample.createStandardContest();
+        BalloonSettings settings = eventFeedXML.getColorSettings(aContest);
+
+        Problem[] problems = aContest.getProblems();
+        for (Problem problem : problems) {
+
+            String color = settings.getColor(problem);
+            String colorRGB = settings.getColorRGB(problem);
+
+            assertNotNull("Expecting color for " + problem, color);
+            assertNotNull("Expecting RGB for " + problem, colorRGB);
+//            System.out.println(problem.getShortName()+"TAB"+color+" ATAB"+colorRGB);
+        }
+        
+        eventFeedXML = new EventFeedXML();
+
+        aContest = new InternalContest();
+        
+        for (Problem problem : problems) {
+            aContest.addProblem(problem);
+        }
+        
+        settings = eventFeedXML.getColorSettings(aContest);
+        
+        assertNull("Not expecting balloon settings ", settings);
+        
+        ensureDirectory(getDataDirectory());
+        
+        String colorFile = getTestFilename("colors.txt");
+//        editFile(colorFile);
+        assertFileExists(colorFile);
+        
+        eventFeedXML.setColorsFilename(colorFile);
+        settings = eventFeedXML.getColorSettings(aContest);
+        
+        assertNotNull("Expecting color settings from "+colorFile, settings);
+        
+        String [] data = { //
+                "sumit;Alice Blue A;F0F8FF", //
+                "quadrangles;Antique White A;FAEBD7", //
+                "finnigans;Beige A;F5F5DC", //
+        };
+        
+        for (Problem problem : problems) {
+
+            String color = settings.getColor(problem);
+            String colorRGB = settings.getColorRGB(problem);
+
+            assertNotNull("Expecting color for " + problem, color);
+            assertNotNull("Expecting RGB for " + problem, colorRGB);
+
+//            System.out.println("Problem : " + problem + " " + color + "," + colorRGB);
+            for (String datum : data) {
+                String[] fields = datum.split(";");
+                if (fields[0].equals(problem.getShortName())) {
+                    assertEquals("Expecting same color for " + problem, fields[1], color);
+                    assertEquals("Expecting same RGB for " + problem, fields[2], colorRGB);
+                }
+            }
+        }
+    }
+    
     
     /**
      * Create socket server on port.

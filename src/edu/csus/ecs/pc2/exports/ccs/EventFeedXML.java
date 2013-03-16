@@ -517,36 +517,38 @@ public class EventFeedXML {
     private BalloonSettings toBalloonSettings(IInternalContest contest, String[] lines) throws Exception {
         int site = 1;
 
-        for (String line : lines) {
-            BalloonSettings settings = new BalloonSettings("Name", site);
+        try {
+
             int found = 0;
-            // probname<tab>color<tab>RGB
-            String[] fields = TabSeparatedValueParser.parseLine(line);
+            BalloonSettings settings = new BalloonSettings("BalloonSettings One", site);
 
-            String shortName = fields[0];
-            Problem problem = getProblem(contest, shortName);
+            for (String line : lines) {
+                // probname<tab>color<tab>RGB
+                String[] fields = TabSeparatedValueParser.parseLine(line);
 
-            if (problem != null && fields != null && fields.length > 1) {
-                // Found problem name and color
-                String colorName = fields[1];
-                String rgbColor = "";
-                if (fields.length > 2) {
-                    // found rgb
-                    rgbColor = fields[2];
+                String shortName = fields[0];
+                Problem problem = getProblem(contest, shortName);
+
+                if (problem != null && fields != null && fields.length > 1) {
+                    // Found problem name and color
+                    String colorName = fields[1];
+                    String rgbColor = "";
+                    if (fields.length > 2) {
+                        // found rgb
+                        rgbColor = fields[2];
+                    }
+
+                    settings.addColor(problem, colorName, rgbColor);
+                    found++;
                 }
-                System.out.println("debug 22 problem "+problem+" color "+colorName+"");
-                
-                settings.addColor(problem, colorName, rgbColor);
-                found++;
             }
-            
-            System.out.println("debug 22 "+problem+" found = "+found);
-            
             if (found == 0) {
                 return null;
             } else {
                 return settings;
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }

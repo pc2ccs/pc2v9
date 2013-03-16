@@ -356,6 +356,9 @@ public class BalloonSettings implements IElementObject {
         colorList.put(problem.getElementId(), colorName);
     }
 
+    /**
+     * @param id Problem eventId
+     */
     public String getColor(ElementId id) {
         return colorList.get(id);
     }
@@ -585,6 +588,10 @@ public class BalloonSettings implements IElementObject {
     public String getColorRGB(Problem problem) {
         return getColorRGB(problem.getElementId());        
     }
+    
+    /**
+     * @param id Problem eventId
+     */
     public String getColorRGB(ElementId id) {
         return colorListRGB.get(id);
     }

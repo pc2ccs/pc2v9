@@ -1,0 +1,6 @@
+sumit	Alice Blue A	F0F8FF
+quadrangles	Antique White A	FAEBD7
+routing	Aqua A	00FFFF
+faulty	Aquamarine A	7FFFD4
+london	Azure A	F0FFFF
+finnigans	Beige A	F5F5DC
