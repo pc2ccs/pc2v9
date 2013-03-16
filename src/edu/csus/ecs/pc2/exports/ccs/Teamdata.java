@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/exports/ccs/Userdata.java $
 public class Teamdata {
 
-    private static final char TAB = '\t';
+    private static final String TAB = "\t";
 
 //    /**
 //     * Create TeamData file for all accounts

@@ -80,7 +80,14 @@ public class TeamdataTest extends TestCase {
 
     public void testSimple() throws Exception {
 
-        IInternalContest contest = sample.createContest(1, 1, 15, 5, true);
+        int numberTeams = 15;
+        
+        IInternalContest contest = sample.createContest(1, 1, numberTeams, 5, true);
+        
+//        Account[] accounts = contest.getAccounts();
+//        for (Account account : accounts) {
+//            System.out.println("account "+account+" "+account.getClientId().getClientNumber());
+//        }
 
         setAccountNamesAndGroups(contest);
 
@@ -88,8 +95,20 @@ public class TeamdataTest extends TestCase {
 
         String[] lines = teamdata.getTeamData(contest);
 
-        assertEquals("Expected number of lines ", 16, lines.length);
-    } 
+        assertEquals("Expected number of lines ", numberTeams + 1, lines.length);
+        
+//        for (String string : lines) {
+//            System.out.println(string);
+//        }
+
+        String line = lines[1];
+        String[] fields = line.split("\t");
+        assertEquals("Expect second line team number  ", Integer.toString(1), fields[0]);
+
+        line = lines[lines.length - 1];
+        fields = line.split("\t");
+        assertEquals("Expect last line team number  ", Integer.toString(numberTeams), fields[0]);
+    }
     
     public static void main(String[] args) {
 
