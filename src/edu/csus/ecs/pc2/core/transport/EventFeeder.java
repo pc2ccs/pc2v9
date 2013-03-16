@@ -35,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
 
@@ -297,7 +298,7 @@ class EventFeeder implements Runnable {
 
         public void accountAdded(AccountEvent accountEvent) {
             Account account = accountEvent.getAccount();
-            if (isTeam(account)) {
+            if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 sendXML(eventFeedXML.createElement(contest, account));
             }
         }
@@ -308,7 +309,7 @@ class EventFeeder implements Runnable {
 
         public void accountModified(AccountEvent accountEvent) {
             Account account = accountEvent.getAccount();
-            if (isTeam(account)) {
+            if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 sendXML(eventFeedXML.createElement(contest, account));
             }
         }
@@ -316,7 +317,7 @@ class EventFeeder implements Runnable {
         public void accountsAdded(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
             for (Account account : accounts) {
-                if (isTeam(account)) {
+                if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                     sendXML(eventFeedXML.createElement(contest, account));
                 }
             }
@@ -326,7 +327,7 @@ class EventFeeder implements Runnable {
             Account[] accounts = accountEvent.getAccounts();
             Arrays.sort(accounts, new AccountComparator());
             for (Account account : accounts) {
-                if (isTeam(account)) {
+                if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                     sendXML(eventFeedXML.createElement(contest, account));
                 }
             }
