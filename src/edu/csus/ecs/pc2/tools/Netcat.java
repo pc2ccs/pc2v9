@@ -48,17 +48,19 @@ public class Netcat {
     void dumpSocketInput(String host, int port) {
         Socket socket;
         try {
-            System.out.println("Reading from " + host + ":" + port);
             socket = new Socket(host, port);
 
             readAndPrintSocketInput(socket);
             System.out.println("*EOF* socket read locahost " + port);
         } catch (ConnectException e) {
-            System.out.println(e);
+            System.err.println("Host: '"+host+"' port="+port);
+            System.err.println(e);
         } catch (UnknownHostException e) {
-            System.out.println(e);
+            System.err.println("Host: '"+host+"' port="+port);
+            System.err.println(e);
         } catch (IOException e) {
-            System.out.println(e);
+            System.err.println("Host: '"+host+"' port="+port);
+            System.err.println(e);
         }
     }
 
