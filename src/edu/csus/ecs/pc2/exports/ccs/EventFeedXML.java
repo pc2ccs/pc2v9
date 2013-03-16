@@ -208,7 +208,7 @@ public class EventFeedXML {
         Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
-            if (filter.matches(account)) {
+            if (filter.matches(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 memento = mementoRoot.createChild(TEAM_TAG);
                 addMemento(memento, contest, account);
             }
@@ -1138,7 +1138,7 @@ public class EventFeedXML {
             idx++;
         }
 
-        idx = 0;
+        idx = 1;
         for (Problem problem : contest.getProblems()) {
             if (filter.matches(problem)){
                 sb.append(toXML(createElement(contest, problem, idx)));
@@ -1158,7 +1158,7 @@ public class EventFeedXML {
 
         Account [] teamAccounts = getTeamAccounts(contest);
         for (Account account : teamAccounts){
-            if (filter.matches(account)){
+            if (filter.matches(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)){
                 sb.append(toXML(createElement(contest, account)));
             }
         }
