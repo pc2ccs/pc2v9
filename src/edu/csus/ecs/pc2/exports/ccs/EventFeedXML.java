@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.exports.ccs;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +8,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.BalloonDeliveryComparator;
@@ -42,6 +44,7 @@ import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.IMemento;
+import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 /**
@@ -96,10 +99,14 @@ public class EventFeedXML {
     public static final String NOTIFICATION_TAG = "notification";
 
     private RunComparator runComparator = new RunComparator();
+    
+    private  BalloonSettings colorSettings = null;
 
     private Log log = null;
     
     private static final String DEFAULT_ACRONYM = "??";
+
+    private static final String DEFAULT_COLORS_FILENAME = "colors.txt";;
     
     private String[] acronymList = { //
             "No - Compilation Error;CE", //
@@ -110,6 +117,8 @@ public class EventFeedXML {
             "Accepted;AC", //
             "Wrong Answer;WA", //
     };
+
+    private String colorsFilename = DEFAULT_COLORS_FILENAME;
 
     private String guessAcronym(String judgementText) {
 
@@ -424,7 +433,7 @@ public class EventFeedXML {
      * @param memento
      * @param contest
      * @param problem
-     * @param id
+     * @param id zero based problem number
      * @return
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Problem problem, int id) {
@@ -433,20 +442,131 @@ public class EventFeedXML {
         XMLUtilities.addChild(memento, "id", id);
         memento.putBoolean("enabled", problem.isActive());
 
-        String problemLetter = getProblemLetter(id);
+        String problemLetter = getProblemLetter(id + 1);
         memento.createChildNode("label", problemLetter);
         memento.createChildNode("name", problem.toString());
 
-        BalloonSettings settings = contest.getBalloonSettings(contest.getSiteNumber());
-        if (settings != null){
-            String color = settings.getColor(problem);
+        String color =  getColor(contest, problem);
+        if (color != null){
             IMemento balloonColor = memento.createChildNode("balloon-color", ""+color);
-            String rgbColor = settings.getColorRGB(problem);
+            String rgbColor = getColorRGB(contest, problem);
             balloonColor.putString("rgb", ""+rgbColor);
         }
+
         return memento;
     }
 
+    
+    private String getColorRGB(IInternalContest contest, Problem problem) {
+
+        BalloonSettings settings = getColorSettings(contest);
+        if (settings != null) {
+            return settings.getColorRGB(problem);
+        }
+        return null;
+    }
+
+    protected BalloonSettings getColorSettings(IInternalContest contest) {
+
+        try {
+
+            if (colorSettings == null) {
+                BalloonSettings[] list = contest.getBalloonSettings();
+                if (list != null && list.length > 0) {
+                    colorSettings = list[0];
+                }
+                if (colorSettings == null) {
+                    BalloonSettings balloonSettings = readBalloonSettings(contest, getColorsFilename());
+                    if (balloonSettings != null) {
+                        colorSettings = balloonSettings;
+                    }
+                }
+            }
+            return colorSettings;
+        } catch (Exception e) {
+            // SOMEDAY log this to a static log
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String getColorsFilename() {
+        return colorsFilename;
+    }
+    
+    public void setColorsFilename(String colorsFilename) {
+        this.colorsFilename = colorsFilename;
+    }
+
+    private BalloonSettings readBalloonSettings(IInternalContest contest, String filename) {
+        if (new File(filename).exists()){
+            try {
+                String [] lines = Utilities.loadFile(filename);
+                return toBalloonSettings (contest, lines);
+            } catch (Exception e) {
+                if (Utilities.isDebugMode()){
+                    e.printStackTrace(System.err);
+                }
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private BalloonSettings toBalloonSettings(IInternalContest contest, String[] lines) throws Exception {
+        int site = 1;
+
+        for (String line : lines) {
+            BalloonSettings settings = new BalloonSettings("Name", site);
+            int found = 0;
+            // probname<tab>color<tab>RGB
+            String[] fields = TabSeparatedValueParser.parseLine(line);
+
+            String shortName = fields[0];
+            Problem problem = getProblem(contest, shortName);
+
+            if (problem != null && fields != null && fields.length > 1) {
+                // Found problem name and color
+                String colorName = fields[1];
+                String rgbColor = "";
+                if (fields.length > 2) {
+                    // found rgb
+                    rgbColor = fields[2];
+                }
+                System.out.println("debug 22 problem "+problem+" color "+colorName+"");
+                
+                settings.addColor(problem, colorName, rgbColor);
+                found++;
+            }
+            
+            System.out.println("debug 22 "+problem+" found = "+found);
+            
+            if (found == 0) {
+                return null;
+            } else {
+                return settings;
+            }
+        }
+        return null;
+    }
+
+    private Problem getProblem(IInternalContest contest, String shortName) {
+        for (Problem problem : contest.getProblems()) {
+            if (shortName.equalsIgnoreCase(problem.getShortName())){
+                return problem;
+            }
+        }
+        return null;
+    }
+
+    private String getColor(IInternalContest contest, Problem problem) {
+        BalloonSettings settings = getColorSettings(contest);
+        if (settings != null) {
+            return settings.getColor(problem);
+        }
+        return null;
+    }
 
     /**
      * For the input number, returns an uppercase letter.
@@ -599,6 +719,8 @@ public class EventFeedXML {
         XMLUtilities.addChild(memento, "id", notification.getNumber());
 
         memento.putInteger("team-id", clientId.getClientNumber());
+        XMLUtilities.addChild(memento, "team-id", clientId.getClientNumber());
+        
 
         XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(notification.getElapsedMS()));
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(notification.getElapsedMS()));
@@ -658,7 +780,8 @@ public class EventFeedXML {
         ClientId clientId = run.getSubmitter();
 
         memento.putInteger("id", notificationSequenceNumber);
-        memento.putInteger("team-id", clientId.getClientNumber());
+//        memento.putInteger("team-id", clientId.getClientNumber());
+        XMLUtilities.addChild(memento, "team-id", clientId.getClientNumber());
 
         XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMins() * 1000));
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(run.getElapsedMins() * 1000));
@@ -731,7 +854,7 @@ public class EventFeedXML {
 
         XMLUtilities.addChild(memento, "name", account.getDisplayName());
         XMLUtilities.addChild(memento, "nationality", account.getCountryCode());
-        XMLUtilities.addChild(memento, "university", account.getLongSchoolName());
+        XMLUtilities.addChild(memento, "university", account.getDisplayName());
 
         String regionName = "";
         if (account.getGroupId() != null) {
@@ -791,7 +914,6 @@ public class EventFeedXML {
          * There may be an implication that if there is no testcase output then
          * the test failed and all remaining test cases failed.
          */
-        XMLUtilities.addChild(memento, "solved", testCase.isSolved());
   
 //        <time>157.614985</time>
 //        <timestamp>1337173290.16</timestamp>
@@ -830,7 +952,7 @@ public class EventFeedXML {
         memento.putInteger("id", clarification.getNumber());
         XMLUtilities.addChild(memento, "id", clarification.getNumber());
 
-        memento.putInteger("team-id", clarification.getNumber());
+        memento.putInteger("team-id", clarification.getSubmitter().getClientNumber());
 
         Problem problem = contest.getProblem(clarification.getProblemId());
         memento.putInteger("problem-id", getProblemIndex(contest, problem));
@@ -920,25 +1042,42 @@ public class EventFeedXML {
         // <timestamp>1265353100.29</timestamp>
         // </run>
 
+        // 2013 "standard"
+//        <run>
+//        <id>1410</id>
+//        <judged>True</judged>
+//        <language>C++</language>
+//        <penalty>True</penalty>
+//        <problem>4</problem>
+        
+//        <result>WA</result>
+//        <solved>False</solved>
+//        <team>74</team>
+//        <time>17960.749403</time>
+//        <timestamp>1265353100.29</timestamp>
+//        </run>
+        
+        
 //        memento.putInteger("id", run.getNumber());
         XMLUtilities.addChild(memento, "id", run.getNumber());
-
-        memento.putInteger("team-id", run.getSubmitter().getClientNumber());
-        Problem problem = contest.getProblem(run.getProblemId());
-        int problemIndex = getProblemIndex(contest, problem);
-//        memento.putInteger("problem", problemIndex);
-        XMLUtilities.addChild(memento, "problem", problemIndex);
-        
         if (suppressJudgement) {
             XMLUtilities.addChild(memento, "judged", false);
         } else {
             XMLUtilities.addChild(memento, "judged", run.isJudged());
         }
-
         Language language = contest.getLanguage(run.getLanguageId());
         XMLUtilities.addChild(memento, "language", language.getDisplayName());
-
+        
         XMLUtilities.addChild(memento, "penalty", "20"); // TODO CCS What is penalty ??
+        Problem problem = contest.getProblem(run.getProblemId());
+        int problemIndex = getProblemIndex(contest, problem);
+//        memento.putInteger("problem", problemIndex);
+        XMLUtilities.addChild(memento, "problem", problemIndex);
+        
+        XMLUtilities.addChild(memento, "team-id",  run.getSubmitter().getClientNumber());
+        XMLUtilities.addChild(memento, "team",  run.getSubmitter().getClientNumber());
+        
+        memento.putInteger("team-id", run.getSubmitter().getClientNumber());
 
         if ((!suppressJudgement) && run.isJudged()) {
             ElementId judgementId = run.getJudgementRecord().getJudgementId();
@@ -946,12 +1085,10 @@ public class EventFeedXML {
             if (acronym == null) {
                 acronym = "?";
             }
-            XMLUtilities.addChild(memento, "judgement", acronym);
-
-            // old XML name/values result and solved.
-            // XMLUtilities.addChild(memento, "result", judgement.toUpperCase().substring(0, 2));
-            // XMLUtilities.addChild(memento, "solved", run.isSolved());
+            XMLUtilities.addChild(memento, "result", acronym);
         }
+        
+        XMLUtilities.addChild(memento, "solved", run.isSolved());
 
         XMLUtilities.addChild(memento, "team", run.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "elapsed-Mins", run.getElapsedMins());
