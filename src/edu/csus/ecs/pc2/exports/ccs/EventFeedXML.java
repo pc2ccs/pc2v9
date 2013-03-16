@@ -1143,6 +1143,12 @@ public class EventFeedXML {
             }
             idx++;
         }
+        
+        Group[] groups = contest.getGroups();
+        Arrays.sort(groups, new GroupComparator());
+        for (Group group : groups) {
+            sb.append(toXML(createElement(contest, group, idx)));
+        }
 
         for (Judgement judgement : contest.getJudgements()) {
             sb.append(toXML(createElement(contest, judgement)));
@@ -1185,6 +1191,12 @@ public class EventFeedXML {
             }
         }
         return sb.toString();
+    }
+
+    public XMLMemento createElement(IInternalContest contest, Group group, int idx) {
+        XMLMemento memento = XMLMemento.createWriteRoot(REGION_TAG);
+        addMemento(memento, contest, group);
+        return memento;
     }
 
     /**
