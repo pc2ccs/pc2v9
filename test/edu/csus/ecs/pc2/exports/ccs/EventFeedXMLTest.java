@@ -202,6 +202,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
         assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
         assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
+        
     }
 
     /**
@@ -438,14 +439,24 @@ public class EventFeedXMLTest extends AbstractTestCase {
         int idx = 1;
         for (Problem problem : contest.getProblems()) {
             String xml = toContestXML(eventFeedXML.createElement(contest, problem, idx));
-            if (debugMode){
+            if (debugMode) {
                 System.out.println(xml);
             }
-            testForValidXML (xml);
+            testForValidXML(xml);
             assertXMLCounts(xml, EventFeedXML.PROBLEM_TAG, 1);
+
+            if (idx == 1) {
+                assertXMLNodeValueEquals(xml, "label", "A");
+                assertXMLNodeValueEquals(xml, "name", "Sumit");
+            }
+
+            if (idx == 6) {
+                assertXMLNodeValueEquals(xml, "label", "F");
+                assertXMLNodeValueEquals(xml, "name", "Finnigans Bluff");
+            }
+
             idx++;
         }
-
     }
 
     public void testTeamElement() throws Exception {
@@ -727,12 +738,40 @@ public class EventFeedXMLTest extends AbstractTestCase {
         assertEquals("Expecting occurances (for" + string + ")", count, getTagCount(xmlString, string));
     }
     
+    /**
+     * Finds name in xml string, compares node/element values against expectedValue.
+     * @param xmlString
+     * @param name XML tag name
+     * @param expectedValue 
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    private void assertXMLNodeValueEquals (String xmlString, String name, String expectedValue) throws ParserConfigurationException, SAXException, IOException{
+        Document document = getDocument(xmlString);
+        NodeList nodes = document.getElementsByTagName(name);
+        if (nodes.getLength() != 1){
+            System.out.println("xml = "+xmlString);
+            fail("Expecting to find nodes for name "+name);
+        }
+        
+//        System.out.println("Nodes length = "+nodes.getLength());
+//        for (int i = 0; i < nodes.getLength(); i++) {
+//            Node node = nodes.item(i);
+//            System.out.println("Looking for "+name+", found node "+node.getNodeName()+" "+node.getNodeValue()+" child is: "+node.getChildNodes().item(0).getNodeValue());
+//        }
+        
+        String childValue = nodes.item(0).getChildNodes().item(0).getNodeValue();
+        if (! expectedValue.equals(childValue)){
+            System.out.println("xml = "+xmlString);
+            assertEquals("Expecting value for "+name, expectedValue, childValue);
+        }
+    }
+    
     private int getTagCount(String xmlString, String string) throws ParserConfigurationException, SAXException, IOException {
 
         Document document = getDocument(xmlString);
-        
         NodeList nodes = document.getElementsByTagName(string);
-
         return nodes.getLength();
     }
 
