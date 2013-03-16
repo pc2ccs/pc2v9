@@ -1,0 +1,22 @@
+#
+# File: incfiles.yaml
+#
+
+accounts:
+
+  - account: JUDGE
+    site: 1
+    count: 12
+
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 2
+    letters: A, B
+    enabled: yes
+
+# eof $Id$

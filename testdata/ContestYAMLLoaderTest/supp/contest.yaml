@@ -1,0 +1,117 @@
+#
+# Contest Configuration, version 1.0 
+# PC^2 Version: Version 9.2 20130308 (Friday, March 08th 2013 02:55 PDT) Java ver 1.5.0_05 build 625 Windows XP 5.1 (x86) 
+# Created: 2013-03-09 03:59:59 PST
+#
+
+# name: 2013 Tech Group Test Contest
+# short-name: 
+# elapsed: 0:00:00
+# remaining: 5:00:00
+# running: false
+# scoreboard-freeze: 
+
+# problemset:
+#   - letter:     A
+#     short-name: asteroids
+# 
+#     color:      Dodger Blue 
+#     rgb:        #1E90FF
+# 
+#   - letter:     B
+#     short-name: bottle
+# 
+#     color:      Midnight Blue 
+#     rgb:        #191970
+# 
+#   - letter:     C
+#     short-name: bustour
+# 
+#     color:      Royal Blue 
+#     rgb:        #4169E1
+# 
+#   - letter:     D
+#     short-name: fibonacci
+# 
+#     color:      Light Blue 
+#     rgb:        #ADD8E6
+# 
+#   - letter:     E
+#     short-name: infiltration
+# 
+#     color:      Light Steel Blue 
+#     rgb:        #B0C4DE
+# 
+#   - letter:     F
+#     short-name: keys
+# 
+#     color:      Light Sky Blue 
+#     rgb:        #87CEFA
+# 
+#   - letter:     G
+#     short-name: minflow
+# 
+#     color:      Plum 
+#     rgb:        #DDA0DD
+# 
+#   - letter:     H
+#     short-name: polish
+# 
+#     color:      Medium Slate Blue 
+#     rgb:        #7B68EE
+# 
+#   - letter:     I
+#     short-name: room
+# 
+#     color:      Silver 
+#     rgb:        #C0C0C0
+# 
+#   - letter:     J
+#     short-name: safe
+# 
+#     color:      Sky Blue 
+#     rgb:        #87CEEB
+# 
+#   - letter:     K
+#     short-name: shortest
+# 
+#     color:      Medium Blue 
+#     rgb:        #0000CD
+# 
+#   - letter:     L
+#     short-name: stacking
+# 
+#     color:      Powder Blue 
+#     rgb:        #B0E0E6
+# 
+#   - letter:     M
+#     short-name: takeover
+# 
+#     color:      Lavender Blush 
+#     rgb:        #FFF0F5
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 1
+    letters: A, B, C, D
+    enabled: yes
+
+  - account: JUDGE
+    site: 1
+    number: 2
+    letters: E, F, G, H
+    enabled: yes
+
+  - account: JUDGE
+    site: 1
+    number: 3
+    letters: I, J, K, L, M
+    enabled: yes
+
+accounts:
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+
+# EOF Contest Configuration

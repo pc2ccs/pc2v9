@@ -1,0 +1,22 @@
+# Contest Configuration, version 1.0 
+# PC^2 Version: Version 9.2 20130308 (Friday, March 08th 2013 02:55 PDT) Java ver 1.6.0_20 build 625 Windows XP 5.1 (x86) 
+# Created: 2013-03-11 23:14:51 PDT
+--- 
+
+name: Sumit Hello Sample
+short-name: 
+elapsed: 0:00:00
+remaining: 5:00:00
+running: false
+scoreboard-freeze: 
+# external-data-files: true
+
+# before file 1
+
+#include "incfiles.yaml"
+
+# before file 2
+
+#include "incfiles2.yaml"
+
+# eof $Id$
