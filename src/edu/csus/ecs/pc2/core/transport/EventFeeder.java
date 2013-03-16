@@ -149,27 +149,38 @@ class EventFeeder implements Runnable {
      *
      */
     private class EventFeedRunner implements IEventFeedRunnable {
-
         public void send(String xmlString) {
             sendToSocket(xmlString);
         }
-
     }
 
     public void run() {
-        
+
         /**
          * Write startup xml to socket
          */
         String xml = eventFeedXML.createStartupXML(contest);
         eventFeedRunnable.send(xml);
-        
-        /**
-         * Register to listen to events.
-         */
-        registerListeners(contest);
-        
-        System.out.println("EventFeeder done");
+
+        FinalizeData finalizeData = contest.getFinalizeData();
+
+        if (finalizeData != null && contest.getFinalizeData().isCertified()) {
+            xml = eventFeedXML.createFinalizeXML(contest, finalizeData);
+            eventFeedRunnable.send(xml);
+            /**
+             * Since no listeners registered, this will close the socket/connection.
+             */
+            
+            // Halt this thread, close the socket.
+//            Thread.currentThread().interrupt();
+            halt();
+            
+        } else {
+            /**
+             * Register to listen to events. This keeps the event feeder feeding.
+             */
+            registerListeners(contest);
+        }
     }
 
     private void registerListeners(IInternalContest inContest) {
@@ -183,7 +194,7 @@ class EventFeeder implements Runnable {
         inContest.addJudgementListener(judgementListener);
         inContest.addContestInformationListener(contestInformationListener);
 
-        // TODO CCS insure that commented out listeners are not needed.
+        // TODO CCS ensure that commented out listeners are not needed.
         // inContest.addContestTimeListener(new ContestTimeListener());
         // inContest.addMessageListener(new MessageListener());
         // inContest.addSiteListener(new SiteListener());
