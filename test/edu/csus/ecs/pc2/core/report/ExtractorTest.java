@@ -26,6 +26,7 @@ public class ExtractorTest extends TestCase {
 
         int teams = 22;
         int judges = 12;
+        int scoreboards = 1;
 
         IInternalContest contest = sample.createContest(1, 2, teams, judges, false);
         IInternalController controller = sample.createController(contest, true, false);
@@ -33,18 +34,21 @@ public class ExtractorTest extends TestCase {
         Extractor extractor = new Extractor();
         String[] lines = extractor.getReportLines(Extractor.ACCOUNTS_TSV_FILENAME, contest, controller);
 
-        int expectedLines = 1 + teams + judges;
+        int expectedLines = 1 + teams + judges + scoreboards;
 
-        // for (String string : lines) {
-        // System.out.println("'"+string);
-        // }
+        if (expectedLines != lines.length){
+            for (String string : lines) {
+                System.out.println("'"+string);
+            }
+        }
 
         assertEquals("Expected number of lines ", expectedLines, lines.length);
 
         assertTrue("Expect header ", lines[0].startsWith("accounts"));
         assertTrue("Expect second line  is team ", lines[1].startsWith("team"));
 
-        assertTrue("Expect last account is judge ", lines[lines.length - 1].startsWith("judge"));
+        assertTrue("Expect last account is judge ", lines[lines.length - 2].startsWith("judge"));
+        assertTrue("Expect last account is scoreboard ", lines[lines.length - 1].startsWith("scoreboard"));
 
     }
 
