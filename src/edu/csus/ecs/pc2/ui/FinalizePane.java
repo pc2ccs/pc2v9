@@ -160,7 +160,7 @@ public class FinalizePane extends JPanePlugin {
             getCommentTextField().setText(data.getComment());
 
             if (data.isCertified()) {
-                certificationCommentLabel.setText("Contest Finzlied (Certified)");
+                certificationCommentLabel.setText("Contest Finalized (Certified done)");
                 certificationCommentLabel.setToolTipText("Certified at: " + data.getCertificationDate());
             }
 
