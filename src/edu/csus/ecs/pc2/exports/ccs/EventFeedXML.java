@@ -858,13 +858,18 @@ public class EventFeedXML {
         XMLUtilities.addChild(memento, "nationality", account.getCountryCode());
         XMLUtilities.addChild(memento, "university", account.getDisplayName());
 
-        String regionName = "";
-        if (account.getGroupId() != null) {
-            Group group = contest.getGroup(account.getGroupId());
-            regionName = group.getDisplayName();
+        try {
+            String regionName = "";
+            if (account.getGroupId() != null) {
+                Group group = contest.getGroup(account.getGroupId());
+                regionName = group.getDisplayName();
+            }
+            
+            XMLUtilities.addChild(memento, "region", regionName);
+        } catch (Exception e) {
+            System.out.println("Failed to lookup group for "+account+" group id = "+account.getGroupId());
+            e.printStackTrace();
         }
-
-        XMLUtilities.addChild(memento, "region", regionName);
         return memento;
     }
 
