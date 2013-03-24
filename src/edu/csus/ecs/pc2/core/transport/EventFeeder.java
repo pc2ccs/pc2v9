@@ -259,14 +259,15 @@ class EventFeeder implements Runnable {
      * Halt this thread.
      */
     public void halt() {
-        dispose();
         
         try {
+            out.flush();
             out.close();
         } catch (IOException e) {
             e.printStackTrace();  // TODO CCS log this exception
         }
         
+        dispose();
     }
 
     /**
