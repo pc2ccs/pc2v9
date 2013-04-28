@@ -4,20 +4,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.StringReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import edu.csus.ecs.pc2.core.Constants;
@@ -603,19 +599,6 @@ public class EventFeedXMLTest extends AbstractTestCase {
         testForValidXML (xml);
     }
     
-    /**
-     * Test for well formed XML.
-     * 
-     * @param xml
-     */
-    private void testForValidXML(String xml) throws Exception {
-        
-        assertFalse("Expected XML, found null", xml == null);
-        assertFalse("Expected XML, found empty string", xml.length() == 0);
-        
-        getDocument(xml);
-    }
-
     protected void startEventFeed(int port) throws IOException {
 
         ServerSocket server = new ServerSocket(port);
@@ -773,23 +756,6 @@ public class EventFeedXMLTest extends AbstractTestCase {
         Document document = getDocument(xmlString);
         NodeList nodes = document.getElementsByTagName(string);
         return nodes.getLength();
-    }
-
-    /**
-     * Parse input string and return a Document.
-     * 
-     * @param xmlString
-     * @return
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    private Document getDocument(String xmlString) throws ParserConfigurationException, SAXException, IOException {
-        
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-
-        return  documentBuilder.parse(new InputSource(new StringReader(xmlString)));
     }
 
     /**
