@@ -5,27 +5,37 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.Arrays;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import junit.framework.TestCase;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.report.IReport;
 
 /**
@@ -677,6 +687,80 @@ public class AbstractTestCase extends TestCase {
         return "vi";
     }
 
+
+    /**
+     * Test for well formed XML.
+     * 
+     * @param xml
+     */
+    public void testForValidXML(String xml) throws Exception {
+        
+        assertFalse("Expected XML, found null", xml == null);
+        assertFalse("Expected XML, found empty string", xml.length() == 0);
+        
+        getDocument(xml);
+    }
+    
+    /**
+     * Test for well formed XML that passes schema validation.
+     * 
+     * @param xml
+     */
+    public void testForValidXML(String xml, String schemaString) throws Exception {
+
+        assertFalse("Expected XML, found null", xml == null);
+        assertFalse("Expected XML, found empty string", xml.length() == 0);
+
+        /**
+         * Test for valid XML.
+         */
+        getDocument(xml);
+
+        // Source schemaFile = new StreamSource(new File("schema.xsd"));
+        // Source xmlFile = new StreamSource(new File("test_xml.xml"));
+        // Source inputXML = new StreamSource(new StringReader(xmlString));
+        // Source inputXSL = new StreamSource(xslFile);
+
+        Source schemaSource = new StreamSource(new StringReader(schemaString));
+        Source xmlSource = new StreamSource(new StringReader(xml));
+
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        Schema schema = schemaFactory.newSchema(schemaSource);
+        Validator validator = schema.newValidator();
+
+        validator.validate(xmlSource);
+        // System.out.println(xmlSource.getSystemId() + " is valid");
+
+    }
+
+    /**
+     * Test for well formed XML that passes schema validation.
+     * 
+     * @param xml
+     */
+    public void testForValidXML(String xml, File schemaFile) throws Exception {
+        String [] lines = Utilities.loadFile(schemaFile.getCanonicalPath());
+        StringBuffer buffer = Utilities.join(" ", lines);
+        testForValidXML(xml, buffer.toString());
+    }
+
+    
+    /**
+     * Parse input string and return a Document.
+     * 
+     * @param xmlString
+     * @return
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public Document getDocument(String xmlString) throws ParserConfigurationException, SAXException, IOException {
+        
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+
+        return  documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+    }
 
     
 }
