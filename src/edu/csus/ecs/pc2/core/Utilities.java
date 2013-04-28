@@ -14,9 +14,11 @@ import java.text.CharacterIterator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -609,5 +611,31 @@ public final class Utilities {
         }
 
         return false;
+    }
+    
+    
+    
+    /**
+     * Join a list with a delimiter.
+     */
+    public static StringBuffer join(String delimiter, List<String> list) {
+
+        StringBuffer buffer = new StringBuffer();
+
+        for (int i = 0; i < list.size() - 1; i++) {
+            buffer.append(list.get(i));
+            buffer.append(delimiter);
+        }
+        if (list.size() > 0) {
+            buffer.append(list.get(list.size()-1));
+        }
+        return buffer;
+    }
+    
+    /**
+     * Join an array of string with a delimiter.
+     */
+    public static StringBuffer join(String delimiter, String [] strings) {
+        return join(delimiter, Arrays.asList(strings));
     }
 }
