@@ -70,7 +70,8 @@ public final class XMLUtilities {
     public static String formatSeconds(long timeInMillis) {
         long seconds = timeInMillis / 1000;
         long fraction = timeInMillis % 1000;
-        return seconds + "." + fraction;
+//        return seconds + "." +  fraction;
+        return seconds + "." + String.format("%03d", fraction);
     }
 
     /**
