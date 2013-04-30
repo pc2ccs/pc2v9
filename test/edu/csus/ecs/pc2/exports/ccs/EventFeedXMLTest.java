@@ -868,6 +868,23 @@ public class EventFeedXMLTest extends AbstractTestCase {
                 }
             }
         }
+        
+//        File schemaFile = new File(getSchemaFilename(CCS_EVENT_FEED_SCHEMA_2013));
+//        String xmlString = eventFeedXML.toXML(aContest);
+        
+//        xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + xmlString;
+//        xmlString = "<contest></contest>";
+        
+//        editTempFile(xmlString);
+        
+//        System.out.println("xml="+xmlString);
+        
+//        try {
+//            testForValidXML(xmlString, schemaFile);
+//        } catch (Exception e) {
+//            System.err.println("Error "+e.getMessage());
+//            throw e;
+//        }
     }
     
     

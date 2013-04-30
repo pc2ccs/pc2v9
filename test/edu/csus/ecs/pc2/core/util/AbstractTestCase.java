@@ -77,6 +77,10 @@ public class AbstractTestCase extends TestCase {
      */
     public static final String DEFAULT_PC2_TEST_DIRECTORY = "testdata";
     
+    public static final String CCS_EVENT_FEED_SCHEMA_2013 = "event-feed-2013.xsd";
+
+    public static final String CCS_EVENT_FEED_SCHEMA = "event-feed.xsd";
+
     private String testingOutputDirectory = null;
 
     /**
@@ -367,7 +371,7 @@ public class AbstractTestCase extends TestCase {
 
     public void writeFileContents(String filename, String[] datalines) throws FileNotFoundException{
         PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
-        writeLines(writer, getSampleAnswerLines());
+        writeLines(writer, datalines);
         writer.close();
         writer = null;
     }
@@ -552,7 +556,7 @@ public class AbstractTestCase extends TestCase {
         assertFileExists(name);
         return name;
     }
-
+ 
     /**
      * Directory for pc2 samples.
      * 
@@ -563,6 +567,15 @@ public class AbstractTestCase extends TestCase {
         return getProjectRootDirectory() + File.separator + "samps" + File.separator + "src";
     }
     
+    public String getSchemaFilename(String filename){
+        String name = getSchemaDirectory() + File.separator + filename;
+        assertFileExists(name);
+        return name;
+    }
+    
+    public String getSchemaDirectory() {
+        return getProjectRootDirectory() + File.separator + "samps" + File.separator + "schema";
+    }
     
     /**
      * Remove every ch from string.
@@ -652,6 +665,42 @@ public class AbstractTestCase extends TestCase {
     
     public boolean isDebugMode() {
         return debugMode;
+    }
+    
+    /**
+     * Write temporary files.
+     * 
+     * @param lines
+     * @return
+     * @throws IOException
+     */
+    public File writeTempFile (String [] lines) throws IOException{
+        File tempFile  = File.createTempFile(getName(), "txt");
+        writeFileContents(tempFile.getAbsolutePath(), lines);
+        return tempFile;
+    }
+
+    /**
+     * Write lines and start editor on temp file.
+     * 
+     * @param lines
+     * @throws IOException
+     */
+    public void editTempFile(String  line) throws IOException {
+        String [] lines = { line };
+        File file = writeTempFile(lines);
+        editFile (file.getAbsolutePath());
+    }
+    
+    /**
+     * Write lines and start editor on temp file.
+     * 
+     * @param lines
+     * @throws IOException
+     */
+    public void editTempFile(String [] lines) throws IOException {
+        File file = writeTempFile(lines);
+        editFile (file.getAbsolutePath());
     }
     
     public void editFile(String filename) {
@@ -744,7 +793,6 @@ public class AbstractTestCase extends TestCase {
         testForValidXML(xml, buffer.toString());
     }
 
-    
     /**
      * Parse input string and return a Document.
      * 

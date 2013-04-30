@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Purpose: 2013 Event XML Feed Schema -->
+<!-- $Id: event-feed.xsd 300 2013-02-02 19:03:36Z laned $ -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://www.icpc.org/event-feed"
+  targetNamespace="http://www.icpc.org/event-feed"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+  <xsd:element name="contest">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="info" minOccurs="1" maxOccurs="1"/>
+        <xsd:element ref="language" minOccurs="1"/>
+        <xsd:element ref="region"/>
+        <xsd:element ref="judgement" minOccurs="1"/>
+        <xsd:element ref="problem" minOccurs="1"/>
+        <xsd:element ref="team" minOccurs="1"/>
+        <xsd:element ref="clar"/>
+        <xsd:element ref="run"/>
+        <xsd:element ref="testcase"/>
+        <xsd:element ref="finalized"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="info">
+	<xsd:annotation>
+		<xsd:documentation>General Contest Information</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="length" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="penalty" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="started" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="start-time" type="xsd:decimal" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="title" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="language">
+	<xsd:annotation>
+		<xsd:documentation>Language</xsd:documentation>
+	</xsd:annotation>  
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="region">
+  	<xsd:annotation>
+		<xsd:documentation>Team Region/Group</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <xsd:element name="external-id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="judgement">
+  	<xsd:annotation>
+		<xsd:documentation>Judgement</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+		<xsd:element name="acronym" type="judgementAcronym" minOccurs="1" maxOccurs="1" />
+		<xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1" />
+		<xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="problem">
+  	<xsd:annotation>
+		<xsd:documentation>Problem</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element ref="letter" minOccurs="0" maxOccurs="1"/>
+        <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+        <xsd:element ref="color" minOccurs="0" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="team">
+  	<xsd:annotation>
+		<xsd:documentation>Team</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="external-id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="name" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="nationality" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="region" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="university" type="xsd:string"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="clar">
+  	<xsd:annotation>
+		<xsd:documentation>Clarification Question and Answer</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType>
+      <xsd:all>
+	    <xsd:element minOccurs="1" maxOccurs="1" name="answer" type="xsd:string" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="answered" type="xsd:string" />
+		<xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="question" type="xsd:string" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="status" type="statusValues" />
+		<xsd:element name="team" type="xsd:int" minOccurs="1" maxOccurs="1" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="time" type="xsd:decimal" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="timestamp" type="xsd:decimal" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="to-all" type="xsd:boolean" />
+      </xsd:all>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="run">
+  	<xsd:annotation>
+		<xsd:documentation>Run</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+		<xsd:element name="i" type="xsd:int" minOccurs="1" maxOccurs="1" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="judged" type="xsd:boolean" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="language" type="xsd:string" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="penalty" type="xsd:string" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="problem" type="xsd:boolean" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:string" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="solved" type="xsd:string" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="status" type="xsd:string" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="solved" type="xsd:string" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="time" type="xsd:decimal" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="timestamp" type="xsd:decimal" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+    <xsd:element name="testcase">
+    <xsd:annotation>
+		<xsd:documentation>Single test case results</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+		<xsd:element name="i" type="xsd:int" minOccurs="1" maxOccurs="1" />
+        <xsd:element minOccurs="1" maxOccurs="1" name="judged" type="xsd:boolean"/>
+		<xsd:element name="judgement_id" type="xsd:int" minOccurs="1" maxOccurs="1" />
+		<xsd:element name="n" type="xsd:int" minOccurs="1" maxOccurs="1" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:string" />
+		<xsd:element name="run-id" type="xsd:int" minOccurs="1" maxOccurs="1" />
+		<xsd:element minOccurs="1" maxOccurs="1" name="solved" type="xsd:string" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="finalized">
+    <xsd:annotation>
+		<xsd:documentation>Contest Finalization information</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" name="comment" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="last-bronze" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="last-gold" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="last-silver" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="timestamp"/>
+        <xsd:element  minOccurs="1" maxOccurs="1" name="timestamp" type="xsd:decimal"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="reset"/>
+
+  <xsd:simpleType name="judgementAcronym">
+    <xsd:annotation>
+      <xsd:documentation>Valid judgement acronyms</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="CE"/>
+      <xsd:enumeration value="SV"/>
+      <xsd:enumeration value="RTE"/>
+      <xsd:enumeration value="TLE"/>
+      <xsd:enumeration value="WA"/>
+      <xsd:enumeration value="AC"/>
+      <xsd:enumeration value="JE"/>
+      <xsd:enumeration value="DEL"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:simpleType name="statusValues">
+    <xsd:annotation>
+      <xsd:documentation>Status values (Clarification)</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="fresh"/>
+      <xsd:enumeration value="done"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:simpleType name="problemState">
+    <xsd:annotation>
+      <xsd:documentation>Valid problem states</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="enabled"/>
+      <xsd:enumeration value="disabled"/>
+      <xsd:enumeration value="paused"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:element name="letter">
+    <xsd:simpleType>
+      <xsd:restriction base="xsd:string">
+        <xsd:length value="1"/>
+      </xsd:restriction>
+    </xsd:simpleType>
+  </xsd:element>
+
+  <xsd:element name="color">
+     <xsd:annotation>
+		<xsd:documentation>Balloon Notification Color</xsd:documentation>
+	</xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:attribute name="rgb">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:pattern value="(\#)*[0-9a-fA-F]{6}"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="time" type="xsd:decimal"/>
+  <xsd:element name="timestamp" type="xsd:decimal"/>
+</xsd:schema>
