@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Purpose: 2013 Event XML Feed Schema -->
-<!-- $Id: event-feed.xsd 300 2013-02-02 19:03:36Z laned $ -->
+<!-- $Id$ -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns="http://www.icpc.org/event-feed"
   targetNamespace="http://www.icpc.org/event-feed"
