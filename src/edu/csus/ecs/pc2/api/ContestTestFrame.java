@@ -109,7 +109,7 @@ public class ContestTestFrame extends JFrame {
 
     private ClarificationListener clarificationListener = null;
 
-    private ConfigurationUpdateListener configurationUpdateListener = null;
+    private ConfigUpdateListener configurationUpdateListener = null;
 
     private JButton runContestButton = null;
 
@@ -320,7 +320,7 @@ public class ContestTestFrame extends JFrame {
      */
 
     // $HeadURL$
-    protected class ConfigurationUpdateListener implements IConfigurationUpdateListener {
+    protected class ConfigUpdateListener implements IConfigurationUpdateListener {
 
         public void configurationItemAdded(ContestEvent contestEvent) {
             println("Config item added " + contestEvent.getEventType() + " " + getConfigInfo(contestEvent));
@@ -766,7 +766,7 @@ public class ContestTestFrame extends JFrame {
         if (listenerON) {
             // turn it on
             if (configurationUpdateListener == null) {
-                configurationUpdateListener = new ConfigurationUpdateListener();
+                configurationUpdateListener = new ConfigUpdateListener();
             }
             contest.addContestConfigurationUpdateListener(configurationUpdateListener);
             println("Configuration Listener added");
