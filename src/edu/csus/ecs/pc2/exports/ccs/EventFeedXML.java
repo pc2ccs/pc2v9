@@ -1075,7 +1075,13 @@ public class EventFeedXML {
         Language language = contest.getLanguage(run.getLanguageId());
         XMLUtilities.addChild(memento, "language", language.getDisplayName());
         
-        XMLUtilities.addChild(memento, "penalty", "20"); // TODO CCS What is penalty ??
+        if ((!run.isSolved()) && isYoungerThanFirstYes(contest, run)) {
+            // If this a "no" run and run is younger than first yes.
+            XMLUtilities.addChild(memento, "penalty", "True");
+        } else {
+            XMLUtilities.addChild(memento, "penalty", "False");
+        }
+        
         Problem problem = contest.getProblem(run.getProblemId());
         int problemIndex = getProblemIndex(contest, problem);
 //        memento.putInteger("problem", problemIndex);
@@ -1104,6 +1110,54 @@ public class EventFeedXML {
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
 
         return memento;
+    }
+
+    /**
+     * Is this run younger than first Yes?
+     * @param contest
+     * @param run
+     * @return true if run is younger than first yes, false if no solution or run is actually younger than input solved run.
+     */
+    protected boolean isYoungerThanFirstYes(IInternalContest contest, Run run) {
+        
+        Run firstYes = findFistYes (contest, run.getSubmitter(), run.getProblemId());
+        
+        if (firstYes == null){
+            // no solution found
+            return false;
+        } else {
+            return run.getElapsedMS() < firstYes.getElapsedMS(); 
+        }
+    }
+
+    /**
+     * Finds first (earliest) run.
+     * @return null if no such run, else the first/youngest run from submitter and problem.
+     */
+    protected Run findFistYes(IInternalContest contest, ClientId submitter, ElementId problemId) {
+        Run[] runs = contest.getRuns();
+        
+        Run lastYesRun = null;
+        
+        for (Run run : runs) {
+            if (run.isSolved()){
+                if (run.getProblemId().equals(problemId)){
+                    if (run.getSubmitter().equals(submitter)){
+                        // same team
+                        if (lastYesRun == null){
+                            lastYesRun = run;
+                        } else {
+                            if (lastYesRun.getElapsedMS() > run.getElapsedMS()){
+                                lastYesRun = run;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return lastYesRun;
+        
     }
 
     /**

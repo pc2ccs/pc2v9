@@ -671,7 +671,7 @@ public class SampleContest {
      * @throws IOException
      * @throws RunUnavailableException 
      */
-    public Run addARun(InternalContest contest, String runInfoLine) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
+    public Run addARun(IInternalContest contest, String runInfoLine) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         // get last judge
         Account[] accounts = (Account[]) contest.getAccounts(Type.JUDGE).toArray(new Account[contest.getAccounts(Type.JUDGE).size()]);
@@ -716,7 +716,7 @@ public class SampleContest {
             // Try to find No judgement
 
             for (Judgement judgement : contest.getJudgements()) {
-                if (judgement.toString().equalsIgnoreCase(data[5])) {
+                if (judgement.toString().equalsIgnoreCase(data[4])) {
                     judgementId = judgement.getElementId();
                 }
             }

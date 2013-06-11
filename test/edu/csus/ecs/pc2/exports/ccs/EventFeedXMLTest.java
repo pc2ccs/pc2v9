@@ -886,8 +886,59 @@ public class EventFeedXMLTest extends AbstractTestCase {
 //            throw e;
 //        }
     }
-    
-    
+
+    public void testIsYounger() throws Exception {
+        
+        String [] runsData = {
+
+                "1,1,A,1,No",  //20
+                "2,1,A,3,Yes",  //3 (first yes counts Minutes only)
+                "3,1,A,5,No",  //20
+                "4,1,A,7,Yes",  //20  
+                "5,1,A,9,No",  //20
+                
+                "6,1,B,11,No",  //20  (all runs count)
+                "7,1,B,13,No",  //20  (all runs count)
+                
+                "8,2,A,30,Yes",  //30
+                
+                "9,2,B,35,No",  //20 (all runs count)
+                "10,2,B,40,No",  //20 (all runs count)
+                "11,2,B,45,No",  //20 (all runs count)
+                "12,2,B,50,No",  //20 (all runs count)
+                "13,2,B,55,No",  //20 (all runs count)
+
+                "14,2,A,30,No", // doesn't count, no after yes
+                "15,2,A,25,No", // doesn't count, no after yes
+
+                "16,2,A,330,Yes",  // doesn't count, yes after yes
+
+        };
+        
+        IInternalContest testContest = sample.createStandardContest();
+        
+        for (String runInfoLine : runsData) {
+            sample.addARun(testContest, runInfoLine);      
+        }
+
+        Run[] runs = testContest.getRuns();
+        Arrays.sort(runs, new RunComparator());
+
+        EventFeedXML feed = new EventFeedXML();
+
+//        for (Run run : runs) {
+//            System.out.println(feed.isYoungerThanFirstYes(testContest, run) + " " + getRunInfo(run));
+//        }
+
+        assertFalse("Should be younger", feed.isYoungerThanFirstYes(testContest, runs[13]));
+        assertTrue("Should not be younger", feed.isYoungerThanFirstYes(testContest, runs[14]));
+
+        Run laterRun = feed.getFirstSolvedRun(testContest, runs[15].getSubmitter(), runs[15].getProblemId());
+        Run earliest = runs[7];
+        assertEquals("Expecting first solved run to be " + earliest, earliest, laterRun);
+        
+    }
+
     /**
      * Create socket server on port.
      * 
