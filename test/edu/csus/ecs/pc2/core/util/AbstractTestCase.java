@@ -90,7 +90,8 @@ public class AbstractTestCase extends TestCase {
      */
     public static final String DEFAULT_PC2_OUTPUT_FOR_TESTING_DIRECTORY = "testout";
     
-    public static final String HELLO_SOURCE_FILENAME = "Hello.java";
+    // this file is all lowercase, not mixed-case like Sumit
+    public static final String HELLO_SOURCE_FILENAME = "hello.java";
     
     public static final String SUMIT_SOURCE_FILENAME = "Sumit.java";
     
