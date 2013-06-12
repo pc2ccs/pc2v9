@@ -797,7 +797,8 @@ public class Executable {
     }
 
     private String findPC2JarPath() {
-        String jarDir = "/software/pc2/cc/projects/pc2v9/dist";
+        // end this with a ; so pc2.jar can be appended
+        String jarDir = "/software/pc2/cc/projects/pc2v9/build/prod;";
         try {
             String cp = System.getProperty("java.class.path");
             StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
@@ -806,14 +807,14 @@ public class Executable {
                 File dir = new File(token);
                 if (dir.exists() && dir.isFile()
                         && dir.toString().endsWith("pc2.jar")) {
-                    jarDir = new File(dir.getParent()).getCanonicalPath();
+                    jarDir = new File(dir.getParent()).getCanonicalPath()+File.separator;
                     break;
                 }
             }
         } catch (IOException e) {
             System.err.println("Trouble locating pc2home: " + e.getMessage());
         }
-        return jarDir+File.separator;
+        return jarDir;
     }
 
     /**
