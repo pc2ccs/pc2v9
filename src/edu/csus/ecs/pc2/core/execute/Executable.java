@@ -605,7 +605,6 @@ public class Executable {
 
             String pathToPC2Jar = findPC2JarPath ();
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
-System.err.println("DEBUG: TROY commandPattern = "+commandPattern);
         }
 
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
@@ -797,8 +796,8 @@ System.err.println("DEBUG: TROY commandPattern = "+commandPattern);
     }
 
     private String findPC2JarPath() {
-        // end this with a ; so pc2.jar can be appended
-        String jarDir = "/software/pc2/cc/projects/pc2v9/build/prod;";
+        // end this with a : so pc2.jar can be appended
+        String jarDir = "/software/pc2/cc/projects/pc2v9/build/prod:";
         try {
             String cp = System.getProperty("java.class.path");
             StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
