@@ -605,7 +605,7 @@ public class Executable {
 
             String pathToPC2Jar = findPC2JarPath ();
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
-
+System.err.println("DEBUG: TROY commandPattern = "+commandPattern);
         }
 
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
