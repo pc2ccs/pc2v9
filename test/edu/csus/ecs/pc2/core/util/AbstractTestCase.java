@@ -811,5 +811,53 @@ public class AbstractTestCase extends TestCase {
         return  documentBuilder.parse(new InputSource(new StringReader(xmlString)));
     }
 
-    
+    /**
+     * Asserts that there are expectedCount occurrences of c in sourceString.
+     * @param message
+     * @param expectedCount
+     * @param c
+     * @param sourceString
+     */
+    public void assertCount(String message, int expectedCount, char c, String sourceString) {
+        int actualCount = countCharacters(sourceString, c);
+        assertEquals(message, expectedCount, actualCount);
+
+    }
+
+    /**
+     * Asserts that there are expectedCount occurrences of stringToFind in sourceString.
+     * @param message descriptive message for assert failure.
+     * @param expectedCount
+     * @param stringToFind
+     * @param sourceString
+     */
+    public void assertCount(String message, int expectedCount, String stringToFind, String sourceString) {
+        int actualCount = countString(sourceString, stringToFind);
+        assertEquals(message, expectedCount, actualCount);
+
+    }
+
+    /**
+     * Returns number of occurrences of string in source.
+     */
+    public int countString(String source, String string) {
+        int idx = source.indexOf(string);
+        if (idx != -1) {
+            int count = 0;
+            while (idx != -1) {
+                idx = source.indexOf(string, idx + string.length());
+                count++;
+            }
+            return count;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * return number of chartocount in source.
+     */
+    public int countCharacters(String source, char chartocount) {
+        return source.split("\\" + chartocount, -1).length - 1;
+    }  
 }
