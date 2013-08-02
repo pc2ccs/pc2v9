@@ -83,8 +83,24 @@ public class AutoJudgingMonitor implements UIPlugin {
     private boolean usingGui = true;
 
     private boolean judgingRun;
+    
+    private Runnable controlLoop = null;
 
     // private edu.csus.ecs.pc2.ui.AutoJudgingMonitor.FetchRunListenerImplemenation fetchRunListenerImplemenation;
+
+    /**
+     * This class gets started when autoJudging is started.
+     * It handles calling attemptToFetchNextRun().
+     */
+    private class ControlLoop implements Runnable {
+
+        public void run() {
+            while(isAutoJudgingEnabled() && !isAutoJudgeDisabledLocally()) {
+                attemptToFetchNextRun();
+            }            
+        }
+        
+    }
 
     /**
      * 
@@ -266,9 +282,7 @@ public class AutoJudgingMonitor implements UIPlugin {
     class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            if (event.getRun().getStatus().equals(RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT)) {
-                attemptToFetchNextRun(event.getRun());
-            }
+            // just let the ControlLoop grab it
         }
         
         public void refreshRuns(RunEvent event) {
@@ -347,8 +361,6 @@ public class AutoJudgingMonitor implements UIPlugin {
         
         // and this is what allows us to get into that next attemptToFetchNewRun()
         setCurrentlyAutoJudging(false);
-
-        attemptToFetchNextRun();
     }
 
     private void setAlreadyJudgingRun(boolean b) {
@@ -524,6 +536,15 @@ public class AutoJudgingMonitor implements UIPlugin {
      * @param nextRun
      */
     private void attemptToFetchNextRun(Run nextRun) {
+        if (nextRun == null) {
+            // not ready yet
+            try {
+                Thread.sleep(1300); // 1.3 seconds
+            } catch (InterruptedException e) {
+                log.finest("attemptToFetchNextRun InterruptedException");
+            }
+            return;
+        }
 
         if (!isAutoJudgingEnabled()) {
             // Auto judging is turned OFF no need to fetch a new run
@@ -675,7 +696,10 @@ public class AutoJudgingMonitor implements UIPlugin {
                 notifyMessager.updateMessage("Waiting for runs");
             }
 
-            attemptToFetchNextRun();
+            if (controlLoop == null) {
+                controlLoop = new ControlLoop();
+            }
+            controlLoop.run();
 
         } else {
 
