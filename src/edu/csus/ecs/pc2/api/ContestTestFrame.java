@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.api;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Rectangle;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -33,6 +34,7 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.api.reports.APIAbstractTest;
 import edu.csus.ecs.pc2.api.reports.APIPrintReports;
 import edu.csus.ecs.pc2.api.reports.PrintClarification;
+import edu.csus.ecs.pc2.api.reports.PrintClarificationCategories;
 import edu.csus.ecs.pc2.api.reports.PrintClarifications;
 import edu.csus.ecs.pc2.api.reports.PrintMyClient;
 import edu.csus.ecs.pc2.api.reports.PrintProblems;
@@ -44,7 +46,6 @@ import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
-import java.awt.Rectangle;
 
 /**
  * API 'contest' Test Frame.
@@ -614,6 +615,11 @@ public class ContestTestFrame extends JFrame {
     protected void printProblemsTest() {
         runReport(new PrintProblems());
     }
+    
+    protected void printClarificationCategoriesTest() {
+        runReport(new PrintClarificationCategories());
+    }
+
 
     /**
      * This method initializes logoffButton

@@ -182,7 +182,7 @@ public class SampleContest {
             contest.addProblem(problem);
         }
 
-        Problem generalProblem = new Problem("General.");
+        Problem generalProblem = getGeneralProblem();
         contest.setGeneralProblem(generalProblem);
 
         Judgement judgementYes = new Judgement("Yes.");
@@ -215,6 +215,10 @@ public class SampleContest {
         assignColors(contest);
 
         return contest;
+    }
+
+    public final Problem getGeneralProblem() {
+        return new Problem("General.");
     }
 
     public Problem createProblem(String probName, char letter, int siteNumber) {

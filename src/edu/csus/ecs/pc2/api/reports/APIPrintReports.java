@@ -22,6 +22,7 @@ public class APIPrintReports {
             new PrintContestTitle(), //
             new PrintClarification(), //
             new PrintTeams(), //
+            new PrintClarificationCategories(), //
             new PrintProblems(), //
             new PrintLanguages(), //
             new PrintStandings(), //

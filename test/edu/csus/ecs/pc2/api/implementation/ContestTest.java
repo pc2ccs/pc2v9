@@ -26,6 +26,22 @@ public class ContestTest extends AbstractTestCase {
 
     private SampleContest sampleContest = new SampleContest();
 
+    protected IContest createInstance(String logPrefix) {
+        if (logPrefix == null) {
+            throw new IllegalArgumentException("log prefix must not be null");
+        }
+        IInternalContest contest = sampleContest.createContest(1, 3, 12, 12, true);
+
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
+
+        IInternalController controller = sampleContest.createController(contest, storageDirectory, true, false);
+        Log log = createLog(logPrefix + getName());
+
+        Contest apiContestInst = new Contest(contest, controller, log);
+        return apiContestInst;
+    }
+
     public void testProblemDetails() throws Exception {
 
         IInternalContest contest = sampleContest.createContest(1, 3, 12, 12, true);
@@ -38,6 +54,7 @@ public class ContestTest extends AbstractTestCase {
 
         Contest apiContestInst = new Contest(contest, controller, log);
         IContest apiContest = apiContestInst;
+        
 
         Problem[] problems = contest.getProblems();
         for (Problem problem : problems) {
@@ -80,6 +97,24 @@ public class ContestTest extends AbstractTestCase {
                     " points=" + det.getPenaltyPoints() + " attempts=" + det.getAttempts()+" "+det.getClient().getLoginName());
             
         }
+    }
+    
+    /**
+     * Tests for Bug 766 - Add support for general problem/problem categories.
+     * 
+     * @throws Exception
+     */
+    public void testProblemClars() throws Exception {
+
+        IContest apiContest = createInstance("tpc");
+        
+        IProblem[] cats = apiContest.getClarificationCategories();
+        
+        assertEquals("Expecting one category ", 1, cats.length);
+
+        Problem prob = sampleContest.getGeneralProblem();
+        assertEquals("Expecting general  ", prob.getDisplayName(), cats[0].getName());
+        
     }
 
     private void println(String string) {

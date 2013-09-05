@@ -270,4 +270,11 @@ public class Contest implements IContest, UIPlugin {
     public boolean isCCSTestMode() {
         return contest.getContestInformation().isCcsTestMode();
     }
+    
+    public IProblem[] getClarificationCategories() {
+        Problem problem = contest.getGeneralProblem();
+        ProblemImplementation[] implementations = new ProblemImplementation[1];
+        implementations[0] = new ProblemImplementation(problem, contest);
+        return implementations;
+    }
 }

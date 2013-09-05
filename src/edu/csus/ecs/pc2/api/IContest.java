@@ -103,9 +103,24 @@ public interface IContest {
      * </pre>
      * 
      * @return An array containing one {@link IProblem} for each currently defined contest problem.
-     * 
      */
     IProblem[] getProblems();
+    
+    /**
+     * Get an ordered list of all currently defined clarification categories.
+     * 
+     * <pre>
+     * // list all clarification categories and problems.
+     * </pre>
+     * for (IProblem problem : contest.getClarificationCategories()) {
+     *     System.out.println(problem.getName());
+     * }
+     * for (IProblem problem : contest.getProblems()) {
+     *     System.out.println(problem.getName());
+     * }
+     * @return An array containing one {@link IProblem} for each defined clarification category.
+     */
+    IProblem[] getClarificationCategories();
     
     /**
      * Get an ordered list of all currently defined contest sites.
