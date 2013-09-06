@@ -1,18 +1,28 @@
-import edu.csus.ecs.pc2.api.*;
+import java.io.File;
+import java.util.ArrayList;
+
+import edu.csus.ecs.pc2.api.IClarification;
+import edu.csus.ecs.pc2.api.IClarificationEventListener;
+import edu.csus.ecs.pc2.api.IClient;
+import edu.csus.ecs.pc2.api.IContest;
+import edu.csus.ecs.pc2.api.IContestClock;
+import edu.csus.ecs.pc2.api.ILanguage;
+import edu.csus.ecs.pc2.api.IProblem;
+import edu.csus.ecs.pc2.api.IRun;
+import edu.csus.ecs.pc2.api.IStanding;
+import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
-import java.util.ArrayList;
-import java.io.File;
-
-// This class is designed to allow PHP to easily manage a collection of team ServerConnection objects.
-//
-// 	ServerConnections are stored in a ServerConnectionManager object, and are identified by a "teamKey" 
-//	A teamKey can be an IP address, teamID, or any other property unique to each team.
-//
-// 	ServerInterface is a Singleton, and therefore should be referenced by first calling getInstance()
-
 
 /**
+ * Manager for a collection of PC^2 ServerConnections.
+ * 
+ * This class is designed to allow PHP to easily manage a collection of team ServerConnection objects.
+ *
+ * ServerConnections are stored in a ServerConnectionManager object, and are identified by a "teamKey" 
+ * A teamKey can be an IP address, teamID, or any other property unique to each team.
+ *
+ * ServerInterface is a Singleton, and therefore should be referenced by first calling getInstance()
  * 
  * @author EWU Senior Project Team 2013
  * @version $Id$
