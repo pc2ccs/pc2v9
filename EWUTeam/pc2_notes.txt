@@ -1,13 +1,12 @@
+$Id$
+$HeadURL$
+
+------------------------------------------------------------
+Contains: bugs, enhancements, installation tasks, todo's.
+------------------------------------------------------------
+
 Notes captured from Bug 706
-
 http://pc2.ecs.csus.edu/bugzilla/show_bug.cgi?id=706
-
-$Id: pc2_notes.txt 352 2013-09-05 12:06:14Z laned $
-$HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/EWUTeam/pc2_notes.txt $
-
-------------------------------------------------------------
-Contains: bugs, enhancements, installation tasks
-------------------------------------------------------------
 
 Douglas A. Lane 2013-09-03 19:15:07 PDT
 
@@ -66,5 +65,17 @@ allow_url_include = On
 May need to install PHP5 on web server.
 ubuntu command to install php on a web server
 sudo apt-get install libapache2-mod-php5
+
+--- 
+Fri Sep 06 10:21:55 PDT 2013
+dal
+
+- We should include scripts that run/start the EWU Team backend aka
+	cd JAR
+	java -jar PC2JavaServer.jar
+
+- We should test whether chmod 777 file_uploads is needed.
+
+
 
 *eof*
