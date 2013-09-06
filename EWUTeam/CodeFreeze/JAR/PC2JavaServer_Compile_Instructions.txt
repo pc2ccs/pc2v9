@@ -1,0 +1,10 @@
+INSTRUCTIONS FOR COMPILING
+
+1) copy JavaBridge.jar and pc2.jar to source directory
+2) javac -Djava.ext.dirs=. *.java
+3) Edit MANIFEST.MF to include 
+	Main-Class: x.class
+ and 
+	Class-Path: pc2.jar JavaBridge.jar
+3) jar cvmf MANIFEST.MF <output>.jar *.class
+4) java -jar <output>.jar

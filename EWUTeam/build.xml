@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<project name="v9VersionAndJarBuild" default="jar" basedir=".">
+	<!-- $Id: build.xml 350 2013-09-05 11:35:07Z laned $ -->
+	<!-- $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/EWUTeam/build.xml $ -->
+	<!-- 
+
+Purpose: To create a PC2JavaServer.jar 
+
+To Use this:
+  To run/use this file, insure JAVA_HOME is defined and
+  then Run As... Ant Build
+  
+dal
+
+-->
+	<description>
+         Build of pc2apiTest.jar which runs edu.csus.ecs.pc2.api.ContestTestFrame
+    </description>
+
+	<!-- Name of JAR -->
+	<property name="name" value="PC2JavaServer" />
+	<property name="jar.name" value="${name}.jar" />
+
+	<!-- set global properties for this build -->
+	<property name="src.dir" location="CodeFreeze/JAR" />
+	<property name="lib.dir" location="CodeFreeze/JAR" />
+	<property name="test.dir" location="test" />
+	<property name="build.dir" location="build" />
+	<property name="build.prod.dir" location="${build.dir}/prod" />
+	<property name="build.test.dir" location="${build.dir}/test" />
+	<property name="test.xml.dir" location="${build.dir}/test-results" />
+	<property name="dist.dir" location="dist" />
+
+	<property name="jar.path" value="${dist.dir}/${jar.name}" />
+
+	<path id="project.classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="properties">
+		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+	</target>
+
+	<target name="init" depends="properties">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build.prod.dir}" />
+		<mkdir dir="${build.test.dir}" />
+
+	</target>
+
+	<!-- Compile the java code from ${src.dir} into ${build.dir} -->
+	<target name="compile" depends="init" description="compile the source ">
+		<javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no">
+			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
+			<classpath refid="project.classpath" />
+			<compilerarg line="-log '${build.dir}/${name}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile" description="create distribution jar">
+		<mkdir dir="${dist.dir}" />
+		<!-- TODO 706 change to use subversion build.number -->
+		<tstamp>
+			<format property="millisecond" pattern="S" timezone="UTC" />
+		</tstamp>
+		<property name="build.number" value="${millisecond}" />
+
+		<jar jarfile="${jar.path}" basedir="${build.prod.dir}">
+			<manifest>
+				<attribute name="Specification-Version" value="${version}" />
+				<attribute name="Implementation-Title" value="EWU Web Team Client" />
+				<attribute name="Implementation-Version" value="${build.number}" />
+				<attribute name="Built-On" value="${timestamp.english}" />
+				<attribute name="Main-Class" value="${main.class}" />
+
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+
+</project>

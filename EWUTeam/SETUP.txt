@@ -1,0 +1,27 @@
+$Id: SETUP.txt 352 2013-09-05 12:06:14Z laned $
+$HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/EWUTeam/SETUP.txt $
+
+SETUP GUIDE:
+^^^^^^^^^^^^
+
+Setup of the web-interface is simple. The steps are as follows:
+
+1. Move the contents of the CodeFreeze directory (index.html, Team/, Login/ and JAR/) into the base directory of your web-server (on our Linux Apache2 server, it was /var/www/).
+
+2. Download the PC^2 software and run it on whichever machine you want. It is suggested to run it on a different machine from your webserver. We have provided the version that we used when we developed this.
+
+3. Setup the pc2server (reference PC^2 documentation for setup procedures).
+
+4. When creating accounts in the pc2admin view, create a scoreboard with default username and password (scoreboard1, scoreboard1). Do not change these, for the team clients reference it to update their personal scoreboard.
+
+5. Set up your IP / DNS for your web-server so teams can access you webserver over the internet / intranet from their machines.
+
+6. In the JAR/ directory, open the pc2v9.ini file and enter in the IP if the pc2server in the [CLIENT] section.
+
+7. In the JAR/ directory, run the PC2JavaServer.jar using the command: java -jar PC2JavaServer.jar
+	-This is what allows the website to communicate with the pc2server.
+
+8. You should be able to connect to the pc2server. Finish configuring the contest to PC^2 configuration standards.
+
+Note:
+If you are having troubles submitting files and/or clarifications, change the permissions on the Team, JAR and jar/file_uploads folders to be 777. The key part here is the write permission. The file submitted is copied into the file_uploads directory in the JAR folder and it needs to be able to write to it.

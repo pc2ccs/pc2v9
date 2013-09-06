@@ -1,0 +1,47 @@
+$Id: FUTURE_WORK.txt 352 2013-09-05 12:06:14Z laned $
+$HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/EWUTeam/FUTURE_WORK.txt $
+
+This is a listing of potential projects that could be worked on in the future:
+
+GENERAL:
+
+1: If the PC2JavaServer is killed or crashes during the contest, teams who are already logged in stay on the team page. If they utilize any functionality (submit problem, etc) it should realize that the login failed (when we call is_resource(...)), the PHP session should be cleared and the team should be redirected back to the login page with an error message stating that the connection isn't available.
+
+2: Dynamic updates for the tables (so we don't have to click a refresh button).
+
+3: The Contest Clock still needs to be implemented.
+
+4: Change PHP/Java Bridge to Zend Bridge. PHP/Java bridge seems to crash around 1000 logins and is kind of a hacky technology.
+
+5: The tables need to be modified to display "Pending..." when the status on a run or the response to a clarification hasn't been given yet.
+
+6: Scoreboard needs to be updated for multiple sites, not a single one.
+
+7: The GUI needs to be updated:
+	> A banner for both Login and Team would be great.
+	> Maybe remove descriptor label from each page.
+	> Removing the arrow images from the cells in the tables.
+
+8: Validate files sent:
+	> Only allow extensions by the current language list.
+		> This also means not allowing them to send .exe files.
+
+9: Add functionality for submitting multiple files.
+
+10: As it is right now, general clarifications does not have API support. Getting that to work would be great.
+
+11: Clarifications sent to all teams are currently not displayed in the listing of clarifications.
+
+12: Implement our files in a framework, such as CodeIgniter. This will bring MVC functionality to the project. This will also allow dynamic updating of the tables.
+
+13: As it is right now, we are sending data and files in a non-encrypted form (from contestants machine to central web server). Encryption should be added to that.
+
+
+
+TESTING:
+
+1: Unit tests for the SeverInterface.java file still need to be written and tested.
+
+2: Unit tests for our PHP scripts would be great.
+
+3: Test suites should be made for the unit tests.

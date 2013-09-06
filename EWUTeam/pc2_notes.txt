@@ -1,0 +1,70 @@
+Notes captured from Bug 706
+
+http://pc2.ecs.csus.edu/bugzilla/show_bug.cgi?id=706
+
+$Id: pc2_notes.txt 352 2013-09-05 12:06:14Z laned $
+$HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/EWUTeam/pc2_notes.txt $
+
+------------------------------------------------------------
+Contains: bugs, enhancements, installation tasks
+------------------------------------------------------------
+
+Douglas A. Lane 2013-09-03 19:15:07 PDT
+
+No confirmation on submit nothing to tell you that the
+item was submitted.
+
+Test: 
+  submit run - is there a confirm?
+  submit clar - is there a confirm?
+
+[reply] [-] Comment 2 Douglas A. Lane 2013-09-03 19:17:50 PDT
+
+Enh: make the directory "file_uploads" configurable instead of
+hard coded to under the JAR/ directory.
+
+[reply] [-] Comment 3 Douglas A. Lane 2013-09-03 19:19:19 PDT
+
+Possible bug/issues: All team files are uploaded to files_uploads, there likely
+will be file naming collisions.
+
+[reply] [-] Comment 4 Douglas A. Lane 2013-09-03 19:56:16 PDT
+
+The Team UI will not show that a run has not been accepted by
+the server when the contest clock is stopped, the exception
+is written to the API console.  
+The UI should show a message to the team about the run being rejected.
+
+[reply] [-] Comment 5 Douglas A. Lane 2013-09-03 19:57:03 PDT
+
+Cosmetic: Move the Team Interface: <login> from the
+top of the display to the title bar.
+
+[reply] [-] Comment 6 Douglas A. Lane 2013-09-03 19:57:51 PDT
+
+The special effect when changing menu items (disappear/reappear) 
+is a bit annoying. :)
+
+[reply] [-] Comment 7 Douglas A. Lane 2013-09-03 20:15:26 PDT
+
+File limit size needs to be larger than 20k
+
+[reply] [-] Comment 8 Douglas A. Lane 2013-09-03 20:15:53 PDT
+
+On change of tab, refresh data on that tab.
+
+[reply] [-] Comment 9 Douglas A. Lane 2013-09-03 20:19:59 PDT
+
+Must update php.ini 
+
+In: /etc/php5/apache2/php.ini
+; http://php.net/allow-url-include
+allow_url_include = On
+
+[reply] [-] Comment 10 Douglas A. Lane 2013-09-03 20:24:51 PDT
+
+May need to install PHP5 on web server.
+ubuntu command to install php on a web server
+sudo apt-get install libapache2-mod-php5
+
+*eof*
