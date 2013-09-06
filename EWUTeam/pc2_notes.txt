@@ -24,8 +24,11 @@ hard coded to under the JAR/ directory.
 
 [reply] [-] Comment 3 Douglas A. Lane 2013-09-03 19:19:19 PDT
 
-Possible bug/issues: All team files are uploaded to files_uploads, there likely
+RESOLVED Possible bug/issues: All team files are uploaded to files_uploads/, there likely
 will be file naming collisions.
+- the files when dropped into file_uploads are unique, then the submitted
+files are renamed to the original names there might have been name
+collisions but a Java synchronize avoids that condition.   
 
 [reply] [-] Comment 4 Douglas A. Lane 2013-09-03 19:56:16 PDT
 
@@ -77,5 +80,17 @@ dal
 - We should test whether chmod 777 file_uploads is needed.
 
 
+---
+Fri Sep 06 13:35:56 PDT 2013
 
-*eof*
+	Per Troy, source should not be under CodeFreeze.
+	Should just remove that directory and move things down
+	libs should be under lib not JAR
+	source should be under source not JAR
+	PHP source directories should be moved under src/ as well.
+
+	Per Troy, there should be a tag marking the original
+	code delivered on version/build 2.
+
+
+*eof* $Id$
