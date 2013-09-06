@@ -1,5 +1,5 @@
-$Id: FUTURE_WORK.txt 352 2013-09-05 12:06:14Z laned $
-$HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/EWUTeam/FUTURE_WORK.txt $
+$Id$
+$HeadURL$
 
 This is a listing of potential projects that could be worked on in the future:
 
