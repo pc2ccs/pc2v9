@@ -56,7 +56,7 @@ No need for Javadoc - this is not an API.
 		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
 	</target>
 
-	<target name="init" depends="properties">
+	<target name="init" depends="properties,clean">
 		<!-- Create the time stamp -->
 		<tstamp />
 		<!-- Create the build directory structure used by compile -->
@@ -67,10 +67,15 @@ No need for Javadoc - this is not an API.
 		<!-- 
 		Fetch the SVN build version 
 		-->
+        <!-- XXX this requires svnkit-cli.jar & svnkit.jar in the project
         <java classname="org.tmatesoft.svn.cli.SVNVersion" dir="${basedir}" fork="true" outputproperty="repo.version"
             classpathref="project.classpath">
             <arg line="-n ."/>
         </java>
+        -->
+	<exec executable="svnversion" outputproperty="repo.version">
+            <arg line="-n ."/>
+	</exec>
 
 		<!-- 
 		A hard coded version number 
@@ -124,8 +129,9 @@ No need for Javadoc - this is not an API.
 		<copy file="${jar.path}" todir="${dist.jar.dir}"/>
 
 		<mkdir dir="${staging.dir}/file_uploads" />
+		<chmod dir="${staging.dir}/file_uploads" perm="777"/>
 
-		<copy file="${project.dir}/README.txt" todir="${staging.dir}"/>
+		<copy file="${project.dir}/README" todir="${staging.dir}"/>
 		<copy file="${project.dir}/SETUP.txt" todir="${staging.dir}"/>
 
 		<copy file="${src.dir}/pc2v9.ini" todir="${staging.dir}"/>
@@ -146,8 +152,10 @@ No need for Javadoc - this is not an API.
 
 	</target>
 	
-	<target name="clean">
+	<target name="realclean" depends="clean">
 		<delete dir="${build.dir}" />
+	</target>
+	<target name="clean">
 		<delete dir="${dist.dir}" />
 	</target>
 

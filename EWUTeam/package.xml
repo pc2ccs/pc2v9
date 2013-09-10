@@ -9,10 +9,7 @@
            on ant cmdline w/ -Dversion=9_0 -->
     <property name="release" value="${name}-${version}"/>
 
-    <!--
-    TODO: When build.xml is changed to output to unpack/ replace build.unpack.dir
-     <property name="build.unpack.dir" value="${build.dir}/unpack"/> -->
-	<property name="build.unpack.dir" value="${dist.dir}"/>
+     <property name="build.unpack.dir" value="${build.dir}/unpack"/>
 
     <!-- zip/gzip moved to archives so we have repo.version available -->
     <property name="version.path" value="${build.dir}/VERSION"/>
@@ -34,25 +31,29 @@
         </zip>
     </target>
 
-   <target name="zip" depends="jar">
+   <target name="zip">
         <zip destfile="${zip.path}">
-        	<zipfileset dir="${build.dir}" prefix="${release}" />
+        	<zipfileset dir="${staging.dir}" prefix="${release}" />
         </zip>
         <checksum file="${zip.path}" algorithm="MD5" fileext=".md5.txt"/>
         <checksum file="${zip.path}" algorithm="SHA" fileext=".sha1.txt"/>
     </target>
 
     <target name="gzip" depends="zip">
-        <delete  dir="${build.unpack.dir}" />
-        <mkdir dir="${build.unpack.dir}" />
-        <unzip src="${zip.path}" dest="${build.unpack.dir}"/>
-        <tar destfile="${gzip.path}" basedir="${build.unpack.dir}" compression="gzip" >
+        <tar destfile="${gzip.path}" compression="gzip" >
+        	<tarfileset dir="${staging.dir}" prefix="${release}">
+        		<exclude name="**/file_uploads"/>
+        	</tarfileset>
+        	<!-- XXX this is not working, eg perms not 777 -->
+        	<tarfileset dir="${staging.dir}" prefix="${release}" mode="777"> 
+        		<include name="**/file_uploads"/>
+        	</tarfileset>
         </tar>
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
         <checksum file="${gzip.path}" algorithm="SHA" fileext=".sha1.txt"/>
     </target>
 	
-    <target name="archives" depends="init" description="public in dist, private in build">
+    <target name="archives" depends="stage_files" description="public in dist, private in build">
 
         <property name="zip.name" value="${release}-${repo.version}.zip"/>
         <property name="zip.path" value="${dist.dir}/${zip.name}"/>
