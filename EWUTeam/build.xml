@@ -22,12 +22,14 @@ No need for Javadoc - this is not an API.
 	<property name="version" value="1.0" />
 
 	<!-- Name of JAR -->
-	<property name="name" value="PC2JavaServer" />
-	<property name="jar.name" value="${name}.jar" />
+	<property name="name" value="EWUTeam" />
+	<property name="ewuname" value="PC2JavaServer" />
+	<property name="jar.name" value="${ewuname}.jar" />
 
 	<!-- set global properties for this build -->
 	<property name="src.dir" location="CodeFreeze/JAR" />
 	<property name="lib.dir" location="CodeFreeze/JAR" />
+	<property name="project.dir" location="." />
 	<property name="project.dir" location="." />
 	<property name="php.src.dir" location="CodeFreeze" />
 	<property name="test.dir" location="test" />
@@ -40,6 +42,9 @@ No need for Javadoc - this is not an API.
 	<property name="staging.dir" value="${dist.dir}/staging" />
 	
 	<property name="jar.path" value="${dist.dir}/${jar.name}" />
+		
+	<property name="version.path" value="${build.dir}/VERSION.EWUTEAM"/>
+    <property name="spec.path" value="${build.dir}/ewu.spec"/>
 
 	<path id="project.classpath">
 		<fileset dir="${lib.dir}">
@@ -82,7 +87,7 @@ No need for Javadoc - this is not an API.
 		<javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no">
 			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
 			<classpath refid="project.classpath" />
-			<compilerarg line="-log '${build.dir}/${name}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
+			<compilerarg line="-log '${build.dir}/${ewuname}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
 		</javac>
 	</target>
 

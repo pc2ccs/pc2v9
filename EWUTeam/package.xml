@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+<!-- $HeadURL$ -->
+<project name="package-ewuteam" default="archives" basedir=".">
+    <!-- import build.xml instead of duplicating properties -->
+    <import file="build.xml"/>
+
+    <!-- version is set in build.xml and can be overriden
+           on ant cmdline w/ -Dversion=9_0 -->
+    <property name="release" value="${name}-${version}"/>
+
+    <!--
+    TODO: When build.xml is changed to output to unpack/ replace build.unpack.dir
+     <property name="build.unpack.dir" value="${build.dir}/unpack"/> -->
+	<property name="build.unpack.dir" value="${dist.dir}"/>
+
+    <!-- zip/gzip moved to archives so we have repo.version available -->
+    <property name="version.path" value="${build.dir}/VERSION"/>
+    <property name="ewutzip.name" value="ewuteamj-${version}.zip"/>
+    <property name="ewutzip.path" value="${build.dir}/${ewutzip.name}"/>
+
+    <target name="ewutzip" description="creates zip of the source">
+        <zip destfile="${ewutzip.path}">
+        	<!-- TODO: eventually add all source -->
+        	<zipfileset dir="${build.dir}/JAR/Login" filemode="644" prefix="${release}/src" />
+            <zipfileset dir="${build.dir}/JAR/Team" filemode="644" prefix="${release}/src" />
+        	<!--
+        	TODO: When source is moved to src/ use these.
+            <zipfileset dir="${basedir}/src" filemode="644" prefix="${release}/src">
+            </zipfileset>
+            <zipfileset dir="${basedir}/test" filemode="644" prefix="${release}/test">
+            </zipfileset>
+            -->
+        </zip>
+    </target>
+
+   <target name="zip" depends="jar">
+        <zip destfile="${zip.path}">
+        	<zipfileset dir="${build.dir}" prefix="${release}" />
+        </zip>
+        <checksum file="${zip.path}" algorithm="MD5" fileext=".md5.txt"/>
+        <checksum file="${zip.path}" algorithm="SHA" fileext=".sha1.txt"/>
+    </target>
+
+    <target name="gzip" depends="zip">
+        <delete  dir="${build.unpack.dir}" />
+        <mkdir dir="${build.unpack.dir}" />
+        <unzip src="${zip.path}" dest="${build.unpack.dir}"/>
+        <tar destfile="${gzip.path}" basedir="${build.unpack.dir}" compression="gzip" >
+        </tar>
+        <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
+        <checksum file="${gzip.path}" algorithm="SHA" fileext=".sha1.txt"/>
+    </target>
+	
+    <target name="archives" depends="init" description="public in dist, private in build">
+
+        <property name="zip.name" value="${release}-${repo.version}.zip"/>
+        <property name="zip.path" value="${dist.dir}/${zip.name}"/>
+        <property name="gzip.name" value="${release}-${repo.version}.tar.gz"/>
+        <property name="gzip.path" value="${dist.dir}/${gzip.name}"/>
+        <property name="apizip.name" value="api-doc-${version}-${repo.version}.zip"/>
+        <property name="apizip.path" value="${dist.dir}/${apizip.name}"/>
+
+        <!-- <antcall target="apizip"/> -->
+        <!-- bug 490 gzip depends on zip do not call explicitly -->
+        <antcall target="gzip"/> 
+    </target>
+</project>
