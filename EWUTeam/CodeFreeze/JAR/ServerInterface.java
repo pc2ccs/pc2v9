@@ -1,5 +1,7 @@
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import edu.csus.ecs.pc2.api.IClarification;
 import edu.csus.ecs.pc2.api.IClarificationEventListener;
@@ -35,11 +37,22 @@ public class ServerInterface
 	public static ServerInterface serverInterface = new ServerInterface();
 	private static int connectionId = 0;
 	private ServerConnection scoreBoard;
-	private ArrayList <IClarification> clarBuffer = new ArrayList<IClarification>();;
+	private ArrayList <IClarification> clarBuffer = new ArrayList<IClarification>();
+    private String scoreboardPassword;
 
 	//explicitly private constructor for Singleton behavior
-	private ServerInterface(){}
-	
+    private ServerInterface()
+    {
+        try {
+            Properties pc2Properties = new Properties();
+            pc2Properties.load(new FileInputStream("pc2v9.ini"));
+            scoreboardPassword = (String) pc2Properties.getProperty("client.scoreboard2password");
+            pc2Properties = null;
+        } catch (Exception e) {
+            throw new RuntimeException("Error loading pc2v9.ini "+e.getMessage(), e);
+        }
+    }
+
 	//get instance
 	public static ServerInterface getInstance() { return serverInterface; }
 	
@@ -270,7 +283,7 @@ public class ServerInterface
 			IStanding[] allStandings = null;
 			synchronized(this) {
 				scoreBoard = new ServerConnection();
-				scoreBoard.login("scoreboard1","scoreboard1");
+				scoreBoard.login(getScoreboardLogin(),getScoreboardPassword());
 				allStandings = scoreBoard.getContest().getStandings();
 				scoreBoard.logoff();
 			}
@@ -289,7 +302,15 @@ public class ServerInterface
 		}
 	}//end getRuns
 
-	private void addToClarBuffer(IClarification clar)
+	private String getScoreboardLogin() {
+        return "scoreboard2";
+    }
+
+    private String getScoreboardPassword() {
+        return scoreboardPassword;
+    }
+
+    private void addToClarBuffer(IClarification clar)
 	{
 		clarBuffer.add(clar);
 	}
