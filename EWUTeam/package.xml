@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 <!-- $HeadURL$ -->
-<project name="package-ewuteam" default="archives" basedir=".">
+<project name="package-ewteam" default="archives" basedir=".">
     <!-- import build.xml instead of duplicating properties -->
     <import file="build.xml"/>
 
@@ -13,7 +13,7 @@
 
     <!-- zip/gzip moved to archives so we have repo.version available -->
     <property name="version.path" value="${build.dir}/VERSION"/>
-    <property name="ewutzip.name" value="ewuteamj-${version}.zip"/>
+    <property name="ewutzip.name" value="ewteamj-${version}.zip"/>
     <property name="ewutzip.path" value="${build.dir}/${ewutzip.name}"/>
 
     <target name="ewutzip" description="creates zip of the source">
@@ -42,11 +42,11 @@
     <target name="gzip" depends="zip">
         <tar destfile="${gzip.path}" compression="gzip" >
         	<tarfileset dir="${staging.dir}" prefix="${release}">
-        		<exclude name="**/file_uploads"/>
+        		<exclude name="**/uploads"/>
         	</tarfileset>
         	<!-- XXX this is not working, eg perms not 777 -->
         	<tarfileset dir="${staging.dir}" prefix="${release}" mode="777"> 
-        		<include name="**/file_uploads"/>
+        		<include name="**/uploads"/>
         	</tarfileset>
         </tar>
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>

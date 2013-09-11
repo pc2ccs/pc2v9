@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="EWUTeam" default="stage_files" basedir=".">
+<project name="EWTeam" default="stage_files" basedir=".">
 	<!-- $Id$ -->
 	<!-- $HeadURL$ -->
 	<!-- 
@@ -22,7 +22,7 @@ No need for Javadoc - this is not an API.
 	<property name="version" value="1.0" />
 
 	<!-- Name of JAR -->
-	<property name="name" value="EWUTeam" />
+	<property name="name" value="EWTeam" />
 	<property name="ewuname" value="PC2JavaServer" />
 	<property name="jar.name" value="${ewuname}.jar" />
 
@@ -37,14 +37,19 @@ No need for Javadoc - this is not an API.
 	<property name="build.prod.dir" location="${build.dir}/prod" />
 	<property name="build.test.dir" location="${build.dir}/test" />
 	<property name="test.xml.dir" location="${build.dir}/test-results" />
+  <!-- this is the location for the dist/ directory where the generarated .jar files is created -->
 	<property name="dist.dir" location="dist" />
 
+  <!-- root of the distribution -->
 	<property name="staging.dir" value="${dist.dir}/staging" />
+
+  <!-- this is the location for the dist/ directory in the distribution -->
+	<property name="staging.dist.dir" value="${dist.dir}/staging/dist" />
 	
 	<property name="jar.path" value="${dist.dir}/${jar.name}" />
 		
-	<property name="version.path" value="${build.dir}/VERSION.EWUTEAM"/>
-    <property name="spec.path" value="${build.dir}/ewu.spec"/>
+	<property name="version.path" value="${build.dir}/VERSION.EWTEAM"/>
+  <property name="spec.path" value="${build.dir}/ewu.spec"/>
 
 	<path id="project.classpath">
 		<fileset dir="${lib.dir}">
@@ -122,32 +127,39 @@ No need for Javadoc - this is not an API.
 	
 	<target name="stage_files" depends="jar" description="Stages project deliverables in distribution directory to be packed">
 		
-		<property name="dist.jar.dir" value="${staging.dir}/JAR" />
-		<mkdir dir="${dist.jar.dir}" />
-		
-		<!-- copy .jar to staging -->
-		<copy file="${jar.path}" todir="${dist.jar.dir}"/>
+		<property name="dist.lib.dir" value="${staging.dist.dir}/lib" />
+		<mkdir dir="${dist.lib.dir}" />
 
-		<mkdir dir="${staging.dir}/file_uploads" />
-		<chmod dir="${staging.dir}/file_uploads" perm="777"/>
+    <!-- Copy to staging dist/lib/ directory -->
+		
+		<copy file="${jar.path}" todir="${dist.lib.dir}"/>
+		<copy file="${src.dir}/pc2v9.ini" todir="${dist.lib.dir}"/>
+		<copy todir="${dist.lib.dir}"> 
+		    <fileset dir="${lib.dir}"> 
+		       <include name="*.jar"/>
+		    </fileset>
+		</copy>
+
+    <!-- Copy to staging dist/ directory -->
+
+		<mkdir dir="${staging.dist.dir}/Login" />
+		<mkdir dir="${staging.dist.dir}/Team" />
+			
+		<copy todir="${staging.dist.dir}/Login">  <fileset dir="${php.src.dir}/Login"/>  </copy>
+		<copy todir="${staging.dist.dir}/Team">  <fileset dir="${php.src.dir}/Team"/>  </copy>
+
+		<copy file="${php.src.dir}/index.html" todir="${staging.dir}" />
+
+    <!-- Copy to staging (root of distribution) directory -->
 
 		<copy file="${project.dir}/README.txt" todir="${staging.dir}"/>
 		<copy file="${project.dir}/SETUP.txt" todir="${staging.dir}"/>
 
-		<copy file="${src.dir}/pc2v9.ini" todir="${staging.dir}"/>
 		<copy file="${src.dir}/index.html" todir="${staging.dir}"/>
 
-		<mkdir dir="${staging.dir}/Login" />
-		<mkdir dir="${staging.dir}/Team" />
-			
-		<copy todir="${staging.dir}/Login">  <fileset dir="${php.src.dir}/Login"/>  </copy>
-		<copy todir="${staging.dir}/Team">  <fileset dir="${php.src.dir}/Team"/>  </copy>
+		<mkdir dir="${staging.dir}/uploads" />
+		<chmod dir="${staging.dir}/uploads" perm="777"/>
 
-		 <copy todir="${dist.jar.dir}"> 
-		    <fileset dir="${lib.dir}"> 
-		       <include name="*.jar"/>
-		    </fileset>
-		  </copy>
 		<echo message="Staged project files at ${staging.dir}"/>
 
 	</target>
@@ -155,6 +167,7 @@ No need for Javadoc - this is not an API.
 	<target name="realclean" depends="clean">
 		<delete dir="${build.dir}" />
 	</target>
+
 	<target name="clean">
 		<delete dir="${dist.dir}" />
 	</target>
