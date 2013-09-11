@@ -5,8 +5,7 @@ $HeadURL$
 Contains: bugs, enhancements, installation tasks, todo's.
 ------------------------------------------------------------
 
-Notes captured from Bug 706
-http://pc2.ecs.csus.edu/bugzilla/show_bug.cgi?id=706
+
 
 Douglas A. Lane 2013-09-03 19:15:07 PDT
 
@@ -32,6 +31,7 @@ collisions but a Java synchronize avoids that condition.
 
 [reply] [-] Comment 4 Douglas A. Lane 2013-09-03 19:56:16 PDT
 
+ASSIGNED to Doug to figure out LOE
 The Team UI will not show that a run has not been accepted by
 the server when the contest clock is stopped, the exception
 is written to the API console.  
@@ -39,6 +39,7 @@ The UI should show a message to the team about the run being rejected.
 
 [reply] [-] Comment 5 Douglas A. Lane 2013-09-03 19:57:03 PDT
 
+ASSIGNED to Doug to figure out LOE
 Cosmetic: Move the Team Interface: <login> from the
 top of the display to the title bar.
 
@@ -49,6 +50,7 @@ is a bit annoying. :)
 
 [reply] [-] Comment 7 Douglas A. Lane 2013-09-03 20:15:26 PDT
 
+FIX IT, up limit to: 512K
 File limit size needs to be larger than 20k
 
 [reply] [-] Comment 8 Douglas A. Lane 2013-09-03 20:15:53 PDT
@@ -57,7 +59,8 @@ On change of tab, refresh data on that tab.
 
 [reply] [-] Comment 9 Douglas A. Lane 2013-09-03 20:19:59 PDT
 
-Must update php.ini 
+Must update php.ini, in PHP they are using include (URL)
+should not be using that, oh well.
 
 In: /etc/php5/apache2/php.ini
 ; http://php.net/allow-url-include
