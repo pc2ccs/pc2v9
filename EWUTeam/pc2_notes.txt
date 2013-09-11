@@ -5,76 +5,56 @@ $HeadURL$
 Contains: bugs, enhancements, installation tasks, todo's.
 ------------------------------------------------------------
 
+------------------------------------------------------------
+CATEGORY 1 - HIGH PRIORITY
+------------------------------------------------------------
 
+- rename project from EWUTeam to EWTeam (no more U), repo,
+ artifacts, etc.
 
-Douglas A. Lane 2013-09-03 19:15:07 PDT
+- Read scoreboard2 password from .ini
 
-No confirmation on submit nothing to tell you that the
-item was submitted.
+FIX IT, up limit to: 512K
+File limit size needs to be larger than 20k
 
-Test: 
-  submit run - is there a confirm?
-  submit clar - is there a confirm?
+replace index.html with proper version that has REFRESH
 
-[reply] [-] Comment 2 Douglas A. Lane 2013-09-03 19:17:50 PDT
+rename JAR to lib
 
-Enh: make the directory "file_uploads" configurable instead of
-hard coded to under the JAR/ directory.
+move pc2v9.ini into lib/
 
-[reply] [-] Comment 3 Douglas A. Lane 2013-09-03 19:19:19 PDT
+Remove CodeFreeze dir, put PHP under src/
+put .java under src/
 
-RESOLVED Possible bug/issues: All team files are uploaded to files_uploads/, there likely
-will be file naming collisions.
-- the files when dropped into file_uploads are unique, then the submitted
-files are renamed to the original names there might have been name
-collisions but a Java synchronize avoids that condition.   
+--
 
-[reply] [-] Comment 4 Douglas A. Lane 2013-09-03 19:56:16 PDT
-
-ASSIGNED to Doug to figure out LOE
+- ASSIGNED to Doug to figure out LOE
 The Team UI will not show that a run has not been accepted by
 the server when the contest clock is stopped, the exception
 is written to the API console.  
 The UI should show a message to the team about the run being rejected.
 
-[reply] [-] Comment 5 Douglas A. Lane 2013-09-03 19:57:03 PDT
-
-ASSIGNED to Doug to figure out LOE
+- ASSIGNED to Doug to figure out LOE
 Cosmetic: Move the Team Interface: <login> from the
 top of the display to the title bar.
 
-[reply] [-] Comment 6 Douglas A. Lane 2013-09-03 19:57:51 PDT
+------------------------------------------------------------
+CATEGORY 2 - LOWER PRIORITY
+------------------------------------------------------------
 
-The special effect when changing menu items (disappear/reappear) 
-is a bit annoying. :)
+- No confirmation on submit nothing to tell you that the
+item was submitted.
 
-[reply] [-] Comment 7 Douglas A. Lane 2013-09-03 20:15:26 PDT
+- Test: 
+  submit run - is there a confirm?
+  submit clar - is there a confirm?
 
-FIX IT, up limit to: 512K
-File limit size needs to be larger than 20k
+- Enh: make the directory "file_uploads" configurable instead of
+hard coded to under the JAR/ directory.
 
-[reply] [-] Comment 8 Douglas A. Lane 2013-09-03 20:15:53 PDT
+- The special effect when changing menu items (disappear/reappear) is a bit annoying. :)
 
-On change of tab, refresh data on that tab.
-
-[reply] [-] Comment 9 Douglas A. Lane 2013-09-03 20:19:59 PDT
-
-Must update php.ini, in PHP they are using include (URL)
-should not be using that, oh well.
-
-In: /etc/php5/apache2/php.ini
-; http://php.net/allow-url-include
-allow_url_include = On
-
-[reply] [-] Comment 10 Douglas A. Lane 2013-09-03 20:24:51 PDT
-
-May need to install PHP5 on web server.
-ubuntu command to install php on a web server
-sudo apt-get install libapache2-mod-php5
-
---- 
-Fri Sep 06 10:21:55 PDT 2013
-dal
+- On change of tab, refresh data on that tab.
 
 - We should include scripts that run/start the EWU Team backend aka
 	cd JAR
@@ -82,18 +62,26 @@ dal
 
 - We should test whether chmod 777 file_uploads is needed.
 
+	Per Troy, source should not be under CodeFreeze.  Should just
+	remove that directory and move things down libs should be under
+	lib not JAR source should be under source not JAR PHP source
+	directories should be moved under src/ as well.
 
----
-Fri Sep 06 13:35:56 PDT 2013
+Per Troy, there should be a tag marking the original code
+delivered on version/build 2.
 
-	Per Troy, source should not be under CodeFreeze.
-	Should just remove that directory and move things down
-	libs should be under lib not JAR
-	source should be under source not JAR
-	PHP source directories should be moved under src/ as well.
+NOTES
 
-	Per Troy, there should be a tag marking the original
-	code delivered on version/build 2.
+May need to install PHP5 on web server.  ubuntu command to install php
+on a web server 
+sudo apt-get install libapache2-mod-php5
 
+- PHP using insecure include statements
+fix: Must update php.ini, in PHP they are using include (URL)
+should not be using that, oh well.
+
+In: /etc/php5/apache2/php.ini
+; http://php.net/allow-url-include
+allow_url_include = On
 
 *eof* $Id$
