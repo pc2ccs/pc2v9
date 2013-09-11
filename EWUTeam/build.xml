@@ -131,7 +131,7 @@ No need for Javadoc - this is not an API.
 		<mkdir dir="${staging.dir}/file_uploads" />
 		<chmod dir="${staging.dir}/file_uploads" perm="777"/>
 
-		<copy file="${project.dir}/README" todir="${staging.dir}"/>
+		<copy file="${project.dir}/README.txt" todir="${staging.dir}"/>
 		<copy file="${project.dir}/SETUP.txt" todir="${staging.dir}"/>
 
 		<copy file="${src.dir}/pc2v9.ini" todir="${staging.dir}"/>
