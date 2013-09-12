@@ -172,7 +172,8 @@ No need for Javadoc - this is not an API.
 		<copy todir="${staging.dist.dir}/Login">  <fileset dir="${php.src.dir}/Login"/>  </copy>
 		<copy todir="${staging.dist.dir}/Team">  <fileset dir="${php.src.dir}/Team"/>  </copy>
 
-		<copy file="${php.src.dir}/index.html" todir="${staging.dir}" />
+		<!-- create/copy refresh web page -->
+		<copy file="${php.src.dir}/index.html" todir="${staging.dist.dir}" />
 
     <!-- Copy to staging (root of distribution) directory -->
 

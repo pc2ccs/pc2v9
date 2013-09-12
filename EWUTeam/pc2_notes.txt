@@ -17,10 +17,9 @@ CATEGORY 1 - HIGH PRIORITY
 - Read scoreboard2 password from .ini
 
 RESOLVED FIX IT, up limit to: 512K
-File limit size needs to be larger than 20k
-
-== To change the input file size
-edit Team/submitProblem.php, change 3 lines.
+  File limit size needs to be larger than 20k
+  To change the input file size:
+  edit Team/submitProblem.php, change 3 lines.
 
 Line 8:
 	if($_FILES["file"]["size"] > 512000) {
@@ -30,6 +29,8 @@ Line 34:
 	$_SESSION['error'] = "Input file larger than max input size (512KB).";
 
 RESOLVED replace index.html with proper version that has REFRESH
+
+FIX move index.html under dist/
 
 RESOLVED move pc2v9.ini into lib/
 
