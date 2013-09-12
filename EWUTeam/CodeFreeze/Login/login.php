@@ -1,5 +1,8 @@
 <?php
 	session_start();
+
+	// $Id$
+
 	//echo '<font color="white">UN: ' . $_SESSION['username'];
 	//echo '<br/>CID: ' . $_SESSION['cid'] . '</font>';
 

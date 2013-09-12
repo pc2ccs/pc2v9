@@ -9,22 +9,33 @@ Contains: bugs, enhancements, installation tasks, todo's.
 CATEGORY 1 - HIGH PRIORITY
 ------------------------------------------------------------
 
-- rename project from EWUTeam to EWTeam (no more U), repo,
- artifacts, etc.
+- rename project from EWUTeam to EWTeam (no more U)
+  - repo 
+  RESOLVED - artifacts
+  RESOLVED - web pages
 
 - Read scoreboard2 password from .ini
 
-FIX IT, up limit to: 512K
+RESOLVED FIX IT, up limit to: 512K
 File limit size needs to be larger than 20k
 
-replace index.html with proper version that has REFRESH
+== To change the input file size
+edit Team/submitProblem.php, change 3 lines.
 
-rename JAR to lib
+Line 8:
+	if($_FILES["file"]["size"] > 512000) {
+Line 9:
+	$_SESSION['error'] = "Input file larger than max input size (512KB).";
+Line 34:
+	$_SESSION['error'] = "Input file larger than max input size (512KB).";
 
-move pc2v9.ini into lib/
+RESOLVED replace index.html with proper version that has REFRESH
 
-Remove CodeFreeze dir, put PHP under src/
-put .java under src/
+RESOLVED move pc2v9.ini into lib/
+
+Source file, reorg
+    Remove CodeFreeze dir, put PHP under src/ put .java under src/
+    rename JAR to lib
 
 --
 
