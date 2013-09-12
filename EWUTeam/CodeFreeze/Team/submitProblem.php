@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-
+<!-- $Id$ -->
 <?php
 	session_start();
 	require_once("http://localhost:3306/JavaBridge/java/Java.inc");
 	$server = java("ServerInterface")->getInstance();
 
-	if($_FILES["file"]["size"] > 20000) {
-		$_SESSION['error'] = "Input file larger than max input size (20KB).";
+	if($_FILES["file"]["size"] > 512000) {
+		$_SESSION['error'] = "Input file larger than max input size (512KB).";
 	} elseif($_FILES["file"]["error"] > 0) {
 		//echo "Error: " . $_FILES["file"]["error"];
 	} elseif($_FILES['file']['size'] > 0) {
@@ -31,7 +31,7 @@
 		//echo "moved file to (tmp_name)" . $_FILES["file"]["tmp_name"]."<br>";
 		//echo time();
 	} else {
-		$_SESSION['error'] = "Input file larger than max input size (20KB).";
+		$_SESSION['error'] = "Input file larger than max input size (512KB).";
 	}
 	header("Location: iSubmit.php");
 ?>
