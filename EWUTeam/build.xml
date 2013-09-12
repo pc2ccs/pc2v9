@@ -78,9 +78,9 @@ No need for Javadoc - this is not an API.
             <arg line="-n ."/>
         </java>
         -->
-	<exec executable="svnversion" outputproperty="repo.version">
+		<exec executable="svnversion" outputproperty="repo.version">
             <arg line="-n ."/>
-	</exec>
+		</exec>
 
 		<!-- 
 		A hard coded version number 
@@ -89,6 +89,29 @@ No need for Javadoc - this is not an API.
 		</tstamp>
 		<property name="repo.version" value="${millisecond}" />
 		-->
+		
+	 <tstamp>
+	        <format property="date" pattern="yyyyMMdd" timezone="UTC" />
+	    </tstamp>
+	    <tstamp>
+	        <format property="time" pattern="HHmm" timezone="UTC" />
+	    </tstamp>
+	    <property name="timestamp" value="${date}${time}" />
+	    <tstamp>
+	        <format
+	            property="date.english"
+	            pattern="EEEE, MMMM d yyyy"
+	            timezone="UTC" />
+	    </tstamp>
+	    <tstamp>
+	        <format
+	            property="time.english"
+	            pattern="HH:mm z"
+	            timezone="UTC" />
+	    </tstamp>
+	    <property
+	        name="timestamp.english"
+	        value="${date.english} ${time.english}" />
 
 	</target>
 
@@ -101,7 +124,7 @@ No need for Javadoc - this is not an API.
 		</javac>
 	</target>
 
-	<target name="jar" depends="compile" description="create distribution jar ">
+	<target name="jar" depends="compile,version" description="create distribution jar ">
 		<jar jarfile="${jar.path}" basedir="${build.prod.dir}">
 			<manifest>
 				<attribute name="Specification-Version" value="${version}" />
@@ -116,13 +139,14 @@ No need for Javadoc - this is not an API.
 	
     <target name="version" depends="init" description="re-creates the VERSION file">
         <delete file="${version.path}"/>
-        <echo message="EWU Team PC^2 Project${line.separator}" file="${version.path}"/>
+        <echo message="PC^2 Project EWU Team ${line.separator}" file="${version.path}"/>
         <echo message="Version ${version} ${date} ${repo.version} (${timestamp.english})${line.separator}" file="${version.path}" append="true"/>
         <delete file="${spec.path}"/>
         <echo message="Version: ${version}${line.separator}Release: ${repo.version}${line.separator}" file="${spec.path}"/>
         <concat destfile="${spec.path}" append="true">
              <fileset file=".spec.base"/>
         </concat>
+    	<echo message="Created version info in ${version.path}" />
     </target>
 	
 	<target name="stage_files" depends="jar" description="Stages project deliverables in distribution directory to be packed">
@@ -160,6 +184,8 @@ No need for Javadoc - this is not an API.
 		<mkdir dir="${staging.dir}/uploads" />
 		<chmod dir="${staging.dir}/uploads" perm="777"/>
 
+		<copy file="${build.dir}/VERSION.EWTEAM" todir="${staging.dir}"/>
+		
 		<echo message="Staged project files at ${staging.dir}"/>
 
 	</target>

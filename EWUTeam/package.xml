@@ -12,7 +12,7 @@
      <property name="build.unpack.dir" value="${build.dir}/unpack"/>
 
     <!-- zip/gzip moved to archives so we have repo.version available -->
-    <property name="version.path" value="${build.dir}/VERSION"/>
+    <!-- <property name="version.path" value="${build.dir}/VERSION"/> -->
     <property name="ewutzip.name" value="ewteamj-${version}.zip"/>
     <property name="ewutzip.path" value="${build.dir}/${ewutzip.name}"/>
 
