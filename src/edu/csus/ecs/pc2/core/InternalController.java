@@ -70,6 +70,7 @@ import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
+import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.ILogWindow;
@@ -165,6 +166,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private static final String DEBUG_OPTION_STRING = "--debug";
 
     private static final String LOGIN_OPTION_STRING = "--login";
+    
+    private static final String LOAD_YAML_OPTION_STRING = "--loadyaml";
 
     private static final String PASSWORD_OPTION_STRING = "--password";
 
@@ -2334,16 +2337,28 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void start(String[] stringArray) {
 
         /**
+         * Directory where contest.yaml exists.
+         */
+        String yamlDirectory = null;
+        
+        /**
          * Saved exception.
          * 
          * If TransportException thrown before UI has been created, save the exception and present it on the UI later.
          */
         TransportException savedTransportException = null;
 
-        String[] requireArguementArgs = { "--login", "--id", "--password", MAIN_UI_OPTION, "--remoteServer", "--port", PROFILE_OPTION_STRING, INI_FILENAME_OPTION_STRING, CONTEST_PASSWORD_OPTION,
+        String[] requireArguementArgs = { // 
+                "--login", "--id", "--password", // 
+                MAIN_UI_OPTION, "--remoteServer", // 
+                "--port", //
+                PROFILE_OPTION_STRING, //
+                INI_FILENAME_OPTION_STRING, //
+                CONTEST_PASSWORD_OPTION, //
+                LOAD_YAML_OPTION_STRING, //        
                 FILE_OPTION_STRING };
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
-
+        
         if (parseArguments.isOptPresent("--server")) {
             if (!isContactingRemoteServer()) {
                 theProfile = getCurrentProfile();
@@ -2355,6 +2370,32 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         } else {
             startLog(null, "pc2.startup", null, null);
+        }
+        
+        if (parseArguments.isOptPresent("--server") && parseArguments.isOptPresent(LOAD_YAML_OPTION_STRING)) {
+
+            // Get directory name
+            yamlDirectory = parseArguments.getOptValue(LOAD_YAML_OPTION_STRING);
+
+            if (isEmpty(yamlDirectory)) {
+                fatalError("Cannot start PC^2, missing directory name after "+LOAD_YAML_OPTION_STRING+" option");
+            }
+            
+            if (!new File(yamlDirectory).isDirectory()){
+                fatalError("Cannot start PC^2, specified directory '"+yamlDirectory+"' does not exist ("+LOAD_YAML_OPTION_STRING+" option)");
+            }
+  
+            String contestYamlFilename = yamlDirectory + File.separator + "contest.yaml";
+            if (!new File(contestYamlFilename).isFile()){
+                fatalError("Cannot start PC^2, No contest.yaml found in '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)");
+            }
+            
+            try {
+                log.log(Log.INFO, "Loading YAML from directory "+yamlDirectory);
+                loadContestYaml(yamlDirectory);
+            } catch (Exception e) {
+                fatalError("Cannot start PC^2, Errors loading contest YAML '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)", e);
+            }
         }
 
         handleCommandLineOptions();
@@ -2519,6 +2560,28 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    /**
+     * Check syntax and load contest.yaml.
+     * @param directory
+     */
+    private void loadContestYaml(String directory) {
+        
+        ContestYAMLLoader loader = new ContestYAMLLoader();
+        // TODO Bug 439 - find a way to load current Internal Contest from this yaml
+//        IInternalContest loadedContest = 
+        loader.fromYaml(null, directory);
+
+    }
+
+    /**
+     * Is string null or trimmed length zero?.
+     * @param string
+     * @return
+     */
+    private boolean isEmpty(String string) {
+        return string == null || string.trim().length() == 0;
+    }
+
     private ILoginUI createLoginFrame() {
         ILoginUI ui = (ILoginUI) loadUIClass(loginClassName);
         ui.setContestAndController(contest, this);
@@ -2574,8 +2637,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         if (parseArguments.isOptPresent("--help")) {
             // -F is the ParseArguements internal option to pre-load command line options from a file
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--skipini] [" + INI_FILENAME_OPTION_STRING + " filename] ["
-                    + CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] [" + NO_GUI_OPTION_STRING + "] [" + MAIN_UI_OPTION + " classname]");
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [" + LOAD_YAML_OPTION_STRING + "] [--skipini] " + //
+                    "[" + INI_FILENAME_OPTION_STRING + " filename] [" + //
+                    CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] [" + NO_GUI_OPTION_STRING + "] [" + MAIN_UI_OPTION + " classname]");
             System.exit(0);
         }
 
