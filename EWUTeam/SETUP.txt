@@ -1,49 +1,108 @@
-EWU Team Client Setup Guide
+EWU Team Client Guide
+===========================
 
-dependencies
-web server running PHP
+OVERVIEW
+--------
+The EWTeam Client project provides a web-based Team Client which interfaces to
+a PC^2 Server without the need to install the PC^2 Team module on a team machine.
+Contest teams use a standard web browser to access web services which in turn
+link to an installed PC^2 Server.  The EWTeam Client provides all the services
+normally provided by the standard PC^2 Team Client, EXCEPT that it does not
+support the "Test Run" facility.
 
-State prerequisites - pc2 startupish stuff
-- download pc2 and configure contest
-- create scoreboard2 account and password
+The EWTeam Client project was implemented by a Computer Science Senior Project
+Team at Eastern Washington University under the direction of Professor Tom Capaul.
 
-1. Move the contents of the dist directory (index.html, Team/,
+The remainder of this document presumes basic familiarity with using the PC^2
+system to configure and run a contest.  See the PC^2 Contest Administrator's
+Guide under "Documentation" at the PC^2 Home Page (http://pc2.ecs.csus.edu) for
+details. 
+
+
+DEPENDENCIES
+------------
+In order to use the EWTeam Client, it is necessary for teams to have access to 
+a web server running PHP (the installation process, below, includes inserting 
+PHP modules into the web server for access by the browser).
+
+
+PRIOR PREPARATION
+-----------------
+Before attempting to setup and use the EWTeam Client, install and 
+configure a complete PC^2 system.  This includes downloading the PC^2 code, 
+starting a PC^2 Server, starting a PC^2 Admin and using it to configure the 
+contest, and starting one or more PC^2 Judges.  See the PC^2 Administrator's 
+Guide for details.
+
+  IMPORTANT NOTE:  In order to support the EWTeam Client, the PC^2 configuration 
+must include a scoreboard account explicitly named "scoreboard2".  This 
+account is used by the EWTeam Client to access current contest standings for the
+team display. Be sure to create this special account when setting up contest 
+accounts using the "Generate Accounts" function in the PC^2 Admin.  
+
+The "scoreboard2" account SHOULD NOT BE USED FOR ANY OTHER FUNCTION THAN 
+SUPPORTING THE EWTEAM CLIENT.  If you plan to run your own "PC^2 Scoreboard", 
+use the default PC^2 Scoreboard Account "scoreboard1", or some other account; do
+not use the "scoreboard2" account for any functions within PC^2 as this will 
+conflict with operation of both the EWTeam Client and with the PC^2 scoreboard.
+
+
+INSTALLING THE EWTEAM CLIENT
+----------------------------
+1. Move the contents of the EWTEam Client "dist" directory (index.html, Team/,
 Login/, uploads/ and lib/) into the base directory of your web-server (on our
 Linux Apache2 server, it was /var/www/).
 
 2. Ensure that the team machines have access to the web server.
 
-3. Edit the pc2v9.ini file in the lib/ directory, in the
-[client] section replace localhost with the pc2 server hostname/IP.
+3. Edit the EWTeam pc2v9.ini file (the one in the EWTeam "lib/" directory under
+the webserver base address, not the pc2v9.ini file in your PC^2 system) as 
+follows:  in the [client] section, replace "localhost" with the hostname (or 
+IP address) of your PC^2 server.  
+This allows the EWTeam Client to know where to find the PC^2 Server.
 
-4. In the lib/ directory, run the PC2JavaServer.jar using the command:
-java -jar PC2JavaServer.jar
 
-At this point the teams should be able view the Team Client
-using their browser.
+STARTING THE EWTeam CLIENT SERVICES
+-----------------------------------
+To start the EWTeam Client web services, go to the "lib/" directory of the EWTeam 
+installation (under the base directory of the web server) and run the 
+PC2JavaServer.jar using the command:
 
-todo: how to state how to find the URL for the team client. 
+      java -jar PC2JavaServer.jar
+      
+This starts the Java "bridge" which manages connections between the web server
+and the PC^2 Server.  At this point teams should be able to open a browser 
+window pointing to the Team Client.  The URL which teams should use will be the
+URL of your web server, with "XXXXX" appended.
+ 
 
 TROUBLESHOOTING
+---------------
 
-Note: If you are having troubles submitting files and/or clarifications,
-change the permissions on the Team, JAR and jar/file_uploads folders to
-be 777. The key part here is the write permission. The file submitted
-is copied into the file_uploads directory in the JAR folder and it needs
-to be able to write to it.
+--If you are having trouble submitting files and/or clarifications, check the
+permissions on the Team, JAR and jar/file_uploads folders under the web server.
+These files and folders must all allow write permission to the team. 
+(For example, when a team submits a run the submitted file is copied into 
+the "file_uploads" directory in the JAR folder; this folder needs
+to be writable by the team).
 
-todo: note the default source file size limit
-todo: document how/where to change it in the source/PHP
+--There is a built-in limit on the size of source files which may be submitted
+via the EWTeam Client.  Currently that limit is 512K.  (This value can be 
+changed by editing the file submitProblem.php.)
 
+--The EWTeam Client relies on having an up-to-date PHP5 module in the web server.
+If your PHP module is old it may cause problems; try updating it.  
+We have tested with PHP5 on an Ubuntu server; the command to install this on 
+Ubuntu is
+     sudo apt-get install libapache2-mod-php5
+
+--
 todo: describe problem with PHP include
 fix: 
 In: /etc/php5/apache2/php.ini
 ; http://php.net/allow-url-include
 allow_url_include = On
 
-todo: here is a solution to install PHP write it up.
-May need to install PHP5 on web server.
-ubuntu command to install php on a web server
-sudo apt-get install libapache2-mod-php5
+ 
 
 $Id$
