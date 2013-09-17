@@ -27,11 +27,11 @@ No need for Javadoc - this is not an API.
 	<property name="jar.name" value="${ewuname}.jar" />
 
 	<!-- set global properties for this build -->
-	<property name="src.dir" location="CodeFreeze/JAR" />
-	<property name="lib.dir" location="CodeFreeze/JAR" />
+	<property name="src.dir" location="src" />
+	<property name="lib.dir" location="lib" />
 	<property name="project.dir" location="." />
 	<property name="project.dir" location="." />
-	<property name="php.src.dir" location="CodeFreeze" />
+	<property name="php.src.dir" location="src/php" />
 	<property name="test.dir" location="test" />
 	<property name="build.dir" location="build" />
 	<property name="build.prod.dir" location="${build.dir}/prod" />
@@ -71,26 +71,27 @@ No need for Javadoc - this is not an API.
 
 		<!-- 
 		Fetch the SVN build version 
+		<exec executable="svnversion" outputproperty="repo.version">
+            <arg line="-n ."/>
+		</exec>
 		-->
+		
         <!-- XXX this requires svnkit-cli.jar & svnkit.jar in the project
         <java classname="org.tmatesoft.svn.cli.SVNVersion" dir="${basedir}" fork="true" outputproperty="repo.version"
             classpathref="project.classpath">
             <arg line="-n ."/>
         </java>
         -->
-		<exec executable="svnversion" outputproperty="repo.version">
-            <arg line="-n ."/>
-		</exec>
 
 		<!-- 
 		A hard coded version number 
+		-->
 		<tstamp>
 			<format property="millisecond" pattern="S" timezone="UTC" />
 		</tstamp>
 		<property name="repo.version" value="${millisecond}" />
-		-->
 		
-	 <tstamp>
+	    <tstamp>
 	        <format property="date" pattern="yyyyMMdd" timezone="UTC" />
 	    </tstamp>
 	    <tstamp>
