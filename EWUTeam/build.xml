@@ -185,8 +185,8 @@ No need for Javadoc - this is not an API.
 
 		<copy file="${src.dir}/index.html" todir="${staging.dir}"/>
 
-		<mkdir dir="${staging.dir}/uploads" />
-		<chmod dir="${staging.dir}/uploads" perm="777"/>
+		<mkdir dir="${staging.dist.dir}/uploads" />
+		<chmod dir="${staging.dist.dir}/uploads" perm="777"/>
 
 		<copy file="${build.dir}/VERSION.EWTEAM" todir="${staging.dir}"/>
 		

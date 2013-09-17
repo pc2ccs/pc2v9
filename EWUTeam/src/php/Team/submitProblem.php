@@ -14,7 +14,7 @@
 		//echo "Upload: " . $_FILES["file"]["name"]."<br>";
 		//echo "Stored in " . $_FILES["file"]["tmp_name"]."<br>";
 		
-		$fname = realpath("../JAR/file_uploads").'/'.$_SESSION["cid"].time().".".$_FILES["file"]["name"];
+		$fname = realpath("../uploads").'/'.$_SESSION["cid"].time().".".$_FILES["file"]["name"];
 		//echo $fname;
 		move_uploaded_file($_FILES["file"]["tmp_name"], $fname);
 

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <?php
 	session_start();
-	echo '<p style="font-weight:normal;text-decoration:underline;color:#f3f1eb;letter-spacing:3pt;word-spacing:5pt;font-size:36px;text-align:center;font-family:helvetica, sans-serif;line-height:1;">Team Interface:' . $_SESSION['username'] . '</p><hr/>';
 	//echo '<font color="white">UN: ' . $_SESSION['username'];
 	//echo '<br/>CID: ' . $_SESSION['cid'] . '</font>';
 
@@ -22,7 +21,9 @@
 
 <html lang="en">
 <head>
-<title>PC^2 Team Client</title>
+<title>PC^2 Team Client <?php
+echo " - " . $_SESSION['username'];
+?></title>
 <meta charset="utf-8" />
 
 <link href="tab_style/style.css" rel="stylesheet" type="text/css" />

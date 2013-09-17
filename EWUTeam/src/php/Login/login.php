@@ -54,15 +54,12 @@
 	<table style="color:#f3f1eb">
 	     <tr><td>Username:</td><td> <input type="text" maxlength="10" id="username" name="username" style="width:150" required /></td></tr>
             <tr><td>Password:</td> <td><input type="password" maxlength="20" name="password" style="width:150" required /></td></tr>				
-            <tr><td/><td><input type="submit"  style="width:75" onclick="" value="Submit"/>
+            <tr><td/><td><input type="submit"  style="width:75" onclick="" value="Login"/>
 	        	    <input type="button"  style="width:75" onclick="reset()" value="Clear"/></td></tr>
 	</table>
 	</form>
 	<div style="color:#ffffff"><?php echo $error; ?></div>
 </div>
-
-<input type="button" value="Testing" onclick="location.href='../Test/testMain.php'" />
-<input type="button" value="Scoreboard" onclick="location.href='../Team/ScoreboardMain.php'" />
 
 <script>
 	function reset() {

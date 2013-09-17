@@ -172,7 +172,7 @@ public class ServerInterface
 	public synchronized void submitProblem(String teamKey, String problemName,
 		String language, String mainFileName, String[] otherFiles) throws NotLoggedInException
 	{
-		String directory = "file_uploads/";
+		String directory = "../uploads/";
 
 		//Convert primitive parameters to needed objects
 		try
