@@ -128,11 +128,12 @@ No need for Javadoc - this is not an API.
 	<target name="jar" depends="compile,version" description="create distribution jar ">
 		<jar jarfile="${jar.path}" basedir="${build.prod.dir}">
 			<manifest>
+				<attribute name="Main-Class" value="PC2JavaMiniserver" />
+				<attribute name="Class-Path" value="pc2.jar JavaBridge.jar" />
 				<attribute name="Specification-Version" value="${version}" />
 				<attribute name="Implementation-Title" value="EWU Web Team Client" />
 				<attribute name="Implementation-Version" value="${repo.version}" />
 				<attribute name="Built-On" value="${timestamp.english}" />
-				<!--  <attribute name="Main-Class" value="${main.class}" /GT	-->
 			</manifest>
 		</jar>
 		<echo message="created ${jar.path} Version ${version} build number ${repo.version}"/>
