@@ -49,14 +49,16 @@ conflict with operation of both the EWTeam Client and with the PC^2 scoreboard.
 
 INSTALLING THE EWTEAM CLIENT
 ----------------------------
-1. Move the contents of the EWTEam Client "dist" directory (index.html, Team/,
-Login/, uploads/ and lib/) into the base directory of your web-server (on our
-Linux Apache2 server, it was /var/www/).
+1. Determine the document root directory on your web server (on our Linux
+Apache2 server it was /var/www, for example).
+ 
+2. Create a directory named "pc2team" beneath the web server document root.
 
-2. Ensure that the team machines have access to the web server.
+3. Copy the contents of the EWTEam Client "dist" directory (index.html, Team/,
+Login/, uploads/ and lib/) into the pc2team directory beneath the document root.
 
-3. Edit the EWTeam pc2v9.ini file (the one in the EWTeam "lib/" directory under
-the webserver base address, not the pc2v9.ini file in your PC^2 system) as 
+4. Edit the EWTeam pc2v9.ini file (the one in the EWTeam "lib/" directory under
+the pc2team directory, not the pc2v9.ini file in your PC^2 system) as 
 follows:  in the [client] section, replace "localhost" with the hostname (or 
 IP address) of your PC^2 server.  
 This allows the EWTeam Client to know where to find the PC^2 Server.
@@ -65,7 +67,7 @@ This allows the EWTeam Client to know where to find the PC^2 Server.
 STARTING THE EWTeam CLIENT SERVICES
 -----------------------------------
 To start the EWTeam Client web services, go to the "lib/" directory of the EWTeam 
-installation (under the base directory of the web server) and run the 
+installation (under the pc2team directory of the web server) and run the 
 PC2JavaServer.jar using the command:
 
       java -jar PC2JavaServer.jar
@@ -73,7 +75,7 @@ PC2JavaServer.jar using the command:
 This starts the Java "bridge" which manages connections between the web server
 and the PC^2 Server.  At this point teams should be able to open a browser 
 window pointing to the Team Client.  The URL which teams should use will be the
-URL of your web server, with "XXXXX" appended.
+URL of your web server, with "pc2team" appended.
  
 
 TROUBLESHOOTING
@@ -96,13 +98,15 @@ We have tested with PHP5 on an Ubuntu server; the command to install this on
 Ubuntu is
      sudo apt-get install libapache2-mod-php5
 
---
-todo: describe problem with PHP include
-fix: 
-In: /etc/php5/apache2/php.ini
-; http://php.net/allow-url-include
+--The EWTeam Client currently relies on a PHP capability called 
+"allow_URL_include".  If you see an error message in a team browswer referring
+to a problem with this, you may need to go into your PHP configuration and
+enable allow_url_include.  For example, on our system we edit 
+/etc/php5/apache2/php.ini to contain the line
+
 allow_url_include = On
 
- 
+For further information, see http://php.net/allow-url-include
+
 
 $Id$
