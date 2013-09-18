@@ -50,4 +50,8 @@ public class LanguageImplementation implements ILanguage {
     public int hashCode() {
         return elementId.toString().hashCode();
     }
+    
+    public ElementId getElementId() {
+        return elementId;
+    }
 }

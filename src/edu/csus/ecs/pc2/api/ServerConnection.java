@@ -6,7 +6,10 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.implementation.Contest;
+import edu.csus.ecs.pc2.api.implementation.LanguageImplementation;
+import edu.csus.ecs.pc2.api.implementation.ProblemImplementation;
 import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -32,12 +35,12 @@ import edu.csus.ecs.pc2.core.security.Permission;
 // $HeadURL$
 public class ServerConnection {
 
-    private InternalController controller;
-
-    private IInternalContest internalContest;
-
+    protected IInternalController controller;
+    
+    protected IInternalContest internalContest;
+    
     private Contest contest = null;
-
+    
     /**
      * Construct a local {@link ServerConnection} object which can subsequently be used to connect to a currently-running PC<sup>2</sup> server.
      * 
@@ -83,19 +86,36 @@ public class ServerConnection {
      */
     public IContest login(String login, String password) throws LoginFailureException {
 
+        /**
+         * Was contest overriden/set rather than having to login to
+         * instanciate the contest?
+         */
+        boolean overrideContestUsed = false;
+        
         if (contest != null) {
             throw new LoginFailureException("Already logged in as: " + contest.getMyClient().getLoginName());
         }
-        internalContest = new InternalContest();
-        controller = new InternalController(internalContest);
+        if (internalContest == null){
+            internalContest = new InternalContest();
+        } else {
+            overrideContestUsed = true;
+        }
+            
+        if (controller == null){
+            controller = new InternalController(internalContest);
+        }
 
         controller.setUsingGUI(false);
-        controller.setUsingMainUI(false);
+        if (controller instanceof InternalController){
+            ((InternalController)controller).setUsingMainUI(false);
+        }
         controller.setClientAutoShutdown(false);
 
         try {
             controller.start(new String[0]);
-            internalContest = controller.clientLogin(internalContest, login, password);
+            if (!overrideContestUsed){
+                internalContest = controller.clientLogin(internalContest, login, password);
+            }
 
             contest = new Contest(internalContest, controller, controller.getLog());
             contest.addConnectionListener(new ConnectionEventListener());
@@ -205,23 +225,29 @@ public class ServerConnection {
             }
         }
 
-        Problem submittedProblem = null;
-        Language submittedLanguage = null;
-
-        Problem[] problems = internalContest.getProblems();
-        for (Problem problem2 : problems) {
-            if (problem2.getDisplayName().equals(problem.getName())) {
-                submittedProblem = problem2;
-            }
-        }
-
-        Language[] languages = internalContest.getLanguages();
-        for (Language language2 : languages) {
-            if (language2.getDisplayName().equals(language.getName())) {
-                submittedLanguage = language2;
-            }
-        }
-
+        ProblemImplementation problemImplementation = (ProblemImplementation) problem;
+        Problem submittedProblem = internalContest.getProblem(problemImplementation.getElementId());
+        
+        LanguageImplementation languageImplementation = (LanguageImplementation) language;
+        Language submittedLanguage = internalContest.getLanguage(languageImplementation.getElementId());
+        
+//        Problem submittedProblem = null;
+//        Language submittedLanguage = null;
+//
+//        Problem[] problems = internalContest.getProblems();
+//        for (Problem problem2 : problems) {
+//            if (problem2.getDisplayName().equals(problem.getName())) {
+//                submittedProblem = problem2;
+//            }
+//        }
+//
+//        Language[] languages = internalContest.getLanguages();
+//        for (Language language2 : languages) {
+//            if (language2.getDisplayName().equals(language.getName())) {
+//                submittedLanguage = language2;
+//            }
+//        }
+        
         if (submittedProblem == null) {
             throw new Exception("Could not find any problem matching: '" + problem.getName());
         }

@@ -155,4 +155,7 @@ public class ProblemImplementation implements IProblem {
         return elementId.toString().hashCode();
     }
     
+    public ElementId getElementId() {
+        return elementId;
+    }
 }
