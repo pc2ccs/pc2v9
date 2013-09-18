@@ -1,4 +1,4 @@
-EWU Team Client Guide
+EWTeam Client Guide
 ===========================
 
 OVERVIEW
@@ -32,7 +32,8 @@ Before attempting to setup and use the EWTeam Client, install and
 configure a complete PC^2 system.  This includes downloading the PC^2 code, 
 starting a PC^2 Server, starting a PC^2 Admin and using it to configure the 
 contest, and starting one or more PC^2 Judges.  See the PC^2 Administrator's 
-Guide for details.
+Guide for details. Note that the PC^2 installation does not need to be on the
+same machine as the web server which will support the EWTeam Client. 
 
   IMPORTANT NOTE:  In order to support the EWTeam Client, the PC^2 configuration 
 must include a scoreboard account explicitly named "scoreboard2".  This 
@@ -54,19 +55,20 @@ Apache2 server it was /var/www, for example).
  
 2. Create a directory named "pc2team" beneath the web server document root.
 
-3. Copy the contents of the EWTEam Client "dist" directory (index.html, Team/,
+3. Copy the contents of the EWTeam Client "dist" directory (index.html, Team/,
 Login/, uploads/ and lib/) into the pc2team directory beneath the document root.
 
 4. Edit the EWTeam pc2v9.ini file (the one in the EWTeam "lib/" directory under
 the pc2team directory in the web server, not the pc2v9.ini file in your PC^2 
-system) as follows:  in the [client] section, 
+system) as follows: 
   (a) in the [client] section, replace "localhost" with the hostname (or IP 
     address) of your PC^2 server. This allows the EWTeam Client to know where to 
     find the PC^2 Server.
   (b) in the [client] section, add an entry of the form
        scoreboard2password=xxxx
     where xxxx is the password you assigned to the "scoreboard2" account in the
-    PC^2 Administrator (see the previous section). 
+    PC^2 Administrator (see the previous section).  This allows the EWTeam 
+    Client to login to the server to obtain contest standings.
 
 
 STARTING THE EWTeam CLIENT SERVICES
@@ -87,14 +89,13 @@ TROUBLESHOOTING
 ---------------
 
 --If you are having trouble submitting files and/or clarifications, check the
-permissions on the Team, JAR and jar/file_uploads folders under the web server.
-These files and folders must all allow write permission to the team. 
+permissions on the "uploads" folder under the pc2team folder on the web server.
+This folder must all allow write permission to the web server. 
 (For example, when a team submits a run the submitted file is copied into 
-the "file_uploads" directory in the JAR folder; this folder needs
-to be writable by the team).
+the "uploads" directory; this folder needs to be writable.)
 
---There is a built-in limit on the size of source files which may be submitted
-via the EWTeam Client.  Currently that limit is 512K.  (This value can be 
+--The EWTeam Client has a limit on the size of source files which may be 
+submitted; currently that limit is 512K.  (This value can be 
 changed by editing the file submitProblem.php.)
 
 --The EWTeam Client relies on having an up-to-date PHP5 module in the web server.
