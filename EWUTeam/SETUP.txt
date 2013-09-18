@@ -98,15 +98,5 @@ We have tested with PHP5 on an Ubuntu server; the command to install this on
 Ubuntu is
      sudo apt-get install libapache2-mod-php5
 
---The EWTeam Client currently relies on a PHP capability called 
-"allow_URL_include".  If you see an error message in a team browswer referring
-to a problem with this, you may need to go into your PHP configuration and
-enable allow_url_include.  For example, on our system we edit 
-/etc/php5/apache2/php.ini to contain the line
-
-allow_url_include = On
-
-For further information, see http://php.net/allow-url-include
-
 
 $Id$
