@@ -58,10 +58,15 @@ Apache2 server it was /var/www, for example).
 Login/, uploads/ and lib/) into the pc2team directory beneath the document root.
 
 4. Edit the EWTeam pc2v9.ini file (the one in the EWTeam "lib/" directory under
-the pc2team directory, not the pc2v9.ini file in your PC^2 system) as 
-follows:  in the [client] section, replace "localhost" with the hostname (or 
-IP address) of your PC^2 server.  
-This allows the EWTeam Client to know where to find the PC^2 Server.
+the pc2team directory in the web server, not the pc2v9.ini file in your PC^2 
+system) as follows:  in the [client] section, 
+  (a) in the [client] section, replace "localhost" with the hostname (or IP 
+    address) of your PC^2 server. This allows the EWTeam Client to know where to 
+    find the PC^2 Server.
+  (b) in the [client] section, add an entry of the form
+       scoreboard2password=xxxx
+    where xxxx is the password you assigned to the "scoreboard2" account in the
+    PC^2 Administrator (see the previous section). 
 
 
 STARTING THE EWTeam CLIENT SERVICES
