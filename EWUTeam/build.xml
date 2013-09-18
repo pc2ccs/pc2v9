@@ -162,7 +162,7 @@ No need for Javadoc - this is not an API.
 		<copy file="${src.dir}/pc2v9.ini" todir="${dist.lib.dir}"/>
 		<copy todir="${dist.lib.dir}"> 
 		    <fileset dir="${lib.dir}"> 
-		       <include name="*.jar"/>
+		       <include name="*"/>
 		    </fileset>
 		</copy>
 

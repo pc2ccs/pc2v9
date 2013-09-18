@@ -1,6 +1,6 @@
 <?php
 	session_start();
-	require_once("http://localhost:3306/JavaBridge/java.Java.inc");
+	include("../lib/Java.inc");
 	
 	$server = java("ServerInterface")->getInstance();
 	

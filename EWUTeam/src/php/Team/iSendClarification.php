@@ -3,7 +3,7 @@
 
 	if(is_resource(@fsockopen('localhost', 3306))) 
 	{
-		include("http://localhost:3306/JavaBridge/java/Java.inc");
+		include("../lib/Java.inc");
 		$server = java("ServerInterface")->getInstance();
 
 		try {
