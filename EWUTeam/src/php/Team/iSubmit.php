@@ -30,7 +30,7 @@
 
 <?php 
 	if(isset($_SESSION['error'])) {
-		echo '<div style="color: red;font-style:italic;">Error: File size exceedes limit (20KB).</div>'; 
+		echo '<div style="color: red;font-style:italic;">Error: File size exceeds size limit of 512K.</div>'; 
 		unset($_SESSION['error']);
 	}
 ?>
