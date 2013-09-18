@@ -26,9 +26,9 @@ a web server running PHP (the installation process, below, includes inserting
 PHP modules into the web server for access by the browser).
 
 
-PRIOR PREPARATION
------------------
-Before attempting to setup and use the EWTeam Client, install and 
+PC^2 SETUP
+----------
+Before attempting to setup and use the EWTeam Client, you should install and 
 configure a complete PC^2 system.  This includes downloading the PC^2 code, 
 starting a PC^2 Server, starting a PC^2 Admin and using it to configure the 
 contest, and starting one or more PC^2 Judges.  See the PC^2 Administrator's 
@@ -58,9 +58,8 @@ Apache2 server it was /var/www, for example).
 3. Copy the contents of the EWTeam Client "dist" directory (index.html, Team/,
 Login/, uploads/ and lib/) into the pc2team directory beneath the document root.
 
-4. Edit the EWTeam pc2v9.ini file (the one in the EWTeam "lib/" directory under
-the pc2team directory in the web server, not the pc2v9.ini file in your PC^2 
-system) as follows: 
+4. Edit the pc2v9.ini file in the EWTeam "lib/" directory (not the pc2v9.ini 
+file in your PC^2 system) as follows: 
   (a) in the [client] section, replace "localhost" with the hostname (or IP 
     address) of your PC^2 server. This allows the EWTeam Client to know where to 
     find the PC^2 Server.
