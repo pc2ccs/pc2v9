@@ -46,7 +46,7 @@ public class ServerInterface
         try {
             Properties pc2Properties = new Properties();
             pc2Properties.load(new FileInputStream("pc2v9.ini"));
-            scoreboardPassword = (String) pc2Properties.getProperty("client.scoreboard2password");
+            scoreboardPassword = (String) pc2Properties.getProperty("scoreboard2password");
             pc2Properties = null;
         } catch (Exception e) {
             throw new RuntimeException("Error loading pc2v9.ini "+e.getMessage(), e);
