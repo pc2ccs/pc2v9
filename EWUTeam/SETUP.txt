@@ -97,6 +97,13 @@ If your PHP module is old it may cause problems; try updating it.
 We have tested with PHP5 on an Ubuntu server; the command to install this on 
 Ubuntu is
      sudo apt-get install libapache2-mod-php5
+     
+--The current EWTeam Client implementation has several places where error 
+diagnostics are displayed on the Java console (the console where PC2JavaServer.jar
+was run) rather than being forwarded back to the team web page.  If you are 
+having trouble figuring out why something isn't working, be sure to look at the
+Java console for additional hints.
+
 
 
 $Id$
