@@ -57,11 +57,14 @@ function refreshScoreBoard() {
 <body link="#ffffff" vlink="#ffffff" alink="#ffffff">
 <center>
 
-
-<div style=" width: 450px; padding: 1px;">
-	<a href="http://www.ewu.edu/"><img style="background: white; border:0;" src="../Team/images/EWU_logo.gif" WIDTH=auto HEIGHT=75></a>
-	<a href="http://www.ecs.csus.edu/pc2/"><img style="background: white; border:0;" src="../Team/images/sac_state.png" WIDTH=auto HEIGHT=75 href="http://www.ecs.csus.edu/pc2/"></a>
-	<a href="http://icpc.baylor.edu/"><img style="background: white; border:0;" src="../Team/images/acm-icpc-logo.png" WIDTH=auto HEIGHT=75></a>
+<div style=" width: 750px; padding: 1px; ">
+	<a href="http://www.ecs.csus.edu/pc2/"><img style="background: white; border:0;" src="../Team/images/sac_state.png" href="http://www.ecs.csus.edu/pc2/"></a>
+	&nbsp;	
+	&nbsp;	
+	<a href="http://www.ewu.edu/"><img style="background: white; border:0;" src="../Team/images/EWU.png" ></a>
+	&nbsp;	
+	&nbsp;	
+	<a href="http://icpc.baylor.edu/"><img style="background: white; border:0;" src="../Team/images/acm-icpc-logo.png" ></a>
 </div>
 
 

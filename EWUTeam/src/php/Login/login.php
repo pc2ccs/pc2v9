@@ -37,17 +37,19 @@
 
 <center>
 <body onload="setFocus()">
-<div id="menu" style="width:500px;">
+<div id="menu" style="width:750px;">
        <h1 style="color:#f3f1eb; font-size:48px;font-family:sans-serif; line-height: 36px;" >PC^2 Login Page</h1><hr />
 </div>
 
 <div style="padding-bottom:5px;">
-	<div style=" width: 450px; padding: 5px">
-		<a href="http://www.ewu.edu/"><img style="background: white; border:0;" src="../Team/images/EWU.png" WIDTH=55 HEIGHT=55></a>
-		<a href="http://www.ecs.csus.edu/pc2/"><img style="background: white; border:0;" src="../Team/images/sac_state.png" WIDTH=55 HEIGHT=55 href="http://www.ecs.csus.edu/pc2/"></a>
-		<a href="http://icpc.baylor.edu/"><img style="background: white; border:0;" src="../Team/images/acm-icpc-logo.png" WIDTH=auto HEIGHT=55></a>
+	<div style=" width: 750px; padding: 5px">
+		<a href="http://www.ecs.csus.edu/pc2/"><img style="background: white; border:0;" src="../Team/images/sac_state.png" href="http://www.ecs.csus.edu/pc2/"></a>
+		&nbsp;&nbsp;
+		<a href="http://www.ewu.edu/"><img style="background: white; border:0;" src="../Team/images/EWU_logo.gif" ></a>
+		&nbsp;&nbsp;
+		<a href="http://icpc.baylor.edu/"><img style="background: white; border:0;" src="../Team/images/acm-icpc-logo.png" ></a>
 	</div>
-</div><hr style="width:500px;"/>
+</div><hr style="width:750px;"/>
 
 <div style="border:groove; width:275px; height:auto; padding:10px; border-color:white;">
 	<form name="input" method="post">
