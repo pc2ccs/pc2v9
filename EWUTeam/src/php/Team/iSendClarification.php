@@ -30,7 +30,6 @@
     	<td><b>Problem:<b>
 	<select required id="clarProbs" name="clarProbs">
        	<option value="">Choose a problem</option>
-		<option>General</option>
 		<?php foreach ($JavaProblems as $value) { echo "<option>".$value->getName()."</option>"; } ?>
         </select></td></tr>
     
