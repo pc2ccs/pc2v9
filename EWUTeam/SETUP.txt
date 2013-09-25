@@ -35,6 +35,9 @@ contest, and starting one or more PC^2 Judges.  See the PC^2 Administrator's
 Guide for details. Note that the PC^2 installation does not need to be on the
 same machine as the web server which will support the EWTeam Client. 
 
+  IMPORTANT NOTE:  the EWTeam Client requires using PC^2 version 9.3 Build 2696
+    (or higher).   
+
   IMPORTANT NOTE:  In order to support the EWTeam Client, the PC^2 configuration 
 must include a scoreboard account explicitly named "scoreboard2".  This 
 account is used by the EWTeam Client to access current contest standings for the
