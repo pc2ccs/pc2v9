@@ -7,8 +7,10 @@ The EWTeam Client project provides a web-based Team Client which interfaces to
 a PC^2 Server without the need to install the PC^2 Team module on a team machine.
 Contest teams use a standard web browser to access web services which in turn
 link to an installed PC^2 Server.  The EWTeam Client provides all the services
-normally provided by the standard PC^2 Team Client, EXCEPT that it does not
-support the "Test Run" facility.
+normally provided by the standard PC^2 Team Client, EXCEPT:
+  --it does not support the "Test Run" facility.
+  --it does not support sending Clarifications to ALL teams (Clarifications can
+      be sent to any individual team, just not to all teams at once).
 
 The EWTeam Client project was implemented by a Computer Science Senior Project
 Team at Eastern Washington University under the direction of Professor Tom Capaul.
