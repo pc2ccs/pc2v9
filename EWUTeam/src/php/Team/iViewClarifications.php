@@ -63,10 +63,16 @@ $(function() {
 			echo "<td>".$value->getTeam()->getDisplayName()."</td>";
 			echo "<td>".$value->getNumber()."</td>";
 			echo "<td>".$value->getSubmissionTime()."</td>";
-			if($value->isAnswered())
-				echo "<td>Answered</td>";
-			else
-				echo "<td>Broadcast</td>";
+
+			if ($value->isAnswered() != "") { 
+				if ($value->isSendToAll() != "")
+					echo "<td>Broadcast</td>";
+				else
+					echo "<td>Answered</td>";
+			}
+			else 
+				echo "<td>Not Answered</td>";
+
 			echo "<td>".$value->getProblem()->getName()."</td>";
 			echo "<td>".$value->getQuestion()."</td>";
 			echo "<td>".$value->getAnswer()."</td>";
