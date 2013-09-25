@@ -4,6 +4,7 @@
     "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
 
 <!--
+$HeadURL$
 
   Checkstyle configuration that checks the sun coding conventions from:
 
@@ -28,6 +29,7 @@
 
   Finally, it is worth reading the documentation.
 
+$Log$
 -->
 
 <module name="Checker">
@@ -176,8 +178,9 @@
         <module name="FinalClass"/>
         <module name="HideUtilityClassConstructor"/>
         <module name="InterfaceIsType"/>
-        <module name="VisibilityModifier"/>
-
+        <module name="VisibilityModifier">
+    		<property name="protectedAllowed" value="true"/>
+		</module>
 
         <!-- Miscellaneous other checks.                   -->
         <!-- See http://checkstyle.sf.net/config_misc.html -->

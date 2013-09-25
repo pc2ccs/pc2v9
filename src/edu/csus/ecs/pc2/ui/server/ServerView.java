@@ -443,9 +443,15 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ConnectionsPane connectionsPane = new ConnectionsPane();
         addUIPlugin(getMainTabbedPane(), "Connections", connectionsPane);
-        
-        EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
-        addUIPlugin(getMainTabbedPane(), "Event Feed Server", eventFeedServerPane);
+
+        if (Utilities.isDebugMode()) {
+            try {
+                EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
+                addUIPlugin(getMainTabbedPane(), "Event Feed Server", eventFeedServerPane);
+            } catch (Exception e) {
+                logException(e);
+            }
+        }
         
         ExportDataPane exportPane = new ExportDataPane();
         addUIPlugin(getMainTabbedPane(), "Export", exportPane);
@@ -475,29 +481,25 @@ public class ServerView extends JFrame implements UIPlugin {
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
 
-        try {
-            PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
-            addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
-        } catch (Exception e) {
-            logException(e);
-        }
-
         if (Utilities.isDebugMode()) {
             try {
+                PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
+                addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
+                
                 PluginLoadPane pane = new PluginLoadPane();
                 pane.setParentTabbedPane(getMainTabbedPane());
                 addUIPlugin(getMainTabbedPane(), "Plugin Load", pane);
+                
+                ProfilesPane profilePane = new ProfilesPane();
+                addUIPlugin(getMainTabbedPane(), "Profiles", profilePane);
+                
+                PlaybackPane playbackPane = new PlaybackPane();
+                addUIPlugin(getMainTabbedPane(), "Replay", playbackPane);
             } catch (Exception e) {
                 logException(e);
             }
         }            
 
-        ProfilesPane profilePane = new ProfilesPane();
-        addUIPlugin(getMainTabbedPane(), "Profiles", profilePane);
-
-        PlaybackPane playbackPane = new PlaybackPane();
-        addUIPlugin(getMainTabbedPane(), "Replay", playbackPane);
-        
         ReportPane reportPane = new ReportPane();
         addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
 
@@ -622,7 +624,7 @@ public class ServerView extends JFrame implements UIPlugin {
             messageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.getClickCount() > 1){
-                        System.out.println("debug 22 profile is "+model.getProfile().getName());
+//                        System.out.println("debug profile is "+model.getProfile().getName());
                         updateProfileLabel();
                     }
                 }

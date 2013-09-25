@@ -222,11 +222,17 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 AccountsPane accountsPane = new AccountsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsPane);
                 
-                CategoriesPane categoriesPane = new CategoriesPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Categories", categoriesPane);
-
-                ContestPreloadPane contestPreloadPane = new ContestPreloadPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Contests", contestPreloadPane);
+                if (Utilities.isDebugMode()) {
+                    try {
+                        CategoriesPane categoriesPane = new CategoriesPane();
+                        addUIPlugin(getConfigureContestTabbedPane(), "Clar Categories", categoriesPane);
+                        
+                        ContestPreloadPane contestPreloadPane = new ContestPreloadPane();
+                        addUIPlugin(getConfigureContestTabbedPane(), "Contests", contestPreloadPane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
                 
                 AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Auto Judge", autoJudgesPane);
@@ -237,8 +243,15 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ICPCLoadPane icpcPane = new ICPCLoadPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "ICPC", icpcPane);
                 
-                ImportDataPane importDataPane = new ImportDataPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Import CCS", importDataPane);
+                
+                if (Utilities.isDebugMode()) {
+                    try {
+                        ImportDataPane importDataPane = new ImportDataPane();
+                        addUIPlugin(getConfigureContestTabbedPane(), "Import CCS", importDataPane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
 
                 JudgementsPane judgementsPanel = new JudgementsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Judgements", judgementsPanel);
@@ -254,8 +267,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 // addUIPlugin(getConfigureContestTabbedPane(), "End of Contest Control", eocNotificationsPane);
 
                 if (Utilities.isDebugMode()) {
-                    PacketExplorerPane explorerPane = new PacketExplorerPane();
-                    addUIPlugin(getConfigureContestTabbedPane(), "Packets", explorerPane);
+                    try {
+                        PacketExplorerPane explorerPane = new PacketExplorerPane();
+                        addUIPlugin(getConfigureContestTabbedPane(), "Packets", explorerPane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
                 }
 
                 ProblemsPane problemsPane = new ProblemsPane();
@@ -290,11 +307,13 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
 
-                try {
-                    EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
-                    addUIPlugin(getRunContestTabbedPane(), "Event Feed Server", eventFeedServerPane);
-                } catch (Exception e) {
-                    logException(e);
+                if (Utilities.isDebugMode()) {
+                    try {
+                        EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
+                        addUIPlugin(getRunContestTabbedPane(), "Event Feed Server", eventFeedServerPane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
                 }
                 
 //                EventFeedsPane eventFeedsPane = new EventFeedsPane();
@@ -303,47 +322,52 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ExportDataPane exportPane = new ExportDataPane();
                 addUIPlugin(getRunContestTabbedPane(), "Export", exportPane);
                 
-                FinalizePane finalizePane = new FinalizePane();
-                addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
+                if (Utilities.isDebugMode()) {
+                    try {
+                        FinalizePane finalizePane = new FinalizePane();
+                        addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
 
                 LoginsPane loginsPane = new LoginsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
-                
-                
-                try {
-                    MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
-                    addUIPlugin(getRunContestTabbedPane(), "Messages", messageMonitorPane);
-                } catch (Exception e) {
-                    logException(e);
+             
+                if (Utilities.isDebugMode()) {
+                    try {
+                        MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
+                        addUIPlugin(getRunContestTabbedPane(), "Messages", messageMonitorPane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
                 }
+
 
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
 
-                try {
-                    PacketMonitorPane pane = new PacketMonitorPane();
-                    addUIPlugin(getRunContestTabbedPane(), "Packets", pane);
-                } catch (Exception e) {
-                    logException(e);
-                }
-                
-                try {
-                    PlaybackPane playbackPane = new PlaybackPane();
-                    addUIPlugin(getRunContestTabbedPane(), "Replay", playbackPane);
-                } catch (Exception e) {
-                    logException(e);
-                }
-
                 if (Utilities.isDebugMode()) {
                     try {
+                        PacketMonitorPane pane = new PacketMonitorPane();
+                        addUIPlugin(getRunContestTabbedPane(), "Packets", pane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
+                
+                if (Utilities.isDebugMode()) {
+                    try {
+                        PlaybackPane playbackPane = new PlaybackPane();
+                        
+                        addUIPlugin(getRunContestTabbedPane(), "Replay", playbackPane);
                         PluginLoadPane pane = new PluginLoadPane();
                         pane.setParentTabbedPane(getRunContestTabbedPane());
                         addUIPlugin(getRunContestTabbedPane(), "Plugin Load", pane);
                     } catch (Exception e) {
                         logException(e);
                     }
-
                 }
 
                 ReportPane reportPane = new ReportPane();
