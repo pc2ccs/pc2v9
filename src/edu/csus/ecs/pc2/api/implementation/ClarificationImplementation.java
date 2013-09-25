@@ -36,6 +36,8 @@ public class ClarificationImplementation implements IClarification {
 
     private long submissionTime;
 
+    private boolean sendToAll;
+
     public ClarificationImplementation(Clarification clarification, IInternalContest contest, IInternalController controller) {
 
         answered = clarification.isAnswered();
@@ -50,6 +52,7 @@ public class ClarificationImplementation implements IClarification {
         number = clarification.getNumber();
         siteNumber = clarification.getSiteNumber();
         submissionTime = clarification.getElapsedMins();
+        sendToAll = clarification.isSendToAll();
     }
 
     public String getAnswer() {
@@ -87,5 +90,8 @@ public class ClarificationImplementation implements IClarification {
     public ITeam getTeam() {
         return team;
     }
-
+    
+    public boolean isSendToAll() {
+        return sendToAll;
+    }
 }

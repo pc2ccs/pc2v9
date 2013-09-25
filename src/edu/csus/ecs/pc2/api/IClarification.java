@@ -101,4 +101,10 @@ public interface IClarification {
      */
     int hashCode();
 
+    /**
+     * Return a boolean indicating whether or not the clarification is sent to all teams.
+     * 
+     * @return True if the clarification is being sent to all teams, else false.
+     */
+    boolean isSendToAll();
 }

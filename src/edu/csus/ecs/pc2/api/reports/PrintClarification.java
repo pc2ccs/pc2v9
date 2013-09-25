@@ -33,6 +33,7 @@ public class PrintClarification extends APIAbstractTest {
                     print(" problem: " + clarification.getProblem().getName());
                     print(" " + APIPrintReports.trueFalseString(clarification.isAnswered(), "ANSWERED", "NOT ANSWERED"));
                     print(" " + APIPrintReports.trueFalseString(clarification.isDeleted(), "DELETED", ""));
+                    print(" " + APIPrintReports.trueFalseString(clarification.isSendToAll(), "SEND TO ALL", "NOT SENT TO ALL"));
                     println();
                     println("  Question: " + clarification.getQuestion());
                     if (clarification.isAnswered()) {
