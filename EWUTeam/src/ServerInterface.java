@@ -146,16 +146,14 @@ public class ServerInterface
 		IClarification[] myClarArray = null;
 
 		try {
-			IClient currentClient = getTeam(teamKey).getMyClient();
+			// IClient currentClient = getTeam(teamKey).getMyClient();
 			IClarification[] allClars = getTeam(teamKey).getContest().getClarifications();
 
 			ArrayList<IClarification> clars  = new ArrayList<IClarification>();
 
-			for(IClarification c : allClars) {
-				if(c.getTeam().equals(currentClient)) {
-					clars.add(c);
-				}
-			}
+            for (IClarification c : allClars) {
+                clars.add(c);
+            }
 
 			myClarArray = new IClarification[clars.size()];
 			return clars.toArray(myClarArray);
@@ -168,7 +166,7 @@ public class ServerInterface
 
 	//subit a problem to the contest
 	//the temporary filename passed in will be split between the first '.' in the file name.
-	//NOTE: be sure to add the correct directory to where file will be sotred (to new file name)
+	//NOTE: be sure to add the correct directory to where file will be sorted (to new file name)
 	public synchronized void submitProblem(String teamKey, String problemName,
 		String language, String mainFileName, String[] otherFiles) throws NotLoggedInException
 	{
@@ -231,6 +229,13 @@ public class ServerInterface
 			for(IProblem p : problems)
 				if(p.getName().equals(problemName))
 					return p;
+			
+			problems = getTeam(teamKey).getContest().getClarificationCategories();
+			for (IProblem p : problems) {
+			    if(p.getName().equals(problemName))
+                    return p;
+            }
+			
 		}catch(NotLoggedInException e){
 		}
 		throw new Exception("Problem not found");
