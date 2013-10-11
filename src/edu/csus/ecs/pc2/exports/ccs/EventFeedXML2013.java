@@ -557,11 +557,12 @@ public class EventFeedXML2013 {
 //        <run-id>78</run-id>
 //        <solved>True</solved>
         
-        String result = Judgement.ACRONYM_OTHER_CONTACT_STAFF;
+        String result = Judgement.ACRONYM_JUDGING_ERROR;
         if (testCase.isSolved()){
             result = Judgement.ACRONYM_ACCEPTED;
         }
         XMLUtilities.addChild(memento, "result", result);
+        XMLUtilities.addChild(memento, "run-id", run.getNumber());
         XMLUtilities.addChild(memento, "solved", titleCaseBoolean (testCase.isSolved()));
         
 //        <time>637.307141</time>
@@ -697,8 +698,8 @@ public class EventFeedXML2013 {
         String acronym = getAcronym(judgement);
         XMLUtilities.addChild(memento, "result", acronym);
         
-        XMLUtilities.addChild(memento, "status", getStatus(run.isJudged()));
         XMLUtilities.addChild(memento, "solved", run.isSolved());
+        XMLUtilities.addChild(memento, "status", getStatus(run.isJudged()));
         
 //        <team>50</team>
 //        <time>17938.976757</time>
@@ -955,8 +956,13 @@ public class EventFeedXML2013 {
     }
     
     private String getAcronym(Judgement judgement) {
+
+        if (Judgement.ACRONYM_OTHER_CONTACT_STAFF.equals(judgement.getAcronym())) {
+            return Judgement.ACRONYM_JUDGING_ERROR;
+        }
+
         if (judgement.getAcronym() == null || judgement.getAcronym().length() == 0) {
-            return Judgement.ACRONYM_OTHER_CONTACT_STAFF;
+            return Judgement.ACRONYM_JUDGING_ERROR;
         } else {
             return judgement.getAcronym();
         }

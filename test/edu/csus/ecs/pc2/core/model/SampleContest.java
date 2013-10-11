@@ -1017,6 +1017,16 @@ public class SampleContest {
         assignTeamGroup(contest, group2, teams.length / 2, teams.length - 1);
     }
 
+    public void assignTeamExternalIds(IInternalContest contest, int startId) {
+        Account[] teams = getTeamAccounts(contest);
+        for (Account account : teams) {
+            if (account.getExternalId() == null || "".equals(account.getExternalId())) {
+                account.setExternalId(Integer.toString(startId));
+                startId++;
+            }
+        }
+    }
+    
     /**
      * Quick load of contest with runs and groups.
      * 

@@ -262,8 +262,6 @@ public class EventFeedXML2013Test extends AbstractTestCase {
 
     public void testRegionElement() throws Exception {
 
-        // TODO tag: region
-
         if (debugMode){
             System.out.println(" -- testRegionElement ");
         }
@@ -307,8 +305,6 @@ public class EventFeedXML2013Test extends AbstractTestCase {
   
 
     public void testProblemElement() throws Exception {
-
-        // TODO tag: problem id="1" state="enabled">
 
         if (debugMode){
             System.out.println(" -- testProblemElement ");
@@ -390,11 +386,6 @@ public class EventFeedXML2013Test extends AbstractTestCase {
             }
             testForValidXML (xml);
         }
-    }
-
-    public void testTestcaseElement() throws Exception {
-
-        // TODO CCS tag: testcase run-id="1">
     }
 
     public void testFinalizedElement() throws Exception {
@@ -515,7 +506,7 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         
         int siteNumber = 2;
         
-         IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+        IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
         
         /**
          * Add random runs
@@ -524,6 +515,10 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
         
         createDataFilesForContest (testCaseContest);
+
+        sample.assignSampleGroups(testCaseContest, "Group Thing One", "Group Thing Two");
+        
+        sample.assignTeamExternalIds(testCaseContest, 424242);
         
         /**
          * Add Run Judgements.
@@ -536,16 +531,21 @@ public class EventFeedXML2013Test extends AbstractTestCase {
             System.out.println(" -- testTestCase ");
             System.out.println(xml);
         }
+
         
-        System.out.println("debug 22 xml ="+xml);
-        testForValidXML (xml);
+        testForValidXML(xml);
+
+        assertEquals ("No empty external-id tags expected", 0, countString(xml, "external-id/"));
+        
+        validateUsingSchema (xml);
+        assertEquals ("No empty OCS values expected", 0, countString(xml, "<result>OCS"));
         
         assertXMLCounts(xml, EventFeedXML2013.CONTEST_TAG, 1);
         assertXMLCounts(xml, EventFeedXML2013.INFO_TAG, 1);
         assertXMLCounts(xml, EventFeedXML2013.JUDGEMENT_TAG, 9);
         assertXMLCounts(xml, EventFeedXML2013.LANGUAGE_TAG, 18);
         assertXMLCounts(xml, EventFeedXML2013.PROBLEM_TAG, 18);
-        assertXMLCounts(xml, EventFeedXML2013.REGION_TAG, 22);
+        assertXMLCounts(xml, EventFeedXML2013.REGION_TAG, 24);
         assertXMLCounts(xml, EventFeedXML2013.RUN_TAG, 12);
         assertXMLCounts(xml, EventFeedXML2013.TEAM_TAG, 34); // both teams and team tag in submissions
         assertXMLCounts(xml, EventFeedXML2013.TESTCASE_TAG, 12 * 5); 
@@ -590,6 +590,24 @@ public class EventFeedXML2013Test extends AbstractTestCase {
 
     }
     
+    private void validateUsingSchema(String xml) throws Exception {
+
+        // TODO 623 TODO CCS get this schema validation  to work.
+        
+//        String prolog = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+//        String newXML = prolog + xml;
+//        String [] contents = {newXML};
+//        String filename ="testing.ef.xml";
+//        writeFileContents(filename, contents);
+//        System.out.println("Wrote xml to file "+filename);
+        
+        String schemaFileName = getSchemaFilename("event-feed-2013.xsd");
+        assertFileExists(schemaFileName);
+        
+//        testForValidXML (newXML, schemaFileName);
+        
+    }
+
     /**
      * A very simple
      * 
