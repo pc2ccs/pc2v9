@@ -1002,18 +1002,14 @@ public class SampleContest {
      * @throws FileSecurityException
      * @throws RunUnavailableException 
      */
-    public void quickLoad(IInternalContest contest) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
+    public IInternalContest quickLoad(IInternalContest contest, int numberOfRuns) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         SampleContest sample = new SampleContest();
 
         int siteNumber = 2;
-        contest = sample.createContest(siteNumber, 1, 22, 12, true);
-
-        /**
-         * Add random runs
-         */
-
-        Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
+        if (contest == null){
+            contest = sample.createContest(siteNumber, 1, 22, 12, true);
+        }
 
         addContestInfo(contest, "Contest Title");
 
@@ -1029,6 +1025,12 @@ public class SampleContest {
 
         assignTeamGroup(contest, group1, 0, teams.length / 2);
         assignTeamGroup(contest, group2, teams.length / 2, teams.length - 1);
+        
+        Run[] runs = sample.createRandomRuns(contest, numberOfRuns, true, true, true);
+        
+        for (Run run : runs) {
+            contest.addRun(run);
+        }
 
         /**
          * Add Run Judgements.
@@ -1047,6 +1049,7 @@ public class SampleContest {
             sample.addJudgement(contest, run, judgement, judgeId);
         }
 
+        return contest;
     }
 
     /**

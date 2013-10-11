@@ -67,6 +67,7 @@ import edu.csus.ecs.pc2.core.report.HTMLReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.IReportFile;
 import edu.csus.ecs.pc2.core.report.InternalDumpReport;
+import edu.csus.ecs.pc2.core.report.JSONReport;
 import edu.csus.ecs.pc2.core.report.JudgementNotificationsReport;
 import edu.csus.ecs.pc2.core.report.JudgementReport;
 import edu.csus.ecs.pc2.core.report.LanguagesReport;
@@ -261,6 +262,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new AccountsTSVReport());
         
         reports.add(new RunsTSVReport());
+
+        reports.add(new JSONReport());
         
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());

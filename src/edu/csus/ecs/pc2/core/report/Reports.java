@@ -119,6 +119,8 @@ public final class Reports {
         reports.add(new AccountsTSVReport());
         
         reports.add(new RunsTSVReport());
+        
+        reports.add(new JSONReport());
 
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 

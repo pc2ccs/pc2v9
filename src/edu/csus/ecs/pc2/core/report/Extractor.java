@@ -35,15 +35,17 @@ public class Extractor {
 
     private static final String PASSWORD_OPTION_STRING = "--password";
 
-    public static final String RUNS_TSV_FILENAME = "runs.tsv";
+    public static final String RUNS_OPTION = "runs";
 
-    public static final String SCOREBOARD_TSV_FILENAME = "scoreboard";
+    public static final String SCOREBOARD_OPTION = "scoreboard";
 
-    public static final String RESULTS_TSV_FILENAME = "results";
+    public static final String RESULTS_OPTION = "results";
 
-    public static final String SUBMISSION_TSV_FILENAME = "submission";
+    public static final String SUBMISSION_OPTION = "submission";
 
-    public static final String ACCOUNTS_TSV_FILENAME = "accounts";
+    public static final String ACCOUNTS_OPTION = "accounts";
+
+    public static final String JSON_OPTION = "standings.json";
     
     /**
      * Run extractor program.
@@ -310,14 +312,16 @@ public class Extractor {
         if (name == null || name.trim().length() == 0) {
             return null;
         }
-        if (SUBMISSION_TSV_FILENAME.equals(name) || RUNS_TSV_FILENAME.equals(name)) {
+        if (SUBMISSION_OPTION.equals(name) || RUNS_OPTION.equals(name)) {
             return new RunsTSVReport();
-        } else if (SCOREBOARD_TSV_FILENAME.equals(name)) {
+        } else if (SCOREBOARD_OPTION.equals(name)) {
             return new ScoreboardTSVReport();
-        } else if (ACCOUNTS_TSV_FILENAME.equals(name)) {
+        } else if (ACCOUNTS_OPTION.equals(name)) {
             return new AccountsTSVReportTeamAndJudges();
-        } else if (RESULTS_TSV_FILENAME.equals(name)) {
+        } else if (RESULTS_OPTION.equals(name)) {
             return new ResultsTSVReport();
+        } else if (JSON_OPTION.equals(name)) {
+            return new JSONReport();
         } else {
             return null;
         }
@@ -397,8 +401,8 @@ public class Extractor {
                 LOGIN_OPTION_STRING + " loginName - login name (or use -u)", //
                 PASSWORD_OPTION_STRING + " password - login password (or use -w) ", //
                 "", //
-                "CCS_reportname - one of the following " + SUBMISSION_TSV_FILENAME + ", " + SCOREBOARD_TSV_FILENAME + //
-                    ", " + RESULTS_TSV_FILENAME + ", " + ACCOUNTS_TSV_FILENAME, //
+                "CCS_reportname - one of the following " + SUBMISSION_OPTION + ", " + SCOREBOARD_OPTION + //
+                    ", " + RESULTS_OPTION + ", " + ACCOUNTS_OPTION + ", "+JSON_OPTION, //
                 "", //
                 "Example: Extractor " + LOGIN_OPTION_STRING + " scoreboard1 " + PASSWORD_OPTION_STRING + " scoreboard1 scoreboard", //
                 "", //
