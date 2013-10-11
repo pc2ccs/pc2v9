@@ -463,8 +463,6 @@ private void LogTeamsIn() {
 
 private void submitProblems() {
 
-
-
     for(int i=0; i<connectionId ; i++) {
         try {
             System.out.print("Submitting for team:"+i);
@@ -477,47 +475,4 @@ private void submitProblems() {
         
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }//end class:ServerInterface
-
-class ProblemNotFoundException extends Exception
-{
-    private static final long serialVersionUID = 1L;
-    
-    public ProblemNotFoundException()
-    {
-        super("Problem does not exist.");
-    }
-}
-
-class LanguageNotFoundException extends Exception
-{
-    private static final long serialVersionUID = 1L;
-    
-    public LanguageNotFoundException()
-    {
-        super("Language does not exist.");
-    }
-}
