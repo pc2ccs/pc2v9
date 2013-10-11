@@ -1,4 +1,12 @@
 <?php
+	if(version_compare(phpversion(),'4.3.0')>=0) { 
+	    if(!ereg('^SESS[0-9a-zA-Z]+$',$_REQUEST['SESSION_NAME'])) { 
+	        header("Location: ../index.html");
+	    } 
+	    output_add_rewrite_var('SESSION_NAME',$_REQUEST['SESSION_NAME']); 
+	    session_name($_REQUEST['SESSION_NAME']); 
+	}
+
 	session_start();
 	
 	if(is_resource(@fsockopen('localhost', 3306))) 
@@ -18,14 +26,16 @@
 ?>
 
 <html>
-
-<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+<script src="JQuery/jquery-1.9.1.js"></script>
+<script src="JQuery/jquery-ui.js"></script>
 
 <link href="table_sorter/css/theme.default.css" rel="stylesheet">
 <script type="text/javascript" src="table_sorter/js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript" src="table_sorter/js/jquery.tablesorter.widgets.min.js"></script>
 <script type="text/javascript">
+
+
+
 
 $(function() {
 	$( "#tabs" ).tabs();
@@ -36,6 +46,7 @@ $(function() {
 			sortRestart    : true
 	});
 });
+
 
 </script>
 
@@ -48,7 +59,6 @@ $(function() {
 		<th>Team</th>
 		<th>Clar Id</th>
 		<th>Time</th>
-		<th>Status</th>
 		<th style="text-align:left">Problem</th>
 		<th style="text-align:left">Question</th>
 		<th style="text-align:left">Answer</th>
@@ -63,19 +73,21 @@ $(function() {
 			echo "<td>".$value->getTeam()->getDisplayName()."</td>";
 			echo "<td>".$value->getNumber()."</td>";
 			echo "<td>".$value->getSubmissionTime()."</td>";
-
-			if ($value->isAnswered() != "") { 
-				if ($value->isSendToAll() != "")
-					echo "<td>Broadcast</td>";
-				else
-					echo "<td>Answered</td>";
-			}
-			else 
-				echo "<td>Not Answered</td>";
-
 			echo "<td>".$value->getProblem()->getName()."</td>";
-			echo "<td>".$value->getQuestion()."</td>";
-			echo "<td>".$value->getAnswer()."</td>";
+			
+			//escape
+			$question = $value->getQuestion();
+			$answer = $value->getAnswer();
+			
+			$question = str_replace("<","&lt",$question);
+			$answer = str_replace("<","&lt",$answer);
+			
+			echo "<td>".$question."</td>";
+			
+			if($answer == "")
+				echo "<td style = 'font-style:italic;'>Pending...</td>";
+			else
+				echo "<td>".$answer."</td>";
 			echo "</tr>";
 		}
 	?>

@@ -5,6 +5,9 @@ import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 
+// This class stores a collection of PC^2 ServerConnections in a Java HashMap.
+//	
+//	Standard HashMap errors are translated to PC^2 exceptions.
 /**
  * Manages/stores PC^2 ServerConnections.
  * 
@@ -73,4 +76,20 @@ public class ServerConnectionManager
 
 	
 	}//end method:removeTeam(...);
+	
+	public void clean()
+	{
+		for(ServerConnection sc : connections.values())
+		{
+			try
+			{
+				sc.logoff();
+			}
+			catch(NotLoggedInException e)
+			{
+				
+			}
+		}
+	}
 }//end class:ServerconnectionManager
+

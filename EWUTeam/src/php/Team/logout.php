@@ -1,8 +1,24 @@
 <?php 
+		if(version_compare(phpversion(),'4.3.0')>=0) { 
+  			  if(!ereg('^SESS[0-9a-zA-Z]+$',$_REQUEST['SESSION_NAME'])) { 
+  			      header("Location: ../index.html"); 
+ 			   } 
+  			  output_add_rewrite_var('SESSION_NAME',$_REQUEST['SESSION_NAME']); 
+  			  session_name($_REQUEST['SESSION_NAME']); 
+		}
+
 		session_start();
 		session_destroy();
 
-		include("../lib/Java.inc");
+		if(is_resource(@fsockopen('localhost', 3306))) {
+			include("../lib/Java.inc");
+		} else {
+			session_unset();
+			header("Location: ../Login/login.php");
+			exit();
+		}
+
+		//require_once("http://localhost:3306/JavaBridge/java/Java.inc");
 
 		$server = java("ServerInterface")->getInstance();
 		$error="";
@@ -12,8 +28,7 @@
 
 		} catch (JavaException $exception) {
 			$error = "Couldn't log out!";
-			echo $error;
+			header("Location: ../index.html");
+			//echo $error;
 		}
-
-
 ?>

@@ -1,77 +1,341 @@
-modified from code By Dan Harper
-
 * {
-margin: 0;
-padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 body {
-font-size: 75%;
-color: #000000;
-background: #595959;
-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-line-height: 1.0em;
-min-width: 850px;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:10px;
+	font-size: 75%;
+	color: #000000;
+	background: #3b3b3b;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	line-height: 1.0em;
+	padding: 50px;
+	padding-top: 0px;
+	width:1000px;
 }
 
+img {
+	height: 100%;
+}
+
+button {
+	padding-right:5px;
+	padding-left:5px;
+	font-weight:bold;
+	background:none; 
+	border: 1px solid;
+	//border-radius:15px;
+	position:right;
+}
+
+#SessionNAME {
+	color:white;
+}
+
+#clock {
+	
+	text-align: center;
+}
+.login {
+	font-size:125%;
+	line-height:0px;
+	background-color:#f3f1eb;
+	border: 2px solid;
+	border-color:#dedbd1;
+	padding: 10px;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.login p {
+	margin-top
+}
+
+#loginForm {
+	background: white;
+}
+
+.team {
+	font-style:italic
+}
+
+.title {
+	margin-left:5px;
+	width: 100%;
+}
+
+#banner {
+	min-width: 100%;
+	margin-top:20px;
+	height: 60px;
+}
+
+#banner a, img {
+	border: 0px;
+	margin-top:10px;
+	//float:left;
+	//height: 100%;
+}
+
+#easternLogo {
+	margin-right:0px;
+}
+
+.widget2 {
+	width:30%;
+	float:left;
+	right:245px;
+	margin-top:10px;
+	margin-right:4px;
+	margin-bottom: 20px;
+}
+
+.submit {
+	border: 2px solid;
+	border-color:#dedbd1;
+}
+
+.toolbarBanner {
+	
+	color:black;
+	background-color:#f3f1eb;
+	padding-bottom:1px;
+	font-weight: bold;
+	border-bottom: 1px solid;
+	border-color:#dedbd1;
+}
+
+.toolborder {
+	padding: 5px;
+	border: 1px solid #dedbd1;
+	border-radius: 5px;
+}
 
 .widget {
-min-width: 850px;
-max-width: 850px;
-width: 90%;
-margin: 20px;
-padding: 1px;
-background: #f3f1eb;
-border: 1px solid #dedbd1;
-margin-bottom: 15px;
+	position:relative;
+	float:right;
+	width: 68%;
+	padding-left: 0px;
+	background: #f3f1eb;
+	border: 1px solid #dedbd1;
+	margin-top: 10px;
 }
 
-	.widget a {
-	color: #222;
-	text-decoration: none;
-	}
-	
-	.widget a:hover {
-	color: #009;
-	text-decoration: underline;
-	}
+.tabnav {
+	padding: 5px;
+	border: 1px solid #dedbd1;
+	border-radius: 5px;
+}
 
-
-	.tabnav li {
+.tabnav li {
 	display: inline;
 	list-style: none;
-	padding-right: 5px;
-	
-	}
-	
-		.tabnav li a {
-		text-decoration: none;
-		text-transform: uppercase;
-		color: #222;
-		font-weight: bold;
-		padding: 4px 6px;
-		outline: none;
-		
-		}
-		
-		.tabnav li a:hover, .tabnav li a:active, .tabnav li.ui-tabs-selected a {
-		background: #dedbd1;
-		color: #222;
-		text-decoration: none;
-		
-		}
-		
-	.tabdiv {
+	padding: 5px;
+}
+
+.tabnav li a {
+	text-decoration: none;
+	text-transform: uppercase;
+	color: #222;
+	font-weight: bold;
+	padding: 4px 6px;
+	outline: none;
+}
+
+.tabnav li a:hover, .tabnav li a:active, .tabnav li.ui-tabs-selected a {
+	background: #dedbd1;
+	color: #222;
+	text-decoration: none;
+}
+
+.tabdiv {
 	margin-top: 2px;
 	background: #fff;
 	border: 1px solid #dedbd1;
 	padding: 5px;
 	min-width: 500px;
-	}
-	
-		
-.ui-tabs-hide {
-		display: none;
-		}
+}
 
-		
+#dialog-overlay {
+    width:100%; 
+    height:100%;
+    filter:alpha(opacity=50); 
+    -moz-opacity:0.5; 
+    -khtml-opacity: 0.5; 
+    opacity: 0.5; 
+    background:#000; 
+    /* make sure it appear behind the dialog box but above everything else */
+    position:absolute; 
+    top:0; left:0; 
+    z-index:3000; 
+    /* hide it by default */
+    display:none;
+    
+}
+
+#dialog-box {
+ 
+    /* css3 drop shadow */
+    -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    
+    /* css3 border radius */
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    
+    background:#eee;
+    /* styling of the dialog box, i have a fixed dimension for this demo */ 
+    width:328px; 
+    
+    /* make sure it has the highest z-index */
+    position:absolute; 
+    z-index:5000; 
+    /* hide it by default */
+    display:none;
+    padding:10px;
+    padding-top:0px;
+}
+
+#dialog-box .dialog-content {
+    /* style the content */
+    white-space: pre;
+    color:#666; 
+    font-family:arial; 
+    width:300px;
+     
+}
+
+#dialog-message {
+	font-size:120%;
+	max-width: 300px;
+	text-wrap:unrestricted;
+	white-space: pre-line;
+	overflow-x:auto;
+	height: 75px;
+}
+
+#dialog-header {
+	text-align:center;
+	font-size: 220%;
+	padding-bottom: 10px;
+}
+
+#close {
+    /* styles for button */
+    border-radius: 5px;
+    background-color:transparent;
+	border: transparent;
+    margin:10px auto 0 auto;
+    text-align:center;
+    display: block;
+    padding: 5px 10px 5px 10px;
+    color: #fff;
+    font-weight: bold;
+    line-height: 1;
+    
+    /* button color */
+    background-color: #e33100;
+    
+    /* css3 implementation :) */
+    /* rounded corner */
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    
+    /* drop shadow */
+    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    
+    /* text shaow */
+    text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    position: relative;
+    cursor: pointer;
+    
+}
+
+#close:hover {
+    background-color: #c33100;    
+}
+/* extra styling */
+
+#dialog-box .dialog-content ul {
+    margin:10px 0 10px 20px; 
+    padding:0; 
+    height:50px;
+}
+
+
+input {
+	background: #f3f1eb;
+    border: 1px solid #dedbd1;
+    padding-bottom: 0px;
+    padding: 2px 5px 2px 5px;
+}
+
+input:hover {
+	background: #dedbd1;
+		color: #222;
+		text-decoration: none;
+}
+
+.aboutStyle {
+	font-family:Poly, Geneva, serif;
+	max-width:800px;
+	padding-left:2%; 
+	line-height:1.5; 
+	font-size:100%;
+	margin-bottom:5px;
+}
+
+.tdLogin {
+	border: 2px solid;
+	border-color:#dedbd1; 
+	margin-right:5px;
+}
+
+.tdAbout {
+	height:auto; 
+	border:2px solid; 
+	border-color:#dedbd1;
+}
+
+.submitButtonLogin {
+	float:left;
+	width:48%;
+}
+
+.clearButtonLogin {
+	float:right;
+	width:48%;
+}
+
+.hrDivider {
+	padding-bottom:15px; 
+	border-top: 1px solid;
+}
+
+.errorStyling {
+	color:#FF0000; 
+	padding-top:15px;
+}
+
+.inputStyling {
+	margin-left:0; 
+	padding:5px;
+}
+
+.divContainer {
+	float:left; 
+	vertical-align:top; 
+	margin-top:10px;
+}
+
+#userGuide
+{
+	width:100;
+	margin-left:2%;
+	margin-top: 40px;
+}
