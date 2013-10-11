@@ -16,10 +16,10 @@ No need for Javadoc - this is not an API.
 
 -->
 	<description>
-         Build of pc2apiTest.jar which runs edu.csus.ecs.pc2.api.ContestTestFrame
+         Build of EWTeam.jar
     </description>
 	
-	<property name="version" value="1.0" />
+	<property name="version" value="2.0" />
 
 	<!-- Name of JAR -->
 	<property name="name" value="EWTeam" />
