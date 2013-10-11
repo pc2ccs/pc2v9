@@ -122,6 +122,8 @@ public final class Reports {
         
         reports.add(new JSONReport());
 
+        reports.add(new EventFeed2013Report());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }

@@ -98,7 +98,7 @@ public class EventFeedReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Event Feed XML";
+        return "Event Feed (CCS) XML";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -108,7 +108,7 @@ public class EventFeedReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Event Feed XML Report";
+        return "Event Feed (CCS) XML Report";
     }
 
     public Filter getFilter() {
