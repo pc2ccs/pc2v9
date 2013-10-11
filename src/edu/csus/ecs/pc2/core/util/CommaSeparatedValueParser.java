@@ -38,7 +38,8 @@ public final class CommaSeparatedValueParser {
         char current;
         char next;
         int length = line.length();
-        int ignoredTerminatingQuote = 0;
+        @SuppressWarnings("unused")
+        int ignoredTerminatingQuote = 0; // SOMEDAY can this be removed?
         for (i = 0; i < line.length(); i++) {
             current = line.charAt(i);
             if (current == '"') {

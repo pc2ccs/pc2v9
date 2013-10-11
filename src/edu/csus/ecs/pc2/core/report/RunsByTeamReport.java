@@ -158,8 +158,8 @@ public class RunsByTeamReport implements IReport {
         int attempts = 0;
         int deleteCount = 0;
         
-        
-        int totalSolved = 0;
+        @SuppressWarnings("unused")
+        int totalSolved = 0; // SOMEDAY can this be removed ?
         
         Problem [] problems = contest.getProblems();
         

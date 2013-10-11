@@ -103,6 +103,7 @@ public final class XMLMemento implements IMemento {
      * Create a Document from a Reader and answer a root memento for reading a document.
      */
     protected static XMLMemento createReadRoot(InputStream in) {
+        @SuppressWarnings("unused")
         int errors = 0;
         Document document = null;
         try {
@@ -324,6 +325,7 @@ public final class XMLMemento implements IMemento {
      * @return a memento
      */
     public static IMemento loadMemento(String filename) throws IOException {
+        @SuppressWarnings("unused")
         int errors = 0;
         InputStream in = null;
         try {
@@ -472,6 +474,7 @@ public final class XMLMemento implements IMemento {
      * @exception java.io.IOException
      */
     public void saveToFile(String filename) throws IOException {
+        @SuppressWarnings("unused")
         int errors = 0;
         FileOutputStream w = null;
         try {
