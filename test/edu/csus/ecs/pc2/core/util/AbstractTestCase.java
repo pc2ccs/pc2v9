@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.Random;
+import java.util.Vector;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -32,9 +34,15 @@ import org.xml.sax.SAXException;
 
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 
@@ -98,6 +106,8 @@ public class AbstractTestCase extends TestCase {
     private PermissionGroup permissionGroup = new PermissionGroup();
 
     private boolean debugMode = false;
+
+    private Random random  = new Random(System.currentTimeMillis());
     
     public AbstractTestCase() {
         super();
@@ -859,5 +869,38 @@ public class AbstractTestCase extends TestCase {
      */
     public int countCharacters(String source, char chartocount) {
         return source.split("\\" + chartocount, -1).length - 1;
-    }  
+    }
+    
+    public Account getRandomTeam(IInternalContest contest) {
+        return getRandomAccount(contest, Type.TEAM);
+    }
+
+    public Problem getRandomProblem(IInternalContest contest) {
+        Problem [] problems = contest.getProblems();
+        int randomProblemIndex = random.nextInt(problems.length);
+        return problems[randomProblemIndex];
+    }
+    
+    public Language getRandomLanguage(IInternalContest contest) {
+        Language[] languages = contest.getLanguages();
+        int randomLangIndex = random.nextInt(languages.length);
+        return languages[randomLangIndex];
+        
+    }
+    
+    public Account getRandomAccount(IInternalContest contest, Type type) {
+        Account[] accounts = getAccounts(contest, type);
+        int randomIndex = random.nextInt(accounts.length);
+        return accounts[randomIndex];
+    }
+    
+    public Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
+        Vector<Account> accountVector = contest.getAccounts(type);
+        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+
+        return accounts;
+    }
+
+
 }

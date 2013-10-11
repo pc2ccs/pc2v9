@@ -192,6 +192,8 @@ public class SampleContest {
             Judgement judgement = new Judgement(judgementName);
             contest.addJudgement(judgement);
         }
+        
+        contest.generateNewAccounts(Type.ADMINISTRATOR.toString(), 1, true);
 
         if (numTeams > 0) {
             contest.generateNewAccounts(Type.TEAM.toString(), numTeams, true);
@@ -482,12 +484,12 @@ public class SampleContest {
             Language language = languages[0];
             ClientId teamId = accounts[0].getClientId();
 
-            if (randomTeam) {
+            if (randomLanguage) {
                 int randomLangIndex = random.nextInt(languages.length);
                 language = (Language) languages[randomLangIndex];
             }
 
-            if (randomTeam) {
+            if (randomProblem) {
                 int randomProblemIndex = random.nextInt(problems.length);
                 problem = (Problem) problems[randomProblemIndex];
             }
@@ -991,6 +993,28 @@ public class SampleContest {
         balloonList.put(key, info);
         settings.setBalloonList(balloonList);
         contest2.updateClientSettings(settings);
+    }
+    
+    /**
+     * Assigns two group names to all teams.
+     * 
+     * @param contest
+     * @param groupNameOne first half of teams assigned this group
+     * @param groupNameTwo second half of teams assigned this group
+     */
+    public void assignSampleGroups (IInternalContest contest, String groupNameOne, String groupNameTwo){
+        Group group1 = new Group(groupNameOne);
+        group1.setGroupId(1024);
+        contest.addGroup(group1);
+
+        Group group2 = new Group(groupNameTwo);
+        group2.setGroupId(2048);
+        contest.addGroup(group2);
+
+        Account[] teams = getTeamAccounts(contest);
+
+        assignTeamGroup(contest, group1, 0, teams.length / 2);
+        assignTeamGroup(contest, group2, teams.length / 2, teams.length - 1);
     }
 
     /**

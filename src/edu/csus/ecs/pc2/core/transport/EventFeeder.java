@@ -37,7 +37,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
-import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
+import edu.csus.ecs.pc2.exports.ccs.EventFeedXML2013;
 
 /**
  * Send live event feed XML.
@@ -50,17 +50,10 @@ import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
  * 
  *  Each time an event feed XML element is triggered will send that
  *  XML.
- *  
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
-
-// TODO CCS EF <info>
-
-// TODO CCS EF <testcase>
-// TODO CCS EF <notification>
-// TODO CCS EF <finalized>
 
 // $HeadURL$
 class EventFeeder implements Runnable {
@@ -76,7 +69,11 @@ class EventFeeder implements Runnable {
 
     private OutputStreamWriter out;
 
-    private EventFeedXML eventFeedXML = new EventFeedXML();
+    /**
+     * Class that creates Event Feed which is sent to client.
+     */
+//    private EventFeedXML eventFeedXML = new EventFeedXML();
+    private EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
     
     private AccountListener accountListener = null;
 
@@ -365,15 +362,7 @@ class EventFeeder implements Runnable {
 
         public void runChanged(RunEvent event) {
             Run run = event.getRun();
-            if (filter == null) {
-                sendXML(eventFeedXML.createElement(contest, run, false));
-            } else {
-                /**
-                 * matches filter, assumes that the filter matches runs that
-                 * should have a judgement.
-                 */
-                sendXML(eventFeedXML.createElement(contest, run, ! filter.matches(run)));
-            }
+            sendXML(eventFeedXML.createElement(contest, run));
         }
 
         public void runRemoved(RunEvent event) {
@@ -535,12 +524,14 @@ class EventFeeder implements Runnable {
 
         public void judgementAdded(JudgementEvent event) {
             Judgement judgement = event.getJudgement();
-            sendXML(eventFeedXML.createElement(contest, judgement));
+            int judgementSequence = getJudgementNumber (contest, judgement);
+            sendXML(eventFeedXML.createElement(contest, judgement, judgementSequence));
         }
 
         public void judgementChanged(JudgementEvent event) {
             Judgement judgement = event.getJudgement();
-            sendXML(eventFeedXML.createElement(contest, judgement));
+            int judgementSequence = getJudgementNumber (contest, judgement);
+            sendXML(eventFeedXML.createElement(contest, judgement, judgementSequence));
         }
 
         public void judgementRemoved(JudgementEvent event) {
@@ -584,5 +575,18 @@ class EventFeeder implements Runnable {
             FinalizeData data = contestInformationEvent.getFinalizeData();
             eventFeedRunnable.send(eventFeedXML.createFinalizeXML(contest, data));
         }
+    }
+
+    public int getJudgementNumber(IInternalContest contest2, Judgement inJudgement) {
+
+        int count = 0;
+        for (Judgement judgement : contest2.getJudgements()) {
+            count ++;
+            if (judgement.getElementId().equals(inJudgement.getElementId())) {
+                return count;
+            }
+        }
+        
+        return count;
     }
 }
