@@ -41,7 +41,7 @@
 		//echo "Error: " . $_FILES["file"]["error"];
 	} elseif($_FILES['file']['size'] > 0) {
 		
-		$fname = realpath("../lib/file_uploads").'/'.$_SESSION["cid"].time().".".$_FILES["file"]["name"];
+		$fname = realpath("../lib/uploads").'/'.$_SESSION["cid"].time().".".$_FILES["file"]["name"];
 		move_uploaded_file($_FILES["file"]["tmp_name"], $fname);
 
 		try { 
