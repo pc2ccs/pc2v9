@@ -1,6 +1,17 @@
-import edu.csus.ecs.pc2.api.*;
 import java.util.LinkedList;
 
+import edu.csus.ecs.pc2.api.IClarification;
+import edu.csus.ecs.pc2.api.IClient;
+import edu.csus.ecs.pc2.api.IRun;
+
+/**
+ * 
+ *
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
+ */
+
+// $HeadURL$
 public class TeamData
 {
 	private IClient team;

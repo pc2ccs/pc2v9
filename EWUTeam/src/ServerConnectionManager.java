@@ -1,13 +1,19 @@
-import edu.csus.ecs.pc2.api.*;
+import java.security.Permission;
+import java.util.HashMap;
+
+import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
-import java.security.Permission;
 
-import java.util.*;
+/**
+ * Stores a collection of PC^2 ServerConnections in a Java HashMap.
+ *
+ *	Standard HashMap errors are translated to PC^2 exceptions.
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
+ */
 
-// This class stores a collection of PC^2 ServerConnections in a Java HashMap.
-//	
-//	Standard HashMap errors are translated to PC^2 exceptions.
+// $HeadURL$
 public class ServerConnectionManager
 {
 	private HashMap<String, ServerConnection> connections;

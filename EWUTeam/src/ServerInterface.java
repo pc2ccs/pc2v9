@@ -1,9 +1,21 @@
-import edu.csus.ecs.pc2.api.*;
-import edu.csus.ecs.pc2.api.listener.IRunEventListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Properties;
+
+import edu.csus.ecs.pc2.api.IClarification;
+import edu.csus.ecs.pc2.api.IClarificationEventListener;
+import edu.csus.ecs.pc2.api.IClient;
+import edu.csus.ecs.pc2.api.IContest;
+import edu.csus.ecs.pc2.api.IContestClock;
+import edu.csus.ecs.pc2.api.ILanguage;
+import edu.csus.ecs.pc2.api.IProblem;
+import edu.csus.ecs.pc2.api.IRun;
+import edu.csus.ecs.pc2.api.IStanding;
+import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
-import java.util.ArrayList;
-import java.io.File;
+import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 
 
 // This class is designed to allow PHP to easily manage a collection of team ServerConnection objects.
@@ -21,12 +33,24 @@ public class ServerInterface
 	private ArrayList <IClarification> clarBuffer = new ArrayList<IClarification>();
 	private ArrayList <TeamData> teams = new ArrayList<TeamData>();
 	private ServerConnection scoreBoard = new ServerConnection();
+	private String scoreboardPassword;
 
 	private int prev_clar_num=0;
 	private int cur_clar_num=0;
 
 	//explicitly private constructor for Singleton behavior
-	private ServerInterface(){}
+    private ServerInterface()
+    {
+        try {
+        	// Load scoreboard2 password from .ini file.
+            Properties pc2Properties = new Properties();
+            pc2Properties.load(new FileInputStream("pc2v9.ini"));
+            scoreboardPassword = (String) pc2Properties.getProperty("scoreboard2password");
+            pc2Properties = null;
+        } catch (Exception e) {
+            throw new RuntimeException("Error loading pc2v9.ini "+e.getMessage(), e);
+        }
+    }
 	
 	//get instance
 	public static ServerInterface getInstance() { return serverInterface; }
@@ -201,13 +225,14 @@ public class ServerInterface
 		return getTeam(teamKey).getContest().getClarifications();
 	}
 
-	//subit a problem to the contest
-	//the temporary filename passed in will be split between the first '.' in the file name.
-	//NOTE: be sure to add the correct directory to where file will be sotred (to new file name)
-	public synchronized void submitProblem(String teamKey, String problemName,
-		String language, String mainFileName, String[] otherFiles) throws NotLoggedInException, ProblemNotFoundException, LanguageNotFoundException, Exception
-	{
-		String directory = "file_uploads/";
+    //subit a problem to the contest
+    //the temporary filename passed in will be split between the first '.' in the file name.
+    //NOTE: be sure to add the correct directory to where file will be sotred (to new file name)
+    public synchronized void submitProblem(String teamKey, String problemName,
+        String language, String mainFileName, String[] otherFiles) throws NotLoggedInException, ProblemNotFoundException, LanguageNotFoundException, Exception
+    {
+        // String directory = "file_uploads/";
+        String directory = "../uploads/";
 
 		//Convert primitive parameters to needed objects
 		
@@ -326,7 +351,9 @@ public class ServerInterface
 		try{
 			synchronized(this)
 			{
-				if(!scoreBoard.isLoggedIn())
+				if(!scoreBoard.isLoggedIn()) {
+					 scoreBoard.login(getScoreboardLogin(),getScoreboardPassword());
+				}
 					scoreBoard.login("scoreboard1","scoreboard1");
 			}
 			IStanding[] allStandings = scoreBoard.getContest().getStandings();
@@ -344,6 +371,14 @@ public class ServerInterface
 			return null;
 		}
 	}//end getRuns
+
+    private String getScoreboardLogin() {
+        return "scoreboard2";
+    }
+
+    private String getScoreboardPassword() {
+        return scoreboardPassword;
+    }
 
 	private void addToClarBuffer(IClarification clar)
 	{
