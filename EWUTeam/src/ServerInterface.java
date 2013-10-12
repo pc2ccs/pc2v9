@@ -352,9 +352,10 @@ public class ServerInterface
 			synchronized(this)
 			{
 				if(!scoreBoard.isLoggedIn()) {
-					 scoreBoard.login(getScoreboardLogin(),getScoreboardPassword());
+					 scoreBoard.login("scoreboard2",getScoreboardPassword());
+//                     scoreBoard.login(getScoreboardLogin(),getScoreboardPassword());
+//					 scoreBoard.login("scoreboard1","scoreboard1");
 				}
-					scoreBoard.login("scoreboard1","scoreboard1");
 			}
 			IStanding[] allStandings = scoreBoard.getContest().getStandings();
 		
