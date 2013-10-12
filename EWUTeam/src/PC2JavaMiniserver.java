@@ -1,14 +1,6 @@
-/**
- * A service that allows PHP scripts to create java objects.
- *
- * PC2JavaMiniserver is designed to run in the background allowing PHP scripts to create 
- * java objects via a PHP - Java bridge.
- * 
- * @author EWU Senior Project Team 2013
- * @version $Id$
- */
 
-// $HeadURL$
+// PC2JavaMiniserver is designed to run in the background allowing PHP scripts to create java objects via
+//	a PHP - Java bridge.
 public class PC2JavaMiniserver
 {
 	public static final String JAVABRIDGE_PORT="3306";
