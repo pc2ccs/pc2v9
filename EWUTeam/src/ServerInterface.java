@@ -236,7 +236,7 @@ public class ServerInterface
 
 		//Convert primitive parameters to needed objects
 		
-		File file=null;
+		File file = null;
 		File newFile = null;
 		
 		try
@@ -248,6 +248,7 @@ public class ServerInterface
 
 			//rename temporary file
 			String oldFileName = mainFileName;
+			mainFileName = getFileName(mainFileName);
 			int indexOfBreak = mainFileName.indexOf('.');
 			mainFileName = directory + mainFileName.substring(indexOfBreak + 1);
 
@@ -274,6 +275,18 @@ public class ServerInterface
 		}
 	}
 
+	private String getFileName(String mainFileName) {
+		int index = -1;
+		if (mainFileName.contains("/")) {
+			index = mainFileName.lastIndexOf('/');
+		}
+
+		if (mainFileName.contains("\\")) {
+			index = mainFileName.lastIndexOf('\\');
+		}
+		return mainFileName.substring(index + 1);
+	}
+    
 	//submit a clarification
 	public void submitClarification(String teamKey, String problemName, String question) throws NotLoggedInException
 	{
