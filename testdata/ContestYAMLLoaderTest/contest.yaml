@@ -103,6 +103,11 @@ accounts:
       site: 2
      count: 21
 
+  - account: TEAM
+      site: 3
+     start: 300
+     count: 30
+
   - account: JUDGE
       site: 2
      count: 8

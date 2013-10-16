@@ -483,6 +483,11 @@ public class ContestYAMLLoader {
             String accountType = getSequenceValue(sequenceLines, "- account");
             ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
 
+            int startNumber = 1;
+            String startNumberString = getSequenceValue(sequenceLines, "start");
+            if (startNumberString != null){
+                startNumber = getIntegerValue(startNumberString.trim(), 1);
+            }
             String countString = getSequenceValue(sequenceLines, "count").trim();
             int count = getIntegerValue(countString, 1);
             String siteString = getSequenceValue(sequenceLines, "site");
@@ -494,6 +499,7 @@ public class ContestYAMLLoader {
              * accounts:
              *   -account: TEAM
              *       site: 1
+             *      start: 100
              *      count: 14
              * 
              *   -account: JUDGE
@@ -502,7 +508,8 @@ public class ContestYAMLLoader {
              * </pre>
              */
 
-            Vector<Account> newAccounts = accountList.generateNewAccounts(type, count, PasswordType.JOE, siteNumber, true);
+            Vector<Account> newAccounts = accountList.generateNewAccounts(type, count, startNumber, PasswordType.JOE, siteNumber, true);
+            
             accountVector.addAll(newAccounts);
 
             idx += sequenceLines.length;

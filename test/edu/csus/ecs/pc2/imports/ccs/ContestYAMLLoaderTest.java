@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Vector;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -94,6 +95,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
 
+//        editFile(getYamlTestFileName());
         contest = loader.fromYaml(null, contents, getDataDirectory());
 
         assertNotNull(contest);
@@ -216,15 +218,24 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         Account[] accounts = contest.getAccounts();
         
         ClientType.Type type = ClientType.Type.TEAM;
-        assertEquals("Number of accounts " + type.toString(), 35, getClientCount(contest, type));
+        assertEquals("Number of accounts " + type.toString(), 65, getClientCount(contest, type));
         type = ClientType.Type.JUDGE;
         assertEquals("Number of accounts " + type.toString(), 20, getClientCount(contest, type));
         type = ClientType.Type.ADMINISTRATOR;
         assertEquals("Number of accounts " + type.toString(), 0, getClientCount(contest, type));
         type = ClientType.Type.SCOREBOARD;
         assertEquals("Number of accounts " + type.toString(), 0, getClientCount(contest, type));
-
-        assertEquals("Number of accounts", 55, accounts.length);
+        
+        /**
+         * Test the start number for site 3 starts at 300.
+         */
+        Vector<Account> site3teams = contest.getAccounts(Type.TEAM, 3);
+        Account[] account3 = (Account[]) site3teams.toArray(new Account[site3teams.size()]);
+        for (Account account : account3) {
+            assertTrue ("Expecting team numbers above 299 on site 3",account.getClientId().getClientNumber() > 299);
+        }
+        
+        assertEquals("Number of accounts", 85, accounts.length);
 
         checkPermissions (accounts);
     }
@@ -415,7 +426,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         key = ContestYAMLLoader.ACCOUNTS_KEY;
         sectionLines = loader.getSectionLines(key, contents);
-        assertEquals(key + " lines.", 17, sectionLines.length);
+        assertEquals(key + " lines.", 22, sectionLines.length);
 
         key = ContestYAMLLoader.AUTO_JUDGE_KEY;
         sectionLines = loader.getSectionLines(key, contents);
