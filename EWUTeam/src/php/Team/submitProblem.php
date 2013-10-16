@@ -12,7 +12,7 @@
 
 	session_start();
 
-	if(is_resource(@fsockopen('localhost', 3306))) {
+	if(is_resource(@fsockopen('localhost', 50005))) {
 		include("../lib/Java.inc");
 	} else {
 		session_unset();

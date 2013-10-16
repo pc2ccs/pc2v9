@@ -10,7 +10,7 @@
 		session_start();
 		session_destroy();
 
-		if(is_resource(@fsockopen('localhost', 3306))) {
+		if(is_resource(@fsockopen('localhost', 50005))) {
 			include("../lib/Java.inc");
 		} else {
 			session_unset();
@@ -18,7 +18,7 @@
 			exit();
 		}
 
-		//require_once("http://localhost:3306/JavaBridge/java/Java.inc");
+		//require_once("http://localhost:50005/JavaBridge/java/Java.inc");
 
 		$server = java("ServerInterface")->getInstance();
 		$error="";

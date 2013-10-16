@@ -16,7 +16,7 @@
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL | E_STRICT);	
 
-	if(is_resource(@fsockopen('localhost', 3306))) {
+	if(is_resource(@fsockopen('localhost', 50005))) {
 
 		include("../lib/Java.inc");
 		$server = java("ServerInterface")->getInstance();

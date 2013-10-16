@@ -3,9 +3,9 @@
 # Copyright (C) 2003-2009 Jost Boekemeier.
 # Distributed under the MIT license, see Options.inc for details.
 # Customization examples:
-# define ("JAVA_HOSTS", 3306); 
+# define ("JAVA_HOSTS", 50005); 
 # define ("JAVA_SERVLET", false);
-define ("JAVA_HOSTS", "127.0.0.1:3306");
+define ("JAVA_HOSTS", "127.0.0.1:50005");
 # define ("JAVA_HOSTS", "ssl://my-secure-host.com:8443");
 # define ("JAVA_SERVLET", "/MyWebApp/servlet.phpjavabridge");
 # define ("JAVA_PREFER_VALUES", 1);

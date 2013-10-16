@@ -3,7 +3,8 @@
 //	a PHP - Java bridge.
 public class PC2JavaMiniserver
 {
-	public static final String JAVABRIDGE_PORT="3306";
+	
+	public static final String JAVABRIDGE_PORT="50005";
 	static final php.java.bridge.JavaBridgeRunner runner = php.java.bridge.JavaBridgeRunner.getInstance(JAVABRIDGE_PORT);
 	
 	//run server
