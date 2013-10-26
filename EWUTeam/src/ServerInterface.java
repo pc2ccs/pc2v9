@@ -17,13 +17,14 @@ import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 
-
-// This class is designed to allow PHP to easily manage a collection of team ServerConnection objects.
-//
-// 	ServerConnections are stored in a ServerConnectionManager object, and are identified by a "teamKey" 
-//	A teamKey can be an IP address, teamID, or any other property unique to each team.
-//
-// 	ServerInterface is a Singleton, and therefore should be referenced by first calling getInstance()
+/**
+ * This class is designed to allow PHP to easily manage a collection of team ServerConnection objects.
+ * 	ServerConnections are stored in a ServerConnectionManager object, and are identified by a "teamKey" 
+ *	A teamKey can be an IP address, teamID, or any other property unique to each team.
+ *
+ * 	ServerInterface is a Singleton, and therefore should be referenced by first calling getInstance()
+ * @version $Id$
+ */
 
 public class ServerInterface
 {
@@ -74,12 +75,12 @@ public class ServerInterface
 
 	
 	//log a team in
-	public String login(String username, String password) throws LoginFailureException, NotLoggedInException
+	public String login(String username, String password, String sessionId) throws LoginFailureException, NotLoggedInException
 	{
 		String conId;
 		synchronized(this)
 		{
-			conId ="" + connectionId++;
+			conId = sessionId + Integer.toString(connectionId++);
 		}
 		server.addTeam(conId, username, password);
 		IContest contest = server.getTeam(conId).getContest();
@@ -331,6 +332,7 @@ public class ServerInterface
 	
 	public IRun[] getRuns(String teamKey){
 		try{
+		    // TODO: why is currentClient not used ??
 			IClient currentClient = getTeam(teamKey).getMyClient();
 			IRun[] allRuns = getTeam(teamKey).getContest().getRuns();
 			return allRuns;
@@ -442,72 +444,6 @@ public class ServerInterface
 
 		return null;
 	}
-
-
-/*********************************
-**************TESTING**************/
-
-
-
-public void interactionHandler() {
-	/**
-		i. Log teams in.
-		ii. For each team, submit a problem.
-			a. Print team ID.
-			a. Print teamKey
-	*/
-	LogTeamsIn();
-	submitProblems();
-}
-
-private void LogTeamsIn() {
-	try {
-		for(int i=1; i<=10; i++) {
-			login("team"+i,"team"+i);
-			//(new loginThread()).start();
-		}
-	} catch(LoginFailureException e) {}
-	  catch(NotLoggedInException e){}
-}
-
-private void submitProblems() {
-
-
-
-	for(int i=0; i<connectionId ; i++) {
-		try {
-			System.out.print("Submitting for team:"+i);
-			this.submitProblem(""+i, "Practice Problem", "GNU C++", "/var/www/JAR/file_uploads/9999.practice.cpp", null);
-			System.out.println("      ->SUCCESS");
-		} catch(Exception e){}
-
-	
-	}
-		
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }//end class:ServerInterface
 

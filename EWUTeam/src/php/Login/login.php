@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <?php
+   // $Id$
 	//session_start();
 
 	if(version_compare(phpversion(),'4.3.0')>=0) { 
@@ -26,7 +27,7 @@
 
 		if($_SERVER["REQUEST_METHOD"] == "POST") {
 				try {
-					$_SESSION['cid'] = "" . new Java("java.lang.String", $server->login($_POST['username'], $_POST['password']));
+					$_SESSION['cid'] = "" . new Java("java.lang.String", $server->login($_POST['username'], $_POST['password'], $_REQUEST['SESSION_NAME']));
 					$_SESSION['username'] = $_POST['username'];
 					header("Location: ../Team/TeamClient.php?SESSION_NAME=" . session_name());
 				} catch (JavaException $exception) { $_SESSION['error'] = "Couldn't log in! </br>Username / Password are incorrect!"; }
