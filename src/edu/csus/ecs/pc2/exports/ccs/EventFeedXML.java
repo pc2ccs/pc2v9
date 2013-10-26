@@ -88,7 +88,7 @@ public class EventFeedXML {
 
     public static final String JUDGEMENT_TAG = "judgement";
 
-    public static final String FINALIZE_TAG = "finalize";
+    public static final String FINALIZE_TAG = "finalized";
 
     public static final String JUDGEMENT_RECORD_TAG = "judgement_record";
 
