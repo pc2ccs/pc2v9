@@ -287,6 +287,7 @@ public class EventFeedXML {
         Filter filter = new Filter();
         filter.addAccount(clientId);
         filter.addProblem(contest.getProblem(problemId));
+        filter.setFilteringDeleted(true);
         Run[] runs = filter.getRuns(contest.getRuns());
         Arrays.sort(runs, runComparator);
 
@@ -647,6 +648,7 @@ public class EventFeedXML {
 
         Filter filter = new Filter();
         filter.addAccount(id);
+        filter.setFilteringDeleted(true);
 
         Run [] runs = filter.getRuns(contest.getRuns());
 
@@ -1186,6 +1188,9 @@ public class EventFeedXML {
     public String createStartupXML(IInternalContest contest, Filter filter) {
 
         StringBuffer sb = new StringBuffer("<" + CONTEST_TAG + ">");
+
+        // currently only applies to runs
+        filter.setFilteringDeleted(true);
 
         sb.append(toXML(createInfoElement(contest, contest.getContestInformation())));
 

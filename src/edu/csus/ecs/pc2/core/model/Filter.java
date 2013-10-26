@@ -177,6 +177,8 @@ public class Filter implements Serializable {
 
     private boolean filterEnabled = true;
 
+    private boolean filteringDeleted = false;
+
     private ElementId getJudgementId(Run run) {
         JudgementRecord judgementRecord = run.getJudgementRecord();
         if (judgementRecord != null) {
@@ -195,10 +197,26 @@ public class Filter implements Serializable {
         if (filterEnabled){
             ElementId judgementElementId = getJudgementId(run);
             return matchesSites(run) && matchesAccount(run.getSubmitter()) && matchesRunState(run.getStatus()) && matchesProblem(run.getProblemId()) && matchesLanguage(run.getLanguageId())
-             && matchesJudgement(judgementElementId) && matchesElapsedTimeSubmission(run);
+             && matchesJudgement(judgementElementId) && matchesElapsedTimeSubmission(run) && matchesDeleted(run);
         } else {
             return true;
         }
+    }
+
+    private boolean matchesDeleted(Run run) {
+        if (filterEnabled) {
+            if (isFilteringDeleted()) {
+                return !run.isDeleted();
+            } else {
+                return true;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    private boolean isFilteringDeleted() {
+        return filteringDeleted;
     }
 
     /**
@@ -1273,6 +1291,11 @@ public class Filter implements Serializable {
     public boolean matchesElapsedTime(RunTestCase runTestCase) {
         long elapsedTime = runTestCase.getElapsedMins();
         return matchesElapsedTime(elapsedTime);
+    }
+
+    public void setFilteringDeleted(boolean b) {
+        filteringDeleted = b;
+        
     }
 
 }
