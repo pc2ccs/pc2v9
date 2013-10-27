@@ -29,6 +29,7 @@ No need for Javadoc - this is not an API.
 	<!-- set global properties for this build -->
 	<property name="src.dir" location="src" />
 	<property name="lib.dir" location="lib" />
+	<property name="doc.dir" location="doc" />
 	<property name="project.dir" location="." />
 	<property name="project.dir" location="." />
 	<property name="php.src.dir" location="src/php" />
@@ -49,7 +50,7 @@ No need for Javadoc - this is not an API.
 	<property name="jar.path" value="${dist.dir}/${jar.name}" />
 		
 	<property name="version.path" value="${build.dir}/VERSION.EWTEAM"/>
-  <property name="spec.path" value="${build.dir}/ewu.spec"/>
+    <property name="spec.path" value="${build.dir}/ewu.spec"/>
 
 	<path id="project.classpath">
 		<fileset dir="${lib.dir}">
@@ -170,14 +171,18 @@ No need for Javadoc - this is not an API.
 
 		<mkdir dir="${staging.dist.dir}/Login" />
 		<mkdir dir="${staging.dist.dir}/Team" />
+		<mkdir dir="${staging.dist.dir}/doc" />
 			
 		<copy todir="${staging.dist.dir}/Login">  <fileset dir="${php.src.dir}/Login"/>  </copy>
 		<copy todir="${staging.dist.dir}/Team">  <fileset dir="${php.src.dir}/Team"/>  </copy>
 
+		<!-- copy user doc  -->
+		<copy file="${doc.dir}/pc2userguide.pdf" todir="${staging.dist.dir}/doc" />
+
 		<!-- create/copy refresh web page -->
 		<copy file="${php.src.dir}/index.html" todir="${staging.dist.dir}" />
 
-    <!-- Copy to staging (root of distribution) directory -->
+   	    <!-- Copy to staging (root of distribution) directory -->
 
 		<copy file="${project.dir}/README.txt" todir="${staging.dir}"/>
 		<copy file="${project.dir}/SETUP.txt" todir="${staging.dir}"/>
