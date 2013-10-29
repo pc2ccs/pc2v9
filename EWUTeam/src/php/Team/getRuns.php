@@ -24,7 +24,8 @@
                 java_cast($runs->getProblem()->getName(), "String"),
                 java_cast($runs->getLanguage()->getName(), "String"),
                 java_cast($runs->getSubmissionTime(), "int"),
-				java_cast($runs->getJudgementName(), "String")
+		java_cast($runs->getJudgementName(), "String"),
+		java_cast($runs->isPreliminaryJudged(),"boolean")	
                 );
         
 				echo json_encode($arr);

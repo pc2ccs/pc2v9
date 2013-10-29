@@ -102,7 +102,11 @@ function runs()
 	
 
 	$('#dialog-header').html("Run Judged");
-    openDialog("Time: ", result[2], result[4], result[5]);
+	if(result[6] == true) {
+		openDialog("Time: ", result[2], result[4], "Preliminary " + result[5]);
+	} else {
+		openDialog("Time: ", result[2], result[4], result[5]); }
+		
     var iframe = document.getElementById('runViewFrame');
     iframe.contentWindow.location.reload(true);
     var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -171,7 +175,7 @@ function openDialog(type, Problem, content, Answer)
     // assign values to the overlay and dialog box
     $('#dialog-overlay').css({height:maskHeight, width:maskWidth}).fadeIn();
     $('#dialog-box').css({top:dialogTop, left:dialogLeft}).fadeIn();
-	$('#dialog-message').html("Problem: ".bold() + Problem + "\n"+ type.bold() + content + "\nAnswer: ".bold() + Answer);
+	$('#dialog-message').html("Problem: ".bold() + Problem + "<br><br>"+ type.bold() + content + "<br><br>Answer: ".bold() + Answer);
 	
 }
 function closeDialog()
@@ -265,3 +269,4 @@ $(function() {
 
 </body>
 </html>
+

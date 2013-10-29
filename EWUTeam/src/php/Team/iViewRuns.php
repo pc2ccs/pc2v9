@@ -74,14 +74,18 @@ $(function() {
 		echo "<td>".$value->getProblem()->getName()."</td>";
 		echo "<td>".$value->getLanguage()->getName()."</td>";
 		echo "<td>".$value->getSubmissionTime()."</td>";
-		if($value->getJudgementName() == "")
+		if($value->getJudgementName() == "") {
 			echo "<td style = 'font-style:italic;'>Pending...</td>";
-		else
+		} elseif ($value->isPreliminaryJudged() == 1 && $value->isFinalJudged() == "") {
+			echo "<td style = 'font-style:italic;'>Preliminary - ".$value->getJudgementName()."</td>";
+		} else{
 			echo "<td>".$value->getJudgementName()."</td>";
-		
-		echo "</tr>"; }
+		}
+		echo "</tr>"; 
+	}
 	?>
 	</tbody>
 </table>
 </body>
 </html>
+
