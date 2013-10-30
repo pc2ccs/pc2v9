@@ -97,7 +97,7 @@
 			<span style="color:#cc2211;">Eastern Washington University's</span> 
 			PC^2 Senior Project team and is still actively being worked on and improved.
 		</p>
-		<input type="button" id="userGuide" value="User Guide" onclick="location.href='../Docs/pc2userguide.pdf'" /></br>
+		<input type="button" id="userGuide" value="User Guide" onclick="location.href='../doc/pc2userguide.pdf'" /></br>
 	</td>
 	</tr>
 </table>
