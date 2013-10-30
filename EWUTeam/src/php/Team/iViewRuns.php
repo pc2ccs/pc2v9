@@ -19,6 +19,12 @@
 		include("../lib/Java.inc");
 		$server = java("ServerInterface")->getInstance();
 
+		if( java_is_false( $server->isLoggedIn($_SESSION['cid']))) {
+			session_unset();
+			print "<script type='text/javascript'>alert('Your session has expired. Please log back in.');window.open('../Login/login.php','_parent');</script>";
+			opener.location.reload();
+			exit();
+		}
 
 		try {
 			$runsArray = $server->getRuns($_SESSION['cid']);
