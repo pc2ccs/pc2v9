@@ -77,6 +77,12 @@ public class ServerInterface
 	//log a team in
 	public String login(String username, String password, String sessionId) throws LoginFailureException, NotLoggedInException
 	{
+	    
+        if (!username.toUpperCase().startsWith("TEAM"))
+        {
+            throw new LoginFailureException("Can only login as a team");
+        }
+	    
 		String conId;
 		synchronized(this)
 		{
