@@ -22,10 +22,10 @@
 
 	$server = java("ServerInterface")->getInstance();
 
-	if( !java_is_true( $server->isLoggedIn($_SESSION['cid']))) {
+	if( java_is_false( $server->isLoggedIn($_SESSION['cid']))) {
 		session_unset();
 		$_SESSION['error'] = "Your session has expired. Please log back in and resubmit.";
-		header("Location: ../Login/login.php");
+		header("Http/1.0 406 Not acceptable");
 		exit();
 	}
 

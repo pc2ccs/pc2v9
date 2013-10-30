@@ -17,14 +17,12 @@
 		
 		$server = java("ServerInterface")->getInstance();
 		
-		if( !java_is_true( $server->isLoggedIn($_SESSION['cid']) ) )
+		if( java_is_false( $server->isLoggedIn($_SESSION['cid']) ) )
 		{
-			
-			// - Don't usnet the session. Only unset the CID so that we can have the error persist through to the login page.
 			
 			session_unset();
 			$_SESSION['error'] = "Your session has expired. Please log back in and resubmit your clarification.";
-			header("Location: ../Login/login.php");
+			header("Http/1.0 406 Not acceptable");
 			exit();
 		}
 		try

@@ -61,7 +61,7 @@ function send()
     },
      error: function(msg){
 		 //does not return values to give a chance to copy message before resubmition
-			alert("Failed to send clarification.");
+			alert("Your session has expired. Please log back in and resubmit your clarification.";);
 			parent.window.location="../index.html";
     }
 
