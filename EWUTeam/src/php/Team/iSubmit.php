@@ -58,7 +58,7 @@ function send(){
         },
  error: function(msg){
 		 //does not return values to give a chance to copy message before resubmission
-			alert("Your session has expired. Please log back in and resubmit your run.";);
+			alert("Your session has expired. Please log back in and resubmit your run.");
 			parent.window.location="../index.html";
     },
         cache: false,
