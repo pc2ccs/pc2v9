@@ -215,7 +215,7 @@ public class Filter implements Serializable {
         }
     }
 
-    private boolean isFilteringDeleted() {
+    public boolean isFilteringDeleted() {
         return filteringDeleted;
     }
 

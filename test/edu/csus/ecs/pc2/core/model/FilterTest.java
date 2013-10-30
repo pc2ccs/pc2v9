@@ -199,11 +199,11 @@ public class FilterTest extends TestCase {
 
         int numTeams = 3;
         int numJudges = 12;
-        int numAdmins = 1;
+        int numAdmins = 2;
 
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createContest(3, 3, numTeams, numJudges, true);
-        contest.generateNewAccounts(Type.ADMINISTRATOR.toString(), numAdmins, true);
+        contest.generateNewAccounts(Type.ADMINISTRATOR.toString(), numAdmins - 1, true);
         // IInternalController controller = sample.createController(contest, true, false);
 
         Account[] accounts = contest.getAccounts();
@@ -211,7 +211,7 @@ public class FilterTest extends TestCase {
         Filter filter = new Filter();
         assertEquals("Filtered Accounts should match", accounts.length, filter.countAccounts(accounts));
 
-        // All accounts from site 3 no matches
+        // All accounts were created on site 3, no matches for site 1
         filter.addSite(1);
         assertEquals("Filtered Accounts should match", 0, filter.countAccounts(accounts));
 

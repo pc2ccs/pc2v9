@@ -351,6 +351,7 @@ public class EventFeedXML2013Test extends AbstractTestCase {
     }
 
     public void testClarElement() throws Exception {
+        // TODO: ensure that EventFeedXMLTest includes this method.
 
         if (debugMode){
             System.out.println(" -- testClarElement ");
@@ -359,6 +360,16 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
         Clarification[] clarifications = contest.getClarifications();
         Arrays.sort(clarifications, new ClarificationComparator());
+        
+        Problem problem = contest.getProblems()[0];
+        ClientId who = getTeamAccounts()[0].getClientId();
+        String question = "What is the meaning of pi ?";
+        
+        Clarification clar = new Clarification(who,problem,question);
+        contest.addClarification(clar);
+        
+        clarifications = contest.getClarifications();
+        assertEquals("Expecting number of clarifications ",1,clarifications.length);
 
         for (Clarification clarification : clarifications) {
             String xml = toContestXML(eventFeedXML.createElement(contest, clarification));
@@ -366,7 +377,10 @@ public class EventFeedXML2013Test extends AbstractTestCase {
                 System.out.println(xml);
             }
             testForValidXML (xml);
+            assertXMLCounts(xml, "clar>", 0); // not expecting <clar>
+            assertXMLCounts(xml, EventFeedXML2013.CLARIFICATION_TAG, 1);
         }
+        
     }
 
     public void testRunElement() throws Exception {
@@ -398,13 +412,16 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         data.setSilverRank(16);
         data.setComment("Finalized by the Ultimiate Finalizer role");
         
-        String xml = eventFeedXML.createFinalizeXML(contest, data);
+        String xml = CONTEST_START_TAG + eventFeedXML.createFinalizeXML(contest, data);
         if (debugMode){
             System.out.println(" -- testFinalizedElement ");
             System.out.println(xml);
         }
 
-        testForValidXML (CONTEST_START_TAG + xml);
+        testForValidXML (xml);
+        
+        assertXMLCounts(xml, "finalized", 1);
+        
     }
 
     public void testStartupElement() throws Exception {
@@ -755,6 +772,76 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         Run earliest = runs[7];
         assertEquals("Expecting first solved run to be " + earliest, earliest, laterRun);
         
+    }
+    
+    // SOMEDAY: Ensure that teams that are not shown on scoreboard runs are not in feed.
+    
+    public void testDeletedRuns() throws Exception {
+        // TODO: ensure that EventFeedXMLTest includes this method.
+
+        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+
+        int siteNumber = 2;
+
+        IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+
+        /**
+         * Add random runs
+         */
+
+        Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
+
+        createDataFilesForContest(testCaseContest);
+
+        sample.assignSampleGroups(testCaseContest, "Group Thing One", "Group Thing Two");
+
+        sample.assignTeamExternalIds(testCaseContest, 424242);
+
+        /**
+         * Add Run Judgements.
+         */
+        addRunJudgements(testCaseContest, runs, 5);
+
+        Run[] runs2 = testCaseContest.getRuns();
+        Arrays.sort(runs2, new RunComparator());
+        Run run2 = runs2[1];
+        run2.setDeleted(true);
+        ClientId adminUser = getAdminAccount(testCaseContest).getClientId();
+        testCaseContest.updateRun(run2, adminUser);
+
+        runs2 = testCaseContest.getRuns();
+        Arrays.sort(runs2, new RunComparator());
+        run2 = runs2[1];
+        assertTrue("Expecting run to be deleted ", run2.isDeleted());
+
+        run2 = runs2[3];
+        run2.setDeleted(true);
+        testCaseContest.updateRun(run2, adminUser);
+
+        int deletedCount = 0;
+        runs2 = testCaseContest.getRuns();
+        Arrays.sort(runs2, new RunComparator());
+        for (Run run33 : runs2) {
+            if (run33.isDeleted()) {
+                deletedCount++;
+            }
+        }
+
+        String xml = eventFeedXML.toXML(testCaseContest);
+
+        if (debugMode) {
+            System.out.println(" -- testDeletedRuns ");
+            System.out.println(xml);
+        }
+
+        testForValidXML(xml);
+
+        assertXMLCounts(xml, EventFeedXML2013.RUN_TAG, runs2.length - deletedCount);
+
+    }
+
+    private Account getAdminAccount(IInternalContest inContest) {
+        return inContest.getAccounts(Type.ADMINISTRATOR).firstElement();
     }
 
     /**

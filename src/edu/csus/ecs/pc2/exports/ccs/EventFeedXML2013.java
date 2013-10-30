@@ -69,7 +69,7 @@ public class EventFeedXML2013 {
 
     public static final String TEAM_TAG = "team";
 
-    public static final String CLARIFICATION_TAG = "clarification";
+    public static final String CLARIFICATION_TAG = "clar";
 
     public static final String TESTCASE_TAG = "testcase";
 
@@ -77,7 +77,7 @@ public class EventFeedXML2013 {
 
     public static final String JUDGEMENT_TAG = "judgement";
 
-    public static final String FINALIZE_TAG = "finalize";
+    public static final String FINALIZE_TAG = "finalized";
 
     public static final String JUDGEMENT_RECORD_TAG = "judgement_record";
 
@@ -102,6 +102,7 @@ public class EventFeedXML2013 {
         long mins = contest.getContestTime().getConestLengthMins() - minutesFromEnd;
         
         Filter filter = new Filter();
+        filter.setFilteringDeleted(true);
         // only get XML elements for events before mins
         filter.setEndElapsedTime(mins);
         
@@ -111,6 +112,8 @@ public class EventFeedXML2013 {
 
     public String toXML(IInternalContest contest, Filter filter) {
 
+        filter.setFilteringDeleted(true);
+        
         XMLMemento mementoRoot = XMLMemento.createWriteRoot(CONTEST_TAG);
 
         IMemento memento = mementoRoot.createChild(INFO_TAG);
@@ -179,7 +182,7 @@ public class EventFeedXML2013 {
                         addMemento(memento, contest, runTestCase, run); // add TESTCASE
                     }
                 }
-            } else if ( ! filter.matchesElapsedTime(run)) {
+            } else if ( ! run.isDeleted() && ! filter.matchesElapsedTime(run)) {
                 /**
                  * This is for a frozen event feed.  We will send out
                  * run information without judgement information, essentially
@@ -224,6 +227,7 @@ public class EventFeedXML2013 {
      */
     public Run getFirstSolvedRun(IInternalContest contest, ClientId clientId, ElementId problemId) {
         Filter filter = new Filter();
+        filter.setFilteringDeleted(true);
         filter.addAccount(clientId);
         filter.addProblem(contest.getProblem(problemId));
         Run[] runs = filter.getRuns(contest.getRuns());
@@ -433,6 +437,7 @@ public class EventFeedXML2013 {
     protected Problem [] getSolvedRuns (IInternalContest contest, ClientId id) {
 
         Filter filter = new Filter();
+        filter.setFilteringDeleted(true);
         filter.addAccount(id);
 
         Run [] runs = filter.getRuns(contest.getRuns());
@@ -774,7 +779,9 @@ public class EventFeedXML2013 {
     }
     
     public String createStartupXML(IInternalContest contest) {
-        return createStartupXML(contest, new Filter());
+        Filter filter = new Filter();
+        filter.setFilteringDeleted(true);
+        return createStartupXML(contest, filter);
     }
 
     /**
