@@ -57,8 +57,8 @@ function send(){
 		
         },
  error: function(msg){
-		 //does not return values to give a chance to copy message before resubmition
-			alert("failure to complete submition");
+		 //does not return values to give a chance to copy message before resubmission
+			alert("failure to complete submission");
 			parent.window.location="../index.html";
     },
         cache: false,
