@@ -44,9 +44,12 @@ public class ExecutableTest extends AbstractTestCase {
     @SuppressWarnings("unused")
     private Problem helloWorldProblem = null;
 
+    private Problem largeStdInProblem = null;
+    
     private Language javaLanguage = null;
 
     private String yesJudgement = Validator.JUDGEMENT_YES;
+
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -56,6 +59,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         sumitProblem = createSumitProblem(contest);
         helloWorldProblem = createHelloProblem(contest);
+        largeStdInProblem  = createLargeStdInProblem(contest);
         javaLanguage = createJavaLanguage(contest);
 
     }
@@ -170,6 +174,44 @@ public class ExecutableTest extends AbstractTestCase {
         return problem;
     }
 
+    /**
+     * 
+     * @param contest2
+     * @return
+     * @throws FileNotFoundException
+     */
+    private Problem createLargeStdInProblem(IInternalContest contest2) throws FileNotFoundException {
+
+        Problem problem = new Problem("LargeStdIn");
+
+        problem.setShowValidationToJudges(false);
+        problem.setHideOutputWindow(true);
+        problem.setShowCompareWindow(false);
+
+        problem.setReadInputDataFromSTDIN(true);
+        
+        setPC2Validator(problem);
+
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+
+        //TODO: change from sumit.dat to a LARGE input data file
+        problem.setDataFileName("sumit.dat");
+        String judgesDataFile = getSamplesSourceFilename(problem.getDataFileName());
+        checkFileExistance(judgesDataFile);
+        problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile));
+
+        //TODO: change answer file to correct answer for Large input data file
+        problem.setAnswerFileName("sumit.ans");
+        String answerFileName = getSamplesSourceFilename(problem.getAnswerFileName());
+        checkFileExistance(answerFileName);
+        problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
+
+        contest2.addProblem(problem, problemDataFiles);
+
+        return problem;
+    }
+
+    
     private Account getLastAccount(Type type) {
         return contest.getAccounts(type).lastElement();
     }
@@ -185,6 +227,21 @@ public class ExecutableTest extends AbstractTestCase {
         runExecutableTest(run, runFiles, true, yesJudgement);
 
     }
+
+    public void testLargeStdIn() {
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Run run = new Run(submitter, javaLanguage, largeStdInProblem);
+        
+        //TODO: change source file name to a new large-stdin problem source
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Sumit.java"));
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, true, yesJudgement);
+
+    }
+
 
     /**
      * Invoke a executable test.
@@ -208,7 +265,7 @@ public class ExecutableTest extends AbstractTestCase {
         // System.out.println("expectedJudgement  = " + expectedJudgement);
         // System.out.println("expectedJudgementV = " + executionData.getValidationResults());
 
-        assertTrue("Souce file not compiled " + run.getProblemId(), executionData.isCompileSuccess());
+        assertTrue("Source file not compiled " + run.getProblemId(), executionData.isCompileSuccess());
         assertTrue("Run not executed " + run.getProblemId(), executionData.isExecuteSucess());
         
         // If this test fails - there may not be a Validator in the path, check vstderr.pc2 for  
@@ -217,6 +274,9 @@ public class ExecutableTest extends AbstractTestCase {
 
         assertTrue("Judgement should be solved ", solved);
         assertEquals(expectedJudgement, executionData.getValidationResults());
+        
+        //TODO: change the following println into an assert()
+        System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
     }
 
     protected void tearDown() throws Exception {
