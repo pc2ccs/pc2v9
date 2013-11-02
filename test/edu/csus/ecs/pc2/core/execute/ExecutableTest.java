@@ -194,14 +194,12 @@ public class ExecutableTest extends AbstractTestCase {
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
-        //TODO: change from sumit.dat to a LARGE input data file
-        problem.setDataFileName("sumit.dat");
+        problem.setDataFileName("casting.dat");
         String judgesDataFile = getSamplesSourceFilename(problem.getDataFileName());
         checkFileExistance(judgesDataFile);
         problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile));
 
-        //TODO: change answer file to correct answer for Large input data file
-        problem.setAnswerFileName("sumit.ans");
+        problem.setAnswerFileName("casting.ans");
         String answerFileName = getSamplesSourceFilename(problem.getAnswerFileName());
         checkFileExistance(answerFileName);
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
@@ -234,8 +232,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         Run run = new Run(submitter, javaLanguage, largeStdInProblem);
         
-        //TODO: change source file name to a new large-stdin problem source
-        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Sumit.java"));
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Casting.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, yesJudgement);
@@ -265,6 +262,9 @@ public class ExecutableTest extends AbstractTestCase {
         // System.out.println("expectedJudgement  = " + expectedJudgement);
         // System.out.println("expectedJudgementV = " + executionData.getValidationResults());
 
+        //TODO: change the following println into an assert()
+        System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
+
         assertTrue("Source file not compiled " + run.getProblemId(), executionData.isCompileSuccess());
         assertTrue("Run not executed " + run.getProblemId(), executionData.isExecuteSucess());
         
@@ -275,8 +275,6 @@ public class ExecutableTest extends AbstractTestCase {
         assertTrue("Judgement should be solved ", solved);
         assertEquals(expectedJudgement, executionData.getValidationResults());
         
-        //TODO: change the following println into an assert()
-        System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
     }
 
     protected void tearDown() throws Exception {
