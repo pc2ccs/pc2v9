@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -1037,16 +1038,19 @@ public class Executable {
             if (isValidDataFile(problem) && problem.isReadInputDataFromSTDIN()) {
                 OutputStream outs = process.getOutputStream();
                 PrintWriter pwOut = new PrintWriter(outs);
+                BufferedWriter bOut = new BufferedWriter(pwOut);
                 FileReader fileReader = new FileReader(inputDataFileName);
                 BufferedReader in = new BufferedReader(fileReader);
 
-                int theChar = in.read();
-                while (theChar != -1) {
-                    pwOut.print((char) theChar);
-                    theChar = in.read();
+                char[] cbuf = new char[32768];
+                int charCount = in.read(cbuf);
+                while (charCount != -1) {
+                    bOut.write(cbuf, 0, charCount);
+                    charCount = in.read(cbuf);
                 }
 
                 fileReader.close();
+                bOut.close();
                 pwOut.close();
                 outs.close();
             }

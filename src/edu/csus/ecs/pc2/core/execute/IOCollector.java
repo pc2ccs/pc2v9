@@ -59,17 +59,19 @@ public class IOCollector extends Thread {
      */
     public void run() {
         long offset = 0;
-        int theChar;
+        int charCount;
+        char[] cbuf = new char[32768];
 
         try {
-            theChar = bufReader.read();
+            
+            charCount = bufReader.read(cbuf);
             while ((!stopIt) && // Stopped when someone hit terminate button
-                    (theChar != -1) && // not EOF
+                    (charCount != -1) && // not EOF
                     (offset < (maxFileSize)) // over max size
             ) {
                 offset++;
-                outWriter.print((char) theChar);
-                theChar = bufReader.read();
+                outWriter.write(cbuf, 0, charCount);
+                charCount = bufReader.read(cbuf);
             }
 
             if (stopIt) {
@@ -83,11 +85,11 @@ public class IOCollector extends Thread {
             }
 
             try {
-                theChar = bufReader.read();
+                charCount = bufReader.read(cbuf);
                 while ((!stopIt) && // Stopped when someone hit terminate button
-                        (theChar != -1) // not EOF
+                        (charCount != -1) // not EOF
                 ) {
-                    theChar = bufReader.read();
+                    charCount = bufReader.read(cbuf);
                 }
 
             } catch (Exception notImportant) {
