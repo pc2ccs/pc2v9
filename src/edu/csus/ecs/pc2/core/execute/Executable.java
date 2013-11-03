@@ -1,14 +1,12 @@
 package edu.csus.ecs.pc2.core.execute;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Hashtable;
@@ -649,8 +647,8 @@ public class Executable {
 
         try {
 
-            PrintWriter stdoutlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME), false), true);
-            PrintWriter stderrlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME), false), true);
+            BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME), false));
+            BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME), false));
 
             String msg = "Working...";
             if (problem.isShowValidationToJudges()) {
@@ -668,9 +666,9 @@ public class Executable {
             }
 
             // This reads from the stdout of the child process
-            BufferedReader childOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
             // The reads from the stderr of the child process
-            BufferedReader childError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            BufferedInputStream childError = new BufferedInputStream(process.getErrorStream());
 
             IOCollector stdoutCollector = new IOCollector(log, childOutput, stdoutlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
             IOCollector stderrCollector = new IOCollector(log, childError, stderrlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
@@ -970,8 +968,8 @@ public class Executable {
 
             // SOMEDAY execute the language.getProgramExecuteCommandLine();
 
-            PrintWriter stdoutlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME), false), true);
-            PrintWriter stderrlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDERR_FILENAME), false), true);
+            BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME), false));
+            BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDERR_FILENAME), false));
 
             String cmdline = language.getProgramExecuteCommandLine();
             log.log(Log.DEBUG, "before substitution: " + cmdline);
@@ -1022,9 +1020,9 @@ public class Executable {
             }
 
             // This reads from the stdout of the child process
-            BufferedReader childOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
             // The reads from the stderr of the child process
-            BufferedReader childError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            BufferedInputStream childError = new BufferedInputStream(process.getErrorStream());
 
             IOCollector stdoutCollector = new IOCollector(log, childOutput, stdoutlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
             IOCollector stderrCollector = new IOCollector(log, childError, stderrlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
@@ -1036,23 +1034,16 @@ public class Executable {
             stderrCollector.start();
 
             if (isValidDataFile(problem) && problem.isReadInputDataFromSTDIN()) {
-                OutputStream outs = process.getOutputStream();
-                PrintWriter pwOut = new PrintWriter(outs);
-                BufferedWriter bOut = new BufferedWriter(pwOut);
-                FileReader fileReader = new FileReader(inputDataFileName);
-                BufferedReader in = new BufferedReader(fileReader);
-
-                char[] cbuf = new char[32768];
-                int charCount = in.read(cbuf);
-                while (charCount != -1) {
-                    bOut.write(cbuf, 0, charCount);
-                    charCount = in.read(cbuf);
+                BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
+                BufferedInputStream in = new BufferedInputStream(new FileInputStream(inputDataFileName));
+                byte[] buf = new byte[32768];
+                int c;
+                while ((c = in.read(buf))!= -1) {
+                    out.write(buf, 0, c);
                 }
 
-                fileReader.close();
-                bOut.close();
-                pwOut.close();
-                outs.close();
+                in.close();
+                out.close();
             }
 
             stdoutCollector.join();
@@ -1149,8 +1140,8 @@ public class Executable {
             String cmdline = substituteAllStrings(run, language.getCompileCommandLine());
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
-            PrintWriter stdoutlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false), true);
-            PrintWriter stderrlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false), true);
+            BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false));
+            BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false));
 
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
             executionTimer.startTimer();
@@ -1169,9 +1160,9 @@ public class Executable {
                 return false;
             }
             // This reads from the stdout of the child process
-            BufferedReader childOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
             // The reads from the stderr of the child process
-            BufferedReader childError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            BufferedInputStream childError = new BufferedInputStream(process.getErrorStream());
 
             IOCollector stdoutCollector = new IOCollector(log, childOutput, stdoutlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
             IOCollector stderrCollector = new IOCollector(log, childError, stderrlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
