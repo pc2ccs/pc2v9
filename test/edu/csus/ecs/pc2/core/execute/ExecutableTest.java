@@ -50,6 +50,8 @@ public class ExecutableTest extends AbstractTestCase {
 
     private String yesJudgement = Validator.JUDGEMENT_YES;
 
+    private Problem largeOutputProblem = null;
+
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -60,6 +62,7 @@ public class ExecutableTest extends AbstractTestCase {
         sumitProblem = createSumitProblem(contest);
         helloWorldProblem = createHelloProblem(contest);
         largeStdInProblem  = createLargeStdInProblem(contest);
+        largeOutputProblem  = createLargeOutputProblem(contest);
         javaLanguage = createJavaLanguage(contest);
 
     }
@@ -154,6 +157,7 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setShowValidationToJudges(false);
         problem.setHideOutputWindow(true);
         problem.setShowCompareWindow(false);
+        problem.setTimeOutInSeconds(10);
 
         setPC2Validator(problem);
 
@@ -175,6 +179,28 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     /**
+     * Create sample LargeOutput problem and add to contest.
+     * 
+     * @param contest2
+     * @return
+     * @throws FileNotFoundException
+     */
+    private Problem createLargeOutputProblem(IInternalContest contest2) throws FileNotFoundException {
+
+        // this is just a program that generate a lot of output (stdout & stderr)
+        // so no input or answer files.
+        Problem problem = new Problem("Large Output");
+
+        problem.setShowValidationToJudges(false);
+        problem.setHideOutputWindow(true);
+        problem.setShowCompareWindow(false);
+        problem.setTimeOutInSeconds(4*60);
+        contest2.addProblem(problem);
+
+        return problem;
+    }
+
+    /**
      * 
      * @param contest2
      * @return
@@ -188,6 +214,7 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setHideOutputWindow(true);
         problem.setShowCompareWindow(false);
 
+        problem.setTimeOutInSeconds(60*6);
         problem.setReadInputDataFromSTDIN(true);
         
         setPC2Validator(problem);
@@ -223,6 +250,18 @@ public class ExecutableTest extends AbstractTestCase {
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, yesJudgement);
+
+    }
+
+    public void testLargeOutput() {
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Run run = new Run(submitter, javaLanguage, largeOutputProblem);
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("LargeOutput.java"));
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, true, null);
 
     }
 
@@ -264,13 +303,16 @@ public class ExecutableTest extends AbstractTestCase {
 
         //TODO: change the following println into an assert()
         System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
+        assertTrue("Excessive runtime", executionData.getExecuteTimeMS() < 40000);
 
         assertTrue("Source file not compiled " + run.getProblemId(), executionData.isCompileSuccess());
         assertTrue("Run not executed " + run.getProblemId(), executionData.isExecuteSucess());
         
         // If this test fails - there may not be a Validator in the path, check vstderr.pc2 for  
         // java.lang.NoClassDefFoundError: edu/csus/ecs/pc2/validator/Validator
-        assertTrue("Run not validated " + run.getProblemId(), executionData.isValidationSuccess());
+        if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
+            assertTrue("Run not validated " + run.getProblemId(), executionData.isValidationSuccess());
+        }
 
         assertTrue("Judgement should be solved ", solved);
         assertEquals(expectedJudgement, executionData.getValidationResults());
