@@ -34,6 +34,7 @@ public class ExtractorTest extends AbstractTestCase {
         int teams = 22;
         int judges = 12;
         int scoreboards = 1;
+        int admins = 1;
 
         IInternalContest contest = sample.createContest(1, 2, teams, judges, false);
         IInternalController controller = sample.createController(contest, true, false);
@@ -41,18 +42,20 @@ public class ExtractorTest extends AbstractTestCase {
         Extractor extractor = new Extractor();
         String[] lines = extractor.getReportLines(Extractor.ACCOUNTS_OPTION, contest, controller);
 
-        int expectedLines = 1 + teams + judges + scoreboards;
+        int expectedLines = 1 + admins + teams + judges + scoreboards; // account line and account counts
 
-        if (expectedLines != lines.length){
+        if (expectedLines != lines.length) {
+            int count = 0;
             for (String string : lines) {
-                System.out.println("'"+string);
+                count++;
+                System.out.println(count + " '" + string);
             }
         }
 
         assertEquals("Expected number of lines ", expectedLines, lines.length);
 
         assertTrue("Expect header ", lines[0].startsWith("accounts"));
-        assertTrue("Expect second line  is team ", lines[1].startsWith("team"));
+        assertTrue("Expect third line  is team ", lines[2].startsWith("team"));
 
         assertTrue("Expect last account is judge ", lines[lines.length - 2].startsWith("judge"));
         assertTrue("Expect last account is scoreboard ", lines[lines.length - 1].startsWith("scoreboard"));
