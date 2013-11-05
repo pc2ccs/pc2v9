@@ -170,11 +170,13 @@ public final class LoadICPCData {
                 }
             } catch (IllegalTSVFormatException e2) {
                 // already a properly formatted exception
+                in.close();
                 throw e2;
             } catch (Exception e) {
                 String msg = "Error " + filename + ":" + lineCount + ": " + e.getMessage();
                 Exception sendException = new Exception(msg);
                 sendException.setStackTrace(e.getStackTrace());
+                in.close();
                 throw sendException;
             }
             line = in.readLine();

@@ -478,6 +478,7 @@ public class Validator {
                 lines.addElement(line);
                 line = in.readLine();
             }
+            in.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

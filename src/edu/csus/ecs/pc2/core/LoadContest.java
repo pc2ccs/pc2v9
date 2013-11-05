@@ -545,6 +545,7 @@ public class LoadContest {
             while ((line = file.readLine()) != null) {
                 System.out.println(line);
             }
+            file.close();
             new File(outfilename).deleteOnExit();
 
         } catch (IOException e) {

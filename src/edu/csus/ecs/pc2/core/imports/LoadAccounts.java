@@ -263,6 +263,7 @@ public class LoadAccounts {
             }
             if (accountColumn == -1 || siteColumn == -1) {
                 String msg = "1st line should be the row headers (account and site are required)";
+                in.close();
                 throw new IllegalTSVFormatException(msg);
             }
         }
@@ -282,18 +283,21 @@ public class LoadAccounts {
                     Account account = getAccount(values);
                     if (account == null) {
                         String msg = filename + ":" + lineCount + ": " + " please create the account first (" + values[accountColumn] + ")";
+                        in.close();
                         throw new IllegalTSVFormatException(msg);
                     }
                     accountMap.put(account.getClientId(), account);
                 }
             } catch (IllegalTSVFormatException e2) {
                 // already a properly formatted exception
+                in.close();
                 throw e2;
             } catch (Exception e) {
                 e.printStackTrace();
                 String msg = "Error " + filename + ":" + lineCount + ": " + e.getMessage();
                 Exception sendException = new Exception(msg);
                 sendException.setStackTrace(e.getStackTrace());
+                in.close();
                 throw sendException;
             }
             line = in.readLine();
