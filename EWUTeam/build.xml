@@ -29,6 +29,7 @@ No need for Javadoc - this is not an API.
 	<!-- set global properties for this build -->
 	<property name="src.dir" location="src" />
 	<property name="lib.dir" location="lib" />
+	<property name="lib.1.6.dir" location="/software/pc2/java/jdk1.6.0_22/" />
 	<property name="doc.dir" location="doc" />
 	<property name="project.dir" location="." />
 	<property name="project.dir" location="." />
@@ -53,6 +54,10 @@ No need for Javadoc - this is not an API.
     <property name="spec.path" value="${build.dir}/ewu.spec"/>
 
 	<path id="project.classpath">
+	    <!-- using the 1.6 lib kludge is needed when using the 1.7 javac, must use 1.6 rt.jar -->
+	    <fileset dir="${lib.1.6.dir}">
+	      <include name="*.jar" />
+	    </fileset>
 		<fileset dir="${lib.dir}">
 			<include name="*.jar" />
 		</fileset>
@@ -119,7 +124,7 @@ No need for Javadoc - this is not an API.
 
 	<!-- Compile the java code from ${src.dir} into ${build.dir} -->
 	<target name="compile" depends="init" description="compile the source ">
-		<javac srcdir="${src.dir}" target="1.6" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no">
+		<javac srcdir="${src.dir}" source="1.6" target="1.6" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no">
 			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
 			<classpath refid="project.classpath" />
 			<compilerarg line="-log '${build.dir}/${ewuname}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
