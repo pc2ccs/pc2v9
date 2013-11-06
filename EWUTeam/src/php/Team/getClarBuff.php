@@ -11,7 +11,7 @@ session_start();
 		try {	//Filling in respective arrays. The PHP scripts are down at their respective markup components.
 			$clararray = $server->getClarificationsById($_SESSION['cid']);
 			$JavaClarifications  = java_cast($clararray , "array");
-			foreach ($JavaRuns as $value) {
+			foreach ($JavaClarifications as $value) {
 				$PHPrunsite[$i]=$value->getSiteNumber();
 				$i++;
 			}
