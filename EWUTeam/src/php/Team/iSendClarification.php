@@ -39,6 +39,9 @@
 <script>
 function send()
 {
+    var submitButton = document.getElementById('clarsubbutton');	
+    submitButton.value="Submitting...";
+
 	var cp = document.getElementById("clarProbs").value;
 	var ta = document.getElementById("clarificationTextArea");
 	var text = ta.value;
@@ -57,11 +60,15 @@ function send()
 			ta.value ="";
 			$("#clarProbs").val($("#clarProbs option:first").val());
 			setTimeout('parent.window.frames[\'clarViewFrame\'].location.reload();',1000);
+			submitButton.disabled=false;
+			submitButton.value="Submit Clarification";
 
     },
      error: function(msg){
 		 //does not return values to give a chance to copy message before resubmition
 			alert("Your session has expired. Please log back in and resubmit your clarification.");
+			submitButton.disabled=false;
+			submitButton.value="Submit Clarification";
 			parent.window.location="../index.html";
     }
 
@@ -73,7 +80,7 @@ function send()
 
 </script>
 <body style="background:white;">
-<form onsubmit="return send()" target="_top" >
+<form onsubmit="document.getElementById('clarsubbutton').disabled=1;return send()" target="_top" >
 <table><tr>
     	<td style="text-align:left;"><b>Problem:<b></td></tr><tr><td>
 	<select required id="clarProbs" name="clarProbs">
@@ -83,7 +90,7 @@ function send()
     
 	<tr><td><TEXTAREA required maxlength="300" style="resize:none;" id="clarificationTextArea" ROWS="9" COLS="30" onBlur="blurHandlerRouting" name="clarificationTextArea"></TEXTAREA><br/>
        </td></tr><tr><td>
-		   <input type="submit" value="Submit Clarification" class="sendButton" >
+		   <input type="submit" id=clarsubbutton value="Submit Clarification" class="sendButton" >
 		  <div id="sent-box">
 				<p id="sent-message">Sent</p>
 			</div>

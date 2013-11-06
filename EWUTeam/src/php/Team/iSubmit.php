@@ -40,7 +40,9 @@
 function send(){
 
     var formData = new FormData($("#data")[0]);
-	
+    var submitButton = document.getElementById('subbutton');	
+    submitButton.value="Submitting...";
+
     $.ajax({
         url: "submitProblem.php",
         type: 'POST',
@@ -53,13 +55,15 @@ function send(){
 		$("#lang").val($("#lang option:first").val());
 		$("#file").val("");
 		setTimeout('parent.window.frames[\'runViewFrame\'].location.reload();',1000);
-		
-		
+		submitButton.disabled=false;
+		submitButton.value="Submit Problem";
         },
  error: function(msg){
 		 //does not return values to give a chance to copy message before resubmission
-			alert("Your session has expired. Please log back in and resubmit your run.");
-			parent.window.location="../index.html";
+		alert("Your session has expired. Please log back in and resubmit your run.");
+		submitButton.disabled=false;
+		submitButton.value="Submit Problem";
+		parent.window.location="../index.html";
     },
         cache: false,
         contentType: false,
@@ -75,7 +79,7 @@ function send(){
 
 <body style="background:white;">
 
-<form id="data" method="post" onsubmit="return send()" enctype="multipart/form-data">
+<form id="data" method="post" onsubmit="document.getElementById('subbutton').disabled=1;return send()" enctype="multipart/form-data">
 	<table>
 		<tr><td style="text-align:left;"><b>Problem:</b></td></tr>
 		<tr><td>
@@ -98,7 +102,7 @@ function send(){
           		<input type="file" name="file" id="file" size="9" required />
           	</td></tr>
 	<tr><td>
-	<input type="submit" value="Submit Problem" class="sendButton" >
+	<input type="submit" id=subbutton value="Submit Problem" class="sendButton" >
 			 <div id="sent-box">
 				<p id="sent-message">Sent</p>
 			</div>
