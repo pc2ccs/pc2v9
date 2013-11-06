@@ -72,10 +72,10 @@ No need for Javadoc - this is not an API.
 
 		<!-- 
 		Fetch the SVN build version 
+		-->
 		<exec executable="svnversion" outputproperty="repo.version">
             <arg line="-n ."/>
 		</exec>
-		-->
 		
         <!-- XXX this requires svnkit-cli.jar & svnkit.jar in the project
         <java classname="org.tmatesoft.svn.cli.SVNVersion" dir="${basedir}" fork="true" outputproperty="repo.version"
@@ -86,11 +86,11 @@ No need for Javadoc - this is not an API.
 
 		<!-- 
 		A hard coded version number 
-		-->
 		<tstamp>
 			<format property="millisecond" pattern="S" timezone="UTC" />
 		</tstamp>
 		<property name="repo.version" value="${millisecond}" />
+		-->
 		
 	    <tstamp>
 	        <format property="date" pattern="yyyyMMdd" timezone="UTC" />
