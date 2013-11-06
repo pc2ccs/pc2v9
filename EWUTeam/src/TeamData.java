@@ -44,11 +44,25 @@ public class TeamData
 	
 	public IClarification getNewClar()
 	{
+		if (clars.isEmpty()) {
+			return null;
+			/*
+			 *  otherwise a pop of empty list
+			 *  throws a NoSuchElementException
+			 */
+		}
 		return (IClarification)clars.pop(); //returns null if nothing in list
 		//return newClar; // for old way return type would be boolean
 	}
 	public IRun getNewRun()
 	{
+		if (runs.isEmpty()) {
+			return null;
+			/*
+			 *  otherwise a pop of empty list
+			 *  throws a NoSuchElementException
+			 */
+		}
 		return (IRun)runs.pop(); //returns null if nothing in list
 		//return newRun;// for old way return type would be boolean
 	}

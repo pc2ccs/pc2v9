@@ -421,6 +421,9 @@ public class ServerInterface
 
 	public IRun JudgmentOccurred(String username)
 	{
+		if (username == null) {
+			return null;
+		}
 		for(TeamData t : teams) 
 		{
 			if(username.equals(t.getTeamName()) )
@@ -437,7 +440,9 @@ public class ServerInterface
 	public IClarification clarificationOccurred(String username)
 	{
 
-
+		if (username == null) {
+			return null;
+		}
 		for(TeamData t : teams) 
 		{
 			if(username.equals(t.getTeamName()) )
