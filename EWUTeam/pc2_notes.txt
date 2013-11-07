@@ -10,7 +10,7 @@ CATEGORY 1 - HIGH PRIORITY
 ------------------------------------------------------------
 
 - rename project from EWUTeam to EWTeam (no more U)
-  - repo 
+  - repo  (with scmbug the glue.conf will need to be tweaked)
   RESOLVED - artifacts
   RESOLVED - web pages
 
