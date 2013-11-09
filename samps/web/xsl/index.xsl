@@ -24,7 +24,7 @@
 		    <!-- XXX probably can remove these with the full title -->
 		    <br/>
 		    <!-- hmm, these comment add the ^M to the output -->
-		    Scoreboard will be shut down with one hour is remaining in contest.
+		    Scoreboard will be shut down with one hour remaining in contest.
 		    <xsl:comment>
 		    Standings as of 1 hour to go.  Scoreboard is now frozen.&lt;br/>
 		    </xsl:comment>
