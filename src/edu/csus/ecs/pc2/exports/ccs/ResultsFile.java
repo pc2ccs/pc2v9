@@ -153,7 +153,7 @@ public class ResultsFile {
 
         String xmlString = scoringAlgorithm.getStandings(contest, new Properties(), null);
 
-        String xsltFileName = "results.xsl";
+        String xsltFileName = "results.tsv.xsl";
         
         return XMLUtilities.transformToArray(xmlString, xsltFileName);
     }
