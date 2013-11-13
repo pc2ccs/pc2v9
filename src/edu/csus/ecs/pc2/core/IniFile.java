@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
@@ -188,6 +189,7 @@ public class IniFile {
      * @see #iniFileURL
      */
     private void load() {
+        BufferedReader in = null;
         try {
             // default to reading ini file from current directory
             if (iniFileURL == null) {
@@ -206,16 +208,25 @@ public class IniFile {
             nameValueHash.clear();
             nameValueHash.put("_source", iniFileURL.toString());
             currentSectionName = "";
-            BufferedReader in = new BufferedReader(new InputStreamReader(iniFileURL.openStream()));
+            in = new BufferedReader(new InputStreamReader(iniFileURL.openStream()));
             String line = in.readLine();
             while (line != null) {
                 parseLine(line);
                 line = in.readLine();
             }
+            in.close();
         } catch (Exception e) {
             System.out.println("Error reading ini " + e.getMessage());
             e.printStackTrace();
             return;
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
