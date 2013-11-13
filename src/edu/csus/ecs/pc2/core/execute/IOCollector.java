@@ -1,7 +1,7 @@
 package edu.csus.ecs.pc2.core.execute;
 
-import java.io.BufferedReader;
-import java.io.PrintWriter;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 
 import edu.csus.ecs.pc2.core.log.Log;
 
@@ -15,9 +15,9 @@ import edu.csus.ecs.pc2.core.log.Log;
 // $HeadURL$
 public class IOCollector extends Thread {
 
-    private BufferedReader bufReader;
+    private BufferedInputStream bufReader;
 
-    private PrintWriter outWriter;
+    private BufferedOutputStream outWriter;
 
     private boolean stopIt = false;
 
@@ -28,6 +28,8 @@ public class IOCollector extends Thread {
 
     private Log log = null;
 
+    private static final String NL = System.getProperty("line.separator");
+    
     /**
      * 
      * @param log
@@ -36,7 +38,7 @@ public class IOCollector extends Thread {
      * @param myTimer
      * @param newMaxFileSize maximum number of bytes that are read.
      */
-    public IOCollector(Log log, BufferedReader inReader, PrintWriter printer, ExecuteTimer myTimer, long newMaxFileSize) {
+    public IOCollector(Log log, BufferedInputStream inReader, BufferedOutputStream printer, ExecuteTimer myTimer, long newMaxFileSize) {
         this.log = log;
         maxFileSize = newMaxFileSize;
         bufReader = inReader;
@@ -59,35 +61,34 @@ public class IOCollector extends Thread {
      */
     public void run() {
         long offset = 0;
-        int theChar;
+        int c;
+        byte[] cbuf = new byte[32768];
 
         try {
-            theChar = bufReader.read();
+            
+            c = bufReader.read(cbuf);
             while ((!stopIt) && // Stopped when someone hit terminate button
-                    (theChar != -1) && // not EOF
+                    (c != -1) && // not EOF
                     (offset < (maxFileSize)) // over max size
             ) {
                 offset++;
-                outWriter.print((char) theChar);
-                theChar = bufReader.read();
+                outWriter.write(cbuf, 0, c);
+                c = bufReader.read(cbuf);
             }
 
             if (stopIt) {
-                outWriter.println();
-                outWriter.println("Output halted by operator");
+                outWriter.write((NL+"Output halted by operator"+NL).getBytes());
             }
 
             if (offset >= (maxFileSize)) {
-                outWriter.println();
-                outWriter.println("Output exceeds maximum file size " + new Long(maxFileSize));
+                outWriter.write((NL+"Output exceeds maximum file size " + new Long(maxFileSize).toString()+NL).getBytes());
             }
-
             try {
-                theChar = bufReader.read();
+                c = bufReader.read(cbuf);
                 while ((!stopIt) && // Stopped when someone hit terminate button
-                        (theChar != -1) // not EOF
+                        (c != -1) // not EOF
                 ) {
-                    theChar = bufReader.read();
+                    c = bufReader.read(cbuf);
                 }
 
             } catch (Exception notImportant) {
