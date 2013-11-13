@@ -85,7 +85,7 @@ function send()
     	<td style="text-align:left;"><b>Problem:<b></td></tr><tr><td>
 	<select required id="clarProbs" name="clarProbs">
        		<option value="">Choose a problem</option>
-		<?php foreach ($JavaProblems as $value) { echo "<option>".$value->getName()."</option>"; } ?>
+		<?php foreach ($JavaProblems as $value) { echo "<option value='".urlencode($value->getName())."'>".$value->getName()."</option>"; } ?>
         </select></td></tr>
     
 	<tr><td><TEXTAREA required maxlength="300" style="resize:none;" id="clarificationTextArea" ROWS="9" COLS="30" onBlur="blurHandlerRouting" name="clarificationTextArea"></TEXTAREA><br/>

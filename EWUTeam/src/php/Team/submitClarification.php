@@ -27,7 +27,7 @@
 		}
 		try
 		{
-			$server->submitClarification($_SESSION['cid'], $_POST['clarProbs'], $_POST['clarificationTextArea']);
+			$server->submitClarification($_SESSION['cid'], urldecode($_POST['clarProbs']), $_POST['clarificationTextArea']);
 			echo json_encode("success");
 		}
 		catch(JavaException $e)

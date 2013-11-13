@@ -85,7 +85,7 @@ function send(){
 		<tr><td>
         		<select required id="probs" name="probs">
             			<option style="border:none;" value="">Choose a problem</option>
-				<?php foreach ($JavaProblems as $value) { echo "<option>".$value->getName()."</option>"; } ?>
+				<?php foreach ($JavaProblems as $value) { echo "<option value='".urlencode($value->getName())."'>".$value->getName()."</option>"; } ?>
 			</select>
 		</td></tr>
 
@@ -93,7 +93,7 @@ function send(){
 		<tr><td>
 	       		<select required id="lang" name="lang">
 		    			<option value="">Choose a language</option>
-					<?php foreach ($JavaLanguages as $value) { echo "<option>".$value->getName()."</option>"; } ?>
+					<?php foreach ($JavaLanguages as $value) { echo "<option value='".urlencode($value->getName())."'>".$value->getName()."</option>"; } ?>
 	       		</select>
 		</td></tr>
 

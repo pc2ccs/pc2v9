@@ -30,7 +30,7 @@
 	}
 
 
-	if($_FILES["file"]["size"] > 512000) {
+	if($_FILES["file"]["size"] > 524288) {
 	
 		$_SESSION['error'] = "Input file larger than max input size (512KB).";
 		
@@ -45,7 +45,7 @@
 		move_uploaded_file($_FILES["file"]["tmp_name"], $fname);
 
 		try { 
-			$server->submitProblem($_SESSION["cid"],$_POST["probs"], $_POST["lang"], $fname, NULL);
+			$server->submitProblem($_SESSION["cid"],urldecode($_POST["probs"]), urldecode($_POST["lang"]), $fname, NULL);
 			
 		} catch(JavaException $ex) {
 			$_SESSION['error'] = "File could not be submitted!";
