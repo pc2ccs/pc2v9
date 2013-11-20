@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project name="EWTeam" default="stage_files" basedir=".">
-	<!-- $Id$ -->
-	<!-- $HeadURL$ -->
+	<!-- $Id: build.xml 76 2013-11-06 04:01:20Z laned $ -->
+	<!-- $HeadURL: http://pc2.ecs.csus.edu/repos/pc2projects/trunk/EWUTeam/build.xml $ -->
 	<!-- 
 
 Purpose: To create a PC2JavaServer.jar 
@@ -72,10 +72,10 @@ No need for Javadoc - this is not an API.
 
 		<!-- 
 		Fetch the SVN build version 
-		-->
 		<exec executable="svnversion" outputproperty="repo.version">
             <arg line="-n ."/>
 		</exec>
+		-->
 		
         <!-- XXX this requires svnkit-cli.jar & svnkit.jar in the project
         <java classname="org.tmatesoft.svn.cli.SVNVersion" dir="${basedir}" fork="true" outputproperty="repo.version"
@@ -86,11 +86,11 @@ No need for Javadoc - this is not an API.
 
 		<!-- 
 		A hard coded version number 
+		-->
 		<tstamp>
 			<format property="millisecond" pattern="S" timezone="UTC" />
 		</tstamp>
 		<property name="repo.version" value="${millisecond}" />
-		-->
 		
 	    <tstamp>
 	        <format property="date" pattern="yyyyMMdd" timezone="UTC" />
