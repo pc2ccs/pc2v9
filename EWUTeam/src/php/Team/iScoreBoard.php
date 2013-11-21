@@ -63,12 +63,12 @@ $(function() {
 
 						foreach($value->getProblemDetails() as $problem) {
 							if(java_is_true($problem->isSolved()))
-								echo '<td style="text-align:center;background:#58FA58;border-color:white;">'.$problem->getAttempts().'/'.$problem->getPenaltyPoints().'</td>';
+								echo '<td style="text-align:center;background:#58FA58;border-color:white;">'.$problem->getAttempts().'/'.$problem->getSolutionTime().'</td>';
 							else {
 								if( 0 == java_cast($problem->getAttempts(), "long") )
-									echo '<td style="text-align:center;border-color:white;">'.$problem->getAttempts().'/'.$problem->getPenaltyPoints().'</td>';
+									echo '<td style="text-align:center;border-color:white;">'.$problem->getAttempts().'/--</td>';
 								else
-									echo '<td style="text-align:center;background:#FF6666; border-color:white;">'.$problem->getAttempts().'/'.$problem->getPenaltyPoints().'</td>';
+									echo '<td style="text-align:center;background:#FF6666; border-color:white;">'.$problem->getAttempts().'/--</td>';
 							}
 						}
 					
