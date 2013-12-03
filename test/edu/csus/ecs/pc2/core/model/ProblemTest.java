@@ -248,5 +248,14 @@ public class ProblemTest extends TestCase {
             assertTrue ("Expecting good problem short name '"+name+"'", p1.isValidShortName());
         }
     }
+    
+    public void testDefaultTimeout() throws Exception {
+        
+        Problem problem = new Problem("Foo");
+        
+        assertEquals ("Time limit", Problem.DEFAULT_TIMEOUT_SECONDS, problem.getTimeOutInSeconds());
+        assertEquals ("Time limit", 30, problem.getTimeOutInSeconds());
+        
+    }
 
 }

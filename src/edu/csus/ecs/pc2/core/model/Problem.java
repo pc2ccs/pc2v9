@@ -32,6 +32,8 @@ public class Problem implements IElementObject {
      */
     private static final long serialVersionUID = 1708763261096488240L;
 
+    public static final int DEFAULT_TIMEOUT_SECONDS = 30;
+
     /**
      * Problem title.
      */
@@ -85,7 +87,7 @@ public class Problem implements IElementObject {
     /**
      * Seconds per problem run.
      */
-    private int timeOutInSeconds;
+    private int timeOutInSeconds = DEFAULT_TIMEOUT_SECONDS;
 
     // Validator fields
 

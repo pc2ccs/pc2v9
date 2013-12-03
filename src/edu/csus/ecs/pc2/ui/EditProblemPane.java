@@ -2206,7 +2206,7 @@ public class EditProblemPane extends JPanePlugin {
         updateButton.setEnabled(false);
 
         problemNameTextField.setText("");
-        timeOutSecondTextField.setText("120");
+        timeOutSecondTextField.setText(Integer.toString(Problem.DEFAULT_TIMEOUT_SECONDS));
         judgesHaveAnswerFiles.setSelected(false);
         problemRequiresDataCheckBox.setSelected(false);
 
