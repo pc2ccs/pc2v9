@@ -234,45 +234,25 @@ public class FinalizePane extends JPanePlugin {
 
         FinalizeData data = getFromFields();
 
-        // TODO CCS remove debugMode variable and all conditionals based on the variable.
-        boolean debugMode = false;
-
         int numberUnjudgedRuns = getNumberUnjudgedRuns();
         if (numberUnjudgedRuns > 0) {
-            showMessage("Cannot Finalize - " + numberUnjudgedRuns + " unjudged runs");
-
-            if (!debugMode) {
-                return;
-            }
+            showMessage("Warning " + numberUnjudgedRuns + " unjudged runs");
         }
 
         int numberUnasweredClars = getNumberUnansweredClars();
         if (numberUnasweredClars > 0) {
-            showMessage("Cannot Finalize - " + numberUnasweredClars + " un-answered clarifications");
-
-            if (!debugMode) {
-                return;
-            }
+            showMessage("Warning " + numberUnasweredClars + " un-answered clarifications");
         }
 
         ContestTime contestTime = getContest().getContestTime();
 
         if (contestTime.isContestRunning()) {
 
-            showMessage("Cannot Finalize - contest not stopped");
-
-            if (!debugMode) {
-                return;
-            }
+            showMessage("Warning - contest not stopped");
         }
 
         if (contestTime.getRemainingSecs() > 0) {
-
-            showMessage("Cannot Finalize - contest not over - " + contestTime.getRemainingTimeStr() + " remaining time");
-
-            if (!debugMode) {
-                return;
-            }
+            showMessage("Warning - contest not over - remaining time: " + contestTime.getRemainingTimeStr());
         }
 
         try {
@@ -334,13 +314,13 @@ public class FinalizePane extends JPanePlugin {
         if (data.getGoldRank() == 0) {
             throw new InvalidFieldValue("Gold rank must be greater than zero");
         }
-
-        if (data.getSilverRank() <= data.getGoldRank()) {
-            throw new InvalidFieldValue("Silver rank must be greater than gold rank.");
+        
+        if (data.getSilverRank() == 0) {
+            throw new InvalidFieldValue("Silver rank must be greater than zero");
         }
-
-        if (data.getBronzeRank() <= data.getSilverRank()) {
-            throw new InvalidFieldValue("Bronze rank must be greater than silver rank.");
+        
+        if (data.getBronzeRank() == 0) {
+            throw new InvalidFieldValue("Bronze rank must be greater than zero");
         }
 
         if (data.getComment().trim().length() < 1) {
@@ -505,12 +485,12 @@ public class FinalizePane extends JPanePlugin {
     void enableButtons(){
         
         boolean certified = false;
-        
-        FinalizeData finalizeData = getContest().getFinalizeData();
-        
-        if (finalizeData != null){
-            certified = finalizeData.isCertified();
-        }
+//        
+//        FinalizeData finalizeData = getContest().getFinalizeData();
+//        
+//        if (finalizeData != null){
+//            certified = finalizeData.isCertified();
+//        }
         
         getUpdateButton().setEnabled(! certified);
         getFinalizeButton().setEnabled(! certified);
