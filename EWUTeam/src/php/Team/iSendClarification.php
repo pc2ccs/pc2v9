@@ -53,9 +53,13 @@ function send()
    dataType: 'json',
   cache: false,
    success: function(msg){
-			//alert("sent");
-			$("#sent-box").fadeIn(1000);
-			setTimeout('$("#sent-box").fadeOut();',3000);
+			if(msg.indexOf("ContestStopped") > -1) {
+				parent.alert("The contest is stopped. Unable to submit your clarification.");
+			}
+			else {
+				$("#sent-box").fadeIn(1000);
+				setTimeout('$("#sent-box").fadeOut();',3000);
+			}
 			//return to default values
 			ta.value ="";
 			$("#clarProbs").val($("#clarProbs option:first").val());

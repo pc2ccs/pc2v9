@@ -72,6 +72,19 @@ public class ServerInterface
 			return false;
 		}
 	}
+	
+	//ret:
+	//   true  - Contest is stopped, deny submission.
+	//   false - Contest is running, allow submission.
+	public boolean isContestStopped(String connectionID) {
+		boolean ret = false;
+		try {
+			ret = (! server.getTeam(connectionID).getContest().isContestClockRunning());
+		} catch (NotLoggedInException e) {
+			ret = true;
+		}
+		return ret;		
+	}
 
 	
 	//log a team in

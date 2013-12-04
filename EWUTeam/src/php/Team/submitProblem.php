@@ -29,6 +29,11 @@
 		exit();
 	}
 
+	if (java_is_true($server->isContestStopped($_SESSION['cid']))) {
+		echo json_encode("ContestStopped");
+		exit();
+	}
+	
 
 	if($_FILES["file"]["size"] > 524288) {
 	

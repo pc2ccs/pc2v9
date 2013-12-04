@@ -25,6 +25,10 @@
 			header("Http/1.0 406 Not acceptable");
 			exit();
 		}
+		if (java_is_true($server->isContestStopped($_SESSION['cid']))) {
+			echo json_encode("ContestStopped");
+			exit();
+		}
 		try
 		{
 			$server->submitClarification($_SESSION['cid'], urldecode($_POST['clarProbs']), $_POST['clarificationTextArea']);

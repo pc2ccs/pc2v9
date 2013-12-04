@@ -48,8 +48,13 @@ function send(){
         type: 'POST',
         data: formData,
         success: function (data) {
-           	$("#sent-box").fadeIn(1000);
-		setTimeout('$("#sent-box").fadeOut();',3000);
+		if(data.indexOf("ContestStopped") > -1) {
+			parent.alert("The contest is stopped. Unable to submit your solution.");
+		}
+		else {
+           		$("#sent-box").fadeIn(1000);
+			setTimeout('$("#sent-box").fadeOut();',3000);
+		}
 		//return to default values
 		$("#probs").val($("#probs option:first").val());
 		$("#lang").val($("#lang option:first").val());
