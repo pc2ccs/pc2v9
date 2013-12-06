@@ -193,6 +193,31 @@ public class Problem implements IElementObject {
     private String externalDataFileLocation = null;
     
     /**
+     * Problem State.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    public enum State {
+        /**
+         * Active.
+         */
+        ENABLED, 
+        /**
+         * Not accepting runs
+         */
+        PAUSED, 
+        /**
+         * Not accepting runs.
+         */
+        DISABLED 
+    }
+    
+    private State state = State.ENABLED;
+    
+    /**
      * Create a problem with the display name.
      * 
      * @param displayName
@@ -912,5 +937,13 @@ public class Problem implements IElementObject {
      */
     private String[] getTestCaseAnswerFilenames() {
         return testCaseAnswerFilenames;
+    }
+    
+    public State getState() {
+        return state;
+    }
+    
+    public void setState(State state) {
+        this.state = state;
     }
 }

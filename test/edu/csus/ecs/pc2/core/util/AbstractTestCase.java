@@ -247,6 +247,8 @@ public class AbstractTestCase extends TestCase {
     /**
      * Return a test data directory for the current JUnit/class.
      * 
+     * If directory does not exist will create it.
+     * 
      * @see {@link #getTestFilename(String)}
      * @see {@link #getOutputTestFilename(String)}
      * @see {@link #getSamplesSourceFilename(String)}
@@ -254,12 +256,8 @@ public class AbstractTestCase extends TestCase {
      * @return a project-relative directory name, appends the JUnit name at the end of the string. 
      */
     public String getDataDirectory() {
-        
         String dirname = getRootInputTestDataDirectory() + File.separator + getShortClassName();
-        if (debugMode){
-            ensureDirectory(dirname);
-        }
-        assertDirectoryExists(dirname);
+        ensureDirectory(dirname);
         return dirname;
     }
 

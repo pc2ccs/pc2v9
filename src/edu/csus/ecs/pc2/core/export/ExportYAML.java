@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -106,15 +107,26 @@ public class ExportYAML {
         contestWriter.println("--- ");
 
         contestWriter.println();
+        
+        // from CCS 
+//        name    Name of contest
+//        short-name  Short name of contest
+//        start-time  Date and time in ISO 8601 format (wall-clock time that the contest starts)
+//        duration    Duration as h:mm:ss (length of contest, in contest time)
+//        scoreboard-freeze   Time when scoreboard will be frozen in contest time as h:mm:ss
+//        event-feed-port     Port number for the Event Feed
+//        default-clars   Sequence of pre-defined clarification answers. The first will be pre-selected
+//        clar-categories     Sequence of categories for clarifications.
+//        languages   Sequence of mappings with keys as defined below
+//        penaltytime     Penalty minutes for each incorrect run (optional, default 20) 
+        
+        ContestInformation info = contest.getContestInformation();
 
         // name: ACM-ICPC World Finals 2011
         // short-name: ICPC WF 2011
-        // start-time: 2011-02-04 01:23Z
-        // duration: 5:00:00
-        // scoreboard-freeze: 4:00:00
 
-        contestWriter.println("name: " + contest.getContestInformation().getContestTitle());
-        contestWriter.println("short-name: ");
+        contestWriter.println("name: " + info.getContestTitle());
+        contestWriter.println("short-name: "+info.getContestShortName());
 
         ContestTime contestTime = contest.getContestTime();
         if (contestTime == null) {
@@ -122,15 +134,24 @@ public class ExportYAML {
             contest.addContestTime(contestTime);
         }
 
-        if (contestTime.getElapsedSecs() > 0) {
-            contestWriter.println("start-time: " + formatter.format(contestTime.getResumeTime().getTime()));
-            contestWriter.println("duration: " + contestTime.getContestLengthStr());
-        }
+        // TODO DOC wikitize these
+        // pc2 specific values
         contestWriter.println("elapsed: " + contestTime.getElapsedTimeStr());
         contestWriter.println("remaining: " + contestTime.getRemainingTimeStr());
         contestWriter.println("running: " + contestTime.isContestRunning());
+        
+        // start-time: 2011-02-04 01:23Z
+        contestWriter.println("start-time: " + formatDate(info.getStartDate()));
+        
+        
+        // TODO CCS duration: 5:00:00
+        // duration: 5:00:00
+        contestWriter.println("elapsed: " + contestTime.getContestLengthStr());
 
-        contestWriter.println("scoreboard-freeze: ");
+        // TODO CCS scoreboard-freeze: 4:00:00
+        // scoreboard-freeze: 4:00:00
+                
+        contestWriter.println("scoreboard-freeze: "+info.getFreezeTime());
         
         contestWriter.println("# " + ContestYAMLLoader.PROBLEM_EXTERNAL_FILES_KEY + ": true");
 
@@ -143,7 +164,7 @@ public class ExportYAML {
         // - This will be answered during the answers to questions session.
         contestWriter.println(ContestYAMLLoader.DEFAULT_CLARS_KEY + ":");
         // TODO CCS this needs to be an array
-        contestWriter.println(" - "+contest.getContestInformation().getJudgesDefaultAnswer());
+        contestWriter.println(" - "+info.getJudgesDefaultAnswer());
         contestWriter.println();
         
         // clar-categories:
@@ -341,6 +362,19 @@ public class ExportYAML {
         contestWriter.flush();
         contestWriter.close();
         contestWriter = null;
+    }
+
+    /**
+     * 
+     * @param date
+     * @return empty string if date is null, other wise 
+     */
+    private String formatDate (Date date) {
+        if (date == null){
+            return "";
+        } else {
+            return formatter.format(date);
+        }
     }
 
     private String getProblemLetters(IInternalContest contest, Filter filter) {

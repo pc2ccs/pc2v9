@@ -1,8 +1,10 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Properties;
 
+import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
@@ -101,6 +103,20 @@ public class ContestInformation implements Serializable{
      */
     private PasswordType autoRegistrationPasswordType = PasswordType.RANDOM;
 
+    /**
+     * Contest Start/Date Time.
+     */
+    private Date startDate;
+    
+    private boolean autoStartContest = false;
+
+    /**
+     * Scoreboard freeze time.
+     */
+    private String freezeTime;
+
+    private String contestShortName;
+
     public String getContestTitle() {
         return contestTitle;
     }
@@ -185,6 +201,22 @@ public class ContestInformation implements Serializable{
                 return false;
             }
             
+            if (!DateUtilities.dateSame(startDate, contestInformation.startDate)) {
+                return false;
+            }
+
+            if (autoStartContest != contestInformation.autoStartContest) {
+                return false;
+            }
+
+            if (!StringUtilities.stringSame(freezeTime, contestInformation.freezeTime)) {
+                return false;
+            }
+
+            if (!StringUtilities.stringSame(contestShortName, contestInformation.contestShortName)) {
+                return false;
+            }
+
             return true;
         } catch (Exception e) {
             e.printStackTrace(System.err); // TODO log this exception 
@@ -332,5 +364,37 @@ public class ContestInformation implements Serializable{
 
     public void setAutoRegistrationPasswordType(PasswordType autoRegistrationPasswordType) {
         this.autoRegistrationPasswordType = autoRegistrationPasswordType;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+    
+    public Date getStartDate() {
+        return startDate;
+    }
+    
+    public boolean isAutoStartContest() {
+        return autoStartContest;
+    }
+    
+    public void setAutoStartContest(boolean autoStartContest) {
+        this.autoStartContest = autoStartContest;
+    }
+
+    public String getFreezeTime() {
+        return freezeTime;
+    }
+    
+    public void setFreezeTime(String freezeTime) {
+        this.freezeTime = freezeTime;
+    }
+
+    public String getContestShortName() {
+        return contestShortName;
+    }
+    
+    public void setContestShortName(String contestShortName) {
+        this.contestShortName = contestShortName;
     }
 }
