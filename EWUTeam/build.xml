@@ -119,7 +119,7 @@ No need for Javadoc - this is not an API.
 
 	<!-- Compile the java code from ${src.dir} into ${build.dir} -->
 	<target name="compile" depends="init" description="compile the source ">
-		<javac srcdir="${src.dir}" source="1.6" target="1.6" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no">
+		<javac srcdir="${src.dir}" source="1.6" target="1.6" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="/software/pc2/java/jdk1.6.0_22/jre/lib/rt.jar">
 			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
 			<classpath refid="project.classpath" />
 			<compilerarg line="-log '${build.dir}/${ewuname}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
