@@ -36,6 +36,28 @@
 
 <script>
 
+setInterval('runSubmissionVerification()',5000);
+
+function runSubmissionVerification() {
+	$.ajax({
+		type: 'POST',
+		url: 'verifyRunSubmission.php',
+		data: 'SESSION_NAME=<?php echo session_name(); ?>',
+		dataType: 'json',
+		cache: false,
+		success: function(result) {
+			if(result == 'SubmissionOccurred') 
+			{
+				var submitButton = document.getElementById('subbutton');      
+				submitButton.disabled=false;
+				submitButton.value="Submit Problem";
+				$("#sent-box").fadeIn(1000);
+				setTimeout('$("#sent-box").fadeOut();',3000);
+				setTimeout('parent.window.frames[\'runViewFrame\'].location.reload();',1000);
+			}
+		}
+	});
+}
 
 function send(){
 
@@ -59,9 +81,9 @@ function send(){
 		$("#probs").val($("#probs option:first").val());
 		$("#lang").val($("#lang option:first").val());
 		$("#file").val("");
-		setTimeout('parent.window.frames[\'runViewFrame\'].location.reload();',1000);
-		submitButton.disabled=false;
-		submitButton.value="Submit Problem";
+// 		setTimeout('parent.window.frames[\'runViewFrame\'].location.reload();',1000);
+// 		submitButton.disabled=false;
+// 		submitButton.value="Submit Problem";
         },
  error: function(msg){
 		 //does not return values to give a chance to copy message before resubmission

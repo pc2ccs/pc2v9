@@ -33,10 +33,30 @@
 <script src="JQuery/jquery-1.9.1.js"></script>
 <script src="JQuery/jquery-ui.js"></script>
 
-
-
-
 <script>
+setInterval('clarSubmissionVerification()',5000);
+
+function clarSubmissionVerification() {
+         $.ajax({
+                 type: 'POST',
+                 url: 'VerifyClarificationSubmission.php',
+                 data: 'SESSION_NAME=<?php echo session_name(); ?>',
+                 dataType: 'json',
+                 cache: false,
+                 success: function(result) {
+                         if(result == 'SubmissionOccurred')
+                         {
+                                 var submitButton = document.getElementById('clarsubbutton');
+                                 submitButton.disabled=false;
+                                 submitButton.value="Submit Clarification";
+                                 $("#sent-box").fadeIn(1000);
+                                 setTimeout('$("#sent-box").fadeOut();',3000);
+                                 setTimeout('parent.window.frames[\'clarViewFrame\'].location.reload();',1000);
+                         }
+                 }
+       });
+}
+
 function send()
 {
     var submitButton = document.getElementById('clarsubbutton');	
@@ -63,9 +83,9 @@ function send()
 			//return to default values
 			ta.value ="";
 			$("#clarProbs").val($("#clarProbs option:first").val());
-			setTimeout('parent.window.frames[\'clarViewFrame\'].location.reload();',1000);
-			submitButton.disabled=false;
-			submitButton.value="Submit Clarification";
+// 			setTimeout('parent.window.frames[\'clarViewFrame\'].location.reload();',1000);
+// 			submitButton.disabled=false;
+// 			submitButton.value="Submit Clarification";
 
     },
      error: function(msg){

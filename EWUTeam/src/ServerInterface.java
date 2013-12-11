@@ -150,6 +150,14 @@ public class ServerInterface
 				}
 				public void runSubmitted(IRun run)
 				{
+					for(TeamData t : teams) 
+					{
+						if(run.getTeam().hashCode() == t.getTeamHash())
+						{
+							t.setNewRunSubmission(run);
+							return;
+						}
+					}
 				}
 				public void runUpdated(IRun run, boolean isFinal)
 				{
@@ -169,9 +177,14 @@ public class ServerInterface
 			{
 				public void clarificationAdded(IClarification clar)
 				{
-					//when a clarification is submitted
-//DEBUG
-//System.out.println("Clarification sent: " + clar.getQuestion());
+					for(TeamData t : teams) 
+					{
+						if(clar.getTeam().hashCode() == t.getTeamHash())
+						{
+							t.setNewClarificationSubmission(clar);
+							return;
+						}
+					}
 				}
 				
 				public void clarificationAnswered(IClarification clar)
@@ -462,10 +475,37 @@ public class ServerInterface
 			{
 				return t.getNewClar();
 			}
-					
 		}
+		return null;
+	}
+					
+	public IRun runSubmitOccurred(String username)
+	{
+		if (username == null) {
+			return null;
+		}
+		for(TeamData t : teams) 
+		{
+			if(username.equals(t.getTeamName()))
+			{
+				return t.getRunSubmission();
+			}	
+		}
+		return null;
+	}
 
-
+	public IClarification clarificationSubmitOccurred(String username)
+	{
+		if (username == null) {
+		return null;
+	}
+		for(TeamData t : teams) 
+		{
+			if(username.equals(t.getTeamName()))
+			{
+				return t.getClarificationSubmission();
+			}	
+		}
 		return null;
 	}
 

@@ -20,6 +20,8 @@ public class TeamData
 	//private boolean newRun;
 	private LinkedList<IClarification> clars;
 	private LinkedList<IRun> runs;
+	private LinkedList<IRun> runVerification;
+	private LinkedList<IClarification> clarificationVerification;
 	
 	public TeamData(IClient t)
 	{
@@ -28,6 +30,8 @@ public class TeamData
 		//newRun = false;
 		clars = new LinkedList<IClarification>();
 		runs = new LinkedList<IRun>();
+		runVerification = new LinkedList<IRun>();
+		clarificationVerification = new LinkedList<IClarification>();
 	}
 	
 
@@ -67,6 +71,25 @@ public class TeamData
 		//return newRun;// for old way return type would be boolean
 	}
 
+	public IRun getRunSubmission() {
+		if(runVerification.isEmpty())
+			return null;
+		return (IRun)runVerification.pop();
+	}
+
+	public void setNewRunSubmission(IRun run) {
+		runVerification.addLast(run);
+	}
+	
+	public IClarification getClarificationSubmission() {
+		if(clarificationVerification.isEmpty())
+			return null;
+		return (IClarification)clarificationVerification.pop();
+	}
+	
+	public void setNewClarificationSubmission(IClarification run) {
+		clarificationVerification.addLast(run);
+	}
 
 	public void setNewClar(IClarification c)//boolean a) old way
 	{
