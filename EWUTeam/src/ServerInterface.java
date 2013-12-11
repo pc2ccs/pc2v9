@@ -29,7 +29,7 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
  * @version $Id$
  */
 
-// $ HeadURL $
+// $HeadURL $
 public class ServerInterface {
 	public ServerConnectionManager server = new ServerConnectionManager();
 	public static ServerInterface serverInterface = new ServerInterface();
