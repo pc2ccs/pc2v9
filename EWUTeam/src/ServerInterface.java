@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.api.IClarification;
@@ -15,6 +16,7 @@ import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.api.implementation.Contest;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 
 /**
@@ -211,6 +213,26 @@ public class ServerInterface {
 	// get list of problems for specific team's contest
 	public IProblem[] getProblems(String teamKey) throws NotLoggedInException {
 		return getTeam(teamKey).getContest().getProblems();
+	}
+
+	/**
+ 	 * @return get list of clar categories and contest problems.
+ 	 * @throws NotLoggedInException
+ 	 */
+	public IProblem[] getClarificationProblems(String teamKey)
+			throws NotLoggedInException
+
+	{
+		Contest contest = getTeam(teamKey).getContest();
+		ArrayList<IProblem> list = new ArrayList<IProblem>();
+
+		IProblem[] problems = contest.getProblems();
+		list.addAll(Arrays.asList(problems));
+
+		problems = contest.getClarificationCategories();
+		list.addAll(Arrays.asList(problems));
+
+		return (IProblem[]) list.toArray(new IProblem[list.size()]);
 	}
 
 	// get list of languages for specific team's contest
