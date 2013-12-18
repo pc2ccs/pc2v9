@@ -321,7 +321,7 @@ public class ServerInterface {
 	public void submitClarification(String teamKey, String problemName,
 			String question) throws NotLoggedInException {
 		try {
-			IProblem problem = getProblemByName(teamKey, problemName);
+			IProblem problem = getClarificationProblemByName(teamKey, problemName);
 
 			getTeam(teamKey).submitClarification(problem, question);
 		} catch (Exception e) {
@@ -330,6 +330,20 @@ public class ServerInterface {
 		}
 
 	}
+
+	// get problem by name
+	public IProblem getClarificationProblemByName(String teamKey, String problemName)
+			throws ProblemNotFoundException {
+		try {
+			IProblem[] problems = getClarificationProblems(teamKey);
+			for (IProblem p : problems)
+				if (p.getName().equals(problemName))
+					return p;
+		} catch (NotLoggedInException e) {
+		}
+		throw new ProblemNotFoundException();
+	}
+
 
 	// get problem by name
 	public IProblem getProblemByName(String teamKey, String problemName)
