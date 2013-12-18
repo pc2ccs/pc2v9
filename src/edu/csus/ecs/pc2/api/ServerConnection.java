@@ -158,18 +158,12 @@ public class ServerConnection {
         
         Account account = getAccount(internalContest, internalContest.getClientId());
 
-        if (!account.isAllowed(Permission.Type.SUBMIT_RUN)) {
-            throw new Exception("User not allowed to submit run");
+        if (!account.isAllowed(Permission.Type.SUBMIT_CLARIFICATION)) {
+            throw new Exception("User not allowed to submit clarification");
         }
 
-        Problem submittedProblem = null;
-
-        Problem[] problems = internalContest.getProblems();
-        for (Problem problem2 : problems) {
-            if (problem2.getDisplayName().equals(problem.getName())) {
-                submittedProblem = problem2;
-            }
-        }
+        ProblemImplementation problemImplementation = (ProblemImplementation) problem;
+        Problem submittedProblem = internalContest.getProblem(problemImplementation.getElementId());
 
         if (submittedProblem == null) {
             throw new Exception("Could not find any problem matching: '" + problem.getName());
