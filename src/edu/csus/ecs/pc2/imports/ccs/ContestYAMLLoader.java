@@ -86,9 +86,9 @@ public class ContestYAMLLoader {
     public static final String DEFAULT_PROBLEM_LATEX_FILENAME = "problem.tex";
 
     /**
-     * problemName key in problem.yaml
+     * problem title key in problem.yaml
      */
-    private static final String PROBLEM_NAME_KEY = "name";
+    private static final String PROBLEM_NAME_KEY = "title";
 
     /**
      * Problem input (data files) key.
@@ -550,30 +550,26 @@ public class ContestYAMLLoader {
             throw new YamlLoadException("Can not load problem.yaml: " + problemYamlFilename);
         }
 
-        String problemName = getSequenceValue(contents, PROBLEM_NAME_KEY);
-
-        if (problemName == null) {
-            String problemTextFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_PROBLEM_LATEX_FILENAME;
-            if (new File(problemTextFilename).isFile()) {
-
-                problemName = getProblemNameFromLaTex(problemTextFilename);
-            }
+        String problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_PROBLEM_LATEX_FILENAME;
+        
+        String problemTitle = getSequenceValue(contents, PROBLEM_NAME_KEY);
+        
+        if (new File(problemLaTexFilename).isFile()) {
+            problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
         }
 
         String[] sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
         boolean pc2FormatProblemYamlFile = getSequenceValue(sectionLines, "answerfile") != null;
 
-        if (problemName == null && (pc2FormatProblemYamlFile)) {
-            problemName = getSequenceValue(sectionLines, "name");
+        if (problemTitle == null && (pc2FormatProblemYamlFile)) {
+            problemTitle = getSequenceValue(sectionLines, "name");
         }
         
-        if (problemName == null ){
-            problemName = problem.getShortName();
+        if (problemTitle == null) {
+            syntaxError("No problem name found for " + problem.getShortName()+" in "+problemLaTexFilename);
         }
         
-        if (problemName == null) {
-            syntaxError("No problem name found for " + problem.getShortName());
-        }
+        problem.setDisplayName(problemTitle);
 
         String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
 
@@ -1124,12 +1120,6 @@ public class ContestYAMLLoader {
             if (problemKeyName == null){
                 syntaxError("Missing "+SHORT_NAME_KEY+" in probset section");
             }
-
-            String problemTitle = getSequenceValue(sequenceLines, "name");
-            
-            if (problemTitle == null){
-                problemTitle = problemKeyName;
-            }
             
             /**
              * <pre>
@@ -1138,16 +1128,16 @@ public class ContestYAMLLoader {
              *      short-name: apl
              *      color:      yellow
              *      rgb:        #ffff00
+             * # optional title
+             *      title:      APL Rules!
              * </pre>
              */
-
-            if (problemTitle == null && Utilities.isDebugMode()) {
-                // SOMEDAY use Log4j.debug for this
-                for (String s : sequenceLines) {
-                    System.out.println(s);
-                }
-            }
             
+            String problemTitle = getSequenceValue(sequenceLines, PROBLEM_NAME_KEY);
+            if (problemTitle == null){
+                problemTitle = problemKeyName;
+            }
+
             Problem problem = new Problem(problemTitle);
 
             int actSeconds = getIntegerValue(getSequenceValue(sequenceLines, TIMEOUT_KEY), seconds);
@@ -1168,7 +1158,7 @@ public class ContestYAMLLoader {
             problem.setLetter(problemLetter);
             problem.setColorName(colorName);
             problem.setColorRGB(colorRGB);
-
+            
             String externalFilesUsesString = getSequenceValue(sequenceLines, PROBLEM_EXTERNAL_FILES_KEY);
             problem.setUsingExternalDataFiles(getBooleanValue(externalFilesUsesString, ! loadDataFileContents));
             

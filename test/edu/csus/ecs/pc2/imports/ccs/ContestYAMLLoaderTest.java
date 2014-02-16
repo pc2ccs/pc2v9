@@ -195,20 +195,20 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         int problemIndex = 0;
 
         Problem problem = problems[problemIndex++];
-        assertEquals("Expected problem name ", "apl", problem.getDisplayName());
+        assertEquals("Expected problem name ", "apl Title", problem.getDisplayName());
         assertEquals("Expected default timeout for "+problem, 20, problem.getTimeOutInSeconds());
         
         problem = problems[problemIndex++];
-        assertEquals("Expected problem name ", "barcodes", problem.getDisplayName());
+        assertEquals("Expected problem name ", "barcodes Title", problem.getDisplayName());
         
         problem = problems[problemIndex++];
-        assertEquals("Expected problem name ", "biobots", problem.getDisplayName());
+        assertEquals("Expected problem name ", "biobots Title", problem.getDisplayName());
         
         problem = problems[problemIndex++];
-        assertEquals("Expected problem name ", "castles", problem.getDisplayName());
+        assertEquals("Expected problem name ", "Castles in the Sand", problem.getDisplayName());
         
         problem = problems[problemIndex++];
-        assertEquals("Expected problem name ", "channel", problem.getDisplayName());
+        assertEquals("Expected problem name ", "Channel Island Navigation", problem.getDisplayName());
         assertEquals("Expected default timeout for "+problem, 20, problem.getTimeOutInSeconds());
         
         assertTrue("Expecting comptuer judged", problem.isComputerJudged());
@@ -308,7 +308,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
             idx++;
         }
         
-        String[] probNames = { "apl", "barcodes", "biobots", "castles", "channel" };
+        String[] probNames = { "apl Title", "barcodes Title", "biobots Title", "Castles in the Sand", "Channel Island Navigation" };
         int[] dataSetCount = { 1, 1, 3, 1, 1 };
 
         int i = 0;
@@ -924,5 +924,73 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
             System.out.println(string);
             i++;
         }
+    }
+    
+    private String getProblemSetYamlTestFileName() {
+        return getTestFilename(ExportYAML.PROBLEM_SET_FILENAME);
+    }
+    
+    
+    /**
+     * Test load problemset.yaml.
+     * 
+     * @throws Exception
+     */
+    public void testLoadProblemSet() throws Exception {
+        
+        IInternalContest contest = loader.fromYaml(null, new String[0], "NAD");
+        assertNotNull(contest);
+        
+        String inputYamlFilename = getProblemSetYamlTestFileName();
+        
+//        editFile(inputYamlFilename);
+        
+        assertFileExists(inputYamlFilename);
+
+        String[] contents = Utilities.loadFile(getProblemSetYamlTestFileName());
+
+        contest = loader.fromYaml(null, contents, getDataDirectory());
+
+        assertNotNull(contest);
+        
+        Problem[] problems = contest.getProblems();
+        
+        for (Problem problem2 : problems) {
+            assertNotNull("Expected problem short name ", problem2.getShortName());
+        }
+        
+        int problemIndex = 0;
+
+        Problem problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "apl Title", problem.getDisplayName());
+        assertEquals("Expected default timeout for "+problem, 20, problem.getTimeOutInSeconds());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "barcodes Title", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "biobots Title", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "Castles in the Sand", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "Channel Island Navigation", problem.getDisplayName());
+        assertEquals("Expected default timeout for "+problem, 20, problem.getTimeOutInSeconds());
+        
+        assertEquals("Number of problems", 5, problems.length);
+        
+        ProblemDataFiles[] problemDataFilesList = contest.getProblemDataFiles();
+        
+        for (ProblemDataFiles problemDataFiles : problemDataFilesList) {
+//            assertTrue("Expecting comptuer judged", problemDataFiles.getJudgesDataFile().isExternalFile());
+            
+            String problemTitle = contest.getProblem(problemDataFiles.getProblemId()).getDisplayName();
+            
+            assertNotNull("Missing judges data file, for problem "+problemTitle, problemDataFiles.getJudgesDataFile());
+            assertNotNull("Missing judges answer file, for problem "+problemTitle, problemDataFiles.getJudgesAnswerFile());
+            
+        }
+
     }
 }

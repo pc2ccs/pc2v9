@@ -638,4 +638,18 @@ public final class Utilities {
     public static StringBuffer join(String delimiter, String [] strings) {
         return join(delimiter, Arrays.asList(strings));
     }
+
+    /**
+     * return full path for input relative path/filename.
+     * 
+     * @param relativePath
+     */
+    public static String getFullPath(String relativePath) {
+        if (relativePath.startsWith(".\\") || relativePath.startsWith("./")) {
+            relativePath = relativePath.substring(2);
+        }
+        String fullpath = Utilities.getCurrentDirectory() + "/" + relativePath;
+
+        return new File(fullpath).getAbsolutePath();
+    }
 }

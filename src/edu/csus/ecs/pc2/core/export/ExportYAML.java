@@ -46,6 +46,8 @@ import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 public class ExportYAML {
 
     public static final String CONTEST_FILENAME = "contest.yaml";
+    
+    public static final String PROBLEM_SET_FILENAME = "problemset.yaml";
 
     public static final String PROBLEM_FILENAME = "problem.yaml";
 
