@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
+
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -19,6 +21,62 @@ public class SerializedFileTest extends AbstractTestCase {
 //        setCreateMissingDirectories(true);
         super.setUp();
     }
+    
+    public void testFilesNotFound() throws Exception {
+        
+        String[] names = { "Foo", "MissingFile.c", "NotThere" };
+        for (String filename : names) {
+            SerializedFile file = new SerializedFile(filename);
+
+            assertNull("Expecting file not found/null", file.getBuffer());
+            assertNotNull("Expecting exception set", file.getException());
+            assertEquals("Expecting message", filename + " not found in SerializedFile", file.getErrorMessage());
+        }
+
+    }
+    
+    public void testClone() throws Exception {
+        
+        SerializedFile firstFile = new SerializedFile();
+        
+        SerializedFile clone = (SerializedFile) firstFile.clone();
+        assertFalse("expecting external flag ", firstFile.isExternalFile());
+        assertFalse("expecting external flag ", clone.isExternalFile());
+        
+        compareSerializedFile (firstFile, clone);
+        
+        String filename = "Foo";
+        firstFile = new SerializedFile(filename, true);
+        assertNull("Expecting file not found/null", firstFile.getBuffer());
+        assertNotNull("Expecting exception set", firstFile.getException());
+        assertEquals("Expecting message", filename + " not found in SerializedFile", firstFile.getErrorMessage());
+        assertTrue("expecting external flag ", firstFile.isExternalFile());
+        
+        clone = (SerializedFile) firstFile.clone();
+        compareSerializedFile (firstFile, clone);
+        
+    }
+    
+    private void compareSerializedFile(SerializedFile firstFile, SerializedFile clone) {
+    
+        assertEquals("getErrorMessage ",  firstFile.getErrorMessage(), clone.getErrorMessage());
+        assertEquals("getException ",  firstFile.getException(), clone.getException());
+        assertEquals("external file flag ",  firstFile.isExternalFile(), clone.isExternalFile());
+        
+//        assertTrue("equals", firstFile.equals(clone));
+    }
+
+    public void testBuff2File() throws Exception {
+        
+        String filename = "BadFileName";
+        
+        SerializedFile file = new SerializedFile();
+        file.buffer2file(null, filename);
+        
+        assertNotNull("Expecting exception set", file.getException());
+        assertEquals("Expecting message", "Exception in SerializeFile for file "+filename, file.getErrorMessage());
+    
+    }
 
     public void testEquals() throws Exception {
         
@@ -37,5 +95,39 @@ public class SerializedFileTest extends AbstractTestCase {
         SerializedFile file3 = new SerializedFile(filename);
         assertFalse("a third file should not be equal to the first file", file1.equals(file3));
 
+    }
+    
+    public void testExternal() throws Exception {
+        
+        String filename = getOutputTestFilename("no_file");
+        SerializedFile serializedFile = new SerializedFile(filename, true);
+        
+        assertTrue("Expect external flag file ", serializedFile.isExternalFile());
+        
+        assertFalse ("Not expectinf file ", serializedFile.getFile().isFile());
+        
+        assertNull("Expecting null buffer", serializedFile.getBuffer());
+
+        String actualSum = serializedFile.getSHA1sum();
+        
+        assertNull ("Expecting null SHA string (no file) ",actualSum);
+        
+        filename = sample.createSampleDataFile(getOutputTestFilename("datafile"));
+
+        serializedFile = new SerializedFile(filename, true);
+        
+        assertTrue("Expect external flag file ", serializedFile.isExternalFile());
+        assertNull("Expecting null buffer", serializedFile.getBuffer());
+
+        File file = new File(filename);
+        String expectedSum = SerializedFile.generateSHA1(file);
+        
+        actualSum = serializedFile.getSHA1sum();
+        
+        assertNotNull ("Expecting SHA",actualSum);
+        assertNotNull ("Expecting SHA string ",actualSum.length() > 0);
+        
+        assertEquals("Expecting same SHA",  expectedSum, actualSum);
+        
     }
 }

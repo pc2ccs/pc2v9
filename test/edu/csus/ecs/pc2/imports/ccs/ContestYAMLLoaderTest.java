@@ -6,8 +6,6 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Vector;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
@@ -40,12 +38,13 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoaderTest.java $
 public class ContestYAMLLoaderTest extends AbstractTestCase {
 
+    private static final String TEST_CLASS_NAME = "ContestYAMLLoader";
+
     private boolean debugFlag = false;
 
     private ContestYAMLLoader loader = new ContestYAMLLoader();
     
     private SampleContest sampleContest = new SampleContest();
-
 
     public ContestYAMLLoaderTest(String string) {
         super(string);
@@ -249,10 +248,14 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     }
 
     public void testProblemLoader() throws Exception {
+        
+        boolean loadDataFiles = true;
 
-        IInternalContest contest = loader.fromYaml(null, getDataDirectory());
+        IInternalContest contest = loader.fromYaml(null, getDataDirectory(), loadDataFiles);
         
         debugPrint("Dir " + getDataDirectory());
+        
+//        editFile(getDataDirectory()+"/"+ContestYAMLLoader.DEFAULT_CONTEST_YAML_FILENAME);
 
         int problemNumber = 0;
         for (Problem problem : contest.getProblems()) {
@@ -260,23 +263,30 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
             ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
 
+            debugPrint("Problem id="+problemDataFiles.getProblemId());
             problemNumber ++;
             if (problem.getNumberTestCases() > 1) {
                 for (int i = 0; i < problem.getNumberTestCases(); i++) {
                     int testCaseNumber = i + 1;
+                    
                     String datafile = problem.getDataFileName(testCaseNumber);
                     String answerfile = problem.getAnswerFileName(testCaseNumber);
 
-                    debugPrint("       Data File name " + testCaseNumber + " : " + datafile);
-                    debugPrint("     Answer File name " + testCaseNumber + " : " + answerfile);
+                    debugPrint("       Data File name tc=" + testCaseNumber + " name: " + datafile);
+                    debugPrint("     Answer File name tc=" + testCaseNumber + " name: " + answerfile);
+                    
 
                     SerializedFile sdatafile = problemDataFiles.getJudgesDataFiles()[problemNumber - 1];
-                    assertNotNull("Should find data file ", sdatafile);
-                    assertNotNull("Data file should have contents ", sdatafile.getBuffer());
+                    debugPrint("       Data File tc=" + testCaseNumber + " " + sdatafile);
+                    assertFalse("Expect non-exernally stored file ",sdatafile.isExternalFile());
+                    assertNotNull("Should find data file tc=" + testCaseNumber + " ", sdatafile);
+                    assertNotNull("Data file should have contents tc=" + testCaseNumber + " ", sdatafile.getBuffer());
 
                     SerializedFile sanswerfile = problemDataFiles.getJudgesDataFiles()[problemNumber - 1];
-                    assertNotNull("Should find answer file ", sanswerfile);
-                    assertNotNull("Answer file should have contents ", sanswerfile.getBuffer());
+                    debugPrint("     Answer File tc=" + testCaseNumber + " " + sanswerfile);
+                    assertFalse("Expect non-exernally stored file ",sanswerfile.isExternalFile());
+                    assertNotNull("Should find answer file tc=" + testCaseNumber + " "+sanswerfile, sanswerfile);
+                    assertNotNull("Answer file should have contents tc=" + testCaseNumber + " "+sanswerfile, sanswerfile.getBuffer());
 
                     debugPrint("       Data File name " + testCaseNumber + " : " + datafile+ " size "+sdatafile.getBuffer().length);
                     debugPrint("     Answer File name " + testCaseNumber + " : " + answerfile+ " size "+sanswerfile.getBuffer().length);
@@ -839,26 +849,6 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     }
 
-    public static Test suiteAmatic() {
-        /**
-         * This is a way to test a single test methdod 
-         */
-        TestSuite suite = new TestSuite("YAML loader test");
-
-        String singletonTestName = "";
-
-        singletonTestName = "testLoader";
-         singletonTestName = "testProblemLoader";
-
-        if (!"".equals(singletonTestName)) {
-            suite.addTest(new ContestYAMLLoaderTest(singletonTestName));
-        } else {
-
-            suite.addTest(new ContestYAMLLoaderTest("testLoader"));
-        }
-
-        return suite;
-    }
     
     // TODO CCS fix the include yaml jUnits
     public void atestSuppContestYaml2 () throws Exception {
@@ -993,4 +983,187 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         }
 
     }
+    
+    /**
+     * Tests CCS load.
+     * 
+     * Especially test that the file contents are not loaded {@link SerializedFile#isExternalFile()}.
+     * 
+     * @throws Exception
+     */
+    public void testCCSLoad() throws Exception {
+        
+        String inputYamlFilename = getProblemSetYamlTestFileName();
+        
+//        editFile(inputYamlFilename);
+        
+        assertFileExists(inputYamlFilename);
+
+        String[] contents = Utilities.loadFile(getProblemSetYamlTestFileName());
+
+        // Load from YAML but make all data/ans files external.
+        
+        IInternalContest contest = loader.fromYaml(null, contents, getDataDirectory(), true);
+
+        assertNotNull(contest);
+        
+        Problem[] problems = contest.getProblems();
+        
+        for (Problem problem2 : problems) {
+            assertNotNull("Expected problem short name ", problem2.getShortName());
+        }
+        
+        int problemIndex = 0;
+
+        Problem singleProblem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "apl Title", singleProblem.getDisplayName());
+        assertEquals("Expected default timeout for "+singleProblem, 20, singleProblem.getTimeOutInSeconds());
+        
+        singleProblem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "barcodes Title", singleProblem.getDisplayName());
+        
+        singleProblem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "biobots Title", singleProblem.getDisplayName());
+        
+        singleProblem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "Castles in the Sand", singleProblem.getDisplayName());
+        
+        singleProblem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "Channel Island Navigation", singleProblem.getDisplayName());
+        assertEquals("Expected default timeout for "+singleProblem, 20, singleProblem.getTimeOutInSeconds());
+        
+        assertEquals("Number of problems", 5, problems.length);
+        
+        ProblemDataFiles[] problemDataFilesList = contest.getProblemDataFiles();
+        
+        for (ProblemDataFiles problemDataFiles : problemDataFilesList) {
+            String problemTitle = contest.getProblem(problemDataFiles.getProblemId()).getDisplayName();
+            
+            assertNotNull("Missing judges data file, for problem "+problemTitle, problemDataFiles.getJudgesDataFile());
+            assertNotNull("Missing judges answer file, for problem "+problemTitle, problemDataFiles.getJudgesAnswerFile());
+            
+        }
+        
+        int problemNumber = 0;
+        for (Problem problem : contest.getProblems()) {
+            debugPrint("Problem "+problemNumber+" - " +problem.getDisplayName() + " cases " + problem.getNumberTestCases());
+
+            ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
+
+            debugPrint("Problem id="+problemDataFiles.getProblemId());
+            problemNumber ++;
+            if (problem.getNumberTestCases() > 1) {
+                for (int i = 0; i < problem.getNumberTestCases(); i++) {
+                    int testCaseNumber = i + 1;
+                    
+                    String datafile = problem.getDataFileName(testCaseNumber);
+                    String answerfile = problem.getAnswerFileName(testCaseNumber);
+
+                    debugPrint("       Data File name tc=" + testCaseNumber + " name: " + datafile);
+                    debugPrint("     Answer File name tc=" + testCaseNumber + " name: " + answerfile);
+                    
+                    SerializedFile sdatafile = problemDataFiles.getJudgesDataFiles()[problemNumber - 1];
+                    debugPrint("       Data File tc=" + testCaseNumber + " " + sdatafile);
+                    assertFalse("Expect loaded file contents ",sdatafile.isExternalFile());
+                    assertNotNull("Should find data file tc=" + testCaseNumber + " ", sdatafile);
+                    assertNotNull("Data file should have contents tc=" + testCaseNumber + " ", sdatafile.getBuffer());
+                    
+                    SerializedFile sanswerfile = problemDataFiles.getJudgesDataFiles()[problemNumber - 1];
+                    debugPrint("     Answer File tc=" + testCaseNumber + " " + sanswerfile);
+                    assertFalse("Expect loaded file contents ",sanswerfile.isExternalFile());
+                    assertNotNull("Expect file contents ", sanswerfile.getBuffer());
+                    assertNotNull("Data file should have contents tc=" + testCaseNumber + " ", sanswerfile.getBuffer());
+                    
+                    assertNotNull("Should find answer file tc=" + testCaseNumber + " "+sanswerfile, sanswerfile);
+                    assertNotNull("Answer file should have contents tc=" + testCaseNumber + " "+sanswerfile, sanswerfile.getBuffer());
+
+                    debugPrint("       Data File name " + testCaseNumber + " : " + datafile+ " size "+sdatafile.getBuffer().length);
+                    debugPrint("     Answer File name " + testCaseNumber + " : " + answerfile+ " size "+sanswerfile.getBuffer().length);
+
+                }
+
+                assertNotNull("Expecting judges data file ", problemDataFiles.getJudgesDataFile());
+                assertNotNull("Expecting judges answer file ", problemDataFiles.getJudgesAnswerFile());
+
+                assertNotNull("Expecting judges data file non empty ", problemDataFiles.getJudgesDataFile().getBuffer());
+                assertNotNull("Expecting judges answer file non empty ", problemDataFiles.getJudgesAnswerFile().getBuffer());
+
+                assertNotNull("Expecting judges data file name ", problem.getDataFileName());
+                assertNotNull("Expecting judges answer file name ", problem.getAnswerFileName());
+
+            }
+        }
+
+        String[] basenames = { "bozo", "smart", "sumit" };
+
+        Problem testProblem = contest.getProblems()[2];
+
+        int idx = 1;
+        for (String name : basenames) {
+
+            assertEquals("name: "+testProblem.getShortName()+ " data in name", name + ".in", testProblem.getDataFileName(idx));
+            assertEquals("name: "+testProblem.getShortName()+ "data ans name", name + ".ans", testProblem.getAnswerFileName(idx));
+
+            idx++;
+        }
+        
+        String[] probNames = { "apl Title", "barcodes Title", "biobots Title", "Castles in the Sand", "Channel Island Navigation" };
+        int[] dataSetCount = { 1, 1, 3, 1, 1 };
+
+        int i = 0;
+        for (Problem problem : contest.getProblems()) {
+            assertEquals("Expecting same problem names", probNames[i], problem.getDisplayName());
+            ProblemDataFiles files = contest.getProblemDataFile(problem);
+            assertNotNull("Expected data sets for " + problem.getShortName(), files);
+            int dataSets = files.getJudgesDataFiles().length;
+            assertEquals("Expecting same number data sets " + problem.getShortName(), dataSetCount[i], dataSets);
+            i++;
+        }
+
+    }
+
+//    /**
+//     * The list of the tests to run/test.
+//     * 
+//     * JUnit3 only use.
+//     * 
+//     * @return list of classes to test.
+//     */
+//    public static TestSuite suite() {
+//        /**
+//         * This is a way to test a single test method using JUnit3 
+//         */
+//        
+//        TestSuite suite = new TestSuite(TEST_CLASS_NAME);
+//        
+//        String singletonTestName = "";
+////        singletonTestName = "testProblemLoader";
+//
+//        if (!"".equals(singletonTestName)) {
+//            suite.addTest(new ContestYAMLLoaderTest(singletonTestName));
+//        } else {
+//            suite.addTest(new ContestYAMLLoaderTest("testGetTitle"));
+//            suite.addTest(new ContestYAMLLoaderTest("testLoaderMethods"));
+//            suite.addTest(new ContestYAMLLoaderTest("testLoader"));
+//            suite.addTest(new ContestYAMLLoaderTest("testProblemLoader"));
+//            suite.addTest(new ContestYAMLLoaderTest("testLoadClarCategories"));
+//            suite.addTest(new ContestYAMLLoaderTest("testLoadSites"));
+//            suite.addTest(new ContestYAMLLoaderTest("testGeneralAnswsers"));
+//            suite.addTest(new ContestYAMLLoaderTest("testgetSectionLines"));
+//            suite.addTest(new ContestYAMLLoaderTest("testgetFileNames"));
+//            suite.addTest(new ContestYAMLLoaderTest("testgetProblemsFromLetters"));
+//            suite.addTest(new ContestYAMLLoaderTest("testgetAutoJudgeSettings"));
+//            suite.addTest(new ContestYAMLLoaderTest("testAutoJudgeSettingsTwo"));
+//            suite.addTest(new ContestYAMLLoaderTest("testAutoJudgeSettingsAll"));
+//            suite.addTest(new ContestYAMLLoaderTest("testAllJudges"));
+//            suite.addTest(new ContestYAMLLoaderTest("testReplayLoad"));
+//            suite.addTest(new ContestYAMLLoaderTest("testLatextProblem"));
+//            suite.addTest(new ContestYAMLLoaderTest("testGetBooleanValue"));
+//            suite.addTest(new ContestYAMLLoaderTest("testValidatorKeys"));
+//            suite.addTest(new ContestYAMLLoaderTest("testMultipleDataSets"));
+//            suite.addTest(new ContestYAMLLoaderTest("atestIncludeFile"));
+//            suite.addTest(new ContestYAMLLoaderTest("testLoadProblemSet"));
+//        }
+//        return suite;
+//    }
 }

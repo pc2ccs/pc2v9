@@ -2,14 +2,16 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import edu.csus.ecs.pc2.core.Constants;
-import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.StringUtilities;
 
 /**
  * A file that can be stored to disk or transported.
@@ -20,13 +22,15 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
  * @author pc2@ecs.csus.edu
  */
 // $HeadURL$
-// TODO complete all method comments.
 public class SerializedFile implements Serializable {
 
     static final long serialVersionUID = -254619749606639287L;
 
     private static File file;
 
+    /**
+     * The file contents.
+     */
     private byte[] buffer;
 
     private String name;
@@ -39,9 +43,14 @@ public class SerializedFile implements Serializable {
 
     private int newLineCount = 0;
 
-    // private Constants.FileTypes fileType = Constants.FileTypes.BINARY;
+    /**
+     * Is this a file that is not stored in the buffer, stored on disk.
+     */
+    private boolean externalFile = false;
 
-    // private int newLineCount = 0;
+    private char [] errorMessage;
+
+    private Exception exception;
 
     public SerializedFile() {
         name = null;
@@ -49,38 +58,55 @@ public class SerializedFile implements Serializable {
         file = null;
         fileType = Constants.FILETYPE_BINARY;
     }
+    
+    
+    public SerializedFile(String fileName) {
+        this(fileName, false);
+    }
 
     /**
-     * 
+     *
+     * If externalFile true then will calculate SHA and
+     * {@link #getBuffer()} returns null.
+     *
      * @param fileName
-     *            file to be read/loaded.
+     * @param externalFile if true then no buffer/file loaded 
      */
-    public SerializedFile(String fileName) {
+    public SerializedFile(String fileName, boolean externalFile) {
+        
+        this.externalFile = externalFile;
         file = new File(fileName);
         setName(file.getName());
 
         if (!file.exists()) {
-            info("SerializedFile:" + fileName + " does not exist");
+            // SOMEDAY throw a file not found exception
+            addMessage(fileName + " not found in SerializedFile", new FileNotFoundException(fileName));
         } else {
             try {
                 buffer = file2buffer(fileName);
                 absolutePath = file.getAbsolutePath();
-                generateSHA1(buffer);
+                generateSHA1();
                 generateFileType(buffer);
+                
+                if (externalFile){
+                    /**
+                     * Use the buffer to calculate SHA then null
+                     * out the buffer.
+                     */
+                    buffer = null;
+                }
 
             } catch (Exception e) {
-                StaticLog.log("Exception in SerializeFile for file " + fileName, e);
+                addMessage("Exception in SerializeFile for file " + fileName, e);
             }
         }
     }
 
-    private void info(String string) {
-        // TODO Auto-generated method stub
-
-    }
-
     /**
      * 
+     * 
+     * @see #getErrorMessage()
+     * @see #getException()
      * @param fileName
      *            file to be read/loaded.
      * @param limit -
@@ -91,16 +117,17 @@ public class SerializedFile implements Serializable {
         setName(file.getName());
 
         if (!file.exists()) {
-            info("SerializedFile:" + fileName + " does not exist");
+            // SOMEDAY throw a file not found exception
+            addMessage(fileName + " not found",null);
         } else {
             try {
                 buffer = file2buffer(fileName, limit);
                 absolutePath = file.getAbsolutePath();
-                generateSHA1(buffer);
+                generateSHA1();
                 generateFileType(buffer);
 
             } catch (Exception e) {
-                StaticLog.log("Exception in SerializeFile for file " + fileName, e);
+                addMessage("Exception in SerializeFile for file " + fileName, e);
             }
         }
     }
@@ -110,12 +137,47 @@ public class SerializedFile implements Serializable {
         if (obj == null){
             return false;
         }
+
         SerializedFile otherFile = (SerializedFile) obj;
-        if (sha1sum == otherFile.getSHA1sum()){
-            return absolutePath.equals(otherFile.absolutePath);
+        
+        if (!StringUtilities.stringSame(sha1sum, otherFile.sha1sum)) {
+            return false;
+        }
+        if (!StringUtilities.stringSame(absolutePath, otherFile.absolutePath)) {
+            return false;
+        }
+        if (externalFile != otherFile.externalFile) {
+            return false;
+        }
+        if (!StringUtilities.stringSame(getErrorMessage(), otherFile.getErrorMessage())) {
+            return false;
         }
         
-        return false;
+//        System.out.println("debug 22 exception = "+exception);
+//        System.out.println("debug 22 otherFile = "+otherFile.exception);
+//        System.out.println(""
+//                + "");
+//        if ((exception != null)){
+//            if (exception.equals(otherFile.exception)){
+//                return false;
+//            }
+//        }
+        
+//    clone.setFile(getFile());
+        
+        if (!StringUtilities.stringSame(name, otherFile.name)) {
+            return false;
+        }
+        if (!buffer.equals(otherFile.buffer)) {
+            return false;
+        }
+        if (fileType != otherFile.fileType) {
+            return false;
+        }
+        if (newLineCount != otherFile.newLineCount) {
+            return false;
+        }
+        return true;
     }
     
     @Override
@@ -126,6 +188,8 @@ public class SerializedFile implements Serializable {
     /**
      * Write bytes to file.
      * 
+     * @see #getErrorMessage()
+     * @see #getException()
      * @param b
      *            bytes to write.
      * @param fileName
@@ -142,7 +206,8 @@ public class SerializedFile implements Serializable {
             outputStream.write(b, 0, b.length);
             outputStream.close();
         } catch (Exception e) {
-            StaticLog.log("Exception in buffer2file for file " + fileName, e);
+            addMessage("Exception in SerializeFile for file " + fileName, e);
+
         }
     }
 
@@ -159,6 +224,14 @@ public class SerializedFile implements Serializable {
         clone.setSHA1sum(cloneString(getSHA1sum()));
         clone.fileType = getFileType();
         clone.newLineCount = newLineCount;
+
+        clone.externalFile = externalFile;
+        if (errorMessage != null) {
+            clone.errorMessage = errorMessage.clone();
+        }
+
+        clone.exception = exception;
+
         return clone;
     }
 
@@ -207,9 +280,11 @@ public class SerializedFile implements Serializable {
     /**
      * Read file and output buffer of bytes.
      * 
+     * @see #getErrorMessage()
+     * @see #getException()
      * @param fileName
      *            file to be read.
-     * @return bytes from the input file.
+     * @return bytes from the input file or null if error.
      */
     public byte[] file2buffer(String fileName) {
         InputStream inputStream = null;
@@ -219,17 +294,12 @@ public class SerializedFile implements Serializable {
         try {
             inputStream = new FileInputStream(fileName);
             len = inputStream.available();
-        } catch (Exception e) {
-            StaticLog.log("Exception in file2buffer for file " + fileName, e);
-        }
-
-        b = new byte[len];
-
-        try {
+            b = new byte[len];
             inputStream.read(b);
             inputStream.close();
         } catch (Exception e) {
-            StaticLog.log("Exception in file2buffer for file " + fileName, e);
+            addMessage("Exception reading "+fileName, e);
+            b = null;
         }
 
         return b;
@@ -237,7 +307,9 @@ public class SerializedFile implements Serializable {
 
     /**
      * Read file bytes, read no more than limit bytes.
-     * 
+
+     * @see #getErrorMessage()
+     * @see #getException()
      * @param fileName
      *            file to be read.
      * @param limit
@@ -246,9 +318,6 @@ public class SerializedFile implements Serializable {
      */
     public byte[] file2buffer(String fileName, int limit) {
 
-        // String methodName = "file2buffer(String)";
-        // t.trace(methodName,10);
-
         InputStream inputStream = null;
         byte[] b;
         int len = 0;
@@ -256,46 +325,94 @@ public class SerializedFile implements Serializable {
         try {
             inputStream = new FileInputStream(fileName);
             len = inputStream.available();
-        } catch (Exception e) {
-            StaticLog.log("Exception in file2buffer", e);
-        }
 
-        if (len > limit) {
-            len = limit;
-        }
+            if (len > limit) {
+                len = limit;
+            }
 
-        b = new byte[len];
+            b = new byte[len];
 
-        try {
             inputStream.read(b);
             inputStream.close();
         } catch (Exception e) {
-            StaticLog.log("Exception in generateSHA1", e);
+            addMessage("Exception reading "+fileName, e);
+            b = null;
         }
 
         return b;
     }
 
     /**
-     * Generates a unique checksum for this file.
+     * Add an error message and/or exception.
+     * 
+     * @param message
+     * @param ex
      */
-    public void generateSHA1(byte[] buf) {
+    private void addMessage(String message, Exception ex) {
+        // SOMEDAY throw exception rather than store it
+        errorMessage = message.toCharArray();
+        exception = ex;
+    }
+
+    /**
+     * Generates a unique checksum for this file.
+     * 
+     * @see #getErrorMessage()
+     * @see #getException()
+     * @return null if sum not calculated
+     */
+    private void generateSHA1() {
+        sha1sum = null;
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA");
-            md.reset();
-            md.update(buf);
-            byte[] digested = md.digest();
-
-            String out = "";
-            for (int i = 0; i < digested.length; i++) {
-                out = out + new Integer(digested[i]).toString();
-            }
-            sha1sum = out;
-
+            sha1sum = generateSHA1(buffer); 
         } catch (Exception ex99) {
-            StaticLog.log("Exception in generateSHA1", ex99);
+            addMessage("Exception calculating SHA1", ex99);
+            sha1sum = null;
+        }
+    }
+
+    public static String generateSHA1(File file) throws NoSuchAlgorithmException, IOException {
+
+        String fileName = file.getAbsolutePath();
+
+        InputStream inputStream = null;
+        byte[] buf;
+        int len = 0;
+
+        inputStream = new FileInputStream(fileName);
+        len = inputStream.available();
+        buf = new byte[len];
+        inputStream.read(buf);
+        inputStream.close();
+
+        return generateSHA1(buf);
+    }
+
+    
+    /**
+     * Calculate SHA checksum.
+     * @param buf
+     * @return SHA checksum, if buf returns null 
+     * @throws NoSuchAlgorithmException
+     */
+    public static String generateSHA1(byte[] buf) throws NoSuchAlgorithmException {
+        String out = null;
+
+        if (buf == null) {
+            return null;
         }
 
+        MessageDigest md = MessageDigest.getInstance("SHA");
+        md.reset();
+        md.update(buf);
+        byte[] digested = md.digest();
+
+        out = "";
+        for (int i = 0; i < digested.length; i++) {
+            out = out + new Integer(digested[i]).toString();
+        }
+
+        return out;
     }
 
     /**
@@ -524,11 +641,43 @@ public class SerializedFile implements Serializable {
             s = s + Constants.FILETYPE_ASCII_OTHER_TEXT;
         }
 
-        StaticLog.info(s);
-
         fileType = convertFileToType;
         buffer = newbuffer;
 
         return true;
+    }
+    
+    public boolean isExternalFile() {
+        return externalFile;
+    }
+    
+    /**
+     * Get last error message.
+     * 
+     * If a method return null, a message may be set here.
+     * 
+     */
+    public String getErrorMessage() {
+        if (errorMessage == null)
+        {
+            return null;
+        }
+        
+        return new String(errorMessage);
+    }
+    
+    /**
+     * Exception saved from a method.
+     * 
+     * If a method return null, an exception may be set here.
+     * 
+     */
+    public Exception getException() {
+        return exception;
+    }
+    
+    @Override
+    public String toString() {
+        return name + " " + absolutePath + " ext=" + externalFile + " SHA=" + sha1sum;
     }
 }

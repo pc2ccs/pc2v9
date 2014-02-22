@@ -107,7 +107,7 @@ public class ContestYAMLLoader {
     /**
      * Use external data files?   (if no, then no file contents loaded into pc2).  
      */
-    public static final String PROBLEM_EXTERNAL_FILES_KEY = "use-external-data-files";
+    public static final String PROBLEM_LOAD_DATA_FILES_KEY = "load-data-files";
     
     /**
      * Contest wide validator name.
@@ -223,18 +223,10 @@ public class ContestYAMLLoader {
     /**
      * Load/Create contest from YAML lines.
      * 
-     * @param contest
-     *            
-     * @param yamlLines
-     *            lines from YAML file
-     * @return
-     */
-    /**
      * @param contest update/overwrite contest, if null creates new contest.
      * @param yamlLines input YAML lines from contest.yaml
      * @param directoryName location for contest.yaml and problem data files 
-     * @param loadDataFileContents
-     * @return
+     * @param loadDataFileContents if true load the file's contents, if true buffer = null.
      */
     public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName, boolean loadDataFileContents)  {
 
@@ -256,7 +248,7 @@ public class ContestYAMLLoader {
             }
         }
         
-        loadDataFileContents = getBooleanValue(getSequenceValue(yamlLines, PROBLEM_EXTERNAL_FILES_KEY), loadDataFileContents);
+        loadDataFileContents = getBooleanValue(getSequenceValue(yamlLines, PROBLEM_LOAD_DATA_FILES_KEY), loadDataFileContents);
         
         // TODO CCS add contest settings
         // TODO CCS short-name: ICPC WF 2011
@@ -674,7 +666,7 @@ public class ContestYAMLLoader {
         /**
          * Data files are external so data files should not be loaded into problem data files.
          */
-        boolean loadDataFiles = !problem.isUsingExternalDataFiles();
+        boolean loadExternalFile  = problem.isUsingExternalDataFiles();
         
         String[] inputFileNames = getFileNames(dataFileBaseDirectory, ".in");
 
@@ -712,11 +704,9 @@ public class ContestYAMLLoader {
                 checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
                 checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
 
-                if (loadDataFiles) {
-                    dataFiles.add(new SerializedFile(dataFileName));
-                    answerFiles.add(new SerializedFile(answerFileName));
-                    
-                } // else nada, add no files.
+                dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
+                answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
+                
 
             }
 
@@ -724,6 +714,10 @@ public class ContestYAMLLoader {
 
                 SerializedFile[] data = (SerializedFile[]) dataFiles.toArray(new SerializedFile[dataFiles.size()]);
                 SerializedFile[] answer = (SerializedFile[]) answerFiles.toArray(new SerializedFile[answerFiles.size()]);
+                dumpSerialzedFileList (problem, "Judges data", data);
+                dumpSerialzedFileList (problem, "Judges answer", answer);
+                
+                
                 problemDataFiles.setJudgesDataFiles(data);
                 problemDataFiles.setJudgesAnswerFiles(answer);
                 
@@ -751,6 +745,16 @@ public class ContestYAMLLoader {
         validateCCSData(contest, problem);
 
         return problem;
+    }
+
+    public void dumpSerialzedFileList(Problem problem, String logPrefixId, SerializedFile[] sfList) {
+
+        System.out.println(logPrefixId + ": There are "+sfList.length+"files in list for problem "+problem);
+        int count = 1;
+        for (SerializedFile serializedFile : sfList) {
+            System.out.println(logPrefixId + ": " + count + " " + serializedFile);
+            count++;
+        }
     }
 
     private void validateCCSData(IInternalContest contest, Problem problem) {
@@ -845,7 +849,8 @@ public class ContestYAMLLoader {
             problem.setDataFileName(dataFileName);
             problem.setReadInputDataFromSTDIN(false);
 
-            SerializedFile serializedFile = new SerializedFile(dataFilePath);
+            SerializedFile serializedFile = new SerializedFile(dataFilePath, problem.isUsingExternalDataFiles());
+            System.out.println("debug 22 file A "+serializedFile);
             problemDataFiles.setJudgesDataFile(serializedFile);
         }
 
@@ -858,7 +863,8 @@ public class ContestYAMLLoader {
 
             problem.setAnswerFileName(answerFileName);
 
-            SerializedFile serializedFile = new SerializedFile(answerFilePath);
+            SerializedFile serializedFile = new SerializedFile(answerFilePath, problem.isUsingExternalDataFiles());
+            System.out.println("debug 22 file B "+serializedFile);
             problemDataFiles.setJudgesAnswerFile(serializedFile);
         }
 
@@ -1159,21 +1165,10 @@ public class ContestYAMLLoader {
             problem.setColorName(colorName);
             problem.setColorRGB(colorRGB);
             
-            String externalFilesUsesString = getSequenceValue(sequenceLines, PROBLEM_EXTERNAL_FILES_KEY);
-            problem.setUsingExternalDataFiles(getBooleanValue(externalFilesUsesString, ! loadDataFileContents));
-            
-//            if (problem.isUsingExternalDataFiles()){
-//
-//                System.out.println("");
-//                System.out.println("************************************************************************");
-//                System.out.println("************************************************************************");
-//                System.out.println("Problem "+problem.getShortName()+" is USING EXTERNAL DATA FILES (not loading file contents)");
-//                System.out.println("Load data file contents = "+loadDataFileContents+" override is "+externalFilesUsesString);
-//                System.out.println("************************************************************************");
-//                System.out.println("************************************************************************");
-//                System.out.println("");
-//            }
-            
+            String internalFilesUsesString = getSequenceValue(sequenceLines, PROBLEM_LOAD_DATA_FILES_KEY);
+            boolean loadFilesFlag = getBooleanValue(internalFilesUsesString, loadDataFileContents);
+            problem.setUsingExternalDataFiles(! loadFilesFlag);
+
             String validatorCommandLine = getSequenceValue(sequenceLines, VALIDATOR_KEY);
 
             if (validatorCommandLine == null) {
@@ -1449,6 +1444,15 @@ public class ContestYAMLLoader {
         return number;
     }
 
+    /**
+     * Returns boolean for input string.
+     * 
+     * Matches (case insensitive) yes, no, true, false.
+     * 
+     * @param string
+     * @param defaultBoolean
+     * @return default if string does not match (case-insensitive) string
+     */
     protected boolean getBooleanValue(String string, boolean defaultBoolean) {
 
         boolean value = defaultBoolean;

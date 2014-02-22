@@ -155,8 +155,7 @@ public class ExportYAML {
                 
         contestWriter.println("scoreboard-freeze: "+info.getFreezeTime());
         
-        contestWriter.println("# " + ContestYAMLLoader.PROBLEM_EXTERNAL_FILES_KEY + ": true");
-
+        contestWriter.println("# " + ContestYAMLLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": false");
         contestWriter.println();
 
         // TODO CCS write default clar
@@ -256,7 +255,7 @@ public class ExportYAML {
             }
             // else no color, nothing to print.
             
-            contestWriter.println("  " + ContestYAMLLoader.PROBLEM_EXTERNAL_FILES_KEY + ": " + problem.isUsingExternalDataFiles());
+            contestWriter.println("  " + ContestYAMLLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + ( ! problem.isUsingExternalDataFiles()));
 
              String[] filesWritten = writeProblemYAML(contest, directoryName, problem, shortName);
 
