@@ -619,6 +619,8 @@ public class ContestYAMLLoader {
         String name = null;
 
         String titlePattern = "\\problemtitle{";
+        
+        String titlePattern2 = "\\problemname{";
 
         String commentPattern = "%% plainproblemtitle:";
 
@@ -637,6 +639,21 @@ public class ContestYAMLLoader {
 
                 if (line.trim().startsWith(titlePattern)) {
                     name = line.trim().substring(titlePattern.length()).trim();
+                    // name = name.replace(Pattern.quote(")"), "");
+                    // name = name.replace(")", "");
+                    name = name.substring(0, name.length() - 1);
+                    break;
+                }
+                
+            }
+            
+            if (line.indexOf("problemname") != -1) {
+                
+                // \problemname{Problem Name}
+                
+
+                if (line.trim().startsWith(titlePattern2)) {
+                    name = line.trim().substring(titlePattern2.length()).trim();
                     // name = name.replace(Pattern.quote(")"), "");
                     // name = name.replace(")", "");
                     name = name.substring(0, name.length() - 1);
