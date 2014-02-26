@@ -37,11 +37,11 @@
     <property name="javacVerbose" value="false"/>
     <property name="logExtension" value=".log"/>
     <property name="compilerArg" value=""/>
-    <property name="javacSource" value="1.7"/>
-    <property name="javacTarget" value="1.7"/>
+    <property name="javacSource" value="1.6"/>
+    <property name="javacTarget" value="1.6"/>
     <path id="path_bootclasspath">
-            <fileset dir="/software/pc2/java/current/jre/lib">
-                <include name="rt.jar"/>
+            <fileset dir="${java.home}/lib">
+                <include name="*.jar"/>
             </fileset>
     </path>
 
