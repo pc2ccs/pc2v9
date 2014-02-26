@@ -230,6 +230,8 @@ public class ContestYAMLLoader {
      */
     public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName, boolean loadDataFileContents)  {
 
+        // TODO NOW DAL - add code to override the default loadDataFileContents and force it to internal  
+
         contest = createContest(contest);
 
         // name: ACM-ICPC World Finals 2011
@@ -1529,7 +1531,7 @@ public class ContestYAMLLoader {
      * 
      */
     public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName)  {
-        return fromYaml(contest, yamlLines, directoryName, true);
+        return fromYaml(contest, yamlLines, directoryName, false);
     }
 
     public Problem[] getProblems(String[] contents, int defaultTimeOut)  {

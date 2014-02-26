@@ -166,7 +166,7 @@ public class ImportDataPane extends JPanePlugin {
 
         try {
             // TODO CCS figure out how to determine whether to load data file contents.
-            boolean loadDataFileContents = true;
+            boolean loadDataFileContents = false;
             newContest = loader.fromYaml(null, directoryName, loadDataFileContents);
              
              contestSummary = getContestLoadSummary(newContest, getController());

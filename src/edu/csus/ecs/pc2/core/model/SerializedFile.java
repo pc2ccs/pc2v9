@@ -427,10 +427,14 @@ public class SerializedFile implements Serializable {
     /**
      * Get bytes from previously loaded file.
      * 
-     * @return bytes from file (already loaded file)
+     * @return bytes from file (already loaded file), zero byte array if not loaded. 
      */
     public byte[] getBuffer() {
-        return buffer;
+        if (buffer != null){
+            return buffer;
+        } else {
+            return new byte[0];
+        }
     }
 
     public File getFile() {

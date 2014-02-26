@@ -131,7 +131,8 @@ public class ProblemsReport implements IReport {
                             bytes = serializedFile.getBuffer().length;
                             name = serializedFile.getName();
                         }
-                        printWriter.println("                    judge data file '" + name + "' " + bytes + " bytes");
+                        printWriter.println("                    judge data file '" + name + "' " + bytes + " bytes "+
+                                internExternDesc (serializedFile));
                     }
                 }
             } else {
@@ -149,7 +150,8 @@ public class ProblemsReport implements IReport {
                             bytes = serializedFile.getBuffer().length;
                             name = serializedFile.getName();
                         }
-                        printWriter.println("                    judge ans. file '" + name + "' " + bytes + " bytes");
+                        printWriter.println("                    judge ans. file '" + name + "' " + bytes + " bytes "+
+                                internExternDesc (serializedFile));
                     }
                 }
             } else {
@@ -166,9 +168,24 @@ public class ProblemsReport implements IReport {
             if (validatorFile.getBuffer() != null) {
                 bytes = validatorFile.getBuffer().length;
             }
-            printWriter.println("                    validator file '" + validatorFile.getName() + "' " + bytes + " bytes");
+            printWriter.println("                    validator file '" + validatorFile.getName() + "' " + bytes + " bytes "+
+                    internExternDesc (validatorFile));
         } else {
             printWriter.println("                  * No validator files *");
+        }
+    }
+
+    /**
+     * Returns External or Internal (storage) word.
+     * 
+     * @param serializedFile
+     * @return External or Internal (storage) word.
+     */
+    private String internExternDesc(SerializedFile serializedFile) {
+        if (serializedFile.isExternalFile()) {
+            return "External";
+        } else {
+            return "Internal";
         }
     }
 

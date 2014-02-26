@@ -28,7 +28,7 @@ public class SerializedFileTest extends AbstractTestCase {
         for (String filename : names) {
             SerializedFile file = new SerializedFile(filename);
 
-            assertNull("Expecting file not found/null", file.getBuffer());
+            assertEquals("Expecting zero byte buffer", 0, file.getBuffer().length);
             assertNotNull("Expecting exception set", file.getException());
             assertEquals("Expecting message", filename + " not found in SerializedFile", file.getErrorMessage());
         }
@@ -47,7 +47,7 @@ public class SerializedFileTest extends AbstractTestCase {
         
         String filename = "Foo";
         firstFile = new SerializedFile(filename, true);
-        assertNull("Expecting file not found/null", firstFile.getBuffer());
+        assertEquals("Expecting zero byte file ", 0, firstFile.getBuffer().length);
         assertNotNull("Expecting exception set", firstFile.getException());
         assertEquals("Expecting message", filename + " not found in SerializedFile", firstFile.getErrorMessage());
         assertTrue("expecting external flag ", firstFile.isExternalFile());
@@ -106,7 +106,8 @@ public class SerializedFileTest extends AbstractTestCase {
         
         assertFalse ("Not expectinf file ", serializedFile.getFile().isFile());
         
-        assertNull("Expecting null buffer", serializedFile.getBuffer());
+        assertNotNull("Expecting non null buffer", serializedFile.getBuffer());
+        assertNotNull("Expecting non null buffer", serializedFile.getBuffer());
 
         String actualSum = serializedFile.getSHA1sum();
         
@@ -117,7 +118,7 @@ public class SerializedFileTest extends AbstractTestCase {
         serializedFile = new SerializedFile(filename, true);
         
         assertTrue("Expect external flag file ", serializedFile.isExternalFile());
-        assertNull("Expecting null buffer", serializedFile.getBuffer());
+        assertEquals("Expecting zero length buffer", 0, serializedFile.getBuffer().length);
 
         File file = new File(filename);
         String expectedSum = SerializedFile.generateSHA1(file);
