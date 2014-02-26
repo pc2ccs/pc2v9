@@ -40,7 +40,7 @@
     <property name="javacSource" value="1.7"/>
     <property name="javacTarget" value="1.7"/>
     <path id="path_bootclasspath">
-            <fileset dir="/software/pc2/java/current/jre/lib">
+            <fileset dir="${java.home}/lib">
                 <include name="*.jar"/>
             </fileset>
     </path>
