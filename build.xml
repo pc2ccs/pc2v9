@@ -37,8 +37,8 @@
     <property name="javacVerbose" value="false"/>
     <property name="logExtension" value=".log"/>
     <property name="compilerArg" value=""/>
-    <property name="javacSource" value="1.7"/>
-    <property name="javacTarget" value="1.7"/>
+    <property name="javacSource" value="1.6"/>
+    <property name="javacTarget" value="1.6"/>
     <path id="path_bootclasspath">
             <fileset dir="${java.home}/lib">
                 <include name="*.jar"/>
@@ -110,6 +110,7 @@
 
     <target name="compile" depends="init" description="compile the source ">
         <!-- Compile the java code from ${src.dir} into ${build.dir} -->
+	<echo "java home is ${java.home}"/>
         <javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
             <compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
             <classpath refid="project.classpath"/>
