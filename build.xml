@@ -37,8 +37,8 @@
     <property name="javacVerbose" value="false"/>
     <property name="logExtension" value=".log"/>
     <property name="compilerArg" value=""/>
-    <property name="javacSource" value="1.6"/>
-    <property name="javacTarget" value="1.6"/>
+    <property name="javacSource" value="1.7"/>
+    <property name="javacTarget" value="1.7"/>
     <path id="path_bootclasspath">
             <fileset dir="${java.home}/lib">
                 <include name="*.jar"/>
