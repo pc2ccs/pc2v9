@@ -41,7 +41,7 @@
     <property name="javacTarget" value="1.7"/>
     <path id="path_bootclasspath">
             <fileset dir="/software/pc2/java/current/jre/lib">
-                <include name="rt.jar"/>
+                <include name="*.jar"/>
             </fileset>
     </path>
 
