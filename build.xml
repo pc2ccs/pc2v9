@@ -33,15 +33,15 @@
 
     <!-- Compiler settings. -->
     <property name="javacFailOnError" value="false"/>
-    <property name="javacDebugInfo" value="on"/>
-    <property name="javacVerbose" value="true"/>
+    <property name="javacDebugInfo" value="off"/>
+    <property name="javacVerbose" value="off"/>
     <property name="logExtension" value=".log"/>
     <property name="compilerArg" value=""/>
-    <property name="javacSource" value="7"/>
-    <property name="javacTarget" value="7"/>
+    <property name="javacSource" value="1.7"/>
+    <property name="javacTarget" value="1.7"/>
     <path id="path_bootclasspath">
             <fileset dir="${java.home}/lib">
-                <include name="rt.jar"/>
+                <include name="*.jar"/>
             </fileset>
     </path>
 
@@ -221,7 +221,7 @@
     <target name="javadocs-api" description="Creates API javadocs">
         <mkdir dir="${docs.api.dir}" />
 	<javadoc access="protected" author="true" classpath="vendor/lib/mclb.jar" 
-    destdir="${docs.api.dir}" doctitle="PC&amp;sup2; Version 9 API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="7" sourcepath="src" splitindex="true" use="true" version="true" useexternalfile="true">
+    destdir="${docs.api.dir}" doctitle="PC&amp;sup2; Version 9 API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.7" sourcepath="src" splitindex="true" use="true" version="true" useexternalfile="true">
 	    <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistloc="${packagelistloc.dir}"/> 
         </javadoc>
     </target>
