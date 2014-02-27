@@ -98,7 +98,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     private JButton reloadButton = null;
 
-    private JComboBox siteComboBox = null;
+    private JComboBox<Site> siteComboBox = null;
 
     private Site allSitesSite = new Site("All Sites", 0);
     
@@ -619,9 +619,9 @@ public class TeamStatusPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getSiteComboBox() {
+    private JComboBox<Site> getSiteComboBox() {
         if (siteComboBox == null) {
-            siteComboBox = new JComboBox();
+            siteComboBox = new JComboBox<Site>();
             siteComboBox.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(java.awt.event.ItemEvent e) {
                     populateGUI();

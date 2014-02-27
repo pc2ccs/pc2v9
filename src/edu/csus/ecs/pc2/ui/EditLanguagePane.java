@@ -68,7 +68,7 @@ public class EditLanguagePane extends JPanePlugin {
 
     private JLabel jLabel5 = null;
 
-    private JComboBox autoPopulateLanguageComboBox = null;
+    private JComboBox<String> autoPopulateLanguageComboBox = null;
 
     private static final String NO_CHANGE_TITLE = "No Change";
 
@@ -487,9 +487,9 @@ public class EditLanguagePane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getAutoPopulateLanguageComboBox() {
+    private JComboBox<String> getAutoPopulateLanguageComboBox() {
         if (autoPopulateLanguageComboBox == null) {
-            autoPopulateLanguageComboBox = new JComboBox();
+            autoPopulateLanguageComboBox = new JComboBox<String>();
             autoPopulateLanguageComboBox.setBounds(new java.awt.Rectangle(209, 12, 259, 23));
             autoPopulateLanguageComboBox.setName("LangPopulateComboBox");
             autoPopulateLanguageComboBox.addActionListener(new java.awt.event.ActionListener() {

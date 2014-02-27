@@ -81,19 +81,19 @@ public class EditFilterPane extends JPanePlugin {
 
     private JCheckBoxJList judgementListBox = null;
 
-    private DefaultListModel judgementListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> judgementListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private JCheckBoxJList teamListBox = null;
 
-    private DefaultListModel teamListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> teamListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private JCheckBoxJList problemsListBox = null;
 
-    private DefaultListModel problemListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> problemListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private JCheckBoxJList languagesListBox = null;
 
-    private DefaultListModel languageListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> languageListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private Filter filter = new Filter();
 
@@ -103,13 +103,13 @@ public class EditFilterPane extends JPanePlugin {
 
     private JCheckBoxJList runStatesListBox = null;
 
-    private DefaultListModel runStatesListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> runStatesListModel = new DefaultListModel<WrapperJCheckBox>();
     
-    private DefaultListModel clarificationStatesListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> clarificationStatesListModel = new DefaultListModel<WrapperJCheckBox>();
 
-    private DefaultListModel sitesListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> sitesListModel = new DefaultListModel<WrapperJCheckBox>();
 
-    private DefaultListModel permissionsListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> permissionsListModel = new DefaultListModel<WrapperJCheckBox>();
     
     private JPanel timeRangePane = null;
 
@@ -131,7 +131,7 @@ public class EditFilterPane extends JPanePlugin {
 
     private JScrollPane clarificationStateScrollPane = null;
 
-    private JList clarificationStatesListBox = null;
+    private JList<?> clarificationStatesListBox = null;
 
     private JPanel sitesPane = null;  //  @jve:decl-index=0:visual-constraint="649,76"
 
@@ -147,7 +147,7 @@ public class EditFilterPane extends JPanePlugin {
     
     private JPanel accountsPane = null;
 
-    private DefaultListModel accountListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> accountListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private JCheckBoxJList accountListBox = null;
     
@@ -157,7 +157,7 @@ public class EditFilterPane extends JPanePlugin {
 
     private JScrollPane clientTypeScroll = null;
     
-    private DefaultListModel clientTypeListModel = new DefaultListModel();
+    private DefaultListModel<WrapperJCheckBox> clientTypeListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private JCheckBoxJList clientTypesListBox;  //  @jve:decl-index=0:
 
@@ -1121,7 +1121,7 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JList
      */
-    private JList getClarificationStatesListBox() {
+    private JList<?> getClarificationStatesListBox() {
         if (clarificationStatesListBox == null) {
             clarificationStatesListBox = new JCheckBoxJList(clarificationStatesListModel);
         }

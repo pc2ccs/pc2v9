@@ -116,9 +116,9 @@ public class ContestTestFrame extends JFrame {
 
     private JScrollPane reportScrollPane = null;
 
-    private JList reportJList = null;
+    private JList<APIAbstractTest> reportJList = null;
 
-    private DefaultListModel listModel = new DefaultListModel();
+    private DefaultListModel<APIAbstractTest> listModel = new DefaultListModel<APIAbstractTest>();
 
     private JPanel topPane = null;
 
@@ -140,7 +140,7 @@ public class ContestTestFrame extends JFrame {
 
     private JLabel jLabel1 = null;
 
-    private JComboBox siteComboBox = null;
+    private JComboBox<ISiteWrapper> siteComboBox = null;
 
     private JLabel runsOnSite = null;
 
@@ -1009,7 +1009,7 @@ public class ContestTestFrame extends JFrame {
                         showMessage("No Repport Selected");
                     } else {
                         println();
-                        for (Object object : getReportJList().getSelectedValues()) {
+                        for (Object object : getReportJList().getSelectedValuesList()) {
                             println("-- Report " + ((APIAbstractTest) object).getTitle());
                             runReport(object);
                         }
@@ -1075,9 +1075,9 @@ public class ContestTestFrame extends JFrame {
      * 
      * @return javax.swing.JList
      */
-    private JList getReportJList() {
+    private JList<APIAbstractTest> getReportJList() {
         if (reportJList == null) {
-            reportJList = new JList(listModel);
+            reportJList = new JList<APIAbstractTest>(listModel);
             reportJList.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.getClickCount() >= 2) {
@@ -1191,9 +1191,9 @@ public class ContestTestFrame extends JFrame {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getSiteComboBox() {
+    private JComboBox<ISiteWrapper> getSiteComboBox() {
         if (siteComboBox == null) {
-            siteComboBox = new JComboBox();
+            siteComboBox = new JComboBox<ISiteWrapper>();
             siteComboBox.setBounds(new java.awt.Rectangle(162, 142, 159, 21));
             siteComboBox.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(java.awt.event.ItemEvent e) {

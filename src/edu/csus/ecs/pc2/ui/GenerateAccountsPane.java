@@ -67,7 +67,7 @@ public class GenerateAccountsPane extends JPanePlugin {
 
     private JButton generateButton = null;
 
-    private JComboBox siteSelectionComboBox = null;
+    private JComboBox<Site> siteSelectionComboBox = null;
 
     private JLabel genStartNumberLabel = null;
 
@@ -75,7 +75,7 @@ public class GenerateAccountsPane extends JPanePlugin {
 
     private JLabel siteLabel = null;
 
-    private JComboBox otherClientsComboBox = null;
+    private JComboBox<Type> otherClientsComboBox = null;
 
     private JTextField otherClientCountTextBox = null;
 
@@ -427,9 +427,9 @@ public class GenerateAccountsPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getSiteSelectionComboBox() {
+    private JComboBox<Site> getSiteSelectionComboBox() {
         if (siteSelectionComboBox == null) {
-            siteSelectionComboBox = new JComboBox();
+            siteSelectionComboBox = new JComboBox<Site>();
             siteSelectionComboBox.setBounds(new java.awt.Rectangle(151, 9, 229, 19));
             siteSelectionComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -563,9 +563,9 @@ public class GenerateAccountsPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getOtherClientsComboBox() {
+    private JComboBox<Type> getOtherClientsComboBox() {
         if (otherClientsComboBox == null) {
-            otherClientsComboBox = new JComboBox();
+            otherClientsComboBox = new JComboBox<Type>();
             otherClientsComboBox.setBounds(new java.awt.Rectangle(81, 162, 167, 20));
             otherClientsComboBox.setVisible(false);
             otherClientsComboBox.addItem(Type.EXECUTOR);

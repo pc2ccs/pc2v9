@@ -155,7 +155,7 @@ public class EditProblemPane extends JPanePlugin {
 
     private JLabel validatorOptionsLabel = null;
 
-    private JComboBox pc2ValidatorOptionComboBox = null;
+    private JComboBox<String> pc2ValidatorOptionComboBox = null;
 
     private JCheckBox ignoreCaseCheckBox = null;
 
@@ -998,11 +998,6 @@ public class EditProblemPane extends JPanePlugin {
      */
     protected void addProblemFilesTab(ProblemDataFiles problemDataFiles) {
 
-        if (multipleDataSetPane == null) {
-            multipleDataSetPane = getMultipleDataSetPane();
-            getMainTabbedPane().addTab("Test Data Sets", multipleDataSetPane);
-        }
-
         getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
         getMultipleDataSetPane().setVisible(true);
     }
@@ -1289,9 +1284,13 @@ public class EditProblemPane extends JPanePlugin {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new java.awt.Dimension(400, 400));
-            mainTabbedPane.addTab("General", null, getGeneralPane(), null);
-            mainTabbedPane.addTab("Judging Type", null, getJudgingTypePanel(), null);
-            mainTabbedPane.addTab("Validator", null, getValidatorPane(), null);
+            if (multipleDataSetPane == null) {
+                multipleDataSetPane = getMultipleDataSetPane();
+            }
+            mainTabbedPane.insertTab("Test Data Sets", null, multipleDataSetPane, null, 0);
+            mainTabbedPane.insertTab("Validator", null, getValidatorPane(), null, 0);
+            mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
+            mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);
         }
         return mainTabbedPane;
     }
@@ -1901,9 +1900,9 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getPc2ValidatorComboBox() {
+    private JComboBox<String> getPc2ValidatorComboBox() {
         if (pc2ValidatorOptionComboBox == null) {
-            pc2ValidatorOptionComboBox = new JComboBox();
+            pc2ValidatorOptionComboBox = new JComboBox<String>();
             pc2ValidatorOptionComboBox.setBounds(new java.awt.Rectangle(158, 24, 255, 26));
 
             pc2ValidatorOptionComboBox.addItemListener(new java.awt.event.ItemListener() {

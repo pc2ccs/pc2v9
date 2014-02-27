@@ -29,7 +29,7 @@ import javax.swing.border.EmptyBorder;
  * 
  * NOTE: addListListener should not be used, gets called before the list is updated.
  */
-public class JCheckBoxJList extends JList {
+public class JCheckBoxJList extends JList<Object> {
 
     /**
      * 
@@ -47,8 +47,9 @@ public class JCheckBoxJList extends JList {
     /**
      * @param dataModel
      */
-    public JCheckBoxJList(ListModel dataModel) {
-        super(dataModel);
+    @SuppressWarnings("unchecked")
+    public JCheckBoxJList(ListModel<?> dataModel) {
+        super((ListModel<Object>) dataModel);
         constructorCommon();
     }
 
@@ -265,7 +266,7 @@ public class JCheckBoxJList extends JList {
  */
 
 // $HeadURL$
-class CheckBoxListCellRenderer extends JCheckBox implements ListCellRenderer {
+class CheckBoxListCellRenderer extends JCheckBox implements ListCellRenderer<Object> {
 
     /**
      * 
@@ -274,7 +275,7 @@ class CheckBoxListCellRenderer extends JCheckBox implements ListCellRenderer {
 
     protected static final Border NO_FOCUS_BORDER = new EmptyBorder(1, 1, 1, 1);
 
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         JCheckBox data = (JCheckBox) value;
 
         setText(data.getText());

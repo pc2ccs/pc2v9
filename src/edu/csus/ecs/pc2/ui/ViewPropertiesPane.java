@@ -11,9 +11,9 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -37,7 +37,7 @@ public class ViewPropertiesPane extends JPanePlugin {
      */
     private static final long serialVersionUID = 2554693130978453347L;
 
-    private DefaultListModel defaultListModel = new DefaultListModel();  //  @jve:decl-index=0:visual-constraint="455,14"
+    private ListModel<Object> defaultListModel = new DefaultListModel<Object>();  //  @jve:decl-index=0:visual-constraint="455,14"
 
     private JLabel permissionCountLabel = null;
 
@@ -84,7 +84,7 @@ public class ViewPropertiesPane extends JPanePlugin {
      * 
      * @return javax.swing.JList
      */
-    private JList getPermissionsJList() {
+    private JCheckBoxJList getPermissionsJList() {
         if (permissionsJList == null) {
             permissionsJList = new JCheckBoxJList();
             permissionsJList.setModel(defaultListModel);
@@ -112,13 +112,13 @@ public class ViewPropertiesPane extends JPanePlugin {
 
     private void populatePermissions(Account inAccount) {
 
-        defaultListModel.removeAllElements();
+        ((DefaultListModel<Object>) defaultListModel).removeAllElements();
 
         if (inAccount == null) {
 
             for (String name : getPermissionDescriptions()) {
                 JCheckBox checkBox = new JCheckBox(name);
-                defaultListModel.addElement(checkBox);
+                ((DefaultListModel<Object>) defaultListModel).addElement(checkBox);
             }
             getPermissionsJList().setSelectedIndex(-1);
 
@@ -137,7 +137,7 @@ public class ViewPropertiesPane extends JPanePlugin {
                 int idx = 0;
                 for (Type type : Permission.Type.values()) {
                     JCheckBox checkBox = new JCheckBox(permission.getDescription(type));
-                    defaultListModel.addElement(checkBox);
+                    ((DefaultListModel<Object>) defaultListModel).addElement(checkBox);
                     if (account.isAllowed(type)) {
                         indexes[count] = idx;
                         count++;
@@ -149,7 +149,7 @@ public class ViewPropertiesPane extends JPanePlugin {
             } else {
                 for (Type type : Permission.Type.values()) {
                     JCheckBox checkBox = new JCheckBox(permission.getDescription(type));
-                    defaultListModel.addElement(checkBox);
+                    ((DefaultListModel<Object>) defaultListModel).addElement(checkBox);
                 }
             }
         }

@@ -95,7 +95,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private Executable executable;
 
-    private JComboBox judgementComboBox = null;
+    private JComboBox<Judgement> judgementComboBox = null;
 
     private JLabel statusLabel = null;
 
@@ -992,9 +992,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getJudgementComboBox() {
+    private JComboBox<Judgement> getJudgementComboBox() {
         if (judgementComboBox == null) {
-            judgementComboBox = new JComboBox();
+            judgementComboBox = new JComboBox<Judgement>();
             judgementComboBox.setMinimumSize(new java.awt.Dimension(150, 25));
             judgementComboBox.setBounds(new java.awt.Rectangle(225,120,225,25));
             judgementComboBox.setLocation(new java.awt.Point(225,101));

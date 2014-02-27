@@ -124,7 +124,7 @@ public class ReportPane extends JPanePlugin {
 
     private JPanel reportChoicePane = null;
 
-    private JComboBox reportsComboBox = null;
+    private JComboBox<String> reportsComboBox = null;
 
     private JLabel messageLabel = null;
 
@@ -799,9 +799,9 @@ public class ReportPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getReportsComboBox() {
+    private JComboBox<String> getReportsComboBox() {
         if (reportsComboBox == null) {
-            reportsComboBox = new JComboBox();
+            reportsComboBox = new JComboBox<String>();
             reportsComboBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {

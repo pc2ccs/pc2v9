@@ -78,7 +78,7 @@ public class StartupContestDialog extends JDialog implements IStartupContestDial
 
     private boolean bAlreadyLoggingIn = false;
 
-    private JComboBox profilesComboBox = null;
+    private JComboBox<ProfileWrapper> profilesComboBox = null;
 
     private JLabel profileTitleLabel = null;
 
@@ -526,9 +526,9 @@ public class StartupContestDialog extends JDialog implements IStartupContestDial
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getProfilesComboBox() {
+    private JComboBox<ProfileWrapper> getProfilesComboBox() {
         if (profilesComboBox == null) {
-            profilesComboBox = new JComboBox();
+            profilesComboBox = new JComboBox<ProfileWrapper>();
             profilesComboBox.setBounds(new Rectangle(175, 21, 259, 25));
         }
         return profilesComboBox;

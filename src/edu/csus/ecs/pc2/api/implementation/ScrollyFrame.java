@@ -11,8 +11,11 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
 import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
+
 import javax.swing.JPanel;
+
 import java.awt.BorderLayout;
+
 import javax.swing.JButton;
 
 /**
@@ -31,9 +34,9 @@ public class ScrollyFrame extends JFrame {
 
     private JScrollPane scrollPane = null;
 
-    private JList listOfStuff = null;
+    private JList<String> listOfStuff = null;
     
-    private DefaultListModel defaultListModel = new DefaultListModel();
+    private DefaultListModel<String> defaultListModel = new DefaultListModel<String>();
 
     private JPanel mainPanel = null;
 
@@ -93,9 +96,9 @@ public class ScrollyFrame extends JFrame {
      * 
      * @return javax.swing.JList
      */
-    private JList getListOfStuff() {
+    private JList<String> getListOfStuff() {
         if (listOfStuff == null) {
-            listOfStuff = new JList(defaultListModel);
+            listOfStuff = new JList<String>(defaultListModel);
             listOfStuff.setFont(new java.awt.Font("Courier New", java.awt.Font.BOLD, 12));
         }
         return listOfStuff;

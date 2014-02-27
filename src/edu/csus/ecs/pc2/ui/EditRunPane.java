@@ -80,7 +80,7 @@ public class EditRunPane extends JPanePlugin {
 
     private Executable executable;
 
-    private JComboBox judgementComboBox = null;
+    private JComboBox<Judgement> judgementComboBox = null;
 
     private JLabel runInfoLabel = null;
 
@@ -92,9 +92,9 @@ public class EditRunPane extends JPanePlugin {
 
     private JLabel statusTitleLabel = null;
 
-    private JComboBox problemComboBox = null;
+    private JComboBox<Problem> problemComboBox = null;
 
-    private JComboBox languageComboBox = null;
+    private JComboBox<Language> languageComboBox = null;
 
     private JLabel problemLabel = null;
 
@@ -724,9 +724,9 @@ public class EditRunPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getJudgementComboBox() {
+    private JComboBox<Judgement> getJudgementComboBox() {
         if (judgementComboBox == null) {
-            judgementComboBox = new JComboBox();
+            judgementComboBox = new JComboBox<Judgement>();
             judgementComboBox.setLocation(new java.awt.Point(224, 97));
             judgementComboBox.setSize(new java.awt.Dimension(263, 22));
             judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
@@ -762,9 +762,9 @@ public class EditRunPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getProblemComboBox() {
+    private JComboBox<Problem> getProblemComboBox() {
         if (problemComboBox == null) {
-            problemComboBox = new JComboBox();
+            problemComboBox = new JComboBox<Problem>();
             problemComboBox.setBounds(new java.awt.Rectangle(224, 130, 263, 22));
             problemComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -780,9 +780,9 @@ public class EditRunPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getLanguageComboBox() {
+    private JComboBox<Language> getLanguageComboBox() {
         if (languageComboBox == null) {
-            languageComboBox = new JComboBox();
+            languageComboBox = new JComboBox<Language>();
             languageComboBox.setBounds(new java.awt.Rectangle(224, 163, 263, 22));
             languageComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

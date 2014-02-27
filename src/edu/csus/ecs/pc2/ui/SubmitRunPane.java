@@ -58,9 +58,9 @@ public class SubmitRunPane extends JPanePlugin {
 
     private JButton submitRunButton = null;
 
-    private JComboBox problemComboBox = null;
+    private JComboBox<Problem> problemComboBox = null;
 
-    private JComboBox languageComboBox = null;
+    private JComboBox<Language> languageComboBox = null;
 
     private JButton pickFileButton = null;
 
@@ -585,9 +585,9 @@ public class SubmitRunPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getProblemComboBox() {
+    private JComboBox<Problem> getProblemComboBox() {
         if (problemComboBox == null) {
-            problemComboBox = new JComboBox();
+            problemComboBox = new JComboBox<Problem>();
             problemComboBox.setBounds(new java.awt.Rectangle(38, 42, 221, 28));
             problemComboBox.addItem(new Problem("Select Problem"));
         }
@@ -599,9 +599,9 @@ public class SubmitRunPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getLanguageComboBox() {
+    private JComboBox<Language> getLanguageComboBox() {
         if (languageComboBox == null) {
-            languageComboBox = new JComboBox();
+            languageComboBox = new JComboBox<Language>();
             languageComboBox.setBounds(new java.awt.Rectangle(49, 97, 221, 28));
             languageComboBox.addItem(new Language("Select Language"));
         }

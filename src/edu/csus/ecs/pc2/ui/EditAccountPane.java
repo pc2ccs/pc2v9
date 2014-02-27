@@ -9,19 +9,21 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -71,7 +73,7 @@ public class EditAccountPane extends JPanePlugin {
 
     private Account account = null;
 
-    private DefaultListModel defaultListModel = new DefaultListModel();
+    private ListModel<Object> defaultListModel = new DefaultListModel<Object>();
 
     // May be used sometime later.
     @SuppressWarnings("unused")
@@ -105,7 +107,7 @@ public class EditAccountPane extends JPanePlugin {
 
     private JLabel groupTitleLabel = null;
 
-    private JComboBox groupComboBox = null;
+    private JComboBox<Serializable> groupComboBox = null;
 
     private boolean populatingGUI = false;
 
@@ -113,13 +115,13 @@ public class EditAccountPane extends JPanePlugin {
 
     private JLabel jLabel1 = null;
 
-    private JComboBox accountTypeComboBox = null;
+    private JComboBox<edu.csus.ecs.pc2.core.model.ClientType.Type> accountTypeComboBox = null;
 
     private JLabel accountLabel = null;
 
     private JTextField accountTextField = null;
 
-    private JComboBox siteSelectionComboBox = null;
+    private JComboBox<Site> siteSelectionComboBox = null;
 
     private JLabel siteLabel = null;
 
@@ -497,7 +499,7 @@ public class EditAccountPane extends JPanePlugin {
 
     private void populatePermissions(Account inAccount) {
 
-        defaultListModel.removeAllElements();
+        ((DefaultListModel<Object>) defaultListModel).removeAllElements();
         
         Permission.Type[] types = Permission.Type.values();
         Arrays.sort(types, new PermissionByDescriptionComparator());
@@ -506,7 +508,7 @@ public class EditAccountPane extends JPanePlugin {
 
             for (Type type : types) {
                 JCheckBox checkBox = new JCheckBox(permission.getDescription(type));
-                defaultListModel.addElement(checkBox);
+                ((DefaultListModel<Object>) defaultListModel).addElement(checkBox);
             }
             getPermissionsJList().setSelectedIndex(-1);
 
@@ -525,7 +527,7 @@ public class EditAccountPane extends JPanePlugin {
                 int idx = 0;
                 for (Type type : types) {
                     JCheckBox checkBox = new JCheckBox(permission.getDescription(type));
-                    defaultListModel.addElement(checkBox);
+                    ((DefaultListModel<Object>) defaultListModel).addElement(checkBox);
                     if (account.isAllowed(type)) {
                         indexes[count] = idx;
                         count++;
@@ -537,7 +539,7 @@ public class EditAccountPane extends JPanePlugin {
             } else {
                 for (Type type : types) {
                     JCheckBox checkBox = new JCheckBox(permission.getDescription(type));
-                    defaultListModel.addElement(checkBox);
+                    ((DefaultListModel<Object>) defaultListModel).addElement(checkBox);
                 }
             }
         }
@@ -690,7 +692,7 @@ public class EditAccountPane extends JPanePlugin {
      * 
      * @return javax.swing.JList
      */
-    private JList getPermissionsJList() {
+    private JCheckBoxJList getPermissionsJList() {
         if (permissionsJList == null) {
             permissionsJList = new JCheckBoxJList();
             permissionsJList.setModel(defaultListModel);
@@ -764,9 +766,9 @@ public class EditAccountPane extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JComboBox getGroupComboBox() {
+    private JComboBox<Serializable> getGroupComboBox() {
         if (groupComboBox == null) {
-            groupComboBox = new JComboBox();
+            groupComboBox = new JComboBox<Serializable>();
             groupComboBox.setBounds(new java.awt.Rectangle(14, 291, 272, 22));
             groupComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -838,15 +840,15 @@ public class EditAccountPane extends JPanePlugin {
         // clear out the permissions
         checkAccount.clearListAndLoadPermissions(new PermissionList());
         // get permissions
-        Object[] objects = getPermissionsJList().getSelectedValues();
+        List<Object> objects = getPermissionsJList().getSelectedValuesList();
         for (Object object : objects) {
-            JCheckBox checkBox = (JCheckBox) object;
+            JCheckBox checkBox = (JCheckBox)object;
             String name = checkBox.getText();
             Type type = getTypeFromDescrption(name);
             checkAccount.addPermission(type);
         }
 
-        if (objects.length == 0 && account == null) {
+        if (objects.isEmpty() && account == null) {
             // Add default permissions if none selected and new account
             ClientType.Type clientType = checkAccount.getClientId().getClientType();
             checkAccount.clearListAndLoadPermissions(new PermissionGroup().getPermissionList(clientType));
@@ -889,9 +891,9 @@ public class EditAccountPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getAccountTypeComboBox() {
+    private JComboBox<edu.csus.ecs.pc2.core.model.ClientType.Type> getAccountTypeComboBox() {
         if (accountTypeComboBox == null) {
-            accountTypeComboBox = new JComboBox();
+            accountTypeComboBox = new JComboBox<edu.csus.ecs.pc2.core.model.ClientType.Type>();
             accountTypeComboBox.setBounds(new java.awt.Rectangle(14, 242, 137, 25));
 
             accountTypeComboBox.addItem(ClientType.Type.TEAM);
@@ -924,9 +926,9 @@ public class EditAccountPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getSiteSelectionComboBox() {
+    private JComboBox<Site> getSiteSelectionComboBox() {
         if (siteSelectionComboBox == null) {
-            siteSelectionComboBox = new JComboBox();
+            siteSelectionComboBox = new JComboBox<Site>();
             siteSelectionComboBox.setBounds(new java.awt.Rectangle(157, 243, 124, 25));
         }
         return siteSelectionComboBox;

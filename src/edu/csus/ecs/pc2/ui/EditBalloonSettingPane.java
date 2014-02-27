@@ -33,6 +33,7 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Font;
 import java.awt.Dimension;
+import java.io.Serializable;
 
 /**
  * Add/Edit BalloonSettings Pane.
@@ -93,13 +94,13 @@ public class EditBalloonSettingPane extends JPanePlugin {
 
     private MCLB colorListBox = null;
 
-    private JComboBox siteComboBox = null;
+    private JComboBox<Site> siteComboBox = null;
 
     private IInternalContest contest;
 
     private JLabel balloonClientLabel = null;
 
-    private JComboBox balloonClientComboBox = null;
+    private JComboBox<Serializable> balloonClientComboBox = null;
 
     private JButton advancedMailButton = null;
 
@@ -867,9 +868,9 @@ public class EditBalloonSettingPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getSiteComboBox() {
+    private JComboBox<Site> getSiteComboBox() {
         if (siteComboBox == null) {
-            siteComboBox = new JComboBox();
+            siteComboBox = new JComboBox<Site>();
             siteComboBox.setBounds(new Rectangle(85, 17, 254, 25));
             siteComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -885,9 +886,9 @@ public class EditBalloonSettingPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getBalloonClientComboBox() {
+    private JComboBox<Serializable> getBalloonClientComboBox() {
         if (balloonClientComboBox == null) {
-            balloonClientComboBox = new JComboBox();
+            balloonClientComboBox = new JComboBox<Serializable>();
             balloonClientComboBox.setBounds(new Rectangle(131, 280, 204, 25));
             balloonClientComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

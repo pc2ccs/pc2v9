@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
+import java.io.Serializable;
 import java.util.Arrays;
 
 import javax.swing.JButton;
@@ -66,7 +67,7 @@ public class EditGroupPane extends JPanePlugin {
 
     private boolean populatingGUI = true;
 
-    private JComboBox siteComboBox = null;
+    private JComboBox<Serializable> siteComboBox = null;
 
     private JCheckBox displayOnScoreboardCheckbox = null;
 
@@ -520,9 +521,9 @@ public class EditGroupPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getSiteComboBox() {
+    private JComboBox<Serializable> getSiteComboBox() {
         if (siteComboBox == null) {
-            siteComboBox = new JComboBox();
+            siteComboBox = new JComboBox<Serializable>();
             siteComboBox.setBounds(new Rectangle(213, 50, 247, 25));
             siteComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

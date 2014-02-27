@@ -45,7 +45,7 @@ public class SubmitClarificationPane extends JPanePlugin {
 
     private JPanel problemPane = null;
 
-    private JComboBox problemComboBox = null;
+    private JComboBox<Problem> problemComboBox = null;
 
     private JPanel questionPane = null;
 
@@ -103,9 +103,9 @@ public class SubmitClarificationPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getProblemComboBox() {
+    private JComboBox<Problem> getProblemComboBox() {
         if (problemComboBox == null) {
-            problemComboBox = new JComboBox();
+            problemComboBox = new JComboBox<Problem>();
         }
         return problemComboBox;
     }

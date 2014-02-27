@@ -52,7 +52,7 @@ public class ContestClockPane extends JPanePlugin {
 
     private JLabel messageLabel = null;
 
-    private JComboBox siteSelectComboBox = null;
+    private JComboBox<String> siteSelectComboBox = null;
 
     private Log log;
 
@@ -144,9 +144,9 @@ public class ContestClockPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getSiteSelectComboBox() {
+    private JComboBox<String> getSiteSelectComboBox() {
         if (siteSelectComboBox == null) {
-            siteSelectComboBox = new JComboBox();
+            siteSelectComboBox = new JComboBox<String>();
             siteSelectComboBox.setPreferredSize(new java.awt.Dimension(300, 25));
             siteSelectComboBox.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(java.awt.event.ItemEvent e) {

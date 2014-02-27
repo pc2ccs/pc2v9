@@ -30,7 +30,7 @@ public class PluginLoadPane extends JPanePlugin {
      */
     private static final long serialVersionUID = -1303011559658754807L;
 
-    private JComboBox pluginComboBox = null;
+    private JComboBox<PluginWrapper> pluginComboBox = null;
 
     private JButton openNewPluginButton = null;
 
@@ -78,9 +78,9 @@ public class PluginLoadPane extends JPanePlugin {
      * 
      * @return javax.swing.JComboBox
      */
-    private JComboBox getPluginComboBox() {
+    private JComboBox<PluginWrapper> getPluginComboBox() {
         if (pluginComboBox == null) {
-            pluginComboBox = new JComboBox();
+            pluginComboBox = new JComboBox<PluginWrapper>();
             pluginComboBox.setBounds(new Rectangle(41, 57, 458, 33));
         }
         return pluginComboBox;
