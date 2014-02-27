@@ -34,14 +34,14 @@
     <!-- Compiler settings. -->
     <property name="javacFailOnError" value="false"/>
     <property name="javacDebugInfo" value="on"/>
-    <property name="javacVerbose" value="false"/>
+    <property name="javacVerbose" value="true"/>
     <property name="logExtension" value=".log"/>
     <property name="compilerArg" value=""/>
-    <property name="javacSource" value="1.5"/>
-    <property name="javacTarget" value="1.5"/>
+    <property name="javacSource" value="7"/>
+    <property name="javacTarget" value="7"/>
     <path id="path_bootclasspath">
             <fileset dir="${java.home}/lib">
-                <include name="*.jar"/>
+                <include name="rt.jar"/>
             </fileset>
     </path>
 
