@@ -6,6 +6,8 @@
         v9 build file
     </description>
     <!-- set global properties for this build -->
+    <property name="apt.build.javac.target" value="1.7" />
+    <property name="apt.build.javac.source" value="1.7" />
     <property name="src.dir" location="src" />
     <property name="test.dir" location="test" />
     <property name="build.dir" location="build" />
