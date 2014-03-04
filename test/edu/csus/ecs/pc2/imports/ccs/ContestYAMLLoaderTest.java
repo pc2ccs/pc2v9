@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Vector;
 
+import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
@@ -1121,49 +1122,115 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         }
 
     }
+    
+    public void testYamlWriteAndLoad() throws Exception {
+        
+        String testDirectory = getOutputDataDirectory("testYamlWriteAndLoad");
+        ensureDirectory(testDirectory);
+        
+        IInternalContest originalContest = sampleContest.createContest(3, 3, 12, 5, true);
 
-//    /**
-//     * The list of the tests to run/test.
-//     * 
-//     * JUnit3 only use.
-//     * 
-//     * @return list of classes to test.
-//     */
+        ExportYAML exportYAML = new ExportYAML();
+
+        exportYAML.exportFiles(testDirectory, originalContest);
+        
+//        String filename = testDirectory + File.separator + ExportYAML.CONTEST_FILENAME;
+//        editFile(filename);
+
+        exportYAML = null;
+        
+        IInternalContest contest = loader.fromYaml(null, new String[0], "NAD");
+        assertNotNull(contest);
+
+        loader.setLoadProblemDataFiles(false);
+        contest = loader.fromYaml(null, testDirectory);
+
+        assertNotNull(contest);
+        
+        Language[] languages = contest.getLanguages();
+
+        assertEquals("Number of languages", 6, languages.length);
+
+//        
+//        languages:
+//            - name: 'Java'
+//              active: true
+//              compilerCmd: 'javac {:mainfile}'
+//              exemask: '{:basename}.class'
+//              execCmd: 'java {:basename}'
+//              runner: 'java'
+//              runner-args: '{:basename}        
+        
+        assertEquals("Expected language name ", "Java", languages[0].getDisplayName());
+        assertEquals("Expected language compilerCmd ", "javac {:mainfile}", languages[0].getCompileCommandLine());
+        assertEquals("Expected language exemask ", "{:basename}.class", languages[0].getExecutableIdentifierMask());
+        assertEquals("Expected language execCmd ", "java {:basename}", languages[0].getProgramExecuteCommandLine());
+        
+        assertEquals("Expected language name ", "Default", languages[1].getDisplayName());
+        assertEquals("Expected language name ", "GNU C++ (Unix / Windows)", languages[2].getDisplayName());
+    }
+    
+    public void testUnQuote() throws Exception {
+        
+        ContestYAMLLoader loader = new ContestYAMLLoader();
+
+        unquoteAssertEquals (loader, "'Java'", "Java");
+        
+    }
+
+    private void unquoteAssertEquals(ContestYAMLLoader inLoader, String input, String expected){
+
+        String actual = loader.unquote(input, "'");
+        assertEquals("Expected unquoted string", expected, actual);
+        
+    }
+
+    /**
+     * The list of the tests to run/test.
+     * 
+     * JUnit3 only use.
+     * 
+     * @return list of classes to test.
+     */
+    
+    public static TestSuite NotUsedSuite() {
 //    public static TestSuite suite() {
-//        /**
-//         * This is a way to test a single test method using JUnit3 
-//         */
-//        
-//        TestSuite suite = new TestSuite(TEST_CLASS_NAME);
-//        
-//        String singletonTestName = "";
-////        singletonTestName = "testProblemLoader";
-//
-//        if (!"".equals(singletonTestName)) {
-//            suite.addTest(new ContestYAMLLoaderTest(singletonTestName));
-//        } else {
-//            suite.addTest(new ContestYAMLLoaderTest("testGetTitle"));
-//            suite.addTest(new ContestYAMLLoaderTest("testLoaderMethods"));
-//            suite.addTest(new ContestYAMLLoaderTest("testLoader"));
-//            suite.addTest(new ContestYAMLLoaderTest("testProblemLoader"));
-//            suite.addTest(new ContestYAMLLoaderTest("testLoadClarCategories"));
-//            suite.addTest(new ContestYAMLLoaderTest("testLoadSites"));
-//            suite.addTest(new ContestYAMLLoaderTest("testGeneralAnswsers"));
-//            suite.addTest(new ContestYAMLLoaderTest("testgetSectionLines"));
-//            suite.addTest(new ContestYAMLLoaderTest("testgetFileNames"));
-//            suite.addTest(new ContestYAMLLoaderTest("testgetProblemsFromLetters"));
-//            suite.addTest(new ContestYAMLLoaderTest("testgetAutoJudgeSettings"));
-//            suite.addTest(new ContestYAMLLoaderTest("testAutoJudgeSettingsTwo"));
-//            suite.addTest(new ContestYAMLLoaderTest("testAutoJudgeSettingsAll"));
-//            suite.addTest(new ContestYAMLLoaderTest("testAllJudges"));
-//            suite.addTest(new ContestYAMLLoaderTest("testReplayLoad"));
-//            suite.addTest(new ContestYAMLLoaderTest("testLatextProblem"));
-//            suite.addTest(new ContestYAMLLoaderTest("testGetBooleanValue"));
-//            suite.addTest(new ContestYAMLLoaderTest("testValidatorKeys"));
-//            suite.addTest(new ContestYAMLLoaderTest("testMultipleDataSets"));
-//            suite.addTest(new ContestYAMLLoaderTest("atestIncludeFile"));
-//            suite.addTest(new ContestYAMLLoaderTest("testLoadProblemSet"));
-//        }
-//        return suite;
-//    }
+        /**
+         * This is a way to test a single test method using JUnit3 
+         */
+        
+        TestSuite suite = new TestSuite(TEST_CLASS_NAME);
+        
+        String singletonTestName = "";
+        singletonTestName = "testYamlWriteAndLoad";
+//        singletonTestName = "testUnQuote";
+        
+
+        if (!"".equals(singletonTestName)) {
+            suite.addTest(new ContestYAMLLoaderTest(singletonTestName));
+        } else {
+            suite.addTest(new ContestYAMLLoaderTest("testGetTitle"));
+            suite.addTest(new ContestYAMLLoaderTest("testLoaderMethods"));
+            suite.addTest(new ContestYAMLLoaderTest("testLoader"));
+            suite.addTest(new ContestYAMLLoaderTest("testProblemLoader"));
+            suite.addTest(new ContestYAMLLoaderTest("testLoadClarCategories"));
+            suite.addTest(new ContestYAMLLoaderTest("testLoadSites"));
+            suite.addTest(new ContestYAMLLoaderTest("testGeneralAnswsers"));
+            suite.addTest(new ContestYAMLLoaderTest("testgetSectionLines"));
+            suite.addTest(new ContestYAMLLoaderTest("testgetFileNames"));
+            suite.addTest(new ContestYAMLLoaderTest("testgetProblemsFromLetters"));
+            suite.addTest(new ContestYAMLLoaderTest("testgetAutoJudgeSettings"));
+            suite.addTest(new ContestYAMLLoaderTest("testAutoJudgeSettingsTwo"));
+            suite.addTest(new ContestYAMLLoaderTest("testAutoJudgeSettingsAll"));
+            suite.addTest(new ContestYAMLLoaderTest("testAllJudges"));
+            suite.addTest(new ContestYAMLLoaderTest("testReplayLoad"));
+            suite.addTest(new ContestYAMLLoaderTest("testLatextProblem"));
+            suite.addTest(new ContestYAMLLoaderTest("testGetBooleanValue"));
+            suite.addTest(new ContestYAMLLoaderTest("testValidatorKeys"));
+            suite.addTest(new ContestYAMLLoaderTest("testMultipleDataSets"));
+            suite.addTest(new ContestYAMLLoaderTest("atestIncludeFile"));
+            suite.addTest(new ContestYAMLLoaderTest("testLoadProblemSet"));
+        }
+        return suite;
+    }
 }

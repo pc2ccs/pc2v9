@@ -1,15 +1,12 @@
 package edu.csus.ecs.pc2.core.export;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test for YAML export.
@@ -19,33 +16,16 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/export/ExportYAMLTest.java $
-public class ExportYAMLTest extends TestCase {
+public class ExportYAMLTest extends AbstractTestCase {
 
     private boolean debugMode = false;
 
-    private String baseTestDirectory = "testing";
-
-    /**
-     * Test directory name for this JUnit run.
-     */
-    private String testDirectory = null;
-
     private SampleContest sampleContest = new SampleContest();
-
-    private SimpleDateFormat formatter = new SimpleDateFormat("HH.mm.ss MMM dd");
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        if (testDirectory == null) {
-            testDirectory = baseTestDirectory + File.separator + "eyaml" + File.separator + formatter.format(new Date());
-            new File(testDirectory).mkdirs();
-        }
-
-        if (debugMode) {
-            System.out.println("Creating to dir: " + testDirectory);
-        }
     }
 
     public void testOne() throws Exception {
@@ -61,6 +41,9 @@ public class ExportYAMLTest extends TestCase {
                 System.out.println(problem.getDisplayName() + " " +problem.getShortName());
             }
         }
+        
+        String testDirectory = getOutputDataDirectory("testOne");
+        ensureDirectory(testDirectory);
 
         sampleContest.addDataFiles(contest, testDirectory, problems[0], "sumit.dat", "sumit.ans");
         sampleContest.addDataFiles(contest, testDirectory, problems[1], "quads.in", "quads.ans");
@@ -92,7 +75,24 @@ public class ExportYAMLTest extends TestCase {
         }
 
     }
+    
+    public void testCreateYaml() throws Exception {
+        
+        String testDirectory = getOutputDataDirectory("testCreateYaml");
+        ensureDirectory(testDirectory);
+        
+        IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
 
+        ExportYAML exportYAML = new ExportYAML();
+
+        exportYAML.exportFiles(testDirectory, contest);
+        
+//        String filename = testDirectory + File.separator + ExportYAML.CONTEST_FILENAME;
+//        editFile(filename);
+
+        exportYAML = null;
+
+    }
 //    private void addShortNames(IInternalContest contest) throws Exception {
 //
 //        int idx = 1;

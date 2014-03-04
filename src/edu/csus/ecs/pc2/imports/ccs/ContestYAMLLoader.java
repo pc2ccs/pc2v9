@@ -144,6 +144,12 @@ public class ContestYAMLLoader {
     private static final String VALIDATOR_KEY = "validator";
     
     /**
+     * Load Problem Data File Contents
+     */
+    private boolean loadProblemDataFiles = true;
+
+    
+    /**
      * Load contest data from contest.yaml.
      * 
      * @param contest
@@ -282,8 +288,10 @@ public class ContestYAMLLoader {
         
         Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine);
         
-        for (Problem problem : problems) {
-            loadProblemInformationAndDataFiles(contest, directoryName, problem);
+        if (loadProblemDataFiles){
+            for (Problem problem : problems) {
+                loadProblemInformationAndDataFiles(contest, directoryName, problem);
+            }
         }
         
         Site[] sites = getSites(yamlLines);
@@ -1236,15 +1244,32 @@ public class ContestYAMLLoader {
         for (String line : lines) {
             String keyString = key + DELIMIT;
             if (line.trim().startsWith(keyString)) {
-                return line.trim().substring(keyString.length()).trim();
+                return unquote(line.trim().substring(keyString.length()).trim(),"'");
             }
 
             keyString = "- " + key + DELIMIT;
             if (line.trim().startsWith(keyString)) {
-                return line.trim().substring(keyString.length()).trim();
+                return unquote(line.trim().substring(keyString.length()).trim(),"'");
             }
         }
         return null;
+    }
+
+    /**
+     * Remove trailing and leading quote char
+     * @param string
+     * @param quoteChar 
+     * @return
+     */
+    protected String unquote(String string, String quoteChar) {
+        if (string.startsWith(quoteChar)){
+            String newString = string.substring(1);
+            if (newString.endsWith(quoteChar)){
+                newString = newString.substring(0,newString.length()-1);
+            }
+            return newString;
+        }
+        return string;
     }
 
     public String[] getNextSequence(String[] sectionLines, int idx) {
@@ -1537,4 +1562,18 @@ public class ContestYAMLLoader {
     public Problem[] getProblems(String[] contents, int defaultTimeOut)  {
         return getProblems(contents, defaultTimeOut, true, null, null);
     }
+
+    /**
+     * Load problem data files.
+     * 
+     * @param loadProblemDataFiles false means ignore problem data files
+     */
+    public void setLoadProblemDataFiles(boolean loadProblemDataFiles) {
+        this.loadProblemDataFiles = loadProblemDataFiles;
+    }
+    
+    public boolean isLoadProblemDataFiles() {
+        return loadProblemDataFiles;
+    }
+
 }

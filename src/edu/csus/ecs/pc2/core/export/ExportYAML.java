@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.export;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -127,8 +128,8 @@ public class ExportYAML {
         // name: ACM-ICPC World Finals 2011
         // short-name: ICPC WF 2011
 
-        contestWriter.println("name: " + info.getContestTitle());
-        contestWriter.println("short-name: "+info.getContestShortName());
+        contestWriter.println("name: " + quote(info.getContestTitle()));
+        contestWriter.println("short-name: "+ quote(info.getContestShortName()));
 
         ContestTime contestTime = contest.getContestTime();
         if (contestTime == null) {
@@ -201,18 +202,18 @@ public class ExportYAML {
         // runner-args:
 
         for (Language language : languages) {
-            contestWriter.println(" - name: " + language.getDisplayName());
+            contestWriter.println(" - name: " + quote(language.getDisplayName()));
             contestWriter.println("   active: " + language.isActive());
-            contestWriter.println("   compilerCmd: " + language.getCompileCommandLine());
-            contestWriter.println("   exemask: " + language.getExecutableIdentifierMask());
-            contestWriter.println("   execCmd: " + language.getProgramExecuteCommandLine());
+            contestWriter.println("   compilerCmd: " + quote(language.getCompileCommandLine()));
+            contestWriter.println("   exemask: " + quote(language.getExecutableIdentifierMask()));
+            contestWriter.println("   execCmd: " + quote(language.getProgramExecuteCommandLine()));
 
             String runner = getRunner(language.getProgramExecuteCommandLine());
             String runnerArguments = getRunnerArguments(language.getProgramExecuteCommandLine());
 
             if (runner != null) {
-                contestWriter.println("   runner: " + runner);
-                contestWriter.println("   runner-args: " + runnerArguments);
+                contestWriter.println("   runner: " + quote(runner));
+                contestWriter.println("   runner-args: " + quote(runnerArguments));
 
             }
             contestWriter.println();
@@ -224,6 +225,8 @@ public class ExportYAML {
             contestWriter.println(ContestYAMLLoader.PROBLEMS_KEY + ":");
         }
 
+        // TODO CCS put the problemset section into its own method
+        
         // problemset:
         //
         // - letter: B
@@ -247,7 +250,7 @@ public class ExportYAML {
                 shortName = problem.getShortName();
             }
             contestWriter.println("    short-name: " + shortName);
-            contestWriter.println("          name: " + name);
+            contestWriter.println("          name: " + quote(name));
             
             String colorName = getProblemBalloonColor(contest, problem);
             if (colorName != null) {
@@ -322,7 +325,7 @@ public class ExportYAML {
         contestWriter.println(ContestYAMLLoader.SITES_KEY + ":");
         for (Site site : sites) {
             contestWriter.println(" - number: " + site.getSiteNumber());
-            contestWriter.println("   name: " + site.getDisplayName());
+            contestWriter.println("   name: " + quote(site.getDisplayName()));
             contestWriter.println("   password: " + site.getPassword());
 
             String hostName = site.getConnectionInfo().getProperty(Site.IP_KEY);
@@ -363,6 +366,15 @@ public class ExportYAML {
         contestWriter.flush();
         contestWriter.close();
         contestWriter = null;
+    }
+
+    /**
+     * Surround by a single quote
+     * @param string
+     * @return
+     */
+    private String quote(String string) {
+        return "'" + string +"'";
     }
 
     /**
@@ -486,7 +498,7 @@ public class ExportYAML {
 
         problemWriter.println();
 
-        problemWriter.println("name: " + problem.getDisplayName());
+        problemWriter.println("name: " + quote(problem.getDisplayName()));
         problemWriter.println("source: ");
         problemWriter.println("author: ");
         problemWriter.println("license: ");
@@ -510,6 +522,9 @@ public class ExportYAML {
         problemWriter.println(ContestYAMLLoader.INPUT_KEY + ":");
         problemWriter.println("   readFromSTDIN: " + problem.isReadInputDataFromSTDIN());
         problemWriter.println();
+        
+        String problemLaTexFilename = parentDirectoryName + File.separator + "problem_statement" + File.separator + ContestYAMLLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
+        writeProblemTitleToFile (problemLaTexFilename, problem.getDisplayName());
 
         /**
          * Create data files target directory.
@@ -562,6 +577,35 @@ public class ExportYAML {
         problemWriter = null;
 
         return (String[]) filesWritten.toArray(new String[filesWritten.size()]);
+    }
+
+    /**
+     * Write problem title to (LaTeX) file 
+     * @param filename
+     * @param title
+     * @throws FileNotFoundException
+     */
+    protected void writeProblemTitleToFile(String filename, String title) throws FileNotFoundException {
+
+        String parentDirectoryName = new File(filename).getParent();
+        new File(parentDirectoryName).mkdirs();
+
+        PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
+
+        String titlePattern2 = "\\problemname{";
+
+        String commentPattern = "%% plainproblemtitle:";
+
+        // \problemtitle{Problem Name}
+
+        writer.println(titlePattern2 + title + "}");
+
+        // %% plainproblemtitle: Problem Name
+
+        writer.println(commentPattern + title);
+        
+        writer.close();
+        writer = null;
     }
 
     /**

@@ -231,6 +231,19 @@ public class AbstractTestCase extends TestCase {
     public boolean ensureOutputDirectory() {
         return ensureDirectory(getOutputDataDirectory());
     }
+    
+    /**
+     * Ensure output sub directory exists under output directory.
+     * 
+     * @see #ensureOutputDirectory()
+     * @param subDirectoryName
+     * @return
+     */
+    public boolean ensureOutputDirectory(String subDirectoryName) {
+        return ensureDirectory(getOutputDataDirectory(subDirectoryName));
+    }
+    
+    
 
     /**
      * Return the project (with JUnit name) relative directory where test output data is located.
