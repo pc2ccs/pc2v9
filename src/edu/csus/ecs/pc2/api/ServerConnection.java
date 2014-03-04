@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
  * This class represents a connection to a PC<sup>2</sup> server. Instantiating the class creates a local {@link ServerConnection} object which can then be used to connect to the PC<sup>2</sup> server
@@ -156,11 +157,7 @@ public class ServerConnection {
 
         checkWhetherLoggedIn();
         
-        Account account = getAccount(internalContest, internalContest.getClientId());
-
-        if (!account.isAllowed(Permission.Type.SUBMIT_CLARIFICATION)) {
-            throw new Exception("User not allowed to submit clarification");
-        }
+        allowedTo (Permission.Type.SUBMIT_CLARIFICATION, "User not allowed to submit clarification");
 
         ProblemImplementation problemImplementation = (ProblemImplementation) problem;
         Problem submittedProblem = internalContest.getProblem(problemImplementation.getElementId());
@@ -200,11 +197,7 @@ public class ServerConnection {
 
         checkWhetherLoggedIn();
         
-        Account account = getAccount(internalContest, internalContest.getClientId());
-
-        if (!account.isAllowed(Permission.Type.SUBMIT_RUN)) {
-            throw new Exception("User not allowed to submit run");
-        }
+        allowedTo (Permission.Type.SUBMIT_RUN, "User not allowed to submit run");
         
         if (! new File(mainFileName).isFile()){
             throw new Exception("File '"+mainFileName+"' no such file (not found)"); 
@@ -336,5 +329,62 @@ public class ServerConnection {
             contest = null;
         }
     }
+    
+    
+    /**
+     * Start the contest clock.
+     * 
+     * If the contest clock is already started this has no effect.
+     * @throws Exception 
+     */
+    public void startContestClock() throws Exception {
+        
+        checkWhetherLoggedIn();
 
+        allowedTo (Permission.Type.START_CONTEST_CLOCK, "User not allowed to start contest clock");
+
+        try {
+            controller.startContest(internalContest.getSiteNumber());
+        } catch (Exception e) {
+            throw new Exception("Unable to start Contest "+e.getLocalizedMessage());
+        }
+    }
+    
+    /**
+     * Client side permission check.
+     * 
+     * @param permissionType
+     * @param message
+     * @throws Exception
+     */
+    protected void allowedTo(Type permissionType, String message) throws Exception {
+        Account account = getAccount(internalContest, internalContest.getClientId());
+
+        if (!account.isAllowed(permissionType)) {
+            throw new Exception(message +", user="+contest.getMyClient().getLoginName());
+        }
+        
+    }
+
+    /**
+     * Stop the contest clock.
+     * 
+     * Stops the contest clock, no elapsed time will accrue.  No
+     * new runs will be accepted.
+     * 
+     * 
+     * @throws Exception 
+     */
+    public void stopContestClock() throws Exception {
+        checkWhetherLoggedIn();
+        
+        allowedTo (Permission.Type.STOP_CONTEST_CLOCK, "User not allowed to start contest clock");
+        
+        try {
+            controller.stopContest(internalContest.getSiteNumber());
+        } catch (Exception e) {
+            throw new Exception("Unable to stop Contest "+e.getLocalizedMessage());
+        }
+        
+    }
 }
