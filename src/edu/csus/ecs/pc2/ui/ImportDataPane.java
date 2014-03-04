@@ -21,6 +21,7 @@ import javax.swing.filechooser.FileFilter;
 import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -166,7 +167,12 @@ public class ImportDataPane extends JPanePlugin {
 
         try {
             // TODO CCS figure out how to determine whether to load data file contents.
-            boolean loadDataFileContents = false;
+            boolean loadDataFileContents = true;
+            String value = IniFile.getValue("server.externalfiles");
+            if (value != null && value.equalsIgnoreCase("yes")){
+                loadDataFileContents = false;
+            }
+        
             newContest = loader.fromYaml(null, directoryName, loadDataFileContents);
              
              contestSummary = getContestLoadSummary(newContest, getController());
