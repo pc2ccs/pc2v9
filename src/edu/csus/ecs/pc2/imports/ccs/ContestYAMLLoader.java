@@ -741,9 +741,9 @@ public class ContestYAMLLoader {
 
                 SerializedFile[] data = (SerializedFile[]) dataFiles.toArray(new SerializedFile[dataFiles.size()]);
                 SerializedFile[] answer = (SerializedFile[]) answerFiles.toArray(new SerializedFile[answerFiles.size()]);
-                dumpSerialzedFileList (problem, "Judges data", data);
-                dumpSerialzedFileList (problem, "Judges answer", answer);
-                
+
+//                dumpSerialzedFileList (problem, "Judges data", data);
+//                dumpSerialzedFileList (problem, "Judges answer", answer);
                 
                 problemDataFiles.setJudgesDataFiles(data);
                 problemDataFiles.setJudgesAnswerFiles(answer);

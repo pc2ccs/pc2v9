@@ -70,6 +70,8 @@ public class EventFeedXMLTest extends AbstractTestCase {
     
     private NotificationUtilities notificationUtilities = new NotificationUtilities();
 
+    private boolean exitingServer = false;
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -611,7 +613,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
         System.out.println("Opened socket on port " + port);
 
-        while (true) {
+        while (! exitingServer) {
 
             try {
                 Socket connection = server.accept();
@@ -625,6 +627,9 @@ public class EventFeedXMLTest extends AbstractTestCase {
                 e.printStackTrace();
             }
         }
+        
+//        server.close();  TODO 796 code/catch this
+        server = null;
 
     }
 
@@ -954,5 +959,9 @@ public class EventFeedXMLTest extends AbstractTestCase {
             e.printStackTrace();
         }
 
+    }
+    
+    public void exitServer(){
+        this.exitingServer = true;
     }
 }

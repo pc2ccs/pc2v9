@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import junit.framework.TestSuite;
+import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
@@ -153,14 +154,6 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     private String getYamlTestFileName() {
         return getTestFilename(ExportYAML.CONTEST_FILENAME);
     }
-    
-    
-    // TODO CCS use this
-    @SuppressWarnings("unused")
-    private String getYamlTestFileName(String dirname) {
-        return getTestFilename(dirname + File.separator + ExportYAML.CONTEST_FILENAME);
-    }
-
 
     public void testLoader() throws Exception {
 
@@ -1129,6 +1122,10 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         ensureDirectory(testDirectory);
         
         IInternalContest originalContest = sampleContest.createContest(3, 3, 12, 5, true);
+        Problem [] problems = originalContest.getProblems();
+        Problem problem = problems[0];
+        sampleContest.setCCSValidation(originalContest,null,problem);
+        ElementId problemId = problem.getElementId(); 
 
         ExportYAML exportYAML = new ExportYAML();
 
@@ -1141,7 +1138,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         IInternalContest contest = loader.fromYaml(null, new String[0], "NAD");
         assertNotNull(contest);
-
+        
         loader.setLoadProblemDataFiles(false);
         contest = loader.fromYaml(null, testDirectory);
 
@@ -1168,6 +1165,13 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         assertEquals("Expected language name ", "Default", languages[1].getDisplayName());
         assertEquals("Expected language name ", "GNU C++ (Unix / Windows)", languages[2].getDisplayName());
+        
+        problem = originalContest.getProblem(problemId);
+        
+        
+        assertEquals("Expected validator name ", CCSConstants.INTERNAL_CCS_VALIDATOR_NAME, problem.getValidatorProgramName());
+        assertEquals("Expected validator command ", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problem.getValidatorCommandLine());
+        
     }
     
     public void testUnQuote() throws Exception {
