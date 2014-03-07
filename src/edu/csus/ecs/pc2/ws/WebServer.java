@@ -10,7 +10,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.VersionInfo;
 
 /**
- * Web server (main module).
+ * Web server.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id: ServerModule.java 2391 2011-10-29 02:07:55Z laned $
@@ -28,7 +28,7 @@ public class WebServer {
     // private static String PROPERTY_FILENAME = "www-server.properties";
 
     boolean exitServerFlag = false;
-
+    
     protected static void printStderr(String s) {
         System.err.println(Thread.currentThread().getName() + " " + s);
     }
@@ -68,6 +68,8 @@ public class WebServer {
      * Port to listen on.
      */
     private int port = DEAFAULT_PORT;
+    
+    private ResponseHandler responseHandler = null;
 
     /*
      * Load properties from property file.
@@ -157,7 +159,7 @@ public class WebServer {
             // printProps();
 
             for (int i = 0; i < workers; ++i) {
-                Worker w = new Worker();
+                Worker w = new Worker(responseHandler);
                 (new Thread(w, "worker #" + i)).start();
                 threads.addElement(w);
             }
@@ -179,7 +181,7 @@ public class WebServer {
 
                 synchronized (threads) {
                     if (threads.isEmpty()) {
-                        Worker ws = new Worker();
+                        Worker ws = new Worker(responseHandler);
                         ws.setSocket(s);
                         (new Thread(ws, "additional worker")).start();
                     } else {

@@ -7,7 +7,9 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -30,6 +32,8 @@ class Worker extends WebServer implements Runnable {
     /* Socket to client we're handling */
     private Socket s;
 
+    private ResponseHandler responseHandler;
+
     /*
      * mapping of file extensions to content-types
      */
@@ -46,9 +50,13 @@ class Worker extends WebServer implements Runnable {
         map.put(k, v);
     }
 
-    Worker() {
+    protected Worker() {
         buf = new byte[2048];
         s = null;
+    }
+    
+    public Worker(ResponseHandler responseHandler) {
+        this.responseHandler = responseHandler;
     }
 
     synchronized void setSocket(Socket s) {
@@ -198,9 +206,41 @@ class Worker extends WebServer implements Runnable {
     private void postResponse(String httpCommand, PrintStream ps) {
         
         ps.println(EOL);
+
+        String [] requestParts = parseHttpCommand (httpCommand);
+        
+        String path = requestParts[1];
+        Map<String, String> parameters = mapParams (requestParts[2]);
+        String response = responseHandler.getResponse(path, parameters);
+        ps.println(response);
+        
         ps.println("http: "+httpCommand);
         ps.println(EOL);
         
+    }
+
+
+    private String[] parseHttpCommand(String httpCommand) {
+        // TODO 796 code this 
+
+        return null;
+    }
+
+    /**
+     * Maps the http parameters.
+     * 
+     * If there is no value then 
+     * @param string
+     * @return
+     */
+    private Map<String, String> mapParams(String string) {
+        HashMap<String, String> map = new HashMap<String, String>();
+        
+        
+        
+        // TODO 796 code this 
+        
+        return map;
     }
 
     /**
