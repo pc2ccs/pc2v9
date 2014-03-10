@@ -2,9 +2,9 @@ package edu.csus.ecs.pc2.ws;
 
 import java.util.Map;
 
-import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.ui.UIPlugin;
+import edu.csus.ecs.pc2.api.IContest;
+import edu.csus.ecs.pc2.api.ServerConnection;
+import edu.csus.ecs.pc2.api.implementation.APIPlugin;
 
 /**
  * Takes action and returns response for HTTP request.
@@ -14,12 +14,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  */
 
 // $HeadURL$
-public class ResponseHandler implements UIPlugin {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 6618712539578482961L;
+public class ResponseHandler implements APIPlugin {
 
     private static final String START_CLOCK_PATH = "/ccs/start_clock";
 
@@ -31,28 +26,28 @@ public class ResponseHandler implements UIPlugin {
 
     private static final String CLOCK_STARTED_PATH = "/ccs/contest_started";
 
-    private IInternalContest contest;
-
-    private IInternalController controller;
-
     private String startTime;
 
-    public String getResponse(String path, Map<String, String> parameters) {
+    private IContest contest;
+
+    private ServerConnection serverConnection;
+
+    public String getResponse(String path, Map<String, String> parameters) throws Exception {
 
         if (path == null) {
             return get404Response(path);
         } else if (START_CLOCK_PATH.equals(path)) {
-            controller.startAllContestTimes();
+            serverConnection.startContestClock();
             return tag("pre", "Started Contest");
         } else if (STOP_CLOCK_PATH.equals(path)) {
-            controller.stopAllContestTimes();
+            serverConnection.stopContestClock();
             return  tag("pre", "Stopped/Paused Contest");
         } else if (GET_CLOCK_START_TIME_PATH.equals(path)) {
             return tag("start_time", startTime);
         } else if (SET_CLOCK_PATH.equals(path)) {
             return set_start_time(getDefaultParameter(parameters));
         } else if (CLOCK_STARTED_PATH.equals(path)) {
-            return tag("contest_started", "" + contest.getContestTime().isContestRunning());
+            return tag("contest_started", "" + contest.isContestClockRunning());
         } else {
             return get404Response(path);
         }
@@ -81,14 +76,15 @@ public class ResponseHandler implements UIPlugin {
     }
 
     @Override
-    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        this.contest = inContest;
-        this.controller = inController;
+    public String getPluginTitle() {
+        return "RequestHandler";
     }
 
     @Override
-    public String getPluginTitle() {
-        return "RequestHandler";
+    public void setContestAndServerConnection(ServerConnection inServerConnection, IContest inContest) {
+        this.serverConnection = inServerConnection;
+        this.contest = inContest;
+        
     }
 
 }

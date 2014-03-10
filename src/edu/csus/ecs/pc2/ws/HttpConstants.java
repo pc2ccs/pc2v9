@@ -4,10 +4,10 @@ package edu.csus.ecs.pc2.ws;
  * HTTP Constants.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: ServerModule.java 2391 2011-10-29 02:07:55Z laned $
+ * @version $Id$
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/server/ServerModule.java $
+// $HeadURL$
 public class HttpConstants {
 
     public static final int HTTP_OK = 200;

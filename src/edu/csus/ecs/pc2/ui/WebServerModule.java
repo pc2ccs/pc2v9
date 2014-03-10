@@ -6,16 +6,17 @@ import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.exception.CommandLineErrorException;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.ws.ResponseHandler;
 import edu.csus.ecs.pc2.ws.WebServer;
 
 /**
  * non-GUI Web Server.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: ServerModule.java 2391 2011-10-29 02:07:55Z laned $
+ * @version $Id$
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/server/ServerModule.java $
+// $HeadURL$
 public class WebServerModule {
     
     private ServerConnection serverConnection = null;
@@ -46,9 +47,11 @@ public class WebServerModule {
             
             System.out.println("For: " + contest.getMyClient().getDisplayName() + " (" + contest.getMyClient().getLoginName() + ")");
             System.out.println();
-            
-             WebServer webServer = new WebServer();
-             webServer.startServer(port);
+
+            WebServer webServer = new WebServer();
+            ResponseHandler responseHandler = new ResponseHandler();
+            responseHandler.setContestAndServerConnection(serverConnection, contest);
+            webServer.startServer(port, responseHandler);
             
         } catch (Exception e) {
             System.err.println("Error - "+e.getLocalizedMessage());
@@ -118,11 +121,9 @@ public class WebServerModule {
         "Usage WebServer [--help] ", //
                 "Usage WebServer [-F propfile] [--port ##] --login login --password password", //
                 "", //
-                "", //
                 "--help   this listing", //
                 "", //
-                "", //
-                "$Id: Submitter.java 2658 2013-03-13 05:40:19Z laned $", //
+                "$Id$", //
         };
 
         for (String s : usage) {

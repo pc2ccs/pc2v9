@@ -16,10 +16,10 @@ import java.util.Vector;
  * Handles each HTTP request.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: ServerModule.java 2391 2011-10-29 02:07:55Z laned $
+ * @version $Id$
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/server/ServerModule.java $
+// $HeadURL$
 
 class Worker extends WebServer implements Runnable {
     final static int BUF_SIZE = 2048;
@@ -53,9 +53,11 @@ class Worker extends WebServer implements Runnable {
     protected Worker() {
         buf = new byte[2048];
         s = null;
+        System.out.println("debug 22 Starting worker");
     }
     
     public Worker(ResponseHandler responseHandler) {
+        this();
         this.responseHandler = responseHandler;
     }
 
@@ -98,6 +100,7 @@ class Worker extends WebServer implements Runnable {
     }
 
     void handleClient() throws IOException {
+        System.out.println("debug 22 handleClient");
         InputStream is = new BufferedInputStream(s.getInputStream());
         PrintStream ps = new PrintStream(s.getOutputStream());
         /*
@@ -138,7 +141,7 @@ class Worker extends WebServer implements Runnable {
 
             String httpCommand = new String(buf);
             
-            System.out.println("http is "+httpCommand);
+            System.out.println("debug 22 http <"+httpCommand+"> http end");
 
             if (httpCommand.startsWith("GET ")) {
                 // if (buf[0] == (byte) 'G' && buf[1] == (byte) 'E' && buf[2] == (byte) 'T' && buf[3] == (byte) ' ') {
@@ -211,19 +214,61 @@ class Worker extends WebServer implements Runnable {
         
         String path = requestParts[1];
         Map<String, String> parameters = mapParams (requestParts[2]);
-        String response = responseHandler.getResponse(path, parameters);
-        ps.println(response);
+        try {
+            String response = responseHandler.getResponse(path, parameters);
+            ps.println(response);
+        } catch (Exception e) {
+            try {
+                sendErrorResponse(ps, e);
+            } catch (Exception e2) {
+                e.printStackTrace(System.err);
+            }
+        }
         
         ps.println("http: "+httpCommand);
         ps.println(EOL);
-        
+    }
+    
+    void sendErrorResponse(PrintStream ps,Exception e) throws IOException {
+        ps.write(EOL);
+        ps.write(EOL);
+        ps.println("<h3><b>Internal Error</b><P>");
+        if (e != null) {
+            ps.println(e.getLocalizedMessage());
+            e.printStackTrace(System.err);
+        }
     }
 
-
+    /**
+     * 
+     * <pre>
+     * [0] - command
+     * [1] - path
+     * [2] - arguments
+     * 
+     * @param httpCommand
+     * @return parts of html 
+     */
     private String[] parseHttpCommand(String httpCommand) {
-        // TODO 796 code this 
+        
+        String [] fields = httpCommand.split(" ");
+        
+        String path = fields[1];
+        String parameters  = null;
+        
+        int questIndex = path.indexOf('?');
+        if (questIndex > -1){
+            parameters = path.substring(questIndex);
+            path = path.substring(0,questIndex);
+        }
+        
+        String [] outFields = { //
+                fields[0],
+                path,
+                parameters
+        };
 
-        return null;
+        return outFields;
     }
 
     /**
@@ -296,29 +341,18 @@ class Worker extends WebServer implements Runnable {
     }
     
     boolean printHeaders(PrintStream ps) throws IOException {
-//        int rCode = 0;
         boolean ret = false;
-//        if (!targ.exists()) {
-//            rCode = HttpConstants.HTTP_NOT_FOUND;
-//            ps.print("HTTP/1.0 " + HttpConstants.HTTP_NOT_FOUND + " not found");
-//            ps.write(EOL);
-//            ret = false;
-//        } else {
-//            rCode = HttpConstants.HTTP_OK;
-            ps.print("HTTP/1.0 " + HttpConstants.HTTP_OK + " OK");
+        System.out.println("debug 22 HTTP/1.0 " + HttpConstants.HTTP_OK + " OK");
+        ps.print("HTTP/1.0 " + HttpConstants.HTTP_OK + " OK");
+        ps.write(EOL);
+        ret = true;
+        ps.print("Server: pc2 Web Server");
+        ps.write(EOL);
+        if (ret) {
+            ps.print("Content-type: text/html");
             ps.write(EOL);
-            ret = true;
-//        }
-//        log("From " + s.getInetAddress().getHostAddress() + ": GET " + targ.getAbsolutePath() + "-->" + rCode);
-            ps.print("Server: pc2 Web Server");
-            ps.write(EOL);
-//            ps.print("Date: " + (new Date()));
-//            ps.write(EOL);
-            if (ret) {
-                ps.print("Content-type: text/html");
-                ps.write(EOL);
-            }
-            return ret;
+        }
+        return ret;
     }
 
     /**
