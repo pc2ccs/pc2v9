@@ -69,6 +69,8 @@ public class WebServer {
      */
     private int port = DEAFAULT_PORT;
     
+    private ResponseHandler responseHandler = null;
+
     /*
      * Load properties from property file.
      * 
@@ -150,7 +152,11 @@ public class WebServer {
      * 
      * @param port
      */
-    public void startServer(int port, ResponseHandler responseHandler) {
+    public void startServer(int port) {
+        
+        if (responseHandler == null){
+            new Exception("responseHandler not intialized").printStackTrace();
+        }
 
         try {
             // loadProps();
@@ -255,4 +261,9 @@ public class WebServer {
     public void setPort(int port) {
         this.port = port;
     }
+    
+    public void setResponseHandler(ResponseHandler responseHandler) {
+        this.responseHandler = responseHandler;
+    }
 }
+

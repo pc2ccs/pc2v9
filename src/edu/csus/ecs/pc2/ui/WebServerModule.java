@@ -51,8 +51,8 @@ public class WebServerModule {
             WebServer webServer = new WebServer();
             ResponseHandler responseHandler = new ResponseHandler();
             responseHandler.setContestAndServerConnection(serverConnection, contest);
-            webServer.startServer(port, responseHandler);
-            
+            webServer.setResponseHandler(responseHandler);
+            webServer.startServer(port);
         } catch (Exception e) {
             System.err.println("Error - "+e.getLocalizedMessage());
             e.printStackTrace();

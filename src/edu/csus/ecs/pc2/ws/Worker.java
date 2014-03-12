@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -206,9 +205,9 @@ class Worker extends WebServer implements Runnable {
         }
     }
 
-    private void postResponse(String httpCommand, PrintStream ps) {
+    private void postResponse(String httpCommand, PrintStream ps) throws IOException {
         
-        ps.println(EOL);
+        ps.write(EOL);
 
         String [] requestParts = parseHttpCommand (httpCommand);
         
@@ -296,58 +295,56 @@ class Worker extends WebServer implements Runnable {
      * @return
      * @throws IOException
      */
-    boolean printHeaders(File targ, PrintStream ps) throws IOException {
-        boolean ret = false;
-//        int rCode = 0;
-        if (!targ.exists()) {
-//            rCode = HttpConstants.HTTP_NOT_FOUND;
-            ps.print("HTTP/1.0 " + HttpConstants.HTTP_NOT_FOUND + " not found");
-            ps.write(EOL);
-            ret = false;
-        } else {
-//            rCode = HttpConstants.HTTP_OK;
-            ps.print("HTTP/1.0 " + HttpConstants.HTTP_OK + " OK");
-            ps.write(EOL);
-            ret = true;
-        }
-//        log("From " + s.getInetAddress().getHostAddress() + ": GET " + targ.getAbsolutePath() + "-->" + rCode);
-        ps.print("Server: Simple java");
-        ps.write(EOL);
-        ps.print("Date: " + (new Date()));
-        ps.write(EOL);
-        if (ret) {
-            if (!targ.isDirectory()) {
-                ps.print("Content-length: " + targ.length());
-                ps.write(EOL);
-                ps.print("Last Modified: " + (new Date(targ.lastModified())));
-                ps.write(EOL);
-                String name = targ.getName();
-                int ind = name.lastIndexOf('.');
-                String ct = null;
-                if (ind > 0) {
-                    ct = (String) map.get(name.substring(ind));
-                }
-                if (ct == null) {
-                    ct = "unknown/unknown";
-                }
-                ps.print("Content-type: " + ct);
-                ps.write(EOL);
-            } else {
-                ps.print("Content-type: text/html");
-                ps.write(EOL);
-            }
-        }
-        return ret;
-    }
+//    boolean printHeaders(File targ, PrintStream ps) throws IOException {
+//        boolean ret = false;
+////        int rCode = 0;
+//        if (!targ.exists()) {
+////            rCode = HttpConstants.HTTP_NOT_FOUND;
+//            ps.print("HTTP/1.0 " + HttpConstants.HTTP_NOT_FOUND + " not found");
+//            ps.write(EOL);
+//            ret = false;
+//        } else {
+////            rCode = HttpConstants.HTTP_OK;
+//            ps.print("HTTP/1.0 " + HttpConstants.HTTP_OK + " OK");
+//            ps.write(EOL);
+//            ret = true;
+//        }
+////        log("From " + s.getInetAddress().getHostAddress() + ": GET " + targ.getAbsolutePath() + "-->" + rCode);
+//        ps.print("Server: Simple java");
+//        ps.write(EOL);
+//        ps.print("Date: " + (new Date()));
+//        ps.write(EOL);
+//        if (ret) {
+//            if (!targ.isDirectory()) {
+//                ps.print("Content-length: " + targ.length());
+//                ps.write(EOL);
+//                ps.print("Last Modified: " + (new Date(targ.lastModified())));
+//                ps.write(EOL);
+//                String name = targ.getName();
+//                int ind = name.lastIndexOf('.');
+//                String ct = null;
+//                if (ind > 0) {
+//                    ct = (String) map.get(name.substring(ind));
+//                }
+//                if (ct == null) {
+//                    ct = "unknown/unknown";
+//                }
+//                ps.print("Content-type: " + ct);
+//                ps.write(EOL);
+//            } else {
+//                ps.print("Content-type: text/html");
+//                ps.write(EOL);
+//            }
+//        }
+//        return ret;
+//    }
     
     boolean printHeaders(PrintStream ps) throws IOException {
         boolean ret = false;
-        System.out.println("debug 22 HTTP/1.0 " + HttpConstants.HTTP_OK + " OK");
+//        System.out.println("debug 22 HTTP/1.0 " + HttpConstants.HTTP_OK + " OK");
         ps.print("HTTP/1.0 " + HttpConstants.HTTP_OK + " OK");
         ps.write(EOL);
         ret = true;
-        ps.print("Server: pc2 Web Server");
-        ps.write(EOL);
         if (ret) {
             ps.print("Content-type: text/html");
             ps.write(EOL);
