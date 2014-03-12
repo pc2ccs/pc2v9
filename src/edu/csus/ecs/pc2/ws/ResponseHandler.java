@@ -26,7 +26,7 @@ public class ResponseHandler implements APIPlugin {
 
     private static final String CLOCK_STARTED_PATH = "/ccs/contest_started";
 
-    private String startTime;
+    private String startTime = "undefined";
 
     private IContest contest;
 
@@ -72,8 +72,9 @@ public class ResponseHandler implements APIPlugin {
     }
 
     private String get404Response(String path) {
-        return tag("center", "404 error - no page found "+path);
+        return tag("center", "404 error - no page found \""+path+"\"");
     }
+
 
     @Override
     public String getPluginTitle() {

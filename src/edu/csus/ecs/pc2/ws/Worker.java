@@ -224,8 +224,8 @@ class Worker extends WebServer implements Runnable {
             }
         }
         
-        ps.println("http: "+httpCommand);
-        ps.println(EOL);
+//        ps.println("http: "+httpCommand);
+//        ps.println(EOL);
     }
     
     void sendErrorResponse(PrintStream ps,Exception e) throws IOException {
