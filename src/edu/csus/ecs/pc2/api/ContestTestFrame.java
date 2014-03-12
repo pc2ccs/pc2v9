@@ -47,6 +47,9 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
 
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 /**
  * API 'contest' Test Frame.
  * 
@@ -421,8 +424,70 @@ public class ContestTestFrame extends JFrame {
             centerPane.add(clarificationsOnSite, null);
             centerPane.add(getConnectionListenerCheckBox(), null);
             centerPane.add(getViewRunGrid(), null);
+            
+            JButton btnStartClock = new JButton();
+            btnStartClock.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    stopContest();
+                }
+            });
+            btnStartClock.setToolTipText("Start Contest Clock");
+            btnStartClock.setText("Start");
+            btnStartClock.setBounds(new Rectangle(246, 61, 94, 29));
+            btnStartClock.setBounds(37, 103, 94, 29);
+            centerPane.add(btnStartClock);
+            
+            JButton btnStopClock = new JButton();
+            btnStopClock.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    startContest();
+                }
+            });
+            btnStopClock.setToolTipText("Stop Contest Clock");
+            btnStopClock.setText("Stop");
+            btnStopClock.setBounds(new Rectangle(246, 61, 94, 29));
+            btnStopClock.setBounds(143, 102, 94, 29);
+            centerPane.add(btnStopClock);
         }
         return centerPane;
+    }
+
+    protected void startContest() {
+        if (contest == null) {
+            showMessage("Not logged in");
+            return;
+        }
+        
+        if (contest.isContestClockRunning()){
+            showMessage("Note: clock already started");
+            println("Note: clock already started");
+        }
+        
+        try {
+            serverConnection.startContestClock();
+        } catch (Exception e) {
+            println(e.getMessage());
+            showMessage(e.getMessage());
+        }
+    }
+
+    protected void stopContest() {
+        if (contest == null) {
+            showMessage("Not logged in");
+            return;
+        }
+        
+        if (! contest.isContestClockRunning()){
+            showMessage("Note: clock already stopped");
+            println("Note: clock already stopped");
+        }
+        
+        try {
+            serverConnection.stopContestClock();
+        } catch (Exception e) {
+            println(e.getMessage());
+            showMessage(e.getMessage());
+        }
     }
 
     /**
@@ -1474,6 +1539,4 @@ public class ContestTestFrame extends JFrame {
             }
         });
     }
-    
-
 } // @jve:decl-index=0:visual-constraint="21,23"
