@@ -1038,8 +1038,12 @@ public class Executable {
                 BufferedInputStream in = new BufferedInputStream(new FileInputStream(inputDataFileName));
                 byte[] buf = new byte[32768];
                 int c;
-                while ((c = in.read(buf))!= -1) {
-                    out.write(buf, 0, c);
+                try {
+                    while ((c = in.read(buf))!= -1) {
+                        out.write(buf, 0, c);
+                    }
+                } catch (java.io.IOException e) {
+                    log.info("Caught a "+e.getMessage()+" do not be alarmed.");
                 }
 
                 in.close();
