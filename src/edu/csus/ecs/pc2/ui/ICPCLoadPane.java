@@ -434,10 +434,14 @@ public class ICPCLoadPane extends JPanePlugin {
             if (filename != null){
                 info ("Did not load data from file "+filename);
             }
+            log.log(log.INFO, "IOException in loadTSVFiles()", e);
+            // TODO how about popping up a dialog here?
         } catch (Exception e) {
             if (filename != null){
                 info ("Did not load data from file "+filename);
             }
+            log.log(log.INFO, "Exception in loadTSVFiles()", e);
+            // TODO how about popping up a dialog here?
         }
     }
 
