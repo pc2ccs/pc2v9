@@ -1,18 +1,12 @@
 package edu.csus.ecs.pc2.core.scoring;
 
-import java.util.Arrays;
 import java.util.Properties;
 
-import edu.csus.ecs.pc2.core.list.RunCompartorByElapsed;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
  * Holds summary score information for a single Problem.
- * 
- * This uses the same Properties from the {@link DefaultScoringAlgorithm}.
- * <P>
- * This class ignores deleted runs and respects the {@link Run#isSendToTeams()}
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id: ProblemScoreRecord.java 181 2011-04-11 03:21:46Z laned $
@@ -31,86 +25,46 @@ public class ProblemScoreRecord {
 
     private Run solvingRun = null;
 
-    private Run[] runs;
-
     private Problem problem;
 
-    private Properties properties;
-
-//    private static final String POINTS_PER_NO = "Points per No";
-//
-//    private static final String POINTS_PER_YES_MINUTE = "Points per Minute (for 1st yes)";
-//
-//    private static final String BASE_POINTS_PER_YES = "Base Points per Yes";
-
-    public ProblemScoreRecord(Run[] runs, Problem problem, Properties properties) {
-        super();
-        this.runs = runs;
-        this.problem = problem;
-        this.properties = properties;
-
-        calculateScore();
-    }
-
-    private void calculateScore() {
-
-        int submissionsBeforeYes = 0;
-
-        Arrays.sort(runs, new RunCompartorByElapsed());
-
-        for (Run run : runs) {
-            if (run.isDeleted()) {
-                continue;
-            }
-
-            numberSubmissions++;
-            
-            if (run.isSendToTeams()){
-                if (run.isSolved()  && solutionTime == 0) {
-                    solved = true;
-                    solutionTime = run.getElapsedMins();
-                    solvingRun = run;
-                }
-                if (!isSolved()) {
-                    // Not solved, yet
-
-                    if (run.isJudged() && (!run.isSolved())) {
-                        submissionsBeforeYes++;
-                    }
-                }
-            }
-        }
-
-        if (isSolved()) {
-            points = (solutionTime * getMinutePenalty() + getYesPenalty()) + (submissionsBeforeYes * getNoPenalty());
-        }
-
-    }
-
-    private long getYesPenalty() {
-        return getPropIntValue(properties, DefaultScoringAlgorithm.BASE_POINTS_PER_YES, "0");
-    }
+    private int submissionsBeforeYes;
 
     /**
-     * @param key property to lookup
-     * @param defaultValue
-     * @return
+     * 
+     * @param solved
+     * @param solvingRun
+     * @param problem
+     * @param points
+     * @param solutionTime
+     * @param numberSubmissions
+     * @param submissionsBeforeYes
      */
-    private int getPropIntValue(Properties inProperties, String key, String defaultValue) {
-        String s = inProperties.getProperty(key, defaultValue);
-        Integer i = Integer.parseInt(s);
-        return (i.intValue());
+    public ProblemScoreRecord(boolean solved, Run solvingRun, Problem problem, long points, long solutionTime, int numberSubmissions, int submissionsBeforeYes) {
+        super();
+        this.solved = solved;
+        this.solvingRun = solvingRun;
+        this.points = points;
+        this.solutionTime = solutionTime;
+        this.numberSubmissions = numberSubmissions;
+        this.problem = problem;
+        this.submissionsBeforeYes = submissionsBeforeYes;
     }
 
-    private int getNoPenalty() {
-        // private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, {
-        // BASE_POINTS_PER_YES, "0:Integer" } };
-        return getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_NO, "20");
+
+    /**
+     * Constructor deprecated.
+     * 
+     * This class is now used to store values, before it was used to both calculate
+     * and store values.
+     * <br>
+     * See {@link IScoringAlgorithm#createProblemScoreRecord(Run[], Problem, Properties)} as an example
+     * of how to compute values.
+     */
+    @Deprecated  
+    public ProblemScoreRecord(Run[] teamProblemRuns, Problem problem2, Properties properties) {
+        // TODO Auto-generated constructor stub
     }
 
-    private int getMinutePenalty() {
-        return getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_YES_MINUTE, "1");
-    }
 
     /**
      * Has problem been solved?.
@@ -134,27 +88,6 @@ public class ProblemScoreRecord {
     }
 
     /**
-     * Get all runs from constructor.
-     * 
-     * @return
-     */
-    public Run[] getRuns() {
-        return runs;
-    }
-
-    public Problem getProblem() {
-        return problem;
-    }
-
-    /**
-     * 
-     * @return scoring properties
-     */
-    public Properties getProperties() {
-        return properties;
-    }
-
-    /**
      * Time/Penalty points for this problem.
      * 
      * @return number of points 
@@ -170,6 +103,14 @@ public class ProblemScoreRecord {
      */
     public Run getSolvingRun() {
         return solvingRun;
+    }
+    
+    /**
+     * Number of submissions before first yes.
+     * @return
+     */
+    public int getSubmissionsBeforeYes() {
+        return submissionsBeforeYes;
     }
 
     @Override

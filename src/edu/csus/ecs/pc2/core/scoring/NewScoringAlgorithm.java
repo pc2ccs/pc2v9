@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
+import edu.csus.ecs.pc2.core.list.RunCompartorByElapsed;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -33,12 +34,14 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 /**
  * Scoring Algorithm implementation.
  * 
+ * Uses same SA as the {@link DefaultScoringAlgorithm}
+ * 
  * @author pc2@ecs.csus.edu
- * @version $Id: NewScoringAlgorithm.java 194 2011-05-15 03:03:40Z laned $
+ * @version $Id$
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/core/scoring/NewScoringAlgorithm.java $
-public class NewScoringAlgorithm implements IScoringAlgorithm {
+// $HeadURL$
+public class NewScoringAlgorithm implements INewScoringAlgorithm, ICalculateScore {
 
     /**
      * @see #setBlockRanking(boolean)
@@ -62,6 +65,7 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
      * @return
      * @throws IllegalContestState
      */
+    // TODO SA SOMEDAY Move this to a SA Utility Class
     public StandingsRecord[] getRegionalWinners(IInternalContest contest, Properties properties) throws IllegalContestState {
         
         StandingsRecord[] records = getStandingsRecords(contest, properties);
@@ -89,6 +93,7 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
      * @return null if no regional winner or if more than one regional winner.
      * @throws IllegalContestState
      */
+    // TODO SA SOMEDAY Move this to a SA Utility Class
     public StandingsRecord getRegionalWinner(IInternalContest contest, Properties properties, Group group) throws IllegalContestState {
         
         StandingsRecord[] records = getStandingsRecords(contest, properties);
@@ -121,15 +126,8 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
         
         return outRecord;
     }
-    
-    /**
-     * Returns sorted and ranked StandingsRecord.
-     * 
-     * @param contest
-     * @param properties
-     * @return ranked StandingsRecords.
-     * @throws IllegalContestState
-     */
+ 
+    @Override
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties) throws IllegalContestState {
 
         Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
@@ -187,10 +185,10 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
         return (Run[]) vector.toArray(new Run[vector.size()]);
     }
 
-    
-    /* (non-Javadoc)
-     * @see edu.csus.ecs.pc2.core.scoring.IScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.model.IInternalContest, java.util.Properties, edu.csus.ecs.pc2.core.log.Log)
-     */
+
+    @Override
+    // TODO SA SOMEDAY Move this to a SA Utility Class
+    // returns XML String for standings.
     public String getStandings(IInternalContest contest, Properties properties, Log log) throws IllegalContestState {
 
         StandingsRecord[] standings = getStandingsRecords(contest, properties);
@@ -251,7 +249,8 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
         }
         return true;
     }
-
+    
+    // TODO SA SOMEDAY Move this to a SA Utility Class
     private void assignRanksBlock(StandingsRecord[] standings) {
 
         int rank = 1;
@@ -279,6 +278,8 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
         }
     }
 
+    // TODO SA SOMEDAY Move this to a SA Utility Class
+    // TODO SA figure out how to make isTied abstract or an interface
     private void assignRanks(StandingsRecord[] standings) {
 
         int rank = 1;
@@ -298,6 +299,7 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
 
     }
 
+    // TODO SA SOMEDAY Move this to a SA Utility Class
     private void assignGroupRanks(IInternalContest contest, StandingsRecord[] standings) {
 
         Group[] groups = contest.getGroups();
@@ -357,6 +359,7 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
      * @param problems
      * @return
      */
+    // TODO SA SOMEDAY Move this to a SA Utility Class
     private GrandTotals addProblemSummaryMememento(IMemento summaryMememento, StandingsRecord[] standings,
             IInternalContest contest, Problem[] problems) {
 
@@ -420,6 +423,7 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
      * @param indexNumber
      * @return teamStanding XML element for team (StandingsRecord.getClientId()).
      */
+    // TODO SA SOMEDAY Move this to a SA Utility Class
     private IMemento addTeamMemento(IMemento mementoRoot, IInternalContest contest, StandingsRecord standingsRecord, int indexNumber) {
 
         IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
@@ -498,7 +502,9 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
                 Run[] teamProblemRuns = getRuns(runs, account.getClientId(), problem);
 
                 if (teamProblemRuns.length > 0) {
-                    ProblemScoreRecord problemScoreRecord = new ProblemScoreRecord(teamProblemRuns, problem, properties);
+                    
+                    // old ProblemScoreRecord problemScoreRecord = new ProblemScoreRecord(teamProblemRuns, problem, properties);
+                    ProblemScoreRecord problemScoreRecord = createProblemScoreRecord(teamProblemRuns, problem, properties);
 
                     standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemScoreRecord.getPoints());
 
@@ -534,6 +540,82 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
         return standingsRecords;
     }
     
+    private long getYesPenalty(Properties properties) {
+        return getPropIntValue(properties, DefaultScoringAlgorithm.BASE_POINTS_PER_YES, "0");
+    }
+
+    /**
+     * @param key property to lookup
+     * @param defaultValue
+     * @return
+     */
+    // TODO SA SOMEDAY Move this to a SA Utility Class
+    private int getPropIntValue(Properties inProperties, String key, String defaultValue) {
+        String s = inProperties.getProperty(key, defaultValue);
+        Integer i = Integer.parseInt(s);
+        return (i.intValue());
+    }
+
+    private int getNoPenalty(Properties properties) {
+        // private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, {
+        // BASE_POINTS_PER_YES, "0:Integer" } };
+        return getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_NO, "20");
+    }
+
+    private int getMinutePenalty(Properties properties) {
+        return getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_YES_MINUTE, "1");
+    }
+
+    
+    @Override
+    public ProblemScoreRecord createProblemScoreRecord(Run[] runs, Problem problem, Properties properties) {
+
+        boolean solved = false;
+
+        long points = 0;
+
+        long solutionTime = 0;
+
+        int numberSubmissions = 0;
+
+        Run solvingRun = null;
+
+        int submissionsBeforeYes = 0;
+
+        Arrays.sort(runs, new RunCompartorByElapsed());
+
+        for (Run run : runs) {
+            if (run.isDeleted()) {
+                continue;
+            }
+
+            numberSubmissions++;
+
+            if (run.isSendToTeams()) {
+                if (run.isSolved() && solutionTime == 0) {
+                    solved = true;
+                    solutionTime = run.getElapsedMins();
+                    solvingRun = run;
+                }
+                if (!solved) {
+                    // Not solved, yet
+
+                    if (run.isJudged() && (!run.isSolved())) {
+                        submissionsBeforeYes++;
+                    }
+                }
+            }
+        }
+
+        if (solved) {
+            points = (solutionTime * getMinutePenalty(properties) + getYesPenalty(properties)) + (submissionsBeforeYes * getNoPenalty(properties));
+        }
+        
+        
+        return new ProblemScoreRecord(solved, solvingRun, problem, points, solutionTime, numberSubmissions, submissionsBeforeYes);
+
+    }
+
     /**
      * Add XML problemSummaryInfo.
      * 
@@ -542,6 +624,7 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
      * @param summaryInfo
      * @return
      */
+    // TODO SA SOMEDAY Move this to a SA Utility Class
     private IMemento addProblemSummaryRow(IMemento mementoRoot, int index, ProblemSummaryInfo summaryInfo){
         IMemento summaryInfoMemento = mementoRoot.createChild("problemSummaryInfo");
         summaryInfoMemento.putInteger("index", index);
@@ -554,6 +637,7 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
         return summaryInfoMemento;
     }
 
+    // TODO SA SOMEDAY Move this to a SA Utility Class
     private ProblemSummaryInfo createProblemSummaryInfo(Run[] runs, Problem problem, int problemNumber,
             ProblemScoreRecord problemScoreRecord) {
         ProblemSummaryInfo summaryInfo = new ProblemSummaryInfo();
@@ -568,6 +652,13 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
         return summaryInfo;
     }
 
+    /**
+     * Get all runs for a team/clientid and problem.
+     * @param runs
+     * @param clientId
+     * @param problem
+     * @return
+     */
     private Run[] getRuns(Run[] runs, ClientId clientId, Problem problem) {
         Vector<Run> vector = new Vector<Run>();
 
@@ -689,6 +780,7 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @param mementoRoot
      */
+    // TODO SA SOMEDAY Move this to a SA Utility Class
     private IMemento createSummaryMomento(ContestInformation contestInformation, XMLMemento mementoRoot) {
         IMemento memento = mementoRoot.createChild("standingsHeader");
         String title = contestInformation.getContestTitle();
@@ -701,7 +793,7 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
         memento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
         memento.putString("systemURL", versionInfo.getSystemURL());
         memento.putString("currentDate", new Date().toString());
-        memento.putString("generatorId", "$Id: NewScoringAlgorithm.java 194 2011-05-15 03:03:40Z laned $");
+        memento.putString("generatorId", "$Id$");
 
         return memento;
     }
@@ -750,12 +842,12 @@ public class NewScoringAlgorithm implements IScoringAlgorithm {
     }
 
     /**
-     * 
+     * Grand totals per team.
      * @author pc2@ecs.csus.edu
-     * @version $Id: NewScoringAlgorithm.java 194 2011-05-15 03:03:40Z laned $
+     * @version $Id$
      */
 
-    // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/core/scoring/NewScoringAlgorithm.java $
+    // $HeadURL$
     private class GrandTotals {
         private int totalAttempts = 0;
 
