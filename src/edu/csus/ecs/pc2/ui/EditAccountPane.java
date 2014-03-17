@@ -11,7 +11,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -840,7 +839,7 @@ public class EditAccountPane extends JPanePlugin {
         // clear out the permissions
         checkAccount.clearListAndLoadPermissions(new PermissionList());
         // get permissions
-        List<Object> objects = getPermissionsJList().getSelectedValuesList();
+        Object[] objects = getPermissionsJList().getSelectedValues();
         for (Object object : objects) {
             JCheckBox checkBox = (JCheckBox)object;
             String name = checkBox.getText();
@@ -848,7 +847,7 @@ public class EditAccountPane extends JPanePlugin {
             checkAccount.addPermission(type);
         }
 
-        if (objects.isEmpty() && account == null) {
+        if (objects.length == 0 && account == null) {
             // Add default permissions if none selected and new account
             ClientType.Type clientType = checkAccount.getClientId().getClientType();
             checkAccount.clearListAndLoadPermissions(new PermissionGroup().getPermissionList(clientType));
