@@ -20,7 +20,7 @@ public class ResponseHandler implements APIPlugin {
 
     private static final String STOP_CLOCK_PATH = "/ccs/stop_clock";
 
-    private static final String SET_CLOCK_PATH = "/ccs/set_clock";
+    private static final String SET_CLOCK_PATH = "/starttime";
 
     private static final String GET_CLOCK_START_TIME_PATH = "/ccs/contest_starttime";
 
@@ -45,7 +45,7 @@ public class ResponseHandler implements APIPlugin {
         } else if (GET_CLOCK_START_TIME_PATH.equals(path)) {
             return tag("start_time", startTime);
         } else if (SET_CLOCK_PATH.equals(path)) {
-            return set_start_time(getDefaultParameter(parameters));
+            return set_start_time(getAbsoluteParameter(parameters));
         } else if (CLOCK_STARTED_PATH.equals(path)) {
             return tag("contest_started", "" + contest.isContestClockRunning());
         } else {
@@ -62,9 +62,9 @@ public class ResponseHandler implements APIPlugin {
         return tag("start_time", startTime);
     }
 
-    private String getDefaultParameter(Map<String, String> parameters) {
+    private String getAbsoluteParameter(Map<String, String> parameters) {
 
-        String value = parameters.get("");
+        String value = parameters.get("absolute");
         if (value == null) {
             value = "";
         }

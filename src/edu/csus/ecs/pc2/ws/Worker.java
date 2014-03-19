@@ -5,11 +5,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
-import java.util.HashMap;
+import java.net.URLDecoder;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
+
+import com.json.parsers.JSONParser;
+import com.json.parsers.JsonParserFactory;
 
 /**
  * Handles each HTTP request.
@@ -151,6 +155,9 @@ class Worker extends WebServer implements Runnable {
                 // && buf[4] == (byte) ' ') {
                 doingGet = false;
                 index = 5;
+            } else if (httpCommand.startsWith("PUT ")) {
+                doingGet = true; // a white lie
+                index = 4;
             } else {
                 /* we don't support this method */
                 ps.print("HTTP/1.0 " + HttpConstants.HTTP_BAD_METHOD + " unsupported method type: ");
@@ -250,15 +257,41 @@ class Worker extends WebServer implements Runnable {
      */
     private String[] parseHttpCommand(String httpCommand) {
         
-        String [] fields = httpCommand.split(" ");
+        // limit this to 2 we can get to the content  
+        String [] fields = httpCommand.split(" ", 2);
         
         String path = fields[1];
         String parameters  = null;
         
         int questIndex = path.indexOf('?');
         if (questIndex > -1){
-            parameters = path.substring(questIndex);
+            // this only does the GET /starttime?{"absolute": foo
+            int endSpace = path.indexOf(' ');
+            try {
+                parameters = URLDecoder.decode(path.substring(questIndex+1, endSpace), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             path = path.substring(0,questIndex);
+        } else if (fields[0].startsWith("PUT")) {
+            // this handles the PUT
+            int httpIndex = path.indexOf("HTTP");
+            // start by ignoring rest of headers
+            int bodyIndex = path.indexOf("\r\n\r\n");
+            // end when we see the 1st }
+            int curlyIndex = path.indexOf('}');
+            // this is likely a "Content-Type: application/x-www-form-urlencoded"
+            // NOTE we are in trouble if this a base64 object
+            try {
+                // do not include the CRLFCRLF, but do include the }
+                parameters = URLDecoder.decode(path.substring(bodyIndex+4,curlyIndex+1),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            // do not include the space before HTTP
+            path = path.substring(0, httpIndex-1 );
         }
         
         String [] outFields = { //
@@ -278,12 +311,11 @@ class Worker extends WebServer implements Runnable {
      * @return
      */
     private Map<String, String> mapParams(String string) {
-        HashMap<String, String> map = new HashMap<String, String>();
-        
-        
-        
-        // TODO 796 code this 
-        
+        JsonParserFactory factory=JsonParserFactory.getInstance();
+        JSONParser parser=factory.newJsonParser();
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = parser.parseJson(string);
+
         return map;
     }
 
