@@ -1003,6 +1003,7 @@ public class EditAccountPane extends JPanePlugin {
         populatePermissions(fakeAccount);
         permissionList = null;
         fakeAccount = null;
+        enableUpdateButton();
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
