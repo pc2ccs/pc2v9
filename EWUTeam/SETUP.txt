@@ -11,6 +11,12 @@ normally provided by the standard PC^2 Team Client, EXCEPT:
   --it does not support the "Test Run" facility.
   --it does not support sending Clarifications to ALL teams (Clarifications can
       be sent to any individual team, just not to all teams at once).
+      
+NOTE: the EWTeam project is intended to be used by CONTEST ADMINISTRATORS 
+to support the ability of teams to participate in a contest using just a web browser. 
+It only needs to be installed at the site HOSTING the contest; it is not necessary 
+for TEAMS to install anything -- all a team needs to do is obtain the contest URL 
+from the Contest Administrator and then use any web browser to connect to the contest as a team.      
 
 The EWTeam Client project was implemented by a Computer Science Senior Project
 Team at Eastern Washington University under the direction of Professor Tom Capaul.
