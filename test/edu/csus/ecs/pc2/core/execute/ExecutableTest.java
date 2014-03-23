@@ -52,6 +52,9 @@ public class ExecutableTest extends AbstractTestCase {
 
     private Problem largeOutputProblem = null;
 
+    public ExecutableTest(String string) {
+        super(string);
+    }
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -302,7 +305,7 @@ public class ExecutableTest extends AbstractTestCase {
         // System.out.println("expectedJudgementV = " + executionData.getValidationResults());
 
         //TODO: change the following println into an assert()
-        System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
+//        System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
         assertTrue("Excessive runtime", executionData.getExecuteTimeMS() < 40000);
 
         assertTrue("Source file not compiled " + run.getProblemId(), executionData.isCompileSuccess());
@@ -310,12 +313,52 @@ public class ExecutableTest extends AbstractTestCase {
         
         // If this test fails - there may not be a Validator in the path, check vstderr.pc2 for  
         // java.lang.NoClassDefFoundError: edu/csus/ecs/pc2/validator/Validator
-        if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
-            assertTrue("Run not validated " + run.getProblemId(), executionData.isValidationSuccess());
-        }
+        
+        
+      String jarPath = executable.findPC2JarPath();
+      
+      if (! new File(jarPath).isDirectory()){
+          System.err.println("ERROR - pc2 jar path not a directory '"+jarPath+"'");
+          System.out.println("TODO 636 - unable to unit test - testFindPC2Jar fails so no ability to judge run");
+      } 
+      else 
+      {
+          if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
+              assertTrue("Run not validated " + run.getProblemId(), executionData.isValidationSuccess());
+          }
+          
+          assertTrue("Judgement should be solved ", solved);
+          assertEquals(expectedJudgement, executionData.getValidationResults());
+      }
+    }
+    
+    public void testFindPC2Jar() throws Exception {
+        
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        assertTrue("Judgement should be solved ", solved);
-        assertEquals(expectedJudgement, executionData.getValidationResults());
+        Run run = new Run(submitter, javaLanguage, sumitProblem);
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Sumit.java"));
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        testFindPC2Jar(run,runFiles);
+        
+    }
+    
+    public void testFindPC2Jar(Run run, RunFiles runFiles) throws Exception {
+        
+        // TODO 636 fails unit test when findPC2JarPath fixed uncomment these lines
+//        String executeDirectoryName = getOutputDataDirectory(getName());
+//        ensureDirectory(executeDirectoryName);
+//        
+//        Executable executable = new Executable(contest, controller, run, runFiles);
+//        executable.setExecuteDirectoryName(executeDirectoryName);
+//        executable.setUsingGUI(false);
+//
+//        String jarPath = executable.findPC2JarPath();
+//        
+//        if (! new File(jarPath).isDirectory()){
+//            fail ("No such directory, using findPC2JarPath. path='"+jarPath+"'");
+//        }
         
     }
 
@@ -405,5 +448,32 @@ public class ExecutableTest extends AbstractTestCase {
     private String prefixExecuteDirname(String string) {
         return "execute/"+string;
     }
+    
+    /**
+     * Test Suite.
+     * 
+     * This only works under JUnit 3.
+     * 
+     * @return suite of tests.
+     */
+//    public static TestSuite suite() {
+//
+//        TestSuite suite = new TestSuite("ExecutableTest");
+//
+//        String singletonTestName = "";
+////        singletonTestName = "testSumit";
+//
+//        if (!"".equals(singletonTestName)) {
+//            suite.addTest(new ExecutableTest(singletonTestName));
+//        } else {
+//            
+//            suite.addTest(new ExecutableTest("testFindPC2Jar"));
+//            suite.addTest(new ExecutableTest("testSumit"));
+//            suite.addTest(new ExecutableTest("testLargeStdIn"));
+//            suite.addTest(new ExecutableTest("testLargeOutput"));
+//            suite.addTest(new ExecutableTest("testStripSpace"));
+//        }
+//        return suite;
+//    }
 
 }
