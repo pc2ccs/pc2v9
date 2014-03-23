@@ -12,7 +12,6 @@ import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -239,9 +238,6 @@ class EventFeeder implements Runnable {
     /**
      * This sets the minute when the contest freezes.
      * <br><br>
-     * 
-     * <code>setFreezeTimeMinutes ({@link ContestTime#getConestLengthMins()} - 60);</code>
-     * // will set the freeze time at one hours before end of contest.
      * 
      * @param contestTimeWhenJudgementsNoLongerSentMinutes
      */

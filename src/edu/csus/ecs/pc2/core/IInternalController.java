@@ -29,7 +29,6 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
-import edu.csus.ecs.pc2.core.packet.PacketType;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
@@ -643,8 +642,6 @@ public interface IInternalController {
 
     /**
      * Send auto registration request.
-     * 
-     * @param teamInformation - a list of team name and team member names delimited by {@link PacketType#FIELD_DELIMIT}
      */
     void autoRegister(String teamInformation);
 

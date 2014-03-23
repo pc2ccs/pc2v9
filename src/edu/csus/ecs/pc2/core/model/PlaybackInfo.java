@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.model.playback.PlaybackRecord;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
 
 /**
@@ -12,10 +11,6 @@ import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
  * 
  * Contains {@link ReplayEvent}s ({@link #getReplayList()}), load file name and general information like
  * sequenceNumber and state ({@link #isStarted()}).
- * 
- * <br>
- * {@link ReplayEvent}s are the data for a replay, a {@link PlaybackRecord} is the actual record/status for
- * each playback event.  
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
