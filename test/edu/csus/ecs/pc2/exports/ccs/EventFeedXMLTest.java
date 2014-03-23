@@ -625,10 +625,10 @@ public class EventFeedXMLTest extends AbstractTestCase {
                 System.out.println("Opened and output sample Event Feed");
             } catch (Exception e) {
                 e.printStackTrace();
+                server.close();
             }
         }
         
-//        server.close();  TODO 796 code/catch this
         server = null;
 
     }

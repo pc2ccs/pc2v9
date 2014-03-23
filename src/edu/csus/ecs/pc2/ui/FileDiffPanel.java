@@ -348,9 +348,9 @@ public class FileDiffPanel implements IDiffPanel {
 
     private JLabel ivjJLabel1 = null;
 
-    private JList ivjJList1 = null;
+    private JList<String> ivjJList1 = null;
 
-    private JList ivjJList2 = null;
+    private JList<String> ivjJList2 = null;
 
     public BufferedReader getFileHandle(String fileName) throws FileNotFoundException {
         BufferedReader br = null;
@@ -398,10 +398,10 @@ public class FileDiffPanel implements IDiffPanel {
      * @return JList
      */
     /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    protected JList getJList1() {
+    protected JList<String> getJList1() {
         if (ivjJList1 == null) {
             try {
-                ivjJList1 = new JList();
+                ivjJList1 = new JList<String>();
                 ivjJList1.setName("JList1");
                 ivjJList1.setBounds(0, 0, 160, 120);
                 // user code begin {1}
@@ -422,10 +422,10 @@ public class FileDiffPanel implements IDiffPanel {
      * @return JList
      */
     /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private JList getJList2() {
+    private JList<String> getJList2() {
         if (ivjJList2 == null) {
             try {
-                ivjJList2 = new JList();
+                ivjJList2 = new JList<String>();
                 ivjJList2.setName("JList2");
                 ivjJList2.setBounds(0, 0, 160, 120);
                 // user code begin {1}

@@ -512,9 +512,9 @@ public class EventFeedXML2013Test extends AbstractTestCase {
                 System.out.println("Opened and output sample Event Feed");
             } catch (Exception e) {
                 e.printStackTrace();
+                server.close();
             }
         }
-
     }
 
     public void testTestCase() throws Exception {

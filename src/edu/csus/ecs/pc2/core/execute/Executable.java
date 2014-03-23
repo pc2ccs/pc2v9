@@ -175,7 +175,7 @@ public class Executable {
      *            directory to be cleared.
      * @return true if directory was cleared.
      */
-    private boolean clearDirectory(String dirName) {
+    protected boolean clearDirectory(String dirName) {
         File dir = null;
         boolean result = true;
 
@@ -330,13 +330,15 @@ public class Executable {
                     // getting here when not in validator mode results in a blank execute results window
                     boolean passed = true;
 
-                    // SOMEDAY make this work properly - aka not depend on mtsv
+                    // TODO CCS SOMEDAY make this work properly - aka not depend on mtsv
 //                    while (passed && dataSetNumber < dataFiles.length) {
                         if (executeProgram(dataSetNumber) && isValidated()) {
                             passed = validateProgram(dataSetNumber);
                         } else {
                             passed = false; // didn't execute.
                         }
+                        
+                        log.info("Run "+run.getNumber()+" test case passes = "+passed);
 
                         dataSetNumber++;
 //                    }
@@ -479,7 +481,7 @@ public class Executable {
         return false;
     }
 
-    private boolean createFile(SerializedFile file, String filename) {
+    protected boolean createFile(SerializedFile file, String filename) {
         try {
             Utilities.createFile(file, filename);
             return true;
@@ -493,7 +495,7 @@ public class Executable {
      * Show pop up mesage to user.
      * @param string
      */
-    private void showDialogToUser(String string) {
+    protected void showDialogToUser(String string) {
         
         if (showMessageToUser){
             if (usingGUI) {
@@ -510,7 +512,7 @@ public class Executable {
      *            directory to create.
      * @return whether directory exists.
      */
-    boolean insureDir(String dirName) {
+    public boolean insureDir(String dirName) {
         File dir = null;
 
         dir = new File(dirName);
@@ -522,7 +524,7 @@ public class Executable {
         return dir.isDirectory();
     }
 
-    private boolean validateProgram(int dataSetNumber) {
+    protected boolean validateProgram(int dataSetNumber) {
 
         // SOMEDAY Handle the error messages better, log and put them before the user to
         // help with debugging
@@ -743,7 +745,7 @@ public class Executable {
      * @param resultsFileName
      * @param logger
      */
-    private void storeValidatorResults(String resultsFileName, Log logger) {
+    protected void storeValidatorResults(String resultsFileName, Log logger) {
 
         IResultsParser parser = new XMLResultsParser();
         parser.setLog(log);
@@ -794,7 +796,7 @@ public class Executable {
         inExecutionData.setExecutionException(new Exception(string));
     }
 
-    private String findPC2JarPath() {
+    protected String findPC2JarPath() {
         // end this with a : so pc2.jar can be appended
         String jarDir = "/software/pc2/cc/projects/pc2v9/build/prod:";
         try {
@@ -820,7 +822,7 @@ public class Executable {
      * 
      * @return true if should be validated.
      */
-    private boolean isValidated() {
+    public boolean isValidated() {
         return (problem.isValidatedProblem() && (!isTestRunOnly()));
     }
 
@@ -847,7 +849,7 @@ public class Executable {
      * Select using File Open GUI file and copy to execute directory.
      * 
      */
-    private void selectAndCopyDataFile(String inputFileName) throws Exception {
+    protected void selectAndCopyDataFile(String inputFileName) throws Exception {
         // Prompt for filename
 
         String pickedFileName = getFileNameFromUser();
@@ -876,7 +878,7 @@ public class Executable {
      * @param writeJudgesDataFiles
      * @return true if execution worked.
      */
-    private boolean executeProgram(int dataSetNumber) {
+    protected boolean executeProgram(int dataSetNumber) {
         boolean passed = false;
         String inputDataFileName = null;
         
@@ -1120,7 +1122,7 @@ public class Executable {
      * 
      * @return true if executable is created.
      */
-    private boolean compileProgram() {
+    protected boolean compileProgram() {
 
         try {
             
@@ -1459,7 +1461,7 @@ public class Executable {
      *            input file.
      * @return directory name.
      */
-    private String getDirName(SerializedFile file) {
+    protected String getDirName(SerializedFile file) {
         String absPath = file.getAbsolutePath();
         return absPath.substring(0, absPath.length() - 1 - file.getName().length());
     }
