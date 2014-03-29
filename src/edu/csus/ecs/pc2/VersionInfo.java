@@ -123,9 +123,43 @@ public class VersionInfo {
 
         return "Version " + versionNumber + " (" + versionDate + ") Java ver " + javaVer + " build " + buildNumber
             + " " + osName + " " + osVer + " (" + osArch + ") ";
+    }
+    
+    public String [] getSystemVersionInfoMultiLine() {
+        VersionInfo versionInfo = new VersionInfo();
+        
+//      CSUS Programming Contest System
+//      Version 9.2 20101009 (Saturday, October 9th 2010 02:19 UTC) Build 2184
+//      Java ver 1.5.0_05
+//      Windows XP 5.1 (x86)
+      
+        String [] lines = { 
+                versionInfo.getSystemName(),
+                "Version " + versionInfo.getPC2Version() + " Build "+versionInfo.getBuildNumber(),
+                "Java ver " + versionInfo.getJavaVersion(),
+                versionInfo.getOperatingSystemInformation(),
+        };
 
+        return lines;
     }
 
+    
+    public String getOperatingSystemInformation(){
+        String osName = System.getProperty("os.name", "?");
+        String osArch = System.getProperty("os.arch", "?");
+        String osVer = System.getProperty("os.version", "?");
+        return osName + " " + osVer + " (" + osArch + ") ";
+    }
+    
+    public String getPC2Version() {
+        return versionNumber + " (" + versionDate + ")";
+    }
+
+    public String getJavaVersion(){
+        String javaVer = System.getProperty("java.version", "?");
+        return javaVer;
+    }
+    
     /**
      * 
      * Returns long form for version date, like: "September 8th, 2006 9:19am".

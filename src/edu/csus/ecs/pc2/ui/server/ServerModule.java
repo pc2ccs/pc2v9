@@ -47,9 +47,11 @@ public class ServerModule implements UIPlugin {
 
     public ServerModule() {
         VersionInfo versionInfo = new VersionInfo();
-        System.out.println(versionInfo.getSystemName());
-        System.out.println(versionInfo.getSystemVersionInfo());
-        System.out.println("Build " + versionInfo.getBuildNumber());
+        String [] lines = versionInfo.getSystemVersionInfoMultiLine();
+        for (String line : lines) {
+            System.out.println(line);
+        }
+        System.out.println();
         System.out.println("Date: " + getL10nDateTime());
         System.out.println("Working directory is " + Utilities.getCurrentDirectory());
         System.out.println();
