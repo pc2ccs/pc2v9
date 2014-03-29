@@ -44,6 +44,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.NotificationUtilities;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
@@ -89,7 +90,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         group2.setGroupId(2048);
         contest.addGroup(group2);
 
-        Account[] teams = getTeamAccounts();
+        Account[] teams = getTeamAccounts(contest);
 
         assignTeamGroup(group1, 0, teams.length / 2);
         assignTeamGroup(group2, teams.length / 2, teams.length - 1);
@@ -147,7 +148,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
      * @param endIdx
      */
     private void assignTeamGroup(Group group, int startIdx, int endIdx) {
-        Account[] teams = getTeamAccounts();
+        Account[] teams = getTeamAccounts(contest);
         for (int i = startIdx; i < endIdx; i++) {
             teams[i].setGroupId(group.getElementId());
         }
@@ -157,8 +158,8 @@ public class EventFeedXMLTest extends AbstractTestCase {
      * Return list of accounts sorted by team id.
      * @return
      */
-    private Account[] getTeamAccounts() {
-        Vector<Account> teams = contest.getAccounts(Type.TEAM);
+    private Account[] getTeamAccounts(IInternalContest inContest) {
+        Vector<Account> teams = inContest.getAccounts(Type.TEAM);
         Account[] accounts = (Account[]) teams.toArray(new Account[teams.size()]);
         Arrays.sort(accounts, new AccountComparator());
         return accounts;
@@ -464,7 +465,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
         EventFeedXML eventFeedXML = new EventFeedXML();
 
-        Account[] accounts = getTeamAccounts();
+        Account[] accounts = getTeamAccounts(contest);
 
         for (Account account : accounts) {
             String xml = toContestXML(eventFeedXML.createElement(contest, account));
@@ -654,8 +655,9 @@ public class EventFeedXMLTest extends AbstractTestCase {
          */
         addRunJudgements(testCaseContest, runs, 5);
         
-        String xml = eventFeedXML.toXML(testCaseContest);
+        int expectedTeamTags = getTeamAccounts(testCaseContest).length  + testCaseContest.getRuns().length;
         
+        String xml = eventFeedXML.toXML(testCaseContest);
         if (debugMode){
             System.out.println(" -- testTestCase ");
             System.out.println(xml);
@@ -670,7 +672,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         assertXMLCounts(xml, EventFeedXML.PROBLEM_TAG, 18);
         assertXMLCounts(xml, EventFeedXML.REGION_TAG, 22);
         assertXMLCounts(xml, EventFeedXML.RUN_TAG, 12);
-        assertXMLCounts(xml, EventFeedXML.TEAM_TAG, 46);
+        assertXMLCounts(xml, EventFeedXML.TEAM_TAG, expectedTeamTags);
         assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, 12 * 5); 
 
         /**
@@ -712,7 +714,119 @@ public class EventFeedXMLTest extends AbstractTestCase {
         assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, numruns * 5); 
 
     }
+
+    /**
+     * Test to ensure that DISPLAY_ON_SCOREBOARD teams are not present in the event feed.
+     * 
+     * @throws Exception
+     */
+    public void testTeamsNotOnScoreboard() throws Exception {
+        
+        EventFeedXML eventFeedXML = new EventFeedXML();
+        
+        int siteNumber = 2;
+        
+         IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+        
+        /**
+         * Add random runs
+         */
+        
+        Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
+        
+        createDataFilesForContest (testCaseContest);
+        
+        /**
+         * Add Run Judgements.
+         */
+        addRunJudgements(testCaseContest, runs, 5);
+        
+        int expectedTeamTags = getTeamAccounts(testCaseContest).length  + testCaseContest.getRuns().length;
+
+        String xml = eventFeedXML.toXML(testCaseContest);
+        
+        if (debugMode){
+            System.out.println(" -- testTestCase ");
+            System.out.println(xml);
+        }
+        testForValidXML (xml);
+        
+        assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
+        assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
+        assertXMLCounts(xml, EventFeedXML.JUDGEMENT_TAG, 9);
+        assertXMLCounts(xml, EventFeedXML.LANGUAGE_TAG, 18);
+        assertXMLCounts(xml, EventFeedXML.NOTIFICATION_TAG, 0);
+        assertXMLCounts(xml, EventFeedXML.PROBLEM_TAG, 18);
+        assertXMLCounts(xml, EventFeedXML.REGION_TAG, 22);
+        assertXMLCounts(xml, EventFeedXML.RUN_TAG, 12);
+        assertXMLCounts(xml, EventFeedXML.TEAM_TAG, expectedTeamTags);
+        assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, 12 * 5);
+        
+        Vector<Account> vector = testCaseContest.getAccounts(Type.TEAM);
+        Account[] accounts = (Account[]) vector.toArray(new Account[vector.size()]);
+        Arrays.sort(accounts,new AccountComparator());
+        
+        int dontShowCount = 7;
+        
+        assertEquals("Expecting number of runs ", 12, testCaseContest.getRuns().length);
+        
+        /**
+         * Team 16 - Team 22 should not show on event feed.
+         */
+        
+        for (int i = 0; i < dontShowCount; i++) {
+            Account account = accounts[accounts.length - 1 - i];
+            account.removePermission(edu.csus.ecs.pc2.core.security.Permission.Type.DISPLAY_ON_SCOREBOARD);
+            testCaseContest.updateAccount(account);
+            runs = sample.createRandomRuns(testCaseContest, 1, account.getClientId(), false, false, false, account.getClientId().getSiteNumber());
+            assertTrue("Expecting one run to be created", runs.length == 1);
+            testCaseContest.addRun(runs[0]);
+        }
+        
+        int numberTeamsToDisplay = getNumberOfTeamsTodisplay(testCaseContest);
+        
+        int numberOfRunsToDisplay = getNumberOfRunsToDisplay (testCaseContest);
+        
+        assertEquals ("Expeced teams to be displayed/included", getTeamAccounts(testCaseContest).length - dontShowCount, numberTeamsToDisplay);
+        
+        xml = eventFeedXML.toXML(testCaseContest);
+        assertXMLCounts(xml, EventFeedXML.TEAM_TAG, numberTeamsToDisplay + numberOfRunsToDisplay);
+        assertXMLCounts(xml, EventFeedXML.RUN_TAG, numberOfRunsToDisplay);
+    }
     
+    private int getNumberOfRunsToDisplay(IInternalContest testCaseContest) {
+        Run[] runs = testCaseContest.getRuns();
+        int count = 0;
+        for (Run run : runs) {
+            if (teamDisplayedOnScoreboard(testCaseContest, run.getSubmitter())){
+                count ++;
+            }
+        }
+        return count;
+    }
+
+    private boolean teamDisplayedOnScoreboard(IInternalContest inContest, ClientId clientId) {
+        return inContest.isAllowed(clientId, Permission.Type.DISPLAY_ON_SCOREBOARD);
+    }
+
+    
+    private int getNumberOfTeamsTodisplay(IInternalContest testCaseContest) {
+        Account[] accounts = getTeamAccounts(testCaseContest);
+        int count = 0;
+        for (Account account : accounts) {
+            if (teamDisplayedOnScoreboard(testCaseContest, account.getClientId())){
+                count ++;
+            }
+        }
+        return count;
+    }
+
+    public void viewString(String xml) throws IOException {
+        String [] lines = xml.split("\n");
+        File file = writeTempFile(lines);
+        editFile(file.getAbsolutePath());
+    }
+
     /**
      * A very simple
      * 

@@ -208,7 +208,7 @@ public class EventFeedXML {
         Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
-            if (filter.matches(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+            if (filter.matches(account) && teamDisplayedOnScoreboard(contest, account.getClientId())) {
                 memento = mementoRoot.createChild(TEAM_TAG);
                 addMemento(memento, contest, account);
             }
@@ -218,25 +218,28 @@ public class EventFeedXML {
         Arrays.sort(runs, new RunComparator());
 
         for (Run run : runs) {
-            if (filter.matches(run)) {
-                memento = mementoRoot.createChild(RUN_TAG);
-                addMemento(memento, contest, run, false); // add RUN
-                
-                RunTestCase[] runTestCases = getLastJudgementTestCases(run);
-                Arrays.sort(runTestCases, new RunTestCaseComparator());
-                for (RunTestCase runTestCase : runTestCases) {
-                    if (filter.matchesElapsedTime(runTestCase)){
-                        memento = mementoRoot.createChild(TESTCASE_TAG);
-                        addMemento(memento, contest, runTestCase, run); // add TESTCASE
+            if (teamDisplayedOnScoreboard(contest, run.getSubmitter())){
+
+                if (filter.matches(run)) {
+                    memento = mementoRoot.createChild(RUN_TAG);
+                    addMemento(memento, contest, run, false); // add RUN
+
+                    RunTestCase[] runTestCases = getLastJudgementTestCases(run);
+                    Arrays.sort(runTestCases, new RunTestCaseComparator());
+                    for (RunTestCase runTestCase : runTestCases) {
+                        if (filter.matchesElapsedTime(runTestCase)){
+                            memento = mementoRoot.createChild(TESTCASE_TAG);
+                            addMemento(memento, contest, runTestCase, run); // add TESTCASE
+                        }
                     }
+                } else if ( ! filter.matchesElapsedTime(run)) {
+                    /**
+                     * This is for a frozen event feed.  We will send out
+                     * run information without judgement information, essentially
+                     * we sent out that the run is 'NEW'.
+                     */
+                    addMemento(memento, contest, run, false); // add RUN
                 }
-            } else if ( ! filter.matchesElapsedTime(run)) {
-                /**
-                 * This is for a frozen event feed.  We will send out
-                 * run information without judgement information, essentially
-                 * we sent out that the run is 'NEW'.
-                 */
-                addMemento(memento, contest, run, false); // add RUN
             }
         }
 
@@ -1105,7 +1108,6 @@ public class EventFeedXML {
         
         XMLUtilities.addChild(memento, "solved", run.isSolved());
 
-        XMLUtilities.addChild(memento, "team", run.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "elapsed-Mins", run.getElapsedMins());
 //        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMS()));
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(run.getElapsedMS()));
@@ -1221,8 +1223,8 @@ public class EventFeedXML {
         }
 
         Account [] teamAccounts = getTeamAccounts(contest);
-        for (Account account : teamAccounts){
-            if (filter.matches(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)){
+        for (Account account : teamAccounts) {
+            if (filter.matches(account) && teamDisplayedOnScoreboard(contest, account.getClientId())) {
                 sb.append(toXML(createElement(contest, account)));
             }
         }
@@ -1236,27 +1238,34 @@ public class EventFeedXML {
         Arrays.sort(runs, new RunComparator());
 
         for (Run run : runs) {
+            
+            if (teamDisplayedOnScoreboard(contest, run.getSubmitter())){
 
-            if (filter.matches(run)) {
-                sb.append(toXML(createElement(contest, run, false))); // add RUN
-                
-                RunTestCase[] runTestCases = getLastJudgementTestCases(run);
-                Arrays.sort(runTestCases, new RunTestCaseComparator());
-                for (RunTestCase runTestCase : runTestCases) {
-                    if (filter.matchesElapsedTime(runTestCase)){
-                        sb.append(toXML(createElement(contest, runTestCase, run))); // add TESTCASE
+                if (filter.matches(run)) {
+                    sb.append(toXML(createElement(contest, run, false))); // add RUN
+
+                    RunTestCase[] runTestCases = getLastJudgementTestCases(run);
+                    Arrays.sort(runTestCases, new RunTestCaseComparator());
+                    for (RunTestCase runTestCase : runTestCases) {
+                        if (filter.matchesElapsedTime(runTestCase)){
+                            sb.append(toXML(createElement(contest, runTestCase, run))); // add TESTCASE
+                        }
                     }
+                } else if ( ! filter.matchesElapsedTime(run)) {
+                    /**
+                     * This is for a frozen event feed.  We will send out
+                     * run information without judgement information, essentially
+                     * we sent out that the run is 'NEW'.
+                     */
+                    sb.append(toXML(createElement(contest, run, false))); // add RUN
                 }
-            } else if ( ! filter.matchesElapsedTime(run)) {
-                /**
-                 * This is for a frozen event feed.  We will send out
-                 * run information without judgement information, essentially
-                 * we sent out that the run is 'NEW'.
-                 */
-                sb.append(toXML(createElement(contest, run, false))); // add RUN
             }
         }
         return sb.toString();
+    }
+
+    private boolean teamDisplayedOnScoreboard(IInternalContest inContest, ClientId clientId) {
+        return inContest.isAllowed(clientId, Permission.Type.DISPLAY_ON_SCOREBOARD);
     }
 
     public XMLMemento createElement(IInternalContest contest, Group group, int idx) {
@@ -1416,3 +1425,4 @@ public class EventFeedXML {
         this.log = log;
     }
 }
+
