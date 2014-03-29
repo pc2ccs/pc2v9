@@ -460,7 +460,28 @@ public class SampleContest {
         return runs;
     }
 
+    
+    
     public Run[] createRandomRuns(IInternalContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage, int siteNumber) {
+
+        Account[] accounts = getTeamAccounts(contest);
+
+        if (siteNumber != 0) {
+            accounts = getTeamAccounts(contest, siteNumber);
+        }
+
+        if (accounts.length == 0) {
+            new Exception("No accounts for site " + siteNumber).printStackTrace();
+            return new Run[0];
+        }
+
+        ClientId teamId = accounts[0].getClientId();
+
+        return createRandomRuns(contest, numberRuns, teamId, randomTeam, randomProblem, randomLanguage, siteNumber);
+
+    }
+    
+    public Run[] createRandomRuns(IInternalContest contest, int numberRuns, ClientId teamId, boolean randomTeam, boolean randomProblem, boolean randomLanguage, int siteNumber) {
 
         Run[] runs = new Run[numberRuns];
 
@@ -475,14 +496,13 @@ public class SampleContest {
         }
 
         if (accounts.length == 0) {
-            new Exception("No accounts for site " + siteNumber).printStackTrace();
-            return new Run[0];
+            throw new RuntimeException("No accounts for site " + siteNumber);
         }
 
         for (int i = 0; i < numberRuns; i++) {
             Problem problem = problems[0];
             Language language = languages[0];
-            ClientId teamId = accounts[0].getClientId();
+            
 
             if (randomLanguage) {
                 int randomLangIndex = random.nextInt(languages.length);
@@ -518,7 +538,7 @@ public class SampleContest {
      * @return
      */
     public Run[] createRandomRuns(IInternalContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage) {
-        return createRandomRuns(contest, numberRuns, randomTeam, randomProblem, randomLanguage, 0);
+        return createRandomRuns(contest, numberRuns, randomTeam, randomProblem, randomLanguage, contest.getSiteNumber());
     }
 
     /**
