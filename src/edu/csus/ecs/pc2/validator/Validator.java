@@ -76,6 +76,14 @@ public class Validator {
      */
     public static final String JUDGEMENT_NO_WRONG_ANSWER = "No - Wrong Answer";
 
+
+    /**
+     * Runtime error
+     * 
+     * Before compare, checks for EXITCODE.TXT
+     */
+    public static final String JUDGEMENT_NO_RUNTIME_ERROR = "No - Run-time Error";
+    
     /**
      * Indeterminant.
      * 
@@ -589,7 +597,11 @@ public class Validator {
         String judgement = JUDGEMENT_NO_INDETERMINANT;
 
         try {
-            judgement = renderJudgement();
+            if (new File("EXITCODE.TXT").exists()) {
+                judgement = JUDGEMENT_NO_RUNTIME_ERROR;
+            } else {
+                judgement = renderJudgement();
+            }
         } catch (IOException e1) {
             System.err.println("Error reading output or answer file ");
             e1.printStackTrace(System.err);
