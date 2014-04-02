@@ -27,6 +27,9 @@ public class PermissionGroup {
 
     private PermissionList spectatorPermissionList = new PermissionList();
 
+    private PermissionList feederPermissionList = new PermissionList();
+
+    
     public PermissionGroup() {
         initialize();
     }
@@ -125,6 +128,26 @@ public class PermissionGroup {
         scoreboardPermissionList.addPermission(Type.LOGIN);
         scoreboardPermissionList.addPermission(Type.VIEW_STANDINGS);
         scoreboardPermissionList.addPermission(Type.VIEW_SUMMARY_ATTEMPTS_GRID);
+        
+
+        /**
+         * Event Feeder and Feeder list.
+         */
+        feederPermissionList.addPermission(Type.CHANGE_PASSWORD);
+        feederPermissionList.addPermission(Type.JUDGE_RUN);
+        feederPermissionList.addPermission(Type.LOGIN);
+        feederPermissionList.addPermission(Type.REJUDGE_RUN);
+        feederPermissionList.addPermission(Type.TEST_RUN);
+        feederPermissionList.addPermission(Type.VIEW_CLARIFICATIONS);
+        feederPermissionList.addPermission(Type.VIEW_RUNS);
+        feederPermissionList.addPermission(Type.ANSWER_CLARIFICATION);
+        feederPermissionList.addPermission(Type.SUBMIT_CLARIFICATION);
+        feederPermissionList.addPermission(Type.VIEW_ALL_JUDGEMENTS);
+        feederPermissionList.addPermission(Type.VIEW_STANDINGS);
+        feederPermissionList.addPermission(Type.VIEW_SUMMARY_ATTEMPTS_GRID);
+        feederPermissionList.addPermission(Type.VIEW_RUN_JUDGEMENT_HISTORIES);
+
+
     }
 
     /**
@@ -146,6 +169,8 @@ public class PermissionGroup {
                 return judgePermissionList;
             case SPECTATOR:
                 return spectatorPermissionList;
+            case FEEDER:
+                 return feederPermissionList;
             case SCOREBOARD:
                 return scoreboardPermissionList;
             // case TEAM:

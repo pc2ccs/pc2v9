@@ -83,6 +83,7 @@ public final class LoadUIClass {
         properties.put(Type.EXECUTOR.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.judge.JudgeView");
         properties.put(Type.SERVER.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.server.ServerView");
         properties.put(Type.TEAM.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.team.TeamView");
+        properties.put(Type.FEEDER.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.eventfeed.FeederView");
         return properties;
 
     }

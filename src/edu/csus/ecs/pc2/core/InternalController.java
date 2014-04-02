@@ -545,6 +545,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else if (loginName.startsWith("board") && loginName.length() > 5) {
             int number = getIntegerValue(loginName.substring(5));
             return new ClientId(defaultSiteNumber, Type.SCOREBOARD, number);
+        } else if (loginName.startsWith("feeder") && loginName.length() > 6) {
+            int number = getIntegerValue(loginName.substring(6));
+            return new ClientId(defaultSiteNumber, Type.FEEDER, number);
+        } else if (loginName.startsWith("eventfeed") && loginName.length() > 8) {
+            int number = getIntegerValue(loginName.substring(8));
+            return new ClientId(defaultSiteNumber, Type.FEEDER, number);
         } else if (loginName.startsWith("s") && loginName.length() > 1) {
             if (Character.isDigit(loginName.charAt(1))) {
                 int number = getIntegerValue(loginName.substring(1));
@@ -562,6 +568,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else if (loginName.startsWith("t") && loginName.length() > 4) {
             int number = getIntegerValue(loginName.substring(4));
             return new ClientId(defaultSiteNumber, Type.TEAM, number);
+        } else if (loginName.startsWith("ef") && loginName.length() > 2) {
+            int number = getIntegerValue(loginName.substring(2));
+            return new ClientId(defaultSiteNumber, Type.FEEDER, number);
         } else if (loginName.startsWith("t") && loginName.length() > 1) {
             int number = getIntegerValue(loginName.substring(1));
             return new ClientId(defaultSiteNumber, Type.TEAM, number);

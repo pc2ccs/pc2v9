@@ -899,6 +899,7 @@ public class EditAccountPane extends JPanePlugin {
             accountTypeComboBox.addItem(ClientType.Type.JUDGE);
             accountTypeComboBox.addItem(ClientType.Type.SCOREBOARD);
             accountTypeComboBox.addItem(ClientType.Type.ADMINISTRATOR);
+            accountTypeComboBox.addItem(ClientType.Type.FEEDER);
             accountTypeComboBox.addItem(ClientType.Type.SPECTATOR);
 
         }

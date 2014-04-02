@@ -51,6 +51,10 @@ public final class ClientType {
          */
         SPECTATOR,
         /**
+         * Event Feed or Feeder
+         */
+        FEEDER,
+        /**
          * Auto Judger.
          */
         EXECUTOR,
