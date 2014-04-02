@@ -196,7 +196,20 @@ public class SitesPane extends JPanePlugin {
      * 
      */
     protected void addNewTestSite() {
+        
         int nextSiteNumber = siteListBox.getRowCount() + 1;
+        
+        if (nextSiteNumber == 2) {
+
+            String message = "Warning - \"Profiles\" are not supported when running multiple sites.  Proceed?";
+
+            int result = FrameUtilities.yesNoCancelDialog(this, message, "Disable Profiles?");
+
+            if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.NO_OPTION) {
+                return;
+            }
+        }
+        
         int port = DEFAULT_LISTENING_PORT + (nextSiteNumber - 1) * 1000;
         Site newSite = createSite(nextSiteNumber, "localhost", port);
         addSiteRow(newSite);
@@ -208,6 +221,18 @@ public class SitesPane extends JPanePlugin {
      */
     protected void addNewSite() {
         int nextSiteNumber = siteListBox.getRowCount() + 1;
+        
+        if (nextSiteNumber == 2){
+            
+            String message = "Warning - \"Profiles\" are not supported when running multiple sites.  Proceed?"; 
+
+            int result = FrameUtilities.yesNoCancelDialog(this, message, "Disable Profiles?");
+            
+            if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.NO_OPTION) {
+                return;
+            }
+        }
+        
         int port = DEFAULT_LISTENING_PORT;
         Site newSite = createSite(nextSiteNumber, "", port);
         addSiteRow(newSite);
@@ -565,7 +590,6 @@ public class SitesPane extends JPanePlugin {
         }
 
         public void siteAdded(SiteEvent event) {
-            StaticLog.unclassified("Site " + event.getAction() + " " + event.getSite());
             updateSiteList(event.getSite());
         }
 

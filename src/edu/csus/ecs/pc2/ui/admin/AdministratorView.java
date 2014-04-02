@@ -111,6 +111,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     private JTabbedPane runContestTabbedPane = null;
 
     private static final Color ACTIVE_TAB_COLOR = Color.BLUE;
+
     private static final Color INACTIVE_TAB_COLOR = Color.GRAY ;
 
     private JPanel centerPane = null;
@@ -278,15 +279,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ProblemsPane problemsPane = new ProblemsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Problems", problemsPane);
 
-                if (Utilities.isDebugMode()) {
-                    try {
-                        ProfilesPane profilesPane = new ProfilesPane();
-                        addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
-                }
-                
+                ProfilesPane profilesPane = new ProfilesPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
 
                 ReportPane reportPaneC = new ReportPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Reports", reportPaneC);

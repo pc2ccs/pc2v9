@@ -37,9 +37,11 @@ import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
+import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -508,6 +510,8 @@ public class ProfilesPane extends JPanePlugin {
         inContest.addProfileListener(new ProfileListenerImplementation());
         
         inContest.addAccountListener(new AccountListenerImplementation());
+        
+        inContest.addSiteListener(new SiteListenerImplementation());
     }
     
     private void updateGUIperPermissions() {
@@ -539,12 +543,30 @@ public class ProfilesPane extends JPanePlugin {
                 getProfilesListBox().autoSizeAllColumns();
                 getSwitchButton().setEnabled(true);
             }
+            
+            if (getContest().getSites().length > 1) {
+                // Bug 792
+                disableAllButtons();
+            }
 
             updateProfileInformation(getContest().getProfile());
 
         } catch (Exception e) {
             getController().getLog().log(Log.DEBUG, "Exception refreshing profile list", e);
         }
+    }
+
+    /**
+     * Disable all buttons
+     */
+    private void disableAllButtons() {
+        // Bug 792
+        getNewButton().setEnabled(false);
+        getSwitchButton().setEnabled(false);
+        getSetButton().setEnabled(false);
+        getCloneButton().setEnabled(false);
+        getResetContestButton().setEnabled(false);
+        getResetContestButton().setEnabled(false);
     }
 
     private Object[] buildProfileRow(Profile profile) {
@@ -948,6 +970,56 @@ public class ProfilesPane extends JPanePlugin {
         
         JOptionPane.showMessageDialog(this,"Contest quick loaded");
     }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    public class SiteListenerImplementation implements ISiteListener {
+
+        @Override
+        public void siteAdded(SiteEvent event) {
+            refreshProfilesList();            
+        }
+
+        @Override
+        public void siteRemoved(SiteEvent event) {
+            refreshProfilesList();            
+            }
+
+        @Override
+        public void siteChanged(SiteEvent event) {
+            refreshProfilesList();            
+        }
+
+        @Override
+        public void siteLoggedOn(SiteEvent event) {
+            // ignored
+            
+        }
+
+        @Override
+        public void siteLoggedOff(SiteEvent event) {
+            // ignored
+            
+        }
+
+        @Override
+        public void siteProfileStatusChanged(SiteEvent event) {
+            // ignored
+            
+        }
+
+        @Override
+        public void sitesRefreshAll(SiteEvent siteEvent) {
+            refreshProfilesList();            
+        }
+
+    }
+    
     
  
 } // @jve:decl-index=0:visual-constraint="25,9"
