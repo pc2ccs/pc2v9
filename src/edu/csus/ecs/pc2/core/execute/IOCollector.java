@@ -71,7 +71,7 @@ public class IOCollector extends Thread {
                     (c != -1) && // not EOF
                     (offset < (maxFileSize)) // over max size
             ) {
-                offset++;
+                offset += c;
                 outWriter.write(cbuf, 0, c);
                 c = bufReader.read(cbuf);
             }
