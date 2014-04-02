@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
+import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -50,8 +51,6 @@ public class FeederView extends JFrame implements UIPlugin {
     private IInternalController controller;
 
     private JTabbedPane mainTabbedPane = null;
-
-    private String xslDir;
 
     private Log log;
 
@@ -146,9 +145,8 @@ public class FeederView extends JFrame implements UIPlugin {
 
         contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
-
         log = controller.getLog();
-        log.info("Using XSL from directory "+xslDir);
+        log.info("Started Feeder View");
         
         contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
         contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
@@ -198,6 +196,9 @@ public class FeederView extends JFrame implements UIPlugin {
                         }
                     }
                 }
+                
+                OptionsPane optionsPanel = new OptionsPane();
+                addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
 
                 showMessage("");
 

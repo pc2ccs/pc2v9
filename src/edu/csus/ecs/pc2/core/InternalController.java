@@ -1468,6 +1468,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendToAdministrators(packet);
             sendToJudges(packet);
             sendToScoreboards(packet);
+            sendToFeeders(packet);
             if (sendToServers) {
                 sendToServers(packet);
             }
@@ -2210,6 +2211,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void sendToScoreboards(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
+    }
+    
+    public void sendToFeeders(Packet packet) {
+        sendPacketToClients(packet, ClientType.Type.FEEDER);
     }
 
     public void sendToTeams(Packet packet) {
