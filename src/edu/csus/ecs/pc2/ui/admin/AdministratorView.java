@@ -316,14 +316,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ExportDataPane exportPane = new ExportDataPane();
                 addUIPlugin(getRunContestTabbedPane(), "Export", exportPane);
                 
-                if (Utilities.isDebugMode()) {
-                    try {
-                        FinalizePane finalizePane = new FinalizePane();
-                        addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
-                }
+                FinalizePane finalizePane = new FinalizePane();
+                addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
 
                 LoginsPane loginsPane = new LoginsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
