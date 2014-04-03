@@ -1,6 +1,12 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
 import java.util.Arrays;
 
 import javax.swing.JButton;
@@ -14,19 +20,16 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import java.awt.FlowLayout;
-import java.awt.event.KeyEvent;
-import java.awt.Point;
-import java.awt.Dimension;
 
 /**
  * Generate accounts pane.
@@ -74,6 +77,9 @@ public class GenerateAccountsPane extends JPanePlugin {
     private JTextField startNumberTextField = null;
 
     private JLabel siteLabel = null;
+    
+    private JLabel genOtherLabel = null;
+    
 
     private JComboBox<Type> otherClientsComboBox = null;
 
@@ -175,6 +181,8 @@ public class GenerateAccountsPane extends JPanePlugin {
 
                 number = getContest().getAccounts(ClientType.Type.ADMINISTRATOR, theSiteNumber).size();
                 genAdminLabel.setText("Administrators (" + number + ")");
+                
+                updateOtherClientsLabel();
 
                 generateButton.setText("Generate Accounts for Site " + theSiteNumber);
                 generateButton.setMnemonic(KeyEvent.VK_G);
@@ -229,6 +237,13 @@ public class GenerateAccountsPane extends JPanePlugin {
             centerPanel.add(siteLabel, null);
             centerPanel.add(getOtherClientsComboBox(), null);
             centerPanel.add(getOtherClientCountTextBox(), null);
+            
+            genOtherLabel = new JLabel();
+            genOtherLabel.setText("0");
+            genOtherLabel.setSize(new Dimension(200, 19));
+            genOtherLabel.setLocation(new Point(81, 198));
+            genOtherLabel.setBounds(283, 163, 48, 19);
+            centerPanel.add(genOtherLabel);
         }
         return centerPanel;
     }
@@ -417,7 +432,8 @@ public class GenerateAccountsPane extends JPanePlugin {
             getStartNumberTextField().setText("");
             enableUpdateButtons(false);
         } catch (Exception e) {
-            // TODO: handle exception
+            // SOMEDAY handle exception better
+            getLog().log(Log.INFO,e.getMessage(),e);
             e.printStackTrace();
         }
     }
@@ -524,7 +540,7 @@ public class GenerateAccountsPane extends JPanePlugin {
     public class SiteListenerImplementation implements ISiteListener {
 
         public void siteProfileStatusChanged(SiteEvent event) {
-            // TODO this UI does not use a change in profile status 
+            // SOMEDAY this UI does not use a change in profile status 
         }
 
         public void siteAdded(SiteEvent event) {
@@ -566,12 +582,33 @@ public class GenerateAccountsPane extends JPanePlugin {
     private JComboBox<Type> getOtherClientsComboBox() {
         if (otherClientsComboBox == null) {
             otherClientsComboBox = new JComboBox<Type>();
+            otherClientsComboBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    updateOtherClientsLabel();
+                }
+            });
             otherClientsComboBox.setBounds(new java.awt.Rectangle(81, 162, 167, 20));
-            otherClientsComboBox.setVisible(false);
-            otherClientsComboBox.addItem(Type.EXECUTOR);
-            otherClientsComboBox.addItem(Type.SPECTATOR);
+//            otherClientsComboBox.addItem(Type.EXECUTOR);
+//            otherClientsComboBox.addItem(Type.SPECTATOR);
+          otherClientsComboBox.addItem(Type.FEEDER);
+          otherClientsComboBox.setSelectedIndex(0);
         }
         return otherClientsComboBox;
+    }
+
+    protected void updateOtherClientsLabel() {
+        
+        Type accountType = (Type) otherClientsComboBox.getSelectedItem();
+        
+        if (accountType == null){
+            genOtherLabel.setText("(0)");
+        } else {
+            if (getContest() != null){
+                int thisSiteNumber = getContest().getSiteNumber();
+                int number = getContest().getAccounts(accountType, thisSiteNumber).size();
+                genOtherLabel.setText("("+number+")");
+            }
+        }
     }
 
     /**
@@ -584,7 +621,11 @@ public class GenerateAccountsPane extends JPanePlugin {
             otherClientCountTextBox = new JTextField();
             otherClientCountTextBox.setBounds(new java.awt.Rectangle(343, 160, 39, 22));
             otherClientCountTextBox.setDocument(new IntegerDocument());
-            otherClientCountTextBox.setVisible(false);
+            otherClientCountTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return otherClientCountTextBox;
     }
@@ -595,9 +636,9 @@ public class GenerateAccountsPane extends JPanePlugin {
      */
     public void enableUpdateButton() {
         boolean noData = false;
-        // in 2 lines to keep the line size down
         noData = isTextFieldEmpty(getAdminCountTextField()) && isTextFieldEmpty(getJudgeCountTextField());
         noData = noData && (isTextFieldEmpty(getTeamCountTextField()) && isTextFieldEmpty(getBoardCountTextField()));
+        noData = noData && (isTextFieldEmpty(getOtherClientCountTextBox()));
         enableUpdateButtons(!noData);
     }
 
@@ -679,6 +720,5 @@ public class GenerateAccountsPane extends JPanePlugin {
         getCancelButton().setVisible(true);
         enableUpdateButton();
     }
-
 } // @jve:decl-index=0:visual-constraint="10,10"
 
