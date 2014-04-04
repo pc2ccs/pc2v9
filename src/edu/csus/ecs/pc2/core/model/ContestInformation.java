@@ -24,6 +24,11 @@ public class ContestInformation implements Serializable{
      */
     private static final long serialVersionUID = -7333255582657988200L;
 
+    /**
+     * Default scoreboard freeze minutes
+     */
+    public static final int DEFAULT_FREEZE_MINUTES = 60;
+
     private String contestTitle = "Programming Contest";
 
     private String contestURL;

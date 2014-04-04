@@ -652,4 +652,78 @@ public final class Utilities {
 
         return new File(fullpath).getAbsolutePath();
     }
+    
+    /**
+     * Convert String to second. 
+     * 
+     * @param s  string in form hh:mm:ss, ss or mm:ss
+     * @return -1 if invalid time string, else returns number of seconds
+     */
+    public static long HHMMSStoString(String s) {
+
+        if (s == null || s.trim().length() == 0) {
+            return -1;
+        }
+
+        String[] fields = s.split(":");
+        long hh = 0;
+        long mm = 0;
+        long ss = 0;
+        
+        switch (fields.length ) {
+            case 3:
+                hh = stringToLong(fields[0]);
+                mm = stringToLong(fields[1]);
+                ss = stringToLong(fields[2]);
+                break;
+            case 2:
+                mm = stringToLong(fields[0]);
+                ss = stringToLong(fields[1]);
+                break;
+            case 1:
+                ss = stringToLong(fields[0]);
+                break;
+
+            default:
+                break;
+        }
+
+        // System.out.println(" values "+hh+":"+mm+":"+ss);
+
+        long totsecs = 0;
+        if (hh != -1) {
+            totsecs = hh;
+        }
+        if (mm != -1) {
+            totsecs = (totsecs * 60) + mm;
+        }
+        if (ss != -1) {
+            totsecs = (totsecs * 60) + ss;
+        }
+
+        // System.out.println(" values "+hh+":"+mm+":"+ss+" secs="+totsecs);
+
+        if (hh == -1 || mm == -1 || ss == -1) {
+            return -1;
+        }
+
+        return totsecs;
+    }
+
+    /**
+     * Parse and return positive long.
+     * 
+     * @param s1
+     * @return -1 if non-long string, else long value
+     */
+    public static long stringToLong(String s1) {
+        if (s1 == null) {
+            return -1;
+        }
+        try {
+            return Long.parseLong(s1);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 }

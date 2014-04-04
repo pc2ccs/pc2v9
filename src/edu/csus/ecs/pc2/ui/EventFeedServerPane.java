@@ -9,6 +9,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -17,8 +18,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.transport.EventFeedServer;
+import edu.csus.ecs.pc2.exports.ccs.EventFeedXML2013;
 
 /**
  * Event Feed Server Pane.
@@ -348,10 +352,8 @@ public class EventFeedServerPane extends JPanePlugin {
 
     private void showSnapshotOfEventViewer(boolean showFilteredFeed) {
 
-        // EventFeedXML eventFeedXML = new EventFeedXML();
-        // String [] lines = { eventFeedXML.toXML(getContest()) };
-
-        // SOMEDAY CCS snapshot of event feed
+        // SOMEDAY CCS get feed directly from the port. 
+        
 //        int port = Integer.parseInt(getFilteredPortTextField().getText());
 //        if (showFilteredFeed) {
 //            port = Integer.parseInt(getUnfilteredPortTextField().getText());
@@ -359,14 +361,47 @@ public class EventFeedServerPane extends JPanePlugin {
 //
 //        String[] lines = SocketUtilities.readLinesFromPort(port);
 //
-//        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
-//        multipleFileViewer.addTextintoPane("Event Feed", lines);
-//        multipleFileViewer.setTitle("PC^2 Event Feed at " + new Date());
-//        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
-//        multipleFileViewer.setVisible(true);
         
-        JOptionPane.showMessageDialog(this, "Snapshot not implemented, yet");
+        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+
+        String eventFeed = null;
+        if (showFilteredFeed) {
+            eventFeed = eventFeedXML.toXML(getContest());
+        } else {
+            ContestInformation info = getContest().getContestInformation();
+            String freezeTime = info.getFreezeTime();
+            long numberMinutesFreezeTime = parseFreezeTime(freezeTime);
+            eventFeed = eventFeedXML.toXMLFreeze(getContest(), numberMinutesFreezeTime);
+
+        }
+        String[] lines = { eventFeed };
+            
+        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+        multipleFileViewer.addTextintoPane("Event Feed", lines);
+        multipleFileViewer.setTitle("PC^2 Event Feed at " + new Date());
+        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+        multipleFileViewer.setVisible(true);
         
+    }
+
+    /**
+     * Parses input time.
+     * 
+     * @param freezeTime
+     * @return number of minutes.
+     */
+    private long parseFreezeTime(String freezeTime) {
+        
+        if (freezeTime == null){
+            return ContestInformation.DEFAULT_FREEZE_MINUTES;
+        } else {
+            
+            long seconds = Utilities.HHMMSStoString(freezeTime);
+            if (seconds == -1){
+                return ContestInformation.DEFAULT_FREEZE_MINUTES;
+            }
+            return seconds / 60; 
+        }
     }
 
     /**
