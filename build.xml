@@ -28,6 +28,7 @@
     <property name="packagelistloc.dir" location="${basedir}/vendor/api-1.5.0/"/>
     <property name="scripts.dir" location="${basedir}/bin"/>
     <property name="samps.dir" location="${basedir}/samps"/>
+    <property name="projects.dir" location="${basedir}/projects"/>
     <!-- used in javadocs linkoffline, this is the location on
          the build host, override on the ant commandline -->
     <property name="api.url" location="/software/pc2/java/docs/api/"/>

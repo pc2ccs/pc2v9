@@ -2,7 +2,10 @@
 <!-- $Id$ -->
 <!-- $HeadURL$ -->
 <project name="package-pc2v9" default="archives" basedir=".">
-    <!-- import build.xml instead of duplicating properties -->
+    
+	<!--
+    *** import build.xml instead of duplicating properties 
+    -->
     <import file="build.xml"/>
 
     <!-- version is set in build.xml and can be overriden
@@ -84,6 +87,9 @@
                 <include name="**/rotate*"/>
                 <include name="**/distribute_score"/>
             </zipfileset>
+            <zipfileset dir="${projects.dir}" filemode="755" prefix="${release}/projects">
+                <include name="**/*.zip"/>
+            </zipfileset>
             <zipfileset dir="${data.dir}" filemode="755" prefix="${release}/samps/data"/>
             <!-- bug 353: copy api and other docs to release -->
             <zipfileset dir="${docs.api.dir}" filemode="755" prefix="${release}/doc/api"/>
@@ -104,7 +110,7 @@
         <delete  dir="${build.unpack.dir}" />
         <mkdir dir="${build.unpack.dir}" />
         <unzip src="${zip.path}" dest="${build.unpack.dir}"/>
-        <tar destfile="${gzip.path}" basedir="${build.unpack.dir}" compression="gzip" excludes="${release}/bin/**,${release}/samps/**">
+        <tar destfile="${gzip.path}" basedir="${build.unpack.dir}" compression="gzip" excludes="${release}/bin/**,${release}/samps/**,${release}/projects/**">
             <tarfileset mode="755" dir="${build.unpack.dir}">
                 <include name="${release}/bin/**"/>
                 <include name="${release}/samps/scripts/**"/>
@@ -118,6 +124,9 @@
                 <exclude name="${release}/samps/sleep.exe"/>
                 <exclude name="${release}/samps/**/distribute_score**"/>
                 <exclude name="${release}/samps/**/rotate**"/>
+            </tarfileset>
+            <tarfileset mode="644" dir="${projects.dir}">
+                <include name="${release}/projects/*tar.gz"/>
             </tarfileset>
         </tar>
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
