@@ -125,8 +125,8 @@
                 <exclude name="${release}/samps/**/distribute_score**"/>
                 <exclude name="${release}/samps/**/rotate**"/>
             </tarfileset>
-            <tarfileset mode="644" dir="${projects.dir}">
-                <include name="${release}/projects/*tar.gz"/>
+            <tarfileset dir="${projects.dir}" filemode="644" prefix="${release}/projects">
+                <include name="**/*.tar.gz"/>
             </tarfileset>
         </tar>
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
