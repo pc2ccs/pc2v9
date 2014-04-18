@@ -6,11 +6,8 @@
 #  
 # $HeadURL$  
 #
-# based on # Revision 1.21  2012/03/28 02:56:32  laned
 # ----------------------------------------------------------------------
-
-# IT - Fri Apr 27 17:30:44 PDT 2012
-# Sun May 13 13:59:19 CEST 2012
+# Spring 2014
 
 use strict;
 
@@ -24,8 +21,13 @@ select STDOUT; $| = 1;  # flush stdout automatically
 my $JUDGEMENT_WRONG_ANSWER = "wrong answer";
 my $JUDGEMENT_IF = "Illegal Function";
 my $JUDGEMENT_CE = "Compile Error";
-my $JUDGEMENT_TLE = "Time Limit Exceeded";
+my $JUDGEMENT_TLE = "Time-limit Exceeded";
 my $JUDGEMENT_ACCEPTED = "accepted";
+
+# pc2 overrides for spring 2014
+$JUDGEMENT_WRONG_ANSWER = "No - Wrong Output";
+$JUDGEMENT_IF = "No - Illegal Function";
+$JUDGEMENT_TLE = "No - Time-limit Exceeded";
 
 # dir(or file) present?  will not show them gvim output
 my $IS_AUTO_JUDGE = "/home/pc2/computer";
@@ -91,18 +93,15 @@ my $VALIDATOR_KEY = "validator";
 # default validator if not problem-specific validator specified
 my $default_validator = "";
 
-# Problem specific validators (found in problem.yaml)
+# Problem specific validators (found in contest.yaml)
 # key letter, value validator name/info
 my %problem_validators = ();
+# Problem specific validators (found in problem.yaml)
+# key letter, value validator args
+my %problem_validators_args = ();
 
 # key: letter value: short problem name
 my %prob_short_names = ();
-
-# pc2 overrides for finals2012
-$JUDGEMENT_WRONG_ANSWER = "No - Wrong Answer";
-$JUDGEMENT_IF = "No - Security Violation";
-$JUDGEMENT_TLE = "No - Time Limit Exceeded";
-# $use_STDIN = 0;
 
 &loadResourceFile();
 if ( $verbose )
@@ -222,7 +221,11 @@ else
       my $value = $prob_short_names{$key};
       my $probyamlname = "$yaml_directory/$value/problem.yaml";
 
-      print STDERR "Missing problem.yaml for $key at $probyamlname\n" if ! -f $probyamlname;
+      if (-f $probyamlname) {
+        &load_problem_yaml($key, $probyamlname);
+      } else {
+        print STDERR "Missing problem.yaml for $key at $probyamlname\n";
+      }
     }
 
     &checkAllProblemDataFiles() if $verbose;
@@ -370,6 +373,9 @@ sub dump_validators
     }
     else
     {
+        if (defined($problem_validators_args{$letter}) && $problem_validators_args{$letter} ne "") {
+          $validator .= "' with args '".$problem_validators_args{$letter};
+        }
         printf("$letter %-12s has validator '$validator'\n", "($shortname)" );
     }
   }
@@ -485,7 +491,7 @@ sub run_and_validate
 				if (! -d $feedback_dir ) {
 				    mkdir $feedback_dir;
 				}
-				my $rc = &do_validate ($validator, $inputfilename, $ansfile, $out_filename, $feedback_dir ); 
+				my $rc = &do_validate ($validator, $inputfilename, $ansfile, $out_filename, $feedback_dir, $problem_validators_args{$letter}); 
 
 				# decrement form the failures
 				$failcount -- if $rc == 42;
@@ -564,6 +570,12 @@ sub do_execute
   {
     $execute_cmd = "./$execute_cmd";
 	&verify_execute_cmd($execute_cmd);
+	if ( $usingwrapper )
+	{
+	 # /usr/local/pc2v9/bin/run_execute.sh a.out c policy.{:probshort}.C log
+    # $execute_cmd = "/usr/local/pc2v9/bin/run_execute.sh a.out c policy.$shortname.C log";
+    $execute_cmd = "/usr/local/pc2v9/bin/run_execute.sh a.out c policy.generic.C log $time_limit";
+	}
   }
 
 # /usr/local/pc2v9/bin/run_execute.sh {:basename} java policy.{:probshort}.J log
@@ -632,12 +644,12 @@ sub check_for_security_violation
 #
 sub do_validate
 {
-  my ($validate_cmd, $inputfile, $answerfile, $teamoutput, $feedbackfile) = @_;
+  my ($validate_cmd, $inputfile, $answerfile, $teamoutput, $feedbackfile, $validator_args) = @_;
 
   print STDERR "Validating using $validate_cmd\n" if $verbose;
-  print STDERR "Command: $validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput \n";
+  print STDERR "Command: $validate_cmd $inputfile $answerfile $feedbackfile $validator_args < $teamoutput \n";
 
-  `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
+  `$validate_cmd $inputfile $answerfile $feedbackfile $validator_args < $teamoutput `;
   my $rtn = $?;
   $rtn >>= 8 if $rtn != -1;
   print "return code '$rtn'\n" if $verbose;
@@ -812,6 +824,24 @@ sub getOutputValidatorPath
 # Load contest configuraiton information
 #
 
+sub load_problem_yaml
+{
+  my ($key, $yaml) = @_;
+
+  # load_list strips out comments, thankfully.
+  my @lines = load_list ($yaml);
+
+  my $validator_args = "";
+  foreach my $line (@lines)
+  {
+      if ( $line =~m/^$VALIDATOR_KEY:\s*(.*)/i)
+      {
+        $validator_args = $1;
+      }
+  }
+  $problem_validators_args{$key}=$validator_args;
+}
+
 sub load_contest_yaml
 {
 
@@ -979,6 +1009,9 @@ sub list_all_files
   {
     my $shortname = $prob_short_names{$key};
     my $probyamlname = "$yaml_directory/$shortname/problem.yaml";
+    if (-f $probyamlname) {
+      &load_problem_yaml($key, $probyamlname);
+    }
         push (@long_filelist, $probyamlname );
 
         my @filelist = &get_file_names(&getSecretPath($shortname), ".in");
@@ -1015,9 +1048,12 @@ sub check_all_files
   {
     my $value = $prob_short_names{$key};
     my $probyamlname = "$yaml_directory/$value/problem.yaml";
-
-    $validator_message = "Missing problem.yaml for $key at $probyamlname\n" if ! -f $probyamlname;
-    print STDERR "$validator_message\n" if ! -f $probyamlname;
+    if (-f $probyamlname) {
+      &load_problem_yaml($key, $probyamlname);
+    } else {
+      $validator_message = "Missing problem.yaml for $key at $probyamlname\n";
+      print STDERR "$validator_message\n";
+    }
   }
 
   &checkAllProblemDataFiles();
