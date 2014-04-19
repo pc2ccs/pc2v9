@@ -7,7 +7,7 @@
 # $HeadURL$  
 #
 # ----------------------------------------------------------------------
-# Spring 2014
+# Spring 2014 Revised for allout.
 
 use strict;
 
@@ -433,6 +433,12 @@ sub run_and_validate
   # Loop through test sets
   #
 
+  my $allout = "all.out";
+  my $ansout = "all.ans";
+
+  unlink $allout if -f $allout;
+  unlink $ansout if -f $ansout;
+
   for ( ; ! $done && $test_case_number <= $number_data_sets; $test_case_number ++)
   {
     my $inputfilename = $filelist[$test_case_number - 1];
@@ -493,6 +499,12 @@ sub run_and_validate
 				}
 				my $rc = &do_validate ($validator, $inputfilename, $ansfile, $out_filename, $feedback_dir, $problem_validators_args{$letter}); 
 
+				`echo "- Test case: $test_case_number ---------------" >> $allout`;
+				`cat $out_filename >> $allout`;
+
+				`echo "- Test case: $test_case_number ---------------" >> $ansout`;
+				`cat $ansfile >> $ansout`; 
+
 				# decrement form the failures
 				$failcount -- if $rc == 42;
 			}
@@ -518,7 +530,9 @@ sub run_and_validate
 
 	if ( ! -e "$IS_AUTO_JUDGE" )
 	{
-		`gvim -d $out_filename $ansfile`;
+		`echo "- End of output ------------------------------" >> $allout`;
+		`echo "- End of output ------------------------------" >> $ansout`;
+		`gvim -d $allout $ansout`;
 	}
 
 
