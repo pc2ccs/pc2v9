@@ -27,7 +27,6 @@ goto :end
 
 :continue
 call %PC2BIN%\pc2env.bat
-rem TODO add support for a truststore and add -Djavax.net.ssl.trustStore=jssecacerts
 java -Xms64M -Xmx768M -cp %pc2_classpath% edu.csus.ecs.pc2.Starter %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end

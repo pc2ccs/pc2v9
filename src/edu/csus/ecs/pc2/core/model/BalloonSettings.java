@@ -190,6 +190,8 @@ public class BalloonSettings implements IElementObject {
         defaultProperties.put("mail.smtps.auth", Boolean.toString(false));
         defaultProperties.put("mail.smtps.port", Integer.toString(DEFAULT_PORT_SMTPS));
         defaultProperties.put(MAIL_FROM, DEFAULT_MAIL_FROM);
+        defaultProperties.put("mail.smtp.ssl.trust", "*"); // trust everyone
+        defaultProperties.put("mail.smtps.ssl.trust", "*"); // trust everyone
         return defaultProperties;
     }
     /*
