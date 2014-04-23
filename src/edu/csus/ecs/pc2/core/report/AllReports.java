@@ -98,6 +98,24 @@ public class AllReports implements IReport {
         reports.add(new RunStatisticsReport());
         
         reports.add(new PlaybackDumpReport());
+        
+        reports.add(new AccountsTSVReportTeamAndJudges());
+
+        reports.add(new AccountsTSVReport());
+        
+        reports.add(new RunsTSVReport());
+        
+        reports.add(new JSONReport());
+
+        reports.add(new EventFeed2013Report());
+        
+        reports.add(new UserdataTSVReport());
+        
+        reports.add(new GroupsTSVReport());
+        
+        reports.add(new TeamsTSVReport());
+        
+        reports.add(new ScoreboardTSVReport());
 
         IReport [] listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());

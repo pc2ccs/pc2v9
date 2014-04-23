@@ -124,6 +124,14 @@ public final class Reports {
 
         reports.add(new EventFeed2013Report());
         
+        reports.add(new UserdataTSVReport());
+        
+        reports.add(new GroupsTSVReport());
+        
+        reports.add(new TeamsTSVReport());
+        
+        reports.add(new ScoreboardTSVReport());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }

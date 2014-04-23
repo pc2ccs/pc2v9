@@ -4,124 +4,121 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.exports.ccs.StandingsJSON;
+import edu.csus.ecs.pc2.exports.ccs.Userdata;
 
 /**
- * JSON Standings Report
+ * userdata.tsv report/output.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class JSONReport implements IReportFile {
+public class UserdataTSVReport implements IReportFile {
 
     /**
      * 
      */
-    private static final long serialVersionUID = 7792034304338639074L;
+    private static final long serialVersionUID = -5820127797123643672L;
 
     private IInternalContest contest;
 
     private IInternalController controller;
 
     private Log log;
-    
-    private Filter theFilter = null;
 
+    private Filter filter;
+
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        controller = inController;
-        contest = inContest;
+        this.contest = inContest;
+        this.controller = inController;
         log = controller.getLog();
     }
 
+    @Override
     public String getPluginTitle() {
-        return "JSON Standings";
+        return "userdata.tsv";
     }
 
+    @Override
     public void createReportFile(String filename, Filter filter) throws IOException {
+
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
-        theFilter = filter;
 
         try {
-            printHeader(printWriter);
-
             try {
+                printHeader(printWriter);
+
                 writeReport(printWriter);
-                System.out.println();
+
+                printFooter(printWriter);
+
+                printWriter.close();
             } catch (Exception e) {
                 printWriter.println("Exception in report: " + e.getMessage());
                 e.printStackTrace(printWriter);
             }
 
-            printFooter(printWriter);
-
-            printWriter.close();
             printWriter = null;
 
         } catch (Exception e) {
             log.log(Log.INFO, "Exception writing report", e);
-            printWriter.println("Exception generating report " + e.getMessage());
         }
 
     }
 
+    @Override
     public String[] createReport(Filter filter) {
-        theFilter = filter;
-        StandingsJSON standingsJSON = new StandingsJSON();
-        try {
-            String result = standingsJSON.createJSON(contest);
-            String [] list = { result };
-            return list;
-        } catch (IllegalContestState e) {
-            log.log(Log.WARNING, e.getMessage(), e.getCause());
-        } finally {
-            standingsJSON = null;
-        }
-        return new String[0];
+        Userdata userdata = new Userdata();
+        String[] lines = userdata.getUserData(contest);
+        return lines;
     }
 
+    @Override
     public String createReportXML(Filter filter) throws IOException {
-        throw new SecurityException("Not implemented");
+        return null;
     }
 
+    @Override
     public void writeReport(PrintWriter printWriter) throws Exception {
-        StandingsJSON standingsJSON = new StandingsJSON();
-        printWriter.print(standingsJSON.createJSON(contest));
-        standingsJSON = null;
+
+        Userdata userdata = new Userdata();
+        String[] lines = userdata.getUserData(contest);
+        for (String string : lines) {
+            printWriter.println(string);
+        }
     }
 
+    @Override
     public String getReportTitle() {
-        return "JSON Standings";
+        return "userdata.tsv";
     }
 
+    @Override
     public Filter getFilter() {
-        return theFilter;
+        return filter;
     }
 
+    @Override
     public void setFilter(Filter filter) {
-        theFilter = filter;
+
     }
 
+    @Override
     public void printHeader(PrintWriter printWriter) {
-        printWriter.println(new VersionInfo().getSystemName());
-        printWriter.println("Date: " + Utilities.getL10nDateTime());
-        printWriter.println(new VersionInfo().getSystemVersionInfo());
-        printWriter.println();
-        printWriter.println(getReportTitle() + " Report");
+
     }
 
+    @Override
     public void printFooter(PrintWriter printWriter) {
-        printWriter.println();
-        printWriter.println("end report");
-    }
 
+    }
+    
     @Override
     public boolean suppressHeaderFooter() {
         return true;

@@ -64,6 +64,7 @@ import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedSummaryReport;
 import edu.csus.ecs.pc2.core.report.FinalizeReport;
 import edu.csus.ecs.pc2.core.report.GroupsReport;
+import edu.csus.ecs.pc2.core.report.GroupsTSVReport;
 import edu.csus.ecs.pc2.core.report.HTMLReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.IReportFile;
@@ -88,9 +89,12 @@ import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
 import edu.csus.ecs.pc2.core.report.RunsTSVReport;
+import edu.csus.ecs.pc2.core.report.ScoreboardTSVReport;
 import edu.csus.ecs.pc2.core.report.SitesReport;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
+import edu.csus.ecs.pc2.core.report.TeamsTSVReport;
+import edu.csus.ecs.pc2.core.report.UserdataTSVReport;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.util.IMemento;
@@ -266,6 +270,14 @@ public class ReportPane extends JPanePlugin {
         reports.add(new RunsTSVReport());
 
         reports.add(new JSONReport());
+        
+        reports.add(new UserdataTSVReport());
+        
+        reports.add(new GroupsTSVReport());
+        
+        reports.add(new TeamsTSVReport());
+        
+        reports.add(new ScoreboardTSVReport());
         
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());
@@ -566,11 +578,12 @@ public class ReportPane extends JPanePlugin {
             if (writeXML){
                 createXMLFile(selectedReport, filename, filter);
             } else {
-                boolean defaultSuppressHeaderFooter = false;
+                boolean suppressHeaderFooter = false;
                 if (selectedReport instanceof IReportFile) {
-                    defaultSuppressHeaderFooter = true;
+                    IReportFile reportFile = (IReportFile) selectedReport;
+                    suppressHeaderFooter = reportFile.suppressHeaderFooter();
                 }
-                createReportFile(selectedReport, defaultSuppressHeaderFooter, filename, filter);
+                createReportFile(selectedReport, suppressHeaderFooter, filename, filter);
             }
             
             viewFile(filename, selectedReport.getReportTitle());
