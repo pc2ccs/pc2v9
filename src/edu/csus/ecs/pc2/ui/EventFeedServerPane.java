@@ -41,7 +41,7 @@ public class EventFeedServerPane extends JPanePlugin {
 
     public static final int DEFAULT_EVENT_FEED_PORT_NUMBER = 4713;
 
-    public static final int DEFAULT_FILTERED_EVENT_FEED_PORT_NUMBER = 4714;
+//    public static final int DEFAULT_FILTERED_EVENT_FEED_PORT_NUMBER = 4714;
 
     private JPanel buttonPanel = null;
 
@@ -53,13 +53,13 @@ public class EventFeedServerPane extends JPanePlugin {
 
     private JLabel portLabel = null;
 
-    private JTextField filteredPortTextField = null;
+//    private JTextField filteredPortTextField = null;
 
     private JTextField unFilteredPortTextField = null;
 
     private EventFeedServer eventFeedServer = new EventFeedServer(); // @jve:decl-index=0:
 
-    private EventFeedServer filteredEventFeedServer = new EventFeedServer(); // @jve:decl-index=0:
+//    private EventFeedServer filteredEventFeedServer = new EventFeedServer(); // @jve:decl-index=0:
 
     private JLabel eventFeedServerStatusLabel = null;
 
@@ -132,7 +132,7 @@ public class EventFeedServerPane extends JPanePlugin {
 
     protected void startEventServer() {
         startEventServer(eventFeedServer, unFilteredPortTextField, false);
-        startEventServer(filteredEventFeedServer, filteredPortTextField, true);
+//        startEventServer(filteredEventFeedServer, filteredPortTextField, true);
     }
 
     private void startEventServer(EventFeedServer server, JTextField textField, boolean filteredFeed) {
@@ -198,17 +198,17 @@ public class EventFeedServerPane extends JPanePlugin {
             eventFeedServerStatusLabel.setText("Event Feed NOT running");
         }
 
-        if (filteredEventFeedServer.isListening()) {
-            try {
-                filteredEventFeedServer.halt();
-            } catch (IOException e) {
-                e.printStackTrace();
-                getLog().log(Log.INFO,e.getMessage(),e);
-            }
-        }
-        if (! eventFeedServer.isListening()) {
-            eventFeedServerStatusLabel.setText("Event Feed NOT running");
-        }
+//        if (filteredEventFeedServer.isListening()) {
+//            try {
+//                filteredEventFeedServer.halt();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                getLog().log(Log.INFO,e.getMessage(),e);
+//            }
+//        }
+//        if (! eventFeedServer.isListening()) {
+//            eventFeedServerStatusLabel.setText("Event Feed NOT running");
+//        }
 
         enableButtons();
     }
@@ -261,36 +261,36 @@ public class EventFeedServerPane extends JPanePlugin {
             gbcviewButton.gridy = 1;
             centerPanel.add(getViewButton(), gbcviewButton);
 
-            JLabel lblFilteredEventFeed = new JLabel();
-            lblFilteredEventFeed.setText("Filtered event feed port");
-            lblFilteredEventFeed.setPreferredSize(new Dimension(52, 26));
-            lblFilteredEventFeed.setHorizontalAlignment(SwingConstants.RIGHT);
-            GridBagConstraints gbclblFilteredEventFeed = new GridBagConstraints();
-            gbclblFilteredEventFeed.fill = GridBagConstraints.BOTH;
-            gbclblFilteredEventFeed.insets = new Insets(0, 0, 0, 5);
-            gbclblFilteredEventFeed.gridx = 0;
-            gbclblFilteredEventFeed.gridy = 3;
-            centerPanel.add(lblFilteredEventFeed, gbclblFilteredEventFeed);
-            GridBagConstraints gbcfilteredPortTextField = new GridBagConstraints();
-            gbcfilteredPortTextField.fill = GridBagConstraints.HORIZONTAL;
-            gbcfilteredPortTextField.insets = new Insets(0, 0, 0, 5);
-            gbcfilteredPortTextField.gridx = 1;
-            gbcfilteredPortTextField.gridy = 3;
-            centerPanel.add(getFilteredPortTextField(), gbcfilteredPortTextField);
+//            JLabel lblFilteredEventFeed = new JLabel();
+//            lblFilteredEventFeed.setText("Filtered event feed port");
+//            lblFilteredEventFeed.setPreferredSize(new Dimension(52, 26));
+//            lblFilteredEventFeed.setHorizontalAlignment(SwingConstants.RIGHT);
+//            GridBagConstraints gbclblFilteredEventFeed = new GridBagConstraints();
+//            gbclblFilteredEventFeed.fill = GridBagConstraints.BOTH;
+//            gbclblFilteredEventFeed.insets = new Insets(0, 0, 0, 5);
+//            gbclblFilteredEventFeed.gridx = 0;
+//            gbclblFilteredEventFeed.gridy = 3;
+//            centerPanel.add(lblFilteredEventFeed, gbclblFilteredEventFeed);
+//            GridBagConstraints gbcfilteredPortTextField = new GridBagConstraints();
+//            gbcfilteredPortTextField.fill = GridBagConstraints.HORIZONTAL;
+//            gbcfilteredPortTextField.insets = new Insets(0, 0, 0, 5);
+//            gbcfilteredPortTextField.gridx = 1;
+//            gbcfilteredPortTextField.gridy = 3;
+//            centerPanel.add(getFilteredPortTextField(), gbcfilteredPortTextField);
 
-            JButton button = new JButton();
-            button.setToolTipText("Show a snapshot of the filtered event feed");
-            button.setText("Snapshot");
-            button.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showEventFeedInViewer(true);
-                }
-            });
-            GridBagConstraints gbcbutton = new GridBagConstraints();
-            gbcbutton.anchor = GridBagConstraints.NORTHWEST;
-            gbcbutton.gridx = 2;
-            gbcbutton.gridy = 3;
-            centerPanel.add(button, gbcbutton);
+//            JButton button = new JButton();
+//            button.setToolTipText("Show a snapshot of the filtered event feed");
+//            button.setText("View");
+//            button.addActionListener(new java.awt.event.ActionListener() {
+//                public void actionPerformed(java.awt.event.ActionEvent e) {
+//                    showEventFeedInViewer(true);
+//                }
+//            });
+//            GridBagConstraints gbcbutton = new GridBagConstraints();
+//            gbcbutton.anchor = GridBagConstraints.NORTHWEST;
+//            gbcbutton.gridx = 2;
+//            gbcbutton.gridy = 3;
+//            centerPanel.add(button, gbcbutton);
         }
         return centerPanel;
     }
@@ -309,14 +309,14 @@ public class EventFeedServerPane extends JPanePlugin {
         return unFilteredPortTextField;
     }
 
-    private JTextField getFilteredPortTextField() {
-        if (filteredPortTextField == null) {
-            filteredPortTextField = new JTextField();
-            filteredPortTextField.setDocument(new IntegerDocument());
-            filteredPortTextField.setText(Integer.toString(DEFAULT_FILTERED_EVENT_FEED_PORT_NUMBER));
-        }
-        return filteredPortTextField;
-    }
+//    private JTextField getFilteredPortTextField() {
+//        if (filteredPortTextField == null) {
+//            filteredPortTextField = new JTextField();
+//            filteredPortTextField.setDocument(new IntegerDocument());
+//            filteredPortTextField.setText(Integer.toString(DEFAULT_FILTERED_EVENT_FEED_PORT_NUMBER));
+//        }
+//        return filteredPortTextField;
+//    }
 
 
     private void enableButtons () {
@@ -340,7 +340,7 @@ public class EventFeedServerPane extends JPanePlugin {
         if (viewButton == null) {
             viewButton = new JButton();
             viewButton.setToolTipText("Show a snapshot of the Un-filtered event feed");
-            viewButton.setText("Snapshot");
+            viewButton.setText("View");
             viewButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showEventFeedInViewer(false);
@@ -365,7 +365,7 @@ public class EventFeedServerPane extends JPanePlugin {
         EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
 
         String eventFeed = null;
-        if (showFilteredFeed) {
+        if (! showFilteredFeed) {
             eventFeed = eventFeedXML.toXML(getContest());
         } else {
             ContestInformation info = getContest().getContestInformation();
