@@ -882,26 +882,26 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         
     }
     
-//    public void testUnjudgedRuns() throws Exception {
-//        
-//        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
-//
-//        int siteNumber = 2;
-//
-//        IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
-//        
-//
-//        Account acc = sample.getTeamAccounts(testCaseContest)[0];
-//        ClientId clientId = acc.getClientId();
-//        Problem problem = testCaseContest.getProblems()[0];
-//        Run run = sample.createRun(testCaseContest, clientId, problem);
-//        
-//        testCaseContest.addRun(run);
-//        String xmlString = eventFeedXML.toXML(testCaseContest);
-//        
-//        testForValidXML(xmlString);
-//        
-//    }
+    public void testUnjudgedRuns() throws Exception {
+        
+        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+
+        int siteNumber = 2;
+
+        IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+        
+
+        Account acc = sample.getTeamAccounts(testCaseContest)[0];
+        ClientId clientId = acc.getClientId();
+        Problem problem = testCaseContest.getProblems()[0];
+        Run run = sample.createRun(testCaseContest, clientId, problem);
+        
+        testCaseContest.addRun(run);
+        String xmlString = eventFeedXML.toXML(testCaseContest);
+        
+        testForValidXML(xmlString);
+        
+    }
     
     
 

@@ -713,9 +713,11 @@ public class EventFeedXML2013 {
 //        <solved>False</solved>
 //        <status>done</status>
         
-        Judgement judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId());
-        String acronym = getAcronym(judgement);
-        XMLUtilities.addChild(memento, "result", acronym);
+        if (run.isJudged()){
+            Judgement judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId());
+            String acronym = getAcronym(judgement);
+            XMLUtilities.addChild(memento, "result", acronym);
+        }
         
         XMLUtilities.addChild(memento, "solved", run.isSolved());
         XMLUtilities.addChild(memento, "status", getStatus(run.isJudged()));
