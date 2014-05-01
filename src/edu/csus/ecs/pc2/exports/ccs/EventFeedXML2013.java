@@ -494,7 +494,7 @@ public class EventFeedXML2013 {
 
         int teamId =  account.getClientId().getClientNumber();
         
-        XMLUtilities.addChild(memento, "external-id", account.getExternalId());
+        XMLUtilities.addChild(memento, "external-id", useDefaultIfEmpty (account.getExternalId(),"836577"+teamId));
         XMLUtilities.addChild(memento, "id", teamId);
         XMLUtilities.addChild(memento, "name", account.getDisplayName());
         
@@ -506,6 +506,20 @@ public class EventFeedXML2013 {
         XMLUtilities.addChild(memento, "university", account.getDisplayName());
         
         return memento;
+    }
+
+    /**
+     * If string null or empty return defaultString.
+     * @param value
+     * @param defaultString
+     * @return
+     */
+    private String useDefaultIfEmpty(String value, String defaultString) {
+        if (value == null || "".equals(value.trim())) {
+            return defaultString;
+        } else {
+            return value;
+        }
     }
 
     private String getRegionName(IInternalContest contest, Account account) {

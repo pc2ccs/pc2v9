@@ -12,6 +12,7 @@ import java.util.Vector;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -64,6 +65,10 @@ public class EventFeedXML2013Test extends AbstractTestCase {
     
     private SampleContest sample = new SampleContest();
     
+    public EventFeedXML2013Test(String testName) {
+        super(testName);
+    }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -843,6 +848,62 @@ public class EventFeedXML2013Test extends AbstractTestCase {
     private Account getAdminAccount(IInternalContest inContest) {
         return inContest.getAccounts(Type.ADMINISTRATOR).firstElement();
     }
+    
+    public void testExternalId() throws Exception {
+        
+        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+
+        int siteNumber = 2;
+
+        IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+        String xmlString = eventFeedXML.toXML(testCaseContest);
+        
+        testForValidXML(xmlString);
+
+        Document document = getDocument(xmlString);
+        
+        NodeList nodes = document.getElementsByTagName("external-id");
+        
+        assertEquals("external id count ", 22,nodes.getLength());
+        
+        String baseValue = "836577";
+
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
+            String value = node.getTextContent();
+            // System.out.println("value = " + value);
+            String expectedValue = baseValue + (i + 1);
+            assertNotNull("Expect value for external-id", value);
+            assertFalse("Expect value " + expectedValue + "for external-id", "".equals(value));
+            assertEquals("Expecting same value", expectedValue, value);
+        }
+
+        assertXMLCounts(xmlString, EventFeedXML2013.TEAM_TAG, 22);
+        
+    }
+    
+//    public void testUnjudgedRuns() throws Exception {
+//        
+//        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+//
+//        int siteNumber = 2;
+//
+//        IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+//        
+//
+//        Account acc = sample.getTeamAccounts(testCaseContest)[0];
+//        ClientId clientId = acc.getClientId();
+//        Problem problem = testCaseContest.getProblems()[0];
+//        Run run = sample.createRun(testCaseContest, clientId, problem);
+//        
+//        testCaseContest.addRun(run);
+//        String xmlString = eventFeedXML.toXML(testCaseContest);
+//        
+//        testForValidXML(xmlString);
+//        
+//    }
+    
+    
 
     /**
      * Create socket server on port.
@@ -861,5 +922,42 @@ public class EventFeedXML2013Test extends AbstractTestCase {
 
     }
 
-    
+//    /**
+//     * Test Suite.
+//     * 
+//     * This only works under JUnit 3.
+//     * 
+//     * @return suite of tests.
+//     */
+//    public static TestSuite suite() {
+//
+//        TestSuite suite = new TestSuite("EventFeedXML2013Test");
+//
+//        String singletonTestName = "";
+////        singletonTestName = "testExternalId";
+//
+//        if (!"".equals(singletonTestName)) {
+//            suite.addTest(new EventFeedXML2013Test(singletonTestName));
+//        } else {
+//
+//            suite.addTest(new EventFeedXML2013Test("testContestElement"));
+//            suite.addTest(new EventFeedXML2013Test("testInfoElement"));
+//            suite.addTest(new EventFeedXML2013Test("testLanguageElement"));
+//            suite.addTest(new EventFeedXML2013Test("testRegionElement"));
+//            suite.addTest(new EventFeedXML2013Test("testJudgementElement"));
+//            suite.addTest(new EventFeedXML2013Test("testProblemElement"));
+//            suite.addTest(new EventFeedXML2013Test("testTeamElement"));
+//            suite.addTest(new EventFeedXML2013Test("testClarElement"));
+//            suite.addTest(new EventFeedXML2013Test("testRunElement"));
+//            suite.addTest(new EventFeedXML2013Test("testFinalizedElement"));
+//            suite.addTest(new EventFeedXML2013Test("testStartupElement"));
+//            suite.addTest(new EventFeedXML2013Test("testToXML"));
+//            suite.addTest(new EventFeedXML2013Test("testTestCase"));
+//            suite.addTest(new EventFeedXML2013Test("testIsYounger"));
+//            suite.addTest(new EventFeedXML2013Test("testDeletedRuns"));
+//            suite.addTest(new EventFeedXML2013Test("testExternalId"));
+//
+//        }
+//        return suite;
+//    }
 }
