@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-        <classpathentry kind="src" path="src"/>
-        <classpathentry excluding="**/package.html" kind="src" path="test"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="**/package.html" kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="vendor/lib/activation.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/mailapi.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/mclb.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/smtp.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/quick-json-1.0.2.3.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>
