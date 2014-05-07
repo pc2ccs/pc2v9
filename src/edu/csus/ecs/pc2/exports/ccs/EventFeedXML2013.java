@@ -188,6 +188,7 @@ public class EventFeedXML2013 {
                  * run information without judgement information, essentially
                  * we sent out that the run is 'NEW'.
                  */
+                memento = mementoRoot.createChild(RUN_TAG);
                 addMemento(memento, contest, run); // add RUN
             }
         }
