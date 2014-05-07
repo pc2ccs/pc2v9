@@ -167,7 +167,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private static final String LOGIN_OPTION_STRING = "--login";
     
-    private static final String LOAD_YAML_OPTION_STRING = "--loadyaml";
+//    private static final String LOAD_YAML_OPTION_STRING = "--loadyaml";
 
     private static final String PASSWORD_OPTION_STRING = "--password";
 
@@ -2369,7 +2369,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 PROFILE_OPTION_STRING, //
                 INI_FILENAME_OPTION_STRING, //
                 CONTEST_PASSWORD_OPTION, //
-                LOAD_YAML_OPTION_STRING, //        
+//                LOAD_YAML_OPTION_STRING, // TODO 770 - add         
                 FILE_OPTION_STRING };
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
         
@@ -2386,31 +2386,32 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             startLog(null, "pc2.startup", null, null);
         }
         
-        if (parseArguments.isOptPresent("--server") && parseArguments.isOptPresent(LOAD_YAML_OPTION_STRING)) {
-
-            // Get directory name
-            yamlDirectory = parseArguments.getOptValue(LOAD_YAML_OPTION_STRING);
-
-            if (isEmpty(yamlDirectory)) {
-                fatalError("Cannot start PC^2, missing directory name after "+LOAD_YAML_OPTION_STRING+" option");
-            }
-            
-            if (!new File(yamlDirectory).isDirectory()){
-                fatalError("Cannot start PC^2, specified directory '"+yamlDirectory+"' does not exist ("+LOAD_YAML_OPTION_STRING+" option)");
-            }
-  
-            String contestYamlFilename = yamlDirectory + File.separator + "contest.yaml";
-            if (!new File(contestYamlFilename).isFile()){
-                fatalError("Cannot start PC^2, No contest.yaml found in '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)");
-            }
-            
-            try {
-                log.log(Log.INFO, "Loading YAML from directory "+yamlDirectory);
-                loadContestYaml(yamlDirectory);
-            } catch (Exception e) {
-                fatalError("Cannot start PC^2, Errors loading contest YAML '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)", e);
-            }
-        }
+        // TODO 770 untested code for bug
+//        if (parseArguments.isOptPresent("--server") && parseArguments.isOptPresent(LOAD_YAML_OPTION_STRING)) {
+//
+//            // Get directory name
+//            yamlDirectory = parseArguments.getOptValue(LOAD_YAML_OPTION_STRING);
+//
+//            if (isEmpty(yamlDirectory)) {
+//                fatalError("Cannot start PC^2, missing directory name after "+LOAD_YAML_OPTION_STRING+" option");
+//            }
+//            
+//            if (!new File(yamlDirectory).isDirectory()){
+//                fatalError("Cannot start PC^2, specified directory '"+yamlDirectory+"' does not exist ("+LOAD_YAML_OPTION_STRING+" option)");
+//            }
+//  
+//            String contestYamlFilename = yamlDirectory + File.separator + "contest.yaml";
+//            if (!new File(contestYamlFilename).isFile()){
+//                fatalError("Cannot start PC^2, No contest.yaml found in '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)");
+//            }
+//            
+//            try {
+//                log.log(Log.INFO, "Loading YAML from directory "+yamlDirectory);
+//                loadContestYaml(yamlDirectory);
+//            } catch (Exception e) {
+//                fatalError("Cannot start PC^2, Errors loading contest YAML '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)", e);
+//            }
+//        }
 
         handleCommandLineOptions();
 
@@ -2651,7 +2652,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         if (parseArguments.isOptPresent("--help")) {
             // -F is the ParseArguements internal option to pre-load command line options from a file
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [" + LOAD_YAML_OPTION_STRING + "] [--skipini] " + //
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [" 
+//            + LOAD_YAML_OPTION_STRING 
+                    + "] [--skipini] " + //
                     "[" + INI_FILENAME_OPTION_STRING + " filename] [" + //
                     CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] [" + NO_GUI_OPTION_STRING + "] [" + MAIN_UI_OPTION + " classname]");
             System.exit(0);
