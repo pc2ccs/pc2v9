@@ -120,7 +120,7 @@ public class EventFeedServerPane extends JPanePlugin {
             startButton = new JButton();
             startButton.setText("Start");
             startButton.setMnemonic(KeyEvent.VK_S);
-            startButton.setToolTipText("Start Event Feed Servers");
+            startButton.setToolTipText("Start Event Feed Server");
             startButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     startEventServer();
@@ -174,7 +174,7 @@ public class EventFeedServerPane extends JPanePlugin {
             stopButton = new JButton();
             stopButton.setText("Stop");
             stopButton.setMnemonic(KeyEvent.VK_T);
-            stopButton.setToolTipText("Stop Event Feed Servers");
+            stopButton.setToolTipText("Stop Event Feed Server");
             stopButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     stopEventServer();
@@ -241,7 +241,7 @@ public class EventFeedServerPane extends JPanePlugin {
             portLabel = new JLabel();
             portLabel.setPreferredSize(new Dimension(52, 26));
             portLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            portLabel.setText("UN-filtered event feed port");
+            portLabel.setText("Event feed port");
             GridBagConstraints gbcportLabel = new GridBagConstraints();
             gbcportLabel.fill = GridBagConstraints.BOTH;
             gbcportLabel.insets = new Insets(0, 0, 5, 5);
@@ -325,9 +325,9 @@ public class EventFeedServerPane extends JPanePlugin {
         getStopButton().setEnabled(serverRunning);
 
         if (serverRunning){
-            eventFeedServerStatusLabel.setText("Event Feed servers running");
+            eventFeedServerStatusLabel.setText("Event Feed server running");
         } else {
-            eventFeedServerStatusLabel.setText("Event Feed servers STOPPED");
+            eventFeedServerStatusLabel.setText("Event Feed server STOPPED");
         }
     }
 
@@ -339,7 +339,7 @@ public class EventFeedServerPane extends JPanePlugin {
     private JButton getViewButton() {
         if (viewButton == null) {
             viewButton = new JButton();
-            viewButton.setToolTipText("Show a snapshot of the Un-filtered event feed");
+            viewButton.setToolTipText("Show a copy an event feed");
             viewButton.setText("View");
             viewButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
