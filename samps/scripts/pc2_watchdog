@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+
+# This script requires libproc-processtable-perl
+# Update $KILL_LIMIT if problems have time limits more then 55 seconds
+#
+# This script forks to put itself in the background.
+# Only looks at a.out to kill if using up too much memory or taking too long.
+
+# java sometimes has trouble killing c/c++ programs in tight loops
+# this script kills those trouble programs.
+
+use strict;
+use warnings;
+use vars qw/ $me $interval $tobj $pid $pidfile/;
+
+BEGIN {
+    $me = $0;
+    $me =~ s/.*\/(\S+)$/$1/;
+}
+
+# this requires libproc-processtable-perl package
+use Proc::ProcessTable;
+use Sys::Syslog qw ( :DEFAULT setlogsock );
+
+$KILL_LIMIT=60; # in seconds, eg kill process if it's been running longer then this
+$interval=47; # sleep interval in seconds
+$|=1;
+
+$SIG{CHLD}="IGNORE";
+$tobj = new Proc::ProcessTable;
+$pidfile="$ENV{HOME}/$me.pid";
+if(-f $pidfile) {
+    open(PID, $pidfile) || die("Could not read $me:$! \n");
+    $pid = <PID>;
+    close($pid);
+    chomp($pid);
+    if (&verifypid($pid)) {
+        die("$me already running (pid $pid)\n");
+    }
+}
+
+$pid = fork();
+die("cannot fork") unless defined $pid;
+if ($pid == 0) {
+    # this is the child
+    open(PID, ">$pidfile") || die;
+    print PID "$$\n";
+    close(PID);
+} else {
+    exit(0);
+}
+
+setlogsock('unix');
+openlog($me, 'pid,cons', 'kern');
+syslog('info', "starting");
+
+while(1) {
+    &collectstats;
+    sleep($interval);
+}
+
+sub collectstats {
+    my($process);
+    my($current_time)=time;
+    foreach $process (@{$tobj->table}) {
+	# ignore ourselves
+ 	next if ($process->pid() == $$);
+        if ($process->fname() =~ /a.out/) {
+	    if ($process->pctmem > 95) {
+		my $msg=sprintf("killing process %d, pctmem is %d", $process->pid(), $process->pctmem);
+		syslog('notice', $msg);
+		$process->kill(9);
+	    }
+	    if (($current_time-$process->start) > $KILL_LIMIT) { # $process->time is broken
+		my $msg=sprintf("killing process %d, time is %d seconds", $process->pid(), $current_time-$process->start);
+		syslog('notice', $msg);
+		$process->kill(9);
+	    }
+	}
+    }
+}
+
+sub verifypid {
+    my($pid)=shift;
+
+    my($process);
+    foreach $process (@{$tobj->table}) {
+ 	next if ($process->pid() != $pid);
+	if ($process->fname =~ m#$me#) {
+	    return(1);
+        }
+    }
+    return(0);
+}
