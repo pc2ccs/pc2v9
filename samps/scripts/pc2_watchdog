@@ -11,7 +11,7 @@
 
 use strict;
 use warnings;
-use vars qw/ $me $interval $tobj $pid $pidfile/;
+use vars qw/ $me $interval $tobj $pid $pidfile $KILL_LIMIT/;
 
 BEGIN {
     $me = $0;
