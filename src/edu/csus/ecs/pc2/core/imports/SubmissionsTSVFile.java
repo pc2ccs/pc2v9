@@ -18,14 +18,14 @@ import edu.csus.ecs.pc2.ui.InvalidFieldValue;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * Load Runs from a runs.tsv file.
+ * Load Runs from a submissions.tsv file.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class RunsTSVFile implements UIPlugin {
+public class SubmissionsTSVFile implements UIPlugin {
 
     /**
      * 
@@ -218,7 +218,7 @@ public class RunsTSVFile implements UIPlugin {
     }
 
     public String getPluginTitle() {
-        return "Load runs.tsv";
+        return "Load submissions.tsv";
     }
 
     public boolean isCheckRunSubmissionFiles() {
