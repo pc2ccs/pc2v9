@@ -192,6 +192,10 @@ public class RunsTSVReport implements IReportFile {
         } else {
             // printWriter.println("-- " + runs.length + " runs --");
             for (Run run : runs) {
+                // skip deleted runs
+                if (run.isDeleted()) {
+                    continue;
+                }
                 list.add(createLine(run));
             }
         }
