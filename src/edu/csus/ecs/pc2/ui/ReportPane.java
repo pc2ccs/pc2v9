@@ -257,8 +257,6 @@ public class ReportPane extends JPanePlugin {
         
         reports.add(new RunStatisticsReport());
 
-        reports.add(new SubmissionsTSVReport());
-
         reports.add(new PlaybackDumpReport());
         
         reports.add(new PasswordsReport());
