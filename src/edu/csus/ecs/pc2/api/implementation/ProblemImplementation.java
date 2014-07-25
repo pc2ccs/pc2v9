@@ -39,6 +39,8 @@ public class ProblemImplementation implements IProblem {
 
     private boolean readsInputFromSTDIN = false;
 
+    private String shortName;
+
     public ProblemImplementation(ElementId problemId, IInternalContest internalContest) {
         this(internalContest.getProblem(problemId), internalContest);
     }
@@ -46,6 +48,10 @@ public class ProblemImplementation implements IProblem {
     public ProblemImplementation(Problem problem, IInternalContest internalContest) {
         elementId = problem.getElementId();
         name = problem.getDisplayName();
+        shortName = problem.getShortName();
+        if (shortName == null) {
+            shortName = name;
+        }
         judgesDataFileName = problem.getDataFileName();
         judgesAnswerFileName = problem.getAnswerFileName();
         validatorFileName = problem.getValidatorProgramName();
@@ -157,5 +163,10 @@ public class ProblemImplementation implements IProblem {
     
     public ElementId getElementId() {
         return elementId;
+    }
+
+    @Override
+    public String getShortName() {
+        return shortName;
     }
 }

@@ -38,6 +38,13 @@ public interface IProblem {
     String getName();
     
     /**
+     * Get the short name for this problem as configured by the Contest Administrator.
+     * 
+     * @return A String containing the short name of the problem.
+     */
+    String getShortName();
+    
+    /**
      * Get the name of the data file which the Judges have provided for this problem.
      * 
      * @see #hasDataFile()

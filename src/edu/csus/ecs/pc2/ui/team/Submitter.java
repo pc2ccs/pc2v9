@@ -923,6 +923,9 @@ public class Submitter {
             if (problem.getName().equalsIgnoreCase(problemTitle2)) {
                 return problem;
             }
+            if (problem.getShortName().equalsIgnoreCase(problemTitle2)) {
+                return problem;
+            }
         }
 
         char let = 'A';
