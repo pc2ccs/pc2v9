@@ -156,9 +156,7 @@ public class RunsTSVReport implements IReportFile {
 
     public void writeReport(PrintWriter printWriter) {
 
-        // Runs
-        printWriter.println();
-
+        // runs.tsv
         String[] lines = getReportLines();
         for (String string : lines) {
             printWriter.println(string);
