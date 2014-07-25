@@ -20,14 +20,14 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * runs.tsv report/file output.
+ * submissions.tsv report/file output.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class RunsTSVReport implements IReportFile {
+public class SubmissionsTSVReport implements IReportFile {
 
     /**
      * 
@@ -156,7 +156,7 @@ public class RunsTSVReport implements IReportFile {
 
     public void writeReport(PrintWriter printWriter) {
 
-        // runs.tsv
+        // submissions.tsv
         String[] lines = getReportLines();
         for (String string : lines) {
             printWriter.println(string);
@@ -260,7 +260,7 @@ public class RunsTSVReport implements IReportFile {
     }
 
     public String getPluginTitle() {
-        return "runs.tsv Report";
+        return "submissions.tsv Report";
     }
 
     public Filter getFilter() {

@@ -313,7 +313,7 @@ public class Extractor {
             return null;
         }
         if (SUBMISSION_OPTION.equals(name) || RUNS_OPTION.equals(name)) {
-            return new RunsTSVReport();
+            return new SubmissionsTSVReport();
         } else if (SCOREBOARD_OPTION.equals(name)) {
             return new ScoreboardTSVReport();
         } else if (ACCOUNTS_OPTION.equals(name)) {

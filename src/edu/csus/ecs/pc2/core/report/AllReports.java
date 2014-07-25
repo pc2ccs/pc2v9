@@ -103,7 +103,7 @@ public class AllReports implements IReport {
 
         reports.add(new AccountsTSVReport());
         
-        reports.add(new RunsTSVReport());
+        reports.add(new SubmissionsTSVReport());
         
         reports.add(new JSONReport());
 

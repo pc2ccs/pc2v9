@@ -20,7 +20,7 @@ import javax.swing.filechooser.FileFilter;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
-import edu.csus.ecs.pc2.core.report.RunsTSVReport;
+import edu.csus.ecs.pc2.core.report.SubmissionsTSVReport;
 import edu.csus.ecs.pc2.exports.ccs.Groupdata;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
@@ -422,7 +422,7 @@ public class ExportDataPane extends JPanePlugin {
     private JButton getExportRunTSVButton() {
         if (exportRunTSVButton == null) {
             exportRunTSVButton = new JButton();
-            exportRunTSVButton.setText("Export runs.tsv");
+            exportRunTSVButton.setText("Export submissions.tsv");
             exportRunTSVButton.setMnemonic(KeyEvent.VK_R);
             exportRunTSVButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -435,11 +435,11 @@ public class ExportDataPane extends JPanePlugin {
 
     protected void exportRunTSVFile() {
         
-        File file = saveAsFileDialog(this, lastDirectory, "runs.tsv");
+        File file = saveAsFileDialog(this, lastDirectory, "submissions.tsv");
         
         if (file != null) {
-            RunsTSVReport runsTSVReport = new RunsTSVReport();
-            Utilities.viewReport(runsTSVReport, "runs.tsv file", getContest(), getController(), ! runsTSVReport.suppressHeaderFooter());
+            SubmissionsTSVReport runsTSVReport = new SubmissionsTSVReport();
+            Utilities.viewReport(runsTSVReport, "submissions.tsv file", getContest(), getController(), ! runsTSVReport.suppressHeaderFooter());
         }
     }
 

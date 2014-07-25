@@ -88,7 +88,7 @@ import edu.csus.ecs.pc2.core.report.RunStatisticsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
-import edu.csus.ecs.pc2.core.report.RunsTSVReport;
+import edu.csus.ecs.pc2.core.report.SubmissionsTSVReport;
 import edu.csus.ecs.pc2.core.report.ScoreboardTSVReport;
 import edu.csus.ecs.pc2.core.report.SitesReport;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
@@ -257,7 +257,7 @@ public class ReportPane extends JPanePlugin {
         
         reports.add(new RunStatisticsReport());
 
-        reports.add(new RunsTSVReport());
+        reports.add(new SubmissionsTSVReport());
 
         reports.add(new PlaybackDumpReport());
         
@@ -267,7 +267,7 @@ public class ReportPane extends JPanePlugin {
         
         reports.add(new AccountsTSVReport());
         
-        reports.add(new RunsTSVReport());
+        reports.add(new SubmissionsTSVReport());
 
         reports.add(new JSONReport());
         
