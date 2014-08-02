@@ -13,11 +13,11 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  */
 
 // $HeadURL$
-public class RunsTSVFileTest extends AbstractTestCase {
+public class SubmissionsTSVFileTest extends AbstractTestCase {
     
     public void testLoadFile() throws Exception {
         
-        RunsTSVFile tsv = new RunsTSVFile();
+        SubmissionsTSVFile tsv = new SubmissionsTSVFile();
         
         String datafile = getTestFilename("runs1.tsv");
         
