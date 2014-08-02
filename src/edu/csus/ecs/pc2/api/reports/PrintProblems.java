@@ -16,6 +16,8 @@ public class PrintProblems extends APIAbstractTest {
         for (IProblem problem : getContest().getProblems()) {
             print("Problem name = " + problem.getName());
 
+            print(" short name = " + problem.getShortName());
+
             print(" data file = ");
             if (problem.hasDataFile()) {
                 print(problem.getJudgesDataFileName());

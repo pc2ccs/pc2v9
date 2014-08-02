@@ -49,7 +49,7 @@ public class ProblemImplementation implements IProblem {
         elementId = problem.getElementId();
         name = problem.getDisplayName();
         shortName = problem.getShortName();
-        if (shortName == null) {
+        if (shortName == null || shortName.isEmpty()) {
             shortName = name;
         }
         judgesDataFileName = problem.getDataFileName();
