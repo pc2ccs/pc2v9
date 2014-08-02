@@ -50,7 +50,11 @@ public class ProblemImplementation implements IProblem {
         name = problem.getDisplayName();
         shortName = problem.getShortName();
         if (shortName == null || shortName.isEmpty()) {
-            shortName = name;
+            shortName = name.toLowerCase();
+            int space = shortName.indexOf(" ");
+            if (space > 0) {
+                shortName = shortName.substring(0, space);
+            }
         }
         judgesDataFileName = problem.getDataFileName();
         judgesAnswerFileName = problem.getAnswerFileName();

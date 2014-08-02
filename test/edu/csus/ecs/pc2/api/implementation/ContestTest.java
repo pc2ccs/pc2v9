@@ -42,6 +42,38 @@ public class ContestTest extends AbstractTestCase {
         return apiContestInst;
     }
 
+    public void testProblems() throws Exception {
+        IInternalContest contest = sampleContest.createContest(1, 3, 12, 12, true);
+
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
+
+        IInternalController controller = sampleContest.createController(contest, storageDirectory, true, false);
+        Log log = createLog(getName());
+
+        Contest apiContestInst = new Contest(contest, controller, log);
+        IContest apiContest = apiContestInst;
+        
+
+        Problem[] problems = contest.getProblems();
+        assertNotNull("Expecting problems ", problems);
+        assertEquals("expected problems count", 6, problems.length);
+        problems[0].setShortName("short_name");
+        IProblem[] iproblems = apiContest.getProblems();
+        for ( IProblem iProblem : iproblems) {
+            if (iProblem.getName().equalsIgnoreCase("Sumit")) {
+                assertEquals("name vs shortname", "short_name", iProblem.getShortName());
+            } else {
+                String expectedName = iProblem.getName().toLowerCase();
+                int space = expectedName.indexOf(" ");
+                if (space > 0) {
+                    expectedName = expectedName.substring(0, space);
+                }
+                assertEquals("name vs shortname", expectedName, iProblem.getShortName());
+            }
+        }
+    }
+    
     public void testProblemDetails() throws Exception {
 
         IInternalContest contest = sampleContest.createContest(1, 3, 12, 12, true);
