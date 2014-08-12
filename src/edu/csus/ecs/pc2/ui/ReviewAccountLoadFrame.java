@@ -485,7 +485,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private JCheckBox getShowAllAccountsCheckBox() {
         if (showAllAccountsCheckBox == null) {
             showAllAccountsCheckBox = new JCheckBox();
-            showAllAccountsCheckBox.setText("Included unchanged accounts");
+            showAllAccountsCheckBox.setText("Include unchanged accounts");
             showAllAccountsCheckBox.setPreferredSize(new Dimension(250, 24));
             showAllAccountsCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
