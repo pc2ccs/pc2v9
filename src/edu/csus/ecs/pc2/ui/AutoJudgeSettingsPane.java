@@ -562,6 +562,7 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
 
             problemListMCLB.addColumns(cols);
             problemListMCLB.getColumnInfo(0).setWidth(200);
+            problemListMCLB.getColumnInfo(1).setWidth(200);
             // SOMEDAY make autoSizeAllColumns work with JCheckBoxes
 //            problemListMCLB.autoSizeAllColumns()
 
