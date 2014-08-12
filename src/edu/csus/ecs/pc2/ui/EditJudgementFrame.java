@@ -43,7 +43,7 @@ public class EditJudgementFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(431, 176));
+        this.setSize(new Dimension(431, 225));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getJudgementPane());
         this.setTitle("Edit Judgement");
