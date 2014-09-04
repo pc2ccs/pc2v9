@@ -11,7 +11,8 @@
 
 use strict;
 use warnings;
-use vars qw/ $me $interval $tobj $pid $pidfile $KILL_LIMIT/;
+use vars qw/ $me $interval $tobj $pid $pidfile $KILL_LIMIT $opt_nofork/;
+use Getopt::Long;
 
 BEGIN {
     $me = $0;
@@ -26,6 +27,7 @@ $KILL_LIMIT=60; # in seconds, eg kill process if it's been running longer then t
 $interval=47; # sleep interval in seconds
 $|=1;
 
+my $result = GetOptions('nofork');
 $SIG{CHLD}="IGNORE";
 $tobj = new Proc::ProcessTable;
 $pidfile="$ENV{HOME}/$me.pid";
@@ -39,15 +41,17 @@ if(-f $pidfile) {
     }
 }
 
-$pid = fork();
-die("cannot fork") unless defined $pid;
-if ($pid == 0) {
-    # this is the child
-    open(PID, ">$pidfile") || die;
-    print PID "$$\n";
-    close(PID);
+if (!defined($opt_nofork)) {
+    $pid = fork();
+    die("cannot fork") unless defined $pid;
+    if ($pid == 0) {
+        # this is the child
+        &writepid;
+    } else {
+        exit(0);
+    }
 } else {
-    exit(0);
+    &writepid;
 }
 
 setlogsock('unix');
@@ -57,6 +61,12 @@ syslog('info', "starting");
 while(1) {
     &collectstats;
     sleep($interval);
+}
+
+sub writepid {
+    open(PID, ">$pidfile") || die;
+    print PID "$$\n";
+    close(PID);
 }
 
 sub collectstats {
