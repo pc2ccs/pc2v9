@@ -1254,9 +1254,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         }
                     }
 
+                } else if (contest.isRemoteLoggedIn(packet.getSourceId()) && clientId.getClientType().equals(Type.ADMINISTRATOR)) {
+                    // this is needed for site1 admin to create accounts on site2
+                    // securityCheck does not always have ConnectionHandlerID list of remotely logged in clients
+//                    securityCheck(packet, connectionHandlerID);
+                    processPacket(packet, connectionHandlerID);
                 } else {
-                    // Security Failure??
-
                     if (clientId.getClientType().equals(Type.SERVER)) {
                         // Packet from a server.
 
@@ -1280,49 +1283,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                             loginServer(clientId, connectionHandlerID);
 
-                        } else {
-
-                            log.log(Log.INFO, "Packet from non-logged in server, processed anyways " + packet);
-
-                            // //
-                            // String message = "Security violation user " + clientId + " got a " + packet;
-                            // info(message + " on " + connectionHandlerID);
-                            // PacketFactory.dumpPacket(System.err, packet);
-
-                            // try {
-                            //                                
-                            // packetArchiver.writeNextPacket(packet);
-                            // log.info("Security violation possible spoof packet from "+clientId+" connection "+connectionHandlerID);
-                            // log.info("Security violation wrote packet to "+packetArchiver+" packet "+packet);
-                            // } catch (Exception e) {
-                            // log.log(Log.WARNING, "Exception logged writing packet ", e);
-                            // }
-
+                        } else if (!contest.isLoggedIn() && packet.getType().equals(PacketType.Type.LOGIN)) {
+                            // on site 2 login to site 1, site 2 reports LOGIN (and LOGIN_SUCCESS) on login to site1
                             processPacket(packet, connectionHandlerID);
-
-                        }
+                        } else {
+                            System.err.println("Security Violation Packet from non-logged in server" + packet);
+                            info("Note: security violation in packet: Packet from non-logged in server");
+                            log.info("Security Violation for packet " + packet);
+                       }
                         return;
-                    } else if (clientId.getClientType().equals(Type.ADMINISTRATOR)) {
-
-                        // TODO code security kluge admin
-                        // TODO KLUDGE HUGE KLUDGE - this block allows any admin to update stuff.
-
-                        
-//                        securityCheck(packet, connectionHandlerID);
-
-                        processPacket(packet, connectionHandlerID);
-
                     } else {
-
-                        // TODO warning got packet but client is not logged in
-
-                        log.log(Log.WARNING, "Packet from non-logged in user, processed anyways " + packet);
-
-                        securityCheck(packet, connectionHandlerID);
-
-                        // TODO remove processPacket when security is in place.
-                        processPacket(packet, connectionHandlerID);
-
+                        System.err.println("Security Violation Packet from non-logged in server" + packet);
+                        info("Note: security violation in packet: Packet from non-logged in server");
+                        log.info("Security Violation for packet " + packet);
                     }
                 }
             } else {
