@@ -2592,4 +2592,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void setClientAutoShutdown(boolean clientAutoShutdown) {
         this.clientAutoShutdown = clientAutoShutdown;
     }
+
+    public void setLog(Log log) {
+        this.log = log;
+        
+    }
 }
