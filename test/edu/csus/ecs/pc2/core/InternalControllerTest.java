@@ -60,6 +60,8 @@ public class InternalControllerTest extends TestCase {
 
         IInternalContest contest = sample.createContest(siteNum, 1, 3, 1, true);
 
+        contest.generateNewAccounts(Type.ADMINISTRATOR.toString(), 1, true);
+
         ClientId adminId = new ClientId(siteNum, Type.ADMINISTRATOR, 42);
 
         Account admin1 = contest.getAccount(adminId);
