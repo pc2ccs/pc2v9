@@ -30,7 +30,7 @@ public class ValidatorTest extends TestCase {
         super.setUp();
         
         // Project path for JUnit with Cruise Control
-        String projectPath = "projects" + File.separator + "pc2v9";
+        String projectPath = "projects" + File.separator + "pc2-9.1";
         
         // Directory where test data is
         String testDir = "testdata";

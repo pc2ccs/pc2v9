@@ -33,7 +33,7 @@ public class LoadICPCDataTest extends TestCase {
         File dir = new File(loadDir);
         if (!dir.exists()) {
             // TODO, try to find this path in the environment
-            dir = new File("projects" + File.separator +"pc2v9" + File.separator + loadDir);
+            dir = new File("projects" + File.separator +"pc2-9.1" + File.separator + loadDir);
             if (dir.exists()) {
                 loadDir=dir.toString() + File.separator;
             } else {

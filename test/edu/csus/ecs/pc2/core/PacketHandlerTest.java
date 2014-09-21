@@ -39,7 +39,7 @@ public class PacketHandlerTest extends TestCase {
         File dir = new File(loadFile);
         if (!dir.exists()) {
             // TODO, try to find this path in the environment
-            dir = new File("projects" + File.separator +"pc2v9" + File.separator + loadFile);
+            dir = new File("projects" + File.separator +"pc2-9.1" + File.separator + loadFile);
             if (!dir.exists()) {
                 System.err.println("could not find " + loadFile);
             } else {
