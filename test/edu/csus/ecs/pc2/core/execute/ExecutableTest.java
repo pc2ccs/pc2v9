@@ -3,7 +3,9 @@ package edu.csus.ecs.pc2.core.execute;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.ConsoleHandler;
 
+import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -30,6 +32,8 @@ import edu.csus.ecs.pc2.validator.Validator;
 // $HeadURL$
 public class ExecutableTest extends AbstractTestCase {
 
+    // SOMDAY change to using Hello.java by fixing class name in Hello.java
+    
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     // private static int testNumber = 1;
@@ -41,7 +45,6 @@ public class ExecutableTest extends AbstractTestCase {
     private Problem sumitProblem = null;
 
     // SOMEDAY add test for hello
-    @SuppressWarnings("unused")
     private Problem helloWorldProblem = null;
 
     private Problem largeStdInProblem = null;
@@ -62,6 +65,14 @@ public class ExecutableTest extends AbstractTestCase {
         contest = sampleContest.createContest(2, 2, 12, 12, true);
         controller = sampleContest.createController(contest, true, false);
 
+//        setDebugMode(true);
+        
+        if (isDebugMode()){
+            // this will make all log output go to stdout
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            controller.getLog().addHandler(consoleHandler);
+        }
+        
         sumitProblem = createSumitProblem(contest);
         helloWorldProblem = createHelloProblem(contest);
         largeStdInProblem  = createLargeStdInProblem(contest);
@@ -202,6 +213,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         return problem;
     }
+    
 
     /**
      * 
@@ -225,12 +237,12 @@ public class ExecutableTest extends AbstractTestCase {
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
         problem.setDataFileName("casting.dat");
-        String judgesDataFile = getSamplesSourceFilename(problem.getDataFileName());
+        String judgesDataFile = getRootInputTestFile(problem.getDataFileName());
         checkFileExistance(judgesDataFile);
         problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile));
 
         problem.setAnswerFileName("casting.ans");
-        String answerFileName = getSamplesSourceFilename(problem.getAnswerFileName());
+        String answerFileName = getRootInputTestFile(problem.getAnswerFileName());
         checkFileExistance(answerFileName);
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
 
@@ -255,6 +267,19 @@ public class ExecutableTest extends AbstractTestCase {
         runExecutableTest(run, runFiles, true, yesJudgement);
 
     }
+    
+    public void testHello() {
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Run run = new Run(submitter, javaLanguage, helloWorldProblem);
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, true, yesJudgement);
+
+    }
+
 
     public void testLargeOutput() {
 
@@ -274,11 +299,10 @@ public class ExecutableTest extends AbstractTestCase {
 
         Run run = new Run(submitter, javaLanguage, largeStdInProblem);
         
-        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Casting.java"));
+        RunFiles runFiles = new RunFiles(run,  getRootInputTestFile("Casting.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, yesJudgement);
-
     }
 
 
@@ -308,7 +332,7 @@ public class ExecutableTest extends AbstractTestCase {
 //        System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
         assertTrue("Excessive runtime", executionData.getExecuteTimeMS() < 40000);
 
-        assertTrue("Source file not compiled " + run.getProblemId(), executionData.isCompileSuccess());
+        assertTrue("Compile failed " + run.getProblemId(), executionData.isCompileSuccess());
         assertTrue("Run not executed " + run.getProblemId(), executionData.isExecuteSucess());
         
         // If this test fails - there may not be a Validator in the path, check vstderr.pc2 for  
@@ -330,6 +354,10 @@ public class ExecutableTest extends AbstractTestCase {
           assertTrue("Judgement should be solved ", solved);
           assertEquals(expectedJudgement, executionData.getValidationResults());
       }
+      
+      executionData = null;
+      executable = null;
+      
     }
     
     public void testFindPC2Jar() throws Exception {
@@ -450,30 +478,93 @@ public class ExecutableTest extends AbstractTestCase {
     }
     
     /**
+     * 
+     * @param contest2
+     * @return
+     * @throws FileNotFoundException
+     */
+    private Problem createHelloProblemNoJudgesData(IInternalContest contest2) throws FileNotFoundException {
+
+        Problem problem = new Problem("Hello-NoJudgesData");
+
+        problem.setShowValidationToJudges(false);
+        problem.setHideOutputWindow(true);
+        problem.setShowCompareWindow(false);
+        problem.setTimeOutInSeconds(10);
+
+        setPC2Validator(problem);
+
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+
+//        problem.setDataFileName("sumit.dat");
+//        String judgesDataFile = getSamplesSourceFilename(problem.getDataFileName());
+//        checkFileExistance(judgesDataFile);
+//        problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile));
+
+        problem.setAnswerFileName("hello.ans");
+        String answerFileName = getSamplesSourceFilename(problem.getAnswerFileName());
+        checkFileExistance(answerFileName);
+        problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
+
+        contest2.addProblem(problem, problemDataFiles);
+
+        return problem;
+    }
+    
+    /**
+     * Bug TODO - no judge data file specified
+     * @throws Exception
+     */
+    public void testValidateMissingJudgesDataFile() throws Exception {
+        
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+        
+        Problem problem = createHelloProblemNoJudgesData(contest);
+        
+//        assertFalse("Expecting using internal data files ",problem.isUsingExternalDataFiles());
+
+        Run run = new Run(submitter, javaLanguage, problem);
+        String helloSourceFilename = getSamplesSourceFilename("hello.java");
+        assertFileExists(helloSourceFilename);
+        RunFiles runFiles = new RunFiles(run, helloSourceFilename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, true, yesJudgement);       
+    }
+    
+    
+    /**
      * Test Suite.
      * 
      * This only works under JUnit 3.
      * 
      * @return suite of tests.
      */
-//    public static TestSuite suite() {
-//
-//        TestSuite suite = new TestSuite("ExecutableTest");
-//
-//        String singletonTestName = "";
-////        singletonTestName = "testSumit";
-//
-//        if (!"".equals(singletonTestName)) {
-//            suite.addTest(new ExecutableTest(singletonTestName));
-//        } else {
-//            
-//            suite.addTest(new ExecutableTest("testFindPC2Jar"));
-//            suite.addTest(new ExecutableTest("testSumit"));
-//            suite.addTest(new ExecutableTest("testLargeStdIn"));
-//            suite.addTest(new ExecutableTest("testLargeOutput"));
-//            suite.addTest(new ExecutableTest("testStripSpace"));
-//        }
-//        return suite;
-//    }
+    public static TestSuite suite() {
+
+        TestSuite suite = new TestSuite("Executable");
+
+        String singletonTestName = "";
+//        singletonTestName = "testSumit";
+//        singletonTestName = "testHello";
+//        singletonTestName = "testValidateMissingJudgesDataFile";
+      
+
+        if (!"".equals(singletonTestName)) {
+            suite.addTest(new ExecutableTest(singletonTestName));
+        } else {
+            
+            suite.addTest(new ExecutableTest("testFindPC2Jar"));
+            suite.addTest(new ExecutableTest("testSumit"));
+            suite.addTest(new ExecutableTest("testStripSpace"));
+            suite.addTest(new ExecutableTest("testValidateMissingJudgesDataFile"));
+            
+            // large tests last
+            suite.addTest(new ExecutableTest("testLargeOutput"));
+            suite.addTest(new ExecutableTest("testLargeStdIn"));
+            
+        }
+        return suite;
+    }
 
 }

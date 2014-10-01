@@ -126,6 +126,17 @@ public class AbstractTestCase extends TestCase {
     }
     
     /**
+     * Get the full filename for a file in the root testdata directory.
+     * 
+     * @see #getRootInputTestDataDirectory()
+     * @param filename
+     */
+    public String getRootInputTestFile(String filename){
+        return getRootInputTestDataDirectory() + File.separator + filename;
+    }
+    
+    
+    /**
      * Get the full path to the input test directory under the project.
      * 
      * @see {@link #getTestFilename(String)}
@@ -854,6 +865,9 @@ public class AbstractTestCase extends TestCase {
      */
     public void assertCount(String message, int expectedCount, String stringToFind, String sourceString) {
         int actualCount = countString(sourceString, stringToFind);
+        if (actualCount != expectedCount){
+            System.out.println("count = "+actualCount+" '"+sourceString+"'");
+        }
         assertEquals(message, expectedCount, actualCount);
 
     }

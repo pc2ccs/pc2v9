@@ -470,7 +470,7 @@ public class Executable {
      * @return true if file written to disk.
      * @throws IOException 
      */
-    public boolean createFile(SerializedFile[] fileList, int setNumber, String outputFileName) throws IOException {
+    public boolean createFile(SerializedFile[] fileList, int setNumber, String outputFileName) {
 
         if (fileList != null) {
             if (setNumber < fileList.length) {
@@ -563,11 +563,16 @@ public class Executable {
                 /**
                  * If not external files, must unpack files.
                  */
-                // Create the input data file
-                createFile(problemDataFiles.getJudgesDataFiles()[dataSetNumber], prefixExecuteDirname(problem.getDataFileName()));
+                // TODO remove these old lines
+//                createFile(problemDataFiles.getJudgesDataFiles()[dataSetNumber], prefixExecuteDirname(problem.getDataFileName()));
+//                createFile(problemDataFiles.getJudgesAnswerFiles()[dataSetNumber], prefixExecuteDirname(problem.getAnswerFileName()));
                 
                 // Create the correct output file, aka answer file
-                createFile(problemDataFiles.getJudgesAnswerFiles()[dataSetNumber], prefixExecuteDirname(problem.getAnswerFileName()));
+                createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, prefixExecuteDirname(problem.getDataFileName()));
+
+                // Create the correct output file, aka answer file
+                createFile(problemDataFiles.getJudgesAnswerFiles(), dataSetNumber, prefixExecuteDirname(problem.getAnswerFileName()));
+                
             } // else no need to create external data files.
 
         }
@@ -798,7 +803,8 @@ public class Executable {
 
     protected String findPC2JarPath() {
         // end this with a : so pc2.jar can be appended
-        String jarDir = "/software/pc2/cc/projects/pc2v9/build/prod:";
+        String default_path = "/software/pc2/cc/projects/pc2v9/build/prod:"; 
+        String jarDir = default_path;
         try {
             String cp = System.getProperty("java.class.path");
             StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
@@ -810,6 +816,12 @@ public class Executable {
                     jarDir = new File(dir.getParent()).getCanonicalPath()+File.separator;
                     break;
                 }
+            }
+            if (default_path.equals(jarDir)){
+               File dir = new File("dist/pc2.jar");
+               if (dir.isFile()) {
+                   jarDir = new File(dir.getParent()).getCanonicalPath()+File.separator;
+               }
             }
         } catch (IOException e) {
             System.err.println("Trouble locating pc2home: " + e.getMessage());
