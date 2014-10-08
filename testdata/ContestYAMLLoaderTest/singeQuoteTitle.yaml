@@ -1,0 +1,48 @@
+# Contest configuration
+# 
+# $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/testdata/ContestYAMLLoaderTest/contest.yaml $
+# $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $
+---
+name:              'Single Quoted Contest Name'
+short-name:        'ICPC WF 2011'
+start-time:        2011-02-04 01:23Z
+duration:          5:00:00
+scoreboard-freeze: 4:00:00
+
+timeout:  20
+
+default-validator: /bin/true
+
+default-clars:
+  - 'No comment, read problem statement.'
+  - 'This will be answered during the answers to questions session.'
+
+clar-categories:
+  - 'General'
+  - 'SysOps'
+  - 'Operations'
+
+replay:
+  - title: A Playback Name 
+        file: loadfile/replay.file.txt
+  auto_start: no
+   minevents: 230
+    pacingMS: 400
+        site: 1
+
+languages:
+  - name: 'C++'
+    compiler: '/usr/bin/g++'
+    compiler-args: '-O2 -Wall -o a.out -static {files}'
+
+  - name: C
+    compiler: /usr/bin/gcc
+    compiler-args: -O2 -Wall -std=gnu99 -o a.out -static {files} -lm
+
+  - name: 'Java'
+    compiler: /usr/bin/javac
+    compiler-args: -O {files}
+    runner: /usr/bin/java
+    runner-args:
+
+# eof $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $

@@ -251,7 +251,7 @@ public class ContestYAMLLoader {
 
         for (String line : yamlLines) {
             if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
-                setTitle(contest, line.substring(line.indexOf(DELIMIT) + 1).trim());
+                setTitle(contest, unquoteAll(line.substring(line.indexOf(DELIMIT) + 1).trim()));
 
             }
         }
@@ -1244,12 +1244,12 @@ public class ContestYAMLLoader {
         for (String line : lines) {
             String keyString = key + DELIMIT;
             if (line.trim().startsWith(keyString)) {
-                return unquote(line.trim().substring(keyString.length()).trim(),"'");
+                return unquoteAll(line.trim().substring(keyString.length()).trim());
             }
 
             keyString = "- " + key + DELIMIT;
             if (line.trim().startsWith(keyString)) {
-                return unquote(line.trim().substring(keyString.length()).trim(),"'");
+                return unquoteAll(line.trim().substring(keyString.length()).trim());
             }
         }
         return null;
@@ -1270,6 +1270,27 @@ public class ContestYAMLLoader {
             return newString;
         }
         return string;
+    }
+    
+    /**
+     * Unquotes either ' or ".
+     * 
+     * If the first character is a ' then will strip leading/trailing ' <br>
+     * or If the first character is a " then will strip leading/trailing ". <br>
+     * 
+     * @param string
+     * @return
+     */
+    protected String unquoteAll(String string){
+        if (string.startsWith("'")){
+            return unquote(string, "'");
+            
+        } else if (string.startsWith("\"")){
+            return unquote(string, "\"");
+            
+        } else {
+            return string;
+        }
     }
 
     public String[] getNextSequence(String[] sectionLines, int idx) {

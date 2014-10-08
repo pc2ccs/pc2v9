@@ -927,5 +927,18 @@ public class AbstractTestCase extends TestCase {
         return accounts;
     }
 
+    /**
+     * Start Windows Explorer.
+     * 
+     * @param dir directory to display
+     * @throws IOException
+     */
+    public void startExplorer(File dir) throws IOException
+    {
+//       String[] command = {"explorer.exe /e,"+directoryName.getAbsolutePath()};
+       String command = "explorer.exe /e,"+dir.getAbsolutePath();
+       System.out.println("cmd = "+command);
+       Runtime.getRuntime().exec(command);
+    }
 
 }

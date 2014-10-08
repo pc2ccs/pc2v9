@@ -232,6 +232,94 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         checkPermissions (accounts);
     }
+    
+    /**
+     * Test contest.yaml with double quotes.
+     *  
+     * Test for Bug 829
+     * @throws Exception
+     */
+    public void testLoaderDoubleQuotedStrings() throws Exception {
+
+//        startExplorer(new File(getDataDirectory()));
+        
+        String inputYamlFile = getTestFilename("contest_double.yaml");
+
+        String[] lines = Utilities.loadFile(inputYamlFile);
+        
+        IInternalContest contest = loader.fromYaml(null, lines, getDataDirectory());
+        
+        assertNotNull(contest);
+
+        assertEquals("Contest title", "ACM-ICPC World Finals 2011", contest.getContestInformation().getContestTitle());
+
+        // short-name: ICPC WF 2011
+        // start-time: 2011-02-04 01:23Z
+        // duration: 5:00:00
+        // scoreboard-freeze: 4:00:00
+
+        Language[] languages = contest.getLanguages();
+
+        assertEquals("Number of languages", 3, languages.length);
+
+        assertEquals("Expected language name ", "C++", languages[0].getDisplayName());
+        assertEquals("Expected language name ", "C", languages[1].getDisplayName());
+        assertEquals("Expected language name ", "Java", languages[2].getDisplayName());
+
+        // for (Language language : languages){
+        // writeRow(System.out, language);
+        // }
+
+        Problem[] problems = contest.getProblems();
+
+        int problemIndex = 0;
+
+        Problem problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "apl Title", problem.getDisplayName());
+        assertEquals("Expected default timeout for "+problem, 20, problem.getTimeOutInSeconds());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "barcodes Title", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "biobots Title", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "Castles in the Sand", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "Channel Island Navigation", problem.getDisplayName());
+        assertEquals("Expected default timeout for "+problem, 20, problem.getTimeOutInSeconds());
+        
+        assertTrue("Expecting comptuer judged", problem.isComputerJudged());
+
+        assertEquals("Number of problems", 5, problems.length);
+
+        Account[] accounts = contest.getAccounts();
+        
+        ClientType.Type type = ClientType.Type.TEAM;
+        assertEquals("Number of accounts " + type.toString(), 65, getClientCount(contest, type));
+        type = ClientType.Type.JUDGE;
+        assertEquals("Number of accounts " + type.toString(), 20, getClientCount(contest, type));
+        type = ClientType.Type.ADMINISTRATOR;
+        assertEquals("Number of accounts " + type.toString(), 0, getClientCount(contest, type));
+        type = ClientType.Type.SCOREBOARD;
+        assertEquals("Number of accounts " + type.toString(), 0, getClientCount(contest, type));
+        
+        /**
+         * Test the start number for site 3 starts at 300.
+         */
+        Vector<Account> site3teams = contest.getAccounts(Type.TEAM, 3);
+        Account[] account3 = (Account[]) site3teams.toArray(new Account[site3teams.size()]);
+        for (Account account : account3) {
+            assertTrue ("Expecting team numbers above 299 on site 3",account.getClientId().getClientNumber() > 299);
+        }
+        
+        assertEquals("Number of accounts", 85, accounts.length);
+
+        checkPermissions (accounts);
+        
+    }
 
     private void checkPermissions(Account[] accounts) {
         for (Account account : accounts) {
@@ -240,6 +328,45 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         }
 
     }
+    
+    /**
+     * Test contest title with double quoted strings.
+     * 
+     * Test for Bug 829
+     * @throws Exception
+     */
+    public void testDoubleQuoteImport() throws Exception {
+//      startExplorer(new File(getDataDirectory()));
+        
+        String inputYamlFile = getTestFilename("double.yaml");
+
+        String[] lines = Utilities.loadFile(inputYamlFile);
+        
+        IInternalContest contest = loader.fromYaml(null, lines, getDataDirectory());
+        
+        assertEquals("Double Quoted Contest Name", contest.getContestInformation().getContestTitle());
+    }
+
+    
+    /**
+     * Test that single quote in contest title is stripped off.
+     * 
+     * Test for Bug 829
+     * 
+     * @throws Exception
+     */
+    public void testContestTitle () throws Exception {
+        
+        String inputYamlFile = getTestFilename("singeQuoteTitle.yaml");
+
+        String[] lines = Utilities.loadFile(inputYamlFile);
+        
+        IInternalContest contest = loader.fromYaml(null, lines, getDataDirectory());
+        
+        assertEquals("Single Quoted Contest Name", contest.getContestInformation().getContestTitle());
+        
+    }
+
 
     public void testProblemLoader() throws Exception {
         
@@ -844,7 +971,6 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     }
 
     
-    // TODO CCS fix the include yaml jUnits
     public void atestSuppContestYaml2 () throws Exception {
         
         String dirname = getDataDirectory("supp");
