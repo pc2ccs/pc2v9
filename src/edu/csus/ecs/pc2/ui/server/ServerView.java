@@ -509,7 +509,7 @@ public class ServerView extends JFrame implements UIPlugin {
         ContestTimesPane contestTimesPane = new ContestTimesPane();
         addUIPlugin(getMainTabbedPane(), "Times", contestTimesPane);
         
-        setSelectedTab(getMainTabbedPane(), "Sites");
+        setSelectedTab(getMainTabbedPane(), "Logins");
         
         Profile profile = inContest.getProfile();
         info("Using Profile: " + profile.getName() + " @ " + profile.getProfilePath());
