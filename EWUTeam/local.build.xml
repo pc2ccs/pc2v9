@@ -20,6 +20,9 @@ No need for Javadoc - this is not an API.
     </description>
 	
 	<property name="version" value="2.0" />
+	
+    <!-- Compiler settings. -->
+    <property name="compilerArg" value=""/>
 
 	<!-- Name of JAR -->
 	<property name="name" value="EWTeam" />
