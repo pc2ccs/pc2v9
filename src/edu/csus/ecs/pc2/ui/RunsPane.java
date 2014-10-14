@@ -1757,7 +1757,7 @@ public class RunsPane extends JPanePlugin {
             return;
         }
         if (isAutoJudgingEnabled()) {
-            
+            showMessage("");
             // Keep this off the AWT thread.
             new Thread(new Runnable() {
                 public void run() {
