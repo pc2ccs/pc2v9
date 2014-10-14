@@ -94,12 +94,17 @@ public class AutoJudgingMonitor implements UIPlugin {
      */
     private class ControlLoop implements Runnable {
 
+        private boolean running = false;
         public void run() {
+            running = true;
             while(isAutoJudgingEnabled() && !isAutoJudgeDisabledLocally()) {
                 attemptToFetchNextRun();
             }            
+            running = false;
         }
-        
+        public boolean isRunning() {
+            return running;
+        }
     }
 
     /**
@@ -699,7 +704,9 @@ public class AutoJudgingMonitor implements UIPlugin {
             if (controlLoop == null) {
                 controlLoop = new ControlLoop();
             }
-            controlLoop.run();
+            if (!((ControlLoop) controlLoop).isRunning()) {
+                controlLoop.run();
+            }
 
         } else {
 
