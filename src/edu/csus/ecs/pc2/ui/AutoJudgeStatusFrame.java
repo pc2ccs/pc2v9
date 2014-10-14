@@ -148,19 +148,26 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
     }
 
     protected void startStopAutoJudging() {
-        
-        if (autoJudgingMonitor.isAutoJudgeDisabledLocally()){
+        if (autoJudgingMonitor.isAutoJudgeDisabledLocally()) {
             // Locally turned off, turn it ON
             getStopAutoJudgingButton().setText("Stop Auto Judging");
-            autoJudgingMonitor.setAutoJudgeDisabledLocally(false);
-            autoJudgingMonitor.startAutoJudging();
-              
+            new Thread(new Runnable() {
+                public void run() {
+                    autoJudgingMonitor.setAutoJudgeDisabledLocally(false);
+                    autoJudgingMonitor.startAutoJudging();
+                }
+            }).start();
+
         } else {
             // Local turned ON, turn it off
             getStopAutoJudgingButton().setText("Start Auto Judging");
-            autoJudgingMonitor.setAutoJudgeDisabledLocally(true);
-            autoJudgingMonitor.stopAutoJudging();
-            
+            new Thread(new Runnable() {
+                public void run() {
+                    autoJudgingMonitor.setAutoJudgeDisabledLocally(true);
+                    autoJudgingMonitor.stopAutoJudging();
+                }
+            }).start();
+
         }
     }
 
