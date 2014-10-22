@@ -156,8 +156,8 @@ public class ServerInterface {
 					scoreBoard.getContest().addRunListener(new RunListenerEventImplementation());
 					scoreBoard.getContest().addContestConfigurationUpdateListener(new ConfigurationListenerEventImplementation());
 				}
+				updateStandings();
 			}
-			updateStandings();
 			return standingsArray;
 		} catch (Exception e) {
 			// couldn't get runs
