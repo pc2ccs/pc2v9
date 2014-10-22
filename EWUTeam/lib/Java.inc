@@ -1992,7 +1992,7 @@ $result=clone($client->cachedJavaPrototype);
 $result->__factory=$cacheEntry->factory;
 $result->__java=++$client->asyncCtx;
 $result->__signature=$cacheEntry->signature;
-$result->__cancelProxyCreationTag=++$client->cancelProxyCreationTag;
+$this->__cancelProxyCreationTag=++$client->cancelProxyCreationTag;
 return $result;
 }
 } else {
