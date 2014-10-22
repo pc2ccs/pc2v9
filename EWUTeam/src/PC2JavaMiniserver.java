@@ -90,7 +90,11 @@ public class PC2JavaMiniserver {
 
     public static String getManifestValue(String name) throws IOException
     {
-        Package corePackage = Package.getPackage(null);
+    	Package[] packages = Package.getPackages();
+    	for (int i = 0; i < packages.length; i++) {
+			System.out.println("package.name="+packages[i].getName());
+		}
+        Package corePackage = Package.getPackage(".");
         if (corePackage != null) {
             String manifestSpecificationVersion = corePackage
                     .getSpecificationVersion();
