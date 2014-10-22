@@ -3,7 +3,7 @@
 // $Id$
 // session_start();
 if (version_compare ( phpversion (), '4.3.0' ) >= 0) {
-	if (! ereg ( '^SESS[0-9a-zA-Z]+$', $_REQUEST ['SESSION_NAME'] )) {
+	if (! isset($_REQUEST ['SESSION_NAME']) || ! ereg ( '^SESS[0-9a-zA-Z]+$', $_REQUEST ['SESSION_NAME'] )) {
 		$_REQUEST ['SESSION_NAME'] = 'SESS' . uniqid ( '' );
 	}
 	output_add_rewrite_var ( 'SESSION_NAME', $_REQUEST ['SESSION_NAME'] );
