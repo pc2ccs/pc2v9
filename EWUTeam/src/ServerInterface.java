@@ -137,13 +137,6 @@ public class ServerInterface {
 					+ e.getMessage(), e);
 		}
 		standingsArray = populateStandings();
-	
-		try {
-			System.out.println("Starting JavaBridge version "+getVersionNumber()+"-"+getBuildNumber()+" with PC^2 version "+getVersionNumberforPC2()+"-"+getBuildNumberForPC2());
-		} catch (IOException e) {
-			System.out.println("Trouble reading the version and build numbers "+e.getMessage());
-		}
-		System.out.println("JavaBridge is ready");
 	}
 
 	private IStanding[] populateStandings() {
