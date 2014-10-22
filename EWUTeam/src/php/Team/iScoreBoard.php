@@ -7,7 +7,7 @@
 		include("../lib/Java.inc");
 		$server = java("ServerInterface")->getInstance();
 		try {
-			$standingArray = $server->getStandings($_SESSION['cid']);
+			$standingArray = $server->getStandings("");
 			$JavaStanding = java_cast($standingArray , "array");
 			
 			
