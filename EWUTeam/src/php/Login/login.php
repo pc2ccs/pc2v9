@@ -111,12 +111,12 @@ if (is_resource ( @fsockopen ( 'localhost', 50005 ) )) {
 							(CSUS)</span> in support of Computer Programming Contest
 						activities of the ACM, and in particular the ACM International
 						Collegiate Programming Contest (ICPC) and its Regional Contests
-						around the world.
+						around the world.  <?php if (isset($server)) { echo "Version: "; echo $server->getVersionNumberForPC2(); echo "-"; echo $server->getBuildNumberForPC2(); } ?>
 					</p>
 					<p class="aboutStyle">
 						This web interface was created by <span style="color: #cc2211;">Eastern
 							Washington University's</span> PC^2 Senior Project team and is
-						still actively being worked on and improved.
+						still actively being worked on and improved.  <?php if (isset($server)) { echo "Version: "; echo $server->getVersionNumber(); echo "-"; echo $server->getBuildNumber(); } ?>
 					</p> <input type="button" id="userGuide" value="User Guide"
 					onclick="location.href='../doc/pc2userguide.pdf'" /><br />
 				</td>
