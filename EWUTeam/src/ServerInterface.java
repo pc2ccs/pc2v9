@@ -1,3 +1,4 @@
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.implementation.Contest;
+import edu.csus.ecs.pc2.api.listener.ContestEvent;
+import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 
 /**
@@ -44,7 +47,76 @@ public class ServerInterface {
 	private int prev_clar_num = 0;
 	private int cur_clar_num = 0;
 
-	// explicitly private constructor for Singleton behavior
+	private IStanding[] standingsArray = null;
+	
+    public class RunListenerEventImplementation implements IRunEventListener {
+
+		@Override
+		public void runCheckedOut(IRun arg0, boolean arg1) {
+			populateStandings();
+		}
+
+		@Override
+		public void runCompiling(IRun arg0, boolean arg1) {
+			// we do not care about this
+		}
+
+		@Override
+		public void runDeleted(IRun arg0) {
+			populateStandings();
+		}
+
+		@Override
+		public void runExecuting(IRun arg0, boolean arg1) {
+			// we do not care about this
+		}
+
+		@Override
+		public void runJudged(IRun arg0, boolean arg1) {
+			populateStandings();
+		}
+
+		@Override
+		public void runJudgingCanceled(IRun arg0, boolean arg1) {
+			// we do not care about this
+		}
+
+		@Override
+		public void runSubmitted(IRun arg0) {
+			populateStandings();
+		}
+
+		@Override
+		public void runUpdated(IRun arg0, boolean arg1) {
+			populateStandings();
+		}
+
+		@Override
+		public void runValidating(IRun arg0, boolean arg1) {
+			// we do not care about this
+		}
+		
+	}
+    public class ConfigurationListenerEventImplementation implements IConfigurationUpdateListener {
+
+		@Override
+		public void configurationItemAdded(ContestEvent arg0) {
+			populateStandings();
+		}
+
+		@Override
+		public void configurationItemRemoved(ContestEvent arg0) {
+			populateStandings();
+			
+		}
+
+		@Override
+		public void configurationItemUpdated(ContestEvent arg0) {
+			populateStandings();
+		}
+    }
+    
+    // explicitly private constructor for Singleton behavior
 	private ServerInterface() {
 		try {
 			// Load scoreboard2 password from .ini file.
@@ -57,6 +129,45 @@ public class ServerInterface {
 			throw new RuntimeException("Error loading pc2v9.ini "
 					+ e.getMessage(), e);
 		}
+		standingsArray = populateStandings();
+	}
+
+	private IStanding[] populateStandings() {
+		try {
+			synchronized (this) {
+				if (!scoreBoard.isLoggedIn()) {
+					scoreBoard.login("scoreboard2", getScoreboardPassword());
+					// scoreBoard.login(getScoreboardLogin(),getScoreboardPassword());
+					// scoreBoard.login("scoreboard1","scoreboard1");
+					scoreBoard.getContest().addRunListener(new RunListenerEventImplementation());
+					scoreBoard.getContest().addContestConfigurationUpdateListener(new ConfigurationListenerEventImplementation());
+				}
+			}
+			updateStandings();
+			return standingsArray;
+		} catch (Exception e) {
+			// couldn't get runs
+			System.out.println(e);
+			return null;
+		}
+	}
+
+	private void updateStandings() {
+		try{
+			IStanding[] allStandings = scoreBoard.getContest().getStandings();
+		
+			ArrayList<IStanding> standings = new ArrayList<IStanding>();
+			for (IStanding s : allStandings) {
+				standings.add(s);
+			}
+			standingsArray = new IStanding[standings.size()];
+		
+			standingsArray = standings.toArray(standingsArray);
+		} catch (Exception e) {
+			// couldn't get runs
+			System.out.println(e);
+		}
+		return;
 	}
 
 	// get instance
@@ -401,29 +512,8 @@ public class ServerInterface {
 	}// end method:getClock
 
 	public IStanding[] getStandings(String teamKey) {
-		try {
-			synchronized (this) {
-				if (!scoreBoard.isLoggedIn()) {
-					scoreBoard.login("scoreboard2", getScoreboardPassword());
-					// scoreBoard.login(getScoreboardLogin(),getScoreboardPassword());
-					// scoreBoard.login("scoreboard1","scoreboard1");
-				}
-			}
-			IStanding[] allStandings = scoreBoard.getContest().getStandings();
-
-			ArrayList<IStanding> standings = new ArrayList<IStanding>();
-			for (IStanding s : allStandings) {
-				standings.add(s);
-			}
-			IStanding[] myStandingsArray = new IStanding[standings.size()];
-
-			return standings.toArray(myStandingsArray);
-		} catch (Exception e) {
-			// couldn't get runs
-			System.out.println(e);
-			return null;
-		}
-	}// end getRuns
+		return standingsArray;
+	}// end getStandings
 
 	private String getScoreboardLogin() {
 		return "scoreboard2";
