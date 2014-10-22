@@ -23,12 +23,10 @@
 
 		$hours = (int)($timeleft / 3600);
 		$min = (int)(($timeleft%3600)/60);
-		//$sec = ($timeleft%3600)%60;
 		
 		$time = array(
     		"hour"  => $hours,
     		"min" => $min,
-    		"sec" => $sec
 		);
 		
 		echo json_encode($time);
