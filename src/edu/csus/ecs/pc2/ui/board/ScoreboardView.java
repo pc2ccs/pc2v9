@@ -305,7 +305,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                             outputFile = new File("pc2export.dat");
                         }
                         // dump json and tsv and csv files in the html directory
-                        if (xslFilename.endsWith(".json.xsl") || xslFilename.endsWith(".tsv.xsl") || xslFilename.endsWith(".csv.xsl")) {
+                        if (xslFilename.endsWith(".json.xsl") || xslFilename.endsWith(".tsv.xsl") || xslFilename.endsWith(".csv.xsl") || xslFilename.endsWith(".php.xsl")) {
                             outputFile = new File(outputDir + File.separator + xslFilename.substring(0, xslFilename.length() - 4));
                         }
                         // behaviour of renameTo is platform specific, try the possibly atomic 1st
