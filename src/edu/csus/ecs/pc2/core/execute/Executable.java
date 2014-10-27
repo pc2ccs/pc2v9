@@ -381,6 +381,18 @@ public class Executable {
 
             fileViewer.setTitle("Executable");
 
+            outputFile = prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME);
+            file = new File(outputFile);
+            if (file.isFile() && file.length() > 0) {
+                fileViewer.addFilePane("Validator output", outputFile);
+            }
+
+            outputFile = prefixExecuteDirname(VALIDATOR_STDERR_FILENAME);
+            file = new File(outputFile);
+            if (file.isFile() && file.length() > 0) {
+                fileViewer.addFilePane("Validator stderr", outputFile);
+            }
+            
             outputFile = prefixExecuteDirname(EXECUTE_STDOUT_FILENAME);
             file = new File(outputFile);
             boolean programGeneratedOutput = false;
