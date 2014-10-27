@@ -336,45 +336,50 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     protected void updateRun() {
-
-        Run newRun = getRunFromFields();
-
-        enableUpdateButtons(false);
-        closeViewerWindows();
-
-        JudgementRecord judgementRecord = null;
-        RunResultFiles newRunResultFiles = null;
-
-        if (judgementChanged()) {
-            newRun.setStatus(RunStates.JUDGED);
-
-            boolean solved = getJudgementComboBox().getSelectedIndex() == 0;
-            Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
-
-            judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
-            judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
-            TimeZone tz = TimeZone.getTimeZone("GMT");
-            GregorianCalendar cal = new GregorianCalendar(tz);
-
-            long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
-            long totalSeconds = milliDiff / 1000;
-            judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
-        }
-
-        JudgeView.setAlreadyJudgingRun(false);
-
-        ExecutionData executionData = null;
-        if (executable != null) {
-            executionData = executable.getExecutionData();
-            judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
-        }
-
-        newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
-
-        getController().submitRunJudgement(newRun, judgementRecord, newRunResultFiles);
-
-        if (getParentFrame() != null) {
-            getParentFrame().setVisible(false);
+        try {
+            Run newRun = getRunFromFields();
+    
+            enableUpdateButtons(false);
+            closeViewerWindows();
+    
+            JudgementRecord judgementRecord = null;
+            RunResultFiles newRunResultFiles = null;
+    
+            if (judgementChanged()) {
+                newRun.setStatus(RunStates.JUDGED);
+    
+                boolean solved = getJudgementComboBox().getSelectedIndex() == 0;
+                Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
+    
+                judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
+                judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+                TimeZone tz = TimeZone.getTimeZone("GMT");
+                GregorianCalendar cal = new GregorianCalendar(tz);
+    
+                long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
+                long totalSeconds = milliDiff / 1000;
+                judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
+            }
+    
+            JudgeView.setAlreadyJudgingRun(false);
+    
+            ExecutionData executionData = null;
+            if (executable != null) {
+                executionData = executable.getExecutionData();
+                if (judgementRecord != null) {
+                    judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
+                }
+            }
+    
+            newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
+    
+            getController().submitRunJudgement(newRun, judgementRecord, newRunResultFiles);
+    
+            if (getParentFrame() != null) {
+                getParentFrame().setVisible(false);
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING,"updateRun()", e);
         }
     }
 
