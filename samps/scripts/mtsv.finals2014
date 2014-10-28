@@ -475,7 +475,9 @@ sub run_and_validate
 
       print STDERR "AFTER EXECUTE Validator: '$validator_message', Judgement: '$judgement' \n";
 
-		 print STDERR "out   file: $out_filename\n" if $verbose;
+      print STDERR "out   file: $out_filename\n" if $verbose;
+      `echo "- Test case: $test_case_number ---------------" >> $ansout`;
+      `cat $ansfile >> $ansout`; 
 
 		if ( $validator_message eq "" )
 		{
@@ -509,8 +511,6 @@ sub run_and_validate
 				`echo "- Test case: $test_case_number ---------------" >> $allout`;
 				`cat $out_filename >> $allout`;
 
-				`echo "- Test case: $test_case_number ---------------" >> $ansout`;
-				`cat $ansfile >> $ansout`; 
 
 				# decrement form the failures
 				$failcount -- if $rc == 42;
