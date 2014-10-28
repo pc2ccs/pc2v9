@@ -3458,7 +3458,29 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         ClientId clientId = contest.getClientId();
         String id = clientId.getName();
+        try {
+            if (log != null) {
+                log.close();
+            }
+        } catch (Throwable e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+
+        setTheProfile(inContest.getProfile());
         startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), id, clientId.getName());
+        if (evaluationLog != null) {
+            evaluationLog.closeEvalLog();
+            evaluationLog = null;
+        }
+        if (evaluationLog == null) {
+            String logDirectory = getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME);
+            Utilities.insureDir(logDirectory);
+            // this not only opens the log but registers this class to handle all run events.
+            evaluationLog = new EvaluationLog(logDirectory + File.separator + "evals.log", inContest, this);
+            evaluationLog.getEvalLog().println("# Log opened " + new Date());
+            info("evals.log is opened at " + logDirectory);
+        }
 
         try {
             new ProfileManager().mergeProfiles(contest);

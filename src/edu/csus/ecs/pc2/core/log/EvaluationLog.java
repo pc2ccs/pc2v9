@@ -180,4 +180,11 @@ public class EvaluationLog implements UIPlugin {
     public PrintWriter getEvalLog() {
         return evalLog;
     }
+    
+    public void closeEvalLog() {
+        if (isLogOpened()) {
+            evalLog.close();
+            logOpened = false;
+        }
+    }
 }

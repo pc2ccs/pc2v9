@@ -2429,6 +2429,14 @@ public class InternalContest implements IInternalContest {
             throw new ProfileCloneException("Unable to create DB dir " + profilePath, e);
         }
         
+        String logDirectoryName = profilePath + File.separator + Log.LOG_DIRECTORY_NAME;
+
+        try {
+            new File(logDirectoryName).mkdirs();
+        } catch (Exception e) {
+            throw new ProfileCloneException("Unable to create log dir " + profilePath, e);
+        }
+
         FileSecurity fileSecurity = new FileSecurity(databaseDirectoryName);
 
         try {
