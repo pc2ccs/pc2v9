@@ -22,12 +22,14 @@ my $JUDGEMENT_WRONG_ANSWER = "wrong answer";
 my $JUDGEMENT_IF = "Illegal Function";
 my $JUDGEMENT_CE = "Compile Error";
 my $JUDGEMENT_TLE = "Time-limit Exceeded";
+my $JUDGEMENT_RTE = "Run-time Error";
 my $JUDGEMENT_ACCEPTED = "accepted";
 
-# pc2 overrides for spring 2014
+# pc2 overrides for fall2014
 $JUDGEMENT_WRONG_ANSWER = "No - Wrong Output";
-$JUDGEMENT_IF = "No - Illegal Function";
+$JUDGEMENT_IF = "No - Security Violation";
 $JUDGEMENT_TLE = "No - Time-limit Exceeded";
+$JUDGEMENT_RTE = "No - Run-time Error";
 
 # dir(or file) present?  will not show them gvim output
 my $IS_AUTO_JUDGE = "/home/pc2/computer";
@@ -38,9 +40,7 @@ my $usingwrapper = 1;
 # Input type/source
 my $usingStdin = 1;
 
-my $JAVAOPTS = " -client -Xss8M ";
-# new for Finals 2012
-$JAVAOPTS = " -client -Xss8m -Xmx2048m ";
+my $JAVAOPTS = " -client -Xss8M -Xmx1024m ";
 
 # -v option
 my $verbose = 1; 
@@ -89,6 +89,8 @@ my $DEFAULT_VALIDATOR_KEY = "default-validator";
 
 # key in contest.yaml problemset section
 my $VALIDATOR_KEY = "validator";
+my $VALIDATION_KEY = "validation";
+my $VALIDATOR_FLAGS_KEY = "validator_flags";
 
 # default validator if not problem-specific validator specified
 my $default_validator = "";
@@ -439,6 +441,7 @@ sub run_and_validate
   unlink $allout if -f $allout;
   unlink $ansout if -f $ansout;
 
+  unlink "core" if -f "core";
   for ( ; ! $done && $test_case_number <= $number_data_sets; $test_case_number ++)
   {
     my $inputfilename = $filelist[$test_case_number - 1];
@@ -468,16 +471,22 @@ sub run_and_validate
       my $xtime = time - $beforetime;
       print STDERR "\n**** done at " . `/bin/date` . " execute time $xtime sec\n";
       print STDERR "\n**** done at " . `/bin/date`;
-      print STDERR "Progrma execute time $xtime ms\n";
+      print STDERR "Program execute time $xtime ms\n";
 
       print STDERR "AFTER EXECUTE Validator: '$validator_message', Judgement: '$judgement' \n";
 
 		 print STDERR "out   file: $out_filename\n" if $verbose;
+	`echo "- Test case: $test_case_number ---------------" >> $ansout`;
+	`cat $ansfile >> $ansout`; 
 
 		if ( $validator_message eq "" )
 		{
 		    print STDERR "Validator blank??: '$validator_message' \n";
-			if ( -f "timelimit.txt" )
+			if ( -f "core" )
+			{
+				$judgement = $JUDGEMENT_RTE;
+			}
+			elsif ( -f "timelimit.txt" )
 			{
 				$judgement = $JUDGEMENT_TLE;
 			}
@@ -502,8 +511,6 @@ sub run_and_validate
 				`echo "- Test case: $test_case_number ---------------" >> $allout`;
 				`cat $out_filename >> $allout`;
 
-				`echo "- Test case: $test_case_number ---------------" >> $ansout`;
-				`cat $ansfile >> $ansout`; 
 
 				# decrement form the failures
 				$failcount -- if $rc == 42;
@@ -852,8 +859,44 @@ sub load_problem_yaml
       {
         $validator_args = $1;
       }
+      if ( $line =~m/^$VALIDATOR_FLAGS_KEY:\s*(.*)/i)
+      {
+        $validator_args = $1;
+      }
+      if ( $line =~m/^$VALIDATION_KEY:\s*(.*)/i)
+      {
+# If the first word of the validator field is not "custom" (or if the
+# validator field is not specified), the default validator is used,
+# and the entire validator field (if present) is passed as
+# command-line arguments to the default validator.
+        if ($1 eq "custom") {
+# 
+           my($ovdir)=$yaml;
+           $ovdir =~ s/problem.yaml/output_validators/;
+           $problem_validators{$key}=&locate_output_validator($ovdir);
+        } else {
+            $validator_args = $1;
+        }
+      }
   }
   $problem_validators_args{$key}=$validator_args;
+}
+
+sub locate_output_validator
+{
+    my($d)=shift;
+    my($f)="";
+
+    opendir(DIR, $d) || warn("Unable to opendir($d): $!\n");
+    my(@files)=grep(!/^\./, readdir(DIR));
+    closedir(DIR);
+    foreach (@files) {
+        if (-x "$d/$_") {
+            $f=$_;
+            last;
+        }
+    }
+    return($f);
 }
 
 sub load_contest_yaml
