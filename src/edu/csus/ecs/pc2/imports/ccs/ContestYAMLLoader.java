@@ -479,6 +479,17 @@ public class ContestYAMLLoader {
         String[] sequenceLines = getNextSequence(sectionLines, idx);
 
         while (sequenceLines.length > 0) {
+            // TODO CCS do a proper parsing of Yaml to handle preceding comment lines 
+            /**
+             * There is a bug where the section parsing does not ignore blank and
+             * comment lines preceding a section.
+             */
+               
+            if (! sequenceLines[0].trim().startsWith("-")) {
+                idx += sequenceLines.length;
+                sequenceLines = getNextSequence(sectionLines, idx);
+                continue;
+            }
 
             // * - account: TEAM
 
@@ -825,6 +836,9 @@ public class ContestYAMLLoader {
         File dir = new File(directoryName);
 
         String[] entries = dir.list();
+        if (entries == null) {
+            return new String[0];
+        }
         Arrays.sort(entries);
 
         for (String name : entries) {
@@ -1357,7 +1371,9 @@ public class ContestYAMLLoader {
     public AutoJudgeSetting[] getAutoJudgeSettings(String[] yamlLines, Problem[] problems)  {
 
         String[] sectionLines = getSectionLines(AUTO_JUDGE_KEY, yamlLines);
-        
+        if (sectionLines == null) {
+            System.err.println("section AJ settings sectionLines is null, looking for "+AUTO_JUDGE_KEY);
+        }
         Account [] accounts = getAccounts(yamlLines);
 
         ArrayList<AutoJudgeSetting> ajList = new ArrayList<AutoJudgeSetting>();
@@ -1366,7 +1382,17 @@ public class ContestYAMLLoader {
         String[] sequenceLines = getNextSequence(sectionLines, idx);
 
         while (sequenceLines.length > 0) {
-
+            // TODO CCS do a proper parsing of Yaml to handle preceding comment lines 
+            /**
+             * There is a bug where the section parsing does not ignore blank and
+             * comment lines preceding a section.
+             */
+               
+            if (! sequenceLines[0].trim().startsWith("-")) {
+                idx += sequenceLines.length;
+                sequenceLines = getNextSequence(sectionLines, idx);
+                continue;
+            }
             String accountType = getSequenceValue(sequenceLines, "- account");
             ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
 
