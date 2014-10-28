@@ -894,7 +894,7 @@ sub load_contest_yaml
       {
         $validator_info = $1;
       }
-      if ( $line =~m/short-name: (.*)/i)
+      if ( $line =~m/short-name:\s*(.*)\s*$/i)
       {
         $shortname = $1;
       }
