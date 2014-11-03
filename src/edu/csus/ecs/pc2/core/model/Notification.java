@@ -11,7 +11,7 @@ import java.util.Date;
  */
 
 // $HeadURL$
-public class Notification implements IElementObject {
+public class Notification implements IElementObject, IGetDate {
 
     /**
      * 
@@ -24,6 +24,8 @@ public class Notification implements IElementObject {
     private long timeSent;
 
     private int siteNumber;
+    
+    private long time = new Date().getTime();
 
     /**
      * Number assigned to notification.
@@ -164,4 +166,27 @@ public class Notification implements IElementObject {
     public void setElapsedMS(long elapsedMS) {
         this.elapsedMS = elapsedMS;
     }
+    
+    /**
+     * Get wall clock time for submission.
+     *      * @return
+     */
+    public  Date getDate() {
+        return new Date(time);
+    }
+    
+    /**
+     * Set submission date.
+     * 
+     * This field does not affect {@link #getElapsedMS()} or {@link #getElapsedMins()}.
+     * 
+     * @param date Date, if null then sets Date long value to zero
+     */
+    public void setDate (Date date){
+        time = 0;
+        if (date != null){
+            time = date.getTime();
+        }
+    }
+    
 }

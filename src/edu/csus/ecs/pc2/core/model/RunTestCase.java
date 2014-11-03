@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Date;
+
 import edu.csus.ecs.pc2.core.Constants;
 
 /**
@@ -10,7 +12,7 @@ import edu.csus.ecs.pc2.core.Constants;
  */
 
 // $HeadURL$
-public class RunTestCase implements IElementObject{
+public class RunTestCase implements IElementObject, IGetDate{
 
     /**
      * 
@@ -42,6 +44,8 @@ public class RunTestCase implements IElementObject{
      * Number of elapsed MS.
      */
     private long elapsedMS;
+    
+    private long time = new Date().getTime();
     
     public RunTestCase(Run run, JudgementRecord record, int testNumber, boolean solved) {
         runElementId = run.getElementId();
@@ -105,4 +109,29 @@ public class RunTestCase implements IElementObject{
     public long getElapsedMS() {
         return elapsedMS;
     }
+    
+
+    /**
+     * Get wall clock time for submission.
+     * 
+     * @return
+     */
+    public  Date getDate() {
+        return new Date(time);
+    }
+    
+    /**
+     * Set submission date.
+     * 
+     * This field does not affect {@link #getElapsedMS()} or {@link #getElapsedMins()}.
+     * 
+     * @param date Date, if null then sets Date long value to zero
+     */
+    public void setDate (Date date){
+        time = 0;
+        if (date != null){
+            time = date.getTime();
+        }
+    }
+    
 }

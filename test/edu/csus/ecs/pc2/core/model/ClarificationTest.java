@@ -38,5 +38,27 @@ public class ClarificationTest extends TestCase {
         
         
     }
+    
+    
+  public void testGetSetDateBug844() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createContest(1, 1, 12, 12, true);
+        
+        ClientId team = sample.getTeamAccounts(contest)[0].getClientId();
+        Problem problem = contest.getProblems()[0];
+        
+        Clarification clarification = new Clarification(team, problem, "Foo");
+        
+        assertNotNull ("Expecting time", clarification.getDate());
+        assertTrue ("Expecting time > 0 ", clarification.getDate().getTime() != 0);
+        
+        /**
+         * In this test case the date time value is set to zero 
+         */
+        clarification.setDate(null);
+        assertEquals("Expecting time",0, clarification.getDate().getTime() );
+    }
+
 
 }

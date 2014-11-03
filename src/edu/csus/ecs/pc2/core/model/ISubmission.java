@@ -13,6 +13,8 @@ import java.util.Date;
  * @author pc2@ecs.csus.edu
  */
 
+// TODO SOJMEDAY rename this class to Submission
+
 // $HeadURL$
 public class ISubmission implements Serializable, IElementObject {
 
@@ -21,7 +23,8 @@ public class ISubmission implements Serializable, IElementObject {
      */
     private static final long serialVersionUID = 7787390513757832467L;
 
-    public static final String SVN_ID = "$Id$";
+    private long time = new Date().getTime();
+
 
     /**
      * Who submitted this submission.
@@ -184,4 +187,26 @@ public class ISubmission implements Serializable, IElementObject {
         this.playbackId = playbackId;
     }
 
+    /**
+     * Get wall clock time for submission.
+     *      * @return
+     */
+    public  Date getDate() {
+        return new Date(time);
+    }
+    
+    /**
+     * Set submission date.
+     * 
+     * This field does not affect {@link #getElapsedMS()} or {@link #getElapsedMins()}.
+     * 
+     * @param date Date, if null then sets Date long value to zero
+     */
+    public void setDate (Date date){
+        time = 0;
+        if (date != null){
+            time = date.getTime();
+        }
+    }
+    
 }

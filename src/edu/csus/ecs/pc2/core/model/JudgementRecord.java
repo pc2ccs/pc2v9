@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * A set of Judgement information for a run.
@@ -15,7 +16,7 @@ import java.io.Serializable;
  */
 
 // $HeadURL$
-public class JudgementRecord implements Serializable {
+public class JudgementRecord implements Serializable, IGetDate {
 
     /**
      * 
@@ -28,6 +29,8 @@ public class JudgementRecord implements Serializable {
      * Will match Judgement.getElementId();
      */
     private ElementId judgementId = null;
+    
+    private long time = new Date().getTime();
 
     /**
      * A string that identifies this type.
@@ -401,4 +404,28 @@ public class JudgementRecord implements Serializable {
     public void setPreliminaryJudgement(boolean preliminaryJudgement) {
         this.preliminaryJudgement = preliminaryJudgement;
     }
+    
+
+    /**
+     * Get wall clock time for submission.
+     * 
+     * @return
+     */
+    public  Date getDate() {
+        return new Date(time);
+    }
+    
+    /**
+     * Set submission date.
+     * 
+     * This field does not affect {@link #getElapsedMS()} or {@link #getElapsedMins()}.
+     * 
+     * @param date Date, if null then sets Date long value to zero
+     */
+    public void setDate (Date date){
+        time = 0;
+        if (date != null){
+            time = date.getTime();
+        }
+    }    
 }
