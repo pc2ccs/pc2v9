@@ -56,14 +56,16 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     private Log log = null;
     
     private boolean debugMode = false;
-    // alt1: 0 0 200
-    private Properties alt1 = populateProperties(0, 0, 200);
-    // alt2: 30 5 0
-    private Properties alt2 = populateProperties(30, 5, 0);
-    // alt3: 0 10 0
-    private Properties alt3 = populateProperties(0, 10, 0);
-    // alt4: 5 0 20
-    private Properties alt4 = populateProperties(5, 0, 20);
+    // alt1: 0 0 200 0 0
+    private Properties alt1 = populateProperties(0, 0, 200, 0, 0);
+    // alt2: 30 5 0 0 0
+    private Properties alt2 = populateProperties(30, 5, 0, 0, 0);
+    // alt3: 0 10 0 0 0
+    private Properties alt3 = populateProperties(0, 10, 0, 0, 0);
+    // alt4: 5 0 20 0 0
+    private Properties alt4 = populateProperties(5, 0, 20, 0, 0);
+    // alt5: 5 0 20 3 7
+    private Properties alt5 = populateProperties(20, 1, 0, 3, 7);
 
     private File loadData;
 
@@ -84,21 +86,26 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         
     }
 
-    private Properties populateProperties(int perNo, int perMin, int baseYes) {
+    private Properties populateProperties(int perNo, int perMin, int baseYes, int perCE, int perSV) {
         Properties props=DefaultScoringAlgorithm.getDefaultProperties();
         Enumeration<Object> keys= props.keys();
         while(keys.hasMoreElements()) {
             String key = (String)keys.nextElement();
-            String value=props.getProperty(key);
-            switch (Integer.parseInt(value)) {
-                case 0:
+            switch (key) {
+                case DefaultScoringAlgorithm.BASE_POINTS_PER_YES:
                     props.put(key, Integer.toString(baseYes));
                     break;
-                case 20:
-                    props.put(key,Integer.toString(perNo));
+                case DefaultScoringAlgorithm.POINTS_PER_NO:
+                    props.put(key, Integer.toString(perNo));
                     break;
-                case 1:
-                    props.put(key,Integer.toString(perMin));
+                case DefaultScoringAlgorithm.POINTS_PER_NO_COMPILATION_ERROR:
+                    props.put(key, Integer.toString(perCE));
+                    break;
+                case DefaultScoringAlgorithm.POINTS_PER_NO_SECURITY_VIOLATION:
+                    props.put(key, Integer.toString(perSV));
+                    break;
+                case DefaultScoringAlgorithm.POINTS_PER_YES_MINUTE:
+                    props.put(key, Integer.toString(perMin));
                     break;
                 default:
                     assertTrue("Unknown property: "+key,true);
@@ -148,10 +155,12 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         contest.addLanguage(language);
         
         String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", "No - It's just really bad",
-                "No - judges enjoyed a good laugh", "You've been bad - contact staff" };
-
-        for (String judgementName : judgementNames) {
-            Judgement judgement = new Judgement(judgementName);
+                "No - judges enjoyed a good laugh", "You've been bad - contact staff", "No - Illegal Function" };
+        
+        String[] acronyms = { "AC", "CE", "WA", "WA", "WA", "WA", "SV" };
+        
+        for (int i = 0; i < judgementNames.length; i++) {
+            Judgement judgement = new Judgement(judgementNames[i], acronyms[i]);
             contest.addJudgement(judgement);
         }
         
@@ -214,10 +223,12 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         Language language = new Language("Java");
         contest.addLanguage(language);
 
-        String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", "Contact staff" };
+        String[] judgementNames = { "Yes", "No - incorrect output", "No - compilation error", "Contact staff", "No - Security Violation" };
+      
+        String[] acronyms = { "AC", "WA", "CE", "WA", "SV" };
 
-        for (String judgementName : judgementNames) {
-            Judgement judgement = new Judgement(judgementName);
+        for (int i = 0; i < judgementNames.length; i++) {
+            Judgement judgement = new Judgement(judgementNames[i], acronyms[i]);
             contest.addJudgement(judgement);
         }
     }
@@ -310,6 +321,41 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
        
         checkOutputXML(contest);
     }
+    
+    public void testCESVNoJudgements() throws IOException, ClassNotFoundException, FileSecurityException {
+
+        String [] runsData = {
+                "1,1,A,1,No,No,4",  // 0 (a No before first yes Security Violation)
+                "2,1,A,1,No,No,2",  // 0 (a No before first yes Compilation Error)
+                "3,1,A,1,No,No,1",  // 20 (a No before first yes)
+                "4,1,A,3,Yes,No,0",  // 3 (first yes counts Minute points but never Run Penalty points)
+                "5,1,A,5,No,No,1",  // zero -- after Yes
+                "6,1,A,7,Yes,No,0",  // zero -- after Yes
+                "7,1,A,9,No,No,1",  // zero -- after Yes
+                "8,1,B,11,No,No,1",  // zero -- not solved
+                "9,2,A,48,No,No,4",  // 0 (a No before first yes Security Violation)
+                "10,2,A,50,Yes,No,0",  // 50 (minute points; no Run points on first Yes)
+                "11,2,B,35,No,No,1",  // zero -- not solved
+                "12,2,B,40,No,No,1",  // zero -- not solved
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team1,1,23",
+                "2,team2,1,50"
+        };
+        
+        String [] rankData5 = {
+                "1,team1,1,33", // +7 for SV + 3 for CE
+                "2,team2,1,57" // +7 for SV
+        };
+
+
+        scoreboardTest(2, runsData, rankData);
+        scoreboardTest(2, runsData, rankData5, alt5);
+
+    } 
     
     /**
      * Create a judged run
@@ -1406,6 +1452,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * 3 - elapsed, int
      * 4 - solved, String &quot;Yes&quot; or No
      * 5 - send to teams, Yes or No
+     * 6 - No Judgement index
      * 
      * Example:
      * &quot;6,5,A,12,Yes&quot;
@@ -1443,6 +1490,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         boolean sendToTeams = true;
         if (data.length > 5){
             sendToTeams = data[5].equals("Yes");
+        }
+        if (data.length > 6) {
+            noJudgement = contest.getJudgements()[getIntegerValue(data[6])];
         }
 
         int problemIndex = probLet.charAt(0) - 'A';

@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
@@ -59,13 +60,17 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     public static final String POINTS_PER_YES_MINUTE = "Points per Minute (for 1st yes)";
 
     public static final String BASE_POINTS_PER_YES = "Base Points per Yes";
-
+    
+    public static final String POINTS_PER_NO_COMPILATION_ERROR = "Points per Compilation Error";
+    
+    public static final String POINTS_PER_NO_SECURITY_VIOLATION = "Points per Security Violation";
+    
     /**
      * properties.
      * 
      * key=name, value=default_value, type, min, max (colon delimited)
      */
-    private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" } };
+    private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" }, { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" } };
     
     private Properties props = new Properties();
 
@@ -134,7 +139,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param treeMap
      *            java.util.TreeMap
      */
-    private ProblemSummaryInfo calcProblemScoreData(TreeMap<Run,Run> treeMap) throws IllegalContestState {
+    private ProblemSummaryInfo calcProblemScoreData(TreeMap<Run,Run> treeMap, IInternalContest theContest) throws IllegalContestState {
         ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
         int score = 0;
         int attempts = 0;
@@ -170,7 +175,13 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 } else {
                     // we should really only do this if it's been judged
                     if (isValidJudgement(run)) {
-                        score += getPenaltyPointsPerNo();
+                    	String response = theContest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
+                        if(response.equals(Judgement.ACRONYM_COMPILATION_ERROR))
+                    		score += getPenaltyPointsPerNoCompilationError();
+                    	else if(response.equals(Judgement.ACRONYM_SECURITY_VIOLATION))
+                    		score += getPenaltyPointsPerNoSecurityViolation();
+                    	else
+                    		score += getPenaltyPointsPerNo();
                     } else {
                         unJudgedRun = true;
                     }
@@ -214,6 +225,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      */
     private int getPenaltyPointsPerNo() {
         return (getPropIntValue(POINTS_PER_NO));
+    }
+    
+    private int getPenaltyPointsPerNoCompilationError() {
+        return (getPropIntValue(POINTS_PER_NO_COMPILATION_ERROR));
+    }
+    
+    private int getPenaltyPointsPerNoSecurityViolation() {
+        return (getPropIntValue(POINTS_PER_NO_SECURITY_VIOLATION));
     }
 
     /**
@@ -362,7 +381,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             
             if (!runTreeMap.isEmpty()) {
                 
-                generateStandingsValues (runTreeMap, standingsRecordHash, problemsIndexHash);
+                generateStandingsValues (runTreeMap, standingsRecordHash, problemsIndexHash, theContest);
                     
             } // else no runs
 
@@ -745,7 +764,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param standingsRecordHash
      * @param problemsIndexHash
      */
-    private void generateStandingsValues (final TreeMap<Run, Run> runTreeMap, Hashtable<String, StandingsRecord> standingsHash, Hashtable<ElementId, Integer> problemsHash) throws IllegalContestState {
+    private void generateStandingsValues (final TreeMap<Run, Run> runTreeMap, Hashtable<String, StandingsRecord> standingsHash, Hashtable<ElementId, Integer> problemsHash, IInternalContest theContest) throws IllegalContestState {
 
         long oldTime = 0;
         long youngTime = -1;
@@ -764,7 +783,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             Run run = (Run) o;
             if (!lastUser.equals(run.getSubmitter().toString()) || !lastProblem.equals(run.getProblemId().toString())) {
                 if (!problemTreeMap.isEmpty()) {
-                    ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap);
+                    ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap, theContest);
                     StandingsRecord standingsRecord = (StandingsRecord) standingsHash.get(lastUser);
                     SummaryRow summaryRow = standingsRecord.getSummaryRow();
                     summaryRow.put(problemsHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
@@ -793,7 +812,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
         // handle last run
         if (!problemTreeMap.isEmpty()) {
-            ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap);
+            ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap, theContest);
             StandingsRecord standingsRecord = (StandingsRecord) standingsHash.get(lastUser);
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             summaryRow.put(problemsHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);

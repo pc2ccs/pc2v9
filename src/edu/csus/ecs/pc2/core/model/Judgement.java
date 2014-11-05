@@ -24,6 +24,8 @@ public class Judgement implements IElementObject, Serializable {
     public static final String ACRONYM_JUDGING_ERROR = "JE";
 
     public static final String ACRONYM_COMPILATION_ERROR = "CE";
+    
+    public static final String ACRONYM_SECURITY_VIOLATION = "SV";
 
     public static final String ACRONYM_RUN_TIME_ERROR = "RTE";
 
