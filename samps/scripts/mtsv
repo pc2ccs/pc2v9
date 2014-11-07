@@ -5,9 +5,9 @@
 # Author:  laned@ecs.csus.edu <Douglas Lane> $Author: laned $
 #  
 # $HeadURL$  
-#
 # ----------------------------------------------------------------------
 # Spring 2014 Revised for allout.
+# added support for python, ruby, perl
 
 use strict;
 
@@ -552,6 +552,28 @@ sub run_and_validate
 }
 
 # ------------------------------------------------------------
+# pick first field and basename
+#
+# Ex. 
+#  In:  "/usr/bin/python hello.py"
+#  Out: "python"
+#  In:  "/usr/bin/python3 hello.py"
+#  Out: "python3"
+#
+sub base_name 
+{
+  my ($file) = @_;
+
+  $file =~s/^\s*//;   # strip off starting whitespace / left trim
+  $file =~s/\s+.*//;  # strip off whitespace and anything else, effective strip and right trim
+
+  $file =~s/.*\///;   # strip off up and through /
+  $file =~s/.*\\//;   # strip off up and through \
+
+  return $file;
+}
+
+# ------------------------------------------------------------
 # do_execute
 #
 sub do_execute
@@ -562,6 +584,8 @@ sub do_execute
 
   if ( -f "${executable}.class" )
   {
+    # Java
+
     $execute_cmd = "java $JAVAOPTS $executable";
 
 # wrapper
@@ -576,8 +600,21 @@ sub do_execute
 	}
 
   }
+  elsif ( &base_name ( $execute_cmd ) =~/^(python|perl|ruby)/ )
+  {
+    # note: base_name input "/usr/bin/python hello.py" output: "python"
+
+    # TODO add security wrapper here, does the wrapper even permit/support: python hello.py ?
+    # 
+    # $execute_cmd = "/usr/local/pc2v9/bin/run_execute.sh $executable java policy.generic.J log $time_limit";
+
+    # Note - keep the execute command as it is.  Ex. /usr/bin/python hello.py
+
+  }
   elsif ( ! -f $execute_cmd )
   {
+    # C or C++
+
     $execute_cmd = "./a.out";
 	&verify_execute_cmd($execute_cmd);
 	if ( $usingwrapper )
@@ -1414,6 +1451,10 @@ sub fatal_error
 
 }
 
+# ------------------------------------------------------------
+# verify_execute_cmd 
+# if executable doesn't exist asssume compilation error.
+#
 sub verify_execute_cmd {
   my ($cmd) = @_;
   if ( ! -f $cmd) {
