@@ -200,6 +200,9 @@ public class PacketExplorerPane extends JPanePlugin {
      */
     protected Packet fetchPC2Packet(File file) throws Exception {
         Object obj = storage.load(file.getCanonicalPath());
+        if (obj == null) {
+            throw new Exception("Not a packet: "+file.getName()+" is null, load failure?");
+        }
         if (obj instanceof Packet) {
             return (Packet) obj;
         } else { 
@@ -233,6 +236,7 @@ public class PacketExplorerPane extends JPanePlugin {
                 FileSecurity fileSecurity = new FileSecurity("db.1");
                 fileSecurity.verifyPassword(password.toCharArray());
                 contestPassword = password;
+                storage = fileSecurity;
             } catch (FileSecurityException e) {
                 JOptionPane.showMessageDialog(this, "Password did not match "+e.getMessage());
                 return;
@@ -260,6 +264,7 @@ public class PacketExplorerPane extends JPanePlugin {
                     try {
                         packet = fetchPC2Packet(packfile);
                     } catch (Exception e) {
+                        e.printStackTrace();
                         System.out.println(packfile.getName()+" " +e.getMessage());
                     }
                     
