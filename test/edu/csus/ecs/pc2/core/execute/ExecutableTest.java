@@ -91,7 +91,6 @@ public class ExecutableTest extends AbstractTestCase {
 
         String[] values = LanguageAutoFill.getAutoFillValues(autoFillLanguageTitle);
         Language language = new Language(values[4]);
-        System.out.println("for "+autoFillLanguageTitle+" got displayname of "+values[0]);
         // displayNameTextField.setText(values[0]);
         // compileCommandLineTextField.setText(values[1]);
         language.setCompileCommandLine(values[1]);
