@@ -1388,7 +1388,7 @@ public class Executable {
                 String displayName="";
                 for (int i = 0; i < langs.length; i++) {
                     if (langs[i] != null && langs[i].getElementId().equals(inRun.getLanguageId())) {
-                        displayName = langs[i].getDisplayName().toLowerCase();
+                        displayName = langs[i].getDisplayName().toLowerCase().replaceAll(" ", "_");
                         index=i+1;
                         break;
                     }

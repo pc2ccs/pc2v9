@@ -89,9 +89,9 @@ public class ExecutableTest extends AbstractTestCase {
      */
     private Language createLanguage(String autoFillLanguageTitle) {
 
-        Language language = new Language(autoFillLanguageTitle);
         String[] values = LanguageAutoFill.getAutoFillValues(autoFillLanguageTitle);
-
+        Language language = new Language(values[4]);
+        System.out.println("for "+autoFillLanguageTitle+" got displayname of "+values[0]);
         // displayNameTextField.setText(values[0]);
         // compileCommandLineTextField.setText(values[1]);
         language.setCompileCommandLine(values[1]);
@@ -452,10 +452,12 @@ public class ExecutableTest extends AbstractTestCase {
     public void testLanguageNameSub() throws Exception {
         // test for bug 855
         String origString = "mtsv {:languagename} {:language}";
-        String expected = "mtsv java 7";
+        String expected = "mtsv gnu_c++ 8";
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
-        Run run = new Run(submitter, javaLanguage, helloWorldProblem);
+        Language language = createLanguage(LanguageAutoFill.GNUCPPTITLE);
+        contest.addLanguage(language);
+        Run run = new Run(submitter, language, helloWorldProblem);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
 
         Executable executable = new Executable(contest, controller, run, runFiles);
@@ -568,6 +570,7 @@ public class ExecutableTest extends AbstractTestCase {
             suite.addTest(new ExecutableTest(singletonTestName));
         } else {
             
+            suite.addTest(new ExecutableTest("testLanguageNameSub"));
             suite.addTest(new ExecutableTest("testFindPC2Jar"));
             suite.addTest(new ExecutableTest("testSumit"));
             suite.addTest(new ExecutableTest("testStripSpace"));
