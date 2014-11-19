@@ -1385,8 +1385,10 @@ public class Executable {
             if (inRun.getLanguageId() != null) {
                 Language[] langs=contest.getLanguages();
                 int index = 0;
+                String displayName="";
                 for (int i = 0; i < langs.length; i++) {
                     if (langs[i] != null && langs[i].getElementId().equals(inRun.getLanguageId())) {
+                        displayName = langs[i].getDisplayName().toLowerCase();
                         index=i+1;
                         break;
                     }
@@ -1394,6 +1396,7 @@ public class Executable {
                 if (index > 0) {
                     newString = replaceString(newString, "{:language}", index);
                     newString = replaceString(newString, "{:languageletter}", Utilities.convertNumber(index));
+                    newString = replaceString(newString, "{:languagename}", displayName);
                 }
             }
             if (inRun.getProblemId() != null) {

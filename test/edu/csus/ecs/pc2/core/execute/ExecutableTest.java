@@ -449,6 +449,20 @@ public class ExecutableTest extends AbstractTestCase {
         
     }
     
+    public void testLanguageNameSub() throws Exception {
+        // test for bug 855
+        String origString = "mtsv {:languagename} {:language}";
+        String expected = "mtsv java 7";
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+        Run run = new Run(submitter, javaLanguage, helloWorldProblem);
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
+
+        Executable executable = new Executable(contest, controller, run, runFiles);
+        String actual = executable.substituteAllStrings(run, origString);
+        assertEquals(expected, actual);
+    }
+
      private String stripSpace(String cmdline) throws IOException {
         /**
          * Check for a space in the command line, if there is a space then
