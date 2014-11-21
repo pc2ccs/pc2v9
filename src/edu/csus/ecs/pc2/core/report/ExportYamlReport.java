@@ -80,7 +80,7 @@ public class ExportYamlReport implements IReport {
     }
 
     public String createReportXML(Filter inFilter) throws IOException {
-        throw new SecurityException("Not implemented");
+        return Reports.notImplementedXML(this);
     }
 
     public void writeReport(PrintWriter printWriter) throws Exception {

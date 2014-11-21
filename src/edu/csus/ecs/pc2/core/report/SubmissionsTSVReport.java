@@ -245,12 +245,12 @@ public class SubmissionsTSVReport implements IReportFile {
         return getReportLines();
     }
 
-    public String createReportXML(Filter inFilter) {
-        throw new SecurityException("Not implemented");
+    public String createReportXML(Filter inFilter) throws IOException {
+        return Reports.notImplementedXML(this);
     }
 
     public String getReportTitle() {
-        return "run.tsv";
+        return "submissions.tsv";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -260,7 +260,7 @@ public class SubmissionsTSVReport implements IReportFile {
     }
 
     public String getPluginTitle() {
-        return "submissions.tsv Report";
+        return "submissions.tsv";
     }
 
     public Filter getFilter() {

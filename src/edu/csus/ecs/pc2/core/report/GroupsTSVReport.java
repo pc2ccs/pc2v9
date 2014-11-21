@@ -82,7 +82,7 @@ public class GroupsTSVReport implements IReportFile {
 
     @Override
     public String createReportXML(Filter filter) throws IOException {
-        return null;
+        return Reports.notImplementedXML(this);  
     }
 
     @Override

@@ -97,7 +97,11 @@ public class ContestReport implements IReport {
 
     public String createReportXML(Filter inFilter) throws IOException {
         ContestXML xmlContest = new ContestXML();
-        return xmlContest.toXML(contest, inFilter);
+        if (contest == null){
+            return Reports.notImplementedXML(this,"contest variables is null");
+        } else {
+            return xmlContest.toXML(contest, inFilter);
+        }
     }
 
     public String getReportTitle() {

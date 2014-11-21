@@ -93,8 +93,12 @@ public class EventFeed2013Report implements IReport {
     }
 
     public String createReportXML(Filter inFilter) throws IOException {
-        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
-        return eventFeedXML.toXML(contest, filter);
+        if (contest != null){
+            EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+            return eventFeedXML.toXML(contest, filter);
+        } else {
+            return Reports.notImplementedXML(this, "contest is not set (null)");
+        }
     }
 
     public String getReportTitle() {

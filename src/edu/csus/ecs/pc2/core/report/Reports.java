@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,6 +13,7 @@ import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.imports.ContestXML;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -22,6 +24,8 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.util.IMemento;
+import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.profile.ProfileLoadException;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 
@@ -118,7 +122,7 @@ public final class Reports {
 
         reports.add(new AccountsTSVReport());
         
-        reports.add(new SubmissionsTSVReport());
+        reports.add(new RunsTSVReport());
         
         reports.add(new JSONReport());
 
@@ -131,6 +135,8 @@ public final class Reports {
         reports.add(new TeamsTSVReport());
         
         reports.add(new ScoreboardTSVReport());
+
+        reports.add(new SubmissionsTSVReport());
         
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
@@ -275,8 +281,9 @@ public final class Reports {
      * Print a report.
      * 
      * @param arg either number or name for the report
+     * @param outputXML 
      */
-    private void printReport(String arg) {
+    private void printReport(String arg, boolean outputXML) {
 
         String dirName = null;
 
@@ -355,7 +362,12 @@ public final class Reports {
                 controller.setLog(log);
                 String filename = getReportFileName(report);
                 report.setContestAndController(contest, controller);
-                report.createReportFile(filename, new Filter());
+                if (outputXML) {
+                    String xml = report.createReportXML(new Filter());
+                    writeFile(filename, xml);
+                } else {
+                    report.createReportFile(filename, new Filter());
+                }
                 catfile(filename);
 
             }
@@ -368,6 +380,16 @@ public final class Reports {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void writeFile(String filename, String s) throws IOException {
+        
+        FileOutputStream fis = new FileOutputStream(filename, false);
+        fis.write(s.getBytes());
+        fis.close();
+        fis = null;
+        // TODO Auto-generated method stub
+        
     }
 
     /**
@@ -464,6 +486,8 @@ public final class Reports {
             System.exit(2);
 
         }
+        
+        boolean xmlOutputOption = arguments.isOptPresent("--xml");
 
         String password = arguments.getOptValue("--contestPassword");
         String profileName = arguments.getOptValue("--profile");
@@ -487,7 +511,7 @@ public final class Reports {
 
         for (int i = 0; i < arguments.getArgCount(); i++) {
             String arg = arguments.getArg(i);
-            reports.printReport(arg);
+            reports.printReport(arg, xmlOutputOption);
         }
 
     }
@@ -565,5 +589,36 @@ public final class Reports {
         } catch (ProfileLoadException e) {
             e.printStackTrace(System.err);
         }
+    }
+
+    /**
+     * Create an empty XML element/report.
+     * @param report
+     * @return
+     * @throws IOException
+     */
+    public static String notImplementedXML (IReport report) throws IOException{
+        return notImplementedXML(report,"");
+    }
+
+    public static String notImplementedXML (IReport report, String message) throws IOException{
+
+        ContestXML contestXML = new ContestXML();
+
+        XMLMemento mementoRoot = XMLMemento.createWriteRoot("report");
+
+        IMemento memento = mementoRoot.createChild("message");
+        memento.putString("name", "Not implemented");
+        if (message != null && message.length() > 0){
+            memento.putString("info", message);
+        }
+        memento.putString("reportName", report.getReportTitle());
+
+        contestXML.addVersionInfo (mementoRoot, null);
+
+        contestXML.addFileInfo (mementoRoot);
+
+        return mementoRoot.saveToString();
+
     }
 }

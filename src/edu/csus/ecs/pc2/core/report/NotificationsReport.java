@@ -101,9 +101,16 @@ public class NotificationsReport implements IReport {
         filter = inFilter;
         return new String[0];
     }
-
     public String createReportXML(Filter inFilter) throws IOException {
-
+        if (contest != null){
+            return toXML(filter);
+        } else{
+            return Reports.notImplementedXML(this,"contest is null");
+        }
+    }
+    
+    public String toXML(Filter inFilter) throws IOException{
+        
         NotificationXML notificationXML = new NotificationXML();
 
         BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());

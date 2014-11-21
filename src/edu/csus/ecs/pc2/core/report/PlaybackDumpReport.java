@@ -83,7 +83,7 @@ public class PlaybackDumpReport implements IReport {
     }
 
     public String createReportXML(Filter inFilter) throws IOException {
-        throw new SecurityException("Not implemented");
+        return Reports.notImplementedXML(this);
     }
 
     public String getReportTitle() {

@@ -250,9 +250,8 @@ public class ListRunLanguages implements IReport {
         return null;
     }
 
-    public String createReportXML(Filter arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    public String createReportXML(Filter arg0) throws IOException {
+        return Reports.notImplementedXML(this);  
     }
 
     public String getReportTitle() {

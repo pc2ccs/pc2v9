@@ -653,7 +653,7 @@ public class ReportPane extends JPanePlugin {
     }
 
     private void showXMLCheckbox() {
-        getXmlOutputCheckbox().setVisible(Utilities.isDebugMode());
+        getXmlOutputCheckbox().setVisible(true);
     }
 
     /**

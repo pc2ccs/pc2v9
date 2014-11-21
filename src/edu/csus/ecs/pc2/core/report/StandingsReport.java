@@ -118,13 +118,17 @@ public class StandingsReport implements IReport {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter inFilter) {
-        DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        try {
-            return defaultScoringAlgorithm.getStandings(contest, new Properties(), controller.getLog());
-        } catch (IllegalContestState e) {
-            e.printStackTrace();
-            return "Exception in report: " + e.getMessage();
+    public String createReportXML(Filter inFilter) throws IOException {
+        
+        if (contest != null){
+            try {
+                DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+                return defaultScoringAlgorithm.getStandings(contest, new Properties(), controller.getLog());
+            } catch (IllegalContestState e) {
+                return Reports.notImplementedXML(this, "Exception "+e.getMessage());
+            }
+        } else{
+            return Reports.notImplementedXML(this,"contest is null");
         }
     }
 

@@ -88,7 +88,7 @@ public class JSONReport implements IReportFile {
     }
 
     public String createReportXML(Filter filter) throws IOException {
-        throw new SecurityException("Not implemented");
+        return Reports.notImplementedXML(this);
     }
 
     public void writeReport(PrintWriter printWriter) throws Exception {

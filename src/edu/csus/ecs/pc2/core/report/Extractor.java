@@ -289,7 +289,7 @@ public class Extractor {
 
         
         public String createReportXML(Filter filter) throws IOException {
-            return null;
+            return Reports.notImplementedXML(this);
         }
 
         

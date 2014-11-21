@@ -146,8 +146,8 @@ public class ClarificationsReport implements IReport {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter inFilter) {
-        throw new SecurityException("Not implemented");
+    public String createReportXML(Filter inFilter) throws IOException {
+        return Reports.notImplementedXML(this);
     }
 
     public String getReportTitle() {

@@ -130,8 +130,8 @@ public class PasswordsReport implements IReport {
         return getPasswords();
     }
 
-    public String createReportXML(Filter inFilter) {
-        throw new SecurityException("Not implemented");
+    public String createReportXML(Filter inFilter) throws IOException {
+        return Reports.notImplementedXML(this);
     }
 
     public String getReportTitle() {

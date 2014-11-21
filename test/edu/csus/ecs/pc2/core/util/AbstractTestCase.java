@@ -1,9 +1,11 @@
 package edu.csus.ecs.pc2.core.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.Arrays;
@@ -666,10 +668,9 @@ public class AbstractTestCase extends TestCase {
     public Document createDocument(IReport report, Filter filter) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-
         String xmlString = report.createReportXML(filter);
-        Document doc = builder.parse(xmlString);
-
+        InputStream inputStream = new ByteArrayInputStream(xmlString.getBytes());
+        Document doc = builder.parse(inputStream);
         return doc;
     }
 
@@ -866,7 +867,7 @@ public class AbstractTestCase extends TestCase {
     public void assertCount(String message, int expectedCount, String stringToFind, String sourceString) {
         int actualCount = countString(sourceString, stringToFind);
         if (actualCount != expectedCount){
-            System.out.println("count = "+actualCount+" '"+sourceString+"'");
+            System.out.println("Searching for "+stringToFind+" count = "+actualCount+" '"+sourceString+"'");
         }
         assertEquals(message, expectedCount, actualCount);
 
