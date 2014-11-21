@@ -164,6 +164,7 @@ public final class Reports {
                 "", // 
                 "--profile name - profile name, default uses current profile.  name may be a ## from --listp listing", // 
                 "--contestPassword padd  - password needed to decrypt pc2 data", // 
+                "--xml          - output only XML for report", // 
                 "--list         - list names of reports (and the report numbers)", // 
                 "--dir name     - alternate base directory name, by default uses profile dir name", // 
                 "--site ##      - specify the site number", // 
