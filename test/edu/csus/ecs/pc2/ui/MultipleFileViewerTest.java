@@ -58,6 +58,16 @@ public class MultipleFileViewerTest extends TestCase {
 
                 viewer.setVisible(true);
                 break;
+                
+
+            case 5:
+                viewer.setTitle("Empty form test");
+                filename = "stuf1"; viewer.addFilePane(filename, filename);
+                filename = "stuf2"; viewer.addFilePane(filename, filename);
+                filename = "stuf3"; viewer.addFilePane(filename, filename);
+                
+                viewer.setVisible(true);
+                break;
 
             default:
                 viewer.showMessage("No test number selected in MultipleFileViewerTest");

@@ -1,16 +1,21 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -22,7 +27,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import java.awt.FlowLayout;
 
 /**
  * Multiple File Viewer.
@@ -41,14 +45,11 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
      */
     private static final long serialVersionUID = -3837495960973474113L;
 
-    public static final String SVN_ID = "$Id$";
-
     private JButton closeButton = null;
 
     @SuppressWarnings("unused")
     private IInternalContest contest;
 
-    @SuppressWarnings("unused")
     private IInternalController controller;
 
     private IDiffPanel fileDiffPanel;
@@ -72,6 +73,9 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
     private JPanel soutPane = null;
 
     private String teamOutputFileName = null;
+    private JButton saveButton;
+
+    private String lastDirectory = ".";
 
     public MultipleFileViewer(Log log) {
         super();
@@ -87,6 +91,9 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         getCompareButton().setVisible(false);
     }
 
+    /**
+     * @wbp.parser.constructor
+     */
     public MultipleFileViewer(Log log, String windowTitle, String paneTitle, String messageData, boolean isFile) {
 
         super(windowTitle);
@@ -347,6 +354,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
             ivjButtonFrame.setPreferredSize(new java.awt.Dimension(35, 35));
             getButtonFrame().add(getCompareButton(), getCompareButton().getName());
             getButtonFrame().add(getCloseButton(), getCloseButton().getName());
+            ivjButtonFrame.add(getBtnNewButton());
         }
         return ivjButtonFrame;
     }
@@ -446,6 +454,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
 
         FrameUtilities.centerFrame(this);
         getCompareButton().setVisible(false);
+        getBtnNewButton().setVisible(true);
     }
 
     public boolean loadFile(JTextArea jPane, SerializedFile inFile) {
@@ -582,6 +591,114 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
 
         addTextPane("Message", inMessage);
         this.setVisible(true);
+    }
+
+    private JButton getBtnNewButton() {
+        if (saveButton == null) {
+        	saveButton = new JButton("Save");
+        	saveButton.setToolTipText("Save current buffer to file");
+        	saveButton.setMnemonic(KeyEvent.VK_S);
+        	saveButton.addActionListener(new java.awt.event.ActionListener() {
+                   public void actionPerformed(java.awt.event.ActionEvent e) {
+
+                       saveActiveBuffer();
+                   }
+               });
+        }
+        return saveButton;
+    }
+
+    protected void saveActiveBuffer() {
+        
+        int idx = getFileTabbedPane().getSelectedIndex();
+        
+        JTextArea area = getTabTextArea (idx);
+        
+        String fileNameFromPane = getFileTabbedPane().getTitleAt(idx);
+        
+        File file = saveAsFileDialog(this, lastDirectory, fileNameFromPane);
+
+        if (file != null) {
+            // Save panel to file
+            
+            if (file.isFile()){
+                
+                int result = FrameUtilities.yesNoCancelDialog(this, "Overwrite "+file.getName()+" ?", "Overwrite File?");
+
+                if (result != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+            
+            String string = area.getText();
+            
+//            System.out.println("output file contents = "+string);
+            writeFile(file, string);
+            
+        }
+    }
+    
+    private void writeFile(File file, String string) {
+        try {
+            FileOutputStream fis = new FileOutputStream(file.getAbsolutePath(), false);
+            fis.write(string.getBytes());
+            fis.close();
+            fis = null;
+        } catch (Exception e) {
+            if (controller != null) {
+                log.log(Log.DEBUG, "Unable to write to file " + file.getAbsolutePath(), e);
+            }
+            showMessage("Unable to write file " + e.getMessage());
+        }
+    }
+
+    private JTextArea getTabTextArea(int idx) {
+        
+        // JPanel
+        Component component = getFileTabbedPane().getComponentAt(idx);
+        JPanel panel = (JPanel) component;
+                
+        // then JScrollPane
+        component = panel.getComponent(0);
+        JScrollPane scrolly = (JScrollPane) component;
+        
+        // then JTextArea
+        component = scrolly.getViewport().getComponent(0);
+        JTextArea textArea = (JTextArea) component;
+
+        return textArea;
+    }
+
+    public File saveAsFileDialog (Component parent, String startDirectory, String defaultFileName) {
+
+        File inFile = new File(startDirectory + File.separator + defaultFileName);
+        JFileChooser chooser = new JFileChooser(startDirectory);
+        
+        chooser.setSelectedFile(inFile);
+        
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        
+//        FileFilter filterText = new FileNameExtensionFilter( "TSV file (*.tsv)", "tsv");
+//        FileFilter filterText = new FileNameExtensionFilter( "Text document (*.txt)", "txt");
+//        chooser.addChoosableFileFilter(filterText);
+        
+//        chooser.setAcceptAllFileFilterUsed(false);
+//        chooser.setFileFilter(filterText);
+       
+        int action = chooser.showSaveDialog(parent);
+
+        switch (action) {
+            case JFileChooser.APPROVE_OPTION:
+                File file = chooser.getSelectedFile();
+                lastDirectory = chooser.getCurrentDirectory().toString();
+                return file;
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+            default:
+                break;
+        }
+        return null;
+
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
