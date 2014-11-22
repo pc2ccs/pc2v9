@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
@@ -16,6 +17,7 @@ import edu.csus.ecs.pc2.core.list.RunCompartorByElapsed;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -25,7 +27,6 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.util.IMemento;
@@ -41,7 +42,12 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  */
 
 // $HeadURL$
-public class NewScoringAlgorithm implements INewScoringAlgorithm, ICalculateScore {
+public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm, ICalculateScore {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -7815725774105747895L;
 
     /**
      * @see #setBlockRanking(boolean)
@@ -874,6 +880,18 @@ public class NewScoringAlgorithm implements INewScoringAlgorithm, ICalculateScor
         public int getTotalProblemAttempts() {
             return totalProblemAttempts;
         }
+    }
+
+    @Override
+    public String getPluginTitle() {
+        return "Scoring Algorithm";
+    }
+
+    @Override
+    public void dispose() {
+        
+        // nothing to dispose of.
+        
     }
 
 }

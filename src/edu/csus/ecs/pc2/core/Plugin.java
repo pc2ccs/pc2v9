@@ -3,16 +3,20 @@ package edu.csus.ecs.pc2.core;
 import java.io.Serializable;
 import java.util.Properties;
 
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
+ * An parent class for plugins.
+ * 
+ * Provides storage for data common to plugins.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public abstract class Plugin implements Serializable {
+public abstract class Plugin implements IPlugin, Serializable {
 
     /**
      * 
@@ -55,6 +59,10 @@ public abstract class Plugin implements Serializable {
     public IInternalContest getContest() {
         return contest;
     }
+    
+    public Log getLog() {
+        return getController().getLog();
+    }
 
     /**
      * @return name of this plugin, used in choosing plugin.
@@ -78,5 +86,46 @@ public abstract class Plugin implements Serializable {
      * Provide a way to for the plugin to cleanup itself.
      */
     public abstract void dispose();
+
+    /**
+     * Make these method abstract so if other developers create plugins
+     * they can fill in these fields.
+     */
+    //  TODO plugin make method abstract getAuthorEmailAddress
+    //  TODO plugin make method abstract getAuthorURL
+    //  TODO plugin make method abstract getAuthorName
+    //  TODO plugin make method abstract getDescription
+    //  TODO plugin make method abstract getTitle
+    //  TODO plugin make method abstract getVersion
+    
+    @Override
+    public String getAuthorEmailAddress() {
+        return "pc2@ecs.csus.edu";
+    }
+    
+    @Override
+    public String getAuthorURL() {
+        return "http://pc2.ecs.csus.edu";
+    }
+    
+    @Override
+    public String getAuthorName() {
+        return "CSUS pc2 development team";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Generic Plugin Title";
+    }
+    
+    @Override
+    public String getTitle() {
+        return "Generic Plugin Title";
+    }
+    
+    @Override
+    public String getVersion() {
+        return "9.3";
+    }
 
 }
