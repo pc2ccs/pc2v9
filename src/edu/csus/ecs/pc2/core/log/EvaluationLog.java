@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.core.log;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.util.Date;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -81,7 +80,7 @@ public class EvaluationLog implements UIPlugin {
         // 2 site #
         // 3 Run #
         // 4 Team #
-        printWriter.print(new Date() + "|");
+        printWriter.print(run.getDate() + "|");
         printWriter.print("Site " + run.getSiteNumber() + "|");
         printWriter.print("Run " + run.getNumber() + "|");
         printWriter.print("Team " + run.getSubmitter().getClientNumber() + "|");

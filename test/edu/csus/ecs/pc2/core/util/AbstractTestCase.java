@@ -29,6 +29,7 @@ import javax.xml.xpath.XPathFactory;
 
 import junit.framework.TestCase;
 
+import org.junit.ComparisonFailure;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -942,4 +943,13 @@ public class AbstractTestCase extends TestCase {
        Runtime.getRuntime().exec(command);
     }
 
+    /**
+     * Compares strings, if strings are equal fails. 
+     */
+    public void assertNotEquals(String message, String expected, String actual) {
+        String msg = message + " expected <" + expected + "> to be unequal to <" + actual +">";
+        if (actual.equals(expected)){
+            throw new ComparisonFailure(msg, expected, actual);
+        }
+    }
 }
