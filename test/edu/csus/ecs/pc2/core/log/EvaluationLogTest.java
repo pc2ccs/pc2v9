@@ -155,10 +155,15 @@ public class EvaluationLogTest extends AbstractTestCase {
         //9 = ValJud false
         //10 = AccHit false
         //11 = Judge JUDGE1 @ site 3
-        
-        String judgementName = fields[8].replaceFirst("Judgement ",  "");
-        assertEquals("Judgement", judgement.getDisplayName(), judgementName);
-        
-    }
 
+        String judgementName = fields[8].replaceFirst("Judgement ", "");
+        assertEquals("Judgement", judgement.getDisplayName(), judgementName);
+
+        assertEquals("Expecting elapsed time field", 13, fields.length);
+
+        String elapsedField = fields[12];
+        String expected = "elapsed ";
+        String actual = elapsedField.substring(0, expected.length());
+        assertEquals("Expecting elapsed field label", expected, actual);
+    }
 }

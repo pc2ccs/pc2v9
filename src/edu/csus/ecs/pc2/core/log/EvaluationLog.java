@@ -111,6 +111,7 @@ public class EvaluationLog implements UIPlugin {
         } else {
             printWriter.print("||||");
         }
+        printWriter.print("elapsed " + (run.getElapsedMS() / 1000));
         printWriter.println();
         printWriter.flush();
     }
