@@ -70,7 +70,6 @@ import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.ILogWindow;
@@ -2327,11 +2326,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void start(String[] stringArray) {
 
         /**
-         * Directory where contest.yaml exists.
-         */
-        String yamlDirectory = null;
-        
-        /**
          * Saved exception.
          * 
          * If TransportException thrown before UI has been created, save the exception and present it on the UI later.
@@ -2551,27 +2545,27 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
-    /**
-     * Check syntax and load contest.yaml.
-     * @param directory
-     */
-    private void loadContestYaml(String directory) {
-        
-        ContestYAMLLoader loader = new ContestYAMLLoader();
-        // TODO Bug 439 - find a way to load current Internal Contest from this yaml
-//        IInternalContest loadedContest = 
-        loader.fromYaml(null, directory);
-
-    }
+//    /**
+//     * Check syntax and load contest.yaml.
+//     * @param directory
+//     */
+//    private void loadContestYaml(String directory) {
+//        
+//        ContestYAMLLoader loader = new ContestYAMLLoader();
+//        // TODO Bug 439 - find a way to load current Internal Contest from this yaml
+////        IInternalContest loadedContest = 
+//        loader.fromYaml(null, directory);
+//
+//    }
 
     /**
      * Is string null or trimmed length zero?.
      * @param string
      * @return
      */
-    private boolean isEmpty(String string) {
-        return string == null || string.trim().length() == 0;
-    }
+//    private boolean isEmpty(String string) {
+//        return string == null || string.trim().length() == 0;
+//    }
 
     private ILoginUI createLoginFrame() {
         ILoginUI ui = (ILoginUI) loadUIClass(loginClassName);
