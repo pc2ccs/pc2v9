@@ -18,7 +18,6 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.ISubmission;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -27,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFilesList;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.Submission;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -914,7 +914,7 @@ public class ContestLoader {
      * @param submission
      * @return
      */
-    private boolean isThisSite(IInternalContest contest, ISubmission submission) {
+    private boolean isThisSite(IInternalContest contest, Submission submission) {
         return submission.getSiteNumber() == contest.getSiteNumber();
     }
 

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 // TODO CLEANUP - need to deprecate setAnswer
 
 // $HeadURL$
-public class Clarification extends ISubmission {
+public class Clarification extends Submission {
 
     /**
      * 

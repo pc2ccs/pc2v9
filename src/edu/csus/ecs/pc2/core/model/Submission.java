@@ -13,10 +13,8 @@ import java.util.Date;
  * @author pc2@ecs.csus.edu
  */
 
-// TODO SOJMEDAY rename this class to Submission
-
 // $HeadURL$
-public class ISubmission implements Serializable, IElementObject {
+public class Submission implements Serializable, IElementObject {
 
     /**
      * 

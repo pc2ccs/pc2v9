@@ -13,7 +13,7 @@ import java.util.Vector;
 
 // $HeadURL$
 // TODO Should judgementList be accessed with a synchronize ??
-public class Run extends ISubmission {
+public class Run extends Submission {
 
     /**
      * 

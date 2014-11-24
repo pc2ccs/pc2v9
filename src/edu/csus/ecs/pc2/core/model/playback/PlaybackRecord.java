@@ -2,7 +2,7 @@ package edu.csus.ecs.pc2.core.model.playback;
 
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IElementObject;
-import edu.csus.ecs.pc2.core.model.ISubmission;
+import edu.csus.ecs.pc2.core.model.Submission;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.EventType;
 
 /**
@@ -94,7 +94,7 @@ public class PlaybackRecord implements IElementObject {
      * @return originating run or clarification id.
      */
     public int getId() {
-        ISubmission submission = replayEvent.getEventDetails().getSubmission();
+        Submission submission = replayEvent.getEventDetails().getSubmission();
         if (submission != null) {
             return submission.getNumber();
         } else {

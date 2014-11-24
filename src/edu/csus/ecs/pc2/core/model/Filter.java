@@ -545,7 +545,7 @@ public class Filter implements Serializable {
      * @param submission a run or clarification
      * @return true if matches sites filter.
      */
-    private boolean matchesSites (ISubmission submission) {
+    private boolean matchesSites (Submission submission) {
         return matchesSites (submission.getSiteNumber());
     }
 
@@ -974,7 +974,7 @@ public class Filter implements Serializable {
         return matchesElapsedTimeSubmission(clarification);
     }
 
-    public boolean matchesElapsedTimeSubmission(ISubmission submission) {
+    public boolean matchesElapsedTimeSubmission(Submission submission) {
         long elapsedTime = submission.getElapsedMins();
         return matchesElapsedTime(elapsedTime);
     }

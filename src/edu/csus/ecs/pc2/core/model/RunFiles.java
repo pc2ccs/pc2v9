@@ -17,6 +17,8 @@ public class RunFiles implements Serializable {
      * 
      */
     private static final long serialVersionUID = -7676377417419464772L;
+    
+    Submission submission = null;
 
     /**
      * Unique id for this instance.
@@ -46,6 +48,7 @@ public class RunFiles implements Serializable {
         super();
         this.runId = run.getElementId();
         this.mainFile = new SerializedFile(filename);
+        this.submission = run;
     }
 
     /**
@@ -58,6 +61,7 @@ public class RunFiles implements Serializable {
         this.runId = run.getElementId();
         this.mainFile = mainFile;
         this.otherFiles = otherFiles;
+        this.submission = run;
     }
 
     /**
@@ -88,6 +92,14 @@ public class RunFiles implements Serializable {
      */
     public ElementId getRunId() {
         return runId;
+    }
+    
+    public void setSubmission(Submission submission) {
+        this.submission = submission;
+    }
+    
+    public Submission getSubmission() {
+        return submission;
     }
 
 }

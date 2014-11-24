@@ -6,6 +6,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.model.Submission;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -19,32 +20,6 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 // $HeadURL$
 public class RunFilesListTest extends AbstractTestCase {
 
-//    private File sumitSourceFilename;
-//    private String testDir;
-
-//    protected void setUp() throws Exception {
-//        super.setUp();
-//        
-//        testDir = "testdata";
-//        String projectPath = JUnitUtilities.locate(testDir);
-//        if (projectPath == null) {
-//            throw new Exception("Unable to locate "+testDir);
-//        }
-//        testDir=projectPath+File.separator+testDir+File.separator;
-//        String loadFile = testDir + "Sumit.java";
-//        sumitSourceFilename = new File(loadFile);
-//        if (!sumitSourceFilename.exists()) {
-//            System.err.println("Could not find " + loadFile);
-//            throw new Exception("Could not find "+ loadFile+" in "+testDir);
-//        }
-//        
-//        getSamplesSourceFilename()
-//        
-//    }
-
-//    protected void tearDown() throws Exception {
-//        super.tearDown();
-//    }
 
     public void testSingleFile() throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -58,7 +33,6 @@ public class RunFilesListTest extends AbstractTestCase {
 
         Run theRun = runs[0];
         Run secondRun = runs[1];
-        
         
         String sumitFilename = getSamplesSourceFilename("Sumit.java");
 
@@ -78,7 +52,7 @@ public class RunFilesListTest extends AbstractTestCase {
         filesList.add(theRun, runFiles);
 
         /**
-         * This overwrites the runFiles stored because RunFilesList holds the last runFildes only
+         * This overwrites the runFiles stored because RunFilesList holds the last runFiles only
          * 
          * In other tests it will test the cache which will contain all runFiles added.
          */
@@ -98,7 +72,16 @@ public class RunFilesListTest extends AbstractTestCase {
 
         assertNotNull(runFiles2);
         assertEquals (runFiles2.getMainFile().getName(), HELLO_SOURCE_FILENAME);
+        
+        Submission submission = secondRunFiles.getSubmission();
+        compareSubmission(secondRun, runFiles2, submission);
+    }
 
+    private void compareSubmission(Run run, RunFiles runFiles, Submission submission) {
+        
+        assertNotNull("Expecting submission", submission);
+        assertEquals("Expecting same run elementId", runFiles.getSubmission().getElementId(), submission.getElementId());
+        assertEquals("Expecting same teamId ", run.getSubmitter(), submission.getSubmitter());
     }
 
     public void testCache() throws IOException, ClassNotFoundException, FileSecurityException {
@@ -151,6 +134,10 @@ public class RunFilesListTest extends AbstractTestCase {
 
         assertNotNull(runFiles2);
         assertEquals(runFiles2.getMainFile().getName(), SUMIT_SOURCE_FILENAME);
+
+        
+        Submission submission = runFiles.getSubmission();
+        compareSubmission(theRun, runFiles, submission);
 
     }
 }

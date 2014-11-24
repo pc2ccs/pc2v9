@@ -3,10 +3,10 @@ package edu.csus.ecs.pc2.core.model.playback;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IElementObject;
-import edu.csus.ecs.pc2.core.model.ISubmission;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.Submission;
 
 /**
  * Information used with {@link ReplayEvent}.
@@ -139,7 +139,7 @@ public class ReplayEventDetails implements IElementObject {
         }
     }
 
-    public ISubmission getSubmission() {
+    public Submission getSubmission() {
         if (run != null) {
             return run;
         } else if (clarification != null) {
