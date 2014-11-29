@@ -16,6 +16,7 @@ import javax.swing.JFileChooser;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -48,8 +49,13 @@ import edu.csus.ecs.pc2.ui.NullViewer;
 // SOMEDAY design decision how to handle MultipleFileViewer, display here, on TeamClient??
 
 // $HeadURL$
-public class Executable {
+public class Executable extends Plugin implements IExecutable {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1408367949659070087L;
+
     private static final String NL = System.getProperty("line.separator");
 
     private Run run = null;
@@ -192,34 +198,14 @@ public class Executable {
         return (result);
     }
 
-    /**
-     * Compile, execute and validate run - using Judge's data file(s).
-     * 
-     * @see #execute(boolean)
-     */
+
+    @Override
     public IFileViewer execute() {
         return execute(true);
     }
 
-    /**
-     * Compile, execute and validate run.
-     * 
-     * execute does the following:
-     * <ol>
-     * <li>Creates and clears execute directory (if clearDirFirst == true)
-     * <li>Extracts source file(s)
-     * <li>Compiles source
-     * <li>If executable created, will executes program
-     * <li>If not a team module, and successful execution, run validator.
-     * </ol>
-     * 
-     * <br>
-     * Will only run the validation on a run if not a {@link edu.csus.ecs.pc2.core.model.ClientType.Type#TEAM} client.
-     * 
-     * @param clearDirFirst -
-     *            clear the directory before unpacking and executing
-     * @return FileViewer with 1 or more tabs
-     */
+
+    @Override
     public IFileViewer execute(boolean clearDirFirst) {
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
@@ -330,6 +316,7 @@ public class Executable {
                     // getting here when not in validator mode results in a blank execute results window
                     boolean passed = true;
 
+                    // TODO 164
                     // TODO CCS SOMEDAY make this work properly - aka not depend on mtsv
 //                    while (passed && dataSetNumber < dataFiles.length) {
                         if (executeProgram(dataSetNumber) && isValidated()) {
@@ -1732,6 +1719,35 @@ public class Executable {
     
     public boolean isUsingGUI() {
         return usingGUI;
+    }
+
+    @Override
+    public IFileViewer execute(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, boolean clearDirFirst) {
+
+        this.contest = inContest;
+        this.controller = inController;
+        this.runFiles = runFiles;
+        this.run = run;
+        language = inContest.getLanguage(run.getLanguageId());
+        problem = inContest.getProblem(run.getProblemId());
+        
+        initialize();
+        
+        return execute(clearDirFirst);
+        
+    }
+
+    @Override
+    public String getPluginTitle() {
+        return "Executeable";
+    }
+
+    @Override
+    public void dispose() {
+       
+        executionData = null;
+        executionTimer = null;
+        fileViewer = null;
     }
 }
 

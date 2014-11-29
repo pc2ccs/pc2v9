@@ -20,7 +20,10 @@ public final class AllTests {
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.execute");
         //$JUnit-BEGIN$
+        suite.addTestSuite(ExecuteUtilitiesTest.class);
         suite.addTestSuite(ExecutableTest.class);
+        suite.addTestSuite(ExecutableV9Test.class);
+
         //$JUnit-END$
         return suite;
     }

@@ -947,9 +947,8 @@ public class AbstractTestCase extends TestCase {
      * Compares strings, if strings are equal fails. 
      */
     public void assertNotEquals(String message, String expected, String actual) {
-        String msg = message + " expected <" + expected + "> to be unequal to <" + actual +">";
         if (actual.equals(expected)){
-            throw new ComparisonFailure(msg, expected, actual);
+            throw new ComparisonFailure(message, expected, actual);
         }
     }
 }

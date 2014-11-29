@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
 
-import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -406,6 +405,10 @@ public class ExecutableTest extends AbstractTestCase {
     // $HeadURL$
     class ExecutableOverride extends Executable {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -6045865627706850495L;
         private String executeDirectoryName = null;
 
         public ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles,
@@ -459,8 +462,11 @@ public class ExecutableTest extends AbstractTestCase {
         Run run = new Run(submitter, language, helloWorldProblem);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
 
-        Executable executable = new Executable(contest, controller, run, runFiles);
-        String actual = executable.substituteAllStrings(run, origString);
+//        Executable executable = new Executable(contest, controller, run, runFiles);
+        
+        Problem problem = null;
+        ExecuteUtilities executeUtilities = new ExecuteUtilities(contest, controller, run, runFiles, problem, language);
+        String actual = executeUtilities.substituteAllStrings(origString);
         assertEquals(expected, actual);
     }
 
@@ -555,32 +561,32 @@ public class ExecutableTest extends AbstractTestCase {
      * 
      * @return suite of tests.
      */
-    public static TestSuite suite() {
-
-        TestSuite suite = new TestSuite("Executable");
-
-        String singletonTestName = "";
-//        singletonTestName = "testSumit";
-//        singletonTestName = "testHello";
-//        singletonTestName = "testValidateMissingJudgesDataFile";
-      
-
-        if (!"".equals(singletonTestName)) {
-            suite.addTest(new ExecutableTest(singletonTestName));
-        } else {
-            
-            suite.addTest(new ExecutableTest("testLanguageNameSub"));
-            suite.addTest(new ExecutableTest("testFindPC2Jar"));
-            suite.addTest(new ExecutableTest("testSumit"));
-            suite.addTest(new ExecutableTest("testStripSpace"));
-            suite.addTest(new ExecutableTest("testValidateMissingJudgesDataFile"));
-            
-            // large tests last
-            suite.addTest(new ExecutableTest("testLargeOutput"));
-            suite.addTest(new ExecutableTest("testLargeStdIn"));
-            
-        }
-        return suite;
-    }
+//    public static TestSuite suite() {
+//
+//        TestSuite suite = new TestSuite("Executable");
+//
+//        String singletonTestName = "";
+////        singletonTestName = "testLanguageNameSub";
+////        singletonTestName = "testHello";
+////        singletonTestName = "testValidateMissingJudgesDataFile";
+//      
+//
+//        if (!"".equals(singletonTestName)) {
+//            suite.addTest(new ExecutableTest(singletonTestName));
+//        } else {
+//            
+//            suite.addTest(new ExecutableTest("testLanguageNameSub"));
+//            suite.addTest(new ExecutableTest("testFindPC2Jar"));
+//            suite.addTest(new ExecutableTest("testSumit"));
+//            suite.addTest(new ExecutableTest("testStripSpace"));
+//            suite.addTest(new ExecutableTest("testValidateMissingJudgesDataFile"));
+//            
+//            // large tests last
+//            suite.addTest(new ExecutableTest("testLargeOutput"));
+//            suite.addTest(new ExecutableTest("testLargeStdIn"));
+//            
+//        }
+//        return suite;
+//    }
 
 }
