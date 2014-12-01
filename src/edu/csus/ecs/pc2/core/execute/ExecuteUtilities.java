@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Date;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -491,5 +492,73 @@ public class ExecuteUtilities extends Plugin {
             ;
         }
         return jarDir;
+    }
+
+    /**
+     * Copy a file and optionally log exceptions.
+     * @param fileOne
+     * @param fileTwo
+     * @param log if not null then will log exception/error info to log.
+     * @return true if file copied, else false.
+     */
+    public static boolean copyFile(String fileOne, String fileTwo, Log log) {
+        try {
+            Files.copy(new File(fileOne).toPath(), new File(fileTwo).toPath());
+            return true;
+        } catch (Exception e) {
+            if (log != null){
+                log.warning("Unable to copy file " + fileOne + " " + e.getMessage());
+            }
+            return false;
+        }
+    }
+    
+    /**
+     * Did the team's run solve the problem ?.
+     * 
+     * @param inExecutionData     * @return true if no compilation error, etc.
+     */
+    public static boolean didTeamSolveProblem(ExecutionData executionData) {
+        
+        if (!executionData.isCompileSuccess() || !executionData.isExecuteSucess()){
+            return false;
+        }
+        
+        if (executionData.isRunTimeLimitExceeded()){
+            return false;
+        }
+
+        // validator program failed to run 
+        if (! executionData.isValidationSuccess()){
+            return false;
+        }
+
+        
+        if (executionData.getExecutionException() != null){
+            return false;
+        }
+        
+        if (executionData.getValidationResults() != null){
+            
+            String results = executionData.getValidationResults();
+            
+            // bug 280 ICPC Validator Interface Standard calls for "accepted" in any case.
+            if (results.trim().equalsIgnoreCase("accepted")) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public static String toString(ExecutionData executionData) {
+
+        return " compileSuccess=" + executionData.isCompileSuccess() + //
+                ", executeSucess=" + executionData.isExecuteSucess() + //
+                ", runTimeLimitExceeded=" + executionData.isRunTimeLimitExceeded() + //
+                ", validationSuccess=" + executionData.isValidationSuccess() + //
+                ", executionException=" + executionData.getExecutionException() + //
+                ", validationResults=" + executionData.getValidationResults() //
+        ;
     }
 }

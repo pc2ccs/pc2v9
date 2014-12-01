@@ -3,9 +3,17 @@ package edu.csus.ecs.pc2.core.execute;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.ConsoleHandler;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -46,13 +54,11 @@ public class ExecutableTest extends AbstractTestCase {
     // SOMEDAY add test for hello
     private Problem helloWorldProblem = null;
 
-    private Problem largeStdInProblem = null;
-    
     private Language javaLanguage = null;
 
     private String yesJudgement = Validator.JUDGEMENT_YES;
 
-    private Problem largeOutputProblem = null;
+    private Log log = null;
 
     public ExecutableTest(String string) {
         super(string);
@@ -62,20 +68,28 @@ public class ExecutableTest extends AbstractTestCase {
         super.setUp();
         SampleContest sampleContest = new SampleContest();
         contest = sampleContest.createContest(2, 2, 12, 12, true);
+        
+        ClientId clientId = contest.getClientId();
+        if (clientId == null){
+            clientId = getFirstJudge().getClientId();
+                    
+        }
+        contest.setClientId(clientId);
+
         controller = sampleContest.createController(contest, true, false);
+        log = controller.getLog();
 
 //        setDebugMode(true);
         
         if (isDebugMode()){
             // this will make all log output go to stdout
             ConsoleHandler consoleHandler = new ConsoleHandler();
-            controller.getLog().addHandler(consoleHandler);
+            log.addHandler(consoleHandler);
+            log.setLevel(Log.DEBUG);
         }
         
         sumitProblem = createSumitProblem(contest);
         helloWorldProblem = createHelloProblem(contest);
-        largeStdInProblem  = createLargeStdInProblem(contest);
-        largeOutputProblem  = createLargeOutputProblem(contest);
         javaLanguage = createJavaLanguage(contest);
 
     }
@@ -279,10 +293,12 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
 
-    public void testLargeOutput() {
+    public void testLargeOutput() throws FileNotFoundException {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
+        Problem largeOutputProblem  = createLargeOutputProblem(contest);
+        
         Run run = new Run(submitter, javaLanguage, largeOutputProblem);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("LargeOutput.java"));
 
@@ -291,16 +307,18 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
 
-    public void testLargeStdIn() {
+    public void testLargeStdIn() throws FileNotFoundException {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
+        Problem largeStdInProblem  = createLargeStdInProblem(contest);
+        
         Run run = new Run(submitter, javaLanguage, largeStdInProblem);
         
         RunFiles runFiles = new RunFiles(run,  getRootInputTestFile("Casting.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
-        runExecutableTest(run, runFiles, true, yesJudgement);
+        runExecutableTest(run, runFiles, false, yesJudgement);
     }
 
 
@@ -322,6 +340,8 @@ public class ExecutableTest extends AbstractTestCase {
         executable.execute();
 
         ExecutionData executionData = executable.getExecutionData();
+        
+//        dumpRunTestCases(run);
 
         // System.out.println("expectedJudgement  = " + expectedJudgement);
         // System.out.println("expectedJudgementV = " + executionData.getValidationResults());
@@ -329,35 +349,79 @@ public class ExecutableTest extends AbstractTestCase {
         //TODO: change the following println into an assert()
 //        System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
         assertTrue("Excessive runtime", executionData.getExecuteTimeMS() < 40000);
+        
+        if (!executionData.isCompileSuccess()){
+            SerializedFile file = executionData.getCompileStdout();
+//            dumpFile("Compiler stdout", file);
+            file = executionData.getCompileStderr();
+//            dumpFile("Compiler stderr", file);
+        }
 
-        assertTrue("Compile failed " + run.getProblemId(), executionData.isCompileSuccess());
+        assertTrue("Compilation failure " + run.getLanguageId(), executionData.isCompileSuccess());
         assertTrue("Run not executed " + run.getProblemId(), executionData.isExecuteSucess());
         
         // If this test fails - there may not be a Validator in the path, check vstderr.pc2 for  
         // java.lang.NoClassDefFoundError: edu/csus/ecs/pc2/validator/Validator
         
         
-      String jarPath = executable.findPC2JarPath();
-      
-      if (! new File(jarPath).isDirectory()){
-          System.err.println("ERROR - pc2 jar path not a directory '"+jarPath+"'");
-          System.out.println("TODO 636 - unable to unit test - testFindPC2Jar fails so no ability to judge run");
-      } 
-      else 
-      {
-          if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
-              assertTrue("Run not validated " + run.getProblemId(), executionData.isValidationSuccess());
-          }
-          
-          assertTrue("Judgement should be solved ", solved);
-          assertEquals(expectedJudgement, executionData.getValidationResults());
-      }
-      
-      executionData = null;
-      executable = null;
-      
+        String jarPath = executable.findPC2JarPath();
+
+        if (! new File(jarPath).isDirectory()){
+            System.err.println("ERROR - pc2 jar path not a directory '"+jarPath+"'");
+            System.out.println("TODO 636 - unable to unit test - testFindPC2Jar fails so no ability to judge run");
+            fail("ERROR - pc2 jar path not a directory '"+jarPath+"'");
+        } 
+        else 
+        {
+            if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
+                
+                assertTrue("Expect no error running validator" , executionData.isValidationSuccess());
+//                System.out.println("debug 22 executionData = "+toString(executionData));
+                
+                if (solved){
+                    assertTrue("Expected to run to be a Yes " + run.getProblemId(), ExecuteUtilities.didTeamSolveProblem(executionData));
+                }
+            }
+
+            if (solved){
+                assertTrue("Judgement should be solved ", solved);
+                assertEquals(expectedJudgement, executionData.getValidationResults());
+            } else {
+                assertFalse("Judgement should not be solved ", solved);
+            }
+        }
+        
+        executionData = null;
+        executable = null;
+
     }
     
+//    private void dumpRunTestCases(Run run) {
+//        
+//        RunTestCase[] cases = run.getRunTestCases();
+//        
+//        System.out.println("There are "+cases.length+" test cases.");
+//        int number = 0;
+//        for (RunTestCase testCase : cases) {
+//            System.out.println("# " + number + " solved = " + testCase.isSolved() + " " + testCase.getRunElementId());
+//            number++;
+//        }
+//    }
+
+    private Account getFirstJudge() {
+        Account[] accounts = new SampleContest().getJudgeAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+        return accounts[0];
+        
+    }
+
+    private void dumpFile(String message, SerializedFile file) {
+        System.out.println(message);
+        byte[] buf = file.getBuffer();
+        System.out.println(buf.toString());
+        
+    }
+
     public void testFindPC2Jar() throws Exception {
         
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
@@ -372,19 +436,18 @@ public class ExecutableTest extends AbstractTestCase {
     
     public void testFindPC2Jar(Run run, RunFiles runFiles) throws Exception {
         
-        // TODO 636 fails unit test when findPC2JarPath fixed uncomment these lines
-//        String executeDirectoryName = getOutputDataDirectory(getName());
-//        ensureDirectory(executeDirectoryName);
-//        
-//        Executable executable = new Executable(contest, controller, run, runFiles);
-//        executable.setExecuteDirectoryName(executeDirectoryName);
-//        executable.setUsingGUI(false);
-//
-//        String jarPath = executable.findPC2JarPath();
-//        
-//        if (! new File(jarPath).isDirectory()){
-//            fail ("No such directory, using findPC2JarPath. path='"+jarPath+"'");
-//        }
+        String executeDirectoryName = getOutputDataDirectory(getName());
+        ensureDirectory(executeDirectoryName);
+        
+        Executable executable = new Executable(contest, controller, run, runFiles);
+        executable.setExecuteDirectoryName(executeDirectoryName);
+        executable.setUsingGUI(false);
+
+        String jarPath = executable.findPC2JarPath();
+        
+        if (! new File(jarPath).isDirectory()){
+            fail ("No such directory, using findPC2JarPath. path='"+jarPath+"'");
+        }
         
     }
 
@@ -553,6 +616,218 @@ public class ExecutableTest extends AbstractTestCase {
         runExecutableTest(run, runFiles, true, yesJudgement);       
     }
     
+    public static void dumpPath(PrintStream out) {
+        
+        Map<String, String> map = System.getenv();
+        
+        Set<String> keys = map.keySet();
+        String [] names  = (String[]) keys.toArray(new String[keys.size()]);
+        Arrays.sort(names);
+        
+        for (String name : names) {
+            String value = map.get(name);
+            out.println(name+"='"+value+"'");
+        }
+        
+        String path = map.get("Path");
+        for (String dirname : path.split(File.pathSeparator)) {
+            out.println(" dir = "+dirname);
+        }
+        
+
+    }
+
+    public String which(String programName) {
+
+        Map<String, String> map = System.getenv();
+
+        String path = map.get("PATH");
+        if (path != null){
+            
+            for (String dirname : path.split(File.pathSeparator)) {
+                String fullPath = dirname + File.separator + programName;
+                if (new File(fullPath).isFile()) {
+                    return fullPath;
+                }
+                fullPath = dirname + File.separator + programName + ".exe";
+                if (new File(fullPath).isFile()) {
+                    return fullPath;
+                }
+            }
+        }
+        return null;
+    }
+    
+    public void testMultipleTestCaseFromSTDIN() throws Exception {
+
+        String sumitFilename = getSamplesSourceFilename("ISumit.java");
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Problem problem = createMultiTestCaseProblem(contest);
+
+        problem.setReadInputDataFromSTDIN(true);
+
+        assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
+
+        Run run = new Run(submitter, javaLanguage, problem);
+
+        assertFileExists(sumitFilename);
+        RunFiles runFiles = new RunFiles(run, sumitFilename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, true, yesJudgement);
+
+    }
+    
+    public void testMultipleTestCaseFromFile() throws Exception {
+
+        String sumitFilename = getSamplesSourceFilename("Sumit.java");
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Problem problem = createMultiTestCaseProblem(contest);
+
+        problem.setDataFileName("sumit.dat");
+        problem.setAnswerFileName("sumit.ans");
+
+        assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
+
+        Run run = new Run(submitter, javaLanguage, problem);
+
+        assertFileExists(sumitFilename);
+        RunFiles runFiles = new RunFiles(run, sumitFilename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, true, yesJudgement);
+
+    }
+    
+    public void testMultipleTestCaseFailTest2() throws Exception {
+        
+        String sumitFilename = getSamplesSourceFilename("ISumit.java");
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Problem problem = createMultiTestCaseProblem(contest);
+
+        problem.setReadInputDataFromSTDIN(true);
+
+        assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
+
+        Run run = new Run(submitter, javaLanguage, problem);
+
+        assertFileExists(sumitFilename);
+        RunFiles runFiles = new RunFiles(run, sumitFilename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, false, yesJudgement);
+
+    }
+
+    /**
+     * Create a multiple test case sumit problem.
+     * 
+     * @param contest2
+     * @return
+     * @throws IOException 
+     */
+    private Problem createMultiTestCaseProblem(IInternalContest contest2) throws IOException {
+        Problem problem = new Problem("Sumit-Multidataset");
+
+        problem.setShowValidationToJudges(false);
+        problem.setHideOutputWindow(true);
+        problem.setShowCompareWindow(false);
+        problem.setTimeOutInSeconds(10);
+
+        setPC2Validator(problem);
+
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+        
+        String testBaseDirname = getDataDirectory(this.getName());
+        
+        /**
+         * 
+         */
+        String [] dataFileBaseNames = {
+                "sumit1",
+                "sumit2",
+                "sumit3",
+                "sumit4",
+        };
+        
+        testBaseDirname = Utilities.getCurrentDirectory() + File.separator + testBaseDirname;
+        
+//        ensureDirectory(testBaseDirname);
+//        startExplorer(new File(testBaseDirname));
+        
+        setDataFiles(problem, problemDataFiles,testBaseDirname, dataFileBaseNames);
+        
+        int numberJudgesFiles = problemDataFiles.getJudgesDataFiles().length;
+        assertEquals("Expected number of judge data files ", dataFileBaseNames.length, numberJudgesFiles);
+
+        int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
+        assertEquals("Expected number of judge answer files ", dataFileBaseNames.length, numberJudgesAnswerFiles);
+
+        contest2.addProblem(problem, problemDataFiles);
+        
+        return problem;
+
+    }
+    
+    private void setDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String testBaseDirname, String[] dataFileBaseNames) {
+
+ //      
+//      for (String name : dataFileBaseNames) {
+//          String inputFileName =  testBaseDirname + File.separator + name + ".in";
+//          String ansFilename = testBaseDirname + File.separator + name + ".ans";
+//          System.out.println(inputFileName);
+//          System.out.println(ansFilename);
+//
+//      }
+      
+      ArrayList<SerializedFile> inList = new ArrayList<SerializedFile>();
+      ArrayList<SerializedFile> ansList = new ArrayList<SerializedFile>();
+
+      for (String name : dataFileBaseNames) {
+          String inputFileName = testBaseDirname + File.separator + name + ".in";
+          String ansFilename = testBaseDirname + File.separator + name + ".ans";
+
+          assertFileExists(inputFileName);
+          assertFileExists(ansFilename);
+          
+          SerializedFile inFile = new SerializedFile(inputFileName);
+          inList.add(inFile);
+          
+          SerializedFile ansFile = new SerializedFile(ansFilename);
+          ansList.add(ansFile);
+      }
+      
+      
+      SerializedFile[] inArray = (SerializedFile[]) inList.toArray(new SerializedFile[inList.size()]);
+      problemDataFiles.setJudgesDataFiles(inArray);
+      
+      SerializedFile[] ansArray = (SerializedFile[]) ansList.toArray(new SerializedFile[ansList.size()]);
+      problemDataFiles.setJudgesAnswerFiles(ansArray);
+      
+      problem.setDataFileName(inArray[0].getName());
+      problem.setAnswerFileName(ansArray[0].getName());
+      
+    }
+
+//    public static TestSuite suite() {
+//
+//        TestSuite suite = new TestSuite("Executable");
+//        String singletonTestName = null;
+//        singletonTestName = "testMultipleTestCaseFromSTDIN";
+//        singletonTestName = "testMultipleTestCaseFromFile";
+//        singletonTestName = "testMultipleTestCaseFailTest2";
+//        
+//        suite.addTest(new ExecutableTest(singletonTestName));
+//        return suite;
+//
+//    }
+    
     
     /**
      * Test Suite.
@@ -566,27 +841,36 @@ public class ExecutableTest extends AbstractTestCase {
 //        TestSuite suite = new TestSuite("Executable");
 //
 //        String singletonTestName = "";
-////        singletonTestName = "testLanguageNameSub";
-////        singletonTestName = "testHello";
-////        singletonTestName = "testValidateMissingJudgesDataFile";
-//      
+//        //        singletonTestName = "testLanguageNameSub";
+//        //        singletonTestName = "testHello";
+//        //        singletonTestName = "testValidateMissingJudgesDataFile";
+//
 //
 //        if (!"".equals(singletonTestName)) {
 //            suite.addTest(new ExecutableTest(singletonTestName));
 //        } else {
-//            
-//            suite.addTest(new ExecutableTest("testLanguageNameSub"));
-//            suite.addTest(new ExecutableTest("testFindPC2Jar"));
-//            suite.addTest(new ExecutableTest("testSumit"));
-//            suite.addTest(new ExecutableTest("testStripSpace"));
-//            suite.addTest(new ExecutableTest("testValidateMissingJudgesDataFile"));
-//            
-//            // large tests last
-//            suite.addTest(new ExecutableTest("testLargeOutput"));
-//            suite.addTest(new ExecutableTest("testLargeStdIn"));
-//            
+//
+//            String [] testNames = { //
+//                    "testSumit", //
+//                    "testHello", //
+//                    "testFindPC2Jar", //
+//                    "testStripSpace", //
+//                    "testLanguageNameSub", //
+//                    "testValidateMissingJudgesDataFile", //
+//                    "testMultipleTestCaseFromSTDIN", //
+//                    "testMultipleTestCaseFromFile", //
+//                    "testMultipleTestCaseFailTest2", //
+//
+//                    "testLargeOutput", //
+//                    "testLargeStdIn", //
+//            };
+//
+//
+//            for (String testName : testNames) {
+//                suite.addTest(new ExecutableTest(testName)); 
+//            }
 //        }
+//
 //        return suite;
 //    }
-
 }

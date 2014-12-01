@@ -231,7 +231,12 @@ public class ExecutionData implements Serializable {
     }
 
     /**
-     * @return Returns the validationSuccess.
+     * Did the validator program run without an error ?.
+     * 
+     * This does NOT indicate that the team's run was a Yes/accepted.  This
+     * only returns whether the validator program ran without any OS or other sort of error.
+     * 
+     * @return Returns whether the validator program executed successfully.
      */
     public boolean isValidationSuccess() {
         return validationSuccess;

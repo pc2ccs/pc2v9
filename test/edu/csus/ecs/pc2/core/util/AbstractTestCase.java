@@ -300,7 +300,6 @@ public class AbstractTestCase extends TestCase {
      */
     public String getDataDirectory(String directoryName) {
         String newDirName = getDataDirectory() + File.separator + directoryName;
-        assertDirectoryExists(newDirName);
         return newDirName; 
     }
 
