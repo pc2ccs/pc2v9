@@ -499,13 +499,14 @@ public class Executable extends Plugin implements IExecutable {
      */
     private void createOutputDataset(int testCaseNumber, String resultsFileName) {
         
-        String fileSuffix = "set"+testCaseNumber;
+        String fileSuffix = ".set"+testCaseNumber;
         
         String [] filenames = {
                 VALIDATOR_STDOUT_FILENAME, //
                 VALIDATOR_STDERR_FILENAME, //
                 EXECUTE_STDOUT_FILENAME, //
                 EXECUTE_STDERR_FILENAME, //
+                resultsFileName, //
         };
         
         for (String name : filenames) {
