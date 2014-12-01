@@ -10,7 +10,7 @@ import java.io.*;
 // $Id: isumit.java 1962 2009-11-25 03:42:12Z boudreat $
 //
 
-public class isumit {
+public class ISumit {
     public static void main(String[] args) 
     {
 	try
@@ -33,7 +33,7 @@ public class isumit {
 	}
 	catch(Exception e)
 	{
-		System.out.println("Possible trouble reading sumit.dat");
+		System.out.println("Possible trouble reading stdin");
 		System.out.println("Message: "+ e.getMessage());
 	}			
     }
