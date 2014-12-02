@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -149,6 +150,8 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
      * The output file for the validator results.
      */
     private String validatorResultsFileName;
+    
+    private String testingSummaryFilename;
 
     public ExecutablePlugin(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
@@ -182,6 +185,8 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
         
         String secs = new Long((new Date().getTime()) % 100).toString();
         validatorResultsFileName = run.getNumber() + secs + "XRSAM.txt";
+        
+        testingSummaryFilename = run.getNumber() + secs + "XRSAM.results.txt";
     }
 
     /**
@@ -217,6 +222,12 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
 
     @Override
     public IFileViewer execute(boolean clearDirFirst) {
+        
+        /**
+         * List of summaries of each test data set.
+         */
+        ArrayList<String> summaryLines = new ArrayList<String>();
+        
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
         } else {
@@ -271,6 +282,15 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
                     }
                 }
             }
+            
+            String judgeSummaryLine = "run=" + run.getNumber()+ //
+                    ",site=" + run.getSiteNumber() +//
+                    ",team=" + run.getSubmitter()+//
+                    ",judge=" + getContest().getClientId() + //
+                    ",runstatus=" + run.getStatus() + //
+                    ",problem=" + run.getProblemId() //
+                    ;
+            summaryLines.add(judgeSummaryLine);
 
             if (isTestRunOnly()) {
                 // Team, just compile and execute it.
@@ -316,26 +336,35 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
                     dataFiles = problemDataFiles.getJudgesDataFiles();
                 } // else problem has no data files
                 int dataSetNumber = 0;
+                
+                boolean passed = false;
 
                 if (dataFiles == null || dataFiles.length <= 1) {
                     // Only a single (at most) data set,
                     
                     log.info("SINGLE run test case for un "+run.getNumber()+" site "+run.getSiteNumber());
-//                    System.out.println("debug 22 SINGLE run test case for un "+run.getNumber()+" site "+run.getSiteNumber());
+//                    System.out.println("debug SINGLE run test case for un "+run.getNumber()+" site "+run.getSiteNumber());
                     
                     if (executeProgram(dataSetNumber) && isValidated()) {
                         
                         validateProgram(dataSetNumber);
                         
+                        passed = ExecuteUtilities.didTeamSolveProblem(executionData);
+                        
                         createOutputDataset(1, validatorResultsFileName);
+                        
+                        String summaryLine = createTestSummaryLine (dataSetNumber + 1, executionData);
+                        summaryLines.add(summaryLine);
+                        
                     }
                 } else {
                     
                     /**
                      * Multiple Test Cases.
                      */
-                    boolean passed = true;
-
+                    
+                    passed = true;
+                    
                     while (passed && dataSetNumber < dataFiles.length) {
 
                         int testCaseNumber = dataSetNumber + 1;
@@ -356,12 +385,27 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
                                 }
 
                                 createOutputDataset(testCaseNumber, validatorResultsFileName);
+                                
+                                String summaryLine = createTestSummaryLine (dataSetNumber + 1, executionData);
+                                summaryLines.add(summaryLine);
                             }
                         } else {
                             log.info("Run test case "+testCaseNumber +" for run "+run.getNumber()+" site "+run.getSiteNumber()+", program did not run/execute ");
                         }
 
                         dataSetNumber++;
+                    }
+                }
+                
+                summaryLines.add("results="+passed);
+                
+                String fullResultsFilename = prefixExecuteDirname(testingSummaryFilename);
+                try {
+                    ExecuteUtilities.writeFileContents(fullResultsFilename, summaryLines);
+                } catch (Exception e) {
+                    log.info("Could not write results to file: " + fullResultsFilename + ", exception=" + e);
+                    for (String sumLine : summaryLines) {
+                        log.info("summary: " + sumLine);
                     }
                 }
                 
@@ -429,6 +473,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
                 fileViewer.addFilePane("Program stderr", outputFile);
                 programGeneratedOutput = true;
             }
+   
 
             if (!programGeneratedOutput) {
                 String message = "PC2: execution of program did not generate any output";
@@ -454,6 +499,13 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
             file = new File(outputFile);
             if (file.isFile() && file.length() > 0) {
                 fileViewer.addFilePane("Compiler stderr", outputFile);
+            }
+            
+            outputFile = prefixExecuteDirname(testingSummaryFilename);
+            file = new File(outputFile);
+            if (file.isFile() && file.length() > 0) {
+                fileViewer.addFilePane("Testing Results", outputFile);
+                programGeneratedOutput = true;
             }
 
             if (executionData.getExecuteExitValue() != 0) {
@@ -492,6 +544,22 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
         return fileViewer;
     }
     
+    private String createTestSummaryLine(int dataSetNumber, ExecutionData data) {
+        
+        boolean passed = ExecuteUtilities.didTeamSolveProblem(executionData);
+
+        return "testnumber=" + dataSetNumber + //
+                ",accepted=" + passed + //
+                ",exeMS=" + data.getExecuteTimeMS() + //
+                ",valMS=" + data.getvalidateTimeMS() + //
+                ",exeRC=" + data.getExecuteExitValue() + //
+                ",valRC=" + data.getValidationReturnCode() + //
+                "\ntestnumber=" + dataSetNumber + //
+                ",exeExc=" + data.getExecutionException() + //
+                ",addInfo=" + data.getAdditionalInformation() //
+        ;
+    }
+
     /**
      * Create copies of output from execution and validation output.
      * 
@@ -635,10 +703,6 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
                 /**
                  * If not external files, must unpack files.
                  */
-                // TODO remove these old lines
-//                createFile(problemDataFiles.getJudgesDataFiles()[dataSetNumber], prefixExecuteDirname(problem.getDataFileName()));
-//                createFile(problemDataFiles.getJudgesAnswerFiles()[dataSetNumber], prefixExecuteDirname(problem.getAnswerFileName()));
-                
                 // Create the correct output file, aka answer file
                 createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, prefixExecuteDirname(problem.getDataFileName()));
 
@@ -1086,7 +1150,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
                  * If the first word is a existing file, use
                  * the full path
                  */
-                // TODO is this a bug in that the rest of the command line is thrown away?
+                // SOMEDAY is this a bug in that the rest of the command line is thrown away?
                 cmdline = f.getCanonicalPath();
             }
             
@@ -1825,5 +1889,25 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
         executionTimer = null;
         fileViewer = null;
     }
+    
+    /**
+     * Name of validator results file.
+     * 
+     * Each time the validator runs the validator results should be output to this file. 
+     */
+    public String getValidatorResultsFileName() {
+        return validatorResultsFileName;
+    }
+    
+    /**
+     * Name of testing summary results file.
+     * 
+     * Contains run information and results from each test.
+     */
+    public String getTestingSummaryFilename() {
+        return testingSummaryFilename;
+    }
+    
+    
 }
 

@@ -1,8 +1,12 @@
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Date;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -560,5 +564,35 @@ public class ExecuteUtilities extends Plugin {
                 ", executionException=" + executionData.getExecutionException() + //
                 ", validationResults=" + executionData.getValidationResults() //
         ;
+    }
+
+    /**
+     * Write String Array to file.
+     * @param filename
+     * @param datalines
+     * @throws FileNotFoundException
+     */
+    public static void writeFileContents(String filename, String[] datalines) throws FileNotFoundException {
+        PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
+        for (String s : datalines) {
+            writer.println(s);
+        }
+        writer.close();
+        writer = null;
+    }
+
+    /**
+     * Write ArrayList to file.
+     * @param filename
+     * @param datalines
+     * @throws FileNotFoundException
+     */
+    public static void writeFileContents(String filename, ArrayList<String> datalines) throws FileNotFoundException {
+        PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
+        for (String s : datalines) {
+            writer.println(s);
+        }
+        writer.close();
+        writer = null;
     }
 }

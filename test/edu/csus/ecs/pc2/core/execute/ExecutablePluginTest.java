@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.ConsoleHandler;
@@ -39,8 +40,6 @@ import edu.csus.ecs.pc2.validator.Validator;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/test/edu/csus/ecs/pc2/core/execute/ExecutableTest.java $
 public class ExecutablePluginTest extends AbstractTestCase {
 
-    // SOMDAY change to using Hello.java by fixing class name in Hello.java
-    
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     // private static int testNumber = 1;
@@ -51,7 +50,6 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
     private Problem sumitProblem = null;
 
-    // SOMEDAY add test for hello
     private Problem helloWorldProblem = null;
 
     private Language javaLanguage = null;
@@ -272,7 +270,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        Run run = new Run(submitter, javaLanguage, sumitProblem);
+        Run run = createRun(submitter, javaLanguage, sumitProblem);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Sumit.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
@@ -284,7 +282,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        Run run = new Run(submitter, javaLanguage, helloWorldProblem);
+        Run run = createRun(submitter, javaLanguage, helloWorldProblem);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
@@ -299,7 +297,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
         Problem largeOutputProblem  = createLargeOutputProblem(contest);
         
-        Run run = new Run(submitter, javaLanguage, largeOutputProblem);
+        Run run = createRun(submitter, javaLanguage, largeOutputProblem);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("LargeOutput.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
@@ -313,7 +311,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
         Problem largeStdInProblem  = createLargeStdInProblem(contest);
         
-        Run run = new Run(submitter, javaLanguage, largeStdInProblem);
+        Run run = createRun(submitter, javaLanguage, largeStdInProblem);
         
         RunFiles runFiles = new RunFiles(run,  getRootInputTestFile("Casting.java"));
 
@@ -334,28 +332,26 @@ public class ExecutablePluginTest extends AbstractTestCase {
         String executeDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(executeDirectoryName);
         
-        ExecutablePlugin executable = new ExecutablePlugin(contest, controller, run, runFiles);
-        executable.setExecuteDirectoryName(executeDirectoryName);
-        executable.setUsingGUI(false);
-        executable.execute();
+        ExecutablePlugin executablePlugin = new ExecutablePlugin(contest, controller, run, runFiles);
+        executablePlugin.setExecuteDirectoryName(executeDirectoryName);
+        executablePlugin.setUsingGUI(false);
+        executablePlugin.execute();
 
-        ExecutionData executionData = executable.getExecutionData();
+        ExecutionData executionData = executablePlugin.getExecutionData();
         
 //        dumpRunTestCases(run);
 
         // System.out.println("expectedJudgement  = " + expectedJudgement);
         // System.out.println("expectedJudgementV = " + executionData.getValidationResults());
 
-        //TODO: change the following println into an assert()
-//        System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
         assertTrue("Excessive runtime", executionData.getExecuteTimeMS() < 40000);
         
-        if (!executionData.isCompileSuccess()){
-            SerializedFile file = executionData.getCompileStdout();
+//        if (!executionData.isCompileSuccess()){
+//            SerializedFile file = executionData.getCompileStdout();
 //            dumpFile("Compiler stdout", file);
-            file = executionData.getCompileStderr();
+//            file = executionData.getCompileStderr();
 //            dumpFile("Compiler stderr", file);
-        }
+//        }
 
         assertTrue("Compilation failure " + run.getLanguageId(), executionData.isCompileSuccess());
         assertTrue("Run not executed " + run.getProblemId(), executionData.isExecuteSucess());
@@ -364,7 +360,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         // java.lang.NoClassDefFoundError: edu/csus/ecs/pc2/validator/Validator
         
         
-        String jarPath = executable.findPC2JarPath();
+        String jarPath = executablePlugin.findPC2JarPath();
 
         if (! new File(jarPath).isDirectory()){
             System.err.println("ERROR - pc2 jar path not a directory '"+jarPath+"'");
@@ -392,7 +388,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         }
         
         executionData = null;
-        executable = null;
+        executablePlugin = null;
 
     }
     
@@ -426,7 +422,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        Run run = new Run(submitter, javaLanguage, sumitProblem);
+        Run run = createRun (submitter, javaLanguage, sumitProblem);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Sumit.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
@@ -434,6 +430,15 @@ public class ExecutablePluginTest extends AbstractTestCase {
         
     }
     
+    private Run createRun(ClientId submitter, Language language, Problem problem) {
+        
+        Run run = new Run(submitter, language, problem);
+        run.setSiteNumber(contest.getSiteNumber());
+        Long secs = new Long (new Date().getTime() % 100);
+        run.setNumber(secs.intValue() +100);
+        return run;
+    }
+
     public void testFindPC2Jar(Run run, RunFiles runFiles) throws Exception {
         
         String executeDirectoryName = getOutputDataDirectory(getName());
@@ -525,7 +530,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
         Language language = createLanguage(LanguageAutoFill.GNUCPPTITLE);
         contest.addLanguage(language);
-        Run run = new Run(submitter, language, helloWorldProblem);
+        Run run = createRun(submitter, language, helloWorldProblem);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
 
 //        ExecutablePlugin executable = new ExecutablePlugin(contest, controller, run, runFiles);
@@ -599,7 +604,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
     }
     
     /**
-     * Bug TODO - no judge data file specified
+     * No judge data file specified
      * @throws Exception
      */
     public void testValidateMissingJudgesDataFile() throws Exception {
@@ -610,7 +615,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         
 //        assertFalse("Expecting using internal data files ",problem.isUsingExternalDataFiles());
 
-        Run run = new Run(submitter, javaLanguage, problem);
+        Run run = createRun(submitter, javaLanguage, problem);
         String helloSourceFilename = getSamplesSourceFilename("hello.java");
         assertFileExists(helloSourceFilename);
         RunFiles runFiles = new RunFiles(run, helloSourceFilename);
@@ -673,7 +678,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
         assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
 
-        Run run = new Run(submitter, javaLanguage, problem);
+        Run run = createRun(submitter, javaLanguage, problem);
 
         assertFileExists(sumitFilename);
         RunFiles runFiles = new RunFiles(run, sumitFilename);
@@ -696,7 +701,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
         assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
 
-        Run run = new Run(submitter, javaLanguage, problem);
+        Run run = createRun(submitter, javaLanguage, problem);
 
         assertFileExists(sumitFilename);
         RunFiles runFiles = new RunFiles(run, sumitFilename);
@@ -718,7 +723,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
         assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
 
-        Run run = new Run(submitter, javaLanguage, problem);
+        Run run = createRun(submitter, javaLanguage, problem);
 
         assertFileExists(sumitFilename);
         RunFiles runFiles = new RunFiles(run, sumitFilename);
@@ -762,7 +767,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         testBaseDirname = Utilities.getCurrentDirectory() + File.separator + testBaseDirname;
         
 //        ensureDirectory(testBaseDirname);
-        startExplorer(new File(testBaseDirname));
+//        startExplorer(new File(testBaseDirname));
         
         setDataFiles(problem, problemDataFiles,testBaseDirname, dataFileBaseNames);
         
@@ -818,15 +823,21 @@ public class ExecutablePluginTest extends AbstractTestCase {
       
     }
 
+    /**
+     * Uncomment this to run individual tests.
+     * 
+     * This only works under JUnit 3.
+     */
+    
 //    public static TestSuite suite() {
 //
 //        TestSuite suite = new TestSuite("ExecutablePlugin");
 //        String singletonTestName = null;
 //        singletonTestName = "testMultipleTestCaseFromSTDIN";
-//        singletonTestName = "testMultipleTestCaseFromFile";
 //        singletonTestName = "testMultipleTestCaseFailTest2";
+//        singletonTestName = "testMultipleTestCaseFromFile";
 //        
-//        suite.addTest(new ExecutableTest(singletonTestName));
+//        suite.addTest(new ExecutablePluginTest(singletonTestName));
 //        return suite;
 //
 //    }
@@ -850,7 +861,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 //
 //
 //        if (!"".equals(singletonTestName)) {
-//            suite.addTest(new ExecutableTest(singletonTestName));
+//            suite.addTest(new ExecutablePluginTest(singletonTestName));
 //        } else {
 //
 //            String [] testNames = { //
@@ -870,7 +881,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 //
 //
 //            for (String testName : testNames) {
-//                suite.addTest(new ExecutableTest(testName)); 
+//                suite.addTest(new ExecutablePluginTest(testName)); 
 //            }
 //        }
 //
