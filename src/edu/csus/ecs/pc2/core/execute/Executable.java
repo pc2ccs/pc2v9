@@ -145,11 +145,6 @@ public class Executable extends Plugin implements IExecutable {
     
     private boolean usingGUI = true;
 
-    /**
-     * The output file for the validator results.
-     */
-    private String validatorResultsFileName;
-
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
         this.contest = inContest;
@@ -158,8 +153,6 @@ public class Executable extends Plugin implements IExecutable {
         this.run = run;
         language = inContest.getLanguage(run.getLanguageId());
         problem = inContest.getProblem(run.getProblemId());
-        
-        super.setContestAndController(contest, controller);
 
         initialize();
     }
@@ -179,9 +172,6 @@ public class Executable extends Plugin implements IExecutable {
         if (executorId.getClientType() != ClientType.Type.TEAM) {
             this.problemDataFiles = contest.getProblemDataFile(problem);
         }
-        
-        String secs = new Long((new Date().getTime()) % 100).toString();
-        validatorResultsFileName = run.getNumber() + secs + "XRSAM.txt";
     }
 
     /**
@@ -319,52 +309,27 @@ public class Executable extends Plugin implements IExecutable {
 
                 if (dataFiles == null || dataFiles.length <= 1) {
                     // Only a single (at most) data set,
-                    
-                    log.info("SINGLE run test case for un "+run.getNumber()+" site "+run.getSiteNumber());
-//                    System.out.println("debug 22 SINGLE run test case for un "+run.getNumber()+" site "+run.getSiteNumber());
-                    
                     if (executeProgram(dataSetNumber) && isValidated()) {
-                        
                         validateProgram(dataSetNumber);
-                        
-                        createOutputDataset(1, validatorResultsFileName);
                     }
                 } else {
-                    
-                    /**
-                     * Multiple Test Cases.
-                     */
+                    // getting here when not in validator mode results in a blank execute results window
                     boolean passed = true;
 
-                    while (passed && dataSetNumber < dataFiles.length) {
-
-                        int testCaseNumber = dataSetNumber + 1;
-                        log.info("Run test case "+testCaseNumber +" for run "+run.getNumber()+" site "+run.getSiteNumber());
-
-                        if (executeProgram(dataSetNumber)) {
-
-                            if (isValidated()) {
-                                validateProgram(dataSetNumber);
-                                
-                                passed = ExecuteUtilities.didTeamSolveProblem(executionData);
-
-//                                System.out.println("\ndebug   ******* TEST "+testCaseNumber+" of "+dataFiles.length+" didValidationPass "+passed);
-                                if (passed) {
-                                    log.info("Run test case " + testCaseNumber + " for run " + run.getNumber() + " site " + run.getSiteNumber() + " passed validation ");
-                                } else {
-                                    log.info("Run test case " + testCaseNumber + " for run " + run.getNumber() + " site " + run.getSiteNumber() + " failed validation ");
-                                }
-
-                                createOutputDataset(testCaseNumber, validatorResultsFileName);
-                            }
+                    // TODO 164
+                    // TODO CCS SOMEDAY make this work properly - aka not depend on mtsv
+//                    while (passed && dataSetNumber < dataFiles.length) {
+                        if (executeProgram(dataSetNumber) && isValidated()) {
+                            passed = validateProgram(dataSetNumber);
                         } else {
-                            log.info("Run test case "+testCaseNumber +" for run "+run.getNumber()+" site "+run.getSiteNumber()+", program did not run/execute ");
+                            passed = false; // didn't execute.
                         }
+                        
+                        log.info("Run "+run.getNumber()+" test case passes = "+passed);
 
                         dataSetNumber++;
-                    }
+//                    }
                 }
-                
             } else {
                 /**
                  * compileProgram returns false if
@@ -493,35 +458,6 @@ public class Executable extends Plugin implements IExecutable {
     }
     
     /**
-     * Create copies of output from execution and validation output.
-     * 
-     * @param testCaseNumber
-     */
-    private void createOutputDataset(int testCaseNumber, String resultsFileName) {
-        
-        String fileSuffix = ".set"+testCaseNumber;
-        
-        String [] filenames = {
-                VALIDATOR_STDOUT_FILENAME, //
-                VALIDATOR_STDERR_FILENAME, //
-                EXECUTE_STDOUT_FILENAME, //
-                EXECUTE_STDERR_FILENAME, //
-                resultsFileName, //
-        };
-        
-        for (String name : filenames) {
-
-            String sourceName = prefixExecuteDirname(name);
-            String targ = sourceName + fileSuffix;
-            if (new File(sourceName).isFile()) {
-                if (! ExecuteUtilities.copyFile(sourceName, targ, log)) {
-                    log.warning("Unnable to copy file " + sourceName + " to " + targ);
-                }
-            }
-        }
-    }
-
-    /**
      * Extracts file setNumber from list of files (fileList).
      * 
      * @param fileList -
@@ -587,15 +523,6 @@ public class Executable extends Plugin implements IExecutable {
         return dir.isDirectory();
     }
 
-    /**
-     * Run validator.
-     * 
-     * You MUST use {@link ExecuteUtilities#didTeamSolveProblem(ExecutionData)} to learn whether
-     * team's run solved the problem.
-     * 
-     * @param dataSetNumber
-     * @return true if validation was executed successfully.  This does NOT mean that the run was a yes/accepted. 
-     */
     protected boolean validateProgram(int dataSetNumber) {
 
         // SOMEDAY Handle the error messages better, log and put them before the user to
@@ -654,6 +581,12 @@ public class Executable extends Plugin implements IExecutable {
         
         createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
 
+        String secs = new Long((new Date().getTime()) % 100).toString();
+
+        // Answer/results file name
+
+        String resultsFileName = run.getNumber() + secs + "XRSAM.txt";
+
         /*
          * <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files]
          */
@@ -682,7 +615,7 @@ public class Executable extends Plugin implements IExecutable {
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
 
         String cmdLine = substituteAllStrings(run, commandPattern);
-        cmdLine = replaceString(cmdLine, "{:resfile}", validatorResultsFileName);
+        cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
 
         log.log(Log.DEBUG, "after  substitution: " + cmdLine);
 
@@ -784,16 +717,16 @@ public class Executable extends Plugin implements IExecutable {
             log.log(Log.CONFIG, "Exception in validator ", ex);
         }
 
-        boolean fileThere = new File(prefixExecuteDirname(validatorResultsFileName)).exists();
+        boolean fileThere = new File(prefixExecuteDirname(resultsFileName)).exists();
 
         try {
             if (fileThere) {
                 
-                storeValidatorResults(validatorResultsFileName, log);
+                storeValidatorResults(resultsFileName, log);
                 
             } else {
                 // SOMEDAY LOG
-                log.config("validationCall - Did not produce output results file " + validatorResultsFileName);
+                log.config("validationCall - Did not produce output results file " + resultsFileName);
 //                JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
             }
         } catch (Exception ex) {
@@ -868,10 +801,6 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     protected String findPC2JarPath() {
-        return ExecuteUtilities.findPC2JarPath();
-    }
-
-    protected String old_findPC2JarPath() {
         // end this with a : so pc2.jar can be appended
         String default_path = "/software/pc2/cc/projects/pc2v9/build/prod:"; 
         String jarDir = default_path;
@@ -980,16 +909,16 @@ public class Executable extends Plugin implements IExecutable {
             executionTimer.startTimer();
 
             if (problem.getDataFileName() != null) {
-                inputDataFileName = prefixExecuteDirname(problem.getDataFileName());
+                if (problem.isReadInputDataFromSTDIN()) {
+                    // we are using createTempFile just to get a temp name, not to avoid conflicts
+                    File output = File.createTempFile("__t", ".in", new File(getExecuteDirectoryName()));
+                    inputDataFileName = prefixExecuteDirname(output.getName());
+                    output.delete(); // will be created later
+                } else {
+                    inputDataFileName = prefixExecuteDirname(problem.getDataFileName());
+                }
             }
-            
-            if (problem.isReadInputDataFromSTDIN()) {
-                // we are using createTempFile just to get a temp name, not to avoid conflicts
-                File output = File.createTempFile("__t", ".in", new File(getExecuteDirectoryName()));
-                inputDataFileName = prefixExecuteDirname(output.getName());
-                output.delete(); // will be created later
-            }
-            
+
             if (isTestRunOnly()) {
 
                 if (problem.isReadInputDataFromSTDIN()) {
@@ -1017,15 +946,11 @@ public class Executable extends Plugin implements IExecutable {
                 }
 
             } else {
-                
                 // Extract the judge data file for this problem and dataSetNumber.
-                
                 if ( ! problem.isUsingExternalDataFiles() ){
-                    
                     /**
                      * Only extract internal data files.
                      */
-
                     if (inputDataFileName != null && problemDataFiles.getJudgesDataFiles() != null) {
 
                         if (overwriteJudgesDataFiles) {
@@ -1037,6 +962,7 @@ public class Executable extends Plugin implements IExecutable {
                         }
 
                     }
+                    // Else, leave whatever data file is present.
                 } else {
                     
                     /*
@@ -1121,8 +1047,6 @@ public class Executable extends Plugin implements IExecutable {
             stderrCollector.start();
 
             if (isValidDataFile(problem) && problem.isReadInputDataFromSTDIN()) {
-                
-                log.info("Submission is reading from stdin");
                 BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
                 BufferedInputStream in = new BufferedInputStream(new FileInputStream(inputDataFileName));
                 byte[] buf = new byte[32768];
