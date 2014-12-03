@@ -30,9 +30,14 @@ $JUDGEMENT_WRONG_ANSWER = "No - Wrong Output";
 $JUDGEMENT_IF = "No - Security Violation";
 $JUDGEMENT_TLE = "No - Time-limit Exceeded";
 $JUDGEMENT_RTE = "No - Run-time Error";
+# pc2 overrides for pac2014
+$JUDGEMENT_WRONG_ANSWER = "No - Completed - Wrong Answer";
+$JUDGEMENT_IF = "No - Other - Security Violation";
+$JUDGEMENT_TLE = "No - Time-limit Exceeded - Wrong Answer";
+$JUDGEMENT_RTE = "No - Runtime Error - Wrong Answer";
 
 # dir(or file) present?  will not show them gvim output
-my $IS_AUTO_JUDGE = "/home/pc2/computer";
+my $IS_AUTO_JUDGE = "/home/judge/computer";
 
 # using security wrapper
 my $usingwrapper = 1;
@@ -61,6 +66,8 @@ my $validator_message = "";
 
 my $exit_code = 22;
 
+# return value of running a submission
+my $result_code;
 
 # the command line to execute the team's solution
 
@@ -116,7 +123,7 @@ if ( $verbose )
 #
 # Fetch problem letter, resultsXMLfile and teamsource files from command line
 #
-my ($letter, $resultsfilename, $execute_command, $time_limit) = & parse_args ( @ARGV );
+my ($letter, $resultsfilename, $execute_command, $time_limit, $language_name, $main_file) = & parse_args ( @ARGV );
 
 $time_limit = 30 if $time_limit eq "";
 
@@ -486,6 +493,10 @@ sub run_and_validate
 			{
 				$judgement = $JUDGEMENT_RTE;
 			}
+			if ( defined($result_code) && $result_code ne "0"  )
+			{
+				$judgement = $JUDGEMENT_RTE;
+			}
 			elsif ( -f "timelimit.txt" )
 			{
 				$judgement = $JUDGEMENT_TLE;
@@ -582,6 +593,9 @@ sub do_execute
 
   my $execute_cmd = $executable;
 
+  #  TODO find a more elegant way to handle python
+  my $is_python = $language_name =~ /python/;
+
   if ( -f "${executable}.class" )
   {
     # Java
@@ -600,16 +614,21 @@ sub do_execute
 	}
 
   }
-  elsif ( &base_name ( $execute_cmd ) =~/^(python|perl|ruby)/ )
+  # elsif ( &base_name ( $execute_cmd ) =~/^(python|perl|ruby)/ )
+  elsif ( $is_python )
   {
-    # note: base_name input "/usr/bin/python hello.py" output: "python"
-
-    # TODO add security wrapper here, does the wrapper even permit/support: python hello.py ?
-    # 
-    # $execute_cmd = "/usr/local/pc2v9/bin/run_execute.sh $executable java policy.generic.J log $time_limit";
-
-    # Note - keep the execute command as it is.  Ex. /usr/bin/python hello.py
-
+ # || $lang=~ , $main_file) = & parse_args ( @ARGV );
+ 	if ( $language_name =~ /python3/ )
+	{
+		$execute_cmd = "/usr/bin/python3 $main_file";
+	} 
+        elsif ( $language_name =~ /python/ )
+	{
+		$execute_cmd = "/usr/bin/python $main_file";
+	}
+        open my $log, ">", "log" || warn("Unable to open log: $!\n");
+        print $log "No Security Violation\n";
+        close($log);
   }
   elsif ( ! -f $execute_cmd )
   {
@@ -642,14 +661,14 @@ sub do_execute
 	if ( $use_STDIN )
 	{
 		print STDERR "Running $execute_cmd < $inputfile > $outfile \n" if $verbose;
-		` $execute_cmd < $inputfile > $outfile `;
+		$result_code=` $execute_cmd < $inputfile > $outfile `;
 	}
 	else
 	{
 		print STDERR "Running /bin/cp -f -p . \n" if $verbose;
 		`/bin/cp -f -p $inputfile .`;
 		print STDERR "Running $execute_cmd > $outfile \n" if $verbose;
-		`$execute_cmd > $outfile `;
+		$result_code=`$execute_cmd > $outfile `;
 	}
 	if ( $usingwrapper )
 	{
@@ -1323,7 +1342,7 @@ sub load_list
 sub print_usage
 {
 	print <<SAGEU;
-Usage: $0 [-h] [-v] letter resultsfilename executable_name
+Usage: $0 [-h] [-v] letter resultsfilename executable_name lang_name mainfile
 
 Purpose To validate/judge teams output
 
@@ -1331,6 +1350,8 @@ where
   letter      - the letter for the problem to be judged
   resultsfilename - output results/judgement file name (Internation Standard format in XML)
   executable_name - team's executable or main class filename
+  lang_name - language display name lowercase
+  mainfile - team's submitted main filename
 
 -h      this message
 -s      not -v (more silent)
