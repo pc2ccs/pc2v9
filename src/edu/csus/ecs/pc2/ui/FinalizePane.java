@@ -20,10 +20,12 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.FinalizeReport;
@@ -233,42 +235,106 @@ public class FinalizePane extends JPanePlugin {
     protected void certifyContest() {
 
         FinalizeData data = getFromFields();
-
-        int numberUnjudgedRuns = getNumberUnjudgedRuns();
-        if (numberUnjudgedRuns > 0) {
-            showMessage("Warning " + numberUnjudgedRuns + " unjudged runs");
-        }
-
-        int numberUnasweredClars = getNumberUnansweredClars();
-        if (numberUnasweredClars > 0) {
-            showMessage("Warning " + numberUnasweredClars + " un-answered clarifications");
-        }
-
-        ContestTime contestTime = getContest().getContestTime();
-
-        if (contestTime.isContestRunning()) {
-
-            showMessage("Warning - contest not stopped");
-        }
-
-        if (contestTime.getRemainingSecs() > 0) {
-            showMessage("Warning - contest not over - remaining time: " + contestTime.getRemainingTimeStr());
-        }
-
+        
         try {
-            validateData(data);
+
+            int numberUnjudgedRuns = getNumberUnjudgedRuns();
+            if (numberUnjudgedRuns > 0) {
+                throw new InvalidFieldValue("Cannot finalize all runs must be judged, "+numberUnjudgedRuns+" unjudged runs");
+            }
+
+            int numberUnasweredClars = getNumberUnansweredClars();
+            if (numberUnasweredClars > 0) {
+                throw new InvalidFieldValue("Cannot finalize all clars must be answered, "+ numberUnasweredClars + " un-answered clarifications");
+            }
+            
+            int numberJudgingErrorRuns = getNumberJERuns(getContest());
+            if (numberJudgingErrorRuns > 0) {
+                throw new InvalidFieldValue("Cannot finalize there are runs with Judging Errors (JEs), "+ numberJudgingErrorRuns + " un-answered clarifications");
+            }
+            ContestTime contestTime = getContest().getContestTime();
+
+            if (contestTime.isContestRunning()) {
+                throw new InvalidFieldValue("Cannot finalize contest, contest clock not stopped");
+            }
+
+            if (contestTime.getRemainingSecs() > 0) {
+                throw new InvalidFieldValue("Cannot finalize contest - contest not over - remaining time: " + contestTime.getRemainingTimeStr());
+            }
+            
+//            if (data.getGoldRank() == 0) {
+//                throw new InvalidFieldValue("Cannot finalize contest - Number of golds must be greater than zero");
+//            }
+//            
+//            if (data.getSilverRank() == 0) {
+//                throw new InvalidFieldValue("Cannot finalize contest - Silver rank must be greater than zero");
+//            }
+            
+            if (data.getBronzeRank() == 0) {
+                throw new InvalidFieldValue("Cannot finalize contest - Bronze rank must be greater than zero");
+            }
+
+            if (data.getComment().trim().length() < 1) {
+                throw new InvalidFieldValue("Cannot finalize contest - missing comment, enter a comment");
+            }
+
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
             return;
         }
 
-        data.setCertified(true);
-
         int result = FrameUtilities.yesNoCancelDialog(this, "Are you sure you want to finalize?", "Sure, really realy sure?");
         if (result == JOptionPane.YES_OPTION) {
+            data.setCertified(true);
             getController().updateFinalizeData(data);
         }
 
+    }
+
+    /**
+     * Get number of JE runs.
+     * @param contest 
+     * @return
+     */
+    public static int getNumberJERuns(IInternalContest contest) {
+        Run[] runs = contest.getRuns();
+
+        Filter filter = new Filter();
+        filter.addRunState(RunStates.JUDGED);
+        
+        runs = filter.getRuns(runs);
+        
+        Judgement judgementJE = null;
+        Judgement[] judgeList = contest.getJudgements();
+        for (Judgement judgement : judgeList) {
+            if (judgement.getAcronym() != null){
+                if (judgement.getAcronym().equalsIgnoreCase("JE")){
+                    judgementJE = judgement;
+                }
+            }
+        }
+        
+        if (judgementJE == null){
+            /**
+             * No JE judgement, there is no way to have any runs judged as JE.
+             */
+            
+            return 0; // ------------------------ RETURN -------------
+        }
+        
+        int count = 0;
+
+        for (Run run : runs) {
+            if (!run.isDeleted()) {
+                
+                ElementId id = run.getJudgementRecord().getJudgementId();
+                if (judgementJE.getElementId().equals(id))
+                {
+                  count ++;  
+                }
+            }
+        }
+        return count;
     }
 
     private int getNumberUnjudgedRuns() {
@@ -304,30 +370,7 @@ public class FinalizePane extends JPanePlugin {
         JOptionPane.showMessageDialog(this, message);
     }
 
-    /**
-     * Validate and error check data.
-     * 
-     * @param data
-     */
-    private void validateData(FinalizeData data) {
 
-        if (data.getGoldRank() == 0) {
-            throw new InvalidFieldValue("Gold rank must be greater than zero");
-        }
-        
-        if (data.getSilverRank() == 0) {
-            throw new InvalidFieldValue("Silver rank must be greater than zero");
-        }
-        
-        if (data.getBronzeRank() == 0) {
-            throw new InvalidFieldValue("Bronze rank must be greater than zero");
-        }
-
-        if (data.getComment().trim().length() < 1) {
-            throw new InvalidFieldValue("Missing comment, enter a comment");
-        }
-
-    }
 
     /**
      * This method initializes centerPane

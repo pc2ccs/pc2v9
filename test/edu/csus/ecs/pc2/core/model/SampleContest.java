@@ -730,6 +730,7 @@ public class SampleContest {
 
         Run run = new Run(clientId, languageId, problem);
         run.setNumber(runId);
+        run.setSiteNumber(contest.getSiteNumber());
         run.setElapsedMins(elapsed);
 
         // Use a default No entry

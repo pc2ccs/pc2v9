@@ -46,6 +46,7 @@ import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 
@@ -949,5 +950,11 @@ public class AbstractTestCase extends TestCase {
         if (actual.equals(expected)){
             throw new ComparisonFailure(message, expected, actual);
         }
+    }
+
+    public Account getFirstJudge(IInternalContest contest) {
+        Account[] accounts = new SampleContest().getJudgeAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+        return accounts[0];
     }
 }
