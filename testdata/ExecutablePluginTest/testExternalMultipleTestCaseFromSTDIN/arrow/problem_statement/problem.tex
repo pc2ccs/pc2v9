@@ -1,0 +1,27 @@
+
+
+\problemname{Arrow}
+
+
+You are shooting at an archery target and aren't quite sure what angle to raise your bow and arrow. You know that gravity will start forcing your arrow toward the ground as soon as it's released and that you may need to aim your arrow upward to compensate. But how far?
+
+Your program should read three real numbers, the positive speed (m/s) at which the arrow is released, the positive horizontal distance from the tip of the arrow to the center of the target (m), and the vertical distance from the tip of the arrow to the center of the target (m). The vertical distance may be positive, negative or zero depending on whether the target is higher than you, lower than you, or level with you, respectively. You should assume there is no friction and that acceleration due to gravity is 9.8 m/s/s. Your answer should be the number of degrees above horizontal at which releasing the arrow will cause the arrow to strike the center of the target.
+
+\section*{Input}
+
+You should read from standard input three floating-point numbers -- speed, horizontal distance, vertical distance -- separated by whitespace.
+
+\section*{Output}
+
+If the speed of the arrow is insufficient to reach the target, output the word ``None''. Otherwise output the angle closest to zero degrees that causes the center of the target to be hit. A negative angle indicates lowering the arrow below horizontal, which might be needed if the target is below the horizontal (eg, down a hill). 
+
+As you know, the \texttt{double} type only approximates real numbers and is prone to small rounding errors. Answers within 0.001 of correct will be considered correct.
+
+\includesample{sample}
+\includesample{sample2}
+
+\hfill
+
+\begin{center}
+\includegraphics[scale=0.4]{pic.jpg}
+\end{center}

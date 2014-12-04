@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.ConsoleHandler;
 
+import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -28,16 +29,17 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 import edu.csus.ecs.pc2.validator.Validator;
 
 /**
  * Test ExecutablePlugin class.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: ExecutableTest.java 2891 2014-12-01 04:33:45Z laned $
+ * @version $Id$
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/test/edu/csus/ecs/pc2/core/execute/ExecutableTest.java $
+// $HeadURL$
 public class ExecutablePluginTest extends AbstractTestCase {
 
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
@@ -319,6 +321,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         runExecutableTest(run, runFiles, false, yesJudgement);
     }
 
+    
 
     /**
      * Invoke a executable test.
@@ -336,6 +339,8 @@ public class ExecutablePluginTest extends AbstractTestCase {
         executablePlugin.setExecuteDirectoryName(executeDirectoryName);
         executablePlugin.setUsingGUI(false);
         executablePlugin.execute();
+        
+//        startExplorer(executablePlugin.getExecuteDirectoryName());
 
         ExecutionData executionData = executablePlugin.getExecutionData();
         
@@ -404,6 +409,15 @@ public class ExecutablePluginTest extends AbstractTestCase {
 //        }
 //    }
 
+    protected void startExplorer(String directoryName) {
+        try {
+            startExplorer(new File(directoryName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+    }
+
     private Account getFirstJudge() {
         Account[] accounts = new SampleContest().getJudgeAccounts(contest);
         Arrays.sort(accounts, new AccountComparator());
@@ -467,10 +481,10 @@ public class ExecutablePluginTest extends AbstractTestCase {
      * directory, especially for testing purposes with multi-threaded tests.
      * 
      * @author pc2@ecs.csus.edu
-     * @version $Id: ExecutableTest.java 2891 2014-12-01 04:33:45Z laned $
+     * @version $Id$
      */
 
-    // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/test/edu/csus/ecs/pc2/core/execute/ExecutableTest.java $
+    // $HeadURL$
     class ExecutableOverride extends ExecutablePlugin {
 
         /**
@@ -696,7 +710,11 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
         Problem problem = createMultiTestCaseProblem(contest);
 
-        problem.setDataFileName("sumit.dat");
+        /**
+         * These must be set, each data file is copied to these names
+         * before execution.
+         */
+        problem.setDataFileName("sumit.dat"); // The team has been told to read from sumit.dat.
         problem.setAnswerFileName("sumit.ans");
 
         assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
@@ -783,6 +801,90 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
     }
     
+    /**
+     * Test multiple test cases from a CCS/problem.yaml defined problem.
+     * @throws Exception
+     */
+    public void testExternalMultipleTestCaseFromSTDIN() throws Exception {
+
+        String testBaseDirname = getDataDirectory(this.getName());
+        
+        String filename = testBaseDirname + "/arrow/submissions/accepted/Arrow.java";
+        
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+//        ensureDirectory(testBaseDirname);
+//        startExplorer(new File(testBaseDirname));
+        
+        Problem problem = createExternalMultiTestCaseProblem("arrow", contest, 2);
+        
+        assertNotEquals("Expecting problem display name loaded",problem.getDisplayName(), problem.getShortName());
+
+        problem.setReadInputDataFromSTDIN(true);
+        
+        problem.setShowValidationToJudges(false);
+        problem.setHideOutputWindow(true);
+        problem.setShowCompareWindow(false);
+        problem.setTimeOutInSeconds(10);
+
+        setPC2Validator(problem);
+
+        assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
+
+        Run run = createRun(submitter, javaLanguage, problem);
+
+        assertFileExists(filename);
+        RunFiles runFiles = new RunFiles(run, filename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, true, yesJudgement);
+                
+
+        // Run twice more
+        
+        runExecutableTest(run, runFiles, true, yesJudgement);
+
+        runExecutableTest(run, runFiles, true, yesJudgement);
+
+    }
+    
+    
+    /**
+     * Create a multiple test case problem from problem.yaml.
+     * 
+     * @param contest2
+     * @return
+     * @throws IOException 
+     */
+    private Problem createExternalMultiTestCaseProblem(String problemShortName, IInternalContest contest2, int expectedDataSets) throws IOException {
+        Problem problem = new Problem(problemShortName);
+        problem.setShortName(problemShortName);
+
+        ContestYAMLLoader loader = new ContestYAMLLoader();
+
+        // where problem.yaml file is
+        String testBaseDirname = getDataDirectory(this.getName());
+        // testBaseDirname = Utilities.getCurrentDirectory() + File.separator + testBaseDirname;
+
+//        ensureDirectory(testBaseDirname);
+//        startExplorer(new File(testBaseDirname));
+
+        loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem);
+
+        ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
+
+        int numberJudgesFiles = problemDataFiles.getJudgesDataFiles().length;
+        assertEquals("Expected number of judge data files ", expectedDataSets, numberJudgesFiles);
+
+        int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
+        assertEquals("Expected number of judge answer files ", expectedDataSets, numberJudgesAnswerFiles);
+
+        contest2.addProblem(problem, problemDataFiles);
+
+        return problem;
+
+    }
+    
     private void setDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String testBaseDirname, String[] dataFileBaseNames) {
 
  //      
@@ -829,18 +931,21 @@ public class ExecutablePluginTest extends AbstractTestCase {
      * This only works under JUnit 3.
      */
     
+    // rename metho to suite to run this test
 //    public static TestSuite suite() {
-//
-//        TestSuite suite = new TestSuite("ExecutablePlugin");
-//        String singletonTestName = null;
-//        singletonTestName = "testMultipleTestCaseFromSTDIN";
-//        singletonTestName = "testMultipleTestCaseFailTest2";
-//        singletonTestName = "testMultipleTestCaseFromFile";
-//        
-//        suite.addTest(new ExecutablePluginTest(singletonTestName));
-//        return suite;
-//
-//    }
+    public static TestSuite suiteOne() {
+
+        TestSuite suite = new TestSuite("ExecutablePlugin");
+        String singletonTestName = null;
+        singletonTestName = "testMultipleTestCaseFromSTDIN";
+        singletonTestName = "testMultipleTestCaseFailTest2";
+        singletonTestName = "testMultipleTestCaseFromFile";
+        singletonTestName = "testExternalMultipleTestCaseFromSTDIN";
+        
+        suite.addTest(new ExecutablePluginTest(singletonTestName));
+        return suite;
+
+    }
     
     
     /**
@@ -850,41 +955,43 @@ public class ExecutablePluginTest extends AbstractTestCase {
      * 
      * @return suite of tests.
      */
+    // rename method to suite to run these tests
 //    public static TestSuite suite() {
-//
-//        TestSuite suite = new TestSuite("ExecutablePlugin");
-//
-//        String singletonTestName = "";
-//        //        singletonTestName = "testLanguageNameSub";
-//        //        singletonTestName = "testHello";
-//        //        singletonTestName = "testValidateMissingJudgesDataFile";
-//
-//
-//        if (!"".equals(singletonTestName)) {
-//            suite.addTest(new ExecutablePluginTest(singletonTestName));
-//        } else {
-//
-//            String [] testNames = { //
-//                    "testSumit", //
-//                    "testHello", //
-//                    "testFindPC2Jar", //
-//                    "testStripSpace", //
-//                    "testLanguageNameSub", //
-//                    "testValidateMissingJudgesDataFile", //
-//                    "testMultipleTestCaseFromSTDIN", //
-//                    "testMultipleTestCaseFromFile", //
-//                    "testMultipleTestCaseFailTest2", //
-//
-//                    "testLargeOutput", //
-//                    "testLargeStdIn", //
-//            };
-//
-//
-//            for (String testName : testNames) {
-//                suite.addTest(new ExecutablePluginTest(testName)); 
-//            }
-//        }
-//
-//        return suite;
-//    }
+    public static TestSuite suiteTwo() {
+
+        TestSuite suite = new TestSuite("ExecutablePlugin");
+
+        String singletonTestName = "";
+        //        singletonTestName = "testLanguageNameSub";
+        //        singletonTestName = "testHello";
+        //        singletonTestName = "testValidateMissingJudgesDataFile";
+
+
+        if (!"".equals(singletonTestName)) {
+            suite.addTest(new ExecutablePluginTest(singletonTestName));
+        } else {
+
+            String [] testNames = { //
+                    "testSumit", //
+                    "testHello", //
+                    "testFindPC2Jar", //
+                    "testStripSpace", //
+                    "testLanguageNameSub", //
+                    "testValidateMissingJudgesDataFile", //
+                    "testMultipleTestCaseFromSTDIN", //
+                    "testMultipleTestCaseFromFile", //
+                    "testMultipleTestCaseFailTest2", //
+
+                    "testLargeOutput", //
+                    "testLargeStdIn", //
+            };
+
+
+            for (String testName : testNames) {
+                suite.addTest(new ExecutablePluginTest(testName)); 
+            }
+        }
+
+        return suite;
+    }
 }

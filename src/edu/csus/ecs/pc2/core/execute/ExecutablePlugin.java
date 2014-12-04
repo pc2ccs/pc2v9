@@ -15,7 +15,6 @@ import java.util.StringTokenizer;
 
 import javax.swing.JFileChooser;
 
-import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -41,7 +40,7 @@ import edu.csus.ecs.pc2.ui.NullViewer;
  * To not overwrite the judge's data files, use {@link #setOverwriteJudgesDataFiles(boolean)} to false.
  * 
  * @see #execute()
- * @version $Id: Executable.java 2895 2014-12-01 04:57:14Z laned $
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 
@@ -49,7 +48,7 @@ import edu.csus.ecs.pc2.ui.NullViewer;
 // should these routines be placed in a static way in a static class ?
 // SOMEDAY design decision how to handle MultipleFileViewer, display here, on TeamClient??
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/core/execute/Executable.java $
+// $HeadURL$
 public class ExecutablePlugin extends Plugin implements IExecutable {
     
     /**
@@ -68,6 +67,8 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
     private ProblemDataFiles problemDataFiles = null;
 
     private ClientId executorId = null;
+    
+    private ExecuteUtilities executeUtilities = null;
 
     /**
      * Directory where main file is found
@@ -179,8 +180,11 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
 
         log = controller.getLog();
 
+        executeUtilities = new ExecuteUtilities(contest, controller, run, runFiles, problem, language);
+        
         if (executorId.getClientType() != ClientType.Type.TEAM) {
             this.problemDataFiles = contest.getProblemDataFile(problem);
+            executeUtilities.setProblemDataFiles(problemDataFiles);
         }
         
         String secs = new Long((new Date().getTime()) % 100).toString();
@@ -188,31 +192,6 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
         
         testingSummaryFilename = run.getNumber() + secs + "XRSAM.results.txt";
     }
-
-    /**
-     * Remove all files from specified directory, including subdirectories.
-     * 
-     * @param dirName
-     *            directory to be cleared.
-     * @return true if directory was cleared.
-     */
-    protected boolean clearDirectory(String dirName) {
-        File dir = null;
-        boolean result = true;
-
-        dir = new File(dirName);
-        String[] filesToRemove = dir.list();
-        for (int i = 0; i < filesToRemove.length; i++) {
-            File fn1 = new File(dirName + File.separator + filesToRemove[i]);
-            if (fn1.isDirectory()) {
-                // recurse through any directories
-                result &= clearDirectory(dirName + File.separator + filesToRemove[i]);
-            }
-            result &= fn1.delete();
-        }
-        return (result);
-    }
-
 
     @Override
     public IFileViewer execute() {
@@ -236,6 +215,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
 
         try {
             executionData = new ExecutionData();
+            executeUtilities.setExecutionData(executionData);
             
             executeDirectoryName = getExecuteDirectoryName();
 
@@ -256,7 +236,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
                  * Do not clear directory if writeJudgesDataFiles is false, because if we are not overwriting the judge's data file, then erasing the existing files makes no sense.
                  */
 
-                boolean cleared = clearDirectory(executeDirectoryName);
+                boolean cleared = ExecuteUtilities.clearDirectory(executeDirectoryName);
                 if (!cleared) {
                     // SOMEDAY LOG error Directory could not be cleared, other process running?
                     log.config("Directory could not be cleared, other process running? ");
@@ -745,8 +725,8 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
 
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
 
-        String cmdLine = substituteAllStrings(run, commandPattern);
-        cmdLine = replaceString(cmdLine, "{:resfile}", validatorResultsFileName);
+        String cmdLine = executeUtilities.substituteAllStrings(commandPattern);
+        cmdLine = ExecuteUtilities.replaceString(cmdLine, "{:resfile}", validatorResultsFileName);
 
         log.log(Log.DEBUG, "after  substitution: " + cmdLine);
 
@@ -1125,7 +1105,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
             String cmdline = language.getProgramExecuteCommandLine();
             log.log(Log.DEBUG, "before substitution: " + cmdline);
 
-            cmdline = substituteAllStrings(run, cmdline);
+            cmdline = executeUtilities.substituteAllStrings(cmdline);
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
             /**
@@ -1281,7 +1261,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
                 controller.sendCompilingMessage(run);
             }
 
-            String programName = replaceString(language.getExecutableIdentifierMask(), "{:basename}", removeExtension(runFiles.getMainFile().getName()));
+            String programName = ExecuteUtilities.replaceString(language.getExecutableIdentifierMask(), "{:basename}", ExecuteUtilities.removeExtension(runFiles.getMainFile().getName()));
 
             // Check whether the team submitted a executable, if they did remove
             // it.
@@ -1294,7 +1274,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
             }
 
             log.log(Log.DEBUG, "before substitution: " + language.getCompileCommandLine());
-            String cmdline = substituteAllStrings(run, language.getCompileCommandLine());
+            String cmdline = executeUtilities.substituteAllStrings(language.getCompileCommandLine());
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false));
@@ -1394,219 +1374,219 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
         return contest.getContestInformation().getMaxFileSize();
     }
 
-    /**
-     * Replace all instances of beforeString with afterString.
-     * 
-     * If before string is not found, then returns original string.
-     * 
-     * @param origString
-     *            string to be modified
-     * @param beforeString
-     *            string to search for
-     * @param afterString
-     *            string to replace beforeString
-     * @return original string with all beforeString instances replaced with afterString
-     */
-    public String replaceString(String origString, String beforeString, String afterString) {
+//    /**
+//     * Replace all instances of beforeString with afterString.
+//     * 
+//     * If before string is not found, then returns original string.
+//     * 
+//     * @param origString
+//     *            string to be modified
+//     * @param beforeString
+//     *            string to search for
+//     * @param afterString
+//     *            string to replace beforeString
+//     * @return original string with all beforeString instances replaced with afterString
+//     */
+//    public String replaceString(String origString, String beforeString, String afterString) {
+//
+//        if (origString == null) {
+//            return origString;
+//        }
+//
+//        int startIdx = origString.lastIndexOf(beforeString);
+//
+//        if (startIdx == -1) {
+//            return origString;
+//        }
+//
+//        StringBuffer buf = new StringBuffer(origString);
+//
+//        while (startIdx != -1) {
+//            buf.replace(startIdx, startIdx + beforeString.length(), afterString);
+//            startIdx = origString.lastIndexOf(beforeString, startIdx - 1);
+//        }
+//
+//        return buf.toString();
+//    }
 
-        if (origString == null) {
-            return origString;
-        }
+//    /**
+//     * Replace beforeString with int.
+//     * 
+//     * For details see {@link #replaceString(String, String, String)}
+//     * 
+//     * @param origString
+//     *            string to be modified
+//     * @param beforeString
+//     *            string to search for
+//     * @param afterInt
+//     *            integer to replace beforeString
+//     * @return string after replacement.
+//     */
+//    public String replaceString(String origString, String beforeString, int afterInt) {
+//        String afterString = new Integer(afterInt).toString();
+//        return replaceString(origString, beforeString, afterString);
+//    }
 
-        int startIdx = origString.lastIndexOf(beforeString);
-
-        if (startIdx == -1) {
-            return origString;
-        }
-
-        StringBuffer buf = new StringBuffer(origString);
-
-        while (startIdx != -1) {
-            buf.replace(startIdx, startIdx + beforeString.length(), afterString);
-            startIdx = origString.lastIndexOf(beforeString, startIdx - 1);
-        }
-
-        return buf.toString();
-    }
-
-    /**
-     * Replace beforeString with int.
-     * 
-     * For details see {@link #replaceString(String, String, String)}
-     * 
-     * @param origString
-     *            string to be modified
-     * @param beforeString
-     *            string to search for
-     * @param afterInt
-     *            integer to replace beforeString
-     * @return string after replacement.
-     */
-    public String replaceString(String origString, String beforeString, int afterInt) {
-        String afterString = new Integer(afterInt).toString();
-        return replaceString(origString, beforeString, afterString);
-    }
-
-    /**
-     * return string with all field variables filled with values.
-     * 
-     * Each variable will be filled in with values.
-     * 
-     * <pre>
-     *             valid fields are:
-     *              {:mainfile} - submitted file (hello.java)
-     *              {:basename} - mainfile without extension (hello)
-     *              {:validator} - validator program name
-     *              {:language}
-     *              {:problem}
-     *              {:teamid}
-     *              {:siteid}
-     *              {:infile}
-     *              {:outfile}
-     *              {:ansfile}
-     *              {:pc2home}
-     * </pre>
-     * 
-     * @param inRun
-     *            submitted by team
-     * @param origString -
-     *            original string to be substituted.
-     * @return string with values
-     */
-    public String substituteAllStrings(Run inRun, String origString) {
-        String newString = "";
-        String nullArgument = "-"; /* this needs to change */
-
-        try {
-            if (inRun == null) {
-                throw new IllegalArgumentException("Run is null");
-            }
-
-            if (runFiles.getMainFile() == null) {
-                log.config("substituteAllStrings() main file is null (no contents)");
-                return origString;
-            }
-            newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
-            newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
-
-            String validatorCommand = null;
-
-            if (problem.getValidatorProgramName() != null) {
-                validatorCommand = problem.getValidatorProgramName();
-            }
-
-            if (problemDataFiles != null) {
-                SerializedFile validatorFile = problemDataFiles.getValidatorFile();
-                if (validatorFile != null) {
-                    validatorCommand = validatorFile.getName(); // validator
-                }
-            }
-            
-            if (validatorCommand != null) {
-                newString = replaceString(newString, "{:validator}", validatorCommand);
-            }
-
-            // SOMEDAY LanguageId and ProblemId are now a long string not an int,
-            // what should we do?
-
-            if (inRun.getLanguageId() != null) {
-                Language[] langs=contest.getLanguages();
-                int index = 0;
-                String displayName="";
-                for (int i = 0; i < langs.length; i++) {
-                    if (langs[i] != null && langs[i].getElementId().equals(inRun.getLanguageId())) {
-                        displayName = langs[i].getDisplayName().toLowerCase().replaceAll(" ", "_");
-                        index=i+1;
-                        break;
-                    }
-                }
-                if (index > 0) {
-                    newString = replaceString(newString, "{:language}", index);
-                    newString = replaceString(newString, "{:languageletter}", Utilities.convertNumber(index));
-                    newString = replaceString(newString, "{:languagename}", displayName);
-                }
-            }
-            if (inRun.getProblemId() != null) {
-                Problem[] problems=contest.getProblems();
-                int index = 0;
-                for (int i = 0; i < problems.length; i++) {
-                    if (problems[i] != null && problems[i].getElementId().equals(inRun.getProblemId())) {
-                        index=i+1;
-                        break;
-                    }
-                }
-                if (index > 0) {
-                    newString = replaceString(newString, "{:problem}", index);
-                    newString = replaceString(newString, "{:problemletter}", Utilities.convertNumber(index));
-                }
-            }
-            if (inRun.getSubmitter() != null) {
-                newString = replaceString(newString, "{:teamid}", inRun.getSubmitter().getClientNumber());
-                newString = replaceString(newString, "{:siteid}", inRun.getSubmitter().getSiteNumber());
-            }
-
-            if (problem != null) {
-                if (problem.getDataFileName() != null && !problem.getDataFileName().equals("")) {
-                    newString = replaceString(newString, "{:infile}", problem.getDataFileName());
-                } else {
-                    newString = replaceString(newString, "{:infile}", nullArgument);
-                }
-                if (problem.getAnswerFileName() != null && !problem.getAnswerFileName().equals("")) {
-                    newString = replaceString(newString, "{:ansfile}", problem.getAnswerFileName());
-                } else {
-                    newString = replaceString(newString, "{:ansfile}", nullArgument);
-                }
-                newString = replaceString(newString, "{:timelimit}", Long.toString(problem.getTimeOutInSeconds()));
-            } else {
-                log.config("substituteAllStrings() problem is undefined (null)");
-            }
-
-            if (executionData != null) {
-                if (executionData.getExecuteProgramOutput() != null) {
-                    if (executionData.getExecuteProgramOutput().getName() != null) {
-                        newString = replaceString(newString, "{:outfile}", executionData.getExecuteProgramOutput().getName());
-                    } else {
-                        newString = replaceString(newString, "{:outfile}", nullArgument);
-                    }
-                }
-                newString = replaceString(newString, "{:exitvalue}", Integer.toString(executionData.getExecuteExitValue()));
-                newString = replaceString(newString, "{:executetime}", Long.toString(executionData.getExecuteTimeMS()));
-            }
-            String pc2home = new VersionInfo().locateHome();
-            if (pc2home != null && pc2home.length() > 0) {
-                newString = replaceString(newString, "{:pc2home}", pc2home);
-            }
-        } catch (Exception e) {
-            // SOMEDAY LOG
-            log.log(Log.CONFIG, "Exception ", e);
-        }
-
-        return newString;
-    }
+//    /**
+//     * return string with all field variables filled with values.
+//     * 
+//     * Each variable will be filled in with values.
+//     * 
+//     * <pre>
+//     *             valid fields are:
+//     *              {:mainfile} - submitted file (hello.java)
+//     *              {:basename} - mainfile without extension (hello)
+//     *              {:validator} - validator program name
+//     *              {:language}
+//     *              {:problem}
+//     *              {:teamid}
+//     *              {:siteid}
+//     *              {:infile}
+//     *              {:outfile}
+//     *              {:ansfile}
+//     *              {:pc2home}
+//     * </pre>
+//     * 
+//     * @param inRun
+//     *            submitted by team
+//     * @param origString -
+//     *            original string to be substituted.
+//     * @return string with values
+//     */
+//    public String substituteAllStrings(Run inRun, String origString) {
+//        String newString = "";
+//        String nullArgument = "-"; /* this needs to change */
+//
+//        try {
+//            if (inRun == null) {
+//                throw new IllegalArgumentException("Run is null");
+//            }
+//
+//            if (runFiles.getMainFile() == null) {
+//                log.config("substituteAllStrings() main file is null (no contents)");
+//                return origString;
+//            }
+//            newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
+//            newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
+//
+//            String validatorCommand = null;
+//
+//            if (problem.getValidatorProgramName() != null) {
+//                validatorCommand = problem.getValidatorProgramName();
+//            }
+//
+//            if (problemDataFiles != null) {
+//                SerializedFile validatorFile = problemDataFiles.getValidatorFile();
+//                if (validatorFile != null) {
+//                    validatorCommand = validatorFile.getName(); // validator
+//                }
+//            }
+//            
+//            if (validatorCommand != null) {
+//                newString = replaceString(newString, "{:validator}", validatorCommand);
+//            }
+//
+//            // SOMEDAY LanguageId and ProblemId are now a long string not an int,
+//            // what should we do?
+//
+//            if (inRun.getLanguageId() != null) {
+//                Language[] langs=contest.getLanguages();
+//                int index = 0;
+//                String displayName="";
+//                for (int i = 0; i < langs.length; i++) {
+//                    if (langs[i] != null && langs[i].getElementId().equals(inRun.getLanguageId())) {
+//                        displayName = langs[i].getDisplayName().toLowerCase().replaceAll(" ", "_");
+//                        index=i+1;
+//                        break;
+//                    }
+//                }
+//                if (index > 0) {
+//                    newString = replaceString(newString, "{:language}", index);
+//                    newString = replaceString(newString, "{:languageletter}", Utilities.convertNumber(index));
+//                    newString = replaceString(newString, "{:languagename}", displayName);
+//                }
+//            }
+//            if (inRun.getProblemId() != null) {
+//                Problem[] problems=contest.getProblems();
+//                int index = 0;
+//                for (int i = 0; i < problems.length; i++) {
+//                    if (problems[i] != null && problems[i].getElementId().equals(inRun.getProblemId())) {
+//                        index=i+1;
+//                        break;
+//                    }
+//                }
+//                if (index > 0) {
+//                    newString = replaceString(newString, "{:problem}", index);
+//                    newString = replaceString(newString, "{:problemletter}", Utilities.convertNumber(index));
+//                }
+//            }
+//            if (inRun.getSubmitter() != null) {
+//                newString = replaceString(newString, "{:teamid}", inRun.getSubmitter().getClientNumber());
+//                newString = replaceString(newString, "{:siteid}", inRun.getSubmitter().getSiteNumber());
+//            }
+//
+//            if (problem != null) {
+//                if (problem.getDataFileName() != null && !problem.getDataFileName().equals("")) {
+//                    newString = replaceString(newString, "{:infile}", problem.getDataFileName());
+//                } else {
+//                    newString = replaceString(newString, "{:infile}", nullArgument);
+//                }
+//                if (problem.getAnswerFileName() != null && !problem.getAnswerFileName().equals("")) {
+//                    newString = replaceString(newString, "{:ansfile}", problem.getAnswerFileName());
+//                } else {
+//                    newString = replaceString(newString, "{:ansfile}", nullArgument);
+//                }
+//                newString = replaceString(newString, "{:timelimit}", Long.toString(problem.getTimeOutInSeconds()));
+//            } else {
+//                log.config("substituteAllStrings() problem is undefined (null)");
+//            }
+//
+//            if (executionData != null) {
+//                if (executionData.getExecuteProgramOutput() != null) {
+//                    if (executionData.getExecuteProgramOutput().getName() != null) {
+//                        newString = replaceString(newString, "{:outfile}", executionData.getExecuteProgramOutput().getName());
+//                    } else {
+//                        newString = replaceString(newString, "{:outfile}", nullArgument);
+//                    }
+//                }
+//                newString = replaceString(newString, "{:exitvalue}", Integer.toString(executionData.getExecuteExitValue()));
+//                newString = replaceString(newString, "{:executetime}", Long.toString(executionData.getExecuteTimeMS()));
+//            }
+//            String pc2home = new VersionInfo().locateHome();
+//            if (pc2home != null && pc2home.length() > 0) {
+//                newString = replaceString(newString, "{:pc2home}", pc2home);
+//            }
+//        } catch (Exception e) {
+//            // SOMEDAY LOG
+//            log.log(Log.CONFIG, "Exception ", e);
+//        }
+//
+//        return newString;
+//    }
 
 
-    /**
-     * Return string minus last extension. <br>
-     * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
-     * Unlike the Unix basename program, no extension is supplied.
-     * 
-     * @param original
-     *            the input string
-     * @return a string with all text after last . removed
-     */
-    public String removeExtension(String original) {
-        String outString = new String(original);
-
-        // Strip off all text after and including final dot
-
-        int dotIndex = outString.lastIndexOf('.', outString.length() - 1);
-        if (dotIndex != -1) {
-            outString = outString.substring(0, dotIndex);
-        }
-
-        return outString;
-
-    }
+//    /**
+//     * Return string minus last extension. <br>
+//     * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
+//     * Unlike the Unix basename program, no extension is supplied.
+//     * 
+//     * @param original
+//     *            the input string
+//     * @return a string with all text after last . removed
+//     */
+//    public String removeExtension(String original) {
+//        String outString = new String(original);
+//
+//        // Strip off all text after and including final dot
+//
+//        int dotIndex = outString.lastIndexOf('.', outString.length() - 1);
+//        if (dotIndex != -1) {
+//            outString = outString.substring(0, dotIndex);
+//        }
+//
+//        return outString;
+//
+//    }
 
     /**
      * return directory name for input file.

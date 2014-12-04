@@ -1,0 +1,10 @@
+#
+# $HeadURL$
+#
+#
+name: Arrow
+source: Sacramento State Spring 2014 Contest
+author: Ted Krovetz
+license: cc0
+validator: float_absolute_tolerance 1e-3
+timeout: 60
