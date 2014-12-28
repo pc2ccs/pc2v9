@@ -845,6 +845,46 @@ public class AbstractTestCase extends TestCase {
         return  documentBuilder.parse(new InputSource(new StringReader(xmlString)));
     }
 
+    public void assertFileContentsEquals(File expectedFile, File actualFile) throws IOException{
+        assertFileContentsEquals(expectedFile, actualFile, 1);
+    }
+    
+    /**
+     * Text file contents equal.
+     * 
+     * @param expectedFile
+     * @param actualFile
+     * @param startLine (base 1) first line to compare in files.
+     */
+    public void assertFileContentsEquals(File expectedFile, File actualFile, int startLine) throws IOException{
+        
+        if (! expectedFile.isFile()){
+            throw new FileNotFoundException(expectedFile.getAbsolutePath());
+        }
+
+        if (! actualFile.isFile()){
+            throw new FileNotFoundException(actualFile.getAbsolutePath());
+        }
+        
+        String [] expectedContents = Utilities.loadFile(expectedFile.getAbsolutePath());
+        String [] actualContents = Utilities.loadFile(actualFile.getAbsolutePath());
+        
+        if (expectedContents.length  != actualContents.length){
+            throw new ComparisonFailure("File contents different number of lines", ""+expectedContents.length, ""+actualContents.length);
+        }
+        
+        for (int i = startLine-1; i < expectedContents.length; i++) {
+            String expected = expectedContents[i];
+            String actual = actualContents[i];
+            if (! expected.equals(actual)){
+                System.err.println("assertFileContentsEquals: expected file: "+expectedFile.getAbsolutePath());
+                System.err.println("assertFileContentsEquals: actual   file: "+actualFile.getAbsolutePath());
+                System.err.println("assertFileContentsEquals: Diff lines at: "+(i+1));
+                assertEquals("Expecting same line ine "+(i+1), expected, actual);
+            }
+        }
+    }
+    
     /**
      * Asserts that there are expectedCount occurrences of c in sourceString.
      * @param message
@@ -951,6 +991,7 @@ public class AbstractTestCase extends TestCase {
             throw new ComparisonFailure(message, expected, actual);
         }
     }
+    
 
     public Account getFirstJudge(IInternalContest contest) {
         Account[] accounts = new SampleContest().getJudgeAccounts(contest);

@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.export;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -87,8 +88,17 @@ public class ExportYAMLTest extends AbstractTestCase {
 
         exportYAML.exportFiles(testDirectory, contest);
         
+        String actualContestYamlFile = testDirectory+File.separator+ExportYAML.CONTEST_FILENAME;
+        
+//        editFile(actualContestYamlFile);
+        
+        String expectedContestYamlFile = getTestFilename("expected.contest.yaml");
+        
+//        editFile(expectedContestYamlFile);
+        
+        assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4);
+        
 //        String filename = testDirectory + File.separator + ExportYAML.CONTEST_FILENAME;
-//        editFile(filename);
 
         exportYAML = null;
 

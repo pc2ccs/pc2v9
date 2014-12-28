@@ -58,6 +58,7 @@ public class ProblemsReport implements IReport {
         }
         
         printWriter.println("  Problem '" + problem + deletedText + "' ver=" + problem.getElementId().getVersionNumber() + " id=" + problem.getElementId());
+        printWriter.println("       Short name       : " + problem.getShortName());
         printWriter.println("       Data file name   : " + problem.getDataFileName());
         printWriter.println("       Answer file name : " + problem.getAnswerFileName());
         printWriter.println("       Number test cases: " + problem.getNumberTestCases());
