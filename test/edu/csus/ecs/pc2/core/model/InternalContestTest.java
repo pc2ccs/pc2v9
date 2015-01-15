@@ -170,6 +170,29 @@ public class InternalContestTest extends AbstractTestCase {
         contestsEqual("testClone identical", contest1, contest2, false);
     }
     
+    /**
+     * 
+     */
+    public void testCloneJudgementsBug849() throws Exception {
+        
+        InternalContest contest1 = new InternalContest();
+        InternalContest contest2 = new InternalContest();
+        
+        int siteNumber = 4;
+        ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
+        contest1.setClientId(serverId);
+        contest1.setSiteNumber(siteNumber);
+        
+        contest2.setClientId(contest1.getClientId());
+        contest2.setSiteNumber(siteNumber);
+
+        contestsEqual("testClone identical", contest1, contest2, true);
+        
+        IInternalContest standardContest = new SampleContest().createStandardContest();
+        
+        contestsEqual("Expecting contests to be different", contest1, standardContest, false);
+    }
+    
     protected Profile createProfile (String name){
         Profile profile = new Profile(name);
         profile.setDescription("Contest "+name);
@@ -426,6 +449,26 @@ public class InternalContestTest extends AbstractTestCase {
                 failures.addElement(CONFIG_GROUPS + ": > " + group + " " + group.getElementId());
             }
         }
+        
+        Judgement[] judgements = contest2.getJudgements();
+        for (Judgement judgement : judgements) {
+
+            Judgement otherJudgement = contest1.getJudgement(judgement.getElementId());
+            
+            if (otherJudgement == null) {
+                failures.addElement(CONFIG_JUDGEMENTS + ": < " + judgement + " " + judgement.getElementId());
+            } else {
+                if (!judgement.isSameAs(otherJudgement)) {
+                    failures.addElement(CONFIG_JUDGEMENTS + ": != " + judgement + " " + judgement.getElementId());
+                }
+
+                compare(failures, CONFIG_JUDGEMENTS, "Display Name", judgement.getDisplayName(), otherJudgement.getDisplayName());
+                compare(failures, CONFIG_JUDGEMENTS, "acronym", judgement.getAcronym(), otherJudgement.getAcronym());
+                compare(failures, CONFIG_JUDGEMENTS, "active", judgement.isActive(), otherJudgement.isActive());
+                compare(failures, CONFIG_JUDGEMENTS, "siteNumber", judgement.getSiteNumber(), otherJudgement.getSiteNumber());
+
+            }
+        }
 
         Account[] accounts = contest1.getAccounts();
         Arrays.sort(accounts, new AccountComparator());
@@ -436,9 +479,9 @@ public class InternalContestTest extends AbstractTestCase {
             if (otherAccount == null) {
                 failures.addElement(CONFIG_ACCOUNTS + ": < " + account + " " + account.getElementId());
             } else {
-                compare(failures, CONFIG_ACCOUNTS, "Display Name", account.getDisplayName(), account.getDisplayName());
-                compare(failures, CONFIG_ACCOUNTS, "Group", account.getGroupId(), account.getGroupId());
-                compare(failures, CONFIG_ACCOUNTS, "Alias", account.getAliasName(), account.getAliasName());
+                compare(failures, CONFIG_ACCOUNTS, "Display Name", account.getDisplayName(), otherAccount.getDisplayName());
+                compare(failures, CONFIG_ACCOUNTS, "Group", account.getGroupId(), otherAccount.getGroupId());
+                compare(failures, CONFIG_ACCOUNTS, "Alias", account.getAliasName(), otherAccount.getAliasName());
 
                 // TODO all the rest of the account fields.
             }
@@ -454,8 +497,15 @@ public class InternalContestTest extends AbstractTestCase {
                 failures.addElement(CONFIG_ACCOUNTS + ": < " + account + " " + account.getElementId());
             }
         }
+        
+        String[] failureList = (String[]) failures.toArray(new String[failures.size()]);
+//        if (failureList.length > 0) {
+//            for (String string : failureList) {
+//                System.out.println(string);
+//            }
+//        }
 
-        return (String[]) failures.toArray(new String[failures.size()]);
+        return failureList;
 
     }
 
@@ -485,6 +535,23 @@ public class InternalContestTest extends AbstractTestCase {
             vector.add(contestConfigArea + ": " + comment + " (" + string1 + " vs " + string2 + ")");
         }
     }
+    
+    private void compare(Vector<String> vector, String contestConfigArea, String comment, int int1, int int2) {
+
+        String string1 = Integer.toString(int1);
+        String string2 = Integer.toString(int2);
+        
+        compare(vector, contestConfigArea, comment, string1,  string2);
+    }
+
+    private void compare(Vector<String> vector, String contestConfigArea, String comment, boolean boolean1, boolean boolean2) {
+
+        String string1 = Boolean.toString(boolean1);
+        String string2 = Boolean.toString(boolean2);
+        
+        compare(vector, contestConfigArea, comment, string1,  string2);
+    }
+
 
     /**
      * Ensure judgement acronyms are automatically created.
@@ -590,7 +657,8 @@ public class InternalContestTest extends AbstractTestCase {
      * 
      * @return suite of tests.
      */
-    public static TestSuite suite() {
+    public static TestSuite suiteTest() {
+//        public static TestSuite suite() {
 
         // HOWTO Create a test suite
 
