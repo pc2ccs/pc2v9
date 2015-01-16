@@ -707,6 +707,15 @@ public class AutoJudgingMonitor implements UIPlugin {
             if (!((ControlLoop) controlLoop).isRunning()) {
                 controlLoop.run();
             }
+            
+            if (usingGui){
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        autoJudgeStatusFrame.setVisible(true);
+                    }
+                });
+            }
 
         } else {
 
@@ -721,14 +730,8 @@ public class AutoJudgingMonitor implements UIPlugin {
                 notifyMessager.updateStatusLabel("Auto-judging is OFF");
             }
         }
-        if (usingGui){
-
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    autoJudgeStatusFrame.setVisible(true);
-                }
-            });
-        }
+        
+   
 
     }
 
