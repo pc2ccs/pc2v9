@@ -221,6 +221,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private static final String CLIENT_PORT_KEY = "client.port";
 
+    /**
+     * The connection handle for the server this server logged into.
+     */
     private static ConnectionHandlerID remoteServerConnectionHandlerID = null;
 
     private ParseArguments parseArguments = new ParseArguments();
@@ -1332,41 +1335,72 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 //                    securityCheck(packet, connectionHandlerID);
                     processPacket(packet, connectionHandlerID);
                 } else {
+                    
                     if (clientId.getClientType().equals(Type.SERVER)) {
                         // Packet from a server.
 
                         if (packet.getType() == PacketType.Type.LOGIN_FAILED) {
+                            
                             handleServerLoginFailure(packet);
-                        } else if (!contest.isLoggedIn() && packet.getType().equals(PacketType.Type.LOGIN_SUCCESS)) {
-
+                            
+                        } else if (packet.getType().equals(PacketType.Type.LOGIN_SUCCESS)) {
+                            
                             /**
-                             * Since this module is not logged in, this packet should only be a LOGIN_SUCCESS from a server we just tried to login to. At this point we are not connected to the contest
-                             * and need information from the server we logged into.
+                             * The current server has successfully logged into a remote server.
                              */
 
                             // SOMEDAY SECURITY add a security check that this connection id matches the one we
                             // sent the login request packet to. If we don't add this, then some other
                             // server could send us a LOGIN_SUCCESS packet, which would be bad. Highly
                             // unlikely but potentially bad.
-                            // Add data from packet into contest.
-                            processPacket(packet, connectionHandlerID);
 
-                            // Add the other (server we logged into) into our logged in list.
-
+                            // Add the other (server we logged into) into our local logged in list.
                             loginServer(clientId, connectionHandlerID);
+                            
+                            /**
+                             * Since this module is not logged in, this packet should only be a LOGIN_SUCCESS from a server we initially logged into,
+                             * aka the remoteServer.  
+                             */
+                            
+                            if (connectionHandlerID.equals(remoteServerConnectionHandlerID)){
+                                
+                                /**
+                                 * Only accept/chagne config data on this site if the login success is from 
+                                 * the server that this site connected to initially.
+                                 */
+                                info("Loading contest settings from remoteServer "+clientId+" @ "+connectionHandlerID);
+                                
+                                // Add data from packet into contest and sync all runs
+                                processPacket(packet, connectionHandlerID);
+                            } else {
+                                
+                                info("Not loading contest settings from other server, not the remoteServer  "+clientId+" @ "+connectionHandlerID);
+                                
+                                // TODO 856 - sync runs using PacketHandler.sendRequestForRunfFiles
+                                /**
+                                 * Runs need to be sync'd here
+                                 */
+                                // PacketHandler.sendRequestForRunfFiles  Send FETCH_RUN_FILES get back UPDATE_RUN_FILES
+                                
+                            }
+                                
 
-                        } else if (!contest.isLoggedIn() && packet.getType().equals(PacketType.Type.LOGIN)) {
-                            // on site 2 login to site 1, site 2 reports LOGIN (and LOGIN_SUCCESS) on login to site1
+
+                        } else if (contest.isLocalLoggedIn(clientId) && packet.getType().equals(PacketType.Type.LOGIN)) {
+                            /**
+                             * A user has logged into another remote server 
+                             */
+                            // on site 2 login to site 1, site 2 reports LOGIN on login to site1
                             processPacket(packet, connectionHandlerID);
                         } else {
                             System.err.println("Security Violation Packet from non-logged in server" + packet);
-                            info("Note: security violation in packet: Packet from non-logged in server");
+                            info("Note: security violation in packet: Packet from non-logged in server"+ packet);
                             log.info("Security Violation for packet " + packet);
                        }
                         return;
                     } else {
                         System.err.println("Security Violation Packet from non-logged in server" + packet);
-                        info("Note: security violation in packet: Packet from non-logged in server");
+                        info("Note: security violation in packet: Packet from non-logged in server "+packet);
                         log.info("Security Violation for packet " + packet);
                     }
                 }
