@@ -9,6 +9,7 @@ import java.util.Vector;
 import java.util.logging.Logger;
 
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
@@ -93,7 +94,7 @@ public class ConfigurationIO {
          */
         PROFILE,
         /**
-         * Profiles 
+         * Profiles
          */
         PROFILES,
         /**
@@ -108,7 +109,7 @@ public class ConfigurationIO {
          * 
          */
         CATEGORIES,
-        
+
     }
 
     private IStorage storage = null;
@@ -124,29 +125,29 @@ public class ConfigurationIO {
     public boolean loadFromDisk(int siteNumber, IInternalContest contest, Log log) {
 
         Configuration configuration = new Configuration(storage);
-        
+
         try {
 
             if (configuration.loadFromDisk(getFileName())) {
-                
+
                 ConfigKeys key;
-                
+
                 key = ConfigKeys.SITE_NUMBER;
                 if (configuration.containsKey(key)) {
                     Integer diskSiteNumber = (Integer) configuration.get(key.toString());
-                    
+
                     if (diskSiteNumber.intValue() != siteNumber) {
-                        Exception exception = new Exception("FATAL ERROR Attempted to load site "+siteNumber+" from Site "+diskSiteNumber);
+                        Exception exception = new Exception("FATAL ERROR Attempted to load site " + siteNumber + " from Site " + diskSiteNumber);
                         System.err.println(exception.getMessage());
                         log.log(Log.SEVERE, exception.getMessage(), exception);
                         System.exit(22);
                     }
-                    
+
                     contest.setSiteNumber(diskSiteNumber);
                     log.info("Loading site number " + diskSiteNumber);
                 } else {
-                    System.err.println("WARNING Attempted to load site "+siteNumber+" but key "+ConfigKeys.SITE_NUMBER+" not found");
-                    log.info("WARNING Attempted to load site "+siteNumber+" but key "+ConfigKeys.SITE_NUMBER+" not found");
+                    System.err.println("WARNING Attempted to load site " + siteNumber + " but key " + ConfigKeys.SITE_NUMBER + " not found");
+                    log.info("WARNING Attempted to load site " + siteNumber + " but key " + ConfigKeys.SITE_NUMBER + " not found");
                 }
 
                 try {
@@ -187,9 +188,7 @@ public class ConfigurationIO {
                 } catch (Exception e) {
                     log.log(Log.WARNING, "Exception while loading contest times ", e);
                 }
-                
 
-                
                 try {
                     key = ConfigKeys.ACCOUNTS;
                     if (configuration.containsKey(key)) {
@@ -215,43 +214,42 @@ public class ConfigurationIO {
                 } catch (Exception e) {
                     log.log(Log.WARNING, "Exception while loading judgements ", e);
                 }
-                
+
                 loadProblemDataFilesInfo(contest, configuration, log);
-                
+
                 loadSomeSettings(configuration, contest, log);
-                
+
                 return true;
-                
+
             } else {
                 return false;
             }
-            
-        } catch (FileNotFoundException fileNotFoundException){
-            log.info("No configuration file exists "+getFileName());
+
+        } catch (FileNotFoundException fileNotFoundException) {
+            log.info("No configuration file exists " + getFileName());
             return false;
         } catch (Exception e) {
             log.log(Log.WARNING, "Loading configuration from disk", e);
             return false;
         }
     }
-    
+
     private void loadSomeSettings(Configuration configuration, IInternalContest contest, Logger log) {
-        
+
         ConfigKeys key;
-        
 
         try {
             key = ConfigKeys.BALLOON_SETTINGS_LIST;
             if (configuration.containsKey(key)) {
-                BalloonSettings [] balloonSettings = (BalloonSettings []) configuration.get(key.toString());
-                for (BalloonSettings balloonSetting : balloonSettings){
+                BalloonSettings[] balloonSettings = (BalloonSettings[]) configuration.get(key.toString());
+                for (BalloonSettings balloonSetting : balloonSettings) {
                     contest.addBalloonSettings(balloonSetting);
                 }
                 log.info("Loaded " + balloonSettings.length + " " + key.toString().toLowerCase());
-            } 
+            }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading balloon settings ", e);
-        } 
+        }
 
         try {
             key = ConfigKeys.CONTEST_TIME;
@@ -267,14 +265,14 @@ public class ConfigurationIO {
         try {
             key = ConfigKeys.GENERAL_PROBLEM;
             if (configuration.containsKey(key)) {
-                Problem genProblem = (Problem)  configuration.get(key.toString());
+                Problem genProblem = (Problem) configuration.get(key.toString());
                 contest.setGeneralProblem(genProblem);
                 log.info("Loaded " + key.toString().toLowerCase());
             }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading general problem ", e);
         }
-        
+
         try {
             key = ConfigKeys.PROFILES;
             if (configuration.containsKey(key)) {
@@ -287,7 +285,7 @@ public class ConfigurationIO {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading profiles ", e);
         }
-        
+
         try {
             key = ConfigKeys.FINALIZE_DATA;
             if (configuration.containsKey(key)) {
@@ -298,8 +296,7 @@ public class ConfigurationIO {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading Finalize Data ", e);
         }
-        
-        
+
         try {
             key = ConfigKeys.CATEGORIES;
             if (configuration.containsKey(key)) {
@@ -312,7 +309,7 @@ public class ConfigurationIO {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading judgements ", e);
         }
-        
+
         try {
             key = ConfigKeys.PROFILE;
             if (configuration.containsKey(key)) {
@@ -326,7 +323,7 @@ public class ConfigurationIO {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading current profile ", e);
         }
-        
+
         try {
             key = ConfigKeys.PROFILE_CLONE_SETTINGS;
             if (configuration.containsKey(key)) {
@@ -337,7 +334,7 @@ public class ConfigurationIO {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading profile clone settings ", e);
         }
-        
+
         try {
             key = ConfigKeys.SITES;
             if (configuration.containsKey(key)) {
@@ -346,34 +343,34 @@ public class ConfigurationIO {
                     contest.addSite(site);
                 }
                 log.info("Loaded " + sites.length + " " + key.toString().toLowerCase());
-            } 
+            }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading sites ", e);
-        }   
-        
+        }
+
         try {
             key = ConfigKeys.CONTEST_INFORMATION;
             if (configuration.containsKey(key)) {
                 ContestInformation contestInformation = (ContestInformation) configuration.get(key.toString());
                 contest.addContestInformation(contestInformation);
                 log.info("Loaded Contest Information " + contestInformation.getContestTitle());
-            } 
+            }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading contest information/title ", e);
-        } 
-        
+        }
+
         try {
             key = ConfigKeys.CLIENT_SETTINGS_LIST;
             if (configuration.containsKey(key)) {
-                ClientSettings [] clientSettingsList =  (ClientSettings[]) configuration.get(key.toString());
+                ClientSettings[] clientSettingsList = (ClientSettings[]) configuration.get(key.toString());
                 for (ClientSettings clientSettings : clientSettingsList) {
                     contest.addClientSettings(clientSettings);
                 }
                 log.info("Loaded " + clientSettingsList.length + " " + key.toString().toLowerCase());
-            } 
+            }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while updating client settings ", e);
-        }   
+        }
 
         try {
             key = ConfigKeys.GROUPS;
@@ -387,7 +384,7 @@ public class ConfigurationIO {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading groups ", e);
         }
-        
+
     }
 
     private void loadProblemDataFilesInfo(IInternalContest contest, Configuration configuration, Logger log) {
@@ -415,8 +412,6 @@ public class ConfigurationIO {
         }
     }
 
-
-
     /**
      * Return all accounts for all sites.
      * 
@@ -440,13 +435,13 @@ public class ConfigurationIO {
     public boolean store(IInternalContest contest, Log log) throws IOException, ClassNotFoundException, FileSecurityException {
 
         Configuration configuration = new Configuration(storage);
-        
+
         configuration.add(ConfigKeys.SITE_NUMBER, new Integer(contest.getSiteNumber()));
         configuration.add(ConfigKeys.ACCOUNTS, getAllAccounts(contest));
         configuration.add(ConfigKeys.CONTEST_TIME, contest.getContestTime());
         configuration.add(ConfigKeys.CONTEST_TIME_LIST, contest.getContestTimes());
         configuration.add(ConfigKeys.BALLOON_SETTINGS_LIST, contest.getBalloonSettings());
-        if (contest.getGeneralProblem() != null){
+        if (contest.getGeneralProblem() != null) {
             configuration.add(ConfigKeys.GENERAL_PROBLEM, contest.getGeneralProblem());
         }
         configuration.add(ConfigKeys.PROBLEM_DATA_FILES, contest.getProblemDataFiles());
@@ -454,29 +449,31 @@ public class ConfigurationIO {
         configuration.add(ConfigKeys.LANGUAGES, contest.getLanguages());
         configuration.add(ConfigKeys.PROBLEMS, contest.getProblems());
         configuration.add(ConfigKeys.SITES, contest.getSites());
-        
+
         configuration.add(ConfigKeys.CONTEST_INFORMATION, contest.getContestInformation());
         configuration.add(ConfigKeys.CLIENT_SETTINGS_LIST, contest.getClientSettingsList());
         configuration.add(ConfigKeys.GROUPS, contest.getGroups());
         configuration.add(ConfigKeys.PROFILES, contest.getProfiles());
         configuration.add(ConfigKeys.PROFILE, contest.getProfile());
-        
+
         if (contest.getFinalizeData() != null) {
             configuration.add(ConfigKeys.FINALIZE_DATA, contest.getFinalizeData());
         }
-        
+
         if (contest.getCategories() != null) {
             configuration.add(ConfigKeys.CATEGORIES, contest.getCategories());
         }
-        
-        if (contest.getProfileCloneSettings() != null){
+
+        if (contest.getProfileCloneSettings() != null) {
             configuration.add(ConfigKeys.PROFILE_CLONE_SETTINGS, contest.getProfileCloneSettings());
         }
 
         configuration.writeToDisk(getFileName());
 
+        configuration.writeToDisk(getBackupFilename());
+
         configuration = null;
-        
+
         return true;
     }
 
@@ -489,7 +486,7 @@ public class ConfigurationIO {
     private class Configuration {
 
         private Hashtable<String, Object> configItemHash = new Hashtable<String, Object>();
-        
+
         private IStorage storage;
 
         public Configuration(IStorage storage) {
@@ -517,11 +514,11 @@ public class ConfigurationIO {
          * Write the run data to disk.
          * 
          * @throws IOException
-         * @throws FileSecurityException 
-         * @throws ClassNotFoundException 
+         * @throws FileSecurityException
+         * @throws ClassNotFoundException
          */
         public synchronized boolean writeToDisk(String fileName) throws IOException, ClassNotFoundException, FileSecurityException {
-            return storage.store(getFileName(), configItemHash);
+            return storage.store(fileName, configItemHash);
         }
 
         @SuppressWarnings("unchecked")
@@ -538,4 +535,9 @@ public class ConfigurationIO {
     public String getFileName() {
         return storage.getDirectoryName() + File.separator + "settings.dat";
     }
+
+    public String getBackupFilename() {
+        return storage.getDirectoryName() + File.separator + "settings." + Utilities.getDateTime() + ".dat";
+    }
+
 }

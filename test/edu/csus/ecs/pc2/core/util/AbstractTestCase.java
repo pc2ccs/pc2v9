@@ -266,7 +266,7 @@ public class AbstractTestCase extends TestCase {
      * @param directoryName name of directory to append to end of path
      * @return a project-relative directory name  
      */
-    protected String getOutputDataDirectory(String directoryName) {
+    public String getOutputDataDirectory(String directoryName) {
 
         String newDirName = getRootOutputTestDataDirectory() + File.separator + getShortClassName() + File.separator + directoryName;
         return newDirName;
@@ -998,4 +998,21 @@ public class AbstractTestCase extends TestCase {
         Arrays.sort(accounts, new AccountComparator());
         return accounts[0];
     }
+    
+    
+    /**
+     * Compares count of directory entries in dir with expectedNumberOfFiles.
+     * @param string
+     * @param dir
+     * @param expectedNumberOfFiles
+     */
+    public void assertExpectedFileCount(String string, File dir, int expectedNumberOfFiles){
+        
+        int entryCount = dir.list().length;
+        if (expectedNumberOfFiles != entryCount){
+            throw new ComparisonFailure(string, Integer.toString(expectedNumberOfFiles), Integer.toString(entryCount));
+        }
+    }
+    
+    
 }

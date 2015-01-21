@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import junit.framework.TestCase;
 
@@ -103,5 +105,18 @@ public class UtilitiesTest extends TestCase {
                 assertEquals("testCase"+i+"("+testCases[i]+")", expectedAnswers[i],result);
             }
 
+        }
+        
+        public void testgetDateTime() throws Exception {
+            
+            String actual = Utilities.getDateTime();
+            
+            // may not match actual milliseconds.
+            String nearlyExpected = new SimpleDateFormat(Utilities.DATE_TIME_FORMAT_STRING).format(new Date());
+            
+            assertEquals("Should be same length ", nearlyExpected.length(), actual.length());
+            
+            // match pattern up to . where pattern is yyyyddMMhhmmss.SSS
+            assertTrue ("First part of string should match ",actual.substring(0,15).equals(nearlyExpected.substring(0,15)));
         }
 }

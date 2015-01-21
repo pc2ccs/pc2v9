@@ -220,6 +220,11 @@ public class ClarificationList implements Serializable {
     private String getFileName() {
         return storage.getDirectoryName() + File.separator + "clarlist.dat";
     }
+    
+    public String getBackupFilename() {
+        return storage.getDirectoryName() + File.separator + "clarlist" + Utilities.getDateTime() + ".dat";
+    }
+
 
     /**
      * Load Clarifications from disk.
@@ -242,8 +247,12 @@ public class ClarificationList implements Serializable {
         if (!isSaveToDisk()) {
             return false;
         }
+        
+        boolean stored = storage.store(getFileName(), clarHash);
+        
+        storage.store(getBackupFilename(), clarHash);
 
-        return storage.store(getFileName(), clarHash);
+        return stored;
     }
 
     /**

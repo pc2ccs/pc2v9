@@ -50,6 +50,10 @@ public final class Utilities {
      * String.substring starts at 0, so letters begin at 1
      */
     private static final String LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
+    
+    public static final String DATE_TIME_FORMAT_STRING = "yyyyddMMhhmmss.SSS";
+
+    private static SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
 
     /**
      * Constructor is private as this is a utility class which
@@ -726,4 +730,14 @@ public final class Utilities {
             return -1;
         }
     }
+
+    /**
+     * return date/time string.
+     * 
+     * @return curernt date using format {@value Utilities#DATE_TIME_FORMAT_STRING}.
+     */
+    public static String getDateTime() {
+        return format.format(new Date());
+    }
+
 }

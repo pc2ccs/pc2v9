@@ -227,6 +227,12 @@ public class RunList implements Serializable {
     private String getFileName() {
         return storage.getDirectoryName() + File.separator + "runlist.dat";
     }
+    
+    
+    public String getBackupFilename() {
+        return storage.getDirectoryName() + File.separator + "runlist." + Utilities.getDateTime() + ".dat";
+    }
+
 
     /**
      * Write the run data to disk.
@@ -242,7 +248,11 @@ public class RunList implements Serializable {
             return false;
         }
         
-        return storage.store(getFileName(), runHash);
+        boolean stored = storage.store(getFileName(), runHash);
+        
+        storage.store(getBackupFilename(), runHash);
+
+        return stored;
     }
 
     /**
@@ -329,4 +339,5 @@ public class RunList implements Serializable {
     public int getNextRunNumber() {
         return nextRunNumber;
     }
+
 }

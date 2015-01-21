@@ -3,10 +3,10 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.File;
 import java.util.Random;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.security.FileStorage;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
@@ -17,16 +17,9 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
  */
 
 // $HeadURL$
-public class ConfigurationIOTest extends TestCase {
+public class ConfigurationIOTest extends AbstractTestCase {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-    
     protected String getTestDirectoryName(){
         String testDir = "testing";
         
@@ -223,6 +216,41 @@ public class ConfigurationIOTest extends TestCase {
         Random r = new Random();
         r.setSeed(System.nanoTime());
         return r.nextInt(32760);
+    }
+    
+    /**
+     * Test that backup file created when settings written to disk.
+     * 
+     * Unit test Bug 876.
+     * @throws Exception
+     */
+    public void testBackupFiles() throws Exception {
+        
+        String configDirName = getOutputDataDirectory("testBackupFiles");
+        
+        removeDirectory(configDirName); // remove previous files
+        
+        int siteNumber = 5;
+
+        IInternalContest contest = new InternalContest();
+        contest.setSiteNumber(siteNumber);
+
+        IStorage storage = createStorage(configDirName);
+
+        Log log = new Log(configDirName, "configioSaveFinalData.log");
+
+        ConfigurationIO configurationIO = new ConfigurationIO(storage);
+        
+        boolean wroteConfig = configurationIO.store(contest, log);
+        
+        assertTrue("Expecting to write config ", wroteConfig);
+        
+        configurationIO.store(contest, log);
+        
+//        startExplorer(new File (configDirName));
+        
+        assertExpectedFileCount("Expected file count ", new File(configDirName), 5);
+        
     }
 
 }
