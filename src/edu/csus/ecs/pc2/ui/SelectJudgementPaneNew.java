@@ -566,9 +566,19 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private void buildFileViewer(RunResultFiles files) {
         MultipleFileViewer mfv = new MultipleFileViewer(log, "Executable");
         boolean showOutput = false;
+        boolean tmpProgramOutput = false;
+        
         showOutput |= addFilePane(mfv, "Compiler stdout", files.getCompilerStdoutFile());
         showOutput |= addFilePane(mfv, "Compiler stderr", files.getCompilerStderrFile());
-        showOutput |= addFilePane(mfv, "Program stdout", files.getExecuteStdoutFile());
+        
+        tmpProgramOutput |= addFilePane(mfv, "Program stdout", files.getExecuteStdoutFile());
+        showOutput |= tmpProgramOutput;
+        
+        if (!tmpProgramOutput) {
+            mfv.addTextPane("Program stdout",  "PC2: execution of program did not generate any stdout");
+            showOutput = true;
+        }
+ 
         showOutput |= addFilePane(mfv, "Program stderr", files.getExecuteStderrFile());
         showOutput |= addFilePane(mfv, "Validator stdout", files.getValidatorStdoutFile());
         showOutput |= addFilePane(mfv, "Validator stderr", files.getValidatorStderrFile());
