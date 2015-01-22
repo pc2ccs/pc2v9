@@ -72,7 +72,120 @@ public class RunListTest extends AbstractTestCase {
 
     }
     
+
     /**
+     * A Runnable class that adds a run to a runlist.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class AddRun implements Runnable {
+
+        private RunList runList;
+        private Run run;
+
+        public AddRun(RunList runList, Run run) {
+            this.runList = runList;
+            this.run = run;
+        }
+
+        @Override
+        public void run() {
+            try {
+                runList.add(run);
+                runList.updateRun(run);
+                
+                runList.setSaveToDisk(true);
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * Test that backup file created when settings written to disk.
+     * 
+     * Kicks off a thread per new run added to runlist.
+     * 
+     * This is a stress test.
+     * 
+     * Unit test bug 876.
+     * 
+     * @throws Exception
+     */
+    public void testBackupStressUsingThreads() throws Exception {
+        
+        /**
+         * Number of runs to add.
+         */
+        int numRuns = 500;
+        
+        String testDir = getOutputDataDirectory("runlistbackupStress");
+
+        removeDirectory(testDir); // remove files from previous test
+
+        new File(testDir).mkdirs();
+        
+        FileStorage storage = new FileStorage(testDir);
+        RunList runList = new RunList(storage);
+
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createContest(2, 12, 22, 12, true);
+
+ 
+
+        Run[] runs = sample.createRandomRuns(contest, numRuns, true, true, true);
+
+        Thread[] thredList = new Thread[runs.length];
+        int threadCount = 0;
+
+        for (Run run : runs) {
+            AddRun addRun = new AddRun(runList, run);
+
+            /**
+             * Create thread to add run to emulate Hail Mary speed submissions.
+             */
+            Thread thread = new Thread(addRun);
+            thredList[threadCount] = thread;
+            thread.start();
+            threadCount++;
+            
+        }
+
+        int activeThreds = countActiveThreads(thredList);
+        
+        while (activeThreds > 0){
+            activeThreds = countActiveThreads(thredList);
+            
+            if (isDebugMode()){
+                Thread.sleep(500);
+                System.out.println("Active threads = "+activeThreds);
+            }
+        }
+
+//        startExplorer(new File(testDir));
+        
+        assertExpectedFileCount("Expecting dir entries ", new File(testDir), numRuns * 2 + 1);
+        
+        assertNoZeroSizeFiles(new File(testDir));
+        
+    }
+
+
+    private int countActiveThreads(Thread[] array) {
+        int count = 0;
+        for (Thread thread : array) {
+            if (thread.isAlive()){
+                count++;
+            }
+        }
+        return count;
+    }
+
+  /**
      * Test that backup file created when settings written to disk.
      * 
      * Unit test bug 876.
@@ -108,5 +221,8 @@ public class RunListTest extends AbstractTestCase {
         
         assertExpectedFileCount("Expecting dir entries ", new File(testDir), 9);
         
+        assertNoZeroSizeFiles(new File(testDir));
+        
     }
+    
 }

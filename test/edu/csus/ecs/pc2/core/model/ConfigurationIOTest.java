@@ -253,4 +253,44 @@ public class ConfigurationIOTest extends AbstractTestCase {
         
     }
 
+    public void testBackupFilesStress() throws Exception {
+        
+        String configDirName = getOutputDataDirectory("testBackupFilesStress");
+        
+        removeDirectory(configDirName); // remove previous files
+        
+        int siteNumber = 5;
+
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createStandardContest();
+        contest.setSiteNumber(siteNumber);
+
+        IStorage storage = createStorage(configDirName);
+
+        String logdir = configDirName + File.separator + "log";
+        new File(logdir).mkdirs();
+        
+        Log log = new Log(logdir, "configioSaveFinalData.log");
+
+        ConfigurationIO configurationIO = new ConfigurationIO(storage);
+        
+        int iterations = 213;
+        
+        for (int i = 0; i < iterations; i++) {
+            
+            contest.generateNewAccounts("TEAM", 3, true);
+
+            boolean wroteConfig = configurationIO.store(contest, log);
+            
+            assertTrue("Expecting to write config ", wroteConfig);
+        }
+        
+//        startExplorer(new File (configDirName));
+        
+        assertExpectedFileCount("Expected number of files", new File(configDirName), iterations + 1);
+        
+        assertNoZeroSizeFiles(new File(configDirName));
+        
+    }
+
 }

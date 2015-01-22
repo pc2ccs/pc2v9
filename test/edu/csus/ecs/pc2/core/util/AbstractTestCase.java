@@ -1008,11 +1008,36 @@ public class AbstractTestCase extends TestCase {
      */
     public void assertExpectedFileCount(String string, File dir, int expectedNumberOfFiles){
         
-        int entryCount = dir.list().length;
+        int entryCount = 0;
+        File[] entries = dir.listFiles();
+        for (File file : entries) {
+            if (file.isFile()){
+                entryCount++;
+            }
+        }
+        
         if (expectedNumberOfFiles != entryCount){
-            throw new ComparisonFailure(string, Integer.toString(expectedNumberOfFiles), Integer.toString(entryCount));
+            throw new ComparisonFailure(string+" in "+dir.getAbsolutePath(), Integer.toString(expectedNumberOfFiles), Integer.toString(entryCount));
         }
     }
+
+    /**
+     * Test if any files in input directory have zero bytes.
+     * 
+     * @param dir
+     */
+    public void assertNoZeroSizeFiles(File dir) {
+       
+        File[] list = dir.listFiles();
+        for (File file : list) {
+            if (file.isFile() && file.length() == 0) {
+                fail("Found zero byte file " + file.getAbsolutePath());
+            }
+        }
+    }
+
+    
+
     
     
 }

@@ -432,7 +432,7 @@ public class ConfigurationIO {
         return accounts;
     }
 
-    public boolean store(IInternalContest contest, Log log) throws IOException, ClassNotFoundException, FileSecurityException {
+    public synchronized boolean store(IInternalContest contest, Log log) throws IOException, ClassNotFoundException, FileSecurityException {
 
         Configuration configuration = new Configuration(storage);
 
@@ -537,7 +537,7 @@ public class ConfigurationIO {
     }
 
     public String getBackupFilename() {
-        return storage.getDirectoryName() + File.separator + "settings." + Utilities.getDateTime() + ".dat";
+        return storage.getDirectoryName() + File.separator + "settings." + Utilities.getDateTime() + "." + System.nanoTime() + ".dat";
     }
 
 }

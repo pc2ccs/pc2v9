@@ -88,10 +88,18 @@ public class ClarificationListTest extends AbstractTestCase {
         for (Account account : accounts ){
             Clarification clarification = new Clarification(account.getClientId(), problem, "Why? from "+account);
             list.addNewClarification(clarification);
+            
+            clarification = new Clarification(account.getClientId(), problem, "Why #2? from "+account);
+            list.addNewClarification(clarification);
         }
+        
+        int numberOfClarifications = accounts.length * 2 + 1;
         
 //        startExplorer(new File(clarificationStorageDirectory));
         
-        assertExpectedFileCount("Expecting dir entries ", new File(clarificationStorageDirectory), 21);
+        assertExpectedFileCount("Expecting dir entries ", new File(clarificationStorageDirectory), numberOfClarifications);
+        
+        assertNoZeroSizeFiles(new File(clarificationStorageDirectory));
+        
     }
 }

@@ -230,7 +230,7 @@ public class RunList implements Serializable {
     
     
     public String getBackupFilename() {
-        return storage.getDirectoryName() + File.separator + "runlist." + Utilities.getDateTime() + ".dat";
+        return storage.getDirectoryName() + File.separator + "runlist." + Utilities.getDateTime() + "." + System.nanoTime() + ".dat";
     }
 
 
@@ -243,7 +243,7 @@ public class RunList implements Serializable {
      * @throws IOException
      * 
      */
-    private boolean writeToDisk() throws IOException, ClassNotFoundException, FileSecurityException {
+    private synchronized boolean writeToDisk() throws IOException, ClassNotFoundException, FileSecurityException {
         if (!isSaveToDisk()) {
             return false;
         }
