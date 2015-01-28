@@ -353,8 +353,8 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
             ivjButtonFrame.setName("ButtonFrame");
             ivjButtonFrame.setPreferredSize(new java.awt.Dimension(35, 35));
             getButtonFrame().add(getCompareButton(), getCompareButton().getName());
-            getButtonFrame().add(getCloseButton(), getCloseButton().getName());
             ivjButtonFrame.add(getBtnNewButton());
+            getButtonFrame().add(getCloseButton(), getCloseButton().getName());
         }
         return ivjButtonFrame;
     }
