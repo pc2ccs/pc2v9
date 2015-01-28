@@ -335,7 +335,7 @@ public class Run extends Submission {
     }
 
     public String toString() {
-        return "Run " + getNumber() + " " + getStatus() + " " + getElapsedMins()+ " min " + getElapsedMS() +"ms from " + getSubmitter() + " id " + getElementId().toString();
+        return "Run " + getNumber() + " " + getStatus() + " " + getElapsedMins()+ " min " + getElapsedMS() +"ms from " + getSubmitter() + " id " + getElementId().toString()+" problem "+getProblemId()+ " lang " + getLanguageId();
     }
 
     /**
