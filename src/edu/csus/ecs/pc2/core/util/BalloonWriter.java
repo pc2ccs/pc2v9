@@ -42,6 +42,8 @@ public class BalloonWriter {
 
     private String contestTitle = "";
 
+    private String message = "";
+
     /**
      * 
      */
@@ -434,12 +436,22 @@ public class BalloonWriter {
             tr.sendMessage(msg, msg.getAllRecipients());
             tr.close();
             success = true;
+            setMessage("successful");
         } catch (Exception e) {
             log.throwing(getClass().getName(), "sendBallonBalloonByEmail()", e);
+            setMessage(e.getMessage());
         } finally {
             log.exiting(getClass().getName(), "sendBalloonByEmail()", success);
         }
         return success;
+    }
+
+    private void setMessage(String message) {
+        this.message = message;
+    }
+    
+    public String getLastStatus() {
+        return message;
     }
 
     /**

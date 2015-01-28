@@ -56,6 +56,10 @@ public class BalloonPane extends JPanePlugin {
 
     private static final int FILE_PRINT_COLUMN = 1;
     
+    private static final int TSTAMP_COLUMN = 3;
+
+    private static final int RESULT_COLUMN = 4;
+    
     private BalloonHandler balloonHandler = new BalloonHandler();
 
     /**
@@ -353,10 +357,12 @@ public class BalloonPane extends JPanePlugin {
     protected void runSelectedTests() {
         try {
             int siteTested = 0;
+            final StringBuffer msgs = new StringBuffer();
             for (int i = 1; i < getTestMCLB().getRowCount() ; i++){
                 Object[] row=getTestMCLB().getRow(i);
                 Site key=(Site)getTestMCLB().getRowKey(i);
                 final int site = key.getSiteNumber();
+                final int rowNum = i;
                 final boolean testEmail = ((JCheckBox)row[EMAIL_COLUMN]).isSelected();
                 final boolean testPrint = ((JCheckBox)row[FILE_PRINT_COLUMN]).isSelected();
                 if (testEmail || testPrint) {
@@ -370,6 +376,21 @@ public class BalloonPane extends JPanePlugin {
                     Thread testASite = new Thread() {
                         public void run() {
                             balloonWriter.sendBalloon(testBalloon);
+                            System.out.println("result of site "+site+" test: "+balloonWriter.getLastStatus());
+                            final String lastStatus = balloonWriter.getLastStatus();
+                            // save the date in case there are delays dispatching the awt thread
+                            final String date = new Date().toString();
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    Object o[] = getTestMCLB().getRow(rowNum);
+                                    o[TSTAMP_COLUMN] = date;
+                                    o[RESULT_COLUMN] = lastStatus;
+                                    getTestMCLB().replaceRow(o, rowNum);
+                                    getTestMCLB().autoSizeColumn(TSTAMP_COLUMN);
+                                    getTestMCLB().autoSizeColumn(RESULT_COLUMN);
+                                }
+                            });
+
                         }
                     };
                     testASite.start();
@@ -475,9 +496,11 @@ public class BalloonPane extends JPanePlugin {
     private MCLB getTestMCLB() {
         if (testMCLB == null) {
             testMCLB = new MCLB();
-            Object[] cols = { "Site", "", "" };
+            Object[] cols = { "Site", "", "", "", "" };
             cols[EMAIL_COLUMN] = "Test Email";
             cols[FILE_PRINT_COLUMN] = "Test Print";
+            cols[TSTAMP_COLUMN] = "Last Test";
+            cols[RESULT_COLUMN] = "Result";
             testMCLB.addColumns(cols);
         }
         return testMCLB;
