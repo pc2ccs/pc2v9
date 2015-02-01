@@ -134,12 +134,12 @@ public class ImportDataPane extends JPanePlugin {
                 try {
                     checkAndLoadYAML(filename);
                 } catch (Exception e) {
-                    logException("Error loading contest.xml", e);
-                    showMessage("Error loading contest.xml "+e.getMessage());
+                    logException("Error loading contest.yaml", e);
+                    showMessage("Error loading contest.yaml "+e.getMessage());
                 }
                 
             } else {
-                showMessage("Please select a context.yaml file");
+                showMessage("Please select a contest.yaml file");
             }
 
         }
