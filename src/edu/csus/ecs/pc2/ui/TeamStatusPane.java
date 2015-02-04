@@ -235,6 +235,7 @@ public class TeamStatusPane extends JPanePlugin {
         boolean allSites = false;
 
         Site site = null;
+        int countOfSites = getContest().getSites().length;
 
         if (getSiteComboBox().getSelectedIndex() < 1) {
             allSites = true;
@@ -277,7 +278,7 @@ public class TeamStatusPane extends JPanePlugin {
             JLabel teamLabel = new JLabel();
             ClientId clientId = account.getClientId();
             String teamName = clientId.getName();
-            if (allSites){
+            if (allSites && countOfSites > 1){
                 teamName = "S"+clientId.getSiteNumber()+" "+teamName;
             }
             String toolTipText = "No submissions";
