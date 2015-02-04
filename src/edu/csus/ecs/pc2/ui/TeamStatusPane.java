@@ -20,11 +20,13 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
@@ -362,6 +364,7 @@ public class TeamStatusPane extends JPanePlugin {
 
         populateGUI();
 
+        getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addLoginListener(new LoginListenerImplementation());
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addClarificationListener(new ClarificationListenerImplementation());
@@ -429,7 +432,32 @@ public class TeamStatusPane extends JPanePlugin {
 
     }
 
-    /**
+    /*
+     * What to when accounts change
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            populateGUI();
+        }
+
+        public void accountModified(AccountEvent event) {
+            // ignore, does not affect this pane
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            populateGUI();
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            // ignore, does not affect this pane
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            populateGUI();
+        }
+    }
+   /**
      * 
      * @author pc2@ecs.csus.edu
      */
