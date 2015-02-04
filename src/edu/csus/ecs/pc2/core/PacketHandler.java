@@ -1725,14 +1725,11 @@ public class PacketHandler {
 
     private void handleSecurityMessage(Packet inPacket) {
 
-        ClientId clientId = (ClientId) PacketFactory.getObjectValue(inPacket, PacketFactory.CLIENT_ID);
         String message = (String) PacketFactory.getObjectValue(inPacket, PacketFactory.MESSAGE);
         ContestSecurityException contestSecurityException = (ContestSecurityException) PacketFactory.getObjectValue(inPacket, PacketFactory.EXCEPTION);
         // Packet packet = (Packet)PacketFactory.getObjectValue(inPacket, PacketFactory.PACKET);
 
-        controller.getLog().log(Log.WARNING, "Security violation " + clientId + " " + message);
-
-        contest.newSecurityMessage(clientId, "", message, contestSecurityException);
+        contest.newSecurityMessage(contestSecurityException.getClientId(), "", message, contestSecurityException);
 
         if (isServer()) {
             Packet forwardPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, inPacket);
