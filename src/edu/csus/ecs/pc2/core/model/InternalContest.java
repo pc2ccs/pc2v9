@@ -1263,9 +1263,13 @@ public class InternalContest implements IInternalContest {
         if (contestTime == null) {
             throw new IllegalArgumentException("contestTime is null");
         }
-        contestTimeList.add(contestTime);
-        ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.ADDED, contestTime, contestTime.getSiteNumber());
-        fireContestTimeListener(contestTimeEvent);
+        // only do this if we do not already have this contesTime in the list
+        // otherwise the add will throw a IllegalArguementException
+        if (contestTimeList.get(contestTime.getSiteNumber()) == null) {
+            contestTimeList.add(contestTime);
+            ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.ADDED, contestTime, contestTime.getSiteNumber());
+            fireContestTimeListener(contestTimeEvent);
+        }
     }
 
     public ClientId[] getLocalLoggedInClients(Type type) {
