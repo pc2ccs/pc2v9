@@ -357,7 +357,6 @@ public class BalloonPane extends JPanePlugin {
     protected void runSelectedTests() {
         try {
             int siteTested = 0;
-            final StringBuffer msgs = new StringBuffer();
             for (int i = 1; i < getTestMCLB().getRowCount() ; i++){
                 Object[] row=getTestMCLB().getRow(i);
                 Site key=(Site)getTestMCLB().getRowKey(i);
