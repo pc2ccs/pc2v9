@@ -135,7 +135,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
      */
     private void initialize() {
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setBounds(new java.awt.Rectangle(0, 0, 754, 500));
+        this.setBounds(new java.awt.Rectangle(0, 0, 815, 500));
         this.setContentPane(getJPanel());
         this.setTitle("PC^2 Administrator");
         this.addWindowListener(new java.awt.event.WindowAdapter() {
