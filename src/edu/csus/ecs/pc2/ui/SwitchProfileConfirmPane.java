@@ -145,7 +145,7 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
     private JButton getSwitchButton() {
         if (switchButton == null) {
             switchButton = new JButton();
-            switchButton.setPreferredSize(new Dimension(75, 26));
+            switchButton.setPreferredSize(new Dimension(100, 26));
             switchButton.setMnemonic(KeyEvent.VK_S);
             switchButton.setText("Switch");
             switchButton.addActionListener(new java.awt.event.ActionListener() {
@@ -165,7 +165,7 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
     private JButton getCancelButton() {
         if (cancelButton == null) {
             cancelButton = new JButton();
-            cancelButton.setPreferredSize(new Dimension(75, 26));
+            cancelButton.setPreferredSize(new Dimension(100, 26));
             cancelButton.setMnemonic(KeyEvent.VK_C);
             cancelButton.setText("Cancel");
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
