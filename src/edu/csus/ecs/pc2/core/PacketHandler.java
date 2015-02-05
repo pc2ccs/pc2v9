@@ -3468,7 +3468,7 @@ public class PacketHandler {
      * @param packet
      * @param connectionHandlerID
      */
-    private void loadSettingsFromRemoteServer(ContestLoader loader, Packet packet, ConnectionHandlerID connectionHandlerID) {
+    public void loadSettingsFromRemoteServer(ContestLoader loader, Packet packet, ConnectionHandlerID connectionHandlerID) {
         
         int remoteSiteNumber = packet.getSourceId().getSiteNumber();
         info("Start loading settings from remote site "+remoteSiteNumber);
@@ -3492,6 +3492,8 @@ public class PacketHandler {
 
         loader.addRemoteAllClientSettingsToModel(contest, controller, packet, remoteSiteNumber);
 
+        loader.addAllConnectionIdsToModel(contest, controller, packet);
+
         loader.addRemoteLoginsToModel(contest, controller, packet, remoteSiteNumber);
         
         info("Done loading settings from remote site "+remoteSiteNumber);
@@ -3503,11 +3505,15 @@ public class PacketHandler {
      * Determines whether this site has all run files for a remote site.
      * If there is a need to sync, will send a packet to sync with that
      * other site.
+     * 
+     * Send a packet to the remote server to retrieve all run submissions (files) from that remote server.
      *  
      * @param packet
      * @param remoteSiteNumber
      */
-    private void sendRequestForRunfFiles(Packet packet, int remoteSiteNumber) {
+    public void sendRequestForRunfFiles(Packet packet, int remoteSiteNumber) {
+        
+        info("sendRequestForRunfFiles for  "+remoteSiteNumber);
 
         Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
         if (runs != null) {
@@ -3518,6 +3524,7 @@ public class PacketHandler {
 
             if (localLastRunId < lastRemoteRunId) {
                 sendRunFilesRequestToServer(remoteSiteNumber, localLastRunId);
+                info("sendRequestForRunfFiles to "+remoteSiteNumber+ " starting at run id # "+localLastRunId);
             } // else { no files to fetch
             
         } // else no runs from that site, ok.

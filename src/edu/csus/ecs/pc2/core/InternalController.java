@@ -1365,26 +1365,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             if (connectionHandlerID.equals(remoteServerConnectionHandlerID)){
                                 
                                 /**
-                                 * Only accept/chagne config data on this site if the login success is from 
-                                 * the server that this site connected to initially.
+                                 * Only accept/change config data on this site if the login success is from the server that this site connected to initially.
                                  */
-                                info("Loading contest settings from remoteServer "+clientId+" @ "+connectionHandlerID);
-                                
+                                info("Loading contest settings from remoteServer " + clientId + " @ " + connectionHandlerID);
+
                                 // Add data from packet into contest and sync all runs
                                 processPacket(packet, connectionHandlerID);
+                                
                             } else {
                                 
-                                info("Not loading contest settings from other server, not the remoteServer  "+clientId+" @ "+connectionHandlerID);
-                                
-                                // TODO 856 - sync runs using PacketHandler.sendRequestForRunfFiles
                                 /**
-                                 * Runs need to be sync'd here
+                                 * This should happen when a server logs into another server that is not its remoeteServer (initial server logged into).
+                                 * 
+                                 * This is where the remote site's data is synced on this server.
                                  */
-                                // PacketHandler.sendRequestForRunfFiles  Send FETCH_RUN_FILES get back UPDATE_RUN_FILES
                                 
+                                info("Updating this server's settings from remote server specific settings from " + clientId + " @ " + connectionHandlerID);
+ 
+                                packetHandler.loadSettingsFromRemoteServer(new ContestLoader(), packet, connectionHandlerID);
+                      
                             }
-                                
-
 
                         } else if (contest.isLocalLoggedIn(clientId) && packet.getType().equals(PacketType.Type.LOGIN)) {
                             /**
