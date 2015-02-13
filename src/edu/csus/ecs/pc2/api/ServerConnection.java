@@ -164,6 +164,25 @@ public class ServerConnection {
       * <P>
       * The current logged in user must be an Administrator user otherwise a SecurityException
       * will be thrown.
+      * <P>
+      * The following code snippet shows a example for a addAccount invocation.
+      * 
+      * <pre>
+      * String login = &quot;administrator2&quot;;
+      * String password = &quot;administrator2&quot;;
+      * try {
+      *     ServerConnection serverConnection = new ServerConnection();
+      *     IContest contest = serverConnection.login(login, password);
+      *     connection.addAccount("TEAM", "Team Name", "teampassword");
+      *     Thread.sleep(1000); // sleep just long enough before logging off
+      *     serverConnection.logoff();
+      * } catch (LoginFailureException e) {
+      *     System.out.println(&quot;Could not login because &quot; + e.getMessage());
+      * } catch (NotLoggedInException e) {
+      *     System.out.println(&quot;Unable to execute API method&quot;);
+      *     e.printStackTrace();
+      * }
+      * </pre>      
       * 
       * @param accountTypeName name of account, ex TEAM
       * @param displayName title for account/team, if null will be login name
