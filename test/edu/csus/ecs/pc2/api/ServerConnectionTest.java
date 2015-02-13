@@ -251,5 +251,20 @@ public class ServerConnectionTest extends AbstractTestCase {
         }
 
     }
+    
+    public void testTextValidClientType() throws Exception {
+        
+        ServerConnection connection = new ServerConnection();
+        
+        String name = "TEAM";
+        boolean valid = connection.isValidAccountTypeName(name);
+        assertTrue("Expecting "+name+" to be valid", valid);
+        
+        name = "BANNANA";
+        valid = connection.isValidAccountTypeName(name);
+        assertFalse("Expecting "+name+" to NOT be valid", valid);
+        
+        
+    }
 
 }

@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -145,6 +146,56 @@ public class ServerConnection {
          */
         throw new Exception("Internal Error (SC.getAccount) No account found for " + clientId);
     }
+    
+     public boolean isValidAccountTypeName (String name){
+        try {
+            ClientType.Type clientType = ClientType.Type.valueOf(name);
+            return clientType != null;
+        } catch (java.lang.IllegalArgumentException e) {
+            return false;
+        }
+     }
+     
+     /**
+      * Add a single account.
+      * 
+      * @param accountTypeName name of account, ex TEAM
+      * @param displayName title for account/team, if null will be login name
+      * @param password password for account, if null will be same as login name (ex team22)
+      * @throws Exception
+      */
+    
+    public void addAccount (String accountTypeName, String displayName, String password) throws Exception {
+        
+        accountTypeName = accountTypeName.toUpperCase();
+        
+        if (! isValidAccountTypeName(accountTypeName)){
+            throw new IllegalArgumentException("Invalid account type name '"+accountTypeName+"'");
+        }
+        
+        if (! internalContest.isAllowed(Type.ADD_ACCOUNT)){
+            throw new SecurityException("This login/account is not allowed to add an account");
+        }
+        
+        ClientType.Type clientType = ClientType.Type.valueOf(accountTypeName);
+        
+        ClientId clientId = new ClientId(internalContest.getSiteNumber(), clientType, 0);
+        
+        if (password == null || password.trim().length() == 0){
+            // joe password 
+            password = clientId.getName();
+        }
+        
+        if (displayName == null){
+            displayName = clientId.getName();
+        }
+        
+        Account account = new Account(clientId, password, internalContest.getSiteNumber());
+        account.setDisplayName(displayName);
+        
+        controller.addNewAccount(account);
+    }
+    
     
     /**
      * Submit a clarification.
