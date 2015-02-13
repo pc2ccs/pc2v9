@@ -157,45 +157,48 @@ public class ServerConnection {
      }
      
      /**
-      * Add a single account.
+      * Add a single account (admin feature).
+      * <P> 
+      * For the input accountTypeName, ex. TEAM, will add the next client number account.
+      * If adding a new TEAM account and there are 22 teams, this method will add team23 login account.
+      * <P>
+      * The current logged in user must be an Administrator user otherwise a SecurityException
+      * will be thrown.
       * 
       * @param accountTypeName name of account, ex TEAM
       * @param displayName title for account/team, if null will be login name
-      * @param password password for account, if null will be same as login name (ex team22)
+      * @param password password for account, must not be null or emptystring (string length==0)
       * @throws Exception
       */
-    
-    public void addAccount (String accountTypeName, String displayName, String password) throws Exception {
-        
+    public void addAccount(String accountTypeName, String displayName, String password) throws Exception {
+
         accountTypeName = accountTypeName.toUpperCase();
-        
-        if (! isValidAccountTypeName(accountTypeName)){
-            throw new IllegalArgumentException("Invalid account type name '"+accountTypeName+"'");
+
+        if (!isValidAccountTypeName(accountTypeName)) {
+            throw new IllegalArgumentException("Invalid account type name '" + accountTypeName + "'");
         }
-        
-        if (! internalContest.isAllowed(Type.ADD_ACCOUNT)){
+
+        if (!internalContest.isAllowed(Type.ADD_ACCOUNT)) {
             throw new SecurityException("This login/account is not allowed to add an account");
         }
-        
+
         ClientType.Type clientType = ClientType.Type.valueOf(accountTypeName);
-        
+
         ClientId clientId = new ClientId(internalContest.getSiteNumber(), clientType, 0);
-        
-        if (password == null || password.trim().length() == 0){
-            // joe password 
-            password = clientId.getName();
+
+        if (password == null || password.trim().length() == 0) {
+            throw new IllegalArgumentException("Invalid password (null or missing) '" + password + "'");
         }
-        
-        if (displayName == null){
+
+        if (displayName == null) {
             displayName = clientId.getName();
         }
-        
+
         Account account = new Account(clientId, password, internalContest.getSiteNumber());
         account.setDisplayName(displayName);
-        
+
         controller.addNewAccount(account);
-    }
-    
+    }    
     
     /**
      * Submit a clarification.
