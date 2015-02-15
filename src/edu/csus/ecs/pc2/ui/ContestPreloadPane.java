@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.ContestComparison;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
@@ -226,7 +227,7 @@ public class ContestPreloadPane extends JPanePlugin {
         try {
             ContestYAMLLoader loader = new ContestYAMLLoader();
             newContest = loader.fromYaml(null, directoryName);
-            contestSummary = ImportDataPane.getContestLoadSummary(newContest);
+            contestSummary = new ContestComparison().getContestLoadSummary(newContest);
             
             result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
 

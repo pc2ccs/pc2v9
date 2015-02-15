@@ -20,22 +20,13 @@ import javax.swing.filechooser.FileFilter;
 
 import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
-import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.Category;
-import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestComparison;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.PlaybackInfo;
-import edu.csus.ecs.pc2.core.model.Pluralize;
-import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
-import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
@@ -174,8 +165,8 @@ public class ImportDataPane extends JPanePlugin {
             }
         
             newContest = loader.fromYaml(null, directoryName, loadDataFileContents);
-             
-             contestSummary = getContestLoadSummary(newContest, getController());
+            
+             contestSummary = new ContestComparison().getContestLoadSummary(newContest);
              
              if (Utilities.isDebugMode()){
                  newContest.generateNewAccounts(Type.ADMINISTRATOR.toString(), 1, true);
@@ -214,116 +205,7 @@ public class ImportDataPane extends JPanePlugin {
         
     }
 
-    private static void addSummaryEntry(StringBuffer buf, int count, String prefix, String entryName) {
-        if (count > 0) {
-            buf.append(count);
-            String pluralized = Pluralize.pluralize(entryName, count);
-            if (prefix.length() > 0) {
-                buf.append(' ');
-                buf.append(prefix);
-            }
-            buf.append(' ');
-            buf.append(pluralized);
-            buf.append(NL);
-        }
-    }
 
-    private static void addSummaryEntry(StringBuffer sb, int count, String entryName) {
-        addSummaryEntry(sb, count, "", entryName);
-    }
-    
-    private static void addSummaryEntry(StringBuffer buf, String entryName) {
-        buf.append(entryName);
-        buf.append(NL);
-    }
-
-    public static String getContestLoadSummary(IInternalContest newContest, IInternalController inController) throws Exception {
-
-        // TODO debug 22 replace getContestLoadSummary with ContestSummaryFrame
-//        ContestSummaryFrame frame = new ContestSummaryFrame();
-//        frame.setContestAndController(newContest, inController);
-//        frame.setVisible(true);
-       
-        Language[] languages = newContest.getLanguages();
-        Problem[] problems = newContest.getProblems();
-        Site[] sites = newContest.getSites();
-        Category[] categories = newContest.getCategories();
-        ClientSettings [] settings = newContest.getClientSettingsList();
-        
-        PlaybackInfo info = getPlaybackInfo(newContest);
-
-        StringBuffer sb = new StringBuffer();
-
-        addSummaryEntry(sb, sites.length, "site");
-
-        addSummaryEntry(sb, problems.length, "problem");
-        
-        long totalBytes = 0;
-        
-        if (problems.length > 0) {
-            int ansCount = 0;
-            int datCount = 0;
-            
-            for (Problem problem : problems) {
-                ProblemDataFiles pdfiles = newContest.getProblemDataFile(problem);
-                if (pdfiles != null) {
-                    ansCount += pdfiles.getJudgesAnswerFiles().length;
-                    datCount += pdfiles.getJudgesDataFiles().length;
-                    for (SerializedFile serializedFile : pdfiles.getJudgesAnswerFiles()) {
-                        totalBytes += serializedFile.getBuffer().length;
-                    }
-                    for (SerializedFile serializedFile : pdfiles.getJudgesDataFiles()) {
-                        totalBytes += serializedFile.getBuffer().length;
-                    }
-//                } else { // nothing to do here, move on
-                }
-            }
-            
-            addSummaryEntry(sb, datCount, "input data file");
-            addSummaryEntry(sb, ansCount, "answer data file");
-        } else {
-            addSummaryEntry(sb, "No problems to be added");
-        }
-
-        addSummaryEntry(sb, languages.length, "language");
-
-        for (Type type : Type.values()) {
-            Vector<Account> accounts = newContest.getAccounts(type);
-            String accountTypeName = type.toString().toLowerCase();
-            addSummaryEntry(sb, accounts.size(), accountTypeName, " account");
-        }
-
-        addSummaryEntry(sb, categories.length, "clar", "category");
-
-        addSummaryEntry(sb, settings.length, "AJ setting");
-        
-        if (info != null) {
-            sb.append("1 replay defined, auto started? "+info.isStarted());
-            sb.append(NL);
-            sb.append("   file: "+info.getFilename());
-            sb.append(NL);
-            sb.append(info.toString());
-            sb.append(NL);
-        }
-        
-        if (problems.length > 0 && totalBytes == 0) {
-            sb.append ("NO file/data contents loaded for any Problems");
-            sb.append(NL);
-        }
-
-        return sb.toString();
-    }
-    
-    private static PlaybackInfo getPlaybackInfo(IInternalContest newContest) {
-        
-        PlaybackInfo [] infos = newContest.getPlaybackInfos();
-        if (infos.length > 0) {
-            return infos[0];
-        } else {
-            return null;
-        }
-    }
-    
     private void showMessage(String string) {
         JOptionPane.showMessageDialog(this, string, "Message", JOptionPane.INFORMATION_MESSAGE);
     }
@@ -536,77 +418,6 @@ public class ImportDataPane extends JPanePlugin {
             centerPane.setLayout(new GridBagLayout());
         }
         return centerPane;
-    }
-
-    public static String getContestLoadSummary(IInternalContest newContest) throws Exception {
-
-        Language[] languages = newContest.getLanguages();
-        Problem[] problems = newContest.getProblems();
-        Site[] sites = newContest.getSites();
-        Category[] categories = newContest.getCategories();
-        ClientSettings [] settings = newContest.getClientSettingsList();
-        
-        PlaybackInfo info = getPlaybackInfo(newContest);
-
-        StringBuffer sb = new StringBuffer();
-
-        addSummaryEntry(sb, sites.length, "site");
-
-        addSummaryEntry(sb, problems.length, "problem");
-        
-        if (problems.length > 0) {
-            int ansCount = 0;
-            int datCount = 0;
-            int numberExternalDataFileProblems = 0;
-            
-            for (Problem problem : problems) {
-                ProblemDataFiles pdfiles = newContest.getProblemDataFile(problem);
-                if (pdfiles != null) {
-                    ansCount += pdfiles.getJudgesAnswerFiles().length;
-                    datCount += pdfiles.getJudgesDataFiles().length;
-//                } else { // nothing to do here, move on
-                }
-                
-                if (problem.isUsingExternalDataFiles()) {
-                    numberExternalDataFileProblems ++;
-                }
-            }
-
-            if (datCount > 0) {
-                addSummaryEntry(sb, datCount, "input data file");
-            } else if (numberExternalDataFileProblems == problems.length) {
-                sb.append("All data files are external");
-            }
-
-            if (ansCount > 0) {
-                addSummaryEntry(sb, ansCount, "answer data file");
-            } else if (numberExternalDataFileProblems == problems.length) {
-                sb.append("All answer files are external");
-            }
-        }
-
-        addSummaryEntry(sb, languages.length, "language");
-
-        for (Type type : Type.values()) {
-            Vector<Account> accounts = newContest.getAccounts(type);
-            String accountTypeName = type.toString().toLowerCase();
-            addSummaryEntry(sb, accounts.size(), accountTypeName, " account");
-        }
-
-        addSummaryEntry(sb, categories.length, "clar", "category");
-
-        addSummaryEntry(sb, settings.length, "AJ setting");
-        
-        if (info != null) {
-            sb.append("1 replay defined, auto started? "+info.isStarted());
-            sb.append(NL);
-            sb.append("   file: "+info.getFilename());
-            sb.append(NL);
-            sb.append(info.toString());
-            sb.append(NL);
-        }
-
-        return sb.toString();
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
