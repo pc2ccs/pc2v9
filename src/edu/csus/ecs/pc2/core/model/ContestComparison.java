@@ -6,6 +6,14 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
+/**
+ * Provides descriptions of differences between model (Contest). 
+ * 
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
+ */
+
+// $HeadURL$
 public class ContestComparison {
 
     public static final String NEW_LINE = System.getProperty("line.separator");
@@ -20,7 +28,7 @@ public class ContestComparison {
         ContestInformation ciTwo = contestTwo.getContestInformation();
 
         if (!ciOne.isSameAs(ciTwo)) {
-            buffer.append("Replace Contest Information");
+            buffer.append("Replace Contest Information" + NEW_LINE);
         }
 
         buffer.append(addComment("Problem", contestOne.getProblems().length, contestTwo.getProblems().length));
@@ -62,13 +70,15 @@ public class ContestComparison {
         String message = "";
 
         if (sizeTwo == 0 && sizeOne == 0) {
-            //
+            // identical 
         } else if (sizeTwo == sizeOne) {
             message += "Replace all " + sizeOne + " " + Pluralize.pluralize(name, sizeOne) + NEW_LINE;
         } else if (sizeTwo < sizeOne) {
-            message += "Replace " + sizeOne + " " + Pluralize.pluralize(name, sizeOne) + NEW_LINE;
             int diff = sizeOne - sizeTwo;
-            message += "ignore last " + diff + " " + Pluralize.pluralize(name, diff) + NEW_LINE;
+            if (sizeTwo != 0){
+                message += "Replace " + sizeTwo + " " + Pluralize.pluralize(name, sizeOne) + NEW_LINE;
+                message += "Keep/ignore last " + diff + " " + Pluralize.pluralize(name, diff) + NEW_LINE;
+            }
         } else if (sizeTwo > sizeOne) {
             int diff = sizeTwo - sizeOne;
             message += "Add " + diff + " " + Pluralize.pluralize(name, diff) + NEW_LINE;

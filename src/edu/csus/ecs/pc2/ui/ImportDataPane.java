@@ -176,6 +176,9 @@ public class ImportDataPane extends JPanePlugin {
                  } else {
                      Utilities.viewReport(new ProblemsReport(), "Title: "+newContest.getTitle(), newContest, getController());
                  }
+                 
+                 FrameUtilities.showMessage(null, "New Comparison information", new ContestComparison().comparisonList(getContest(), newContest));
+                 
              }
              
              result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
@@ -347,11 +350,9 @@ public class ImportDataPane extends JPanePlugin {
                 try {
                     checkAndLoadPasswordsFile(filename);
                 } catch (FileNotFoundException fnfe) {
-                    fnfe.printStackTrace(); // TODO remove this, debug 22
                     logException("File not found loading passwords.txt ", fnfe);
                     showMessage("File not found " + fnfe.getMessage());
                 } catch (Exception e) {
-                    e.printStackTrace(); // TODO remove this, debug 22
                     logException("Error loading passwords.txt", e);
                     showMessage("Error loading passwords.txt " + e.getMessage());
                 }
