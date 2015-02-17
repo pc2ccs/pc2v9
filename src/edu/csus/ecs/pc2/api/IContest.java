@@ -404,4 +404,12 @@ public interface IContest {
      */
     IClient[] getClients();
 
+    /**
+     * Get run state for a run (judge or admin only).
+     * 
+     * @param run
+     * @return
+     */
+    RunStates getRunState(IRun run);
+
 }

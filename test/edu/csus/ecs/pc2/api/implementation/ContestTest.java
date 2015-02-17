@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.api.IProblemDetails;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ITeam;
+import edu.csus.ecs.pc2.api.RunStates;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -198,5 +199,68 @@ public class ContestTest extends AbstractTestCase {
 
         number = countClients(allClients, 1, ClientType.SCOREBOARD_CLIENT);
         assertEquals("Scoreboard clients ", 2, number);
+    }
+    
+    public void testRunStatus() throws Exception {
+        
+        String [] runsData = {
+
+                "1,1,A,1,No",  //20
+                "2,1,A,3,Yes",  //3 (first yes counts Minutes only)
+                "3,1,A,5,No",  //20
+                "4,1,A,7,Yes",  //20  
+                "5,1,A,9,No",  //20
+                
+                "6,1,B,11,No",  //20  (all runs count)
+                "7,1,B,13,No",  //20  (all runs count)
+                
+                "8,2,A,30,Yes",  //30
+                
+                "9,2,B,35,No",  //20 (all runs count)
+                "10,2,B,40,No",  //20 (all runs count)
+                "11,2,B,45,No",  //20 (all runs count)
+                "12,2,B,50,No",  //20 (all runs count)
+                "13,2,B,55,No",  //20 (all runs count)
+
+                "14,2,A,30, ", // doesn't count, no after yes
+                "15,2,A,25, ", // doesn't count, no after yes
+
+                "16,2,A,330, ",  // doesn't count, yes after yes
+        };
+        
+        IInternalContest contest = sampleContest.createContest(1, 3, 12, 12, true);
+
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
+
+        IInternalController controller = sampleContest.createController(contest, storageDirectory, true, false);
+        Log log = createLog("testRunStatus" + getName());
+
+        Contest apiContestInst = new Contest(contest, controller, log);
+        
+        for (String runInfoLine : runsData) {
+            sampleContest.addARun(contest, runInfoLine);      
+        }
+        
+        IRun[] runs = apiContestInst.getRuns();
+        
+        assertEquals("Number of runs", 16, runs.length);
+        
+        assertEquals("Number of NEW runs", 3, countRunStatus(apiContestInst, runs, RunStates.NEW));
+        assertEquals("Number of JUDGED runs", 13, countRunStatus(apiContestInst, runs, RunStates.JUDGED));
+        
+//        for (IRun iRun : runs) {
+//            println("debug 22 "+apiContestInst.getRunState(iRun));
+//        }
+    }
+
+    private int countRunStatus(Contest contest, IRun[] runs, RunStates runStates) {
+        int count = 0;
+        for (IRun iRun : runs) {
+            if (runStates.equals(contest.getRunState(iRun))){
+                count ++;
+            }
+        }
+        return count;
     }
 }

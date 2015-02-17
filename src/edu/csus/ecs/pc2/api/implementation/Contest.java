@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.ISite;
 import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ITeam;
+import edu.csus.ecs.pc2.api.RunStates;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
@@ -34,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -309,4 +311,84 @@ public class Contest implements IContest, UIPlugin {
         return (IClient[]) list.toArray(new IClient[list.size()]);
     }
 
+
+    @Override
+    public RunStates getRunState(IRun run) {
+
+        RunStates value = RunStates.UNKNOWN;
+
+        if (run == null) {
+            throw new IllegalArgumentException("run is null");
+        }
+
+        if (isAllowed(Type.JUDGE_RUN) || isAllowed(Type.EDIT_RUN)) {
+
+            edu.csus.ecs.pc2.core.model.Run.RunStates state = getRunStateInternal(run);
+
+            switch (state) {
+                case NEW:
+                    value = RunStates.NEW;
+                    break;
+
+                case BEING_COMPUTER_JUDGED:
+                case BEING_JUDGED:
+                    value = RunStates.BEING_JUDGED;
+                    break;
+
+                case BEING_RE_JUDGED:
+                    value = RunStates.BEING_RE_JUDGED;
+                    break;
+
+                case JUDGED:
+                    value = RunStates.JUDGED;
+                    break;
+
+                default:
+                    // keep state at UNKNOWN.
+                    break;
+            }
+
+        } else {
+            throw new SecurityException("Not allowed to get run state");
+        }
+
+        return value;
+    }
+
+    /**
+     * Get Run.
+     * @param run a API Run
+     * @return a Run
+     */
+    private Run getInternalRun(IRun run) {
+
+        Run[] runList = contest.getRuns();
+        for (Run run2 : runList) {
+            if (run2.getNumber() == run.getNumber()) {
+                if (run2.getSiteNumber() == run.getSiteNumber()) {
+                    // found it
+                    return run2;
+                }
+            }
+        }
+        return null;
+    }
+
+    private edu.csus.ecs.pc2.core.model.Run.RunStates getRunStateInternal(IRun run) {
+
+        Run foundRun = getInternalRun(run);
+
+        if (foundRun == null) {
+            throw new IllegalArgumentException("No run found " + run);
+        }
+
+        return foundRun.getStatus();
+
+    }
+    
+    private boolean isAllowed(Type type) {
+        return contest.isAllowed(type);
+    }
+
+    
 }

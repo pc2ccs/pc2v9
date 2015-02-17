@@ -732,28 +732,38 @@ public class SampleContest {
         run.setNumber(runId);
         run.setSiteNumber(contest.getSiteNumber());
         run.setElapsedMins(elapsed);
+        
+        JudgementRecord judgementRecord = null;
 
-        // Use a default No entry
-        ElementId judgementId = noJudgement.getElementId();
+        if (data[4].trim().length() != 0 && (! data[4].equalsIgnoreCase("New"))){
+            
+            // Use a default No entry
+            ElementId judgementId = noJudgement.getElementId();
 
-        if (solved) {
-            judgementId = getYesJudgement(contest).getElementId();
-        } else {
+            if (solved) {
+                judgementId = getYesJudgement(contest).getElementId();
+            } else {
 
-            // Try to find No judgement
+                // Try to find No judgement
 
-            for (Judgement judgement : contest.getJudgements()) {
-                if (judgement.toString().equalsIgnoreCase(data[4])) {
-                    judgementId = judgement.getElementId();
+                for (Judgement judgement : contest.getJudgements()) {
+                    if (judgement.toString().equalsIgnoreCase(data[4])) {
+                        judgementId = judgement.getElementId();
+                    }
                 }
             }
+            
+            judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
+            judgementRecord.setSendToTeam(sendToTeams);
+
         }
-        JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
-        judgementRecord.setSendToTeam(sendToTeams);
+        
         contest.addRun(run);
 
-        checkOutRun(contest, run, judgeId);
-        contest.addRunJudgement(run, judgementRecord, null, judgeId);
+        if (judgementRecord != null){
+            checkOutRun(contest, run, judgeId);
+            contest.addRunJudgement(run, judgementRecord, null, judgeId);
+        }
 
         if (debugMode) {
             System.out.print("Send to teams " + run.getJudgementRecord().isSendToTeam() + " ");
