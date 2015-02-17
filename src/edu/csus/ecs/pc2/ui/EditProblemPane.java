@@ -912,8 +912,12 @@ public class EditProblemPane extends JPanePlugin {
                 return false;
             }
         } else {
-            showMessage(fileName + " does not exist");
-            return false;
+            Object[] options = {"Ok", "Cancel", "Ignore"};
+            int n = JOptionPane.showOptionDialog(null, fileName +" does not exist", "Message", JOptionPane.OK_CANCEL_OPTION,JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+            System.out.println("showOptionDialog returned "+n);
+            if (n < 2) {
+                return false;
+            } // only Ignore will fall thru to true
         }
         return true;
     }
