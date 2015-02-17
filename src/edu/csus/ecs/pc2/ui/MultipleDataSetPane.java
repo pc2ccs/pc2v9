@@ -166,12 +166,13 @@ public class MultipleDataSetPane extends JPanePlugin {
             if (judgeFiles == null || judgeFiles.length == 0) {
                 // No data in the data set.
                 judgeFiles = new SerializedFile[1];
-                answerFiles = new SerializedFile[1];
-
                 judgeFiles[0] = problemDataFiles.getJudgesDataFile();
+            }
+            if (answerFiles == null || answerFiles.length == 0) {
+                // No answer in the data set.
+                answerFiles = new SerializedFile[1];
                 answerFiles[0] = problemDataFiles.getJudgesAnswerFile();
             }
-
             for (int i = 0; i < judgeFiles.length; i++) {
                 addSetRow(i + 1, judgeFiles[i], answerFiles[i]);
             }
