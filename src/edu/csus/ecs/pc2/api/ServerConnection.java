@@ -1,7 +1,7 @@
 package edu.csus.ecs.pc2.api;
 
 import java.io.File;
-import java.util.Vector;
+import java.util.Properties;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.api.implementation.Contest;
 import edu.csus.ecs.pc2.api.implementation.LanguageImplementation;
 import edu.csus.ecs.pc2.api.implementation.ProblemImplementation;
 import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -17,7 +18,9 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
@@ -37,6 +40,10 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 // $HeadURL$
 public class ServerConnection {
 
+    private static final String VALIDATOR_COMMAND = "VALIDATOR_COMMAND";
+
+    private String[] problemPropertyNames = { VALIDATOR_COMMAND, };
+    
     protected IInternalController controller;
     
     protected IInternalContest internalContest;
@@ -130,22 +137,22 @@ public class ServerConnection {
         }
     }
 
-    private Account getAccount(IInternalContest iContest, ClientId clientId) throws Exception {
-
-        Vector<Account> accountList = iContest.getAccounts(clientId.getClientType());
-
-        for (int i = 0; i < accountList.size(); i++) {
-            if (accountList.elementAt(i).getClientId().equals(clientId)) {
-                return accountList.elementAt(i);
-            }
-        }
-
-        /**
-         * This condition should not happen. Every clientId in the system that can login to the system must have a matching account. This Exception is thrown when there is no Account in
-         * internalContest for the input ClientId.
-         */
-        throw new Exception("Internal Error (SC.getAccount) No account found for " + clientId);
-    }
+//    private Account getAccount(IInternalContest iContest, ClientId clientId) throws Exception {
+//
+//        Vector<Account> accountList = iContest.getAccounts(clientId.getClientType());
+//
+//        for (int i = 0; i < accountList.size(); i++) {
+//            if (accountList.elementAt(i).getClientId().equals(clientId)) {
+//                return accountList.elementAt(i);
+//            }
+//        }
+//
+//        /**
+//         * This condition should not happen. Every clientId in the system that can login to the system must have a matching account. This Exception is thrown when there is no Account in
+//         * internalContest for the input ClientId.
+//         */
+//        throw new Exception("Internal Error (SC.getAccount) No account found for " + clientId);
+//    }
     
      public boolean isValidAccountTypeName (String name){
         try {
@@ -197,9 +204,7 @@ public class ServerConnection {
             throw new IllegalArgumentException("Invalid account type name '" + accountTypeName + "'");
         }
 
-        if (!internalContest.isAllowed(Type.ADD_ACCOUNT)) {
-            throw new SecurityException("This login/account is not allowed to add an account");
-        }
+        checkIsAllowed(Type.ADD_ACCOUNT, "This login/account is not allowed to add an account");
 
         ClientType.Type clientType = ClientType.Type.valueOf(accountTypeName);
 
@@ -230,7 +235,7 @@ public class ServerConnection {
 
         checkWhetherLoggedIn();
         
-        allowedTo (Permission.Type.SUBMIT_CLARIFICATION, "User not allowed to submit clarification");
+        checkIsAllowed (Permission.Type.SUBMIT_CLARIFICATION, "User not allowed to submit clarification");
 
         ProblemImplementation problemImplementation = (ProblemImplementation) problem;
         Problem submittedProblem = internalContest.getProblem(problemImplementation.getElementId());
@@ -270,7 +275,7 @@ public class ServerConnection {
 
         checkWhetherLoggedIn();
         
-        allowedTo (Permission.Type.SUBMIT_RUN, "User not allowed to submit run");
+        checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit run");
         
         if (! new File(mainFileName).isFile()){
             throw new Exception("File '"+mainFileName+"' no such file (not found)"); 
@@ -414,7 +419,7 @@ public class ServerConnection {
         
         checkWhetherLoggedIn();
 
-        allowedTo (Permission.Type.START_CONTEST_CLOCK, "User not allowed to start contest clock");
+        checkIsAllowed (Permission.Type.START_CONTEST_CLOCK, "User not allowed to start contest clock");
 
         try {
             controller.startContest(internalContest.getSiteNumber());
@@ -430,14 +435,14 @@ public class ServerConnection {
      * @param message
      * @throws Exception
      */
-    protected void allowedTo(Type permissionType, String message) throws Exception {
-        Account account = getAccount(internalContest, internalContest.getClientId());
-
-        if (!account.isAllowed(permissionType)) {
-            throw new Exception(message +", user="+contest.getMyClient().getLoginName());
-        }
-        
-    }
+//    protected void allowedTo(Type permissionType, String message) throws Exception {
+//        Account account = getAccount(internalContest, internalContest.getClientId());
+//
+//        if (!account.isAllowed(permissionType)) {
+//            throw new Exception(message +", user="+contest.getMyClient().getLoginName());
+//        }
+//        
+//    }
 
     /**
      * Stop the contest clock.
@@ -451,7 +456,7 @@ public class ServerConnection {
     public void stopContestClock() throws Exception {
         checkWhetherLoggedIn();
         
-        allowedTo (Permission.Type.STOP_CONTEST_CLOCK, "User not allowed to start contest clock");
+        checkIsAllowed (Permission.Type.STOP_CONTEST_CLOCK, "User not allowed to start contest clock");
         
         try {
             controller.stopContest(internalContest.getSiteNumber());
@@ -460,4 +465,165 @@ public class ServerConnection {
         }
         
     }
+    
+    protected void setPC2Validator(Problem problem) {
+
+        problem.setValidatedProblem(true);
+        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+
+        problem.setUsingPC2Validator(true);
+        problem.setWhichPC2Validator(1);
+        problem.setIgnoreSpacesOnValidation(true);
+        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
+                + problem.isIgnoreSpacesOnValidation());
+        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+    }
+    
+    /**
+     * Add a Problem definition.
+     * 
+     * @param title
+     *            - title for problem
+     * @param problemShortName
+     *            - a unique (to the contest) short problem name
+     * @param judgesDataFile
+     *            - judges input data file
+     * @param judgesAnswerFile
+     *            - judges answer file
+     * @param validated
+     *            - is the problem validated using the pc2 internal validator?
+     * @param problemProperties
+     *            - optional properties, for a list of keys see {@link #getProblemPropertyNames()}, null is allowed.
+     */
+    public void addProblem(String title, String shortName, File judgesDataFile, File judgesAnswerFile, boolean validated, Properties problemProperties) {
+
+        checkNotEmpty("Problem title", title);
+        checkNotEmpty("Problem short name", shortName);
+        checkFile("Judges data file", judgesDataFile);
+        
+        checkIsAllowed(Type.ADD_PROBLEM);
+        
+        Problem problem = new Problem(title);
+        problem.setShortName(shortName);
+        problem.setDataFileName(judgesDataFile.getName());
+        problem.setAnswerFileName(judgesAnswerFile.getName());
+        
+        problem.setValidatedProblem(validated);
+        
+        if (validated){
+            setPC2Validator(problem);
+        }
+
+        problem.setShowValidationToJudges(false);
+        problem.setHideOutputWindow(true); 
+        
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+        problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile.getAbsolutePath()));
+        problemDataFiles.setJudgesAnswerFile(new SerializedFile(judgesAnswerFile.getAbsolutePath()));
+        controller.addNewProblem(problem, problemDataFiles);
+
+    }
+
+    private void checkFile(String name, File file) {
+        if (file == null) {
+            throw new IllegalArgumentException(name + " is null");
+        }
+        if (!file.isFile()) {
+            throw new IllegalArgumentException(name + " does not exist");
+        }
+        if (file.length() == 0) {
+            throw new IllegalArgumentException(name + " must be a non-zero byte (in length) file");
+        }
+
+    }
+
+    /**
+     * Check for null or empty strings, throw IllegalArgumentException if null or empty.
+     * 
+     * @param name
+     * @param value
+     */
+    private void checkNotEmpty(String name, String value) {
+
+        if (value == null) {
+            throw new IllegalArgumentException(name + " is null");
+        }
+        if (value.trim().length() == 0) {
+            throw new IllegalArgumentException(name + " cannot be an empty string (or all spaces) '" + value + "'");
+        }
+
+    }
+
+    /**
+     * Get a list of optional Problem settings names.
+     * 
+     * Returns a list of all property names that provide a way for additional configuration of a problem.
+     * 
+     * @return
+     */
+    public String[] getProblemPropertyNames() {
+        return problemPropertyNames;
+    }
+
+    public boolean isValidAutoFillLangauageName(String name) {
+        boolean valid = false;
+        for (String langName : LanguageAutoFill.getLanguageList()) {
+            if (langName.equals(name)) {
+                valid = true;
+            }
+        }
+        return valid;
+    }
+
+    /**
+     * 
+     * @return a list of language names.
+     */
+    public String[] getAutoFillLanguageList() {
+        return LanguageAutoFill.getLanguageList();
+    }
+
+    /**
+     * Add a language.
+     * 
+     * The fill title name must be one of the names in the list.
+     * The list of names can be retrieved using {@link #getAutoFillLanguageList()}.
+     * 
+     * @param autoFillTitleName a automatic language fill title name
+     */
+    public void addLanguage(String autoFillTitleName) {
+
+        checkNotEmpty("Language Name/title", autoFillTitleName);
+
+        if (!isValidAutoFillLangauageName(autoFillTitleName)) {
+            throw new IllegalArgumentException("No such language name '" + autoFillTitleName + "'");
+        }
+
+        checkIsAllowed(Type.ADD_LANGUAGE);
+
+        Language language = LanguageAutoFill.languageLookup(autoFillTitleName);
+        controller.addNewLanguage(language);
+
+    }
+
+    private void checkIsAllowed(Type type) {
+        checkIsAllowed(type, null);
+    }
+    
+    private void checkIsAllowed(Type type, String message) {
+
+        if (!internalContest.isAllowed(type)) {
+            if (message == null){
+                throw new SecurityException("Not allowed to "+ getPermissionDescription(type));
+            }
+            else 
+                throw new SecurityException("Not allowed to " + message+ "(requires "+ getPermissionDescription(type)+" permission)");
+        }
+
+    }
+
+    private String getPermissionDescription(Type type) {
+        return new Permission().getDescription(type);
+    }
+   
 }

@@ -1,10 +1,12 @@
 package edu.csus.ecs.pc2.api;
 
+import java.io.File;
 import java.util.Date;
 
 import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
+import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.implementation.LanguageImplementation;
 import edu.csus.ecs.pc2.api.implementation.ProblemImplementation;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -219,6 +221,13 @@ public class ServerConnectionTest extends AbstractTestCase {
         public void setContest(IInternalContest contest) {
             this.internalContest = contest;
         }
+        
+        
+        public IInternalContest getInternalContest(){
+            return this.internalContest;
+        }
+        
+        
     }
 
     /**
@@ -251,15 +260,22 @@ public class ServerConnectionTest extends AbstractTestCase {
                     
                     new ServerConnectionTest().addAccountTest();
                     
+                } else if ("addP".equalsIgnoreCase(firstArg)) {
+                    
+                    new ServerConnectionTest().addProblemTest();
+                    
                 } else 
                     
                 
                 if (args[0].equalsIgnoreCase("--help")) {
-                    System.out.println("ServerConnectionTest [--help] [login|addA]");
+                    System.out.println("ServerConnectionTest [--help] [login|addA|addP]");
                     System.out.println();
                     System.out.println("If no parameters passed will prompt for login and password");
                     System.out.println();
                     System.out.println("login - login and password for test login ");
+                    System.out.println();
+                    System.out.println("adda - test add account method");
+                    System.out.println("addp - test add problem method");
                     System.out.println();
                     System.out.println("When passes test prints: PASSED Test ");
                 } else {
@@ -274,6 +290,8 @@ public class ServerConnectionTest extends AbstractTestCase {
         }
         
             }
+
+  
 
     public void testTextValidClientType() throws Exception {
 
@@ -320,8 +338,74 @@ public class ServerConnectionTest extends AbstractTestCase {
         } finally {
             connection.logoff();
         }
+    }
+    
+    /**
+     * Add Problem Unit test.
+     * 
+     * <P>
+     * To test Bug 886:
+     * <li> Create admin 2 account
+     * <li> Run: <code>ServerConnectionTest addP</code>
+     * 
+     * @throws Exception
+     */
 
+    private void addProblemTest() throws NotLoggedInException {
+        ServerConnection connection = new ServerConnection();
 
+        String user = "administrator2";
+        
+        try {
+            
+            connection.login(user, user);
+            
+            String data = getSamplesSourceFilename("sumit.dat");
+            String answer = getSamplesSourceFilename("sumit.ans");
+            
+            File dataFile = new File(data);
+            File answerFile = new File(answer);
+            
+            connection.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, false, null);
+            
+            Thread.sleep(1000); // sleep so packet can be sent/processed
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        } finally {
+            connection.logoff();
+        }
+    }
+    
+    public void testAddProblem() throws Exception {
+        
+        ServerConnectionTester tester = createServerConnectionTester();
+     
+        String data = getSamplesSourceFilename("sumit.dat");
+        String answer = getSamplesSourceFilename("sumit.ans");
+        
+        File dataFile = new File(data);
+        File answerFile = new File(answer);
+        
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, false, null);
+     
+        // TODO test whether actually adds a problem
+        
+    }
+
+    private ServerConnectionTester createServerConnectionTester() {
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createStandardContest();
+        
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
+
+        IInternalController controller = sample.createController(contest, storageDirectory, true, false);
+
+        ServerConnectionTester tester = new ServerConnectionTester();
+        tester.setContest(contest);
+        tester.setController(controller);
+        return tester;
     }
 
 //    // public static TestSuite NotUsedSuite() {
