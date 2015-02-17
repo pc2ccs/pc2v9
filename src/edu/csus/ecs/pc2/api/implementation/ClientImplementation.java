@@ -49,9 +49,14 @@ public class ClientImplementation implements IClient {
             case SCOREBOARD:
                 clientType = ClientType.SCOREBOARD_CLIENT;
                 break;
+            case ADMINISTRATOR:
+                clientType = ClientType.SCOREBOARD_CLIENT;
+                break;
             case TEAM:
-            default:
                 clientType = ClientType.TEAM_CLIENT;
+                break;
+            default:
+                clientType = ClientType.UNKNOWN_CLIENT;
                 break;
         }
     }

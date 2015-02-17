@@ -390,4 +390,18 @@ public interface IContest {
      */
     IProblemDetails[] getProblemDetails();
 
+    /**
+     * Get all clients from all sites.
+     * 
+     * @return a list of clients from all sites.
+     */
+    IClient[] getClientsAllSites();
+
+    /**
+     * Get all this site's clients.
+     * 
+     * @return a list of clients from this site.
+     */
+    IClient[] getClients();
+
 }

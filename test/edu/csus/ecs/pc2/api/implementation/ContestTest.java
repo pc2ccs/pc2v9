@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.api.implementation;
 
+import edu.csus.ecs.pc2.api.IClient;
+import edu.csus.ecs.pc2.api.IClient.ClientType;
 import edu.csus.ecs.pc2.api.IContest;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IProblemDetails;
@@ -54,7 +56,6 @@ public class ContestTest extends AbstractTestCase {
         Contest apiContestInst = new Contest(contest, controller, log);
         IContest apiContest = apiContestInst;
         
-
         Problem[] problems = contest.getProblems();
         assertNotNull("Expecting problems ", problems);
         assertEquals("expected problems count", 6, problems.length);
@@ -152,5 +153,50 @@ public class ContestTest extends AbstractTestCase {
     private void println(String string) {
         System.out.println(string);
         
+    }
+    
+    private int countClients(IClient [] list, int siteNumber, IClient.ClientType type){
+        
+        int count = 0;
+        
+        for (IClient iClient : list) {
+            if (iClient.getSiteNumber() == siteNumber){
+                if (iClient.getType().equals(type)){
+                    count++;
+                }
+            }
+        }
+        
+        return count;
+    }
+    
+    public void testGetClients() throws Exception {
+        
+        IContest contest = createInstance("testGetClients");
+        
+        ITeam[] teams = contest.getTeams();
+        assertEquals("Expecting teams ", 12, teams.length);
+
+        IClient[] siteList = contest.getClients();
+
+        assertEquals("Expecting this sites clients ", 26, siteList.length);
+
+        IClient[] allClients = contest.getClientsAllSites();
+
+        assertEquals("Expecting teams ", 26, allClients.length);
+
+        int number;
+
+        number = countClients(allClients, 1, ClientType.JUDGE_CLIENT);
+        assertEquals("Judge clients ", 12, number);
+
+        number = countClients(allClients, 1, ClientType.ADMIN_CLIENT);
+        assertEquals("Admin clients ", 0, number);
+
+        number = countClients(allClients, 1, ClientType.TEAM_CLIENT);
+        assertEquals("Team clients ", 12, number);
+
+        number = countClients(allClients, 1, ClientType.SCOREBOARD_CLIENT);
+        assertEquals("Scoreboard clients ", 2, number);
     }
 }

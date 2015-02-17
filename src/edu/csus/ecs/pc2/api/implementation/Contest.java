@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.api.implementation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.api.IClarification;
@@ -277,4 +279,34 @@ public class Contest implements IContest, UIPlugin {
         implementations[0] = new ProblemImplementation(problem, contest);
         return implementations;
     }
+    
+    @Override
+    public IClient[] getClientsAllSites() {
+        Vector<Account> accounts = contest.getAccounts(ClientType.Type.ALL);
+        return createClientList(accounts);
+    }
+
+    @Override
+    public IClient[] getClients() {
+        Vector<Account> accounts = contest.getAccounts(ClientType.Type.ALL);
+        ArrayList<Account> list = new ArrayList<Account>();
+        
+        for (Account account : accounts) {
+            if(account.getSiteNumber() == contest.getSiteNumber()){
+                list.add(account);
+            }
+        }
+        return createClientList(list);
+    }
+
+    private IClient[] createClientList(List<Account> accounts) {
+        List<IClient> list = new ArrayList<IClient>();
+
+        for (Account account : accounts) {
+            ClientImplementation client = new ClientImplementation(account.getClientId(), contest);
+            list.add(client);
+        }
+        return (IClient[]) list.toArray(new IClient[list.size()]);
+    }
+
 }
