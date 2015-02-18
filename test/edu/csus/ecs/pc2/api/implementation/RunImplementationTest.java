@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
- * Test RunImplementation.
+ * Unit Test.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -76,6 +76,54 @@ public class RunImplementationTest extends TestCase {
 
         assertEquals(problem.getName(), contest.getProblem(run.getProblemId()).toString());
         assertEquals(language.getName(), contest.getLanguage(run.getLanguageId()).toString());
+
+    }
+    
+    
+    /**
+     * Test for getJudge, for null (not judged judge) and judge name.
+     * 
+     * Bug 890 - add getJudge for judged runs.
+     * 
+     * @throws Exception
+     */
+    public void testGetJudge() throws Exception {
+
+        SampleContest sampleContest = new SampleContest();
+
+        IInternalContest contest = sampleContest.createContest(3, 3, 33, 12, true);
+
+        ClientId firstJudgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
+
+        Run[] runs = sampleContest.createRandomRuns(contest, 12, true, true, false);
+
+        IInternalController controller = sampleContest.createController(contest, true, false);
+
+        Judgement yesJudgement = sampleContest.getYesJudgement(contest);
+
+        Run run = runs[0];
+        run.setElapsedMins(40);
+
+        IRun apiRun = new RunImplementation(run, contest, controller);
+
+        assertNull("Run not judged expect null judge ", apiRun.getJudge());
+
+        // prelim judgement
+        JudgementRecord record = new JudgementRecord(yesJudgement.getElementId(), firstJudgeId, true, true);
+        record.setPreliminaryJudgement(true);
+        run.addJudgement(record);
+        run.setStatus(RunStates.JUDGED);
+
+        // final judgement
+        record = new JudgementRecord(yesJudgement.getElementId(), firstJudgeId, true, false);
+        run.addJudgement(record);
+
+        IRun irun = new RunImplementation(run, contest, controller);
+
+        String expected = firstJudgeId.getName();
+        String actual = irun.getJudge().getDisplayName();
+
+        assertEquals("Expecting judge name ", expected, actual);
 
     }
 }
