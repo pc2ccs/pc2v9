@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.api.implementation;
 
+import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.IRunJudgement;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -68,5 +69,9 @@ public class RunJudgementImplemenation implements IRunJudgement {
 
     public boolean isSolved() {
         return record.isSolved();
+    }
+    
+    public IClient getJudge(){
+        return new ClientImplementation(record.getJudgerClientId(), internalContest);
     }
 }

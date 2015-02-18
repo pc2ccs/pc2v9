@@ -68,12 +68,20 @@ public interface IRun {
      */
     String getJudgementName();
     
+    
     /**
      * Return List of judgements assigned by judges.
      * 
      * @return list of IRunJudgements or zero length array of IRunJudgement.
      */
     IRunJudgement [] getRunJudgements();
+    
+    /**
+     * Get the judge that judged this run. 
+     * 
+     * @return the judge client or returns null if run is not judged.
+     */
+    IClient getJudge();
 
     /**
      * Get the problem for which this run was submitted.

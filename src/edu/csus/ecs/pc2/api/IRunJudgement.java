@@ -11,6 +11,13 @@ package edu.csus.ecs.pc2.api;
 public interface IRunJudgement {
     
     /**
+     * Get the judge who judged this run.
+     * 
+     * @return the judge who judged this run.
+     */
+    IClient getJudge();
+    
+    /**
      * Get the judgement assigned to the run by the Judges.
      * 
      * @return the judgement for this run.

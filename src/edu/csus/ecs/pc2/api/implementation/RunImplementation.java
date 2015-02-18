@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.api.implementation;
 import java.io.IOException;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
@@ -26,8 +27,8 @@ import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Implementation for IRun.
@@ -435,5 +436,14 @@ public class RunImplementation implements IRun {
 
     public boolean isPreliminaryJudged() {
         return preliminaryJudged;
+    }
+
+    @Override
+    public IClient getJudge() {
+        if (run.isJudged()) {
+            return new ClientImplementation(run.getJudgementRecord().getJudgerClientId(), internalContest);
+        } else {
+            return null;
+        }
     }
 }
