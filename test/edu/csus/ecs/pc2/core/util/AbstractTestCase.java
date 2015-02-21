@@ -1035,9 +1035,18 @@ public class AbstractTestCase extends TestCase {
             }
         }
     }
-
     
-
+    
+    public String join(String delimit, String[] names) {
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < names.length; i++) {
+            buffer.append(names[i]);
+            if (i < names.length - 1) {
+                buffer.append(delimit);
+            }
+        }
+        return buffer.toString();
+    }
     
     
 }

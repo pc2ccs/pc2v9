@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.api.IClarification;
 import edu.csus.ecs.pc2.api.IClarificationEventListener;
 import edu.csus.ecs.pc2.api.IClient;
@@ -52,6 +55,8 @@ public class Contest implements IContest, UIPlugin {
      * 
      */
     private static final long serialVersionUID = 292457136351847397L;
+    
+    private VersionInfo versionInfo = new VersionInfo();
 
     private boolean loggedIn = true;
 
@@ -388,6 +393,62 @@ public class Contest implements IContest, UIPlugin {
     
     private boolean isAllowed(Type type) {
         return contest.isAllowed(type);
+    }
+    
+    
+
+    @Override
+    public String getMajorVersion() {
+        String [] parts = getVersionParts(versionInfo.getVersionNumber());
+        return parts[0];
+    }
+
+    /**
+     * Input pc2 version string
+     * @param versionInfo2
+     * @return 3 elemement array, 0 = major, 1 = mino, 2 = rest
+     */
+    protected String[] getVersionParts(String versionString ) {
+        String [] output = new String[3];
+        
+        Arrays.fill(output,"");
+        
+//        String versionString = info.getVersionNumber();
+        
+        Pattern pattern  = Pattern.compile("([0-9]+)[.]([0-9]+)(.*)");
+        Matcher m = pattern.matcher(versionString);
+        
+        if (m.matches() && m.groupCount() == 3) {
+            output[0] = m.group(1);
+            output[1] = m.group(2);
+            output[2] = m.group(3);
+        } else {
+            output[0] = versionString;
+        }
+        
+        return output;
+    }
+
+    @Override
+    public String getMinorVersion() {
+        String [] parts = getVersionParts(versionInfo.getVersionNumber());
+        return parts[1];
+    }
+    
+    @Override
+    public String getOtherVersionInfo(){
+        String [] parts = getVersionParts(versionInfo.getVersionNumber());
+        return parts[2];
+    }
+
+    @Override
+    public String getBuildNumber() {
+        return versionInfo.getBuildNumber();
+    }
+
+    @Override
+    public String getFullVersionString() {
+        return "Version " + versionInfo.getPC2Version() + " Build "+versionInfo.getBuildNumber();
     }
 
     

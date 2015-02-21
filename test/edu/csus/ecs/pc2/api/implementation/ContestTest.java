@@ -263,4 +263,42 @@ public class ContestTest extends AbstractTestCase {
         }
         return count;
     }
+
+    
+    public void testgetVersionParts() throws Exception {
+
+        IContest apiContest = createInstance("tgparts");
+        
+        String[] data = {
+                // input,expected
+                "9.3Beta,9+3+Beta", //
+                "2.2,2+2+", //
+                "2.,2.++", //
+                
+        };
+
+        for (String line : data) {
+            String[] fields = line.trim().split(",");
+            String input = fields[0];
+            String expected = fields[1];
+            
+            String [] results = ((Contest)apiContest).getVersionParts(input);
+            String actual = join("+", results);
+            
+//            println("\""+input+","+actual+"\", //");
+            
+            assertEquals("Expected matching strings", expected, actual);
+        }
+        
+//        String s = apiContest.getBuildNumber();
+//        println("Build number: "+s);
+//        s = apiContest.getMajorVersion();
+//        println("Major : "+s);
+//        s = apiContest.getMinorVersion();
+//        println("Minor: "+s);
+        
+        
+        
+    }
+    
 }

@@ -411,5 +411,43 @@ public interface IContest {
      * @return
      */
     RunStates getRunState(IRun run);
+    
+    /**
+     * Get PC^2 Major version.
+     * 
+     * For "9.3Beta" would be "9"
+     */
+    String getMajorVersion();
+
+    /**
+     * Get PC^2 Minor version number.
+     * 
+     * For "9.3Beta" would be "3"
+     */
+    String getMinorVersion();
+    
+    /**
+     * Get PC^2 Build number.
+     * @return build number.
+     */
+    String getBuildNumber();
+    
+    /**
+     * Get Full PC^2 version string.
+     * <P>
+     * Ex.
+     * <pre>Version 9.3 20150205 (Thursday, February 5th 2015 15:55 UTC) build 2920<pre>
+     */
+    String getFullVersionString();
+
+    /**
+     * Get extra version info.
+     * 
+     * Get anyting after the minor version number.
+     * <br><br>
+     *  For ""9.3Beta"" would be "Beta"
+     * @return
+     */
+    String getOtherVersionInfo();
 
 }
