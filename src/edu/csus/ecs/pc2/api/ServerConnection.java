@@ -1,7 +1,10 @@
 package edu.csus.ecs.pc2.api;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.Set;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
@@ -40,9 +43,15 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 // $HeadURL$
 public class ServerConnection {
 
-    private static final String VALIDATOR_COMMAND = "VALIDATOR_COMMAND";
-
-    private String[] problemPropertyNames = { VALIDATOR_COMMAND, };
+    
+    /**
+     * Valid Problem Property names.
+     */
+    private String[] problemPropertyNames = { // 
+            APIConstants.JUDGING_TYPE, //
+            APIConstants.VALIDATOR_PROGRAM, //
+            APIConstants.VALIDATOR_COMMAND_LINE //
+    };
     
     protected IInternalController controller;
     
@@ -466,6 +475,11 @@ public class ServerConnection {
         
     }
     
+    /**
+     * Define a pc2 validated problem.
+     * 
+     * @param problem
+     */
     protected void setPC2Validator(Problem problem) {
 
         problem.setValidatedProblem(true);
@@ -482,8 +496,11 @@ public class ServerConnection {
     /**
      * Add a Problem definition.
      * 
+     * @see APIConstants
      * @param title
      *            - title for problem
+     * @param shortName short name/id for problem.
+     * 
      * @param problemShortName
      *            - a unique (to the contest) short problem name
      * @param judgesDataFile
@@ -508,20 +525,133 @@ public class ServerConnection {
         problem.setDataFileName(judgesDataFile.getName());
         problem.setAnswerFileName(judgesAnswerFile.getName());
         
-        problem.setValidatedProblem(validated);
+        /**
+         * Check for valid property names.
+         */
+        String[] invalids = validateProperties (problemProperties);
+        if (invalids.length > 0){
+            throw new IllegalArgumentException("Unknown/Invalid property names: "+ Arrays.toString(invalids));
+        }
+        
+        String judgingType = getProperty(problemProperties, APIConstants.JUDGING_TYPE, null);
+        
+        if (judgingType != null){
+            /**
+             * Cannot be manual judged and validated.
+             */
+            if (APIConstants.MANUAL_JUDGING_ONLY.equals(judgingType) && validated){
+                throw new IllegalArgumentException("Problem cannot be validated and not judging type computer judged");
+            }
+        }
+        
+        switch (judgingType) {
+            case APIConstants.MANUAL_JUDGING_ONLY:
+                validated = false;
+                problem.setManualReview(true);
+                break;
+            case APIConstants.COMPUTER_JUDGING_ONLY:
+                validated = true;
+                problem.setManualReview(false);
+                break;
+            case APIConstants.COMPUTER_AND_MANUAL_JUDGING:
+                validated = true;
+                problem.setManualReview(true);
+                break;
+
+            default:
+                break;
+        }
         
         if (validated){
-            setPC2Validator(problem);
+            
+            problem.setValidatedProblem(validated);
+            
+            String validatorCommandLine = getProperty(problemProperties, APIConstants.VALIDATOR_COMMAND_LINE, APIConstants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+            problem.setValidatorCommandLine(validatorCommandLine);
+            
+            String validatorProgram = getProperty(problemProperties, APIConstants.VALIDATOR_PROGRAM, APIConstants.PC2_VALIDATOR_PROGRAM);
+            boolean usingPc2Validator = APIConstants.PC2_VALIDATOR_PROGRAM.equals(validatorProgram);
+            
+            if (usingPc2Validator) {
+                setPC2Validator(problem);
+            }
+            
         }
 
         problem.setShowValidationToJudges(false);
         problem.setHideOutputWindow(true); 
         
+        /**
+         * Add problem data files.
+         */
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
         problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile.getAbsolutePath()));
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(judgesAnswerFile.getAbsolutePath()));
+        
         controller.addNewProblem(problem, problemDataFiles);
 
+    }
+
+    /**
+     * Return value for property.
+     * 
+     * if problemProperties is null then will return null
+     * 
+     * @param problemProperties
+     * @param key
+     * @param defaultValue
+     * @return value if found, else returns defaultValue.
+     */
+    protected String getProperty(Properties problemProperties, String key, String defaultValue) {
+
+        String value = null;
+
+        if (problemProperties != null) {
+
+            value = problemProperties.getProperty(key);
+            if (value == null) {
+                // not found use default value
+                value = defaultValue;
+            } // else use value from properties
+
+        } // else return null;
+
+        return value;
+    }
+
+    /**
+     * Check property names against valid list of names.
+     * 
+     * @param properties
+     * @return array of invalid/unknown keys
+     */
+    protected String[] validateProperties(Properties properties) {
+
+        if (properties == null) {
+            // avoid NPE later.
+            return new String[0];
+        }
+
+        ArrayList<String> unknownKeys = new ArrayList<String>();
+
+        String[] names = getProblemPropertyNames();
+
+        Set<Object> keys = properties.keySet();
+
+        for (Object object : keys) {
+            String key = (String) object;
+            boolean found = false;
+            for (String name : names) {
+                if (name.equals(key)) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                unknownKeys.add(key);
+            }
+
+        }
+        return (String[]) unknownKeys.toArray(new String[unknownKeys.size()]);
     }
 
     private void checkFile(String name, File file) {
@@ -559,7 +689,8 @@ public class ServerConnection {
      * 
      * Returns a list of all property names that provide a way for additional configuration of a problem.
      * 
-     * @return
+     * @see APIConstants
+     * @return a list of property names from {@link APIConstants}.
      */
     public String[] getProblemPropertyNames() {
         return problemPropertyNames;
