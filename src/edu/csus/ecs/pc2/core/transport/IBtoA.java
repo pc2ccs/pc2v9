@@ -5,9 +5,10 @@ import java.io.Serializable;
 /**
  * Call back methods from the TransportManager to the PC<sup>2</sup> client modules.
  * 
- * This provides methods for the transport to send to the pc2 server module.
+ * This provides methods for the transport to any client/server logged into a server.
  * <P>
- * Information goes up from the transport to the server module.
+ * Information goes up from the transport to the server module (from B to A
+ * on a long ago lost diagram).
  * 
  * @version $Id$
  * @author pc2@ecs.csus.edu
@@ -16,7 +17,6 @@ import java.io.Serializable;
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/transport/IBtoA.java$
 public interface IBtoA {
-    String SVN_ID = "$Id$";
 
     /**
      * Server receives object from Transport Manager.
@@ -38,6 +38,9 @@ public interface IBtoA {
      */
     void connectionError(Serializable object, ConnectionHandlerID connectionHandlerID, String causeDescription);
 
+    /**
+     * This connection was terminated by a server.
+     */
     void connectionDropped();
 
 }

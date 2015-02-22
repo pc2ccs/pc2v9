@@ -13,15 +13,13 @@ import edu.csus.ecs.pc2.core.model.ElementId;
  * @author pc2@ecs.csus.edu
  */
 
-// TODO should this be named something different, it contains information beyond just Id.
+// SOMEDAY should this be named something different, it contains information beyond just Id.
 // $HeadURL$
 public class ConnectionHandlerID implements Serializable {
     /**
      * 
      */
     private static final long serialVersionUID = -3845388028654277507L;
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Unique identifier for each instance of a ConnectionHandler.
@@ -72,6 +70,10 @@ public class ConnectionHandlerID implements Serializable {
         return elementID.toString();
     }
 
+    /**
+     * All initialization has been done and this connection is ready to communicate.
+     * @return
+     */
     public boolean isReadyToCommunicate() {
         return readyToCommunicate;
     }

@@ -5,19 +5,17 @@ import java.io.Serializable;
 /**
  * Call back methods from the TransportManager to the PC<sup>2 server module.
  * 
- * This provides methods to send information from the transport to the application layer (client or server).
+ * This provides methods to send information from the transport to the Server application layer.
  * <P>
- * Information goes from transport to pc2 client/server module.
- * 
+ * Information goes from transport to pc2 server module (From 2 (transport) to 1 (server) on a
+ * long ago lost diagram).
  * 
  * @version $Id$
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/transport/ITwoToOne.java$
 public interface ITwoToOne {
-    String SVN_ID = "$Id$";
 
     /**
      * Server receives object from Transport Manager.
@@ -30,7 +28,7 @@ public interface ITwoToOne {
     void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID);
 
     /**
-     * A new connection has been established on the Transport Manager.
+     * A new connection from a client (or another server) to this server.
      * 
      * @param connectionHandlerID
      *            unique identifier for this new connection.
@@ -38,7 +36,7 @@ public interface ITwoToOne {
     void connectionEstablished(ConnectionHandlerID connectionHandlerID);
 
     /**
-     * The contact/connection to the connection has been lost.
+     * The contact/connection to the server has been lost.
      * 
      * @param connectionHandlerID
      *            unique identifier for connection
@@ -46,7 +44,7 @@ public interface ITwoToOne {
     void connectionDropped(ConnectionHandlerID connectionHandlerID);
 
     /**
-     * An error on a connection that needs to be communicated to the pc2 sever module.
+     * An error on a connection that needs to be communicated to the pc2 server module.
      * 
      * @param object
      *            the object that was sent, may be null if not part of a send.

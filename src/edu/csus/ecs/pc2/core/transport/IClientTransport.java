@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.transport;
 import java.io.Serializable;
 
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.packet.Packet;
 
 /**
  * Public interface Transport Manager for a client.
@@ -15,12 +16,15 @@ import edu.csus.ecs.pc2.core.log.Log;
 public interface IClientTransport {
 
     /**
-     * Interface method for Client Applications. Used to establish Connection to the Server.
+     * Establish Connection to the Server.
      */
     void connectToMyServer() throws TransportException;
 
     /**
-     * Interface method for Client Applications used to send Serializable Object to the Server.
+     * Send Serializable Object to the Server.
+     * <P>
+     * In practice sends a {@link Packet} to the server.
+     * 
      * 
      * @param msgObj
      * @throws TransportException
@@ -28,7 +32,7 @@ public interface IClientTransport {
     void send(Serializable msgObj) throws TransportException;
 
     /**
-     * Interface method for Server Applications used to Initiate communication with another Server.
+     * Initiate communication with another Server.
      * 
      * @param serverIP
      * @param port
