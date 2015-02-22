@@ -2432,7 +2432,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
 
         log.info("Starting ConnectionManager...");
-        connectionManager = new ConnectionManager(log);
+        if (connectionManager == null){
+            /**
+             * If connection manager has not been set, create new one.
+             */
+            connectionManager = new ConnectionManager(log);
+        }
         log.info("Started ConnectionManager");
 
         boolean useIniFile = !parseArguments.isOptPresent("--skipini");
@@ -3813,4 +3818,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet packet = PacketFactory.createAutoRegisterRequest(fauxClientId, serverClientId, loginName);
         sendToLocalServer(packet);
     }
+
+    @Override
+    public void setConnectionManager(ITransportManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+    
 }

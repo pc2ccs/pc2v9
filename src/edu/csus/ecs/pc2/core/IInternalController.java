@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.ui.ILogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -655,4 +656,12 @@ public interface IInternalController {
      * @param sendToServer if true then send to other server.
      */
     void sendToJudgesAndOthers(Packet packet, boolean sendToServers);
+
+    /**
+     * Override the connection manager.
+     * 
+     * @see ITransportManager
+     * @param connectionManager
+     */
+    void setConnectionManager(ITransportManager connectionManager);
 }

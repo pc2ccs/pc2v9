@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.ui.ILogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -604,6 +605,12 @@ public class NullController implements IInternalController{
     }
 
     public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setConnectionManager(ITransportManager connectionManager) {
         // TODO Auto-generated method stub
         
     }

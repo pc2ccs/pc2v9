@@ -559,8 +559,13 @@ public class ServerConnection {
                 break;
 
             default:
-                break;
+                throw new IllegalArgumentException("Unknown "+APIConstants.JUDGING_TYPE+" '"+judgingType+"'");
         }
+        
+        boolean usingPc2Validator = false;
+        
+        String validatorProgram = getProperty(problemProperties, APIConstants.VALIDATOR_PROGRAM, APIConstants.PC2_VALIDATOR_PROGRAM);
+        usingPc2Validator = APIConstants.PC2_VALIDATOR_PROGRAM.equals(validatorProgram);
         
         if (validated){
             
@@ -569,12 +574,9 @@ public class ServerConnection {
             String validatorCommandLine = getProperty(problemProperties, APIConstants.VALIDATOR_COMMAND_LINE, APIConstants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
             problem.setValidatorCommandLine(validatorCommandLine);
             
-            String validatorProgram = getProperty(problemProperties, APIConstants.VALIDATOR_PROGRAM, APIConstants.PC2_VALIDATOR_PROGRAM);
-            boolean usingPc2Validator = APIConstants.PC2_VALIDATOR_PROGRAM.equals(validatorProgram);
-            
             if (usingPc2Validator) {
                 setPC2Validator(problem);
-            }
+            } // else add external validator later
             
         }
 
@@ -588,8 +590,15 @@ public class ServerConnection {
         problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile.getAbsolutePath()));
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(judgesAnswerFile.getAbsolutePath()));
         
+        if (validated && ! usingPc2Validator){
+            // add external validator
+            if (new File(validatorProgram).isFile()){
+                SerializedFile validatorFile = new SerializedFile(validatorProgram);
+                problemDataFiles.setValidatorFile(validatorFile);
+            }
+        }
+        
         controller.addNewProblem(problem, problemDataFiles);
-
     }
 
     /**

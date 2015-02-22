@@ -1,7 +1,10 @@
 package edu.csus.ecs.pc2.api;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
@@ -11,13 +14,17 @@ import edu.csus.ecs.pc2.api.implementation.LanguageImplementation;
 import edu.csus.ecs.pc2.api.implementation.ProblemImplementation;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.InternalControllerSpecial;
 import edu.csus.ecs.pc2.core.log.NullController;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -386,7 +393,6 @@ public class ServerConnectionTest extends AbstractTestCase {
         
         File dataFile = new File(data);
         File answerFile = new File(answer);
-        
         tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, false, null);
      
         // TODO test whether actually adds a problem
@@ -407,6 +413,91 @@ public class ServerConnectionTest extends AbstractTestCase {
         tester.setController(controller);
         return tester;
     }
+    
+    
+    
+    public void dumpPacket(Packet packet, String message, IInternalContest contest, IInternalController controller) {
+
+        System.out.println ("Packet " + packet.getType() + " (Seq #" + packet.getPacketNumber() + " ) " + message);
+        System.out.println ("  From: " + packet.getSourceId() + " (" + packet.getHostName() + " @ " + packet.getHostAddress() + ")" + " (Contest Id: " + packet.getContestIdentifier() + ")");
+        System.out.println ("    To: " + packet.getDestinationId());
+        Object obj = packet.getContent();
+        if (obj instanceof Properties) {
+            Properties prop = (Properties) obj;
+            Enumeration<?> enumeration = prop.keys();
+
+            while (enumeration.hasMoreElements()) {
+                String element = (String) enumeration.nextElement();
+                System.out.println ("   key: " + element + " is: " + prop.get(element).getClass().getName() + " " );
+                dumpElement("      :   ",prop.get(element), contest, controller);
+            }
+        } else {
+
+            System.out.println ("  Contains: " + obj.toString() + " " + obj);
+        }
+    }
+
+    private String dumpElement(String pad, Object object, IInternalContest inContest, IInternalController controller) {
+
+        if (object instanceof Problem) {
+            
+            Problem problem = (Problem) object;
+            ProblemsReport report = new ProblemsReport();
+            report.setContestAndController(inContest, controller);
+            report.writeRow(new PrintWriter(System.out), problem, null);
+            return "";
+
+        } else {
+            return object.toString();
+        }
+    }
+
+    public void dumpPackets(InternalControllerSpecial controller, IInternalContest contest) {
+        Packet[] list = controller.getPacketList();
+        System.out.println("There are "+list.length+" packets.");
+        for (Packet packet : list) {
+            dumpPacket(packet, "", contest, controller);
+        }
+    }
+
+    
+    public void testAddProblemValidated() throws Exception {
+
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createStandardContest();
+        
+        /**
+         * Set to admin so will "send" packet.
+         */
+        ClientId admin = getAccounts(contest, Type.ADMINISTRATOR)[0].getClientId();
+        contest.setClientId(admin);
+        
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
+
+        InternalControllerSpecial controller = sample.createPacketController(contest, storageDirectory, true, false);
+
+        ServerConnectionTester tester = new ServerConnectionTester();
+        tester.setContest(contest);
+        tester.setController(controller);
+
+        String data = getSamplesSourceFilename("sumit.dat");
+        String answer = getSamplesSourceFilename("sumit.ans");
+
+        File dataFile = new File(data);
+        File answerFile = new File(answer);
+
+        Properties properties = new Properties();
+        
+        properties.put(APIConstants.JUDGING_TYPE, APIConstants.COMPUTER_JUDGING_ONLY);
+        properties.put(APIConstants.VALIDATOR_PROGRAM, "/home/pc2/validdiff");
+        
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, true, properties);
+        
+        dumpPackets(controller, contest);
+     
+    }
+    
 
 //    // public static TestSuite NotUsedSuite() {
 //    public static TestSuite suite() {

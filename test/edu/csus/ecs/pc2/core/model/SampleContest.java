@@ -17,6 +17,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.InternalControllerSpecial;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -342,6 +343,43 @@ public class SampleContest {
 
         return controller;
     }
+
+    
+    /**
+     * Create a controller which saves packets.
+     */
+    public InternalControllerSpecial createPacketController(IInternalContest contest, String storageDirectory, boolean isServer, boolean isRemote) {
+
+        // Start site 1
+        InternalControllerSpecial controller = new InternalControllerSpecial(contest);
+        controller.setUsingMainUI(false);
+
+        if (isServer) {
+            controller.setContactingRemoteServer(isRemote);
+            String[] argsSiteOne = { "--server", "--skipini" };
+            int siteNumber = contest.getSiteNumber();
+
+            // As of 2008-01-20 start sets site number to zero.
+            controller.start(argsSiteOne);
+
+            // set InternalContest back to original site number
+            contest.setSiteNumber(siteNumber);
+
+            if (storageDirectory != null) {
+                FileStorage storage = new FileStorage(storageDirectory);
+                contest.setStorage(storage);
+                controller.initializeStorage(storage);
+            }
+        } else {
+            controller.start(null);
+
+        }
+
+        return controller;
+    }
+    
+    
+    
 
     public static String getTestDirectoryName() {
         String testDir = "testing";
