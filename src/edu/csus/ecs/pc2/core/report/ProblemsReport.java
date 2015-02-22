@@ -162,8 +162,8 @@ public class ProblemsReport implements IReport {
             printWriter.println("                  * No judge's data or answer files *");
         }
         
-        SerializedFile validatorFile = problemDataFiles.getValidatorFile();
-        if (validatorFile != null) {
+        if (problemDataFiles != null && problemDataFiles.getValidatorFile() != null) {
+            SerializedFile validatorFile = problemDataFiles.getValidatorFile();
             printWriter.println("                  " + 1 + " validator file");
             int bytes = 0;
             if (validatorFile.getBuffer() != null) {
