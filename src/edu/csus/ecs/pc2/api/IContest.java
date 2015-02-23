@@ -189,6 +189,14 @@ public interface IContest {
     IRun[] getRuns();
     
     /**
+     * Get single run by runNumber from the current site.
+     * 
+     * @param runNumber
+     * @return the IRun or null if no such run exists.
+     */
+    IRun getRun(int runNumber);
+    
+    /**
      * Get a list of all the clarifications in the contest.
      * 
      * @return An unordered list of Clarifications for all sites  connected to the contest.
@@ -449,5 +457,14 @@ public interface IContest {
      * @return
      */
     String getOtherVersionInfo();
+
+    /**
+     * Get a run from a site.
+     * 
+     * @param siteNumber 
+     * @param runNumber
+     * @return
+     */
+    IRun getRun(int siteNumber, int runNumber);
 
 }

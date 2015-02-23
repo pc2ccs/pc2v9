@@ -450,6 +450,26 @@ public class Contest implements IContest, UIPlugin {
     public String getFullVersionString() {
         return "Version " + versionInfo.getPC2Version() + " Build "+versionInfo.getBuildNumber();
     }
+    
+    @Override
+    public IRun getRun(int siteNumber, int runNumber) {
+
+        IRun[] runs = getRuns();
+        for (IRun iRun : runs) {
+            if (iRun.getNumber() == runNumber) {
+                if (iRun.getSiteNumber() == siteNumber) {
+                    return iRun;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public IRun getRun(int runNumber) {
+        return getRun(contest.getSiteNumber(), runNumber);
+    }
 
     
 }
