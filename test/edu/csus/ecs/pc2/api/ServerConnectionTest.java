@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -606,7 +607,7 @@ public class ServerConnectionTest extends AbstractTestCase {
         
         assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
         
-        dumpPackets(special, contest);
+//        dumpPackets(special, contest);
         
         Account account = (Account) PacketFactory.getObjectValue(packetOne, PacketFactory.ACCOUNT);
         assertNotNull("Expecting a ACCOUNT in packet ", account);
@@ -615,7 +616,66 @@ public class ServerConnectionTest extends AbstractTestCase {
         assertEquals("Expect account password", pass, account.getPassword());
         
     }
+    
+    public void testAddLanguage() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createContest(1, 1, 0, 0, false);
+        InternalControllerSpecial special = new InternalControllerSpecial(contest);
 
+        ServerConnectionTester tester = createServerConnectionTester();
+        tester.setController(special);
+
+        tester.addLanguage(LanguageAutoFill.GNUCPPTITLE);
+
+        Packet[] list = special.getPacketList();
+        assertEquals("Expecting packets sent", 1, list.length);
+
+        Packet packetOne = list[0];
+        
+        assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
+        
+//        dumpPackets(special, contest);
+        
+        Language language = (Language) PacketFactory.getObjectValue(packetOne, PacketFactory.LANGUAGE);
+        
+        Language expected = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.GNUCPPTITLE);
+        
+        assertTrue("Expecting same", expected.isSameAs(language));
+    }
+
+    /**
+     * Test add interpreted language.
+     * @throws Exception
+     */
+    public void testAddLanguagePerl() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createContest(1, 1, 0, 0, false);
+        InternalControllerSpecial special = new InternalControllerSpecial(contest);
+
+        ServerConnectionTester tester = createServerConnectionTester();
+        tester.setController(special);
+
+        tester.addLanguage(LanguageAutoFill.PERLTITLE);
+
+        Packet[] list = special.getPacketList();
+        assertEquals("Expecting packets sent", 1, list.length);
+
+        Packet packetOne = list[0];
+        
+        assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
+        
+//        dumpPackets(special, contest);
+        
+        Language language = (Language) PacketFactory.getObjectValue(packetOne, PacketFactory.LANGUAGE);
+        
+        Language expected = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.PERLTITLE);
+        
+        assertTrue("Expecting same", expected.isSameAs(language));
+    }
 
 
 //    // public static TestSuite NotUsedSuite() {
