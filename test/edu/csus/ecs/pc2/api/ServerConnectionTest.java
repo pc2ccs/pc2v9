@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.InternalControllerSpecial;
 import edu.csus.ecs.pc2.core.log.NullController;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -583,7 +584,39 @@ public class ServerConnectionTest extends AbstractTestCase {
         assertTrue("Manual review", problem.isManualReview()); 
         
     }
-    
+
+    public void testAddAccount() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createContest(1, 1, 0, 0, false);
+        InternalControllerSpecial special = new InternalControllerSpecial(contest);
+
+        ServerConnectionTester tester = createServerConnectionTester();
+        tester.setController(special);
+
+        String name = "Judge One";
+        String pass = "judgepassword";
+        tester.addAccount(Type.JUDGE.toString(), name, pass);
+
+        Packet[] list = special.getPacketList();
+        assertEquals("Expecting packets sent", 1, list.length);
+
+        Packet packetOne = list[0];
+        
+        assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
+        
+        dumpPackets(special, contest);
+        
+        Account account = (Account) PacketFactory.getObjectValue(packetOne, PacketFactory.ACCOUNT);
+        assertNotNull("Expecting a ACCOUNT in packet ", account);
+        
+        assertEquals("Expect account name", name, account.getDisplayName());
+        assertEquals("Expect account password", pass, account.getPassword());
+        
+    }
+
+
 
 //    // public static TestSuite NotUsedSuite() {
 //    public static TestSuite suite() {
