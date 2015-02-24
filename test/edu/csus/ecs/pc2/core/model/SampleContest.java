@@ -93,7 +93,7 @@ public class SampleContest {
 
 
     public SampleContest() {
-
+        super();
     }
 
     /**
@@ -136,15 +136,15 @@ public class SampleContest {
     }
 
     /**
-     * Create an instance of contest with languages, problems, teams and judges.
+     * Create an instance of contest with languages, problems, judgements, teams and judges.
      * 
-     * @param numSites
-     *            number of sites to create
+     * @param siteNumber current site number
+     * @param numSites 
      * @param numTeams
-     *            number of teams to create
      * @param numJudges
-     *            number of judges to create
-     * @param setAsServer
+     * @param initAsServer initialize as server, else initalizes as admin.
+     * @param profile
+     * @param contestPassword
      * @return
      */
     public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer, Profile profile, String contestPassword) {
@@ -209,6 +209,9 @@ public class SampleContest {
 
         if (initAsServer) {
             ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
+            contest.setClientId(serverId);
+        } else {
+            ClientId serverId = new ClientId(siteNumber, Type.ADMINISTRATOR, 1);
             contest.setClientId(serverId);
         }
 

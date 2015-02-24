@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -386,7 +387,13 @@ public class ServerConnectionTest extends AbstractTestCase {
     
     public void testAddProblem() throws Exception {
         
+        SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createContest(1, 1, 0,0,false);
+        InternalControllerSpecial special = new InternalControllerSpecial(contest);
+        
         ServerConnectionTester tester = createServerConnectionTester();
+        tester.setController(special);
      
         String data = getSamplesSourceFilename("sumit.dat");
         String answer = getSamplesSourceFilename("sumit.ans");
@@ -394,9 +401,18 @@ public class ServerConnectionTest extends AbstractTestCase {
         File dataFile = new File(data);
         File answerFile = new File(answer);
         tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, false, null);
-     
-        // TODO test whether actually adds a problem
         
+        Packet[] list = special.getPacketList();
+        assertEquals("Expecting packets sent", 1, list.length);
+        
+        Packet packetOne = list[0];
+        
+        assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
+        
+//        dumpPackets(special, contest);
+        
+        Problem problem = (Problem) PacketFactory.getObjectValue(packetOne, PacketFactory.PROBLEM);
+        assertNotNull("Expecting a PROBLEM in packet ", problem);
     }
 
     private ServerConnectionTester createServerConnectionTester() {
@@ -475,11 +491,11 @@ public class ServerConnectionTest extends AbstractTestCase {
         ensureOutputDirectory();
         String storageDirectory = getOutputDataDirectory();
 
-        InternalControllerSpecial controller = sample.createPacketController(contest, storageDirectory, true, false);
+        InternalControllerSpecial special = sample.createPacketController(contest, storageDirectory, true, false);
 
         ServerConnectionTester tester = new ServerConnectionTester();
         tester.setContest(contest);
-        tester.setController(controller);
+        tester.setController(special);
 
         String data = getSamplesSourceFilename("sumit.dat");
         String answer = getSamplesSourceFilename("sumit.ans");
@@ -494,8 +510,78 @@ public class ServerConnectionTest extends AbstractTestCase {
         
         tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, true, properties);
         
-        dumpPackets(controller, contest);
-     
+        Packet[] list = special.getPacketList();
+        assertEquals("Expecting packets sent", 1, list.length);
+
+        Packet packetOne = list[0];
+        
+        assertEquals("Expecting packet type", "ADD_SETTING", packetOne.getType().toString());
+        
+//        dumpPackets(special, contest);
+        
+        Problem problem = (Problem) PacketFactory.getObjectValue(packetOne, PacketFactory.PROBLEM);
+        assertNotNull("Expecting a PROBLEM in packet ", problem);
+        
+        assertTrue("Computer Judged only", problem.isComputerJudged());
+        assertFalse("Manual review", problem.isManualReview());
+
+        assertEquals("Data file name", "sumit.dat", problem.getDataFileName());
+        assertEquals("Answer file name", "sumit.ans", problem.getAnswerFileName());
+
+        assertEquals("Validator cmd line ", "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ", problem.getValidatorCommandLine());
+
+// TODO         assertEquals("Validator prog name ", "/home/pc2/validdiff", problem.getValidatorProgramName());
+    }
+    
+    /**
+     * Test add problem, manual review only.
+     * 
+     * @throws Exception
+     */
+    public void testAddProblemDefault() throws Exception {
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createStandardContest();
+        
+        /**
+         * Set to admin so will "send" packet.
+         */
+        ClientId admin = getAccounts(contest, Type.ADMINISTRATOR)[0].getClientId();
+        contest.setClientId(admin);
+        
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
+
+        InternalControllerSpecial special = sample.createPacketController(contest, storageDirectory, true, false);
+
+        ServerConnectionTester tester = new ServerConnectionTester();
+        tester.setContest(contest);
+        tester.setController(special);
+
+        String data = getSamplesSourceFilename("sumit.dat");
+        String answer = getSamplesSourceFilename("sumit.ans");
+
+        File dataFile = new File(data);
+        File answerFile = new File(answer);
+
+        Properties properties = new Properties();
+        
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, true, properties);
+        
+        Packet[] list = special.getPacketList();
+        assertEquals("Expecting packets sent", 1, list.length);
+
+        Packet packetOne = list[0];
+        
+        assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
+        
+//        dumpPackets(special, contest);
+        
+        Problem problem = (Problem) PacketFactory.getObjectValue(packetOne, PacketFactory.PROBLEM);
+        assertNotNull("Expecting a PROBLEM in packet ", problem);
+        
+        assertFalse("Computer Judged only", problem.isComputerJudged());
+        assertTrue("Manual review", problem.isManualReview()); 
+        
     }
     
 

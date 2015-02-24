@@ -542,6 +542,8 @@ public class ServerConnection {
             if (APIConstants.MANUAL_JUDGING_ONLY.equals(judgingType) && validated){
                 throw new IllegalArgumentException("Problem cannot be validated and not judging type computer judged");
             }
+        } else {
+            judgingType = APIConstants.MANUAL_JUDGING_ONLY;
         }
         
         switch (judgingType) {
@@ -551,10 +553,12 @@ public class ServerConnection {
                 break;
             case APIConstants.COMPUTER_JUDGING_ONLY:
                 validated = true;
+                problem.setComputerJudged(true);;
                 problem.setManualReview(false);
                 break;
             case APIConstants.COMPUTER_AND_MANUAL_JUDGING:
                 validated = true;
+                problem.setComputerJudged(true);;
                 problem.setManualReview(true);
                 break;
 
