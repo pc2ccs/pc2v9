@@ -30,8 +30,26 @@ public class ContestComparison {
         if (!ciOne.isSameAs(ciTwo)) {
             buffer.append("Replace Contest Information" + NEW_LINE);
         }
+        
+        buffer.append(addComment("Site", contestOne.getSites().length, contestTwo.getSites().length));
 
         buffer.append(addComment("Problem", contestOne.getProblems().length, contestTwo.getProblems().length));
+
+        
+        int [] contestOneCounts = getDataFileCounts(contestOne);
+        int [] contestTwoCounts = getDataFileCounts(contestTwo);
+        
+        String [] countTitles = {
+         //  [0] total files, [1] data files, [2] answer files, [3] data file bytes, [4] answer file bytes
+                "Total Files", //
+                "Input files", //
+                "Answer files", //
+        };
+        
+        for (int i = 0; i < contestTwoCounts.length; i++) {
+            buffer.append(addComment(countTitles[i], contestOneCounts[i], contestTwoCounts[i]));
+        }
+        
         buffer.append(addComment("Language", contestOne.getLanguages().length, contestTwo.getLanguages().length));
         
         for (Type type : Type.values()) {
@@ -46,7 +64,6 @@ public class ContestComparison {
             buffer.append(addComment(accountTypeName, countOne, countTwo));
         }
         
-        buffer.append(addComment("Site", contestOne.getSites().length, contestTwo.getSites().length));
 
         buffer.append(addComment("Group", contestOne.getGroups().length, contestTwo.getGroups().length));
         buffer.append(addComment("Clar. category", contestOne.getCategories().length, contestTwo.getCategories().length));
@@ -65,6 +82,50 @@ public class ContestComparison {
         return buffer.toString();
     }
 
+
+    /**
+     * Get counts of data files.
+     * 
+     * @param aContest
+     * @return [0] total files, [1] data files, [2] answer files
+     */
+    private int[] getDataFileCounts(IInternalContest aContest) {
+
+        int[] outCounts = new int[3];
+
+//        long totalAnswerBytes = 0;
+//        long totalBytes = 0;
+
+        Problem[] problems = aContest.getProblems();
+
+        if (problems.length > 0) {
+            int ansCount = 0;
+            int datCount = 0;
+
+            for (Problem problem : problems) {
+                ProblemDataFiles pdfiles = aContest.getProblemDataFile(problem);
+                if (pdfiles != null) {
+                    
+                    ansCount += pdfiles.getJudgesAnswerFiles().length;
+                    datCount += pdfiles.getJudgesDataFiles().length;
+                    
+//                    for (SerializedFile serializedFile : pdfiles.getJudgesAnswerFiles()) {
+//                        totalBytes += serializedFile.getBuffer().length;
+//                    }
+//                    for (SerializedFile serializedFile : pdfiles.getJudgesDataFiles()) {
+//                        totalAnswerBytes = serializedFile.getBuffer().length;
+//                    }
+                    // } else { // nothing to do here, move on
+                }
+            }
+
+            outCounts[1] = datCount;
+            outCounts[2] = ansCount;
+        } // no else
+
+        return outCounts;
+    }
+
     private String addComment(String name, int sizeOne, int sizeTwo) {
 
         String message = "";
@@ -81,6 +142,9 @@ public class ContestComparison {
             }
         } else if (sizeTwo > sizeOne) {
             int diff = sizeTwo - sizeOne;
+            if (sizeOne > 0) {
+                message += "Replace " + sizeOne + " " + Pluralize.pluralize(name, sizeOne) + NEW_LINE;
+            }
             message += "Add " + diff + " " + Pluralize.pluralize(name, diff) + NEW_LINE;
         }
 

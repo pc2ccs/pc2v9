@@ -38,9 +38,9 @@ public class ContestComparisonTest extends AbstractTestCase {
 
         String actual = new ContestComparison().comparisonList(contest, contest2);
 
-        // printExpectedDeclaration(actual);
+//         printExpectedDeclaration(actual);
 
-        String expected = "Add 6 Problems;Add 6 Languages;Add 134 Accounts;Add 1 administrator;Add 120 teams;Add 12 judges;Add 1 scoreboard;Add 3 Sites;Add 9 Judgements;";
+        String expected = "Add 3 Sites;Add 6 Problems;Add 6 Languages;Add 134 Accounts;Add 1 administrator;Add 120 teams;Add 12 judges;Add 1 scoreboard;Add 9 Judgements;";
 
         expected = expected.replaceAll("; ", NEW_LINE);
         expected = expected.replaceAll(";", NEW_LINE);
@@ -59,7 +59,7 @@ public class ContestComparisonTest extends AbstractTestCase {
 
         String actual = new ContestComparison().comparisonList(contest, contest2);
 
-        // printExpectedDeclaration(actual);
+//         printExpectedDeclaration(actual);
 
         String expected = "Add 1 Problem;";
 
@@ -81,12 +81,15 @@ public class ContestComparisonTest extends AbstractTestCase {
 
         IInternalContest contest = sample.createStandardContest();
         IInternalContest contest2 = sample.createStandardContest();
+        contest2.addSite(sample.createSite(contest2, "Site 4"));
+        contest2.addSite(sample.createSite(contest2, "Site 5"));
 
         String actual = new ContestComparison().comparisonList(contest, contest2);
 
 //         printExpectedDeclaration(actual);
+        
 
-        String expected = "Replace all 6 Problems;Replace all 6 Languages;Replace all 134 Accounts;Replace all 1 administrator;Replace all 120 teams;Replace all 12 judges;Replace all 1 scoreboard;Replace all 3 Sites;Replace all 9 Judgements;Replace all 1 AJ Settings;";
+        String expected = "Replace 3 Sites;Add 2 Sites;Replace all 6 Problems;Replace all 6 Languages;Replace all 134 Accounts;Replace all 1 administrator;Replace all 120 teams;Replace all 12 judges;Replace all 1 scoreboard;Replace all 9 Judgements;Replace all 1 AJ Settings;";
 
         expected = expected.replaceAll("; ", NEW_LINE);
         expected = expected.replaceAll(";", NEW_LINE);
@@ -107,7 +110,7 @@ public class ContestComparisonTest extends AbstractTestCase {
 
     }
 
-    public void testContestsTow() throws Exception {
+    public void testContestsTwo() throws Exception {
 
         SampleContest sample = new SampleContest();
 
@@ -116,9 +119,9 @@ public class ContestComparisonTest extends AbstractTestCase {
 
         String actual = new ContestComparison().comparisonList(contest, contest2);
 
-        // printExpectedDeclaration(actual);
+//         printExpectedDeclaration(actual);
 
-        String expected = "Add 6 Problems;Add 6 Languages;Add 134 Accounts;Add 1 administrator;Add 120 teams;Add 12 judges;Add 1 scoreboard;Add 3 Sites;Add 9 Judgements;";
+        String expected = "Add 3 Sites;Add 6 Problems;Add 6 Languages;Add 134 Accounts;Add 1 administrator;Add 120 teams;Add 12 judges;Add 1 scoreboard;Add 9 Judgements;";
 
         expected = expected.replaceAll("; ", NEW_LINE);
         expected = expected.replaceAll(";", NEW_LINE);
