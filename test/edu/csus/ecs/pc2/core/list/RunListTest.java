@@ -2,9 +2,12 @@ package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
 
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.security.FileSecurity;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -225,4 +228,37 @@ public class RunListTest extends AbstractTestCase {
         
     }
     
+    
+    /**
+     * Test when file is corrupted.
+     * 
+     * Bug 879 
+     * @throws Exception
+     */
+    public void testCorrupt() throws Exception {
+        
+        String testdir = getDataDirectory("testCorrupt");
+        
+//        startExplorer(new File(testdir));
+        
+        IStorage storage = new FileSecurity(testdir);
+        
+        RunList runList = new RunList(storage);
+        String runListFile = runList.getFileName();
+        System.out.println("file is "+runListFile);
+        
+        createSampleAnswerFile(runListFile);
+        try {
+            
+            runList.loadFromDisk(3);
+            fail("RunList file expected to be corrupt"+runListFile);
+            
+        } catch (FileSecurityException e) {
+            
+            //Passes -  expected to not read/be corrupt
+            
+//            FileSecurityException: NOT_READY_TO_READ
+            
+        }
+    }
 }
