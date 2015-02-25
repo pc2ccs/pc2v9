@@ -301,4 +301,65 @@ public class ContestTest extends AbstractTestCase {
         
     }
     
+    public void testGetRun() throws Exception {
+        
+        IInternalContest contest = sampleContest.createContest(1, 3, 12, 12, true);
+
+        assertEquals("Site id", 1, contest.getSiteNumber());
+
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
+
+        IInternalController controller = sampleContest.createController(contest, storageDirectory, true, false);
+        Log log = createLog(getName());
+
+        Contest apiContestInst = new Contest(contest, controller, log);
+        IContest apiContest = apiContestInst;
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+            Run run = sampleContest.createRandomJudgedRunSolved(contest);
+            run.setProblemId(problem.getElementId());
+            assertEquals("Site id", contest.getSiteNumber(), run.getSiteNumber());
+
+        }
+
+        int expectedNumberOfRuns = problems.length;
+
+        IRun[] runs = apiContest.getRuns();
+        assertEquals("Expecting runs ", expectedNumberOfRuns, runs.length);
+
+        // Edge Tests
+        
+        IRun runOne = apiContest.getRun(1);
+        assertNotNull("Expecting run id 1 ", runOne);
+        assertEquals("Run id", 1, runOne.getNumber());
+        
+        int lastRunNumber = runs.length;
+        IRun lastRun = apiContest.getRun(lastRunNumber);
+        assertNotNull("Expecting run id "+lastRun, lastRun);
+        assertEquals("Run id", lastRunNumber, lastRun.getNumber());
+        
+        // out of upper range test
+        
+        IRun lastRunPlusOne = apiContest.getRun(lastRunNumber+1);
+        assertNull("Expecting null for run id "+(lastRunNumber+1), lastRunPlusOne);
+        
+        // negative test, ahem
+        
+        int runId = -3;
+        IRun run = apiContest.getRun(-3);
+        assertNull("Expecting null for run id "+runId, run);
+        
+        // mid point test
+        
+        runId = runs.length / 2;
+        run = apiContest.getRun(runId);
+        assertNotNull("Expecting to find run id "+runId, run);
+        assertEquals("Run id", runId, run.getNumber());
+        
+        
+        
+    }
+    
 }
