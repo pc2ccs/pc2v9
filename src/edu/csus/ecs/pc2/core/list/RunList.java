@@ -224,7 +224,7 @@ public class RunList implements Serializable {
         return runHash.elements();
     }
 
-    private String getFileName() {
+    protected String getFileName() {
         return storage.getDirectoryName() + File.separator + "runlist.dat";
     }
     
