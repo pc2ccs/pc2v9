@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.api.implementation.ProblemImplementation;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.InternalControllerSpecial;
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.log.NullController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -28,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -586,7 +588,7 @@ public class ServerConnectionTest extends AbstractTestCase {
         
     }
 
-    public void testAddAccount() throws Exception {
+    public void testAddJudgeAccount() throws Exception {
         
         SampleContest sample = new SampleContest();
         
@@ -612,11 +614,100 @@ public class ServerConnectionTest extends AbstractTestCase {
         Account account = (Account) PacketFactory.getObjectValue(packetOne, PacketFactory.ACCOUNT);
         assertNotNull("Expecting a ACCOUNT in packet ", account);
         
+        comparePermissions(account, Type.JUDGE);
+        
         assertEquals("Expect account name", name, account.getDisplayName());
         assertEquals("Expect account password", pass, account.getPassword());
         
     }
     
+    public void testAddTeamAccount() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createContest(1, 1, 0, 0, false);
+        InternalControllerSpecial special = new InternalControllerSpecial(contest);
+
+        ServerConnectionTester tester = createServerConnectionTester();
+        tester.setController(special);
+
+        String name = "Team One";
+        String pass = "teamPassword";
+        tester.addAccount(Type.TEAM.toString(), name, pass);
+
+        Packet[] list = special.getPacketList();
+        assertEquals("Expecting packets sent", 1, list.length);
+
+        Packet packetOne = list[0];
+        
+        assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
+        
+//        dumpPackets(special, contest);
+        
+        Account account = (Account) PacketFactory.getObjectValue(packetOne, PacketFactory.ACCOUNT);
+        assertNotNull("Expecting a ACCOUNT in packet ", account);
+        
+        comparePermissions(account, Type.TEAM);
+        
+        assertEquals("Expect account name", name, account.getDisplayName());
+        assertEquals("Expect account password", pass, account.getPassword());
+        
+    }
+    
+    public void testAddAdminAccount() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createContest(1, 1, 0, 0, false);
+        InternalControllerSpecial special = new InternalControllerSpecial(contest);
+
+        ServerConnectionTester tester = createServerConnectionTester();
+        tester.setController(special);
+
+        String name = "Admin Two";
+        String pass = "adminPassword";
+        tester.addAccount(Type.ADMINISTRATOR.toString(), name, pass);
+
+        Packet[] list = special.getPacketList();
+        assertEquals("Expecting packets sent", 1, list.length);
+
+        Packet packetOne = list[0];
+        
+        assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
+        
+//        dumpPackets(special, contest);
+        
+        Account account = (Account) PacketFactory.getObjectValue(packetOne, PacketFactory.ACCOUNT);
+        assertNotNull("Expecting a ACCOUNT in packet ", account);
+        
+        comparePermissions(account, Type.ADMINISTRATOR);
+        
+        assertEquals("Expect account name", name, account.getDisplayName());
+        assertEquals("Expect account password", pass, account.getPassword());
+        
+    }
+    
+    
+    /**
+     * Compare permission between account and type
+     * @param account
+     * @param judge
+     */
+    private void comparePermissions(Account account, Type type) {
+        
+        PermissionGroup group = new PermissionGroup();
+        PermissionList expected = group.getPermissionList(type);
+        
+        PermissionList actual = account.getPermissionList();
+        
+        edu.csus.ecs.pc2.core.security.Permission.Type[] expectedList = expected.getList();
+        
+        edu.csus.ecs.pc2.core.security.Permission.Type[] actualList = actual.getList();
+        
+        assertEquals("Expecting same number of permissions ", expectedList.length, actualList.length);
+        
+    }
+
     public void testAddLanguage() throws Exception {
         
         SampleContest sample = new SampleContest();

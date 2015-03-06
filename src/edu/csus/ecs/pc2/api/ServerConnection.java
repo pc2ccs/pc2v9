@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -229,6 +230,8 @@ public class ServerConnection {
 
         Account account = new Account(clientId, password, internalContest.getSiteNumber());
         account.setDisplayName(displayName);
+        
+        account.clearListAndLoadPermissions(new PermissionGroup().getPermissionList(clientType));
 
         controller.addNewAccount(account);
     }    
