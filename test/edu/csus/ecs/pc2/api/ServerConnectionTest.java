@@ -750,7 +750,19 @@ public class ServerConnectionTest extends AbstractTestCase {
         ServerConnectionTester tester = createServerConnectionTester();
         tester.setController(special);
 
-        tester.addLanguage(LanguageAutoFill.PERLTITLE);
+        String [] values = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.GNUCPPTITLE);
+        
+//        String[] dVals = { PHPTITLE, "php -l {:mainfile}", /*"{:noexe}", //
+//                "php {:mainfile}", PHPTITLE, INTERPRETER_VALUE };*/
+
+        String title = values[0];
+        String compilerCommandLine = values[1];
+        String executionCommandLine = values[2];
+        String executableMask = values[3];
+
+        boolean interpreted = LanguageAutoFill.INTERPRETER_VALUE.equals(values[4]);
+
+        tester.addLanguage(title, compilerCommandLine, executionCommandLine, interpreted, executableMask);
 
         Packet[] list = special.getPacketList();
         assertEquals("Expecting packets sent", 1, list.length);
@@ -763,9 +775,44 @@ public class ServerConnectionTest extends AbstractTestCase {
         
         Language language = (Language) PacketFactory.getObjectValue(packetOne, PacketFactory.LANGUAGE);
         
-        Language expected = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.PERLTITLE);
+        Language expected = new Language(title);
+        expected.setCompileCommandLine(compilerCommandLine);
+        expected.setProgramExecuteCommandLine(executionCommandLine);
+        expected.setExecutableIdentifierMask(executableMask);
+        expected.setInterpreted(interpreted);
         
         assertTrue("Expecting same", expected.isSameAs(language));
+    }
+    
+    public void testAddLanguageLong() throws Exception {
+        
+    SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createContest(1, 1, 0,0,false);
+        InternalControllerSpecial special = new InternalControllerSpecial(contest);
+        
+        ServerConnectionTester tester = createServerConnectionTester();
+        tester.setController(special);
+     
+        String data = getSamplesSourceFilename("sumit.dat");
+        String answer = getSamplesSourceFilename("sumit.ans");
+        
+        File dataFile = new File(data);
+        File answerFile = new File(answer);
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, false, null);
+        
+        Packet[] list = special.getPacketList();
+        assertEquals("Expecting packets sent", 1, list.length);
+        
+        Packet packetOne = list[0];
+        
+        assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
+        
+//        dumpPackets(special, contest);
+        
+        Problem problem = (Problem) PacketFactory.getObjectValue(packetOne, PacketFactory.PROBLEM);
+        assertNotNull("Expecting a PROBLEM in packet ", problem);  
+        
     }
 
 

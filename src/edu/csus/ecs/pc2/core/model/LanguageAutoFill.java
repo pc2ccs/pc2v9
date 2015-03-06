@@ -39,7 +39,10 @@ public final class LanguageAutoFill {
     
     public static final String RUBYTITLE = "Ruby";
 
-    private static final String INTERPRETER_VALUE = "interpeter";
+    /**
+     * Constant string for an interpreted language.
+     */
+    public static final String INTERPRETER_VALUE = "interpeter";
     
     private static final String NULL_LANGUAGE_NAME = "";
 
@@ -64,7 +67,7 @@ public final class LanguageAutoFill {
      * <li>Compiler Command Line
      * <li>Executable Identifier Mask
      * <li>Execute command line
-     * <li>"interpreted" if interpreter.
+     * <li>{@link #INTERPRETER_VALUE} if interpreter.
      * </ol>
      * 
      * @param key

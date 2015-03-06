@@ -773,4 +773,33 @@ public class ServerConnection {
         return new Permission().getDescription(type);
     }
    
+    // TODO 885 add code example
+    /**
+     * Add a language to the contest.
+     * 
+     * @param title Display Name for the language, ex. Java
+     * @param compilerCommandLine command to compile source code
+     * @param executionCommandLine command to execute program
+     * @param interpreted is this an interpreted language like Perl or Python
+     * @param executableMask an expected output program name
+     */
+    public void addLanguage(String title, String compilerCommandLine, String executionCommandLine, boolean interpreted, String executableMask) {
+        
+        checkNotEmpty("Language Name/title", title);
+        checkNotEmpty("Language compilation command", compilerCommandLine);
+        checkNotEmpty("Language executable mask", executableMask);
+        checkNotEmpty("Language execution comman lLine", executionCommandLine);
+        
+        Language language = new Language(title);
+        
+        language.setCompileCommandLine(compilerCommandLine);
+        language.setInterpreted(interpreted);
+        language.setExecutableIdentifierMask(executableMask);
+        language.setProgramExecuteCommandLine(executionCommandLine);
+            
+        checkIsAllowed(Type.ADD_LANGUAGE);
+
+        controller.addNewLanguage(language);
+    }
+    
 }
