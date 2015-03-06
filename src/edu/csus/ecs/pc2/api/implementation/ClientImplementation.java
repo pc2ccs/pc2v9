@@ -50,7 +50,7 @@ public class ClientImplementation implements IClient {
                 clientType = ClientType.SCOREBOARD_CLIENT;
                 break;
             case ADMINISTRATOR:
-                clientType = ClientType.SCOREBOARD_CLIENT;
+                clientType = ClientType.ADMIN_CLIENT;
                 break;
             case TEAM:
                 clientType = ClientType.TEAM_CLIENT;
