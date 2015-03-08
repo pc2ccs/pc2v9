@@ -773,30 +773,63 @@ public class ServerConnection {
         return new Permission().getDescription(type);
     }
    
-    // TODO 885 add code example
     /**
      * Add a language to the contest.
      * 
-     * @param title Display Name for the language, ex. Java
-     * @param compilerCommandLine command to compile source code
-     * @param executionCommandLine command to execute program
-     * @param interpreted is this an interpreted language like Perl or Python
-     * @param executableMask an expected output program name
+     * The following code snippet shows an example to add a language.
+     * <pre>
+     * String login = &quot;administrator2&quot;;
+     * String password = &quot;administrator2&quot;;
+     * try {
+     *     ServerConnection serverConnection = new ServerConnection();
+     *     IContest contest = serverConnection.login(login, password);
+     * 
+     *     String title = &quot;Ruby&quot;;
+     *     String compilerCommandLine = &quot;ruby -c {:mainfile}&quot;;
+     *     String executionCommandLine = &quot;ruby {:mainfile}&quot;;
+     *     String executableMask = &quot;{:noexe}&quot;;
+     *     boolean interpreted = true;
+     * 
+     *     serverConnection.addLanguage(title, compilerCommandLine, executionCommandLine, interpreted, executableMask);
+     * 
+     *     // may need to pause for a second or two for the language to be added.
+     *     ILanguage[] languages = contest.getLanguages();
+     *     System.out.println(&quot;Added language &quot; + languages[languages.length - 1].getName());
+     * 
+     *     serverConnection.logoff();
+     * } catch (LoginFailureException e) {
+     *     System.out.println(&quot;Could not login because &quot; + e.getMessage());
+     * } catch (NotLoggedInException e) {
+     *     System.out.println(&quot;Unable to execute API method&quot;);
+     *     e.printStackTrace();
+     * }
+     * </pre>
+     * 
+     * @param title
+     *            Display Name for the language, ex. Java
+     * @param compilerCommandLine
+     *            command to compile source code
+     * @param executionCommandLine
+     *            command to execute program
+     * @param interpreted
+     *            is this an interpreted language like Perl or Python
+     * @param executableMask
+     *            an expected output program name
      */
     public void addLanguage(String title, String compilerCommandLine, String executionCommandLine, boolean interpreted, String executableMask) {
-        
+
         checkNotEmpty("Language Name/title", title);
         checkNotEmpty("Language compilation command", compilerCommandLine);
         checkNotEmpty("Language executable mask", executableMask);
         checkNotEmpty("Language execution comman lLine", executionCommandLine);
-        
+
         Language language = new Language(title);
-        
+
         language.setCompileCommandLine(compilerCommandLine);
         language.setInterpreted(interpreted);
         language.setExecutableIdentifierMask(executableMask);
         language.setProgramExecuteCommandLine(executionCommandLine);
-            
+
         checkIsAllowed(Type.ADD_LANGUAGE);
 
         controller.addNewLanguage(language);

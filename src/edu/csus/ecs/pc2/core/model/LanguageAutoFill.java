@@ -10,10 +10,7 @@ package edu.csus.ecs.pc2.core.model;
  * @author pc2@ecs.csus.edu
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/admin/gui/LanguageAutoFill.java$
 public final class LanguageAutoFill {
-
-    public static final String SVN_ID = "$Id$";
 
     public static final String JAVATITLE = "Java";
 
@@ -59,18 +56,19 @@ public final class LanguageAutoFill {
     }
 
     /**
-     * Returns auto populate values for input language. 
+     * Returns auto populate values for a language. 
      * 
-     * For each key returns an array of:
+     * For each key returns an array containing:
      * <ol>
      * <li>Title for Language
      * <li>Compiler Command Line
      * <li>Executable Identifier Mask
      * <li>Execute command line
-     * <li>{@link #INTERPRETER_VALUE} if interpreter.
+     * <li>Title for Language
+     * <li>Interpreted language, value will be {@link #INTERPRETER_VALUE} if interpreter.
      * </ol>
      * 
-     * @param key
+     * @param key a name in the auto populate language list, see {@link #getLanguageList()}.
      * @return array for auto-populating {@link Language}
      */
     public static String[] getAutoFillValues(String key) {
@@ -149,7 +147,8 @@ public final class LanguageAutoFill {
     }
 
     /**
-     * Return list of autopopulate titles.
+     * Return list of language names in the autopopulate list.
+     * 
      * @return list of language titles.
      */
     public static String[] getLanguageList() {

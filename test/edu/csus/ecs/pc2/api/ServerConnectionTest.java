@@ -247,10 +247,10 @@ public class ServerConnectionTest extends AbstractTestCase {
      * @param args
      */
     public static void main(String[] args) {
-        
+
         try {
             if (args.length == 0) {
-                
+
                 // Run test Login prompt for fields 
 
                 String login = JOptionPane.showInputDialog("Enter login name", "team4");
@@ -261,49 +261,105 @@ public class ServerConnectionTest extends AbstractTestCase {
 
                 String password = JOptionPane.showInputDialog("Enter password", login);
 
-                
+
                 new ServerConnectionTest().testLogin(login, password);
-               
+
             } else {
-                
+
                 String firstArg = args[0];
-                
+
                 if ("addA".equalsIgnoreCase(firstArg)) {
-                    
+
                     new ServerConnectionTest().addAccountTest();
-                    
+
                 } else if ("addP".equalsIgnoreCase(firstArg)) {
-                    
+
                     new ServerConnectionTest().addProblemTest();
-                    
-                } else 
-                    
-                
-                if (args[0].equalsIgnoreCase("--help")) {
-                    System.out.println("ServerConnectionTest [--help] [login|addA|addP]");
-                    System.out.println();
-                    System.out.println("If no parameters passed will prompt for login and password");
-                    System.out.println();
-                    System.out.println("login - login and password for test login ");
-                    System.out.println();
-                    System.out.println("adda - test add account method");
-                    System.out.println("addp - test add problem method");
-                    System.out.println();
-                    System.out.println("When passes test prints: PASSED Test ");
-                } else {
-                    
-                    // run test login 
-                    
-                    new ServerConnectionTest().testLogin(firstArg, firstArg);
-                }
+                } else if ("addL".equalsIgnoreCase(firstArg)) {
+
+                    new ServerConnectionTest().addLanguageTest();
+
+                } else
+
+                    if (args[0].equalsIgnoreCase("--help")) {
+                        System.out.println("ServerConnectionTest [--help] [login|addA|addP]");
+                        System.out.println();
+                        System.out.println("If no parameters passed will prompt for login and password");
+                        System.out.println();
+                        System.out.println("login - login and password for test login ");
+                        System.out.println();
+                        System.out.println("adda - test addAccount method");
+                        System.out.println("addp - test addProblem method");
+                        System.out.println("addl - test huh method");
+                        System.out.println();
+                        System.out.println("When passes test prints: PASSED Test ");
+                    } else {
+
+                        // run test login 
+
+                        new ServerConnectionTest().testLogin(firstArg, firstArg);
+                    }
             }
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
-        
-            }
 
-  
+    }
+
+    private void addLanguageTest() throws NotLoggedInException {
+
+        ServerConnection connection = new ServerConnection();
+
+        String user = "administrator2";
+        
+        try {
+            
+            IContest contest = connection.login(user, user);
+            
+            ILanguage[] languages = contest.getLanguages();
+            
+            int beforeLangCount = languages.length;
+            
+            connection.addLanguage(LanguageAutoFill.MSCTITLE);
+            
+            String[] values = { "Ruby D", "ruby -c {:mainfile}", "{:noexe}", //
+                    "ruby {:mainfile}", "Ruby D", LanguageAutoFill.INTERPRETER_VALUE };
+            
+            String title = values[0];
+            String compilerCommandLine = values[1];
+            String executionCommandLine = values[2];
+            String executableMask = values[3];
+
+            boolean interpreted = LanguageAutoFill.INTERPRETER_VALUE.equals(values[5]);
+            
+            connection.addLanguage(title, compilerCommandLine, executionCommandLine, interpreted, executableMask);
+            
+            Thread.sleep(1000); // sleep so packet can be sent/processed
+            
+            languages = contest.getLanguages();
+            
+            int afterLangCount = languages.length;
+            
+            int langsAdded = afterLangCount - beforeLangCount;
+            
+            switch (langsAdded) {
+                case 2:
+                    System.out.println("Success.  Two languages added.");
+                    break;
+
+                default:
+                    System.out.println("Failed. Expecting 2 languages added, "+langsAdded+" were added ");
+                    break;
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        } finally {
+            connection.logoff();
+        }
+    
+        
+    }
 
     public void testTextValidClientType() throws Exception {
 
@@ -740,7 +796,7 @@ public class ServerConnectionTest extends AbstractTestCase {
      * Test add interpreted language.
      * @throws Exception
      */
-    public void testAddLanguagePerl() throws Exception {
+    public void testAddLanguageLong() throws Exception {
         
         SampleContest sample = new SampleContest();
         
@@ -760,7 +816,8 @@ public class ServerConnectionTest extends AbstractTestCase {
         String executionCommandLine = values[2];
         String executableMask = values[3];
 
-        boolean interpreted = LanguageAutoFill.INTERPRETER_VALUE.equals(values[4]);
+        boolean interpreted = LanguageAutoFill.INTERPRETER_VALUE.equals(values[5]);
+        assertFalse("Expecting to NOT be defined as interpreted ",interpreted);
 
         tester.addLanguage(title, compilerCommandLine, executionCommandLine, interpreted, executableMask);
 
@@ -782,39 +839,86 @@ public class ServerConnectionTest extends AbstractTestCase {
         expected.setInterpreted(interpreted);
         
         assertTrue("Expecting same", expected.isSameAs(language));
+        assertFalse("Expecting to NOT be defined as interpreted ",language.isInterpreted());
+        
     }
     
-    public void testAddLanguageLong() throws Exception {
+    public void testAddLanguagePerl() throws Exception {
+       
         
-    SampleContest sample = new SampleContest();
+        SampleContest sample = new SampleContest();
         
-        IInternalContest contest = sample.createContest(1, 1, 0,0,false);
+        IInternalContest contest = sample.createContest(1, 1, 0, 0, false);
         InternalControllerSpecial special = new InternalControllerSpecial(contest);
-        
+
         ServerConnectionTester tester = createServerConnectionTester();
         tester.setController(special);
-     
-        String data = getSamplesSourceFilename("sumit.dat");
-        String answer = getSamplesSourceFilename("sumit.ans");
+
+        String [] values = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.PERLTITLE);
         
-        File dataFile = new File(data);
-        File answerFile = new File(answer);
-        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, false, null);
-        
+//        String[] dVals = { PHPTITLE, "php -l {:mainfile}", /*"{:noexe}", //
+//                "php {:mainfile}", PHPTITLE, INTERPRETER_VALUE };*/
+
+        String title = values[0];
+        String compilerCommandLine = values[1];
+        String executionCommandLine = values[2];
+        String executableMask = values[3];
+
+        boolean interpreted = LanguageAutoFill.INTERPRETER_VALUE.equals(values[5]);
+        assertTrue("Expecting to be defined as interpreted ",interpreted);
+
+        tester.addLanguage(title, compilerCommandLine, executionCommandLine, interpreted, executableMask);
+
         Packet[] list = special.getPacketList();
         assertEquals("Expecting packets sent", 1, list.length);
-        
+
         Packet packetOne = list[0];
         
         assertEquals("Expecting ", "ADD_SETTING", packetOne.getType().toString());
         
 //        dumpPackets(special, contest);
         
-        Problem problem = (Problem) PacketFactory.getObjectValue(packetOne, PacketFactory.PROBLEM);
-        assertNotNull("Expecting a PROBLEM in packet ", problem);  
+        Language language = (Language) PacketFactory.getObjectValue(packetOne, PacketFactory.LANGUAGE);
+        
+        Language expected = new Language(title);
+        expected.setCompileCommandLine(compilerCommandLine);
+        expected.setProgramExecuteCommandLine(executionCommandLine);
+        expected.setExecutableIdentifierMask(executableMask);
+        expected.setInterpreted(interpreted);
+        
+        assertTrue("Expecting to be set to interpreted ",language.isInterpreted());
+        assertTrue("Expecting same", expected.isSameAs(language));
         
     }
 
+//    private void addLanguageSample() {
+//
+//        String login = "administrator2";
+//        String password = "administrator2";
+//        try {
+//            ServerConnection serverConnection = new ServerConnection();
+//            IContest contest = serverConnection.login(login, password);
+//
+//            String title = "Ruby";
+//            String compilerCommandLine = "ruby -c {:mainfile}";
+//            String executionCommandLine = "ruby {:mainfile}";
+//            String executableMask = "{:noexe}";
+//            boolean interpreted = true;
+//
+//            serverConnection.addLanguage(title, compilerCommandLine, executionCommandLine, interpreted, executableMask);
+//
+//            // may need to pause for a second or two for the language to be added.
+//            ILanguage[] languages = contest.getLanguages();
+//            System.out.println("Added language " + languages[languages.length - 1].getName());
+//
+//            serverConnection.logoff();
+//        } catch (LoginFailureException e) {
+//            System.out.println("Could not login because " + e.getMessage());
+//        } catch (NotLoggedInException e) {
+//            System.out.println("Unable to execute API method");
+//            e.printStackTrace();
+//        }
+//    }
 
 //    // public static TestSuite NotUsedSuite() {
 //    public static TestSuite suite() {
