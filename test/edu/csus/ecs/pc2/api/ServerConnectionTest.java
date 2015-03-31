@@ -35,7 +35,9 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 /**
  * A test of the Server Connection class, prompts for use and password to login.
  * 
- * main method will run a program to test ServerConnection, see usage (--help option).
+ * There are some unit tests that are directly tested.   This JUnit also runs
+ * as a program.  In the main method there are a number of tests that typically
+ * require a server to be started.  For a list see the usage (--help option).
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -43,7 +45,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 // $HeadURL$
 public class ServerConnectionTest extends AbstractTestCase {
-
+    
     public ServerConnectionTest(String name) {
         super(name);
     }
@@ -275,10 +277,19 @@ public class ServerConnectionTest extends AbstractTestCase {
                 } else if ("addP".equalsIgnoreCase(firstArg)) {
 
                     new ServerConnectionTest().addProblemTest();
+                    
                 } else if ("addL".equalsIgnoreCase(firstArg)) {
 
                     new ServerConnectionTest().addLanguageTest();
 
+                } else if ("shut".equalsIgnoreCase(firstArg)) {
+
+                    new ServerConnectionTest().shutdownLocalServer();
+                    
+                } else if ("shutall".equalsIgnoreCase(firstArg)) {
+
+                    new ServerConnectionTest().shutdownAllServers();
+                    
                 } else
 
                     if (args[0].equalsIgnoreCase("--help")) {
@@ -290,7 +301,9 @@ public class ServerConnectionTest extends AbstractTestCase {
                         System.out.println();
                         System.out.println("adda - test addAccount method");
                         System.out.println("addp - test addProblem method");
-                        System.out.println("addl - test huh method");
+                        System.out.println("addl - test addLanguage method");
+                        System.out.println("shut - test shutdownServer method");
+                        System.out.println("shutall - test shutdownAllServers method");
                         System.out.println();
                         System.out.println("When passes test prints: PASSED Test ");
                     } else {
@@ -304,6 +317,46 @@ public class ServerConnectionTest extends AbstractTestCase {
             e.printStackTrace(System.err);
         }
 
+    }
+
+    private void shutdownAllServers() throws NotLoggedInException {
+        ServerConnection connection = new ServerConnection();
+
+        String user = "administrator2";
+        
+        try {
+            
+            connection.login(user, user);
+            connection.shutdownAllServers();
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        } finally {
+            connection.logoff();
+        }
+    
+        
+        
+    }
+
+    private void shutdownLocalServer() throws NotLoggedInException {
+
+        ServerConnection connection = new ServerConnection();
+
+        String user = "administrator2";
+        
+        try {
+            
+            connection.login(user, user);
+            connection.shutdownServer();
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        } finally {
+            connection.logoff();
+        }
+    
+        
     }
 
     private void addLanguageTest() throws NotLoggedInException {

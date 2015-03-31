@@ -4018,12 +4018,32 @@ public class PacketHandler {
         if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS)) {
             
             controller.shutdownRemoteServers (requestor);
+            
+            // Sleep for a couple of seconds to allow time to send
+            // shutdown packets to send to other sites.
+            
+            sleepSecs(2);
+            
             controller.shutdownServer(packet.getSourceId());
 
         } else {
             throw new SecurityException("User " + requestor + " not allowed to shutdown all servers");
         }
 
+    }
+
+    /**
+     * Sleep for n seconds
+     * @param seconds - number of seconds to sleep
+     */
+    private void sleepSecs(int seconds) {
+
+        try {
+            Thread.sleep(seconds * 1000);
+
+        } catch (Exception e) {
+            ; // ignore exception
+        }
     }
 
     private void handleServerShutdown(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {

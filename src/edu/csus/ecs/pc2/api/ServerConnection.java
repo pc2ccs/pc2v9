@@ -768,6 +768,28 @@ public class ServerConnection {
         }
 
     }
+    
+    /**
+     * Are any of the specified permissions allowed?
+     */
+    private void checkIsAnyAllowed(Type[] types, String message) {
+
+        boolean allowed = false;
+        for (Type type : types) {
+            if (internalContest.isAllowed(type)) {
+                allowed = true;
+            }
+
+        }
+
+        if (!allowed) {
+            if (message == null) {
+                throw new SecurityException("Not allowed to " + getPermissionDescription(types[0]));
+            } else
+                throw new SecurityException("Not allowed to " + message + "(requires " + getPermissionDescription(types[0]) + " permission)");
+        }
+
+    }
 
     private String getPermissionDescription(Type type) {
         return new Permission().getDescription(type);
@@ -833,6 +855,34 @@ public class ServerConnection {
         checkIsAllowed(Type.ADD_LANGUAGE);
 
         controller.addNewLanguage(language);
+    }
+    
+    
+    /**
+     * Shutdown the server.
+     * 
+     * @see #shutdownAllServers()
+     */
+    public void shutdownServer(){
+
+        checkIsAllowed(Type.SHUTDOWN_SERVER,"Shutdown local server");
+        controller.sendShutdownSite(internalContest.getSiteNumber());
+        
+    }
+    
+    /**
+     * Shutdown all servers.
+     * 
+     *  Will shutdown all servers connected to the current server, then
+     *  shutdown the current server.
+     *  
+     *  @see #shutdownServer()
+     */
+    public void shutdownAllServers(){
+
+        Type [] allowList = { Type.SHUTDOWN_ALL_SERVERS, Type.SHUTDOWN_SERVER };
+        checkIsAnyAllowed(allowList, "Shutdown local server");
+        controller.sendShutdownAllSites();
     }
     
 }
