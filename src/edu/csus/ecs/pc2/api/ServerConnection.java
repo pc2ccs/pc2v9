@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -884,5 +885,47 @@ public class ServerConnection {
         checkIsAnyAllowed(allowList, "Shutdown local server");
         controller.sendShutdownAllSites();
     }
+    
+    /**
+     * Update/set contest clock.
+     * 
+     * @param contestLengthSeconds
+     *            number of seconds contest is long
+     * @param contestElapsedSeconds
+     *            number of seconds elapsed since start of contest
+     * @param contestRemainingSeconds
+     *            number of seconds until end of contest
+     */
+    public void setContestTimes(long contestLengthSeconds, long contestElapsedSeconds, long contestRemainingSeconds) {
+
+        checkIsAllowed(Type.EDIT_CONTEST_CLOCK);
+
+        if (contestLengthSeconds != (contestElapsedSeconds + contestRemainingSeconds)) {
+            throw new IllegalArgumentException("Contest Length must equal elapsed plus remaining ( " + contestLengthSeconds + " != " + contestElapsedSeconds + " + " + contestRemainingSeconds + " )");
+        }
+
+        ContestTime newContestTime = internalContest.getContestTime();
+        newContestTime.setContestLengthSecs(contestLengthSeconds);
+        newContestTime.setElapsedSecs(contestElapsedSeconds);
+        newContestTime.setRemainingSecs(contestRemainingSeconds);
+
+        controller.updateContestTime(newContestTime);
+    }
+
+    /**
+     * Change contest length.
+     * 
+     * Will adjust remaining time if neecessary.
+     * 
+     * @param contestLengthSeconds
+     *            number of seconds contest is long
+     */
+    public void setContestLength(long contestLengthSeconds) {
+        ContestTime newContestTime = internalContest.getContestTime();
+        long newRemain = contestLengthSeconds - newContestTime.getElapsedSecs();
+        setContestTimes(contestLengthSeconds, newContestTime.getElapsedSecs(), newRemain);
+
+    }
+
     
 }
