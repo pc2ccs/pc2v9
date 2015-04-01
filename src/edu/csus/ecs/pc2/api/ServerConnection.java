@@ -890,13 +890,18 @@ public class ServerConnection {
     /**
      * Update/set contest clock.
      * 
+     * <p>
+     * Contest clock must be stopped to change contest length.
+     * 
+     * @see IContest#isContestClockRunning()
+     * 
      * @param contestLengthSeconds
      *            number of seconds contest is long
      * @param contestElapsedSeconds
      *            number of seconds elapsed since start of contest
      * @param contestRemainingSeconds
      *            number of seconds until end of contest
-     * @throws IllegalContestState 
+     * @throws IllegalContestState thrown if contest clock is started.
      */
     public void setContestTimes(long contestLengthSeconds, long contestElapsedSeconds, long contestRemainingSeconds) throws IllegalContestState {
 
@@ -921,11 +926,16 @@ public class ServerConnection {
     /**
      * Change contest length.
      * 
-     * Will adjust remaining time if neecessary.
+     * Will adjust remaining time if necessary.
+     * 
+     * <p>
+     * Contest clock must be stopped to change contest length.
+     * 
+     * @see IContest#isContestClockRunning()
      * 
      * @param contestLengthSeconds
      *            number of seconds contest is long
-     * @throws IllegalContestState 
+     * @throws IllegalContestState thrown if contest clock is started.
      */
     public void setContestLength(long contestLengthSeconds) throws IllegalContestState {
         ContestTime newContestTime = internalContest.getContestTime();
@@ -933,6 +943,5 @@ public class ServerConnection {
         setContestTimes(contestLengthSeconds, newContestTime.getElapsedSecs(), newRemain);
 
     }
-
     
 }
