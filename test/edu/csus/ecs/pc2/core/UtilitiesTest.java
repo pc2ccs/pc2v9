@@ -4,7 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * 
@@ -12,7 +12,7 @@ import junit.framework.TestCase;
  * @version $Id$
  *
  */
-public class UtilitiesTest extends TestCase {
+public class UtilitiesTest extends AbstractTestCase {
 
     public void testOne() {
         char[] array1 = null;
@@ -118,5 +118,31 @@ public class UtilitiesTest extends TestCase {
             
             // match pattern up to . where pattern is yyyyddMMhhmmss.SSS
             assertTrue ("First part of string should match ",actual.substring(0,15).equals(nearlyExpected.substring(0,15)));
+        }
+        
+        public void testHHMMSStoString() throws Exception {
+            
+            String [] testData = { //
+                    // HH:MM:SS,seconds 
+                    "0,0", //
+                    "1:00:00,3600", //
+                    "1:00,60", //
+                    "59,59", //
+                    "5:00:00,18000", //
+                    "59:59,3599", //
+                    "23:59:58,86398", //
+
+            };
+            
+            for (String timeString : testData) {
+                
+                String [] fields = timeString.split(",");
+                
+                long actualSeconds = Utilities.HHMMSStoString(fields[0]);
+                long expectedSeconds = Long.parseLong(fields[1]);
+                
+                assertEquals("Expected seconds ", expectedSeconds, actualSeconds);
+//                System.out.println("\""+fields[0]+","+actualSeconds+"\", //");
+            }
         }
 }

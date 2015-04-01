@@ -739,5 +739,63 @@ public final class Utilities {
     public static String getDateTime() {
         return format.format(new Date());
     }
+    
+    /**
+     * Convert String to second. Expects input in form: ss or mm:ss or hh:mm:ss
+     * 
+     * @param s
+     *            string to be converted to seconds
+     * @return -1 if invalid time string, 0 or >0 if valid
+     */
+    public long stringToLongSecs(String s) {
+
+        if (s == null || s.trim().length() == 0) {
+            return -1;
+        }
+
+        String[] fields = s.split(":");
+        long hh = 0;
+        long mm = 0;
+        long ss = 0;
+        
+        switch (fields.length ) {
+            case 3:
+                hh = stringToLong(fields[0]);
+                mm = stringToLong(fields[1]);
+                ss = stringToLong(fields[2]);
+                break;
+            case 2:
+                mm = stringToLong(fields[0]);
+                ss = stringToLong(fields[1]);
+                break;
+            case 1:
+                ss = stringToLong(fields[0]);
+                break;
+
+            default:
+                break;
+        }
+
+        // System.out.println(" values "+hh+":"+mm+":"+ss);
+
+        long totsecs = 0;
+        if (hh != -1) {
+            totsecs = hh;
+        }
+        if (mm != -1) {
+            totsecs = (totsecs * 60) + mm;
+        }
+        if (ss != -1) {
+            totsecs = (totsecs * 60) + ss;
+        }
+
+        // System.out.println(" values "+hh+":"+mm+":"+ss+" secs="+totsecs);
+
+        if (hh == -1 || mm == -1 || ss == -1) {
+            return -1;
+        }
+
+        return totsecs;
+    }
 
 }

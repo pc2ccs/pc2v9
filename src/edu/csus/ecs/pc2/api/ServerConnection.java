@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -895,10 +896,15 @@ public class ServerConnection {
      *            number of seconds elapsed since start of contest
      * @param contestRemainingSeconds
      *            number of seconds until end of contest
+     * @throws IllegalContestState 
      */
-    public void setContestTimes(long contestLengthSeconds, long contestElapsedSeconds, long contestRemainingSeconds) {
+    public void setContestTimes(long contestLengthSeconds, long contestElapsedSeconds, long contestRemainingSeconds) throws IllegalContestState {
 
         checkIsAllowed(Type.EDIT_CONTEST_CLOCK);
+        
+        if (internalContest.getContestTime().isContestRunning()){
+            throw new IllegalContestState("Cannot set contest times while contest clock is running/started");
+        }
 
         if (contestLengthSeconds != (contestElapsedSeconds + contestRemainingSeconds)) {
             throw new IllegalArgumentException("Contest Length must equal elapsed plus remaining ( " + contestLengthSeconds + " != " + contestElapsedSeconds + " + " + contestRemainingSeconds + " )");
@@ -919,8 +925,9 @@ public class ServerConnection {
      * 
      * @param contestLengthSeconds
      *            number of seconds contest is long
+     * @throws IllegalContestState 
      */
-    public void setContestLength(long contestLengthSeconds) {
+    public void setContestLength(long contestLengthSeconds) throws IllegalContestState {
         ContestTime newContestTime = internalContest.getContestTime();
         long newRemain = contestLengthSeconds - newContestTime.getElapsedSecs();
         setContestTimes(contestLengthSeconds, newContestTime.getElapsedSecs(), newRemain);

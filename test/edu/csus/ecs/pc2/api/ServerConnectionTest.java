@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.InternalControllerSpecial;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.NullController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -54,7 +55,7 @@ public class ServerConnectionTest extends AbstractTestCase {
         super();
     }
 
-    public void testLogin(String login, String password) {
+    public void testLogin(String login, String password) throws LoginFailureException {
 
         ServerConnection serverConnection = new ServerConnection();
         try {
@@ -62,6 +63,7 @@ public class ServerConnectionTest extends AbstractTestCase {
             System.out.println("PASSED Test - Logged in as " + contest.getMyClient().getLoginName());
         } catch (LoginFailureException e) {
             System.out.println("Could not login because " + e.getMessage());
+            throw e;
         }
         try {
             serverConnection.logoff();
@@ -289,11 +291,29 @@ public class ServerConnectionTest extends AbstractTestCase {
                 } else if ("shutall".equalsIgnoreCase(firstArg)) {
 
                     new ServerConnectionTest().shutdownAllServers();
+
+                } else if ("settime".equalsIgnoreCase(firstArg)) {
+
+                    // settime 4:10:00 10:11 3:59:49
+                    long contestLength = Utilities.HHMMSStoString( getArg (args, 1));
+                    long elapsedTime =  Utilities.HHMMSStoString( getArg (args, 2));
+                    long remainTime =  Utilities.HHMMSStoString( getArg (args, 3));
+                    
+                    new ServerConnectionTest().setContetTime(contestLength, remainTime, elapsedTime);
+                    
+                } else if ("setlen".equalsIgnoreCase(firstArg)) {
+
+                    // setlen 4:00:00
+                    long contestLength =  Utilities.HHMMSStoString( getArg (args, 1));
+                    
+                    new ServerConnectionTest().setContetLength(contestLength);
                     
                 } else
 
                     if (args[0].equalsIgnoreCase("--help")) {
                         System.out.println("ServerConnectionTest [--help] [login|addA|addP]");
+                        System.out.println("ServerConnectionTest settime length elapsed remaining");
+                        System.out.println("ServerConnectionTest setlen length");
                         System.out.println();
                         System.out.println("If no parameters passed will prompt for login and password");
                         System.out.println();
@@ -304,19 +324,74 @@ public class ServerConnectionTest extends AbstractTestCase {
                         System.out.println("addl - test addLanguage method");
                         System.out.println("shut - test shutdownServer method");
                         System.out.println("shutall - test shutdownAllServers method");
+                        System.out.println("settime - test setContestTimes method");
+                        System.out.println("setlen - test setContestLength method");
                         System.out.println();
                         System.out.println("When passes test prints: PASSED Test ");
+                        System.exit(30);
                     } else {
 
                         // run test login 
 
                         new ServerConnectionTest().testLogin(firstArg, firstArg);
                     }
+                
+                System.out.println("PASSED Test.");
             }
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
 
+    }
+
+    private void setContetLength(long contestLengthSeconds) throws NotLoggedInException {
+        ServerConnection connection = new ServerConnection();
+
+        String user = "administrator2";
+        
+        try {
+            connection.login(user, user);
+            connection.setContestLength(contestLengthSeconds);
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        } finally {
+            connection.logoff();
+        }
+    
+    }
+
+    private void setContetTime(long contestLengthSeconds, long contestElapsedSeconds, long contestRemainingSeconds) throws NotLoggedInException {
+      
+        ServerConnection connection = new ServerConnection();
+
+        String user = "administrator2";
+        
+        try {
+            
+            connection.login(user, user);
+            connection.setContestTimes(contestLengthSeconds, contestElapsedSeconds, contestRemainingSeconds);
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        } finally {
+            connection.logoff();
+        }
+    
+        
+    }
+
+    /**
+     * 
+     * @param args
+     * @param i
+     * @return element i from args 
+     */
+    private static String getArg(String[] args, int i) {
+        if (i >= args.length){
+            throw new IllegalArgumentException("Expecting a "+i+" parameter");
+        }
+        return args[i];
     }
 
     private void shutdownAllServers() throws NotLoggedInException {
@@ -643,7 +718,7 @@ public class ServerConnectionTest extends AbstractTestCase {
 
         assertEquals("Validator cmd line ", "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ", problem.getValidatorCommandLine());
 
-// TODO         assertEquals("Validator prog name ", "/home/pc2/validdiff", problem.getValidatorProgramName());
+// SOMEDAY  assertEquals("Validator prog name ", "/home/pc2/validdiff", problem.getValidatorProgramName());
     }
     
     /**
