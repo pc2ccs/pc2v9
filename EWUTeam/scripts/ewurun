@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Purpose: Start the EWU Java Bridge/Server
+# Author : pc2@ecs.csus.edu
+# $HeadURL$
+#
+
+. `dirname $0`/pc2env
+
+# MacOS or not
+if [ -f /mach_kernel ]; then
+  # set our dock name (otherwise defaults to Starter)
+  EWUOPTS="-Xdock:name=`basename $0`"
+else
+  EWUOPTS=""
+fi
+
+# java -Xmx1600M -jar PC2JavaServer.jar
+# java $EWUOPTS -Xms64M -Xmx1600M -cp $libdir/pc2.jar edu.csus.ecs.pc2.Starter --server $*
+java $EWUOPTS -Xms64M -Xmx1600M -cp $libdir/pc2.jar -jar $libdir/PC2JavaServer.jar
+
+# eof ewurun  $Id$ 
