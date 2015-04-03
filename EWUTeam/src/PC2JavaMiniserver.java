@@ -1,7 +1,16 @@
 import java.io.File;
 
-// PC2JavaMiniserver is designed to run in the background allowing PHP scripts to create java objects via
-//	a PHP - Java bridge.
+import edu.csus.pc2.ewuteam.VersionInfo;
+
+// 
+/**
+ * PC2JavaMiniserver is designed to run in the background allowing PHP scripts to create java objects via
+ * a PHP - Java bridge.
+ * 
+ * @version $Id$
+ */
+
+// $HeadURL$
 public class PC2JavaMiniserver {
 
 	public static final String JAVABRIDGE_PORT = "50005";
@@ -10,6 +19,9 @@ public class PC2JavaMiniserver {
 
 	// run server
 	public static void main(String[] args) throws Exception {
+	    
+	    VersionInfo versionInfo = new VersionInfo();
+	    
 		File uploadsDir = new File(".." + File.separator + "uploads");
 		if (!uploadsDir.exists()) {
 			System.err.println("Error: " + uploadsDir.getAbsolutePath()
@@ -23,6 +35,12 @@ public class PC2JavaMiniserver {
 			uploadsDir.setWritable(true, false);
 			uploadsDir.setExecutable(true, false);
 		}
+		for (String verline : versionInfo.getSystemVersionInfoMultiLine()) {
+            System.out.println(verline);
+        }
+		System.out.println();
+        System.out.println("Using port " + JAVABRIDGE_PORT);
+        System.out.println();
 		System.out.println("JavaBridge is ready");
 		runner.waitFor();
 		System.exit(0);

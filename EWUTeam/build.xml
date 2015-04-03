@@ -36,6 +36,7 @@ No need for Javadoc - this is not an API.
 	<property name="project.dir" location="." />
 	<property name="project.dir" location="." />
 	<property name="php.src.dir" location="src/php" />
+	<property name="scripts.src.dir" location="scripts" />
 	<property name="test.dir" location="test" />
 	<property name="build.dir" location="build" />
 	<property name="build.prod.dir" location="${build.dir}/prod" />
@@ -175,9 +176,15 @@ No need for Javadoc - this is not an API.
 		<mkdir dir="${staging.dist.dir}/Login" />
 		<mkdir dir="${staging.dist.dir}/Team" />
 		<mkdir dir="${staging.dist.dir}/doc" />
+		<mkdir dir="${staging.dist.dir}/bin" />
 			
 		<copy todir="${staging.dist.dir}/Login">  <fileset dir="${php.src.dir}/Login"/>  </copy>
 		<copy todir="${staging.dist.dir}/Team">  <fileset dir="${php.src.dir}/Team"/>  </copy>
+		<copy todir="${staging.dist.dir}/bin">  <fileset dir="${scripts.src.dir}"/>  </copy>
+
+    <chmod perm="775">
+		  <fileset dir="${staging.dist.dir}/bin"/>
+    </chmod>
 
 		<!-- copy user doc  -->
 		<copy file="${doc.dir}/pc2userguide.pdf" todir="${staging.dist.dir}/doc" />
