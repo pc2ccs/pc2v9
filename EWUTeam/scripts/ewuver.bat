@@ -23,15 +23,14 @@ echo Please set the variable EWUINSTALL to the location of
 echo   the VERSION file (ex: c:\eauteam)
 echo.
 pause
-goto :end
+goto end
 
 :continue
+
 call %EWUBIN%\ewuenv.bat
-rem bin\ewuenv.bat
 
-
-rem todo 
-java -cp %libdir%\pc2.jar edu.csus.ecs.pc2.VersionInfo
+echo java -cp %libdir%\PC2JavaServer.jar edu.csus.pc2.ewuteam.VersionInfo
+java -cp %libdir%\PC2JavaServer.jar edu.csus.pc2.ewuteam.VersionInfo
 
 :end
 rem eof ewuver.bat $Id$

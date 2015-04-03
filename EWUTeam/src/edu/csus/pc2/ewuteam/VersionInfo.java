@@ -342,12 +342,20 @@ public class VersionInfo {
         }
         return (pc2home);
     }
+//
+//    public String getManifestValue(String key, String defaultValue) {
+//        
+//        String value = defaultValue;
+//        
+//         String manifestPath = "/META-INF/MANIFEST.MF";
+//         Manifest manifest = new Manifest(new URL(manifestPath).openStream());
+//         Attributes attr = manifest.getMainAttributes();
+//         String value = attr.getValue("Manifest-Version");
+//     
+//        return value;
+//    }
 
     public String getManifestValue(String key, String defaultValue) {
-        // String manifestPath = "/META-INF/MANIFEST.MF";
-        // Manifest manifest = new Manifest(new URL(manifestPath).openStream());
-        // Attributes attr = manifest.getMainAttributes();
-        // String value = attr.getValue("Manifest-Version");
 
         String value = defaultValue;
 
@@ -355,17 +363,43 @@ public class VersionInfo {
             Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/MANIFEST.MF");
             while (resources.hasMoreElements()) {
                 Manifest manifest = new Manifest(resources.nextElement().openStream());
-                Attributes mainAttribs = manifest.getMainAttributes();
-                String attribValue = mainAttribs.getValue(key);
-                if (attribValue != null) {
-                    value = attribValue;
+                
+                /**
+                 * Only return manifest info from EWU Team manifest.
+                 */
+                if (manifestContains(manifest, "Implementation-Title", "EW")) {
+                    Attributes mainAttribs = manifest.getMainAttributes();
+                    String attribValue = mainAttribs.getValue(key);
+
+                    if (attribValue != null) {
+                        value = attribValue;
+                    }
                 }
+                    
             }
         } catch (Exception e) {
             // ignore exception, use defautl value if value cannot be fetched/found.
             e.printStackTrace(); // TODO remove this
         }
         return value;
+    }
+
+    /**
+     * If manifest value for key contains searchForString return true.
+     * 
+     * @param manifest
+     * @param key name in manifest
+     * @param searchForString
+     * @return if manifest value for key contains searchForString return true.
+     */
+    private boolean manifestContains(Manifest manifest, String key, String searchForString) {
+        
+        Attributes mainAttribs = manifest.getMainAttributes();
+        String value = mainAttribs.getValue(key);
+        if (value != null) {
+            return value.indexOf(searchForString) != -1;
+        }
+        return false;
     }
 
     public void setBuildNumber(String newBuildNumber) {

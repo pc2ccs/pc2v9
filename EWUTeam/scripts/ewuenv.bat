@@ -23,7 +23,7 @@ echo Could not find pc2.jar, please check your installation
 rem XXX we really want to do a break here
 rem pause
 
-end:
+:end 
 
 set pc2_classpath=%libdir%\pc2.jar
 

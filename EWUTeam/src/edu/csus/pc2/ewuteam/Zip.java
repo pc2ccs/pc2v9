@@ -81,7 +81,7 @@ public class Zip {
             } else if (IniFile.containsKey("client.site")) {
                 zipFileName = IniFile.getValue("client.site");
             } else {
-                zipFileName = "pc2archive";
+                zipFileName = DEFAULT_ARCHIVE_NAME;
             }
         }
 
@@ -398,6 +398,9 @@ public class Zip {
         }
 
         Zip zip = new Zip();
+        
+        VersionInfo versionInfo = new VersionInfo();
+        showMessage(versionInfo.getSystemName()+" version "+versionInfo.getVersionNumber()+" build "+versionInfo.getBuildNumber());
 
         for (int i = 0; i < args.length; i++) {
             String filename = args[i];
