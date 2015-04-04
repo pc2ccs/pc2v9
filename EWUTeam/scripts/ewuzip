@@ -5,8 +5,8 @@
 # $HeadURL$
 #
 
-. `dirname $0`/pc2env
+. `dirname $0`/ewuenv
 
-java  -Xms64M -Xmx768M -cp $libdir/PC2JavaServer.jaredu.csus.ecs.pc2.core.archive.ZipPC2
+java  -Xms64M -Xmx768M -cp $libdir/pc2.jar:$libdir/PC2JavaServer.jar edu.csus.pc2.ewuteam.Zip $*
 
 # eof ewuver $Id$ 

@@ -7,6 +7,6 @@
 
 . `dirname $0`/ewuenv
 
-java -cp $libdir/PC2JavaServer.jar edu.csus.ecs.pc2.VersionInfo
+java -cp $libdir/PC2JavaServer.jar  edu.csus.pc2.ewuteam.VersionInfo
 
 # eof ewuver $Id$ 

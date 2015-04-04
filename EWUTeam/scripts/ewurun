@@ -5,7 +5,7 @@
 # $HeadURL$
 #
 
-. `dirname $0`/pc2env
+. `dirname $0`/ewuenv
 
 # MacOS or not
 if [ -f /mach_kernel ]; then
@@ -15,8 +15,6 @@ else
   EWUOPTS=""
 fi
 
-# java -Xmx1600M -jar PC2JavaServer.jar
-# java $EWUOPTS -Xms64M -Xmx1600M -cp $libdir/pc2.jar edu.csus.ecs.pc2.Starter --server $*
-java $EWUOPTS -Xms64M -Xmx1600M -cp $libdir/pc2.jar -jar $libdir/PC2JavaServer.jar
+java $EWUOPTS -Xms64M -Xmx1600M -cp $libdir/pc2.jar -jar $libdir/PC2JavaServer.jar $*
 
-# eof ewurun  $Id$ 
+# ewurun $Id$

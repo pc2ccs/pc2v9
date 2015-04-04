@@ -28,7 +28,8 @@ goto :end
 :continue
 call %EWUBIN%\ewuenv.bat
 
-java -Xms64M -Xmx768M -cp %libdir%\PC2JavaServer.jar edu.csus.pc2.ewuteam.Zip
+java -Xms64M -Xmx768M -cp %libdir%\PC2JavaServer.jar edu.csus.pc2.ewuteam.Zip %1 %2 %3 %4 %5 %6 %7 %8 %9
+
 
 :end
 rem eof ewuzip.bat $Id$
