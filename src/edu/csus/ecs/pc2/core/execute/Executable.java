@@ -305,30 +305,36 @@ public class Executable extends Plugin implements IExecutable {
                 if (problemDataFiles != null) {
                     dataFiles = problemDataFiles.getJudgesDataFiles();
                 } // else problem has no data files
+                
                 int dataSetNumber = 0;
+                boolean passed = true;
 
                 if (dataFiles == null || dataFiles.length <= 1) {
                     // Only a single (at most) data set,
-                    if (executeProgram(dataSetNumber) && isValidated()) {
-                        validateProgram(dataSetNumber);
-                    }
+
+                    log.info("Test cases: 1 for run " + run.getNumber());
+
+                    passed = executeAndValidateDataSet(dataSetNumber);
+
                 } else {
-                    // getting here when not in validator mode results in a blank execute results window
-                    boolean passed = true;
 
-                    // TODO 164
-                    // TODO CCS SOMEDAY make this work properly - aka not depend on mtsv
-//                    while (passed && dataSetNumber < dataFiles.length) {
-                        if (executeProgram(dataSetNumber) && isValidated()) {
-                            passed = validateProgram(dataSetNumber);
-                        } else {
-                            passed = false; // didn't execute.
-                        }
-                        
-                        log.info("Run "+run.getNumber()+" test case passes = "+passed);
+                    log.info("Test cases: " + dataFiles.length + " for run " + run.getNumber());
 
+                    while (passed && dataSetNumber < dataFiles.length) {
+                        passed = executeAndValidateDataSet(dataSetNumber);
                         dataSetNumber++;
-//                    }
+                    }
+
+                    if (!passed) {
+                        log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber());
+                    }
+
+                }
+
+                if (passed) {
+                    log.info("Test results: ALL passed for run " + run);
+                } else {
+                    log.info("Test results: test failed " + run);
                 }
             } else {
                 /**
@@ -458,6 +464,30 @@ public class Executable extends Plugin implements IExecutable {
     }
     
     /**
+     * Execute and validates
+     * @param dataSetNumber zero based data set number.
+     * @return true if passes test
+     */
+    private boolean executeAndValidateDataSet(int dataSetNumber) {
+
+        boolean passed = false;
+        int testNumber = dataSetNumber + 1;
+
+        log.info("  Test case " + testNumber + " execute, run " + run.getNumber());
+
+        if (executeProgram(dataSetNumber) && isValidated()) {
+            log.info("  Test case " + testNumber + " validate, run " + run.getNumber());
+            passed = validateProgram(dataSetNumber);
+        } else {
+            passed = false;
+        }
+
+        log.info("  Test case " + testNumber + " passed " + Utilities.yesNoString(passed));
+
+        return passed;
+    }
+
+    /**
      * Extracts file setNumber from list of files (fileList).
      * 
      * @param fileList -
@@ -535,7 +565,7 @@ public class Executable extends Plugin implements IExecutable {
             controller.sendValidatingMessage(run);
         }
 
-        if (problemDataFiles.getValidatorFile() != null) {
+        if (problemDataFiles != null && problemDataFiles.getValidatorFile() != null) {
             // Create Validation Program
 
             String validatorFileName = problemDataFiles.getValidatorFile().getName();
@@ -558,13 +588,20 @@ public class Executable extends Plugin implements IExecutable {
 
         if (overwriteJudgesDataFiles) {
 
-            if (! problem.isUsingExternalDataFiles()){
+            if (problem.isUsingExternalDataFiles()) {
+
+                // TODO copy external files to local directory if not STDIN program
+                // is this done somewhere else ?
+
+            } else {
+                
+                if (problemDataFiles == null){
+                    throw new NullPointerException("Internal error - no data files present for problem "+problem);
+                }
+
                 /**
                  * If not external files, must unpack files.
                  */
-                // TODO remove these old lines
-//                createFile(problemDataFiles.getJudgesDataFiles()[dataSetNumber], prefixExecuteDirname(problem.getDataFileName()));
-//                createFile(problemDataFiles.getJudgesAnswerFiles()[dataSetNumber], prefixExecuteDirname(problem.getAnswerFileName()));
                 
                 // Create the correct output file, aka answer file
                 createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, prefixExecuteDirname(problem.getDataFileName()));
@@ -613,7 +650,7 @@ public class Executable extends Plugin implements IExecutable {
         }
 
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
-
+        
         String cmdLine = substituteAllStrings(run, commandPattern);
         cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
 
@@ -969,15 +1006,29 @@ public class Executable extends Plugin implements IExecutable {
                      * External data files (not inside of pc2).  On local disk.
                      */
                     
-                    File dataFile = problem.locateJudgesDataFile(testSetNumber);
-                    if (dataFile == null){
-                        String name = problem.getDataFileName(testSetNumber);
-                        log.log(Log.DEBUG,"For problem "+problem+" test number "+testSetNumber+" expecting file "+name+" in dir "+problem.getCCSfileDirectory());
-                        throw new SecurityException("Unable to find/extract data file "+name+" for data set "+dataSetNumber+" check log");
+                    SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
+                    String dataFileName = Utilities.locateJudgesDataFile(problem, serializedFile, Utilities.DataFileType.JUDGE_DATA_FILE);
+                    
+                    if (dataFileName != null){
+                        // Found file 
+                        
+                        File dataFile = new File(dataFileName);
+                        inputDataFileName = dataFile.getCanonicalPath();
+                        log.info("(External) Input data file: "+inputDataFileName);
+                        
+                    } else {
+                        
+                        // Did not find file
+                        
+                        String expectedFileName = serializedFile.getName();
+                        log.log(Log.DEBUG,"For problem "+problem+" test case "+testSetNumber+" expecting file "+expectedFileName+" in dir "+problem.getCCSfileDirectory());
+                        FileNotFoundException notFound = new FileNotFoundException(expectedFileName + " for test case "+testSetNumber);
+                        executionData.setExecutionException(notFound);
+                        log.info("(External) Input data file: NOT FOUND ");
                     }
-                    inputDataFileName = dataFile.getCanonicalPath();
                 }
             }
+            
 
             // SOMEDAY execute the language.getProgramExecuteCommandLine();
 
@@ -1012,7 +1063,6 @@ public class Executable extends Plugin implements IExecutable {
                  * If the first word is a existing file, use
                  * the full path
                  */
-                // TODO is this a bug in that the rest of the command line is thrown away?
                 cmdline = f.getCanonicalPath();
             }
             
@@ -1069,6 +1119,8 @@ public class Executable extends Plugin implements IExecutable {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
                 executionData.setRunTimeLimitExceeded(executionTimer.isRunTimeLimitExceeded());
+                // TODO - this happens much too much find out why time limit is 10 when should be 30 by default.
+                log.info("Run exceeded time limit "+problem.getTimeOutInSeconds()+" secs, Run = "+run);
             }
 
             if (process != null) {
@@ -1503,6 +1555,7 @@ public class Executable extends Plugin implements IExecutable {
             File runDir = new File(executeDirectoryName);
             if (runDir.isDirectory()) {
                 log.config("executing: '" + cmdline + "'");
+                
                 String[] env = null;
 
                 if (executionTimer != null) {

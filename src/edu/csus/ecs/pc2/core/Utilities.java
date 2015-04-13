@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -52,8 +53,32 @@ public final class Utilities {
     private static final String LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
     
     public static final String DATE_TIME_FORMAT_STRING = "yyyyddMMhhmmss.SSS";
+    
+    /**
+     * CCS directory where data files are stored.
+     */
+    private static final String SECRET_DATA_DIR = "data" + File.separator + "secret";
 
     private static SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
+    
+    /**
+     * File Types.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    public enum  DataFileType {
+        /**
+         * Judge's input/test data file.
+         */
+        JUDGE_DATA_FILE,
+        /**
+         * Judge's solution/answer file.
+         */
+        JUDGE_ANSWER_FILE,
+    }
 
     /**
      * Constructor is private as this is a utility class which
@@ -796,6 +821,47 @@ public final class Utilities {
         }
 
         return totsecs;
+    }
+
+    /**
+     * Locate judges data file on disk.
+     * 
+     * @param problem
+     * @param serializedFile
+     * @param judgeDataFile 
+     * @return
+     */
+    public static String locateJudgesDataFile(Problem problem, SerializedFile serializedFile, DataFileType judgeDataFile) {
+
+        if (serializedFile.isExternalFile()){
+
+            String testFileName;
+
+            // Search under CCS secret
+            
+            testFileName = problem.getCCSfileDirectory() + File.separator  + problem.getShortName() + SECRET_DATA_DIR + File.separator + serializedFile.getName();
+            if (fileExists(testFileName)){
+                return testFileName;
+            }
+
+            testFileName = problem.getExternalDataFileLocation() + File.separator  + serializedFile.getName();
+            if (fileExists(testFileName)){
+                return testFileName;
+            }
+
+            testFileName = serializedFile.getAbsolutePath();
+
+            if (fileExists(testFileName)){
+                return testFileName;
+            }
+        }
+
+        return null;
+    }
+
+    public static boolean fileExists(String filename) {
+        System.out.println("debug 22 - tried file = '"+filename+"'");
+        return new File(filename).isFile();
     }
 
 }

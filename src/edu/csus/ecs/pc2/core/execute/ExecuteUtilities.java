@@ -565,6 +565,24 @@ public class ExecuteUtilities extends Plugin {
                 ", validationResults=" + executionData.getValidationResults() //
         ;
     }
+    
+    public static void dump(ExecutionData executionData) {
+
+        System.out.println( " compileSuccess=" + executionData.isCompileSuccess() + //
+                ", executeSucess=" + executionData.isExecuteSucess() + //
+                ", runTimeLimitExceeded=" + executionData.isRunTimeLimitExceeded() + //
+                ", validationSuccess=" + executionData.isValidationSuccess() + //
+                ", executionException=" + executionData.getExecutionException() + //
+                ", validationResults=" + executionData.getValidationResults() //
+                )
+        ;
+        
+        if (executionData.getExecutionException() != null){
+            executionData.getExecutionException().printStackTrace();
+        }
+    }
+    
+        
 
     /**
      * Write String Array to file.
