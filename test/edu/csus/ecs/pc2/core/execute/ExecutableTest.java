@@ -460,9 +460,13 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     private void dumpFile(String message, SerializedFile file) {
-        System.out.println(message);
-        byte[] buf = file.getBuffer();
-        System.out.println(buf.toString());
+        if (file != null){
+            System.out.println(message);
+            byte[] buf = file.getBuffer();
+            System.out.println(buf.toString());
+        } else {
+            System.out.println("No file contents for "+message);
+        }
         
     }
 
@@ -931,10 +935,10 @@ public class ExecutableTest extends AbstractTestCase {
         ProblemDataFiles problemDataFiles = contest2.getProblemDataFile(problem);
 
         int numberJudgesFiles = problemDataFiles.getJudgesDataFiles().length;
-        assertEquals("Expected number of judge data files ", 3, numberJudgesFiles);
+        assertEquals("Expected number of judge data files ", 4, numberJudgesFiles);
 
         int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
-        assertEquals("Expected number of judge answer files ", 3, numberJudgesAnswerFiles);
+        assertEquals("Expected number of judge answer files ", 4, numberJudgesAnswerFiles);
 
         contest2.addProblem(problem, problemDataFiles);
 
