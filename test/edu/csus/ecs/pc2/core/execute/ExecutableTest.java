@@ -4,19 +4,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.ConsoleHandler;
 
+import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
-import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.DataLoader;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
@@ -27,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 import edu.csus.ecs.pc2.validator.Validator;
 
 /**
@@ -58,14 +58,16 @@ public class ExecutableTest extends AbstractTestCase {
 
     private String yesJudgement = Validator.JUDGEMENT_YES;
 
-    private Log log = null;
-
     public ExecutableTest(String string) {
         super(string);
     }
 
     protected void setUp() throws Exception {
         super.setUp();
+        
+//        setDebugMode(true);  // log to console, debug turned on
+        
+        
         SampleContest sampleContest = new SampleContest();
         contest = sampleContest.createContest(2, 2, 12, 12, true);
         
@@ -77,15 +79,14 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(clientId);
 
         controller = sampleContest.createController(contest, true, false);
-        log = controller.getLog();
 
 //        setDebugMode(true);
         
         if (isDebugMode()){
             // this will make all log output go to stdout
-            ConsoleHandler consoleHandler = new ConsoleHandler();
-            log.addHandler(consoleHandler);
-            log.setLevel(Log.DEBUG);
+            
+            addConsoleHandler(controller.getLog());
+            setDebugLevel(controller.getLog());
         }
         
         sumitProblem = createSumitProblem(contest);
@@ -129,12 +130,16 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
 
-    protected void setPC2Validator(Problem problem) {
+    protected void setupUsingPC2Validator(Problem problem) {
 
         problem.setValidatedProblem(true);
         problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
 
         problem.setUsingPC2Validator(true);
+        
+        assertTrue("Expecting using pc2 validator" ,problem.isUsingPC2Validator());
+
+        
         problem.setWhichPC2Validator(1);
         problem.setIgnoreSpacesOnValidation(true);
         problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
@@ -158,7 +163,7 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setHideOutputWindow(true);
         problem.setShowCompareWindow(false);
 
-        setPC2Validator(problem);
+        setupUsingPC2Validator(problem);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
         String answerFileName = super.getSamplesSourceFilename(problem.getAnswerFileName());
@@ -185,7 +190,7 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setShowCompareWindow(false);
         problem.setTimeOutInSeconds(10);
 
-        setPC2Validator(problem);
+        setupUsingPC2Validator(problem);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
@@ -221,7 +226,24 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setHideOutputWindow(true);
         problem.setShowCompareWindow(false);
         problem.setTimeOutInSeconds(4*60);
-        contest2.addProblem(problem);
+        
+        setupUsingPC2Validator(problem);
+        
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+
+        problem.setDataFileName("sumit.dat");
+        String judgesDataFile = getSamplesSourceFilename(problem.getDataFileName());
+        checkFileExistance(judgesDataFile);
+        problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile));
+
+        problem.setAnswerFileName("sumit.ans");
+        String answerFileName = getSamplesSourceFilename(problem.getAnswerFileName());
+        checkFileExistance(answerFileName);
+        problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
+
+        contest2.addProblem(problem, problemDataFiles);
+        
+        
 
         return problem;
     }
@@ -244,7 +266,7 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setTimeOutInSeconds(60*6);
         problem.setReadInputDataFromSTDIN(true);
         
-        setPC2Validator(problem);
+        setupUsingPC2Validator(problem);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
@@ -268,11 +290,11 @@ public class ExecutableTest extends AbstractTestCase {
         return contest.getAccounts(type).lastElement();
     }
 
-    public void testSumit() {
+    public void testSumit() throws Exception {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        Run run = new Run(submitter, javaLanguage, sumitProblem);
+        Run run = createRun (submitter, javaLanguage, sumitProblem, 42, 120);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Sumit.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
@@ -280,11 +302,11 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
     
-    public void testHello() {
+    public void testHello() throws Exception {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        Run run = new Run(submitter, javaLanguage, helloWorldProblem);
+        Run run = createRun (submitter, javaLanguage, helloWorldProblem, 42, 120);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
@@ -293,27 +315,33 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
 
-    public void testLargeOutput() throws FileNotFoundException {
+    public void testLargeOutput() throws Exception {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         Problem largeOutputProblem  = createLargeOutputProblem(contest);
         
-        Run run = new Run(submitter, javaLanguage, largeOutputProblem);
+        Run run = createRun (submitter, javaLanguage, largeOutputProblem, 42, 120);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("LargeOutput.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
-        runExecutableTest(run, runFiles, true, null);
+        
+        runExecutableTest(run, runFiles, false, null);
 
     }
 
-    public void testLargeStdIn() throws FileNotFoundException {
+    public void testLargeStdIn() throws Exception {
 
+        if (isDebugMode()){
+            // Don't run this time wasting junit while debugging other Junits
+            return;
+        }
+        
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         Problem largeStdInProblem  = createLargeStdInProblem(contest);
         
-        Run run = new Run(submitter, javaLanguage, largeStdInProblem);
+        Run run = createRun (submitter, javaLanguage, largeStdInProblem, 42, 120);
         
         RunFiles runFiles = new RunFiles(run,  getRootInputTestFile("Casting.java"));
 
@@ -328,8 +356,9 @@ public class ExecutableTest extends AbstractTestCase {
      * @param runFiles
      * @param solved
      * @param expectedJudgement
+     * @throws Exception 
      */
-    protected void runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement) {
+    protected ExecutionData runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement) throws Exception {
 
         String executeDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(executeDirectoryName);
@@ -352,9 +381,14 @@ public class ExecutableTest extends AbstractTestCase {
         
         if (!executionData.isCompileSuccess()){
             SerializedFile file = executionData.getCompileStdout();
-//            dumpFile("Compiler stdout", file);
+            dumpFile("Compiler stdout", file);
             file = executionData.getCompileStderr();
-//            dumpFile("Compiler stderr", file);
+            dumpFile("Compiler stderr", file);
+        }
+        
+        
+        if (executionData.getExecutionException() != null){
+            throw executionData.getExecutionException();
         }
 
         assertTrue("Compilation failure " + run.getLanguageId(), executionData.isCompileSuccess());
@@ -374,9 +408,14 @@ public class ExecutableTest extends AbstractTestCase {
         else 
         {
             if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
+
+                if (!executable.isValidationSuccess()) {
+//                    System.out.println(ExecuteUtilities.toString(executionData));
+                     throw executionData.getExecutionException();
+
+                }
                 
-                assertTrue("Expect no error running validator" , executionData.isValidationSuccess());
-//                System.out.println("debug 22 executionData = "+toString(executionData));
+                assertTrue("Expecting run to pass all tests " , executionData.isValidationSuccess());
                 
                 if (solved){
                     assertTrue("Expected to run to be a Yes " + run.getProblemId(), ExecuteUtilities.didTeamSolveProblem(executionData));
@@ -391,8 +430,13 @@ public class ExecutableTest extends AbstractTestCase {
             }
         }
         
-        executionData = null;
         executable = null;
+        
+        if (isDebugMode()){
+            System.err.println("DEBUG IS TURNED ON - turn it off");
+        }
+        
+        return executionData;
 
     }
     
@@ -426,7 +470,7 @@ public class ExecutableTest extends AbstractTestCase {
         
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        Run run = new Run(submitter, javaLanguage, sumitProblem);
+        Run run = createRun (submitter, javaLanguage, sumitProblem, 42, 120);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("Sumit.java"));
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
@@ -522,7 +566,7 @@ public class ExecutableTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
         Language language = createLanguage(LanguageAutoFill.GNUCPPTITLE);
         contest.addLanguage(language);
-        Run run = new Run(submitter, language, helloWorldProblem);
+        Run run = createRun (submitter, language, helloWorldProblem, 42, 120);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
 
 //        Executable executable = new Executable(contest, controller, run, runFiles);
@@ -576,7 +620,7 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setShowCompareWindow(false);
         problem.setTimeOutInSeconds(10);
 
-        setPC2Validator(problem);
+        setupUsingPC2Validator(problem);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
@@ -607,7 +651,7 @@ public class ExecutableTest extends AbstractTestCase {
         
 //        assertFalse("Expecting using internal data files ",problem.isUsingExternalDataFiles());
 
-        Run run = new Run(submitter, javaLanguage, problem);
+        Run run = createRun (submitter, javaLanguage, problem, 42, 120);
         String helloSourceFilename = getSamplesSourceFilename("hello.java");
         assertFileExists(helloSourceFilename);
         RunFiles runFiles = new RunFiles(run, helloSourceFilename);
@@ -664,13 +708,13 @@ public class ExecutableTest extends AbstractTestCase {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        Problem problem = createMultiTestCaseProblem(contest);
+        Problem problem = createMultiTestCaseProblem(contest, false);
 
         problem.setReadInputDataFromSTDIN(true);
 
         assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
 
-        Run run = new Run(submitter, javaLanguage, problem);
+        Run run = createRun (submitter, javaLanguage, problem, 42, 120);
 
         assertFileExists(sumitFilename);
         RunFiles runFiles = new RunFiles(run, sumitFilename);
@@ -686,14 +730,14 @@ public class ExecutableTest extends AbstractTestCase {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        Problem problem = createMultiTestCaseProblem(contest);
+        Problem problem = createMultiTestCaseProblem(contest, false);
 
         problem.setDataFileName("sumit.dat");
         problem.setAnswerFileName("sumit.ans");
 
         assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
 
-        Run run = new Run(submitter, javaLanguage, problem);
+        Run run = createRun (submitter, javaLanguage, problem, 42, 120);
 
         assertFileExists(sumitFilename);
         RunFiles runFiles = new RunFiles(run, sumitFilename);
@@ -703,13 +747,111 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
     
+    // TODO debug and fix this.
+    public void FOOtestMultipleTestCaseFromExternalFile() throws Exception {
+
+        String sumitFilename = getSamplesSourceFilename("ISumit.java");
+        
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Problem problem = createMultiTestCaseProblemExternalFiles(contest, "barcodes");
+
+        problem.setDataFileName("sumit.dat");
+        problem.setAnswerFileName("sumit.ans");
+
+        assertTrue("Expecting all problem files external ", areDataFilesExternal(contest.getProblemDataFile(problem)));
+
+        assertTrue("Expecting using external data files ", problem.isUsingExternalDataFiles());
+        
+        Run run = createRun (submitter, javaLanguage, problem, 45, 120);
+
+        assertFileExists(sumitFilename);
+        RunFiles runFiles = new RunFiles(run, sumitFilename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        
+        runExecutableTest(run, runFiles, true, yesJudgement);
+    }
+    
+    
+    public void testMultipleTestCaseFromInternalFile() throws Exception {
+
+        
+//        String testBaseDirname = getDataDirectory(this.getName());
+//        ensureDirectory(testBaseDirname);
+//        startExplorer(testBaseDirname);
+        
+        String sumitFilename = getSamplesSourceFilename("ISumit.java");
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Problem problem = createMultiTestCaseProblemInternalFiles(contest,"barcodes");
+
+        problem.setDataFileName("sumit.dat");
+        problem.setAnswerFileName("sumit.ans");
+
+        assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
+        
+        assertFalse("Expecting all problem files internal ", areDataFilesExternal(contest.getProblemDataFile(problem)));
+
+        
+        Run run = createRun (submitter, javaLanguage, problem, 45, 120);
+
+        assertFileExists(sumitFilename);
+        RunFiles runFiles = new RunFiles(run, sumitFilename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        
+        runExecutableTest(run, runFiles, true, yesJudgement);
+    }
+    
+    private boolean areDataFilesExternal(ProblemDataFiles problemDataFile) {
+
+        
+        SerializedFile[] files = problemDataFile.getJudgesDataFiles();
+        int totalfiles = 0;
+        int externalFiles = 0;
+        
+        for (SerializedFile serializedFile : files) {
+            if (serializedFile.isExternalFile()){
+                externalFiles ++;
+            }
+            totalfiles ++;
+        }
+        
+        files = problemDataFile.getJudgesAnswerFiles();
+        for (SerializedFile serializedFile : files) {
+            if (serializedFile.isExternalFile()){
+                externalFiles ++;
+            }
+            totalfiles ++;
+        }
+        
+        if (isDebugMode()){
+            System.out.println("areDataFilesExternal total = "+totalfiles+" external "+externalFiles);
+        }
+        
+        return totalfiles > 0 && totalfiles == externalFiles;
+    }
+
+    private Run createRun(ClientId submitter, Language language , Problem problem, int runNumber, int elapsedMins) {
+        
+        Run run  = new Run(submitter,language, problem);
+        run.setNumber(runNumber);
+        run.setElapsedMins(elapsedMins);
+        
+        assertTrue("Expecting using pc2 validator" ,problem.isUsingPC2Validator());
+        
+        return run;
+    }
+
     public void testMultipleTestCaseFailTest2() throws Exception {
         
         String sumitFilename = getSamplesSourceFilename("ISumit.java");
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        Problem problem = createMultiTestCaseProblem(contest);
+        Problem problem = createMultiTestCaseProblem(contest, false);
 
         problem.setReadInputDataFromSTDIN(true);
 
@@ -725,14 +867,90 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
 
+    private Problem createMultiTestCaseProblemExternalFiles(IInternalContest contest2, String problemName) throws IOException {
+        Problem problem = new Problem(problemName);
+
+        problem.setShowValidationToJudges(false);
+        problem.setHideOutputWindow(true);
+        problem.setShowCompareWindow(false);
+        problem.setTimeOutInSeconds(10);
+
+
+        String testBaseDirname = getDataDirectory(this.getName());
+//        ensureDirectory(testBaseDirname);
+//        startExplorer(new File(testBaseDirname));
+
+        testBaseDirname = Utilities.getCurrentDirectory() + File.separator + testBaseDirname + File.separator + problemName +
+                File.separator +"data"+File.separator+"secret";
+        
+//        ContestYAMLLoader loader = new ContestYAMLLoader();
+//        loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem);
+//        ProblemDataFiles problemDataFiles = contest2.getProblemDataFile(problem);
+        
+        setupUsingPC2Validator(problem);
+        
+        
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+        setDataFiles(problem, problemDataFiles, testBaseDirname, true);
+        problem.setUsingExternalDataFiles(true);
+
+        int numberJudgesFiles = problemDataFiles.getJudgesDataFiles().length;
+        assertEquals("Expected number of judge data files ", 3, numberJudgesFiles);
+
+        int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
+        assertEquals("Expected number of judge answer files ", 3, numberJudgesAnswerFiles);
+
+        contest2.addProblem(problem, problemDataFiles);
+
+        return problem;
+
+    }
+    
+    
+    private Problem createMultiTestCaseProblemInternalFiles(IInternalContest contest2, String problemName) throws IOException {
+        Problem problem = new Problem(problemName);
+
+        problem.setShowValidationToJudges(false);
+        problem.setHideOutputWindow(true);
+        problem.setShowCompareWindow(false);
+        problem.setTimeOutInSeconds(10);
+
+
+        String testBaseDirname = getDataDirectory(this.getName());
+//        ensureDirectory(testBaseDirname);
+//        startExplorer(new File(testBaseDirname));
+
+        testBaseDirname = Utilities.getCurrentDirectory() + File.separator + testBaseDirname + File.separator + problemName;
+        
+        ContestYAMLLoader loader = new ContestYAMLLoader();
+        loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem);
+        
+        // TODO loadProblemInformationAndDataFiles not setting pc2 validator flag
+        setupUsingPC2Validator(problem);
+        
+        ProblemDataFiles problemDataFiles = contest2.getProblemDataFile(problem);
+
+        int numberJudgesFiles = problemDataFiles.getJudgesDataFiles().length;
+        assertEquals("Expected number of judge data files ", 3, numberJudgesFiles);
+
+        int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
+        assertEquals("Expected number of judge answer files ", 3, numberJudgesAnswerFiles);
+
+        contest2.addProblem(problem, problemDataFiles);
+
+        return problem;
+
+    }
+
     /**
      * Create a multiple test case sumit problem.
      * 
      * @param contest2
+     * @param externalFiles 
      * @return
      * @throws IOException 
      */
-    private Problem createMultiTestCaseProblem(IInternalContest contest2) throws IOException {
+    private Problem createMultiTestCaseProblem(IInternalContest contest2, boolean externalFiles) throws IOException {
         Problem problem = new Problem("Sumit-Multidataset");
 
         problem.setShowValidationToJudges(false);
@@ -740,42 +958,27 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setShowCompareWindow(false);
         problem.setTimeOutInSeconds(10);
 
-        setPC2Validator(problem);
+        setupUsingPC2Validator(problem);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
         
         String testBaseDirname = getDataDirectory(this.getName());
-        
-        /**
-         * 
-         */
-        String [] dataFileBaseNames = {
-                "sumit1",
-                "sumit2",
-                "sumit3",
-                "sumit4",
-        };
-        
-        testBaseDirname = Utilities.getCurrentDirectory() + File.separator + testBaseDirname;
-        
-//        ensureDirectory(testBaseDirname);
-//        startExplorer(new File(testBaseDirname));
-        
-        setDataFiles(problem, problemDataFiles,testBaseDirname, dataFileBaseNames);
-        
+
+        setDataFiles(problem, problemDataFiles, testBaseDirname, externalFiles);
+
         int numberJudgesFiles = problemDataFiles.getJudgesDataFiles().length;
-        assertEquals("Expected number of judge data files ", dataFileBaseNames.length, numberJudgesFiles);
+        assertEquals("Expected number of judge data files ", 4, numberJudgesFiles);
 
         int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
-        assertEquals("Expected number of judge answer files ", dataFileBaseNames.length, numberJudgesAnswerFiles);
+        assertEquals("Expected number of judge answer files ", 4, numberJudgesAnswerFiles);
 
         contest2.addProblem(problem, problemDataFiles);
-        
+
         return problem;
 
     }
     
-    private void setDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String testBaseDirname, String[] dataFileBaseNames) {
+//    private void setDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String testBaseDirname, String[] dataFileBaseNames) {
 
  //      
 //      for (String name : dataFileBaseNames) {
@@ -786,48 +989,49 @@ public class ExecutableTest extends AbstractTestCase {
 //
 //      }
       
-      ArrayList<SerializedFile> inList = new ArrayList<SerializedFile>();
-      ArrayList<SerializedFile> ansList = new ArrayList<SerializedFile>();
-
-      for (String name : dataFileBaseNames) {
-          String inputFileName = testBaseDirname + File.separator + name + ".in";
-          String ansFilename = testBaseDirname + File.separator + name + ".ans";
-
-          assertFileExists(inputFileName);
-          assertFileExists(ansFilename);
-          
-          SerializedFile inFile = new SerializedFile(inputFileName);
-          inList.add(inFile);
-          
-          SerializedFile ansFile = new SerializedFile(ansFilename);
-          ansList.add(ansFile);
-      }
-      
-      
-      SerializedFile[] inArray = (SerializedFile[]) inList.toArray(new SerializedFile[inList.size()]);
-      problemDataFiles.setJudgesDataFiles(inArray);
-      
-      SerializedFile[] ansArray = (SerializedFile[]) ansList.toArray(new SerializedFile[ansList.size()]);
-      problemDataFiles.setJudgesAnswerFiles(ansArray);
-      
-      problem.setDataFileName(inArray[0].getName());
-      problem.setAnswerFileName(ansArray[0].getName());
-      
-    }
-
-//    public static TestSuite suite() {
+//      ArrayList<SerializedFile> inList = new ArrayList<SerializedFile>();
+//      ArrayList<SerializedFile> ansList = new ArrayList<SerializedFile>();
 //
-//        TestSuite suite = new TestSuite("Executable");
-//        String singletonTestName = null;
-//        singletonTestName = "testMultipleTestCaseFromSTDIN";
-//        singletonTestName = "testMultipleTestCaseFromFile";
-//        singletonTestName = "testMultipleTestCaseFailTest2";
-//        
-//        suite.addTest(new ExecutableTest(singletonTestName));
-//        return suite;
+//      for (String name : dataFileBaseNames) {
+//          String inputFileName = testBaseDirname + File.separator + name + ".in";
+//          String ansFilename = testBaseDirname + File.separator + name + ".ans";
 //
+//          assertFileExists(inputFileName);
+//          assertFileExists(ansFilename);
+//          
+//          SerializedFile inFile = new SerializedFile(inputFileName);
+//          inList.add(inFile);
+//          
+//          SerializedFile ansFile = new SerializedFile(ansFilename);
+//          ansList.add(ansFile);
+//      }
+//      
+//      
+//      SerializedFile[] inArray = (SerializedFile[]) inList.toArray(new SerializedFile[inList.size()]);
+//      problemDataFiles.setJudgesDataFiles(inArray);
+//      
+//      SerializedFile[] ansArray = (SerializedFile[]) ansList.toArray(new SerializedFile[ansList.size()]);
+//      problemDataFiles.setJudgesAnswerFiles(ansArray);
+        
+      
+//      problem.setDataFileName(inArray[0].getName());
+//      problem.setAnswerFileName(ansArray[0].getName());
+      
 //    }
     
+    private void setDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String testBaseDirname, boolean externalFiles) throws FileNotFoundException {
+
+        DataLoader.loadDataSets(problemDataFiles, testBaseDirname, externalFiles);
+        if (externalFiles){
+            problem.setExternalDataFileLocation(testBaseDirname);
+        }
+        
+        SerializedFile[] inArray = problemDataFiles.getJudgesDataFiles();
+        SerializedFile[] ansArray = problemDataFiles.getJudgesAnswerFiles();
+
+        problem.setDataFileName(inArray[0].getName());
+        problem.setAnswerFileName(ansArray[0].getName());
+    }
     
     /**
      * Test Suite.
@@ -836,41 +1040,37 @@ public class ExecutableTest extends AbstractTestCase {
      * 
      * @return suite of tests.
      */
-//    public static TestSuite suite() {
-//
-//        TestSuite suite = new TestSuite("Executable");
-//
-//        String singletonTestName = "";
-//        //        singletonTestName = "testLanguageNameSub";
-//        //        singletonTestName = "testHello";
-//        //        singletonTestName = "testValidateMissingJudgesDataFile";
-//
-//
-//        if (!"".equals(singletonTestName)) {
-//            suite.addTest(new ExecutableTest(singletonTestName));
-//        } else {
-//
-//            String [] testNames = { //
-//                    "testSumit", //
-//                    "testHello", //
-//                    "testFindPC2Jar", //
-//                    "testStripSpace", //
-//                    "testLanguageNameSub", //
-//                    "testValidateMissingJudgesDataFile", //
-//                    "testMultipleTestCaseFromSTDIN", //
-//                    "testMultipleTestCaseFromFile", //
-//                    "testMultipleTestCaseFailTest2", //
-//
-//                    "testLargeOutput", //
-//                    "testLargeStdIn", //
-//            };
-//
-//
-//            for (String testName : testNames) {
-//                suite.addTest(new ExecutableTest(testName)); 
-//            }
-//        }
-//
-//        return suite;
-//    }
+    public static TestSuite suiteA() {
+        
+        TestSuite suite = new TestSuite("ExecutableTest");
+        String singletonTestName = null;
+//        singletonTestName = "testMultipleTestCaseFromSTDIN";
+//        singletonTestName = "testMultipleTestCaseFailTest2";
+//        singletonTestName = "testMultipleTestCaseFromFile";
+        singletonTestName = "testMultipleTestCaseFromExternalFile";
+//        singletonTestName = "testFindPC2Jar";
+        
+//        singletonTestName = "testValidationFalurue";
+        
+        suite.addTest(new ExecutableTest(singletonTestName));
+        return suite;
+    }
+
+    
+    /**
+     * Submit hello world program for sumit problem.
+     * @throws Exception
+     */
+    public void testValidationFalurue() throws Exception {
+        
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Run run = createRun (submitter, javaLanguage, helloWorldProblem, 45, 1220);
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, false, null);
+    }
 }
+
+

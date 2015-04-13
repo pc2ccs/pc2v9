@@ -11,6 +11,7 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Vector;
+import java.util.logging.ConsoleHandler;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -982,6 +983,24 @@ public class AbstractTestCase extends TestCase {
        System.out.println("cmd = "+command);
        Runtime.getRuntime().exec(command);
     }
+    
+    /**
+     * Start Windows Explorer on  directory.
+     */
+    public void startExplorer(String directoryName) throws IOException
+    {
+        File dir = new File(directoryName);
+        startExplorer(dir);
+    }
+    
+    /**
+     * Start Windows Explorer on data directory.
+     * @throws IOException
+     */
+    public void startExplorer() throws IOException
+    {
+        startExplorer(getDataDirectory());
+    }
 
     /**
      * Compares strings, if strings are equal fails. 
@@ -1046,6 +1065,21 @@ public class AbstractTestCase extends TestCase {
             }
         }
         return buffer.toString();
+    }
+
+    /**
+     * Print log output to console/stdout.
+     */
+    public void addConsoleHandler(Log log) {
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        log.addHandler(consoleHandler);
+    }
+
+    /**
+     * Set log level to DEBUG.
+     */
+    public void setDebugLevel(Log log) {
+        log.setLevel(Log.DEBUG);
     }
     
     

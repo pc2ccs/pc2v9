@@ -409,7 +409,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 //        }
 //    }
 
-    protected void startExplorer(String directoryName) {
+    public void startExplorer(String directoryName) {
         try {
             startExplorer(new File(directoryName));
         } catch (IOException e) {
