@@ -53,4 +53,10 @@ public interface IResultsParser {
 
     void setLog(Log log);
 
+    /**
+     * return any exception during {@link #parseValidatorResultsFile(String)}.
+     * @return
+     */
+    Exception getException();
+
 }

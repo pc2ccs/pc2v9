@@ -67,7 +67,6 @@ public class ExecutableTest extends AbstractTestCase {
         
 //        setDebugMode(true);  // log to console, debug turned on
         
-        
         SampleContest sampleContest = new SampleContest();
         contest = sampleContest.createContest(2, 2, 12, 12, true);
         
@@ -80,8 +79,6 @@ public class ExecutableTest extends AbstractTestCase {
 
         controller = sampleContest.createController(contest, true, false);
 
-//        setDebugMode(true);
-        
         if (isDebugMode()){
             // this will make all log output go to stdout
             
@@ -354,7 +351,7 @@ public class ExecutableTest extends AbstractTestCase {
      * Invoke a executable test.
      * @param run
      * @param runFiles
-     * @param solved
+     * @param solved expecting Yes judgement, else failed somewhere in compile/execute/validate.
      * @param expectedJudgement
      * @throws Exception 
      */
@@ -409,15 +406,19 @@ public class ExecutableTest extends AbstractTestCase {
         {
             if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
 
-                if (!executable.isValidationSuccess()) {
-//                    System.out.println(ExecuteUtilities.toString(executionData));
-                     throw executionData.getExecutionException();
+                if (solved) {
 
-                }
-                
-                assertTrue("Expecting run to pass all tests " , executionData.isValidationSuccess());
-                
-                if (solved){
+                    if (!executable.isValidationSuccess()) {
+
+                        if (executionData.getExecutionException() != null){
+                            throw executionData.getExecutionException();
+                        }
+                        System.out.println(ExecuteUtilities.toString(executionData));
+                        fail("Failed validation "+executionData.getValidationResults());
+                    }
+
+                    assertTrue("Expecting run to pass all tests " , executionData.isValidationSuccess());
+
                     assertTrue("Expected to run to be a Yes " + run.getProblemId(), ExecuteUtilities.didTeamSolveProblem(executionData));
                 }
             }
@@ -751,17 +752,19 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
     
-    // TODO debug and fix this.
-    public void FOOtestMultipleTestCaseFromExternalFile() throws Exception {
+    public void testMultipleTestCaseFromExternalFile() throws Exception {
 
+//        startExplorer(getDataDirectory(this.getName()));
         String sumitFilename = getSamplesSourceFilename("ISumit.java");
         
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         Problem problem = createMultiTestCaseProblemExternalFiles(contest, "barcodes");
 
-        problem.setDataFileName("sumit.dat");
+        problem.setDataFileName("sumit.in");
         problem.setAnswerFileName("sumit.ans");
+        problem.setTimeOutInSeconds(15);
+        problem.setReadInputDataFromSTDIN(true);
 
         assertTrue("Expecting all problem files external ", areDataFilesExternal(contest.getProblemDataFile(problem)));
 
@@ -780,7 +783,6 @@ public class ExecutableTest extends AbstractTestCase {
     
     public void testMultipleTestCaseFromInternalFile() throws Exception {
 
-        
 //        String testBaseDirname = getDataDirectory(this.getName());
 //        ensureDirectory(testBaseDirname);
 //        startExplorer(testBaseDirname);
@@ -832,7 +834,7 @@ public class ExecutableTest extends AbstractTestCase {
         }
         
         if (isDebugMode()){
-            System.out.println("areDataFilesExternal total = "+totalfiles+" external "+externalFiles);
+            System.out.println("debug areDataFilesExternal total = "+totalfiles+" external "+externalFiles);
         }
         
         return totalfiles > 0 && totalfiles == externalFiles;
@@ -899,10 +901,10 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setUsingExternalDataFiles(true);
 
         int numberJudgesFiles = problemDataFiles.getJudgesDataFiles().length;
-        assertEquals("Expected number of judge data files ", 3, numberJudgesFiles);
+        assertEquals("Expected number of judge data files ", 12, numberJudgesFiles);
 
         int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
-        assertEquals("Expected number of judge answer files ", 3, numberJudgesAnswerFiles);
+        assertEquals("Expected number of judge answer files ", 12, numberJudgesAnswerFiles);
 
         contest2.addProblem(problem, problemDataFiles);
 
@@ -1051,10 +1053,11 @@ public class ExecutableTest extends AbstractTestCase {
 //        singletonTestName = "testMultipleTestCaseFromSTDIN";
 //        singletonTestName = "testMultipleTestCaseFailTest2";
 //        singletonTestName = "testMultipleTestCaseFromFile";
-        singletonTestName = "testMultipleTestCaseFromExternalFile";
 //        singletonTestName = "testFindPC2Jar";
+        singletonTestName = "testHello";
+        singletonTestName = "testMultipleTestCaseFromExternalFile";
+        singletonTestName = "testMultipleTestCaseFromInternalFile";
         
-//        singletonTestName = "testValidationFalurue";
         
         suite.addTest(new ExecutableTest(singletonTestName));
         return suite;

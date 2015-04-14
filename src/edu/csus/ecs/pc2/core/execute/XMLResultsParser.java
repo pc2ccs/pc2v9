@@ -1,19 +1,18 @@
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
 import edu.csus.ecs.pc2.core.log.Log;
-
-import java.util.Enumeration;
-import java.util.Hashtable;
 
 /**
  * Parse validator results (XML) file and return results.
@@ -60,7 +59,7 @@ import java.util.Hashtable;
 // $HeadURL$
 public class XMLResultsParser implements IResultsParser {
 
-    
+    private Exception exception = null;
 
     private Log log = null;
 
@@ -88,6 +87,7 @@ public class XMLResultsParser implements IResultsParser {
 
         if (!(new File(resultsFileName).exists())) {
             log.config("WARNING - results file " + resultsFileName + " not found");
+            exception = new FileNotFoundException(resultsFileName);
         }
 
         String content = "";
@@ -111,17 +111,14 @@ public class XMLResultsParser implements IResultsParser {
                 if (results.containsKey(OUTCOME_KEY)) {
                     return true;
                 } else {
-                    log.config("Parse error - could not find '" + OUTCOME_KEY + "' attribute");
+                    log.info("Parse error - could not find '" + OUTCOME_KEY + "' attribute in "+resultsFileName);
                 }
             } else {
-                log.config("Parse error expecting " + RESULT_KEY + " rootNode, but found node: " + rootNode);
+                log.info("Parse error expecting " + RESULT_KEY + " rootNode, but found node: " + rootNode+" in "+resultsFileName);
             }
-        } catch (SAXParseException spe) {
-            log.log(Log.CONFIG, "XML Parse error - SAX exception", spe);
-        } catch (SAXException se) {
-            log.log(Log.CONFIG, "XML Parse error - SAX exception", se);
-        } catch (Throwable t) {
-            log.log(Log.CONFIG, "XML Parse error - exception", t);
+        } catch (Exception ex){
+            log.log(Log.CONFIG, "Error parsing results XML file "+resultsFileName, ex);
+            exception = ex;
         }
         return false;
 
@@ -156,6 +153,11 @@ public class XMLResultsParser implements IResultsParser {
 
             }
         }
+    }
+    
+    @Override
+    public Exception getException() {
+        return exception;
     }
 
 }

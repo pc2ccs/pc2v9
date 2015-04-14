@@ -19,7 +19,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -73,7 +72,7 @@ public class Executable extends Plugin implements IExecutable {
      */
     private String mainFileDirectory;
 
-    private ExecutionData executionData;
+    private ExecutionData executionData = new ExecutionData();
 
     private ExecuteTimer executionTimer;
 
@@ -113,6 +112,11 @@ public class Executable extends Plugin implements IExecutable {
      * Execution stderr filename.
      */
     public static final String VALIDATOR_STDERR_FILENAME = "vstderr.pc2";
+
+    /**
+     * Interface - the file created with the process return.exit code.
+     */
+    private static final String EXIT_CODE_FILENAME = "EXITCODE.TXT";
 
     /**
      * Files submitted with the Run.
@@ -224,7 +228,7 @@ public class Executable extends Plugin implements IExecutable {
             if (!dirThere) {
                 log.config("Directory could not be created: " + executeDirectoryName);
                 showDialogToUser("Unable to create directory " + executeDirectoryName);
-                setException (executionData, "Unable to create directory " + executeDirectoryName);
+                setException ("Unable to create directory " + executeDirectoryName);
                 return fileViewer;
             }
 
@@ -241,7 +245,7 @@ public class Executable extends Plugin implements IExecutable {
                     log.config("Directory could not be cleared, other process running? ");
 
                     showDialogToUser("Unable to remove all files from directory " + executeDirectoryName);
-                    setException (executionData, "Unable to remove all files from directory " + executeDirectoryName);
+                    setException ("Unable to remove all files from directory " + executeDirectoryName);
                     return fileViewer;
                 }
 
@@ -296,7 +300,7 @@ public class Executable extends Plugin implements IExecutable {
                             errorMessage = "Problem executing compiler, contact staff.";
                         }
                         showDialogToUser(errorMessage);
-                        setException (executionData, errorMessage);
+                        setException (errorMessage);
                         fileViewer.addTextPane("Error during compile", errorMessage);
                     } // else they will get a tab hopefully showing something wrong
                 }
@@ -326,7 +330,7 @@ public class Executable extends Plugin implements IExecutable {
                     }
 
                     if (!passed) {
-                        log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber());
+                        log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber()+" reason "+getFailureReason());
                     }
 
                 }
@@ -334,7 +338,7 @@ public class Executable extends Plugin implements IExecutable {
                 if (passed) {
                     log.info("Test results: ALL passed for run " + run);
                 } else {
-                    log.info("Test results: test failed " + run);
+                    log.info("Test results: test failed " + run + " reason = "+getFailureReason() );
                 }
             } else {
                 /**
@@ -364,7 +368,7 @@ public class Executable extends Plugin implements IExecutable {
                         errorMessage = "Problem executing compiler, contact staff.";
                     }
                     showDialogToUser(errorMessage);
-                    setException (executionData, errorMessage);
+                    setException (errorMessage);
                     fileViewer.addTextPane("Error during compile", errorMessage);
                 } // else they will get a tab hopefully showing something wrong
             }
@@ -463,6 +467,18 @@ public class Executable extends Plugin implements IExecutable {
         return fileViewer;
     }
     
+    public String getFailureReason() {
+
+        if (executionData.getExecutionException() != null) {
+            return executionData.getExecutionException().getMessage();
+        } else if (executionData.getValidationResults() != null) {
+            return executionData.getValidationResults();
+        }
+
+        // TODO Auto-generated method stub
+        return "Undetermined, developer note need another condition in getFailureReason()";
+    }
+
     /**
      * Execute and validates
      * @param dataSetNumber zero based data set number.
@@ -478,11 +494,23 @@ public class Executable extends Plugin implements IExecutable {
         if (executeProgram(dataSetNumber) && isValidated()) {
             log.info("  Test case " + testNumber + " validate, run " + run.getNumber());
             passed = validateProgram(dataSetNumber);
+
+            if (!ExecuteUtilities.didTeamSolveProblem(executionData)) {
+                passed = false;
+            }
+
         } else {
             passed = false;
         }
+        
+        String reason = getFailureReason();
+        if (reason == null) {
+            reason = "";
+        } else {
+            reason = " Reason is " + reason;
+        }
 
-        log.info("  Test case " + testNumber + " passed " + Utilities.yesNoString(passed));
+        log.info("  Test case " + testNumber + " passed " + Utilities.yesNoString(passed)+reason);
 
         return passed;
     }
@@ -547,7 +575,7 @@ public class Executable extends Plugin implements IExecutable {
         dir = new File(dirName);
         if (!dir.exists() && !dir.mkdir()) {
             log.log(Log.CONFIG, "Executable.execute(RunData): Directory " + dir.getName() + " could not be created.");
-            setException (executionData, "Executable.execute(RunData): Directory " + dir.getName() + " could not be created.");
+            setException ("Executable.execute(RunData): Directory " + dir.getName() + " could not be created.");
         }
 
         return dir.isDirectory();
@@ -572,7 +600,7 @@ public class Executable extends Plugin implements IExecutable {
             String validatorUnpackName = prefixExecuteDirname(validatorFileName);
             if (!createFile(problemDataFiles.getValidatorFile(), validatorUnpackName)) {
                 log.info("Unable to create validator program " + validatorUnpackName);
-                setException (executionData, "Unable to create validator program " + validatorUnpackName);
+                setException ("Unable to create validator program " + validatorUnpackName);
 
                 throw new SecurityException("Unable to create validator, check logs");
             }
@@ -585,13 +613,29 @@ public class Executable extends Plugin implements IExecutable {
                 setExecuteBit(prefixExecuteDirname(validatorFileName));
             }
         }
-
+        
+        /**
+         * Judge input data file name, either short name or fully qualified if external file.{:infile}
+         */
+        String judgeDataFilename =  problem.getDataFileName();
+        /**
+         * Judge answer  data file name, either short name or fully qualified if external file.{:infile}
+         */
+        String judgeAnswerFilename = problem.getAnswerFileName();
+        
         if (overwriteJudgesDataFiles) {
 
             if (problem.isUsingExternalDataFiles()) {
+                
+                /**
+                 * Set filenames if external files.
+                 */
+                
+                SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
+                judgeDataFilename = Utilities.locateJudgesDataFile(problem, serializedFile, Utilities.DataFileType.JUDGE_DATA_FILE);
 
-                // TODO copy external files to local directory if not STDIN program
-                // is this done somewhere else ?
+                serializedFile = problemDataFiles.getJudgesAnswerFiles()[dataSetNumber];
+                judgeAnswerFilename = Utilities.locateJudgesDataFile(problem, serializedFile, Utilities.DataFileType.JUDGE_DATA_FILE);
 
             } else {
                 
@@ -609,20 +653,22 @@ public class Executable extends Plugin implements IExecutable {
                 // Create the correct output file, aka answer file
                 createFile(problemDataFiles.getJudgesAnswerFiles(), dataSetNumber, prefixExecuteDirname(problem.getAnswerFileName()));
                 
+             
             } // else no need to create external data files.
 
         }
 
         // teams output file
         SerializedFile userOutputFile = executionData.getExecuteProgramOutput();
-        
+
         createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
 
-        String secs = new Long((new Date().getTime()) % 100).toString();
+        String secs = Long.toString((new Date().getTime()) % 100);
 
-        // Answer/results file name
+        // Answer/results XML file name
 
-        String resultsFileName = run.getNumber() + secs + "XRSAM.txt";
+        int testSetNumber = dataSetNumber + 1;
+        String resultsFileName = run.getNumber() + secs + "XRSAM." + testSetNumber + ".txt";
 
         /*
          * <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files]
@@ -650,8 +696,13 @@ public class Executable extends Plugin implements IExecutable {
         }
 
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
+
+//      orig  String cmdLine = substituteAllStrings(run, commandPattern);
         
-        String cmdLine = substituteAllStrings(run, commandPattern);
+        String cmdLine = replaceString(commandPattern, "{:infile}", judgeDataFilename);
+        cmdLine = replaceString(cmdLine, "{:ansfile}", judgeAnswerFilename);
+        
+        cmdLine = substituteAllStrings(run, cmdLine);
         cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
 
         log.log(Log.DEBUG, "after  substitution: " + cmdLine);
@@ -682,9 +733,8 @@ public class Executable extends Plugin implements IExecutable {
             }
 
         } catch (Exception e) {
-            setException (executionData, "Exception in validatorCall "+e.getMessage());
-
-            log.log(Log.INFO, "Exception in validatorCall ", e);
+            log.log(Log.INFO, "Exception while constructing validator command line ", e);
+            executionData.setExecutionException(e);
             throw new SecurityException(e);
         }
 
@@ -748,6 +798,7 @@ public class Executable extends Plugin implements IExecutable {
             executionData.setValidationStderr(new SerializedFile(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME)));
 
         } catch (Exception ex) {
+            executionData.setExecutionException(ex);
             if (executionTimer != null) {
                 executionTimer.stopTimer();
             }
@@ -767,7 +818,8 @@ public class Executable extends Plugin implements IExecutable {
 //                JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
             }
         } catch (Exception ex) {
-            log.log(Log.INFO, "Exception in validation  ", ex);
+            executionData.setExecutionException(ex);
+            log.log(Log.INFO, "Exception while reading results file "+resultsFileName, ex);
             throw new SecurityException(ex);
         } finally {
             
@@ -790,18 +842,26 @@ public class Executable extends Plugin implements IExecutable {
 
         IResultsParser parser = new XMLResultsParser();
         parser.setLog(log);
+        
+        /**
+         * returns true if valid XML and found outcome tag.
+         */
         boolean done = parser.parseValidatorResultsFile(prefixExecuteDirname(resultsFileName));
         Hashtable<String, String> results = parser.getResults();
-
-        if (done && results != null && results.containsKey("outcome")) {
+        
+        if (parser.getException() != null){
+            logger.log(Log.WARNING,"Exception parsing XML in file "+resultsFileName, parser.getException());
+            
+        } else if (done && results != null && results.containsKey("outcome")) {
             // non-IJRM does not require security, but if it is IJRM it better have security.
+            
             if (!problem.isInternationalJudgementReadMethod() || (results.containsKey("security") && resultsFileName.equals(results.get("security")))) {
                 // Found the string
                 executionData.setValidationResults(results.get("outcome"));
                 executionData.setValidationSuccess(true);
             } else {
                 // SOMEDAY LOG info
-                setException(executionData, "validationCall - results file did not contain security");
+                setException( "validationCall - results file did not contain security");
 
                 logger.config("validationCall - results file did not contain security");
                 logger.config(resultsFileName + " != " + results.get("security"));
@@ -810,13 +870,13 @@ public class Executable extends Plugin implements IExecutable {
             if (!done) {
                 // SOMEDAY LOG
                 // SOMEDAY show user message
-                setException(executionData, "Error parsing/reading results file, check log");
+                setException( "Error parsing/reading results file, check log");
 
                 logger.config("Error parsing/reading results file, check log");
             } else if (results != null && (!results.containsKey("outcome"))) {
                 // SOMEDAY LOG
                 // SOMEDAY show user message
-                setException(executionData, "Error parsing/reading results file, check log");
+                setException( "Error parsing/reading results file, check log");
                 logger.config("Error could not find 'outcome' in results file, check log");
             } else {
                 // SOMEDAY LOG
@@ -828,13 +888,13 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Sets the exception for this execute().
+     * Create an Execution Exception. 
      * 
      * @param inExecutionData
      * @param string
      */
-    private void setException(ExecutionData inExecutionData, String string) {
-        inExecutionData.setExecutionException(new Exception(string));
+    private void setException(String string) {
+        executionData.setExecutionException(new Exception(string));
     }
 
     protected String findPC2JarPath() {
@@ -860,7 +920,7 @@ public class Executable extends Plugin implements IExecutable {
                }
             }
         } catch (IOException e) {
-            System.err.println("Trouble locating pc2home: " + e.getMessage());
+            log.log(Log.WARNING, "Trouble locating pc2home: " + e.getMessage(), e);
         }
         return jarDir;
     }
@@ -885,7 +945,6 @@ public class Executable extends Plugin implements IExecutable {
                 outFileName = chooser.getSelectedFile().getCanonicalFile().toString();
             }
         } catch (Exception e) {
-            // SOMEDAY log this exception
             log.log(Log.CONFIG, "Error getting selected file, try again.", e);
         }
         chooser = null;
@@ -1096,7 +1155,9 @@ public class Executable extends Plugin implements IExecutable {
             stdoutCollector.start();
             stderrCollector.start();
 
-            if (isValidDataFile(problem) && problem.isReadInputDataFromSTDIN()) {
+            if ( problem.isReadInputDataFromSTDIN()) {
+                log.info("Using STDIN from file " +inputDataFileName);
+                    
                 BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
                 BufferedInputStream in = new BufferedInputStream(new FileInputStream(inputDataFileName));
                 byte[] buf = new byte[32768];
@@ -1136,16 +1197,16 @@ public class Executable extends Plugin implements IExecutable {
             executionData.setExecuteTimeMS(System.currentTimeMillis() - startSecs);
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
-
+            
             if (executionData.getExecuteExitValue() != 0) {
                 long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
                 PrintWriter exitCodeFile = null;
                 try {
-                    exitCodeFile = new PrintWriter(new FileOutputStream(prefixExecuteDirname("EXITCODE.TXT"), false), true);
+                    exitCodeFile = new PrintWriter(new FileOutputStream(prefixExecuteDirname(EXIT_CODE_FILENAME), false), true);
                     exitCodeFile.write("0x"+Long.toHexString(returnValue).toUpperCase());
                 } catch (FileNotFoundException e) {
-                    StaticLog.log("Unable to open file EXITCODE.TXT", e);
+                    log.log(Log.WARNING, "Unable to open/write file "+EXIT_CODE_FILENAME, e);
                     exitCodeFile = null;
                 } finally {
                     if (exitCodeFile != null) {
@@ -1159,7 +1220,8 @@ public class Executable extends Plugin implements IExecutable {
                 executionTimer.stopTimer();
             }
             // SOMEDAY  handle exception
-            log.log(Log.INFO, "executeProgram() Exception ", e);
+            log.log(Log.INFO, "Exception in executeProgram()", e);
+            executionData.setExecutionException(e);
             throw new SecurityException(e);
         }
 
@@ -1167,10 +1229,13 @@ public class Executable extends Plugin implements IExecutable {
     }
 
 
-    private boolean isValidDataFile(Problem inProblem) {
+    protected boolean isValidDataFile(Problem inProblem) {
         boolean result = false;
         if (inProblem.getDataFileName() != null && inProblem.getDataFileName().trim().length() > 0) {
             result = true;
+        }
+        if (inProblem.isUsingExternalDataFiles()){
+            return true;
         }
         return result;
     }
@@ -1321,7 +1386,7 @@ public class Executable extends Plugin implements IExecutable {
      */
     public String replaceString(String origString, String beforeString, String afterString) {
 
-        if (origString == null) {
+        if (origString == null || afterString == null) {
             return origString;
         }
 
@@ -1489,8 +1554,8 @@ public class Executable extends Plugin implements IExecutable {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
         } catch (Exception e) {
-            // SOMEDAY LOG
-            log.log(Log.CONFIG, "Exception ", e);
+            log.log(Log.CONFIG, "Exception substituting strings ", e);
+            // carrying on not required to save exception
         }
 
         return newString;

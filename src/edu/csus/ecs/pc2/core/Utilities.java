@@ -860,7 +860,6 @@ public final class Utilities {
     }
 
     public static boolean fileExists(String filename) {
-        System.out.println("debug 22 - tried file = '"+filename+"'");
         return new File(filename).isFile();
     }
 

@@ -101,7 +101,8 @@ public class ExecuteTimer extends Thread implements
             getTimerCount().setForeground(java.awt.Color.red);
 
             if (doAutoStop) {
-                log.info("ExecuteTimer - halting run execute, over time limit "+maxTime+" seconds.");
+                System.out.println("ExecuteTimer - halting run execute, time " + currentTime + " over time limit " + maxTime + " seconds limit.");
+                log.info("ExecuteTimer - halting run execute, time " + currentTime + " over time limit " + maxTime + " seconds limit.");
                 setRunTimeLimitExceeded(true);
                 stopIOCollectors();
             }
