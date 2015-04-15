@@ -210,6 +210,9 @@ public final class LanguageAutoFill {
             language.setProgramExecuteCommandLine(values[3]);
             boolean isScript = LanguageAutoFill.isInterpretedLanguage(name);
             language.setInterpreted(isScript);
+            
+            // set Judge's same as Team's.
+            language.setJudgeProgramExecuteCommandLine(values[3]);
             return language;
         } else {
             return null;

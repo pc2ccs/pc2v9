@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.log.StaticLog;
+
 
 /**
  * Single Language Definition.
@@ -39,6 +41,19 @@ public class Language implements IElementObject {
      */
     private String executableIdentifierMask;
 
+    
+    /**
+     * Judge program command line.
+     * 
+     * Command line for judges to execute the program created using compileCommandLine.
+     */
+    private String judgeProgramExecuteCommandLine;
+    
+    /**
+     * Flag to indicate whether using judge execut command line.
+     */
+    private boolean usingJudgeProgramExecuteCommandLine = false;
+    
     /**
      * Execute program command line.
      * 
@@ -168,13 +183,19 @@ public class Language implements IElementObject {
             if (!programExecuteCommandLine.equals(language.getProgramExecuteCommandLine())) {
                 return false;
             }
+            if (!judgeProgramExecuteCommandLine.equals(language.getJudgeProgramExecuteCommandLine())) {
+                return false;
+            }
+            if (usingJudgeProgramExecuteCommandLine != language.isUsingJudgeProgramExecuteCommandLine()) {
+                return false;
+            }
             if (interpreted != language.isInterpreted()) {
                 return false;
             }
             
             return true;
         } catch (Exception e) {
-            // TODO log to static Exception log
+            StaticLog.log("Exception in Language.isSameAs",  e);
             return false;
         }
     }
@@ -199,5 +220,25 @@ public class Language implements IElementObject {
     
     public boolean isInterpreted() {
         return interpreted;
+    }
+
+    public String getJudgeProgramExecuteCommandLine() {
+        if (usingJudgeProgramExecuteCommandLine){
+            return judgeProgramExecuteCommandLine;
+        } else {
+            return getProgramExecuteCommandLine();
+        }
+    }
+    
+    public void setJudgeProgramExecuteCommandLine(String judgeProgramExecuteCommandLine) {
+        this.judgeProgramExecuteCommandLine = judgeProgramExecuteCommandLine;
+    }
+    
+    public void setUsingJudgeProgramExecuteCommandLine(boolean usingJudgeProgramExecuteCommandLine) {
+        this.usingJudgeProgramExecuteCommandLine = usingJudgeProgramExecuteCommandLine;
+    }
+    
+    public boolean isUsingJudgeProgramExecuteCommandLine() {
+        return usingJudgeProgramExecuteCommandLine;
     }
 }
