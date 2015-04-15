@@ -69,6 +69,11 @@ public class ContestYAMLLoader {
     public static final String SITES_KEY = "sites";
 
     public static final String REPLAY_KEY = "replay";
+    
+    /**
+     * Base path/location where config (CDP) problem files found.
+     */
+    public static final String JUDGE_CONFIG_PATH_KEY = "judge-config-path";
 
     /**
      * Run execution time limit, in seconds.
@@ -225,7 +230,13 @@ public class ContestYAMLLoader {
         String contestTitle = getSequenceValue(contents, CONTEST_NAME_KEY);
         return contestTitle;
     }
-
+    
+    public String getJudgesCDPBasePath(String contestYamlFilename) throws IOException {
+        String[] contents = loadFileWithIncludes(null, contestYamlFilename);
+        String contestTitle = getSequenceValue(contents, JUDGE_CONFIG_PATH_KEY);
+        return contestTitle;
+    }
+    
     /**
      * Load/Create contest from YAML lines.
      * 

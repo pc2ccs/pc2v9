@@ -42,6 +42,8 @@ public class ContestInformation implements Serializable{
     
     private boolean sendAdditionalRunStatusInformation = false;
     
+    private String judgeCDPBasePath = null;
+    
     /**
      * Test mode allow run submission with override elapsed time.
      * 
@@ -221,6 +223,10 @@ public class ContestInformation implements Serializable{
             if (!StringUtilities.stringSame(contestShortName, contestInformation.contestShortName)) {
                 return false;
             }
+            if (!StringUtilities.stringSame(judgeCDPBasePath, contestInformation.getJudgeCDPBasePath())) {
+                return false;
+            }
+            
 
             return true;
         } catch (Exception e) {
@@ -401,5 +407,24 @@ public class ContestInformation implements Serializable{
     
     public void setContestShortName(String contestShortName) {
         this.contestShortName = contestShortName;
+    }
+    
+    /**
+     * Set base path for CDP/external files on judge.
+     * 
+     * This is the base path location where the problem data files are located.
+     * 
+     * @param judgeCDPBasePath
+     */
+    public void setJudgeCDPBasePath(String judgeCDPBasePath) {
+        this.judgeCDPBasePath = judgeCDPBasePath;
+    }
+
+    /**
+     * Get base path for CDP/external files on judge.
+     * @return
+     */
+    public String getJudgeCDPBasePath() {
+        return judgeCDPBasePath;
     }
 }

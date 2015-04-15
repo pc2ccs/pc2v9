@@ -42,8 +42,6 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     private static final String TEST_CLASS_NAME = "ContestYAMLLoader";
 
-    private boolean debugFlag = false;
-
     private ContestYAMLLoader loader = new ContestYAMLLoader();
     
     private SampleContest sampleContest = new SampleContest();
@@ -55,6 +53,8 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        
+//        setDebugMode(true); // debug mode 
         
     }
 
@@ -375,6 +375,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         IInternalContest contest = loader.fromYaml(null, getDataDirectory(), loadDataFiles);
         
         debugPrint("Dir " + getDataDirectory());
+//        startExplorer(getDataDirectory());
         
 //        editFile(getDataDirectory()+"/"+ContestYAMLLoader.DEFAULT_CONTEST_YAML_FILENAME);
 
@@ -440,7 +441,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         }
         
         String[] probNames = { "apl Title", "barcodes Title", "biobots Title", "Castles in the Sand", "Channel Island Navigation" };
-        int[] dataSetCount = { 1, 1, 3, 1, 1 };
+        int[] dataSetCount = { 1, 15, 3, 1, 1 };
 
         int i = 0;
         for (Problem problem : contest.getProblems()) {
@@ -454,7 +455,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     }
 
     private void debugPrint(String string) {
-        if (debugFlag){
+        if (isDebugMode()){
             System.out.println(string);
         }
     }
@@ -650,9 +651,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertTrue("Test file does not exist " + contestYamlFilename, Utilities.isFileThere(contestYamlFilename));
         String[] yamlLines = Utilities.loadFile(contestYamlFilename);
 
-        if (debugFlag) {
-            System.out.println("Loading " + contestYamlFilename);
-        }
+        debugPrint("Loading " + contestYamlFilename);
 
         Problem[] contestProblems = loader.getProblems(yamlLines, 12);
 
@@ -669,7 +668,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expecting Judge Number ", "judge7", lastClient.getName());
         assertEquals("Expecting Site ", 2, lastClient.getSiteNumber());
 
-        if (debugFlag) {
+        if (isDebugMode()) {
             dumpAutoJudgeSettings(contestProblems, autoJudgeSettings);
         }
     }
@@ -783,9 +782,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertTrue("Test file does not exist " + contestYamlFilename, Utilities.isFileThere(contestYamlFilename));
         String[] yamlLines = Utilities.loadFile(contestYamlFilename);
 
-        if (debugFlag) {
-            System.out.println("Loading " + contestYamlFilename);
-        }
+        debugPrint("Loading " + contestYamlFilename);
 
         PlaybackInfo replay = loader.getReplaySettings(yamlLines);
         
@@ -1114,7 +1111,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     public void testCCSLoad() throws Exception {
         
         String inputYamlFilename = getProblemSetYamlTestFileName();
-        
+//        startExplorer(getDataDirectory());
 //        editFile(inputYamlFilename);
         
         assertFileExists(inputYamlFilename);
@@ -1228,7 +1225,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         }
         
         String[] probNames = { "apl Title", "barcodes Title", "biobots Title", "Castles in the Sand", "Channel Island Navigation" };
-        int[] dataSetCount = { 1, 1, 3, 1, 1 };
+        int[] dataSetCount = { 1, 15, 3, 1, 1 };
 
         int i = 0;
         for (Problem problem : contest.getProblems()) {
@@ -1314,6 +1311,27 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected unquoted string", expected, actual);
         
     }
+    
+    public void testJudgeCDPPath() throws Exception {
+        
+        String testDirName =getDataDirectory(this.getName());
+//        ensureDirectory(testDirName);
+//        startExplorer(testDirName);
+        
+        String yamlFileName = testDirName+File.separator+"contest.yaml";
+        if (isDebugMode()){
+            System.out.println("filename = "+yamlFileName);
+        }
+        
+        
+        String path = loader.getJudgesCDPBasePath(yamlFileName);
+
+        // name: ACM-ICPC World Finals 2011
+        assertEquals("Judge CDP Basepath", "/home/pc2/judge/cdp", path);
+
+        
+        
+    }
 
     /**
      * The list of the tests to run/test.
@@ -1323,7 +1341,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
      * @return list of classes to test.
      */
     
-    public static TestSuite NotUsedSuite() {
+    public static TestSuite SuiteNotUsed() {
 //    public static TestSuite suite() {
         /**
          * This is a way to test a single test method using JUnit3 
@@ -1334,7 +1352,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         String singletonTestName = "";
         singletonTestName = "testYamlWriteAndLoad";
 //        singletonTestName = "testUnQuote";
-        
+        singletonTestName = "testJudgeCDPPath";
 
         if (!"".equals(singletonTestName)) {
             suite.addTest(new ContestYAMLLoaderTest(singletonTestName));

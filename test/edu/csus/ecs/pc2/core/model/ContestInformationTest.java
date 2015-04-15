@@ -84,5 +84,30 @@ public class ContestInformationTest extends TestCase {
         assertFalse("Not Same properties", contestInformation1.isSameAs(contestInformation2));
 
     }
+    
+    /**
+     * Test for Judges CDP Path.
+     * 
+     * Bug 904.
+     */
+    public void testPropertiesIsSameAsWithJudgeCDPPath() {
+
+        ContestInformation contestInformation1 = new ContestInformation();
+        ContestInformation contestInformation2 = new ContestInformation();
+
+        Properties properties = DefaultScoringAlgorithm.getDefaultProperties();
+        contestInformation1.setScoringProperties(properties);
+        properties = DefaultScoringAlgorithm.getDefaultProperties();
+        contestInformation2.setScoringProperties(properties);
+
+        assertTrue("Same properties", contestInformation1.isSameAs(contestInformation1));
+
+        assertTrue("Same properties", contestInformation1.isSameAs(contestInformation2));
+
+        properties = new Properties();
+        contestInformation2.setJudgeCDPBasePath("/home/pc2/cdp");
+        assertFalse("Expecting not same properties", contestInformation1.isSameAs(contestInformation2));
+
+    }
 
 }
