@@ -754,7 +754,10 @@ public class ExecutableTest extends AbstractTestCase {
     
     public void testMultipleTestCaseFromExternalFile() throws Exception {
 
-//        startExplorer(getDataDirectory(this.getName()));
+//        String testBaseDirname = getDataDirectory(this.getName());
+//        ensureDirectory(testBaseDirname);
+//        startExplorer(testBaseDirname);
+
         String sumitFilename = getSamplesSourceFilename("ISumit.java");
         
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
@@ -901,10 +904,10 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setUsingExternalDataFiles(true);
 
         int numberJudgesFiles = problemDataFiles.getJudgesDataFiles().length;
-        assertEquals("Expected number of judge data files ", 12, numberJudgesFiles);
+        assertEquals("Expected number of judge data files ", 13, numberJudgesFiles);
 
         int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
-        assertEquals("Expected number of judge answer files ", 12, numberJudgesAnswerFiles);
+        assertEquals("Expected number of judge answer files ", 13, numberJudgesAnswerFiles);
 
         contest2.addProblem(problem, problemDataFiles);
 
@@ -1055,8 +1058,8 @@ public class ExecutableTest extends AbstractTestCase {
 //        singletonTestName = "testMultipleTestCaseFromFile";
 //        singletonTestName = "testFindPC2Jar";
         singletonTestName = "testHello";
-        singletonTestName = "testMultipleTestCaseFromExternalFile";
         singletonTestName = "testMultipleTestCaseFromInternalFile";
+        singletonTestName = "testMultipleTestCaseFromExternalFile";
         
         
         suite.addTest(new ExecutableTest(singletonTestName));
