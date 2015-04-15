@@ -45,9 +45,6 @@ public class LanguageTest extends AbstractTestCase {
 
         assertTrue("language expected to be the same",language.isSameAs(language2));
 
-        language.setJudgeProgramExecuteCommandLine("security_wrapper ./{:basename}");
-        assertFalse("language NOT expected to be the same",language.isSameAs(language2));
-        
         assertFalse("Since setJudgeProgramExecuteCommandLine to be false", language.isUsingJudgeProgramExecuteCommandLine());
 
         assertEquals("Expecting team exec and judge exec to be same ", language.getProgramExecuteCommandLine(), language.getJudgeProgramExecuteCommandLine());

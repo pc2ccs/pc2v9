@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 
 
@@ -183,7 +184,7 @@ public class Language implements IElementObject {
             if (!programExecuteCommandLine.equals(language.getProgramExecuteCommandLine())) {
                 return false;
             }
-            if (!judgeProgramExecuteCommandLine.equals(language.getJudgeProgramExecuteCommandLine())) {
+            if (!StringUtilities.stringSame(getJudgeProgramExecuteCommandLine(), language.getProgramExecuteCommandLine())){
                 return false;
             }
             if (usingJudgeProgramExecuteCommandLine != language.isUsingJudgeProgramExecuteCommandLine()) {
