@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -62,7 +63,7 @@ public class Executable extends Plugin implements IExecutable {
     private Language language = null;
 
     private Problem problem = null;
-
+    
     private ProblemDataFiles problemDataFiles = null;
 
     private ClientId executorId = null;
@@ -475,7 +476,6 @@ public class Executable extends Plugin implements IExecutable {
             return executionData.getValidationResults();
         }
 
-        // TODO Auto-generated method stub
         return "Undetermined, developer note need another condition in getFailureReason()";
     }
 
@@ -632,10 +632,10 @@ public class Executable extends Plugin implements IExecutable {
                  */
                 
                 SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
-                judgeDataFilename = Utilities.locateJudgesDataFile(problem, serializedFile, Utilities.DataFileType.JUDGE_DATA_FILE);
+                judgeDataFilename = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
 
                 serializedFile = problemDataFiles.getJudgesAnswerFiles()[dataSetNumber];
-                judgeAnswerFilename = Utilities.locateJudgesDataFile(problem, serializedFile, Utilities.DataFileType.JUDGE_DATA_FILE);
+                judgeAnswerFilename = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
 
             } else {
                 
@@ -1074,7 +1074,7 @@ public class Executable extends Plugin implements IExecutable {
                      */
                     
                     SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
-                    String dataFileName = Utilities.locateJudgesDataFile(problem, serializedFile, Utilities.DataFileType.JUDGE_DATA_FILE);
+                    String dataFileName = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
                     
                     if (dataFileName != null){
                         // Found file 
@@ -1889,6 +1889,10 @@ public class Executable extends Plugin implements IExecutable {
         executionData = null;
         executionTimer = null;
         fileViewer = null;
+    }
+    
+    public ContestInformation getContestInformation() {
+        return contest.getContestInformation();
     }
 }
 
