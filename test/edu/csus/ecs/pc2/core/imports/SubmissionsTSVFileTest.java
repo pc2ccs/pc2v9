@@ -20,6 +20,7 @@ public class SubmissionsTSVFileTest extends AbstractTestCase {
         SubmissionsTSVFile tsv = new SubmissionsTSVFile();
         
         String datafile = getTestFilename("runs1.tsv");
+//        editFile(datafile);
         
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createStandardContest();
@@ -27,10 +28,10 @@ public class SubmissionsTSVFileTest extends AbstractTestCase {
         
         tsv.setContest(contest);
         
-        Run[] foo = tsv.loadRuns(datafile);
-        assertEquals("expecting runs ", 13, foo.length);
-        for (Run run : foo) {
-            System.out.println("debug 22 run "+run);
-        }
+        Run[] runs = tsv.loadRuns(datafile);
+        assertEquals("expecting runs ", 13, runs.length);
+//        for (Run run : runs) {
+//            System.out.println("debug run "+run);
+//        }
     }
 }
