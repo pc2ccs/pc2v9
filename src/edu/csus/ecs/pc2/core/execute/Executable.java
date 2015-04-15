@@ -1016,6 +1016,9 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             if (isTestRunOnly()) {
+                /**
+                 * Team executing run
+                 */
 
                 if (problem.isReadInputDataFromSTDIN()) {
                     selectAndCopyDataFile(inputDataFileName);
@@ -1042,7 +1045,12 @@ public class Executable extends Plugin implements IExecutable {
                 }
 
             } else {
+                /**
+                 * Judge execute run
+                 */
+                
                 // Extract the judge data file for this problem and dataSetNumber.
+                
                 if ( ! problem.isUsingExternalDataFiles() ){
                     /**
                      * Only extract internal data files.
@@ -1094,9 +1102,22 @@ public class Executable extends Plugin implements IExecutable {
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME), false));
             BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDERR_FILENAME), false));
 
-            String cmdline = language.getProgramExecuteCommandLine();
-            log.log(Log.DEBUG, "before substitution: " + cmdline);
 
+            String cmdline = language.getProgramExecuteCommandLine();
+            
+            if (!isTestRunOnly()) {
+                if (language.isUsingJudgeProgramExecuteCommandLine()){
+                    
+                    /**
+                     * Use Judge execution command line (override).
+                     */
+                    cmdline = language.getJudgeProgramExecuteCommandLine();
+                    log.info("Using judge command line "+cmdline);
+                }
+                
+            }
+            
+            log.log(Log.DEBUG, "before substitution: " + cmdline);
             cmdline = substituteAllStrings(run, cmdline);
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
@@ -1127,7 +1148,9 @@ public class Executable extends Plugin implements IExecutable {
             
             boolean autoStop = false;
             if (! isTestRunOnly()){
-                // This autostops all executions except Test Run (team)
+                /**
+                 * Auto stop on time limit exceeded - Judge (aka non-Team) only.
+                 */
                 autoStop = true;
             }
             
