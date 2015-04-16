@@ -79,6 +79,16 @@ public class EditLanguagePane extends JPanePlugin {
     private JCheckBox deleteLanguageCheckbox = null;
 
     private JCheckBox interpretedLanguageCheckBox = null;
+    
+    /**
+     * Judge's command line.
+     */
+    private JTextField judgeCommandLineTextBox = null;
+    
+    /**
+     * Checkbox for judges's command line 
+     */
+    private JCheckBox chckbxJudgesCommandLine = null;
 
     /**
      * This method initializes
@@ -95,7 +105,7 @@ public class EditLanguagePane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(517, 289));
+        this.setSize(new Dimension(517, 338));
 
         this.add(getMainPanel(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -175,7 +185,7 @@ public class EditLanguagePane extends JPanePlugin {
     protected void addLanguage() {
 
         try {
-            Language newLanguage = getLanguageFromFields();
+            Language newLanguage = getLanguageFromFields(language);
 
             getController().addNewLanguage(newLanguage);
 
@@ -193,24 +203,33 @@ public class EditLanguagePane extends JPanePlugin {
         }
     }
 
-    private Language getLanguageFromFields() {
-        if (language == null) {
-            language = new Language(displayNameTextField.getText());
+    private Language getLanguageFromFields(Language existingLanguage) {
+        
+        if (existingLanguage == null) {
+            existingLanguage = new Language(displayNameTextField.getText());
         } else {
-            language.setDisplayName(displayNameTextField.getText());
+            existingLanguage.setDisplayName(displayNameTextField.getText());
         }
 
-        language.setCompileCommandLine(compileCommandLineTextField.getText());
-        language.setInterpreted(getInterpretedLanguageCheckBox().isSelected());
-        language.setExecutableIdentifierMask(getExecutableFilenameTextField().getText());
-        language.setProgramExecuteCommandLine(programExecutionCommandLineTextField.getText());
-        language.setActive(!getDeleteLanguageCheckbox().isSelected());
+        existingLanguage.setCompileCommandLine(compileCommandLineTextField.getText());
+        existingLanguage.setInterpreted(getInterpretedLanguageCheckBox().isSelected());
+        existingLanguage.setExecutableIdentifierMask(getExecutableFilenameTextField().getText());
+        existingLanguage.setProgramExecuteCommandLine(programExecutionCommandLineTextField.getText());
+        existingLanguage.setActive(!getDeleteLanguageCheckbox().isSelected());
         
-        checkForEmptyField (language.getDisplayName(), "Enter a language name");
-        checkForEmptyField (language.getCompileCommandLine(), "Enter a compiler command line");
-        checkForEmptyField (language.getProgramExecuteCommandLine(), "Enter a execute command line");
+        existingLanguage.setJudgeProgramExecuteCommandLine(judgeCommandLineTextBox.getText());
+        existingLanguage.setUsingJudgeProgramExecuteCommandLine(chckbxJudgesCommandLine.isSelected());
+        
+        checkForEmptyField (existingLanguage.getDisplayName(), "Enter a language name");
+        checkForEmptyField (existingLanguage.getCompileCommandLine(), "Enter a compiler command line");
+        checkForEmptyField (existingLanguage.getProgramExecuteCommandLine(), "Enter a execute command line");
+        
+        if (existingLanguage.isUsingJudgeProgramExecuteCommandLine()) {
+            checkForEmptyField(existingLanguage.getJudgeProgramExecuteCommandLine(), "Judge execution command line");
+        }
+        
 
-        return language;
+        return existingLanguage;
     }
     
     /**
@@ -249,7 +268,7 @@ public class EditLanguagePane extends JPanePlugin {
     protected void updateLanguage() {
 
         try {
-            Language newLanguage = getLanguageFromFields();
+            Language newLanguage = getLanguageFromFields(language);
 
             getController().updateLanguage(newLanguage);
 
@@ -328,7 +347,7 @@ public class EditLanguagePane extends JPanePlugin {
             jLabel5.setText("Auto Populate with");
             jLabel5.setName("AutoPopulateLabel");
             jLabel4 = new JLabel();
-            jLabel4.setBounds(new Rectangle(9, 176, 244, 20));
+            jLabel4.setBounds(new Rectangle(13, 214, 244, 20));
             jLabel4.setName("ProgramExLabel");
             jLabel4.setMaximumSize(new Dimension(2147483647, 2147483647));
             jLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -379,6 +398,33 @@ public class EditLanguagePane extends JPanePlugin {
             mainPanel.add(getAutoPopulateLanguageComboBox(), getAutoPopulateLanguageComboBox().getName());
             mainPanel.add(getDeleteLanguageCheckbox(), null);
             mainPanel.add(getInterpretedLanguageCheckBox(), null);
+            
+            judgeCommandLineTextBox = new JTextField();
+            judgeCommandLineTextBox.setToolTipText("Execute command line for Judges");
+            judgeCommandLineTextBox.setName("judgesProgramCommandLine");
+            judgeCommandLineTextBox.setBounds(new Rectangle(274, 214, 198, 20));
+            judgeCommandLineTextBox.setBounds(274, 183, 198, 20);
+            judgeCommandLineTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+            
+            mainPanel.add(judgeCommandLineTextBox);
+            
+            chckbxJudgesCommandLine = new JCheckBox();
+            chckbxJudgesCommandLine.setToolTipText("Use Judge command line");
+            chckbxJudgesCommandLine.setHorizontalAlignment(SwingConstants.RIGHT);
+            chckbxJudgesCommandLine.setText("Judge execution command line");
+            chckbxJudgesCommandLine.setBounds(new Rectangle(209, 143, 275, 21));
+            chckbxJudgesCommandLine.setBounds(19, 182, 238, 21);
+            chckbxJudgesCommandLine.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+            
+            mainPanel.add(chckbxJudgesCommandLine);
         }
         return mainPanel;
     }
@@ -469,7 +515,7 @@ public class EditLanguagePane extends JPanePlugin {
     private JTextField getProgramExecutionCommandLineTextField() {
         if (programExecutionCommandLineTextField == null) {
             programExecutionCommandLineTextField = new JTextField();
-            programExecutionCommandLineTextField.setBounds(new Rectangle(270, 176, 198, 20));
+            programExecutionCommandLineTextField.setBounds(new Rectangle(274, 214, 198, 20));
             programExecutionCommandLineTextField.setToolTipText("Form: exe");
             programExecutionCommandLineTextField.setName("programCommandLine");
             programExecutionCommandLineTextField.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -519,6 +565,9 @@ public class EditLanguagePane extends JPanePlugin {
         compileCommandLineTextField.setText(values[1]);
         executableFilenameTextField.setText(values[2]);
         programExecutionCommandLineTextField.setText(values[3]);
+        
+        judgeCommandLineTextBox.setText(values[3]);
+        chckbxJudgesCommandLine.setSelected(false);
 
         boolean isScript = LanguageAutoFill.isInterpretedLanguage(languageToFill);
 
@@ -529,6 +578,8 @@ public class EditLanguagePane extends JPanePlugin {
         }
 
         executableFilenameTextField.setEnabled(! isScript);
+        
+        deleteLanguageCheckbox.setSelected(false);
         
         enableUpdateButtons(true);
     }
@@ -549,10 +600,10 @@ public class EditLanguagePane extends JPanePlugin {
 
             Language newLanguage = null;
             try {
-                newLanguage = getLanguageFromFields();
+                newLanguage = getLanguageFromFields(null);
             } catch (InvalidFieldValue e) {
                 
-                // TODO there has to be a better way to ignore this exception
+                // SOMEDAY there has to be a better way to ignore this exception
                 // without CheckStyle complaining.
                 
                 /**
@@ -565,8 +616,8 @@ public class EditLanguagePane extends JPanePlugin {
                 
                 e.printStackTrace();
             }
-
-            enableButton |= language.isSameAs(newLanguage);
+            
+            enableButton = !language.isSameAs(newLanguage);
 
         } else {
             if (getAddButton().isVisible()) {
@@ -606,6 +657,9 @@ public class EditLanguagePane extends JPanePlugin {
             getAutoPopulateLanguageComboBox().setSelectedIndex(0);
             getDeleteLanguageCheckbox().setSelected(!language2.isActive());
             getInterpretedLanguageCheckBox().setSelected(language2.isInterpreted());
+            
+            chckbxJudgesCommandLine.setSelected(language2.isUsingJudgeProgramExecuteCommandLine());
+            judgeCommandLineTextBox.setText(language2.getJudgeProgramExecuteCommandLine());
 
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
@@ -615,6 +669,11 @@ public class EditLanguagePane extends JPanePlugin {
             compileCommandLineTextField.setText("");
             executableFilenameTextField.setText("");
             programExecutionCommandLineTextField.setText("");
+            
+            chckbxJudgesCommandLine.setSelected(false);
+            judgeCommandLineTextBox.setText("");
+
+            
             getDeleteLanguageCheckbox().setSelected(false);
             getInterpretedLanguageCheckBox().setSelected(false);
             getAutoPopulateLanguageComboBox().setSelectedIndex(0);
@@ -648,7 +707,7 @@ public class EditLanguagePane extends JPanePlugin {
     private JCheckBox getDeleteLanguageCheckbox() {
         if (deleteLanguageCheckbox == null) {
             deleteLanguageCheckbox = new JCheckBox();
-            deleteLanguageCheckbox.setBounds(new Rectangle(272, 210, 224, 21));
+            deleteLanguageCheckbox.setBounds(new Rectangle(275, 241, 224, 21));
             deleteLanguageCheckbox.setText("Hide Language");
             deleteLanguageCheckbox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -683,5 +742,4 @@ public class EditLanguagePane extends JPanePlugin {
         getExecutableFilenameTextField().setEnabled(intLang);
         enableUpdateButton();
     }
-
 } // @jve:decl-index=0:visual-constraint="10,10"

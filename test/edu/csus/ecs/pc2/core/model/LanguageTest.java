@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -13,6 +14,11 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 public class LanguageTest extends AbstractTestCase {
     
     
+    public LanguageTest(String name) {
+        super(name);
+    }
+
+
     public void testJudgeProgramExecuteCommandLine() throws Exception {
         
          Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.JAVATITLE);
@@ -71,5 +77,47 @@ public class LanguageTest extends AbstractTestCase {
         assertNotEquals("Expecting team exec and judge exec NOT to be same ", language.getProgramExecuteCommandLine(), language.getJudgeProgramExecuteCommandLine());
     }
 
+   public void testSameAssetUsingJudgeProgramExecuteCommandLine() throws Exception {
+        
+        Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.JAVATITLE);
+        Language language2 = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.JAVATITLE);
+        
+        assertTrue("language expected to be equal",language.isSameAs(language2));
+        language2.setUsingJudgeProgramExecuteCommandLine(true);
+        assertFalse("language expected to be equal",language.isSameAs(language2));
+    }
+   
+   public void testsetDisplayName() throws Exception {
+       
+       Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.JAVATITLE);
+       Language language2 = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.JAVATITLE);
+       
+       assertTrue("language expected to be equal",language.isSameAs(language2));
+       language2.setDisplayName("foo");
+       assertFalse("language expected to be equal",language.isSameAs(language2));
+       
+   }
+   
+    public void testsetCompileCommandLine() throws Exception {
 
+        Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.JAVATITLE);
+        Language language2 = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.JAVATITLE);
+
+        assertTrue("language expected to be equal", language.isSameAs(language2));
+        language2.setCompileCommandLine("foo");
+        assertFalse("language expected to be equal", language.isSameAs(language2));
+
+    }
+
+    public static TestSuite suiteA() {
+        
+        TestSuite suite = new TestSuite("LanguageTest");
+        String singletonTestName = null;
+        singletonTestName = "testsetCompileCommandLine";
+        
+        suite.addTest(new LanguageTest(singletonTestName));
+        return suite;
+    }
+
+    
 }

@@ -172,16 +172,17 @@ public class Language implements IElementObject {
 
     public boolean isSameAs(Language language) {
         try {
-            if (!displayName.equals(language.getDisplayName())) {
+            
+            if (! StringUtilities.stringSame(displayName, language.getDisplayName())) {
                 return false;
             }
             if (isActive() != language.isActive()) {
                 return false;
             }
-            if (!compileCommandLine.equals(language.getCompileCommandLine())) {
+            if (! StringUtilities.stringSame(compileCommandLine, language.getCompileCommandLine())){
                 return false;
             }
-            if (!programExecuteCommandLine.equals(language.getProgramExecuteCommandLine())) {
+            if (! StringUtilities.stringSame(programExecuteCommandLine, language.getProgramExecuteCommandLine())) {
                 return false;
             }
             if (!StringUtilities.stringSame(getJudgeProgramExecuteCommandLine(), language.getProgramExecuteCommandLine())){
@@ -193,6 +194,7 @@ public class Language implements IElementObject {
             if (interpreted != language.isInterpreted()) {
                 return false;
             }
+
             
             return true;
         } catch (Exception e) {

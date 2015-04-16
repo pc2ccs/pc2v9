@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Dimension;
+
 import javax.swing.JFrame;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -7,6 +9,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 
 /**
+ * Edit Language Frame.
  * 
  * @version $Id$
  * @author pc2@ecs.csus.edu
@@ -14,7 +17,6 @@ import edu.csus.ecs.pc2.core.model.Language;
  */
 
 // $HeadURL$
-// $Id$
 
 public class EditLanguageFrame extends JFrame implements UIPlugin {
 
@@ -43,7 +45,7 @@ public class EditLanguageFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549, 278));
+        this.setSize(new Dimension(549, 345));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getLanguagePane());
         this.setTitle("New Language");
