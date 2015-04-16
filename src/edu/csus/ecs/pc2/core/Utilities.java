@@ -872,4 +872,23 @@ public final class Utilities {
         return new File(filename).isFile();
     }
 
+    /**
+     * Write file to output printWriter.
+     * @param printWriter
+     * @param outputfilename
+     */
+    public static void catFile(PrintWriter printWriter, String outputfilename) {
+
+        String[] lines;
+        try {
+            lines = Utilities.loadFile(outputfilename);
+            for (String s : lines) {
+                printWriter.println(s);
+            }
+        } catch (IOException e) {
+            printWriter.println("Unable to write to file " + outputfilename);
+            e.printStackTrace(printWriter);
+        }
+    }
+
 }

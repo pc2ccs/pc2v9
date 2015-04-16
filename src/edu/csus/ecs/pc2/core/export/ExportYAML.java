@@ -162,6 +162,14 @@ public class ExportYAML {
         contestWriter.println("# " + ContestYAMLLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": false");
         contestWriter.println();
 
+        String judgeCDPBasePath = info.getJudgeCDPBasePath();
+        if (judgeCDPBasePath == null){
+            judgeCDPBasePath = "";
+        }
+        
+        contestWriter.println(ContestYAMLLoader.JUDGE_CONFIG_PATH_KEY +": "+judgeCDPBasePath);
+        contestWriter.println();
+
         // TODO CCS write default clar
 
         // default-clars:

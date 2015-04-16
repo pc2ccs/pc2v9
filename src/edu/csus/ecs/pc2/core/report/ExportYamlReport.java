@@ -105,9 +105,14 @@ public class ExportYamlReport implements IReport {
         }
 
         exportYAML.writeContestYAMLFiles(contest, directoryName, outputfilename);
+        
 
         listFiles(printWriter, "  file ", directoryName);
 
+        printWriter.println();
+        printWriter.println("contest.yaml contents");
+        printWriter.println();
+        Utilities.catFile(printWriter, outputfilename);
         printWriter.println();
 
     }
