@@ -217,8 +217,11 @@ public class ExportYAML {
             if (runner != null) {
                 contestWriter.println(PAD4 + "runner: " + quote(runner));
                 contestWriter.println(PAD4 + "runner-args: " + quote(runnerArguments));
-
             }
+            
+            contestWriter.println(PAD4 + "use-judge-cmd: " + language.isUsingJudgeProgramExecuteCommandLine());
+            contestWriter.println(PAD4 + "judge-exec-cmd: " + quote(language.getJudgeProgramExecuteCommandLine()));
+
             contestWriter.println();
         }
 

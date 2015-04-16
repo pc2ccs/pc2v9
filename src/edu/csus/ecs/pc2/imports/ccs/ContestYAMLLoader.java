@@ -1104,6 +1104,15 @@ public class ContestYAMLLoader {
                 boolean active = getBooleanValue(activeStr, true);
                 language.setActive(active);
 
+                String useStr = getSequenceValue(sequenceLines, "use-judge-cmd");
+                active = getBooleanValue(useStr, false);
+                language.setUsingJudgeProgramExecuteCommandLine(active);
+                
+                String judgeExecuteCommandLine = getSequenceValue(sequenceLines, "judge-exec-cmd");
+                if (judgeExecuteCommandLine != null){
+                    language.setJudgeProgramExecuteCommandLine(judgeExecuteCommandLine);
+                }
+
                 // TODO handle interpreted languages, seems it should be in the export
 
                 if (valid(language, name)) {
