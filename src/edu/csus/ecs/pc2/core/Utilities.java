@@ -831,11 +831,20 @@ public final class Utilities {
      * @param judgeDataFile 
      * @return
      */
-    public static String locateJudgesDataFile(Problem problem, SerializedFile serializedFile, DataFileType judgeDataFile) {
+    public static String locateJudgesDataFile(Problem problem, SerializedFile serializedFile, String alternateCDPPath, DataFileType judgeDataFile) {
 
         if (serializedFile.isExternalFile()){
 
             String testFileName;
+
+            if (alternateCDPPath != null && alternateCDPPath.trim().length() > 0) {
+
+                testFileName = alternateCDPPath + File.separator + problem.getShortName() + SECRET_DATA_DIR + File.separator + serializedFile.getName();
+
+                if (fileExists(testFileName)) {
+                    return testFileName;
+                }
+            }
 
             // Search under CCS secret
             
