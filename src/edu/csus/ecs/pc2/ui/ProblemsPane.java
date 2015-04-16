@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
@@ -11,12 +12,16 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -24,6 +29,11 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
+
+import java.awt.Dimension;
+
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
 
 /**
  * View Problems.
@@ -59,6 +69,15 @@ public class ProblemsPane extends JPanePlugin {
     private EditProblemFrame editProblemFrame = null;
 
     private JButton reportButton = null;
+    private JPanel centerPanel;
+    private JPanel centerSouthPane;
+    private JLabel judgeCDPPathLabel;
+    private JTextField judgeCDPLocationTextField;
+    private JButton judgeCDPUpdateButton;
+
+    private String savedJudgeCDPLocation = "";
+    private JPanel centerSouthEastPane;
+    private JButton judgeCDPCancelButton;
     
     /**
      * This method initializes
@@ -77,7 +96,7 @@ public class ProblemsPane extends JPanePlugin {
         this.setLayout(new BorderLayout());
         this.setSize(new java.awt.Dimension(564, 229));
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
-        this.add(getProblemListBox(), java.awt.BorderLayout.CENTER);
+        add(getCenterPanel(), BorderLayout.CENTER);
         this.add(getProblemButtonPane(), java.awt.BorderLayout.SOUTH);
 
         editProblemFrame = new EditProblemFrame();
@@ -290,24 +309,38 @@ public class ProblemsPane extends JPanePlugin {
 
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
+        getContest().addContestInformationListener(new ContestInformationListenerImplementation());
 
         initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateGUIperPermissions();
-                reloadListBox();
+                populateGUI();
+                enableUpdateButtons();
             }
         });
     }
     
     
+    protected void enableUpdateButtons() {
+
+        boolean enabled = !StringUtilities.stringSame(savedJudgeCDPLocation, judgeCDPLocationTextField.getText());
+
+        judgeCDPUpdateButton.setEnabled(enabled);
+        judgeCDPCancelButton.setEnabled(enabled);
+    }
+
     private void updateGUIperPermissions() {
         addButton.setVisible(isAllowed(Permission.Type.ADD_PROBLEM));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_PROBLEM));
         copyButton.setVisible(isAllowed(Permission.Type.EDIT_PROBLEM));
+        
+        judgeCDPUpdateButton.setEnabled(isAllowed(Permission.Type.EDIT_PROBLEM));
+        judgeCDPCancelButton.setEnabled(isAllowed(Permission.Type.EDIT_PROBLEM));
+        
+        judgeCDPLocationTextField.setEnabled(isAllowed(Permission.Type.EDIT_PROBLEM));
     }
-
 
     /**
      * This method initializes addButton
@@ -416,6 +449,46 @@ public class ProblemsPane extends JPanePlugin {
     private void showMessage(final String string) {
         JOptionPane.showMessageDialog(this, string, "Problems pane message", JOptionPane.INFORMATION_MESSAGE);
     }
+    
+    class ContestInformationListenerImplementation implements IContestInformationListener {
+        
+        @Override
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            // ignore
+            
+        }
+        
+        @Override
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            // ignore
+            
+        }
+        
+        @Override
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    refreshJudgesCDPField();
+                }
+            });
+            
+        }
+        
+        @Override
+        public void contestInformationChanged(ContestInformationEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    refreshJudgesCDPField();
+                }
+            });
+        }
+        
+        @Override
+        public void contestInformationAdded(ContestInformationEvent event) {
+            // ignore
+            
+        }
+    }
 
     /**
      * 
@@ -443,7 +516,7 @@ public class ProblemsPane extends JPanePlugin {
         public void problemRemoved(ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    reloadListBox();
+                    populateGUI();
                 }
             });
         }
@@ -451,12 +524,47 @@ public class ProblemsPane extends JPanePlugin {
         public void problemRefreshAll(ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    reloadListBox();
+                    populateGUI();
                 }
             }); 
         }
     }
     
+    protected void populateGUI() {
+        
+        // Assumption - this is run on the Swing Thread
+        
+        reloadListBox();
+        refreshJudgesCDPField();
+    }
+    
+    private void refreshJudgesCDPField() {
+
+        // Assumption - this is run on the Swing Thread
+        try {
+            savedJudgeCDPLocation = getJudgeCDPLocation();
+            judgeCDPLocationTextField.setText(savedJudgeCDPLocation);
+            enableUpdateButtons();
+        } catch (Exception e) {
+            getLog().log(Log.WARNING, "Problem fetching judges CDP Location ", e);
+        }
+
+    }
+
+    private String getJudgeCDPLocation() {
+
+        String value = null;
+
+        ContestInformation info = getContest().getContestInformation();
+        if (info != null) {
+            value = info.getJudgeCDPBasePath();
+        }
+        if (value == null){
+            value = "";
+        }
+        return value;
+    }
+
     /**
      * Account Listener Implementation.
      * 
@@ -546,4 +654,98 @@ public class ProblemsPane extends JPanePlugin {
         Utilities.viewReport(new ProblemsReport() , "Problems Report ", getContest(), getController());
     }
 
+    private JPanel getCenterPanel() {
+        if (centerPanel == null) {
+        	centerPanel = new JPanel();
+        	centerPanel.setLayout(new BorderLayout(0, 0));
+        	centerPanel.add(getProblemListBox(), BorderLayout.CENTER);
+        	centerPanel.add(getCenterSouthPane(), BorderLayout.SOUTH);
+        }
+        return centerPanel;
+    }
+    private JPanel getCenterSouthPane() {
+        if (centerSouthPane == null) {
+        	centerSouthPane = new JPanel();
+        	centerSouthPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        	centerSouthPane.setPreferredSize(new Dimension(35, 35));
+        	centerSouthPane.setLayout(new BorderLayout(10, 10));
+        	centerSouthPane.add(getJudgeCDPPathLabel(), BorderLayout.WEST);
+        	centerSouthPane.add(getJudgeCDPLocationTextField(), BorderLayout.CENTER);
+        	centerSouthPane.add(getCenterSouthEastPane(), BorderLayout.EAST);
+        }
+        return centerSouthPane;
+    }
+    private JLabel getJudgeCDPPathLabel() {
+        if (judgeCDPPathLabel == null) {
+        	judgeCDPPathLabel = new JLabel("Location for Judges CDP Config");
+        	judgeCDPPathLabel.setToolTipText("Alternate Location for CDP/config files on Judge machines");
+        }
+        return judgeCDPPathLabel;
+    }
+    private JTextField getJudgeCDPLocationTextField() {
+        if (judgeCDPLocationTextField == null) {
+        	judgeCDPLocationTextField = new JTextField();
+        	judgeCDPLocationTextField.setPreferredSize(new Dimension(200, 20));
+        	judgeCDPLocationTextField.setMinimumSize(new Dimension(50, 20));
+        	judgeCDPLocationTextField.setColumns(10);
+        	
+        	judgeCDPLocationTextField.addKeyListener(new KeyAdapter() {
+                // public void keyPressed(java.awt.event.KeyEvent e) {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButtons();
+                }
+            });
+        }
+        return judgeCDPLocationTextField;
+    }
+    private JButton getJudgeCDPUpdateButton() {
+        if (judgeCDPUpdateButton == null) {
+        	judgeCDPUpdateButton = new JButton("Update");
+        	judgeCDPUpdateButton.setMnemonic('U');
+        	judgeCDPUpdateButton.setEnabled(false);
+        	judgeCDPUpdateButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    updateContestInformation();
+                }
+            });
+        	
+        	
+        }
+        return judgeCDPUpdateButton;
+    }
+    
+    private void updateContestInformation() {
+        ContestInformation contestInformation = getFromFields();
+        getController().updateContestInformation(contestInformation);
+    }
+
+    private ContestInformation getFromFields() {
+        
+        ContestInformation newInfo = getContest().getContestInformation();
+        newInfo.setJudgeCDPBasePath(judgeCDPLocationTextField.getText());
+        return newInfo;
+    }
+
+    private JPanel getCenterSouthEastPane() {
+        if (centerSouthEastPane == null) {
+        	centerSouthEastPane = new JPanel();
+        	centerSouthEastPane.add(getJudgeCDPUpdateButton());
+        	centerSouthEastPane.add(getJudgeCDPCancelButton());
+        }
+        return centerSouthEastPane;
+    }
+    private JButton getJudgeCDPCancelButton() {
+        if (judgeCDPCancelButton == null) {
+        	judgeCDPCancelButton = new JButton("Cancel");
+        	judgeCDPCancelButton.setEnabled(false);
+        	judgeCDPCancelButton.setMnemonic('C');
+        	
+        	judgeCDPCancelButton.addActionListener(new java.awt.event.ActionListener() {
+                   public void actionPerformed(java.awt.event.ActionEvent e) {
+                       refreshJudgesCDPField();
+                   }
+               });
+        }
+        return judgeCDPCancelButton;
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"

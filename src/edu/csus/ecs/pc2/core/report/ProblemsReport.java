@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Category;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -195,11 +196,30 @@ public class ProblemsReport implements IReport {
         // Problem
         printWriter.println();
         printWriter.println("-- " + contest.getProblems().length + " problems --");
+        
+        ContestInformation info = contest.getContestInformation();
+        if (info != null){
+            
+            String judgeCDPBasePath= info.getJudgeCDPBasePath();
+            if (judgeCDPBasePath == null){
+                judgeCDPBasePath = "";
+            }
+
+            printWriter.println();
+            printWriter.println("  Location for Judges CDP / problem config  " + judgeCDPBasePath); 
+            printWriter.println();
+
+        }
+        
+        
         for (Problem problem : contest.getProblems()) {
             printWriter.println();
             ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
             writeRow(printWriter, problem, problemDataFiles);
         }
+        
+        printWriter.println();
+        
 
         // ProblemDataFiles
         printWriter.println();
