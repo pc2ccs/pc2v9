@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"> 
+<!-- $Id$ -->
+<!--
+
+$Log: event-feed-draft-2013.xsd,v $
+Revision 1.6  2013/10/11 00:56:00  laned
+First working version - validated Finals 2013 event feed
+
+Revision 1.5  2013/10/10 19:53:03  laned
+changed boolean, reordered elements
+
+Revision 1.4  2013/10/10 19:32:51  laned
+stripped out header xml assigns, removed version and account-type
+
+Revision 1.3  2013/10/10 19:06:14  laned
+region done, team done, clar done, judgement done, finalized done
+
+Revision 1.2  2013/10/10 17:36:12  laned
+testcase done
+
+Revision 1.1  2013/10/10 16:56:03  laned
+Initial revision
+
+-->
+
+  <xsd:element name="contest">
+    <xsd:annotation>
+      <xsd:documentation>
+This is a de facto schema for a event feed used at the 2013 Finals
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
+        
+        <xsd:element ref="info" minOccurs="1" maxOccurs="1"/>
+        <xsd:element ref="language" minOccurs="1" maxOccurs="unbounded"/>
+        <xsd:element ref="region" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="judgement" minOccurs="1" maxOccurs="unbounded"/>
+        <xsd:element ref="problem" minOccurs="1" maxOccurs="unbounded"/>
+        <xsd:element ref="team" minOccurs="1" maxOccurs="unbounded"/>
+        <xsd:element ref="clar" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="run" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="testcase" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="finalized" minOccurs="1" maxOccurs="1"/>
+       
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="info">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="length" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="penalty" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="started" type="xsd:string" minOccurs="1" maxOccurs="1"/> <!-- xx TODO create more expansive boolean value check --> 
+        <xsd:element name="starttime" type="xsd:decimal" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="title" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="language">
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="region">
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <xsd:element name="external-id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="judgement">
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <xsd:element name="acronym" type="judgementAcronym" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="problem">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="team">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="external-id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="name" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="nationality" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="region" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="university" type="xsd:string"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+ 
+  <xsd:element name="clar">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="answer" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="answered" type="xsd:string" minOccurs="1" maxOccurs="1"/> <!-- xx TODO create more expansive boolean value check --> 
+        <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="question" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="status" type="xsd:string" minOccurs="1" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>Create a enumerated list of items clar status'</xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="team" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="time" type="xsd:decimal" minOccurs="1" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>TODO - is this a /unused?</xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="timestamp" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="to-all" type="xsd:string" minOccurs="1" maxOccurs="1"/> <!-- xx TODO create more expansive boolean value check --> 
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="testcase">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="i" type="xsd:int" minOccurs="1" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>Test set/case number</xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+
+        <xsd:element name="judged" type="xsd:string" minOccurs="1" maxOccurs="1"/> <!-- xx TODO create more expansive boolean value check --> 
+
+        <xsd:element name="judgement_id" type="xsd:int" minOccurs="1" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>TODO - find out what this is, seems to be dup run-id</xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="n" type="xsd:int" minOccurs="1" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>Total number of test sets for problem.</xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="result" type="judgementAcronym" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="run-id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="solved" type="xsd:string" minOccurs="1" maxOccurs="1"/> <!-- xx TODO create more expansive boolean value check --> 
+        <xsd:element name="time" type="xsd:decimal" minOccurs="1" maxOccurs="1"/>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="timestamp"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="run">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="judged" type="xsd:string" minOccurs="1" maxOccurs="1"/> <!-- xx TODO create more expansive boolean value check --> 
+        <xsd:element minOccurs="1" maxOccurs="1" name="language" type="xsd:string"/>
+        <xsd:element name="penalty" type="xsd:string" minOccurs="0" maxOccurs="1"/><!-- xx TODO create more expansive boolean value check --> 
+
+        <xsd:element minOccurs="1" maxOccurs="1" name="problem" type="xsd:string"/>
+        <xsd:element name="result" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+        <xsd:element name="solved" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+
+        <xsd:element name="status" type="xsd:string" minOccurs="1" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>TODO Create an enumerated list of status'</xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="team" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="time" type="xsd:decimal" minOccurs="1" maxOccurs="1"/>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="timestamp"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="file">
+    <xsd:complexType>
+      <xsd:attribute name="name" type="xsd:int" use="required"/>
+      <xsd:attribute name="main" type="xsd:string"/> <!-- xx TODO create more expansive boolean value check --> 
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="finalized">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" name="comment" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="last-bronze" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="last-gold" type="xsd:string"/>
+        <xsd:element minOccurs="1" maxOccurs="1" name="last-silver" type="xsd:string"/>
+        <xsd:element name="time" type="xsd:int" minOccurs="1" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>TODO - what is this value, is it used/needed ?
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="timestamp"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:simpleType name="booleanTitleCase">
+    <xsd:annotation>
+      <xsd:documentation>Non-standard boolean, Title case </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="True"/>
+      <xsd:enumeration value="False"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="judgementAcronym">
+    <xsd:annotation>
+      <xsd:documentation>Valid judgement acronyms</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="CE"/>
+      <xsd:enumeration value="SV"/>
+      <xsd:enumeration value="RTE"/>
+      <xsd:enumeration value="TLE"/>
+      <xsd:enumeration value="WA"/>
+      <xsd:enumeration value="AC"/>
+      <xsd:enumeration value="JE"/>
+      <xsd:enumeration value="DEL"/>
+
+      <xsd:enumeration value="MLE" />
+      <xsd:enumeration value="OLE" />
+      <xsd:enumeration value="IF" />
+      <xsd:enumeration value="PE" />
+    </xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:element name="contest-time" type="xsd:decimal">
+    <xsd:annotation>
+      <xsd:documentation>Contest elapsed seconds since start of the contest, decimal 2 places
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+  <xsd:element name="timestamp" type="xsd:decimal">
+    <xsd:annotation>
+      <xsd:documentation>the current time (in seconds) since the Unix epoch, decimal 2 places.
+      C library time() function.
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+</xsd:schema>
