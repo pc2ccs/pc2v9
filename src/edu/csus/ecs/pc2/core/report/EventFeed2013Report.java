@@ -13,13 +13,13 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.EventFeedXML2013;
 
 /**
- * Event Feed XML Report.
+ * Event Feed Finals 2013 XML Report.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: EventFeedReport.java 2363 2011-09-27 01:37:28Z laned $
+ * @version $Id$
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/core/report/EventFeedReport.java $
+// $HeadURL$
 public class EventFeed2013Report implements IReport {
 
     /**

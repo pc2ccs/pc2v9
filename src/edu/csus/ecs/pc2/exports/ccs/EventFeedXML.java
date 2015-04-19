@@ -48,7 +48,7 @@ import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 /**
- * Event Feed XML.
+ * Event Feed (CCS) XML.
  * 
  * Class used <li>to CCS Standard Event Feed output XML based on contest data.
  * 

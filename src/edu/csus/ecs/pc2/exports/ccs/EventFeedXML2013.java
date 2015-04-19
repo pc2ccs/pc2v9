@@ -39,7 +39,7 @@ import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 /**
- * 2013 Finals Event Feed XML.
+ * Event Feed Finals 2013 XML.
  *
  * The CCS Event Feed is implemented in the {@link EventFeedXML}.
  * 
@@ -51,10 +51,10 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  * {@link #addMemento(IMemento, IInternalContest, Language, int)}.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: EventFeedXML.java 2685 2013-06-11 13:14:16Z laned $
+ * @version $Id$
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/exports/ccs/EventFeedXML.java $
+// $HeadURL$
 public class EventFeedXML2013 {
 
     public static final String CONTEST_TAG = "contest";
