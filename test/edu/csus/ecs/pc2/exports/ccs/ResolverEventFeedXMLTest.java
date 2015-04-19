@@ -163,7 +163,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     public void testContestElement() throws Exception {
 
-        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
         InternalContest internalContest = new InternalContest();
 
@@ -191,8 +191,8 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         debugPrintln();
         testForValidXML (xml);
 
-        assertXMLCounts(xml, EventFeedXML2013.CONTEST_TAG, 1);
-        assertXMLCounts(xml, EventFeedXML2013.INFO_TAG, 1);
+        assertXMLCounts(xml, ResolverEventFeedXML.CONTEST_TAG, 1);
+        assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
 
     }
 
@@ -203,7 +203,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
      */
     public void testInfoElement() throws Exception {
 
-        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
         ContestInformation info = new ContestInformation();
         info.setContestTitle("Title One");
@@ -227,7 +227,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         debugPrintln(" -- testLanguageElement ");
 
-        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
         int idx = 1;
         for (Language language : contest.getLanguages()) {
             String xml = toContestXML(eventFeedXML.createElement(contest, language, idx));
@@ -260,7 +260,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         Group[] groups = contest.getGroups();
         Arrays.sort(groups, new GroupComparator());
 
-        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
         for (Group group : groups) {
             String xml = toContestXML(eventFeedXML.createElement(contest, group));
             debugPrintln(xml);
@@ -272,7 +272,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         debugPrintln(" -- testJudgementElement ");
 
-        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
         int sequence = 1;
         for (Judgement judgement : contest.getJudgements()) {
             String xml = toContestXML(eventFeedXML.createElement(contest, judgement, sequence));
@@ -293,13 +293,13 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         debugPrintln(" -- testProblemElement ");
 
-        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
         int idx = 1;
         for (Problem problem : contest.getProblems()) {
             String xml = toContestXML(eventFeedXML.createElement(contest, problem, idx));
             debugPrintln(xml);
             testForValidXML(xml);
-            assertXMLCounts(xml, EventFeedXML2013.PROBLEM_TAG, 1);
+            assertXMLCounts(xml, ResolverEventFeedXML.PROBLEM_TAG, 1);
 
             if (idx == 1) {
                 assertXMLNodeValueEquals(xml, "name", "Sumit");
@@ -316,7 +316,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
     public void testTeamElement() throws Exception {
         debugPrintln(" -- testTeamElement ");
 
-        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
         Account[] accounts = getTeamAccounts();
 
@@ -331,7 +331,7 @@ public void testClarElement() throws Exception {
 
     debugPrintln(" -- testClarElement ");
 
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
     Clarification[] clarifications = contest.getClarifications();
     Arrays.sort(clarifications, new ClarificationComparator());
 
@@ -350,7 +350,7 @@ public void testClarElement() throws Exception {
         debugPrintln(xml);
         testForValidXML (xml);
         assertXMLCounts(xml, "clar>", 0); // not expecting <clar>
-        assertXMLCounts(xml, EventFeedXML2013.CLARIFICATION_TAG, 1);
+        assertXMLCounts(xml, ResolverEventFeedXML.CLARIFICATION_TAG, 1);
     }
 
 }
@@ -359,7 +359,7 @@ public void testRunElement() throws Exception {
 
     debugPrintln(" -- testRunElement ");
 
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
     Run[] runs = contest.getRuns();
     Arrays.sort(runs, new RunComparator());
 
@@ -372,7 +372,7 @@ public void testRunElement() throws Exception {
 
 public void testFinalizedElement() throws Exception {
 
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
     FinalizeData data = new FinalizeData();
     data.setGoldRank(8);
@@ -392,7 +392,7 @@ public void testFinalizedElement() throws Exception {
 
 public void testStartupElement() throws Exception {
 
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
     String xml = eventFeedXML.createStartupXML(contest);
 
     debugPrintln(" -- testStartupElement ");
@@ -400,10 +400,10 @@ public void testStartupElement() throws Exception {
     xml = xml + CONTEST_END_TAG;
     testForValidXML (xml);
 
-    assertXMLCounts(xml, EventFeedXML2013.CONTEST_TAG, 1);
-    assertXMLCounts(xml, EventFeedXML2013.INFO_TAG, 1);
-    assertXMLCounts(xml, EventFeedXML2013.JUDGEMENT_TAG, 9);
-    assertXMLCounts(xml, EventFeedXML2013.REGION_TAG, 24);
+    assertXMLCounts(xml, ResolverEventFeedXML.CONTEST_TAG, 1);
+    assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
+    assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, 9);
+    assertXMLCounts(xml, ResolverEventFeedXML.REGION_TAG, 24);
 
 }
 
@@ -433,9 +433,9 @@ public void printElemntCounts(String comment, String xmlString) throws ParserCon
 
 public String [] getAllEventFeedTagNames (){
     String[] tagnames = { //
-            EventFeedXML2013.CONTEST_TAG, EventFeedXML2013.INFO_TAG, EventFeedXML2013.REGION_TAG, EventFeedXML2013.PROBLEM_TAG, EventFeedXML2013.LANGUAGE_TAG, EventFeedXML2013.TEAM_TAG,
-            EventFeedXML2013.CLARIFICATION_TAG, EventFeedXML2013.TESTCASE_TAG, EventFeedXML2013.RUN_TAG, EventFeedXML2013.JUDGEMENT_TAG, EventFeedXML2013.FINALIZE_TAG,
-            EventFeedXML2013.JUDGEMENT_RECORD_TAG
+            ResolverEventFeedXML.CONTEST_TAG, ResolverEventFeedXML.INFO_TAG, ResolverEventFeedXML.REGION_TAG, ResolverEventFeedXML.PROBLEM_TAG, ResolverEventFeedXML.LANGUAGE_TAG, ResolverEventFeedXML.TEAM_TAG,
+            ResolverEventFeedXML.CLARIFICATION_TAG, ResolverEventFeedXML.TESTCASE_TAG, ResolverEventFeedXML.RUN_TAG, ResolverEventFeedXML.JUDGEMENT_TAG, ResolverEventFeedXML.FINALIZE_TAG,
+            ResolverEventFeedXML.JUDGEMENT_RECORD_TAG
             //
     };
     return tagnames;
@@ -443,7 +443,7 @@ public String [] getAllEventFeedTagNames (){
 
 public void testToXML() throws Exception {
 
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
     String xml = eventFeedXML.toXML(contest);
     debugPrintln(" -- testToXML ");
     debugPrintln(xml);
@@ -457,7 +457,7 @@ protected void startEventFeed(int port) throws IOException {
     /**
      * Check info tag, if there is no contest data in InternalContest.
      */
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
     String xml = eventFeedXML.toXML(contest);
 
     debugPrintln("Opened socket on port " + port);
@@ -481,7 +481,7 @@ protected void startEventFeed(int port) throws IOException {
 
 public void testTestCase() throws Exception {
 
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
     int siteNumber = 2;
 
@@ -516,15 +516,15 @@ public void testTestCase() throws Exception {
     validateUsingSchema (xml);
     assertEquals ("No empty OCS values expected", 0, countString(xml, "<result>OCS"));
 
-    assertXMLCounts(xml, EventFeedXML2013.CONTEST_TAG, 1);
-    assertXMLCounts(xml, EventFeedXML2013.INFO_TAG, 1);
-    assertXMLCounts(xml, EventFeedXML2013.JUDGEMENT_TAG, 9);
-    assertXMLCounts(xml, EventFeedXML2013.LANGUAGE_TAG, 18);
-    assertXMLCounts(xml, EventFeedXML2013.PROBLEM_TAG, 18);
-    assertXMLCounts(xml, EventFeedXML2013.REGION_TAG, 24);
-    assertXMLCounts(xml, EventFeedXML2013.RUN_TAG, 12);
-    assertXMLCounts(xml, EventFeedXML2013.TEAM_TAG, 34); // both teams and team tag in submissions
-    assertXMLCounts(xml, EventFeedXML2013.TESTCASE_TAG, 12 * 5); 
+    assertXMLCounts(xml, ResolverEventFeedXML.CONTEST_TAG, 1);
+    assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
+    assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, 9);
+    assertXMLCounts(xml, ResolverEventFeedXML.LANGUAGE_TAG, 18);
+    assertXMLCounts(xml, ResolverEventFeedXML.PROBLEM_TAG, 18);
+    assertXMLCounts(xml, ResolverEventFeedXML.REGION_TAG, 24);
+    assertXMLCounts(xml, ResolverEventFeedXML.RUN_TAG, 12);
+    assertXMLCounts(xml, ResolverEventFeedXML.TEAM_TAG, 34); // both teams and team tag in submissions
+    assertXMLCounts(xml, ResolverEventFeedXML.TESTCASE_TAG, 12 * 5); 
 
     /**
      * Test FINALIZE
@@ -539,7 +539,7 @@ public void testTestCase() throws Exception {
 
     testForValidXML (xml);
 
-    assertXMLCounts(xml, EventFeedXML2013.FINALIZE_TAG, 1);
+    assertXMLCounts(xml, ResolverEventFeedXML.FINALIZE_TAG, 1);
     assertXMLCounts(xml, "comment", 1);
 
 
@@ -562,27 +562,35 @@ public void testTestCase() throws Exception {
     xml = eventFeedXML.toXML(testCaseContest, filter);
 
     // TODO fix this test
-    //        assertXMLCounts(xml, EventFeedXML2013.RUN_TAG, numruns);
+    //        assertXMLCounts(xml, ResolverEventFeedXML.RUN_TAG, numruns);
 
-    assertXMLCounts(xml, EventFeedXML2013.TESTCASE_TAG, numruns * 5); 
+    assertXMLCounts(xml, ResolverEventFeedXML.TESTCASE_TAG, numruns * 5); 
 
 }
 
 private void validateUsingSchema(String xml) throws Exception {
 
-    // TODO 623 TODO CCS get this schema validation  to work.
-
-    //        String prolog = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-    //        String newXML = prolog + xml;
-    //        String [] contents = {newXML};
-    //        String filename ="testing.ef.xml";
-    //        writeFileContents(filename, contents);
-    //        debugPrintln("Wrote xml to file "+filename);
-
-    String schemaFileName = getSchemaFilename("event-feed-2013.xsd");
+    
+//    startExplorer(getSchemaDirectory());
+    
+    String schemaFileName = getSchemaFilename("resolver-event-feed.xsd");
     assertFileExists(schemaFileName);
 
-    //        testForValidXML (newXML, schemaFileName);
+    String prolog = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    
+    String newXML = prolog + xml;
+    String [] contents = {newXML};
+    String filename ="testing.ef.xml";
+    writeFileContents(filename, contents);
+    
+//    debugPrintln("Wrote xml to file "+filename);
+    
+//    editFile(filename);
+    
+    // TODO 623 TODO CCS validation failing with
+//    org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.
+
+//    testForValidXML (newXML, schemaFileName);
 
 }
 
@@ -718,7 +726,7 @@ public void testIsYounger() throws Exception {
     Run[] runs = testContest.getRuns();
     Arrays.sort(runs, new RunComparator());
 
-    EventFeedXML2013 feed = new EventFeedXML2013();
+    ResolverEventFeedXML feed = new ResolverEventFeedXML();
 
     //        for (Run run : runs) {
     //            debugPrintln(feed.isYoungerThanFirstYes(testContest, run) + " " + getRunInfo(run));
@@ -736,7 +744,7 @@ public void testIsYounger() throws Exception {
 // SOMEDAY: Ensure that teams that are not shown on scoreboard runs are not in feed.
 
 public void testDeletedRuns() throws Exception {
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
     int siteNumber = 2;
 
@@ -791,7 +799,7 @@ public void testDeletedRuns() throws Exception {
 
     testForValidXML(xml);
 
-    assertXMLCounts(xml, EventFeedXML2013.RUN_TAG, runs2.length - deletedCount);
+    assertXMLCounts(xml, ResolverEventFeedXML.RUN_TAG, runs2.length - deletedCount);
 
 }
 
@@ -801,7 +809,7 @@ private Account getAdminAccount(IInternalContest inContest) {
 
 public void testExternalId() throws Exception {
 
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
     int siteNumber = 2;
 
@@ -828,13 +836,13 @@ public void testExternalId() throws Exception {
         assertEquals("Expecting same value", expectedValue, value);
     }
 
-    assertXMLCounts(xmlString, EventFeedXML2013.TEAM_TAG, 22);
+    assertXMLCounts(xmlString, ResolverEventFeedXML.TEAM_TAG, 22);
 
 }
 
 public void testUnjudgedRuns() throws Exception {
 
-    EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+    ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
     int siteNumber = 2;
 
@@ -881,31 +889,31 @@ public static void main(String[] args) {
  */
 public static TestSuite suiteA() {
 
-    TestSuite suite = new TestSuite("EventFeedXML2013Test");
+    TestSuite suite = new TestSuite("ResolverEventFeedXMLTest");
 
     String singletonTestName = "";
     //        singletonTestName = "testExternalId";
 
     if (!"".equals(singletonTestName)) {
-        suite.addTest(new EventFeedXML2013Test(singletonTestName));
+        suite.addTest(new ResolverEventFeedXMLTest(singletonTestName));
     } else {
 
-        suite.addTest(new EventFeedXML2013Test("testContestElement"));
-        suite.addTest(new EventFeedXML2013Test("testInfoElement"));
-        suite.addTest(new EventFeedXML2013Test("testLanguageElement"));
-        suite.addTest(new EventFeedXML2013Test("testRegionElement"));
-        suite.addTest(new EventFeedXML2013Test("testJudgementElement"));
-        suite.addTest(new EventFeedXML2013Test("testProblemElement"));
-        suite.addTest(new EventFeedXML2013Test("testTeamElement"));
-        suite.addTest(new EventFeedXML2013Test("testClarElement"));
-        suite.addTest(new EventFeedXML2013Test("testRunElement"));
-        suite.addTest(new EventFeedXML2013Test("testFinalizedElement"));
-        suite.addTest(new EventFeedXML2013Test("testStartupElement"));
-        suite.addTest(new EventFeedXML2013Test("testToXML"));
-        suite.addTest(new EventFeedXML2013Test("testTestCase"));
-        suite.addTest(new EventFeedXML2013Test("testIsYounger"));
-        suite.addTest(new EventFeedXML2013Test("testDeletedRuns"));
-        suite.addTest(new EventFeedXML2013Test("testExternalId"));
+        suite.addTest(new ResolverEventFeedXMLTest("testContestElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testInfoElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testLanguageElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testRegionElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testJudgementElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testProblemElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testTeamElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testClarElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testRunElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testFinalizedElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testStartupElement"));
+        suite.addTest(new ResolverEventFeedXMLTest("testToXML"));
+        suite.addTest(new ResolverEventFeedXMLTest("testTestCase"));
+        suite.addTest(new ResolverEventFeedXMLTest("testIsYounger"));
+        suite.addTest(new ResolverEventFeedXMLTest("testDeletedRuns"));
+        suite.addTest(new ResolverEventFeedXMLTest("testExternalId"));
 
     }
     return suite;
