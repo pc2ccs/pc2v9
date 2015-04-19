@@ -36,7 +36,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
-import edu.csus.ecs.pc2.exports.ccs.EventFeedXML2013;
+import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
 
 /**
  * Send live event feed XML.
@@ -72,7 +72,8 @@ class EventFeeder implements Runnable {
      * Class that creates Event Feed which is sent to client.
      */
 //    private EventFeedXML eventFeedXML = new EventFeedXML();
-    private EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+//    private EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+  private ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
     
     private AccountListener accountListener = null;
 
