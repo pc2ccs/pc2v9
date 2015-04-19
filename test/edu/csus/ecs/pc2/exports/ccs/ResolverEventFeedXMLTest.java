@@ -824,7 +824,7 @@ public void testExternalId() throws Exception {
 
     assertEquals("external id count ", 22,nodes.getLength());
 
-    String baseValue = "836577";
+    String baseValue = "4242";
 
     for (int i = 0; i < nodes.getLength(); i++) {
         Node node = nodes.item(i);

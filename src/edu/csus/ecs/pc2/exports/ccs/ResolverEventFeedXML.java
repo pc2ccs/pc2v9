@@ -257,13 +257,15 @@ public class ResolverEventFeedXML {
 
     public IMemento addInfoMemento(IMemento memento, IInternalContest contest, ContestInformation info)  {
 
-//        <info>
-//        <length>05:00:00</length>
-//        <penalty>20</penalty>
-//        <started>True</started>
-//        <starttime>1372831200.0</starttime>
-//        <title>37th Annual World Finals of the ACM International Collegiate Programming Contest</title>
-//       </info>
+        // 4/19/2015
+//    <info>
+//    <length>4:15:00</length>
+//    <penalty>20</penalty>
+//    <started>False</started>
+//    <starttime>1414199710.909</starttime>
+//    <scoreboard-freeze-length>0:45:00</scoreboard-freeze-length>
+//    <title>ICPC Resolver Demo Contest</title>
+//  </info>
 
         ContestTime time = contest.getContestTime();
 
@@ -314,6 +316,9 @@ public class ResolverEventFeedXML {
      * @return
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Language language, int id) {
+        
+        // TODO CCS validate content vs demo/sample XML
+        
 
 //        <language>
 //        <id>1</id>
@@ -349,6 +354,9 @@ public class ResolverEventFeedXML {
      * @return
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Problem problem, int id) {
+        
+        // TODO CCS validate content vs demo/sample XML
+        
 
 //        <problem>
 //        <id>1</id>
@@ -483,6 +491,8 @@ public class ResolverEventFeedXML {
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Account account) {
         
+        // TODO CCS validate content vs demo/sample XML
+        
 //        <team>
 //        <external-id>171936</external-id>
 //        <id>107</id>
@@ -492,10 +502,19 @@ public class ResolverEventFeedXML {
 //        <university>University of New South Wales</university>
 //       </team>
 
-
+// 4/19/2015
+//   <team>
+//    <external-id>8365771</external-id>
+//    <id>1</id>
+//    <name>University of Melbourne, Australia Team</name>
+//    <nationality/>
+//    <region>Open Division</region>
+//    <university>University of Melbourne, Australia</university>
+//  </team>
+        
         int teamId =  account.getClientId().getClientNumber();
         
-        XMLUtilities.addChild(memento, "external-id", useDefaultIfEmpty (account.getExternalId(),"836577"+teamId));
+        XMLUtilities.addChild(memento, "external-id", useDefaultIfEmpty(account.getExternalId(), "4242" + teamId));
         XMLUtilities.addChild(memento, "id", teamId);
         XMLUtilities.addChild(memento, "name", account.getDisplayName());
         
@@ -559,6 +578,9 @@ public class ResolverEventFeedXML {
      * @param problem
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, RunTestCase testCase, Run run) {
+        
+        // TODO CCS validate content vs demo/sample XML
+        
 
 //        <testcase>
 //        <i>3</i>
@@ -602,11 +624,13 @@ public class ResolverEventFeedXML {
 
     public IMemento addMemento(IMemento memento, IInternalContest contest, Clarification clarification) {
 
-//        <clar>
-//        <answer></answer>
-//        <answered>False</answered>
-//        <id>1</id>
-//        <question>Are the calculators provided?</question>
+        
+//         4/19/2015
+//    <clar>
+//    <answer>arrow</answer>
+//    <id>19</id>
+//    <answered>True</answered>
+//    <question>Which problem is allowed to have 60 seconds to solve?</question>
 
         String answer = clarification.getAnswer();
         if (answer == null) {
@@ -617,27 +641,32 @@ public class ResolverEventFeedXML {
         XMLUtilities.addChild(memento, "answered", titleCaseBoolean(clarification.isAnswered()));
         XMLUtilities.addChild(memento, "question", clarification.getQuestion());
         
-//        <status>fresh</status>
-//        <team>53</team>
-//        <time>1194.626055</time>
+//    <status>done</status>
+//    <team>8</team>
+//    <time>14016.479</time>
 
         String status = getStatus(clarification.isAnswered());
         XMLUtilities.addChild(memento, "status", status);
         XMLUtilities.addChild(memento, "team", clarification.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(clarification.getElapsedMS()));
         
-//        <timestamp>1372832394.63</timestamp>
-//        <to-all>False</to-all>
-//       </clar>
-//       <clar>
+//    <timestamp>1414215455.760</timestamp>
+//    <to-all>False</to-all>
+//  </clar       
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
         XMLUtilities.addChild(memento, "to-all", titleCaseBoolean(clarification.isSendToAll()));
         
         return memento;
     }
 
-    private String getStatus(boolean value) {
-        if (value){
+    /**
+     * Returns CCS run status.
+     * 
+     * @param solved
+     * @return done if solved, else fresh.
+     */
+    private String getStatus(boolean solved) {
+        if (solved){
             return "done";
         } else {
             return "fresh";
@@ -686,12 +715,13 @@ public class ResolverEventFeedXML {
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Run run) {
 
-//        <run>
-//        <id>1698</id>
-//        <judged>True</judged>
-//        <language>C++</language>
-//        <penalty>True</penalty>
-//        <problem>9</problem>
+        // 4/19/2015
+//    <run>
+//    <id>13</id>
+//    <judged>True</judged>
+//    <language>C++</language>
+//    <penalty>True</penalty>
+//    <problem>2</problem>
         
         XMLUtilities.addChild(memento, "id", run.getNumber());
         XMLUtilities.addChild(memento, "judged", titleCaseBoolean(run.isJudged()));
@@ -710,9 +740,9 @@ public class ResolverEventFeedXML {
         int problemIndex = getProblemIndex(contest, problem);
         XMLUtilities.addChild(memento, "problem", problemIndex);
         
-//        <result>TLE</result>
-//        <solved>False</solved>
-//        <status>done</status>
+//    <result>JE</result>
+//    <solved>false</solved>
+//    <status>done</status>
         
         if (run.isJudged()){
             Judgement judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId());
@@ -723,10 +753,10 @@ public class ResolverEventFeedXML {
         XMLUtilities.addChild(memento, "solved", run.isSolved());
         XMLUtilities.addChild(memento, "status", getStatus(run.isJudged()));
         
-//        <team>50</team>
-//        <time>17938.976757</time>
-//        <timestamp>1372849248.21</timestamp>
-//       </run>
+//    <team>2</team>
+//    <time>2872.860</time>
+//    <timestamp>1414215455.740</timestamp>
+//  </run
 
         XMLUtilities.addChild(memento, "team",  run.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(run.getElapsedMS()));
@@ -939,6 +969,10 @@ public class ResolverEventFeedXML {
 
     private void addMemento(IMemento memento, IInternalContest contest, FinalizeData data) {
 
+        
+        // TODO CCS validate content vs demo/sample XML
+        
+
 //        <finalized>
 //        <comment>Certified by: Gunnar</comment>
 //        <last-bronze>13</last-bronze>
@@ -964,6 +998,9 @@ public class ResolverEventFeedXML {
 
     public void addMemento(IMemento memento, IInternalContest contest, Group group) {
         
+        // TODO CCS validate content vs demo/sample XML
+        
+
 //        <region>
 //        <external-id>5752</external-id>
 //        <name>South Pacific</name>
@@ -994,6 +1031,9 @@ public class ResolverEventFeedXML {
 
     public IMemento addMemento(IMemento memento, IInternalContest contest, Judgement judgement, int judgementSequence) {
         
+        // TODO CCS validate content vs demo/sample XML
+        
+   
 //        <judgement>
 //        <acronym>CE</acronym>
 //        <id>8</id>
