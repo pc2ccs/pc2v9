@@ -138,6 +138,8 @@ public final class Reports {
 
         reports.add(new SubmissionsTSVReport());
         
+        reports.add(new ResolverEventFeedReport());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }
