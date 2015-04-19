@@ -198,12 +198,6 @@ public class NotificationXMLTest extends AbstractTestCase {
 
     }
     
-    private void debugPrint(String string) {
-        if (debugMode) {
-            System.out.println(string);
-        }
-    }
-
     /**
      * a pass.
      * 

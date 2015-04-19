@@ -454,12 +454,6 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         }
     }
 
-    private void debugPrint(String string) {
-        if (isDebugMode()){
-            System.out.println(string);
-        }
-    }
-
     private Object getClientCount(IInternalContest contest, Type type) {
         return contest.getAccounts(type).size();
     }

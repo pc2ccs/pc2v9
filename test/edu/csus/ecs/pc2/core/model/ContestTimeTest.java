@@ -14,8 +14,6 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 // $HeadURL$
 public class ContestTimeTest extends AbstractTestCase {
 
-    private boolean debugMode = true;
-    
     private SampleContest sampleContest = new SampleContest();
 
     public ContestTimeTest(String string) {
@@ -171,12 +169,6 @@ public class ContestTimeTest extends AbstractTestCase {
         assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / ContestTime.MS_PER_MINUTE, contestTime.getRemainingSecs() / ContestTime.SECONDS_PER_MINUTE);
        
         
-    }
-
-    private void debugPrint(String string) {
-        if (debugMode) {
-            System.out.println(string);
-        }
     }
 
     public static Test suite() {

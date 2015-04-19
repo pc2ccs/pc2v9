@@ -1081,6 +1081,32 @@ public class AbstractTestCase extends TestCase {
     public void setDebugLevel(Log log) {
         log.setLevel(Log.DEBUG);
     }
+
+    /**
+     * Print string if debugMode.
+     * @param string
+     */
+    public void debugPrint(String string) {
+        if (debugMode){
+            System.err.print(string);
+        }
+    }
     
+    /**
+     * Print string if debugMode.
+     * @param string
+     */
+    public void debugPrintln(String string) {
+        if (debugMode){
+            System.err.println(string);
+        }
+    }
+    public void debugPrintln() {
+        if (debugMode){
+            System.err.println();
+        }
+    }
+    
+ 
     
 }
