@@ -932,7 +932,7 @@ public class ExecutableTest extends AbstractTestCase {
         testBaseDirname = Utilities.getCurrentDirectory() + File.separator + testBaseDirname + File.separator + problemName;
         
         ContestYAMLLoader loader = new ContestYAMLLoader();
-        loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem);
+        loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem, false);
         
         // TODO loadProblemInformationAndDataFiles not setting pc2 validator flag
         setupUsingPC2Validator(problem);
