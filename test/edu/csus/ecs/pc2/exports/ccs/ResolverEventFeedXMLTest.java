@@ -366,7 +366,22 @@ public void testRunElement() throws Exception {
     for (Run run : runs) {
         String xml = toContestXML(eventFeedXML.createElement(contest, run));
         debugPrintln(xml);
-        testForValidXML (xml);
+        if (run.isJudged()) {
+            String acronymn = contest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
+            String expectedResult = "True";
+            switch (acronymn) {
+                case "AC":
+                    // fall thru
+                case "CE":
+                    // fall thru
+                case "JE":
+                    expectedResult = "False";
+                    break;
+                default:
+                    break;
+            }
+            assertXMLNodeValueEquals(xml, "penalty", expectedResult);
+        }
     }
 }
 
