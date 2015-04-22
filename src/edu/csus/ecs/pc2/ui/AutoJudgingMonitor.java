@@ -704,9 +704,6 @@ public class AutoJudgingMonitor implements UIPlugin {
             if (controlLoop == null) {
                 controlLoop = new ControlLoop();
             }
-            if (!((ControlLoop) controlLoop).isRunning()) {
-                controlLoop.run();
-            }
             
             if (usingGui){
 
@@ -716,6 +713,15 @@ public class AutoJudgingMonitor implements UIPlugin {
                     }
                 });
             }
+            
+            System.out.println("debug - is this before look ?!");
+            
+            if (!((ControlLoop) controlLoop).isRunning()) {
+                System.out.println("debug - is running? ?!");
+                controlLoop.run();
+            }
+            
+            System.out.println("debug - is this dead code");
 
         } else {
 
