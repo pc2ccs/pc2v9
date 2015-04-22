@@ -836,19 +836,19 @@ public final class Utilities {
         if (serializedFile.isExternalFile()){
 
             String testFileName;
-
+            
             if (alternateCDPPath != null && alternateCDPPath.trim().length() > 0) {
 
-                testFileName = alternateCDPPath + File.separator + problem.getShortName() + SECRET_DATA_DIR + File.separator + serializedFile.getName();
-
+                testFileName = alternateCDPPath + File.separator + problem.getShortName() + File.separator + SECRET_DATA_DIR + File.separator + serializedFile.getName();
                 if (fileExists(testFileName)) {
                     return testFileName;
                 }
             }
 
             // Search under CCS secret
-            
-            testFileName = problem.getCCSfileDirectory() + File.separator  + problem.getShortName() + SECRET_DATA_DIR + File.separator + serializedFile.getName();
+
+            testFileName = problem.getCCSfileDirectory() + File.separator + problem.getShortName() + File.separator + SECRET_DATA_DIR + File.separator + serializedFile.getName();
+
             if (fileExists(testFileName)){
                 return testFileName;
             }
