@@ -153,7 +153,8 @@ public class SampleContest {
         String[] problemsNames = { "Sumit", "Quadrangles", "Routing", "Faulty Towers", "London Bridge", "Finnigans Bluff" };
         String[] judgements = { "Stupid programming error", "Misread problem statement", "Almost there", "You have no clue", "Give up and go home", "Consider switching to another major",
                 "How did you get into this place ?", "Contact Staff - you have no hope" };
-
+        String[] acronymns = {"CE", "WA", "TLE", "WA2", "RTE", "OFE", "WA3", "JE" };
+        
         InternalContest contest = new InternalContest();
 
         contest.setSiteNumber(siteNumber);
@@ -186,12 +187,14 @@ public class SampleContest {
         Problem generalProblem = getGeneralProblem();
         contest.setGeneralProblem(generalProblem);
 
-        Judgement judgementYes = new Judgement("Yes.");
+        Judgement judgementYes = new Judgement("Yes.", "AC");
         contest.addJudgement(judgementYes);
 
+        int i = 0;
         for (String judgementName : judgements) {
-            Judgement judgement = new Judgement(judgementName);
+            Judgement judgement = new Judgement(judgementName,acronymns[i]);
             contest.addJudgement(judgement);
+            i++;
         }
         
         contest.generateNewAccounts(Type.ADMINISTRATOR.toString(), 1, true);
