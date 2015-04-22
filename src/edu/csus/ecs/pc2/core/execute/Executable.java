@@ -1063,6 +1063,17 @@ public class Executable extends Plugin implements IExecutable {
                             if (!createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, inputDataFileName)) {
                                 throw new SecurityException("Unable to create data file " + inputDataFileName);
                             }
+
+                            String actualDataFile = null;
+                            try {
+                                actualDataFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber].getName();
+                            } catch (Exception e) {
+                                actualDataFile = "Problem getting judge data file name for set " + dataSetNumber + " " + e.getMessage();
+                                log.log(Log.DEBUG, e.toString(), e);
+                            }
+
+                            log.info("(Internal) Input data file: " + actualDataFile);
+                            
                         }
 
                     }
