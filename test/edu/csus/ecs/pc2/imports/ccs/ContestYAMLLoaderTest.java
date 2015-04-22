@@ -1313,6 +1313,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 //        startExplorer(testDirName);
         
         String yamlFileName = testDirName+File.separator+"contest.yaml";
+        editFile(yamlFileName);
         if (isDebugMode()){
             System.out.println("filename = "+yamlFileName);
         }
@@ -1322,8 +1323,12 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         // name: ACM-ICPC World Finals 2011
         assertEquals("Judge CDP Basepath", "/home/pc2/judge/cdp", path);
-
         
+        loader.setLoadProblemDataFiles(false);
+        IInternalContest contest = loader.fromYaml(null, testDirName, false);
+        
+        
+        assertEquals("judge CDP ", "/home/pc2/judge/cdp", contest.getContestInformation().getJudgeCDPBasePath()); 
         
     }
 

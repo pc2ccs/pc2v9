@@ -146,7 +146,9 @@ public class ContestYAMLLoader {
     /**
      * Validator per problem.
      */
-    private static final String VALIDATOR_KEY = "validator";
+    public static final String VALIDATOR_KEY = "validator";
+
+    public static final String USING_PC2_VALIDATOR = "use-internal-validator";
     
     /**
      * Load Problem Data File Contents
@@ -257,6 +259,11 @@ public class ContestYAMLLoader {
         if (contestTitle != null) {
             setTitle(contest, contestTitle);
         }
+        
+        String judgeCDPath = getSequenceValue(yamlLines, JUDGE_CONFIG_PATH_KEY);
+        if (judgeCDPath != null) {
+            setCDPPath(contest, judgeCDPath);
+        }
 
         int defaultTimeout = getIntegerValue(getSequenceValue(yamlLines, TIMEOUT_KEY), DEFAULT_TIME_OUT);
 
@@ -284,6 +291,7 @@ public class ContestYAMLLoader {
         
         String overrideValidatorCommandLine = getSequenceValue(yamlLines, OVERRIDE_VALIDATOR_KEY);
         
+        
         if (overrideValidatorCommandLine == null){
 
             // if no override defined, then maybe use mtsv
@@ -297,11 +305,21 @@ public class ContestYAMLLoader {
             }
         }
         
-        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine);
+        
+        String[] sectionLines = getSectionLines(USING_PC2_VALIDATOR, yamlLines);
+
+        boolean overrideUsePc2Validator = false;
+        String usingValidator = getSequenceValue(sectionLines, ContestYAMLLoader.USING_PC2_VALIDATOR);
+        
+        if (usingValidator != null && usingValidator.equalsIgnoreCase("true")){
+            overrideUsePc2Validator = true;
+        }
+
+        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator);
         
         if (loadProblemDataFiles){
             for (Problem problem : problems) {
-                loadProblemInformationAndDataFiles(contest, directoryName, problem);
+                loadProblemInformationAndDataFiles(contest, directoryName, problem, overrideUsePc2Validator);
             }
         }
         
@@ -348,6 +366,10 @@ public class ContestYAMLLoader {
     }
 
  
+    private void setCDPPath(IInternalContest contest, String path) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setJudgeCDPBasePath(path);
+    }
 
     public PlaybackInfo getReplaySettings(String[] yamlLines) {
 
@@ -554,7 +576,7 @@ public class ContestYAMLLoader {
      * @param problem
      * @param dataFiles
      */
-    public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem) {
+    public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator) {
 
         // TODO CCS code this: do not add problem to contest model, new new parameter flag
 
@@ -581,9 +603,21 @@ public class ContestYAMLLoader {
         if (new File(problemLaTexFilename).isFile()) {
             problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
         }
+        
+        String[] sectionLines = getSectionLines(USING_PC2_VALIDATOR, contents);
 
-        String[] sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
-        boolean pc2FormatProblemYamlFile = getSequenceValue(sectionLines, "answerfile") != null;
+        boolean pc2FormatProblemYamlFile = false;
+        String usingValidator = getSequenceValue(sectionLines, ContestYAMLLoader.USING_PC2_VALIDATOR);
+        
+        if (usingValidator != null && usingValidator.equalsIgnoreCase("true")){
+            pc2FormatProblemYamlFile = true;
+        }
+        
+//        if (overrideUsePc2Validator){
+//            pc2FormatProblemYamlFile = true; 
+//        }
+
+        sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
 
         if (problemTitle == null && (pc2FormatProblemYamlFile)) {
             problemTitle = getSequenceValue(sectionLines, "name");
@@ -1152,7 +1186,7 @@ public class ContestYAMLLoader {
      * @return list of {@link Problem}
      * 
      */
-    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine)  {
+    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator)  {
 
         String[] linesFromSection = getSectionLines(PROBLEMS_KEY, yamlLines);
         
@@ -1611,7 +1645,7 @@ public class ContestYAMLLoader {
      * 
      */
     public Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine)  {
-        return getProblems(contents, defaultTimeOut, loadDataFileContents, defaultValidatorCommandLine, null);
+        return getProblems(contents, defaultTimeOut, loadDataFileContents, defaultValidatorCommandLine, null, false);
     }
 
     /**
@@ -1627,7 +1661,7 @@ public class ContestYAMLLoader {
     }
 
     public Problem[] getProblems(String[] contents, int defaultTimeOut)  {
-        return getProblems(contents, defaultTimeOut, true, null, null);
+        return getProblems(contents, defaultTimeOut, true, null, null, false);
     }
 
     /**
