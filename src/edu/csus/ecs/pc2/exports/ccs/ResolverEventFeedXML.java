@@ -731,7 +731,16 @@ public class ResolverEventFeedXML {
         
         if ((!run.isSolved()) && isYoungerThanFirstYes(contest, run)) {
             // If this a "no" run and run is younger than first yes.
-            XMLUtilities.addChild(memento, "penalty", "True");
+            if (run.isJudged()) {
+                String acronymn = contest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
+                if ("CE".equalsIgnoreCase(acronymn) || "JE".equalsIgnoreCase(acronymn)) {
+                    XMLUtilities.addChild(memento, "penalty", "False");
+                } else {
+                    XMLUtilities.addChild(memento, "penalty", "True");
+                }
+            } else {
+                XMLUtilities.addChild(memento, "penalty", "False");
+            }
         } else {
             XMLUtilities.addChild(memento, "penalty", "False");
         }
@@ -769,7 +778,7 @@ public class ResolverEventFeedXML {
      * Is this run younger than first Yes?
      * @param contest
      * @param run
-     * @return true if run is younger than first yes, false if no solution or run is actually younger than input solved run.
+     * @return true if run is younger than first yes or if no solution, else false.
      */
     protected boolean isYoungerThanFirstYes(IInternalContest contest, Run run) {
         
@@ -777,7 +786,7 @@ public class ResolverEventFeedXML {
         
         if (firstYes == null){
             // no solution found
-            return false;
+            return true;
         } else {
             return run.getElapsedMS() < firstYes.getElapsedMS(); 
         }
