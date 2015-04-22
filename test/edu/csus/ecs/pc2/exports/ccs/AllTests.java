@@ -24,6 +24,7 @@ public final class AllTests {
         suite.addTestSuite(TeamdataTest.class);
         suite.addTestSuite(GroupdataTest.class);
         suite.addTestSuite(EventFeedXMLTest.class);
+        suite.addTestSuite(ResolverEventFeedXMLTest.class);
         suite.addTestSuite(UserdataTest.class);
         //$JUnit-END$
         return suite;
