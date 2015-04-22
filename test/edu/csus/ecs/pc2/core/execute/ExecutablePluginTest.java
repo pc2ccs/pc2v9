@@ -869,7 +869,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
 //        ensureDirectory(testBaseDirname);
 //        startExplorer(new File(testBaseDirname));
 
-        loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem);
+        loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem, false);
 
         ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
 
