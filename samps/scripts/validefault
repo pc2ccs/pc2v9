@@ -1,0 +1,63 @@
+#!/bin/bash -x
+
+validir=$HOME/cdp/config
+val=$validir/default_validator
+vargs=
+
+# args for this should be: {:infile} {:outfile} {:ansfile} {:resfile}
+
+if [ $# -ne "4" ]; then
+    cat <<EOM
+Usage:
+    $0 infile outfile ansfile resfile
+
+where 
+    infile is the judges input data file
+    outfile is the teams output file
+    ansfile is the judges answer file
+    resfile is the results xml file
+EOM
+    exit 1
+fi
+
+if [ ! -f $val ]; then
+   echo Could not find validator at $val
+   exit 1
+fi
+
+# Output validator args are: 
+# input judge_answer feedback_dir [additional_arguments] < team_output [ > team_input ]
+# args for pc2 should be: {:infile} {:outfile} {:ansfile} {:resfile}
+
+if [ -f EXITCODE.TXT ]; then
+cat >$4<<EOM
+<?xml version="1.0"?>
+<result outcome =  "No - Run-time Error" security = "$4">Team execution exited non-zero, this is a possible run-time error
+</result>
+EOM
+fi
+
+mkdir -p feedback
+$val $1 $3 feedback/ $vargs < $2
+result=$?
+if [ $result -eq "43" ]; then
+# output is incorrect
+cat >$4<<EOM
+<?xml version="1.0"?>
+<result outcome =  "No - Wrong Answer" security = "$4">$val returned 43
+</result>
+EOM
+exit 0
+fi
+if [ $result -eq "42" ]; then
+# correct output
+cat >$4<<EOM
+<?xml version="1.0"?>
+<result outcome =  "Accepted" security = "$4">$val returned 42
+</result>
+EOM
+exit 0
+fi
+
+# validator failed for some reason
+exit $result
