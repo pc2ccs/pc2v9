@@ -524,13 +524,15 @@ public class ExportYAML {
         problemWriter.println();
 
         if (problem.isValidatedProblem()) {
-            problemWriter.println("validator: ");
+            problemWriter.println(ContestYAMLLoader.VALIDATOR_KEY+": ");
             problemWriter.println(PAD4 + "validatorProg: " + quote(problem.getValidatorProgramName()));
             problemWriter.println(PAD4 + "validatorCmd: " + quote(problem.getValidatorCommandLine()));
             problemWriter.println(PAD4 + "usingInternal: " + problem.isUsingPC2Validator());
             problemWriter.println(PAD4 + "validatorOption: " + problem.getWhichPC2Validator());
             problemWriter.println();
+            problemWriter.println(PAD4 + ContestYAMLLoader.USING_PC2_VALIDATOR + ": " + problem.isUsingPC2Validator());
         }
+        
 
         problemWriter.println(ContestYAMLLoader.INPUT_KEY + ":");
         problemWriter.println(PAD4 + "readFromSTDIN: " + problem.isReadInputDataFromSTDIN());
