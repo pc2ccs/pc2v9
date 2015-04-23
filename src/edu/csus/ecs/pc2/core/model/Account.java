@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -90,6 +91,7 @@ public class Account implements IElementObject {
         setPassword(password);
         elementId.setSiteNumber(siteNumber);
         displayName = getDefaultDisplayName(clientId);
+        externalId = Long.toString(AccountList.generateExternalId(this));
     }
     
     public String getDefaultDisplayName(ClientId inClientId) {

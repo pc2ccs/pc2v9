@@ -376,5 +376,24 @@ public class AccountList extends BaseElementList {
     private boolean isNotAssigned(Account account) {
         return account.getDefaultDisplayName(account.getClientId()).equals(account.getDisplayName());
     }
+    
+    /**
+     * A default external id
+     * @param account
+     * @returna default external id based on site number and client number.
+     */
+    public static long generateExternalId(Account account) {
+        return generateExternalId(account.getSiteNumber(), account.getClientId().getClientNumber());
+    }
 
+    /**
+     * A default external id
+     * @param siteNumber
+     * @param clientNumber
+     * @returna default external id based on site number and client number.
+     */
+    public static long generateExternalId(int siteNumber, int clientNumber) {
+        return siteNumber * 1000 + clientNumber;
+    }
+    
 }

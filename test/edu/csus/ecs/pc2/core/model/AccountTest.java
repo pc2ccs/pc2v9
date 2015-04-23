@@ -1,7 +1,8 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * JUnit test for Account class.
@@ -11,7 +12,7 @@ import junit.framework.TestCase;
  */
 
 // $HeadURL$
-public class AccountTest extends TestCase {
+public class AccountTest extends AbstractTestCase {
 
     private Account account = null;
 
@@ -46,6 +47,12 @@ public class AccountTest extends TestCase {
         assertEquals(password, account.getPassword());
         assertNotSame(password + "A", account.getPassword());
     }
+    
+    public void testExternalId() throws Exception {
+
+        System.out.println("debug 22 " + account.getExternalId());
+        assertElementIdCorrect(account);
+    }
 
     public void testPassword() {
 
@@ -59,6 +66,10 @@ public class AccountTest extends TestCase {
         assertEquals(newPasswprd, account2.getPassword());
         assertNotSame(newPasswprd + "A", account2.getPassword());
 
+    }
+    
+    private void assertElementIdCorrect (Account account){
+        assertEquals("Expecting external id ", ""+ AccountList.generateExternalId(account), account.getExternalId());
     }
 
     public void testSiteNumber() {

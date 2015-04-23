@@ -1107,6 +1107,13 @@ public class AbstractTestCase extends TestCase {
         }
     }
     
- 
+
+    public void testNull() throws Exception {
+        
+        /**
+         * Stub test so JUnit runner doesn't complain
+         */
+    }
+    
     
 }

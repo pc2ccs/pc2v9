@@ -839,13 +839,14 @@ public void testExternalId() throws Exception {
 
     assertEquals("external id count ", 22,nodes.getLength());
 
-    String baseValue = "4242";
 
     for (int i = 0; i < nodes.getLength(); i++) {
         Node node = nodes.item(i);
         String value = node.getTextContent();
         // debugPrintln("value = " + value);
-        String expectedValue = baseValue + (i + 1);
+        
+        String expectedValue = Long.toString(siteNumber * 1000 + i+1) ;
+        
         assertNotNull("Expect value for external-id", value);
         assertFalse("Expect value " + expectedValue + "for external-id", "".equals(value));
         assertEquals("Expecting same value", expectedValue, value);

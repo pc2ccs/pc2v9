@@ -38,6 +38,8 @@ public class AccountListTest extends TestCase {
         totAccounts += numAccounts;
         assertTrue("Did not create " + numAccounts + " team accounts", accountList.getAccounts(ClientType.Type.TEAM).size() == numAccounts);
         assertTrue("Did not create " + totAccounts + " accounts", accountList.getAccounts(ClientType.Type.ALL).size() == totAccounts);
+        
+        testExternalIdAccounts(accounts);
     }
 
     public void testAddJudgeAccounts() {
@@ -51,6 +53,8 @@ public class AccountListTest extends TestCase {
         totAccounts += numAccounts;
         assertTrue("Did not create " + numAccounts + " judge accounts", accountList.getAccounts(ClientType.Type.JUDGE).size() == numAccounts);
         assertTrue("Did not create " + totAccounts + " accounts", accountList.getAccounts(ClientType.Type.ALL).size() == totAccounts);
+        
+        testExternalIdAccounts(accounts);
     }
 
     public void testNoAdminAccount() {
@@ -71,5 +75,25 @@ public class AccountListTest extends TestCase {
         totAccounts += numAccounts;
         assertTrue("Did not create " + numAccounts + " judge accounts", accountList.getAccounts(ClientType.Type.SCOREBOARD).size() == numAccounts);
         assertTrue("Did not create " + totAccounts + " accounts", accountList.getAccounts(ClientType.Type.ALL).size() == totAccounts);
+        
+        testExternalIdAccounts(accounts);
     }
+    
+    
+    private void testExternalIdAccounts(Vector<Account> accounts) {
+        for (Account account : accounts) {
+            assertElementIdCorrect(account);
+        }
+    }
+
+    private long generateExternalId(Account account) {
+        
+        return AccountList.generateExternalId(account);
+
+    }
+    
+    private void assertElementIdCorrect (Account account){
+        assertEquals("Expecting external id ", ""+ generateExternalId(account), account.getExternalId());
+    }
+
 }
