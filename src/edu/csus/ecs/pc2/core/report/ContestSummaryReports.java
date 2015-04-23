@@ -69,6 +69,14 @@ public class ContestSummaryReports extends Plugin {
 
         reports.add(new OldRunsReport());
         reports.add(new ContestSettingsReport());
+        
+        // Bug 908
+        reports.add(new JSONReport());
+        reports.add(new GroupsTSVReport());
+        reports.add(new ScoreboardTSVReport());
+        reports.add(new SubmissionsTSVReport());
+        reports.add(new ResolverEventFeedReport());
+
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
     }

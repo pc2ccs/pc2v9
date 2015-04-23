@@ -991,6 +991,7 @@ public class ReportPane extends JPanePlugin {
             ContestSummaryReports contestReports = new ContestSummaryReports();
             contestReports.setContestAndController(getContest(), getController());
             contestReports.generateReports();
+            System.out.println("Reports Generated to " + Utilities.getCurrentDirectory() + File.separator + contestReports.getReportDirectory());
             JOptionPane.showMessageDialog(this, "Reports Generated to "+contestReports.getReportDirectory());
         } catch (Exception e) {
             logException("Unable to produce reports", e);
