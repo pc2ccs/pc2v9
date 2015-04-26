@@ -17,6 +17,12 @@ public class LanguageImplementation implements ILanguage {
     private String name;
     
     private ElementId elementId;
+    
+    private String compilerCommandLine;
+    private String executionCommandLine;
+    private boolean interpreted;
+    private String executableMask;
+    
 
     public LanguageImplementation(ElementId languageId, IInternalContest internalContest) {
         this(internalContest.getLanguage(languageId));
@@ -25,6 +31,11 @@ public class LanguageImplementation implements ILanguage {
     public LanguageImplementation(Language language) {
         name = language.getDisplayName();
         elementId = language.getElementId();
+
+        compilerCommandLine = language.getCompileCommandLine();
+        executionCommandLine = language.getProgramExecuteCommandLine();
+        interpreted = language.isInterpreted();
+        executableMask = language.getExecutableIdentifierMask();
     }
 
     public String getName() {
@@ -50,8 +61,34 @@ public class LanguageImplementation implements ILanguage {
     public int hashCode() {
         return elementId.toString().hashCode();
     }
-    
+
     public ElementId getElementId() {
         return elementId;
     }
+    
+    @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
+    public String getCompilerCommandLine() {
+        return compilerCommandLine;
+    }
+
+    @Override
+    public boolean isInterpreted() {
+        return interpreted;
+    }
+
+    @Override
+    public String getExecutionCommandLine() {
+        return executionCommandLine;
+    }
+
+    @Override
+    public String getExecutableMask() {
+        return executableMask;
+    }
+    
 }

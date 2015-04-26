@@ -42,4 +42,39 @@ public interface ILanguage {
      * @return An integer hashcode for this object.
      */
     int hashCode();
+    
+    /**
+     * Get Display Name for the language, ex. Java.
+     * 
+     * @return Display Name for the language, ex. Java
+     */
+    String getTitle();
+
+    /**
+     * Get command to compile source code.
+     * 
+     * @return command to compile source code.
+     */
+    String getCompilerCommandLine();
+
+    /**
+     * Is this an interpreted language like Perl or Python.
+     * 
+     * @return true if interpreted, false if language created executable.
+     */
+    boolean isInterpreted();
+
+    /**
+     * Get command to execute program.
+     * 
+     * @return command to execute program.
+     */
+    String getExecutionCommandLine();
+
+    /**
+     * Get an expected output program name.
+     * 
+     * @return an expected output program name
+     */
+    String getExecutableMask();
 }

@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.api.implementation;
 import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IClient.ClientType;
 import edu.csus.ecs.pc2.api.IContest;
+import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IProblemDetails;
 import edu.csus.ecs.pc2.api.IRun;
@@ -12,6 +13,8 @@ import edu.csus.ecs.pc2.api.RunStates;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
@@ -192,13 +195,13 @@ public class ContestTest extends AbstractTestCase {
         assertEquals("Judge clients ", 12, number);
 
         number = countClients(allClients, 1, ClientType.ADMIN_CLIENT);
-        assertEquals("Admin clients ", 0, number);
+        assertEquals("Admin clients ", 1, number);
 
         number = countClients(allClients, 1, ClientType.TEAM_CLIENT);
         assertEquals("Team clients ", 12, number);
 
         number = countClients(allClients, 1, ClientType.SCOREBOARD_CLIENT);
-        assertEquals("Scoreboard clients ", 2, number);
+        assertEquals("Scoreboard clients ", 1, number);
     }
     
     public void testRunStatus() throws Exception {
@@ -358,8 +361,56 @@ public class ContestTest extends AbstractTestCase {
         assertNotNull("Expecting to find run id "+runId, run);
         assertEquals("Run id", runId, run.getNumber());
         
-        
-        
     }
     
+    public void testLanguagesImpl() throws Exception {
+        
+        Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.JAVATITLE);
+        
+        IInternalContest internal = sampleContest.createContest(1, 3, 12, 12, true);
+
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
+
+        IInternalController controller = sampleContest.createController(internal, storageDirectory, true, false);
+        Log log = createLog("loggy" + getName());
+        
+        internal.addLanguage(language);
+        
+        Contest contest = new Contest(internal, controller, log);
+        
+        int lastIndex = contest.getLanguages().length - 1;
+        ILanguage lang = contest.getLanguages()[lastIndex];
+
+        
+        assertEquals("getName ", language.getDisplayName(), lang.getName());
+        assertEquals("getTitle ", language.getDisplayName(), lang.getTitle());
+        
+        assertEquals("getCompileCommandLine ", language.getCompileCommandLine(), lang.getCompilerCommandLine());
+        assertEquals("isInterpreted ", language.isInterpreted(), lang.isInterpreted());
+        assertEquals("getExecutableMask ", language.getExecutableIdentifierMask(), lang.getExecutableMask());
+        assertEquals("getExecutionCommandLine ", language.getProgramExecuteCommandLine(), lang.getExecutionCommandLine());
+        
+        assertFalse("isInterpreted ", lang.isInterpreted());
+
+        
+        language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.PHPTITLE);
+        
+        internal.addLanguage(language);
+        
+        lastIndex = contest.getLanguages().length - 1;
+        lang = contest.getLanguages()[lastIndex];
+        
+        assertEquals("getName ", language.getDisplayName(), lang.getName());
+        assertEquals("getTitle ", language.getDisplayName(), lang.getTitle());
+        
+        assertEquals("getCompileCommandLine ", language.getCompileCommandLine(), lang.getCompilerCommandLine());
+        assertEquals("isInterpreted ", language.isInterpreted(), lang.isInterpreted());
+        
+        assertEquals("getExecutableMask ", language.getExecutableIdentifierMask(), lang.getExecutableMask());
+        assertEquals("getExecutionCommandLine ", language.getProgramExecuteCommandLine(), lang.getExecutionCommandLine());
+        
+        assertTrue("isInterpreted ", lang.isInterpreted());
+        
+    }
 }
