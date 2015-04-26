@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -124,6 +125,10 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         Problem[] problems = loader.getProblems(contents, ContestYAMLLoader.DEFAULT_TIME_OUT);
 
         assertEquals("Number of problems", 5, problems.length);
+        
+        for (Problem problem : problems) {
+            assertFalse("Expecting NOT manual review", problem.isManualReview());
+        }
         
         int problemIndex = 0;
 
@@ -1313,7 +1318,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 //        startExplorer(testDirName);
         
         String yamlFileName = testDirName+File.separator+"contest.yaml";
-        editFile(yamlFileName);
+//        editFile(yamlFileName);
         if (isDebugMode()){
             System.out.println("filename = "+yamlFileName);
         }
@@ -1351,7 +1356,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         String singletonTestName = "";
         singletonTestName = "testYamlWriteAndLoad";
 //        singletonTestName = "testUnQuote";
-        singletonTestName = "testJudgeCDPPath";
+        singletonTestName = "testGlobalManualOverrideSet";
 
         if (!"".equals(singletonTestName)) {
             suite.addTest(new ContestYAMLLoaderTest(singletonTestName));
@@ -1379,5 +1384,45 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
             suite.addTest(new ContestYAMLLoaderTest("testLoadProblemSet"));
         }
         return suite;
+    }
+    
+    // TODO test problem using validator command line
+    
+    public void testSetManualJudge() throws Exception {
+        
+        String testdir = getDataDirectory(this.getName());
+//        ensureDirectory(testdir+File.separator+"manualProb");
+//        startExplorer(testdir);
+        
+        ContestYAMLLoader loader = new ContestYAMLLoader();
+        
+        Problem problem = new Problem("testmanualproblem");
+        
+        IInternalContest contest = new InternalContest();
+        
+        problem.setShortName("manualProb");
+        boolean overrideUsePc2Validator = false;
+        
+        loader.loadProblemInformationAndDataFiles(contest, testdir, problem, overrideUsePc2Validator);
+        
+        assertTrue("Expecting manual review", problem.isManualReview());
+
+    }
+    public void testGlobalManualOverrideSet() throws Exception {
+        
+        String testdir = getDataDirectory(this.getName());
+//        ensureDirectory(testdir);
+//        startExplorer(testdir);
+        
+        IInternalContest contest = loader.fromYaml(null, testdir, true);
+        
+        Problem[] problems = contest.getProblems();
+        
+        assertEquals("Expecting problems defined ", 4, problems.length);
+        
+        for (Problem problem : problems) {
+            assertTrue("Expecting manual review for "+problem, problem.isManualReview());
+        }
+        
     }
 }

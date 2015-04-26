@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,6 +64,8 @@ public class ContestYAMLLoader {
     public static final String CLAR_CATEGORIES_KEY = "clar-categories";
 
     public static final String PROBLEMS_KEY = "problemset";
+    
+    public static final String MANUAL_REVIEW_KEY = "manual-review";
 
     public static final String ACCOUNTS_KEY = "accounts";
 
@@ -149,6 +152,8 @@ public class ContestYAMLLoader {
     public static final String VALIDATOR_KEY = "validator";
 
     public static final String USING_PC2_VALIDATOR = "use-internal-validator";
+
+//    private static final String SEND_PRELIMINARY_JUDGEMENT_KEY = "send-prelim-judgement";;
     
     /**
      * Load Problem Data File Contents
@@ -182,7 +187,7 @@ public class ContestYAMLLoader {
     public IInternalContest fromYaml(IInternalContest contest, String directoryName, boolean loadDataFileContents)  {
         String[] contents;
         try {
-            contents = loadFileWithIncludes(directoryName, directoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME);
+            contents = loadFileWithIncludes(directoryName,  directoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME);
         } catch (IOException e) {
             throw new YamlLoadException(e);
         }
@@ -198,6 +203,10 @@ public class ContestYAMLLoader {
      * @throws IOException
      */
     public String[] loadFileWithIncludes(String dirname, String filename) throws IOException {
+        
+        if (! new File(filename).isFile()) {
+            throw new FileNotFoundException(filename);
+        }
 
         ArrayList<String> outs = new ArrayList<String>();
 
@@ -315,11 +324,16 @@ public class ContestYAMLLoader {
             overrideUsePc2Validator = true;
         }
 
-        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator);
+        /**
+         * Manual Review global override.
+         */
+        boolean manualReviewOverride = getBooleanValue(getSequenceValue(yamlLines, MANUAL_REVIEW_KEY), false);
+
+        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
         
         if (loadProblemDataFiles){
             for (Problem problem : problems) {
-                loadProblemInformationAndDataFiles(contest, directoryName, problem, overrideUsePc2Validator);
+                loadProblemInformationAndDataFiles(contest, directoryName, problem, overrideUsePc2Validator, manualReviewOverride);
             }
         }
         
@@ -577,6 +591,10 @@ public class ContestYAMLLoader {
      * @param dataFiles
      */
     public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator) {
+        loadProblemInformationAndDataFiles(contest, baseDirectoryName, problem, overrideUsePc2Validator, false);
+    }
+    
+    public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator, boolean overrideManualReview) {
 
         // TODO CCS code this: do not add problem to contest model, new new parameter flag
 
@@ -667,6 +685,23 @@ public class ContestYAMLLoader {
             problem.setComputerJudged(true);
             addDefaultPC2Validator(problem, 1);
         }
+        
+        boolean manualReview = getBooleanValue(getSequenceValue(contents, MANUAL_REVIEW_KEY), false);
+        if (overrideManualReview){
+            manualReview = true;
+        }
+        
+        if (manualReview){
+            problem.setManualReview(true);
+        }
+
+        // TODO CCS - send preliminary - add bug - fix.
+//        boolean sendPreliminary = getBooleanValue(getSequenceValue(contents, SEND_PRELIMINARY_JUDGEMENT_KEY), false);
+//        if (sendPreliminary){
+//            problem.setPrelimaryNotification(true);
+//        }
+               
+        
     }
 
     private void syntaxWarning(String message) {
@@ -936,7 +971,6 @@ public class ContestYAMLLoader {
             problem.setReadInputDataFromSTDIN(false);
 
             SerializedFile serializedFile = new SerializedFile(dataFilePath, problem.isUsingExternalDataFiles());
-            System.out.println("debug 22 file A "+serializedFile);
             problemDataFiles.setJudgesDataFile(serializedFile);
         }
 
@@ -950,7 +984,6 @@ public class ContestYAMLLoader {
             problem.setAnswerFileName(answerFileName);
 
             SerializedFile serializedFile = new SerializedFile(answerFilePath, problem.isUsingExternalDataFiles());
-            System.out.println("debug 22 file B "+serializedFile);
             problemDataFiles.setJudgesAnswerFile(serializedFile);
         }
 
@@ -1186,7 +1219,7 @@ public class ContestYAMLLoader {
      * @return list of {@link Problem}
      * 
      */
-    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator)  {
+    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator, boolean todobool)  {
 
         String[] linesFromSection = getSectionLines(PROBLEMS_KEY, yamlLines);
         
@@ -1547,7 +1580,7 @@ public class ContestYAMLLoader {
             int offset = letter - 'A';
 
             if (offset < 0 || offset >= problems.length) {
-                throw new YamlLoadException("No problem defined for letter " + letter + " (" + list[i].trim().toUpperCase() + ")");
+                throw new YamlLoadException("getProblemsFromLetters: There is no problem definition # " + (offset+1)+" only "+offset+" problems defined?");
             }
             out[i] = problems[offset];
         }
@@ -1645,7 +1678,7 @@ public class ContestYAMLLoader {
      * 
      */
     public Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine)  {
-        return getProblems(contents, defaultTimeOut, loadDataFileContents, defaultValidatorCommandLine, null, false);
+        return getProblems(contents, defaultTimeOut, loadDataFileContents, defaultValidatorCommandLine, null, false, false);
     }
 
     /**
@@ -1661,7 +1694,7 @@ public class ContestYAMLLoader {
     }
 
     public Problem[] getProblems(String[] contents, int defaultTimeOut)  {
-        return getProblems(contents, defaultTimeOut, true, null, null, false);
+        return getProblems(contents, defaultTimeOut, true, null, null, false, false);
     }
 
     /**
