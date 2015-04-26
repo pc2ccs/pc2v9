@@ -24,12 +24,16 @@ languages:
     execCmd: 'java {:basename}'
     runner: 'java'
     runner-args: '{:basename}'
+    use-judge-cmd: false
+    judge-exec-cmd: 'java {:basename}'
 
   - name: 'Default'
     active: true
     compilerCmd: '<Compiler> {:mainfile}'
     exemask: '{:basename}.exe'
     execCmd: '{:basename}.exe'
+    use-judge-cmd: false
+    judge-exec-cmd: '{:basename}.exe'
 
   - name: 'GNU C++ (Unix / Windows)'
     active: true
@@ -38,6 +42,8 @@ languages:
     execCmd: '.\{:basename}.exe'
     runner: '.\{:basename}.exe'
     runner-args: ''
+    use-judge-cmd: false
+    judge-exec-cmd: '.\{:basename}.exe'
 
   - name: 'Perl'
     active: true
@@ -46,6 +52,8 @@ languages:
     execCmd: 'perl {:mainfile}'
     runner: 'perl'
     runner-args: '{:mainfile}'
+    use-judge-cmd: false
+    judge-exec-cmd: 'perl {:mainfile}'
 
   - name: 'Microsoft C++'
     active: true
@@ -54,12 +62,16 @@ languages:
     execCmd: '.\{:basename}.exe'
     runner: '.\{:basename}.exe'
     runner-args: ''
+    use-judge-cmd: false
+    judge-exec-cmd: '.\{:basename}.exe'
 
   - name: 'APL'
     active: true
     compilerCmd: '<Compiler> {:mainfile}'
     exemask: '{:basename}.exe'
     execCmd: '{:basename}.exe'
+    use-judge-cmd: false
+    judge-exec-cmd: '{:basename}.exe'
 
 problemset:
   - letter: A

@@ -881,6 +881,8 @@ public class AbstractTestCase extends TestCase {
                 System.err.println("assertFileContentsEquals: expected file: "+expectedFile.getAbsolutePath());
                 System.err.println("assertFileContentsEquals: actual   file: "+actualFile.getAbsolutePath());
                 System.err.println("assertFileContentsEquals: Diff lines at: "+(i+1));
+                System.err.println("assertFileContentsEquals: expected     : "+expected);
+                System.err.println("assertFileContentsEquals: actual       : "+actual);
                 assertEquals("Expecting same line ine "+(i+1), expected, actual);
             }
         }

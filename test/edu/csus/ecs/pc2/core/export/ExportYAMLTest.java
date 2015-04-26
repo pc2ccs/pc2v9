@@ -83,6 +83,14 @@ public class ExportYAMLTest extends AbstractTestCase {
         ensureDirectory(testDirectory);
         
         IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
+        
+        asertProblemShortAssigned(contest);
+        
+        // Add Manual Evalution on problem 2
+        
+        addManualReview(contest, 2, true);
+        
+//        addShortNames(contest);
 
         ExportYAML exportYAML = new ExportYAML();
 
@@ -90,10 +98,9 @@ public class ExportYAMLTest extends AbstractTestCase {
         
         String actualContestYamlFile = testDirectory+File.separator+ExportYAML.CONTEST_FILENAME;
         
-//        editFile(actualContestYamlFile);
-        
         String expectedContestYamlFile = getTestFilename("expected.contest.yaml");
         
+//        editFile(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
         
         assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4);
@@ -103,13 +110,36 @@ public class ExportYAMLTest extends AbstractTestCase {
         exportYAML = null;
 
     }
-//    private void addShortNames(IInternalContest contest) throws Exception {
+    
+//  private void addShortNames(IInternalContest contest) throws Exception {
 //
-//        int idx = 1;
-//        for (Problem problem : contest.getProblems()) {
-//            problem.setShortName("short" + idx);
-//            idx++;
-//        }
-//    }
+//      int idx = 1;
+//      for (Problem problem : contest.getProblems()) {
+//          if (problem.getShortName() == null){
+//              problem.setShortName("short" + idx);
+//          }
+//          idx++;
+//      }
+//  }
+
+      private void asertProblemShortAssigned(IInternalContest contest) throws Exception {
+    
+          for (Problem problem : contest.getProblems()) {
+              assertNotNull("Problem short name not assigned "+problem,problem.getShortName());
+          }
+      }
+
+      /**
+       * Add manual review to all problems.
+       * @param contest
+       * @param problemNumber
+       * @param flag
+       */
+      private void addManualReview(IInternalContest contest, int problemNumber, boolean flag) {
+
+          Problem[] problems = contest.getProblems();
+          Problem problem = problems[problemNumber+1];
+          problem.setManualReview(flag);
+      }
 
 }

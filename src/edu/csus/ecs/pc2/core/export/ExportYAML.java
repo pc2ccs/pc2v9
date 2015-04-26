@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
@@ -160,14 +161,12 @@ public class ExportYAML {
         contestWriter.println("scoreboard-freeze: " + info.getFreezeTime());
 
         contestWriter.println("# " + ContestYAMLLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": false");
-        contestWriter.println();
 
         String judgeCDPBasePath = info.getJudgeCDPBasePath();
-        if (judgeCDPBasePath == null){
-            judgeCDPBasePath = "";
+        if (! StringUtilities.isEmpty(judgeCDPBasePath)){
+            contestWriter.println(ContestYAMLLoader.JUDGE_CONFIG_PATH_KEY +": "+judgeCDPBasePath);
         }
         
-        contestWriter.println(ContestYAMLLoader.JUDGE_CONFIG_PATH_KEY +": "+judgeCDPBasePath);
         contestWriter.println();
 
         // TODO CCS write default clar
@@ -516,6 +515,12 @@ public class ExportYAML {
         problemWriter.println("author: ");
         problemWriter.println("license: ");
         problemWriter.println("rights_owner: ");
+        
+//        if (problem.isManualReview()){
+//            problemWriter.println(ContestYAMLLoader.MANUAL_REVIEW_KEY+": true");
+//            problemWriter.println();
+//            
+//        }
 
         problemWriter.println();
 
