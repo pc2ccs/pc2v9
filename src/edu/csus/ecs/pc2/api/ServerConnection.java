@@ -127,9 +127,12 @@ public class ServerConnection {
         }
 
         controller.setUsingGUI(false);
-        if (controller instanceof InternalController){
-            ((InternalController)controller).setUsingMainUI(false);
+        
+        if (controller instanceof InternalController) {
+            ((InternalController) controller).setUsingMainUI(false);
+            ((InternalController) controller).setHaltOnFatalError(false);
         }
+        
         controller.setClientAutoShutdown(false);
 
         try {

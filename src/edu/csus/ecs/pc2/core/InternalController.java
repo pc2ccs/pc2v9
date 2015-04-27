@@ -133,6 +133,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private static final String FILE_OPTION_STRING = "-F";
 
     private static final String NO_GUI_OPTION_STRING = "--nogui";
+    
+    private boolean haltOnFatalError = true;
 
     /**
      * InternalContest data.
@@ -3420,14 +3422,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * @param ex
      */
     protected void fatalError(String message, Exception ex) {
-
+        
         if (log != null) {
             if (ex != null) {
                 log.log(Log.SEVERE, message, ex);
             } else {
                 log.log(Log.SEVERE, message);
             }
-            log.log(Log.INFO, "PC^2 halted");
+
+            if (haltOnFatalError) {
+                log.log(Log.INFO, "PC^2 halted");
+            }
         }
 
         if (usingGUI) {
@@ -3444,10 +3449,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     ex.printStackTrace(System.err);
                 }
             }
-            System.err.println("PC^2 Halted - check logs");
+
+            if (haltOnFatalError) {
+                System.err.println("PC^2 Halted - check logs");
+            }
         }
 
-        System.exit(4);
+        if (haltOnFatalError) {
+            System.exit(4);
+        }
+        
     }
 
     /**
@@ -3822,6 +3833,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     @Override
     public void setConnectionManager(ITransportManager connectionManager) {
         this.connectionManager = connectionManager;
+    }
+    
+    public void setHaltOnFatalError(boolean haltOnFatalError) {
+        this.haltOnFatalError = haltOnFatalError;
+    }
+    
+    public boolean isHaltOnFatalError() {
+        return haltOnFatalError;
     }
     
 }
