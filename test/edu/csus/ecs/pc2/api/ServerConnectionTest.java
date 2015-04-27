@@ -1019,6 +1019,21 @@ public class ServerConnectionTest extends AbstractTestCase {
         
     }
 
+    public void testFailedLogin() throws Exception {
+        
+        String login = "team99";
+        
+        ServerConnection serverConnection = new ServerConnection();
+        try {
+            serverConnection.login(login, login);
+            
+            fail("Expecting LoginFailureException");
+            
+        } catch (LoginFailureException e) {
+            // Passes - should throw this exception
+        }
+    }
+
 //    private void addLanguageSample() {
 //
 //        String login = "administrator2";
