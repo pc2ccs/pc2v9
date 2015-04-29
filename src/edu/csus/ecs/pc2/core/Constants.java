@@ -74,4 +74,11 @@ public final class Constants {
 
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
     
+    /**
+     * Default file name for judgement ini file.
+     */
+    public static final String JUDGEMENT_INIT_FILENAME = "reject.ini";
+
+
+    
 }

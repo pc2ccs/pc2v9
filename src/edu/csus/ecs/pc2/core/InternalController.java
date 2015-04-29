@@ -162,8 +162,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private Ini ini = new Ini();
 
-    private String judgementINIFileName = "reject.ini";
-
     private static final String DEBUG_OPTION_STRING = "--debug";
 
     private static final String LOGIN_OPTION_STRING = "--login";
@@ -974,10 +972,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             if (contest.getJudgements().length == 0) {
 
-                if (loadedJudgementsFromIni()) {
-                    info("Loaded judgements from " + judgementINIFileName);
+                if (loadedJudgementsFromIni(Constants.JUDGEMENT_INIT_FILENAME)) {
+                    info("Loaded judgements from " + Constants.JUDGEMENT_INIT_FILENAME);
                 } else {
-                    info(judgementINIFileName + " not found, ok.  Loading default judgements");
+                    info(Constants.JUDGEMENT_INIT_FILENAME + " not found.  Loading default judgements");
                     loadDefaultJudgements();
                 }
             }
@@ -993,11 +991,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * 
      * @return true if loaded, false if could not read file.
      */
-    protected boolean loadedJudgementsFromIni() {
+    protected boolean loadedJudgementsFromIni(String filename) {
 
-        if (new File(judgementINIFileName).exists()) {
+        if (new File(filename).exists()) {
 
-            String[] lines = Utilities.loadINIFile(judgementINIFileName);
+            String[] lines = Utilities.loadINIFile(filename);
 
             if (lines == null || lines.length == 0) {
                 return false;
@@ -1005,9 +1003,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             Judgement judgement = new Judgement("Yes", Judgement.ACRONYM_ACCEPTED);
             contest.addJudgement(judgement);
+            int offset = contest.getJudgements().length;
 
             for (String judgementName : lines) {
-                judgement = new Judgement("No - " + judgementName, "JE");
+                String WA_number = String.format("%03d", offset++);
+                judgement = new Judgement("No - " + judgementName, Judgement.ACRONYM_WRONG_ANSWER+WA_number);
                 contest.addJudgement(judgement);
             }
 
