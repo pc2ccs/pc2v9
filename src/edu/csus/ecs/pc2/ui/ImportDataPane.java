@@ -159,30 +159,27 @@ public class ImportDataPane extends JPanePlugin {
         try {
             // TODO CCS figure out how to determine whether to load data file contents.
             boolean loadDataFileContents = true;
+
             String value = IniFile.getValue("server.externalfiles");
-            if (value != null && value.equalsIgnoreCase("yes")){
+            if (value != null && value.equalsIgnoreCase("yes")) {
                 loadDataFileContents = false;
             }
-        
+
             newContest = loader.fromYaml(null, directoryName, loadDataFileContents);
-            
-             contestSummary = new ContestComparison().getContestLoadSummary(newContest);
-             
-             if (Utilities.isDebugMode()){
-                 newContest.generateNewAccounts(Type.ADMINISTRATOR.toString(), 1, true);
-                 newContest.setClientId(newContest.getAccounts(Type.ADMINISTRATOR).firstElement().getClientId());
-                 if (newContest.getClientId() == null){
-                     showReportFrame(newContest);
-                 } else {
-                     Utilities.viewReport(new ProblemsReport(), "Title: "+newContest.getTitle(), newContest, getController());
-                 }
-                 
-                 FrameUtilities.showMessage(null, "New Comparison information", new ContestComparison().comparisonList(getContest(), newContest));
-                 
-             }
-             
-             result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
-   
+
+//            contestSummary = new ContestComparison().getContestLoadSummary(newContest);
+            contestSummary = new ContestComparison().comparisonList(getContest(), newContest);
+
+            if (Utilities.isDebugMode()) {
+                
+                Utilities.viewReport(new ProblemsReport(), "Title: " + newContest.getTitle(), newContest, getController());
+
+                // FrameUtilities.showMessage(null, "New Comparison information", new ContestComparison().comparisonList(getContest(), newContest));
+//                showReportFrame(newContest);
+            }
+
+            result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
+
         } catch (Exception e) {
             logException("Unable to load contest YAML from " + filename, e);
             showMessage("Problem loading file(s), check log.  " + e.getMessage());
