@@ -22,7 +22,7 @@ public class LanguageAutoFillTest extends TestCase {
 
     public void testisInterpretedLanguage() throws Exception {
 
-        String[] keys = { LanguageAutoFill.PERLTITLE, LanguageAutoFill.PHPTITLE, LanguageAutoFill.PYTHONTITLE, LanguageAutoFill.RUBYTITLE, };
+        String[] keys = { LanguageAutoFill.PERLTITLE, LanguageAutoFill.PHPTITLE, LanguageAutoFill.PYTHONTITLE, LanguageAutoFill.PYTHON3TITLE, LanguageAutoFill.RUBYTITLE, };
 
         for (String key : keys) {
             assertTrue("Expecting interpreted language", LanguageAutoFill.isInterpretedLanguage(key));
@@ -54,6 +54,20 @@ public class LanguageAutoFillTest extends TestCase {
             assertTrue("Expected {: in " + programExecutionCommandLine + " for " + key, programExecutionCommandLine.indexOf("{:") > -1);
 
         }
+    }
+    
+    public void testPython3Def() throws Exception {
+
+        Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.PYTHON3TITLE);
+
+        String[] values = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.PYTHON3TITLE);
+
+        assertEquals("interpreted ", true, language.isInterpreted());
+
+        assertEquals("lang name ", values[0], language.getDisplayName());
+
+        assertEquals("lang execute ", values[3], language.getProgramExecuteCommandLine());
+
     }
 
     public static void printDefs() {

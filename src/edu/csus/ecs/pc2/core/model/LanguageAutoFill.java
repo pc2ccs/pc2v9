@@ -35,6 +35,8 @@ public final class LanguageAutoFill {
     public static final String PYTHONTITLE = "Python";
     
     public static final String RUBYTITLE = "Ruby";
+    
+    public static final String PYTHON3TITLE = "Python 3";
 
     /**
      * Constant string for an interpreted language.
@@ -44,7 +46,7 @@ public final class LanguageAutoFill {
     private static final String NULL_LANGUAGE_NAME = "";
 
     private static String[] languageList = { DEFAULTTITLE, JAVATITLE, //
-            GNUCPPTITLE, GNUCTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, RUBYTITLE, //
+            GNUCPPTITLE, GNUCTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, PYTHON3TITLE, RUBYTITLE, //
             MSCTITLE, KYLIXTITLE, KYLIXCPPTITLE, FPCTITLE };
 
     /**
@@ -128,6 +130,12 @@ public final class LanguageAutoFill {
 
             String[] dVals = { PYTHONTITLE, "python -m py_compile {:mainfile}", "{:noexe}", //
                     "python {:mainfile}", PYTHONTITLE, INTERPRETER_VALUE };
+            return dVals;
+
+        } else if (key.equals(PYTHON3TITLE)) {
+
+            String[] dVals = { PYTHONTITLE, "python3 -m py_compile {:mainfile}", "{:noexe}", //
+                    "python3 {:mainfile}", PYTHONTITLE, INTERPRETER_VALUE };
             return dVals;
 
         } else if (key.equals(RUBYTITLE)) {
