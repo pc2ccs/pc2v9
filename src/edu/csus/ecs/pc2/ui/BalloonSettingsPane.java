@@ -379,7 +379,7 @@ public class BalloonSettingsPane extends JPanePlugin {
 
         public void balloonSettingsRemoved(BalloonSettingsEvent event) {
             // TODO remove balloon setting
-            log.info("debug BalloonSettings REMOVED  " + event.getBalloonSettings());
+            log.info("BalloonSettings REMOVED  " + event.getBalloonSettings());
         }
 
         public void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent) {

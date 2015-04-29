@@ -134,7 +134,6 @@ public class ContestPreloadPane extends JPanePlugin {
         } else {
 
             getLog().info("Could not load preconfigured contests from " + dirname);
-            System.err.println("debug 22 -Could not load preconfigured contests from " + dirname);
         }
 
     }

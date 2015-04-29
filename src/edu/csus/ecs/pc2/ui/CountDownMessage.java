@@ -58,7 +58,6 @@ public class CountDownMessage extends JDialog implements ActionListener, ICountD
 
     public void start(String prefixForCount, int seconds) {
 
-        System.out.println("debug 22 START ");
         setRemainingSeconds(seconds);
         endMilliSeconds = new Date().getTime() + inputRemainingSeconds * 1000;
 
@@ -67,7 +66,6 @@ public class CountDownMessage extends JDialog implements ActionListener, ICountD
         countdownTimerLabel.setText(remainSring);
         setEnabled(true); // SOMEDAY remove this redundant method call and test.
         setVisible(true);
-        System.out.println("debug 22 timer started ");
         timer.start();
     }
 
@@ -154,7 +152,6 @@ public class CountDownMessage extends JDialog implements ActionListener, ICountD
     }
 
     public void actionOnClose() {
-        System.out.println("debug 22 actionOnClose");
         if (exitOnClose) {
             System.exit(4);
         } else {
@@ -191,7 +188,7 @@ public class CountDownMessage extends JDialog implements ActionListener, ICountD
         }
 
         countdownTimerLabel.setText(message);
-        System.out.println("debug 22 remaining = "+message);
+        System.out.println("Remaining " + message);
 
         if (remainingSeconds < 1) {
             actionOnClose();

@@ -714,15 +714,10 @@ public class AutoJudgingMonitor implements UIPlugin {
                 });
             }
             
-            System.out.println("debug - is this before look ?!");
-            
             if (!((ControlLoop) controlLoop).isRunning()) {
-                System.out.println("debug - is running? ?!");
                 controlLoop.run();
             }
             
-            System.out.println("debug - is this dead code");
-
         } else {
 
             if (usingGui){

@@ -114,7 +114,7 @@ public class PacketHandler {
         info("handlePacket start " + packet);
         PacketFactory.dumpPacket(controller.getLog(), packet, "handlePacket");
         if (Utilities.isDebugMode()) {
-            PacketFactory.dumpPacket(System.out, packet, "debug handlePacket");
+            PacketFactory.dumpPacket(System.out, packet, "handlePacket");
         }
         
         ClientId fromId = packet.getSourceId();
@@ -440,8 +440,6 @@ public class PacketHandler {
     private void handleStopPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {
         // SOMEDAY  673 forward this start playback to other servers
         
-        System.out.println("debug 22 - handleStartPlayback "); // SOMEDAY  673 remove debuggin
-        
         securityCheck(Permission.Type.STOP_PLAYBACK, fromId, connectionHandlerID);
         
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
@@ -451,7 +449,6 @@ public class PacketHandler {
     private void handleStartPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {
         
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
-        System.out.println("debug 22 - handleStartPlayback " + playbackInfo); // SOMEDAY  673 remove debugging
         
         if ( isServer()) {
 
@@ -512,7 +509,6 @@ public class PacketHandler {
 
         } else {
             
-            System.out.println("debug 22 - for "+contest.getClientId()+" handleStartPlayback " + playbackInfo); // SOMEDAY  673 remove debugging
             contest.updatePlaybackInfo(playbackInfo);
         }
     }
@@ -614,7 +610,7 @@ public class PacketHandler {
 
         if (manager.isProfileAvailable(newProfile, contest.getSiteNumber(), contestPassword.toCharArray())) {
 
-            PacketFactory.dumpPacket(System.out, packet, "handleSwitchProfile switchProfile"); // debug 22
+//            PacketFactory.dumpPacket(System.out, packet, "handleSwitchProfile switchProfile"); // debug 
             IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), true);
             contest = newContest;
             
@@ -717,8 +713,6 @@ public class PacketHandler {
             contest.cloneAllLoginAndConnections(newContest);
         } catch (CloneException e) {
             info(e);
-            System.err.println("debug 22 - CloneException ");
-            e.printStackTrace(System.err); // debug 22
         }
         
         /*

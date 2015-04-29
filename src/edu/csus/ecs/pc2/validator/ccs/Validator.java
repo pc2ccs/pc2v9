@@ -453,7 +453,6 @@ public class Validator {
 
         Validator validator = new Validator();
         int exitCode = validator.runValidator(args);
-        System.err.println("debug 22 Exit with code "+exitCode);
         System.exit(exitCode);
     }
 }

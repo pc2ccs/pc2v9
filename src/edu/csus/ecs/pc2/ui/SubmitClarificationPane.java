@@ -249,36 +249,30 @@ public class SubmitClarificationPane extends JPanePlugin {
     private class ContestTimeListenerImplementation implements IContestTimeListener {
 
         public void contestTimeAdded(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " ADDED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
 
         public void contestTimeRemoved(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " REMOVED ");
         }
 
         public void contestTimeChanged(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " CHANGED ");
         }
 
         public void contestStarted(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " STARTED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
 
         public void contestStopped(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " STOPPED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
 
         public void refreshAll(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " STOPPED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
