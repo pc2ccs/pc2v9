@@ -2389,7 +2389,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 startLog(null, "pc2.startup", null, null);
             }
         } else {
-            startLog(null, "pc2.startup", null, null);
+            startLog(null, "pc2.startup."+System.currentTimeMillis(), null, null);
         }
         
         // TODO 770 untested code for bug
