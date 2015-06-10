@@ -216,10 +216,11 @@ public class Log extends Logger {
                 addHandler(streamHandler);
             }
 
+        } catch (IOException e) {
+            System.err.println("IOexception in setFileHandlers "+e.getMessage());
         } catch (Exception e) {
-            System.err.println("exception in setFileHandlers");
+            System.err.println("exception in setFileHandlers "+e.getMessage());
             e.printStackTrace();
-            // TODO: handle exception
         }
 
         // setup the new handlers
