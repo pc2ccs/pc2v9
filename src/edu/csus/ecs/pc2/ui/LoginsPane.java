@@ -54,6 +54,8 @@ public class LoginsPane extends JPanePlugin {
     private JLabel messageLabel = null;
 
     private JButton reportButton = null;
+    
+    private JLabel rowCountLabel = null;
 
     /**
      * This method initializes
@@ -207,6 +209,7 @@ public class LoginsPane extends JPanePlugin {
             loginListBox.replaceRow(objects, row);
         }
         loginListBox.autoSizeAllColumns();
+        updateRowCount();
     }
 
     private void removeLoginRow(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
@@ -215,6 +218,7 @@ public class LoginsPane extends JPanePlugin {
             loginListBox.removeRow(row);
         }
         loginListBox.autoSizeAllColumns();
+        updateRowCount();
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -330,6 +334,10 @@ public class LoginsPane extends JPanePlugin {
      */
     private JPanel getMessagePanel() {
         if (messagePanel == null) {
+            rowCountLabel = new JLabel();
+            rowCountLabel.setText("0   ");
+            rowCountLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+            rowCountLabel.setPreferredSize(new java.awt.Dimension(100,16));
             messageLabel = new JLabel();
             messageLabel.setText("");
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -337,6 +345,7 @@ public class LoginsPane extends JPanePlugin {
             messagePanel.setLayout(new BorderLayout());
             messagePanel.setPreferredSize(new java.awt.Dimension(25, 25));
             messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
+            messagePanel.add(rowCountLabel, java.awt.BorderLayout.EAST);
         }
         return messagePanel;
     }
@@ -432,6 +441,14 @@ public class LoginsPane extends JPanePlugin {
                }
            });
        }
+   }
+   
+   /**
+    * This updates the rowCountlabel & toolTipText. It should be called only while on the swing thread.
+    */
+   private void updateRowCount() {
+           rowCountLabel.setText(Integer.toString(loginListBox.getRowCount())+"  ");
+           rowCountLabel.setToolTipText(loginListBox.getRowCount() + " logins ");
    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
