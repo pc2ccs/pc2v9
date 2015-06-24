@@ -8,8 +8,9 @@
 		$server = java("ServerInterface")->getInstance();
 		try {
 			$standingArray = $server->getStandings("");
-			$JavaStanding = java_cast($standingArray , "array");
-			
+			if (!java_is_null($standingsArray)) {
+				$JavaStanding = java_cast($standingArray , "array");
+			}
 			
 		} catch(JavaException $exception) {
 			//$error = "Could not get problems!";
