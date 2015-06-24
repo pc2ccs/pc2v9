@@ -28,6 +28,7 @@ No need for Javadoc - this is not an API.
 	<property name="name" value="EWTeam" />
 	<property name="ewuname" value="PC2JavaServer" />
 	<property name="jar.name" value="${ewuname}.jar" />
+	<property name="javacDebugInfo" value="true" />
 
 	<!-- set global properties for this build -->
 	<property name="src.dir" location="src" />
