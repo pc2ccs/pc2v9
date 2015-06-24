@@ -115,7 +115,7 @@ public class ProblemsReport implements IReport {
         writeProblemDataFiles(printWriter, problemDataFiles);
     }
 
-    private void writeProblemDataFiles(PrintWriter printWriter, ProblemDataFiles problemDataFiles) {
+    public void writeProblemDataFiles(PrintWriter printWriter, ProblemDataFiles problemDataFiles) {
         
         if (problemDataFiles != null) {
             SerializedFile[] judgesDataFiles = problemDataFiles.getJudgesDataFiles();

@@ -664,13 +664,14 @@ public class Problem implements IElementObject {
             if (! StringUtilities.stringSame(shortName, problem.getShortName())){
                 return false;
             }
+            // TODO 917 - do isameAs when test case filenames can be added.
+//            if (! StringUtilities.stringArraySame(testCaseDataFilenames, problem.getTestCaseDataFilenames())) {
+//                return false;
+//            }
+//            if (! StringUtilities.stringArraySame(testCaseAnswerFilenames, problem.getTestCaseAnswerFilenames())) {
+//                return false;
+//            }
             
-            if (! StringUtilities.stringArraySame(testCaseDataFilenames, problem.getTestCaseDataFilenames())) {
-                return false;
-            }
-            if (! StringUtilities.stringArraySame(testCaseAnswerFilenames, problem.getTestCaseAnswerFilenames())) {
-                return false;
-            }
             return true;
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);
@@ -925,19 +926,20 @@ public class Problem implements IElementObject {
         return null;
     }
 
-    /**
-     * @return the testCaseDataFilenames
-     */
-    private String[] getTestCaseDataFilenames() {
-        return testCaseDataFilenames;
-    }
-
-    /**
-     * @return the testCaseAnswerFilenames
-     */
-    private String[] getTestCaseAnswerFilenames() {
-        return testCaseAnswerFilenames;
-    }
+    // TODO 917 - isSameAs methods
+//    /**
+//     * @return the testCaseDataFilenames
+//     */
+//    private String[] getTestCaseDataFilenames() {
+//        return testCaseDataFilenames;
+//    }
+//
+//    /**
+//     * @return the testCaseAnswerFilenames
+//     */
+//    private String[] getTestCaseAnswerFilenames() {
+//        return testCaseAnswerFilenames;
+//    }
     
     public State getState() {
         return state;
@@ -945,5 +947,9 @@ public class Problem implements IElementObject {
     
     public void setState(State state) {
         this.state = state;
+    }
+
+    public void setElementId(Problem problem) {
+        problem.elementId = elementId;
     }
 }
