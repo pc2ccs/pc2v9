@@ -7,6 +7,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -229,7 +230,8 @@ public class ServerInterface {
 		// only add to list if not already there
 		boolean inlist = false;
 
-		for(Iterator<TeamData> iterator = teams.iterator(); iterator.hasNext();) {
+		List<TeamData> list = teams;
+		for(Iterator<TeamData> iterator = list.iterator(); iterator.hasNext();) {
 			TeamData t = iterator.next();
 			if (t.getTeamHash() == server.getTeam(conId).getContest()
 					.getMyClient().hashCode())
