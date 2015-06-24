@@ -230,10 +230,11 @@ public class ServerInterface {
 		// only add to list if not already there
 		boolean inlist = false;
 
+		int h = server.getTeam(conId).getContest()
+				.getMyClient().hashCode();
 		TeamData[] d = teams.toArray(new TeamData[0]);
 		for (TeamData t : d) {
-			if (t.getTeamHash() == server.getTeam(conId).getContest()
-						.getMyClient().hashCode()) {
+			if (t.getTeamHash() == h) {
 					inlist = true;
 					break;
 			}
