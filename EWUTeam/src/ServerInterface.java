@@ -254,12 +254,13 @@ public class ServerInterface {
 
 		contest.addRunListener(new IRunEventListener() {
 			public void runJudged(IRun run, boolean isFinal) {
-				for (TeamData t : teams) {
-					if (run.getTeam().hashCode() == t.getTeamHash()) {
-						t.setNewRun(run);
-						return;
+				synchronized (teams) {
+					for (TeamData t : teams) {
+						if (run.getTeam().hashCode() == t.getTeamHash()) {
+							t.setNewRun(run);
+							return;
+						}
 					}
-
 				}
 			}
 
@@ -279,10 +280,12 @@ public class ServerInterface {
 			}
 
 			public void runSubmitted(IRun run) {
-				for (TeamData t : teams) {
-					if (run.getTeam().hashCode() == t.getTeamHash()) {
-						t.setNewRunSubmission(run);
-						return;
+				synchronized (teams) {
+					for (TeamData t : teams) {
+						if (run.getTeam().hashCode() == t.getTeamHash()) {
+							t.setNewRunSubmission(run);
+							return;
+						}
 					}
 				}
 			}
@@ -298,24 +301,27 @@ public class ServerInterface {
 
 		contest.addClarificationListener(new IClarificationEventListener() {
 			public void clarificationAdded(IClarification clar) {
-				for (TeamData t : teams) {
-					if (clar.getTeam().hashCode() == t.getTeamHash()) {
-						t.setNewClarificationSubmission(clar);
-						return;
+				synchronized (teams) {
+					for (TeamData t : teams) {
+						if (clar.getTeam().hashCode() == t.getTeamHash()) {
+							t.setNewClarificationSubmission(clar);
+							return;
+						}
 					}
 				}
 			}
 
 			public void clarificationAnswered(IClarification clar) {
 
-				for (TeamData t : teams) {
-					// System.out.println("clar hash: " + clar.hashCode());
-					// System.out.println("team hash: " + t.getTeamHash());
-					if (clar.getTeam().hashCode() == t.getTeamHash()) {
-						t.setNewClar(clar);
-						return;
+				synchronized (teams) {
+					for (TeamData t : teams) {
+						// System.out.println("clar hash: " + clar.hashCode());
+						// System.out.println("team hash: " + t.getTeamHash());
+						if (clar.getTeam().hashCode() == t.getTeamHash()) {
+							t.setNewClar(clar);
+							return;
+						}
 					}
-
 				}
 
 				// addToClarBuffer(clar);
@@ -563,11 +569,13 @@ public class ServerInterface {
 		if (username == null) {
 			return null;
 		}
-		for (TeamData t : teams) {
-			if (username.equals(t.getTeamName())) {
-				return t.getNewRun();
+		synchronized (teams) {
+			for (TeamData t : teams) {
+				if (username.equals(t.getTeamName())) {
+					return t.getNewRun();
+				}
+	
 			}
-
 		}
 		return null;
 	}
@@ -577,9 +585,11 @@ public class ServerInterface {
 		if (username == null) {
 			return null;
 		}
-		for (TeamData t : teams) {
-			if (username.equals(t.getTeamName())) {
-				return t.getNewClar();
+		synchronized (teams) {
+			for (TeamData t : teams) {
+				if (username.equals(t.getTeamName())) {
+					return t.getNewClar();
+				}
 			}
 		}
 		return null;
@@ -589,9 +599,11 @@ public class ServerInterface {
 		if (username == null) {
 			return null;
 		}
-		for (TeamData t : teams) {
-			if (username.equals(t.getTeamName())) {
-				return t.getRunSubmission();
+		synchronized (teams) {
+			for (TeamData t : teams) {
+				if (username.equals(t.getTeamName())) {
+					return t.getRunSubmission();
+				}
 			}
 		}
 		return null;
@@ -601,9 +613,11 @@ public class ServerInterface {
 		if (username == null) {
 			return null;
 		}
-		for (TeamData t : teams) {
-			if (username.equals(t.getTeamName())) {
-				return t.getClarificationSubmission();
+		synchronized (teams) {
+			for (TeamData t : teams) {
+				if (username.equals(t.getTeamName())) {
+					return t.getClarificationSubmission();
+				}
 			}
 		}
 		return null;
