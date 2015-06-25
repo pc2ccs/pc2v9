@@ -50,12 +50,12 @@ $(function() {
 		 		<th>Team Name</th>
 				<th>Solved</th>
 				<th>Time</th>
-			<?php foreach($JavaStanding[0]->getProblemDetails() as $problem) {echo '<th>' . $problem->getProblem()->getName() . '</th>';}?>
+			<?php if (isset($JavaStanding)) { foreach($JavaStanding[0]->getProblemDetails() as $problem) {echo '<th>' . $problem->getProblem()->getName() . '</th>';}}?>
 						
 			</tr>
 		</thead>
 		<tbody>
-			<?php	foreach ($JavaStanding as $value)  {
+			<?php	if (isset($JavaStanding)) { foreach ($JavaStanding as $value)  {
 					echo "<tr>";
 					echo "<td>".$value->getRank()."</td>";
 					echo "<td>".$value->getClient()->getDisplayName()."</td>";
@@ -74,7 +74,7 @@ $(function() {
 						}
 					
 					echo "</tr>";
-				}
+				}}
 			?>
 	</tbody>
 </table>
