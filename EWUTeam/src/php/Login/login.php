@@ -30,6 +30,7 @@ if (is_resource ( @fsockopen ( 'localhost', 50005 ) )) {
 			$_SESSION ['username'] = $_POST ['username'];
 			header ( "Location: ../Team/TeamClient.php?SESSION_NAME=" . session_name () );
 		} catch ( JavaException $exception ) {
+			error_log("POST login.php JavaException for ".$_POST['username']." ".$exception, 0);
 			$_SESSION ['error'] = "Couldn't log in! </br>Username / Password are incorrect!";
 		}
 	} // end if($_SERVER...)
