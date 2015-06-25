@@ -8,7 +8,7 @@
 		$server = java("ServerInterface")->getInstance();
 		try {
 			$standingArray = $server->getStandings("");
-			if (!java_is_null($standingsArray)) {
+			if (!java_is_null($standingArray)) {
 				$JavaStanding = java_cast($standingArray , "array");
 			}
 			
