@@ -19,20 +19,23 @@
 		include("../lib/Java.inc");
 		$server = java("ServerInterface")->getInstance();
 
-		if( java_is_false( $server->isLoggedIn($_SESSION['cid']))) {
-			session_unset();
-			print "<script type='text/javascript'>alert('Your session has expired. Please log back in.');window.open('../Login/login.php','_parent');</script>";
-			opener.location.reload();
-			exit();
+		if (isset($_SESSION['cid'])) {
+			if( java_is_false( $server->isLoggedIn($_SESSION['cid']))) {
+				session_unset();
+				print "<script type='text/javascript'>alert('Your session has expired. Please log back in.');window.open('../Login/login.php','_parent');</script>";
+				opener.location.reload();
+				exit();
+			}
+	
+			try {
+				$runsArray = $server->getRuns($_SESSION['cid']);
+				if (!java_isnull($runsArray)) {
+					$JavaRuns = java_cast($runsArray, "array");
+				}
+			} catch(JavaException $exception) {
+				$error = "Could not get problems!";
+			}//end catch
 		}
-
-		try {
-			$runsArray = $server->getRuns($_SESSION['cid']);
-			$JavaRuns = java_cast($runsArray, "array");
-			
-		} catch(JavaException $exception) {
-			$error = "Could not get problems!";
-		}//end catch
 	}//end if
 ?>
 

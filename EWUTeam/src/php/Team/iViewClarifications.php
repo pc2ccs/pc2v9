@@ -13,22 +13,24 @@
 	{
 		include("../lib/Java.inc");
 		$server = java("ServerInterface")->getInstance();
-
-	if( java_is_false( $server->isLoggedIn($_SESSION['cid']))) {
-			session_unset();
-			print "<script type='text/javascript'>alert('Your session has expired. Please log back in.');window.open('../Login/login.php','_parent');</script>";
-			opener.location.reload();
-			exit();
-		}
-
-		try {	//Filling in respective arrays. The PHP scripts are down at their respective markup components.
-			$clararray = $server->getClarificationsById($_SESSION['cid']);
-			$JavaClarifications  = java_cast($clararray , "array");
-			
-		} catch(JavaException $exception) {
-			//$error = "Could not get problems!";
-		}//end catch
-	}//end if(is_resource(. . .)) {}
+	if (isset($_SESSION['cid'])) {
+		if( java_is_false( $server->isLoggedIn($_SESSION['cid']))) {
+				session_unset();
+				print "<script type='text/javascript'>alert('Your session has expired. Please log back in.');window.open('../Login/login.php','_parent');</script>";
+				opener.location.reload();
+				exit();
+			}
+	
+			try {	//Filling in respective arrays. The PHP scripts are down at their respective markup components.
+					$clararray = $server->getClarificationsById($_SESSION['cid']);
+					if (!java_is_null($clararray)) {
+						$JavaClarifications  = java_cast($clararray , "array");
+					}
+			} catch(JavaException $exception) {
+				//$error = "Could not get problems!";
+			}//end catch
+		}//end if(is_resource(. . .)) {}
+	}
 ?>
 
 <html>
@@ -73,6 +75,7 @@ $(function() {
 <tbody>
 
 	<?php
+	if (isset($JavaClarifications)) {
 		foreach ($JavaClarifications as $value) {
 			echo "<tr>";
 			echo "<td>".$value->getSiteNumber()."</td>";
@@ -96,6 +99,7 @@ $(function() {
 				echo "<td>".$answer."</td>";
 			echo "</tr>";
 		}
+	}
 	?>
 </tbody>
 </table>
