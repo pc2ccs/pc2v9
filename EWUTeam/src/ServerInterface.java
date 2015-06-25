@@ -42,7 +42,9 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
  * @version $Id$
  */
 
-// $HeadURL$
+// $HeadURL:
+// http://pc2.ecs.csus.edu/repos/pc2projects/trunk/EWUTeam/src/ServerInterface.java
+// $
 public class ServerInterface {
 	public ServerConnectionManager server = new ServerConnectionManager();
 	public static ServerInterface serverInterface = new ServerInterface();
@@ -56,9 +58,9 @@ public class ServerInterface {
 	private int cur_clar_num = 0;
 
 	private IStanding[] standingsArray = null;
-    private VersionInfo versionInfo = new VersionInfo();
-	
-    public class RunListenerEventImplementation implements IRunEventListener {
+	private VersionInfo versionInfo = new VersionInfo();
+
+	public class RunListenerEventImplementation implements IRunEventListener {
 
 		@Override
 		public void runCheckedOut(IRun arg0, boolean arg1) {
@@ -104,9 +106,11 @@ public class ServerInterface {
 		public void runValidating(IRun arg0, boolean arg1) {
 			// we do not care about this
 		}
-		
+
 	}
-    public class ConfigurationListenerEventImplementation implements IConfigurationUpdateListener {
+
+	public class ConfigurationListenerEventImplementation implements
+			IConfigurationUpdateListener {
 
 		@Override
 		public void configurationItemAdded(ContestEvent arg0) {
@@ -116,16 +120,16 @@ public class ServerInterface {
 		@Override
 		public void configurationItemRemoved(ContestEvent arg0) {
 			populateStandings();
-			
+
 		}
 
 		@Override
 		public void configurationItemUpdated(ContestEvent arg0) {
 			populateStandings();
 		}
-    }
-    
-    // explicitly private constructor for Singleton behavior
+	}
+
+	// explicitly private constructor for Singleton behavior
 	private ServerInterface() {
 		try {
 			// Load scoreboard2 password from .ini file.
@@ -148,8 +152,12 @@ public class ServerInterface {
 					scoreBoard.login("scoreboard2", getScoreboardPassword());
 					// scoreBoard.login(getScoreboardLogin(),getScoreboardPassword());
 					// scoreBoard.login("scoreboard1","scoreboard1");
-					scoreBoard.getContest().addRunListener(new RunListenerEventImplementation());
-					scoreBoard.getContest().addContestConfigurationUpdateListener(new ConfigurationListenerEventImplementation());
+					scoreBoard.getContest().addRunListener(
+							new RunListenerEventImplementation());
+					scoreBoard
+							.getContest()
+							.addContestConfigurationUpdateListener(
+									new ConfigurationListenerEventImplementation());
 				}
 				updateStandings();
 			}
@@ -162,15 +170,15 @@ public class ServerInterface {
 	}
 
 	private void updateStandings() {
-		try{
+		try {
 			IStanding[] allStandings = scoreBoard.getContest().getStandings();
-		
+
 			ArrayList<IStanding> standings = new ArrayList<IStanding>();
 			for (IStanding s : allStandings) {
 				standings.add(s);
 			}
 			standingsArray = new IStanding[standings.size()];
-		
+
 			standingsArray = standings.toArray(standingsArray);
 		} catch (Exception e) {
 			// couldn't get runs
@@ -230,18 +238,19 @@ public class ServerInterface {
 		// only add to list if not already there
 		boolean inlist = false;
 
-		int h = server.getTeam(conId).getContest()
-				.getMyClient().hashCode();
-		TeamData[] d = teams.toArray(new TeamData[0]);
-		for (TeamData t : d) {
-			if (t.getTeamHash() == h) {
+		int h = server.getTeam(conId).getContest().getMyClient().hashCode();
+		synchronized (teams) {
+			for (TeamData t : teams) {
+				if (t.getTeamHash() == h) {
 					inlist = true;
 					break;
+				}
 			}
+			if (!inlist)
+				teams.add(new TeamData(server.getTeam(conId).getContest()
+						.getMyClient()));
+
 		}
-		if (!inlist)
-			teams.add(new TeamData(server.getTeam(conId).getContest()
-					.getMyClient()));
 
 		contest.addRunListener(new IRunEventListener() {
 			public void runJudged(IRun run, boolean isFinal) {
@@ -340,9 +349,9 @@ public class ServerInterface {
 	}
 
 	/**
- 	 * @return get list of clar categories and contest problems.
- 	 * @throws NotLoggedInException
- 	 */
+	 * @return get list of clar categories and contest problems.
+	 * @throws NotLoggedInException
+	 */
 	public IProblem[] getClarificationProblems(String teamKey)
 			throws NotLoggedInException
 
@@ -445,7 +454,8 @@ public class ServerInterface {
 	public void submitClarification(String teamKey, String problemName,
 			String question) throws NotLoggedInException {
 		try {
-			IProblem problem = getClarificationProblemByName(teamKey, problemName);
+			IProblem problem = getClarificationProblemByName(teamKey,
+					problemName);
 
 			getTeam(teamKey).submitClarification(problem, question);
 		} catch (Exception e) {
@@ -456,8 +466,8 @@ public class ServerInterface {
 	}
 
 	// get problem by name
-	public IProblem getClarificationProblemByName(String teamKey, String problemName)
-			throws ProblemNotFoundException {
+	public IProblem getClarificationProblemByName(String teamKey,
+			String problemName) throws ProblemNotFoundException {
 		try {
 			IProblem[] problems = getClarificationProblems(teamKey);
 			for (IProblem p : problems)
@@ -467,7 +477,6 @@ public class ServerInterface {
 		}
 		throw new ProblemNotFoundException();
 	}
-
 
 	// get problem by name
 	public IProblem getProblemByName(String teamKey, String problemName)
@@ -600,66 +609,53 @@ public class ServerInterface {
 		return null;
 	}
 
-    /**
-     * @return build number for pc2.
-     */
-    public String getBuildNumberForPC2()
-    {
-        return versionInfo.getBuildNumber();
-    }
+	/**
+	 * @return build number for pc2.
+	 */
+	public String getBuildNumberForPC2() {
+		return versionInfo.getBuildNumber();
+	}
 
-    /**
-     * 
-     * @return
-     */
-    public String getVersionNumberforPC2()
-    {
-        /*
-         * $ cat MANIFEST.MF 
-         * Manifest-Version: 1.0
-         * Ant-Version: Apache Ant 1.7.0
-         * Created-By: 1.5.0_17-b04 (Sun Microsystems Inc.)
-         * Specification-Version: 9.3beta
-         * Implementation-Title: CSUS Programming Contest Control System
-         * Implementation-Version: 2697
-         * Built-On: Wednesday, September 25 2013 03:33 UTC
-         * Built-On-Date: 20130925
-         * Main-Class: edu.csus.ecs.pc2.Starter
-         */
+	/**
+	 * 
+	 * @return
+	 */
+	public String getVersionNumberforPC2() {
+		/*
+		 * $ cat MANIFEST.MF Manifest-Version: 1.0 Ant-Version: Apache Ant 1.7.0
+		 * Created-By: 1.5.0_17-b04 (Sun Microsystems Inc.)
+		 * Specification-Version: 9.3beta Implementation-Title: CSUS Programming
+		 * Contest Control System Implementation-Version: 2697 Built-On:
+		 * Wednesday, September 25 2013 03:33 UTC Built-On-Date: 20130925
+		 * Main-Class: edu.csus.ecs.pc2.Starter
+		 */
 
-        return versionInfo.getVersionNumber();
-    }
+		return versionInfo.getVersionNumber();
+	}
 
-    public String getBuildNumber() throws IOException
-    {
-        return getManifestValue("Implementation-Version");
-    }
+	public String getBuildNumber() throws IOException {
+		return getManifestValue("Implementation-Version");
+	}
 
-    public String getVersionNumber() throws IOException
-    {
-        /*
-         * $ cat MANIFEST.MF 
-         * Manifest-Version: 1.0
-         * Ant-Version: Apache Ant 1.7.0
-         * Created-By: 24.0-b56 (Oracle Corporation)
-         * Main-Class: PC2JavaMiniserver
-         * Specification-Version: 2.0
-         * Implementation-Title: EWU Web Team Client
-         * Implementation-Version: 60
-         * Built-On: Saturday, October 26 2013 06:21 UTC
-         * Class-Path: pc2.jar JavaBridge.jar
-         */
-        return getManifestValue("Specification-Version");
-    }
+	public String getVersionNumber() throws IOException {
+		/*
+		 * $ cat MANIFEST.MF Manifest-Version: 1.0 Ant-Version: Apache Ant 1.7.0
+		 * Created-By: 24.0-b56 (Oracle Corporation) Main-Class:
+		 * PC2JavaMiniserver Specification-Version: 2.0 Implementation-Title:
+		 * EWU Web Team Client Implementation-Version: 60 Built-On: Saturday,
+		 * October 26 2013 06:21 UTC Class-Path: pc2.jar JavaBridge.jar
+		 */
+		return getManifestValue("Specification-Version");
+	}
 
-    public String getManifestValue(String name) throws IOException
-    {
-        URLClassLoader classLoader = (URLClassLoader) getClass().getClassLoader();
-        URL url = classLoader.findResource("META-INF/MANIFEST.MF");
-        Manifest manifest = new Manifest(url.openStream());
-        Attributes attributes = manifest.getMainAttributes();
-        return attributes.getValue(name);
-    }
-    
+	public String getManifestValue(String name) throws IOException {
+		URLClassLoader classLoader = (URLClassLoader) getClass()
+				.getClassLoader();
+		URL url = classLoader.findResource("META-INF/MANIFEST.MF");
+		Manifest manifest = new Manifest(url.openStream());
+		Attributes attributes = manifest.getMainAttributes();
+		return attributes.getValue(name);
+	}
+
 }// end class:ServerInterface
 
