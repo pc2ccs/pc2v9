@@ -12,23 +12,29 @@
 
 		$server = java("ServerInterface")->getInstance();
 		
-		try {
-			$clock = $server->getClock($_SESSION['cid']);
-		} catch (JavaException $exception) {
-			echo 'failed!';
+		if (isset($_SESSION['cid'])) {
+			try {
+				$clock = $server->getClock($_SESSION['cid']);
+			} catch (JavaException $exception) {
+				error_log("getClock.php JavaException "+$exception);
+				echo 'failed!';
+			}
+			
+			
+			if (isset($clock)) {
+				$timeleft = java_cast($clock->getRemainingSecs(),"integer");
+		
+				$hours = (int)($timeleft / 3600);
+				$min = (int)(($timeleft%3600)/60);
+				
+				$time = array(
+		    		"hour"  => $hours,
+		    		"min" => $min,
+				);
+				
+				echo json_encode($time);
+			}
+		} else {
+			error_log("getClock.php ".$_REQUEST['SESSION_NAME']." cid not set");
 		}
-		
-		
-		$timeleft = java_cast($clock->getRemainingSecs(),"integer");
-
-		$hours = (int)($timeleft / 3600);
-		$min = (int)(($timeleft%3600)/60);
-		
-		$time = array(
-    		"hour"  => $hours,
-    		"min" => $min,
-		);
-		
-		echo json_encode($time);
-
 		?>
