@@ -9,6 +9,22 @@ import javax.swing.JPanel;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
+import javax.swing.JTabbedPane;
+import javax.swing.border.LineBorder;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+
+import java.awt.Color;
+
+import javax.swing.JLabel;
+
+import java.awt.Component;
+
+import javax.swing.Box;
+import javax.swing.JTable;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+
 /**
  * Multiple data set viewer pane.
  * 
@@ -25,6 +41,7 @@ public class MultiSetOutputViewerPane extends JPanePlugin {
     private static final long serialVersionUID = 7363093989131251458L;
 
     private JPanel centerPanel = null;
+    private JTable resultsTable;
 
     /**
      * This method initializes
@@ -54,7 +71,7 @@ public class MultiSetOutputViewerPane extends JPanePlugin {
     }
 
     public String getPluginTitle() {
-        return "Edit ClientSettings Pane";
+        return "MultiTestSetOutputViewer Pane";
     }
 
     /**
@@ -68,6 +85,73 @@ public class MultiSetOutputViewerPane extends JPanePlugin {
             borderLayout.setVgap(0);
             centerPanel = new JPanel();
             centerPanel.setLayout(borderLayout);
+            
+            JTabbedPane multiSetTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+            multiSetTabbedPane.setName("multiTestSetTabbedPane");
+            multiSetTabbedPane.setBorder(new LineBorder(new Color(0, 0, 0)));
+            centerPanel.add(multiSetTabbedPane, BorderLayout.CENTER);
+            
+            JPanel resultsPane = new JPanel();
+            resultsPane.setName("ViewDataSets");
+            multiSetTabbedPane.addTab("Data Set Results", null, resultsPane, "Show the results of this submission for each test data set");
+            resultsPane.setLayout(new BorderLayout(0, 0));
+            
+            JPanel resultsPaneHeader = new JPanel();
+            resultsPaneHeader.setBorder(new LineBorder(Color.BLUE, 2));
+            resultsPane.add(resultsPaneHeader, BorderLayout.NORTH);
+            
+            JLabel lblProblemTitle = new JLabel("Problem Title");
+            resultsPaneHeader.add(lblProblemTitle);
+            
+            Component horizontalStrut = Box.createHorizontalStrut(20);
+            resultsPaneHeader.add(horizontalStrut);
+            
+            JLabel lblTeamName = new JLabel("Team Name");
+            resultsPaneHeader.add(lblTeamName);
+            
+            Component horizontalStrut_1 = Box.createHorizontalStrut(20);
+            resultsPaneHeader.add(horizontalStrut_1);
+            
+            JLabel lblNumTestCases = new JLabel("Num Test Cases");
+            resultsPaneHeader.add(lblNumTestCases);
+            
+            JScrollPane resultsScrollPane = new JScrollPane();
+            resultsPane.add(resultsScrollPane, BorderLayout.CENTER);
+            
+            final String[] columnNames = {"Data Set #", "Result", "Time(ms)", "Team Output", 
+                    "Judge's Output", "Judge's Data" } ;
+            
+            //TODO: replace the following with code that loads the actual row data
+            final String[][] rowData = { 
+                    {"1", "Pass", "100", "Link1", "Link2", "Link3"},
+                    {"2", "Fail", "200", "Link1", "Link2", "Link3"}
+            } ;
+            
+            TableModel tableModel = new AbstractTableModel() {
+                public String getColumnName(int col) {
+                    return columnNames[col].toString();
+                }
+                public int getRowCount() { return rowData.length; }
+                public int getColumnCount() { return columnNames.length; }
+                public Object getValueAt(int row, int col) {
+                    return rowData[row][col];
+                }
+                public boolean isCellEditable(int row, int col) { return false; }
+                public void setValueAt(Object value, int row, int col) {
+                    rowData[row][col] = (String) value;
+                    fireTableCellUpdated(row, col);
+                }
+            };
+            
+            resultsTable = new JTable(tableModel);
+            resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+            resultsScrollPane.setViewportView(resultsTable);
+            
+
+ 
+                        
+            JPanel optionsPane = new JPanel();
+            multiSetTabbedPane.addTab("Options", null, optionsPane, "Set options for tools used to display submission results");
         }
         return centerPanel;
     }
