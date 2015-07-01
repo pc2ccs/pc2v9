@@ -34,10 +34,10 @@ public class MultiSetOutputViewerFrame extends javax.swing.JFrame implements UIP
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(519, 251));
+        this.setSize(new java.awt.Dimension(800, 600));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         this.setContentPane(getMultiSetOutputViewerPane());
-        this.setTitle("Multiple  Status");
+        this.setTitle("Multiple Test Set Results");
         
         // TODO Bug 918
 
@@ -57,7 +57,12 @@ public class MultiSetOutputViewerFrame extends javax.swing.JFrame implements UIP
     }
 
     public String getPluginTitle() {
-        return "Multi Set Output View Frame";
+        return "Multiple Test Set Output View Frame";
+    }
+    
+    public static void main (String [] args) {
+        MultiSetOutputViewerFrame mf = new MultiSetOutputViewerFrame();
+        mf.setVisible(true);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
