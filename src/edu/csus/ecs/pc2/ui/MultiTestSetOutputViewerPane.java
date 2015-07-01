@@ -33,7 +33,7 @@ import javax.swing.ListSelectionModel;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/AutoJudgeSettingsPane.java $
-public class MultiSetOutputViewerPane extends JPanePlugin {
+public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     /**
      * 
@@ -47,7 +47,7 @@ public class MultiSetOutputViewerPane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public MultiSetOutputViewerPane() {
+    public MultiTestSetOutputViewerPane() {
         super();
         initialize();
     }

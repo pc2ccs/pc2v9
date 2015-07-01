@@ -11,20 +11,20 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/AutoJudgeStatusFrame.java $
-public class MultiSetOutputViewerFrame extends javax.swing.JFrame implements UIPlugin {
+public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements UIPlugin {
 
     /**
      * 
      */
     private static final long serialVersionUID = 1253631987477621456L;
 
-    private MultiSetOutputViewerPane multiSetOutputViewerPane = null;
+    private MultiTestSetOutputViewerPane multiSetOutputViewerPane = null;
 
     /**
      * This method initializes
      * 
      */
-    public MultiSetOutputViewerFrame() {
+    public MultiTestSetOutputViewerFrame() {
         super();
         initialize();
     }
@@ -36,23 +36,23 @@ public class MultiSetOutputViewerFrame extends javax.swing.JFrame implements UIP
     private void initialize() {
         this.setSize(new java.awt.Dimension(800, 600));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        this.setContentPane(getMultiSetOutputViewerPane());
+        this.setContentPane(getMultiTestSetOutputViewerPane());
         this.setTitle("Multiple Test Set Results");
         
         // TODO Bug 918
 
     }
 
-    public MultiSetOutputViewerPane getMultiSetOutputViewerPane() {
+    public MultiTestSetOutputViewerPane getMultiTestSetOutputViewerPane() {
         if (multiSetOutputViewerPane == null) {
-            multiSetOutputViewerPane = new MultiSetOutputViewerPane();
+            multiSetOutputViewerPane = new MultiTestSetOutputViewerPane();
         }
         return multiSetOutputViewerPane;
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
 
-        getMultiSetOutputViewerPane().setContestAndController(inContest, inController);
+        getMultiTestSetOutputViewerPane().setContestAndController(inContest, inController);
 
     }
 
@@ -61,7 +61,7 @@ public class MultiSetOutputViewerFrame extends javax.swing.JFrame implements UIP
     }
     
     public static void main (String [] args) {
-        MultiSetOutputViewerFrame mf = new MultiSetOutputViewerFrame();
+        MultiTestSetOutputViewerFrame mf = new MultiTestSetOutputViewerFrame();
         mf.setVisible(true);
     }
 
