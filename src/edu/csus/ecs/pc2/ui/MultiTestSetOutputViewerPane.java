@@ -1,29 +1,36 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-
-import javax.swing.JTabbedPane;
-import javax.swing.border.LineBorder;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
-
-import java.awt.Color;
-
-import javax.swing.JLabel;
-
-import java.awt.Component;
-
-import javax.swing.Box;
-import javax.swing.JTable;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 
 /**
  * Multiple data set viewer pane.
@@ -42,6 +49,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private JPanel centerPanel = null;
     private JTable resultsTable;
+    private final ButtonGroup buttonGroup = new ButtonGroup();
+    private final ButtonGroup buttonGroup_1 = new ButtonGroup();
 
     /**
      * This method initializes
@@ -100,33 +109,40 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             resultsPane.setLayout(new BorderLayout(0, 0));
             
             //add a header for holding labels to the results panel
-            JPanel resultsPaneHeader = new JPanel();
-            resultsPaneHeader.setBorder(new LineBorder(Color.BLUE, 2));
-            resultsPane.add(resultsPaneHeader, BorderLayout.NORTH);
+            JPanel resultsPaneHeaderPanel = new JPanel();
+            resultsPaneHeaderPanel.setBorder(new LineBorder(Color.BLUE, 2));
+            resultsPane.add(resultsPaneHeaderPanel, BorderLayout.NORTH);
             
             //add a label to the header showing the Problem for which this set of test results applies
             //TODO: replace the following label text with the problem title from the current submission
-            JLabel lblProblemTitle = new JLabel("Problem Title");
-            resultsPaneHeader.add(lblProblemTitle);
+            JLabel lblProblemTitle = new JLabel("Problem: XXX");
+            resultsPaneHeaderPanel.add(lblProblemTitle);
             
-            //put some space between the header labels
-            Component horizontalStrut = Box.createHorizontalStrut(20);
-            resultsPaneHeader.add(horizontalStrut);
+            Component horizontalGlue = Box.createHorizontalGlue();
+            horizontalGlue.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue);
             
             //add a label to the header showing the Team for which this set of test results applies
             //TODO: replace the following label text with the Team Name and Number from the current submission
-            JLabel lblTeamName = new JLabel("Team Name");
-            resultsPaneHeader.add(lblTeamName);
+            JLabel lblTeamName = new JLabel("Team: XXX");
+            resultsPaneHeaderPanel.add(lblTeamName);
             
-            //put some space between the header labels
-            Component horizontalStrut_1 = Box.createHorizontalStrut(20);
-            resultsPaneHeader.add(horizontalStrut_1);
+            Component horizontalGlue_1 = Box.createHorizontalGlue();
+            horizontalGlue_1.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue_1);
+            
+            JLabel lblRunID = new JLabel("Run ID: XXX");
+            resultsPaneHeaderPanel.add(lblRunID);
+            
+            Component horizontalGlue_2 = Box.createHorizontalGlue();
+            horizontalGlue_2.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue_2);
             
             //add a label to the header showing the total number of test cases for this problem
            //TODO: replace the "XX" in the following label text with the actual number of test cases for the
             // problem in the current submission
-            JLabel lblNumTestCases = new JLabel("Num Test Cases: XX");
-            resultsPaneHeader.add(lblNumTestCases);
+            JLabel lblNumTestCases = new JLabel("Num Test Cases: XXX");
+            resultsPaneHeaderPanel.add(lblNumTestCases);
             
             //add a scrollpane to hold the table of results
             JScrollPane resultsScrollPane = new JScrollPane();
@@ -136,14 +152,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             final String[] columnNames = {"Data Set #", "Result", "Time(ms)", "Team Output", 
                     "Judge's Output", "Judge's Data" } ;
             
-            //define the row data for the table of results
-            //TODO: replace the following with code that loads the actual row data, including 
-            // hyperlinks (labels) to open each output file, and also including 
-            // additional links to "compare selected rows" (see Strawman diagram)
-            final String[][] rowData = { 
-                    {"1", "Pass", "100", "Link1", "Link2", "Link3"},
-                    {"2", "Fail", "200", "Link1", "Link2", "Link3"}
-            } ;
+            //get the row data for the table of results
+            final String[][] rowData = getRowData() ;
             
             //define a model for the table data
             //TODO: this model assumes all data are Strings; that's probably not a good idea
@@ -168,6 +178,34 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             resultsScrollPane.setViewportView(resultsTable);
             
+            JPanel resultsPaneFooterPanel = new JPanel();
+            resultsPane.add(resultsPaneFooterPanel, BorderLayout.SOUTH);
+            
+            JButton btnCompareSelected = new JButton("Compare Selected Outputs");
+            resultsPaneFooterPanel.add(btnCompareSelected);
+            
+            Component horizontalGlue_3 = Box.createHorizontalGlue();
+            horizontalGlue_3.setPreferredSize(new Dimension(20, 20));
+            resultsPaneFooterPanel.add(horizontalGlue_3);
+            
+            final JButton btnClose = new JButton("Close");
+            btnClose.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Window parentFrame = SwingUtilities.getWindowAncestor(btnClose);
+                    parentFrame.dispose();
+                }
+            });
+            resultsPaneFooterPanel.add(btnClose);
+            
+            //set a centering renderer on the table columns
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
+            
+            for (int col = 0; col < resultsTable.getColumnCount(); col++) {
+                resultsTable.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
+            }
+//            resultsTable.setDefaultRenderer(String.class, centerRenderer);
+            
             //TODO: add a bottom panel with a "Close" button
             
 
@@ -176,10 +214,71 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             JPanel optionsPane = new JPanel();
             multiTestSetTabbedPane.addTab("Options", null, optionsPane, "Set options for tools used to display test set results");
             
+            JPanel chooseCompareProgramPanel = new JPanel();
+            chooseCompareProgramPanel.setPreferredSize(new Dimension(200, 200));
+            chooseCompareProgramPanel.setBorder(new TitledBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), "Choose Compare Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            optionsPane.add(chooseCompareProgramPanel);
+            chooseCompareProgramPanel.setLayout(new BoxLayout(chooseCompareProgramPanel, BoxLayout.Y_AXIS));
+            
+            JRadioButton rdbtnInternalCompareProgram = new JRadioButton("Built-in Comparator");
+            buttonGroup.add(rdbtnInternalCompareProgram);
+            chooseCompareProgramPanel.add(rdbtnInternalCompareProgram);
+            
+            JRadioButton rdbtnPulldownCompareList = new JRadioButton("Select");
+            buttonGroup.add(rdbtnPulldownCompareList);
+            chooseCompareProgramPanel.add(rdbtnPulldownCompareList);
+            
+            JRadioButton rdbtnSpecifyCompareProgram = new JRadioButton("User Specified");
+            buttonGroup.add(rdbtnSpecifyCompareProgram);
+            chooseCompareProgramPanel.add(rdbtnSpecifyCompareProgram);
+            
+            JPanel chooseViewerProgramPanel = new JPanel();
+            chooseViewerProgramPanel.setPreferredSize(new Dimension(200, 200));
+            chooseViewerProgramPanel.setBorder(new TitledBorder(null, "Choose Viewer Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            optionsPane.add(chooseViewerProgramPanel);
+            chooseViewerProgramPanel.setLayout(new BoxLayout(chooseViewerProgramPanel, BoxLayout.Y_AXIS));
+            
+            JRadioButton rdbtnInternalViewerProgram = new JRadioButton("Built-in Viewer");
+            buttonGroup_1.add(rdbtnInternalViewerProgram);
+            chooseViewerProgramPanel.add(rdbtnInternalViewerProgram);
+            
+            JRadioButton rdbtnPulldownViewerList = new JRadioButton("Select");
+            buttonGroup_1.add(rdbtnPulldownViewerList);
+            chooseViewerProgramPanel.add(rdbtnPulldownViewerList);
+            
+            JRadioButton rdbtnSpecifyViewerProgram = new JRadioButton("User Specified");
+            buttonGroup_1.add(rdbtnSpecifyViewerProgram);
+            chooseViewerProgramPanel.add(rdbtnSpecifyViewerProgram);
+            
             //TODO: add Strawman fields to Options pane
             
         }
         return centerPanel;
+    }
+    
+    /**
+     * Returns an array of Strings defining the rows of data to be entered into
+     * the test case results table.
+     * 
+     * @return an array of arrays of Strings defining the table data
+     */
+    private String [][] getRowData() {
+        
+        //TODO: replace the following with code that gets the actual row data from the model, 
+        // including creating hyperlinks (labels) to open each output file, and also including 
+        // additional links to "compare selected rows" (see Strawman diagram)
+        return new String[][]  { 
+                {"1", "Pass", "100", "Link1", "Link2", "Link3"},
+                {"2", "Fail", "200", "Link1", "Link2", "Link3"},
+                {"3", "Pass", "100", "Link1", "Link2", "Link3"},
+                {"4", "Fail", "150", "Link1", "Link2", "Link3"},
+                {"5", "Fail", "50", "Link1", "Link2", "Link3"},
+                {"6", "Pass", "100", "Link1", "Link2", "Link3"},
+                {"7", "Fail", "1000", "Link1", "Link2", "Link3"},
+                {"8", "Pass", "100", "Link1", "Link2", "Link3"},
+                {"9", "Fail", "1500", "Link1", "Link2", "Link3"},
+                {"10", "Fail", "10", "Link1", "Link2", "Link3"},
+       } ;
     }
 
     public void showMessage(final String message) {
