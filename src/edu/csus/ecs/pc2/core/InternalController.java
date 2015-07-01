@@ -1114,7 +1114,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else if (containsINIKey(CLIENT_SERVER_KEY)) {
             remoteHostName = getINIValue(CLIENT_SERVER_KEY);
 
-            getLog().log(Log.INFO, "INI File location: " + IniFile.getIniFileURL());
+            getLog().log(Log.INFO, "INIFile File location: " + IniFile.getIniFileURL());
             /*
              * Examples: server=[2001:DB8::1] (default port) server=[2001:DB8::1]:50000 server=10.86.76.240:50002 server=10.86.76.240 (default port)
              */

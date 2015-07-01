@@ -72,7 +72,7 @@ public class IniFile {
     public void loadFile() {
         load();
     }
-    
+
     /**
      * returns true if key is in file.
      * 
@@ -100,13 +100,15 @@ public class IniFile {
     /**
      * List contents to System.out.
      */
-    public static void dump(){
+    public static void dump() {
         dump(System.out);
     }
-    
+
     /**
      * Write contents to PrintStream.
-     * @param ps PrintStream
+     * 
+     * @param ps
+     *            PrintStream
      */
     public static void dump(PrintStream ps) {
         ps.println("Dumping: " + getIniFileURL());
@@ -121,6 +123,7 @@ public class IniFile {
 
     /**
      * Get input filename.
+     * 
      * @return the name of the .ini file.
      */
     public static String getINIFilename() {
@@ -129,6 +132,7 @@ public class IniFile {
 
     /**
      * Get filename in URL form.
+     * 
      * @return the URL for the .ini file.
      */
     public static URL getIniFileURL() {
@@ -185,6 +189,7 @@ public class IniFile {
 
     /**
      * Load the name value pairs from the input file.
+     * 
      * @see #getIniFileURL()
      * @see #iniFileURL
      */
@@ -204,17 +209,24 @@ public class IniFile {
 
                 setIniFileURL(iniFilefile.toURI().toURL());
             }
-            iniFileURL.openStream();
-            nameValueHash.clear();
-            nameValueHash.put("_source", iniFileURL.toString());
-            currentSectionName = "";
-            in = new BufferedReader(new InputStreamReader(iniFileURL.openStream()));
-            String line = in.readLine();
-            while (line != null) {
-                parseLine(line);
-                line = in.readLine();
+            synchronized (nameValueHash) {
+                if (nameValueHash.contains("_source") && iniFileURL.toString().equals(nameValueHash.get("_source"))) {
+                    // trying to load the same file, do not read it again
+                    return;
+                } else {
+                    iniFileURL.openStream();
+                    nameValueHash.clear();
+                    nameValueHash.put("_source", iniFileURL.toString());
+                    currentSectionName = "";
+                    in = new BufferedReader(new InputStreamReader(iniFileURL.openStream()));
+                    String line = in.readLine();
+                    while (line != null) {
+                        parseLine(line);
+                        line = in.readLine();
+                    }
+                    in.close();
+                }
             }
-            in.close();
         } catch (Exception e) {
             System.out.println("Error reading ini " + e.getMessage());
             e.printStackTrace();
@@ -269,24 +281,25 @@ public class IniFile {
     }
 
     /**
-    * This will try newIni as an URL 1st, if it is not a valid URL attempt as a regular file.
-    *
-    * @param newIni
-    *            name of new .ini file.
-     * @throws MalformedURLException 
-    */
-   public static void setIniURLorFile(String newIni) throws MalformedURLException {
-       try {
-           URL url = new URL(newIni);
-           setIniFileURL(url);
-       } catch (java.net.MalformedURLException e) {
-           // it better be a normal file then...
-           setIniFile(newIni);
-       }
-   }
+     * This will try newIni as an URL 1st, if it is not a valid URL attempt as a regular file.
+     * 
+     * @param newIni
+     *            name of new .ini file.
+     * @throws MalformedURLException
+     */
+    public static void setIniURLorFile(String newIni) throws MalformedURLException {
+        try {
+            URL url = new URL(newIni);
+            setIniFileURL(url);
+        } catch (java.net.MalformedURLException e) {
+            // it better be a normal file then...
+            setIniFile(newIni);
+        }
+    }
 
     /**
-     * set a new input filename. 
+     * set a new input filename.
+     * 
      * @param newIniFile
      * @throws MalformedURLException
      */
@@ -302,8 +315,9 @@ public class IniFile {
 
     /**
      * Set a new input filename via URL.
-     * @param newIniFileURL -
-     *            new URL
+     * 
+     * @param newIniFileURL
+     *            - new URL
      */
     public static void setIniFileURL(java.net.URL newIniFileURL) {
         iniFileURL = newIniFileURL;
