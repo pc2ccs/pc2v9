@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import java.awt.Dimension;
 
 /**
  *  Multiple data set viewer Window.
@@ -34,10 +35,11 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(800, 600));
+        this.setSize(new Dimension(800, 400));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         this.setContentPane(getMultiTestSetOutputViewerPane());
         this.setTitle("Multiple Test Set Results");
+        this.setLocationRelativeTo(null);
         
         // TODO Bug 918
 
