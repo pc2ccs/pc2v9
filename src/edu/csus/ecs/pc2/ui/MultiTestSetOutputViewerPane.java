@@ -31,6 +31,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
@@ -63,6 +65,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private JTextField textUserSpecifyViewer;
 
     private JComboBox pulldownSelectViewer;
+
+    private JButton btnCompareSelected;
 
     /**
      * This method initializes
@@ -165,7 +169,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     "Judge's Output", "Judge's Data" } ;
             
             //get the row data for the table of results
-            final String[][] rowData = getRowData() ;
+            final String[][] tableData = getTableData() ;
             
             //define a model for the table data
             //TODO: this model assumes all data are Strings; that's probably not a good idea
@@ -175,19 +179,32 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public String getColumnName(int col) {
                     return columnNames[col].toString();
                 }
-                public int getRowCount() { return rowData.length; }
+                public int getRowCount() { return tableData.length; }
                 public int getColumnCount() { return columnNames.length; }
-                public Object getValueAt(int row, int col) { return rowData[row][col]; }
+                public Object getValueAt(int row, int col) { return tableData[row][col]; }
                 public boolean isCellEditable(int row, int col) { return false; }
                 public void setValueAt(Object value, int row, int col) {
-                    rowData[row][col] = (String) value;
+                    tableData[row][col] = (String) value;
                     fireTableCellUpdated(row, col);
                 }
             };
             
             //add a table containing the test set results to the scrollpane in the tabbed pane's panel
             resultsTable = new JTable(tableModel);
-            resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+            resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            resultsTable.setFillsViewportHeight(true);
+            resultsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                //insure "compare" button is only enabled when exactly ONE table row is selected
+                public void valueChanged(ListSelectionEvent e) {
+                    if (resultsTable.getSelectedRowCount() == 1) {
+                        btnCompareSelected.setEnabled(true);
+                    } else {
+                        btnCompareSelected.setEnabled(false);
+                    }
+                    
+                }
+            });
             resultsScrollPane.setViewportView(resultsTable);
  
             //set a centering renderer on the table columns
@@ -203,7 +220,15 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             resultsPane.add(resultsPaneFooterPanel, BorderLayout.SOUTH);
             
             //add a control button to invoke comparison of the team and judge output files for a selected row 
-            JButton btnCompareSelected = new JButton("Compare Selected Outputs");
+            btnCompareSelected = new JButton("Compare Selected Team/Judge Outputs");
+            btnCompareSelected.setToolTipText("Show comparison between Team and Judge output for selected row (only one row may be selected at a time)");
+            btnCompareSelected.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    //display a comparison between the Team and Judge output in the selected table row
+                    showComparison(resultsTable.getSelectedRow()); 
+                }
+            });
+            btnCompareSelected.setEnabled(false);
             resultsPaneFooterPanel.add(btnCompareSelected);
             
             Component horizontalGlue_3 = Box.createHorizontalGlue();
@@ -457,7 +482,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      * 
      * @return an array of arrays of Strings defining the table data
      */
-    private String [][] getRowData() {
+    private String [][] getTableData() {
         
         //TODO: replace the following with code that gets the actual row data from the model, 
         // including creating hyperlinks (labels) to open each output file, and also including 
@@ -476,6 +501,18 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
        } ;
     }
 
+    
+    /**
+     * Displays a window showing side-by-side comparison of the Team's and Judge's output
+     * for the specified table row. 
+     * 
+     * @param selectedRow - the currently selected row in the results table
+     */
+    private void showComparison(int selectedRow) {
+        int dataSetNumber = selectedRow+1 ;
+        System.out.println ("Would have shown comparison window for data set #" + dataSetNumber);
+    }
+    
     public void showMessage(final String message) {
         JOptionPane.showMessageDialog(this, message);
     }
