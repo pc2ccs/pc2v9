@@ -4,14 +4,19 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -19,6 +24,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -51,6 +57,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private JTable resultsTable;
     private final ButtonGroup buttonGroup = new ButtonGroup();
     private final ButtonGroup buttonGroup_1 = new ButtonGroup();
+
+    protected Component pulldownSelectComparator;
+    private JTextField textUserSpecify;
+    private JTextField textField;
 
     /**
      * This method initializes
@@ -177,10 +187,20 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             resultsTable = new JTable(tableModel);
             resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             resultsScrollPane.setViewportView(resultsTable);
+ 
+            //set a centering renderer on the table columns
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
             
+            for (int col = 0; col < resultsTable.getColumnCount(); col++) {
+                resultsTable.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
+            }
+            
+            //add a footer panel containing control buttons
             JPanel resultsPaneFooterPanel = new JPanel();
             resultsPane.add(resultsPaneFooterPanel, BorderLayout.SOUTH);
             
+            //add a control button to invoke comparison of the team and judge output files for a selected row 
             JButton btnCompareSelected = new JButton("Compare Selected Outputs");
             resultsPaneFooterPanel.add(btnCompareSelected);
             
@@ -188,6 +208,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             horizontalGlue_3.setPreferredSize(new Dimension(20, 20));
             resultsPaneFooterPanel.add(horizontalGlue_3);
             
+            //add a control button to dismiss the frame
             final JButton btnClose = new JButton("Close");
             btnClose.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -197,67 +218,213 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             });
             resultsPaneFooterPanel.add(btnClose);
             
-            //set a centering renderer on the table columns
-            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-            centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
-            
-            for (int col = 0; col < resultsTable.getColumnCount(); col++) {
-                resultsTable.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
-            }
-//            resultsTable.setDefaultRenderer(String.class, centerRenderer);
-            
-            //TODO: add a bottom panel with a "Close" button
-            
 
- 
-            //add a tab with a JPanel that will display options for managing the display of data for the test cases                        
+            //add a tab that will display options for managing the display of data for the test cases                        
             JPanel optionsPane = new JPanel();
             multiTestSetTabbedPane.addTab("Options", null, optionsPane, "Set options for tools used to display test set results");
+            optionsPane.setLayout(new BorderLayout(0, 0));
             
-            JPanel chooseCompareProgramPanel = new JPanel();
-            chooseCompareProgramPanel.setPreferredSize(new Dimension(200, 200));
-            chooseCompareProgramPanel.setBorder(new TitledBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), "Choose Compare Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            optionsPane.add(chooseCompareProgramPanel);
-            chooseCompareProgramPanel.setLayout(new BoxLayout(chooseCompareProgramPanel, BoxLayout.Y_AXIS));
+            //add a panel that will hold the various chooser options
+            JPanel panelChoosers = new JPanel();
+            optionsPane.add(panelChoosers, BorderLayout.CENTER);
             
+            //add a panel that will support choosing the comparator tool to be used
+            JPanel chooseComparatorPanel = new JPanel();
+            panelChoosers.add(chooseComparatorPanel);
+            chooseComparatorPanel.setBounds(new Rectangle(0, 0, 0, 20));
+            chooseComparatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseComparatorPanel.setPreferredSize(new Dimension(220, 200));
+            chooseComparatorPanel.setBorder(new TitledBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), "Choose Compare Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            chooseComparatorPanel.setLayout(new BoxLayout(chooseComparatorPanel, BoxLayout.Y_AXIS));
+            
+            Component verticalStrut = Box.createVerticalStrut(20);
+            verticalStrut.setMinimumSize(new Dimension(0, 10));
+            verticalStrut.setPreferredSize(new Dimension(0, 15));
+            chooseComparatorPanel.add(verticalStrut);
+            
+            //add a button to select the built-in comparator
             JRadioButton rdbtnInternalCompareProgram = new JRadioButton("Built-in Comparator");
+            rdbtnInternalCompareProgram.setSelected(true);
             buttonGroup.add(rdbtnInternalCompareProgram);
-            chooseCompareProgramPanel.add(rdbtnInternalCompareProgram);
+            chooseComparatorPanel.add(rdbtnInternalCompareProgram);
             
-            JRadioButton rdbtnPulldownCompareList = new JRadioButton("Select");
+            //add a button to select from a list of available comparators
+            final JRadioButton rdbtnPulldownCompareList = new JRadioButton("Select");
+            chooseComparatorPanel.add(rdbtnPulldownCompareList);
+            rdbtnPulldownCompareList.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    if (rdbtnPulldownCompareList.isSelected()) {
+                        pulldownSelectComparator.setEnabled(true);
+                    } else {
+                        pulldownSelectComparator.setEnabled(false);
+                    }
+                }
+            });
             buttonGroup.add(rdbtnPulldownCompareList);
-            chooseCompareProgramPanel.add(rdbtnPulldownCompareList);
             
-            JRadioButton rdbtnSpecifyCompareProgram = new JRadioButton("User Specified");
+            //add a panel to hold the pulldown list which allows a user to select a comparator
+            JPanel panelSelectComparator = new JPanel();
+            FlowLayout flowLayout = (FlowLayout) panelSelectComparator.getLayout();
+            flowLayout.setAlignOnBaseline(true);
+            panelSelectComparator.setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseComparatorPanel.add(panelSelectComparator);
+            
+            //construct a dropdown list of available comparators and add it to the panel
+            pulldownSelectComparator = new JComboBox(getAvailableComparatorsList());
+            pulldownSelectComparator.setEnabled(false);
+            panelSelectComparator.add(pulldownSelectComparator);
+            
+            //add a button that allows the user to edit a text field identifying the comparator to be used
+            final JRadioButton rdbtnSpecifyCompareProgram = new JRadioButton("User Specified");
+            chooseComparatorPanel.add(rdbtnSpecifyCompareProgram);
+            rdbtnSpecifyCompareProgram.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    if (rdbtnSpecifyCompareProgram.isSelected()) {
+                        textUserSpecify.setEnabled(true);
+                    } else {
+                        textUserSpecify.setEnabled(false);
+                    }
+                }
+            });
             buttonGroup.add(rdbtnSpecifyCompareProgram);
-            chooseCompareProgramPanel.add(rdbtnSpecifyCompareProgram);
             
-            JPanel chooseViewerProgramPanel = new JPanel();
-            chooseViewerProgramPanel.setPreferredSize(new Dimension(200, 200));
-            chooseViewerProgramPanel.setBorder(new TitledBorder(null, "Choose Viewer Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            optionsPane.add(chooseViewerProgramPanel);
-            chooseViewerProgramPanel.setLayout(new BoxLayout(chooseViewerProgramPanel, BoxLayout.Y_AXIS));
+            //add a panel to hold the user-specified comparator text box
+            JPanel panelSpecifyComparator = new JPanel();
+            FlowLayout flowLayout_1 = (FlowLayout) panelSpecifyComparator.getLayout();
+            flowLayout_1.setAlignOnBaseline(true);
+            panelSpecifyComparator.setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseComparatorPanel.add(panelSpecifyComparator);
             
+            //add a text box for the user to specify the comparator
+            textUserSpecify = new JTextField();
+            textUserSpecify.setEnabled(false);
+            textUserSpecify.setText("<enter comparator name>");
+            panelSpecifyComparator.add(textUserSpecify);
+            textUserSpecify.setColumns(15);
+            
+            Component horizontalStrut = Box.createHorizontalStrut(20);
+            horizontalStrut.setMinimumSize(new Dimension(40, 0));
+            panelChoosers.add(horizontalStrut);
+            
+            //create a panel to hold the various components allowing choice of viewers
+            JPanel chooseViewerPanel = new JPanel();
+            chooseViewerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panelChoosers.add(chooseViewerPanel);
+            chooseViewerPanel.setPreferredSize(new Dimension(200, 200));
+            chooseViewerPanel.setBorder(new TitledBorder(null, "Choose Viewer Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            chooseViewerPanel.setLayout(new BoxLayout(chooseViewerPanel, BoxLayout.Y_AXIS));
+            
+            Component verticalStrut_1 = Box.createVerticalStrut(20);
+            verticalStrut_1.setPreferredSize(new Dimension(0, 15));
+            verticalStrut_1.setMinimumSize(new Dimension(0, 10));
+            chooseViewerPanel.add(verticalStrut_1);
+            
+            //add a button for selecting the built-in viewer
             JRadioButton rdbtnInternalViewerProgram = new JRadioButton("Built-in Viewer");
             buttonGroup_1.add(rdbtnInternalViewerProgram);
-            chooseViewerProgramPanel.add(rdbtnInternalViewerProgram);
+            chooseViewerPanel.add(rdbtnInternalViewerProgram);
             
+            //add a button for selecting the viewer from a list of available viewers
             JRadioButton rdbtnPulldownViewerList = new JRadioButton("Select");
             buttonGroup_1.add(rdbtnPulldownViewerList);
-            chooseViewerProgramPanel.add(rdbtnPulldownViewerList);
+            chooseViewerPanel.add(rdbtnPulldownViewerList);
             
+            //add a panel to hold the drop-down list of available viewers
+            JPanel panel = new JPanel();
+            chooseViewerPanel.add(panel);
+            
+            //add a drop-down list of available viewers
+            JComboBox comboBox = new JComboBox(getAvailableViewersList());
+            panel.add(comboBox);
+            
+            //add a button allowing the user to enable a textbox for typing the name of a viewer
             JRadioButton rdbtnSpecifyViewerProgram = new JRadioButton("User Specified");
             buttonGroup_1.add(rdbtnSpecifyViewerProgram);
-            chooseViewerProgramPanel.add(rdbtnSpecifyViewerProgram);
+            chooseViewerPanel.add(rdbtnSpecifyViewerProgram);
             
-            //TODO: add Strawman fields to Options pane
+            //add a panel to hold the text box
+            JPanel panel_1 = new JPanel();
+            chooseViewerPanel.add(panel_1);
+            
+            //add a text field for the user to specify a viewer
+            textField = new JTextField();
+            textField.setText("<enter viewer name>");
+            panel_1.add(textField);
+            textField.setColumns(15);
+            
+            //add a footer panel to hold control buttons 
+            JPanel panelFooterButtons = new JPanel();
+            optionsPane.add(panelFooterButtons, BorderLayout.SOUTH);
+            
+            //add a control button to restore defaults
+            JButton btnRestoreDefaults = new JButton("Restore Defaults");
+            panelFooterButtons.add(btnRestoreDefaults);
+            
+            Component horizontalGlue_4 = Box.createHorizontalGlue();
+            horizontalGlue_4.setPreferredSize(new Dimension(20, 20));
+            panelFooterButtons.add(horizontalGlue_4);
+            
+            //add a button to save currently-selected options
+            JButton btnUpdate = new JButton("Update");
+            btnUpdate.setEnabled(false);
+            panelFooterButtons.add(btnUpdate);
+            
+            Component horizontalGlue_5 = Box.createHorizontalGlue();
+            horizontalGlue_5.setPreferredSize(new Dimension(20, 20));
+            panelFooterButtons.add(horizontalGlue_5);
+            
+            //add a button to cancel, restoring former settings
+            JButton btnCancel = new JButton("Cancel");
+            btnCancel.setEnabled(false);
+            panelFooterButtons.add(btnCancel);
+            
+            Component horizontalGlue_6 = Box.createHorizontalGlue();
+            horizontalGlue_6.setPreferredSize(new Dimension(20, 20));
+            panelFooterButtons.add(horizontalGlue_6);
+            
+            //add a button to dismiss the frame
+            JButton btnClose_1 = new JButton("Close");
+            btnClose_1.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Window parentFrame = SwingUtilities.getWindowAncestor(btnClose);
+                    parentFrame.dispose();
+                }
+            });
+            panelFooterButtons.add(btnClose_1);
             
         }
         return centerPanel;
     }
     
+    
     /**
-     * Returns an array of Strings defining the rows of data to be entered into
+     * Returns an array of Strings listing the names of available (known)
+     * output viewer tools.
+     * 
+     * @return a String array of viewer tool names
+     */
+    private String[] getAvailableViewersList() {
+        // TODO figure out how to coordinate this with actual known viewers
+        return new String [] {
+                "gvim", "notepad", "write", "Another Viewer Tool"
+        };
+    }
+
+    /**
+     * Returns an array of Strings listing the names of available (known)
+     * output comparator tools.
+     * 
+     * @return a String array of comparator tool names
+     */
+    private String[] getAvailableComparatorsList() {
+        // TODO figure out how to coordinate this with actual known comparators
+        return new String [] {
+                "diff", "GVimDiff", "Another Diff Tool"
+        };
+    }
+
+    /**
+     * Returns an array of String arrays defining the rows of data to be entered into
      * the test case results table.
      * 
      * @return an array of arrays of Strings defining the table data
