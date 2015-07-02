@@ -354,7 +354,10 @@ class EventFeeder implements Runnable {
     protected class RunListener implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            runChanged(event);
+            Run run = event.getRun();
+            if (! run.isDeleted()){
+                runChanged(event);
+            }
         }
 
         public void runChanged(RunEvent event) {
