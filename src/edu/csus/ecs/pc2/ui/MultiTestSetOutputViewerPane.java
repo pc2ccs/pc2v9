@@ -59,8 +59,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private final ButtonGroup buttonGroup_1 = new ButtonGroup();
 
     protected Component pulldownSelectComparator;
-    private JTextField textUserSpecify;
-    private JTextField textField;
+    private JTextField textUserSpecifyComparator;
+    private JTextField textUserSpecifyViewer;
+
+    private JComboBox pulldownSelectViewer;
 
     /**
      * This method initializes
@@ -280,9 +282,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             rdbtnSpecifyCompareProgram.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     if (rdbtnSpecifyCompareProgram.isSelected()) {
-                        textUserSpecify.setEnabled(true);
+                        textUserSpecifyComparator.setEnabled(true);
                     } else {
-                        textUserSpecify.setEnabled(false);
+                        textUserSpecifyComparator.setEnabled(false);
                     }
                 }
             });
@@ -296,11 +298,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             chooseComparatorPanel.add(panelSpecifyComparator);
             
             //add a text box for the user to specify the comparator
-            textUserSpecify = new JTextField();
-            textUserSpecify.setEnabled(false);
-            textUserSpecify.setText("<enter comparator name>");
-            panelSpecifyComparator.add(textUserSpecify);
-            textUserSpecify.setColumns(15);
+            textUserSpecifyComparator = new JTextField();
+            textUserSpecifyComparator.setEnabled(false);
+            textUserSpecifyComparator.setText("<enter comparator name>");
+            panelSpecifyComparator.add(textUserSpecifyComparator);
+            textUserSpecifyComparator.setColumns(15);
             
             Component horizontalStrut = Box.createHorizontalStrut(20);
             horizontalStrut.setMinimumSize(new Dimension(40, 0));
@@ -310,7 +312,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             JPanel chooseViewerPanel = new JPanel();
             chooseViewerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             panelChoosers.add(chooseViewerPanel);
-            chooseViewerPanel.setPreferredSize(new Dimension(200, 200));
+            chooseViewerPanel.setPreferredSize(new Dimension(220, 200));
             chooseViewerPanel.setBorder(new TitledBorder(null, "Choose Viewer Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
             chooseViewerPanel.setLayout(new BoxLayout(chooseViewerPanel, BoxLayout.Y_AXIS));
             
@@ -321,36 +323,62 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             
             //add a button for selecting the built-in viewer
             JRadioButton rdbtnInternalViewerProgram = new JRadioButton("Built-in Viewer");
+            rdbtnInternalViewerProgram.setSelected(true);
+            rdbtnInternalViewerProgram.setPreferredSize(new Dimension(117, 23));
+            rdbtnInternalViewerProgram.setMinimumSize(new Dimension(117, 23));
+            rdbtnInternalViewerProgram.setMaximumSize(new Dimension(117, 23));
             buttonGroup_1.add(rdbtnInternalViewerProgram);
             chooseViewerPanel.add(rdbtnInternalViewerProgram);
             
             //add a button for selecting the viewer from a list of available viewers
-            JRadioButton rdbtnPulldownViewerList = new JRadioButton("Select");
+            final JRadioButton rdbtnPulldownViewerList = new JRadioButton("Select");
+            rdbtnPulldownViewerList.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    if (rdbtnPulldownViewerList.isSelected()) {
+                        pulldownSelectViewer.setEnabled(true);
+                    } else {
+                        pulldownSelectViewer.setEnabled(false);
+                    }
+               }
+            });
             buttonGroup_1.add(rdbtnPulldownViewerList);
             chooseViewerPanel.add(rdbtnPulldownViewerList);
             
             //add a panel to hold the drop-down list of available viewers
             JPanel panel = new JPanel();
+            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
             chooseViewerPanel.add(panel);
             
             //add a drop-down list of available viewers
-            JComboBox comboBox = new JComboBox(getAvailableViewersList());
-            panel.add(comboBox);
+            pulldownSelectViewer = new JComboBox(getAvailableViewersList());
+            pulldownSelectViewer.setEnabled(false);
+            panel.add(pulldownSelectViewer);
             
             //add a button allowing the user to enable a textbox for typing the name of a viewer
-            JRadioButton rdbtnSpecifyViewerProgram = new JRadioButton("User Specified");
+            final JRadioButton rdbtnSpecifyViewerProgram = new JRadioButton("User Specified");
+            rdbtnSpecifyViewerProgram.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    if (rdbtnSpecifyViewerProgram.isSelected()) {
+                        textUserSpecifyViewer.setEnabled(true);
+                    } else {
+                        textUserSpecifyViewer.setEnabled(false);
+                    }
+                }
+            });
             buttonGroup_1.add(rdbtnSpecifyViewerProgram);
             chooseViewerPanel.add(rdbtnSpecifyViewerProgram);
             
             //add a panel to hold the text box
             JPanel panel_1 = new JPanel();
+            panel_1.setEnabled(false);
             chooseViewerPanel.add(panel_1);
             
             //add a text field for the user to specify a viewer
-            textField = new JTextField();
-            textField.setText("<enter viewer name>");
-            panel_1.add(textField);
-            textField.setColumns(15);
+            textUserSpecifyViewer = new JTextField();
+            textUserSpecifyViewer.setEnabled(false);
+            textUserSpecifyViewer.setText("<enter viewer name>");
+            panel_1.add(textUserSpecifyViewer);
+            textUserSpecifyViewer.setColumns(15);
             
             //add a footer panel to hold control buttons 
             JPanel panelFooterButtons = new JPanel();
