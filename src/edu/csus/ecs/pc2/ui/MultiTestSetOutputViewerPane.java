@@ -520,16 +520,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         // including creating hyperlinks (labels) to open each output file, and also including 
         // additional links to "compare selected rows" (see Strawman diagram)
         return new Object[][]  { 
-                {"1", "Pass", "100", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
-                {"2", "Fail", "200", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
-                {"3", "Pass", "100", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
-                {"4", "Fail", "150", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
-                {"5", "Fail", "50",  new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
-                {"6", "Pass", "100", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
-                {"7", "Fail", "1000", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
-                {"8", "Pass", "100", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
-                {"9", "Fail", "1500", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
-                {"10", "Fail", "10", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"1", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {"2", "Fail", "200", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {"3", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {"4", "Fail", "150", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {"5", "Fail", "50",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {"6", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {"7", "Fail", "1000", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {"8", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {"9", "Fail", "1500", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {"10", "Fail", "10", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
        } ;
     }
 
