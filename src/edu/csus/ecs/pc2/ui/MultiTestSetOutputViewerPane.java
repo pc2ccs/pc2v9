@@ -21,6 +21,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -38,9 +39,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableModel;
+import javax.swing.table.TableCellRenderer;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -166,10 +166,18 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             JLabel lblNumTestCases = new JLabel("Test Cases: XXX");
             resultsPaneHeaderPanel.add(lblNumTestCases);
             
+            Component horizontalGlue_7 = Box.createHorizontalGlue();
+            horizontalGlue_7.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue_7);
+            
+            JLabel lblNumFailedTestCases = new JLabel("Failed Test Cases: XXX");
+            resultsPaneHeaderPanel.add(lblNumFailedTestCases);
+            
             //add a scrollpane to hold the table of results
             JScrollPane resultsScrollPane = new JScrollPane();
             resultsPane.add(resultsScrollPane, BorderLayout.CENTER);
             
+            //get the table of results and put it in the scrollpane
             resultsTable = getResultsTable();
             resultsScrollPane.setViewportView(resultsTable);
  
@@ -179,12 +187,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             resultsPane.add(resultsPaneFooterPanel, BorderLayout.SOUTH);
             
             //add a control button to invoke comparison of the team and judge output files for a selected row 
-            btnCompareSelected = new JButton("Compare Selected Team/Judge Outputs");
+            btnCompareSelected = new JButton("Compare Selected");
             btnCompareSelected.setToolTipText("Show comparison between Team and Judge output for selected row (only one row may be selected at a time)");
             btnCompareSelected.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     //display a comparison between the Team and Judge output in the selected table row
-                    showComparison(resultsTable.getSelectedRow()); 
+                    showComparison(resultsTable.getSelectedRows()); 
                 }
             });
             btnCompareSelected.setEnabled(false);
@@ -415,42 +423,52 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private JTable getResultsTable() {
         
+        final int COLUMN_SELECT = 0;
+        final int COLUMN_DATASET = 1;
+        final int COLUMN_RESULT = 2;
+        final int COLUMN_TIME = 3;
+        final int COLUMN_TEAM_OUTPUT = 4;
+        final int COLUMN_JUDGE_OUTPUT = 5;
+        final int COLUMN_JUDGE_DATA = 6 ;
+        //yes, I know about enums... you can't define one in this scope :(
+        
         final JTable resultsTable ;
         
         //define the column headers for the table of results
-        final String[] columnNames = {"Data Set #", "Result", "Time(ms)", "Team Output", 
+        final String[] columnNames = {"Select", "Data Set #", "Result", "Time(ms)", "Team Output", 
                 "Judge's Output", "Judge's Data" } ;
         
         //get the row data for the table of results
         final Object[][] tableData = getTableData() ;
         
-        //define a model for the table data
-        //TODO: this model assumes all data are Strings; that's probably not a good idea
-        // (see for example method setValueAt() )
-        TableModel tableModel = new AbstractTableModel() {
-            private static final long serialVersionUID = 1L;
-            public String getColumnName(int col) {
-                return columnNames[col].toString();
-            }
-            public int getRowCount() { return tableData.length; }
-            public int getColumnCount() { return columnNames.length; }
-            public Object getValueAt(int row, int col) { return tableData[row][col]; }
-            public boolean isCellEditable(int row, int col) { return false; }
-            public void setValueAt(Object value, int row, int col) {
-                tableData[row][col] = (String) value;
-                fireTableCellUpdated(row, col);
-            }
-        };
+//        //define a model for the table data
+//        //TODO: this model assumes all data are Strings; that's probably not a good idea
+//        // (see for example method setValueAt() )
+//        TableModel tableModel = new AbstractTableModel() {
+//            private static final long serialVersionUID = 1L;
+//            public String getColumnName(int col) {
+//                return columnNames[col].toString();
+//            }
+//            public int getRowCount() { return tableData.length; }
+//            public int getColumnCount() { return columnNames.length; }
+//            public Object getValueAt(int row, int col) { return tableData[row][col]; }
+//            public boolean isCellEditable(int row, int col) { return false; }
+//            public void setValueAt(Object value, int row, int col) {
+//                tableData[row][col] = (String) value;
+//                fireTableCellUpdated(row, col);
+//            }
+//        };
+//        
+//        resultsTable = new JTable(tableModel);
         
-        //add a table containing the test set results to the scrollpane in the tabbed pane's panel
-        resultsTable = new JTable(tableModel);
-        resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        resultsTable = new JTable(tableData, columnNames);
+        resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         resultsTable.setFillsViewportHeight(true);
         resultsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             //insure "compare" button is only enabled when exactly ONE table row is selected
             public void valueChanged(ListSelectionEvent e) {
-                if (resultsTable.getSelectedRowCount() == 1) {
+                if (resultsTable.getSelectedRowCount() >= 1) {
                     btnCompareSelected.setEnabled(true);
                 } else {
                     btnCompareSelected.setEnabled(false);
@@ -459,19 +477,23 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             }
         });
         
-        //set a centering renderer on the table columns
+        //set a centering renderer on desired table columns
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
+        resultsTable.getColumnModel().getColumn(COLUMN_SELECT).setCellRenderer(new CheckBoxRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN_DATASET).setCellRenderer(centerRenderer);
         
-        for (int col = 0; col < 3; col++) {
-            resultsTable.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
-        }
+        //set a LinkRenderer on those cells containing links
+        resultsTable.getColumnModel().getColumn(COLUMN_TEAM_OUTPUT).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN_JUDGE_OUTPUT).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN_JUDGE_DATA).setCellRenderer(new LinkRenderer());
+
         
-        for (int col=3; col<6; col++) {
-            resultsTable.getColumnModel().getColumn(col).setCellRenderer(new LinkRenderer());
-        }
+//        resultsTable.getColumnModel().getColumn(COLUMN_RESULT).setCellRenderer(new PassFailCellRenderer());
         
-//        resultsTable.getColumnModel().getColumn(1).setCellRenderer(new PassFailCellRenderer());
+        //force table column widths to nice values
+//        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//        resultsTable.getColumnModel().getColumn(COLUMN_SELECT).setPreferredWidth(45);
         
         //add a listener to allow users to click an output or data file name and display it
         resultsTable.addMouseListener(new MouseAdapter() {
@@ -480,7 +502,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 int row = target.getSelectedRow();
                 int column = target.getSelectedColumn();
                 
-                if (column>2 && column<6) {
+                if (column>=COLUMN_TEAM_OUTPUT && column<COLUMN_JUDGE_DATA) {
                     showListing (row, column);
                 }
             }
@@ -538,29 +560,39 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         // including creating hyperlinks (labels) to open each output file, and also including 
         // additional links to "compare selected rows" (see Strawman diagram)
         return new Object[][]  { 
-                {"1", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {"2", "Fail", "200", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {"3", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {"4", "Fail", "150", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {"5", "Fail", "50",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {"6", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {"7", "Fail", "1000", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {"8", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {"9", "Fail", "1500", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {"10", "Fail", "10", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {Boolean.FALSE, "1", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {Boolean.TRUE, "2", "Fail", "200", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(), "3", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(), "4", "Fail", "150", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(), "5", "Fail", "50",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(), "6", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(), "7", "Fail", "1000", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(), "8", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(), "9", "Fail", "1500", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(), "10", "Fail", "10", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
        } ;
     }
 
     
     /**
      * Displays a window showing side-by-side comparison of the Team's and Judge's output
-     * for the specified table row. 
+     * for each of the specified table rows. 
      * 
-     * @param selectedRow - the currently selected row in the results table
+     * @param rows - an array containing the index numbers of the currently selected rows in the results table
      */
-    private void showComparison(int selectedRow) {
-        int dataSetNumber = selectedRow+1 ;
-        System.out.println ("Would have shown comparison window for data set #" + dataSetNumber);
+    private void showComparison(int[] rows) {
+        if (rows.length<=0) {
+            System.out.println("Comparison requested but no rows selected!?");
+        } else {
+            System.out.print ("Would have shown comparisons for the following data sets: ");
+            for (int i=0; i<rows.length; i++) {
+                System.out.print(rows[i]+1);   
+                if (i<rows.length-1) {
+                    System.out.print (", ");
+                }
+            }
+            System.out.println();
+        }
     }
     
     public void showMessage(final String message) {
@@ -606,5 +638,27 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
         
     }
+    
+    public class CheckBoxRenderer extends JCheckBox implements TableCellRenderer {
+
+        private static final long serialVersionUID = 1L;
+
+        public CheckBoxRenderer() {
+          setHorizontalAlignment(SwingConstants.CENTER);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+          if (isSelected) {
+            setForeground(table.getSelectionForeground());
+            setBackground(table.getSelectionBackground());
+          } else {
+            setForeground(table.getForeground());
+            setBackground(table.getBackground());
+          }
+          setSelected(isSelected);
+          return this;
+        }
+}
 
 } // @jve:decl-index=0:visual-constraint="10,10"
