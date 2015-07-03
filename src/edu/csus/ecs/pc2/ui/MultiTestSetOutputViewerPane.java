@@ -5,12 +5,17 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.font.TextAttribute;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -169,7 +174,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     "Judge's Output", "Judge's Data" } ;
             
             //get the row data for the table of results
-            final String[][] tableData = getTableData() ;
+            final Object[][] tableData = getTableData() ;
             
             //define a model for the table data
             //TODO: this model assumes all data are Strings; that's probably not a good idea
@@ -211,9 +216,26 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
             centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
             
-            for (int col = 0; col < resultsTable.getColumnCount(); col++) {
+            for (int col = 0; col < 3; col++) {
                 resultsTable.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
             }
+            
+            for (int col=3; col<6; col++) {
+                resultsTable.getColumnModel().getColumn(col).setCellRenderer(new LinkRenderer());
+            }
+            
+            //add a listener to allow users to click an output or data file name and display it
+            resultsTable.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    JTable target = (JTable)e.getSource();
+                    int row = target.getSelectedRow();
+                    int column = target.getSelectedColumn();
+                    
+                    if (column>2 && column<6) {
+                        showListing (row, column);
+                    }
+                }
+              });
             
             //add a footer panel containing control buttons
             JPanel resultsPaneFooterPanel = new JPanel();
@@ -449,7 +471,17 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         return centerPanel;
     }
     
-    
+    /**
+     * Uses the currently-defined Viewer to display output file listed in the specified table row/col.
+     * @param row - the selected table row (0-based)
+     * @param col - the selected table column (0-based)
+     */
+    private void showListing(int row, int col) {
+        int dataSet = row+1;
+        String outputType = col==3?"Team Output":col==4?"Judge's Output":"Judge's Data";
+        System.out.println ("Would have displayed " + outputType + " for Data Set " + dataSet);
+    }
+
     /**
      * Returns an array of Strings listing the names of available (known)
      * output viewer tools.
@@ -477,27 +509,27 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
-     * Returns an array of String arrays defining the rows of data to be entered into
+     * Returns a set of Objects defining the rows of data to be entered into
      * the test case results table.
      * 
      * @return an array of arrays of Strings defining the table data
      */
-    private String [][] getTableData() {
+    private Object [][] getTableData() {
         
         //TODO: replace the following with code that gets the actual row data from the model, 
         // including creating hyperlinks (labels) to open each output file, and also including 
         // additional links to "compare selected rows" (see Strawman diagram)
-        return new String[][]  { 
-                {"1", "Pass", "100", "Link1", "Link2", "Link3"},
-                {"2", "Fail", "200", "Link1", "Link2", "Link3"},
-                {"3", "Pass", "100", "Link1", "Link2", "Link3"},
-                {"4", "Fail", "150", "Link1", "Link2", "Link3"},
-                {"5", "Fail", "50", "Link1", "Link2", "Link3"},
-                {"6", "Pass", "100", "Link1", "Link2", "Link3"},
-                {"7", "Fail", "1000", "Link1", "Link2", "Link3"},
-                {"8", "Pass", "100", "Link1", "Link2", "Link3"},
-                {"9", "Fail", "1500", "Link1", "Link2", "Link3"},
-                {"10", "Fail", "10", "Link1", "Link2", "Link3"},
+        return new Object[][]  { 
+                {"1", "Pass", "100", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"2", "Fail", "200", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"3", "Pass", "100", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"4", "Fail", "150", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"5", "Fail", "50",  new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"6", "Pass", "100", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"7", "Fail", "1000", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"8", "Pass", "100", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"9", "Fail", "1500", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
+                {"10", "Fail", "10", new JLabel("Link1"), new JLabel("Link2"), new JLabel("Link3")},
        } ;
     }
 
@@ -515,6 +547,22 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     
     public void showMessage(final String message) {
         JOptionPane.showMessageDialog(this, message);
+    }
+    
+    public class LinkRenderer extends DefaultTableCellRenderer {
+
+        private static final long serialVersionUID = 1L;
+
+        public void setValue(Object value) {
+            setForeground(Color.BLUE);
+            setText(((JLabel)value).getText());
+            Font font = getFont();
+            Map attributes = font.getAttributes();
+            attributes.put(TextAttribute.UNDERLINE,  TextAttribute.UNDERLINE_ON);
+            setFont(font.deriveFont(attributes));
+            setHorizontalAlignment( SwingConstants.CENTER );
+        }
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
