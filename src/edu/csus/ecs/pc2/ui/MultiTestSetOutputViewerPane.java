@@ -35,6 +35,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -489,7 +490,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         resultsTable.getColumnModel().getColumn(COLUMN_JUDGE_DATA).setCellRenderer(new LinkRenderer());
 
         
-//        resultsTable.getColumnModel().getColumn(COLUMN_RESULT).setCellRenderer(new PassFailCellRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN_RESULT).setCellRenderer(new PassFailCellRenderer());
         
         //force table column widths to nice values
 //        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -560,16 +561,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         // including creating hyperlinks (labels) to open each output file, and also including 
         // additional links to "compare selected rows" (see Strawman diagram)
         return new Object[][]  { 
-                {Boolean.FALSE, "1", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {Boolean.TRUE, "2", "Fail", "200", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(), "3", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(), "4", "Fail", "150", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(), "5", "Fail", "50",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(), "6", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(), "7", "Fail", "1000", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(), "8", "Pass", "100", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(), "9", "Fail", "1500", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(), "10", "Fail", "10", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "1", new JLabel("Pass"), "100",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "2", new JLabel("Fail"), "200",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "3", new JLabel("Pass"), "100",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "4", new JLabel("Fail"), "150",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "5", new JLabel("Unknown"), "50",   new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "6", new JLabel("Pass"), "100",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "7", new JLabel("Fail"), "1000", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "8", new JLabel("Pass"), "100",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "9", new JLabel("Unknown"), "1500", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(), "10", new JLabel("Fail"), "10",   new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
        } ;
     }
 
@@ -622,19 +623,20 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         private static final long serialVersionUID = 1L;
         
         public void setValue(Object value) {
-            String testResult = getText();
-            System.out.println ("Case " + count++ + "  Text = '" + testResult +"'");
+            String testResult = ((JLabel)value).getText();
             if (testResult.equalsIgnoreCase("Pass")) {
                 setBackground(Color.green);
+                setText("Pass");
             } else if (testResult.equalsIgnoreCase("Fail")) {
                 setBackground(Color.red);
+                setText("Fail");
             } else {
                 //illegal value
                 setBackground(Color.yellow);
-                setText("yy");
+                setText("??");
             }
-
             setHorizontalAlignment( SwingConstants.LEFT );
+            setBorder(new EmptyBorder(0,30,0,0));
         }
         
     }
