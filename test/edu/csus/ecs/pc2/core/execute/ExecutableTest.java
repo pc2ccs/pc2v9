@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -355,7 +356,7 @@ public class ExecutableTest extends AbstractTestCase {
      * @param expectedJudgement
      * @throws Exception 
      */
-    protected ExecutionData runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement) throws Exception {
+    protected Executable runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement) throws Exception {
 
         String executeDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(executeDirectoryName);
@@ -431,13 +432,11 @@ public class ExecutableTest extends AbstractTestCase {
             }
         }
         
-        executable = null;
-        
         if (isDebugMode()){
             System.err.println("DEBUG IS TURNED ON - turn it off");
         }
         
-        return executionData;
+        return executable;
 
     }
     
@@ -714,6 +713,8 @@ public class ExecutableTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         Problem problem = createMultiTestCaseProblem(contest, false);
+        
+        assertEquals("Expecting data files", 4,+problem.getNumberTestCases());
 
         problem.setReadInputDataFromSTDIN(true);
 
@@ -725,7 +726,14 @@ public class ExecutableTest extends AbstractTestCase {
         RunFiles runFiles = new RunFiles(run, sumitFilename);
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
-        runExecutableTest(run, runFiles, true, yesJudgement);
+        /**
+         * If this method failes with  ERROR - pc2 jar path not a directory '/software/pc2/cc/projects/pc2v9/build/prod:'
+         * then one must create pc2.jar, one can use createVERSIONandJar.xml to create pc2.jar. 
+         */
+        Executable executable = runExecutableTest(run, runFiles, true, yesJudgement);
+        
+        List<String> list = executable.getTeamsOutputFilenames();
+        assertEquals("Expecting output filenames ", problem.getNumberTestCases(), list.size());
 
     }
     
@@ -752,7 +760,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
     
-    public void testMultipleTestCaseFromExternalFile() throws Exception {
+    public void testMultipleTestCaseExternalFile() throws Exception {
 
 //        String testBaseDirname = getDataDirectory(this.getName());
 //        ensureDirectory(testBaseDirname);
@@ -784,7 +792,7 @@ public class ExecutableTest extends AbstractTestCase {
     }
     
     
-    public void testMultipleTestCaseFromInternalFile() throws Exception {
+    public void testMultipleTestCaseInternalFile() throws Exception {
 
 //        String testBaseDirname = getDataDirectory(this.getName());
 //        ensureDirectory(testBaseDirname);
@@ -1037,6 +1045,9 @@ public class ExecutableTest extends AbstractTestCase {
         
         SerializedFile[] inArray = problemDataFiles.getJudgesDataFiles();
         SerializedFile[] ansArray = problemDataFiles.getJudgesAnswerFiles();
+        for (int i = 0; i < ansArray.length; i++) {
+            problem.addTestCaseFilenames(inArray[i].getName(), ansArray[i].getName());
+        }
 
         problem.setDataFileName(inArray[0].getName());
         problem.setAnswerFileName(ansArray[0].getName());

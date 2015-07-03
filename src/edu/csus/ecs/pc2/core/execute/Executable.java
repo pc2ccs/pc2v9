@@ -8,8 +8,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.swing.JFileChooser;
@@ -150,6 +152,11 @@ public class Executable extends Plugin implements IExecutable {
     
     private boolean usingGUI = true;
 
+    /**
+     * List of Team's output filenames, created by execute method.
+     */
+    private ArrayList<String> teamsOutputFilenames = new ArrayList<String>();
+
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
         this.contest = inContest;
@@ -212,6 +219,9 @@ public class Executable extends Plugin implements IExecutable {
 
     @Override
     public IFileViewer execute(boolean clearDirFirst) {
+        
+        teamsOutputFilenames = new ArrayList<String>();
+        
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
         } else {
@@ -658,11 +668,14 @@ public class Executable extends Plugin implements IExecutable {
 
         }
 
-        // teams output file
+        // teams output file - single file name
         SerializedFile userOutputFile = executionData.getExecuteProgramOutput();
-
         createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
-
+        
+        String teamsOutputFilename = prefixExecuteDirname("teamoutput." + dataSetNumber + ".txt");
+        createFile(userOutputFile, teamsOutputFilename); // Create a per test case Team's output file
+        teamsOutputFilenames.add(teamsOutputFilename); // add to list
+        
         String secs = Long.toString((new Date().getTime()) % 100);
 
         // Answer/results XML file name
@@ -1904,6 +1917,14 @@ public class Executable extends Plugin implements IExecutable {
     
     public ContestInformation getContestInformation() {
         return contest.getContestInformation();
+    }
+    
+    /**
+     * Get filename for each team's output for each test case.
+     * @return the list of team output file names.
+     */
+    public List<String> getTeamsOutputFilenames() {
+        return teamsOutputFilenames;
     }
 }
 
