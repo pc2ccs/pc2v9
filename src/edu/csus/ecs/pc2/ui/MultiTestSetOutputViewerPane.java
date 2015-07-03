@@ -61,7 +61,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private static final long serialVersionUID = 7363093989131251458L;
 
     private JPanel centerPanel = null;
-    private JTable resultsTable;
     private final ButtonGroup buttonGroup = new ButtonGroup();
     private final ButtonGroup buttonGroup_1 = new ButtonGroup();
 
@@ -72,6 +71,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private JComboBox pulldownSelectViewer;
 
     private JButton btnCompareSelected;
+
+    private JTable resultsTable;
 
     /**
      * This method initializes
@@ -162,80 +163,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             //add a label to the header showing the total number of test cases for this problem
            //TODO: replace the "XX" in the following label text with the actual number of test cases for the
             // problem in the current submission
-            JLabel lblNumTestCases = new JLabel("Num Test Cases: XXX");
+            JLabel lblNumTestCases = new JLabel("Test Cases: XXX");
             resultsPaneHeaderPanel.add(lblNumTestCases);
             
             //add a scrollpane to hold the table of results
             JScrollPane resultsScrollPane = new JScrollPane();
             resultsPane.add(resultsScrollPane, BorderLayout.CENTER);
             
-            //define the column headers for the table of results
-            final String[] columnNames = {"Data Set #", "Result", "Time(ms)", "Team Output", 
-                    "Judge's Output", "Judge's Data" } ;
-            
-            //get the row data for the table of results
-            final Object[][] tableData = getTableData() ;
-            
-            //define a model for the table data
-            //TODO: this model assumes all data are Strings; that's probably not a good idea
-            // (see for example method setValueAt() )
-            TableModel tableModel = new AbstractTableModel() {
-                private static final long serialVersionUID = 1L;
-                public String getColumnName(int col) {
-                    return columnNames[col].toString();
-                }
-                public int getRowCount() { return tableData.length; }
-                public int getColumnCount() { return columnNames.length; }
-                public Object getValueAt(int row, int col) { return tableData[row][col]; }
-                public boolean isCellEditable(int row, int col) { return false; }
-                public void setValueAt(Object value, int row, int col) {
-                    tableData[row][col] = (String) value;
-                    fireTableCellUpdated(row, col);
-                }
-            };
-            
-            //add a table containing the test set results to the scrollpane in the tabbed pane's panel
-            resultsTable = new JTable(tableModel);
-            resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            resultsTable.setFillsViewportHeight(true);
-            resultsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                //insure "compare" button is only enabled when exactly ONE table row is selected
-                public void valueChanged(ListSelectionEvent e) {
-                    if (resultsTable.getSelectedRowCount() == 1) {
-                        btnCompareSelected.setEnabled(true);
-                    } else {
-                        btnCompareSelected.setEnabled(false);
-                    }
-                    
-                }
-            });
+            resultsTable = getResultsTable();
             resultsScrollPane.setViewportView(resultsTable);
  
-            //set a centering renderer on the table columns
-            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-            centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
-            
-            for (int col = 0; col < 3; col++) {
-                resultsTable.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
-            }
-            
-            for (int col=3; col<6; col++) {
-                resultsTable.getColumnModel().getColumn(col).setCellRenderer(new LinkRenderer());
-            }
-            
-            //add a listener to allow users to click an output or data file name and display it
-            resultsTable.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-                    JTable target = (JTable)e.getSource();
-                    int row = target.getSelectedRow();
-                    int column = target.getSelectedColumn();
-                    
-                    if (column>2 && column<6) {
-                        showListing (row, column);
-                    }
-                }
-              });
             
             //add a footer panel containing control buttons
             JPanel resultsPaneFooterPanel = new JPanel();
@@ -470,6 +407,87 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
         return centerPanel;
     }
+
+    /**
+     * Returns a JTable containing the results information for each test case.
+     * The method sets not only the table data but the appropriate cell renderers
+     * and action/mouse listeners for the table.
+     */
+    private JTable getResultsTable() {
+        
+        final JTable resultsTable ;
+        
+        //define the column headers for the table of results
+        final String[] columnNames = {"Data Set #", "Result", "Time(ms)", "Team Output", 
+                "Judge's Output", "Judge's Data" } ;
+        
+        //get the row data for the table of results
+        final Object[][] tableData = getTableData() ;
+        
+        //define a model for the table data
+        //TODO: this model assumes all data are Strings; that's probably not a good idea
+        // (see for example method setValueAt() )
+        TableModel tableModel = new AbstractTableModel() {
+            private static final long serialVersionUID = 1L;
+            public String getColumnName(int col) {
+                return columnNames[col].toString();
+            }
+            public int getRowCount() { return tableData.length; }
+            public int getColumnCount() { return columnNames.length; }
+            public Object getValueAt(int row, int col) { return tableData[row][col]; }
+            public boolean isCellEditable(int row, int col) { return false; }
+            public void setValueAt(Object value, int row, int col) {
+                tableData[row][col] = (String) value;
+                fireTableCellUpdated(row, col);
+            }
+        };
+        
+        //add a table containing the test set results to the scrollpane in the tabbed pane's panel
+        resultsTable = new JTable(tableModel);
+        resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        resultsTable.setFillsViewportHeight(true);
+        resultsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            //insure "compare" button is only enabled when exactly ONE table row is selected
+            public void valueChanged(ListSelectionEvent e) {
+                if (resultsTable.getSelectedRowCount() == 1) {
+                    btnCompareSelected.setEnabled(true);
+                } else {
+                    btnCompareSelected.setEnabled(false);
+                }
+                
+            }
+        });
+        
+        //set a centering renderer on the table columns
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
+        
+        for (int col = 0; col < 3; col++) {
+            resultsTable.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
+        }
+        
+        for (int col=3; col<6; col++) {
+            resultsTable.getColumnModel().getColumn(col).setCellRenderer(new LinkRenderer());
+        }
+        
+//        resultsTable.getColumnModel().getColumn(1).setCellRenderer(new PassFailCellRenderer());
+        
+        //add a listener to allow users to click an output or data file name and display it
+        resultsTable.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                JTable target = (JTable)e.getSource();
+                int row = target.getSelectedRow();
+                int column = target.getSelectedColumn();
+                
+                if (column>2 && column<6) {
+                    showListing (row, column);
+                }
+            }
+          });
+        
+        return resultsTable;
+    }
     
     /**
      * Uses the currently-defined Viewer to display output file listed in the specified table row/col.
@@ -561,6 +579,30 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             attributes.put(TextAttribute.UNDERLINE,  TextAttribute.UNDERLINE_ON);
             setFont(font.deriveFont(attributes));
             setHorizontalAlignment( SwingConstants.CENTER );
+        }
+        
+    }
+    
+    private static int count = 1 ;
+    
+    public class PassFailCellRenderer extends DefaultTableCellRenderer {
+
+        private static final long serialVersionUID = 1L;
+        
+        public void setValue(Object value) {
+            String testResult = getText();
+            System.out.println ("Case " + count++ + "  Text = '" + testResult +"'");
+            if (testResult.equalsIgnoreCase("Pass")) {
+                setBackground(Color.green);
+            } else if (testResult.equalsIgnoreCase("Fail")) {
+                setBackground(Color.red);
+            } else {
+                //illegal value
+                setBackground(Color.yellow);
+                setText("yy");
+            }
+
+            setHorizontalAlignment( SwingConstants.LEFT );
         }
         
     }
