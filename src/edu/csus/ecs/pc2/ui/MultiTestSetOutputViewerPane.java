@@ -171,7 +171,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             horizontalGlue_7.setPreferredSize(new Dimension(20, 20));
             resultsPaneHeaderPanel.add(horizontalGlue_7);
             
-            JLabel lblNumFailedTestCases = new JLabel("Failed Test Cases: XXX");
+            JLabel lblNumFailedTestCases = new JLabel("Failed: XXX");
             resultsPaneHeaderPanel.add(lblNumFailedTestCases);
             
             //add a scrollpane to hold the table of results
@@ -196,6 +196,23 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     showComparison(resultsTable.getSelectedRows()); 
                 }
             });
+            
+            JCheckBox chckbxShowFailuresOnly = new JCheckBox("Show Failures Only");
+            chckbxShowFailuresOnly.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if ( ((JCheckBox)(e.getSource())).isSelected()) {
+                        loadTableWithFailedTestCases();
+                    } else {
+                        loadTableWithAllTestCases();
+                    }
+                }
+
+            });
+            
+            resultsPaneFooterPanel.add(chckbxShowFailuresOnly);
+            
+            Component horizontalStrut_1 = Box.createHorizontalStrut(20);
+            resultsPaneFooterPanel.add(horizontalStrut_1);
             btnCompareSelected.setEnabled(false);
             resultsPaneFooterPanel.add(btnCompareSelected);
             
@@ -415,6 +432,23 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             
         }
         return centerPanel;
+    }
+    
+    /**
+     * Loads the result table with data for all test case results.
+     */
+    private void loadTableWithAllTestCases() {
+        //TODO fill in this method
+        System.out.println ("Would have reloaded table with all test case results.");
+        
+    }
+
+    /**
+     * Loads the result table with data for all test case results.
+     */
+    private void loadTableWithFailedTestCases() {
+        //TODO fill in this method
+        System.out.println ("Would have reloaded table with failed test case results (only).");
     }
 
     /**
