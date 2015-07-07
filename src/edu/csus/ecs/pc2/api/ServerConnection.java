@@ -508,9 +508,6 @@ public class ServerConnection {
      * @param title
      *            - title for problem
      * @param shortName short name/id for problem.
-     * 
-     * @param problemShortName
-     *            - a unique (to the contest) short problem name
      * @param judgesDataFile
      *            - judges input data file
      * @param judgesAnswerFile

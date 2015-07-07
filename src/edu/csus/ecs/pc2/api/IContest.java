@@ -416,7 +416,7 @@ public interface IContest {
      * Get run state for a run (judge or admin only).
      * 
      * @param run
-     * @return
+     * @return run state
      */
     RunStates getRunState(IRun run);
     
@@ -454,7 +454,7 @@ public interface IContest {
      * Get anyting after the minor version number.
      * <br><br>
      *  For ""9.3Beta"" would be "Beta"
-     * @return
+     * @return extra veresion info
      */
     String getOtherVersionInfo();
 
@@ -463,7 +463,7 @@ public interface IContest {
      * 
      * @param siteNumber 
      * @param runNumber
-     * @return
+     * @return run
      */
     IRun getRun(int siteNumber, int runNumber);
 
