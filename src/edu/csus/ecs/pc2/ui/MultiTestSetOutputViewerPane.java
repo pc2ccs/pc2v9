@@ -44,6 +44,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -248,6 +249,25 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             
             Component horizontalStrut_1 = Box.createHorizontalStrut(20);
             resultsPaneFooterPanel.add(horizontalStrut_1);
+            
+            JButton btnSelectAll = new JButton("Select All");
+            btnSelectAll.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    //mark every checkbox in the "Select" column of the results table as "Selected"
+                    TableModel tm = resultsTable.getModel();
+                    int col = resultsTable.getColumnModel().getColumn(COLUMN.SELECT_CHKBOX.ordinal()).getModelIndex();
+                    for (int row=0; row<tm.getRowCount(); row++) {
+                       ((JCheckBox)(tm.getValueAt(row, col))).setSelected(true);
+                       System.out.println ("Value at (" + row + "," + col + ") = " + ((JCheckBox)(tm.getValueAt(row, col))).isSelected());
+                    }
+                    ((javax.swing.table.AbstractTableModel) tm).fireTableDataChanged();
+                    resultsTable.repaint();
+                }
+            });
+            resultsPaneFooterPanel.add(btnSelectAll);
+            
+            Component horizontalStrut_2 = Box.createHorizontalStrut(20);
+            resultsPaneFooterPanel.add(horizontalStrut_2);
             btnCompareSelected.setEnabled(false);
             resultsPaneFooterPanel.add(btnCompareSelected);
             
@@ -857,8 +877,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         return getContest().getProblemDataFile(problem);
     }
 
-
-    private static int count = 1 ;
     
     public class PassFailCellRenderer extends DefaultTableCellRenderer {
 
@@ -898,9 +916,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
           if (isSelected) {
             setForeground(table.getSelectionForeground());
             setBackground(table.getSelectionBackground());
+            setSelected(true);
           } else {
             setForeground(table.getForeground());
             setBackground(table.getBackground());
+            setSelected(false);
           }
           setSelected(isSelected);
           return this;
