@@ -134,4 +134,16 @@ public class RunTestCase implements IElementObject, IGetDate{
         }
     }
     
+    /**
+     * Returns a String representing the contents of this Test Case.
+     */
+    public String toString() {
+        String ret = "";
+        ret += "Test Case: ";
+        ret += "num=" + testNumber + ", ";
+        ret += "solved=" + solved + ", ";
+        ret += "time(ms)=" + elapsedMS + ", ";
+        
+        return ret ;
+    }
 }
