@@ -44,6 +44,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -659,8 +660,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         resultsTable.getColumnModel().getColumn(COLUMN_JUDGE_OUTPUT).setCellRenderer(new LinkRenderer());
         resultsTable.getColumnModel().getColumn(COLUMN_JUDGE_DATA).setCellRenderer(new LinkRenderer());
 
-        
+        //render Result column as Pass/Fail on Green/Red
         resultsTable.getColumnModel().getColumn(COLUMN_RESULT).setCellRenderer(new PassFailCellRenderer());
+        
+        //render Time column right-justified
+        resultsTable.getColumnModel().getColumn(COLUMN_TIME).setCellRenderer(new TimeRenderer());
         
         //force table column widths to nice values
 //        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -731,16 +735,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         // including creating hyperlinks (labels) to open each output file, and also including 
         // additional links to "compare selected rows" (see Strawman diagram)
         return new Object[][]  { 
-                {new JCheckBox(),  "1", new JLabel("Pass"), "100",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(),  "2", new JLabel("Fail"), "200",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(),  "3", new JLabel("Pass"), "100",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(),  "4", new JLabel("Fail"), "150",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(),  "5", new JLabel("Unknown"), "50",   new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(),  "6", new JLabel("Pass"), "100",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(),  "7", new JLabel("Fail"), "1000", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(),  "8", new JLabel("Pass"), "100",  new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(),  "9", new JLabel("Unknown"), "1500", new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
-                {new JCheckBox(), "10", new JLabel("Fail"), "10",   new JLabel("Link"), new JLabel("Link"), new JLabel("Link")},
+                {new JCheckBox(),  "1", new JLabel("Pass"),    "100",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
+                {new JCheckBox(),  "2", new JLabel("Fail"),    "200",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
+                {new JCheckBox(),  "3", new JLabel("Pass"),    "100",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
+                {new JCheckBox(),  "4", new JLabel("Fail"),    "150",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
+                {new JCheckBox(),  "5", new JLabel("Unknown"),  "50",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
+                {new JCheckBox(),  "6", new JLabel("Pass"),    "100",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
+                {new JCheckBox(),  "7", new JLabel("Fail"),   "1000",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
+                {new JCheckBox(),  "8", new JLabel("Pass"),    "100",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
+                {new JCheckBox(),  "9", new JLabel("Unknown"),"1500",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
+                {new JCheckBox(), "10", new JLabel("Fail"),     "10",   new JLabel("View   Compare"), new JLabel("View"), new JLabel("View")},
        } ;
     }
 
@@ -804,6 +808,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 //illegal value
                 setBackground(Color.yellow);
                 setText("??");
+                Log log = getController().getLog();
+                log.log(Log.SEVERE, "MTSV PassFailCellRenderer: unknown pass/fail result: ", value);
             }
             setHorizontalAlignment( SwingConstants.LEFT );
             setBorder(new EmptyBorder(0,30,0,0));
@@ -831,7 +837,19 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
           setSelected(isSelected);
           return this;
         }
-}
+    }
+    
+    public class TimeRenderer extends DefaultTableCellRenderer {
+        
+        private static final long serialVersionUID = 1L;
+        
+        public void setValue(Object value) {
+            setHorizontalAlignment( SwingConstants.RIGHT );
+            setBorder(new EmptyBorder(0,0,0,30));
+            setText((String)value);
+        }
+
+    }
 
     public void setData(Run run, Problem problem, ProblemDataFiles problemDataFiles) {
          
