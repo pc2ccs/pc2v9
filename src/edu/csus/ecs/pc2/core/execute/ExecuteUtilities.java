@@ -55,7 +55,7 @@ public class ExecuteUtilities extends Plugin {
 
     private static String debugMessage = null;
     
-    public static String DEFAULT_PC2_JAR_PATH = "/software/pc2/cc/projects/pc2v9/build/prod:";
+    public static String DEFAULT_PC2_JAR_PATH = "./build/prod";
     
     public static String PC2_JAR_FILENAME = "pc2.jar";
     
@@ -92,7 +92,6 @@ public class ExecuteUtilities extends Plugin {
      * @return original string with all beforeString instances replaced with afterString
      */
     public static String replaceString(String origString, String beforeString, String afterString) {
-
         debugMessage = null;
         
         if (origString == null) {
@@ -462,8 +461,10 @@ public class ExecuteUtilities extends Plugin {
      */
     public static String findPC2JarPath() {
 
-        String jarDir = DEFAULT_PC2_JAR_PATH;
+        String jarDir = ".";
         try {
+            String default_path = new File(DEFAULT_PC2_JAR_PATH).getCanonicalPath(); 
+            jarDir = default_path;
             String cp = System.getProperty("java.class.path");
             
             String[] dirlist = cp.split(":");

@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Date;
 import java.util.Hashtable;
 
 import javax.swing.JFileChooser;
@@ -597,11 +596,9 @@ public class ExecutableV9 extends Plugin implements IExecutable {
 
         createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
 
-        String secs = new Long((new Date().getTime()) % 100).toString();
-
         // Answer/results file name
 
-        String resultsFileName = run.getNumber() + secs + "XRSAM.txt";
+        String resultsFileName = executeUtilities.getResultsFileName();
 
         /*
          * <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files]
@@ -614,6 +611,7 @@ public class ExecutableV9 extends Plugin implements IExecutable {
          */
 
         String commandPattern = problem.getValidatorCommandLine();
+        boolean pc2_jar_use_directory = false;
 
         if (problem.isUsingPC2Validator()) {
 
@@ -625,15 +623,15 @@ public class ExecutableV9 extends Plugin implements IExecutable {
              */
 
             String pathToPC2Jar = ExecuteUtilities.findPC2JarPath();
+            if (!(new File(pathToPC2Jar+"pc2.jar")).exists()) {
+                pc2_jar_use_directory = true;
+            }
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
         }
 
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
 
         String cmdLine = executeUtilities.substituteAllStrings(commandPattern);
-        cmdLine = ExecuteUtilities.replaceString(cmdLine, "{:resfile}", resultsFileName);
-
-        log.log(Log.DEBUG, "after  substitution: " + cmdLine);
 
         if (File.separator.equals("\\")) {
             if (problem.isUsingPC2Validator()) {
@@ -642,6 +640,12 @@ public class ExecutableV9 extends Plugin implements IExecutable {
                 log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);
             }
         }
+        if (pc2_jar_use_directory) {
+            // this is a directory, remove "pc2.jar" from string
+            cmdLine = ExecuteUtilities.replaceString(cmdLine, "pc2.jar", "");
+        }
+
+        log.log(Log.DEBUG, "after  substitution: " + cmdLine);
 
         try {
             String actFilename = new String(cmdLine);

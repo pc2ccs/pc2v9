@@ -694,6 +694,7 @@ public class Executable extends Plugin implements IExecutable {
          */
 
         String commandPattern = problem.getValidatorCommandLine();
+        boolean pc2_jar_use_directory = false;
 
         if (problem.isUsingPC2Validator()) {
 
@@ -705,6 +706,9 @@ public class Executable extends Plugin implements IExecutable {
              */
 
             String pathToPC2Jar = findPC2JarPath ();
+            if (!(new File(pathToPC2Jar+"pc2.jar")).exists()) {
+                pc2_jar_use_directory = true;
+            }
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
         }
 
@@ -718,8 +722,6 @@ public class Executable extends Plugin implements IExecutable {
         cmdLine = substituteAllStrings(run, cmdLine);
         cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
 
-        log.log(Log.DEBUG, "after  substitution: " + cmdLine);
-
         if (File.separator.equals("\\")) {
             if (problem.isUsingPC2Validator()) {
                 cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
@@ -727,6 +729,12 @@ public class Executable extends Plugin implements IExecutable {
                 log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);
             }
         }
+        if (pc2_jar_use_directory) {
+            // this is a directory, remove "pc2.jar" from string
+            cmdLine = ExecuteUtilities.replaceString(cmdLine, "pc2.jar", "");
+        }
+        log.log(Log.DEBUG, "after  substitution: " + cmdLine);
+
         
         try {
             String actFilename = new String(cmdLine);
@@ -911,10 +919,10 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     protected String findPC2JarPath() {
-        // end this with a : so pc2.jar can be appended
-        String default_path = "/software/pc2/cc/projects/pc2v9/build/prod:"; 
-        String jarDir = default_path;
+        String jarDir = ".";
         try {
+            String default_path = new File("./build/prod").getCanonicalPath(); 
+            jarDir = default_path;
             String cp = System.getProperty("java.class.path");
             StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
             while (st.hasMoreTokens()) {
