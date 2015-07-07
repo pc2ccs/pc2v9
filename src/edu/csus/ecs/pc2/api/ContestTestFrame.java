@@ -171,7 +171,7 @@ public class ContestTestFrame extends JFrame {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(609, 552));
+        this.setSize(new java.awt.Dimension(650, 552));
         this.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
         this.setContentPane(getMainPain());
         this.setTitle(DEFAULT_TITLE);
@@ -557,7 +557,7 @@ public class ContestTestFrame extends JFrame {
         if (loginButton == null) {
             loginButton = new JButton();
             loginButton.setToolTipText("Login to contest");
-            loginButton.setBounds(new java.awt.Rectangle(318, 8, 70, 26));
+            loginButton.setBounds(new java.awt.Rectangle(318, 8, 125, 26));
             loginButton.setMnemonic(java.awt.event.KeyEvent.VK_L);
             loginButton.setText("Login");
             loginButton.addActionListener(new java.awt.event.ActionListener() {
@@ -695,7 +695,7 @@ public class ContestTestFrame extends JFrame {
         if (logoffButton == null) {
             logoffButton = new JButton();
             logoffButton.setToolTipText("Logoff of contest");
-            logoffButton.setBounds(new java.awt.Rectangle(419, 8, 70, 26));
+            logoffButton.setBounds(new java.awt.Rectangle(500, 8, 125, 26));
             logoffButton.setMnemonic(java.awt.event.KeyEvent.VK_O);
             logoffButton.setText("Logoff");
             logoffButton.addActionListener(new java.awt.event.ActionListener() {
@@ -815,7 +815,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getConfigListenerCheckBox() {
         if (configListenerCheckBox == null) {
             configListenerCheckBox = new JCheckBox();
-            configListenerCheckBox.setBounds(new java.awt.Rectangle(17, 332, 156, 21));
+            configListenerCheckBox.setBounds(new java.awt.Rectangle(17, 332, 180, 21));
             configListenerCheckBox.setToolTipText("Listen for all configuration change events");
             configListenerCheckBox.setText("View Config Listener");
             configListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -857,7 +857,7 @@ public class ContestTestFrame extends JFrame {
     private JButton getStandingsButton() {
         if (standingsButton == null) {
             standingsButton = new JButton();
-            standingsButton.setBounds(new java.awt.Rectangle(246, 61, 94, 29));
+            standingsButton.setBounds(new java.awt.Rectangle(246, 61, 140, 29));
             standingsButton.setToolTipText("Print Standings");
             standingsButton.setText("Standings");
             standingsButton.addActionListener(new java.awt.event.ActionListener() {
@@ -881,7 +881,7 @@ public class ContestTestFrame extends JFrame {
     private JButton getPrintAllButton() {
         if (printAllButton == null) {
             printAllButton = new JButton();
-            printAllButton.setBounds(new java.awt.Rectangle(245, 14, 94, 29));
+            printAllButton.setBounds(new java.awt.Rectangle(245, 14, 140, 29));
             printAllButton.setToolTipText("Print all contest info");
             printAllButton.setMnemonic(java.awt.event.KeyEvent.VK_P);
             printAllButton.setText("Print ALL");
@@ -1162,11 +1162,11 @@ public class ContestTestFrame extends JFrame {
     private JPanel getTopPane() {
         if (topPane == null) {
             passwordLabel = new JLabel();
-            passwordLabel.setBounds(new java.awt.Rectangle(74, 38, 58, 16));
+            passwordLabel.setBounds(new java.awt.Rectangle(45, 38, 100, 16));
             passwordLabel.setText("Password");
             passwordLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             loginLabel = new JLabel();
-            loginLabel.setBounds(new java.awt.Rectangle(101, 13, 31, 16));
+            loginLabel.setBounds(new java.awt.Rectangle(45, 13, 100, 16));
             loginLabel.setText("Login");
             loginLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             topPane = new JPanel();
@@ -1210,9 +1210,9 @@ public class ContestTestFrame extends JFrame {
         if (mainPanel == null) {
             mainPanel = new JPanel();
             mainPanel.setLayout(new BorderLayout());
-            mainPanel.add(getEastPane(), java.awt.BorderLayout.CENTER);
+            mainPanel.add(getEastPane(), java.awt.BorderLayout.EAST);
             mainPanel.add(getTopPane(), java.awt.BorderLayout.NORTH);
-            mainPanel.add(getCenterPane(), java.awt.BorderLayout.WEST);
+            mainPanel.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         }
         return mainPanel;
     }
@@ -1383,7 +1383,7 @@ public class ContestTestFrame extends JFrame {
     private JButton getGetClarificationButton() {
         if (getClarificationButton == null) {
             getClarificationButton = new JButton();
-            getClarificationButton.setBounds(new java.awt.Rectangle(205, 265, 129, 26));
+            getClarificationButton.setBounds(new java.awt.Rectangle(205, 265, 150, 26));
             getClarificationButton.setText("getClarification");
             getClarificationButton.setToolTipText("Print Run information list");
             getClarificationButton.addActionListener(new java.awt.event.ActionListener() {
@@ -1403,7 +1403,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getConnectionListenerCheckBox() {
         if (connectionListenerCheckBox == null) {
             connectionListenerCheckBox = new JCheckBox();
-            connectionListenerCheckBox.setBounds(new java.awt.Rectangle(17, 366, 184, 24));
+            connectionListenerCheckBox.setBounds(new java.awt.Rectangle(17, 366, 220, 24));
             connectionListenerCheckBox.setText("View Connection Listener");
             connectionListenerCheckBox.setToolTipText("Listen for all connection change events");
             connectionListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
