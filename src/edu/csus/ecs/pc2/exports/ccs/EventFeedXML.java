@@ -915,7 +915,7 @@ public class EventFeedXML {
         
         // TODO CCS is result really the judgement acronym?
         String result = Judgement.ACRONYM_OTHER_CONTACT_STAFF;
-        if (testCase.isSolved()){
+        if (testCase.isPassed()){
             result = Judgement.ACRONYM_ACCEPTED;
         }
         XMLUtilities.addChild(memento, "result", result);

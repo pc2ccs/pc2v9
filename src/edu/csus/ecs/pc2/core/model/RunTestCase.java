@@ -38,7 +38,10 @@ public class RunTestCase implements IElementObject, IGetDate{
     
     private int testNumber;
     
-    private boolean solved = false;
+    /**
+     * Whether or not the run passed this particular Test Case.
+     */
+    private boolean passed = false;
     
     /**
      * Number of elapsed MS.
@@ -51,7 +54,7 @@ public class RunTestCase implements IElementObject, IGetDate{
         runElementId = run.getElementId();
         judgementId = record.getElementId();
         this.testNumber = testNumber;
-        this.solved = solved;
+        this.passed = solved;
     }
     
     public ElementId getElementId() {
@@ -90,8 +93,13 @@ public class RunTestCase implements IElementObject, IGetDate{
         }
     }
 
-    public boolean isSolved() {
-        return solved;
+    /**
+     * Returns true if Run to which this Test Case is attached passed this
+     * Test Case; false otherwise.
+     * @return whether the run passed this Test Case
+     */
+    public boolean isPassed() {
+        return passed;
     }
     
     public ElementId getRunElementId() {
@@ -141,7 +149,7 @@ public class RunTestCase implements IElementObject, IGetDate{
         String ret = "";
         ret += "Test Case: ";
         ret += "num=" + testNumber + ", ";
-        ret += "solved=" + solved + ", ";
+        ret += "solved=" + passed + ", ";
         ret += "time(ms)=" + elapsedMS + ", ";
         
         return ret ;

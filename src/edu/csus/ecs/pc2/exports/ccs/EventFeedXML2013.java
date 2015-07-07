@@ -578,12 +578,12 @@ public class EventFeedXML2013 {
 //        <solved>True</solved>
         
         String result = Judgement.ACRONYM_JUDGING_ERROR;
-        if (testCase.isSolved()){
+        if (testCase.isPassed()){
             result = Judgement.ACRONYM_ACCEPTED;
         }
         XMLUtilities.addChild(memento, "result", result);
         XMLUtilities.addChild(memento, "run-id", run.getNumber());
-        XMLUtilities.addChild(memento, "solved", titleCaseBoolean (testCase.isSolved()));
+        XMLUtilities.addChild(memento, "solved", titleCaseBoolean (testCase.isPassed()));
         
 //        <time>637.307141</time>
 //        <timestamp>1372831837.31</timestamp>
