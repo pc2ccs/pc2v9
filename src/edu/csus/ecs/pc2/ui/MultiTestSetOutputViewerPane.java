@@ -62,10 +62,17 @@ import edu.csus.ecs.pc2.core.model.RunTestCase;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/AutoJudgeSettingsPane.java $
 public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 7363093989131251458L;
+    
+    private enum COLUMN {SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT, JUDGE_OUTPUT, JUDGE_DATA} ;
+    
+//    private final static int COLUMN_SELECT_CHKBOX = 0;
+//    private final static int COLUMN_DATASET_NUM = 1;
+//    private final static int COLUMN_RESULT = 2;
+//    private final static int COLUMN_TIME = 3;
+//    private final static int COLUMN_TEAM_OUTPUT = 4;
+//    private final static int COLUMN_JUDGE_OUTPUT = 5;
+//    private final static int COLUMN_JUDGE_DATA = 6 ;
 
     private JPanel centerPanel = null;
     private final ButtonGroup buttonGroup = new ButtonGroup();
@@ -97,7 +104,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private JLabel lblNumTestCases;
 
-
+    
     /**
      * Constructs an instance of a plugin pane for viewing multi-testset output values.
      * 
@@ -595,19 +602,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private JTable getResultsTable() {
         
-        final int COLUMN_SELECT = 0;
-        final int COLUMN_DATASET = 1;
-        final int COLUMN_RESULT = 2;
-        final int COLUMN_TIME = 3;
-        final int COLUMN_TEAM_OUTPUT = 4;
-        final int COLUMN_JUDGE_OUTPUT = 5;
-        final int COLUMN_JUDGE_DATA = 6 ;
-        //yes, I know about enums... you can't define one in this scope :(
-        
         final JTable resultsTable ;
         
         //define the column headers for the table of results
-        final String[] columnNames = {"Select", "Data Set #", "Result", "Time(ms)", "Team Output", 
+        final String[] columnNames = {"Select", "Data Set #", "Result", "Time (ms)", "Team Output", 
                 "Judge's Output", "Judge's Data" } ;
         
         //get the row data for the table of results
@@ -652,19 +650,19 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         //set a centering renderer on desired table columns
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
-        resultsTable.getColumnModel().getColumn(COLUMN_SELECT).setCellRenderer(new CheckBoxRenderer());
-        resultsTable.getColumnModel().getColumn(COLUMN_DATASET).setCellRenderer(centerRenderer);
+        resultsTable.getColumnModel().getColumn(COLUMN.SELECT_CHKBOX.ordinal()).setCellRenderer(new CheckBoxRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN.DATASET_NUM.ordinal()).setCellRenderer(centerRenderer);
         
         //set a LinkRenderer on those cells containing links
-        resultsTable.getColumnModel().getColumn(COLUMN_TEAM_OUTPUT).setCellRenderer(new LinkRenderer());
-        resultsTable.getColumnModel().getColumn(COLUMN_JUDGE_OUTPUT).setCellRenderer(new LinkRenderer());
-        resultsTable.getColumnModel().getColumn(COLUMN_JUDGE_DATA).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN.TEAM_OUTPUT.ordinal()).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN.JUDGE_OUTPUT.ordinal()).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN.JUDGE_DATA.ordinal()).setCellRenderer(new LinkRenderer());
 
         //render Result column as Pass/Fail on Green/Red
-        resultsTable.getColumnModel().getColumn(COLUMN_RESULT).setCellRenderer(new PassFailCellRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN.RESULT.ordinal()).setCellRenderer(new PassFailCellRenderer());
         
         //render Time column right-justified
-        resultsTable.getColumnModel().getColumn(COLUMN_TIME).setCellRenderer(new TimeRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN.TIME.ordinal()).setCellRenderer(new TimeRenderer());
         
         //force table column widths to nice values
 //        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -677,7 +675,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 int row = target.getSelectedRow();
                 int column = target.getSelectedColumn();
                 
-                if (column>=COLUMN_TEAM_OUTPUT && column<COLUMN_JUDGE_DATA) {
+                if (column>=COLUMN.TEAM_OUTPUT.ordinal() && column<=COLUMN.JUDGE_DATA.ordinal()) {
                     showListing (row, column);
                 }
             }
@@ -688,12 +686,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     
     /**
      * Uses the currently-defined Viewer to display output file listed in the specified table row/col.
+     * TODO: add code to actually display the specified output file.
      * @param row - the selected table row (0-based)
      * @param col - the selected table column (0-based)
      */
     private void showListing(int row, int col) {
         int dataSet = row+1;
-        String outputType = col==3?"Team Output":col==4?"Judge's Output":"Judge's Data";
+        String outputType = col == COLUMN.TEAM_OUTPUT.ordinal() ? "Team Output"
+                : col == COLUMN.JUDGE_OUTPUT.ordinal() ? "Judge's Output"
+                        : col == COLUMN.JUDGE_DATA.ordinal() ? "Judge's Data"
+                                : "??";
         System.out.println ("Would have displayed " + outputType + " for Data Set " + dataSet);
     }
 
