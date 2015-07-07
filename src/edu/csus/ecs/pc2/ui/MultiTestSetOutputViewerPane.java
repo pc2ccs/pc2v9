@@ -15,6 +15,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import javax.swing.Box;
@@ -44,6 +46,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -51,6 +55,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * Multiple data set viewer pane.
@@ -103,6 +108,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private JLabel lblNumFailedTestCases;
 
     private JLabel lblNumTestCases;
+    
+    private IFileViewer currentViewer ;
 
     
     /**
@@ -696,7 +703,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 : col == COLUMN.JUDGE_OUTPUT.ordinal() ? "Judge's Output"
                         : col == COLUMN.JUDGE_DATA.ordinal() ? "Judge's Data"
                                 : "??";
-        System.out.println ("Would have displayed " + outputType + " for Data Set " + dataSet);
+        System.out.println ("Showing " + outputType + " for Data Set " + dataSet);
+        viewFile(row, col);
     }
 
     /**
@@ -792,6 +800,64 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         
     }
     
+    /**
+     * Pops up a viewer window for the file defined at the specified row/col in the results table.
+     * @param row - the test case row number
+     * @param col - the column in the table: team output, judge's output, or judge's data
+     */
+    protected void viewFile(int row, int col) {
+        if (col != COLUMN.TEAM_OUTPUT.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal()) {
+            Log log = getController().getLog();
+            log.log(Log.WARNING, "MTSV: invalid column number for file viewing request");
+            return;
+        }
+        if (currentViewer != null) {
+            currentViewer.dispose();
+        }
+        currentViewer = new MultipleFileViewer(getController().getLog());
+        String title = col==COLUMN.TEAM_OUTPUT.ordinal()?"Team Output"
+                :col==COLUMN.JUDGE_OUTPUT.ordinal()?"Judge's Output"
+                        :col==COLUMN.JUDGE_DATA.ordinal()?"Judge's Data"
+                                :"<unknown";
+        createAndViewFile(currentViewer, getFileForTableCell(row,col), title, true);
+    }
+
+    private SerializedFile getFileForTableCell(int row, int col) {
+        return new SerializedFile("TestFileName");
+    }
+
+    private void createAndViewFile(IFileViewer fileViewer, SerializedFile file, String title, boolean visible) {
+        // TODO the executable dir name should be from the model, eh ?
+        String targetDirectory = getExecuteDirectoryName();
+        Utilities.insureDir(targetDirectory);
+        String targetFileName = targetDirectory + File.separator + file.getName();
+        try {
+            file.writeFile(targetFileName);
+
+            if (new File(targetFileName).isFile()) {
+                fileViewer.addFilePane(title, targetFileName);
+            } else {
+                fileViewer.addTextPane(title, "Could not create file at " + targetFileName);
+            }
+        } catch (IOException e) {
+            fileViewer.addTextPane(title, "Could not create file at " + targetFileName + "Exception " + e.getMessage());
+        }
+        if (visible) {
+            fileViewer.setVisible(true);
+        }
+    }
+
+    private String getExecuteDirectoryName() {
+        Executable tempEexecutable = new Executable(getContest(), getController(), currentRun, /*runFiles*/ null);
+        return tempEexecutable.getExecuteDirectoryName();
+    }
+
+    private ProblemDataFiles getProblemDataFiles() {
+        Problem problem = getContest().getProblem(currentRun.getProblemId());
+        return getContest().getProblemDataFile(problem);
+    }
+
+
     private static int count = 1 ;
     
     public class PassFailCellRenderer extends DefaultTableCellRenderer {
