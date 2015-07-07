@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.core.transport;
 import java.io.Serializable;
 
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.packet.Packet;
 
 /**
  * Public interface Transport Manager for a client.
