@@ -2,6 +2,10 @@ package edu.csus.ecs.pc2.ui;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.Run;
+
 import java.awt.Dimension;
 
 /**
@@ -22,7 +26,10 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
     private MultiTestSetOutputViewerPane multiSetOutputViewerPane = null;
 
     /**
-     * This method initializes
+     * Constructor which initializes this Frame to contain a {@link #multiSetOutputViewerPane}.
+     * Invokers are expected to call {@link #setContestAndController(IInternalContest, IInternalController)}
+     * and then {@link #setData(Run, Problem, ProblemDataFiles)} prior to calling
+     * {@link #setVisible(boolean)} on the frame.
      * 
      */
     public MultiTestSetOutputViewerFrame() {
@@ -31,7 +38,10 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
     }
 
     /**
-     * This method initializes this
+     * This method initializes this Frame to contain a {@link #multiSetOutputViewerPane}.
+     * Invokers are expected to call {@link #setContestAndController(IInternalContest, IInternalController)}
+     * and then {@link #setData(Run, Problem, ProblemDataFiles)} prior to calling
+     * {@link #setVisible(boolean)} on the frame.
      * 
      */
     private void initialize() {
@@ -62,9 +72,10 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
         return "Multiple Test Set Output View Frame";
     }
     
-    public static void main (String [] args) {
-        MultiTestSetOutputViewerFrame mf = new MultiTestSetOutputViewerFrame();
-        mf.setVisible(true);
+
+    public void setData(Run run, Problem problem, ProblemDataFiles problemDataFiles) {
+
+        getMultiTestSetOutputViewerPane().setData(run, problem, problemDataFiles);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
