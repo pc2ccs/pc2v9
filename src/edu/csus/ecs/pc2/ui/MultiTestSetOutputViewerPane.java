@@ -45,6 +45,11 @@ import javax.swing.table.TableCellRenderer;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 
 /**
  * Multiple data set viewer pane.
@@ -75,8 +80,25 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private JTable resultsTable;
 
+    private JLabel lblProblemTitle;
+    private JLabel lblTeamNumber;
+    private JLabel lblRunID;
+    
+    private Run currentRun;
+
+    private Problem currentProblem;
+
+    private ProblemDataFiles currentProblemDataFiles;
+
+    private JLabel lblLanguage;
+
+    private JLabel lblNumFailedTestCases;
+
+    private JLabel lblNumTestCases;
+
+
     /**
-     * This method initializes
+     * Constructs an instance of a plugin pane for viewing multi-testset output values.
      * 
      */
     public MultiTestSetOutputViewerPane() {
@@ -85,7 +107,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes this
+     * This method initializes the pane.
      * 
      */
     private void initialize() {
@@ -136,10 +158,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             resultsPaneHeaderPanel.setBorder(new LineBorder(Color.BLUE, 2));
             resultsPane.add(resultsPaneHeaderPanel, BorderLayout.NORTH);
             
+            resultsPaneHeaderPanel.add(getRunIDLabel());
+            
+            Component horizontalGlue_1 = Box.createHorizontalGlue();
+            horizontalGlue_1.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue_1);
+            
             //add a label to the header showing the Problem for which this set of test results applies
-            //TODO: replace the following label text with the problem title from the current submission
-            JLabel lblProblemTitle = new JLabel("Problem: XXX");
-            resultsPaneHeaderPanel.add(lblProblemTitle);
+            resultsPaneHeaderPanel.add(getProblemTitleLabel());
             
             Component horizontalGlue = Box.createHorizontalGlue();
             horizontalGlue.setPreferredSize(new Dimension(20, 20));
@@ -147,32 +173,26 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             
             //add a label to the header showing the Team for which this set of test results applies
             //TODO: replace the following label text with the Team Name and Number from the current submission
-            JLabel lblTeamName = new JLabel("Team: XXX");
-            resultsPaneHeaderPanel.add(lblTeamName);
-            
-            Component horizontalGlue_1 = Box.createHorizontalGlue();
-            horizontalGlue_1.setPreferredSize(new Dimension(20, 20));
-            resultsPaneHeaderPanel.add(horizontalGlue_1);
-            
-            JLabel lblRunID = new JLabel("Run ID: XXX");
-            resultsPaneHeaderPanel.add(lblRunID);
+            resultsPaneHeaderPanel.add(getTeamNumberLabel());
             
             Component horizontalGlue_2 = Box.createHorizontalGlue();
             horizontalGlue_2.setPreferredSize(new Dimension(20, 20));
             resultsPaneHeaderPanel.add(horizontalGlue_2);
             
+            resultsPaneHeaderPanel.add(getLanguageLabel());
+            
+            Component horizontalGlue_8 = Box.createHorizontalGlue();
+            horizontalGlue_8.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue_8);
+            
             //add a label to the header showing the total number of test cases for this problem
-           //TODO: replace the "XX" in the following label text with the actual number of test cases for the
-            // problem in the current submission
-            JLabel lblNumTestCases = new JLabel("Test Cases: XXX");
-            resultsPaneHeaderPanel.add(lblNumTestCases);
+            resultsPaneHeaderPanel.add(getNumTestCasesLabel());
             
             Component horizontalGlue_7 = Box.createHorizontalGlue();
             horizontalGlue_7.setPreferredSize(new Dimension(20, 20));
             resultsPaneHeaderPanel.add(horizontalGlue_7);
             
-            JLabel lblNumFailedTestCases = new JLabel("Failed: XXX");
-            resultsPaneHeaderPanel.add(lblNumFailedTestCases);
+            resultsPaneHeaderPanel.add(getNumFailedTestCasesLabel());
             
             //add a scrollpane to hold the table of results
             JScrollPane resultsScrollPane = new JScrollPane();
@@ -433,6 +453,122 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
         return centerPanel;
     }
+
+    /**
+     * @return
+     */
+    private JLabel getNumTestCasesLabel() {
+        if (lblNumTestCases == null) {
+            lblNumTestCases= new JLabel("Test Cases: XXX");
+        }
+        return lblNumTestCases;
+    }
+
+    /**
+     * @return
+     */
+    private JLabel getNumFailedTestCasesLabel() {
+        if (lblNumFailedTestCases == null) {
+            lblNumFailedTestCases= new JLabel("Failed: XXX");
+        }
+        return lblNumFailedTestCases;
+    }
+    
+    private JLabel getLanguageLabel() {
+        if (lblLanguage == null) {
+            lblLanguage = new JLabel("Language: XXX");
+        }
+        return lblLanguage;
+    }
+
+    private JLabel getRunIDLabel() {
+        if (lblRunID == null) {
+            lblRunID = new JLabel("Run ID: XXX");
+        }
+
+        return lblRunID;
+    }
+
+    private JLabel getTeamNumberLabel() {
+
+        if (lblTeamNumber == null) {
+            lblTeamNumber = new JLabel("Team: XXX");
+        }
+
+        return lblTeamNumber;
+    }
+
+    private JLabel getProblemTitleLabel() {
+        if (lblProblemTitle == null) {
+            lblProblemTitle = new JLabel("Problem: XXX");            
+        }
+        return lblProblemTitle;
+    }
+
+    private void populateGUI() {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                //fill in the basic header information
+                getProblemTitleLabel().setText("Problem:  " + currentProblem.getLetter() + " - " + currentProblem.getShortName());
+                getTeamNumberLabel().setText("Team:  " + currentRun.getSubmitter().getClientNumber());
+                getRunIDLabel().setText("Run ID:  " + currentRun.getNumber());
+                getLanguageLabel().setText("Language:  " + getCurrentRunLanguageName());
+                
+                //get the test case results for the current run
+                RunTestCase [] testCases = currentRun.getRunTestCases();
+                
+                //fill in the test case summary information
+                getNumTestCasesLabel().setText("Test Cases:  " + testCases.length);
+                for (int i=0; i<testCases.length; i++) {
+                    System.out.println ("Test case " + testCases[i].getTestNumber() + " result: " + testCases[i]);
+                }
+                
+                int failedCount = getNumFailedTestCases(testCases);
+                if (failedCount > 0) {
+                    getNumFailedTestCasesLabel().setForeground(Color.red);
+                    getNumFailedTestCasesLabel().setText("Failed:  " + failedCount);
+                } else {
+                    getNumFailedTestCasesLabel().setForeground(Color.green);
+                    getNumFailedTestCasesLabel().setText("ALL PASSED");
+                }
+                
+                //the following code is from the class where it was copied from; need to do the "equivalent" operations
+                // for THIS type of pane...
+//                selectDisplayRadioButton();
+//                getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
+//                getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
+//                getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
+//                getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
+//                getAutoRegistrationCheckbox().setSelected(contestInformation.isEnableAutoRegistration());
+//                setContestInformation(contestInformation);
+//                setEnableButtons(false);
+                //...
+                
+                
+            }
+
+        });
+
+    }
+    
+
+    private int getNumFailedTestCases(RunTestCase[] testCases) {
+//        int failed = 0 ;
+//        for (int i=0; i<testCases.length; i++) {
+//            if (testCases[i].get
+//                ...
+//        }
+        return 3;
+    }
+
+    /**
+     * Returns the name of the language used in the "current run" defined by the field "currentRun".
+     * @return the language display name as defined by the toString() method of the defined language.
+     */
+    private String getCurrentRunLanguageName() {
+        Language language = getContest().getLanguage(currentRun.getLanguageId());
+        return language.toString();    }
     
     /**
      * Loads the result table with data for all test case results.
@@ -696,5 +832,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
           return this;
         }
 }
+
+    public void setData(Run run, Problem problem, ProblemDataFiles problemDataFiles) {
+         
+        this.currentRun = run;
+        this.currentProblem = problem;
+        this.currentProblemDataFiles = problemDataFiles;
+        
+        populateGUI();
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
