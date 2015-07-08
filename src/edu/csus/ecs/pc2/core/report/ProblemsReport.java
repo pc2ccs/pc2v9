@@ -129,12 +129,14 @@ public class ProblemsReport implements IReport {
                     for (SerializedFile serializedFile : judgesDataFiles) {
                         Integer bytes = null;
                         String name = null;
+                        String shaSum = null;
                         if (serializedFile != null && serializedFile.getBuffer() != null) {
                             bytes = serializedFile.getBuffer().length;
                             name = serializedFile.getName();
+                            shaSum = serializedFile.getSHA1sum();
                         }
-                        printWriter.println("                    judge data file '" + name + "' " + bytes + " bytes "+
-                                internExternDesc (serializedFile));
+                        printWriter.println("                    judge data file '" + name + "' " + bytes + " bytes,  SHA1 = " + shaSum // 
+                                + " " + internExternDesc(serializedFile));
                     }
                 }
             } else {
@@ -148,12 +150,14 @@ public class ProblemsReport implements IReport {
                     for (SerializedFile serializedFile : judgesAnswerFiles) {
                         Integer bytes = null;
                         String name = null;
+                        String shaSum = null;
                         if (serializedFile != null && serializedFile.getBuffer() != null) {
                             bytes = serializedFile.getBuffer().length;
                             name = serializedFile.getName();
+                            shaSum = serializedFile.getSHA1sum();
                         }
-                        printWriter.println("                    judge ans. file '" + name + "' " + bytes + " bytes "+
-                                internExternDesc (serializedFile));
+                        printWriter.println("                    judge ans. file '" + name + "' " + bytes + " bytes,  SHA1 = " + shaSum + //
+                                " " + internExternDesc(serializedFile));
                     }
                 }
             } else {

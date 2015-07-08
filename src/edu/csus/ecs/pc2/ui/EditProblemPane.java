@@ -260,17 +260,15 @@ public class EditProblemPane extends JPanePlugin {
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
-
-        // getContest().addProblemListener(new Proble)
-
         addWindowListeners();
+
+        getMultipleDataSetPane().setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getLoadButton().setVisible(Utilities.isDebugMode());
                 getExportButton().setVisible(Utilities.isDebugMode());
                 getReportButton().setVisible(Utilities.isDebugMode());
-//                addProblemFilesTab(null);
             }
         });
 
@@ -618,8 +616,6 @@ public class EditProblemPane extends JPanePlugin {
                 throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
             }
             
-            System.out.println("debug 22 tool tip "+inputDataFileLabel.getToolTipText());
-
             if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
                 fileName = inputDataFileLabel.getToolTipText() + "";
             }
@@ -852,8 +848,6 @@ public class EditProblemPane extends JPanePlugin {
             
             getProblemDataFilesFromFields();
             
-            dumpProblem("/tmp/stuf.beforeup.txt",  newProblemDataFiles);
-            
             // also updates newProblemDataFiles
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -879,87 +873,18 @@ public class EditProblemPane extends JPanePlugin {
      * @return
      */
     protected ProblemDataFiles getProblemDataFilesFromFields() {
-
-        SerializedFile[] datafiles = originalProblemDataFiles.getJudgesDataFiles();
         
-        dumpProblem("/tmp/stuf.orig.prob.txt", originalProblemDataFiles);
+        /**
+         * These are the judge data and ans from the first pane, 
+         * they need to replace the first data set files.
+         */
+        // TODO 917 handl   lastAnsFile;
+        // TODO 917 handle  lastDataFile;
 
-        // TODO
-
-//        String inFileName = inputDataFileLabel.getText();
-//        SerializedFile judgesDataFile = new SerializedFile(inFileName);
-//        // copy from original data
-//        SerializedFile[] newFilelist = new SerializedFile[datafiles.length];
-//        for (int i = 0; i < datafiles.length; i++) {
-//            newFilelist[i] = datafiles[i];
-//            if (i == 0) {
-//                newFilelist[i] = judgesDataFile;
-//            }
-//            System.out.println("debug 22 adding dat "+i+" "+newFilelist[i]);
-//        }
+        newProblemDataFiles = multipleDataSetPane.getProblemDataFiles();
         
-        // copy from original data
-        SerializedFile[] newFilelist = new SerializedFile[datafiles.length];
-        for (int i = 0; i < datafiles.length; i++) {
-            newFilelist[i] = datafiles[i];
-            System.out.println("debug 22 adding dat "+i+" "+newFilelist[i]);
-        }
+        // TODO 917 check and refresh all data files in all test cases.
         
-        if (lastDataFile != null){
-            int i = 0;
-            newFilelist[0] = lastDataFile;
-            System.out.println("debug 22 adding dat "+i+" "+newFilelist[i]);
-        }
-        
-        System.out.println("debug 22 number of data sets = "+newFilelist.length);
-        
-        newProblemDataFiles.setJudgesDataFiles(newFilelist);
-
-//        String fileName = answerFileNameLabel.getText();
-//        SerializedFile serializedFile = new SerializedFile(fileName);
-//
-//        SerializedFile[] ansFiles = originalProblemDataFiles.getJudgesAnswerFiles();
-//
-//        // copy from original data
-//        newFilelist = new SerializedFile[ansFiles.length];
-//        for (int i = 0; i < ansFiles.length; i++) {
-//            newFilelist[i] = ansFiles[i];
-//            if (i == 0) {
-//                newFilelist[i] = serializedFile;
-//            }
-//            System.out.println("debug 22 adding ans "+i+" "+newFilelist[i]);
-//        }
-        
-
-        SerializedFile[] ansFiles = originalProblemDataFiles.getJudgesAnswerFiles();
-
-        // copy from original data
-        newFilelist = new SerializedFile[ansFiles.length];
-        for (int i = 0; i < ansFiles.length; i++) {
-            newFilelist[i] = ansFiles[i];
-            System.out.println("debug 22 adding ans "+i+" "+newFilelist[i]);
-        }
-        
-        if (lastAnsFile != null){
-            int i = 0;
-            newFilelist[i] = ansFiles[i];
-            System.out.println("debug 22 adding ans "+i+" "+newFilelist[i]);
-        }
-
-        System.out.println("debug 22 number of ans  sets = "+newFilelist.length);
-
-        newProblemDataFiles.setJudgesAnswerFiles(newFilelist);
-
-        // Compare before and after
-        
-//        System.out.println("debug 22 origF " + fileName);
-        System.out.println("debug 22 orig " + originalProblemDataFiles);
-        System.out.println("debug 22  new " + newProblemDataFiles);
-
-        System.out.println("debug 22 equals " + originalProblemDataFiles.toString().equals(newProblemDataFiles.toString()));
-        
-        dumpProblem("/tmp/stuf.getProblemDataFilesFromFields.txt", newProblemDataFiles);
-
         return newProblemDataFiles;
     }
 
@@ -1123,8 +1048,6 @@ public class EditProblemPane extends JPanePlugin {
      */
     public void setProblem(final Problem inProblem, final ProblemDataFiles problemDataFiles) {
         
-        System.out.println("debug 22 setProblem w/problemDataFiles "+problemDataFiles);
-        
         problem = inProblem;
         originalProblemDataFiles = problemDataFiles;
         
@@ -1242,8 +1165,6 @@ public class EditProblemPane extends JPanePlugin {
      */
     public void setProblem(final Problem problem) {
         
-        System.out.println("debug 22 setProblem new ");
-
         this.problem = problem;
         this.newProblemDataFiles = null;
 
@@ -1295,8 +1216,14 @@ public class EditProblemPane extends JPanePlugin {
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
         
         if (originalProblemDataFiles != null) {
-            System.out.println("debug 22 setProblem "+originalProblemDataFiles);
-            getMultipleDataSetPane().setProblemDataFiles(originalProblemDataFiles);
+            try {
+                getMultipleDataSetPane().setProblemDataFiles(originalProblemDataFiles);
+            } catch (Exception e) {
+                String message = "Error loading/editing problem data files: " + e.getMessage();
+                showMessage(message + " check logs.");
+                getLog().log(Log.WARNING, message, e);
+                e.printStackTrace(); // debug 22
+            }
         }
 
         // select the general tab
@@ -1304,6 +1231,7 @@ public class EditProblemPane extends JPanePlugin {
         populatingGUI = false;
     }
     
+    @SuppressWarnings("unused")
     private void dumpProblem(String filename, ProblemDataFiles pdf) {
         
         PrintWriter out = new PrintWriter(System.out, true);
@@ -1315,6 +1243,7 @@ public class EditProblemPane extends JPanePlugin {
             try {
                 FileOutputStream stream = new FileOutputStream(filename, false);
                 out = new PrintWriter(stream, true);
+                out.println("Problem = "+problem);
                 report.writeProblemDataFiles(out, pdf);
                 out.close();
                 out = null;
@@ -1340,13 +1269,6 @@ public class EditProblemPane extends JPanePlugin {
         
         problem = inProblem;
         originalProblemDataFiles = problemDataFiles;
-        
-        dumpProblem("/tmp/stuf.setForm.txt", problemDataFiles);
-        
-        System.out.println("debug 22 prob " + inProblem);
-        System.out.println("debug 22 orig " + originalProblemDataFiles);
-        System.out.println("debug 22  new " + newProblemDataFiles);
-
         
         problemNameTextField.setText(inProblem.getDisplayName());
         timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
@@ -1427,8 +1349,6 @@ public class EditProblemPane extends JPanePlugin {
         usingExternalDataFiles = inProblem.isUsingExternalDataFiles();
         loadPath = inProblem.getExternalDataFileLocation();
 
-//        addProblemFilesTab (problemDataFiles);
-        
         /**
          * Short problem name
          */

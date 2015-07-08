@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 
 /**
@@ -15,6 +16,8 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
+
+// TODO 917 make font larger
 
 // $HeadURL$
 public class MultipleDataSetPane extends JPanePlugin {
@@ -60,6 +63,10 @@ public class MultipleDataSetPane extends JPanePlugin {
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(440, 229));
         this.add(getCenterPane(), BorderLayout.CENTER);
+        
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setPreferredSize(new Dimension(35, 35));
+        add(buttonPanel, BorderLayout.SOUTH);
 //        this.add(getButtonPane(), BorderLayout.SOUTH);
 
     }
@@ -98,9 +105,16 @@ public class MultipleDataSetPane extends JPanePlugin {
 //        return columns;
 //    }
 
-    public void setProblemDataFiles(ProblemDataFiles problemDataFiles) {
-
-        this.problemDataFiles = problemDataFiles;
+    /**
+     * Clone data files and populate in pane.
+     * 
+     * @param problemDataFiles
+     * @throws CloneNotSupportedException
+     */
+    public void setProblemDataFiles(ProblemDataFiles problemDataFiles) throws CloneNotSupportedException  {
+        
+        Problem problem = getContest().getProblem(problemDataFiles.getProblemId());
+        this.problemDataFiles = problemDataFiles.copy(problem);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

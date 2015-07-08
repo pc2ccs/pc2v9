@@ -75,9 +75,18 @@ public class ProblemDataFiles implements IElementObject {
         clone.setSiteNumber(getSiteNumber());
         
         // local fields
+        clone.elementId = elementId;
+        clone.problemId = getProblemId();
+
         clone.setValidatorFile(cloneSerializedFile(getValidatorFile()));
+
+        clone.setValidatorRunCommand(getValidatorRunCommand());
+        clone.setValidatorFile(cloneSerializedFile(getValidatorRunFile()));
+
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
+        clone.setValidatorFiles(getValidatorFiles());
+        
         return clone;
     }
 
@@ -317,6 +326,8 @@ public class ProblemDataFiles implements IElementObject {
             if (!compareSerializedFiles(validatorFile, newProblemDataFiles.getValidatorFile())) {
                 return false;
             }
+            
+            // TODO 917 should compare the other problemDataFile fields too.
                 
             return true;
         } catch (Exception e) {
