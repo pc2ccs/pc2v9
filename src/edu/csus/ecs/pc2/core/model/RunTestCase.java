@@ -157,10 +157,10 @@ public class RunTestCase implements IElementObject, IGetDate{
      */
     public String toString() {
         String ret = "";
-        ret += "Test Case: ";
+        ret += "[Test Case: ";
         ret += "num=" + testNumber + ", ";
         ret += "passed=" + passed + ", ";
-        ret += "time(ms)=" + elapsedMS + ", ";
+        ret += "time(ms)=" + elapsedMS + "]";
         
         return ret ;
     }
