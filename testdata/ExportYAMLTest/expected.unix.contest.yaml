@@ -63,7 +63,7 @@ languages:
     runner: './{:basename}.exe'
     runner-args: ''
     use-judge-cmd: false
-    judge-exec-cmd: '.\{:basename}.exe'
+    judge-exec-cmd: './{:basename}.exe'
 
   - name: 'APL'
     active: true
