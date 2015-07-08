@@ -1600,4 +1600,55 @@ public class SampleContest {
         return createContest(3, 3, 120, 12, true);
     }
 
+    
+    public String getSampleFileName(String baseFileName) {
+        return "samps" + File.separator + "src" + File.separator + baseFileName;
+    }
+
+    /**
+     * Create judge data and answer files.
+     * 
+     * @param problem
+     *            problem for data files
+     * @param testCases
+     *            number of data/answer file test sets to create.
+     * @param dataFileName
+     *            name of data file
+     * @param answerFileName
+     *            name of answer file
+     */
+    public ProblemDataFiles createProblemDataFiles(Problem problem, int testCases, String dataFileName, String answerFileName) {
+        ProblemDataFiles files = new ProblemDataFiles(problem);
+
+        SerializedFile[] dataFiles = new SerializedFile[testCases];
+        SerializedFile[] ansFiles = new SerializedFile[testCases];
+
+        SerializedFile datafile = new SerializedFile(dataFileName);
+        SerializedFile answerfile = new SerializedFile(answerFileName);
+
+        for (int i = 0; i < ansFiles.length; i++) {
+            dataFiles[i] = datafile;
+            ansFiles[i] = answerfile;
+        }
+
+        files.setJudgesAnswerFiles(ansFiles);
+        files.setJudgesDataFiles(dataFiles);
+
+        return files;
+    }
+
+    /**
+     * Create testCases number of data files (data and answer).
+     * 
+     * @param problem
+     *            problem for data files
+     * @param testCases
+     *            number of test data sets to create.
+     */
+    public ProblemDataFiles createProblemDataFiles(Problem problem, int testCases) {
+
+        return createProblemDataFiles(problem, testCases, //
+                getSampleFileName("sumit.dat"), getSampleFileName("sumit.ans"));
+    }
+
 }

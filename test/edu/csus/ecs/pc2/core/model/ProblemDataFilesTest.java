@@ -2,9 +2,8 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
 
-import edu.csus.ecs.pc2.core.util.JUnitUtilities;
-
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 /**
  * Tests for ProblemDataFiles.
  * 
@@ -88,6 +87,32 @@ public class ProblemDataFilesTest extends TestCase {
             // or blank out the validator/data/answer file names.
         }
         assertTrue("copy failed with 2 answer/1 data file", pdf1.isSameAs(pdf2));
+        
+    }
+
+    public void testcreateProblemDataFiles() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createStandardContest();
+        
+        Problem[] problems = contest.getProblems();
+        
+        Problem firstProblem = problems[0];
+        
+        int numCases = 321;
+        
+        ProblemDataFiles dataFiles = sample.createProblemDataFiles(firstProblem, numCases);
+        
+        assertEquals("Expecting data files ", numCases, dataFiles.getJudgesDataFiles().length);
+        assertEquals("Expecting answer files ", numCases, dataFiles.getJudgesAnswerFiles().length);
+        
+        SerializedFile[] files = dataFiles.getJudgesAnswerFiles();
+        String firstFile = files[0].getName();
+        for (SerializedFile serializedFile : files) {
+            assertEquals("Expecting all filenames to be same ",firstFile,serializedFile.getName());
+            assertEquals("Expecting all checksums to be same ",files[0].getSHA1sum(),serializedFile.getSHA1sum());
+        }
         
     }
 }
