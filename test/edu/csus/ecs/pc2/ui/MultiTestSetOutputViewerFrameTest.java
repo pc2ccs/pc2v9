@@ -42,9 +42,15 @@ public class MultiTestSetOutputViewerFrameTest extends TestCase {
         
         //get the first defined problem in the contest
         Problem problem = contest.getProblems()[0];
+        //add some data files (judge's answer/output) to the problem
+        
+        ProblemDataFiles files = sample.createProblemDataFiles(problem, 5);
+        contest.updateProblem(problem, files);
+        System.out.println ("MTSVFrameTest: sample contest created with problem " + problem);
         
         //get the judge's data files associated with the problem
         ProblemDataFiles problemDataFiles = controller.getProblemDataFiles(problem); // this will likely not work because the problem data files are not 
+        System.out.println ("MTSVFrameTest: ProblemDataFiles from sample contest = " + problemDataFiles);
         
         //get a team Id under which runs will be submitted
         ClientId teamId = contest.getAccounts(Type.TEAM).firstElement().getClientId();
@@ -57,23 +63,17 @@ public class MultiTestSetOutputViewerFrameTest extends TestCase {
             System.err.println("Error creating run in sample contest: ");
             e.printStackTrace();
         }
+        System.out.println ("MTSVFrameTest: added the following run to the sample contest: " + run);
         
         //add a judgment record to the run (so it appears to have been judged already)
-        //the following code was excerpted from RunTestCaseTest
         ClientId judgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
         ElementId  judgementId = contest.getJudgements()[3].getElementId();
         JudgementRecord record = new JudgementRecord(judgementId, judgeId, true, false);    //solved=true; usedValidator=false
         run.addJudgement(record);
-//        int testNumber = 5;
-//        boolean solved = true;
-//        IGetDate dateVar = new RunTestCase(run, record, testNumber, solved);
 
         //add some test cases to the run
-        addTestCase(contest, run, 4);   //add four "test cases"
+        addTestCase(contest, run, 10);   //add ten "test cases"
         
-        System.out.println ("Run: " + run);
-        System.out.println ("Problem: " + problem);
-        System.out.println ("Data Files: " + problemDataFiles);
 
         //create an MTSV frame and show it
         MultiTestSetOutputViewerFrame frame = new MultiTestSetOutputViewerFrame();
@@ -101,8 +101,12 @@ public class MultiTestSetOutputViewerFrameTest extends TestCase {
         }
         
         for (int i = 0; i < count; i++) {
-            RunTestCase runTestCase = new RunTestCase(run, judgementRecord, i+1, run.isSolved());
+            boolean passed = (Math.random() < 0.5);
+            long time = (long) (Math.random() * 1000) ; 
+            RunTestCase runTestCase = new RunTestCase(run, judgementRecord, i+1, passed);
+            runTestCase.setElapsedMS(time);
             run.addTestCase (runTestCase);
+            System.out.println ("  " + runTestCase);
         }
     }
 
