@@ -1475,7 +1475,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         Language languageId = contest.getLanguages()[0];
 
         Judgement yesJudgement = contest.getJudgements()[0];
-        Judgement noJudgement = contest.getJudgements()[1];
+        Judgement[] judgement = contest.getJudgements();
+        Judgement noJudgement = null;
+        for (int i = 0; i < judgement.length; i++) {
+            if (judgement[i].getAcronym().equals("WA")) {
+                noJudgement = judgement[i];
+                break;
+            }
+        }
         
         String[] data = runInfoLine.split(",");
         
