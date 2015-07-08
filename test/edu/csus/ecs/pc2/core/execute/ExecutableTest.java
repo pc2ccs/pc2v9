@@ -898,7 +898,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         testBaseDirname = testBaseDirname + File.separator + problemName +
                 File.separator +"data"+File.separator+"secret";
-        
+        testBaseDirname = new File(testBaseDirname).getCanonicalPath();
 //        ContestYAMLLoader loader = new ContestYAMLLoader();
 //        loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem);
 //        ProblemDataFiles problemDataFiles = contest2.getProblemDataFile(problem);
