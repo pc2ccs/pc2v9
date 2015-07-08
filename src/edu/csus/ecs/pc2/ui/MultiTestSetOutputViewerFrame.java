@@ -48,7 +48,7 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
         this.setSize(new Dimension(800, 400));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         this.setContentPane(getMultiTestSetOutputViewerPane());
-        this.setTitle("Multiple Test Set Results");
+        this.setTitle("Test Results");
         this.setLocationRelativeTo(null);
         
         // TODO Bug 918
@@ -76,6 +76,7 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
     public void setData(Run run, Problem problem, ProblemDataFiles problemDataFiles) {
 
         getMultiTestSetOutputViewerPane().setData(run, problem, problemDataFiles);
+        setTitle ("Test Results for Run " + run.getNumber());
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
