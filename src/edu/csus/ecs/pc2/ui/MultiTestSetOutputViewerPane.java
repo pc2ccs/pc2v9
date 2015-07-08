@@ -710,6 +710,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         });
 
         resultsTable.setRowSelectionAllowed(false);
+        resultsTable.getTableHeader().setReorderingAllowed(false);
         return resultsTable;
     }
 
