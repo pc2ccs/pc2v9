@@ -11,7 +11,6 @@ import java.util.Set;
 
 import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -897,7 +896,7 @@ public class ExecutableTest extends AbstractTestCase {
 //        ensureDirectory(testBaseDirname);
 //        startExplorer(new File(testBaseDirname));
 
-        testBaseDirname = Utilities.getCurrentDirectory() + File.separator + testBaseDirname + File.separator + problemName +
+        testBaseDirname = testBaseDirname + File.separator + problemName +
                 File.separator +"data"+File.separator+"secret";
         
 //        ContestYAMLLoader loader = new ContestYAMLLoader();
@@ -937,7 +936,7 @@ public class ExecutableTest extends AbstractTestCase {
 //        ensureDirectory(testBaseDirname);
 //        startExplorer(new File(testBaseDirname));
 
-        testBaseDirname = Utilities.getCurrentDirectory() + File.separator + testBaseDirname + File.separator + problemName;
+        testBaseDirname = testBaseDirname + File.separator + problemName;
         
         ContestYAMLLoader loader = new ContestYAMLLoader();
         loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem, false);
