@@ -99,7 +99,9 @@ public class ExportYAMLTest extends AbstractTestCase {
         String actualContestYamlFile = testDirectory+File.separator+ExportYAML.CONTEST_FILENAME;
         
         String expectedContestYamlFile = getTestFilename("expected.contest.yaml");
-        
+        if (File.separator.equals("/")) {
+            expectedContestYamlFile = getTestFilename("expected.unix.contest.yaml");
+        }
 //        editFile(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
         
