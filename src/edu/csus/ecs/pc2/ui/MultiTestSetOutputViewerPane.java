@@ -639,32 +639,19 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         // get the row data for the table of results
         final Object[][] tableData = getTableData();
 
-        // //define a model for the table data
-        // //TODO: this model assumes all data are Strings; that's probably not a good idea
-        // // (see for example method setValueAt() )
-        // TableModel tableModel = new AbstractTableModel() {
-        // private static final long serialVersionUID = 1L;
-        // public String getColumnName(int col) {
-        // return columnNames[col].toString();
-        // }
-        // public int getRowCount() { return tableData.length; }
-        // public int getColumnCount() { return columnNames.length; }
-        // public Object getValueAt(int row, int col) { return tableData[row][col]; }
-        // public boolean isCellEditable(int row, int col) { return false; }
-        // public void setValueAt(Object value, int row, int col) {
-        // tableData[row][col] = (String) value;
-        // fireTableCellUpdated(row, col);
-        // }
-        // };
-        //
-        // resultsTable = new JTable(tableModel);
-
+        //create the results table
         resultsTable = new JTable(tableData, columnNames);
+        
+        //set the desired options on the table
         resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         resultsTable.setFillsViewportHeight(true);
+        resultsTable.setRowSelectionAllowed(false);
+        resultsTable.getTableHeader().setReorderingAllowed(false);
+        
+        //add a listener for selection events on the table
         resultsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
-            // insure "compare" button is only enabled when exactly ONE table row is selected
+            // insure "compare" button is only enabled when at least one table row is selected
             public void valueChanged(ListSelectionEvent e) {
                 if (resultsTable.getSelectedRowCount() >= 1) {
                     btnCompareSelected.setEnabled(true);
@@ -675,11 +662,23 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             }
         });
 
+//        resultsTable.setModel(new DefaultTableModel() {
+//            private static final long serialVersionUID = 1L;
+//            @Override
+//            public boolean isCellEditable(int row, int column) {
+//               return false;
+//            }
+//            public Class getColumnClass(int c) {
+//                return getValueAt(0, c).getClass();
+//            }
+//        });
+        
         // set a centering renderer on desired table columns
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        resultsTable.getColumnModel().getColumn(COLUMN.SELECT_CHKBOX.ordinal()).setCellRenderer(new CheckBoxRenderer());
         resultsTable.getColumnModel().getColumn(COLUMN.DATASET_NUM.ordinal()).setCellRenderer(centerRenderer);
+        
+//        resultsTable.getColumnModel().getColumn(COLUMN.SELECT_CHKBOX.ordinal()).setCellRenderer(new CheckBoxRenderer());
 
         // set a LinkRenderer on those cells containing links
         resultsTable.getColumnModel().getColumn(COLUMN.TEAM_OUTPUT.ordinal()).setCellRenderer(new LinkRenderer());
@@ -690,11 +689,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         resultsTable.getColumnModel().getColumn(COLUMN.RESULT.ordinal()).setCellRenderer(new PassFailCellRenderer());
 
         // render Time column right-justified
-        resultsTable.getColumnModel().getColumn(COLUMN.TIME.ordinal()).setCellRenderer(new TimeRenderer());
+        resultsTable.getColumnModel().getColumn(COLUMN.TIME.ordinal()).setCellRenderer(new RightJustifyRenderer());
 
         // force table column widths to nice values
-        // resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        // resultsTable.getColumnModel().getColumn(COLUMN_SELECT).setPreferredWidth(45);
+//         resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+         resultsTable.getColumnModel().getColumn(COLUMN.SELECT_CHKBOX.ordinal()).setPreferredWidth(15);
 
         // add a listener to allow users to click an output or data file name and display it
         resultsTable.addMouseListener(new MouseAdapter() {
@@ -709,8 +708,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             }
         });
 
-        resultsTable.setRowSelectionAllowed(false);
-        resultsTable.getTableHeader().setReorderingAllowed(false);
         return resultsTable;
     }
 
@@ -760,15 +757,15 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         // including creating hyperlinks (labels) to open each output file, and also including
         // additional links to "compare selected rows" (see Strawman diagram)
         return new Object[][] { { new JCheckBox(), "1", new JLabel("Pass"), "100", new JLabel("<html>View<br>Compare"), new JLabel("View"), new JLabel("View") },
-                { new JCheckBox(), "2", new JLabel("Fail"), "200", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new JCheckBox(), "3", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new JCheckBox(), "4", new JLabel("Fail"), "150", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new JCheckBox(), "5", new JLabel("Unknown"), "50", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new JCheckBox(), "6", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new JCheckBox(), "7", new JLabel("Fail"), "1000", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new JCheckBox(), "8", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new JCheckBox(), "9", new JLabel("Unknown"), "1500", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new JCheckBox(), "10", new JLabel("Fail"), "10", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") }, };
+                { new Boolean(false), "2", new JLabel("Fail"), "200", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(false), "3", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(false), "4", new JLabel("Fail"), "150", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(false), "5", new JLabel("Unknown"), "50", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(false), "6", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(false), "7", new JLabel("Fail"), "1000", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(false), "8", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(false), "9", new JLabel("Unknown"), "1500", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(false), "10", new JLabel("Fail"), "10", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") }, };
     }
 
     /**
@@ -917,7 +914,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
     }
 
-    public class TimeRenderer extends DefaultTableCellRenderer {
+    /**
+     * A cell renderer for displaying right-justified values but with some margin space.
+     * @author John
+     *
+     */
+    public class RightJustifyRenderer extends DefaultTableCellRenderer {
 
         private static final long serialVersionUID = 1L;
 
