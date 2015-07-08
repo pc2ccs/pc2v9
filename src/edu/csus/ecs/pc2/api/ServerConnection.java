@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -942,6 +943,62 @@ public class ServerConnection {
         long newRemain = contestLengthSeconds - newContestTime.getElapsedSecs();
         setContestTimes(contestLengthSeconds, newContestTime.getElapsedSecs(), newRemain);
 
+    }
+    
+    public static void main(String[] args) {
+        
+        
+        String[] requireArguementArgs = { // 
+                "--login", "--password",  //
+        };
+        
+        ParseArguments parseArguments = new ParseArguments(args, requireArguementArgs);
+        
+        if (parseArguments.isOptPresent("--help")){
+            System.out.println("Usage: ServerConnection [--help] --login LOGIN [--passowrd PASS] [--stop]");
+            System.out.println("Purpose to start (default) pc2 server contest clock, or stop contest clock");
+            System.exit(0);
+        }
+        
+        boolean stopContest = parseArguments.isOptPresent("--stop");
+        
+        String login = parseArguments.getOptValue("--login");
+        String password = parseArguments.getOptValue("--password");
+        if (login == null){
+            fatalError("Missing login name, use --help for usage");
+        }
+        if (password == null){
+            password = "";
+        }
+        
+        ServerConnection connection = new ServerConnection();
+        try {
+            IContest contest2 = connection.login(login, password);
+            System.out.println("Logged in as " + contest2.getMyClient().getLoginName());
+            System.out.println("Contest is running?  " + contest2.isContestClockRunning());
+            if (stopContest) {
+                System.out.println("Send Stop Contest");
+                connection.stopContestClock();
+            } else {
+                System.out.println("Send Start Contest");
+                connection.startContestClock();
+            }
+            Thread.sleep(1000);
+            System.out.println("Contest is running?  " + contest2.isContestClockRunning());
+            connection.logoff();
+            System.out.println("Logged off");
+            System.exit(0);
+
+        } catch ( Exception e) {
+            System.err.println("Login failure for login="+login + " "+e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static void fatalError(String string) {
+        System.err.println(string);
+        System.err.println("Program Halted");
+        System.exit(43);
     }
     
 }
