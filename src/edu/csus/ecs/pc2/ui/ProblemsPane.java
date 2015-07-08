@@ -263,7 +263,7 @@ public class ProblemsPane extends JPanePlugin {
                     newProblemDataFiles = pdf.copy(newProblem);
                 }
                 // just bring up the ui, let the user add/cancel the copied problem
-                editProblemFrame.setProblem(newProblem, newProblemDataFiles);
+                editProblemFrame.setProblemCopy(newProblem, newProblemDataFiles);
                 editProblemFrame.setVisible(true);
             }
         } catch (Exception e) {
@@ -420,7 +420,8 @@ public class ProblemsPane extends JPanePlugin {
             ElementId elementId = (ElementId) problemListBox.getKeys()[selectedIndex];
             Problem problemToEdit = getContest().getProblem(elementId);
 
-            editProblemFrame.setProblem(problemToEdit);
+            ProblemDataFiles newProblemDataFiles = getController().getProblemDataFiles(problemToEdit);
+            editProblemFrame.setProblem(problemToEdit, newProblemDataFiles);
             editProblemFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);

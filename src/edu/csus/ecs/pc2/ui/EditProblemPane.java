@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -59,7 +60,7 @@ public class EditProblemPane extends JPanePlugin {
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     /**
-     * 
+     *  
      */
     private static final long serialVersionUID = -1060536964672397704L;
 
@@ -78,7 +79,7 @@ public class EditProblemPane extends JPanePlugin {
     private JLabel messageLabel = null;
 
     /**
-     * The input problem.
+     * The original/input problem.
      */
     private Problem problem = null; // @jve:decl-index=0:
 
@@ -126,6 +127,10 @@ public class EditProblemPane extends JPanePlugin {
 
     private Log log = null;
 
+    /**
+     * Is the form/GUI being currently populated?
+     * Used to avoid reEntry/race conditions populating GUI.
+     */
     private boolean populatingGUI = true;
 
     /**
@@ -136,7 +141,7 @@ public class EditProblemPane extends JPanePlugin {
     private String lastYamlLoadDirectory;
     
     /**
-     * the problem data files to be edited.
+     * The current/original data files, used to compare with chaneges. 
      */
     protected ProblemDataFiles originalProblemDataFiles;
 
@@ -206,7 +211,7 @@ public class EditProblemPane extends JPanePlugin {
 
     private JButton reportButton = null;
 
-//    private MultipleDataSetPane multipleDataSetPane = null;
+    private MultipleDataSetPane multipleDataSetPane = null;
 
     private JPanel judgeTypeInnerPane = null;
 
@@ -1113,22 +1118,31 @@ public class EditProblemPane extends JPanePlugin {
         return problem;
     }
 
+    /**
+     * Set Prbblem and ProblemDataFiles to be edited.
+     */
     public void setProblem(final Problem inProblem, final ProblemDataFiles problemDataFiles) {
+        
+        System.out.println("debug 22 setProblem w/problemDataFiles "+problemDataFiles);
+        
+        problem = inProblem;
+        originalProblemDataFiles = problemDataFiles;
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                populatingGUI = true;
-                setForm(inProblem, problemDataFiles);
-                getAddButton().setVisible(true);
-                getUpdateButton().setVisible(false);
-                enableUpdateButtons(true);
-
-                enableValidatorComponents();
-                enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
-                enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
-
-                // select the general tab
-                getMainTabbedPane().setSelectedIndex(0);
-                populatingGUI = false;
+                
+                populateGUI(inProblem);
+//                populatingGUI = true;
+//                setForm(inProblem, problemDataFiles);
+//                getAddButton().setVisible(true);
+//                getUpdateButton().setVisible(false);
+//                enableUpdateButtons(true);
+//
+//                enableValidatorComponents();
+//                enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
+//                enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
+                
+//                populatingGUI = false;
             }
         });
     }
@@ -1144,10 +1158,14 @@ public class EditProblemPane extends JPanePlugin {
 //        getMultipleDataSetPane().setVisible(true);
 //    }
 
-//    public MultipleDataSetPane getMultipleDataSetPane() {
-//        if (multipleDataSetPane == null) {
-//            multipleDataSetPane = new MultipleDataSetPane();
-//            multipleDataSetPane.setContestAndController(getContest(), getController());
+    public MultipleDataSetPane getMultipleDataSetPane() {
+        if (multipleDataSetPane == null) {
+            multipleDataSetPane = new MultipleDataSetPane();
+            multipleDataSetPane.setContestAndController(getContest(), getController());
+        }
+        return multipleDataSetPane;
+        
+    }
 //            multipleDataSetPane.addTableListener(new com.ibm.webrunner.j2mclb.util.event.TableListener(){
 //
 //                public void columnAdded(TableEvent arg0) {
@@ -1218,9 +1236,18 @@ public class EditProblemPane extends JPanePlugin {
 //        return multipleDataSetPane;
 //    }
 
+    /**
+     * Set new Problem to be edited.
+     * @param problem
+     */
     public void setProblem(final Problem problem) {
+        
+        System.out.println("debug 22 setProblem new ");
 
         this.problem = problem;
+        this.newProblemDataFiles = null;
+
+        this.originalProblemDataFiles = null;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -1230,7 +1257,6 @@ public class EditProblemPane extends JPanePlugin {
                     // new problem
                     enableUpdateButtons(false);
                 } else {
-                    // enable intelligently
                     enableUpdateButton();
                 }
             }
@@ -1248,21 +1274,11 @@ public class EditProblemPane extends JPanePlugin {
 
             setForm(inProblem, getController().getProblemDataFiles(inProblem));
 
-//            getValidatorRunFilePicker().setSerializedFile(foo);
             getCcsValidationEnabledCheckBox().setSelected(inProblem.isCcsMode());
 
-//            ProblemDataFiles problemDataFiles = getController().getProblemDataFiles(inProblem);
-//            addProblemFilesTab();
-
-            // debug 22 final test uncomment this
             try {
                 @SuppressWarnings("unused")
                 Problem changedProblem = getProblemFromFields(inProblem);
-                
-                getProblemDataFilesFromFields(); // TODO 917 remove this
-                dumpProblem("/tmp/stuf.populateGUI.txt",  newProblemDataFiles);
-                
-                
             } catch (InvalidFieldValue e) {
                 logException("Problem with input Problem fields", e);
                 e.printStackTrace(System.err);
@@ -1277,6 +1293,11 @@ public class EditProblemPane extends JPanePlugin {
         enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
 
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
+        
+        if (originalProblemDataFiles != null) {
+            System.out.println("debug 22 setProblem "+originalProblemDataFiles);
+            getMultipleDataSetPane().setProblemDataFiles(originalProblemDataFiles);
+        }
 
         // select the general tab
         getMainTabbedPane().setSelectedIndex(0);
@@ -1308,13 +1329,16 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This populates the form, no error checking is performed. populatingGUI should be set to true before calling this.
+     * Set Form dataa.
+     * 
+     * Populates the form, no error checking is performed. 
      * 
      * @param inProblem
      * @param problemDataFiles
      */
     private void setForm(Problem inProblem, ProblemDataFiles problemDataFiles) {
         
+        problem = inProblem;
         originalProblemDataFiles = problemDataFiles;
         
         dumpProblem("/tmp/stuf.setForm.txt", problemDataFiles);
@@ -1400,8 +1424,8 @@ public class EditProblemPane extends JPanePlugin {
 
         populateJudging(inProblem);
         
-        usingExternalDataFiles = problem.isUsingExternalDataFiles();
-        loadPath = problem.getExternalDataFileLocation();
+        usingExternalDataFiles = inProblem.isUsingExternalDataFiles();
+        loadPath = inProblem.getExternalDataFileLocation();
 
 //        addProblemFilesTab (problemDataFiles);
         
@@ -1409,7 +1433,7 @@ public class EditProblemPane extends JPanePlugin {
          * Short problem name
          */
         
-        shortNameTextfield.setText(problem.getShortName());
+        shortNameTextfield.setText(inProblem.getShortName());
         
     }
 
@@ -1444,13 +1468,18 @@ public class EditProblemPane extends JPanePlugin {
         }
     }
 
+    /**
+     * update/enable Update button.
+     * 
+     * @param fieldsChanged if false assumes changest must be undone aka Canceled.
+     */
     protected void enableUpdateButtons(boolean fieldsChanged) {
         if (fieldsChanged) {
             cancelButton.setText("Cancel");
         } else {
             cancelButton.setText("Close");
         }
-        // only enable the visible one, we are either editing or adding not both
+        
         if (getUpdateButton().isVisible()) {
             getUpdateButton().setEnabled(fieldsChanged);
         } else {
@@ -1465,12 +1494,12 @@ public class EditProblemPane extends JPanePlugin {
      */
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
+            
+            JScrollPane scrollPane = new JScrollPane(getMultipleDataSetPane());
+            
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new java.awt.Dimension(400, 400));
-//            if (multipleDataSetPane == null) {
-//                multipleDataSetPane = getMultipleDataSetPane();
-//            }
-//            mainTabbedPane.insertTab("Test Data Sets", null, multipleDataSetPane, null, 0);
+            mainTabbedPane.insertTab("Test Data Sets", null, scrollPane, null, 0);
             mainTabbedPane.insertTab("Validator", null, getValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
             mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);

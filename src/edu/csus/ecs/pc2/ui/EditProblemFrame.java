@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 public class EditProblemFrame extends JFrame implements UIPlugin {
 
     /**
-     * 
+     *  
      */
     private static final long serialVersionUID = -5684386608226303728L;
 
@@ -84,7 +84,16 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
      */
     public void setProblem(Problem problem, ProblemDataFiles problemDataFiles) {
         setTitle("Add New Problem");
-        getProblemPane().setProblem(problem, problemDataFiles);
+        if (problem == null){
+            setTitle("Add New Problem");
+            getProblemPane().setProblem(problem);
+        } else {
+            setTitle("Edit Problem " + problem.getDisplayName());
+            if (problem.isUsingExternalDataFiles()) {
+                setTitle("Edit Problem " + problem.getDisplayName()+" ("+problem.getExternalDataFileLocation()+")");
+            }  
+            getProblemPane().setProblem(problem, problemDataFiles);
+        }
     }
 
     public String getPluginTitle() {
@@ -101,6 +110,11 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
             problemPane = new EditProblemPane();
         }
         return problemPane;
+    }
+
+    public void setProblemCopy(Problem problem, ProblemDataFiles problemDataFiles) {
+        setTitle("Add New Problem");
+        getProblemPane().setProblem(problem, problemDataFiles);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

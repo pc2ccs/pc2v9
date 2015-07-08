@@ -10,6 +10,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.UIManager;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -310,5 +311,22 @@ public final class FrameUtilities {
         multipleFileViewer.setTitle("PC^2 View File (Build " + new VersionInfo().getBuildNumber() + ")");
         FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
         multipleFileViewer.setVisible(true);
+    }
+    
+    public static void updateRowHeights(JTable table) {
+        try {
+            for (int row = 0; row < table.getRowCount(); row++) {
+                int rowHeight = table.getRowHeight();
+
+                for (int column = 0; column < table.getColumnCount(); column++) {
+                    Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
+                    rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+                }
+
+                table.setRowHeight(row, rowHeight);
+            }
+        } catch (ClassCastException e) {
+            // ignore this exception
+        }
     }
 }
