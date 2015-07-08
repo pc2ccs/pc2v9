@@ -50,11 +50,21 @@ public class RunTestCase implements IElementObject, IGetDate{
     
     private long time = new Date().getTime();
     
-    public RunTestCase(Run run, JudgementRecord record, int testNumber, boolean solved) {
+    /**
+     * Constructor defining a Test Case for a run.  The Test Case is inserted
+     * into the specified JudgementRecord for the specified Run, marked as the
+     * indicated Test Case Number and with the indicated status (either the Run
+     * passed the Test Case or it failed the Test Case).
+     * @param run - the Run for which this test case applies
+     * @param record - the JudgementRecord holding this test case
+     * @param testNumber - the id of this test case
+     * @param passed - boolean indicating whether the Run passed this test case or not
+     */
+    public RunTestCase(Run run, JudgementRecord record, int testNumber, boolean passed) {
         runElementId = run.getElementId();
         judgementId = record.getElementId();
         this.testNumber = testNumber;
-        this.passed = solved;
+        this.passed = passed;
     }
     
     public ElementId getElementId() {
@@ -149,7 +159,7 @@ public class RunTestCase implements IElementObject, IGetDate{
         String ret = "";
         ret += "Test Case: ";
         ret += "num=" + testNumber + ", ";
-        ret += "solved=" + passed + ", ";
+        ret += "passed=" + passed + ", ";
         ret += "time(ms)=" + elapsedMS + ", ";
         
         return ret ;
