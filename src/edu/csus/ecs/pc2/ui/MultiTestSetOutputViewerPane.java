@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.swing.Box;
@@ -70,17 +71,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private static final long serialVersionUID = 7363093989131251458L;
 
-    private enum COLUMN {
+    public static enum COLUMN {
         SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT, JUDGE_OUTPUT, JUDGE_DATA
     };
 
-    // private final static int COLUMN_SELECT_CHKBOX = 0;
-    // private final static int COLUMN_DATASET_NUM = 1;
-    // private final static int COLUMN_RESULT = 2;
-    // private final static int COLUMN_TIME = 3;
-    // private final static int COLUMN_TEAM_OUTPUT = 4;
-    // private final static int COLUMN_JUDGE_OUTPUT = 5;
-    // private final static int COLUMN_JUDGE_DATA = 6 ;
+    // define the column headers for the table of results
+    private String[] columnNames = { "Select", "Data Set #", "Result", "Time (ms)", 
+                                        "Team Output", "Judge's Output", "Judge's Data" };
+
+    // get the row data for the table of results
+    private Object[][] tableData ;
 
     private JPanel centerPanel = null;
 
@@ -137,6 +137,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(568, 363));
 
+        tableData = getTableData();
+        
         this.add(getCenterPanel(), java.awt.BorderLayout.CENTER);
 
         // TODO Bug 918
@@ -228,13 +230,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             JPanel resultsPaneFooterPanel = new JPanel();
             resultsPane.add(resultsPaneFooterPanel, BorderLayout.SOUTH);
 
-            // add a control button to invoke comparison of the team and judge output files for a selected row
+            // add a control button to invoke comparison of the team and judge output files for selected row(s)
             btnCompareSelected = new JButton("Compare Selected");
-            btnCompareSelected.setToolTipText("Show comparison between Team and Judge output for selected row (only one row may be selected at a time)");
+            btnCompareSelected.setToolTipText("Show comparison between Team and Judge output for selected row(s)");
+            btnCompareSelected.setEnabled(getSelectedRowNums().length>0);
             btnCompareSelected.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    // display a comparison between the Team and Judge output in the selected table row
-                    showComparison(resultsTable.getSelectedRows());
+                    // display a comparison between the Team and Judge output in the selected table row(s)
+                    showComparison( getSelectedRowNums() );
                 }
             });
 
@@ -255,24 +258,41 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             Component horizontalStrut_1 = Box.createHorizontalStrut(20);
             resultsPaneFooterPanel.add(horizontalStrut_1);
 
-            JButton btnSelectAll = new JButton("Select All");
+            final JButton btnSelectAll = new JButton("Select All");
             btnSelectAll.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    // mark every checkbox in the "Select" column of the results table as "Selected"
+                    // mark every checkbox in the "Select" column of the results table as "Selected" 
                     TableModel tm = resultsTable.getModel();
-                    int col = resultsTable.getColumnModel().getColumn(COLUMN.SELECT_CHKBOX.ordinal()).getModelIndex();
+                    int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
                     for (int row = 0; row < tm.getRowCount(); row++) {
-                        System.out.print(((JCheckBox) (tm.getValueAt(row, col))).isSelected() + " ");
-                        ((JCheckBox) (tm.getValueAt(row, col))).setSelected(true);
-                        System.out.println("Value at (" + row + "," + col + ") = " + ((JCheckBox) (tm.getValueAt(row, col))).isSelected());
+                        tm.setValueAt(new Boolean(true), row, col);
                     }
+                    btnCompareSelected.setEnabled(true);
                 }
             });
             resultsPaneFooterPanel.add(btnSelectAll);
+            
+            Component horizontalStrut_3 = Box.createHorizontalStrut(20);
+            resultsPaneFooterPanel.add(horizontalStrut_3);
+            
+            JButton btnUnselectAll = new JButton("Unselect All");
+            btnUnselectAll.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    // mark every checkbox in the "Select" column of the results table as "Unselected" 
+                    TableModel tm = resultsTable.getModel();
+                    int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
+                    for (int row = 0; row < tm.getRowCount(); row++) {
+                        tm.setValueAt(new Boolean(false), row, col);
+                    }
+                    btnCompareSelected.setEnabled(false);
+
+                }
+            });
+            resultsPaneFooterPanel.add(btnUnselectAll);
 
             Component horizontalStrut_2 = Box.createHorizontalStrut(20);
             resultsPaneFooterPanel.add(horizontalStrut_2);
-            btnCompareSelected.setEnabled(false);
+            btnCompareSelected.setEnabled(getSelectedRowNums().length>0);
             resultsPaneFooterPanel.add(btnCompareSelected);
 
             Component horizontalGlue_3 = Box.createHorizontalGlue();
@@ -492,6 +512,28 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
         return centerPanel;
     }
+    
+    /**
+     * Returns an array of ints containing the table row numbers of those rows whose 
+     * "Select" checkbox is checked.
+     * 
+     * @return - an int [] of selected rows
+     */
+    private int [] getSelectedRowNums() {
+        ArrayList<Integer> selectedRows = new ArrayList<Integer>();
+        for (int i=0; i<resultsTable.getRowCount(); i++) {
+            if ((Boolean)resultsTable.getValueAt(i, COLUMN.SELECT_CHKBOX.ordinal())){
+                selectedRows.add(new Integer(i));
+            }
+        }
+        Integer [] selectedRowNumbers = selectedRows.toArray(new Integer[selectedRows.size()]);
+        int [] intArray = new int[selectedRowNumbers.length];
+        for (int i=0; i<intArray.length; i++) {
+            intArray[i] = selectedRowNumbers[i].intValue();
+        }
+
+        return intArray;
+    }
 
     /**
      * @return
@@ -591,12 +633,13 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     private int getNumFailedTestCases(RunTestCase[] testCases) {
-        // int failed = 0 ;
-        // for (int i=0; i<testCases.length; i++) {
-        // if (testCases[i].get
-        // ...
-        // }
-        return 3;
+         int failed = 0 ;
+         for (int i=0; i<testCases.length; i++) {
+         if (!testCases[i].isPassed())
+             failed++ ;
+         }
+        System.out.println ("getNumFailedTestCases(): returning " + failed);
+        return failed;
     }
 
     /**
@@ -627,20 +670,17 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
-     * Returns a JTable containing the results information for each test case. The method sets not only the table data but the appropriate cell renderers and action/mouse listeners for the table.
+     * Returns a JTable containing the results information for each test case. 
+     * The method sets not only the table data but the appropriate cell renderers and 
+     * action/mouse listeners for the table.
      */
     private JTable getResultsTable() {
 
         final JTable resultsTable;
 
-        // define the column headers for the table of results
-        final String[] columnNames = { "Select", "Data Set #", "Result", "Time (ms)", "Team Output", "Judge's Output", "Judge's Data" };
-
-        // get the row data for the table of results
-        final Object[][] tableData = getTableData();
-
         //create the results table
-        resultsTable = new JTable(tableData, columnNames);
+        TableModel tableModel = new TestCaseResultsTableModel(tableData, columnNames) ;
+        resultsTable = new JTable(tableModel);
         
         //set the desired options on the table
         resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -653,47 +693,34 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             @Override
             // insure "compare" button is only enabled when at least one table row is selected
             public void valueChanged(ListSelectionEvent e) {
-                if (resultsTable.getSelectedRowCount() >= 1) {
-                    btnCompareSelected.setEnabled(true);
-                } else {
-                    btnCompareSelected.setEnabled(false);
-                }
-
+                btnCompareSelected.setEnabled(getSelectedRowNums().length>0);
             }
         });
-
-//        resultsTable.setModel(new DefaultTableModel() {
-//            private static final long serialVersionUID = 1L;
-//            @Override
-//            public boolean isCellEditable(int row, int column) {
-//               return false;
-//            }
-//            public Class getColumnClass(int c) {
-//                return getValueAt(0, c).getClass();
-//            }
-//        });
         
+        //initialize column renderers based on column type
+
         // set a centering renderer on desired table columns
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        resultsTable.getColumnModel().getColumn(COLUMN.DATASET_NUM.ordinal()).setCellRenderer(centerRenderer);
-        
-//        resultsTable.getColumnModel().getColumn(COLUMN.SELECT_CHKBOX.ordinal()).setCellRenderer(new CheckBoxRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.DATASET_NUM.ordinal()]).setCellRenderer(centerRenderer);
+       
+        //set our own checkbox renderer (don't know how to add an ActionListener to the default checkboxes
+        resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setCellRenderer(new CheckBoxRenderer());
 
         // set a LinkRenderer on those cells containing links
-        resultsTable.getColumnModel().getColumn(COLUMN.TEAM_OUTPUT.ordinal()).setCellRenderer(new LinkRenderer());
-        resultsTable.getColumnModel().getColumn(COLUMN.JUDGE_OUTPUT.ordinal()).setCellRenderer(new LinkRenderer());
-        resultsTable.getColumnModel().getColumn(COLUMN.JUDGE_DATA.ordinal()).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.JUDGE_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.JUDGE_DATA.ordinal()]).setCellRenderer(new LinkRenderer());
 
         // render Result column as Pass/Fail on Green/Red
-        resultsTable.getColumnModel().getColumn(COLUMN.RESULT.ordinal()).setCellRenderer(new PassFailCellRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.RESULT.ordinal()]).setCellRenderer(new PassFailCellRenderer());
 
         // render Time column right-justified
-        resultsTable.getColumnModel().getColumn(COLUMN.TIME.ordinal()).setCellRenderer(new RightJustifyRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.TIME.ordinal()]).setCellRenderer(new RightJustifyRenderer());
 
         // force table column widths to nice values
 //         resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-         resultsTable.getColumnModel().getColumn(COLUMN.SELECT_CHKBOX.ordinal()).setPreferredWidth(15);
+         resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setPreferredWidth(15);
 
         // add a listener to allow users to click an output or data file name and display it
         resultsTable.addMouseListener(new MouseAdapter() {
@@ -753,19 +780,20 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private Object[][] getTableData() {
 
-        // TODO: replace the following with code that gets the actual row data from the model,
+        // TODO: replace the following with code that gets the actual row data from the contest model,
         // including creating hyperlinks (labels) to open each output file, and also including
-        // additional links to "compare selected rows" (see Strawman diagram)
-        return new Object[][] { { new JCheckBox(), "1", new JLabel("Pass"), "100", new JLabel("<html>View<br>Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(false), "2", new JLabel("Fail"), "200", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+        // additional links to "compare selected rows" 
+        return new Object[][] { 
+                { new Boolean(false), "1", new JLabel("Pass"), "100", new JLabel("<html>View<br>Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(true), "2", new JLabel("Fail"), "200", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
                 { new Boolean(false), "3", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(false), "4", new JLabel("Fail"), "150", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(false), "5", new JLabel("Unknown"), "50", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(true), "4", new JLabel("Fail"), "150", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(true), "5", new JLabel("Unknown"), "50", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
                 { new Boolean(false), "6", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(false), "7", new JLabel("Fail"), "1000", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(true), "7", new JLabel("Fail"), "1000", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
                 { new Boolean(false), "8", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(false), "9", new JLabel("Unknown"), "1500", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(false), "10", new JLabel("Fail"), "10", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") }, };
+                { new Boolean(true), "9", new JLabel("Unknown"), "1500", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
+                { new Boolean(true), "10", new JLabel("Fail"), "10", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") }, };
     }
 
     /**
@@ -900,16 +928,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
 
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            if (isSelected) {
-                setForeground(table.getSelectionForeground());
-                setBackground(table.getSelectionBackground());
-                setSelected(true);
-            } else {
-                setForeground(table.getForeground());
-                setBackground(table.getBackground());
-                setSelected(false);
-            }
-            setSelected(isSelected);
+            setSelected((Boolean)value);
             return this;
         }
     }
