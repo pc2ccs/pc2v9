@@ -520,7 +520,7 @@ public class SampleContest {
         }
 
         ClientId teamId = accounts[0].getClientId();
-
+        
         return createRandomRuns(contest, numberRuns, teamId, randomTeam, randomProblem, randomLanguage, siteNumber);
 
     }
@@ -529,7 +529,7 @@ public class SampleContest {
 
         Run[] runs = new Run[numberRuns];
 
-        Account[] accounts = getTeamAccounts(contest);
+        Account[] accounts = getTeamAccounts(contest, siteNumber);
         Language[] languages = contest.getLanguages();
         Problem[] problems = contest.getProblems();
 
@@ -559,13 +559,13 @@ public class SampleContest {
             }
 
             if (randomTeam) {
-                teamId = getRandomAccount(contest, Type.TEAM).getClientId();
+                teamId = getRandomAccount(contest, Type.TEAM, siteNumber).getClientId();
             }
 
             Run run = new Run(teamId, language, problem);
             run.setElapsedMins(9 + i);
             run.setNumber(++numRuns);
-            run.setSiteNumber(contest.getSiteNumber());
+            run.setSiteNumber(siteNumber);
             runs[i] = run;
         }
         return runs;
@@ -1572,6 +1572,12 @@ public class SampleContest {
 
     private Account getRandomAccount(IInternalContest contest, Type type) {
         Account[] accounts = getAccounts(contest, type);
+        int randomIndex = random.nextInt(accounts.length);
+        return accounts[randomIndex];
+    }
+    
+    private Account getRandomAccount(IInternalContest contest, Type type, int siteNumber) {
+        Account[] accounts = getAccounts(contest, type, siteNumber);
         int randomIndex = random.nextInt(accounts.length);
         return accounts[randomIndex];
     }
