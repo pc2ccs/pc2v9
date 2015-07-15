@@ -158,7 +158,7 @@ public class SampleContest {
         InternalContest contest = new InternalContest();
 
         contest.setSiteNumber(siteNumber);
-
+        
         for (int i = 0; i < numSites; i++) {
             Site site = createSite(i + 1, "Site " + (i + 1), null, 0);
             contest.addSite(site);
@@ -325,6 +325,8 @@ public class SampleContest {
         // Start site 1
         InternalController controller = new InternalController(contest);
         controller.setUsingMainUI(false);
+        
+        controller.setLog(null); // creates and opens a default log name 
 
         if (isServer) {
             controller.setContactingRemoteServer(isRemote);
@@ -1657,4 +1659,152 @@ public class SampleContest {
                 getSampleFileName("sumit.dat"), getSampleFileName("sumit.ans"));
     }
 
+
+    private boolean fileNotThere(String name) {
+        return !new File(name).isFile();
+    }
+
+    /**
+     * Get list of filenames with extension in directory, return in sorted order.
+     * 
+     * @param directoryName
+     * @param extension
+     * @return
+     */
+    protected String[] getFileNames(String directoryName, String extension) {
+
+        ArrayList<String> list = new ArrayList<String>();
+        File dir = new File(directoryName);
+
+        String[] entries = dir.list();
+        if (entries == null) {
+            return new String[0];
+        }
+
+        Arrays.sort(entries);
+
+        for (String name : entries) {
+            if (name.endsWith(extension)) {
+                list.add(name);
+            }
+        }
+
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * Add a single data/answer file set to a problemDataFiles.
+     * @param problem
+     * @param problemDataFiles
+     * @param dataFileBaseDirectory
+     * @param dataFileName
+     * @param answerFileName
+     */
+    public void addDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String dataFileBaseDirectory, String dataFileName, String answerFileName) {
+
+        // load judge data file
+        if (dataFileName != null) {
+            String dataFilePath = dataFileBaseDirectory + File.separator + dataFileName;
+            if (fileNotThere(dataFilePath)) {
+                throw new RuntimeException("Missing data file " + dataFilePath);
+            }
+
+            problem.setDataFileName(dataFileName);
+            problem.setReadInputDataFromSTDIN(false);
+
+            SerializedFile serializedFile = new SerializedFile(dataFilePath, problem.isUsingExternalDataFiles());
+            problemDataFiles.setJudgesDataFile(serializedFile);
+        }
+
+        // load judge answer file
+        if (answerFileName != null) {
+            String answerFilePath = dataFileBaseDirectory + File.separator + answerFileName;
+            if (fileNotThere(answerFilePath)) {
+                throw new RuntimeException("Missing data file " + answerFilePath);
+            }
+
+            problem.setAnswerFileName(answerFileName);
+
+            SerializedFile serializedFile = new SerializedFile(answerFilePath, problem.isUsingExternalDataFiles());
+            problemDataFiles.setJudgesAnswerFile(serializedFile);
+        }
+
+    }
+
+    /**
+     * Load data files into datafiles and problem.
+     * 
+     *  Will remove test data sets, and add data sets from dataFileBaseDirectory.
+     *  <br>
+     *  Will create new ProblemDataFiles if input files == null.
+     * 
+     * @param problem problem for the data files.
+     * @param files input data files (null to create new ProblemDataFiles from scratch)
+     * @param dataFileBaseDirectory directory for data files
+     * @param dataExtension extension for data files, ex. "dat"
+     * @param answerExtension extension for answer files, ex "ans"
+     * @return
+     */
+    public ProblemDataFiles loadDataFiles(Problem problem, ProblemDataFiles files, String dataFileBaseDirectory, String dataExtension, String answerExtension) {
+
+        if (files == null) {
+            files = new ProblemDataFiles(problem);
+        } else {
+            /**
+             * A check. It makes no sense to update an existing ProblemDataFiles for a different Problem.
+             */
+            if (!files.getProblemId().equals(problem.getElementId())) {
+                throw new RuntimeException("problem and data files are not for the same problem " + problem.getElementId() + " vs " + files.getProblemId());
+            }
+        }
+
+        String[] inputFileNames = getFileNames(dataFileBaseDirectory, dataExtension);
+
+        String[] answerFileNames = getFileNames(dataFileBaseDirectory, answerExtension);
+
+        if (inputFileNames.length == 0) {
+            throw new RuntimeException("No input files with extensiion " + dataExtension);
+        }
+
+        if (answerFileNames.length == 0) {
+            throw new RuntimeException("No answer  files with extensiion " + answerExtension);
+        }
+
+        if (answerFileNames.length != inputFileNames.length) {
+            throw new RuntimeException("Miss match expecting same " + dataExtension + " and " + answerExtension + " files (" + inputFileNames.length + " vs " + answerFileNames.length);
+        }
+
+        SerializedFile[] inputFiles = createSerializedFiles(dataFileBaseDirectory, inputFileNames, problem.isUsingExternalDataFiles());
+        SerializedFile[] answertFiles = createSerializedFiles(dataFileBaseDirectory, answerFileNames, problem.isUsingExternalDataFiles());
+        files.setJudgesDataFiles(inputFiles);
+        files.setJudgesAnswerFiles(answertFiles);
+
+        problem.removeAllTestCaseFilenames();
+        for (int i = 0; i < answertFiles.length; i++) {
+            problem.addTestCaseFilenames(inputFileNames[i], answerFileNames[i]);
+        }
+
+        return files;
+    }
+
+    /**
+     * Create array of serialized files.
+     * @param dataFileBaseDirectory
+     * @param inputFileNames
+     * @param externalFilesFlag
+     * @return
+     */
+    private SerializedFile[] createSerializedFiles(String dataFileBaseDirectory, String[] inputFileNames, boolean externalFilesFlag) {
+
+        ArrayList<SerializedFile> outfiles = new ArrayList<SerializedFile>();
+
+        for (String name : inputFileNames) {
+            String filename = dataFileBaseDirectory + File.separator + name;
+            outfiles.add(new SerializedFile(filename, externalFilesFlag));
+        }
+
+        return (SerializedFile[]) outfiles.toArray(new SerializedFile[outfiles.size()]);
+    }
+
+    
 }
