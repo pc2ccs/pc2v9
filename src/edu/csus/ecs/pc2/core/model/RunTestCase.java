@@ -51,12 +51,13 @@ public class RunTestCase implements IElementObject, IGetDate{
     private long time = new Date().getTime();
     
     /**
-     * Constructor defining a Test Case for a run.  The Test Case is inserted
-     * into the specified JudgementRecord for the specified Run, marked as the
+     * Constructor defining a Test Case for a run.  Each Test Case saves
+     * a link to the Run and JudgmentRecord with which it is associated;
+     * each Test Case is marked as the
      * indicated Test Case Number and with the indicated status (either the Run
      * passed the Test Case or it failed the Test Case).
      * @param run - the Run for which this test case applies
-     * @param record - the JudgementRecord holding this test case
+     * @param record - the JudgementRecord for which this test case applies
      * @param testNumber - the id of this test case
      * @param passed - boolean indicating whether the Run passed this test case or not
      */
