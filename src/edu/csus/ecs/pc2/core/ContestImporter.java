@@ -182,13 +182,14 @@ public class ContestImporter {
         Problem[] problemList = new Problem[0];
         ProblemDataFiles[] problemDataFiles = null;
 
-        try {
-            HashMap<String, Problem> probHash = new HashMap<String, Problem>();
-            for (Problem existingProblem : theContest.getProblems()) {
-                if (existingProblem.isActive()) {
-                    probHash.put(existingProblem.getDisplayName(), existingProblem);
-                }
+        // this is going to be used by the problems and maybe the clientSettings
+        HashMap<String, Problem> probHash = new HashMap<String, Problem>();
+        for (Problem existingProblem : theContest.getProblems()) {
+            if (existingProblem.isActive()) {
+                probHash.put(existingProblem.getDisplayName(), existingProblem);
             }
+        }
+        try {
 
             ArrayList<Problem> problemsToAddList = new ArrayList<Problem>();
 
@@ -199,7 +200,7 @@ public class ContestImporter {
                         if (!newProblem.isSameAs(problem)) {
                             updateProblemFields(newProblem, problem);
                         }
-                        problemsToAddList.add(newProblem);
+                        theController.updateProblem(newProblem, theContest.getProblemDataFile(problem));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -225,6 +226,32 @@ public class ContestImporter {
         }
         
         ClientSettings [] settings = inContest.getClientSettingsList();
+        // bug 928 convert the loaded problems into the real problems
+        for (int i = 0; i < settings.length; i++) {
+            ClientSettings clientSettings = settings[i];
+            Filter ajFilter = clientSettings.getAutoJudgeFilter();
+            if (ajFilter != null) {
+                ElementId[] pList = ajFilter.getProblemIdList();
+                if (pList != null) {
+                    Vector<Problem> addToList = new Vector<Problem>();
+                    for (int j = 0; j < pList.length; j++) {
+                        ElementId elementId2 = pList[j];
+                        if (probHash.containsKey(inContest.getProblem(elementId2).getDisplayName())) {
+                            addToList.add(probHash.get(inContest.getProblem(elementId2).getDisplayName()));
+                        } else {
+                            // this is a new problem
+                            addToList.add(inContest.getProblem(elementId2));
+                        }
+                    }
+                    ajFilter.clearProblemList();
+                    for (Problem problem2 : addToList) {
+                        ajFilter.addProblem(problem2);
+                    }
+                    ajFilter.setUsingProblemFilter(true); // clearProblemList turned this off
+                    clientSettings.setAutoJudgeFilter(ajFilter);
+                }
+            }
+        }
         
         PlaybackInfo[] infos = inContest.getPlaybackInfos();
         PlaybackInfo playbackInfo = null;
