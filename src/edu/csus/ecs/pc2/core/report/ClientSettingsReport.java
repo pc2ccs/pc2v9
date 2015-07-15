@@ -57,7 +57,7 @@ public class ClientSettingsReport implements IReport {
      * @return
      */
     private String getProblemlist(Filter inFilter) {
-        ElementId[] elementIds = filter.getProblemIdList();
+        ElementId[] elementIds = inFilter.getProblemIdList();
 
         if (elementIds.length == 0) {
             return "(none selected)";
