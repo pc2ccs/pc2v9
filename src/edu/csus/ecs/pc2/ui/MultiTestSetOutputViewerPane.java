@@ -15,8 +15,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -48,8 +46,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -72,12 +68,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private static final long serialVersionUID = 7363093989131251458L;
 
     public static enum COLUMN {
-        SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT, JUDGE_OUTPUT, JUDGE_DATA
+        SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, 
+            JUDGE_OUTPUT, JUDGE_DATA
     };
 
     // define the column headers for the table of results
     private String[] columnNames = { "Select", "Data Set #", "Result", "Time (ms)", 
-                                        "Team Output", "Judge's Output", "Judge's Data" };
+                                        "Team View", "Team Compare", 
+                                        "Judge's Output", "Judge's Data" };
 
     // get the row data for the table of results
     private Object[][] tableData ;
@@ -120,6 +118,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private IFileViewer currentViewer;
 
+    private JScrollPane resultsScrollPane;
+
     /**
      * Constructs an instance of a plugin pane for viewing multi-testset output values.
      * 
@@ -136,9 +136,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private void initialize() {
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(568, 363));
-
-        tableData = getTableData();
-        
         this.add(getCenterPanel(), java.awt.BorderLayout.CENTER);
 
         // TODO Bug 918
@@ -154,7 +151,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes and returns the center panel (JPanel) containing the JTabbedPane holding the output results and options panes.
+     * This method initializes and returns the center panel (JPanel) containing the 
+     * JTabbedPane holding the output results and options panes. Note that the method
+     * does not fill in any live data; that cannot be done until the View Pane's
+     * "setData()" method has been invoked, which doesn't happen until after construction
+     * of the View Pane is completed.
      * 
      * @return javax.swing.JPanel
      */
@@ -174,7 +175,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             // add a tab with a JPanel that will display the results for the test cases
             JPanel resultsPane = new JPanel();
             resultsPane.setName("ViewDataSets");
-            multiTestSetTabbedPane.addTab("Data Set Results", null, resultsPane, "Show the results of this submission for each test data set");
+            multiTestSetTabbedPane.addTab("Data Set Results", null, resultsPane, 
+                    "Show the results of this submission for each test data set");
             resultsPane.setLayout(new BorderLayout(0, 0));
 
             // add a header for holding labels to the results panel
@@ -219,11 +221,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             resultsPaneHeaderPanel.add(getNumFailedTestCasesLabel());
 
             // add a scrollpane to hold the table of results
-            JScrollPane resultsScrollPane = new JScrollPane();
+            resultsScrollPane = new JScrollPane();
             resultsPane.add(resultsScrollPane, BorderLayout.CENTER);
 
-            // get the table of results and put it in the scrollpane
-            resultsTable = getResultsTable();
+            // create an (empty) table of results and put it in the scrollpane
+            resultsTable = new JTable(12,7);
+            resultsTable.setValueAt(true, 0, 0);
             resultsScrollPane.setViewportView(resultsTable);
 
             // add a footer panel containing control buttons
@@ -233,7 +236,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             // add a control button to invoke comparison of the team and judge output files for selected row(s)
             btnCompareSelected = new JButton("Compare Selected");
             btnCompareSelected.setToolTipText("Show comparison between Team and Judge output for selected row(s)");
-            btnCompareSelected.setEnabled(getSelectedRowNums().length>0);
+            btnCompareSelected.setEnabled(true);
             btnCompareSelected.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     // display a comparison between the Team and Judge output in the selected table row(s)
@@ -241,9 +244,15 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 }
             });
 
-            JCheckBox chckbxShowFailuresOnly = new JCheckBox("Show Failures Only");
-            chckbxShowFailuresOnly.addActionListener(new ActionListener() {
+            JCheckBox chkboxShowFailuresOnly = new JCheckBox("Show Failures Only", false);
+            chkboxShowFailuresOnly.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
+                    JOptionPane.showConfirmDialog(null, 
+                            "Sorry, this option has not been implemented yet.",
+                            "Not Implemented", 
+                            JOptionPane.OK_CANCEL_OPTION, 
+                            JOptionPane.INFORMATION_MESSAGE, 
+                            null); 
                     if (((JCheckBox) (e.getSource())).isSelected()) {
                         loadTableWithFailedTestCases();
                     } else {
@@ -253,7 +262,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
             });
 
-            resultsPaneFooterPanel.add(chckbxShowFailuresOnly);
+            resultsPaneFooterPanel.add(chkboxShowFailuresOnly);
 
             Component horizontalStrut_1 = Box.createHorizontalStrut(20);
             resultsPaneFooterPanel.add(horizontalStrut_1);
@@ -263,11 +272,13 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent e) {
                     // mark every checkbox in the "Select" column of the results table as "Selected" 
                     TableModel tm = resultsTable.getModel();
-                    int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
-                    for (int row = 0; row < tm.getRowCount(); row++) {
-                        tm.setValueAt(new Boolean(true), row, col);
+                    if (tm != null) {
+                        int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
+                        for (int row = 0; row < tm.getRowCount(); row++) {
+                            tm.setValueAt(new Boolean(true), row, col);
+                        }
+                        btnCompareSelected.setEnabled(true);
                     }
-                    btnCompareSelected.setEnabled(true);
                 }
             });
             resultsPaneFooterPanel.add(btnSelectAll);
@@ -280,19 +291,20 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent e) {
                     // mark every checkbox in the "Select" column of the results table as "Unselected" 
                     TableModel tm = resultsTable.getModel();
-                    int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
-                    for (int row = 0; row < tm.getRowCount(); row++) {
-                        tm.setValueAt(new Boolean(false), row, col);
+                    if (tm != null) {
+                        int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
+                        for (int row = 0; row < tm.getRowCount(); row++) {
+                            tm.setValueAt(new Boolean(false), row, col);
+                        }
+                        btnCompareSelected.setEnabled(false);
                     }
-                    btnCompareSelected.setEnabled(false);
-
                 }
             });
             resultsPaneFooterPanel.add(btnUnselectAll);
 
             Component horizontalStrut_2 = Box.createHorizontalStrut(20);
             resultsPaneFooterPanel.add(horizontalStrut_2);
-            btnCompareSelected.setEnabled(getSelectedRowNums().length>0);
+            btnCompareSelected.setEnabled(true);
             resultsPaneFooterPanel.add(btnCompareSelected);
 
             Component horizontalGlue_3 = Box.createHorizontalGlue();
@@ -590,6 +602,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                
                 // fill in the basic header information
                 getProblemTitleLabel().setText("Problem:  " + currentProblem.getLetter() + " - " + currentProblem.getShortName());
                 getTeamNumberLabel().setText("Team:  " + currentRun.getSubmitter().getClientNumber());
@@ -601,8 +614,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
                 // fill in the test case summary information
                 getNumTestCasesLabel().setText("Test Cases:  " + testCases.length);
+                
+                System.out.println("MTSVPane.populateGUI(): loading the following test cases:");
                 for (int i = 0; i < testCases.length; i++) {
-                    System.out.println("Test case " + testCases[i].getTestNumber() + " result: " + testCases[i]);
+                    System.out.println("  Test Case " + testCases[i].getTestNumber() + ": " + testCases[i]);
                 }
 
                 int failedCount = getNumFailedTestCases(testCases);
@@ -613,19 +628,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     getNumFailedTestCasesLabel().setForeground(Color.green);
                     getNumFailedTestCasesLabel().setText("ALL PASSED");
                 }
-
-                // the following code is from the class where it was copied from; need to do the "equivalent" operations
-                // for THIS type of pane...
-                // selectDisplayRadioButton();
-                // getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
-                // getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
-                // getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
-                // getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
-                // getAutoRegistrationCheckbox().setSelected(contestInformation.isEnableAutoRegistration());
-                // setContestInformation(contestInformation);
-                // setEnableButtons(false);
-                // ...
-
+                
+                resultsTable = getResultsTable(testCases);
+                resultsScrollPane.setViewportView(resultsTable);
             }
 
         });
@@ -633,11 +638,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     private int getNumFailedTestCases(RunTestCase[] testCases) {
-         int failed = 0 ;
-         for (int i=0; i<testCases.length; i++) {
-         if (!testCases[i].isPassed())
-             failed++ ;
-         }
+        int failed = 0 ;
+        for (int i = 0; i < testCases.length; i++) {
+            if (!testCases[i].isPassed()) {
+                failed++;
+//                int num = i+1;
+//                System.out.println("Found failed test case: " + num);
+            }
+        }
         System.out.println ("getNumFailedTestCases(): returning " + failed);
         return failed;
     }
@@ -670,16 +678,27 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
-     * Returns a JTable containing the results information for each test case. 
-     * The method sets not only the table data but the appropriate cell renderers and 
+     * Returns a JTable containing the results information for the specified set of test cases. 
+     * The method sets not only the table data model but also the appropriate cell renderers and 
      * action/mouse listeners for the table.
      */
-    private JTable getResultsTable() {
+    private JTable getResultsTable(RunTestCase [] testCases) {
 
         final JTable resultsTable;
 
         //create the results table
-        TableModel tableModel = new TestCaseResultsTableModel(tableData, columnNames) ;
+        TableModel tableModel = new TestCaseResultsTableModel(testCases, columnNames) ;
+        
+//        System.out.println ("Table model contains:");
+//        System.out.println ("--------------");
+//        for (int row=0; row<tableModel.getRowCount(); row++) {
+//            for (int col=0; col<tableModel.getColumnCount(); col++) {
+//                System.out.print("[" + tableModel.getValueAt(row, col) + "]");
+//            }
+//            System.out.println();
+//        }
+//        System.out.println ("--------------");
+        
         resultsTable = new JTable(tableModel);
         
         //set the desired options on the table
@@ -708,7 +727,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setCellRenderer(new CheckBoxRenderer());
 
         // set a LinkRenderer on those cells containing links
-        resultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_VIEW.ordinal()]).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_COMPARE.ordinal()]).setCellRenderer(new LinkRenderer());
         resultsTable.getColumn(columnNames[COLUMN.JUDGE_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
         resultsTable.getColumn(columnNames[COLUMN.JUDGE_DATA.ordinal()]).setCellRenderer(new LinkRenderer());
 
@@ -729,8 +749,13 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 int row = target.getSelectedRow();
                 int column = target.getSelectedColumn();
 
-                if (column >= COLUMN.TEAM_OUTPUT.ordinal() && column <= COLUMN.JUDGE_DATA.ordinal()) {
-                    showListing(row, column);
+                if (column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() 
+                        || column == COLUMN.JUDGE_OUTPUT.ordinal()
+                        || column == COLUMN.JUDGE_DATA.ordinal()) {
+                    viewFile(row, column);
+                } else if (column == COLUMN.TEAM_OUTPUT_COMPARE.ordinal()) {
+                    System.out.println ("Would have compared Team & Judge output for test case "
+                            + (row+1));
                 }
             }
         });
@@ -738,20 +763,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         return resultsTable;
     }
 
-    /**
-     * Uses the currently-defined Viewer to display output file listed in the specified table row/col. TODO: add code to actually display the specified output file.
-     * 
-     * @param row
-     *            - the selected table row (0-based)
-     * @param col
-     *            - the selected table column (0-based)
-     */
-    private void showListing(int row, int col) {
-        int dataSet = row + 1;
-        String outputType = col == COLUMN.TEAM_OUTPUT.ordinal() ? "Team Output" : col == COLUMN.JUDGE_OUTPUT.ordinal() ? "Judge's Output" : col == COLUMN.JUDGE_DATA.ordinal() ? "Judge's Data" : "??";
-        System.out.println("Showing " + outputType + " for Data Set " + dataSet);
-        viewFile(row, col);
-    }
 
     /**
      * Returns an array of Strings listing the names of available (known) output viewer tools.
@@ -773,28 +784,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         return new String[] { "diff", "GVimDiff", "Another Diff Tool" };
     }
 
-    /**
-     * Returns a set of Objects defining the rows of data to be entered into the test case results table.
-     * 
-     * @return an array of arrays of Strings defining the table data
-     */
-    private Object[][] getTableData() {
-
-        // TODO: replace the following with code that gets the actual row data from the contest model,
-        // including creating hyperlinks (labels) to open each output file, and also including
-        // additional links to "compare selected rows" 
-        return new Object[][] { 
-                { new Boolean(false), "1", new JLabel("Pass"), "100", new JLabel("<html>View<br>Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(true), "2", new JLabel("Fail"), "200", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(false), "3", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(true), "4", new JLabel("Fail"), "150", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(true), "5", new JLabel("Unknown"), "50", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(false), "6", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(true), "7", new JLabel("Fail"), "1000", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(false), "8", new JLabel("Pass"), "100", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(true), "9", new JLabel("Unknown"), "1500", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") },
-                { new Boolean(true), "10", new JLabel("Fail"), "10", new JLabel("View   Compare"), new JLabel("View"), new JLabel("View") }, };
-    }
 
     /**
      * Displays a window showing side-by-side comparison of the Team's and Judge's output for each of the specified table rows.
@@ -846,52 +835,128 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      *            - the column in the table: team output, judge's output, or judge's data
      */
     protected void viewFile(int row, int col) {
-        if (col != COLUMN.TEAM_OUTPUT.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal()) {
+        if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && 
+                col != COLUMN.JUDGE_DATA.ordinal() ) {
             Log log = getController().getLog();
-            log.log(Log.WARNING, "MTSV: invalid column number for file viewing request");
+            log.log(Log.WARNING, "MTSVPane.viewFile(): invalid column number for file viewing request: "
+                    + col);
+            System.err.println ("Invalid column number for file viewing request: " + col);
             return;
         }
         if (currentViewer != null) {
             currentViewer.dispose();
         }
         currentViewer = new MultipleFileViewer(getController().getLog());
-        String title = col == COLUMN.TEAM_OUTPUT.ordinal() ? "Team Output" : col == COLUMN.JUDGE_OUTPUT.ordinal() ? "Judge's Output" : col == COLUMN.JUDGE_DATA.ordinal() ? "Judge's Data" : "<unknown";
-        createAndViewFile(currentViewer, getFileForTableCell(row, col), title, true);
-    }
-
-    private SerializedFile getFileForTableCell(int row, int col) {
-        return new SerializedFile("TestFileName");
-    }
-
-    private void createAndViewFile(IFileViewer fileViewer, SerializedFile file, String title, boolean visible) {
-        // TODO the executable dir name should be from the model, eh ?
-        String targetDirectory = getExecuteDirectoryName();
-        Utilities.insureDir(targetDirectory);
-        String targetFileName = targetDirectory + File.separator + file.getName();
-        try {
-            file.writeFile(targetFileName);
-
-            if (new File(targetFileName).isFile()) {
-                fileViewer.addFilePane(title, targetFileName);
-            } else {
-                fileViewer.addTextPane(title, "Could not create file at " + targetFileName);
-            }
-        } catch (IOException e) {
-            fileViewer.addTextPane(title, "Could not create file at " + targetFileName + "Exception " + e.getMessage());
+        
+        //get a title based on what column was selected
+        String title = col == COLUMN.TEAM_OUTPUT_VIEW.ordinal() ? "Team Output" 
+                : col == COLUMN.JUDGE_OUTPUT.ordinal() ? "Judge's Output" 
+                        : col == COLUMN.JUDGE_DATA.ordinal() ? "Judge's Data" : "<unknown>";
+        
+        //get the file associated with the specified cell
+        SerializedFile targetFile = getFileForTableCell(row,col);
+        if (targetFile != null) {
+            int testCaseNum = row + 1;
+            showFile(currentViewer, targetFile, title, "Test Case "+testCaseNum, true);
+        } else {
+            String logMsg = "MTSVPane.viewFile(): unable to find file for table cell (" 
+                    + row + "," + col + ")  (Contest configuration error?)" ;
+            Log log = getController().getLog();
+            log.log(Log.WARNING, logMsg);
+            String errMsg = "Unable to find file for table cell (" 
+                    + row + "," + col + ") (Contest configuration error?)" ;
+            JOptionPane.showMessageDialog(getParentFrame(), errMsg, 
+                    "File Not Found", JOptionPane.WARNING_MESSAGE);
         }
+    }
+
+    /**
+     * Returns a SerializedFile corresponding to the "link" in the results table at the 
+     * specified row and column. If the specified column is not one of {team output, 
+     * judge's output(answer), judge's input(data)}, or if no file can be found for
+     * the specified cell, null is returned.
+     *
+     * @param row - a row in the Test Case Results table
+     * @param col - a column in the Test Case Results table
+     * @return a SerializedFile corresponding to the table cell, or null
+     */
+    private SerializedFile getFileForTableCell(int row, int col) {
+        
+        Problem prob = getContest().getProblem(currentRun.getProblemId());
+        
+        ProblemDataFiles problemDataFiles = getController().getProblemDataFiles(prob);
+        
+        //declare the value to be returned
+        SerializedFile returnFile = null ;
+        
+        if (col == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || col == COLUMN.TEAM_OUTPUT_COMPARE.ordinal()) {
+            //get team output file corresponding to test case "row"
+            
+        } else if (col == COLUMN.JUDGE_OUTPUT.ordinal()) {
+            //get judge's output corresponding to test case "row"
+            SerializedFile [] answerFiles = problemDataFiles.getJudgesAnswerFiles();
+            //make sure we got back some answer files and that there is an answer file for the test case
+            if (answerFiles != null && row < answerFiles.length) {
+                returnFile = answerFiles[row];       
+            } else {
+                //there is no answer file for the specified test case (row)
+                returnFile = null ;
+            }
+
+            
+        } else if (col == COLUMN.JUDGE_DATA.ordinal()) {
+            //get judge's input data corresponding to test case "row"
+            SerializedFile [] inputDataFiles = problemDataFiles.getJudgesDataFiles();
+            //make sure we got back some data files and that there is a data file for the test case
+            if (inputDataFiles != null && row < inputDataFiles.length) {
+                returnFile = inputDataFiles[row];       
+            } else {
+                //there is no data file for the specified test case (row)
+                returnFile = null ;
+            }
+
+        } else {
+            //the column is not one of those containing "view" links; return null
+            returnFile = null;
+        }
+
+
+        return returnFile;
+    }
+
+    /**
+     * Uses the specified fileViewer to display the specified file, setting the title and message
+     * on the viewer to the specified values and invoking "setVisible()" on the viewer if desired.
+     * @param fileViewer - the viewer to be used
+     * @param file - the file to be displayed in the viewer
+     * @param title - the title to be set on the viewer title bar
+     * @param tabLabel - the label to be put on the viewer pane tab
+     * @param visible - whether or not to invoke setVisible(true) on the viewer
+     */
+    private void showFile(IFileViewer fileViewer, SerializedFile file, String title, String tabLabel, boolean visible) {
+        System.out.println ("MTSVPane.showFile():");
+        String viewerString = fileViewer==null?"<null>":fileViewer.getClass().toString();
+        String filePathString = file==null?"<null>":file.getAbsolutePath().toString();
+        System.out.println ("  Viewer='" + viewerString + "'" 
+                            + "  File='" + filePathString + "'"
+                            + "  Title='" + title + "'"
+                            + "  setVisible='" + visible + "'");
+        if (fileViewer == null || file == null) {
+            Log log = getController().getLog();
+            log.log(Log.WARNING, "MTSVPane.showFile(): fileViewer or file is null");
+            JOptionPane.showMessageDialog(getParentFrame(), 
+                    "System Error: null fileViewer or file; contact Contest Administrator (check logs)", 
+                    "System Error", JOptionPane.ERROR_MESSAGE);
+            return ;
+        }
+        fileViewer.setTitle(title);
+        fileViewer.addFilePane(tabLabel, file.getAbsolutePath());
+        fileViewer.enableCompareButton(false);
+        fileViewer.setInformationLabelText("File: " + file.getName());
+
         if (visible) {
             fileViewer.setVisible(true);
         }
-    }
-
-    private String getExecuteDirectoryName() {
-        Executable tempEexecutable = new Executable(getContest(), getController(), currentRun, /* runFiles */null);
-        return tempEexecutable.getExecuteDirectoryName();
-    }
-
-    private ProblemDataFiles getProblemDataFiles() {
-        Problem problem = getContest().getProblem(currentRun.getProblemId());
-        return getContest().getProblemDataFile(problem);
     }
 
     public class PassFailCellRenderer extends DefaultTableCellRenderer {
@@ -902,9 +967,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             String testResult = ((JLabel) value).getText();
             if (testResult.equalsIgnoreCase("Pass")) {
                 setBackground(Color.green);
+                setForeground(Color.black);
                 setText("Pass");
             } else if (testResult.equalsIgnoreCase("Fail")) {
                 setBackground(Color.red);
+                setForeground(Color.white);
                 setText("Fail");
             } else {
                 // illegal value
