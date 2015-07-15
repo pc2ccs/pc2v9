@@ -78,5 +78,13 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
         getMultiTestSetOutputViewerPane().setData(run, problem, problemDataFiles);
         setTitle ("Test Results for Run " + run.getNumber());
     }
+    
+    /**
+     * Set new team output filenames.
+     */
+    public void setTeamOutputFileNames(String [] filenames){
+        getMultiTestSetOutputViewerPane().setTeamOutputFileNames(filenames);
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"

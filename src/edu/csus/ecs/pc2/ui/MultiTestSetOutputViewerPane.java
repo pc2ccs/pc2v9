@@ -1025,5 +1025,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
         populateGUI();
     }
+    
+    /**
+     * Set new team output filenames.
+     */
+    public void setTeamOutputFileNames(String [] filenames){
+        // TODO handle when new team filenames are added/sent
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

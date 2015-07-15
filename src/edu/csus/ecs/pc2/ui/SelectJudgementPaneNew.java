@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.swing.BorderFactory;
@@ -154,6 +155,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private GregorianCalendar startTimeCalendar;
     
     private long executeTimeMS = 0;
+
+    private MultiTestSetOutputViewerFrame multiTestSetOutputViewerFrame = null;
+
+    /**
+     * Saved team output names.
+     */
+    private List<String> saveOutputFileNames = null;
 
     /**
      * This method initializes
@@ -652,7 +660,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getJudgementComboBox().setEnabled(b && runFiles != null);
         getCancelButton().setEnabled(b);
         getAcceptValidatorJudgementButton().setEnabled(b);
-        getViewOutputsButton().setEnabled(b);
+//        getViewOutputsButton().setEnabled(b);
         getAcceptChosenSelectionButton().setEnabled(b && getJudgementComboBox().getSelectedIndex() != -1);
     }
 
@@ -694,7 +702,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     private void enableOutputsButton(boolean b) {
-            getViewOutputsButton().setEnabled(b);
+//            getViewOutputsButton().setEnabled(b);
     }
     
     private boolean judgementChanged() {
@@ -883,7 +891,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     protected void executeRun() {
         
-        
         executeTimeMS = 0;
         System.gc();
 
@@ -946,12 +953,42 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 //        RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
         //getManualRunResultsPanel().populatePane(rrf, "Manual Results");
         //getManualRunResultsPanel().setVisible(true);
-
+        
         if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
             executableFileViewer.setVisible(true);
         }
+        
+        saveOutputFileNames = executable.getTeamsOutputFilenames();
+        sendTeamOutputFileNames();
+        
         enableOutputsButton(true);
         setEnabledButtonStatus(true);
+    }
+
+    /**
+     * Send team output names to Multi Test Set Viewer.
+     */
+    private void sendTeamOutputFileNames() {
+
+        if (multiTestSetOutputViewerFrame != null) {
+
+            String[] teamOutputNames = new String[getProblemDataFiles().getJudgesDataFiles().length];
+
+            // null out list
+            for (int i = 0; i < teamOutputNames.length; i++) {
+                teamOutputNames[i] = null;
+            }
+
+            // add entries from acutal team test output
+            if (saveOutputFileNames != null) {
+
+                for (int i = 0; i < saveOutputFileNames.size(); i++) {
+                    teamOutputNames[i] = saveOutputFileNames.get(i);
+                }
+            }
+
+            multiTestSetOutputViewerFrame.setTeamOutputFileNames(teamOutputNames);
+        }
     }
 
     private void showValidatorControls(boolean b, JudgementRecord judgementRecord) {
@@ -1031,7 +1068,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     private void createAndViewFile(IFileViewer fileViewer, SerializedFile file, String title, boolean visible) {
-        // TODO the executable dir name should be from the model, eh ?
+        // SOMEDAY the executable dir name should be from the model, eh ?
         String targetDirectory = getExecuteDirectoryName();
         Utilities.insureDir(targetDirectory);
         String targetFileName = targetDirectory + File.separator + file.getName();
@@ -1369,11 +1406,26 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     protected void viewOutputs() {
-        if (executableFileViewer != null) {
-            executableFileViewer.setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "No output yet!");
+        
+//        if (executableFileViewer != null) {
+//            executableFileViewer.setVisible(true);
+//        } else {
+//            JOptionPane.showMessageDialog(this, "No output yet!");
+//        }
+
+        if (multiTestSetOutputViewerFrame == null) {
+            multiTestSetOutputViewerFrame = new MultiTestSetOutputViewerFrame();
+            multiTestSetOutputViewerFrame.setContestAndController(getContest(), getController());
+
+            Problem problem = getContest().getProblem(run.getProblemId());
+            multiTestSetOutputViewerFrame.setData(run, problem, getProblemDataFiles());
+
+            FrameUtilities.centerFrame(multiTestSetOutputViewerFrame);
+
         }
+        
+        sendTeamOutputFileNames();
+        multiTestSetOutputViewerFrame.setVisible(true);
     }
 
     /**
@@ -1525,9 +1577,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JButton getViewOutputsButton() {
         if (viewOutputsButton == null) {
             viewOutputsButton = new JButton();
-            viewOutputsButton.setActionCommand("View Outputs");
-            viewOutputsButton.setEnabled(false);
-            viewOutputsButton.setToolTipText("Show compiler/execution/validator stdout/err where available");
+            viewOutputsButton.setActionCommand("View Test Results");
+            viewOutputsButton.setEnabled(true);
+            viewOutputsButton.setToolTipText("View Test Results and data sets");
             viewOutputsButton.setText("View Outputs");
             viewOutputsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
