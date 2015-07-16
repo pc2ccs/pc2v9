@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.log;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -31,8 +32,6 @@ import java.util.logging.Logger;
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/log/Log.java$
 public class Log extends Logger {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * SEVERE is a message level indicating a serious failure.
@@ -111,6 +110,12 @@ public class Log extends Logger {
 
     private LogStreamHandler streamHandler = null;
     
+    private Handler consoleHandler = null;
+    
+    private Handler fileHandler = null;
+    
+    private String logfilename = null;
+    
     /**
      * Start a log in the logs/ directory with logFileName
      * @param logFileName name to log messages to.
@@ -140,36 +145,14 @@ public class Log extends Logger {
     public Log(String name, String resourceBundleName, String logDirectory,
             String logFilename) {
         super(name, resourceBundleName);
-        // default to pass thru all levels, the FileHandlers will FilterByLevel
+        /**
+         * default to pass thru all levels, the FileHandlers will FilterByLevel
+         */
         // Logger.getLogger(arg0);
         this.setLevel(Level.ALL);
         setFileHandlers(logDirectory, logFilename);
     }
 
-    // public static Log getLogger(String arg0, String arg1, String arg2)
-    // {
-    // logger = Logger.getLogger(arg0);
-    // logger.setLevel(Level.ALL);
-    // setFileHandlers(arg1, arg2);
-    // return logger;
-    // }
-    /**
-     * the Constructor
-     */
-    // public Log()
-    // {
-    // logger();
-    // logger = logger.getLogger("edu.csus.ecs.pc2");
-    // default to pass thru all levels, the FileHandlers will FilterByLevel
-    // logger.setLevel(Level.ALL);
-    // }
-    // public void setLogDir(String strDirectory)
-    // {
-    // // logger = logger.getLogger("edu.csus.ecs.pc2");
-    // // default to pass thru all levels, the FileHandlers will FilterByLevel
-    // logger.setLevel(Level.ALL);
-    // setFileHandlers(strDirectory);
-    // }
     /**
      * This method starts the new FileHanders writing to logDirBase, and then removes the old handlers. Does nothing if we are
      * currently writing to logDirBase
@@ -180,20 +163,14 @@ public class Log extends Logger {
      *            base name for log file, will append .log to name if .log not present
      */
     public void setFileHandlers(String logDirBase, String baseFileName) {
-        // System.out.println("setFileHandlers before handlers =
-        // "+getHandlers().length);
         if (baseFileName.endsWith(".log")) {
             baseFileName = baseFileName.substring(0, baseFileName.length() - 4);
         }
-        // System.out.println("old="+oldLogDirBase+","+oldBaseFileName+"
-        // new="+logDirBase+","+baseFileName);
-        /*
+
+        /**
          * save the list of existing handlers so we can remove them remove after we setup the new handlers
          */
         Handler[] existingHandlers = getHandlers();
-        // System.out.println("setFileHandlers existingHandlers =
-        // "+existingHandlers.length);
-        FileHandler fh = null;
         try {
             File file = new File(logDirBase);
             // FilterByLevel filter = new FilterByLevel();
@@ -201,13 +178,12 @@ public class Log extends Logger {
             if (!file.exists()) {
                 file.mkdir();
             }
-            fh = new FileHandler(logDirBase + File.separator + baseFileName
-                    + "-%u.log", true);
-            // System.out.println("writing to "+logDirBase + File.separator
-            // + baseFileName + "-%u.log");
-            fh.setLevel(Level.ALL);
-            fh.setFormatter(new LogFormatter(true));
-            addHandler(fh);
+            logfilename = logDirBase + File.separator + baseFileName + "-%u.log";
+            fileHandler = new FileHandler(logfilename, true);
+
+            fileHandler.setLevel(Level.ALL);
+            fileHandler.setFormatter(new LogFormatter(true));
+            addHandler(fileHandler);
 
             if (streamHandler == null) {
                 streamHandler = new LogStreamHandler();
@@ -240,9 +216,9 @@ public class Log extends Logger {
         // fh = setupFileHandler(Level.SEVERE, logDirBase);
         // logger.addHandler(fh);
 
-        // System.out.println("setFileHandlers middle handlers =
-        // "+getHandlers().length);
-        // new handlers established, remove the old handlers
+        /** 
+         * new handlers established, remove the old handlers
+         */
 
         for (Handler handler : existingHandlers) {
             if (handler instanceof FileHandler) {
@@ -250,9 +226,6 @@ public class Log extends Logger {
                 removeHandler(handler);
             }
         }
-
-        // System.out.println("setFileHandlers after handlers =
-        // "+getHandlers().length);
 
         String location = logDirBase;
         try {
@@ -270,15 +243,14 @@ public class Log extends Logger {
      */
     @Override
     protected void finalize() throws Throwable {
-        // System.out.println("finalize called");
-        // log.config("finalize called in logger");
-        // // close our handlers first
+         // close our handlers first
         close();
         super.finalize();
     }
 
     public void close() throws Throwable {
-        // TODO why is this not being called and/or working?
+        // SOMEDAY why is this not being called and/or working?
+        // dal what does not working mean?   A better comment next time please.
         Handler[] handlers = getHandlers();
         closeHandlers(handlers);
     }
@@ -291,15 +263,9 @@ public class Log extends Logger {
      * @param existingHandlers
      */
     private void closeHandlers(Handler[] existingHandlers) {
-        // System.out.println("closeHandlers invoked");
         if (existingHandlers != null) {
-            // System.out.println("existinghandlers is
-            // "+existingHandlers.length);
             for (int i = 0; i < existingHandlers.length; i++) {
-                // System.out.println("found a handler");
                 if (existingHandlers[i] != null) {
-                    // System.out.println("attempting to close
-                    // "+existingHandlers.getClass().getName());
                     removeHandler(existingHandlers[i]);
                     existingHandlers[i].close();
                 }
@@ -307,8 +273,42 @@ public class Log extends Logger {
         }
 
     }
-
+    
     public LogStreamHandler getStreamHandler() {
         return streamHandler;
+    }
+    
+    /**
+     * Start sending log message to console.
+     * 
+     * Adds a console handler to this logger.
+     */
+    public void startConsoleLogger(){
+        
+        if (consoleHandler == null){
+            consoleHandler = new ConsoleHandler();
+        }
+        addHandler(consoleHandler);
+    }
+    
+    /**
+     * Stop sending log message to console.
+     * 
+     * @see #startConsoleLogger()
+     */
+    public void stopConsoleLogger(){
+        if (consoleHandler != null){
+            removeHandler(consoleHandler);
+            consoleHandler.close();
+            consoleHandler = null;
+        }
+    }
+    
+    public Logger getLogger(){
+        return this;
+    }
+    
+    public String getLogfilename() {
+        return logfilename;
     }
 }
