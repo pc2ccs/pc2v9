@@ -41,11 +41,12 @@ public class ContestImporter {
      * If an Exception is thrown then a list of the errors can be retrieved
      * suing {@link #getNoteList()}.
      * 
-     * @param theController
-     * @param inContest
+     * @param theController - controller
+     * @param theContest - existing contest/model
+     * @param newContest - new contest settings
      * @throws LoadContestDataException on exception {@link #getNoteList()} will have errors as well. 
      */
-    public void sendContestSettingsToServer(IInternalController theController, IInternalContest theContest, IInternalContest inContest) throws LoadContestDataException { 
+    public void sendContestSettingsToServer(IInternalController theController, IInternalContest theContest, IInternalContest newContest) throws LoadContestDataException { 
 
         // TODO CCS validate incoming contest data
         
@@ -63,9 +64,9 @@ public class ContestImporter {
         ContestInformation contestInformation = null;
 
         try {
-            if (inContest.getContestInformation().getContestTitle() != null) {
-                contestInformation = inContest.getContestInformation();
-                contestInformation.setContestTitle(inContest.getContestInformation().getContestTitle());
+            if (newContest.getContestInformation().getContestTitle() != null) {
+                contestInformation = newContest.getContestInformation();
+                contestInformation.setContestTitle(newContest.getContestInformation().getContestTitle());
             }
 
         } catch (Exception e) {
@@ -74,7 +75,7 @@ public class ContestImporter {
 
 
         try {
-            for (Site site : inContest.getSites()) {
+            for (Site site : newContest.getSites()) {
                 Site existingSite = theContest.getSite(site.getSiteNumber());
                 if (existingSite != null) {
                     Site updatedSite = existingSite.clone();
@@ -111,7 +112,7 @@ public class ContestImporter {
                 }
             }
 
-            for (Language language : inContest.getLanguages()) {
+            for (Language language : newContest.getLanguages()) {
                 if (langHash.containsKey(language.getDisplayName())) {
                     Language newLanguage = langHash.get(language.getDisplayName());
                     if (!newLanguage.isSameAs(language)) {
@@ -141,7 +142,7 @@ public class ContestImporter {
             for (Account existingAccount : theContest.getAccounts()) {
                 accountHash.put(existingAccount.getClientId().toString(), existingAccount);
             }
-            for (Account account : inContest.getAccounts()) {
+            for (Account account : newContest.getAccounts()) {
                 if (!accountHash.containsKey(account.getClientId().toString())) {
                     addAccountsVector.add(account);
                 }
@@ -163,7 +164,7 @@ public class ContestImporter {
                 Category category = existingCategories[i];
                 cats.put(category.getDisplayName(), category);
             }
-            Category[] categories = inContest.getCategories();
+            Category[] categories = newContest.getCategories();
             Vector<Category> catAdds = new Vector<Category>();
             for (int i = 0; i < categories.length; i++) {
                 Category category = categories[i];
@@ -193,7 +194,7 @@ public class ContestImporter {
 
             ArrayList<Problem> problemsToAddList = new ArrayList<Problem>();
 
-            for (Problem problem : inContest.getProblems()) {
+            for (Problem problem : newContest.getProblems()) {
                 if (probHash.containsKey(problem.getDisplayName())) {
                     try {
                         Problem newProblem = probHash.get(problem.getDisplayName());
@@ -216,7 +217,7 @@ public class ContestImporter {
                 problemDataFiles = new ProblemDataFiles[problemList.length];
                 int idx = 0;
                 for (Problem problem : problemList) {
-                    problemDataFiles[idx] = inContest.getProblemDataFile(problem);
+                    problemDataFiles[idx] = newContest.getProblemDataFile(problem);
                     idx++;
                 }
             }
@@ -225,7 +226,7 @@ public class ContestImporter {
             noteList.logError("Error saving Problem Information", e);
         }
         
-        ClientSettings [] settings = inContest.getClientSettingsList();
+        ClientSettings [] settings = newContest.getClientSettingsList();
         // bug 928 convert the loaded problems into the real problems
         for (int i = 0; i < settings.length; i++) {
             ClientSettings clientSettings = settings[i];
@@ -236,11 +237,11 @@ public class ContestImporter {
                     Vector<Problem> addToList = new Vector<Problem>();
                     for (int j = 0; j < pList.length; j++) {
                         ElementId elementId2 = pList[j];
-                        if (probHash.containsKey(inContest.getProblem(elementId2).getDisplayName())) {
-                            addToList.add(probHash.get(inContest.getProblem(elementId2).getDisplayName()));
+                        if (probHash.containsKey(newContest.getProblem(elementId2).getDisplayName())) {
+                            addToList.add(probHash.get(newContest.getProblem(elementId2).getDisplayName()));
                         } else {
                             // this is a new problem
-                            addToList.add(inContest.getProblem(elementId2));
+                            addToList.add(newContest.getProblem(elementId2));
                         }
                     }
                     ajFilter.clearProblemList();
@@ -253,7 +254,7 @@ public class ContestImporter {
             }
         }
         
-        PlaybackInfo[] infos = inContest.getPlaybackInfos();
+        PlaybackInfo[] infos = newContest.getPlaybackInfos();
         PlaybackInfo playbackInfo = null;
         if (infos.length > 0) {
             playbackInfo = infos[0];
@@ -269,6 +270,28 @@ public class ContestImporter {
             NoteMessage noteMessage = noteList.getAll()[0];
             throw new LoadContestDataException(noteList.size()+" errors in loading contest configuration data, "+noteMessage.getComment());
             
+        }
+
+        try {
+            if (settings.length > 0) {
+                Thread.sleep(2000); // kludge wait for accounts to be created on server
+                // System.out.println("debug 22 - ContestImporer there are "+settings.length+" settings found");
+                for (ClientSettings setting : settings) {
+
+                    ClientSettings clientSettings = theContest.getClientSettings(setting.getClientId());
+                    if (clientSettings == null) {
+                        // new setting add it.
+                        theController.addNewClientSettings(setting);
+                    } else {
+                        // existing setting update it
+                        theController.updateClientSettings(setting);
+                    }
+                    // dumpAJSettings(setting.getClientId(), setting.isAutoJudging(), setting.getAutoJudgeFilter());
+                }
+            }
+        } catch (Exception e) {
+            noteList.logError("Error storing Client Information/Auto Judge settings", e);
+            throw new LoadContestDataException(noteList.size() + " errors in sending Client Information/Auto Judge settings");
         }
 
         /**
@@ -289,14 +312,7 @@ public class ContestImporter {
                 theController.addNewAccounts(addAccountsVector.toArray(new Account[addAccountsVector.size()]));
             }
             
-            if (settings.length > 0) {
-                Thread.sleep(2000);  // kludge wait for accounts to be created on server
-//                System.out.println("debug 22 - ContestImporer there are "+settings.length+" settings found");
-                for (ClientSettings setting : settings) {
-//                    dumpAJSettings(setting.getClientId(), setting.isAutoJudging(), setting.getAutoJudgeFilter());
-                    theController.addNewClientSettings(setting);
-                }
-            }
+
 
             if (playbackInfo != null) {
                 Thread.sleep(2000);  // kludge wait for accounts and auto judge settings
