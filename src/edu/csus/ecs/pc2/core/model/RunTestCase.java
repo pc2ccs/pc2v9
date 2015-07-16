@@ -63,7 +63,7 @@ public class RunTestCase implements IElementObject, IGetDate{
      */
     public RunTestCase(Run run, JudgementRecord record, int testNumber, boolean passed) {
         runElementId = run.getElementId();
-        judgementId = record.getElementId();
+        judgementId = record.getJudgementId();
         this.testNumber = testNumber;
         this.passed = passed;
     }
@@ -151,6 +151,10 @@ public class RunTestCase implements IElementObject, IGetDate{
         if (date != null){
             time = date.getTime();
         }
+    }
+    
+    public ElementId getJudgementId() {
+        return judgementId;
     }
     
     /**
