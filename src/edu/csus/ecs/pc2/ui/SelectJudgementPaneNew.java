@@ -984,6 +984,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
                 for (int i = 0; i < saveOutputFileNames.size(); i++) {
                     teamOutputNames[i] = saveOutputFileNames.get(i);
+                    if (new File(teamOutputNames[i]).length() == 0) {
+                        teamOutputNames[i] = null; // null null, happily null!!
+                    }
                 }
             }
 
