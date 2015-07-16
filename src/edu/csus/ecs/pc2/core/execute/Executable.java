@@ -25,11 +25,14 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
@@ -159,6 +162,8 @@ public class Executable extends Plugin implements IExecutable {
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
+        super.setContestAndController(inContest, inController);
+        
         this.contest = inContest;
         this.controller = inController;
         this.runFiles = runFiles;
@@ -335,7 +340,7 @@ public class Executable extends Plugin implements IExecutable {
 
                     log.info("Test cases: " + dataFiles.length + " for run " + run.getNumber());
 
-                    while (passed && dataSetNumber < dataFiles.length) {
+                    while (dataSetNumber < dataFiles.length) {
                         passed = executeAndValidateDataSet(dataSetNumber);
                         dataSetNumber++;
                     }
@@ -520,7 +525,15 @@ public class Executable extends Plugin implements IExecutable {
             reason = " Reason is " + reason;
         }
 
-        log.info("  Test case " + testNumber + " passed " + Utilities.yesNoString(passed)+reason);
+        log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " " + reason);
+
+        JudgementRecord record = JudgementUtilites.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
+        Judgement judgement = getContest().getJudgement(record.getJudgementId());
+
+        log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement =  " + judgement);
+    
+        RunTestCase runTestCase = new RunTestCase(run, record, testNumber, passed);
+        run.addTestCase(runTestCase);
 
         return passed;
     }
