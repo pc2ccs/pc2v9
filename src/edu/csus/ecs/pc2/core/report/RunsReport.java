@@ -15,10 +15,12 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
@@ -203,9 +205,38 @@ public class RunsReport implements IReport {
             }
         }
         
+        
+        writeTestCases (printWriter, "     ", contest, run);
+        
         printWriter.println();
     }
     
+    private void writeTestCases(PrintWriter printWriter, String pad, IInternalContest internalContest, Run run) {
+        
+        RunTestCase[] testcases = run.getRunTestCases();
+        
+        printWriter.println(pad+"There are "+testcases.length+" test cases.");
+
+        for (RunTestCase runTestCase : testcases) {
+
+            String judgement = "Undetermined";
+            if (runTestCase.getJudgementId() != null) {
+                Judgement j = internalContest.getJudgement(runTestCase.getJudgementId());
+                if (j != null){ // TODO remove this if not null after July 16
+                    judgement = "["+j.getAcronym()+"] "+j.getDisplayName(); 
+                }
+            }
+            printWriter.println(pad+"Test " + runTestCase.getTestNumber() + //
+                    " passes " + runTestCase.isPassed() + //
+                    " at " + runTestCase.getDate() + //
+                    " judgement " + judgement);
+
+        }
+        
+        // TODO Auto-generated method stub
+        
+    }
+
     private boolean isPreliminaryJudgement(Run run, JudgementRecord record) {
 
         Problem problem = contest.getProblem(run.getProblemId());
