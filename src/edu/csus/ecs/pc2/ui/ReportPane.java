@@ -45,6 +45,7 @@ import edu.csus.ecs.pc2.core.report.AccountsReport;
 import edu.csus.ecs.pc2.core.report.AccountsTSVReport;
 import edu.csus.ecs.pc2.core.report.AccountsTSVReportTeamAndJudges;
 import edu.csus.ecs.pc2.core.report.AllReports;
+import edu.csus.ecs.pc2.core.report.AutoJudgingSettingsReport;
 import edu.csus.ecs.pc2.core.report.BalloonDeliveryReport;
 import edu.csus.ecs.pc2.core.report.BalloonSettingsReport;
 import edu.csus.ecs.pc2.core.report.BalloonSummaryReport;
@@ -279,6 +280,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new ScoreboardTSVReport());
         
         reports.add(new ResolverEventFeedReport());
+        
+        reports.add(new AutoJudgingSettingsReport());
         
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());

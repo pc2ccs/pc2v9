@@ -140,6 +140,8 @@ public final class Reports {
         
         reports.add(new ResolverEventFeedReport());
         
+        reports.add(new AutoJudgingSettingsReport());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }
