@@ -71,8 +71,13 @@ public class ContestComparison {
         
         
         ClientSettings[] settings = contestOne.getClientSettingsList();
-        ClientSettings[] settingsTwo = contestOne.getClientSettingsList();
-        buffer.append(addComment("AJ Settings", settings.length, settingsTwo.length));
+        ClientSettings[] settingsTwo = contestTwo.getClientSettingsList();
+        
+        int autoJudgeSettingsOne = getAutoJudgeSettings(settings);
+        int autoJudgeSettingsTow = getAutoJudgeSettings(settingsTwo);
+        
+        
+        buffer.append(addComment("AJ Settings", autoJudgeSettingsOne, autoJudgeSettingsTow));
 
         // SOMEDAY compare CONTEST_INFORMATION,
         // SOMEDAY compare BALLOON_SETTINGS_LIST,
@@ -80,6 +85,20 @@ public class ContestComparison {
         // SOMEDAY compare PROBLEM_DATA_FILES,
 
         return buffer.toString();
+    }
+
+
+    protected int getAutoJudgeSettings(ClientSettings[] settings) {
+        int ajCount = 0;
+
+        for (ClientSettings clientSettings : settings) {
+            Filter filter = clientSettings.getAutoJudgeFilter();
+            int numberProblems = filter.getProblemIdList().length;
+            if (numberProblems > 0) {
+                ajCount++;
+            }
+        }
+        return ajCount;
     }
 
 
