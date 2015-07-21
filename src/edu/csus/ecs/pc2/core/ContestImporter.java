@@ -226,6 +226,67 @@ public class ContestImporter {
             noteList.logError("Error saving Problem Information", e);
         }
         
+        
+
+        PlaybackInfo[] infos = newContest.getPlaybackInfos();
+        PlaybackInfo playbackInfo = null;
+        if (infos.length > 0) {
+            playbackInfo = infos[0];
+        }
+        
+        if (noteList.size() > 0){
+            /**
+             * If there are elements in noteList that means there has been
+             * one or more Exceptions during the preparing of the data to load
+             * into the contest.
+             */
+            
+            NoteMessage noteMessage = noteList.getAll()[0];
+            throw new LoadContestDataException(noteList.size()+" errors in loading contest configuration data, "+noteMessage.getComment());
+            
+        }
+
+ 
+
+        /**
+         * Send/update contest information
+         */
+
+        try {
+
+            if (contestInformation != null) {
+                theController.updateContestInformation(contestInformation);
+            }
+
+            if (problemList.length > 0) {
+                theController.addNewProblem(problemList, problemDataFiles);
+            }
+
+            if (addAccountsVector.size() > 0) {
+                theController.addNewAccounts(addAccountsVector.toArray(new Account[addAccountsVector.size()]));
+            }
+            
+
+
+            if (playbackInfo != null) {
+                Thread.sleep(2000);  // kludge wait for accounts and auto judge settings
+                theController.startPlayback(playbackInfo);
+            }
+            
+            /**
+             * Send updateClientSettings last because it depends on other settings like Problem and Account.
+             */
+            updateClientSettingsAJSettings(theContest, theController, newContest, probHash);
+        
+            
+        } catch (Exception e) {
+            noteList.logError("Error storing configuration Information", e);
+            throw new LoadContestDataException(noteList.size()+" errors in sending contest configuration data");
+        }
+    }
+
+    private void updateClientSettingsAJSettings(IInternalContest theContest, IInternalController theController,IInternalContest newContest, HashMap<String, Problem> probHash) throws LoadContestDataException {
+        
         ClientSettings [] settings = newContest.getClientSettingsList();
         // bug 928 convert the loaded problems into the real problems
         for (int i = 0; i < settings.length; i++) {
@@ -254,24 +315,6 @@ public class ContestImporter {
             }
         }
         
-        PlaybackInfo[] infos = newContest.getPlaybackInfos();
-        PlaybackInfo playbackInfo = null;
-        if (infos.length > 0) {
-            playbackInfo = infos[0];
-        }
-        
-        if (noteList.size() > 0){
-            /**
-             * If there are elements in noteList that means there has been
-             * one or more Exceptions during the preparing of the data to load
-             * into the contest.
-             */
-            
-            NoteMessage noteMessage = noteList.getAll()[0];
-            throw new LoadContestDataException(noteList.size()+" errors in loading contest configuration data, "+noteMessage.getComment());
-            
-        }
-
         try {
             if (settings.length > 0) {
                 Thread.sleep(2000); // kludge wait for accounts to be created on server
@@ -293,36 +336,7 @@ public class ContestImporter {
             noteList.logError("Error storing Client Information/Auto Judge settings", e);
             throw new LoadContestDataException(noteList.size() + " errors in sending Client Information/Auto Judge settings");
         }
-
-        /**
-         * Send/update contest information
-         */
-
-        try {
-
-            if (contestInformation != null) {
-                theController.updateContestInformation(contestInformation);
-            }
-
-            if (problemList.length > 0) {
-                theController.addNewProblem(problemList, problemDataFiles);
-            }
-
-            if (addAccountsVector.size() > 0) {
-                theController.addNewAccounts(addAccountsVector.toArray(new Account[addAccountsVector.size()]));
-            }
-            
-
-
-            if (playbackInfo != null) {
-                Thread.sleep(2000);  // kludge wait for accounts and auto judge settings
-                theController.startPlayback(playbackInfo);
-            }
-            
-        } catch (Exception e) {
-            noteList.logError("Error storing configuration Information", e);
-            throw new LoadContestDataException(noteList.size()+" errors in sending contest configuration data");
-        }
+        
     }
 
     // TODO 669 remove after debugged
