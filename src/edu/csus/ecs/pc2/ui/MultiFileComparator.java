@@ -14,6 +14,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -91,6 +92,12 @@ public class MultiFileComparator extends JFrame  {
         getContentPane().add(pnlSouthPanel, BorderLayout.SOUTH);
         
         JCheckBox chckbxLockScrolling = new JCheckBox("Lock Scrolling");
+        chckbxLockScrolling.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Sorry; this function isn't implemented yet",
+                        "Not Implemented", JOptionPane.INFORMATION_MESSAGE); 
+            }
+        });
         pnlSouthPanel.add(chckbxLockScrolling);
         
         Component horizontalStrut_2 = Box.createHorizontalStrut(20);
