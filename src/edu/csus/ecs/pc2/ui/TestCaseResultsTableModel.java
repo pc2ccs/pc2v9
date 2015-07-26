@@ -69,11 +69,6 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
         }
 
     }
-    
-    public TestCaseResultsTableModel(Object[][] tableData, String[] columnNames) {
-        // TODO 917   nor     P1  Wind    laned@ecs.csus.edu  ASSI    ---     When multiple data sets Edit Problem does not save data sets property 
-        throw new RuntimeException("Unimplmeneted - need to code TestCaseResultsTableModel");
-    }
 
     /**
      * Returns the Class of objects contained in the specified table column.
