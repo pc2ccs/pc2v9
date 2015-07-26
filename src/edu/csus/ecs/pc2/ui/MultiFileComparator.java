@@ -340,8 +340,7 @@ public class MultiFileComparator extends JFrame  {
      * @param judgesDataFileNames - an array of judge's data file names corresponding
      *                              to the specified test case numbers
      */
-    public void setData(int runID, int [] testCaseNums, String [] teamOutputFileNames, 
-            String [] judgesOutputFileNames, String [] judgesDataFileNames) {
+    public void setData(int runID, int [] testCaseNums, String [] teamOutputFileNames, String [] judgesOutputFileNames, String [] judgesDataFileNames) {
         this.setRunID(runID);
         this.setTestCaseList(testCaseNums);
         this.setOutputFileNames(teamOutputFileNames, judgesOutputFileNames);
