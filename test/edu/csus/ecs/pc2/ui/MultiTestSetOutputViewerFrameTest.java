@@ -94,7 +94,6 @@ public class MultiTestSetOutputViewerFrameTest extends AbstractTestCase {
 
         frame.setData(run, problem, problemDataFiles);
 
-        System.out.println("Calling setVisible()");
         frame.setVisible(true);
 
     }
