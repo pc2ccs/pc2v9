@@ -117,8 +117,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private JLabel lblNumTestCases;
 
     private IFileViewer currentViewer;
+    
+    private MultiFileComparator currentComparator ;
 
     private JScrollPane resultsScrollPane;
+    
+    
 
     /**
      * Constructs an instance of a plugin pane for viewing multi-testset output values.
@@ -615,10 +619,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 // fill in the test case summary information
                 getNumTestCasesLabel().setText("Test Cases:  " + testCases.length);
                 
-                System.out.println("MTSVPane.populateGUI(): loading the following test cases:");
-                for (int i = 0; i < testCases.length; i++) {
-                    System.out.println("  Test Case " + testCases[i].getTestNumber() + ": " + testCases[i]);
-                }
+                System.out.println("MTSVPane.populateGUI(): loading " + testCases.length + " test cases into GUI pane...");
+//                for (int i = 0; i < testCases.length; i++) {
+//                    System.out.println("  Test Case " + testCases[i].getTestNumber() + ": " + testCases[i]);
+//                }
 
                 int failedCount = getNumFailedTestCases(testCases);
                 if (failedCount > 0) {
@@ -646,7 +650,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 //                System.out.println("Found failed test case: " + num);
             }
         }
-        System.out.println ("getNumFailedTestCases(): returning " + failed);
+        System.out.println ("  (including " + failed + " failed cases)");
         return failed;
     }
 
@@ -749,21 +753,19 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 int row = target.getSelectedRow();
                 int column = target.getSelectedColumn();
 
-                if (column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() 
-                        || column == COLUMN.JUDGE_OUTPUT.ordinal()
-                        || column == COLUMN.JUDGE_DATA.ordinal()) {
+                if (column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || column == COLUMN.JUDGE_OUTPUT.ordinal() || column == COLUMN.JUDGE_DATA.ordinal()) {
                     viewFile(row, column);
-                } else if (column == COLUMN.TEAM_OUTPUT_COMPARE.ordinal()) {
-                    System.out.println ("Would have compared Team & Judge output for test case "
-                            + (row+1));
+                } else if (column == COLUMN.TEAM_OUTPUT_COMPARE.ordinal() || e.getClickCount() > 1) {
+                    // compare the team and judge's output in the active row
+                    int[] rows = new int[] { row };
+                    compareFiles(rows);
                 }
             }
         });
 
         return resultsTable;
     }
-
-
+    
     /**
      * Returns an array of Strings listing the names of available (known) output viewer tools.
      * 
@@ -868,6 +870,52 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             JOptionPane.showMessageDialog(getParentFrame(), errMsg, 
                     "File Not Found", JOptionPane.WARNING_MESSAGE);
         }
+    }
+    
+    /**
+     * Generates a {@link MultiFileComparator} comparing team and judge's outputs for each of 
+     * the test cases specified by the elements of the input "rows" array.
+     * @param rows - the rows of the table for which team/judge outputs should be compared
+     */
+    private void compareFiles(int [] rows) {
+        
+        System.out.print ("MTSVPane.compareFiles(): would have displayed comparison of files for test cases ");
+        for (int i=0; i<rows.length; i++) {
+            System.out.print ((int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1)))) + " ");
+        }
+        System.out.println ();
+        
+        //make sure we have a comparator
+        if (currentComparator == null) {
+            currentComparator = new MultiFileComparator();
+            currentComparator.setContestAndController(getContest(), getController());
+        }
+
+        //create arrays to hold data to be loaded into the comparator
+        int [] testCases = new int [rows.length];
+        String [] judgesOutputFileNames = new String [rows.length];
+        String [] judgesDataFileNames = new String [rows.length];
+        String [] teamOutputFileNames = new String [rows.length];
+        
+        //get the judge's information defined in the current problem
+        SerializedFile [] judgesAnswerFiles = currentProblemDataFiles.getJudgesAnswerFiles();
+        SerializedFile [] judgesDataFiles = currentProblemDataFiles.getJudgesDataFiles();
+        
+        
+        //load the comparator input arrays
+        for (int i=0; i<rows.length; i++) {
+            testCases[i] = (int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1))));
+            judgesOutputFileNames[i] = judgesAnswerFiles[i].getName();
+            judgesDataFileNames[i] = judgesDataFiles[i].getName();
+            
+            //TODO: load the team output file names into the teamOutputFileNames array
+            System.out.println ("MTSVPane.compareFiles(): WARNING: team output file names not loaded in MultiTestSetOutputViewerPane.compareFiles()");
+        }
+                
+        currentComparator.setData(currentRun.getNumber(), testCases, teamOutputFileNames, judgesOutputFileNames, judgesDataFileNames);
+        
+        currentComparator.setVisible(true);
+
     }
 
     /**
