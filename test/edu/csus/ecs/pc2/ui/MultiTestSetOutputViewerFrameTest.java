@@ -52,7 +52,7 @@ public class MultiTestSetOutputViewerFrameTest extends AbstractTestCase {
         // ProblemDataFiles files = sampleContest.createProblemDataFiles(problem, NUM_TEST_CASES);
 
         String dataFilesDir = getDataDirectory(this.getName());
-        System.out.println(dataFilesDir);
+        System.out.println("MTSVFrameTest: loading test data files from '" + dataFilesDir + "'");
 
         // ensureDirectory(dataFilesDir); // create directory
         // startExplorer(dataFilesDir); // opens up MS explorer for new/input directory
