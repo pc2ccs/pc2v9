@@ -150,6 +150,9 @@ public class MultiFileComparator extends JFrame  {
         
         //add a list listener that handles list selection by switching output views to the
         // newly-selected test case
+        
+        //XXX PROBLEM:  see the comments in method setTestCaseList(), below.
+        //XXX Need to redesign this piece of logic...
         lstTestCases.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                 if (e.getSource() instanceof JList<?>) {
@@ -387,6 +390,12 @@ public class MultiFileComparator extends JFrame  {
         for (int i=0; i<testCaseNums.length; i++) {
             testCaseListModel.addElement(String.valueOf(testCaseNums[i]));
         }
+        
+        //XXX Problem: setting the model CLEARS THE CURRENT SELECTION and then FIRES valueChanged(), 
+        //XXX which invokes the valueChanged() method in the ListSelectionListener, 
+        //XXX which calls getSelectedIndex() on the table -- but there is no longer any selected index
+        //XXX because setting the model cleared the selection!  Result: index out of range in
+        //XXX the list selection "valueChanged()" method (see above)
         lstTestCases.setModel(testCaseListModel);
         int listSize = testCaseListModel.getSize();
         if (listSize<10) {
