@@ -244,7 +244,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             btnCompareSelected.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     // display a comparison between the Team and Judge output in the selected table row(s)
-                    showComparison( getSelectedRowNums() );
+                    compareFiles( getSelectedRowNums() );
                 }
             });
 
@@ -784,28 +784,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private String[] getAvailableComparatorsList() {
         // TODO figure out how to coordinate this with actual known comparators
         return new String[] { "diff", "GVimDiff", "Another Diff Tool" };
-    }
-
-
-    /**
-     * Displays a window showing side-by-side comparison of the Team's and Judge's output for each of the specified table rows.
-     * 
-     * @param rows
-     *            - an array containing the index numbers of the currently selected rows in the results table
-     */
-    private void showComparison(int[] rows) {
-        if (rows.length <= 0) {
-            System.out.println("Comparison requested but no rows selected!?");
-        } else {
-            System.out.print("Would have shown comparisons for the following data sets: ");
-            for (int i = 0; i < rows.length; i++) {
-                System.out.print(rows[i] + 1);
-                if (i < rows.length - 1) {
-                    System.out.print(", ");
-                }
-            }
-            System.out.println();
-        }
     }
 
     public void showMessage(final String message) {
