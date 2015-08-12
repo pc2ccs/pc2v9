@@ -109,6 +109,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private Problem currentProblem;
 
     private ProblemDataFiles currentProblemDataFiles;
+    
+    private String [] currentTeamOutputFileNames ;
 
     private JLabel lblLanguage;
 
@@ -319,6 +321,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             final JButton btnClose = new JButton("Close");
             btnClose.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
+                    if (currentComparator != null) {
+                        currentComparator.dispose();
+                    }
                     Window parentFrame = SwingUtilities.getWindowAncestor(btnClose);
                     parentFrame.dispose();
                 }
@@ -752,6 +757,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 JTable target = (JTable) e.getSource();
                 int row = target.getSelectedRow();
                 int column = target.getSelectedColumn();
+                
+                System.out.println ("MTSVPane.mouseClicked(): row=" + row + ", col=" + column);
 
                 if (column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || column == COLUMN.JUDGE_OUTPUT.ordinal() || column == COLUMN.JUDGE_DATA.ordinal()) {
                     viewFile(row, column);
@@ -857,7 +864,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private void compareFiles(int [] rows) {
         
-        System.out.print ("MTSVPane.compareFiles(): would have displayed comparison of files for test cases ");
+        System.out.print ("MTSVPane.compareFiles(): displaying comparison of files for test case(s) ");
         for (int i=0; i<rows.length; i++) {
             System.out.print ((int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1)))) + " ");
         }
@@ -882,16 +889,30 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         
         //load the comparator input arrays
         for (int i=0; i<rows.length; i++) {
+            //get the test case defined in the second column of the current table row
             testCases[i] = (int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1))));
-            judgesOutputFileNames[i] = judgesAnswerFiles[i].getName();
-            judgesDataFileNames[i] = judgesDataFiles[i].getName();
-            
-            //TODO: load the team output file names into the teamOutputFileNames array
-            System.out.println ("MTSVPane.compareFiles(): WARNING: team output file names not loaded in MultiTestSetOutputViewerPane.compareFiles()");
+            //get the full path to the judge's answer and data files as defined in the SerializedFiles
+            judgesOutputFileNames[i] = judgesAnswerFiles[testCases[i]].getAbsolutePath();
+            judgesDataFileNames[i] = judgesDataFiles[testCases[i]].getAbsolutePath();
+            //make sure the team output file(s) were defined (they have to be loaded by a client
+            // making a separate call to setTeamOutputFileNames; make sure the client complied)
+            if (currentTeamOutputFileNames == null || currentTeamOutputFileNames.length<teamOutputFileNames.length) {
+                Log log = getLog();
+                if (log!=null) {
+                    log.warning("MTSVPane.compareFiles(): invalid team output file names array");
+                } else {
+                    System.err.println ("MTSVPane.compareFiles(): invalid team output file names array");
+                }
+            } else {
+                //get the team output file name, which should be provided by the client as a full path
+                teamOutputFileNames[i] = currentTeamOutputFileNames[i];  
+            }  
         }
                 
+        //put the data into the comparator
         currentComparator.setData(currentRun.getNumber(), testCases, teamOutputFileNames, judgesOutputFileNames, judgesDataFileNames);
         
+        //make the comparator visible
         currentComparator.setVisible(true);
 
     }
@@ -1056,7 +1077,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      * Set new team output filenames.
      */
     public void setTeamOutputFileNames(String [] filenames){
-        // TODO handle when new team filenames are added/sent
+        this.currentTeamOutputFileNames = filenames ;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
