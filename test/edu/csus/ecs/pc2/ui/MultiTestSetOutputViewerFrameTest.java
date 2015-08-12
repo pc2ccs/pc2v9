@@ -1,8 +1,10 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.io.File;
 import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -44,6 +46,10 @@ public class MultiTestSetOutputViewerFrameTest extends AbstractTestCase {
 
         // get a controller for the sample contest
         IInternalController controller = sampleContest.createController(contest, true, false);
+        
+        Log log = controller.getLog();
+        String logName = log.getLogfilename();
+        System.out.println ("MTSVFrameTest: Log file name = '" + logName + "'");
 
         // get the first defined problem in the contest
         Problem problem = contest.getProblems()[0];
@@ -86,17 +92,38 @@ public class MultiTestSetOutputViewerFrameTest extends AbstractTestCase {
         run.addJudgement(record);
 
         // add some test cases to the run
-        addTestCases(contest, run, problemDataFiles.getJudgesDataFiles().length);
+        int numTestCases = problemDataFiles.getJudgesDataFiles().length;
+        addTestCases(contest, run, numTestCases);
 
-        // create an MTSV frame, load it with the data to be displayed, and show it
+        // create an MTSV frame, load it with the data to be displayed
         MultiTestSetOutputViewerFrame frame = new MultiTestSetOutputViewerFrame();
         frame.setContestAndController(contest, controller);
 
         frame.setData(run, problem, problemDataFiles);
+        
+        //load the (hypothetical) team output file names (the only thing which can't be obtained
+        // by the MTSVFrame from the problemDataFiles):
+        
+        //create an array with one entry for each team output file (should be same as num of data files)
+        String[] teamOutputFileNames = new String[problemDataFiles.getJudgesDataFiles().length];
 
+        //point to the folder containing test data files
+        String testDir = getRootInputTestDataDirectory() + File.separator 
+                + "MultiTestSetOutputViewerFrameTest" + File.separator +  "testMTSVFrame" ;
+
+        //get the names of each of the test team output files
+        for (int i=0; i<numTestCases; i++) {
+            teamOutputFileNames[i] = testDir + File.separator + "datafile" + (i+1) + ".team";
+        }
+        
+        //pass the team output file names to the MTSV frame
+        frame.setTeamOutputFileNames(teamOutputFileNames);
+
+        //show the MTSV frame
         frame.setVisible(true);
 
     }
+    
 
     /**
      * Add run test cases.
@@ -105,16 +132,16 @@ public class MultiTestSetOutputViewerFrameTest extends AbstractTestCase {
      *            - the current contest model
      * @param run
      *            - the run to which test cases are to be added
-     * @param count
+     * @param numTestCases
      *            - how many test cases to add
      */
-    public static void addTestCases(IInternalContest inContest, Run run, int count) {
+    public static void addTestCases(IInternalContest inContest, Run run, int numTestCases) {
 
         JudgementRecord judgementRecord = run.getJudgementRecord();
         if (judgementRecord == null) {
             throw new RuntimeException("MTSVFrameTest.addTestCases(): Run has no judgement records; " + "cannot add test cases: " + run);
         } else {
-            System.out.println("MTSVFrameTest.addTestCases(): adding " + count + " test cases to run... ");
+            System.out.println("MTSVFrameTest.addTestCases(): adding " + numTestCases + " test cases to run... ");
         }
 
         // an array of test case data. If the received test case count is greater than the
@@ -134,7 +161,7 @@ public class MultiTestSetOutputViewerFrameTest extends AbstractTestCase {
                 { true, 10 } // 10
         };
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < numTestCases; i++) {
             Object[] testCase = testData[i % testData.length];
             RunTestCase runTestCase = new RunTestCase(run, judgementRecord, i + 1, (boolean) testCase[0]);
             runTestCase.setElapsedMS(new Long((Integer) testCase[1]));
