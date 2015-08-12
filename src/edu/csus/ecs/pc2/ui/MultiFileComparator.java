@@ -80,7 +80,6 @@ public class MultiFileComparator extends JFrame  {
     private String[] currentJudgesDataFileNames;
 
     
-    @SuppressWarnings("serial")
     public  MultiFileComparator() {
         super();
         setTitle("Test Case Outputs for Run ID:  xxx");
@@ -91,11 +90,13 @@ public class MultiFileComparator extends JFrame  {
         JPanel pnlSouthPanel = new JPanel();
         getContentPane().add(pnlSouthPanel, BorderLayout.SOUTH);
         
-        JCheckBox chckbxLockScrolling = new JCheckBox("Lock Scrolling");
+        final JCheckBox chckbxLockScrolling = new JCheckBox("Lock Scrolling");
         chckbxLockScrolling.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(null, "Sorry; this function isn't implemented yet",
                         "Not Implemented", JOptionPane.INFORMATION_MESSAGE); 
+                chckbxLockScrolling.setEnabled(false);
+                chckbxLockScrolling.setSelected(false);
             }
         });
         pnlSouthPanel.add(chckbxLockScrolling);
@@ -103,7 +104,14 @@ public class MultiFileComparator extends JFrame  {
         Component horizontalStrut_2 = Box.createHorizontalStrut(20);
         pnlSouthPanel.add(horizontalStrut_2);
         
-        JButton btnExportFiles = new JButton("Export");
+        final JButton btnExportFiles = new JButton("Export");
+        btnExportFiles.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Sorry; this function isn't implemented yet",
+                        "Not Implemented", JOptionPane.INFORMATION_MESSAGE); 
+                btnExportFiles.setEnabled(false);
+            }
+        });
         pnlSouthPanel.add(btnExportFiles);
         
         Component horizontalStrut_3 = Box.createHorizontalStrut(20);
@@ -121,7 +129,7 @@ public class MultiFileComparator extends JFrame  {
         northPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
         getContentPane().add(northPanel, BorderLayout.NORTH);
         
-        lblTestCaseDataFile = new JLabel("Data file for selected Test Case: <none>");
+        lblTestCaseDataFile = new JLabel("Data file for selected Test Case: <none selected>");
         lblTestCaseDataFile.setToolTipText("The Judge's data file associated with the currently selected Test Case");
         northPanel.add(lblTestCaseDataFile);
         
@@ -160,10 +168,17 @@ public class MultiFileComparator extends JFrame  {
                     if (!source.getValueIsAdjusting()) {
                         ListModel<?> model = source.getModel();
                         int index = source.getSelectedIndex();
-                        System.out.println ("Index = " + index);
+                        System.out.println ("MFC.lstTestCases.valueChanged(): Selected Index = " + index);
                         int testCaseNum = new Integer((String)(model.getElementAt(index)));
-                        System.out.println ("Test Case Number = " + testCaseNum);
-                        updateViewsToSelectedTestCase(testCaseNum);
+                        System.out.println ("MFC.lstTestCases.valueChanged(): Test Case Number = " + testCaseNum);
+                        
+                        //if the list model was just loaded then there is no selected index; 
+                        // force it to display the item at index 0
+                        if (index == -1) {
+                            index = 0;
+                            source.setSelectedIndex(index);
+                        }
+                        updateViewsToSelectedTestCase(index);
                     }
                 }
             }
@@ -217,7 +232,7 @@ public class MultiFileComparator extends JFrame  {
         splitPaneOutputViews.setToolTipText("Displays the outputs corresponding to the selected Test Case");
         pnlOutputViewHolder.add(splitPaneOutputViews, BorderLayout.CENTER);
         
-        String [] noData = new String [] {"<no data>"};
+        String [] noData = new String [] {"<no test case selected>"};
         lstTeamOutput = new JList<String>();
         lstTeamOutput.setListData(noData);
         splitPaneOutputViews.setLeftComponent(lstTeamOutput);
@@ -229,19 +244,20 @@ public class MultiFileComparator extends JFrame  {
     
 
     /**
-     * Changes the Team Output file, Judge's Output file, and Data File name to
-     * the values corresponding to the specified test case.
+     * Changes the Team Output file, Judge's Output file, and Data File name displays to
+     * the values corresponding to the test case specified by the given index.
      * 
-     * @param testCaseNum - the number of the test case which should be displayed
+     * @param testCaseIndex - the index in the JList of the test case which should be displayed
      */
-    private void updateViewsToSelectedTestCase(int testCaseNum) {
-
-        // form the index of the specified test case in the list of test cases
-//        int listIndex = indexOfTestCase(testCaseNum);
-        int testCaseIndex = testCaseNum-1;
+    private void updateViewsToSelectedTestCase(int testCaseIndex) {
         
         //make sure the test case number (index) points into the array of team/judge/data test cases
         if (testCaseIndex >= 0 && testCaseIndex < currentTeamOutputFileNames.length) {
+            
+            System.out.println("MFC.updateViewsToSelectedTestCase(): "
+                    + "received testCaseIndex = " + testCaseIndex 
+                    + "; list test case number = " + currentTestCaseNums[testCaseIndex]
+                    + "; currentJudgesDataFileNames.length = " + currentJudgesDataFileNames.length);
 
             // update the data file name on the display
             if (currentJudgesDataFileNames != null) {
@@ -296,10 +312,10 @@ public class MultiFileComparator extends JFrame  {
             //invalid test case number
             if (getLog() != null) {
                 log.log(Log.WARNING, "MultiFileComparator.updateViewsToSelectedTestCase(): "
-                        + "invalid test case number: "+ testCaseNum);
+                        + "invalid test case number: "+ testCaseIndex);
             } else {
                 System.err.println ("WARNING: MultiFileComparator.updateViewsToSelectedTestCase(): "
-                        + "invalid test case number: "+ testCaseNum);
+                        + "invalid test case number: "+ testCaseIndex);
             }
         }
     }
@@ -429,7 +445,20 @@ public class MultiFileComparator extends JFrame  {
             }
         }
         currentTeamOutputFileNames = teamOutputFileNames;
+        
+        //debug
+        System.out.println ("MFC.setOutputFilenames(): team output file names:");
+        for (int i=0; i<currentTeamOutputFileNames.length; i++) {
+            System.out.println ("  '" + currentTeamOutputFileNames[i] + "'");
+        }
+        
         currentJudgesOutputFileNames = judgesOutputFileNames;
+        
+        //debug
+        System.out.println ("MFC.setOutputFilenames(): judges output file names:");
+        for (int i=0; i<currentJudgesOutputFileNames.length; i++) {
+            System.out.println ("  '" + currentJudgesOutputFileNames[i] + "'");
+        }
         
         //TODO: create a cache of the new team/judge files; load "<none selected>" into list models 
     }
