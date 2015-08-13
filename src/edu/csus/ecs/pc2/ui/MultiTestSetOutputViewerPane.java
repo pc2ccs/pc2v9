@@ -894,8 +894,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             //get the test case defined in the second column of the current table row
             testCases[i] = (int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1))));
             //get the full path to the judge's answer and data files as defined in the SerializedFiles
-            judgesOutputFileNames[i] = judgesAnswerFiles[testCases[i]].getAbsolutePath();
-            judgesDataFileNames[i] = judgesDataFiles[testCases[i]].getAbsolutePath();
+            judgesOutputFileNames[i] = judgesAnswerFiles[testCases[i]-1].getAbsolutePath();
+            judgesDataFileNames[i] = judgesDataFiles[testCases[i]-1].getAbsolutePath();
             //make sure the team output file(s) were defined (they have to be loaded by a client
             // making a separate call to setTeamOutputFileNames; make sure the client complied)
             if (currentTeamOutputFileNames == null || currentTeamOutputFileNames.length<teamOutputFileNames.length) {
@@ -907,7 +907,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 }
             } else {
                 //get the team output file name, which should be provided by the client as a full path
-                teamOutputFileNames[i] = currentTeamOutputFileNames[i];  
+                teamOutputFileNames[i] = currentTeamOutputFileNames[testCases[i]-1];  
             }  
         }
                 
