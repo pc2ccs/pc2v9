@@ -938,7 +938,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         
         if (col == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || col == COLUMN.TEAM_OUTPUT_COMPARE.ordinal()) {
             //get team output file corresponding to test case "row"
-            
+            if (currentTeamOutputFileNames != null || currentTeamOutputFileNames.length >= row) {
+                // get the team output file name, which should be provided by the client as a full path
+                returnFile = new SerializedFile(currentTeamOutputFileNames[row]);
+            }
         } else if (col == COLUMN.JUDGE_OUTPUT.ordinal()) {
             //get judge's output corresponding to test case "row"
             SerializedFile [] answerFiles = problemDataFiles.getJudgesAnswerFiles();
