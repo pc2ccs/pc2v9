@@ -16,6 +16,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Box;
@@ -92,7 +93,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private JTextField textUserSpecifyViewer;
 
-    private JComboBox pulldownSelectViewer;
+    private JComboBox<String> pulldownSelectViewer;
 
     private JButton btnCompareSelected;
 
@@ -382,7 +383,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             chooseComparatorPanel.add(panelSelectComparator);
 
             // construct a dropdown list of available comparators and add it to the panel
-            pulldownSelectComparator = new JComboBox(getAvailableComparatorsList());
+            pulldownSelectComparator = new JComboBox<String>(getAvailableComparatorsList());
             pulldownSelectComparator.setEnabled(false);
             panelSelectComparator.add(pulldownSelectComparator);
 
@@ -460,7 +461,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             chooseViewerPanel.add(panel);
 
             // add a drop-down list of available viewers
-            pulldownSelectViewer = new JComboBox(getAvailableViewersList());
+            pulldownSelectViewer = new JComboBox<String>(getAvailableViewersList());
             pulldownSelectViewer.setEnabled(false);
             panel.add(pulldownSelectViewer);
 
@@ -805,9 +806,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             setForeground(Color.BLUE);
             setText(((JLabel) value).getText());
             Font font = getFont();
-            Map attributes = font.getAttributes();
-            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-            setFont(font.deriveFont(attributes));
+            Map<TextAttribute, Object> map = 
+                    new HashMap<TextAttribute, Object>(font.getAttributes());
+            map.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            setFont(font.deriveFont(map));
             setHorizontalAlignment(SwingConstants.CENTER);
         }
 
