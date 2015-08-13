@@ -169,14 +169,14 @@ public class MultiFileComparator extends JFrame  {
                         ListModel<?> model = source.getModel();
                         int index = source.getSelectedIndex();
                         System.out.println ("MFC.lstTestCases.valueChanged(): Selected Index = " + index);
-                        int testCaseNum = new Integer((String)(model.getElementAt(index)));
-                        System.out.println ("MFC.lstTestCases.valueChanged(): Test Case Number = " + testCaseNum);
-                        
                         //if the list model was just loaded then there is no selected index; 
                         // force it to display the item at index 0
                         if (index == -1) {
                             index = 0;
                             source.setSelectedIndex(index);
+                        } else {
+                            int testCaseNum = new Integer((String)(model.getElementAt(index)));
+                            System.out.println ("MFC.lstTestCases.valueChanged(): Test Case Number = " + testCaseNum);
                         }
                         updateViewsToSelectedTestCase(index);
                     }
