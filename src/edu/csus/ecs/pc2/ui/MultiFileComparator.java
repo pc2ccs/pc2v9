@@ -364,6 +364,10 @@ public class MultiFileComparator extends JFrame  {
         this.setTestCaseList(testCaseNums);
         this.setOutputFileNames(teamOutputFileNames, judgesOutputFileNames);
         this.setJudgesDataFileNames(judgesDataFileNames);
+        // this will highlight the 1st entry
+        lstTestCases.setSelectedIndex(0);
+        // this will show the files for the 1st entry (vs the last MFC files)
+        updateViewsToSelectedTestCase(0);
     }
     
     private void setRunID(int runID) {
