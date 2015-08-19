@@ -3236,6 +3236,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 loadedConfiguration = contest.readConfiguration(siteNum, getLog());
             } catch (Exception e) {
                 logException(e);
+                
+                // Bug 879 -If there is a problem reading the config then exit and show a message. 
+                fatalError("Halting server - configuration file corrupt", e);
                 return false;
             }
         }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Random;
 
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -293,4 +294,59 @@ public class ConfigurationIOTest extends AbstractTestCase {
         
     }
 
+    /**
+     * Test what happens when a corrupt config file is read.
+     * @throws Exception
+     */
+    public void testCorruptRead() throws Exception {
+        
+        String configDirName = getOutputDataDirectory("testCorruptRead");
+        
+        removeDirectory(configDirName); // remove previous files
+        
+        ensureDirectory(configDirName);
+        
+        int siteNumber = 5;
+
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createStandardContest();
+        contest.setSiteNumber(siteNumber);
+
+        IStorage storage = createStorage(configDirName);
+
+        String logdir = configDirName + File.separator + "log";
+        new File(logdir).mkdirs();
+        
+        Log log = new Log(logdir, "configioSaveFinalData.log");
+
+        ConfigurationIO configurationIO = new ConfigurationIO(storage);
+        boolean wroteConfig = configurationIO.store(contest, log);
+        
+        assertTrue("able to write config", wroteConfig);
+        
+        configurationIO = null;
+        configurationIO = new ConfigurationIO(storage);;
+        
+        String configFileName = configurationIO.getFileName();
+        
+        removeFile(configFileName);
+        ExecuteUtilities.copyFile("pc2v9.ini",configFileName, log); 
+        
+//        addConsoleHandler(log);
+        
+        configurationIO = new ConfigurationIO(storage);
+        contest = new InternalContest();
+        contest.setSiteNumber(5);
+        
+        try {
+            configurationIO.loadFromDisk(5, contest, log);
+            fail("Expecting corrupt file "+configurationIO.getFileName());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            String expected = "Error contest config file corrupt";
+            String actual = e.getMessage().substring(0,expected.length());
+            assertEquals("Expecting exception message", expected, actual);
+        }
+        
+    }
 }

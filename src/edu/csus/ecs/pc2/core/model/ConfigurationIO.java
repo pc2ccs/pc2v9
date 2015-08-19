@@ -229,8 +229,8 @@ public class ConfigurationIO {
             log.info("No configuration file exists " + getFileName());
             return false;
         } catch (Exception e) {
-            log.log(Log.WARNING, "Loading configuration from disk", e);
-            return false;
+            log.log(Log.WARNING, "Exception Loading configuration from disk, corrupt", e);
+            throw new RuntimeException("Error contest config file corrupt: "+ getFileName(), e);
         }
     }
 
