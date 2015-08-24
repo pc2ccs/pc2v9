@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Vector;
@@ -41,6 +42,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Filter;
@@ -1116,6 +1118,26 @@ public class AbstractTestCase extends TestCase {
          * Stub test so JUnit runner doesn't complain
          */
     }
-    
+
+    /**
+     * Get a SERVER client id.
+     * 
+     * This is a generic send to all server and clients ClientId.
+     * @param contest 
+     * 
+     * @return a generic all sites server client id
+     */
+    public ClientId getServerClientId(IInternalContest contest) {
+        return new ClientId(contest.getSiteNumber(), ClientType.Type.SERVER, 0);
+    }
+
+    public void copyFileOverwrite(String fileOne, String fileTwo, Log log) throws IOException {
+        File file = new File(fileTwo);
+        if (file.isFile()) {
+            file.delete();
+        }
+        Files.copy(new File(fileOne).toPath(), new File(fileTwo).toPath());
+
+    }
     
 }

@@ -1,5 +1,12 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import edu.csus.ecs.pc2.core.Utilities;
+
+
 /**
  * Data files and programs (validator) for a Problem.
  * 
@@ -421,4 +428,112 @@ public class ProblemDataFiles implements IElementObject {
     public SerializedFile[] getValidatorFiles() {
         return validatorFiles;
     }
+    
+    /**
+     * Returns the full path for judge data filenames.
+     * 
+     * Expected locations vary depending on the client type (Admin or Judge) and
+     * whether the problem has external or internal files.
+     * 
+     * See {@link Utilities#getProblemfullFilenames(IInternalContest, Problem, SerializedFile[], String)} for details.
+     * 
+     * <pre>
+     * Sample code: for Judge
+     * String [] filenames = Utilities.getFullJudgesDataFilenames(contest, executable.getExecuteDirectoryName());
+     * 
+     * Sample code: for Admin
+     * String [] filenames = Utilities.getFullJudgesDataFilenames(contest, null);
+     * 
+     * </pre>
+     * 
+     * @param contest
+     * @param executableDir 
+     */
+    public String[] getFullJudgesDataFilenames(IInternalContest contest, String executableDir) {
+        return Utilities.fullJudgesDataFilenames(contest, this, executableDir);
+    }
+
+    /**
+     * Returns the full path for judge answer filenames.
+     * 
+     * <pre>
+     * Sample code:
+     * String [] filenames = Utilities.getFullJudgesAnswerFilenames(contest, executable.getExecuteDirectoryName());
+     * </pre>     
+     *  
+     * @param contest
+     * @param executableDir
+     */
+    public String[] getFullJudgesAnswerFilenames(IInternalContest contest, String executableDir) {
+        return Utilities.fullJudgesAnswerFilenames(contest, this, executableDir);
+    }
+    
+    /**
+     * Check for existence of all judge data and answer files, may create data files if needed.
+     * 
+     * Will not create files if problem has external files, {@link Problem#isUsingExternalDataFiles()} set true.
+     * <P>
+     * Will create judges answer and and data files (in exedcutableDir) if problem has internal files.
+     * <P>
+     *
+     * <pre>
+     * Sample code:
+     * checkAndCreateFiles(contest, executable.getExecuteDirectoryName());
+     * </pre>     
+     * 
+     * @param contest
+     * @param executableDir directory where internal files are expected.
+     * @throws FileNotFoundException if external files not found or cannot create internal file
+     */
+    public void checkAndCreateFiles(IInternalContest contest, String executableDir) throws FileNotFoundException {
+
+        String[] datafilenames = getFullJudgesDataFilenames(contest, executableDir);
+        for (int i = 0; i < datafilenames.length; i++) {
+            String filename = datafilenames[i]; // actual file expected to exist
+            if (!new File(filename).exists()) {
+                SerializedFile file = judgesDataFiles[i];
+
+                if (file.isExternalFile()) {
+                    // the external file should already exists, file not found
+                    throw new FileNotFoundException(filename);
+                } else {
+                    // Internal files create them.
+                    try {
+                        file.writeFile(filename);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Unable to write " + filename, e);
+                    }
+
+                    if (!new File(filename).exists()) {
+                        throw new FileNotFoundException(filename);
+                    }
+                }
+            }
+        }
+
+        String[] answerfilenames = getFullJudgesAnswerFilenames(contest, executableDir);
+        for (int i = 0; i < answerfilenames.length; i++) {
+            String filename = answerfilenames[i];
+            if (!new File(filename).exists()) {
+                SerializedFile file = judgesAnswerFiles[i];
+
+                if (file.isExternalFile()) {
+                    // the external file should already exists, file not found
+                    throw new FileNotFoundException(filename);
+                } else {
+                    try {
+                        // create file from internal file
+                        file.writeFile(filename);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Unable to write " + filename, e);
+                    }
+                    if (!new File(filename).exists()) {
+                        throw new FileNotFoundException(filename);
+                    }
+                }
+            }
+        }
+
+    }
+
 }

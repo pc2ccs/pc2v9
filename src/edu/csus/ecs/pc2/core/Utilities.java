@@ -14,6 +14,7 @@ import java.text.CharacterIterator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,10 +28,13 @@ import javax.swing.JOptionPane;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
@@ -55,9 +59,12 @@ public final class Utilities {
     public static final String DATE_TIME_FORMAT_STRING = "yyyyddMMhhmmss.SSS";
     
     /**
-     * CCS directory where data files are stored.
+     * CCS directory where data files are stored (under problem short name).
+     * 
+     * @see #getSecretDataPath(String, Problem)
+     * @see #getSecretDataPath(String, String)
      */
-    private static final String SECRET_DATA_DIR = "data" + File.separator + "secret";
+    public static final String SECRET_DATA_DIR = "data" + File.separator + "secret";
 
     private static SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
     
@@ -86,6 +93,20 @@ public final class Utilities {
      */
     private Utilities() {
         super();
+    }
+    
+    /**
+     * Return CCS path for input data and answer file names. 
+     */
+    public static String getSecretDataPath(String baseCDPPath, String problemShortName){
+        return baseCDPPath + File.separator + problemShortName + File.separator + SECRET_DATA_DIR;
+    }
+    
+    /**
+     * Return CCS path for input data and answer file names.
+     */
+    public static String getSecretDataPath(String baseCDPPath, Problem problem){
+        return getSecretDataPath(baseCDPPath, problem.getShortName());
     }
 
     /**
@@ -839,7 +860,7 @@ public final class Utilities {
             
             if (alternateCDPPath != null && alternateCDPPath.trim().length() > 0) {
 
-                testFileName = alternateCDPPath + File.separator + problem.getShortName() + File.separator + SECRET_DATA_DIR + File.separator + serializedFile.getName();
+                testFileName = getSecretDataPath(alternateCDPPath, problem) + File.separator + serializedFile.getName();
                 if (fileExists(testFileName)) {
                     return testFileName;
                 }
@@ -847,7 +868,7 @@ public final class Utilities {
 
             // Search under CCS secret
 
-            testFileName = problem.getCCSfileDirectory() + File.separator + problem.getShortName() + File.separator + SECRET_DATA_DIR + File.separator + serializedFile.getName();
+            testFileName = getSecretDataPath(problem.getCCSfileDirectory(), problem) +File.separator + serializedFile.getName();
 
             if (fileExists(testFileName)){
                 return testFileName;
@@ -890,5 +911,99 @@ public final class Utilities {
             e.printStackTrace(printWriter);
         }
     }
+    
+    public static String getJudgeCDPLocation(IInternalContest contest) {
 
+        String value = null;
+
+        ContestInformation info = contest.getContestInformation();
+        if (info != null) {
+            value = info.getJudgeCDPBasePath();
+        }
+        if (value == null){
+            value = "";
+        }
+        return value;
+    }
+
+    public static String[] fullJudgesDataFilenames(IInternalContest contest, ProblemDataFiles problemDataFiles, String executableDir) {
+
+        Problem problem = contest.getProblem(problemDataFiles.getProblemId());
+
+        SerializedFile[] serializedFiles = problemDataFiles.getJudgesDataFiles();
+
+        return getProblemfullFilenames(contest, problem, serializedFiles, executableDir);
+    }
+
+    public static String[] fullJudgesAnswerFilenames(IInternalContest contest, ProblemDataFiles problemDataFiles, String executableDir) {
+
+        Problem problem = contest.getProblem(problemDataFiles.getProblemId());
+
+        SerializedFile[] serializedFiles = problemDataFiles.getJudgesAnswerFiles();
+
+        return getProblemfullFilenames(contest, problem, serializedFiles, executableDir);
+    }
+    
+    /**
+     * Get the full data files names for input files.
+     * <P>
+     * For internal data files, the base path is the executableDir.
+     * <br>
+     * For external files (aka CDP files) on the JUDGE the path is from {@link ContestInformation#getJudgeCDPBasePath()} where
+     * ContestInformation is in {@link IInternalContest#getContestInformation()}.
+     * <br>
+     * For external files (aka CDP files) on the ADMIN the path is stored in the {@link Problem#getExternalDataFileLocation()}
+     * 
+     * @param contest
+     * @param problem 
+     * @param serializedFiles list of files
+     * @param executableDir 
+     * @return
+     */
+    public static String[] getProblemfullFilenames(IInternalContest contest, Problem problem, SerializedFile[] serializedFiles, String executableDir) {
+
+        ArrayList<String> output = new ArrayList<String>();
+
+        if (problem.isUsingExternalDataFiles()) {
+
+            ClientId id = contest.getClientId();
+            if (id == null) {
+                throw new RuntimeException("contest clientid is null");
+            }
+
+            String judgeDataFilesPath = getJudgeCDPLocation(contest);
+            
+            if (!"".equals(judgeDataFilesPath)) {
+                judgeDataFilesPath = Utilities.getSecretDataPath(judgeDataFilesPath, problem) + File.separator;
+            }
+
+            for (SerializedFile serializedFile : serializedFiles) {
+
+                if (id.getClientType() == Type.ADMINISTRATOR) {
+                    output.add(serializedFile.getAbsolutePath());
+
+                } else {
+
+                    if (executableDir == null) {
+                        String filename = judgeDataFilesPath + serializedFile.getName();
+                        output.add(filename);
+                    } else {
+                        output.add(executableDir + File.separator + serializedFile.getName());
+                    }
+                }
+            }
+
+        } else {
+
+            for (SerializedFile serializedFile : serializedFiles) {
+                
+                if (executableDir == null) {
+                    output.add(serializedFile.getName());
+                } else {
+                    output.add(executableDir + File.separator + serializedFile.getName());
+                }
+            }
+        }
+        return (String[]) output.toArray(new String[output.size()]);
+    }
 }

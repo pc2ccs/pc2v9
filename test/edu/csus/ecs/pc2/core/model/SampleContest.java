@@ -1614,7 +1614,7 @@ public class SampleContest {
     }
 
     /**
-     * Create judge data and answer files.
+     * Create judge data and answer files as internal files.
      * 
      * @param problem
      *            problem for data files
@@ -1646,7 +1646,7 @@ public class SampleContest {
     }
 
     /**
-     * Create testCases number of data files (data and answer).
+     * Create testCases number of data files (data and answer) as internal files.
      * 
      * @param problem
      *            problem for data files
@@ -1732,7 +1732,7 @@ public class SampleContest {
     }
 
     /**
-     * Load data files into datafiles and problem.
+     * Load data files into datafiles and problem from files in dataFileBaseDirectory.
      * 
      *  Will remove test data sets, and add data sets from dataFileBaseDirectory.
      *  <br>

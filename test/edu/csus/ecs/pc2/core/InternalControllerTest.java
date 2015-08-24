@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
+import java.security.InvalidParameterException;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -8,12 +9,14 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
+import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -25,6 +28,8 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 // $HeadURL$
 public class InternalControllerTest extends AbstractTestCase {
+    
+    private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server", "--nogui", "--contestpassword", "foo", "--port", "42020", "--login" , "s"};
 
     int siteNum = 1;
 
@@ -136,5 +141,91 @@ public class InternalControllerTest extends AbstractTestCase {
             assertEquals("Expected judgement acronym ", acronym, judgement.getAcronym());
             assertEquals("Expected judgement title ", title, judgement.toString());
         }
+    }
+    
+    class OverrideFatalErrorController extends InternalController{
+        
+        String message;
+        Exception ex;
+        
+        public OverrideFatalErrorController(IInternalContest contest) {
+            super(contest);
+            if (contest.getClientId() == null){
+                throw new InvalidParameterException("Must be logged in, clientId in contest is null");
+            }
+            setLog(null); // creates and opens a default log name 
+        }
+
+        
+        @Override
+        protected void fatalError(String message, Exception ex) {
+            this.message = message;
+            this.ex = ex;
+        }
+        
+        public String getMessage() {
+            return message;
+        }
+        
+        public Exception getEx() {
+            return ex;
+        }
+    }
+    
+    public void testCorruptSettingsFile() throws Exception {
+
+        String storageDirectory = getOutputDataDirectory(this.getName());
+        removeDirectory(storageDirectory);
+        ensureDirectory(storageDirectory);
+         startExplorer(storageDirectory);
+
+        SampleContest sample = new SampleContest();
+
+        IInternalContest contest = sample.createStandardContest();
+        IInternalContest standardContest = contest;
+
+        IStorage storage = new FileStorage(storageDirectory);
+        contest.setStorage(storage);
+
+        String settingsFileName = new ConfigurationIO(storage).getFileName();
+        System.out.println("debug 22 file " + settingsFileName);
+
+        OverrideFatalErrorController controller = new OverrideFatalErrorController(contest);
+
+        // store config
+        contest.storeConfiguration(controller.getLog());
+
+        // corrupt the config
+        copyFileOverwrite(getSamplesSourceFilename(SUMIT_SOURCE_FILENAME), settingsFileName, controller.getLog());
+
+        storage = new FileStorage(storageDirectory);
+
+        // ConfigurationIO configurationIO = new ConfigurationIO(storage);
+        // boolean loaded = configurationIO.loadFromDisk(contest.getSiteNumber(), contest, controller.getLog());
+
+        controller = null;
+        contest = null;
+        contest = new InternalContest();
+        contest.setClientId(getServerClientId(standardContest));
+        contest.setStorage(storage);
+
+        controller = new OverrideFatalErrorController(contest);
+        controller.addConsoleLogging();
+
+        try {
+            
+            controller.setContactingRemoteServer(false);
+            controller.setUsingMainUI(false);
+            controller.start(SERVER_COMMAND_LINE_OPTIONS);
+            String login = contest.getClientId().getName();
+            System.out.println("login = "+login);
+            controller.login(contest.getClientId().getName(), contest.getClientId().getName());
+            fail ("Expecting exception due to corrupt config");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("message " + controller.getMessage());
     }
 }
