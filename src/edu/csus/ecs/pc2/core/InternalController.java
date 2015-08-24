@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
@@ -3228,12 +3229,25 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(addAccountPacket);
     }
 
+    /**
+     * Read Configuration.
+     * 
+     * Halt if configuration is corrupt.
+     * 
+     * @param siteNum
+     * @return true if config file read
+     */
     public boolean readConfigFromDisk(int siteNum) {
 
         boolean loadedConfiguration = false;
         if (saveCofigurationToDisk) {
             try {
                 loadedConfiguration = contest.readConfiguration(siteNum, getLog());
+                
+            } catch (FileNotFoundException fnf){
+                // This is expected
+                loadedConfiguration = false;
+            
             } catch (Exception e) {
                 logException(e);
                 
