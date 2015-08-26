@@ -487,6 +487,7 @@ public class ProblemDataFiles implements IElementObject {
      */
     public void checkAndCreateFiles(IInternalContest contest, String executableDir) throws FileNotFoundException {
 
+        Utilities.insureDir(executableDir);
         String[] datafilenames = getFullJudgesDataFilenames(contest, executableDir);
         for (int i = 0; i < datafilenames.length; i++) {
             String filename = datafilenames[i]; // actual file expected to exist
