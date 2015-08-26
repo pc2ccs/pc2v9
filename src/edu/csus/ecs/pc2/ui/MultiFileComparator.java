@@ -36,6 +36,7 @@ import java.io.FileReader;
 import java.util.Vector;
 
 import javax.swing.border.EmptyBorder;
+import javax.swing.BoxLayout;
 
 /**
  * This class is a {@link JFrame} designed to display comparisons between
@@ -137,13 +138,15 @@ public class MultiFileComparator extends JFrame  {
         westPanel.setMinimumSize(new Dimension(80, 10));
         westPanel.setPreferredSize(new Dimension(100, 10));
         getContentPane().add(westPanel, BorderLayout.WEST);
+        westPanel.setLayout(new BoxLayout(westPanel, BoxLayout.Y_AXIS));
         
         JLabel lblTestCases = new JLabel("Test Cases");
         westPanel.add(lblTestCases);
         
         //create a scrollpane to hold the list of test cases
         scrollPaneTestCaseList = new JScrollPane();
-        scrollPaneTestCaseList.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        scrollPaneTestCaseList.setPreferredSize(new Dimension(0, 0));
+        scrollPaneTestCaseList.setMinimumSize(new Dimension(0, 0));
         scrollPaneTestCaseList.setViewportBorder(new LineBorder(Color.blue));
         scrollPaneTestCaseList.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPaneTestCaseList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -152,7 +155,6 @@ public class MultiFileComparator extends JFrame  {
 
         //create a JList of Strings for showing the test cases
         lstTestCases = new JList<String>();
-        lstTestCases.setAlignmentX(Component.RIGHT_ALIGNMENT);
         lstTestCases.setBorder(new EmptyBorder(2, 5, 2, 5));
         lstTestCases.setBounds(new Rectangle(10, 0, 0, 0));
         
