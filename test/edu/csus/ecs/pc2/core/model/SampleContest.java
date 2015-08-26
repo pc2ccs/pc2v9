@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.FileStorage;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 import edu.csus.ecs.pc2.core.util.NotificationUtilities;
 import edu.csus.ecs.pc2.ui.InvalidFieldValue;
@@ -631,7 +632,9 @@ public class SampleContest {
         Run run = new Run(clientId, contest.getLanguages()[0], problem);
         run.setElapsedMins(9 + numRuns);
         run.setNumber(++numRuns);
-        contest.addRun(run);
+        AbstractTestCase test = new AbstractTestCase();
+        RunFiles runFiles = new RunFiles(run, test.getSamplesSourceFilename("hello.java"));
+        contest.addRun(run,runFiles);
         return run;
     }
 
