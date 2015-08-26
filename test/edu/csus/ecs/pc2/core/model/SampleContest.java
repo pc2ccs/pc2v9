@@ -1766,11 +1766,11 @@ public class SampleContest {
         String[] answerFileNames = getFileNames(dataFileBaseDirectory, answerExtension);
 
         if (inputFileNames.length == 0) {
-            throw new RuntimeException("No input files with extensiion " + dataExtension);
+            throw new RuntimeException("No input files with extension " + dataExtension + " in "+dataFileBaseDirectory);
         }
 
         if (answerFileNames.length == 0) {
-            throw new RuntimeException("No answer  files with extensiion " + answerExtension);
+            throw new RuntimeException("No answer  files with extension " + answerExtension+ " in "+dataFileBaseDirectory);
         }
 
         if (answerFileNames.length != inputFileNames.length) {
