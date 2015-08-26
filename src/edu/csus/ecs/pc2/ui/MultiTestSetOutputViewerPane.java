@@ -910,7 +910,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         try {
             currentProblemDataFiles.checkAndCreateFiles(getContest(), executableDir);
         } catch (FileNotFoundException e) {
-            System.out.println("copmileFiles() could not find file "+e.getMessage());
+            System.out.println("MTSVPane.compareFiles(): could not find file "+e.getMessage());
             e.printStackTrace();
         }
         //get the judge's information defined in the current problem
