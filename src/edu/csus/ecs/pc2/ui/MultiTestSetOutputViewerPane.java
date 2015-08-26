@@ -15,6 +15,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,14 +49,17 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Multiple data set viewer pane.
@@ -883,10 +888,34 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         String [] judgesOutputFileNames = new String [rows.length];
         String [] judgesDataFileNames = new String [rows.length];
         String [] teamOutputFileNames = new String [rows.length];
-        
+
+        Executable tempExecutable;
+        try {
+            RunFiles runFiles = getContest().getRunFiles(currentRun);
+            if (runFiles == null) {
+                System.err.println("runFiles for run are null from model");
+                return;
+            }
+            if (runFiles.getMainFile() == null) {
+                System.err.println("runFiles.getMainFile is null");
+                return;
+            }
+            tempExecutable = new Executable(getContest(), getController(), currentRun, getContest().getRunFiles(currentRun));
+        } catch (ClassNotFoundException | IOException | FileSecurityException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+            return;
+        }
+        String executableDir = tempExecutable.getExecuteDirectoryName();
+        try {
+            currentProblemDataFiles.checkAndCreateFiles(getContest(), executableDir);
+        } catch (FileNotFoundException e) {
+            System.out.println("copmileFiles() could not find file "+e.getMessage());
+            e.printStackTrace();
+        }
         //get the judge's information defined in the current problem
-        SerializedFile [] judgesAnswerFiles = currentProblemDataFiles.getJudgesAnswerFiles();
-        SerializedFile [] judgesDataFiles = currentProblemDataFiles.getJudgesDataFiles();
+        String[] judgesAnswerFiles = currentProblemDataFiles.getFullJudgesAnswerFilenames(getContest(), executableDir);
+        String[] judgesDataFiles = currentProblemDataFiles.getFullJudgesDataFilenames(getContest(), executableDir);
         
         
         //load the comparator input arrays
@@ -894,8 +923,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             //get the test case defined in the second column of the current table row
             testCases[i] = (int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1))));
             //get the full path to the judge's answer and data files as defined in the SerializedFiles
-            judgesOutputFileNames[i] = judgesAnswerFiles[testCases[i]-1].getAbsolutePath();
-            judgesDataFileNames[i] = judgesDataFiles[testCases[i]-1].getAbsolutePath();
+            judgesOutputFileNames[i] = judgesAnswerFiles[testCases[i]-1];
+            judgesDataFileNames[i] = judgesDataFiles[testCases[i]-1];
             //make sure the team output file(s) were defined (they have to be loaded by a client
             // making a separate call to setTeamOutputFileNames; make sure the client complied)
             if (currentTeamOutputFileNames == null || currentTeamOutputFileNames.length<teamOutputFileNames.length) {
