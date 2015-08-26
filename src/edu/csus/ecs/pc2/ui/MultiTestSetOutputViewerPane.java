@@ -130,6 +130,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private JScrollPane resultsScrollPane;
     
+    Log log ;
+    
     
 
     /**
@@ -156,6 +158,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
+        log = getController().getLog();
     }
 
     public String getPluginTitle() {
@@ -831,10 +834,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     protected void viewFile(int row, int col) {
         if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && 
                 col != COLUMN.JUDGE_DATA.ordinal() ) {
-            Log log = getController().getLog();
-            log.log(Log.WARNING, "MTSVPane.viewFile(): invalid column number for file viewing request: "
-                    + col);
-            System.err.println ("Invalid column number for file viewing request: " + col);
+            if (log != null) {
+                log.log(Log.WARNING, "MTSVPane.viewFile(): invalid column number for file viewing request: " + col);
+            } else {
+                System.err.println ("Invalid column number for file viewing request: " + col);
+            }
             return;
         }
         if (currentViewer != null) {
@@ -853,13 +857,15 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             int testCaseNum = row + 1;
             showFile(currentViewer, targetFile, title, "Test Case "+testCaseNum, true);
         } else {
-            String logMsg = "MTSVPane.viewFile(): unable to find file for table cell (" 
+            String msg = "Unable to find file for table cell (" 
                     + row + "," + col + ")  (Contest configuration error?)" ;
-            Log log = getController().getLog();
-            log.log(Log.WARNING, logMsg);
-            String errMsg = "Unable to find file for table cell (" 
-                    + row + "," + col + ") (Contest configuration error?)" ;
-            JOptionPane.showMessageDialog(getParentFrame(), errMsg, 
+            if (log != null) {
+                log.log(Log.WARNING, "MTSVPane.viewFile(): " + msg);
+            } else {
+                System.err.println ("MTSVPane.viewFile(): " + msg);
+            }
+
+            JOptionPane.showMessageDialog(getParentFrame(), msg, 
                     "File Not Found", JOptionPane.WARNING_MESSAGE);
         }
     }
@@ -910,11 +916,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         try {
             currentProblemDataFiles.checkAndCreateFiles(getContest(), executableDir);
         } catch (FileNotFoundException e) {
-            System.out.println("MTSVPane.compareFiles(): could not find file "+e.getMessage());
-            e.printStackTrace();
             JOptionPane.showMessageDialog(getParentFrame(), 
                     "Error: could not find file: " + e.getMessage(), 
                     "File Missing", JOptionPane.ERROR_MESSAGE);
+            if (log!=null) {
+                log.warning("MTSVPane.compareFiles(): could not find file "+e.getMessage());
+            } else {
+                System.err.println ("MTSVPane.compareFiles(): could not find file "+e.getMessage());
+            }
             return ;
         }
         //get the judge's information defined in the current problem
@@ -926,13 +935,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         for (int i=0; i<rows.length; i++) {
             //get the test case defined in the second column of the current table row
             testCases[i] = (int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1))));
-            //get the full path to the judge's answer and data files as defined in the SerializedFiles
+            //get the full path to the judge's answer and data files 
             judgesOutputFileNames[i] = judgesAnswerFiles[testCases[i]-1];
             judgesDataFileNames[i] = judgesDataFiles[testCases[i]-1];
             //make sure the team output file(s) were defined (they have to be loaded by a client
             // making a separate call to setTeamOutputFileNames; make sure the client complied)
             if (currentTeamOutputFileNames == null || currentTeamOutputFileNames.length<teamOutputFileNames.length) {
-                Log log = getLog();
                 if (log!=null) {
                     log.warning("MTSVPane.compareFiles(): invalid team output file names array");
                 } else {
