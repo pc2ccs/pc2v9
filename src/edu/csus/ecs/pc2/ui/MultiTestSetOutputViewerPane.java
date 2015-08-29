@@ -391,7 +391,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             chooseComparatorPanel.add(panelSelectComparator);
 
             // construct a dropdown list of available comparators and add it to the panel
-            pulldownSelectComparator = new JComboBox<String>(getAvailableComparatorsList());
+            String [] comparators = getAvailableComparatorsList();
+            pulldownSelectComparator = new JComboBox(comparators);
             pulldownSelectComparator.setEnabled(false);
             panelSelectComparator.add(pulldownSelectComparator);
 
@@ -469,7 +470,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             chooseViewerPanel.add(panel);
 
             // add a drop-down list of available viewers
-            pulldownSelectViewer = new JComboBox<String>(getAvailableViewersList());
+            pulldownSelectViewer = new JComboBox(getAvailableViewersList());
             pulldownSelectViewer.setEnabled(false);
             panel.add(pulldownSelectViewer);
 
