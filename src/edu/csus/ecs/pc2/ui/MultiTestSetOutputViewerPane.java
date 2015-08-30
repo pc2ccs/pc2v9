@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -259,15 +260,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 }
             });
 
+            //add a checkbox whose action is to allow filtering to show failed runs only
             JCheckBox chkboxShowFailuresOnly = new JCheckBox("Show Failures Only", false);
             chkboxShowFailuresOnly.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showConfirmDialog(null, 
-                            "Sorry, this option has not been implemented yet.",
-                            "Not Implemented", 
-                            JOptionPane.OK_CANCEL_OPTION, 
-                            JOptionPane.INFORMATION_MESSAGE, 
-                            null); 
+                public void actionPerformed(ActionEvent e) { 
                     if (((JCheckBox) (e.getSource())).isSelected()) {
                         loadTableWithFailedTestCases();
                     } else {
@@ -680,20 +676,40 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
-     * Loads the result table with data for all test case results.
+     * Loads the result table with data for all test cases.
      */
     private void loadTableWithAllTestCases() {
-        // TODO fill in this method
-        System.out.println("Would have reloaded table with all test case results.");
-
+        
+        // get the test case results for the current run
+        RunTestCase[] allTestCases = currentRun.getRunTestCases();
+        
+        //build a new table with the test cases and install it in the scrollpane
+        resultsTable = getResultsTable(allTestCases);
+        resultsScrollPane.setViewportView(resultsTable);
     }
 
     /**
-     * Loads the result table with data for all test case results.
+     * Loads the result table with data for failed test cases (only).
      */
     private void loadTableWithFailedTestCases() {
-        // TODO fill in this method
-        System.out.println("Would have reloaded table with failed test case results (only).");
+        
+        // get the test case results for the current run
+        RunTestCase[] allTestCases = currentRun.getRunTestCases();
+        
+        //extract failed cases into a Vector (list)
+        Vector<RunTestCase> failedTestCaseList = new Vector<RunTestCase>();
+        for (int i=0; i<allTestCases.length; i++) {
+            if (!allTestCases[i].isPassed()) {
+                failedTestCaseList.add(allTestCases[i]);
+            }
+        }
+
+        //convert Vector to array
+        RunTestCase[] failedTestCases =  failedTestCaseList.toArray(new RunTestCase[failedTestCaseList.size()]);
+
+        //build a new table with just the failed cases and install it in the scrollpane
+        resultsTable = getResultsTable(failedTestCases);
+        resultsScrollPane.setViewportView(resultsTable);
     }
 
     /**
