@@ -1420,13 +1420,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             multiTestSetOutputViewerFrame = new MultiTestSetOutputViewerFrame();
             multiTestSetOutputViewerFrame.setContestAndController(getContest(), getController());
 
-            Problem problem = getContest().getProblem(run.getProblemId());
-            multiTestSetOutputViewerFrame.setData(run, problem, getProblemDataFiles());
-
             FrameUtilities.centerFrame(multiTestSetOutputViewerFrame);
 
         }
         
+        Problem problem = getContest().getProblem(run.getProblemId());
+        multiTestSetOutputViewerFrame.setData(run, problem, getProblemDataFiles());
         sendTeamOutputFileNames();
         multiTestSetOutputViewerFrame.setVisible(true);
     }
