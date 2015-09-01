@@ -5,6 +5,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunFiles;
 
 import java.awt.Dimension;
 
@@ -73,9 +74,9 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
     }
     
 
-    public void setData(Run run, Problem problem, ProblemDataFiles problemDataFiles) {
+    public void setData(Run run, RunFiles runFiles, Problem problem, ProblemDataFiles problemDataFiles) {
 
-        getMultiTestSetOutputViewerPane().setData(run, problem, problemDataFiles);
+        getMultiTestSetOutputViewerPane().setData(run, runFiles, problem, problemDataFiles);
         setTitle ("Test Results for Run " + run.getNumber());
     }
     

@@ -99,7 +99,12 @@ public class MultiTestSetOutputViewerFrameTest extends AbstractTestCase {
         MultiTestSetOutputViewerFrame frame = new MultiTestSetOutputViewerFrame();
         frame.setContestAndController(contest, controller);
 
-        frame.setData(run, problem, problemDataFiles);
+        try {
+            frame.setData(run, contest.getRunFiles(run), problem, problemDataFiles);
+        } catch (ClassNotFoundException | IOException | FileSecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         
         //load the (hypothetical) team output file names (the only thing which can't be obtained
         // by the MTSVFrame from the problemDataFiles):

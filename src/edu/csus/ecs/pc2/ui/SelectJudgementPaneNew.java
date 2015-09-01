@@ -1429,7 +1429,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
         
         Problem problem = getContest().getProblem(run.getProblemId());
-        multiTestSetOutputViewerFrame.setData(run, problem, getProblemDataFiles());
+        multiTestSetOutputViewerFrame.setData(run, runFiles, problem, getProblemDataFiles());
         sendTeamOutputFileNames();
         multiTestSetOutputViewerFrame.setVisible(true);
     }

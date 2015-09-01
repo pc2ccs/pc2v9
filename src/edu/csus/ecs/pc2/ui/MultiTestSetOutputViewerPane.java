@@ -16,7 +16,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +59,6 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Multiple data set viewer pane.
@@ -132,7 +130,13 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private JScrollPane resultsScrollPane;
     
     Log log ;
-    
+
+    private RunFiles currentRunFiles;
+
+    /**
+     * The execute directory for this run.
+     */
+    private String executableDir;
     
 
     /**
@@ -940,24 +944,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         String [] judgesDataFileNames = new String [rows.length];
         String [] teamOutputFileNames = new String [rows.length];
 
-        Executable tempExecutable;
-        try {
-            RunFiles runFiles = getContest().getRunFiles(currentRun);
-            if (runFiles == null) {
-                System.err.println("runFiles for run are null from model");
-                return;
-            }
-            if (runFiles.getMainFile() == null) {
-                System.err.println("runFiles.getMainFile is null");
-                return;
-            }
-            tempExecutable = new Executable(getContest(), getController(), currentRun, getContest().getRunFiles(currentRun));
-        } catch (ClassNotFoundException | IOException | FileSecurityException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-            return;
-        }
-        String executableDir = tempExecutable.getExecuteDirectoryName();
         try {
             currentProblemDataFiles.checkAndCreateFiles(getContest(), executableDir);
         } catch (FileNotFoundException e) {
@@ -1003,6 +989,24 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         //make the comparator visible
         currentComparator.setVisible(true);
 
+    }
+
+    /**
+     * @return
+     */
+    private String getExecuteDir() {
+        Executable tempExecutable;
+        if (currentRunFiles == null) {
+            System.err.println("runFiles for run are null from setData()");
+            return null;
+        }
+        if (currentRunFiles == null) {
+            System.err.println("runFiles.getMainFile is null");
+            return null;
+        }
+        tempExecutable = new Executable(getContest(), getController(), currentRun, currentRunFiles);
+        String executableDir = tempExecutable.getExecuteDirectoryName();
+        return executableDir;
     }
 
     /**
@@ -1159,12 +1163,13 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     }
 
-    public void setData(Run run, Problem problem, ProblemDataFiles problemDataFiles) {
+    public void setData(Run run, RunFiles runFiles, Problem problem, ProblemDataFiles problemDataFiles) {
 
         this.currentRun = run;
+        this.currentRunFiles = runFiles;
         this.currentProblem = problem;
         this.currentProblemDataFiles = problemDataFiles;
-
+        executableDir = getExecuteDir();
         populateGUI();
     }
     
