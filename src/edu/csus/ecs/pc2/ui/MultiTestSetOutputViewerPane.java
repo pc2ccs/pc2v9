@@ -15,6 +15,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -907,7 +908,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             showFile(currentViewer, targetFile, title, "Test Case "+testCaseNum, true);
         } else {
             String msg = "Unable to find file for table cell (" 
-                    + row + "," + col + ")  (Contest configuration error?)" ;
+                    + row + "," + col + ") try executing the run 1st." ;
             if (log != null) {
                 log.log(Log.WARNING, "MTSVPane.viewFile(): " + msg);
             } else {
@@ -1094,6 +1095,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     "System Error: null fileViewer or file; contact Contest Administrator (check logs)", 
                     "System Error", JOptionPane.ERROR_MESSAGE);
             return ;
+        }
+        if (! new File(filePathString).isFile()) {
+            JOptionPane.showMessageDialog(getParentFrame(), 
+                "Error: could not find file: " + filePathString, 
+                "File Missing", JOptionPane.ERROR_MESSAGE);
+            Log log = getController().getLog();
+            log.warning("MTSVPane.showFile(): could not find file "+filePathString);
+            return;
         }
         fileViewer.setTitle(title);
         fileViewer.addFilePane(tabLabel, file.getAbsolutePath());
