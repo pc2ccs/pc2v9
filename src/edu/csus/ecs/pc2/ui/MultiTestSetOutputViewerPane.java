@@ -639,6 +639,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 if (failedCount > 0) {
                     getNumFailedTestCasesLabel().setForeground(Color.red);
                     getNumFailedTestCasesLabel().setText("Failed:  " + failedCount);
+                } else if (testCases.length == 0) {
+                    getNumFailedTestCasesLabel().setForeground(Color.ORANGE);
+                    getNumFailedTestCasesLabel().setText("ERROR");
                 } else {
                     getNumFailedTestCasesLabel().setForeground(Color.green);
                     getNumFailedTestCasesLabel().setText("ALL PASSED");
