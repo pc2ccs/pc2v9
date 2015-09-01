@@ -625,7 +625,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 getLanguageLabel().setText("Language:  " + getCurrentRunLanguageName());
 
                 // get the test case results for the current run
-                RunTestCase[] testCases = currentRun.getRunTestCases();
+                RunTestCase[] testCases = getCurrentTestCases(currentRun);
 
                 // fill in the test case summary information
                 getNumTestCasesLabel().setText("Test Cases:  " + testCases.length);
@@ -679,12 +679,37 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
+     * Looks at all the TestCases for a run and filters
+     * that list to just the most recent.
+     * 
+     * @param run
+     * @return most recent RunTestCases
+     */
+    private RunTestCase[] getCurrentTestCases(Run run) {
+        RunTestCase[] testCases = null;
+        RunTestCase[] allTestCases = run.getRunTestCases();
+        // hope the lastTestCase has the highest testNumber....
+        testCases = new RunTestCase[allTestCases[allTestCases.length-1].getTestNumber()];
+        for (int i = allTestCases.length-1; i >= 0; i--) {
+            RunTestCase runTestCase = allTestCases[i];
+            int testCaseNumIndex = runTestCase.getTestNumber()-1;
+            if (testCases[testCaseNumIndex] == null) {
+                testCases[testCaseNumIndex] = runTestCase;
+                if (testCaseNumIndex == 0) {
+                    break;
+                }
+            }
+        }
+        return testCases;
+    }
+
+    /**
      * Loads the result table with data for all test cases.
      */
     private void loadTableWithAllTestCases() {
         
         // get the test case results for the current run
-        RunTestCase[] allTestCases = currentRun.getRunTestCases();
+        RunTestCase[] allTestCases = getCurrentTestCases(currentRun);
         
         //build a new table with the test cases and install it in the scrollpane
         resultsTable = getResultsTable(allTestCases);
@@ -697,7 +722,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private void loadTableWithFailedTestCases() {
         
         // get the test case results for the current run
-        RunTestCase[] allTestCases = currentRun.getRunTestCases();
+        RunTestCase[] allTestCases = getCurrentTestCases(currentRun);
         
         //extract failed cases into a Vector (list)
         Vector<RunTestCase> failedTestCaseList = new Vector<RunTestCase>();
