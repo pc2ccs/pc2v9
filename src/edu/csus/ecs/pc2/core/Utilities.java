@@ -29,12 +29,12 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
@@ -1005,5 +1005,30 @@ public final class Utilities {
             }
         }
         return (String[]) output.toArray(new String[output.size()]);
+    }
+    
+    /**
+     * Start Windows Explorer.
+     * 
+     * @param dir directory to display
+     * @throws IOException
+     */
+    public static void startExplorer(File dir) 
+    {
+        String command = "explorer.exe /e,"+dir.getAbsolutePath();
+        try {
+            Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            throw new RuntimeException("Exception running "+command, e);
+        }
+    }
+    
+    /**
+     * Start Windows Explorer on  directory.
+     */
+    public static void startExplorer(String directoryName)
+    {
+        File dir = new File(directoryName);
+        startExplorer(dir);
     }
 }

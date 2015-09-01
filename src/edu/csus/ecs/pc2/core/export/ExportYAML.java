@@ -444,11 +444,11 @@ public class ExportYAML {
      * 
      * @param file
      * @param outputFileName
-     * @return true if file written to disk.
+     * @return true if file written to disk, false if external or not written to disk.
      * @throws IOException
      */
     boolean createFile(SerializedFile file, String outputFileName) throws IOException {
-        if (file != null && outputFileName != null) {
+        if (file != null && outputFileName != null && ! file.isExternalFile()) {
             file.writeFile(outputFileName);
             return new File(outputFileName).isFile();
         }
@@ -516,12 +516,6 @@ public class ExportYAML {
         problemWriter.println("license: ");
         problemWriter.println("rights_owner: ");
         
-//        if (problem.isManualReview()){
-//            problemWriter.println(ContestYAMLLoader.MANUAL_REVIEW_KEY+": true");
-//            problemWriter.println();
-//            
-//        }
-
         problemWriter.println();
 
         problemWriter.println(ContestYAMLLoader.LIMITS_KEY + ":");
@@ -536,8 +530,23 @@ public class ExportYAML {
             problemWriter.println(PAD4 + "validatorOption: " + problem.getWhichPC2Validator());
             problemWriter.println();
             problemWriter.println(PAD4 + ContestYAMLLoader.USING_PC2_VALIDATOR + ": " + problem.isUsingPC2Validator());
+            problemWriter.println();
         }
         
+        problemWriter.println(ContestYAMLLoader.JUDGING_TYPE_KEY + ":");
+        
+        problemWriter.println(PAD4 + ContestYAMLLoader.COMPUTER_JUDGING_KEY +": " + problem.isComputerJudged());
+
+        if (problem.isComputerJudged()) {
+            // if computer judged, may or may not be manual judged 
+            problemWriter.println(PAD4 + ContestYAMLLoader.MANUAL_REVIEW_KEY + ": " + problem.isManualReview());
+        } else {
+            // if not computer judged then MUST be manaul judged
+            problemWriter.println(PAD4 + ContestYAMLLoader.MANUAL_REVIEW_KEY + ": true");
+        }
+        problemWriter.println(PAD4 + ContestYAMLLoader.SEND_PRELIMINARY_JUDGEMENT_KEY + ": " + problem.isPrelimaryNotification());
+
+        problemWriter.println();
 
         problemWriter.println(ContestYAMLLoader.INPUT_KEY + ":");
         problemWriter.println(PAD4 + "readFromSTDIN: " + problem.isReadInputDataFromSTDIN());

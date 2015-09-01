@@ -57,30 +57,43 @@ public class ProblemsReport implements IReport {
         if (!problem.isActive()) {
             deletedText = " [HIDDEN] ";
         }
-        
+
         printWriter.println("  Problem '" + problem + deletedText + "' ver=" + problem.getElementId().getVersionNumber() + " id=" + problem.getElementId());
         printWriter.println("       Short name       : " + problem.getShortName());
         printWriter.println("       Data file name   : " + problem.getDataFileName());
         printWriter.println("       Answer file name : " + problem.getAnswerFileName());
+        printWriter.println("       Read from stdin  : " + Utilities.yesNoString(problem.isReadInputDataFromSTDIN()));
         printWriter.println("       Number test cases: " + problem.getNumberTestCases());
         printWriter.println();
-        
+
         printWriter.print("   Execution time limit : " + problem.getTimeOutInSeconds() + " seconds");
         if (problem.getTimeOutInSeconds() == 0) {
             printWriter.print(" (no time limit when zero seconds)");
         }
         printWriter.println();
         
+        printWriter.println("        Computer Judged : " + problem.isComputerJudged());
+
+        if (problem.isComputerJudged()) {
+            printWriter.println("         Manual Review  : " + problem.isManualReview());
+        } else {
+            printWriter.println("         Manual Review  : true");
+        }
+
+        printWriter.println("  Show Prelim Judgement : " + problem.isPrelimaryNotification());
+        
+        printWriter.println();
+
         printWriter.println("        Using validator : " + problem.isValidatedProblem());
         printWriter.println("         Validator name : " + problem.getValidatorProgramName());
-        
+
         printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
         printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
         printWriter.println("    Using pc2 validator : " + problem.isUsingPC2Validator());
-        
-        printWriter.println("   Using external files : " + problem.isUsingExternalDataFiles()+" path = "+problem.getExternalDataFileLocation());
+
+        printWriter.println("   Using external files : " + problem.isUsingExternalDataFiles() + " path = " + problem.getExternalDataFileLocation());
         printWriter.println("               CCS mode : " + problem.isCcsMode());
-        
+
         if (problem.getAnswerFileName() != null) {
             if (problemDataFiles != null) {
                 if (problemDataFiles.getJudgesAnswerFiles().length == 0) {
@@ -100,7 +113,7 @@ public class ProblemsReport implements IReport {
                 printWriter.println("                          Warning - no data/judge files defined (null problemDataFiles) ");
             }
         }
-        
+
         if (problem.getNumberTestCases() > 1) {
             for (int i = 0; i < problem.getNumberTestCases(); i++) {
                 int testCaseNumber = i + 1;
@@ -120,7 +133,7 @@ public class ProblemsReport implements IReport {
         if (problemDataFiles != null) {
             SerializedFile[] judgesDataFiles = problemDataFiles.getJudgesDataFiles();
             SerializedFile[] judgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles();
-          
+
             if (judgesDataFiles != null) {
 
                 printWriter.println("                  " + judgesDataFiles.length + " judge data files");
@@ -135,8 +148,7 @@ public class ProblemsReport implements IReport {
                             name = serializedFile.getName();
                             shaSum = serializedFile.getSHA1sum();
                         }
-                        printWriter.println("                    judge data file '" + name + "' " + bytes + " bytes,  SHA1 = " + shaSum // 
-                                + " " + internExternDesc(serializedFile));
+                        printWriter.println("                    judge data file '" + name + "' " + bytes + " bytes, " + internExternDesc(serializedFile) + " SHA1 = " + shaSum);
                     }
                 }
             } else {
@@ -156,8 +168,7 @@ public class ProblemsReport implements IReport {
                             name = serializedFile.getName();
                             shaSum = serializedFile.getSHA1sum();
                         }
-                        printWriter.println("                    judge ans. file '" + name + "' " + bytes + " bytes,  SHA1 = " + shaSum + //
-                                " " + internExternDesc(serializedFile));
+                        printWriter.println("                    judge ans. file '" + name + "' " + bytes + " bytes, " + internExternDesc(serializedFile) + " SHA1 = " + shaSum);
                     }
                 }
             } else {
@@ -166,7 +177,7 @@ public class ProblemsReport implements IReport {
         } else {
             printWriter.println("                  * No judge's data or answer files *");
         }
-        
+
         if (problemDataFiles != null && problemDataFiles.getValidatorFile() != null) {
             SerializedFile validatorFile = problemDataFiles.getValidatorFile();
             printWriter.println("                  " + 1 + " validator file");
@@ -174,8 +185,7 @@ public class ProblemsReport implements IReport {
             if (validatorFile.getBuffer() != null) {
                 bytes = validatorFile.getBuffer().length;
             }
-            printWriter.println("                    validator file '" + validatorFile.getName() + "' " + bytes + " bytes "+
-                    internExternDesc (validatorFile));
+            printWriter.println("                    validator file '" + validatorFile.getName() + "' " + bytes + " bytes " + internExternDesc(validatorFile));
         } else {
             printWriter.println("                  * No validator files *");
         }
@@ -200,30 +210,24 @@ public class ProblemsReport implements IReport {
         // Problem
         printWriter.println();
         printWriter.println("-- " + contest.getProblems().length + " problems --");
-        
+
         ContestInformation info = contest.getContestInformation();
-        if (info != null){
-            
-            String judgeCDPBasePath= info.getJudgeCDPBasePath();
-            if (judgeCDPBasePath == null){
+        if (info != null) {
+
+            String judgeCDPBasePath = info.getJudgeCDPBasePath();
+            if (judgeCDPBasePath == null) {
                 judgeCDPBasePath = "";
             }
 
             printWriter.println();
-            printWriter.println("  Location for Judges CDP / problem config  " + judgeCDPBasePath); 
-            printWriter.println();
-
+            printWriter.println("  Location for Judges CDP / problem config : '" + judgeCDPBasePath + "'");
         }
-        
-        
+
         for (Problem problem : contest.getProblems()) {
             printWriter.println();
             ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
             writeRow(printWriter, problem, problemDataFiles);
         }
-        
-        printWriter.println();
-        
 
         // ProblemDataFiles
         printWriter.println();
@@ -234,13 +238,13 @@ public class ProblemsReport implements IReport {
             printWriter.println("  Problem Data File set for " + problem + " id=" + problemDataFile.getProblemId());
             writeProblemDataFiles(printWriter, problemDataFile);
         }
-        
+
         Category[] categories = contest.getCategories();
         if (categories.length > 0) {
             printWriter.println(" Categories:");
             for (int i = 0; i < categories.length; i++) {
                 Category category = categories[i];
-                printWriter.println("  "+category);
+                printWriter.println("  " + category);
             }
         } else {
             printWriter.println(" Categories: (not defined)");
@@ -253,7 +257,7 @@ public class ProblemsReport implements IReport {
         printWriter.println(new VersionInfo().getSystemVersionInfo());
         printWriter.println();
         printWriter.println(getReportTitle() + " Report");
-        
+
         writeContestTime(printWriter);
     }
 
@@ -270,9 +274,9 @@ public class ProblemsReport implements IReport {
 
             try {
                 printHeader(printWriter);
-                
+
                 writeReport(printWriter);
-                
+
                 printFooter(printWriter);
 
             } catch (Exception e) {
@@ -310,7 +314,7 @@ public class ProblemsReport implements IReport {
     public String getPluginTitle() {
         return "Problems Report";
     }
-    
+
     public Filter getFilter() {
         return filter;
     }
