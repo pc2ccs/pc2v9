@@ -517,7 +517,24 @@ public class ExportYAML {
         problemWriter.println("rights_owner: ");
         
         problemWriter.println();
+        
+        problemWriter.println(ContestYAMLLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!isExternalFiles(problemDataFiles)));
 
+        problemWriter.println();
+        String dataFile = problem.getDataFileName();
+        if (dataFile != null) {
+            // answerfile: sumit.ans
+            problemWriter.println("datafile: " + dataFile);
+        }
+        
+        String answerFileName = problem.getAnswerFileName();
+        if (dataFile != null) {
+            // answerfile: sumit.ans
+            problemWriter.println("datafile: " + answerFileName);
+        }
+
+        problemWriter.println();
+        
         problemWriter.println(ContestYAMLLoader.LIMITS_KEY + ":");
         problemWriter.println(PAD4 + "timeout: " + problem.getTimeOutInSeconds());
         problemWriter.println();
@@ -606,6 +623,35 @@ public class ExportYAML {
         problemWriter = null;
 
         return (String[]) filesWritten.toArray(new String[filesWritten.size()]);
+    }
+
+    /**
+     * Return true if files are not loaded/stored internally.
+     * 
+     * @param problemDataFiles
+     * @return
+     */
+    private boolean isExternalFiles(ProblemDataFiles problemDataFiles) {
+
+        boolean result = false;
+
+        if (problemDataFiles != null) {
+
+            // test first one whatever that is (internal/external), return that.
+
+            SerializedFile file = problemDataFiles.getJudgesDataFile();
+            if (file != null) {
+                result = file.isExternalFile();
+            }
+
+            // in some problems, example hello world, there is only an answer fil.
+            file = problemDataFiles.getJudgesAnswerFile();
+            if (file != null) {
+                result = file.isExternalFile();
+            }
+
+        }
+        return result;
     }
 
     /**
