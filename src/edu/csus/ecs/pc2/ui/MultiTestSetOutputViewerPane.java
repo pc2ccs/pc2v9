@@ -59,7 +59,6 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
-import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * Multiple data set viewer pane.
@@ -902,7 +901,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                         : col == COLUMN.JUDGE_DATA.ordinal() ? "Judge's Data" : "<unknown>";
         
         //get the file associated with the specified cell
-        SerializedFile targetFile = getFileForTableCell(row,col);
+        String targetFile = getFileForTableCell(row,col);
         if (targetFile != null) {
             int testCaseNum = row + 1;
             showFile(currentViewer, targetFile, title, "Test Case "+testCaseNum, true);
@@ -1007,14 +1006,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      * @param col - a column in the Test Case Results table
      * @return a SerializedFile corresponding to the table cell, or null
      */
-    private SerializedFile getFileForTableCell(int row, int col) {
+    private String getFileForTableCell(int row, int col) {
         
         Problem prob = getContest().getProblem(currentRun.getProblemId());
         
         ProblemDataFiles problemDataFiles = getController().getProblemDataFiles(prob);
         
         //declare the value to be returned
-        SerializedFile returnFile = null ;
+        String returnFile = null ;
         
         if (col == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || col == COLUMN.TEAM_OUTPUT_COMPARE.ordinal()) {
             //get team output file corresponding to test case "row"
@@ -1023,12 +1022,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 if (currentTeamOutputFileNames[row] == null) {
                     returnFile = null;
                 } else {
-                    returnFile = new SerializedFile(currentTeamOutputFileNames[row]);
+                    returnFile = currentTeamOutputFileNames[row];
                 }
             }
         } else if (col == COLUMN.JUDGE_OUTPUT.ordinal()) {
             //get judge's output corresponding to test case "row"
-            SerializedFile [] answerFiles = problemDataFiles.getJudgesAnswerFiles();
+            String[] answerFiles = problemDataFiles.getFullJudgesAnswerFilenames(getContest(), executableDir);
             //make sure we got back some answer files and that there is an answer file for the test case
             if (answerFiles != null && row < answerFiles.length) {
                 returnFile = answerFiles[row];       
@@ -1036,11 +1035,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 //there is no answer file for the specified test case (row)
                 returnFile = null ;
             }
-
             
         } else if (col == COLUMN.JUDGE_DATA.ordinal()) {
             //get judge's input data corresponding to test case "row"
-            SerializedFile [] inputDataFiles = problemDataFiles.getJudgesDataFiles();
+            String[] inputDataFiles = problemDataFiles.getFullJudgesDataFilenames(getContest(), executableDir);
             //make sure we got back some data files and that there is a data file for the test case
             if (inputDataFiles != null && row < inputDataFiles.length) {
                 returnFile = inputDataFiles[row];       
@@ -1067,12 +1065,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      * @param tabLabel - the label to be put on the viewer pane tab
      * @param visible - whether or not to invoke setVisible(true) on the viewer
      */
-    private void showFile(IFileViewer fileViewer, SerializedFile file, String title, String tabLabel, boolean visible) {
+    private void showFile(IFileViewer fileViewer, String file, String title, String tabLabel, boolean visible) {
         System.out.println ("MTSVPane.showFile():");
         String viewerString = fileViewer==null?"<null>":fileViewer.getClass().toString();
-        String filePathString = file==null?"<null>":file.getAbsolutePath().toString();
         System.out.println ("  Viewer='" + viewerString + "'" 
-                            + "  File='" + filePathString + "'"
+                            + "  File='" + file + "'"
                             + "  Title='" + title + "'"
                             + "  setVisible='" + visible + "'");
         if (fileViewer == null || file == null) {
@@ -1083,18 +1080,19 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     "System Error", JOptionPane.ERROR_MESSAGE);
             return ;
         }
-        if (! new File(filePathString).isFile()) {
+        File myFile = new File(file);
+        if (! myFile.isFile()) {
             JOptionPane.showMessageDialog(getParentFrame(), 
-                "Error: could not find file: " + filePathString, 
+                "Error: could not find file: " + file, 
                 "File Missing", JOptionPane.ERROR_MESSAGE);
             Log log = getController().getLog();
-            log.warning("MTSVPane.showFile(): could not find file "+filePathString);
+            log.warning("MTSVPane.showFile(): could not find file "+file);
             return;
         }
         fileViewer.setTitle(title);
-        fileViewer.addFilePane(tabLabel, file.getAbsolutePath());
+        fileViewer.addFilePane(tabLabel, file);
         fileViewer.enableCompareButton(false);
-        fileViewer.setInformationLabelText("File: " + file.getName());
+        fileViewer.setInformationLabelText("File: " + myFile.getName());
 
         if (visible) {
             fileViewer.setVisible(true);
