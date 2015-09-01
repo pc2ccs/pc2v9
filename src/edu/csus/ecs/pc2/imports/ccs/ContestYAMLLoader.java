@@ -663,6 +663,7 @@ public class ContestYAMLLoader {
         if (pc2FormatProblemYamlFile) {
             loadPc2ProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, sectionLines);
         } else {
+            problem.setComputerJudged(true); // CCS default computer judged
             loadCCSProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, sectionLines);
         }
 
@@ -702,7 +703,7 @@ public class ContestYAMLLoader {
             problem.setPrelimaryNotification(true);
         }
         
-        boolean computerJudged = getBooleanValue(getSequenceValue(contents, COMPUTER_JUDGING_KEY), false);
+        boolean computerJudged = getBooleanValue(getSequenceValue(contents, COMPUTER_JUDGING_KEY), problem.isComputerJudged());
         problem.setComputerJudged(computerJudged);
         
         boolean manualReview = getBooleanValue(getSequenceValue(contents, MANUAL_REVIEW_KEY), false);
@@ -1105,10 +1106,6 @@ public class ContestYAMLLoader {
             problemDataFiles.setJudgesAnswerFile(serializedFile);
         } 
         
- 
-        
-        System.out.println("debug 22 ABA Problem " + problem.getShortName() + " bytes = " + totBytes);
-        
 //        
 //        ProblemDataFiles pdfiles = problemDataFiles;
 //        if (pdfiles != null) {
@@ -1375,7 +1372,7 @@ public class ContestYAMLLoader {
 
         while (sequenceLines.length > 0) {
             
-            // TODO CCS do a proper parsing of Yaml to handle preceding comment lines 
+            // TODO CCS replace with Snakeyaml because poor parsing of Yaml to handle preceding comment lines 
             /**
              * There is a bug where the section parsing does not ignore blank and
              * comment lines preceding a section.
