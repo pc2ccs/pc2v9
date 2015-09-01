@@ -333,6 +333,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         closeViewer(answerFileViewer);
         closeViewer(sourceViewer);
         closeViewer(executableFileViewer);
+        // because mtsovf is not a IFileViewer
+        if (multiTestSetOutputViewerFrame != null) {
+            multiTestSetOutputViewerFrame.dispose();
+        }
         //getManualRunResultsPanel().closeViewerWindows();
         //getComputerJudgementPanel().closeViewerWindows();
     }
