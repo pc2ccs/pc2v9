@@ -37,6 +37,9 @@ cat >$4<<EOM
 EOM
 fi
 
+# populate vargs based on problem.yaml for the problem.
+pfile=`echo $1 | sed 's#data/.*#problem.yaml#'`
+vargs=`grep validator_flags: $pfile | cut -d: -f2-`
 mkdir -p feedback
 $val $1 $3 feedback/ $vargs < $2
 result=$?
