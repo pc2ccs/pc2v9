@@ -288,12 +288,20 @@ public class ContestComparison {
         addSummaryEntry(sb, problems.length, "problem");
 
         long totalBytes = 0;
+        int ansCount = 0;
+        int datCount = 0;
 
         if (problems.length > 0) {
-            int ansCount = 0;
-            int datCount = 0;
+            
+            int totalProblems = problems.length;
+            int externalDataProblemCount = 0;
 
             for (Problem problem : problems) {
+                
+                if (problem.isUsingExternalDataFiles()){
+                    externalDataProblemCount++;
+                }
+                
                 ProblemDataFiles pdfiles = newContest.getProblemDataFile(problem);
                 if (pdfiles != null) {
                     ansCount += pdfiles.getJudgesAnswerFiles().length;
@@ -305,8 +313,15 @@ public class ContestComparison {
                         totalBytes += serializedFile.getBuffer().length;
                     }
                     // } else { // nothing to do here, move on
+                } // for
+                
+                if (totalProblems == externalDataProblemCount){
+                    System.out.println("All external data files ("+totalProblems+")");
+                } else if (externalDataProblemCount == 0) {
+                    System.out.println("All internal/loaded data files (" + totalProblems + ")");
+                } else {
                 }
-            }
+        }
 
             addSummaryEntry(sb, datCount, "input data file");
             addSummaryEntry(sb, ansCount, "answer data file");
@@ -326,9 +341,17 @@ public class ContestComparison {
 
         addSummaryEntry(sb, settings.length, "AJ setting");
 
-        if (problems.length > 0 && totalBytes == 0) {
-            sb.append("NO file/data contents loaded for any Problems");
-            sb.append(NEW_LINE);
+        if (problems.length > 0) {
+            int totalFiles  = ansCount + datCount;
+
+            if (totalBytes == 0) {
+                sb.append("NO file/data contents loaded for any Problems (external files)");
+                sb.append(NEW_LINE);
+            } else {
+                long meg = totalBytes / 1000 / 1000;
+                sb.append("Will load " + totalBytes + " bytes (" + meg + " Meg) from "+totalFiles+" files");
+                sb.append(NEW_LINE);
+            }
         }
 
         return sb.toString();
