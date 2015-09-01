@@ -945,19 +945,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         String [] judgesDataFileNames = new String [rows.length];
         String [] teamOutputFileNames = new String [rows.length];
 
-        try {
-            currentProblemDataFiles.checkAndCreateFiles(getContest(), executableDir);
-        } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog(getParentFrame(), 
-                    "Error: could not find file: " + e.getMessage(), 
-                    "File Missing", JOptionPane.ERROR_MESSAGE);
-            if (log!=null) {
-                log.warning("MTSVPane.compareFiles(): could not find file "+e.getMessage());
-            } else {
-                System.err.println ("MTSVPane.compareFiles(): could not find file "+e.getMessage());
-            }
-            return ;
-        }
         //get the judge's information defined in the current problem
         String[] judgesAnswerFiles = currentProblemDataFiles.getFullJudgesAnswerFilenames(getContest(), executableDir);
         String[] judgesDataFiles = currentProblemDataFiles.getFullJudgesDataFilenames(getContest(), executableDir);
@@ -1180,6 +1167,19 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         this.currentProblemDataFiles = problemDataFiles;
         executableDir = getExecuteDir();
         populateGUI();
+        try {
+            currentProblemDataFiles.checkAndCreateFiles(getContest(), executableDir);
+        } catch (FileNotFoundException e) {
+            // TODO should this instead show some kind of error on the pane?
+            JOptionPane.showMessageDialog(getParentFrame(), 
+                    "Error: could not find file: " + e.getMessage(), 
+                    "File Missing", JOptionPane.ERROR_MESSAGE);
+            if (log!=null) {
+                log.warning("MTSVPane.compareFiles(): could not find file "+e.getMessage());
+            } else {
+                System.err.println ("MTSVPane.compareFiles(): could not find file "+e.getMessage());
+            }
+        }
     }
     
     /**
