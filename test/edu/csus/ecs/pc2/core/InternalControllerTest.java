@@ -177,7 +177,7 @@ public class InternalControllerTest extends AbstractTestCase {
         String storageDirectory = getOutputDataDirectory(this.getName());
         removeDirectory(storageDirectory);
         ensureDirectory(storageDirectory);
-         startExplorer(storageDirectory);
+//        startExplorer(storageDirectory);
 
         SampleContest sample = new SampleContest();
 

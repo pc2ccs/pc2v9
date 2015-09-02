@@ -108,9 +108,17 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         addRunJudgements(inContest, runs, 0);
     }
     
+    /**
+     * Add run judgements, test cases and run files.
+     * @param inContest
+     * @param runs
+     * @param numberOfTestCases
+     * @throws Exception
+     */
     private void addRunJudgements (IInternalContest inContest, Run[] runs, int numberOfTestCases) throws Exception {
 
         ClientId judgeId = inContest.getAccounts(Type.JUDGE).firstElement().getClientId();
+        
         Judgement judgement;
         String sampleFileName = sample.getSampleFile();
 
@@ -121,11 +129,11 @@ public class EventFeedXML2013Test extends AbstractTestCase {
 
             run.setElapsedMins((run.getNumber() - 1) * 9);
 
-            judgement = sample.getRandomJudgement(inContest, run.getNumber() % 2 == 0); // ever other run is judged Yes.
-            sample.addJudgement(inContest, run, judgement, judgeId);
+            judgement = sample.getRandomJudgement(inContest, run.getNumber() % 2 == 0); // every other run is judged Yes.
+            if (! run.isJudged()) {
+                sample.addJudgement(inContest, run, judgement, judgeId);
+            }
             sample.addTestCase (inContest,run, numberOfTestCases);
-            
-            inContest.updateRunFiles(run, runFiles);
         }
     }
 
@@ -538,27 +546,34 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         
         Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
         
+        for (Run run : runs) {
+            testCaseContest.acceptRun(run, new RunFiles(run,getSamplesSourceFilename(SUMIT_SOURCE_FILENAME)));
+        }
+        
         createDataFilesForContest (testCaseContest, 5);
 
+        runs = testCaseContest.getRuns();
+        
+        assertEquals("number of runs ", 12, runs.length);
+        
         sample.assignSampleGroups(testCaseContest, "Group Thing One", "Group Thing Two");
         
         sample.assignTeamExternalIds(testCaseContest, 424242);
+        
         
         /**
          * Add Run Judgements.
          */
         addRunJudgements(testCaseContest, runs, 5);
-        runs = testCaseContest.getRuns();
-        
+
+        assertEquals("test cases ", 60, countTestCases(testCaseContest));
+
         String xml = eventFeedXML.toXML(testCaseContest);
-        
-        System.out.println("debug 22 xml = "+xml);
         
         if (debugMode){
             System.out.println(" -- testTestCase ");
             System.out.println(xml);
         }
-
         
         testForValidXML(xml);
 
@@ -593,30 +608,60 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         assertXMLCounts(xml, EventFeedXML2013.FINALIZE_TAG, 1);
         assertXMLCounts(xml, "comment", 1);
         
+        testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+        
+        assertNotNull(testCaseContest.getClientId());
+        assertNotNull(testCaseContest.getAccounts(Type.JUDGE).firstElement().getClientId());
+
+        Run[] otherRunes = sample.createRandomRuns(testCaseContest, 5, true, true, true);
+        assertEquals(5,otherRunes.length);
+
+        addRunJudgements(testCaseContest, otherRunes, 5);
+
+        runs = testCaseContest.getRuns();
+        assertEquals(5, runs.length);
 
         for (Run run : runs) {
-            run.setElapsedMins(100); /// set all runs to elapsed time 100
+            run.setElapsedMins(100); // / set all runs to elapsed time 100
         }
-        
+
         int numruns = 5;
         
         for (int i = runs.length - numruns; i < runs.length; i++) {
-            runs[i].setElapsedMins(300); /// set all runs to elapsed time 100
+            runs[i].setElapsedMins(300); // / set all runs to elapsed time 100
             RunTestCase[] testCases = runs[i].getRunTestCases();
             for (RunTestCase runTestCase : testCases) {
                 runTestCase.setElapsedMS(300 * Constants.MS_PER_MINUTE);
             }
         }
         
-         Filter filter = new Filter();
-         filter.setStartElapsedTime(200);
+        assertEquals(5,runs.length);
+
+        Filter filter = new Filter();
+        filter.setStartElapsedTime(200);
         xml = eventFeedXML.toXML(testCaseContest, filter);
-        
+
         assertXMLCounts(xml, EventFeedXML2013.RUN_TAG, numruns);
-        assertXMLCounts(xml, EventFeedXML2013.TESTCASE_TAG, numruns * 5); 
+        assertXMLCounts(xml, EventFeedXML2013.TESTCASE_TAG, numruns * 5);
 
     }
     
+    private int countTestCases(IInternalContest testCaseContest) {
+        int num = 0;
+        
+        Run[] runs = testCaseContest.getRuns();
+        for (Run run : runs) {
+            
+            RunTestCase[] testCases = run.getRunTestCases();
+            for (RunTestCase runTestCase : testCases) {
+                if (runTestCase.matchesJudgement(run.getJudgementRecord())){
+                    num++;
+                }
+            }
+        }
+        return num;
+    }
+
     private void validateUsingSchema(String xml) throws Exception {
 
         // TODO 623 TODO CCS get this schema validation  to work.
@@ -645,7 +690,7 @@ public class EventFeedXML2013Test extends AbstractTestCase {
      * @throws Exception
      */
     private void assertXMLCounts(String xmlString, String string, int count) throws Exception {
-        assertEquals("Expecting occurances (for" + string + ")", count, getTagCount(xmlString, string));
+        assertEquals("Expecting occurances (for " + string + ")", count, getTagCount(xmlString, string));
     }
     
     /**

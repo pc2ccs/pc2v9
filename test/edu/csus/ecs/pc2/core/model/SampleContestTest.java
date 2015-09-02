@@ -45,14 +45,16 @@ public class SampleContestTest extends AbstractTestCase {
             problemDataFiles = sampleContest.loadDataFiles(problem, null, dataFilesDir, "dat", "ans");
             fail("Expecting no input data files");
         } catch (RuntimeException e) {
-            assertEquals("No input files with extensiion dat", e.getMessage());
+            String msg = "No input files with extension dat in";
+            assertEquals(msg, e.getMessage().substring(0,msg.length()));
         }
 
         try {
             problemDataFiles = sampleContest.loadDataFiles(problem, null, dataFilesDir, "in", "foo");
             fail("Expecting no input data files");
         } catch (RuntimeException e) {
-            assertEquals("No answer  files with extensiion foo", e.getMessage());
+            String msg = "No answer  files with extension foo in";
+            assertEquals(msg, e.getMessage().substring(0,msg.length()));
         }
         
         try {

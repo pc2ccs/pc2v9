@@ -265,7 +265,9 @@ public class ReportsTest extends AbstractTestCase {
 //            String className = getShortClassName(iReport.getClass());
 //            System.out.println("Class name = "+className);
             
-            assertEquals("Expected name for report "+(idx+1)+" "+iReport.getClass().getName(), reportTitles[idx], name);
+            if (idx < reportTitles.length){
+                assertEquals("Expected name for report "+(idx+1)+" "+iReport.getClass().getName(), reportTitles[idx], name);
+            }
             idx ++;
         }
     }
