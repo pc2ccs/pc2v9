@@ -91,6 +91,8 @@ public class MultiFileComparator extends JFrame  {
     private String[] currentJudgesDataFileNames;
 
     private String comparatorCommand = ""; // internal is "", otherwise it is the command to invoke
+
+    private Process process = null;
     
     public  MultiFileComparator() {
         super();
@@ -528,6 +530,36 @@ public class MultiFileComparator extends JFrame  {
         //TODO: create a cache of the new team/judge files; load "<none selected>" into list models 
     }
     
+    /* (non-Javadoc)
+     * @see java.awt.Window#setVisible(boolean)
+     */
+    @Override
+    public void setVisible(boolean arg0) {
+        if (comparatorCommand.equals("")) {
+            super.setVisible(arg0);
+        } else {
+            if (arg0) {
+                // execute process
+                String[] env = null;
+                try {
+                    
+                    process = Runtime.getRuntime().exec(comparatorCommand+" "+TEAMS_OUT_FILENAME+" "+JUDGES_ANS_FILENAME, env, new File("."));
+                } catch (IOException e) {
+                    log.warning("setVisible() "+e.getMessage());
+                    JOptionPane.showMessageDialog(this, 
+                            "System Error: "+e.getMessage(), 
+                            "System Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                // destroy process if it still exists
+                if (process != null) {
+                    process.destroy();
+                }
+            }
+        }
+    }
+
+
     /**
      * Returns the log defined by the current controller, or null if none.
      * @return - the current log, or null.
@@ -651,6 +683,22 @@ public class MultiFileComparator extends JFrame  {
         } else {
             this.comparatorCommand = comparatorCommand;
         }
+    }
+
+
+    /* (non-Javadoc)
+     * @see java.awt.Window#dispose()
+     */
+    @Override
+    public void dispose() {
+        if (!comparatorCommand.equals("")) {
+            // destroy process if it still exists
+            if (process  != null) {
+                process.destroy();
+                // TODO alas this doesn't seem to work with gvim.bat
+            }
+        }
+        super.dispose();
     }
 
     
