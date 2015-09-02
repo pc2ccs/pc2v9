@@ -33,6 +33,7 @@ import java.awt.Rectangle;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -56,6 +57,10 @@ import javax.swing.BoxLayout;
  */
 
 public class MultiFileComparator extends JFrame  {
+
+    private static final String JUDGES_ANS_FILENAME = "judges.ans";
+
+    private static final String TEAMS_OUT_FILENAME = "teams.out";
 
     private static final long serialVersionUID = 1L;
 
@@ -379,17 +384,18 @@ public class MultiFileComparator extends JFrame  {
         if (!comparatorCommand.equals("")) {
             // just kidding, we are going to prepare to launch an external command
             try {
-                // PrinterWritter truncates existing files
-                BufferedOutputStream outWriter = new BufferedOutputStream(new FileOutputStream("allout.dat"));
-                BufferedOutputStream ansWriter = new BufferedOutputStream(new FileOutputStream("allans.dat"));
+                BufferedOutputStream outWriter = new BufferedOutputStream(new FileOutputStream(TEAMS_OUT_FILENAME));
+                BufferedOutputStream ansWriter = new BufferedOutputStream(new FileOutputStream(JUDGES_ANS_FILENAME));
                 int fileIndex = 0;
                 for (int caseNum : testCaseNums) {
-                    String msg = "TESTCASE " + caseNum + " BEGIN ---------------";
+                    String msg = "TESTCASE " + caseNum + " BEGIN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+                    msg = msg.substring(0,80) + "\n";
                     outWriter.write(msg.getBytes());
                     ansWriter.write(msg.getBytes());
                     int c = 0;
                     byte[] cbuf = new byte[32768];
-                    if (judgesOutputFileNames != null && judgesOutputFileNames[fileIndex] != null) {
+                    if (judgesOutputFileNames != null && judgesOutputFileNames[fileIndex] != null  && new File(judgesOutputFileNames[fileIndex]).exists()) {
+                        
                         BufferedInputStream ansReader = new BufferedInputStream(new FileInputStream(judgesOutputFileNames[fileIndex]));
                         c = ansReader.read(cbuf);
                         while (c != -1) {
@@ -399,7 +405,7 @@ public class MultiFileComparator extends JFrame  {
                         ansReader.close();
                         ansReader = null;
                     }
-                    if (teamOutputFileNames != null && teamOutputFileNames[fileIndex] != null) {
+                    if (teamOutputFileNames != null && teamOutputFileNames[fileIndex] != null && new File(teamOutputFileNames[fileIndex]).exists()) {
                         BufferedInputStream outReader = new BufferedInputStream(new FileInputStream(teamOutputFileNames[fileIndex]));
                         c = outReader.read(cbuf);
                         while (c != -1) {
@@ -409,7 +415,8 @@ public class MultiFileComparator extends JFrame  {
                         outReader.close();
                         outReader = null;
                     }
-                    msg = "TESTCASE " + caseNum + " END -----------------";
+                    msg = "TESTCASE " + caseNum + " END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+                    msg = msg.substring(0,80) + "\n";
                     outWriter.write(msg.getBytes());
                     ansWriter.write(msg.getBytes());
                     fileIndex++;
@@ -419,8 +426,7 @@ public class MultiFileComparator extends JFrame  {
                 outWriter = null;
                 ansWriter = null;
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.warning(e.getMessage());
             }
         }
     }
