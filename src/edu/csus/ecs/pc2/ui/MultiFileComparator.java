@@ -30,9 +30,14 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 import java.awt.Rectangle;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Vector;
 
 import javax.swing.border.EmptyBorder;
@@ -371,6 +376,49 @@ public class MultiFileComparator extends JFrame  {
         lstTestCases.setSelectedIndex(0);
         // this will show the files for the 1st entry (vs the last MFC files)
         updateViewsToSelectedTestCase(0);
+        if (!comparatorCommand.equals("")) {
+            // just kidding, we are going to prepare to launch an external command
+            try {
+                // PrinterWritter truncates existing files
+                BufferedOutputStream outWriter = new BufferedOutputStream(new FileOutputStream("allout.dat"));
+                BufferedOutputStream ansWriter = new BufferedOutputStream(new FileOutputStream("allans.dat"));
+                int fileIndex = 0;
+                for (int caseNum : testCaseNums) {
+                    String msg = caseNum+" BEGIN-------------------------------------------";
+                    outWriter.write(msg.getBytes());
+                    ansWriter.write(msg.getBytes());
+                    int c = 0;
+                    byte[] cbuf = new byte[32768];
+                    BufferedInputStream outReader = new BufferedInputStream(new FileInputStream(teamOutputFileNames[fileIndex]));
+                    c = outReader.read(cbuf);
+                    while(c != -1) {
+                        outWriter.write(cbuf, 0, c);
+                        c = outReader.read(cbuf);
+                    }
+                    outReader.close();
+                    outReader = null;
+                    BufferedInputStream ansReader = new BufferedInputStream(new FileInputStream(judgesOutputFileNames[fileIndex]));
+                    c = ansReader.read(cbuf);
+                    while(c != -1) {
+                        ansWriter.write(cbuf, 0, c);
+                        c = ansReader.read(cbuf);
+                    }
+                    ansReader.close();
+                    ansReader = null;
+                    msg =        caseNum+" END---------------------------------------------";
+                    outWriter.write(msg.getBytes());
+                    ansWriter.write(msg.getBytes());
+                    fileIndex++;
+                }
+                outWriter.close();
+                ansWriter.close();
+                outWriter = null;
+                ansWriter = null;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
     
     private void setRunID(int runID) {
