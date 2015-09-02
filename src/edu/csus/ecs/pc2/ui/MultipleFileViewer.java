@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -78,6 +79,9 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
     private String lastDirectory = ".";
 
     private String viewerCommand = ""; // internal is "", otherwise it is the command to invoke
+    private String viewerFile = "";
+
+    private Process process = null;
 
     /**
      * @return the viewerCommand
@@ -490,6 +494,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
     }
 
     public boolean loadFile(JTextArea jPane, String filename) {
+        viewerFile = filename;
         FileReader fileReader = null;
         try {
             jPane.setFont(new Font("Courier", Font.PLAIN, 12));
@@ -716,6 +721,50 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
             viewerCommand = "";
         } else {
             viewerCommand  = lastViewer;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see java.awt.Window#dispose()
+     */
+    @Override
+    public void dispose() {
+        if (!viewerCommand.equals("")) {
+            // destroy process if it still exists
+            if (process   != null) {
+                process.destroy();
+                // TODO alas this doesn't seem to work with gvim.bat
+            }
+        }
+        super.dispose();
+    }
+
+    /* (non-Javadoc)
+     * @see java.awt.Window#setVisible(boolean)
+     */
+    @Override
+    public void setVisible(boolean arg0) {
+        if (viewerCommand.equals("")) {
+            super.setVisible(arg0);
+        } else {
+            if (arg0) {
+                // execute process
+                String[] env = null;
+                try {
+                    
+                    process = Runtime.getRuntime().exec(viewerCommand+" "+viewerFile, env, new File("."));
+                } catch (IOException e) {
+                    log.warning("setVisible() "+e.getMessage());
+                    JOptionPane.showMessageDialog(this, 
+                            "System Error: "+e.getMessage(), 
+                            "System Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                // destroy process if it still exists
+                if (process != null) {
+                    process.destroy();
+                }
+            }
         }
     }
 
