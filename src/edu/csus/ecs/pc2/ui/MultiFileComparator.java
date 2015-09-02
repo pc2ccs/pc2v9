@@ -384,28 +384,32 @@ public class MultiFileComparator extends JFrame  {
                 BufferedOutputStream ansWriter = new BufferedOutputStream(new FileOutputStream("allans.dat"));
                 int fileIndex = 0;
                 for (int caseNum : testCaseNums) {
-                    String msg = "TESTCASE " +caseNum+" BEGIN ---------------";
+                    String msg = "TESTCASE " + caseNum + " BEGIN ---------------";
                     outWriter.write(msg.getBytes());
                     ansWriter.write(msg.getBytes());
                     int c = 0;
                     byte[] cbuf = new byte[32768];
-                    BufferedInputStream outReader = new BufferedInputStream(new FileInputStream(teamOutputFileNames[fileIndex]));
-                    c = outReader.read(cbuf);
-                    while(c != -1) {
-                        outWriter.write(cbuf, 0, c);
-                        c = outReader.read(cbuf);
-                    }
-                    outReader.close();
-                    outReader = null;
-                    BufferedInputStream ansReader = new BufferedInputStream(new FileInputStream(judgesOutputFileNames[fileIndex]));
-                    c = ansReader.read(cbuf);
-                    while(c != -1) {
-                        ansWriter.write(cbuf, 0, c);
+                    if (judgesOutputFileNames != null && judgesOutputFileNames[fileIndex] != null) {
+                        BufferedInputStream ansReader = new BufferedInputStream(new FileInputStream(judgesOutputFileNames[fileIndex]));
                         c = ansReader.read(cbuf);
+                        while (c != -1) {
+                            ansWriter.write(cbuf, 0, c);
+                            c = ansReader.read(cbuf);
+                        }
+                        ansReader.close();
+                        ansReader = null;
                     }
-                    ansReader.close();
-                    ansReader = null;
-                    msg = "TESTCASE " + caseNum+" END -----------------";
+                    if (teamOutputFileNames != null && teamOutputFileNames[fileIndex] != null) {
+                        BufferedInputStream outReader = new BufferedInputStream(new FileInputStream(teamOutputFileNames[fileIndex]));
+                        c = outReader.read(cbuf);
+                        while (c != -1) {
+                            outWriter.write(cbuf, 0, c);
+                            c = outReader.read(cbuf);
+                        }
+                        outReader.close();
+                        outReader = null;
+                    }
+                    msg = "TESTCASE " + caseNum + " END -----------------";
                     outWriter.write(msg.getBytes());
                     ansWriter.write(msg.getBytes());
                     fileIndex++;
