@@ -43,6 +43,8 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     private static final String TEST_CLASS_NAME = "ContestYAMLLoader";
 
+    private static final String PAD4 = "    ";
+
     private ContestYAMLLoader loader = new ContestYAMLLoader();
     
     private SampleContest sampleContest = new SampleContest();
@@ -209,7 +211,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected problem name ", "Channel Island Navigation", problem.getDisplayName());
         assertEquals("Expected default timeout for "+problem, 20, problem.getTimeOutInSeconds());
         
-        assertTrue("Expecting comptuer judged", problem.isComputerJudged());
+        assertTrue("Expecting computer judged", problem.isComputerJudged());
 
         assertEquals("Number of problems", 5, problems.length);
 
@@ -428,6 +430,8 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
                 assertNotNull("Expecting judges data file name ", problem.getDataFileName());
                 assertNotNull("Expecting judges answer file name ", problem.getAnswerFileName());
+                
+                assertTrue("Expecting not comptuer judged", problem.isComputerJudged());
 
             }
         }
@@ -1424,5 +1428,62 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
             assertTrue("Expecting manual review for "+problem, problem.isManualReview());
         }
         
+    }
+    
+    
+    private void testJudgingType(boolean computerJudged, boolean manualJudged, boolean preliminaryJudge) {
+        String[] yaml = getJudgeYaml(computerJudged, manualJudged, preliminaryJudge);
+
+        Problem problem = new Problem("X");
+        loader.assignJudgingType(yaml, problem, false);
+
+        assertEquals("Expecting Prelim ", preliminaryJudge, problem.isPrelimaryNotification());
+        assertEquals("Expecting Manual ", manualJudged, problem.isManualReview());
+        assertEquals("Expecting Computer ", computerJudged, problem.isComputerJudged());
+    }
+    
+    
+    public void testJudgingTypeTest() throws Exception {
+        
+        String [] data = {
+                "true,true,true", //
+                "true,true,false", //
+                "true,false,true", //
+                "true,false,false",  //
+                "false,true,true",  //
+                "false,true,false",  //
+                "false,false,true",  //
+                "false,false,false",  //
+        };
+        for (String line : data) {
+            
+            String [] fields = line.split(",");
+            boolean preliminaryJudge = Boolean.parseBoolean(fields[0]);
+            boolean manualJudged = Boolean.parseBoolean(fields[1]);
+            boolean computerJudged = Boolean.parseBoolean(fields[2]);
+            
+            testJudgingType(computerJudged, manualJudged, preliminaryJudge);
+            System.out.println("debug 22 tested "+line);
+        }
+    }
+    
+   public void testJudgingTypeTestOne() throws Exception {
+        
+        boolean preliminaryJudge = false;
+        boolean manualJudged = false;
+        boolean computerJudged = true;
+        
+        testJudgingType(computerJudged, manualJudged, preliminaryJudge);
+    }
+
+    private String[] getJudgeYaml(boolean computerJudged, boolean manualJudged, boolean preliminaryJudge) {
+        
+        String [] yaml =  {
+            ContestYAMLLoader.JUDGING_TYPE_KEY + ":",
+            PAD4 + ContestYAMLLoader.COMPUTER_JUDGING_KEY + ":" + computerJudged,
+            PAD4 + ContestYAMLLoader.MANUAL_REVIEW_KEY + ":" +manualJudged,
+            PAD4 + ContestYAMLLoader.SEND_PRELIMINARY_JUDGEMENT_KEY + ":" +preliminaryJudge, 
+        };
+        return yaml;
     }
 }

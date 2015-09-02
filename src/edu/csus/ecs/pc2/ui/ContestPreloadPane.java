@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestComparison;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
@@ -138,6 +139,13 @@ public class ContestPreloadPane extends JPanePlugin {
 
     }
     
+    private void startExplorer() {
+        
+        String dirname = new VersionInfo().locateHome()+ File.separator + "samps" + File.separator + "contests";
+        Utilities.startExplorer(dirname);
+    }
+    
+    
     private void updateContestRow(String[] cols, String contestFilename) {
 
         if (cols == null || cols.length == 0) {
@@ -226,6 +234,12 @@ public class ContestPreloadPane extends JPanePlugin {
         try {
             ContestYAMLLoader loader = new ContestYAMLLoader();
             newContest = loader.fromYaml(null, directoryName);
+
+//            if (Utilities.isDebugMode()) {
+//                startExplorer();
+//                Utilities.viewReport(new ProblemsReport(), "Contest Preview", newContest, getController());
+//            }
+            
             contestSummary = new ContestComparison().getContestLoadSummary(newContest);
             
             result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");

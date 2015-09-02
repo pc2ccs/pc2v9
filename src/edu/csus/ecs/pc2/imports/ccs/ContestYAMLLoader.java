@@ -697,24 +697,8 @@ public class ContestYAMLLoader {
         }
         
         sectionLines = getSectionLines(JUDGING_TYPE_KEY, contents);
-        
-        boolean sendPreliminary = getBooleanValue(getSequenceValue(contents, SEND_PRELIMINARY_JUDGEMENT_KEY), false);
-        if (sendPreliminary){
-            problem.setPrelimaryNotification(true);
-        }
-        
-        boolean computerJudged = getBooleanValue(getSequenceValue(contents, COMPUTER_JUDGING_KEY), problem.isComputerJudged());
-        problem.setComputerJudged(computerJudged);
-        
-        boolean manualReview = getBooleanValue(getSequenceValue(contents, MANUAL_REVIEW_KEY), false);
-        
-        if (overrideManualReview){
-            manualReview = true;
-        }
-        
-        if (manualReview){
-            problem.setManualReview(true);
-        }
+
+        assignJudgingType(sectionLines, problem, overrideManualReview);
         
         sectionLines = getSectionLines(INPUT_KEY, contents);
         
@@ -722,6 +706,28 @@ public class ContestYAMLLoader {
 
         boolean readFromStdin = getBooleanValue(stdinLoadString, true);
         problem.setReadInputDataFromSTDIN(readFromStdin);
+    }
+
+    protected void assignJudgingType(String[] sectionLines, Problem problem, boolean overrideManualReviewFlag) {
+        
+        boolean sendPreliminary = getBooleanValue(getSequenceValue(sectionLines, SEND_PRELIMINARY_JUDGEMENT_KEY), false);
+        if (sendPreliminary){
+            problem.setPrelimaryNotification(true);
+        }
+        
+        boolean computerJudged = getBooleanValue(getSequenceValue(sectionLines, COMPUTER_JUDGING_KEY), problem.isComputerJudged());
+        problem.setComputerJudged(computerJudged);
+        
+        boolean manualReview = getBooleanValue(getSequenceValue(sectionLines, MANUAL_REVIEW_KEY), false);
+        
+        if (overrideManualReviewFlag){
+            manualReview = true;
+        }
+        
+        if (manualReview){
+            problem.setManualReview(true);
+        }
+        
     }
 
     /**

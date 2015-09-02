@@ -11,6 +11,9 @@ author:
 license: 
 rights_owner: 
 
+judging-type:
+  manual-review: true
+
 limits: 
    timeout: 20
 

@@ -124,6 +124,8 @@ public class EventFeedXML2013Test extends AbstractTestCase {
             judgement = sample.getRandomJudgement(inContest, run.getNumber() % 2 == 0); // ever other run is judged Yes.
             sample.addJudgement(inContest, run, judgement, judgeId);
             sample.addTestCase (inContest,run, numberOfTestCases);
+            
+            inContest.updateRunFiles(run, runFiles);
         }
     }
 
@@ -536,7 +538,7 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         
         Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
         
-        createDataFilesForContest (testCaseContest);
+        createDataFilesForContest (testCaseContest, 5);
 
         sample.assignSampleGroups(testCaseContest, "Group Thing One", "Group Thing Two");
         
@@ -546,8 +548,11 @@ public class EventFeedXML2013Test extends AbstractTestCase {
          * Add Run Judgements.
          */
         addRunJudgements(testCaseContest, runs, 5);
+        runs = testCaseContest.getRuns();
         
         String xml = eventFeedXML.toXML(testCaseContest);
+        
+        System.out.println("debug 22 xml = "+xml);
         
         if (debugMode){
             System.out.println(" -- testTestCase ");
@@ -686,12 +691,15 @@ public class EventFeedXML2013Test extends AbstractTestCase {
      * @param inContest
      * @throws FileNotFoundException
      */
-    private void createDataFilesForContest(IInternalContest inContest) throws FileNotFoundException {
+    private void createDataFilesForContest(IInternalContest inContest, int numberTestCases) throws FileNotFoundException {
 
         Problem[] problems = inContest.getProblems();
         for (Problem problem : problems) {
 
             int numProblemDataFiles = problem.getNumberTestCases();
+            if (numProblemDataFiles == 0){
+                numProblemDataFiles = numberTestCases;
+            }
 
             if (numProblemDataFiles < 1) {
 
@@ -796,7 +804,7 @@ public class EventFeedXML2013Test extends AbstractTestCase {
 
         Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
 
-        createDataFilesForContest(testCaseContest);
+        createDataFilesForContest(testCaseContest, 5);
 
         sample.assignSampleGroups(testCaseContest, "Group Thing One", "Group Thing Two");
 
