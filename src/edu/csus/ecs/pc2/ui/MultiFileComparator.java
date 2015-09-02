@@ -80,6 +80,7 @@ public class MultiFileComparator extends JFrame  {
 
     private String[] currentJudgesDataFileNames;
 
+    private String comparatorCommand = ""; // internal is "", otherwise it is the command to invoke
     
     public  MultiFileComparator() {
         super();
@@ -571,6 +572,27 @@ public class MultiFileComparator extends JFrame  {
         }
 
         return br;
+    }
+
+
+    /**
+     * @return the comparatorCommand
+     */
+    public String getComparatorCommand() {
+        return comparatorCommand;
+    }
+
+
+    /**
+     * @param comparatorCommand the comparatorCommand to set
+     */
+    public void setComparatorCommand(String comparatorCommand) {
+        // null is the same as ""
+        if (comparatorCommand == null) {
+            this.comparatorCommand = "";
+        } else {
+            this.comparatorCommand = comparatorCommand;
+        }
     }
 
     

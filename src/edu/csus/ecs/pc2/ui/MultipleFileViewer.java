@@ -77,6 +77,15 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
 
     private String lastDirectory = ".";
 
+    private String viewerCommand = ""; // internal is "", otherwise it is the command to invoke
+
+    /**
+     * @return the viewerCommand
+     */
+    public String getViewerCommand() {
+        return viewerCommand;
+    }
+
     public MultipleFileViewer(Log log) {
         super();
         this.log = log;
@@ -699,6 +708,15 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         }
         return null;
 
+    }
+
+    public void setViewerCommand(String lastViewer) {
+        // null is the same as ""
+        if (lastViewer == null) {
+            viewerCommand = "";
+        } else {
+            viewerCommand  = lastViewer;
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
