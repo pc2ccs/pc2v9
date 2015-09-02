@@ -125,6 +125,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private MultipleFileViewer currentViewer;
     
+    /**
+     * @return the currentViewer
+     */
+    public MultipleFileViewer getCurrentViewer() {
+        if (currentViewer == null) {
+            currentViewer = new MultipleFileViewer(getController().getLog());
+        }
+        return currentViewer;
+    }
+
     private MultiFileComparator currentComparator ;
 
     private JScrollPane resultsScrollPane;
@@ -511,7 +521,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     lastComparator = currentComparatorCmd;
                     lastViewer = currentViewerCmd;
                     getCurrentComparator().setComparatorCommand(lastComparator);
-                    currentViewer.setViewerCommand(lastViewer);
+                    getCurrentViewer().setViewerCommand(lastViewer);
                     enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
                     
                 }
@@ -965,10 +975,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             }
             return;
         }
-        if (currentViewer != null) {
-            currentViewer.dispose();
+        if (getCurrentViewer() != null) {
+            getCurrentViewer().dispose();
         }
-        currentViewer = new MultipleFileViewer(getController().getLog());
         
         //get a title based on what column was selected
         String title = col == COLUMN.TEAM_OUTPUT_VIEW.ordinal() ? "Team Output" 
