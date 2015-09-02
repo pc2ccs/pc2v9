@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
@@ -160,6 +162,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private JButton btnUpdate;
 
     private JTabbedPane multiTestSetTabbedPane;
+
+    private int ctype;
+
+    private int vtype;
     
 
     /**
@@ -497,6 +503,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             horizontalGlue_4.setPreferredSize(new Dimension(20, 20));
             panelFooterButtons.add(horizontalGlue_4);
 
+            ctype = 1;
+            vtype = 1;
+
             btnUpdate = new JButton("Update");
             btnUpdate.setEnabled(false);
             panelFooterButtons.add(btnUpdate);
@@ -526,6 +535,22 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     
                 }
             });
+            btnCancel.addActionListener(new ActionListener() {
+                
+                @Override
+                public void actionPerformed(ActionEvent arg0) {
+                    if (ctype == 3) {
+                        textUserSpecifyComparator.setText(lastComparator);
+                    }
+                    if (vtype == 3) {
+                        textUserSpecifyViewer.setText(lastViewer);
+                    }
+                    // TODO reset selected buttongroup
+                    currentComparatorCmd = lastComparator;
+                    currentViewerCmd = lastViewer;
+                }
+            });
+            
             rdbtnInternalCompareProgram.addItemListener(new ItemListener() {
                 
                 @Override
@@ -533,6 +558,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     if (rdbtnInternalCompareProgram.isSelected()) {
                         currentComparatorCmd = "";
                         enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
+                        ctype = 1;
                     }
                 }
 
@@ -542,6 +568,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void itemStateChanged(ItemEvent e) {
                     if (rdbtnPulldownCompareList.isSelected()) {
                         pulldownSelectComparator.setEnabled(true);
+                        ctype = 2;
                     } else {
                         pulldownSelectComparator.setEnabled(false);
                     }
@@ -554,7 +581,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void itemStateChanged(ItemEvent e) {
                     if (rdbtnSpecifyCompareProgram.isSelected()) {
                         textUserSpecifyComparator.setEnabled(true);
-                        currentComparatorCmd = textUserSpecifyComparator.getText();
+                        ctype = 3;
                     } else {
                         textUserSpecifyComparator.setEnabled(false);
                     }
@@ -567,6 +594,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void itemStateChanged(ItemEvent arg0) {
                     if (rdbtnInternalViewerProgram.isSelected()) {
                         currentViewerCmd = "";
+                        vtype = 1;
                     }
                     enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
                 }
@@ -577,6 +605,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     if (rdbtnPulldownViewerList.isSelected()) {
                         currentViewerCmd = (String) pulldownSelectViewer.getSelectedItem();
                         pulldownSelectViewer.setEnabled(true);
+                        vtype = 2;
                     } else {
                         pulldownSelectViewer.setEnabled(false);
                     }
@@ -587,12 +616,53 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             rdbtnSpecifyViewerProgram.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     if (rdbtnSpecifyViewerProgram.isSelected()) {
-                        currentViewerCmd = textUserSpecifyViewer.getText();
                         textUserSpecifyViewer.setEnabled(true);
+                        vtype = 3;
                     } else {
                         textUserSpecifyViewer.setEnabled(false);
                     }
                     enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
+                }
+            });
+
+            textUserSpecifyViewer.addKeyListener(new KeyListener() {
+                
+                @Override
+                public void keyTyped(KeyEvent arg0) {
+                    if (vtype == 3) {
+                        currentViewerCmd = textUserSpecifyViewer.getText();
+                        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
+                    }
+                }
+                
+                @Override
+                public void keyReleased(KeyEvent arg0) {
+                    // unused
+                }
+                
+                @Override
+                public void keyPressed(KeyEvent arg0) {
+                    // unused
+                }
+            });
+            textUserSpecifyComparator.addKeyListener(new KeyListener() {
+                
+                @Override
+                public void keyTyped(KeyEvent arg0) {
+                    if (ctype == 3) {
+                        currentComparatorCmd = textUserSpecifyComparator.getText();
+                        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
+                    }
+                }
+                
+                @Override
+                public void keyReleased(KeyEvent arg0) {
+                    // unused
+                }
+                
+                @Override
+                public void keyPressed(KeyEvent arg0) {
+                    // unused
                 }
             });
 
