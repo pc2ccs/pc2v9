@@ -510,7 +510,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent arg0) {
                     lastComparator = currentComparatorCmd;
                     lastViewer = currentViewerCmd;
-                    currentComparator.setComparatorCommand(lastComparator);
+                    getCurrentComparator().setComparatorCommand(lastComparator);
                     currentViewer.setViewerCommand(lastViewer);
                     enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
                     

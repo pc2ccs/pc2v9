@@ -384,7 +384,7 @@ public class MultiFileComparator extends JFrame  {
                 BufferedOutputStream ansWriter = new BufferedOutputStream(new FileOutputStream("allans.dat"));
                 int fileIndex = 0;
                 for (int caseNum : testCaseNums) {
-                    String msg = caseNum+" BEGIN-------------------------------------------";
+                    String msg = "TESTCASE " +caseNum+" BEGIN ---------------";
                     outWriter.write(msg.getBytes());
                     ansWriter.write(msg.getBytes());
                     int c = 0;
@@ -405,7 +405,7 @@ public class MultiFileComparator extends JFrame  {
                     }
                     ansReader.close();
                     ansReader = null;
-                    msg =        caseNum+" END---------------------------------------------";
+                    msg = "TESTCASE " + caseNum+" END -----------------";
                     outWriter.write(msg.getBytes());
                     ansWriter.write(msg.getBytes());
                     fileIndex++;
