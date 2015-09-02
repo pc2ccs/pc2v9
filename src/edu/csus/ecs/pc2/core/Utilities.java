@@ -952,7 +952,7 @@ public final class Utilities {
      * For external files (aka CDP files) on the JUDGE the path is from {@link ContestInformation#getJudgeCDPBasePath()} where
      * ContestInformation is in {@link IInternalContest#getContestInformation()}.
      * <br>
-     * For external files (aka CDP files) on the ADMIN the path is stored in the {@link Problem#getExternalDataFileLocation()}
+     * For external files (aka CDP files) on the ADMIN (or JUDGE without the CDP path set) the path is stored in the {@link Problem#getExternalDataFileLocation()}
      * 
      * @param contest
      * @param problem 
@@ -965,7 +965,6 @@ public final class Utilities {
         ArrayList<String> output = new ArrayList<String>();
 
         if (problem.isUsingExternalDataFiles()) {
-
             ClientId id = contest.getClientId();
             if (id == null) {
                 throw new RuntimeException("contest clientid is null");
@@ -979,7 +978,7 @@ public final class Utilities {
 
             for (SerializedFile serializedFile : serializedFiles) {
 
-                if (id.getClientType() == Type.ADMINISTRATOR) {
+                if (id.getClientType() == Type.ADMINISTRATOR || (id.getClientType() == Type.JUDGE && "".equals(judgeDataFilesPath))) {
                     output.add(serializedFile.getAbsolutePath());
 
                 } else {
