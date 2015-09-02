@@ -100,7 +100,7 @@ public class RunTestCase implements IElementObject, IGetDate{
         if (judgementRecord == null){
             return false;
         } else {
-            return judgementId.equals(judgementRecord.getElementId());
+            return judgementId.equals(judgementRecord.getJudgementId());
         }
     }
 

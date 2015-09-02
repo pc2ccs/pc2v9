@@ -47,5 +47,27 @@ public class RunTestCaseTest extends TestCase {
 
         leTestGetSetDate(dateVar);
     }
+    
+    public void testMatchesJudgement() throws Exception {
+        
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createContest(1, 1, 12, 12, true);
 
+        ClientId team = sample.getTeamAccounts(contest)[0].getClientId();
+        Problem problem = contest.getProblems()[0];
+
+        Run run = sample.createRun(contest, team, problem);
+
+        ClientId judgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
+
+        ElementId judgementId = contest.getJudgements()[3].getElementId();
+
+        JudgementRecord record = new JudgementRecord(judgementId, judgeId, true, false);
+
+        int testNumber = 5;
+        boolean solved = true;
+        RunTestCase runTestCase = new RunTestCase(run, record, testNumber, solved);
+
+        assertTrue("Expcting a match ", runTestCase.matchesJudgement(record));
+    }
 }
