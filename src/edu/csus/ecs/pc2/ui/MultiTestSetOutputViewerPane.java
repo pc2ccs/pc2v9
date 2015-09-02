@@ -1155,7 +1155,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      * @param tabLabel - the label to be put on the viewer pane tab
      * @param visible - whether or not to invoke setVisible(true) on the viewer
      */
-    private void showFile(IFileViewer fileViewer, String file, String title, String tabLabel, boolean visible) {
+    private void showFile(MultipleFileViewer fileViewer, String file, String title, String tabLabel, boolean visible) {
         System.out.println ("MTSVPane.showFile():");
         String viewerString = fileViewer==null?"<null>":fileViewer.getClass().toString();
         System.out.println ("  Viewer='" + viewerString + "'" 
