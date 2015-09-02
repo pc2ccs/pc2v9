@@ -158,6 +158,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private JButton btnCancel;
 
     private JButton btnUpdate;
+
+    private JTabbedPane multiTestSetTabbedPane;
     
 
     /**
@@ -207,16 +209,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             centerPanel = new JPanel();
             centerPanel.setLayout(borderLayout);
 
-            // put a tabbed pane in the center of the panel
-            JTabbedPane multiTestSetTabbedPane = new JTabbedPane(JTabbedPane.TOP);
-            multiTestSetTabbedPane.setName("multiTestSetTabbedPane");
-            multiTestSetTabbedPane.setBorder(new LineBorder(new Color(0, 0, 0)));
-            centerPanel.add(multiTestSetTabbedPane, BorderLayout.CENTER);
+            getMultiTestSetTabbedPane().setName("multiTestSetTabbedPane");
+            getMultiTestSetTabbedPane().setBorder(new LineBorder(new Color(0, 0, 0)));
+            centerPanel.add(getMultiTestSetTabbedPane(), BorderLayout.CENTER);
 
             // add a tab with a JPanel that will display the results for the test cases
             JPanel resultsPane = new JPanel();
             resultsPane.setName("ViewDataSets");
-            multiTestSetTabbedPane.addTab("Data Set Results", null, resultsPane, 
+            getMultiTestSetTabbedPane().addTab("Data Set Results", null, resultsPane, 
                     "Show the results of this submission for each test data set");
             resultsPane.setLayout(new BorderLayout(0, 0));
 
@@ -362,7 +362,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
             // add a tab that will display options for managing the display of data for the test cases
             JPanel optionsPane = new JPanel();
-            multiTestSetTabbedPane.addTab("Options", null, optionsPane, "Set options for tools used to display test set results");
+            getMultiTestSetTabbedPane().addTab("Options", null, optionsPane, "Set options for tools used to display test set results");
             optionsPane.setLayout(new BorderLayout(0, 0));
 
             // add a panel that will hold the various chooser options
@@ -691,7 +691,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                
+                getMultiTestSetTabbedPane().setSelectedIndex(0);
                 // fill in the basic header information
                 getProblemTitleLabel().setText("Problem:  " + currentProblem.getLetter() + " - " + currentProblem.getShortName());
                 getTeamNumberLabel().setText("Team:  " + currentRun.getSubmitter().getClientNumber());
@@ -1275,6 +1275,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     public void setTeamOutputFileNames(String [] filenames){
         this.currentTeamOutputFileNames = filenames ;
+    }
+
+    /**
+     * @return the multiTestSetTabbedPane
+     */
+    public JTabbedPane getMultiTestSetTabbedPane() {
+        if (multiTestSetTabbedPane == null) {
+            multiTestSetTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        }
+        return multiTestSetTabbedPane;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
