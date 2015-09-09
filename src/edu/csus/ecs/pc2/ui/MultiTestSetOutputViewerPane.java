@@ -27,6 +27,7 @@ import java.util.Vector;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -54,6 +55,7 @@ import javax.swing.table.TableModel;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -74,6 +76,23 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private static final long serialVersionUID = 7363093989131251458L;
 
+    /**
+     * comparator radio selection
+     */
+    protected static final String CTYPES = "CTYPES";
+    /**
+     * viewer radio selection
+     */
+    protected static final String VTYPES = "VTYPES";
+    /**
+     * comparator command
+     */
+    protected static final String COMPARATOR_CMD = "COMPARATOR_CMD";
+    /**
+     * viewer command
+     */
+    protected static final String VIEWER_CMD = "VIEWER_CMD";
+
     public static enum COLUMN {
         SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, 
             JUDGE_OUTPUT, JUDGE_DATA
@@ -81,7 +100,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     // define the column headers for the table of results
     private String[] columnNames = { "Select", "Data Set #", "Result", "Time (ms)", 
-                                        "Team View", "Team Compare", 
+                                        "Team Output", "Compare Outputs", 
                                         "Judge's Output", "Judge's Data" };
 
     // get the row data for the table of results
@@ -163,10 +182,43 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private JTabbedPane multiTestSetTabbedPane;
 
-    private int ctype;
-
-    private int vtype;
+    /**
+     * 
+     * TYPES on the radio selects on the options tab
+     */
+    private enum TYPES { 
+        /**
+         *  internal comparator/viewer
+         */
+        INTERNAL,
+        /**
+         * the selector list
+         */
+        LIST,
+        /**
+         * user input
+         */
+        USER
+        };
     
+    // default to the INTERNAL comparator/viewer
+    private TYPES ctype = TYPES.INTERNAL;
+
+    private TYPES vtype = TYPES.INTERNAL;
+    
+    ClientSettings clientSettings = null;
+
+    private JRadioButton rdbtnInternalCompareProgram;
+
+    private JRadioButton rdbtnSpecifyCompareProgram;
+
+    private JRadioButton rdbtnPulldownCompareList;
+
+    private JRadioButton rdbtnInternalViewerProgram;
+
+    private JRadioButton rdbtnPulldownViewerList;
+
+    private JRadioButton rdbtnSpecifyViewerProgram;
 
     /**
      * Constructs an instance of a plugin pane for viewing multi-testset output values.
@@ -193,6 +245,74 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         log = getController().getLog();
+        clientSettings = getContest().getClientSettings();
+        // attempt to load settings from clientSettings (if set)
+        String tmp = clientSettings.getProperty(CTYPES);
+        if (tmp != null) {
+            ctype = TYPES.valueOf(tmp);
+        }
+        tmp = clientSettings.getProperty(COMPARATOR_CMD);
+        if (tmp != null) {
+            lastComparator = currentComparatorCmd = tmp;
+        }
+        tmp = clientSettings.getProperty(VTYPES);
+        if (tmp != null) {
+            vtype = TYPES.valueOf(tmp);
+
+        }
+        tmp = clientSettings.getProperty(VIEWER_CMD);
+        if (tmp != null) {
+            lastViewer = currentViewerCmd = tmp;
+        }
+        // initialize default lists if needed
+        if (ctype == TYPES.LIST) {
+            pulldownSelectComparator.setSelectedItem(currentComparatorCmd);
+        }
+        if (vtype == TYPES.LIST) {
+            pulldownSelectViewer.setSelectedItem(currentViewerCmd);
+        }
+        // now initialize the default text if needed
+        if (ctype == TYPES.USER) {
+            textUserSpecifyComparator.setText(currentComparatorCmd);
+        } else {
+            textUserSpecifyComparator.setText("<enter comparator name>");
+        }
+        if (vtype == TYPES.USER) {
+            textUserSpecifyViewer.setText(currentViewerCmd);
+        } else {
+            textUserSpecifyViewer.setText("<enter viewer name>");
+        }
+        // initialize the button group selections
+        ButtonModel model = null;
+        switch(ctype) {
+            case LIST:
+                model = rdbtnPulldownCompareList.getModel();
+                break;
+            case USER:
+                model = rdbtnSpecifyCompareProgram.getModel();
+                break;
+            default:
+                model = rdbtnInternalCompareProgram.getModel();
+                break;
+        }
+        buttonGroup.setSelected(model, true);
+        switch(ctype) {
+            case INTERNAL:
+                model = rdbtnInternalViewerProgram.getModel();
+                break;
+            case LIST:
+                model = rdbtnPulldownViewerList.getModel();
+                break;
+            case USER:
+                model = rdbtnSpecifyViewerProgram.getModel();
+                break;
+            default:
+                model = rdbtnInternalViewerProgram.getModel();
+                break;
+        }
+        buttonGroup_1.setSelected(model, true);
+        // make sure the buttons are disabled now
+        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
     }
 
     public String getPluginTitle() {
@@ -390,14 +510,13 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             verticalStrut.setPreferredSize(new Dimension(0, 15));
             chooseComparatorPanel.add(verticalStrut);
 
-            // add a button to select the built-in comparator
-            final JRadioButton rdbtnInternalCompareProgram = new JRadioButton("Built-in Comparator");
+            rdbtnInternalCompareProgram = new JRadioButton("Built-in Comparator");
             rdbtnInternalCompareProgram.setSelected(true);
             buttonGroup.add(rdbtnInternalCompareProgram);
             chooseComparatorPanel.add(rdbtnInternalCompareProgram);
 
             // add a button to select from a list of available comparators
-            final JRadioButton rdbtnPulldownCompareList = new JRadioButton("Select");
+            rdbtnPulldownCompareList = new JRadioButton("Select");
             chooseComparatorPanel.add(rdbtnPulldownCompareList);
             buttonGroup.add(rdbtnPulldownCompareList);
 
@@ -414,8 +533,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             pulldownSelectComparator.setEnabled(false);
             panelSelectComparator.add(pulldownSelectComparator);
 
-            // add a button that allows the user to edit a text field identifying the comparator to be used
-            final JRadioButton rdbtnSpecifyCompareProgram = new JRadioButton("User Specified");
+            rdbtnSpecifyCompareProgram = new JRadioButton("User Specified");
             chooseComparatorPanel.add(rdbtnSpecifyCompareProgram);
             buttonGroup.add(rdbtnSpecifyCompareProgram);
             
@@ -429,7 +547,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             // add a text box for the user to specify the comparator
             textUserSpecifyComparator = new JTextField();
             textUserSpecifyComparator.setEnabled(false);
-            textUserSpecifyComparator.setText("<enter comparator name>");
             panelSpecifyComparator.add(textUserSpecifyComparator);
             textUserSpecifyComparator.setColumns(15);
 
@@ -450,8 +567,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             verticalStrut_1.setMinimumSize(new Dimension(0, 10));
             chooseViewerPanel.add(verticalStrut_1);
 
-            // add a button for selecting the built-in viewer
-            final JRadioButton rdbtnInternalViewerProgram = new JRadioButton("Built-in Viewer");
+            rdbtnInternalViewerProgram = new JRadioButton("Built-in Viewer");
             rdbtnInternalViewerProgram.setSelected(true);
             rdbtnInternalViewerProgram.setPreferredSize(new Dimension(117, 23));
             rdbtnInternalViewerProgram.setMinimumSize(new Dimension(117, 23));
@@ -459,8 +575,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             buttonGroup_1.add(rdbtnInternalViewerProgram);
             chooseViewerPanel.add(rdbtnInternalViewerProgram);
 
-            // add a button for selecting the viewer from a list of available viewers
-            final JRadioButton rdbtnPulldownViewerList = new JRadioButton("Select");
+            rdbtnPulldownViewerList = new JRadioButton("Select");
             buttonGroup_1.add(rdbtnPulldownViewerList);
             chooseViewerPanel.add(rdbtnPulldownViewerList);
 
@@ -474,8 +589,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             pulldownSelectViewer.setEnabled(false);
             panel.add(pulldownSelectViewer);
 
-            // add a button allowing the user to enable a textbox for typing the name of a viewer
-            final JRadioButton rdbtnSpecifyViewerProgram = new JRadioButton("User Specified");
+            rdbtnSpecifyViewerProgram = new JRadioButton("User Specified");
             buttonGroup_1.add(rdbtnSpecifyViewerProgram);
             chooseViewerPanel.add(rdbtnSpecifyViewerProgram);
 
@@ -487,7 +601,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             // add a text field for the user to specify a viewer
             textUserSpecifyViewer = new JTextField();
             textUserSpecifyViewer.setEnabled(false);
-            textUserSpecifyViewer.setText("<enter viewer name>");
             panel_1.add(textUserSpecifyViewer);
             textUserSpecifyViewer.setColumns(15);
 
@@ -502,9 +615,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             Component horizontalGlue_4 = Box.createHorizontalGlue();
             horizontalGlue_4.setPreferredSize(new Dimension(20, 20));
             panelFooterButtons.add(horizontalGlue_4);
-
-            ctype = 1;
-            vtype = 1;
 
             btnUpdate = new JButton("Update");
             btnUpdate.setEnabled(false);
@@ -532,17 +642,21 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     getCurrentComparator().setComparatorCommand(lastComparator);
                     getCurrentViewer().setViewerCommand(lastViewer);
                     enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
-                    
+                    clientSettings.put(CTYPES, ctype.toString());
+                    clientSettings.put(VTYPES, vtype.toString());
+                    clientSettings.put(COMPARATOR_CMD, currentComparatorCmd);
+                    clientSettings.put(VIEWER_CMD, currentViewerCmd);
+                    getController().updateClientSettings(clientSettings);
                 }
             });
             btnCancel.addActionListener(new ActionListener() {
                 
                 @Override
                 public void actionPerformed(ActionEvent arg0) {
-                    if (ctype == 3) {
+                    if (ctype == TYPES.USER) {
                         textUserSpecifyComparator.setText(lastComparator);
                     }
-                    if (vtype == 3) {
+                    if (vtype == TYPES.USER) {
                         textUserSpecifyViewer.setText(lastViewer);
                     }
                     // TODO reset selected buttongroup
@@ -558,7 +672,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     if (rdbtnInternalCompareProgram.isSelected()) {
                         currentComparatorCmd = "";
                         enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
-                        ctype = 1;
+                        ctype = TYPES.INTERNAL;
                     }
                 }
 
@@ -568,7 +682,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void itemStateChanged(ItemEvent e) {
                     if (rdbtnPulldownCompareList.isSelected()) {
                         pulldownSelectComparator.setEnabled(true);
-                        ctype = 2;
+                        ctype = TYPES.LIST;
                     } else {
                         pulldownSelectComparator.setEnabled(false);
                     }
@@ -581,7 +695,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void itemStateChanged(ItemEvent e) {
                     if (rdbtnSpecifyCompareProgram.isSelected()) {
                         textUserSpecifyComparator.setEnabled(true);
-                        ctype = 3;
+                        currentComparatorCmd = textUserSpecifyComparator.getText();
+                        ctype = TYPES.USER;
                     } else {
                         textUserSpecifyComparator.setEnabled(false);
                     }
@@ -594,7 +709,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void itemStateChanged(ItemEvent arg0) {
                     if (rdbtnInternalViewerProgram.isSelected()) {
                         currentViewerCmd = "";
-                        vtype = 1;
+                        vtype = TYPES.INTERNAL;
                     }
                     enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
                 }
@@ -605,7 +720,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     if (rdbtnPulldownViewerList.isSelected()) {
                         currentViewerCmd = (String) pulldownSelectViewer.getSelectedItem();
                         pulldownSelectViewer.setEnabled(true);
-                        vtype = 2;
+                        vtype = TYPES.LIST;
                     } else {
                         pulldownSelectViewer.setEnabled(false);
                     }
@@ -617,7 +732,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 public void itemStateChanged(ItemEvent e) {
                     if (rdbtnSpecifyViewerProgram.isSelected()) {
                         textUserSpecifyViewer.setEnabled(true);
-                        vtype = 3;
+                        vtype = TYPES.USER;
+                        currentViewerCmd = textUserSpecifyViewer.getText();
                     } else {
                         textUserSpecifyViewer.setEnabled(false);
                     }
@@ -629,15 +745,15 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 
                 @Override
                 public void keyTyped(KeyEvent arg0) {
-                    if (vtype == 3) {
-                        currentViewerCmd = textUserSpecifyViewer.getText();
-                        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
-                    }
+                    // unused
                 }
                 
                 @Override
                 public void keyReleased(KeyEvent arg0) {
-                    // unused
+                    if (vtype == TYPES.USER) {
+                        currentViewerCmd = textUserSpecifyViewer.getText();
+                        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
+                    }
                 }
                 
                 @Override
@@ -649,15 +765,15 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 
                 @Override
                 public void keyTyped(KeyEvent arg0) {
-                    if (ctype == 3) {
-                        currentComparatorCmd = textUserSpecifyComparator.getText();
-                        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
-                    }
+                    // unused
                 }
                 
                 @Override
                 public void keyReleased(KeyEvent arg0) {
-                    // unused
+                    if (ctype == TYPES.USER) {
+                        currentComparatorCmd = textUserSpecifyComparator.getText();
+                        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
+                    }
                 }
                 
                 @Override
@@ -978,11 +1094,15 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private String[] getAvailableViewersList() {
         // TODO figure out how to coordinate this with actual known viewers
-        return new String[] { "gvim", "notepad", "write" };
+        // gvim options
+        // --nofork so we can kill it when the pane closes
+        // -n to not create swap files
+        // -M do not allow changes
+        return new String[] { "gvim --nofork -n -M", "notepad", "write" };
     }
 
     /**
-     * this update the btnUpdate/btnCancel as appropiate
+     * this update the btnUpdate/btnCancel as appropriate
      * 
      * @param currentComparatorCmd
      * @param currentViewerCmd
@@ -1003,7 +1123,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private String[] getAvailableComparatorsList() {
         // TODO figure out how to coordinate this with actual known comparators
-        return new String[] { "gvim -d" };
+        // gvim options
+        // --nofork so we can kill it when the pane closes
+        // -n to not create swap files
+        // -M do not allow changes
+        // -d diff mode
+        return new String[] { "gvim --nofork -n -M -d" };
     }
 
     public void showMessage(final String message) {
