@@ -729,12 +729,10 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
      */
     @Override
     public void dispose() {
-        if (!viewerCommand.equals("")) {
-            // destroy process if it still exists
-            if (process   != null) {
-                process.destroy();
-                // TODO alas this doesn't seem to work with gvim.bat
-            }
+        // destroy process if it still exists
+        if (process != null) {
+            // note this does not work if the process forks
+            process.destroy();
         }
         super.dispose();
     }

@@ -60,10 +60,16 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
             
             JLabel judgesDataViewLabel = new JLabel("View");
             
+            // link for validator stdout
+            JLabel validatorOutputViewLabel = new JLabel("View");
+            
+            // link for validator stderr
+            JLabel validatorStderrViewLabel = new JLabel("View");
+            
             //build the row object and add it to the model
             Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, time, 
                     teamOutputViewLabel, teamOutputCompareLabel, judgesOutputViewLabel, 
-                    judgesDataViewLabel };
+                    judgesDataViewLabel, validatorOutputViewLabel, validatorStderrViewLabel };
 
             super.addRow(rowData);
         }

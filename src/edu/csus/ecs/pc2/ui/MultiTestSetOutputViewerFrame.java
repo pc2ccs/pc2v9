@@ -46,14 +46,11 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(800, 400));
+        this.setSize(new Dimension(860, 400));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         this.setContentPane(getMultiTestSetOutputViewerPane());
         this.setTitle("Test Results");
         this.setLocationRelativeTo(null);
-        
-        // TODO Bug 918
-
     }
 
     public MultiTestSetOutputViewerPane getMultiTestSetOutputViewerPane() {
@@ -85,6 +82,14 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
      */
     public void setTeamOutputFileNames(String [] filenames){
         getMultiTestSetOutputViewerPane().setTeamOutputFileNames(filenames);
+    }
+
+    public void setValidatorStderrFileNames(String[] filenames) {
+        getMultiTestSetOutputViewerPane().setValidatorStderrFileNames(filenames);
+    }
+
+    public void setValidatorOutputFileNames(String[] filenames) {
+        getMultiTestSetOutputViewerPane().setValidatorOutputFileNames(filenames);
     }
 
 

@@ -126,10 +126,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private JButton acceptValidatorJudgementButton = null;
 
-    private JButton viewDataFileButton = null;
-
-    private JButton viewAnswerFileButton = null;
-
     private JButton shellButton = null;
 
     private DisplayTeamName displayTeamName = null;
@@ -163,6 +159,16 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private List<String> saveOutputFileNames = null;
 
+    /**
+     * saved validator output names
+     */
+    private List<String> saveValidatorOutputFileNames = null;
+    
+    /**
+     * saved validator stderr names
+     */
+    private List<String> saveValidatorErrFileNames = null;
+    
     /**
      * This method initializes
      * 
@@ -242,8 +248,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             buttonPanel.add(getExtractButton(), null);
             buttonPanel.add(getViewSourceButton(), null);
             buttonPanel.add(getViewOutputsButton(), null);
-            buttonPanel.add(getViewDataFileButton(), null);
-            buttonPanel.add(getViewAnswerFileButton(), null);
             buttonPanel.add(getDetailsButton(), null);
             buttonPanel.add(getCancelButton(), null);
         }
@@ -494,24 +498,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             problemNameLabel.setText(getContest().getProblem(run.getProblemId()).toString());
             languageNameLabel.setText(getContest().getLanguage(run.getLanguageId()).toString());
             
-            boolean showFile;
-
-            //determine whether there is a Judge's Answer File and show or hide the View Judge's Answer File button as appropriate
-            if (getProblemDataFiles() != null && getProblemDataFiles().getJudgesAnswerFile() != null) {
-                showFile = true;
-            } else {
-                showFile = false;
-            }
-            getViewAnswerFileButton().setVisible(showFile);
-            
-            //determine whether there is a Judge's Data File and show or hide the View Judge's Data File button as appropriate
-            if (getProblemDataFiles() != null && getProblemDataFiles().getJudgesDataFile() != null) {
-                showFile = true;
-            } else {
-                showFile = false;
-            }
-            getViewDataFileButton().setVisible(showFile);
-            
             //show the View Source button 
             getViewSourceButton().setVisible(true);
 
@@ -558,8 +544,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             problemNameLabel.setText("");
             languageNameLabel.setText("");
             
-            getViewAnswerFileButton().setVisible(false);
-            getViewDataFileButton().setVisible(false);
             getViewSourceButton().setVisible(false);
             showValidatorControls(false);
 
@@ -963,6 +947,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
         
         saveOutputFileNames = executable.getTeamsOutputFilenames();
+        saveValidatorOutputFileNames = executable.getValidatorOutputFilenames();
+        saveValidatorErrFileNames = executable.getValidatorErrFilenames();
         sendTeamOutputFileNames();
         
         enableOutputsButton(true);
@@ -995,6 +981,64 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             }
 
             multiTestSetOutputViewerFrame.setTeamOutputFileNames(teamOutputNames);
+        }
+    }
+
+    /**
+     * Send validator output names to Multi Test Set Viewer.
+     */
+    private void sendValidatorOutputFileNames() {
+
+        if (multiTestSetOutputViewerFrame != null) {
+
+            String[] validatorOutputNames = new String[getProblemDataFiles().getJudgesDataFiles().length];
+
+            // null out list
+            for (int i = 0; i < validatorOutputNames.length; i++) {
+                validatorOutputNames[i] = null;
+            }
+
+            // add entries from actual team test output
+            if (saveValidatorOutputFileNames != null) {
+
+                for (int i = 0; i < saveValidatorOutputFileNames.size(); i++) {
+                    validatorOutputNames[i] = saveValidatorOutputFileNames.get(i);
+                    if (new File(validatorOutputNames[i]).length() == 0) {
+                        validatorOutputNames[i] = null; // null null, happily null!!
+                    }
+                }
+            }
+
+            multiTestSetOutputViewerFrame.setValidatorOutputFileNames(validatorOutputNames);
+        }
+    }
+
+    /**
+     * Send validator output names to Multi Test Set Viewer.
+     */
+    private void sendValidatorStderrFileNames() {
+
+        if (multiTestSetOutputViewerFrame != null) {
+
+            String[] validatorErrFileNames = new String[getProblemDataFiles().getJudgesDataFiles().length];
+
+            // null out list
+            for (int i = 0; i < validatorErrFileNames.length; i++) {
+                validatorErrFileNames[i] = null;
+            }
+
+            // add entries from actual team test output
+            if (saveValidatorErrFileNames != null) {
+
+                for (int i = 0; i < saveValidatorErrFileNames.size(); i++) {
+                    validatorErrFileNames[i] = saveValidatorErrFileNames.get(i);
+                    if (new File(validatorErrFileNames[i]).length() == 0) {
+                        validatorErrFileNames[i] = null; // null null, happily null!!
+                    }
+                }
+            }
+
+            multiTestSetOutputViewerFrame.setValidatorStderrFileNames(validatorErrFileNames);
         }
     }
 
@@ -1296,42 +1340,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     }
 
-    /**
-     * This method initializes viewDataFile
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getViewDataFileButton() {
-        if (viewDataFileButton == null) {
-            viewDataFileButton = new JButton();
-            viewDataFileButton.setText("View Data File");
-            viewDataFileButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    viewDataFile();
-                }
-            });
-        }
-        return viewDataFileButton;
-    }
-
-    /**
-     * This method initializes viewAnswerFile
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getViewAnswerFileButton() {
-        if (viewAnswerFileButton == null) {
-            viewAnswerFileButton = new JButton();
-            viewAnswerFileButton.setText("View Answer File");
-            viewAnswerFileButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    viewAnswerFile();
-                }
-            });
-        }
-        return viewAnswerFileButton;
-    }
-
     private ProblemDataFiles getProblemDataFiles() {
         Problem problem = getContest().getProblem(run.getProblemId());
         return getContest().getProblemDataFile(problem);
@@ -1356,62 +1364,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         fileViewer.setVisible(true);
     }
 
-    protected void viewDataFile() {
-        if (getProblemDataFiles() != null) {
-            if (getProblemDataFiles().getJudgesDataFile() != null) {
-                if (dataFileViewer != null) {
-                    dataFileViewer.dispose();
-                }
-                dataFileViewer = new MultipleFileViewer(getController().getLog());
-
-                SerializedFile[] list = getProblemDataFiles().getJudgesDataFiles();
-                if (list.length == 1) {
-                    createAndViewFile(dataFileViewer, getProblemDataFiles().getJudgesDataFile(), "Judge's data file", true);
-                } else {
-                    createAndViewAllJudgesFiles(dataFileViewer, "Judge's data file", list, true);
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "No data file defined");
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "No data file defined");
-        }
-    }
-
-    private void createAndViewAllJudgesFiles(IFileViewer fileViewer, String title, SerializedFile[] files, boolean b) {
-        
-        if (files != null && files.length > 1) {
-            for (int i = files.length; i > 0; i--) {
-                createAndViewFile(fileViewer, files[i - 1], files[i - 1].getName(), false);
-            }
-        }
-        createAndViewFile(fileViewer, files[0], title, false);
-        fileViewer.setSelectedIndex(0);
-        fileViewer.setVisible(true);
-    }
-
-    protected void viewAnswerFile() {
-        if (getProblemDataFiles() != null) {
-            if (getProblemDataFiles().getJudgesAnswerFile() != null) {
-                if (answerFileViewer != null) {
-                    answerFileViewer.dispose();
-                }
-                answerFileViewer = new MultipleFileViewer(getController().getLog());
-
-                SerializedFile[] list = getProblemDataFiles().getJudgesAnswerFiles();
-                if (list.length == 1) {
-                    createAndViewFile(answerFileViewer, getProblemDataFiles().getJudgesAnswerFile(), "Judge's answer file", true);
-                } else {
-                    createAndViewAllJudgesFiles(answerFileViewer, "Judge's answer file", list, true);
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "No Answer File defined");
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "No Answer File defined");
-        }
-    }
-
     protected void viewOutputs() {
         
 //        if (executableFileViewer != null) {
@@ -1431,6 +1383,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         Problem problem = getContest().getProblem(run.getProblemId());
         multiTestSetOutputViewerFrame.setData(run, runFiles, problem, getProblemDataFiles());
         sendTeamOutputFileNames();
+        sendValidatorOutputFileNames();
+        sendValidatorStderrFileNames();
         multiTestSetOutputViewerFrame.setVisible(true);
     }
 
@@ -1585,8 +1539,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             viewOutputsButton = new JButton();
             viewOutputsButton.setActionCommand("View Test Results");
             viewOutputsButton.setEnabled(true);
-            viewOutputsButton.setToolTipText("View Test Results and data sets");
-            viewOutputsButton.setText("View Outputs");
+            viewOutputsButton.setToolTipText("View/Compare Test Results and data sets");
+            viewOutputsButton.setText("View Outputs & Data");
             viewOutputsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     viewOutputs();

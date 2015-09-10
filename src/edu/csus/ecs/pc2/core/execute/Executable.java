@@ -160,6 +160,16 @@ public class Executable extends Plugin implements IExecutable {
      */
     private ArrayList<String> teamsOutputFilenames = new ArrayList<String>();
 
+    /**
+     * List of Validator output filenames, created by execute method.
+     */
+    private ArrayList<String> validatorOutputFilenames = new ArrayList<String>();
+
+    /**
+     * List of Validator stderr filenames, created by execute method.
+     */
+    private ArrayList<String> validatorStderrFilesnames = new ArrayList<String>();
+
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
         super.setContestAndController(inContest, inController);
@@ -563,8 +573,8 @@ public class Executable extends Plugin implements IExecutable {
 
     protected boolean createFile(SerializedFile file, String filename) {
         try {
-            Utilities.createFile(file, filename);
-            return true;
+            // will return false if file could not be created
+            return Utilities.createFile(file, filename);
         } catch (IOException e) {
             log.log(Log.INFO, "Could not create "+filename, e);
             return false;
@@ -838,6 +848,12 @@ public class Executable extends Plugin implements IExecutable {
             }
             log.log(Log.CONFIG, "Exception in validator ", ex);
         }
+        String validatorOutputFilename = prefixExecuteDirname("valout."+dataSetNumber + ".txt");
+        createFile(executionData.getValidationStdout(), validatorOutputFilename);
+        validatorOutputFilenames.add(validatorOutputFilename);
+        String validatorStderrFilename = prefixExecuteDirname("valerr."+dataSetNumber + ".txt");
+        createFile(executionData.getValidationStderr(), validatorStderrFilename);
+        validatorStderrFilesnames.add(validatorStderrFilename);
 
         boolean fileThere = new File(prefixExecuteDirname(resultsFileName)).exists();
 
@@ -1950,6 +1966,22 @@ public class Executable extends Plugin implements IExecutable {
      */
     public List<String> getTeamsOutputFilenames() {
         return teamsOutputFilenames;
+    }
+
+    /**
+     * Get filename for each team's output for each test case.
+     * @return the list of team output file names.
+     */
+    public List<String> getValidatorOutputFilenames() {
+        return validatorOutputFilenames;
+    }
+
+    /**
+     * Get filename for each team's output for each test case.
+     * @return the list of team output file names.
+     */
+    public List<String> getValidatorErrFilenames() {
+        return validatorStderrFilesnames;
     }
 }
 

@@ -95,16 +95,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     public static enum COLUMN {
         SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, 
-            JUDGE_OUTPUT, JUDGE_DATA
+            JUDGE_OUTPUT, JUDGE_DATA, VALIDATOR_OUTPUT, VALIDATOR_ERR
     };
 
     // define the column headers for the table of results
     private String[] columnNames = { "Select", "Data Set #", "Result", "Time (ms)", 
                                         "Team Output", "Compare Outputs", 
-                                        "Judge's Output", "Judge's Data" };
-
-    // get the row data for the table of results
-    private Object[][] tableData ;
+                                        "Judge's Output", "Judge's Data", "Validator Output",
+                                        "Validator STDERR" };
 
     private JPanel centerPanel = null;
 
@@ -220,6 +218,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private JRadioButton rdbtnSpecifyViewerProgram;
 
+    private String[] currentValidatorOutputFileNames;
+
+    private String[] currentValidatorStderrFileNames;
+
     /**
      * Constructs an instance of a plugin pane for viewing multi-testset output values.
      * 
@@ -247,72 +249,77 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         log = getController().getLog();
         clientSettings = getContest().getClientSettings();
         // attempt to load settings from clientSettings (if set)
-        String tmp = clientSettings.getProperty(CTYPES);
-        if (tmp != null) {
-            ctype = TYPES.valueOf(tmp);
-        }
-        tmp = clientSettings.getProperty(COMPARATOR_CMD);
-        if (tmp != null) {
-            lastComparator = currentComparatorCmd = tmp;
-        }
-        tmp = clientSettings.getProperty(VTYPES);
-        if (tmp != null) {
-            vtype = TYPES.valueOf(tmp);
+        if (clientSettings != null) {
+            String tmp = clientSettings.getProperty(CTYPES);
+            if (tmp != null) {
+                ctype = TYPES.valueOf(tmp);
+            }
+            tmp = clientSettings.getProperty(COMPARATOR_CMD);
+            if (tmp != null) {
+                lastComparator = currentComparatorCmd = tmp;
+            }
+            tmp = clientSettings.getProperty(VTYPES);
+            if (tmp != null) {
+                vtype = TYPES.valueOf(tmp);
 
+            }
+            tmp = clientSettings.getProperty(VIEWER_CMD);
+            if (tmp != null) {
+                lastViewer = currentViewerCmd = tmp;
+            }
+            // initialize default lists if needed
+            if (ctype == TYPES.LIST) {
+                pulldownSelectComparator.setSelectedItem(currentComparatorCmd);
+            }
+            if (vtype == TYPES.LIST) {
+                pulldownSelectViewer.setSelectedItem(currentViewerCmd);
+            }
+            // now initialize the default text if needed
+            if (ctype == TYPES.USER) {
+                textUserSpecifyComparator.setText(currentComparatorCmd);
+            } else {
+                textUserSpecifyComparator.setText("<enter comparator name>");
+            }
+            if (vtype == TYPES.USER) {
+                textUserSpecifyViewer.setText(currentViewerCmd);
+            } else {
+                textUserSpecifyViewer.setText("<enter viewer name>");
+            }
+            // initialize the button group selections
+            ButtonModel model = null;
+            switch (ctype) {
+                case LIST:
+                    model = rdbtnPulldownCompareList.getModel();
+                    break;
+                case USER:
+                    model = rdbtnSpecifyCompareProgram.getModel();
+                    break;
+                default:
+                    model = rdbtnInternalCompareProgram.getModel();
+                    break;
+            }
+            buttonGroup.setSelected(model, true);
+            switch (ctype) {
+                case INTERNAL:
+                    model = rdbtnInternalViewerProgram.getModel();
+                    break;
+                case LIST:
+                    model = rdbtnPulldownViewerList.getModel();
+                    break;
+                case USER:
+                    model = rdbtnSpecifyViewerProgram.getModel();
+                    break;
+                default:
+                    model = rdbtnInternalViewerProgram.getModel();
+                    break;
+            }
+            buttonGroup_1.setSelected(model, true);
+            // make sure these are initialized properly
+            getCurrentComparator().setComparatorCommand(lastComparator);
+            getCurrentViewer().setViewerCommand(lastViewer);
+            // make sure the buttons are disabled now
+            enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
         }
-        tmp = clientSettings.getProperty(VIEWER_CMD);
-        if (tmp != null) {
-            lastViewer = currentViewerCmd = tmp;
-        }
-        // initialize default lists if needed
-        if (ctype == TYPES.LIST) {
-            pulldownSelectComparator.setSelectedItem(currentComparatorCmd);
-        }
-        if (vtype == TYPES.LIST) {
-            pulldownSelectViewer.setSelectedItem(currentViewerCmd);
-        }
-        // now initialize the default text if needed
-        if (ctype == TYPES.USER) {
-            textUserSpecifyComparator.setText(currentComparatorCmd);
-        } else {
-            textUserSpecifyComparator.setText("<enter comparator name>");
-        }
-        if (vtype == TYPES.USER) {
-            textUserSpecifyViewer.setText(currentViewerCmd);
-        } else {
-            textUserSpecifyViewer.setText("<enter viewer name>");
-        }
-        // initialize the button group selections
-        ButtonModel model = null;
-        switch(ctype) {
-            case LIST:
-                model = rdbtnPulldownCompareList.getModel();
-                break;
-            case USER:
-                model = rdbtnSpecifyCompareProgram.getModel();
-                break;
-            default:
-                model = rdbtnInternalCompareProgram.getModel();
-                break;
-        }
-        buttonGroup.setSelected(model, true);
-        switch(ctype) {
-            case INTERNAL:
-                model = rdbtnInternalViewerProgram.getModel();
-                break;
-            case LIST:
-                model = rdbtnPulldownViewerList.getModel();
-                break;
-            case USER:
-                model = rdbtnSpecifyViewerProgram.getModel();
-                break;
-            default:
-                model = rdbtnInternalViewerProgram.getModel();
-                break;
-        }
-        buttonGroup_1.setSelected(model, true);
-        // make sure the buttons are disabled now
-        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
     }
 
     public String getPluginTitle() {
@@ -529,7 +536,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
             // construct a dropdown list of available comparators and add it to the panel
             String [] comparators = getAvailableComparatorsList();
-            pulldownSelectComparator = new JComboBox(comparators);
+            pulldownSelectComparator = new JComboBox<String>(comparators);
             pulldownSelectComparator.setEnabled(false);
             panelSelectComparator.add(pulldownSelectComparator);
 
@@ -585,7 +592,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             chooseViewerPanel.add(panel);
 
             // add a drop-down list of available viewers
-            pulldownSelectViewer = new JComboBox(getAvailableViewersList());
+            pulldownSelectViewer = new JComboBox<String>(getAvailableViewersList());
             pulldownSelectViewer.setEnabled(false);
             panel.add(pulldownSelectViewer);
 
@@ -642,6 +649,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     getCurrentComparator().setComparatorCommand(lastComparator);
                     getCurrentViewer().setViewerCommand(lastViewer);
                     enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
+                    if (clientSettings == null) {
+                        clientSettings = new ClientSettings();
+                    }
                     clientSettings.put(CTYPES, ctype.toString());
                     clientSettings.put(VTYPES, vtype.toString());
                     clientSettings.put(COMPARATOR_CMD, currentComparatorCmd);
@@ -1054,6 +1064,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         resultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_COMPARE.ordinal()]).setCellRenderer(new LinkRenderer());
         resultsTable.getColumn(columnNames[COLUMN.JUDGE_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
         resultsTable.getColumn(columnNames[COLUMN.JUDGE_DATA.ordinal()]).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
+        resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkRenderer());
 
         // render Result column as Pass/Fail on Green/Red
         resultsTable.getColumn(columnNames[COLUMN.RESULT.ordinal()]).setCellRenderer(new PassFailCellRenderer());
@@ -1074,7 +1086,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 
                 System.out.println ("MTSVPane.mouseClicked(): row=" + row + ", col=" + column);
 
-                if (column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || column == COLUMN.JUDGE_OUTPUT.ordinal() || column == COLUMN.JUDGE_DATA.ordinal()) {
+                if (column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || column == COLUMN.JUDGE_OUTPUT.ordinal() || column == COLUMN.JUDGE_DATA.ordinal() || column == COLUMN.VALIDATOR_OUTPUT.ordinal()
+                        || column == COLUMN.VALIDATOR_ERR.ordinal()) {
                     viewFile(row, column);
                 } else if (column == COLUMN.TEAM_OUTPUT_COMPARE.ordinal() || e.getClickCount() > 1) {
                     // compare the team and judge's output in the active row
@@ -1162,7 +1175,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     protected void viewFile(int row, int col) {
         if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && 
-                col != COLUMN.JUDGE_DATA.ordinal() ) {
+                col != COLUMN.JUDGE_DATA.ordinal()  && col != COLUMN.VALIDATOR_OUTPUT.ordinal() &&
+                col != COLUMN.VALIDATOR_ERR.ordinal()) {
             if (log != null) {
                 log.log(Log.WARNING, "MTSVPane.viewFile(): invalid column number for file viewing request: " + col);
             } else {
@@ -1172,29 +1186,41 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
         if (getCurrentViewer() != null) {
             getCurrentViewer().dispose();
+            // we are viewing one file, make sure it will only have the 1 tab
+            currentViewer = null;
         }
-        
+        // and make sure its in the right mode
+        getCurrentViewer().setViewerCommand(currentViewerCmd);
+
         //get a title based on what column was selected
-        String title = col == COLUMN.TEAM_OUTPUT_VIEW.ordinal() ? "Team Output" 
-                : col == COLUMN.JUDGE_OUTPUT.ordinal() ? "Judge's Output" 
-                        : col == COLUMN.JUDGE_DATA.ordinal() ? "Judge's Data" : "<unknown>";
+        String title = col == COLUMN.TEAM_OUTPUT_VIEW.ordinal() ? "Team Output" : col == COLUMN.JUDGE_OUTPUT.ordinal() 
+                ? "Judge's Output" : col == COLUMN.JUDGE_DATA.ordinal() 
+                ? "Judge's Data" : col == COLUMN.VALIDATOR_OUTPUT.ordinal() 
+                ? "Validator Output" : col == COLUMN.VALIDATOR_ERR.ordinal() 
+                ? "Validator STDERR" : "<unknown>";
         
         //get the file associated with the specified cell
         String targetFile = getFileForTableCell(row,col);
         if (targetFile != null) {
             int testCaseNum = row + 1;
-            showFile(currentViewer, targetFile, title, "Test Case "+testCaseNum, true);
+            showFile(getCurrentViewer(), targetFile, title, "Test Case "+testCaseNum, true);
         } else {
-            String msg = "Unable to find file for table cell (" 
-                    + row + "," + col + ") try executing the run 1st." ;
-            if (log != null) {
-                log.log(Log.WARNING, "MTSVPane.viewFile(): " + msg);
+            if (col == COLUMN.TEAM_OUTPUT_VIEW.ordinal()) {
+                String msg = "Unable to find file for table cell (" 
+                        + row + "," + col + ") try executing the run 1st." ;
+                if (log != null) {
+                    log.log(Log.WARNING, "MTSVPane.viewFile(): " + msg);
+                } else {
+                    System.err.println ("MTSVPane.viewFile(): " + msg);
+                }
+                JOptionPane.showMessageDialog(getParentFrame(), msg, 
+                        "File Not Found", JOptionPane.WARNING_MESSAGE);
             } else {
-                System.err.println ("MTSVPane.viewFile(): " + msg);
+                String msg = "No output found";
+                JOptionPane.showMessageDialog(getParentFrame(), msg, 
+                        "File Not Found", JOptionPane.INFORMATION_MESSAGE);
+                
             }
-
-            JOptionPane.showMessageDialog(getParentFrame(), msg, 
-                    "File Not Found", JOptionPane.WARNING_MESSAGE);
         }
     }
     
@@ -1332,6 +1358,18 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 returnFile = null ;
             }
 
+        } else if (col == COLUMN.VALIDATOR_OUTPUT.ordinal()) {
+            //get validator output file corresponding to test case "row"
+            if (currentValidatorOutputFileNames != null && currentValidatorOutputFileNames.length >= row) {
+                // this will either be null or contain the filename
+                returnFile = currentValidatorOutputFileNames[row];
+            }
+        } else if (col == COLUMN.VALIDATOR_ERR.ordinal()) {
+            //get validator output file corresponding to test case "row"
+            if (currentValidatorStderrFileNames != null && currentValidatorStderrFileNames.length >= row) {
+                // this will either be null or contain the filename
+                returnFile = currentValidatorStderrFileNames[row];
+            }
         } else {
             //the column is not one of those containing "view" links; return null
             returnFile = null;
@@ -1480,6 +1518,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             multiTestSetTabbedPane = new JTabbedPane(JTabbedPane.TOP);
         }
         return multiTestSetTabbedPane;
+    }
+
+    public void setValidatorOutputFileNames(String[] filenames) {
+        this.currentValidatorOutputFileNames = filenames ;
+    }
+
+    public void setValidatorStderrFileNames(String[] filenames) {
+        this.currentValidatorStderrFileNames = filenames ;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

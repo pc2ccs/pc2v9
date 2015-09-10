@@ -691,12 +691,10 @@ public class MultiFileComparator extends JFrame  {
      */
     @Override
     public void dispose() {
-        if (!comparatorCommand.equals("")) {
-            // destroy process if it still exists
-            if (process  != null) {
-                process.destroy();
-                // TODO alas this doesn't seem to work with gvim.bat
-            }
+        // destroy process if it still exists
+        if (process != null) {
+            // note this does not work if the process forks
+            process.destroy();
         }
         super.dispose();
     }
