@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -12,10 +13,9 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.FileStorage;
-import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * 
@@ -24,21 +24,11 @@ import junit.framework.TestCase;
  */
 
 // $HeadURL$
-public class RunResultsFileListTest extends TestCase {
+public class RunResultsFileListTest extends AbstractTestCase{
 
 
     private int siteNumber = 45;
     
-    protected String getTestDirectoryName(){
-        String testDir = "testing";
-        
-        if (!new File(testDir).isDirectory()) {
-            new File(testDir).mkdirs();
-        }
-
-        return testDir;
-    }
-
     protected void setUp() throws Exception {
         super.setUp();
     }
@@ -97,6 +87,9 @@ public class RunResultsFileListTest extends TestCase {
     }
 
     public void testToDisk() throws Exception {
+        
+        String dirname = getOutputDataDirectory(this.getDataDirectory());
+        new File(dirname).mkdirs();
 
         SampleContest sampleContest = new SampleContest();
         IInternalContest contest = sampleContest.createContest(siteNumber, siteNumber, 22, 5, false);
@@ -125,8 +118,6 @@ public class RunResultsFileListTest extends TestCase {
 
         RunResultFiles runResultFiles = new RunResultFiles(run, problem.getElementId(), judgementRecord, executionData);
         
-        String dirname = getTestDirectoryName() + File.separator + "runResFileListTest";
-        new File(dirname).mkdirs();
        
         // write to disk
         

@@ -308,6 +308,10 @@ public class ExecutablePluginTest extends AbstractTestCase {
     }
 
     public void testLargeStdIn() throws FileNotFoundException {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
@@ -806,6 +810,10 @@ public class ExecutablePluginTest extends AbstractTestCase {
      * @throws Exception
      */
     public void testExternalMultipleTestCaseFromSTDIN() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
 
         String testBaseDirname = getDataDirectory(this.getName());
         

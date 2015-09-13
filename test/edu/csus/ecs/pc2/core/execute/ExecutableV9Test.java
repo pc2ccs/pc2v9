@@ -292,6 +292,10 @@ public class ExecutableV9Test extends AbstractTestCase {
     }
 
     public void testLargeStdIn() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 

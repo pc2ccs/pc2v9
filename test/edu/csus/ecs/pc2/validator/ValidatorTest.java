@@ -26,7 +26,7 @@ public class ValidatorTest extends AbstractTestCase {
 
     private static final String DATA_DIR_PATH = "validator";
 
-//    private static final String OUT_DIR_PATH = "testing" + File.separator + "validator" + File.separator + "output";
+//    unused private static final String OUT_DIR_PATH = "testing" + File.separator + "validator" + File.separator + "output";
 
     @Override
     protected void setUp() throws Exception {

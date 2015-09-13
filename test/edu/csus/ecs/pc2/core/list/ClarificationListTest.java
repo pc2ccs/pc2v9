@@ -24,8 +24,7 @@ public class ClarificationListTest extends AbstractTestCase {
 
     public void testClear() throws Exception {
 
-        String dirname = "testing" + File.separator + "ClarListTest";
-
+        String dirname = getOutputDataDirectory(this.getName());
         new File(dirname).mkdirs();
 
         SampleContest sample = new SampleContest();

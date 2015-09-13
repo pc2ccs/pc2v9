@@ -121,6 +121,10 @@ public class RunListTest extends AbstractTestCase {
      */
     public void testBackupStressUsingThreads() throws Exception {
         
+        if (isFastJUnitTesting()){
+            return;
+        }
+        
         /**
          * Number of runs to add.
          */

@@ -388,20 +388,8 @@ public class SampleContest {
     }
     
     
-    
-
-    public static String getTestDirectoryName() {
-        String testDir = "testing";
-
-        if (!new File(testDir).isDirectory()) {
-            new File(testDir).mkdirs();
-        }
-
-        return testDir;
-    }
-
     public static String getTestDirectoryName(String subDirName) {
-        String testDir = getTestDirectoryName() + File.separator + subDirName;
+        String testDir = "testout" + File.separator + subDirName;
 
         if (!new File(testDir).isDirectory()) {
             new File(testDir).mkdirs();

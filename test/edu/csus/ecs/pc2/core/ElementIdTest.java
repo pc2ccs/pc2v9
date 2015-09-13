@@ -5,9 +5,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.UUID;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.security.FileStorage;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit tests for ElementId.
@@ -17,18 +17,8 @@ import edu.csus.ecs.pc2.core.security.FileStorage;
  */
 
 // $HeadURL$
-public class ElementIdTest extends TestCase {
+public class ElementIdTest extends AbstractTestCase {
     
-    protected String getTestDirectoryName(){
-        String testDir = "testing";
-        
-        if (!new File(testDir).isDirectory()) {
-            new File(testDir).mkdirs();
-        }
-
-        return testDir;
-    }
-
     /*
      * Test method for 'edu.csus.ecs.pc2.core.ElementId.hashCode()'
      */
@@ -81,16 +71,17 @@ public class ElementIdTest extends TestCase {
 //        System.err.println("testConstructor tested : "+number);
     }
     
-    private Serializable serializeObject (Serializable serializable) throws Exception {
-        
-        FileStorage fileStorage = new FileStorage(getTestDirectoryName() + File.separator);
-        
-        UUID id = UUID.randomUUID();
-        String fileName = getTestDirectoryName() + File.separator + "EIT" + id.toString();
-        
-        fileStorage.writeObjectToFile(fileName, serializable);
-        return fileStorage.load(fileName);
-    }
+
+  private Serializable create (File file, Serializable serializable) throws Exception {
+  
+  FileStorage fileStorage = new FileStorage(file.getParent());
+  
+
+  String fileName = file.getAbsolutePath();
+  
+  fileStorage.writeObjectToFile(fileName, serializable);
+  return fileStorage.load(fileName);
+}
     
     /**
      * Test equals().
@@ -98,7 +89,10 @@ public class ElementIdTest extends TestCase {
      */
     public void testEqual() throws Exception{
         
-        
+
+        String testDirectory = getOutputDataDirectory(this.getName());
+        ensureDirectory(testDirectory);
+
         ElementId id = new ElementId("name");
         ElementId id2 = new ElementId("name");
         
@@ -108,8 +102,11 @@ public class ElementIdTest extends TestCase {
         assertTrue(id.equals(id));
         assertFalse(id.equals(id2));
         
-        Object object = serializeObject (id);
-        
+        UUID uuid = UUID.randomUUID();
+        String fileName = testDirectory + File.separator + "EIT" + uuid.toString();
+        File file = new File(fileName);;
+        Object object = create (file, id);
+
         ElementId newId = (ElementId) object;
         
         assertEquals(id, newId);

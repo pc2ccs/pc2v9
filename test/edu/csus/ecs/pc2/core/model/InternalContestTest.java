@@ -78,16 +78,6 @@ public class InternalContestTest extends AbstractTestCase {
         super(name);
     }
 
-    protected String getTestDirectoryName(){
-        String testDir = "testing";
-        
-        if (!new File(testDir).isDirectory()) {
-            new File(testDir).mkdirs();
-        }
-
-        return testDir;
-    }
-
     public boolean isDebugMode() {
         return debugMode;
     }
@@ -107,7 +97,7 @@ public class InternalContestTest extends AbstractTestCase {
     protected IStorage createStorage(String name, int siteNumber){
         Profile profile = new Profile(name);
         profile.setSiteNumber(siteNumber);
-        String testdirName = getTestDirectoryName() + File.separator + profile.getProfilePath();
+        String testdirName = getOutputDataDirectory() + File.separator + profile.getProfilePath();
         return new FileStorage(testdirName);
     }
     
@@ -285,7 +275,7 @@ public class InternalContestTest extends AbstractTestCase {
 
         int numRuns = 5;
 
-        String logName = getTestDirectoryName() + "TestRunClone.log";
+        String logName = getOutputDataDirectory(this.getName()) +File.separator + "TestRunClone.log";
         Log log = new Log(logName);
 
         Profile originalProfile = new Profile("Original");
@@ -300,7 +290,7 @@ public class InternalContestTest extends AbstractTestCase {
         contest.storeConfiguration(log);
 
         Profile newProfile = new Profile("Cloned Profile");
-        newProfile.setProfilePath(getTestDirectoryName() + File.separator + newProfile.getProfilePath());
+        newProfile.setProfilePath(getOutputDataDirectory(this.getName()) + File.separator + newProfile.getProfilePath());
         if (debugMode){
             System.out.println("Profile clone 1 at "+newProfile.getProfilePath());
         }
@@ -319,7 +309,7 @@ public class InternalContestTest extends AbstractTestCase {
          */
 
         Profile newProfile2 = new Profile("Cloned Profile");
-        newProfile2.setProfilePath(getTestDirectoryName() + File.separator + newProfile2.getProfilePath());
+        newProfile2.setProfilePath(getOutputDataDirectory() + File.separator + newProfile2.getProfilePath());
         if (debugMode){
             System.out.println("Profile clone 2 at "+newProfile2.getProfilePath());
         }

@@ -329,8 +329,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     public void testLargeStdIn() throws Exception {
 
-        if (isDebugMode()){
-            // Don't run this time wasting junit while debugging other Junits
+        if (isFastJUnitTesting()){
             return;
         }
         
@@ -464,7 +463,7 @@ public class ExecutableTest extends AbstractTestCase {
             byte[] buf = file.getBuffer();
             System.out.println(buf.toString());
         } else {
-            System.out.println("No file contents for "+message);
+            new Exception("No file contents for file "+message).printStackTrace();
         }
         
     }
@@ -818,7 +817,11 @@ public class ExecutableTest extends AbstractTestCase {
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         
-        runExecutableTest(run, runFiles, true, yesJudgement);
+        /**
+         * TODO fix this JUnit test.
+         */
+        fail ("testMultipleTestCaseInternalFile - fix run Executable");
+//        runExecutableTest(run, runFiles, true, yesJudgement);
     }
     
     private boolean areDataFilesExternal(ProblemDataFiles problemDataFile) {

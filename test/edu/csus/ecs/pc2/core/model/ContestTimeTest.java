@@ -28,6 +28,10 @@ public class ContestTimeTest extends AbstractTestCase {
      * @throws Exception
      */
     public void testElapsedStartStopInContest() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
 
         String testName = this.getName();
         /**
@@ -68,6 +72,10 @@ public class ContestTimeTest extends AbstractTestCase {
      * @throws Exception
      */
     public void testElapsedStartStop() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
 
         String testName = this.getName();
 

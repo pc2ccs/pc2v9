@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Random;
 import java.util.Vector;
 import java.util.logging.ConsoleHandler;
@@ -45,6 +46,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -82,6 +84,15 @@ import edu.csus.ecs.pc2.core.report.IReport;
 
 // $HeadURL$
 public class AbstractTestCase extends TestCase {
+
+    /**
+     * A setting to speed up tests.
+     * 
+     * Used to skip tests that take longer than a second.
+     * 
+     */
+//    private boolean fastJUnitTesting = true;
+    private boolean fastJUnitTesting = false;
     
     private String testDataDirectory = null;
 
@@ -1138,6 +1149,61 @@ public class AbstractTestCase extends TestCase {
         }
         Files.copy(new File(fileOne).toPath(), new File(fileTwo).toPath());
 
+    }
+
+
+    public class ElementIdComparator implements Comparator<ElementId> {
+        public int compare(ElementId elementIdOne, ElementId elementIdTwo) {
+            return elementIdOne.toString().compareTo(elementIdTwo.toString());
+        }
+    }
+
+    public void assertEquals(String message, Filter expected, Filter actual) {
+
+        assertEquals(message + " problem list ", expected.getProblemIdList(), actual.getProblemIdList());
+        assertEquals(message + " language list ", expected.getLanguageIdList(), actual.getLanguageIdList());
+        assertEquals(message + " language list ", expected.getJudgementIdList(), actual.getJudgementIdList());
+
+        assertEquals("filter ", expected.toString(), actual.toString());
+
+    }
+
+    private void assertEquals(String message, ElementId[] expectedList, ElementId[] actualList) {
+
+        int maxValue = Math.max(expectedList.length, actualList.length);
+        Arrays.sort(expectedList, new ElementIdComparator());
+        Arrays.sort(actualList, new ElementIdComparator());
+
+        int exCount = expectedList.length;
+        int actCount = actualList.length;
+
+        for (int i = 0; i < maxValue; i++) {
+            if (i < expectedList.length && i < actualList.length) {
+
+                if (!expectedList[i].equals(actualList[i])) {
+                    if (exCount != actCount) {
+                        message += " expected#= " + exCount + " act#= " + actCount;
+                    }
+                    // System.out.println("exp = " + expectedList[i].toString());
+                    // System.out.println("act = " + actualList[i].toString());
+                    throw new ComparisonFailure(message, expectedList[i].toString(), actualList[i].toString());
+                }
+            }
+        }
+
+        assertEquals(message + " list length ", exCount, actCount);
+        
+//        System.out.println("act list = "+actCount+" exp list "+exCount);
+    }
+
+
+    /**
+     * Flag to skip tests that take a long time.
+     * 
+     * @return true to skip, else false.
+     */
+    public boolean isFastJUnitTesting() {
+        return fastJUnitTesting;
     }
     
 }

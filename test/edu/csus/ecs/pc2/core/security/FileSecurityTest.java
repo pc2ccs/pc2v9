@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.security;
 import java.io.File;
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * JUnit test for FileSecurity.
@@ -13,23 +13,9 @@ import junit.framework.TestCase;
  */
 
 // $HeadURL$
-public class FileSecurityTest extends TestCase {
+public class FileSecurityTest extends AbstractTestCase {
 
     private String passwordString = "ThisPassword";
-
-    static {
-        insureDirectoriesRemoved();
-    }
-    
-    protected static String  getTestDirectoryName(){
-        String testDir = "testing";
-        
-        if (!new File(testDir).isDirectory()) {
-            new File(testDir).mkdirs();
-        }
-
-        return testDir;
-    }
 
     public FileSecurityTest() {
         super();
@@ -40,28 +26,7 @@ public class FileSecurityTest extends TestCase {
         super.setUp();
     }
 
-    private static void insureDirectoriesRemoved() {
-
-        boolean ableToRemoveDirectories = true;
-
-        String[] dirNames = { "fileSecVPDir", "fileSecVPDirGCD", "getSecretK", "getSecretKTwo" };
-        for (String filename : dirNames) {
-            String name = getTestDirectoryName() + File.separator + filename;
-            ableToRemoveDirectories = ableToRemoveDirectories && insureDirRemoved(name);
-            // System.err.println("debug removing directory "+ableToRemoveDirectories+" "+name);
-        }
-
-        if (!ableToRemoveDirectories) {
-            for (String filename : dirNames) {
-                String name = getTestDirectoryName() + File.separator + filename;
-                if (new File(name).exists()) {
-                    System.err.println("Unable to remove directory: "+name);
-                }
-            }
-            fail("Could not clear all directories created by previous test");
-        }
-
-    }
+   
 
     /**
      * Removes all files and subdirectories.
@@ -95,7 +60,7 @@ public class FileSecurityTest extends TestCase {
 
     public void testSaveWriteRead() {
         
-        String testDir = getTestDirectoryName();
+        String testDir = getOutputDataDirectory(this.getName());
         
         FileSecurity fileSecurity = new FileSecurity(testDir);
 
@@ -133,7 +98,7 @@ public class FileSecurityTest extends TestCase {
 
     public void testVerifyPassword() {
 
-        String dirname = getTestDirectoryName() + File.separator + "fileSecVPDir";
+        String dirname = getOutputDataDirectory(this.getName()); 
 
         FileSecurity fileSecurity = new FileSecurity(dirname);
 
@@ -207,10 +172,10 @@ public class FileSecurityTest extends TestCase {
      * Test method for 'edu.csus.ecs.pc2.core.security.FileSecurity.getContestDirectory()'
      */
     public void testGetContestDirectory() {
-        String dirname = getTestDirectoryName() + File.separator + "fileSecVPDirGCD" + File.separator;
+        String dirname = getOutputDataDirectory(this.getName());
 
         FileSecurity security = new FileSecurity(dirname);
-        assertEquals("getContestDirectory", dirname, security.getContestDirectory());
+        assertEquals("getContestDirectory", dirname + File.separator, security.getContestDirectory());
 
     }
 
@@ -233,7 +198,7 @@ public class FileSecurityTest extends TestCase {
      */
     public void testGetPassword() {
 
-        String dirname = getTestDirectoryName() + File.separator + "fileSecVPDir";
+        String dirname = getOutputDataDirectory(this.getName());
 
         try {
             FileSecurity security = new FileSecurity(dirname);
@@ -250,13 +215,6 @@ public class FileSecurityTest extends TestCase {
             failTest("Unexpected exception in getPassword  ", e);
         }
 
-    }
-
-    private void failTest(String string, Exception e) {
-        System.err.println("Failed TEST " + string);
-        System.err.flush();
-        e.printStackTrace(System.err);
-        fail(string);
     }
 
 }

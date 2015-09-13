@@ -20,17 +20,6 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 // $HeadURL$
 public class ConfigurationIOTest extends AbstractTestCase {
 
-
-    protected String getTestDirectoryName(){
-        String testDir = "testing";
-        
-        if (!new File(testDir).isDirectory()) {
-            new File(testDir).mkdirs();
-        }
-
-        return testDir;
-    }
-
     /**
      * Create testing directory and initialize storage.
      * 
@@ -51,7 +40,9 @@ public class ConfigurationIOTest extends AbstractTestCase {
         IInternalContest contest = new InternalContest();
         contest.setSiteNumber(siteNumber);
 
-        String configDirName = getTestDirectoryName() + File.separator + "configio" + File.separator + "testdir" + getRandNumber();
+        String testdir =  getOutputDataDirectory(this.getName());
+        String configDirName = testdir +File.separator + "testdir" + getRandNumber();
+        ensureDirectory(configDirName);
 
         IStorage storage = createStorage(configDirName);
 
@@ -111,7 +102,12 @@ public class ConfigurationIOTest extends AbstractTestCase {
         IInternalContest contest = new InternalContest();
         contest.setSiteNumber(siteNumber);
 
-        String configDirName = getTestDirectoryName() + File.separator + "configio" + File.separator + "testdir" + getRandNumber();
+//        String configDirName = getTestDirectoryName() + File.separator + "configio" + File.separator + "testdir" + getRandNumber();
+        
+        String testdir =  getOutputDataDirectory(this.getName());
+        String configDirName = testdir +File.separator + "testdir" + getRandNumber();
+        ensureDirectory(configDirName);
+        
 
         IStorage storage = createStorage(configDirName);
 
@@ -256,6 +252,10 @@ public class ConfigurationIOTest extends AbstractTestCase {
 
     public void testBackupFilesStress() throws Exception {
         
+        if (isFastJUnitTesting()){
+            return;
+        }
+        
         String configDirName = getOutputDataDirectory("testBackupFilesStress");
         
         removeDirectory(configDirName); // remove previous files
@@ -342,7 +342,6 @@ public class ConfigurationIOTest extends AbstractTestCase {
             configurationIO.loadFromDisk(5, contest, log);
             fail("Expecting corrupt file "+configurationIO.getFileName());
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             String expected = "Error contest config file corrupt";
             String actual = e.getMessage().substring(0,expected.length());
             assertEquals("Expecting exception message", expected, actual);
