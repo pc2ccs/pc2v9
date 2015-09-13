@@ -1463,7 +1463,6 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
             boolean computerJudged = Boolean.parseBoolean(fields[2]);
             
             testJudgingType(computerJudged, manualJudged, preliminaryJudge);
-            System.out.println("debug 22 tested "+line);
         }
     }
     

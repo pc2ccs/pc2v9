@@ -50,7 +50,7 @@ public class AccountTest extends AbstractTestCase {
     
     public void testExternalId() throws Exception {
 
-        System.out.println("debug 22 " + account.getExternalId());
+//        System.out.println("debug " + account.getExternalId());
         assertElementIdCorrect(account);
     }
 

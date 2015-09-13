@@ -47,6 +47,17 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 // $HeadURL$
 public class ServerConnectionTest extends AbstractTestCase {
     
+    /**
+     * Is server running.
+     * 
+     * This is for tests that require a server be running.
+     * 
+     */
+    private boolean serverRunning = false;
+    
+    // TODO if true should start a server then run test.
+//    private boolean serverRunning = true;
+    
     public ServerConnectionTest(String name) {
         super(name);
     }
@@ -1019,7 +1030,21 @@ public class ServerConnectionTest extends AbstractTestCase {
         
     }
 
+    /**
+     * Test API failed log in.
+     * 
+     * {@link #serverRunning} must be set true and a server should
+     * be running to run this test.
+     * 
+     * @throws Exception
+     */
     public void testFailedLogin() throws Exception {
+        
+        if (! isServerRunning()){
+            return;
+        } else {
+            // ensureServerRunning(); todo code this.
+        }
         
         String login = "team99";
         
@@ -1075,4 +1100,8 @@ public class ServerConnectionTest extends AbstractTestCase {
 //        return suite;
 //    }
 
+    
+    public boolean isServerRunning() {
+        return serverRunning;
+    }
 }

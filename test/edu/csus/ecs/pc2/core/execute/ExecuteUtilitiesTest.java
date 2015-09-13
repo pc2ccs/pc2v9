@@ -114,7 +114,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         
         assertEquals(language.getDisplayName(),"GNU C++");
         
-        dumpArray(contest.getLanguages());
+//        dumpArray(contest.getLanguages());
 
         Problem helloWorldProblem = createHello(contest);
         Run run = new Run(submitter, language, helloWorldProblem);
@@ -126,7 +126,8 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         assertEquals(expected, actual);
     }
 
-    private void dumpArray(Object[] array) {
+    public void dumpArray(Object[] array) {
+        System.out.println("dumpArray : ");
         int i = 0;
         for (Object object : array) {
             System.out.print(" " + i + ":" + object);
