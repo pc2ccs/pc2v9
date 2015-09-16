@@ -5,6 +5,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -79,6 +80,10 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     }
 
     public void setRun(Run theRun, boolean rejudgeRun) {
+        Executable tempEexecutable = new Executable(contest, controller, theRun, null);
+        // clear as soon as we start this run, so View Outputs does not show old info
+        tempEexecutable.clearDirectory(tempEexecutable.getExecuteDirectoryName());
+
         getSelectJudgementPane().setRun(theRun);
         if (theRun == null) {
             setTitle("Run not loaded");

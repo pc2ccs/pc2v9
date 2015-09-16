@@ -191,7 +191,9 @@ public class Executable extends Plugin implements IExecutable {
 
         this.executorId = contest.getClientId();
 
-        mainFileDirectory = getDirName(runFiles.getMainFile());
+        if (runFiles != null) {
+            mainFileDirectory = getDirName(runFiles.getMainFile());
+        }
         executeDirectoryName = getExecuteDirectoryName();
 
         log = controller.getLog();
@@ -208,7 +210,7 @@ public class Executable extends Plugin implements IExecutable {
      *            directory to be cleared.
      * @return true if directory was cleared.
      */
-    protected boolean clearDirectory(String dirName) {
+    public boolean clearDirectory(String dirName) {
         File dir = null;
         boolean result = true;
 
