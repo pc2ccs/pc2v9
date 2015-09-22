@@ -17,8 +17,11 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +41,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -51,7 +55,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
-
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -76,6 +79,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private static final long serialVersionUID = 7363093989131251458L;
 
+    /**
+     * line.separator
+     * TODO move this to a static Utility class
+     */
+    private static final String NL = System.getProperty("line.separator");
     /**
      * comparator radio selection
      */
@@ -887,6 +895,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                // remove any middle tabs (compiler output/stderr)
+                while(getMultiTestSetTabbedPane().getTabCount() > 2) {
+                    getMultiTestSetTabbedPane().removeTabAt(1);
+                }
+                populateCompilerOutput();
                 getMultiTestSetTabbedPane().setSelectedIndex(0);
                 // fill in the basic header information
                 getProblemTitleLabel().setText("Problem:  " + currentProblem.getLetter() + " - " + currentProblem.getShortName());
@@ -921,8 +934,95 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 resultsScrollPane.setViewportView(resultsTable);
             }
 
+
         });
 
+    }
+
+    // copied from MultipleFileViewer
+    public String checkNPCharacters(String s) {
+
+        for (int i = 0; i < s.length(); i++) {
+
+            char c = s.charAt(i);
+            int x = new Character(c).hashCode();
+
+            if (!(Character.isWhitespace(c) || ((x >= 32) && (x <= 126)))) {
+                return ("***** NOTE: This output contains non-printable characters *****" + NL + s);
+            }
+        }
+        return s;
+    }
+
+    // copied from MultipleFileViewer
+    public boolean loadFile(JTextArea jPane, String filename) {
+        try {
+
+            jPane.setFont(new Font("Courier", Font.PLAIN, 12));
+            BufferedReader inFile = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+            
+            StringBuffer sb = new StringBuffer();
+            char[] cbuf = new char[8000];
+            int n = inFile.read(cbuf);
+            while(n > -1) {
+                sb.append(cbuf);
+                n = inFile.read(cbuf);
+            }
+            inFile.close();
+            inFile = null;
+            String s = sb.toString();
+
+//            String oldTitle = getTitle();
+//            setTitle("Loading " + filename + " ... ");
+
+            jPane.append(checkNPCharacters(s));
+            jPane.setCaretPosition(0);
+
+//            setTitle(oldTitle);
+            return true;
+        } catch (Exception e) {
+            System.out.println("MultipleFileViewer class: exception " + e);
+        }
+        return false;
+    }
+
+    public boolean addFilePane(String title, String filename) {
+
+        if (title == null) {
+            title = filename;
+        }
+        if (title.length() < 1) {
+            title = filename;
+        }
+
+        JTextArea textArea = new JTextArea();
+        textArea.setBounds(0, 0, 11, 6);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(textArea);
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new java.awt.BorderLayout());
+        jPanel.add(scrollPane, "Center");
+
+        getMultiTestSetTabbedPane().insertTab(title, null, jPanel, null, 1);
+
+        return loadFile(textArea, filename);
+    }
+
+    private void populateCompilerOutput() {
+        // removing existing compile tabs handled in populateGUI
+        String outputFile = executableDir + File.separatorChar+Executable.COMPILER_STDOUT_FILENAME;
+        File file = new File(outputFile);
+        if (file.isFile() && file.length() > 0) {
+            addFilePane("Compiler stdout", outputFile);
+        }
+
+        outputFile = executableDir+ File.separatorChar + Executable.COMPILER_STDERR_FILENAME ;
+        file = new File(outputFile);
+        if (file.isFile() && file.length() > 0) {
+            addFilePane("Compiler stderr", outputFile);
+        }
     }
 
     private int getNumFailedTestCases(RunTestCase[] testCases) {
