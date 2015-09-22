@@ -8,6 +8,6 @@ import sys
 sys.stdout.softspace=0
 # softspace required to avoid extra space after print 
 
-print "Hello World."
+print("Hello World.")
 
 # eof $Id$
