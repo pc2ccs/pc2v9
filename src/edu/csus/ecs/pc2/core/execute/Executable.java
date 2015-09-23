@@ -720,7 +720,7 @@ public class Executable extends Plugin implements IExecutable {
             byte[] errBuff = executionData.getExecuteStderr().getBuffer();
             FileOutputStream outputStream = null;
             try {
-                if (errBuff != null) {
+                if (errBuff != null && errBuff.length > 0) {
                     outputStream = new FileOutputStream(teamsOutputFilename, true);
                     outputStream.write(("*** Team STDERR Follows:"+NL).getBytes());
                     outputStream.write(errBuff, 0, errBuff.length);
