@@ -700,14 +700,13 @@ public class Executable extends Plugin implements IExecutable {
         String teamsOutputFilename = prefixExecuteDirname("teamoutput." + dataSetNumber + ".txt");
         createFile(userOutputFile, teamsOutputFilename); // Create a per test case Team's output file
         teamsOutputFilenames.add(teamsOutputFilename); // add to list
-        createFile(executionData.getExecuteStderr(), prefixExecuteDirname("teamstderr." + dataSetNumber + ".txt")); // Create a per test case Team's STDERR file
         if (executionData.getExecuteExitValue() != 0) {
             long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
             PrintWriter exitCodeFile = null;
             try {
                 exitCodeFile = new PrintWriter(new FileOutputStream(teamsOutputFilename, true), true);
-                exitCodeFile.write("Team program exit code = 0x"+Long.toHexString(returnValue).toUpperCase());
+                exitCodeFile.write("Team program exit code = 0x"+Long.toHexString(returnValue).toUpperCase()+NL);
             } catch (FileNotFoundException e) {
                 log.log(Log.WARNING, "Unable to append to file "+teamsOutputFilename, e);
                 exitCodeFile = null;
@@ -715,6 +714,20 @@ public class Executable extends Plugin implements IExecutable {
                 if (exitCodeFile != null) {
                     exitCodeFile.close();
                 }
+            }
+        }
+        if (executionData.getExecuteStderr() != null) {
+            byte[] errBuff = executionData.getExecuteStderr().getBuffer();
+            FileOutputStream outputStream = null;
+            try {
+                if (errBuff != null) {
+                    outputStream = new FileOutputStream(teamsOutputFilename, true);
+                    outputStream.write(("*** Team STDERR Follows:"+NL).getBytes());
+                    outputStream.write(errBuff, 0, errBuff.length);
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                log.log(Log.WARNING, "Unable to append to file "+teamsOutputFilename, e);
             }
         }
         
