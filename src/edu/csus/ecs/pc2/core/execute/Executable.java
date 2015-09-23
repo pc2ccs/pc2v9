@@ -700,6 +700,23 @@ public class Executable extends Plugin implements IExecutable {
         String teamsOutputFilename = prefixExecuteDirname("teamoutput." + dataSetNumber + ".txt");
         createFile(userOutputFile, teamsOutputFilename); // Create a per test case Team's output file
         teamsOutputFilenames.add(teamsOutputFilename); // add to list
+        createFile(executionData.getExecuteStderr(), prefixExecuteDirname("teamstderr." + dataSetNumber + ".txt")); // Create a per test case Team's STDERR file
+        if (executionData.getExecuteExitValue() != 0) {
+            long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
+
+            PrintWriter exitCodeFile = null;
+            try {
+                exitCodeFile = new PrintWriter(new FileOutputStream(teamsOutputFilename, true), true);
+                exitCodeFile.write("Team program exit code = 0x"+Long.toHexString(returnValue).toUpperCase());
+            } catch (FileNotFoundException e) {
+                log.log(Log.WARNING, "Unable to append to file "+teamsOutputFilename, e);
+                exitCodeFile = null;
+            } finally {
+                if (exitCodeFile != null) {
+                    exitCodeFile.close();
+                }
+            }
+        }
         
         String secs = Long.toString((new Date().getTime()) % 100);
 
