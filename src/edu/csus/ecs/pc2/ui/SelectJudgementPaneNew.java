@@ -845,7 +845,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         sendValidatorStderrFileNames();
         // only if do not show output is not checked
         if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
-            multiTestSetOutputViewerFrame.setVisible(true);
+            getMultiTestSetOutputViewerFrame().setVisible(true);
         }
         executeTimeMS = executable.getExecutionData().getExecuteTimeMS();
 
@@ -907,7 +907,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private void sendTeamOutputFileNames() {
 
-        if (multiTestSetOutputViewerFrame != null) {
+        if (getMultiTestSetOutputViewerFrame() != null) {
 
             String[] teamOutputNames = new String[getProblemDataFiles().getJudgesDataFiles().length];
 
@@ -927,7 +927,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 }
             }
 
-            multiTestSetOutputViewerFrame.setTeamOutputFileNames(teamOutputNames);
+            getMultiTestSetOutputViewerFrame().setTeamOutputFileNames(teamOutputNames);
         }
     }
 
@@ -936,7 +936,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private void sendValidatorOutputFileNames() {
 
-        if (multiTestSetOutputViewerFrame != null) {
+        if (getMultiTestSetOutputViewerFrame() != null) {
 
             String[] validatorOutputNames = new String[getProblemDataFiles().getJudgesDataFiles().length];
 
@@ -956,7 +956,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 }
             }
 
-            multiTestSetOutputViewerFrame.setValidatorOutputFileNames(validatorOutputNames);
+            getMultiTestSetOutputViewerFrame().setValidatorOutputFileNames(validatorOutputNames);
         }
     }
 
@@ -965,7 +965,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private void sendValidatorStderrFileNames() {
 
-        if (multiTestSetOutputViewerFrame != null) {
+        if (getMultiTestSetOutputViewerFrame() != null) {
 
             String[] validatorErrFileNames = new String[getProblemDataFiles().getJudgesDataFiles().length];
 
@@ -985,7 +985,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 }
             }
 
-            multiTestSetOutputViewerFrame.setValidatorStderrFileNames(validatorErrFileNames);
+            getMultiTestSetOutputViewerFrame().setValidatorStderrFileNames(validatorErrFileNames);
         }
     }
 
@@ -1319,20 +1319,22 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 //            JOptionPane.showMessageDialog(this, "No output yet!");
 //        }
 
-        if (multiTestSetOutputViewerFrame == null) {
-            multiTestSetOutputViewerFrame = new MultiTestSetOutputViewerFrame();
-            multiTestSetOutputViewerFrame.setContestAndController(getContest(), getController());
-
-            FrameUtilities.centerFrame(multiTestSetOutputViewerFrame);
-
-        }
-        
         Problem problem = getContest().getProblem(run.getProblemId());
-        multiTestSetOutputViewerFrame.setData(run, runFiles, problem, getProblemDataFiles());
+        getMultiTestSetOutputViewerFrame().setData(run, runFiles, problem, getProblemDataFiles());
         sendTeamOutputFileNames();
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
-        multiTestSetOutputViewerFrame.setVisible(true);
+        getMultiTestSetOutputViewerFrame().setVisible(true);
+    }
+
+    private MultiTestSetOutputViewerFrame getMultiTestSetOutputViewerFrame() {
+        if (multiTestSetOutputViewerFrame == null) {
+            multiTestSetOutputViewerFrame = new MultiTestSetOutputViewerFrame();
+            multiTestSetOutputViewerFrame.setContestAndController(getContest(), getController());
+    
+            FrameUtilities.centerFrame(multiTestSetOutputViewerFrame);
+        }
+        return multiTestSetOutputViewerFrame;
     }
 
     /**
