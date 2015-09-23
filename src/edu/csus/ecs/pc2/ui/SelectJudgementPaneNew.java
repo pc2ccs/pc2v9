@@ -130,8 +130,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private DisplayTeamName displayTeamName = null;
 
-    private IFileViewer executableFileViewer;
-
     private JPanel mainPanel = null;
 
     private JPanel assignJudgementPanel = null;
@@ -336,7 +334,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         closeViewer(dataFileViewer);
         closeViewer(answerFileViewer);
         closeViewer(sourceViewer);
-        closeViewer(executableFileViewer);
         // because mtsovf is not a IFileViewer
         if (multiTestSetOutputViewerFrame != null) {
             multiTestSetOutputViewerFrame.dispose();
@@ -474,7 +471,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             public void run() {
                 populateGUI(run);
                 enableUpdateButtons(false);
-                executableFileViewer = null;
                 enableOutputsButton(false);
                 showValidatorControls(false);
             }
@@ -512,7 +508,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                     for (int i = 0; i < runResultFiles.length; i++) {
                         if (runResultFiles[i].getJudgementId().equals(computerJudgement.getJudgementId())) {
                             matchingResult = runResultFiles[i];
-                            buildFileViewer(matchingResult);
                             break;
                         }
                     }
@@ -552,51 +547,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         populatingGUI = false;
 
-    }
-
-    /**
-     * Populates executalbeFileViewer based on the input RunResultFiles.
-     * 
-     * @param files
-     */
-    private void buildFileViewer(RunResultFiles files) {
-        MultipleFileViewer mfv = new MultipleFileViewer(log, "Executable");
-        boolean showOutput = false;
-        boolean tmpProgramOutput = false;
-        
-        showOutput |= addFilePane(mfv, "Compiler stdout", files.getCompilerStdoutFile());
-        showOutput |= addFilePane(mfv, "Compiler stderr", files.getCompilerStderrFile());
-        
-        tmpProgramOutput |= addFilePane(mfv, "Program stdout", files.getExecuteStdoutFile());
-        showOutput |= tmpProgramOutput;
-        
-        if (!tmpProgramOutput) {
-            mfv.addTextPane("Program stdout",  "PC2: execution of program did not generate any stdout");
-            showOutput = true;
-        }
- 
-        showOutput |= addFilePane(mfv, "Program stderr", files.getExecuteStderrFile());
-        showOutput |= addFilePane(mfv, "Validator stdout", files.getValidatorStdoutFile());
-        showOutput |= addFilePane(mfv, "Validator stderr", files.getValidatorStderrFile());
-        long code = files.getExecutionResultCode();
-        if (code != 0) {
-            long returnValue = ((long) code << 0x20) >>> 0x20;
-
-            mfv.setInformationLabelText("<html><font size='+1' color='red'>Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase()+"</font>");
-            showOutput = true;
-        } else {
-            mfv.setInformationLabelText("");
-        }
-        executableFileViewer = mfv;
-        enableOutputsButton(showOutput);
-    }
-
-    private boolean addFilePane(MultipleFileViewer mfv, String title, SerializedFile inFile) {
-        boolean success=false;
-        if (inFile != null) {
-            success = mfv.addFilePane(title, inFile);
-        }
-        return(success);
     }
 
     protected void regularCursor() {
@@ -885,12 +835,18 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         executable = new Executable(getContest(), getController(), run, runFiles);
 
         //getManualRunResultsPanel().clear();
-        if (executableFileViewer != null) {
-            executableFileViewer.dispose();
-        }
         setEnabledButtonStatus(false);
-        executableFileViewer = executable.execute();
-        
+        executable.execute();
+        saveOutputFileNames = executable.getTeamsOutputFilenames();
+        saveValidatorOutputFileNames = executable.getValidatorOutputFilenames();
+        saveValidatorErrFileNames = executable.getValidatorErrFilenames();
+        sendTeamOutputFileNames();
+        sendValidatorOutputFileNames();
+        sendValidatorStderrFileNames();
+        // only if do not show output is not checked
+        if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
+            multiTestSetOutputViewerFrame.setVisible(true);
+        }
         executeTimeMS = executable.getExecutionData().getExecuteTimeMS();
 
         // Show validator results, if there are any.
@@ -941,16 +897,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 //        RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
         //getManualRunResultsPanel().populatePane(rrf, "Manual Results");
         //getManualRunResultsPanel().setVisible(true);
-        
-        if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
-            executableFileViewer.setVisible(true);
-        }
-        
-        saveOutputFileNames = executable.getTeamsOutputFilenames();
-        saveValidatorOutputFileNames = executable.getValidatorOutputFilenames();
-        saveValidatorErrFileNames = executable.getValidatorErrFilenames();
-        sendTeamOutputFileNames();
-        
+                
         enableOutputsButton(true);
         setEnabledButtonStatus(true);
     }
