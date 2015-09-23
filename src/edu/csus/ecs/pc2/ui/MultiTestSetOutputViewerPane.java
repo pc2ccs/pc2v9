@@ -80,11 +80,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private static final long serialVersionUID = 7363093989131251458L;
 
     /**
-     * line.separator
-     * TODO move this to a static Utility class
-     */
-    private static final String NL = System.getProperty("line.separator");
-    /**
      * comparator radio selection
      */
     protected static final String CTYPES = "CTYPES";
@@ -940,21 +935,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     // copied from MultipleFileViewer
-    public String checkNPCharacters(String s) {
-
-        for (int i = 0; i < s.length(); i++) {
-
-            char c = s.charAt(i);
-            int x = new Character(c).hashCode();
-
-            if (!(Character.isWhitespace(c) || ((x >= 32) && (x <= 126)))) {
-                return ("***** NOTE: This output contains non-printable characters *****" + NL + s);
-            }
-        }
-        return s;
-    }
-
-    // copied from MultipleFileViewer
     public boolean loadFile(JTextArea jPane, String filename) {
         try {
 
@@ -965,7 +945,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             char[] cbuf = new char[8000];
             int n = inFile.read(cbuf);
             while(n > -1) {
-                sb.append(cbuf);
+                sb.append(cbuf, 0, n);
                 n = inFile.read(cbuf);
             }
             inFile.close();
@@ -975,7 +955,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 //            String oldTitle = getTitle();
 //            setTitle("Loading " + filename + " ... ");
 
-            jPane.append(checkNPCharacters(s));
+            jPane.append(s);
             jPane.setCaretPosition(0);
 
 //            setTitle(oldTitle);
