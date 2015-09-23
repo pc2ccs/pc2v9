@@ -1319,8 +1319,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 //            JOptionPane.showMessageDialog(this, "No output yet!");
 //        }
 
-        Problem problem = getContest().getProblem(run.getProblemId());
-        getMultiTestSetOutputViewerFrame().setData(run, runFiles, problem, getProblemDataFiles());
         sendTeamOutputFileNames();
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
@@ -1331,6 +1329,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (multiTestSetOutputViewerFrame == null) {
             multiTestSetOutputViewerFrame = new MultiTestSetOutputViewerFrame();
             multiTestSetOutputViewerFrame.setContestAndController(getContest(), getController());
+            Problem problem = getContest().getProblem(run.getProblemId());
+            multiTestSetOutputViewerFrame.setData(run, runFiles, problem, getProblemDataFiles());
     
             FrameUtilities.centerFrame(multiTestSetOutputViewerFrame);
         }
