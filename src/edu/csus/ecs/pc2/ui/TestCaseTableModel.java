@@ -37,6 +37,9 @@ public class TestCaseTableModel extends DefaultTableModel {
         if (files != null){
             setRowCount(files.getJudgesAnswerFiles().length);
             this.files = files;
+        } else {
+            setRowCount(0);
+            this.files = null;
         }
     }
 

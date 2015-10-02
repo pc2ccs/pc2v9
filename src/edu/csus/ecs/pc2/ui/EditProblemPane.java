@@ -16,6 +16,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -43,6 +46,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
@@ -235,6 +239,8 @@ public class EditProblemPane extends JPanePlugin {
      * last main answer file loaded.
      */
     private SerializedFile lastAnsFile = null;
+
+    private String fileNameOne;
     
     /**
      * This method initializes
@@ -385,7 +391,8 @@ public class EditProblemPane extends JPanePlugin {
 
         Problem newProblem = null;
         try {
-            newProblem = getProblemFromFields(null);
+            newProblemDataFiles = getProblemDataFilesFromFields();
+            newProblem = getProblemFromFields(null, newProblemDataFiles);
 
             SerializedFile sFile;
             sFile = newProblemDataFiles.getJudgesDataFile();
@@ -448,7 +455,7 @@ public class EditProblemPane extends JPanePlugin {
         if (problem != null) {
 
             try {
-                Problem changedProblem = getProblemFromFields(null);
+                Problem changedProblem = getProblemFromFields(null, null);
                 if (!problem.isSameAs(changedProblem)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
@@ -573,15 +580,17 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @param checkProblem
      *            will update this Problem if supplied, if null creates a new Problem
+     * @param dataFiles 
      * @return Problem based on fields
      * @throws InvalidFieldValue
      */
-    public Problem getProblemFromFields(Problem checkProblem) {
+    public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
         boolean isAdding = true;
         
         lastDataFile = null;
         lastAnsFile = null;
-
+        
+                
         if (checkProblem == null) {
             checkProblem = new Problem(problemNameTextField.getText());
             isAdding = true;
@@ -628,10 +637,10 @@ public class EditProblemPane extends JPanePlugin {
                 }
 
                 checkProblem.setDataFileName(serializedFile.getName());
-                newProblemDataFiles.setJudgesDataFile(serializedFile);
+                
             } else {
 
-                SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getJudgesDataFile();
+                SerializedFile serializedFile = originalProblemDataFiles.getJudgesDataFile();
                 lastDataFile = serializedFile;
                 if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
@@ -640,7 +649,7 @@ public class EditProblemPane extends JPanePlugin {
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
-                newProblemDataFiles.setJudgesDataFile(serializedFile);
+                
                 checkProblem.setDataFileName(serializedFile.getName());
             }
         } else {
@@ -668,7 +677,7 @@ public class EditProblemPane extends JPanePlugin {
                 checkProblem.setAnswerFileName(serializedFile.getName());
                 newProblemDataFiles.setJudgesAnswerFile(serializedFile);
             } else {
-                SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getJudgesAnswerFile();
+                SerializedFile serializedFile = originalProblemDataFiles.getJudgesAnswerFile();
                 lastAnsFile = serializedFile;
                 if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
@@ -678,7 +687,6 @@ public class EditProblemPane extends JPanePlugin {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
 
-                newProblemDataFiles.setJudgesAnswerFile(serializedFile);
                 checkProblem.setAnswerFileName(serializedFile.getName());
             }
         } else {
@@ -801,17 +809,85 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         checkProblem.setExternalDataFileLocation(loadPath);
-
-//        String[] dataList = getMultipleDataSetPane().getTestDataList();
-//        String[] answerList = getMultipleDataSetPane().getTestAnswerList();
-//        checkProblem.removeAllTestCaseFilenames();
-//        if (dataList != null) {
-//            for (int i = 0; i < dataList.length; i++) {
-//                checkProblem.addTestCaseFilenames(dataList[i], answerList[i]);
-//            }
-//        }
+        
+        if (dataFiles != null){
+            populateProblemTestSetFilenames (checkProblem, dataFiles);
+        }
+        
+        newProblemDataFiles = dataFiles;
+        
         return checkProblem;
 
+    }
+
+    /**
+     * Populate the test data set file lists in Problem.
+     * 
+     * @param inProblem
+     * @param dataFiles
+     */
+    private void populateProblemTestSetFilenames(Problem inProblem, ProblemDataFiles dataFiles) {
+
+        String[] dataList = getTestDataList(dataFiles);
+        String[] answerList = getTestAnswerList(dataFiles);
+        
+        inProblem.removeAllTestCaseFilenames();
+        if (dataList != null) {
+            for (int i = 0; i < dataList.length; i++) {
+                inProblem.addTestCaseFilenames(dataList[i], answerList[i]);
+            }
+        }
+    }
+
+    private String[] getTestAnswerList(ProblemDataFiles dataFiles) {
+        
+        ArrayList<String> list = new ArrayList<String>();
+        
+        SerializedFile[] filelist = dataFiles.getJudgesAnswerFiles();
+        SerializedFile[] dataFileList = dataFiles.getJudgesDataFiles();
+
+        for (SerializedFile serializedFile : filelist) {
+            list.add(serializedFile.getName());
+        }
+
+        padListIfNeeded (list, filelist, dataFileList);
+        
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    private String[] getTestDataList(ProblemDataFiles dataFiles) {
+        
+        ArrayList<String> list = new ArrayList<String>();
+        SerializedFile[] filelist = dataFiles.getJudgesAnswerFiles();
+        SerializedFile[] dataFileList = dataFiles.getJudgesDataFiles();
+        
+        for (SerializedFile serializedFile : dataFileList) {
+            list.add(serializedFile.getName());
+        }
+        
+        padListIfNeeded (list, filelist, dataFileList);
+        
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * pad list with nulls if needed.
+     * 
+     *  
+     * 
+     * 
+     * @param list
+     * @param filelist
+     * @param dataFileList
+     */
+    private void padListIfNeeded(ArrayList<String> stringList, SerializedFile[] filelist, SerializedFile[] dataFileList) {
+       
+        // find max of both lists
+        int max = Math.max(filelist.length, dataFileList.length);
+        
+        for (int i = 0; i < max - stringList.size(); i++) {
+            stringList.add("");
+        }
     }
 
     /**
@@ -844,11 +920,9 @@ public class EditProblemPane extends JPanePlugin {
         Problem newProblem = null;
 
         try {
-            newProblem = getProblemFromFields(problem);
+            ProblemDataFiles dataFiles = getProblemDataFilesFromFields();
+            newProblem = getProblemFromFields(problem, dataFiles);
             
-            getProblemDataFilesFromFields();
-            
-            // also updates newProblemDataFiles
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
             // showMessage(e.getMessage());
@@ -868,6 +942,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Populate new data sets.
+     * @param problem2 
      * 
      * @param problem2
      * @return
@@ -878,12 +953,12 @@ public class EditProblemPane extends JPanePlugin {
          * These are the judge data and ans from the first pane, 
          * they need to replace the first data set files.
          */
-        // TODO 917 handl   lastAnsFile;
-        // TODO 917 handle  lastDataFile;
 
         newProblemDataFiles = multipleDataSetPane.getProblemDataFiles();
+//        Utilities.dump(newProblemDataFiles,"debug 22 in getProblemDataFilesFromFields");
         
-        // TODO 917 check and refresh all data files in all test cases.
+        // TODO 917 handle   lastAnsFile;
+        // TODO 917 handle  lastDataFile;
         
         return newProblemDataFiles;
     }
@@ -1043,13 +1118,18 @@ public class EditProblemPane extends JPanePlugin {
         return problem;
     }
 
+
+    
     /**
      * Set Prbblem and ProblemDataFiles to be edited.
      */
     public void setProblem(final Problem inProblem, final ProblemDataFiles problemDataFiles) {
         
         problem = inProblem;
+        this.newProblemDataFiles = null;
         originalProblemDataFiles = problemDataFiles;
+
+        fileNameOne = createProblemReport (inProblem, problemDataFiles, "stuf1");
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -1167,8 +1247,10 @@ public class EditProblemPane extends JPanePlugin {
         
         this.problem = problem;
         this.newProblemDataFiles = null;
-
         this.originalProblemDataFiles = null;
+        
+        fileNameOne = createProblemReport (problem, originalProblemDataFiles, "stuf1");
+        System.out.println("Created problem report "+fileNameOne);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -1199,7 +1281,7 @@ public class EditProblemPane extends JPanePlugin {
 
             try {
                 @SuppressWarnings("unused")
-                Problem changedProblem = getProblemFromFields(inProblem);
+                Problem changedProblem = getProblemFromFields(inProblem, originalProblemDataFiles);
             } catch (InvalidFieldValue e) {
                 logException("Problem with input Problem fields", e);
                 e.printStackTrace(System.err);
@@ -1215,15 +1297,17 @@ public class EditProblemPane extends JPanePlugin {
 
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
         
-        if (originalProblemDataFiles != null) {
-            try {
-                getMultipleDataSetPane().setProblemDataFiles(originalProblemDataFiles);
-            } catch (Exception e) {
-                String message = "Error loading/editing problem data files: " + e.getMessage();
-                showMessage(message + " check logs.");
-                getLog().log(Log.WARNING, message, e);
-                e.printStackTrace(); // debug 22
-            }
+        getMultipleDataSetPane().clearDataFiles();
+        
+//        Utilities.dump(originalProblemDataFiles,"debug 22 in EPP");
+        
+        try {
+            getMultipleDataSetPane().setProblemDataFiles(problem, originalProblemDataFiles);
+        } catch (Exception e) {
+            String message = "Error loading/editing problem data files: " + e.getMessage();
+            showMessage(message + " check logs.");
+            getLog().log(Log.WARNING, message, e);
+            e.printStackTrace(); // debug 22
         }
 
         // select the general tab
@@ -2072,6 +2156,24 @@ public class EditProblemPane extends JPanePlugin {
         }
         return ignoreCaseCheckBox;
     }
+    
+    /**
+     * Show diff between files using gvim.exe.
+     * @param fileOne
+     * @param fileTwo
+     */
+    protected void showFilesDiff(String fileOne, String fileTwo) {
+
+        String command = "gvim.exe -d " + fileOne + " " + fileTwo;
+        System.out.println("cmd = " + command);
+        try {
+            Runtime.getRuntime().exec(command);
+        } catch (Exception e) {
+            showMessage("Unable to diff " + e.getMessage());
+            System.out.println("debug diff cmd: " + command);
+            e.printStackTrace();
+        }
+    }
 
     /**
      * This method initializes externalValidatorPane
@@ -2271,6 +2373,12 @@ public class EditProblemPane extends JPanePlugin {
      * @return true if the file was converted
      */
     public boolean checkFileFormat(SerializedFile newFile) {
+        
+        
+        if (newFile == null){
+            showMessage("Warning new file is null");
+            return false;
+        }
 
         /*
          * DOS FILE 0x0D 0x0A UNIX FILE 0xA MAC FILE 0xD
@@ -2493,52 +2601,66 @@ public class EditProblemPane extends JPanePlugin {
         }
         return loadButton;
     }
+    
+    
+    /**
+     * Load problem info.
+     * 
+     * If selects problem.yaml then load yaml and files
+     * If selects directory will scan for .in and .ans files and load them
+     * 
+     */
 
     protected void loadProblemInfoFile() {
+        
+        showMessage("Load not implemented, yet.");
+        
+        //  TODO implement loadProblemInfoFile
 
-        String filename = null;
-
-        try {
-            filename = selectFileName("Choose a problem.yaml file", lastYamlLoadDirectory);
-
-        } catch (IOException e) {
-            logException("Problem selecting filename", e);
-            showMessage("Problem selecting filename " + e.getMessage());
-        }
-
-        if (filename == null) {
-            showMessage("No file selected/loaded");
-        } else {
-
-            if (filename.endsWith("problem.yaml")) {
-
-                try {
-                    checkAndLoadYAML(filename);
-                } catch (Exception e) {
-                    logException("Error loading contest.xml", e);
-                    showMessage("Error loading contest.xml " + e.getMessage());
-                }
-
-            } else {
-                showMessage("Please select a proble.yaml file");
-            }
-
-        }
+//        String filename = null;
+//        
+//        String loadFileName = ExportYAML.PROBLEM_FILENAME;
+//
+//        try {
+//            filename = selectFileName("Choose a "+loadFileName+" file", lastYamlLoadDirectory);
+//
+//        } catch (IOException e) {
+//            logException(loadFileName+" - File could not be selected", e);
+//            showMessage("File could not be selected " + e.getMessage());
+//        }
+//
+//        if (filename == null) {
+//            showMessage("No file selected/loaded");
+//        } else {
+//
+//            if (filename.endsWith(loadFileName)) {
+//
+//                try {
+//                    loadFromProblemYaml(filename);
+//                } catch (Exception e) {
+//                    logException("Error loading contest.xml", e);
+//                    showMessage("Error loading contest.xml " + e.getMessage());
+//                }
+//
+//            } else {
+//                showMessage("Please select a problem.yaml file");
+//            }
+//
+//        }
     }
 
-    private void checkAndLoadYAML(String filename) {
-        getLog().info("Loading contest.yaml from " + filename);
-
-        String directoryName = new File(filename).getParent();
-
-        try {
-            getLoader().fromYaml(null, directoryName);
-
-        } catch (Exception e) {
-            logException("Unable to load problem YAML from " + filename, e);
-            e.printStackTrace(System.err);
-            showMessage("Problem loading file(s), check log.  " + e.getMessage());
-        }
+    private void loadFromProblemYaml(String filename) {
+        
+//        ContestYAMLLoader loader = new ContestYAMLLoader();
+        
+//        String[] contents = Utilities.loadFile(filename);
+        
+        // TODO Load problem and data files using problem.yaml
+        
+//        loader.getProblems(contents, defaultTimeOut)
+//        String huh;
+//        loader.loadProblemInformationAndDataFiles(contest, huh, null, true);
+        
     }
 
     public File selectYAMLFileDialog(Component parent, String title, String startDirectory) {
@@ -2601,19 +2723,173 @@ public class EditProblemPane extends JPanePlugin {
             exportButton.setMnemonic(KeyEvent.VK_X);
             exportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    saveProblemYaml();
+                    saveAndCopmpare();
                 }
             });
         }
         return exportButton;
     }
+    
+    public static String getReportFilename (String prefix, IReport selectedReport) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
+        // "yyMMdd HHmmss.SSS");
+        String reportName = selectedReport.getReportTitle();
+        
+        while (reportName.indexOf(' ') > -1){
+            reportName = reportName.replace(" ", "_");
+        }
+        return prefix + "report."+ reportName+ "." + simpleDateFormat.format(new Date()) + ".txt";
+
+    }
+    
+    void saveAndCopmpare(){
+        
+        try {
+            System.out.println("debug 22 orig load dump");
+            Utilities.dump(originalProblemDataFiles,"debug 22 in load orig");
+            
+            String[] s2 = getTestDataList(originalProblemDataFiles);
+            System.out.println("debug 22 Number of orig problem data files is "+s2.length);
+            
+            String[] s = getTestDataList(newProblemDataFiles);
+            System.out.println("debug 22 B4 Number of new problem data files is "+s.length);
+            
+            newProblemDataFiles = getProblemDataFilesFromFields();
+            
+            s = getTestDataList(newProblemDataFiles);
+            System.out.println("debug 22 B5 Number of new problem data files is "+s.length);
+            
+            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
+
+            s = getTestDataList(newProblemDataFiles);
+            System.out.println("debug 22 B6 Number of new problem data files is "+s.length);
+            
+            Utilities.dump(newProblemDataFiles,"debug 22 in load new");
+            System.out.flush();
+
+            String fileNameTwo = createProblemReport (newProblem, newProblemDataFiles, "stuf2");
+            System.out.println("Created problem report "+fileNameOne);
+
+            showFilesDiff(fileNameOne, fileNameTwo);
+        } catch (Exception e) {
+            e.printStackTrace(); // debug 22 
+        }
+ 
+    }
+    
+    private String createProblemReport(Problem prob, ProblemDataFiles datafiles, String fileNamePrefix) {
+
+        ProblemsReport report = new ProblemsReport();
+        report.setContestAndController(getContest(), getController());
+        String filename = getReportFilename("stuf2", report);
+
+        try {
+            PrintWriter printWriter = null;
+            printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+            report.writeRow(printWriter, prob, datafiles);
+            printWriter.close();
+            printWriter = null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        report = null;
+
+        return filename;
+    }
 
     protected void saveProblemYaml() {
+
+        try {
+            
+            if (lastSaveDirectory == null){
+                lastSaveDirectory = new File(".").getCanonicalPath() + File.separator + "export";
+            }
+            
+            char currentLetter = currentDirectoryLetter(lastSaveDirectory);
+            
+            String nextDirectory = findNextDirectory(lastSaveDirectory);
+            ExportYAML exportYAML = new ExportYAML();
+            
+            
+            newProblemDataFiles = getProblemDataFilesFromFields();
+            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
+            
+            String problemYamlFile = nextDirectory + File.separator + ExportYAML.PROBLEM_FILENAME;
+            String[] filelist = exportYAML.writeProblemYAML(getContest(), newProblem, problemYamlFile, newProblemDataFiles);
+            
+            String results = compareDirectories(lastSaveDirectory + File.separator + currentLetter, nextDirectory);
+            System.out.println("Comparison : "+results);
+
+            System.out.println("Last dir: "+lastSaveDirectory);
+            System.out.println("Wrote "+problemYamlFile);
+            for (String string : filelist) {
+                System.out.println("Wrote "+string);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // debug 22
+        }
+    }
+    
+
+
+    /**
+     * get Letter.
+     * 
+     * 
+     * @param directory
+     * @return
+     */
+    char currentDirectoryLetter(String directory) {
+        char letter = 'A';
+        String nextDirectory = directory + File.separator + letter;
+        File file = new File(nextDirectory);
+
+        while (file.isDirectory()) {
+            System.out.println("Found directory: "+nextDirectory);
+
+            letter ++;
+            nextDirectory = directory + File.separator + letter;
+            file = new File(nextDirectory);
+            if (!file.isDirectory()){
+                letter --;
+            }
+        }
+        
+
+        return letter;
+
+    }
+
+    private String findNextDirectory(String directory) {
+        
+        char letter = currentDirectoryLetter(directory);
+        String nextDirectory = directory + File.separator + letter;
+        File file = new File(nextDirectory);
+        
+        while (file.isDirectory()){
+            System.out.println("Found directory: "+nextDirectory);
+            
+            letter ++;
+            nextDirectory = directory + File.separator + letter;
+            file = new File(nextDirectory);
+        }
+        
+        if (!file.isDirectory()) {
+            file.mkdirs();
+            System.out.println("Created dir " + nextDirectory);
+        }
+        
+        return nextDirectory;
+    }
+
+    protected void goodsaveProblemYaml() {
 
         Problem newProblem = null;
 
         try {
-            newProblem = getProblemFromFields(problem);
+            newProblemDataFiles = getProblemDataFilesFromFields();
+            newProblem = getProblemFromFields(problem, newProblemDataFiles);
+
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
             return;
@@ -2687,8 +2963,8 @@ public class EditProblemPane extends JPanePlugin {
         SingleProblemReport singleProblemReport = new SingleProblemReport();
 
         try {
-            Problem newProblem = getProblemFromFields(problem);
-            getProblemDataFilesFromFields();
+            newProblemDataFiles = getProblemDataFilesFromFields();
+            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
             singleProblemReport.setProblem(newProblem, newProblemDataFiles);
             Utilities.viewReport(singleProblemReport, "Problem Report " + getProblemNameTextField().getText(), getContest(), getController());
         } catch (InvalidFieldValue e) {
@@ -2761,5 +3037,81 @@ public class EditProblemPane extends JPanePlugin {
         }
         return validatorRunFilePicker;
     }
+    
+    /**
+     * 
+     * @param string
+     * @param nextDirectory
+     * @return
+     */
+    public String compareDirectories(String directory, String nextDirectory) {
+        
+        ArrayList<String> filelist = getFileEntries(directory, "", 0);
+        ArrayList<String> filelistTwo = getFileEntries(nextDirectory, "", 0);
+        
+        int matching  = 0;
+        
+        if(filelist.size() == filelistTwo.size()){
+            for (int i = 0; i < filelist.size(); i++) {
+                String name1 = filelist.get(i);
+                String name2 = filelistTwo.get(i);
+                if (name1.equals(name2)){
+                    matching ++;
+                }
+                else
+                {
+                    System.err.println("Miss match "+name1 +" vs " + name2);
+                }
+            }
+        }
+        
+        if (matching == filelist.size()){
+            return "All "+matching+" matching";
+        } else {
+            return filelist.size() + " vs " + filelistTwo.size();
+        }
+    }
+
+    /**
+     * Returns all filenames (relative path) under input directory.
+     * 
+     * The list does not contain the string directory.  Only directories
+     * under the directory will be included.
+     * 
+     * @param directory
+     * @param relativeDirectory
+     * @param level
+     * @return all files names with relative paths.
+     */
+    private ArrayList<String> getFileEntries(String directory, String relativeDirectory, int level) {
+
+        ArrayList<String> list = new ArrayList<>();
+
+        File[] files = new File(directory).listFiles();
+        
+        if (relativeDirectory.length() > 0){
+            relativeDirectory += File.separator;
+        }
+
+        for (File entry : files) {
+            if (entry.isFile()) {
+                list.add(relativeDirectory + entry.getName());
+            }
+        }
+        
+        // recurse
+
+        for (File entry : files) {
+            if (entry.isDirectory() && !(entry.getName().equals(".") || entry.getName().equals(".."))) {
+                list.addAll(getFileEntries(directory + File.separator + entry.getName(),  //
+                        relativeDirectory + entry.getName(), level + 1));
+            }
+        }
+
+        return list;
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
+
+
 

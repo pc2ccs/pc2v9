@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 
@@ -111,11 +112,12 @@ public class MultipleDataSetPane extends JPanePlugin {
      * @param problemDataFiles
      * @throws CloneNotSupportedException
      */
-    public void setProblemDataFiles(ProblemDataFiles problemDataFiles) throws CloneNotSupportedException  {
+    public void setProblemDataFiles(Problem problem, ProblemDataFiles problemDataFiles) throws CloneNotSupportedException  {
         
-        Problem problem = getContest().getProblem(problemDataFiles.getProblemId());
         this.problemDataFiles = problemDataFiles.copy(problem);
-
+        
+        dump(problemDataFiles, "after clone debug 22");
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateUI();
@@ -126,11 +128,12 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     protected void populateUI() {
 
-        if (problemDataFiles != null) {
-            tableModel.setFiles(problemDataFiles);
-            tableModel.fireTableDataChanged();
-            System.out.println("debug 22 fire data changted "+problemDataFiles);
-        }
+        tableModel.setFiles(problemDataFiles);
+        tableModel.fireTableDataChanged();
+        System.out.println("debug 22 fire data changed ");
+        
+        dump(problemDataFiles, "populateUI debug 22 ");
+        dump(getProblemDataFiles(), "populateUI debug 22 B");
 
         // TODO 917
 //        testDataSetsListBox.autoSizeAllColumns();
@@ -140,6 +143,10 @@ public class MultipleDataSetPane extends JPanePlugin {
 //        Object[] cols = buildTestDataSetRow(rowNumber, serializedFile, answerSerializedFile);
 //        testDataSetsListBox.addRow(cols, new Integer(rowNumber));
 //    }
+
+    private void dump(ProblemDataFiles problemDataFiles2, String string) {
+        Utilities.dump(problemDataFiles2, string);
+    }
 
     /**
      * This method initializes centerPane
@@ -187,10 +194,16 @@ public class MultipleDataSetPane extends JPanePlugin {
     }
     
     public ProblemDataFiles getProblemDataFiles () {
+        dump(tableModel.getFiles(), "populateUI debug 22 C");
         return tableModel.getFiles();
     }
 
-
+    public void clearDataFiles() {
+        this.problemDataFiles = null;
+        
+        tableModel.setFiles(null);
+        tableModel.fireTableDataChanged();
+    }
 
 
 //    private JButton getBtnAddSet() {

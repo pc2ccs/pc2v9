@@ -36,6 +36,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
+import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 
@@ -1030,4 +1031,42 @@ public final class Utilities {
         File dir = new File(directoryName);
         startExplorer(dir);
     }
+    
+    /**
+     * Dump contents of ProblemDataFiles using ProblemReport
+     * 
+     * <pre>
+     * PrintWriter printWriter = new PrintWriter(System.out);
+     * dump(problemDataFiles, "dump this");
+     * printWriter.close();
+     * printWriter = null;
+     * </pre>
+     * @param printWriter
+     * @param dataFiles
+     * @param message
+     */
+    public static void dump(PrintWriter printWriter, ProblemDataFiles dataFiles, String message) {
+
+        ProblemsReport report = new ProblemsReport();
+        printWriter.println("dump ProblemDataFiles " + message);
+        printWriter.println("dump problem data files for " + dataFiles.getProblemId());
+        report.writeProblemDataFiles(printWriter, dataFiles);
+        printWriter.println("dump done");
+        printWriter.flush();
+  
+    }
+    
+    /**
+     * Dump problem data files to System.out.
+     * @param dataFiles
+     * @param message
+     */
+    public static void dump(ProblemDataFiles dataFiles, String message) {
+         PrintWriter printWriter = new PrintWriter(System.out);
+         dump(printWriter, dataFiles, message);
+         printWriter = null;  
+    }
+
+        
+
 }

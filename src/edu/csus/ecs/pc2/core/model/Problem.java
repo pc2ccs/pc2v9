@@ -765,9 +765,13 @@ public class Problem implements IElementObject {
      */
     public void addTestCaseFilenames (String datafile, String answerfile){
         
-        String[] newArray = StringUtilities.appendString(testCaseDataFilenames, datafile);
-        testCaseDataFilenames = newArray;
-        
+        String[] newArray;
+
+        if (datafile != null) {
+            newArray = StringUtilities.appendString(testCaseDataFilenames, datafile);
+            testCaseDataFilenames = newArray;
+        }
+
         newArray = StringUtilities.appendString(testCaseAnswerFilenames, answerfile);
         testCaseAnswerFilenames = newArray;
     }
