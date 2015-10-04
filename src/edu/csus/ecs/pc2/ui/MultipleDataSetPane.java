@@ -2,7 +2,11 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -10,6 +14,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * Multiple Test Data set UI.
@@ -30,22 +35,14 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     private JPanel centerPane = null;
 
-//    private JPanel buttonPane = null;
-
-//    private MCLB testDataSetsListBox = null;
-
     private TestCaseTableModel tableModel = new TestCaseTableModel();
 
     private JTable testDataSetsListBox = null;
 
     private ProblemDataFiles problemDataFiles;
-
-    /**
-     * Intial number of rows that were created, from test data sets.
-     */
-//    private int intialNumberOfRows = 0;
-//    private JButton btnAddSet;
-//    private JButton btnRemoveRow;
+    private JButton btnDelete;
+    private JButton btnReload;
+    private JButton btnLoad;
 
     /**
      * This method initializes
@@ -66,45 +63,19 @@ public class MultipleDataSetPane extends JPanePlugin {
         this.add(getCenterPane(), BorderLayout.CENTER);
         
         JPanel buttonPanel = new JPanel();
+        FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
+        flowLayout.setHgap(45);
         buttonPanel.setPreferredSize(new Dimension(35, 35));
         add(buttonPanel, BorderLayout.SOUTH);
-//        this.add(getButtonPane(), BorderLayout.SOUTH);
-
+        buttonPanel.add(getBtnLoad());
+        buttonPanel.add(getBtnDelete());
+        buttonPanel.add(getBtnReload());
     }
 
     @Override
     public String getPluginTitle() {
         return "Mulitple Data Set Pane";
     }
-
-//    protected Object[] buildTestDataSetRow(int setNumber, SerializedFile judgeFile, SerializedFile answerFile) {
-//
-//        int numberColumns = testDataSetsListBox.getColumnCount();
-//        Object[] columns = new Object[numberColumns];
-//
-//        // String [] cols = {"Set #", "Data File", "Answer File"};
-//
-//        int i = 0;
-//        columns[i] = Integer.toString(setNumber);
-//
-//        i++;
-//
-//        if (judgeFile != null) {
-//            columns[i] = new JTextFieldSerializedFile(judgeFile);
-//        } else {
-//            columns[i] = new JTextFieldSerializedFile();
-//        }
-//
-//        i++;
-//
-//        if (answerFile != null) {
-//            columns[i] = new JTextFieldSerializedFile(answerFile);
-//        } else {
-//            columns[i] = new JTextFieldSerializedFile();
-//        }
-//
-//        return columns;
-//    }
 
     /**
      * Clone data files and populate in pane.
@@ -115,8 +86,6 @@ public class MultipleDataSetPane extends JPanePlugin {
     public void setProblemDataFiles(Problem problem, ProblemDataFiles problemDataFiles) throws CloneNotSupportedException  {
         
         this.problemDataFiles = problemDataFiles.copy(problem);
-        
-        dump(problemDataFiles, "after clone debug 22");
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -139,10 +108,6 @@ public class MultipleDataSetPane extends JPanePlugin {
 //        testDataSetsListBox.autoSizeAllColumns();
     }
 
-//    private void addSetRow(int rowNumber, SerializedFile serializedFile, SerializedFile answerSerializedFile) {
-//        Object[] cols = buildTestDataSetRow(rowNumber, serializedFile, answerSerializedFile);
-//        testDataSetsListBox.addRow(cols, new Integer(rowNumber));
-//    }
 
     private void dump(ProblemDataFiles problemDataFiles2, String string) {
         Utilities.dump(problemDataFiles2, string);
@@ -162,23 +127,6 @@ public class MultipleDataSetPane extends JPanePlugin {
         return centerPane;
     }
 
-//    /**
-//     * This method initializes buttonPane
-//     * 
-//     * @return javax.swing.JPanel
-//     */
-//    private JPanel getButtonPane() {
-//        if (buttonPane == null) {
-//            buttonPane = new JPanel();
-//            buttonPane.setMinimumSize(new Dimension(25, 25));
-//            FlowLayout flbuttonPane = new FlowLayout();
-//            flbuttonPane.setHgap(45);
-//            buttonPane.setLayout(flbuttonPane);
-//            buttonPane.add(getBtnAddSet());
-//            buttonPane.add(getBtnRemoveRow());
-//        }
-//        return buttonPane;
-//    }
 
     /**
      * This method initializes testDataSetsListBox
@@ -204,35 +152,125 @@ public class MultipleDataSetPane extends JPanePlugin {
         tableModel.setFiles(null);
         tableModel.fireTableDataChanged();
     }
+    
+    /**
+     * Compares current set of data sets to input datafiles.
+     * 
+     */
+    boolean hasChanged(ProblemDataFiles originalFiles) {
 
+        if (originalFiles == null && problemDataFiles == null) {
+            return true;
+        }
 
-//    private JButton getBtnAddSet() {
-//        if (btnAddSet == null) {
-//            btnAddSet = new JButton("Add Row");
-//            btnAddSet.setToolTipText("Add row of data files");
-//            btnAddSet.setMnemonic(java.awt.event.KeyEvent.VK_D);
-//            btnAddSet.addActionListener(new ActionListener() {
-//                public void actionPerformed(ActionEvent e) {
-//                    addSetRow(getTestDataSetsListBox().getRowCount()+1, null, null);
-//                }
-//            });
-//        }
-//        return btnAddSet;
-//    }
-//    private JButton getBtnRemoveRow() {
-//        if (btnRemoveRow == null) {
-//            btnRemoveRow = new JButton("Remove Row");
-//            btnRemoveRow.setToolTipText("Remove selectec row");
-//            btnRemoveRow.setMnemonic(java.awt.event.KeyEvent.VK_R);
-//            btnRemoveRow.addActionListener(new ActionListener() {
-//                public void actionPerformed(ActionEvent e) {
-//                    int rowNumber = getTestDataSetsListBox().getSelectedIndex();
-//                    if (rowNumber != -1){
-//                        getTestDataSetsListBox().removeRow(rowNumber);
-//                    }
-//                }
-//            });
-//        }
-//        return btnRemoveRow;
-//    }
+        if (originalFiles == null || problemDataFiles == null) {
+            return false;
+        }
+
+        int comp = compare(originalFiles.getJudgesDataFiles(), problemDataFiles.getJudgesDataFiles());
+        if (comp != 0) {
+            return false;
+        }
+
+        comp = compare(originalFiles.getJudgesAnswerFiles(), problemDataFiles.getJudgesAnswerFiles());
+        if (comp != 0) {
+            return false;
+        }
+        
+        System.out.println("debug 22 Are problemId's identical ?" + //
+                problemDataFiles.getProblemId().equals(originalFiles.getProblemId()));
+
+        return true;
+
+    }
+
+    /**
+     * Compare serializedfile arrays.
+     * 
+     * @param listOne
+     * @param listTwo
+     * @return 0 if identical, non-zero if different.
+     */
+    private int compare(SerializedFile[] listOne, SerializedFile[] listTwo) {
+
+        if (listOne.length != listTwo.length) {
+            return listTwo.length - listOne.length;
+        } else {
+            for (int i = 0; i < listTwo.length; i++) {
+                if (!listOne[i].equals(listTwo[i])) {
+                    return 1;
+                }
+            }
+
+        }
+        return 0;
+    }
+
+    
+    private JButton getBtnDelete() {
+        if (btnDelete == null) {
+            btnDelete = new JButton("Delete");
+            btnDelete.setToolTipText("Delete selected data sets");
+            btnDelete.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    int rowNumber = testDataSetsListBox.getSelectedRow();
+                    if (rowNumber != -1){
+                        removeRow (rowNumber);
+                    }
+                }
+            });
+        }
+        return btnDelete;
+    }
+
+    protected void removeRow(int rowNumber) {
+        showMessage(this, "Not implemented Yet", "removeRow not implemented, yet");
+        // TODO Auto-generated method stub
+        
+        // Warn if they delete row one ??
+
+        // TODO if row one is deleted, update the data and answer file on the General Tab 
+
+    }
+
+    private JButton getBtnReload() {
+        if (btnReload == null) {
+            btnReload = new JButton("Re-Load");
+            btnReload.setToolTipText("Refresh/Reload data sets from disk");
+            btnReload.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    reloadDataFiles();
+                }
+            });
+        }
+        return btnReload;
+    }
+
+    protected void reloadDataFiles() {
+        showMessage(this, "Not implemented Yet", "reloadDataFiles not implemented, yet");
+        // TODO Auto-generated method stub
+        
+    }
+
+    private JButton getBtnLoad() {
+        if (btnLoad == null) {
+            btnLoad = new JButton("Load");
+            btnLoad.setToolTipText("Load data sets from directory");
+
+            btnLoad.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    loadDataFiles();
+                }
+            });
+        }
+        return btnLoad;
+    }
+
+    protected void loadDataFiles() {
+        showMessage(this, "Not implemented Yet", "loadDataFiles not implemented, yet");
+        // TODO Auto-generated method stub
+        
+        // TODO load the data and answer file on the General Tab
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

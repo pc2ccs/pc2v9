@@ -223,8 +223,6 @@ public class EditProblemPane extends JPanePlugin {
 
     private JCheckBox ccsValidationEnabledCheckBox = null;
 
-    private JSerializFilePicker validatorRunFilePicker = null;
-
     private boolean usingExternalDataFiles;
 
     private String loadPath;
@@ -456,7 +454,7 @@ public class EditProblemPane extends JPanePlugin {
 
             try {
                 Problem changedProblem = getProblemFromFields(null, null);
-                if (!problem.isSameAs(changedProblem)) {
+                if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(originalProblemDataFiles)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
                 }
@@ -589,7 +587,6 @@ public class EditProblemPane extends JPanePlugin {
         
         lastDataFile = null;
         lastAnsFile = null;
-        
                 
         if (checkProblem == null) {
             checkProblem = new Problem(problemNameTextField.getText());
@@ -597,7 +594,7 @@ public class EditProblemPane extends JPanePlugin {
             newProblemDataFiles = new ProblemDataFiles(checkProblem);
         } else {
             checkProblem.setDisplayName(problemNameTextField.getText());
-            checkProblem.setElementId(problem);  // dup ElementId so that Problem key/lookup is identical
+            checkProblem.setElementId(problem);  // duplicate ElementId so that Problem key/lookup is identical
             newProblemDataFiles = new ProblemDataFiles(problem);
             isAdding = false;
             
@@ -733,6 +730,8 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         checkProblem.setShowValidationToJudges(showValidatorToJudges.isSelected());
+        
+        // debug 22 getCcsValidationEnabledCheckBox().isSelected();
 
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
@@ -2615,7 +2614,7 @@ public class EditProblemPane extends JPanePlugin {
         
         showMessage("Load not implemented, yet.");
         
-        //  TODO implement loadProblemInfoFile
+        //  TODO implement loadProblemInfoFile to load information from problem.yaml and etc.
 
 //        String filename = null;
 //        
@@ -2649,19 +2648,19 @@ public class EditProblemPane extends JPanePlugin {
 //        }
     }
 
-    private void loadFromProblemYaml(String filename) {
-        
+//    private void loadFromProblemYaml(String filename) {
+//        
 //        ContestYAMLLoader loader = new ContestYAMLLoader();
-        
+//        
 //        String[] contents = Utilities.loadFile(filename);
-        
-        // TODO Load problem and data files using problem.yaml
-        
+//        
+//        // TODO Load problem and data files using problem.yaml
+//        
 //        loader.getProblems(contents, defaultTimeOut)
 //        String huh;
 //        loader.loadProblemInformationAndDataFiles(contest, huh, null, true);
-        
-    }
+//        
+//    }
 
     public File selectYAMLFileDialog(Component parent, String title, String startDirectory) {
 
@@ -2691,17 +2690,17 @@ public class EditProblemPane extends JPanePlugin {
         return null;
     }
 
-    private String selectFileName(String title, String dirname) throws IOException {
-
-        String chosenFile = null;
-        File file = selectYAMLFileDialog(this, title, lastDirectory);
-        if (file != null) {
-            chosenFile = file.getCanonicalFile().toString();
-            return chosenFile;
-        } else {
-            return null;
-        }
-    }
+//    private String selectFileName(String title, String dirname) throws IOException {
+//
+//        String chosenFile = null;
+//        File file = selectYAMLFileDialog(this, title, lastDirectory);
+//        if (file != null) {
+//            chosenFile = file.getCanonicalFile().toString();
+//            return chosenFile;
+//        } else {
+//            return null;
+//        }
+//    }
 
     public ContestYAMLLoader getLoader() {
         if (loader == null) {
@@ -3004,7 +3003,6 @@ public class EditProblemPane extends JPanePlugin {
             ccsSettingsPane.setBorder(BorderFactory.createTitledBorder(null, "CCS Standard Problem Settings", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog",
                     Font.BOLD, 12), new Color(51, 51, 51)));
             ccsSettingsPane.add(getCcsValidationEnabledCheckBox(), null);
-            ccsSettingsPane.add(getValidatorRunFilePicker(), null);
         }
         return ccsSettingsPane;
     }
@@ -3017,25 +3015,17 @@ public class EditProblemPane extends JPanePlugin {
     private JCheckBox getCcsValidationEnabledCheckBox() {
         if (ccsValidationEnabledCheckBox == null) {
             ccsValidationEnabledCheckBox = new JCheckBox();
+            ccsValidationEnabledCheckBox.setToolTipText("Use validator that uses exit code to return judgement");
             ccsValidationEnabledCheckBox.setBounds(new Rectangle(27, 33, 375, 28));
-            ccsValidationEnabledCheckBox.setText("Use CCS mode validator");
+            ccsValidationEnabledCheckBox.setText("Use CCS validator interface");
+            
+            ccsValidationEnabledCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return ccsValidationEnabledCheckBox;
-    }
-
-    /**
-     * This method initializes validatorRunFilePicker
-     * 
-     * @return edu.csus.ecs.pc2.ui.JSerializFilePicker
-     */
-    private JSerializFilePicker getValidatorRunFilePicker() {
-        if (validatorRunFilePicker == null) {
-            validatorRunFilePicker = new JSerializFilePicker();
-            validatorRunFilePicker.setBounds(new Rectangle(31, 68, 420, 47));
-            validatorRunFilePicker.setBorder(BorderFactory.createTitledBorder(null, "Validator Run Program", 
-                    TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
-        }
-        return validatorRunFilePicker;
     }
     
     /**

@@ -53,10 +53,18 @@ public class TestCaseTableModel extends DefaultTableModel {
                 obj = "" + (row + 1);
                 break;
             case 1:
-                obj = files.getJudgesDataFiles()[row].getName();
+                if (files == null || files.getJudgesDataFiles() == null || files.getJudgesDataFiles().length <= row ){
+                    obj = null;
+                } else {
+                    obj = files.getJudgesDataFiles()[row].getName();
+                }
                 break;
             case 2:
+                if (files == null || files.getJudgesAnswerFiles() == null || files.getJudgesAnswerFiles().length <= row ){
+                    obj = null;
+                } else {
                 obj = files.getJudgesAnswerFiles()[row].getName();
+                }
                 break;
             default:
                 break;

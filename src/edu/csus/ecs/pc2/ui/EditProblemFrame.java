@@ -68,7 +68,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
         } else {
             setTitle("Edit Problem " + problem.getDisplayName());
             if (problem.isUsingExternalDataFiles()) {
-                setTitle("Edit Problem " + problem.getDisplayName()+" ("+problem.getExternalDataFileLocation()+")");
+                setTitle("Edit Problem " + problem.getDisplayName()+" [External/CCS]" );
             }
             
         }
