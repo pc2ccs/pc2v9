@@ -44,6 +44,8 @@ public class MultipleDataSetPane extends JPanePlugin {
     private JButton btnReload;
     private JButton btnLoad;
 
+    private EditProblemPane editProblemPane = null;
+
     /**
      * This method initializes
      * 
@@ -83,18 +85,20 @@ public class MultipleDataSetPane extends JPanePlugin {
      * @param problemDataFiles
      * @throws CloneNotSupportedException
      */
-    public void setProblemDataFiles(Problem problem, ProblemDataFiles problemDataFiles) throws CloneNotSupportedException  {
-        
-        this.problemDataFiles = problemDataFiles.copy(problem);
-        
+    public void setProblemDataFiles(Problem problem, ProblemDataFiles problemDataFiles) throws CloneNotSupportedException {
+        setProblemDataFiles(problemDataFiles.copy(problem));
+    }
+
+    public void setProblemDataFiles(ProblemDataFiles datafiles) {
+        this.problemDataFiles = datafiles;
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateUI();
             }
         });
-
     }
-
+    
     protected void populateUI() {
 
         tableModel.setFiles(problemDataFiles);
@@ -104,7 +108,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         dump(problemDataFiles, "populateUI debug 22 ");
         dump(getProblemDataFiles(), "populateUI debug 22 B");
 
-        // TODO 917
+        // TODO 917 re-add auto size columns
 //        testDataSetsListBox.autoSizeAllColumns();
     }
 
@@ -224,13 +228,16 @@ public class MultipleDataSetPane extends JPanePlugin {
     }
 
     protected void removeRow(int rowNumber) {
-        showMessage(this, "Not implemented Yet", "removeRow not implemented, yet");
-        // TODO Auto-generated method stub
+
+        if (tableModel.getRowCount() == 1)
+        {
+            editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
+        }
+
+        tableModel.removeRow(rowNumber);
         
+        // TODO 917 if row one is deleted, update the data and answer file on the General Tab 
         // Warn if they delete row one ??
-
-        // TODO if row one is deleted, update the data and answer file on the General Tab 
-
     }
 
     private JButton getBtnReload() {
@@ -271,6 +278,13 @@ public class MultipleDataSetPane extends JPanePlugin {
         // TODO Auto-generated method stub
         
         // TODO load the data and answer file on the General Tab
+        
+        editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
+
+    }
+
+    public void setParentPane(EditProblemPane pane) {
+        editProblemPane = pane;
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"

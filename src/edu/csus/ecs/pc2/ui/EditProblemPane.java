@@ -1149,94 +1149,51 @@ public class EditProblemPane extends JPanePlugin {
         });
     }
 
-//    /**
-//     * If there are more than one test data set, add a pane.
-//     * 
-//     * @param problemDataFiles
-//     */
-//    protected void addProblemFilesTab(ProblemDataFiles problemDataFiles) {
-//
-//        getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
-//        getMultipleDataSetPane().setVisible(true);
-//    }
-
     public MultipleDataSetPane getMultipleDataSetPane() {
         if (multipleDataSetPane == null) {
             multipleDataSetPane = new MultipleDataSetPane();
             multipleDataSetPane.setContestAndController(getContest(), getController());
+            multipleDataSetPane.setParentPane(this);
         }
         return multipleDataSetPane;
         
     }
-//            multipleDataSetPane.addTableListener(new com.ibm.webrunner.j2mclb.util.event.TableListener(){
-//
-//                public void columnAdded(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void columnChanged(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void columnInfoChanged(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void columnInserted(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void columnRemoved(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void elementChanged(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void rowAdded(TableEvent arg0) {
-//                    enableUpdateButton();
-//                }
-//
-//                public void rowChanged(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void rowInfoChanged(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void rowInserted(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void rowRemoved(TableEvent arg0) {
-//                    enableUpdateButton();
-//                }
-//
-//                public void tableChanged(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//
-//                public void tableRefreshed(TableEvent arg0) {
-//                    // ignore 
-//                    
-//                }
-//                
-//            });
-//        }
-//        return multipleDataSetPane;
-//    }
+    
+    /**
+     * Set/populate (or remove) General tab judge's files.
+     * 
+     * If no first test set 
+     * 
+     * @param datafiles
+     */
+    public void setJudgingTestSetOne (ProblemDataFiles datafiles) {
+
+        if (datafiles == null) {
+            deleteAllDataSets();
+        }
+        
+        if ( datafiles.getJudgesDataFile() == null){
+            // no first data set for judges file
+            
+            // TODO 917 remove general data file
+        }
+        
+        if (datafiles.getJudgesAnswerFile() == null){
+            // no first data set for answer file
+            
+            // TODO 917 remove general answer data file
+        }
+    }
+    
+  
+    /**
+     * Remove all data sets
+     */
+    private void deleteAllDataSets() {
+        ProblemDataFiles dataFiles = getMultipleDataSetPane().getProblemDataFiles();
+        dataFiles.removeAll();
+        getMultipleDataSetPane().setProblemDataFiles(dataFiles);
+    }
 
     /**
      * Set new Problem to be edited.

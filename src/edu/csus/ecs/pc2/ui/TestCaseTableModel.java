@@ -72,8 +72,15 @@ public class TestCaseTableModel extends DefaultTableModel {
         }
         return obj;
     }
+
+    @Override
+    public void removeRow(int row) {
+        files.removeDataSet(row - 1);
+        super.removeRow(row);
+    }
     
     public ProblemDataFiles getFiles() {
+        // TODO 917 populate files from table model.
         return files;
     }
 

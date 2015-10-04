@@ -537,4 +537,53 @@ public class ProblemDataFiles implements IElementObject {
 
     }
 
+    /**
+     * Remove data set from problem data sets.
+     * 
+     * @param index zero based data set row
+     */
+    public void removeDataSet(int index) {
+
+        SerializedFile[] newDataFiles = new SerializedFile[0];
+        SerializedFile[] newAnswerFiles = new SerializedFile[0];
+
+        int curDataFileCount = judgesDataFiles.length;
+        int curAnswerFileCount = judgesAnswerFiles.length;
+
+        if (curDataFileCount == 1 || curAnswerFileCount == 1) {
+            ;
+        } else {
+            if (curDataFileCount > 0) {
+                newDataFiles = new SerializedFile[judgesDataFiles.length - 1];
+                int newIdx = 0;
+                for (int i = 0; i < judgesDataFiles.length; i++) {
+                    if (index != i) {
+                        newDataFiles[newIdx] = judgesDataFiles[i];
+                        newIdx++;
+                    }
+                }
+            }
+
+            if (curAnswerFileCount > 0) {
+                newAnswerFiles = new SerializedFile[judgesAnswerFiles.length - 1];
+                int newIdx = 0;
+                for (int i = 0; i < judgesAnswerFiles.length; i++) {
+                    if (index != i) {
+                        newAnswerFiles[newIdx] = judgesAnswerFiles[i];
+                        newIdx++;
+                    }
+                }
+            }
+        }
+
+        judgesDataFiles = newDataFiles;
+        judgesAnswerFiles = newAnswerFiles;
+
+    }
+
+    public void removeAll() {
+        judgesDataFiles = new SerializedFile[0];
+        judgesAnswerFiles = new SerializedFile[0];
+    }
+
 }
