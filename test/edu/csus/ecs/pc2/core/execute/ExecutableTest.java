@@ -65,7 +65,7 @@ public class ExecutableTest extends AbstractTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-//        setDebugMode(true);  // log to console, debug turned on
+        setDebugMode(true);  // log to console, debug turned on
         
         SampleContest sampleContest = new SampleContest();
         contest = sampleContest.createContest(2, 2, 12, 12, true);
@@ -396,6 +396,7 @@ public class ExecutableTest extends AbstractTestCase {
         
         String jarPath = executable.findPC2JarPath();
 
+        System.err.println("jarPath="+jarPath);
         if (! new File(jarPath).isDirectory()){
             System.err.println("ERROR - pc2 jar path not a directory '"+jarPath+"'");
             System.out.println("TODO 636 - unable to unit test - testFindPC2Jar fails so no ability to judge run");
@@ -418,7 +419,7 @@ public class ExecutableTest extends AbstractTestCase {
 
                     assertTrue("Expecting run to pass all tests " , executionData.isValidationSuccess());
 
-                    assertTrue("Expected to run to be a Yes " + run.getProblemId(), ExecuteUtilities.didTeamSolveProblem(executionData));
+                    assertTrue("Expected to run to be a Yes " + run.getProblemId()+" but found "+executionData.getValidationResults().trim(), ExecuteUtilities.didTeamSolveProblem(executionData));
                 }
             }
 
