@@ -526,29 +526,25 @@ public class ExecuteUtilities extends Plugin {
      * Did the team's run solve the problem ?.
      * 
      * @param inExecutionData    
-     * @return true if no compilation error, etc.
+     * @return true if validation returned accepted
      */
     public static boolean didTeamSolveProblem(ExecutionData executionData) {
         
         if (!executionData.isCompileSuccess() || !executionData.isExecuteSucess()){
-            System.err.println("failed compile or success");
             return false;
         }
         
         if (executionData.isRunTimeLimitExceeded()){
-            System.err.println("failed to run in time limit");
             return false;
         }
 
         // validator program failed to run 
         if (! executionData.isValidationSuccess()){
-            System.err.println("failed in validation");
             return false;
         }
 
         
         if (executionData.getExecutionException() != null){
-            System.err.println("failed with no executionData");
             return false;
         }
         
@@ -559,11 +555,7 @@ public class ExecuteUtilities extends Plugin {
             // bug 280 ICPC Validator Interface Standard calls for "accepted" in any case.
             if (results.trim().equalsIgnoreCase("accepted")) {
                 return true;
-            } else {
-                System.err.println("failed with results other then accepted: '"+results.trim()+"'");
             }
-        } else {
-            System.err.println("failed because validationResults was null");
         }
         return false;
     }
