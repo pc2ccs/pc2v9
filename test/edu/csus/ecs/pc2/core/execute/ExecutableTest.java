@@ -397,6 +397,8 @@ public class ExecutableTest extends AbstractTestCase {
         String jarPath = executable.findPC2JarPath();
 
         System.err.println("jarPath="+jarPath);
+        String dirName = executable.getExecuteDirectoryName();
+        System.err.println("dirName='"+dirName+"', full path="+new File(dirName).getCanonicalPath());
         if (! new File(jarPath).isDirectory()){
             System.err.println("ERROR - pc2 jar path not a directory '"+jarPath+"'");
             System.out.println("TODO 636 - unable to unit test - testFindPC2Jar fails so no ability to judge run");
