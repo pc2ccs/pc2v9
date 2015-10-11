@@ -1,11 +1,15 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.io.File;
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -36,6 +40,8 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     private Run run = null;
 
     private SelectJudgementPaneNew selectJudgementPane = null;
+
+    private Log log = null;
 
     /**
      * This method initializes
@@ -77,12 +83,23 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
         getSelectJudgementPane().setParentFrame(this);
 
         contest.addRunListener(new RunListenerImplementation());
+        
+        log = controller.getLog();
     }
-
+    
     public void setRun(Run theRun, boolean rejudgeRun) {
         Executable tempEexecutable = new Executable(contest, controller, theRun, null);
         // clear as soon as we start this run, so View Outputs does not show old info
-        tempEexecutable.clearDirectory(tempEexecutable.getExecuteDirectoryName());
+        
+        String temporaryExecuteableDirectory = tempEexecutable.getExecuteDirectoryName();
+        
+        if (! new File(temporaryExecuteableDirectory).isDirectory()){
+            // create directory if not present, needed for cleardirectory
+            log.info("Creating directory "+temporaryExecuteableDirectory);
+            Utilities.insureDir(temporaryExecuteableDirectory);
+        }
+        
+        tempEexecutable.clearDirectory(temporaryExecuteableDirectory);
 
         getSelectJudgementPane().setRun(theRun);
         if (theRun == null) {
