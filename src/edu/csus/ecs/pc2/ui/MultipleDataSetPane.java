@@ -86,7 +86,11 @@ public class MultipleDataSetPane extends JPanePlugin {
      * @throws CloneNotSupportedException
      */
     public void setProblemDataFiles(Problem problem, ProblemDataFiles problemDataFiles) throws CloneNotSupportedException {
-        setProblemDataFiles(problemDataFiles.copy(problem));
+        if (problem != null){
+            setProblemDataFiles(problemDataFiles.copy(problem));
+        } else {
+            clearDataFiles();
+        }
     }
 
     public void setProblemDataFiles(ProblemDataFiles datafiles) {
@@ -103,10 +107,14 @@ public class MultipleDataSetPane extends JPanePlugin {
 
         tableModel.setFiles(problemDataFiles);
         tableModel.fireTableDataChanged();
-        System.out.println("debug 22 fire data changed ");
-        
-        dump(problemDataFiles, "populateUI debug 22 ");
-        dump(getProblemDataFiles(), "populateUI debug 22 B");
+     
+        // TODO 917 remove debugging
+        if (EditProblemPane.debug22EditProblem)
+        {
+            System.out.println("debug 22 fire data changed ");
+            dump(problemDataFiles, "populateUI debug 22 ");
+            dump(getProblemDataFiles(), "populateUI debug 22 B");
+        }
 
         // TODO 917 re-add auto size columns
 //        testDataSetsListBox.autoSizeAllColumns();

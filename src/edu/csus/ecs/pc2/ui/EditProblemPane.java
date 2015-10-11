@@ -62,6 +62,8 @@ import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 public class EditProblemPane extends JPanePlugin {
 
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    
+    public static boolean debug22EditProblem = false;
 
     /**
      *  
@@ -223,20 +225,10 @@ public class EditProblemPane extends JPanePlugin {
 
     private JCheckBox ccsValidationEnabledCheckBox = null;
 
-    private boolean usingExternalDataFiles;
+    private boolean usingExternalDataFiles = false;
 
     private String loadPath;
     private JTextField shortNameTextfield;
-
-    /**
-     * Last main data file loaded.
-     */
-    private SerializedFile lastDataFile = null;
-
-    /**
-     * last main answer file loaded.
-     */
-    private SerializedFile lastAnsFile = null;
 
     private String fileNameOne;
     
@@ -584,9 +576,16 @@ public class EditProblemPane extends JPanePlugin {
      */
     public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
         boolean isAdding = true;
+
+        /**
+         * Data file from General tab.
+         */
+        SerializedFile lastDataFile = null;
         
-        lastDataFile = null;
-        lastAnsFile = null;
+        /**
+         * Answer file from General Tab.
+         */
+        SerializedFile lastAnsFile = null;
                 
         if (checkProblem == null) {
             checkProblem = new Problem(problemNameTextField.getText());
@@ -595,7 +594,8 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             checkProblem.setDisplayName(problemNameTextField.getText());
             checkProblem.setElementId(problem);  // duplicate ElementId so that Problem key/lookup is identical
-            newProblemDataFiles = new ProblemDataFiles(problem);
+            newProblemDataFiles = dataFiles;
+//            newProblemDataFiles = new ProblemDataFiles(problem);
             isAdding = false;
             
         }
@@ -634,11 +634,11 @@ public class EditProblemPane extends JPanePlugin {
                 }
 
                 checkProblem.setDataFileName(serializedFile.getName());
+                lastDataFile = serializedFile;
                 
             } else {
 
                 SerializedFile serializedFile = originalProblemDataFiles.getJudgesDataFile();
-                lastDataFile = serializedFile;
                 if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
@@ -648,6 +648,7 @@ public class EditProblemPane extends JPanePlugin {
                 }
                 
                 checkProblem.setDataFileName(serializedFile.getName());
+                lastDataFile = serializedFile;
             }
         } else {
             checkProblem.setDataFileName(null);
@@ -670,12 +671,11 @@ public class EditProblemPane extends JPanePlugin {
                     throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (adding)");
                 }
                 
-                
                 checkProblem.setAnswerFileName(serializedFile.getName());
                 newProblemDataFiles.setJudgesAnswerFile(serializedFile);
+                lastAnsFile = serializedFile;
             } else {
                 SerializedFile serializedFile = originalProblemDataFiles.getJudgesAnswerFile();
-                lastAnsFile = serializedFile;
                 if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
@@ -683,6 +683,7 @@ public class EditProblemPane extends JPanePlugin {
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
+                lastAnsFile = serializedFile;
 
                 checkProblem.setAnswerFileName(serializedFile.getName());
             }
@@ -808,15 +809,33 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         checkProblem.setExternalDataFileLocation(loadPath);
-        
-        if (dataFiles != null){
-            populateProblemTestSetFilenames (checkProblem, dataFiles);
+
+
+        if (lastAnsFile != null) {
+            newProblemDataFiles.setJudgesAnswerFile(lastAnsFile);
         }
-        
-        newProblemDataFiles = dataFiles;
+
+        if (lastDataFile != null) {
+            newProblemDataFiles.setJudgesDataFile(lastDataFile);
+        }
+
+        if (dataFiles == null) {
+            checkProblem.addTestCaseFilenames(getNane(lastAnsFile), getNane(lastDataFile));
+
+        } else {
+            populateProblemTestSetFilenames(checkProblem, dataFiles);
+        }
         
         return checkProblem;
 
+    }
+
+    private String getNane(SerializedFile serializedFile) {
+        if (serializedFile != null){
+            return serializedFile.getName();
+        }
+        
+        return null;
     }
 
     /**
@@ -954,11 +973,12 @@ public class EditProblemPane extends JPanePlugin {
          */
 
         newProblemDataFiles = multipleDataSetPane.getProblemDataFiles();
-//        Utilities.dump(newProblemDataFiles,"debug 22 in getProblemDataFilesFromFields");
         
-        // TODO 917 handle   lastAnsFile;
-        // TODO 917 handle  lastDataFile;
-        
+        if (debug22EditProblem){
+
+            Utilities.dump(newProblemDataFiles,"debug 22 in getProblemDataFilesFromFields");
+        }
+
         return newProblemDataFiles;
     }
 
@@ -1205,6 +1225,8 @@ public class EditProblemPane extends JPanePlugin {
         this.newProblemDataFiles = null;
         this.originalProblemDataFiles = null;
         
+        this.usingExternalDataFiles = false;
+        
         fileNameOne = createProblemReport (problem, originalProblemDataFiles, "stuf1");
         System.out.println("Created problem report "+fileNameOne);
 
@@ -1255,7 +1277,9 @@ public class EditProblemPane extends JPanePlugin {
         
         getMultipleDataSetPane().clearDataFiles();
         
-//        Utilities.dump(originalProblemDataFiles,"debug 22 in EPP");
+        if (debug22EditProblem){
+            Utilities.dump(originalProblemDataFiles,"debug 22 in EPP");
+        }
         
         try {
             getMultipleDataSetPane().setProblemDataFiles(problem, originalProblemDataFiles);
@@ -1263,7 +1287,9 @@ public class EditProblemPane extends JPanePlugin {
             String message = "Error loading/editing problem data files: " + e.getMessage();
             showMessage(message + " check logs.");
             getLog().log(Log.WARNING, message, e);
-            e.printStackTrace(); // debug 22
+            if (debug22EditProblem){
+                       e.printStackTrace(); // debug 22
+            }
         }
 
         // select the general tab
@@ -1272,6 +1298,7 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     @SuppressWarnings("unused")
+    
     private void dumpProblem(String filename, ProblemDataFiles pdf) {
         
         PrintWriter out = new PrintWriter(System.out, true);
@@ -2737,12 +2764,16 @@ public class EditProblemPane extends JPanePlugin {
 
         ProblemsReport report = new ProblemsReport();
         report.setContestAndController(getContest(), getController());
-        String filename = getReportFilename("stuf2", report);
-
+        String filename = getReportFilename(fileNamePrefix+".prob.txt", report);
+        
         try {
             PrintWriter printWriter = null;
             printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
-            report.writeRow(printWriter, prob, datafiles);
+            if (problem == null){
+                printWriter.println("  Problem is null");
+            } else {
+                report.writeRow(printWriter, prob, datafiles);
+            }
             printWriter.close();
             printWriter = null;
         } catch (Exception e) {

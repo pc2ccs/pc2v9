@@ -1049,8 +1049,13 @@ public final class Utilities {
 
         ProblemsReport report = new ProblemsReport();
         printWriter.println("dump ProblemDataFiles " + message);
-        printWriter.println("dump problem data files for " + dataFiles.getProblemId());
-        report.writeProblemDataFiles(printWriter, dataFiles);
+        if (dataFiles == null){
+            printWriter.println("dump problem data files - no ProblemDataFiles defined");
+        }
+        else {
+            printWriter.println("dump problem data files for " + dataFiles.getProblemId());
+            report.writeProblemDataFiles(printWriter, dataFiles);
+        }
         printWriter.println("dump done");
         printWriter.flush();
   

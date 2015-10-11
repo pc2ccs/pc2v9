@@ -771,9 +771,11 @@ public class Problem implements IElementObject {
             newArray = StringUtilities.appendString(testCaseDataFilenames, datafile);
             testCaseDataFilenames = newArray;
         }
-
-        newArray = StringUtilities.appendString(testCaseAnswerFilenames, answerfile);
-        testCaseAnswerFilenames = newArray;
+        
+        if (answerfile != null){
+            newArray = StringUtilities.appendString(testCaseAnswerFilenames, answerfile);
+            testCaseAnswerFilenames = newArray;
+        }
     }
     
     
