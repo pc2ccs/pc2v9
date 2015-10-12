@@ -148,18 +148,22 @@ public class RunListTest extends AbstractTestCase {
 
         Thread[] thredList = new Thread[runs.length];
         int threadCount = 0;
+        try {
 
-        for (Run run : runs) {
-            AddRun addRun = new AddRun(runList, run);
+            for (Run run : runs) {
+                AddRun addRun = new AddRun(runList, run);
 
-            /**
-             * Create thread to add run to emulate Hail Mary speed submissions.
-             */
-            Thread thread = new Thread(addRun);
-            thredList[threadCount] = thread;
-            thread.start();
-            threadCount++;
+                /**
+                 * Create thread to add run to emulate Hail Mary speed submissions.
+                 */
+                Thread thread = new Thread(addRun);
+                thredList[threadCount] = thread;
+                thread.start();
+                threadCount++;
             
+            }
+        } catch (OutOfMemoryError e) {
+            fail("testBackupStressUsingThreads unable to start "+runs.length+" threads stopped at "+(threadCount+1));
         }
 
         int activeThreds = countActiveThreads(thredList);
