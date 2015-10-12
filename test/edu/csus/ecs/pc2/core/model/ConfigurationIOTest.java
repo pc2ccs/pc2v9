@@ -341,7 +341,7 @@ public class ConfigurationIOTest extends AbstractTestCase {
         try {
             configurationIO.loadFromDisk(5, contest, log);
             fail("Expecting corrupt file "+configurationIO.getFileName());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             String expected = "Error contest config file corrupt";
             String actual = e.getMessage().substring(0,expected.length());
             assertEquals("Expecting exception message", expected, actual);
