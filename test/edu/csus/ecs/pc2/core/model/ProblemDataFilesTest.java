@@ -225,7 +225,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         Problem firstProblem = contest.getProblems()[0];
         ProblemDataFiles dataFiles = loadExternalFiles(contest, firstProblem, inputTestDirectory);
 
-        checkFiles(contest, dataFiles, null);
+        checkFiles(contest, dataFiles, testDir);
     }
 
 
@@ -258,7 +258,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         
         dumpProblemDataFiles("Admin", contest, dataFiles, null);
 
-        checkFiles(contest, dataFiles, null);
+        checkFiles(contest, dataFiles, testDir);
     }
     
     public void testLoadDataFiles() throws Exception {
@@ -336,6 +336,8 @@ public class ProblemDataFilesTest extends AbstractTestCase {
     private void checkFiles(IInternalContest contest, ProblemDataFiles dataFiles, String executeDirectory) throws FileNotFoundException {
 
         // make sure all internal files are created.
+        // note with external files on judges this will fail, because if the judgeCDPBasePath
+        // is set, then the executedirectory becomes where it looks for files...
         dataFiles.checkAndCreateFiles(contest, executeDirectory);
 
         // data files
