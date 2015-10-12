@@ -1647,7 +1647,7 @@ public class SampleContest {
     public ProblemDataFiles createProblemDataFiles(Problem problem, int testCases) {
 
         return createProblemDataFiles(problem, testCases, //
-                getSampleFileName("sumit.dat"), getSampleFileName("sumit.ans"));
+                getSampleFile("sumit.dat"), getSampleFile("sumit.ans"));
     }
 
 
