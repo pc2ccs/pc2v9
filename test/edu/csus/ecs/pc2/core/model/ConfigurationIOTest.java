@@ -330,7 +330,12 @@ public class ConfigurationIOTest extends AbstractTestCase {
         String configFileName = configurationIO.getFileName();
         
         removeFile(configFileName);
-        ExecuteUtilities.copyFile("pc2v9.ini",configFileName, log); 
+        // HACK around CC running us from /software/pc2/cc
+        String dir = "/software/pc2/cc/projects/"+ "pc2v9";
+        if (!new File(dir+File.separatorChar+"pc2v9.ini").exists()) {
+            dir = ".";
+        }
+        ExecuteUtilities.copyFile(dir+File.separatorChar+"pc2v9.ini",configFileName, log); 
         
 //        addConsoleHandler(log);
         
