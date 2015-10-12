@@ -245,7 +245,7 @@ public class RunListTest extends AbstractTestCase {
      */
     public void testCorrupt() throws Exception {
         
-        String testdir = getDataDirectory("testCorrupt");
+        String testdir = getOutputDataDirectory("testCorrupt");
         
 //        startExplorer(new File(testdir));
         
