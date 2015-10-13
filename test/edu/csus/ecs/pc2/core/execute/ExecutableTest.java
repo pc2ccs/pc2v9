@@ -359,8 +359,8 @@ public class ExecutableTest extends AbstractTestCase {
         String executeDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(executeDirectoryName);
         
-        Executable executable = new Executable(contest, controller, run, runFiles);
-        executable.setExecuteDirectoryName(executeDirectoryName);
+        // this allows us to set the execute directory to be under testout vs executesiteXaccountY
+        ExecutableOverride executable = new ExecutableOverride(contest, controller, run, runFiles,executeDirectoryName);
         executable.setUsingGUI(false);
         executable.execute();
 
@@ -532,7 +532,7 @@ public class ExecutableTest extends AbstractTestCase {
         }
 
         public void setExecuteDirectoryName(String directory) {
-            this.executeDirectoryName = "execute" + directory;
+            this.executeDirectoryName = directory;
         }
     }
 
@@ -808,7 +808,6 @@ public class ExecutableTest extends AbstractTestCase {
         assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
         
         assertFalse("Expecting all problem files internal ", areDataFilesExternal(contest.getProblemDataFile(problem)));
-
         
         Run run = createRun (submitter, javaLanguage, problem, 45, 120);
 
@@ -817,11 +816,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         
-        /**
-         * TODO fix this JUnit test.
-         */
-        fail ("testMultipleTestCaseInternalFile - fix run Executable");
-//        runExecutableTest(run, runFiles, true, yesJudgement);
+        runExecutableTest(run, runFiles, true, yesJudgement);
     }
     
     private boolean areDataFilesExternal(ProblemDataFiles problemDataFile) {
@@ -955,6 +950,7 @@ public class ExecutableTest extends AbstractTestCase {
         int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
         assertEquals("Expected number of judge answer files ", 4, numberJudgesAnswerFiles);
 
+        problem.setReadInputDataFromSTDIN(true);
         contest2.addProblem(problem, problemDataFiles);
 
         return problem;
