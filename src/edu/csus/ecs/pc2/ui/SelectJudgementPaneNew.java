@@ -482,7 +482,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         populatingGUI = true;
 
         if (theRun != null) {
-            
+
             getAcceptChosenSelectionButton().setVisible(true);
 
             String teamName = getTeamDisplayName(theRun.getSubmitter());
@@ -528,7 +528,14 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             } else {
                 showValidatorControls(false);
             }
-
+            if (runFiles != null) {
+                Problem problem = getContest().getProblem(run.getProblemId());
+                getMultiTestSetOutputViewerFrame().setData(run, runFiles, problem, getProblemDataFiles());
+                getViewOutputsButton().setEnabled(true);
+            } else {
+                // if we do not runFiles yet, do not allow view Outputs.
+                getViewOutputsButton().setEnabled(false);
+            }
         } else { //the run was null
             
             getAcceptChosenSelectionButton().setVisible(false);
@@ -1329,9 +1336,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (multiTestSetOutputViewerFrame == null) {
             multiTestSetOutputViewerFrame = new MultiTestSetOutputViewerFrame();
             multiTestSetOutputViewerFrame.setContestAndController(getContest(), getController());
-            Problem problem = getContest().getProblem(run.getProblemId());
-            multiTestSetOutputViewerFrame.setData(run, runFiles, problem, getProblemDataFiles());
-    
             FrameUtilities.centerFrame(multiTestSetOutputViewerFrame);
         }
         return multiTestSetOutputViewerFrame;
