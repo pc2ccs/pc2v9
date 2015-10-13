@@ -394,5 +394,121 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         }
     }
     
+    public void testremoveDataSetItem3() throws Exception {
+        
+        String testDir = getOutputDataDirectory();
+
+        removeDirectory(testDir);
+        ensureDirectory(testDir);
+
+        SampleContest sample = new SampleContest();
+
+        IInternalContest contest = sample.createStandardContest();
+
+        contest.setClientId(contest.getAccounts(Type.JUDGE).firstElement().getClientId());
+        
+         Problem[] problems = contest.getProblems();
+        
+         Problem firstProblem = problems[0];
+        
+         int numCases = 12;
+        
+         ProblemDataFiles dataFiles = sample.createProblemDataFiles(firstProblem, numCases);
+         
+         dataFiles.removeDataSet(3);
+        
+    }
     
+    public void testremoveDataSetItem0() throws Exception {
+
+        String testDir = getOutputDataDirectory();
+
+        removeDirectory(testDir);
+        ensureDirectory(testDir);
+
+        SampleContest sample = new SampleContest();
+
+        IInternalContest contest = sample.createStandardContest();
+
+        contest.setClientId(contest.getAccounts(Type.JUDGE).firstElement().getClientId());
+
+        Problem[] problems = contest.getProblems();
+
+        Problem firstProblem = problems[0];
+
+        int numCases = 12;
+
+        ProblemDataFiles dataFiles = sample.createProblemDataFiles(firstProblem, numCases);
+
+        dataFiles.removeDataSet(0);
+    }
+
+    public void testremoveDataSetItemRightEdge() throws Exception {
+
+        String testDir = getOutputDataDirectory();
+
+        removeDirectory(testDir);
+        ensureDirectory(testDir);
+
+        SampleContest sample = new SampleContest();
+
+        IInternalContest contest = sample.createStandardContest();
+
+        contest.setClientId(contest.getAccounts(Type.JUDGE).firstElement().getClientId());
+
+        Problem[] problems = contest.getProblems();
+
+        Problem firstProblem = problems[0];
+
+        int numCases = 12;
+
+        ProblemDataFiles dataFiles = sample.createProblemDataFiles(firstProblem, numCases);
+
+        dataFiles.removeDataSet(numCases - 1);
+
+    }
+
+    /**
+     * Test remove data set N.
+     * 
+     * Should error with out of index
+     * 
+     * @throws Exception
+     */
+    public void testremoveDataSetN() throws Exception {
+
+        String testDir = getOutputDataDirectory();
+
+        removeDirectory(testDir);
+        ensureDirectory(testDir);
+
+        SampleContest sample = new SampleContest();
+
+        IInternalContest contest = sample.createStandardContest();
+
+        contest.setClientId(contest.getAccounts(Type.JUDGE).firstElement().getClientId());
+
+        Problem[] problems = contest.getProblems();
+
+        Problem firstProblem = problems[0];
+
+        int numCases = 22;
+
+        ProblemDataFiles dataFiles = sample.createProblemDataFiles(firstProblem, numCases);
+
+        try {
+            dataFiles.removeDataSet(numCases);
+            fail("Should have failed, with ArrayIndexOutOfBoundsException");
+        } catch (ArrayIndexOutOfBoundsException e) {
+            assertEquals("" + (numCases - 1), e.getMessage());
+        }
+    }
+
+    public void testtestremoveDataSet() throws Exception {
+
+        Problem problem = new Problem("removeOne");
+        ProblemDataFiles dataFiles = new ProblemDataFiles(problem);
+        dataFiles.removeDataSet(1);
+    }
+        
 }

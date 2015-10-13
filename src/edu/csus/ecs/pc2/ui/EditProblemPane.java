@@ -61,6 +61,8 @@ import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 // $HeadURL$
 public class EditProblemPane extends JPanePlugin {
 
+    // TODO 917 automatic check on load when external/internal data  sets changed
+    
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
     
     public static boolean debug22EditProblem = false;

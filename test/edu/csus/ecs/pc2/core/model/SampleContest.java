@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.InternalControllerSpecial;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -1656,34 +1657,6 @@ public class SampleContest {
     }
 
     /**
-     * Get list of filenames with extension in directory, return in sorted order.
-     * 
-     * @param directoryName
-     * @param extension
-     * @return
-     */
-    protected String[] getFileNames(String directoryName, String extension) {
-
-        ArrayList<String> list = new ArrayList<String>();
-        File dir = new File(directoryName);
-
-        String[] entries = dir.list();
-        if (entries == null) {
-            return new String[0];
-        }
-
-        Arrays.sort(entries);
-
-        for (String name : entries) {
-            if (name.endsWith(extension)) {
-                list.add(name);
-            }
-        }
-
-        return (String[]) list.toArray(new String[list.size()]);
-    }
-
-    /**
      * Add a single data/answer file set to a problemDataFiles.
      * @param problem
      * @param problemDataFiles
@@ -1749,9 +1722,9 @@ public class SampleContest {
             }
         }
 
-        String[] inputFileNames = getFileNames(dataFileBaseDirectory, dataExtension);
+        String[] inputFileNames = Utilities.getFileNames(dataFileBaseDirectory, dataExtension);
 
-        String[] answerFileNames = getFileNames(dataFileBaseDirectory, answerExtension);
+        String[] answerFileNames = Utilities.getFileNames(dataFileBaseDirectory, answerExtension);
 
         if (inputFileNames.length == 0) {
             throw new RuntimeException("No input files with extension " + dataExtension + " in "+dataFileBaseDirectory);

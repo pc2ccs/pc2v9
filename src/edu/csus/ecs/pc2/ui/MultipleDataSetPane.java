@@ -12,6 +12,7 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -262,9 +263,58 @@ public class MultipleDataSetPane extends JPanePlugin {
     }
 
     protected void reloadDataFiles() {
-        showMessage(this, "Not implemented Yet", "reloadDataFiles not implemented, yet");
-        // TODO Auto-generated method stub
         
+        boolean externalFiles = true;
+        
+        String baseDirectoryName = ".";
+        
+        // TODO 917 let them pick the directory ?
+        
+        /**
+         * short name or base directory
+         */
+        String shortProblemName = "unset";
+        
+        String problemFilesDirectory = shortProblemName;
+        
+        Problem problem = null;
+        
+        // loop through
+        
+        if (problemDataFiles != null){
+            
+            SerializedFile file = problemDataFiles.getJudgesDataFile();
+            if (file != null){
+                baseDirectoryName = Utilities.findDataBasePath (file.getFile().getParent());
+            }
+            
+            // find problem
+            ElementId problemId = problemDataFiles.getProblemId();
+            problem = getContest().getProblem(problemId);
+            
+            if (problem != null){
+                externalFiles = problem.isUsingExternalDataFiles();
+                problemFilesDirectory = Utilities.getSecretDataPath(baseDirectoryName, problem);
+            }
+        }
+        
+        // check for answer files
+        String secretDirPath = Utilities.getSecretDataPath(problemFilesDirectory, shortProblemName);
+        String[] inputFileNames = Utilities.getFileNames(secretDirPath, ".ans");
+        
+        if (inputFileNames.length == 0){
+            System.out.println("debug 22 "+"No .ans files found in "+secretDirPath);
+            showMessage(this, "No answer files found", "No .ans files found in "+secretDirPath);
+            return;
+        }
+        
+        loadDataFiles(problem, problemDataFiles, secretDirPath, ".in", ".ans", externalFiles);
+        
+        // TODO 917 Populate general data and answer files too
+        
+        // TODO 917 trigger refresh of Update button on edit problem frame 
+        
+        populateUI();
     }
 
     private JButton getBtnLoad() {
@@ -293,6 +343,44 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     public void setParentPane(EditProblemPane pane) {
         editProblemPane = pane;
+    }
+    
+    
+    public ProblemDataFiles loadDataFiles(Problem problem, ProblemDataFiles files, String dataFileBaseDirectory, String dataExtension, String answerExtension, boolean externalDataFiles) {
+
+        if (files == null) {
+            files = new ProblemDataFiles(problem);
+        } else {
+            /**
+             * A check. It makes no sense to update an existing ProblemDataFiles for a different Problem.
+             */
+            if (problem != null && !files.getProblemId().equals(problem.getElementId())) {
+                throw new RuntimeException("problem and data files are not for the same problem " + problem.getElementId() + " vs " + files.getProblemId());
+            }
+        }
+
+        String[] inputFileNames = Utilities.getFileNames(dataFileBaseDirectory, dataExtension);
+
+        String[] answerFileNames = Utilities.getFileNames(dataFileBaseDirectory, answerExtension);
+
+        if (inputFileNames.length == 0) {
+            throw new RuntimeException("No input files with extension " + dataExtension + " in "+dataFileBaseDirectory);
+        }
+
+        if (answerFileNames.length == 0) {
+            throw new RuntimeException("No answer  files with extension " + answerExtension+ " in "+dataFileBaseDirectory);
+        }
+
+        if (answerFileNames.length != inputFileNames.length) {
+            throw new RuntimeException("Miss match expecting same " + dataExtension + " and " + answerExtension + " files (" + inputFileNames.length + " vs " + answerFileNames.length);
+        }
+
+        SerializedFile[] inputFiles = Utilities.createSerializedFiles(dataFileBaseDirectory, inputFileNames, externalDataFiles);
+        SerializedFile[] answertFiles = Utilities.createSerializedFiles(dataFileBaseDirectory, answerFileNames, externalDataFiles);
+        files.setJudgesDataFiles(inputFiles);
+        files.setJudgesAnswerFiles(answertFiles);
+
+        return files;
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"

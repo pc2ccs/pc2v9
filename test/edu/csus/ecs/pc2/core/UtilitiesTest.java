@@ -145,4 +145,25 @@ public class UtilitiesTest extends AbstractTestCase {
 //                System.out.println("\""+fields[0]+","+actualSeconds+"\", //");
             }
         }
+        
+        public void testfindDataBasePath() throws Exception {
+            
+            String secretDir = Utilities.SECRET_DATA_DIR;
+            
+            String expected ="cdp/config/problema/";
+            String input = expected+secretDir;
+            
+            String actual = Utilities.findDataBasePath(input);
+            assertEquals("Expecting same path", expected, actual);
+
+            
+            expected ="testdir/problema";
+            input = expected;
+            
+            actual = Utilities.findDataBasePath(input);
+            assertEquals("Expecting same path", expected, actual);
+
+            
+            
+        }
 }

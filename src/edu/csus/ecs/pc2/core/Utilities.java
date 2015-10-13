@@ -1072,6 +1072,64 @@ public final class Utilities {
          printWriter = null;  
     }
 
+
+    /**
+     * Return list of directory entries (including dirs) with extension.
+     * 
+     * @param directoryName
+     * @param extension
+     * @return
+     */
+    public static String[] getFileNames(String directoryName, String extension) {
+
+        ArrayList<String> list = new ArrayList<String>();
+        File dir = new File(directoryName);
+
+        String[] entries = dir.list();
+        if (entries == null) {
+            return new String[0];
+        }
+
+        Arrays.sort(entries);
+
+        for (String name : entries) {
+            if (name.endsWith(extension)) {
+                list.add(name);
+            }
+        }
+
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    
+    public static  SerializedFile[] createSerializedFiles(String dataFileBaseDirectory, String[] inputFileNames, boolean externalFilesFlag) {
+
+        ArrayList<SerializedFile> outfiles = new ArrayList<SerializedFile>();
+
+        for (String name : inputFileNames) {
+            String filename = dataFileBaseDirectory + File.separator + name;
+            outfiles.add(new SerializedFile(filename, externalFilesFlag));
+        }
+
+        return (SerializedFile[]) outfiles.toArray(new SerializedFile[outfiles.size()]);
+    }
+
+    /**
+     * Find base data path for problems.
+     * 
+     * If {@value #SECRET_DATA_DIR} in filePath will strop off anything
+     * including and after {@value #SECRET_DATA_DIR}.
+     * 
+     * @param filePath
+     * @return directory name up to {@value #SECRET_DATA_DIR}
+     */
+    public static String findDataBasePath(String filePath) {
         
+        int idx = filePath.indexOf(SECRET_DATA_DIR);
+        if (idx != -1){
+            return filePath.substring(0, idx);
+        }
+        return filePath;
+    }
 
 }
