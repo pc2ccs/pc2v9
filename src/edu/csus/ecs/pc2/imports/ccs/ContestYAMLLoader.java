@@ -826,6 +826,7 @@ public class ContestYAMLLoader {
             throw new YamlLoadException("  For " + problem + " missing problem short name");
         }
         
+        @SuppressWarnings("unused")
         long totBytes = 0;
         
         /**
@@ -1018,6 +1019,7 @@ public class ContestYAMLLoader {
      */
     protected void pc2AddDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String dataFileBaseDirectory, String dataFileName, String answerFileName)  {
         
+        @SuppressWarnings("unused")
         long totBytes = 0;
         
         

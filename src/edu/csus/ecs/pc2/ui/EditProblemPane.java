@@ -146,6 +146,7 @@ public class EditProblemPane extends JPanePlugin {
      */
     private String lastDirectory; // @jve:decl-index=0:
 
+    @SuppressWarnings("unused")
     private String lastYamlLoadDirectory;
     
     /**

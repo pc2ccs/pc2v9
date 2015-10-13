@@ -29,7 +29,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 // $HeadURL$
 public class InternalControllerTest extends AbstractTestCase {
     
-    private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server", "--nogui", "--contestpassword", "foo", "--port", "42020", "--login" , "s"};
+//    private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server", "--nogui", "--contestpassword", "foo", "--port", "42020", "--login" , "s"};
 
     int siteNum = 1;
 

@@ -225,7 +225,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         Problem firstProblem = contest.getProblems()[0];
         ProblemDataFiles dataFiles = loadExternalFiles(contest, firstProblem, inputTestDirectory);
 
-        checkFiles(contest, dataFiles, testDir);
+        checkFiles(contest, dataFiles, null);
     }
 
 

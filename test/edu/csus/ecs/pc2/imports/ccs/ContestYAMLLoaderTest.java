@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -1040,6 +1041,9 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         return getTestFilename(ExportYAML.PROBLEM_SET_FILENAME);
     }
     
+    private String getContestYamlTestFileName() {
+        return getTestFilename(ExportYAML.CONTEST_FILENAME);
+    }
     
     /**
      * Test load problemset.yaml.
@@ -1240,6 +1244,35 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
             i++;
         }
 
+        // TODO seperate this to separate test
+        inputYamlFilename = getContestYamlTestFileName();
+
+        assertFileExists(inputYamlFilename);
+
+        contents = Utilities.loadFile(inputYamlFilename);
+
+        // Load from YAML but make all data/ans files external.
+
+        contest = loader.fromYaml(null, contents, getDataDirectory(), true);
+
+        assertNotNull(contest);
+        ClientSettings cl = contest.getClientSettings(new ClientId(1, ClientType.Type.JUDGE, 4));
+        assertNotNull("client settings for judge4", cl);
+        contest.addClientSettings(cl);
+        Filter filter = cl.getAutoJudgeFilter();
+        String letterList = SampleContest.getProblemLetters(contest, filter);
+
+        assertEquals("Problem letters", "B, C, D", letterList);
+
+        // now re-load it using existing contest
+        contest.addClientSettings(cl);
+        assertNotNull(contest);
+        cl = contest.getClientSettings(new ClientId(1, ClientType.Type.JUDGE, 4));
+        assertNotNull("client settings for judge4", cl);
+        filter = cl.getAutoJudgeFilter();
+        letterList = SampleContest.getProblemLetters(contest, filter);
+
+        assertEquals("Problem letters", "B, C, D", letterList);
     }
     
     public void testYamlWriteAndLoad() throws Exception {

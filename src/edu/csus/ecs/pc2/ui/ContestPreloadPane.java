@@ -139,6 +139,7 @@ public class ContestPreloadPane extends JPanePlugin {
 
     }
     
+    @SuppressWarnings("unused")
     private void startExplorer() {
         
         String dirname = new VersionInfo().locateHome()+ File.separator + "samps" + File.separator + "contests";

@@ -66,6 +66,7 @@ public class MultiFileComparator extends JFrame  {
 
     private IInternalController controller;
 
+    @SuppressWarnings("unused")
     private IInternalContest contest;
     
     private Log log ;
@@ -76,6 +77,7 @@ public class MultiFileComparator extends JFrame  {
 
     private JList<String> lstJudgesOutput;
 
+    @SuppressWarnings("unused")
     private int currentRunID;
 
     private JScrollPane scrollPaneTestCaseList;
@@ -345,6 +347,7 @@ public class MultiFileComparator extends JFrame  {
      * 
      * @return the index of the specified test case in the list of test cases, or -1 if not found
      */
+    @SuppressWarnings("unused")
     private int indexOfTestCase(int testCaseNum) {
         int retVal = -1;
         if (currentTestCaseNums != null) {
