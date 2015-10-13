@@ -82,9 +82,11 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
      * the specified column.
      */
     @Override
-    public Class getColumnClass(int col) {
+    public Class<?> getColumnClass(int col) {
         //the data for the model is stored in the parent class vector "dataVector"
-        return ((Vector)(dataVector.elementAt(0))).elementAt(col).getClass();
+        @SuppressWarnings("unchecked")
+        Vector<Object> v = (Vector<Object>)dataVector.elementAt(0);
+        return v.elementAt(col).getClass();
     }
 
     @Override
@@ -99,7 +101,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        return ((Vector)(dataVector.elementAt(rowIndex))).elementAt(columnIndex);
+        return ((Vector<?>)(dataVector.elementAt(rowIndex))).elementAt(columnIndex);
     }
 
     /**
