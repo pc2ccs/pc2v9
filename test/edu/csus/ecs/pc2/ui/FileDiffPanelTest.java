@@ -19,7 +19,7 @@ public class FileDiffPanelTest extends AbstractTestCase {
         String sumitDat = getSamplesSourceFilename("sumit.dat");
         String sumitAns = getSamplesSourceFilename("sumit.ans");
         
-        Log log = new Log("FileDiffPanelTest");
+        Log log = createLog(getName());
         FileDiffPanel fileDiffPanel = new FileDiffPanel(log);
         fileDiffPanel.showFiles(sumitDat, "Judge's Data File", sumitAns, "Judge's Answer");
 
