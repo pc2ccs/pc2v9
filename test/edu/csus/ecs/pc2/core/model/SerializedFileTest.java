@@ -68,7 +68,7 @@ public class SerializedFileTest extends AbstractTestCase {
 
     public void testBuff2File() throws Exception {
         
-        String filename = "BadFileName";
+        String filename = getOutputTestFilename("BadFileName");
         
         SerializedFile file = new SerializedFile();
         file.buffer2file(null, filename);
