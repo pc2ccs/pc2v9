@@ -4,7 +4,6 @@ import java.io.File;
 import java.security.InvalidParameterException;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -74,7 +73,7 @@ public class InternalControllerTest extends AbstractTestCase {
         assertNull(admin1);
 
         InternalController controller = new InternalController(contest);
-        controller.setLog(new Log("ICT.log"));
+        controller.setLog(createLog(getName()));
 
         ClientId serverId = new ClientId(2, Type.SERVER, 1);
 
@@ -117,7 +116,7 @@ public class InternalControllerTest extends AbstractTestCase {
         assertNull(admin1);
 
         InternalController controller = new InternalController(contest);
-        controller.setLog(new Log("ICTLG.log"));
+        controller.setLog(createLog(getName()));
         controller.loadedJudgementsFromIni(filename);
 
         Judgement[] judgements = contest.getJudgements();
