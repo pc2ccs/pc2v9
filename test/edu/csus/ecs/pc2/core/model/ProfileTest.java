@@ -4,9 +4,9 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * 
@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
  */
 
 // $HeadURL$
-public class ProfileTest extends TestCase {
+public class ProfileTest extends AbstractTestCase {
     
 //    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HHmmssSSS");
 //    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH_mm_ss.SSS-ddMMMyyyy");
@@ -40,7 +40,9 @@ public class ProfileTest extends TestCase {
      */
     public static String  createProfileFilesAndDirs(Profile profile) throws FileSecurityException {
         
-        String profileDirectory = profile.getProfilePath() + File.separator + "db."+profile.getSiteNumber();
+        // not pretty but this is static and abstractTestCase getOutputDirectory() is not
+        String profileDirectory = AbstractTestCase.DEFAULT_PC2_OUTPUT_FOR_TESTING_DIRECTORY + File.separator +
+                "ProfileTest" + File.separator + profile.getProfilePath() + File.separator + "db."+profile.getSiteNumber();
         
         if (new File(profileDirectory).isDirectory()){
             new Exception("Directory already exists: "+profileDirectory);
