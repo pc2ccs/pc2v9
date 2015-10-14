@@ -275,8 +275,7 @@ public class InternalContestTest extends AbstractTestCase {
 
         int numRuns = 5;
 
-        String logName = getOutputDataDirectory(this.getName()) +File.separator + "TestRunClone.log";
-        Log log = new Log(logName);
+        Log log = createLog(getName());
 
         Profile originalProfile = new Profile("Original");
         String profileDir = ProfileTest.createProfileFilesAndDirs(originalProfile, password);
@@ -552,7 +551,7 @@ public class InternalContestTest extends AbstractTestCase {
 
         String testDirectory = getOutputDataDirectory();
         
-        Log log = new Log(getName()+"static.log");
+        Log log = createLog(getName());
         
         StaticLog.setLog(log);
         
