@@ -267,7 +267,6 @@ public class EditProblemPane extends JPanePlugin {
             public void run() {
                 getLoadButton().setVisible(Utilities.isDebugMode());
                 getExportButton().setVisible(Utilities.isDebugMode());
-                getReportButton().setVisible(Utilities.isDebugMode());
             }
         });
 
@@ -2596,7 +2595,6 @@ public class EditProblemPane extends JPanePlugin {
      * If selects directory will scan for .in and .ans files and load them
      * 
      */
-
     protected void loadProblemInfoFile() {
         
         showMessage("Load not implemented, yet.");
@@ -3090,6 +3088,10 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         return list;
+    }
+    
+    public JTextField getShortNameTextfield() {
+        return shortNameTextfield;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

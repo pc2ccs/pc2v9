@@ -12,7 +12,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -46,6 +45,8 @@ public class MultipleDataSetPane extends JPanePlugin {
     private JButton btnLoad;
 
     private EditProblemPane editProblemPane = null;
+
+    private Problem problem;
 
     /**
      * This method initializes
@@ -87,6 +88,7 @@ public class MultipleDataSetPane extends JPanePlugin {
      * @throws CloneNotSupportedException
      */
     public void setProblemDataFiles(Problem problem, ProblemDataFiles problemDataFiles) throws CloneNotSupportedException {
+        this.problem = problem;
         if (problem != null){
             setProblemDataFiles(problemDataFiles.copy(problem));
         } else {
@@ -264,42 +266,35 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     protected void reloadDataFiles() {
         
-        boolean externalFiles = true;
-        
-        String baseDirectoryName = ".";
-        
-        // TODO 917 let them pick the directory ?
+        /**
+         * cdp config directory with problem subdirectories.
+         */
+        String baseDirectoryName = "workspace";
         
         /**
          * short name or base directory
          */
-        String shortProblemName = "unset";
+        String shortProblemName = getEditProblemPane().getShortNameTextfield().getText();
         
-        String problemFilesDirectory = shortProblemName;
+        if (shortProblemName == null || shortProblemName.trim().length() == 0){
+            showMessage(this, "Must enter short problem name to load","Enter short problems name (on General tab)");
+            return;
+        }
         
-        Problem problem = null;
+        boolean externalFiles = false;
         
-        // loop through
+//        String problemFilesDirectory = baseDirectoryName + File.separator +  shortProblemName; 
         
-        if (problemDataFiles != null){
+        if (problem != null){
+            externalFiles = problem.isUsingExternalDataFiles();
+//            problemFilesDirectory = Utilities.getSecretDataPath(baseDirectoryName, problem);
             
-            SerializedFile file = problemDataFiles.getJudgesDataFile();
-            if (file != null){
-                baseDirectoryName = Utilities.findDataBasePath (file.getFile().getParent());
-            }
-            
-            // find problem
-            ElementId problemId = problemDataFiles.getProblemId();
-            problem = getContest().getProblem(problemId);
-            
-            if (problem != null){
-                externalFiles = problem.isUsingExternalDataFiles();
-                problemFilesDirectory = Utilities.getSecretDataPath(baseDirectoryName, problem);
-            }
+        } else {
+            problem = new Problem(shortProblemName);
         }
         
         // check for answer files
-        String secretDirPath = Utilities.getSecretDataPath(problemFilesDirectory, shortProblemName);
+        String secretDirPath = Utilities.getSecretDataPath(baseDirectoryName, shortProblemName);
         String[] inputFileNames = Utilities.getFileNames(secretDirPath, ".ans");
         
         if (inputFileNames.length == 0){
@@ -308,11 +303,13 @@ public class MultipleDataSetPane extends JPanePlugin {
             return;
         }
         
-        loadDataFiles(problem, problemDataFiles, secretDirPath, ".in", ".ans", externalFiles);
+        dump(problemDataFiles, "debug 22 before load");
+        problemDataFiles = loadDataFiles(problem, problemDataFiles, secretDirPath, ".in", ".ans", externalFiles);
+        dump(problemDataFiles, "debug 22 after load");
         
         // TODO 917 Populate general data and answer files too
         
-        // TODO 917 trigger refresh of Update button on edit problem frame 
+        getEditProblemPane().enableUpdateButton();
         
         populateUI();
     }
@@ -381,6 +378,10 @@ public class MultipleDataSetPane extends JPanePlugin {
         files.setJudgesAnswerFiles(answertFiles);
 
         return files;
+    }
+    
+    public EditProblemPane getEditProblemPane() {
+        return editProblemPane;
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"
