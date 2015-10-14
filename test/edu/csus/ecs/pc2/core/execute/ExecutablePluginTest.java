@@ -77,7 +77,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         contest.setClientId(clientId);
 
         controller = sampleContest.createController(contest, true, false);
-        log = controller.getLog();
+        log = createLog(getName());
 
 //        setDebugMode(true);
         
