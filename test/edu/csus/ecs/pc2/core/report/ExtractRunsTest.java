@@ -59,7 +59,7 @@ public final class ExtractRunsTest extends AbstractTestCase {
             System.exit(4);
         }
 
-        Log log = new Log(stripChar(contest.getClientId().toString(), ' '));
+        Log log = createLog(getName());
         StaticLog.setLog(log);
 
         contest.initializeStartupData(contest.getSiteNumber());
