@@ -10,8 +10,6 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import junit.framework.TestCase;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -41,6 +39,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * New Algorithm tests, a lot of them.
@@ -49,7 +48,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/core/scoring/NewScoringAlgorithmTestLong.java $
-public class NewScoringAlgorithmTestLong extends TestCase {
+public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     private Log log = null;
 
@@ -70,7 +69,7 @@ public class NewScoringAlgorithmTestLong extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        log = new Log("NewScoringAlgorithmTest");
+        log = createLog(getName());
         StaticLog.setLog(log);
 
     }

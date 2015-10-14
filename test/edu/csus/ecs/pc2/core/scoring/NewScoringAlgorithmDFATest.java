@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.scoring;
 import java.io.IOException;
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * New Scoring Algorithm test based on DFA JUnit.
@@ -26,7 +27,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/core/scoring/NewScoringAlgorithmDFATest.java $
-public class NewScoringAlgorithmDFATest extends TestCase {
+public class NewScoringAlgorithmDFATest extends AbstractTestCase {
 
     private boolean debugMode = false;
 
@@ -54,9 +55,10 @@ public class NewScoringAlgorithmDFATest extends TestCase {
         createJudgedRun(contest, 0, true, 12);
         
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+        Log log = createLog(getName());
         
-        String newXml = scoringAlgorithm.getStandings(contest, new Properties(), null);
-        String defXml = defaultScoringAlgorithm.getStandings(contest, new Properties(), null);
+        String newXml = scoringAlgorithm.getStandings(contest, new Properties(), log);
+        String defXml = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
         
         if (debugMode){
             System.out.println(defXml);
