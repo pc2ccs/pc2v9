@@ -11,7 +11,7 @@ license:
 rights_owner: 
 
 limits: 
-   timeout: 120
+   timeout: 10
 
 input: 
    readFromSTDIN: false

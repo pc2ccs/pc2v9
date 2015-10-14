@@ -815,7 +815,7 @@ public class ExecutableTest extends AbstractTestCase {
         RunFiles runFiles = new RunFiles(run, sumitFilename);
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
-        
+
         runExecutableTest(run, runFiles, true, yesJudgement);
     }
     
@@ -927,8 +927,6 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setShowValidationToJudges(false);
         problem.setHideOutputWindow(true);
         problem.setShowCompareWindow(false);
-        problem.setTimeOutInSeconds(10);
-
 
         String testBaseDirname = getDataDirectory(this.getName());
 //        ensureDirectory(testBaseDirname);
