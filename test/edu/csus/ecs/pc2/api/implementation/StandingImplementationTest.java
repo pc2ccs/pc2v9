@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.api.implementation;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.api.IProblemDetails;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.IStanding;
@@ -8,6 +7,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithmTest;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test class for StandingsImplementation (IStanding).
@@ -17,7 +17,7 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithmTest;
  */
 
 // $HeadURL$
-public class StandingImplementationTest extends TestCase {
+public class StandingImplementationTest extends AbstractTestCase {
     
     private final boolean debugMode = false;
 
@@ -30,7 +30,7 @@ public class StandingImplementationTest extends TestCase {
     }
 
     public void testOneDetails() {
-        Log log = new Log("test.GSD-2.log");
+        Log log = createLog(getName());
 
         // RunID TeamID Prob Time Result
 
