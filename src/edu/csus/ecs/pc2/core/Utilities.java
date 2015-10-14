@@ -984,9 +984,12 @@ public final class Utilities {
 
                 } else {
 
-                    if (executableDir == null) {
+                    // if we have a judgeDataFilesPath use it, otherwise continue with the normal handling
+                    if (!"".equals(judgeDataFilesPath)) {
                         String filename = judgeDataFilesPath + serializedFile.getName();
                         output.add(filename);
+                    } else if (executableDir == null) {
+                        output.add(serializedFile.getName());
                     } else {
                         output.add(executableDir + File.separator + serializedFile.getName());
                     }
