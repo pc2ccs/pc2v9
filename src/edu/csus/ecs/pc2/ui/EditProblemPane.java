@@ -657,6 +657,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (judgesHaveAnswerFiles.isSelected()) {
+            
             String fileName = answerFileNameLabel.getText();
             if (fileName == null || fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
@@ -1184,36 +1185,70 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Set/populate (or remove) General tab judge's files.
      * 
-     * If no first test set 
+     * If no first test set then clears fields.
      * 
-     * @param datafiles
      */
-    public void setJudgingTestSetOne (ProblemDataFiles datafiles) {
+    public void setJudgingTestSetOne(ProblemDataFiles datafiles) {
+        
+        /**
+         * Were fields assigned values from dataFiles ?
+         */
+        boolean assignedValues = false;
 
         if (datafiles == null) {
             deleteAllDataSets();
         }
-        
-        if ( datafiles.getJudgesDataFile() == null){
-            // no first data set for judges file
+        else 
+        {
+            SerializedFile[] answerFiles = datafiles.getJudgesAnswerFiles();
             
-            // TODO 917 remove general data file
+            if (answerFiles.length > 0) {
+                
+                // Replace data files on General tab
+                judgesHaveAnswerFiles.setSelected(true);
+                problemRequiresDataCheckBox.setSelected(true);
+                
+                SerializedFile[] files = datafiles.getJudgesDataFiles();
+                if (files.length > 0) {
+                    inputDataFileLabel.setText(files[0].getName());
+                    inputDataFileLabel.setToolTipText(files[0].getAbsolutePath());
+                }
+                files = datafiles.getJudgesAnswerFiles();
+                if (files.length > 0) {
+                    answerFileNameLabel.setText(files[0].getName());
+                    answerFileNameLabel.setToolTipText(files[0].getAbsolutePath());
+                }
+                
+                assignedValues = true;
+            }
         }
         
-        if (datafiles.getJudgesAnswerFile() == null){
-            // no first data set for answer file
+        if (!assignedValues){
             
-            // TODO 917 remove general answer data file
+            // Replace data files on General tab
+            judgesHaveAnswerFiles.setSelected(false);
+            problemRequiresDataCheckBox.setSelected(false);
+            
+            inputDataFileLabel.setText("");
+            inputDataFileLabel.setToolTipText("");
+            answerFileNameLabel.setText("");
+            answerFileNameLabel.setToolTipText("");
+            
         }
+        
+        enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
+        enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
+
     }
-    
   
     /**
      * Remove all data sets
      */
     private void deleteAllDataSets() {
         ProblemDataFiles dataFiles = getMultipleDataSetPane().getProblemDataFiles();
-        dataFiles.removeAll();
+        if (dataFiles != null){
+            dataFiles.removeAll();
+        }
         getMultipleDataSetPane().setProblemDataFiles(dataFiles);
     }
 
@@ -2455,6 +2490,8 @@ public class EditProblemPane extends JPanePlugin {
         getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
 
         getDeleteProblemCheckBox().setSelected(false);
+        
+        shortNameTextfield.setText("");
 
         populateJudging(null);
     }
@@ -2598,54 +2635,11 @@ public class EditProblemPane extends JPanePlugin {
     protected void loadProblemInfoFile() {
         
         showMessage("Load not implemented, yet.");
-        
-        //  TODO implement loadProblemInfoFile to load information from problem.yaml and etc.
-
-//        String filename = null;
-//        
-//        String loadFileName = ExportYAML.PROBLEM_FILENAME;
-//
-//        try {
-//            filename = selectFileName("Choose a "+loadFileName+" file", lastYamlLoadDirectory);
-//
-//        } catch (IOException e) {
-//            logException(loadFileName+" - File could not be selected", e);
-//            showMessage("File could not be selected " + e.getMessage());
-//        }
-//
-//        if (filename == null) {
-//            showMessage("No file selected/loaded");
-//        } else {
-//
-//            if (filename.endsWith(loadFileName)) {
-//
-//                try {
-//                    loadFromProblemYaml(filename);
-//                } catch (Exception e) {
-//                    logException("Error loading contest.xml", e);
-//                    showMessage("Error loading contest.xml " + e.getMessage());
-//                }
-//
-//            } else {
-//                showMessage("Please select a problem.yaml file");
-//            }
-//
-//        }
+    
+        // huh
     }
-
-//    private void loadFromProblemYaml(String filename) {
-//        
-//        ContestYAMLLoader loader = new ContestYAMLLoader();
-//        
-//        String[] contents = Utilities.loadFile(filename);
-//        
-//        // TODO Load problem and data files using problem.yaml
-//        
-//        loader.getProblems(contents, defaultTimeOut)
-//        String huh;
-//        loader.loadProblemInformationAndDataFiles(contest, huh, null, true);
-//        
-//    }
+    
+    
 
     public File selectYAMLFileDialog(Component parent, String title, String startDirectory) {
 

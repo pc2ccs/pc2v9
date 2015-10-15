@@ -1758,7 +1758,7 @@ public class SampleContest {
      * @param externalFilesFlag
      * @return
      */
-    private SerializedFile[] createSerializedFiles(String dataFileBaseDirectory, String[] inputFileNames, boolean externalFilesFlag) {
+    public static SerializedFile[] createSerializedFiles(String dataFileBaseDirectory, String[] inputFileNames, boolean externalFilesFlag) {
 
         ArrayList<SerializedFile> outfiles = new ArrayList<SerializedFile>();
 

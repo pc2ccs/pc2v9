@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -10,6 +11,8 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -120,9 +123,21 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
 
         // TODO 917 re-add auto size columns
-//        testDataSetsListBox.autoSizeAllColumns();
+        resizeColumnWidth(testDataSetsListBox);
     }
-
+    
+    public void resizeColumnWidth(JTable table) {
+        final TableColumnModel columnModel = table.getColumnModel();
+        for (int column = 0; column < table.getColumnCount(); column++) {
+            int width = 50; // Min width
+            for (int row = 0; row < table.getRowCount(); row++) {
+                TableCellRenderer renderer = table.getCellRenderer(row, column);
+                Component comp = table.prepareRenderer(renderer, row, column);
+                width = Math.max(comp.getPreferredSize().width +1 , width);
+            }
+            columnModel.getColumn(column).setPreferredWidth(width);
+        }
+    }
 
     private void dump(ProblemDataFiles problemDataFiles2, String string) {
         Utilities.dump(problemDataFiles2, string);
@@ -264,8 +279,11 @@ public class MultipleDataSetPane extends JPanePlugin {
         return btnReload;
     }
 
-    protected void reloadDataFiles() {
-        
+    /**
+     * Load new data files.
+     */
+    protected void loadDataFiles() {
+
         /**
          * cdp config directory with problem subdirectories.
          */
@@ -307,11 +325,11 @@ public class MultipleDataSetPane extends JPanePlugin {
         problemDataFiles = loadDataFiles(problem, problemDataFiles, secretDirPath, ".in", ".ans", externalFiles);
         dump(problemDataFiles, "debug 22 after load");
         
-        // TODO 917 Populate general data and answer files too
-        
-        getEditProblemPane().enableUpdateButton();
-        
         populateUI();
+        
+        // Populate general data and answer files too
+        editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
+        getEditProblemPane().enableUpdateButton();
     }
 
     private JButton getBtnLoad() {
@@ -328,12 +346,15 @@ public class MultipleDataSetPane extends JPanePlugin {
         return btnLoad;
     }
 
-    protected void loadDataFiles() {
-        showMessage(this, "Not implemented Yet", "loadDataFiles not implemented, yet");
-        // TODO Auto-generated method stub
-        
-        // TODO load the data and answer file on the General Tab
-        
+    /**
+     * Refresh/Reload the already loaded data sets.
+     */
+    protected void reloadDataFiles() {
+
+        // TODO 917 reload/refresh data files.
+        showMessage(this, "Not implemented Yet", "reloadDataFiles not implemented, yet");
+
+        // load the data and answer file on the General Tab
         editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
 
     }
