@@ -24,7 +24,7 @@ for line in hand .readlines():
   if num > 0:
     sum += num
 
-print "The sum of the integers is", sum
+print("The sum of the integers is %d"% sum)
 
 # eof sumit.py $Id$
 
