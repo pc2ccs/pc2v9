@@ -1,6 +1,6 @@
 
 #
-# File:    sum1.pl
+# File:    sumit.pl
 # Purpose: to sum the integers in the file sumit.dat
 # Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
 #

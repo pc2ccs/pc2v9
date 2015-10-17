@@ -1,7 +1,7 @@
 *
 * vi:ts=6:sw=6:ai:ic
 *
-* File: sum.f
+* File: sumit.f
 * Purpose: to sum the numbers from num.dat
 * Source: Fortran 77 (compiled under Linux/fort77)
 * Author: pc2@ecs.csus.edu (laned)

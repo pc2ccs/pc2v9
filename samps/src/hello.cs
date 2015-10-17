@@ -1,6 +1,6 @@
 /*
  *
- * File:    hello.php
+ * File:    hello.cs
  * Purpose: prints Hello World.
  * pc2@ecs.csus.edu at http://www.ecs.csus.edu/pc2
  *

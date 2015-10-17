@@ -2,7 +2,7 @@
 
 {
 *
-* File:    sum1.pas
+* File:    sumit.pas
 * Purpose: prints the sum of the positive integers in sumit.dat
 * Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
 *
