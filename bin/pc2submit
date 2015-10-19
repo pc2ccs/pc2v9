@@ -17,6 +17,6 @@ fi
 
 CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
 
-java $PC2XOPS -Xms64M -Xmx768M -cp $libdir/pc2.jar:$mclbdir/mclb.jar $CLASSNAME $*
+java $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath $CLASSNAME $*
 
 # eof pc2submit $Id$ 

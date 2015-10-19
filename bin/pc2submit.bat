@@ -28,7 +28,7 @@ goto :end
 :continue
 call %PC2BIN%\pc2env.bat
 set CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
-java -Xms64M -Xmx768M -cp %libdir%\pc2.jar;%mclbdir%\mclb.jar %CLASSNAME% %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Xms64M -Xmx768M -cp %pc2_classpath% %CLASSNAME% %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
 rem eof pc2submit.bat $Id$

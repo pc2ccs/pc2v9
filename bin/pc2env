@@ -34,6 +34,7 @@ if [ x$mclbdir = x ]; then
     exit
 fi
 
-pc2_classpath=$libdir/pc2.jar:$mclbdir/mclb.jar:$mclbdir/activation.jar:$mclbdir/mailapi.jar:$mclbdir/smtp.jar
+pc2_classpath=$libdir/pc2.jar:$mclbdir/mclb.jar
+pc2_classpath_mail=$pc2_classpath:$mclbdir/activation.jar:$mclbdir/mailapi.jar:$mclbdir/smtp.jar
 
 # eof pc2env $Id$
