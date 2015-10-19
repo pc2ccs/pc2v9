@@ -180,10 +180,10 @@ table tr td.right {
 <div class="tail">
 
 <span class="right">
-       <A HREF="http://www.ecs.csus.edu/pc2/">PC^2 Homepage</A><br/>
+       <A HREF="http://pc2.ecs.csus.edu/">PC^2 Homepage</A><br/>
        CSS by Tomas Cerny and Ray Holder
 </span>
-Created by <A HREF="http://www.ecs.csus.edu/pc2">CSUS PC^2</A> version <xsl:value-of select="/contestStandings/standingsHeader/@systemVersion"/>
+Created by <A HREF="http://pc2.ecs.csus.edu/">CSUS PC^2</A> version <xsl:value-of select="/contestStandings/standingsHeader/@systemVersion"/>
 <br/>
 Last updated
 <xsl:value-of select="/contestStandings/standingsHeader/@currentDate"/>
