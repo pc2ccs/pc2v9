@@ -90,14 +90,20 @@
             <include name="*.jar"/>
         </fileset>
     </path>
+    <path id="checkstyle.classpath">
+        <fileset dir="${vendor.lib.dir}">
+            <include name="checkstyle*.jar"/>
+        </fileset>
+    </path>
 
-    <taskdef resource="checkstyletask.properties" classpathref="project.classpath"/>
 
     <target name="properties">
         <available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
     </target>
 
     <target name="init" depends="properties">
+<!--        <taskdef resource="checkstyletask.properties" classpathref="checkstyle.classpath"/> -->
+        <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpathref="checkstyle.classpath"/>
         <!-- Create the time stamp -->
         <tstamp />
         <!-- Create the build directory structure used by compile -->
@@ -207,18 +213,18 @@
         <delete file="recovery.key" />
     </target>
 
-    <target name="checkstyle" description="Generates a report of code convention violations." depends="compile">
+    <target name="checkstyle" description="Generates a report of code convention violations." depends="init">
         <checkstyle config="${basedir}/.pc2_checks.xml" failureProperty="checkstyle.failure" failOnViolation="false">
-            <formatter type="xml" tofile="checkstyle_report.xml" />
+            <formatter type="xml" tofile="${build.dir}/checkstyle_report.xml" />
             <fileset dir="src" includes="**/*.java" />
-            <classpath refid="project.classpath"/>
+            <classpath refid="checkstyle.classpath"/>
         </checkstyle>
-        <style in="checkstyle_report.xml" out="checkstyle_report.html" style="checkstyle.xsl" />
+        <xslt in="${build.dir}/checkstyle_report.xml" out="${build.dir}/checkstyle_report.html" style="checkstyle.xsl" />
     </target>
 
     <!-- run this target as part of automated build -->
     <target name="checkstyle-nightly" depends="checkstyle" if="checkstyle.failure" description="Sends email if checkstyle detected code conventions violations.">
-        <mail from="pc2@ecs.csus.edu" tolist="boudreat@gaia.ecs.csus.edu" mailhost="gaia.ecs.csus.edu" subject="Checkstyle violation(s) in project ${ant.project.name}" files="checkstyle_report.html" />
+        <mail from="pc2@ecs.csus.edu" tolist="boudreat@gaia.ecs.csus.edu" mailhost="gaia.ecs.csus.edu" subject="Checkstyle violation(s) in project ${ant.project.name}" files="${build.dir}/checkstyle_report.html" />
     </target>
 
     <target name="javadocs-api" description="Creates API javadocs">
