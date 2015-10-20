@@ -106,10 +106,6 @@
         <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpathref="checkstyle.classpath"/>
         <!-- Create the time stamp -->
         <tstamp />
-        <!-- Create the build directory structure used by compile -->
-        <mkdir dir="${build.prod.dir}" />
-        <mkdir dir="${build.test.dir}" />
-        <mkdir dir="${compilelogs.dir}" />
         <java classname="org.tmatesoft.svn.cli.SVNVersion" dir="${basedir}"
             fork="true" outputproperty="repo.version"
             classpathref="project.classpath">
@@ -117,7 +113,11 @@
         </java>
     </target>
 
-    <target name="compile" depends="init" description="compile the source ">
+    <target name="compile" depends="init,checkstyle" description="compile the source ">
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build.prod.dir}" />
+        <mkdir dir="${build.test.dir}" />
+        <mkdir dir="${compilelogs.dir}" />
         <!-- Compile the java code from ${src.dir} into ${build.dir} -->
         <javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
             <compilerarg line="${compilerArg}" compiler="${build.compiler}"/>

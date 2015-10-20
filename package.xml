@@ -141,6 +141,7 @@
         <property name="apizip.name" value="api-doc-${version}-${repo.version}.zip"/>
         <property name="apizip.path" value="${dist.dir}/${apizip.name}"/>
 
+        <antcall target="clean"/>
         <antcall target="apizip"/>
         <!-- bug 490 gzip depends on zip do not call explicitly -->
         <antcall target="gzip"/> 
