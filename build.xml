@@ -117,7 +117,7 @@
         </java>
     </target>
 
-    <target name="compile" depends="init,checkstyle" description="compile the source ">
+    <target name="compile" depends="init" description="compile the source ">
         <!-- Compile the java code from ${src.dir} into ${build.dir} -->
         <javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
             <compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
