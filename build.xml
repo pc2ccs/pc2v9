@@ -199,12 +199,14 @@
         <!-- Delete the ${build.dir} and ${dist.dir} directory trees -->
         <delete dir="${build.dir}" />
         <delete dir="${dist.dir}" />
+        <!-- junit intended output -->
+        <delete dir="testout" />
         <!-- and crap dumped by junit tests -->
-        <delete file="profiles.properties" />
-        <delete file="teams.output.txt" />
         <delete dir="profiles" />
         <delete dir="logs" />
         <delete dir="executesite2judge1" />
+        <delete file="profiles.properties" />
+        <delete file="teams.output.txt" />
     </target>
 
     <target name="checkstyle" description="Generates a report of code convention violations." depends="init">
