@@ -215,16 +215,16 @@
 
     <target name="checkstyle" description="Generates a report of code convention violations." depends="init">
         <checkstyle config="${basedir}/.pc2_checks.xml" failureProperty="checkstyle.failure" failOnViolation="false">
-            <formatter type="xml" tofile="${build.dir}/checkstyle_report.xml" />
+            <formatter type="xml" tofile="${build.dir}/checkstyle-result.xml" />
             <fileset dir="src" includes="**/*.java" />
             <classpath refid="checkstyle.classpath"/>
         </checkstyle>
-        <xslt in="${build.dir}/checkstyle_report.xml" out="${build.dir}/checkstyle_report.html" style="checkstyle.xsl" />
+        <xslt in="${build.dir}/checkstyle-result.xml" out="${build.dir}/checkstyle-result.html" style="checkstyle.xsl" />
     </target>
 
     <!-- run this target as part of automated build -->
     <target name="checkstyle-nightly" depends="checkstyle" if="checkstyle.failure" description="Sends email if checkstyle detected code conventions violations.">
-        <mail from="pc2@ecs.csus.edu" tolist="boudreat@gaia.ecs.csus.edu" mailhost="gaia.ecs.csus.edu" subject="Checkstyle violation(s) in project ${ant.project.name}" files="${build.dir}/checkstyle_report.html" />
+        <mail from="pc2@ecs.csus.edu" tolist="boudreat@gaia.ecs.csus.edu" mailhost="gaia.ecs.csus.edu" subject="Checkstyle violation(s) in project ${ant.project.name}" files="${build.dir}/checkstyle-result.html" />
     </target>
 
     <target name="javadocs-api" description="Creates API javadocs">
