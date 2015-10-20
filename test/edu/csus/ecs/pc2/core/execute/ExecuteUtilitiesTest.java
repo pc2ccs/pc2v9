@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.execute;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 
 import junit.framework.TestSuite;
@@ -147,12 +148,14 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         IInternalController controller = sampleContest.createController(contest, true, false);
         
         String resultsFileName = ExecuteUtilities.createResultsFileName(56);
-        String outFilename = "teams.output.txt";
+        // this is used by the createMockFileContents to write the file to disk
+        String outFilename = getOutputDataDirectory()+File.separator+"teams.output.txt";
 
+        // but in the testData use it without a path
         String[] testData = { //
         // input;expected
                 "A foggy bottom day runs far;A foggy bottom day runs far", //
-                Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + ";pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat "+outFilename+" sumit.ans "+resultsFileName+" ", // 
+                Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + ";pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
                 "{:ansfile};sumit.ans", // 
                 "{:basename};Sumit", // 
                 "{:executetime};45321", // 
@@ -165,7 +168,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:languagename};java", // 
                 "{:languagename};java", // 
                 "{:mainfile};Sumit.java", // 
-                "{:outfile};"+outFilename, // 
+                "{:outfile};teams.output.txt", // 
                 "{:problem};1", // 
                 "{:problemletter};A", // 
                 "{:siteid};2", // 
@@ -225,12 +228,14 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         IInternalController controller = sampleContest.createController(contest, true, false);
         
         String resultsFileName = ExecuteUtilities.createResultsFileName(56);
-        String outFilename = "teams.output.txt";
+        // this is used by the createMockFileContents to write the file to disk
+        String outFilename = getOutputDataDirectory()+File.separator+"teams.output.txt";
 
+        // but in the testData use it without a path
         String[] testData = { //
         // input;expected
                 "A foggy bottom day runs far;A foggy bottom day runs far", // 
-                Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + ";pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat "+outFilename+" sumit.ans "+resultsFileName+" ", // 
+                Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + ";pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
                 "{:ansfile};sumit.ans", // 
                 "{:basename};Sumit", // 
                 "{:executetime};45321", // 
@@ -310,7 +315,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
             new ExecuteUtilities(contest, controller, run, runFiles, problem, language);
             fail("Expecting IllegalArgumentException");
         } catch (IllegalArgumentException e) {
-            
+            assertTrue(e != null);
             // expecting IllegalArgumentException
         }
      
