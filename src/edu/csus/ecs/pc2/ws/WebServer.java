@@ -21,13 +21,13 @@ public class WebServer {
 
     private static final int DEAFAULT_PORT = 80;
 
-    VersionInfo versionInfo = new VersionInfo();
+    private VersionInfo versionInfo = new VersionInfo();
 
     private static final String VERSION = "$Id$";
 
     // private static String PROPERTY_FILENAME = "www-server.properties";
 
-    boolean exitServerFlag = false;
+    private boolean exitServerFlag = false;
     
     protected static void printStderr(String s) {
         System.err.println(Thread.currentThread().getName() + " " + s);
@@ -49,7 +49,7 @@ public class WebServer {
 
     // Where worker threads stand idle
 
-    static Vector<Worker> threads = new Vector<Worker>();
+    protected static Vector<Worker> threads = new Vector<Worker>();
 
     /**
      * the web server's virtual root
@@ -57,12 +57,12 @@ public class WebServer {
     protected static File root;
 
     /* timeout on client connections */
-    static int timeout = 0;
+    protected static int timeout = 0;
 
     /**
      * max # worker threads
      */
-    static int workers = 5;
+    protected static int workers = 5;
 
     /**
      * Port to listen on.
@@ -150,9 +150,9 @@ public class WebServer {
     /**
      * Start Web Server on port.
      * 
-     * @param port
+     * @param aPort
      */
-    public void startServer(int port) {
+    public void startServer(int aPort) {
         
         if (responseHandler == null){
             new Exception("responseHandler not intialized").printStackTrace();
@@ -168,15 +168,15 @@ public class WebServer {
                 threads.addElement(w);
             }
 
-            ServerSocket ss = new ServerSocket(port);
-            System.out.println("Web server on port " + port + " STARTED");
+            ServerSocket ss = new ServerSocket(aPort);
+            System.out.println("Web server on port " + aPort + " STARTED");
             while (!exitServerFlag) {
 
                 Socket s = null;
                 try {
                     s = ss.accept();
                 } catch (IOException e) {
-                    System.err.println("Could not accept connections on " + port);
+                    System.err.println("Could not accept connections on " + aPort);
                     e.printStackTrace();
                     System.exit(4);
                 }
@@ -198,7 +198,7 @@ public class WebServer {
             ss.close();
 
         } catch (java.net.BindException bindException) {
-            System.err.println("Halting server - port " + port + " already in use");
+            System.err.println("Halting server - port " + aPort + " already in use");
         } catch (Exception e) {
             System.err.println("Halting server ");
             e.printStackTrace(System.err);

@@ -263,6 +263,7 @@ public class RunListTest extends AbstractTestCase {
             
         } catch (FileSecurityException e) {
             
+            assertTrue(e != null);
             //Passes -  expected to not read/be corrupt
             
 //            FileSecurityException: NOT_READY_TO_READ

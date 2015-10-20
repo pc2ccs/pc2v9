@@ -13,7 +13,14 @@ import java.util.Vector;
  */
 
 // $HeadURL$
-public class DataLoader {
+public final class DataLoader {
+
+    /**
+     * 
+     */
+    private DataLoader() {
+        super();
+    }
 
     /**
      * Load data files using extnesions in and ans.

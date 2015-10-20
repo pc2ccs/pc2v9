@@ -41,7 +41,7 @@ public class AutoJudgingSettingsReport implements IReport {
 
     private Filter filter = new Filter();
     
-    int autoJudgeCount = 0;
+    private int autoJudgeCount = 0;
 
     /**
      * Return a list of comma delimited problem names.

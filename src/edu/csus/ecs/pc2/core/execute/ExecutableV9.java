@@ -291,7 +291,10 @@ public class ExecutableV9 extends Plugin implements IExecutable {
                     executeProgram(0); // execute with first data set.
                 } else {
                     /**
-                     * compileProgram returns false if 1) runProgram failed (runProgramErrorString set) 2) compiler fails to create expecte output file (runProgramErrorString empty) If there is compiler stderr or stdout
+                     * compileProgram returns false if 
+                     * 1) runProgram failed (runProgramErrorString set) 
+                     * 2) compiler fails to create expecte output file (runProgramErrorString empty) 
+                     * If there is compiler stderr or stdout
                      * we should not add the textPane saying there was an error.
                      */
                     if (!executionData.isCompileSuccess()) {
@@ -350,7 +353,9 @@ public class ExecutableV9 extends Plugin implements IExecutable {
                 }
             } else {
                 /**
-                 * compileProgram returns false if 1) runProgram failed (runProgramErrorString set) 2) compiler fails to create expected output file (runProgramErrorString empty) If there is compiler stderr or stdout we
+                 * compileProgram returns false if 1) runProgram failed (runProgramErrorString set) 
+                 * 2) compiler fails to create expected output file (runProgramErrorString empty) 
+                 * If there is compiler stderr or stdout we
                  * should not add the textPane saying there was an error.
                  */
                 if (!executionData.isCompileSuccess()) {
@@ -611,7 +616,7 @@ public class ExecutableV9 extends Plugin implements IExecutable {
          */
 
         String commandPattern = problem.getValidatorCommandLine();
-        boolean pc2_jar_use_directory = false;
+        boolean pc2JarUseDirectory = false;
 
         if (problem.isUsingPC2Validator()) {
 
@@ -624,7 +629,7 @@ public class ExecutableV9 extends Plugin implements IExecutable {
 
             String pathToPC2Jar = ExecuteUtilities.findPC2JarPath();
             if (!(new File(pathToPC2Jar+"pc2.jar")).exists()) {
-                pc2_jar_use_directory = true;
+                pc2JarUseDirectory = true;
             }
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
         }
@@ -640,7 +645,7 @@ public class ExecutableV9 extends Plugin implements IExecutable {
                 log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);
             }
         }
-        if (pc2_jar_use_directory) {
+        if (pc2JarUseDirectory) {
             // this is a directory, remove "pc2.jar" from string
             cmdLine = ExecuteUtilities.replaceString(cmdLine, "pc2.jar", "");
         }
@@ -1487,14 +1492,14 @@ public class ExecutableV9 extends Plugin implements IExecutable {
     }
 
     @Override
-    public IFileViewer execute(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, boolean clearDirFirst) {
+    public IFileViewer execute(IInternalContest inContest, IInternalController inController, Run aRun, RunFiles aRunFiles, boolean clearDirFirst) {
 
         this.contest = inContest;
         this.controller = inController;
-        this.runFiles = runFiles;
-        this.run = run;
-        language = inContest.getLanguage(run.getLanguageId());
-        problem = inContest.getProblem(run.getProblemId());
+        this.runFiles = aRunFiles;
+        this.run = aRun;
+        language = inContest.getLanguage(aRun.getLanguageId());
+        problem = inContest.getProblem(aRun.getProblemId());
         
         initialize();
         

@@ -1232,9 +1232,7 @@ public class EditProblemPane extends JPanePlugin {
 
         if (datafiles == null) {
             deleteAllDataSets();
-        }
-        else 
-        {
+        } else {
             SerializedFile[] answerFiles = datafiles.getJudgesAnswerFiles();
             
             if (answerFiles.length > 0) {
@@ -3076,9 +3074,7 @@ public class EditProblemPane extends JPanePlugin {
                 String name2 = filelistTwo.get(i);
                 if (name1.equals(name2)){
                     matching ++;
-                }
-                else
-                {
+                } else {
                     System.err.println("Miss match "+name1 +" vs " + name2);
                 }
             }

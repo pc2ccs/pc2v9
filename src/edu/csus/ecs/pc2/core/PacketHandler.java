@@ -4036,7 +4036,7 @@ public class PacketHandler {
             Thread.sleep(seconds * 1000);
 
         } catch (Exception e) {
-            ; // ignore exception
+            System.out.println("Ignore exception during Thread.sleep.");
         }
     }
 

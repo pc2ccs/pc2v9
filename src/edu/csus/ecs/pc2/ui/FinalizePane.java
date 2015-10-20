@@ -328,8 +328,7 @@ public class FinalizePane extends JPanePlugin {
             if (!run.isDeleted()) {
                 
                 ElementId id = run.getJudgementRecord().getJudgementId();
-                if (judgementJE.getElementId().equals(id))
-                {
+                if (judgementJE.getElementId().equals(id)) {
                   count ++;  
                 }
             }

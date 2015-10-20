@@ -104,7 +104,7 @@ public class ElementIdTest extends AbstractTestCase {
         
         UUID uuid = UUID.randomUUID();
         String fileName = testDirectory + File.separator + "EIT" + uuid.toString();
-        File file = new File(fileName);;
+        File file = new File(fileName);
         Object object = create (file, id);
 
         ElementId newId = (ElementId) object;

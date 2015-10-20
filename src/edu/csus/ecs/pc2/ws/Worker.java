@@ -25,12 +25,12 @@ import com.json.parsers.JsonParserFactory;
 // $HeadURL$
 
 class Worker extends WebServer implements Runnable {
-    final static int BUF_SIZE = 2048;
+    static final int BUF_SIZE = 2048;
 
     static final byte[] EOL = { (byte) '\r', (byte) '\n' };
 
     /* buffer to use for requests */
-    byte[] buf;
+    private byte[] buf;
 
     /* Socket to client we're handling */
     private Socket s;
@@ -40,7 +40,7 @@ class Worker extends WebServer implements Runnable {
     /*
      * mapping of file extensions to content-types
      */
-    static Hashtable<String, String> map = new Hashtable<>();
+    private static Hashtable<String, String> map = new Hashtable<>();
 
     /**
      * Static Block.
@@ -64,8 +64,8 @@ class Worker extends WebServer implements Runnable {
         this.responseHandler = responseHandler;
     }
 
-    synchronized void setSocket(Socket s) {
-        this.s = s;
+    synchronized void setSocket(Socket socket) {
+        this.s = socket;
         notify();
     }
 
@@ -199,9 +199,9 @@ class Worker extends WebServer implements Runnable {
 //                }
 //            }
             
-            boolean OK = printHeaders(ps);
+            boolean ok = printHeaders(ps);
             if (doingGet) {
-                if (OK) {
+                if (ok) {
                     postResponse (httpCommand, ps);
                 } else {
                     send404(ps);
@@ -314,9 +314,9 @@ class Worker extends WebServer implements Runnable {
         JsonParserFactory factory=JsonParserFactory.getInstance();
         JSONParser parser=factory.newJsonParser();
         @SuppressWarnings("unchecked")
-        Map<String, String> map = parser.parseJson(string);
+        Map<String, String> aMap = parser.parseJson(string);
 
-        return map;
+        return aMap;
     }
 
     /**

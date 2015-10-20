@@ -96,6 +96,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     protected static final String VIEWER_CMD = "VIEWER_CMD";
 
+    /**
+     * list of columns
+     */
     public static enum COLUMN {
         SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, 
             JUDGE_OUTPUT, JUDGE_DATA, VALIDATOR_OUTPUT, VALIDATOR_ERR
@@ -161,10 +164,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private JScrollPane resultsScrollPane;
     
-    String lastViewer = ""; // internal
-    String lastComparator = ""; // internal
+    private String lastViewer = ""; // internal
+    private String lastComparator = ""; // internal
 
-    Log log ;
+    private Log log ;
 
     private RunFiles currentRunFiles;
 
@@ -207,7 +210,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private TYPES vtype = TYPES.INTERNAL;
     
-    ClientSettings clientSettings = null;
+    private ClientSettings clientSettings = null;
 
     private JRadioButton rdbtnInternalCompareProgram;
 
@@ -259,7 +262,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             }
             tmp = clientSettings.getProperty(COMPARATOR_CMD);
             if (tmp != null) {
-                lastComparator = currentComparatorCmd = tmp;
+                lastComparator = tmp;
+                currentComparatorCmd = tmp;
             }
             tmp = clientSettings.getProperty(VTYPES);
             if (tmp != null) {
@@ -268,7 +272,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             }
             tmp = clientSettings.getProperty(VIEWER_CMD);
             if (tmp != null) {
-                lastViewer = currentViewerCmd = tmp;
+                lastViewer = tmp;
+                currentViewerCmd = tmp;
             }
             // initialize default lists if needed
             if (ctype == TYPES.LIST) {
@@ -1097,7 +1102,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private JTable getResultsTable(RunTestCase [] testCases) {
 
-        final JTable resultsTable;
+        final JTable localResultsTable;
 
         //create the results table
         TableModel tableModel = new TestCaseResultsTableModel(testCases, columnNames) ;
@@ -1112,16 +1117,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 //        }
 //        System.out.println ("--------------");
         
-        resultsTable = new JTable(tableModel);
+        localResultsTable = new JTable(tableModel);
         
         //set the desired options on the table
-        resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        resultsTable.setFillsViewportHeight(true);
-        resultsTable.setRowSelectionAllowed(false);
-        resultsTable.getTableHeader().setReorderingAllowed(false);
+        localResultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        localResultsTable.setFillsViewportHeight(true);
+        localResultsTable.setRowSelectionAllowed(false);
+        localResultsTable.getTableHeader().setReorderingAllowed(false);
         
         //add a listener for selection events on the table
-        resultsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+        localResultsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             // insure "compare" button is only enabled when at least one table row is selected
             public void valueChanged(ListSelectionEvent e) {
@@ -1134,31 +1139,31 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         // set a centering renderer on desired table columns
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        resultsTable.getColumn(columnNames[COLUMN.DATASET_NUM.ordinal()]).setCellRenderer(centerRenderer);
+        localResultsTable.getColumn(columnNames[COLUMN.DATASET_NUM.ordinal()]).setCellRenderer(centerRenderer);
        
         //set our own checkbox renderer (don't know how to add an ActionListener to the default checkboxes
-        resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setCellRenderer(new CheckBoxRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setCellRenderer(new CheckBoxRenderer());
 
         // set a LinkRenderer on those cells containing links
-        resultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_VIEW.ordinal()]).setCellRenderer(new LinkRenderer());
-        resultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_COMPARE.ordinal()]).setCellRenderer(new LinkRenderer());
-        resultsTable.getColumn(columnNames[COLUMN.JUDGE_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
-        resultsTable.getColumn(columnNames[COLUMN.JUDGE_DATA.ordinal()]).setCellRenderer(new LinkRenderer());
-        resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
-        resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_VIEW.ordinal()]).setCellRenderer(new LinkRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_COMPARE.ordinal()]).setCellRenderer(new LinkRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.JUDGE_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.JUDGE_DATA.ordinal()]).setCellRenderer(new LinkRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkRenderer());
 
         // render Result column as Pass/Fail on Green/Red
-        resultsTable.getColumn(columnNames[COLUMN.RESULT.ordinal()]).setCellRenderer(new PassFailCellRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.RESULT.ordinal()]).setCellRenderer(new PassFailCellRenderer());
 
         // render Time column right-justified
-        resultsTable.getColumn(columnNames[COLUMN.TIME.ordinal()]).setCellRenderer(new RightJustifyRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.TIME.ordinal()]).setCellRenderer(new RightJustifyRenderer());
 
         // force table column widths to nice values
 //         resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-         resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setPreferredWidth(15);
+         localResultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setPreferredWidth(15);
 
         // add a listener to allow users to click an output or data file name and display it
-        resultsTable.addMouseListener(new MouseAdapter() {
+        localResultsTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 JTable target = (JTable) e.getSource();
                 int row = target.getSelectedRow();
@@ -1177,7 +1182,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             }
         });
 
-        return resultsTable;
+        return localResultsTable;
     }
     
     /**
@@ -1197,12 +1202,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     /**
      * this update the btnUpdate/btnCancel as appropriate
      * 
-     * @param currentComparatorCmd
-     * @param currentViewerCmd
+     * @param theCurrentComparatorCmd
+     * @param theCurrentViewerCmd
      */
-    private void enableUpdateCancel(String currentComparatorCmd, String currentViewerCmd) {
+    private void enableUpdateCancel(String theCurrentComparatorCmd, String theCurrentViewerCmd) {
         boolean state = true;
-        if (currentComparatorCmd.equals(lastComparator) && currentViewerCmd.equals(lastViewer)) {
+        if (theCurrentComparatorCmd.equals(lastComparator) && theCurrentViewerCmd.equals(lastViewer)) {
             state = false;
         }
         btnUpdate.setEnabled(state);
@@ -1228,6 +1233,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         JOptionPane.showMessageDialog(this, message);
     }
 
+    /**
+     * 
+     * @author ICPC
+     *
+     */
     public class LinkRenderer extends DefaultTableCellRenderer {
 
         private static final long serialVersionUID = 1L;
@@ -1254,9 +1264,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      *            - the column in the table: team output, judge's output, or judge's data
      */
     protected void viewFile(int row, int col) {
-        if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && 
-                col != COLUMN.JUDGE_DATA.ordinal()  && col != COLUMN.VALIDATOR_OUTPUT.ordinal() &&
-                col != COLUMN.VALIDATOR_ERR.ordinal()) {
+        if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal() && col != COLUMN.VALIDATOR_OUTPUT.ordinal()
+                && col != COLUMN.VALIDATOR_ERR.ordinal()) {
             if (log != null) {
                 log.log(Log.WARNING, "MTSVPane.viewFile(): invalid column number for file viewing request: " + col);
             } else {
@@ -1383,8 +1392,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             return null;
         }
         tempExecutable = new Executable(getContest(), getController(), currentRun, currentRunFiles);
-        String executableDir = tempExecutable.getExecuteDirectoryName();
-        return executableDir;
+        String exeDir = tempExecutable.getExecuteDirectoryName();
+        return exeDir;
     }
 
     /**
@@ -1476,7 +1485,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                             + "  Title='" + title + "'"
                             + "  setVisible='" + visible + "'");
         if (fileViewer == null || file == null) {
-            Log log = getController().getLog();
+            log = getController().getLog();
             log.log(Log.WARNING, "MTSVPane.showFile(): fileViewer or file is null");
             JOptionPane.showMessageDialog(getParentFrame(), 
                     "System Error: null fileViewer or file; contact Contest Administrator (check logs)", 
@@ -1488,7 +1497,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             JOptionPane.showMessageDialog(getParentFrame(), 
                 "Error: could not find file: " + file, 
                 "File Missing", JOptionPane.ERROR_MESSAGE);
-            Log log = getController().getLog();
+            log = getController().getLog();
             log.warning("MTSVPane.showFile(): could not find file "+file);
             return;
         }
@@ -1502,6 +1511,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
     }
 
+    /**
+     * 
+     * @author ICPC
+     *
+     */
     public class PassFailCellRenderer extends DefaultTableCellRenderer {
 
         private static final long serialVersionUID = 1L;
@@ -1520,7 +1534,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 // illegal value
                 setBackground(Color.yellow);
                 setText("??");
-                Log log = getController().getLog();
+                log = getController().getLog();
                 log.log(Log.SEVERE, "MTSV PassFailCellRenderer: unknown pass/fail result: ", value);
             }
             setHorizontalAlignment(SwingConstants.LEFT);
@@ -1529,6 +1543,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     }
 
+    /**
+     * 
+     * @author ICPC
+     *
+     */
     public class CheckBoxRenderer extends JCheckBox implements TableCellRenderer {
 
         private static final long serialVersionUID = 1L;

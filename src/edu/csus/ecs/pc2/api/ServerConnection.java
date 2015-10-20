@@ -559,12 +559,12 @@ public class ServerConnection {
                 break;
             case APIConstants.COMPUTER_JUDGING_ONLY:
                 validated = true;
-                problem.setComputerJudged(true);;
+                problem.setComputerJudged(true);
                 problem.setManualReview(false);
                 break;
             case APIConstants.COMPUTER_AND_MANUAL_JUDGING:
                 validated = true;
-                problem.setComputerJudged(true);;
+                problem.setComputerJudged(true);
                 problem.setManualReview(true);
                 break;
 
@@ -765,9 +765,9 @@ public class ServerConnection {
         if (!internalContest.isAllowed(type)) {
             if (message == null){
                 throw new SecurityException("Not allowed to "+ getPermissionDescription(type));
-            }
-            else 
+            } else {
                 throw new SecurityException("Not allowed to " + message+ "(requires "+ getPermissionDescription(type)+" permission)");
+            }
         }
 
     }
@@ -788,8 +788,9 @@ public class ServerConnection {
         if (!allowed) {
             if (message == null) {
                 throw new SecurityException("Not allowed to " + getPermissionDescription(types[0]));
-            } else
+            } else {
                 throw new SecurityException("Not allowed to " + message + "(requires " + getPermissionDescription(types[0]) + " permission)");
+            }
         }
 
     }

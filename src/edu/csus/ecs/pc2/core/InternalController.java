@@ -1007,8 +1007,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             int offset = contest.getJudgements().length;
 
             for (String judgementName : lines) {
-                String WA_number = String.format("%03d", offset++);
-                judgement = new Judgement("No - " + judgementName, Judgement.ACRONYM_WRONG_ANSWER+WA_number);
+                String waNumber = String.format("%03d", offset++);
+                judgement = new Judgement("No - " + judgementName, Judgement.ACRONYM_WRONG_ANSWER+waNumber);
                 contest.addJudgement(judgement);
             }
 

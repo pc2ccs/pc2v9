@@ -381,7 +381,7 @@ public class BalloonPane extends JPanePlugin {
                             final String date = new Date().toString();
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
-                                    Object o[] = getTestMCLB().getRow(rowNum);
+                                    Object[] o = getTestMCLB().getRow(rowNum);
                                     o[TSTAMP_COLUMN] = date;
                                     o[RESULT_COLUMN] = lastStatus;
                                     getTestMCLB().replaceRow(o, rowNum);

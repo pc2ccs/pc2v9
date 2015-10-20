@@ -327,6 +327,7 @@ public final class FrameUtilities {
             }
         } catch (ClassCastException e) {
             // ignore this exception
+            System.out.println("Ignore "+e.getMessage());
         }
     }
 }

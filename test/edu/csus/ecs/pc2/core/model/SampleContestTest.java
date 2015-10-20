@@ -4,6 +4,11 @@ import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
+/**
+ * 
+ * @author ICPC
+ *
+ */
 public class SampleContestTest extends AbstractTestCase {
 
     public void testLoadDataFiles() throws IOException  {

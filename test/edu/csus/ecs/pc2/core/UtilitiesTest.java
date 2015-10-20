@@ -138,7 +138,7 @@ public class UtilitiesTest extends AbstractTestCase {
                 
                 String [] fields = timeString.split(",");
                 
-                long actualSeconds = Utilities.HHMMSStoString(fields[0]);
+                long actualSeconds = Utilities.convertStringToSeconds(fields[0]);
                 long expectedSeconds = Long.parseLong(fields[1]);
                 
                 assertEquals("Expected seconds ", expectedSeconds, actualSeconds);

@@ -10,6 +10,11 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 // TODO need to figure out update key used when update data files 
 // to avoid duping ProblemDataFiles on update.
 
+/**
+ * 
+ * @author ICPC
+ *
+ */
 public class TestCaseTableModel extends DefaultTableModel {
 
     private static String[] colNames = { "Test Case", "Data File", "Answer File" };

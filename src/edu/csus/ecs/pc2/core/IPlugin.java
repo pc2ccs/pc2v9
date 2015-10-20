@@ -26,56 +26,56 @@ public interface IPlugin {
      * @param inController
      *            contest controller
      */
-    public void setContestAndController(IInternalContest inContest, IInternalController inController);
+    void setContestAndController(IInternalContest inContest, IInternalController inController);
     
-    public void setContest(IInternalContest contest);
+    void setContest(IInternalContest contest);
 
-    public void setController(IInternalController controller);
+    void setController(IInternalController controller);
 
-    public IInternalController getController();
+    IInternalController getController();
 
-    public IInternalContest getContest();
+    IInternalContest getContest();
     
-    public Log getLog();
+    Log getLog();
 
     /**
      * Get Plugin Properties
      * 
      * @return
      */
-    public Properties getPluginProperties();
+    Properties getPluginProperties();
 
-    public void addProperty(Object key, Object value);
+    void addProperty(Object key, Object value);
     
     /**
      * Version for this plugin.
      * @return
      */
-    public String getVersion();
+    String getVersion();
     
     /**
      * Author's URL/home page.
      */
-    public String getAuthorURL();
+    String getAuthorURL();
     
     /**
      * Author's email address.
      */
-    public String getAuthorEmailAddress();
+    String getAuthorEmailAddress();
     
     /**
      * Title for plugin to show to users.
      */
-    public String getTitle();
+    String getTitle();
 
     /**
      * Description of plugin to show to users.
      */
-    public String getDescription();
+    String getDescription();
 
     /**
      * Name of Author. 
      */
-    public String getAuthorName();
+    String getAuthorName();
 
 }

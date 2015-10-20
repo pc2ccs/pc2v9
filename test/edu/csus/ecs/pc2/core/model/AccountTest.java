@@ -68,8 +68,8 @@ public class AccountTest extends AbstractTestCase {
 
     }
     
-    private void assertElementIdCorrect (Account account){
-        assertEquals("Expecting external id ", ""+ AccountList.generateExternalId(account), account.getExternalId());
+    private void assertElementIdCorrect (Account anAccount){
+        assertEquals("Expecting external id ", ""+ AccountList.generateExternalId(anAccount), anAccount.getExternalId());
     }
 
     public void testSiteNumber() {

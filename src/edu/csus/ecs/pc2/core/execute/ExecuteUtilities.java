@@ -55,9 +55,9 @@ public class ExecuteUtilities extends Plugin {
 
     private static String debugMessage = null;
     
-    public static String DEFAULT_PC2_JAR_PATH = "./build/prod";
+    public static final String DEFAULT_PC2_JAR_PATH = "./build/prod";
     
-    public static String PC2_JAR_FILENAME = "pc2.jar";
+    public static final String PC2_JAR_FILENAME = "pc2.jar";
     
     public ExecuteUtilities(IInternalContest contest, IInternalController controller, Run run, RunFiles runFiles, Problem problem, Language language) {
         super();
@@ -306,8 +306,7 @@ public class ExecuteUtilities extends Plugin {
         return newString;
     }
     
-    public static String getPC2Home()
-    {
+    public static String getPC2Home() {
         String pc2home = new VersionInfo().locateHome();
         return pc2home;
     }
@@ -321,7 +320,7 @@ public class ExecuteUtilities extends Plugin {
         if (log != null){
             log. log(Log.DEBUG, ex.getMessage(),  ex);
         } else {
-            ex.printStackTrace(System.err);;
+            ex.printStackTrace(System.err);
         }
     }
     
@@ -463,12 +462,12 @@ public class ExecuteUtilities extends Plugin {
 
         String jarDir = ".";
         try {
-            String default_path = new File(DEFAULT_PC2_JAR_PATH).getCanonicalPath();
+            String defaultPath = new File(DEFAULT_PC2_JAR_PATH).getCanonicalPath();
             // for CruiseControl, will not be needed with jenkins
-            if (! new File(default_path).exists()) {
-                default_path = "/software/pc2/cc/projects/pc2v9/build/prod";
+            if (! new File(defaultPath).exists()) {
+                defaultPath = "/software/pc2/cc/projects/pc2v9/build/prod";
             }
-            jarDir = default_path;
+            jarDir = defaultPath;
             String cp = System.getProperty("java.class.path");
             
             String[] dirlist = cp.split(":");
@@ -498,7 +497,7 @@ public class ExecuteUtilities extends Plugin {
             /**
              * This likely happened with getCanonicalPath, this exception/condition can be ignored.
              */
-            ;
+            System.err.println(e.getMessage());
         }
         return jarDir;
     }

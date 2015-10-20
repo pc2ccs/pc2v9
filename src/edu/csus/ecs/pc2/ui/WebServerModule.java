@@ -35,8 +35,7 @@ public class WebServerModule {
         loadVariables(args);
     }
     
-    public void startWebServer()
-    {
+    public void startWebServer() {
 //        checkRequiredParams();
         
         try {

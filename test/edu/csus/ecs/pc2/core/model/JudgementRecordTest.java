@@ -3,6 +3,11 @@ package edu.csus.ecs.pc2.core.model;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import junit.framework.TestCase;
 
+/**
+ * 
+ * @author ICPC
+ *
+ */
 public class JudgementRecordTest extends TestCase {
 
     

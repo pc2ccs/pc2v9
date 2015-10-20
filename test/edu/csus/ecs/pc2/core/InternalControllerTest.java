@@ -30,7 +30,7 @@ public class InternalControllerTest extends AbstractTestCase {
     
 //    private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server", "--nogui", "--contestpassword", "foo", "--port", "42020", "--login" , "s"};
 
-    int siteNum = 1;
+    private int siteNum = 1;
 
     /**
      * Test for Bug 825 for an Admin.
@@ -142,10 +142,16 @@ public class InternalControllerTest extends AbstractTestCase {
         }
     }
     
+    /**
+     * Override things like fatalError().
+     * 
+     * @author ICPC
+     *
+     */
     class OverrideFatalErrorController extends InternalController{
         
-        String message;
-        Exception ex;
+        private String message;
+        private Exception ex;
         
         public OverrideFatalErrorController(IInternalContest contest) {
             super(contest);
@@ -157,9 +163,9 @@ public class InternalControllerTest extends AbstractTestCase {
 
         
         @Override
-        protected void fatalError(String message, Exception ex) {
-            this.message = message;
-            this.ex = ex;
+        protected void fatalError(String aMessage, Exception theEx) {
+            this.message = aMessage;
+            this.ex = theEx;
         }
         
         public String getMessage() {

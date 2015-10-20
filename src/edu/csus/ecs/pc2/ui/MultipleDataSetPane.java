@@ -87,13 +87,13 @@ public class MultipleDataSetPane extends JPanePlugin {
     /**
      * Clone data files and populate in pane.
      * 
-     * @param problemDataFiles
+     * @param aProblemDataFiles
      * @throws CloneNotSupportedException
      */
-    public void setProblemDataFiles(Problem problem, ProblemDataFiles problemDataFiles) throws CloneNotSupportedException {
-        this.problem = problem;
-        if (problem != null){
-            setProblemDataFiles(problemDataFiles.copy(problem));
+    public void setProblemDataFiles(Problem aProblem, ProblemDataFiles aProblemDataFiles) throws CloneNotSupportedException {
+        this.problem = aProblem;
+        if (aProblem != null){
+            setProblemDataFiles(aProblemDataFiles.copy(aProblem));
         } else {
             clearDataFiles();
         }
@@ -115,8 +115,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         tableModel.fireTableDataChanged();
      
         // TODO 917 remove debugging
-        if (EditProblemPane.debug22EditProblem)
-        {
+        if (EditProblemPane.debug22EditProblem) {
             System.out.println("debug 22 fire data changed ");
             dump(problemDataFiles, "populateUI debug 22 ");
             dump(getProblemDataFiles(), "populateUI debug 22 B");
@@ -259,8 +258,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     protected void removeRow(int rowNumber) {
 
-        if (tableModel.getRowCount() == 1)
-        {
+        if (tableModel.getRowCount() == 1) {
             editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
         }
 
@@ -368,16 +366,16 @@ public class MultipleDataSetPane extends JPanePlugin {
     }
     
     
-    public ProblemDataFiles loadDataFiles(Problem problem, ProblemDataFiles files, String dataFileBaseDirectory, String dataExtension, String answerExtension, boolean externalDataFiles) {
+    public ProblemDataFiles loadDataFiles(Problem aProblem, ProblemDataFiles files, String dataFileBaseDirectory, String dataExtension, String answerExtension, boolean externalDataFiles) {
 
         if (files == null) {
-            files = new ProblemDataFiles(problem);
+            files = new ProblemDataFiles(aProblem);
         } else {
             /**
              * A check. It makes no sense to update an existing ProblemDataFiles for a different Problem.
              */
-            if (problem != null && !files.getProblemId().equals(problem.getElementId())) {
-                throw new RuntimeException("problem and data files are not for the same problem " + problem.getElementId() + " vs " + files.getProblemId());
+            if (aProblem != null && !files.getProblemId().equals(aProblem.getElementId())) {
+                throw new RuntimeException("problem and data files are not for the same problem " + aProblem.getElementId() + " vs " + files.getProblemId());
             }
         }
 

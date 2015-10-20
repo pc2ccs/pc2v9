@@ -18,7 +18,7 @@ public class RunFiles implements Serializable {
      */
     private static final long serialVersionUID = -7676377417419464772L;
     
-    Submission submission = null;
+    private Submission submission = null;
 
     /**
      * Unique id for this instance.

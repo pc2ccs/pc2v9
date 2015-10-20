@@ -991,8 +991,7 @@ public class AbstractTestCase extends TestCase {
      * @param dir directory to display
      * @throws IOException
      */
-    public void startExplorer(File dir) throws IOException
-    {
+    public void startExplorer(File dir) throws IOException {
 //       String[] command = {"explorer.exe /e,"+directoryName.getAbsolutePath()};
        String command = "explorer.exe /e,"+dir.getAbsolutePath();
        System.out.println("cmd = "+command);
@@ -1002,8 +1001,7 @@ public class AbstractTestCase extends TestCase {
     /**
      * Start Windows Explorer on  directory.
      */
-    public void startExplorer(String directoryName) throws IOException
-    {
+    public void startExplorer(String directoryName) throws IOException {
         File dir = new File(directoryName);
         startExplorer(dir);
     }
@@ -1012,8 +1010,7 @@ public class AbstractTestCase extends TestCase {
      * Start Windows Explorer on data directory.
      * @throws IOException
      */
-    public void startExplorer() throws IOException
-    {
+    public void startExplorer() throws IOException {
         startExplorer(getDataDirectory());
     }
 
@@ -1151,8 +1148,10 @@ public class AbstractTestCase extends TestCase {
 
     }
 
-
-    public class ElementIdComparator implements Comparator<ElementId> {
+    /**
+     * Comparator of ElemendIds
+     */
+     public class ElementIdComparator implements Comparator<ElementId> {
         public int compare(ElementId elementIdOne, ElementId elementIdTwo) {
             return elementIdOne.toString().compareTo(elementIdTwo.toString());
         }

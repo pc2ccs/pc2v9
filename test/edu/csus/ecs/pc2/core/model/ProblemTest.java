@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.ui.EditProblemPane;
  * 
  * @author pc2@ecs.csus.edu
  * 
- * @Version $Id$
+ * @version $Id$
  */
 
 // $HeadURL$

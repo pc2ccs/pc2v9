@@ -46,6 +46,7 @@ public class EditProblemPaneTest extends AbstractTestCase {
 
     }
 
+    @SuppressWarnings("unused")
     private void compareProblems(Problem problem, Problem newProblem) throws Exception {
 
         Exception[] exceptions = compare(problem, newProblem);
@@ -184,7 +185,7 @@ public class EditProblemPaneTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
-    public void AtestDiffView() throws Exception {
+    public void aTestDiffView() throws Exception {
         
         
         // TODO 917 uncomment when edit problem pane is done.

@@ -28,17 +28,17 @@ public class Run extends Submission {
          * Initial state before a run is assigned a real state
          */
         INITIAL,
-        
+
         /**
          * Run submitted.
          */
         NEW,
-        
+
         /**
          * Judge has requested run.
          */
         CHECKED_OUT,
-        
+
         /**
          * Run is being judged.
          * 
@@ -57,39 +57,39 @@ public class Run extends Submission {
          * A judge has checked out the run and has chosen to put this run on hold and judge another run.
          */
         HOLD,
-        
+
         /**
          * A previously judged run is being rejudged.
          */
         REJUDGE,
-        
+
         /**
          * All judging has been done.
          */
         JUDGED,
-        
+
         /**
          * Queued for Computer Judged "New"
          */
         QUEUED_FOR_COMPUTER_JUDGEMENT,
-        
+
         /**
-         *  Computer Judged "BEING_JUDGED"
+         * Computer Judged "BEING_JUDGED"
          */
         BEING_COMPUTER_JUDGED,
-        
+
         /**
          * NEW, shown on New
          */
         MANUAL_REVIEW
     }
 
-    private Vector<JudgementRecord> judgementList = new Vector <JudgementRecord>();
+    private Vector<JudgementRecord> judgementList = new Vector<JudgementRecord>();
 
-    private Vector<RunTestCase> testcases = new Vector <RunTestCase>();
-    
+    private Vector<RunTestCase> testcases = new Vector<RunTestCase>();
+
     private boolean deleted;
-    
+
     /**
      * State for this run.
      */
@@ -115,13 +115,13 @@ public class Run extends Submission {
         setLanguageId(languageId.getElementId());
         setProblemId(problemId.getElementId());
 
-        // check if problem is to be "computer judged" or manual judged 
+        // check if problem is to be "computer judged" or manual judged
         if (problemId.isComputerJudged()) {
             status = Run.RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT;
         } else {
             status = Run.RunStates.NEW;
         }
-        
+
         setElementId(new ElementId("Run"));
         systemOS = System.getProperty("os.name", "?");
     }
@@ -158,6 +158,7 @@ public class Run extends Submission {
 
     /**
      * Returns true if judged (or is being re-judged, or Manual_review.
+     * 
      * @return true if judged.
      */
     public boolean isJudged() {
@@ -189,7 +190,7 @@ public class Run extends Submission {
 
         return null;
     }
-    
+
     /**
      * 
      * @return true if team given a Yes.
@@ -205,7 +206,7 @@ public class Run extends Submission {
 
     /**
      * Return list of all JudgementRecords.
-     *  
+     * 
      * @return JudgementRecord[] - list of all active and inactive JudgementRecord
      */
     public JudgementRecord[] getAllJudgementRecords() {
@@ -224,15 +225,15 @@ public class Run extends Submission {
         if (judgement == null) {
             throw new IllegalArgumentException("Input judgement is null");
         }
-        
+
         // Deactivate last judgement
 
         JudgementRecord lastJudgement = getJudgementRecord();
         if (lastJudgement != null) {
             lastJudgement.setActive(false);
-            if (lastJudgement.isComputerJudgement()){
-                if (! judgement.isComputerJudgement()){
-                    judgement.setPreviousComputerJudgementId (judgement.getElementId());
+            if (lastJudgement.isComputerJudgement()) {
+                if (!judgement.isComputerJudgement()) {
+                    judgement.setPreviousComputerJudgementId(judgement.getElementId());
                 }
             }
         }
@@ -240,12 +241,12 @@ public class Run extends Submission {
         judgementList.addElement(judgement);
 
     }
-    
+
     /**
      * 
      * @return null if no judgement found, else the judgement
      */
-    public JudgementRecord getComputerJudgementRecord(){
+    public JudgementRecord getComputerJudgementRecord() {
 
         if (judgementList.size() == 0) {
             return null;
@@ -259,7 +260,7 @@ public class Run extends Submission {
                 return null;
             }
         }
-        
+
         for (int i = judgementList.size() - 1; i >= 0; i--) {
             JudgementRecord judgement = judgementList.elementAt(i);
             if (judgement.isActive() && judgement.isComputerJudgement()) {
@@ -335,29 +336,26 @@ public class Run extends Submission {
     }
 
     public String toString() {
-        return "Run " + getNumber() + " " + getStatus() + " " + getElapsedMins()+ " min " + getElapsedMS() +"ms from " + getSubmitter() + " id " + getElementId().toString()+" problem "+getProblemId()+ " lang " + getLanguageId();
+        return "Run " + getNumber() + " " + getStatus() + " " + getElapsedMins() + " min " + getElapsedMS() + "ms from " + getSubmitter() + " id " + getElementId().toString() + " problem "
+                + getProblemId() + " lang " + getLanguageId();
     }
 
     /**
-     * The  elapsed time when this run was added.
+     * The elapsed time when this run was added.
      * 
-     * This is always the actual server submission time. The submission
-     * time can be 'overridden' using {@link #setElapsedMS(long)} and
-     * that elapsed MS will be used for scoring, esp. in CCS Test Mode.
+     * This is always the actual server submission time. The submission time can be 'overridden' using {@link #setElapsedMS(long)} and that elapsed MS will be used for scoring, esp. in CCS Test Mode.
      * 
      * @return the server timestamp for this submission
      */
     public long getOriginalElapsedMS() {
         return originalElapsedMS;
     }
-    
+
     @Override
     public void setElapsedMS(long elapsedMS) {
         if (getOriginalElapsedMS() == -1) {
             /**
-             * This code only gets exercised the first time elapsed time is
-             * set, so that subsequent calls to setElapsedMS do not overwrite
-             * the original elapsed time. 
+             * This code only gets exercised the first time elapsed time is set, so that subsequent calls to setElapsedMS do not overwrite the original elapsed time.
              */
             originalElapsedMS = elapsedMS;
             if (overRideElapsedTimeMS > 0) {
@@ -370,9 +368,7 @@ public class Run extends Submission {
     /**
      * Set an override time for the elapsed time.
      * 
-     * When {@link #setElapsedMS(long)} is invoked will save that
-     * elapsed time (fetched by {@link #getOverRideElapsedTimeMS()})
-     * and set the elapsed time to this override time.  
+     * When {@link #setElapsedMS(long)} is invoked will save that elapsed time (fetched by {@link #getOverRideElapsedTimeMS()}) and set the elapsed time to this override time.
      * 
      * @param overRideElapsedTimeMS
      */
@@ -383,7 +379,7 @@ public class Run extends Submission {
     public long getOverRideElapsedTimeMS() {
         return overRideElapsedTimeMS;
     }
-    
+
     public boolean isSameAs(Run run) {
         try {
             if (getElapsedMins() != run.getElapsedMins()) {
@@ -413,7 +409,7 @@ public class Run extends Submission {
             return false;
         }
     }
-    
+
     @Override
     public int getNumber() {
         if (overrideNumber > 0) {
@@ -422,9 +418,9 @@ public class Run extends Submission {
             return super.getNumber();
         }
     }
-    
+
     /**
-     * The run id assigned by a server. 
+     * The run id assigned by a server.
      * 
      * @return
      */

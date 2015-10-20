@@ -306,16 +306,16 @@ public class ServerConnectionTest extends AbstractTestCase {
                 } else if ("settime".equalsIgnoreCase(firstArg)) {
 
                     // settime 4:10:00 10:11 3:59:49
-                    long contestLength = Utilities.HHMMSStoString( getArg (args, 1));
-                    long elapsedTime =  Utilities.HHMMSStoString( getArg (args, 2));
-                    long remainTime =  Utilities.HHMMSStoString( getArg (args, 3));
+                    long contestLength = Utilities.convertStringToSeconds( getArg (args, 1));
+                    long elapsedTime =  Utilities.convertStringToSeconds( getArg (args, 2));
+                    long remainTime =  Utilities.convertStringToSeconds( getArg (args, 3));
                     
                     new ServerConnectionTest().setContetTime(contestLength, remainTime, elapsedTime);
                     
                 } else if ("setlen".equalsIgnoreCase(firstArg)) {
 
                     // setlen 4:00:00
-                    long contestLength =  Utilities.HHMMSStoString( getArg (args, 1));
+                    long contestLength =  Utilities.convertStringToSeconds( getArg (args, 1));
                     
                     new ServerConnectionTest().setContetLength(contestLength);
                     
@@ -1042,9 +1042,9 @@ public class ServerConnectionTest extends AbstractTestCase {
         
         if (! isServerRunning()){
             return;
-        } else {
+        } // else {
             // ensureServerRunning(); todo code this.
-        }
+//        }
         
         String login = "team99";
         
@@ -1055,6 +1055,7 @@ public class ServerConnectionTest extends AbstractTestCase {
             fail("Expecting LoginFailureException");
             
         } catch (LoginFailureException e) {
+            assertTrue(e != null);
             // Passes - should throw this exception
         }
     }

@@ -133,7 +133,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
 
     public void testfullJudgesDataFilenames() throws Exception {
 
-        SampleContest sample = new SampleContest();
+        sample = new SampleContest();
 
         IInternalContest contest = sample.createStandardContest();
 
@@ -177,7 +177,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         removeDirectory(testDir);
         ensureDirectory(testDir);
 
-        SampleContest sample = new SampleContest();
+        sample = new SampleContest();
 
         IInternalContest contest = sample.createStandardContest();
 
@@ -212,7 +212,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         removeDirectory(testDir);
         ensureDirectory(testDir);
 
-        SampleContest sample = new SampleContest();
+        sample = new SampleContest();
 
         IInternalContest contest = sample.createStandardContest();
 
@@ -244,7 +244,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         removeDirectory(testDir);
         ensureDirectory(testDir);
 
-        SampleContest sample = new SampleContest();
+        sample = new SampleContest();
 
         IInternalContest contest = sample.createStandardContest();
 
@@ -369,7 +369,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         removeDirectory(testDir);
         ensureDirectory(testDir);
 
-        SampleContest sample = new SampleContest();
+        sample = new SampleContest();
 
         IInternalContest contest = sample.createStandardContest();
 
@@ -402,7 +402,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         removeDirectory(testDir);
         ensureDirectory(testDir);
 
-        SampleContest sample = new SampleContest();
+        sample = new SampleContest();
 
         IInternalContest contest = sample.createStandardContest();
 
@@ -427,7 +427,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         removeDirectory(testDir);
         ensureDirectory(testDir);
 
-        SampleContest sample = new SampleContest();
+        sample = new SampleContest();
 
         IInternalContest contest = sample.createStandardContest();
 
@@ -451,7 +451,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         removeDirectory(testDir);
         ensureDirectory(testDir);
 
-        SampleContest sample = new SampleContest();
+        sample = new SampleContest();
 
         IInternalContest contest = sample.createStandardContest();
 
@@ -483,7 +483,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         removeDirectory(testDir);
         ensureDirectory(testDir);
 
-        SampleContest sample = new SampleContest();
+        sample = new SampleContest();
 
         IInternalContest contest = sample.createStandardContest();
 

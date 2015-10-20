@@ -396,7 +396,7 @@ public class EventFeedServerPane extends JPanePlugin {
             return ContestInformation.DEFAULT_FREEZE_MINUTES;
         } else {
             
-            long seconds = Utilities.HHMMSStoString(freezeTime);
+            long seconds = Utilities.convertStringToSeconds(freezeTime);
             if (seconds == -1){
                 return ContestInformation.DEFAULT_FREEZE_MINUTES;
             }

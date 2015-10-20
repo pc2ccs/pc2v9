@@ -14,7 +14,14 @@ import edu.csus.ecs.pc2.core.model.Run;
  */
 
 // $HeadURL$
-public class JudgementUtilites {
+public final class JudgementUtilites {
+
+    /**
+     * 
+     */
+    private JudgementUtilites() {
+        super();
+    }
 
     /**
      * Create judgementRecord, create record based on execution results.
@@ -105,8 +112,8 @@ public class JudgementUtilites {
         
         Judgement[] judgements = contest.getJudgements();
         for (Judgement judgement : judgements) {
-            if (judgement.getAcronym().equals(acronym)){
-                
+            if (judgement.getAcronym().equals(acronym)) {
+                return judgement;
             }
         }
         

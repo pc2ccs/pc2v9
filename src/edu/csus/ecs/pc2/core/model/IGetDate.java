@@ -17,7 +17,7 @@ public interface IGetDate {
      * 
      * @return
      */
-    public  Date getDate();
+    Date getDate();
     
     /**
      * Set submission date.
@@ -26,6 +26,6 @@ public interface IGetDate {
      * 
      * @param date Date, if null then sets Date long value to zero
      */
-    public void setDate (Date date);
+    void setDate (Date date);
 
 }

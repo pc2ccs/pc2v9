@@ -149,9 +149,10 @@ public class ContestComparison {
 
         String message = "";
 
-        if (sizeTwo == 0 && sizeOne == 0) {
+        // replaced by the sizeOne+sizeTwo > 0 test on the equal size if
+//        if (sizeTwo == 0 && sizeOne == 0) {
             // identical 
-        } else if (sizeTwo == sizeOne) {
+        if (sizeTwo == sizeOne && (sizeOne + sizeTwo > 0)) {
             message += "Replace all " + sizeOne + " " + Pluralize.pluralize(name, sizeOne) + NEW_LINE;
         } else if (sizeTwo < sizeOne) {
             int diff = sizeOne - sizeTwo;
@@ -319,7 +320,6 @@ public class ContestComparison {
                     System.out.println("All external data files ("+totalProblems+")");
                 } else if (externalDataProblemCount == 0) {
                     System.out.println("All internal/loaded data files (" + totalProblems + ")");
-                } else {
                 }
         }
 

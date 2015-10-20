@@ -41,8 +41,8 @@ public class ProfileTest extends AbstractTestCase {
     public static String  createProfileFilesAndDirs(Profile profile) throws FileSecurityException {
         
         // not pretty but this is static and abstractTestCase getOutputDirectory() is not
-        String profileDirectory = AbstractTestCase.DEFAULT_PC2_OUTPUT_FOR_TESTING_DIRECTORY + File.separator +
-                "ProfileTest" + File.separator + profile.getProfilePath() + File.separator + "db."+profile.getSiteNumber();
+        String profileDirectory = AbstractTestCase.DEFAULT_PC2_OUTPUT_FOR_TESTING_DIRECTORY + File.separator + "ProfileTest" + File.separator + profile.getProfilePath() + File.separator + "db."
+                + profile.getSiteNumber();
         
         if (new File(profileDirectory).isDirectory()){
             new Exception("Directory already exists: "+profileDirectory);

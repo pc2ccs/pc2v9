@@ -285,7 +285,8 @@ public class ContestImporter {
         }
     }
 
-    private void updateClientSettingsAJSettings(IInternalContest theContest, IInternalController theController,IInternalContest newContest, HashMap<String, Problem> probHash) throws LoadContestDataException {
+    private void updateClientSettingsAJSettings(IInternalContest theContest, IInternalController theController, IInternalContest newContest, HashMap<String, Problem> probHash)
+            throws LoadContestDataException {
         
         ClientSettings [] settings = newContest.getClientSettingsList();
         // bug 928 convert the loaded problems into the real problems

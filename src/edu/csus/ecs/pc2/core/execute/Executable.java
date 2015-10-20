@@ -749,7 +749,7 @@ public class Executable extends Plugin implements IExecutable {
          */
 
         String commandPattern = problem.getValidatorCommandLine();
-        boolean pc2_jar_use_directory = false;
+        boolean pc2JarUseDirectory = false;
 
         if (problem.isUsingPC2Validator()) {
 
@@ -762,7 +762,7 @@ public class Executable extends Plugin implements IExecutable {
 
             String pathToPC2Jar = findPC2JarPath ();
             if (!(new File(pathToPC2Jar+"pc2.jar")).exists()) {
-                pc2_jar_use_directory = true;
+                pc2JarUseDirectory = true;
             }
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
         }
@@ -784,7 +784,7 @@ public class Executable extends Plugin implements IExecutable {
                 log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);
             }
         }
-        if (pc2_jar_use_directory) {
+        if (pc2JarUseDirectory) {
             // this is a directory, remove "pc2.jar" from string
             cmdLine = ExecuteUtilities.replaceString(cmdLine, "pc2.jar", "");
         }
@@ -982,12 +982,12 @@ public class Executable extends Plugin implements IExecutable {
     protected String findPC2JarPath() {
         String jarDir = ".";
         try {
-            String default_path = new File("./build/prod").getCanonicalPath(); 
+            String defaultPath = new File("./build/prod").getCanonicalPath(); 
             // for CruiseControl, will not be needed with jenkins
-            if (! new File(default_path).exists()) {
-                default_path = "/software/pc2/cc/projects/pc2v9/build/prod";
+            if (! new File(defaultPath).exists()) {
+                defaultPath = "/software/pc2/cc/projects/pc2v9/build/prod";
             }
-            jarDir = default_path;
+            jarDir = defaultPath;
             String cp = System.getProperty("java.class.path");
             StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
             while (st.hasMoreTokens()) {
@@ -999,7 +999,7 @@ public class Executable extends Plugin implements IExecutable {
                     break;
                 }
             }
-            if (default_path.equals(jarDir)){
+            if (defaultPath.equals(jarDir)){
                File dir = new File("dist/pc2.jar");
                if (dir.isFile()) {
                    jarDir = new File(dir.getParent()).getCanonicalPath()+File.separator;
@@ -1960,14 +1960,14 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     @Override
-    public IFileViewer execute(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, boolean clearDirFirst) {
+    public IFileViewer execute(IInternalContest inContest, IInternalController inController, Run aRun, RunFiles aRunFiles, boolean clearDirFirst) {
 
         this.contest = inContest;
         this.controller = inController;
-        this.runFiles = runFiles;
-        this.run = run;
-        language = inContest.getLanguage(run.getLanguageId());
-        problem = inContest.getProblem(run.getProblemId());
+        this.runFiles = aRunFiles;
+        this.run = aRun;
+        language = inContest.getLanguage(aRun.getLanguageId());
+        problem = inContest.getProblem(aRun.getProblemId());
         
         initialize();
         

@@ -24,9 +24,9 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 // $HeadURL$
 public class EvaluationLogTest extends AbstractTestCase {
 
-    public final static long MS_DAY = 24 * 60 * 60 * 1000;
+    public static final long MS_DAY = 24 * 60 * 60 * 1000;
 
-    public final static long FOUR_DAYS = 4 * MS_DAY;
+    public static final long FOUR_DAYS = 4 * MS_DAY;
 
     /**
      * Test whether new Run.getDate() method is used rather than current date.

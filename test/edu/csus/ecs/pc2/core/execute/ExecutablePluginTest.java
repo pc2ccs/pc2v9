@@ -375,9 +375,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
             System.err.println("ERROR - pc2 jar path not a directory '"+jarPath+"'");
             System.out.println("TODO 636 - unable to unit test - testFindPC2Jar fails so no ability to judge run");
             fail("ERROR - pc2 jar path not a directory '"+jarPath+"'");
-        } 
-        else 
-        {
+        } else {
             if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
                 
                 assertTrue("Expect no error running validator" , executionData.isValidationSuccess());

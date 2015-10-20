@@ -46,7 +46,7 @@ public class TeamsTSVReport implements IReportFile {
     }
 
     @Override
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    public void createReportFile(String filename, Filter aFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -73,14 +73,14 @@ public class TeamsTSVReport implements IReportFile {
     }
 
     @Override
-    public String[] createReport(Filter filter) {
+    public String[] createReport(Filter aFilter) {
         Teamdata teamdata = new Teamdata();
         String[] lines = teamdata.getTeamData(contest);
         return lines;
     }
 
     @Override
-    public String createReportXML(Filter filter) throws IOException {
+    public String createReportXML(Filter aFilter) throws IOException {
         return Reports.notImplementedXML(this);
     }
 

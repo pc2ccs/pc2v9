@@ -70,7 +70,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * key=name, value=default_value, type, min, max (colon delimited)
      */
-    private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" }, { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" } };
+    private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" },
+            { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" } };
     
     private Properties props = new Properties();
 
@@ -175,13 +176,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 } else {
                     // we should really only do this if it's been judged
                     if (isValidJudgement(run)) {
-                    	String response = theContest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
-                        if(response.equals(Judgement.ACRONYM_COMPILATION_ERROR))
-                    		score += getPenaltyPointsPerNoCompilationError();
-                    	else if(response.equals(Judgement.ACRONYM_SECURITY_VIOLATION))
-                    		score += getPenaltyPointsPerNoSecurityViolation();
-                    	else
-                    		score += getPenaltyPointsPerNo();
+                        String response = theContest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
+                        if(response.equals(Judgement.ACRONYM_COMPILATION_ERROR)) {
+                            score += getPenaltyPointsPerNoCompilationError();
+                        } else if(response.equals(Judgement.ACRONYM_SECURITY_VIOLATION)) {
+                            score += getPenaltyPointsPerNoSecurityViolation();
+                        } else {
+                            score += getPenaltyPointsPerNo();
+                        }
                     } else {
                         unJudgedRun = true;
                     }
@@ -764,7 +766,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param standingsRecordHash
      * @param problemsIndexHash
      */
-    private void generateStandingsValues (final TreeMap<Run, Run> runTreeMap, Hashtable<String, StandingsRecord> standingsHash, Hashtable<ElementId, Integer> problemsHash, IInternalContest theContest) throws IllegalContestState {
+    private void generateStandingsValues(final TreeMap<Run, Run> runTreeMap, Hashtable<String, StandingsRecord> standingsHash, Hashtable<ElementId, Integer> problemsHash, IInternalContest theContest)
+            throws IllegalContestState {
 
         long oldTime = 0;
         long youngTime = -1;

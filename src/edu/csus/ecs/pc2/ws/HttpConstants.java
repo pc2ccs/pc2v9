@@ -8,7 +8,14 @@ package edu.csus.ecs.pc2.ws;
  */
 
 // $HeadURL$
-public class HttpConstants {
+public final class HttpConstants {
+
+    /**
+     * 
+     */
+    private HttpConstants() {
+        super();
+    }
 
     public static final int HTTP_OK = 200;
 
@@ -79,4 +86,5 @@ public class HttpConstants {
     public static final int HTTP_GATEWAY_TIMEOUT = 504;
 
     public static final int HTTP_VERSION = 505;
+    
 }

@@ -432,7 +432,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     }
 
-    /*
+    /**
      * What to when accounts change
      */
     public class AccountListenerImplementation implements IAccountListener {

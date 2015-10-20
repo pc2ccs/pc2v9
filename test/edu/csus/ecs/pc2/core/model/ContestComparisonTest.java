@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 // $HeadURL$
 public class ContestComparisonTest extends AbstractTestCase {
 
-    String NEW_LINE = ContestComparison.NEW_LINE;
+    private static final String NEW_LINE = ContestComparison.NEW_LINE;
 
     public void testEmptyContest() throws Exception {
 
@@ -109,8 +109,9 @@ public class ContestComparisonTest extends AbstractTestCase {
 
 //        printExpectedDeclaration(actual);
 
-        String expected = "Replace 3 Sites;Add 2 Sites;Replace all 6 Problems;Replace all 6 Languages;Replace all 134 Accounts;Replace all 1 administrator;Replace all 120 teams;Replace all 12 judges;Replace all 1 scoreboard;Replace all 9 Judgements;Replace 2 AJ Settingss;Add 2 AJ Settingss;";
-
+        String expected = "Replace 3 Sites;Add 2 Sites;Replace all 6 Problems;Replace all 6 Languages;"
+                + "Replace all 134 Accounts;Replace all 1 administrator;Replace all 120 teams;Replace all 12 judges;"
+                + "Replace all 1 scoreboard;Replace all 9 Judgements;Replace 2 AJ Settingss;Add 2 AJ Settingss;";
 
         expected = expected.replaceAll("; ", NEW_LINE);
         expected = expected.replaceAll(";", NEW_LINE);

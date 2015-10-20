@@ -8,7 +8,7 @@ import edu.csus.ecs.pc2.core.list.ProblemList;
  * 
  * @author pc2@ecs.csus.edu
  * 
- * @Version $Id$
+ * @version $Id$
  */
 
 // $HeadURL$

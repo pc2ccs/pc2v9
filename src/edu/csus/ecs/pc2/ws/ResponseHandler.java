@@ -45,7 +45,7 @@ public class ResponseHandler implements APIPlugin {
         } else if (GET_CLOCK_START_TIME_PATH.equals(path)) {
             return tag("start_time", startTime);
         } else if (SET_CLOCK_PATH.equals(path)) {
-            return set_start_time(getAbsoluteParameter(parameters));
+            return setStartTime(getAbsoluteParameter(parameters));
         } else if (CLOCK_STARTED_PATH.equals(path)) {
             return tag("contest_started", "" + contest.isContestClockRunning());
         } else {
@@ -57,7 +57,7 @@ public class ResponseHandler implements APIPlugin {
         return "<" + name + ">" + value + "</" + name + ">";
     }
 
-    private String set_start_time(String newTime) {
+    private String setStartTime(String newTime) {
         startTime = newTime;
         return tag("start_time", startTime);
     }

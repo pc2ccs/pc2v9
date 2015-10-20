@@ -164,6 +164,11 @@ public class ReportsTest extends AbstractTestCase {
         return new SampleContest().createContest(1, 5, 12, 12, true);
     }
     
+    /**
+     * 
+     * @author ICPC
+     *
+     */
     protected class ReportTitleComparator implements Comparator<IReport>, Serializable {
 
         /**

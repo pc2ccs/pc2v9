@@ -371,9 +371,9 @@ public class SerializedFile implements Serializable {
         }
     }
 
-    public static String generateSHA1(File file) throws NoSuchAlgorithmException, IOException {
+    public static String generateSHA1(File theFile) throws NoSuchAlgorithmException, IOException {
 
-        String fileName = file.getAbsolutePath();
+        String fileName = theFile.getAbsolutePath();
 
         InputStream inputStream = null;
         byte[] buf;
@@ -662,8 +662,7 @@ public class SerializedFile implements Serializable {
      * 
      */
     public String getErrorMessage() {
-        if (errorMessage == null)
-        {
+        if (errorMessage == null) {
             return null;
         }
         

@@ -42,7 +42,7 @@ public class BalloonWriter {
 
     private String contestTitle = "";
 
-    private String message = "";
+    private String statusMessage = "";
 
     /**
      * 
@@ -447,11 +447,11 @@ public class BalloonWriter {
     }
 
     private void setMessage(String message) {
-        this.message = message;
+        this.statusMessage = message;
     }
     
     public String getLastStatus() {
-        return message;
+        return statusMessage;
     }
 
     /**

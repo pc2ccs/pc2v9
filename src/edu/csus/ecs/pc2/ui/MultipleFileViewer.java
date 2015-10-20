@@ -609,10 +609,10 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
 
     private JButton getBtnNewButton() {
         if (saveButton == null) {
-        	saveButton = new JButton("Save");
-        	saveButton.setToolTipText("Save current buffer to file");
-        	saveButton.setMnemonic(KeyEvent.VK_S);
-        	saveButton.addActionListener(new java.awt.event.ActionListener() {
+            saveButton = new JButton("Save");
+            saveButton.setToolTipText("Save current buffer to file");
+            saveButton.setMnemonic(KeyEvent.VK_S);
+            saveButton.addActionListener(new java.awt.event.ActionListener() {
                    public void actionPerformed(java.awt.event.ActionEvent e) {
 
                        saveActiveBuffer();

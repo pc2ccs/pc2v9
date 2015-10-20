@@ -326,7 +326,7 @@ public class ConfigurationIOTest extends AbstractTestCase {
         assertTrue("able to write config", wroteConfig);
         
         configurationIO = null;
-        configurationIO = new ConfigurationIO(storage);;
+        configurationIO = new ConfigurationIO(storage);
         
         String configFileName = configurationIO.getFileName();
         

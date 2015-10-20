@@ -504,8 +504,7 @@ public class MultiFileComparator extends JFrame  {
      * @param judgesOutputFileNames - the names of the judge's output files for the test cases to be displayed
      */
     private void setOutputFileNames(String [] teamOutputFileNames, String [] judgesOutputFileNames) {
-        if (teamOutputFileNames==null || judgesOutputFileNames==null ||
-                teamOutputFileNames.length != judgesOutputFileNames.length) {
+        if (teamOutputFileNames == null || judgesOutputFileNames == null || teamOutputFileNames.length != judgesOutputFileNames.length) {
             if (getLog() != null) {
                 log.log(Log.WARNING, 
                    "MultiFileComparator.setOutputFileNames() called with invalid arrays (null or different lengths)");

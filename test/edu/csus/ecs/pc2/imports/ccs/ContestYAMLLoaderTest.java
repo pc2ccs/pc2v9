@@ -1335,7 +1335,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     
     public void testUnQuote() throws Exception {
         
-        ContestYAMLLoader loader = new ContestYAMLLoader();
+        loader = new ContestYAMLLoader();
 
         unquoteAssertEquals (loader, "'Java'", "Java");
         
@@ -1382,7 +1382,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
      * @return list of classes to test.
      */
     
-    public static TestSuite SuiteNotUsed() {
+    public static TestSuite suiteNotUsed() {
 //    public static TestSuite suite() {
         /**
          * This is a way to test a single test method using JUnit3 
@@ -1431,7 +1431,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 //        ensureDirectory(testdir+File.separator+"manualProb");
 //        startExplorer(testdir);
         
-        ContestYAMLLoader loader = new ContestYAMLLoader();
+        loader = new ContestYAMLLoader();
         
         Problem problem = new Problem("testmanualproblem");
         

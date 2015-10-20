@@ -710,7 +710,7 @@ public final class Utilities {
      * @param s  string in form hh:mm:ss, ss or mm:ss
      * @return -1 if invalid time string, else returns number of seconds
      */
-    public static long HHMMSStoString(String s) {
+    public static long convertStringToSeconds(String s) {
 
         if (s == null || s.trim().length() == 0) {
             return -1;
@@ -1016,8 +1016,7 @@ public final class Utilities {
      * @param dir directory to display
      * @throws IOException
      */
-    public static void startExplorer(File dir) 
-    {
+    public static void startExplorer(File dir) {
         String command = "explorer.exe /e,"+dir.getAbsolutePath();
         try {
             Runtime.getRuntime().exec(command);
@@ -1029,8 +1028,7 @@ public final class Utilities {
     /**
      * Start Windows Explorer on  directory.
      */
-    public static void startExplorer(String directoryName)
-    {
+    public static void startExplorer(String directoryName) {
         File dir = new File(directoryName);
         startExplorer(dir);
     }
@@ -1054,8 +1052,7 @@ public final class Utilities {
         printWriter.println("dump ProblemDataFiles " + message);
         if (dataFiles == null){
             printWriter.println("dump problem data files - no ProblemDataFiles defined");
-        }
-        else {
+        } else {
             printWriter.println("dump problem data files for " + dataFiles.getProblemId());
             report.writeProblemDataFiles(printWriter, dataFiles);
         }

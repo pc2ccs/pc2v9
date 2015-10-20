@@ -1362,7 +1362,8 @@ public class ContestYAMLLoader {
      * @return list of {@link Problem}
      * 
      */
-    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator, boolean todobool)  {
+    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
+            boolean todobool) {
 
         String[] linesFromSection = getSectionLines(PROBLEMS_KEY, yamlLines);
         

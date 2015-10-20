@@ -29,7 +29,7 @@ import edu.csus.ecs.pc2.core.transport.TransportException;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/core/InternalController.java $
 public class InternalControllerSpecial extends InternalController {
 
-    PacketConnectionManager manager = new PacketConnectionManager();
+    private PacketConnectionManager manager = new PacketConnectionManager();
 
     public InternalControllerSpecial(IInternalContest contest) {
         super(contest);

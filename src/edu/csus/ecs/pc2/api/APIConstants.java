@@ -15,6 +15,13 @@ public final class APIConstants {
     // --------- name/keys ---------------
     
     /**
+     * 
+     */
+    private APIConstants() {
+        super();
+    }
+
+    /**
      * Problem Judging Type
      */
     public static final String JUDGING_TYPE = "JUDGING_TYPE";
