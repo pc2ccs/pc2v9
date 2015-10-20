@@ -153,7 +153,7 @@ public class ProblemDataFilesTest extends AbstractTestCase {
      // TODO 164 - write code to test filenames
 
         // for (String string : list) {
-        // System.out.println("debug 22 judgeFullNames "+string);
+        // debugPrint("debug 22 judgeFullNames "+string);
         // }
 
     }
@@ -269,15 +269,16 @@ public class ProblemDataFilesTest extends AbstractTestCase {
     
 
     private void dumpProblemDataFiles(String string, IInternalContest contest, ProblemDataFiles dataFiles, String executableDir) {
-        System.out.println("dumpProblemDataFiles " + string);
+        
+        debugPrint("dumpProblemDataFiles " + string);
 
         String[] files = dataFiles.getFullJudgesAnswerFilenames(contest, executableDir);
         for (int i = 0; i < files.length; i++) {
-            System.out.println("dumpProblemDataFiles data[" + i + "] = " + files[i]);
+            debugPrint("dumpProblemDataFiles data[" + i + "] = " + files[i]);
         }
         files = dataFiles.getFullJudgesDataFilenames(contest, executableDir);
         for (int i = 0; i < files.length; i++) {
-            System.out.println("dumpProblemDataFiles answer[" + i + "] = " + files[i]);
+            debugPrint("dumpProblemDataFiles answer[" + i + "] = " + files[i]);
         }
 
     }
@@ -509,6 +510,34 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         Problem problem = new Problem("removeOne");
         ProblemDataFiles dataFiles = new ProblemDataFiles(problem);
         dataFiles.removeDataSet(1);
+    }
+    
+    public void testCopy() throws Exception {
+        
+//        String testDir = getOutputDataDirectory();
+//
+//        removeDirectory(testDir);
+//        ensureDirectory(testDir);
+//
+//        SampleContest sample = new SampleContest();
+//
+//        IInternalContest contest = sample.createStandardContest();
+//
+//        contest.setClientId(contest.getAccounts(Type.JUDGE).firstElement().getClientId());
+//        
+//         Problem[] problems = contest.getProblems();
+//        
+//         Problem firstProblem = problems[0];
+//        
+//         int numCases = 12;
+//        
+//         ProblemDataFiles dataFiles = sample.createProblemDataFiles(firstProblem, numCases);
+         
+//         ProblemDataFiles data = dataFiles.copy(firstProblem);
+         
+        // TODO 917 add test with data and dataFiles
+         
+
     }
         
 }

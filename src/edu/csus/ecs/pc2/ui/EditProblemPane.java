@@ -39,6 +39,7 @@ import javax.swing.filechooser.FileFilter;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -256,11 +257,11 @@ public class EditProblemPane extends JPanePlugin {
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         this.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
     }
-
+    
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         addWindowListeners();
-
+        
         getMultipleDataSetPane().setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -269,6 +270,17 @@ public class EditProblemPane extends JPanePlugin {
                 getExportButton().setVisible(Utilities.isDebugMode());
             }
         });
+        
+        try {
+            if (IniFile.isFilePresent()) {
+                String value = IniFile.getValue("client.debug");
+                if (value != null){
+                    debug22EditProblem = value.equalsIgnoreCase("true");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace(System.err); // debug 22 remove try/catch 
+        }
 
     }
 
@@ -447,7 +459,7 @@ public class EditProblemPane extends JPanePlugin {
         if (problem != null) {
 
             try {
-                Problem changedProblem = getProblemFromFields(null, null);
+                Problem changedProblem = getProblemFromFields(problem, originalProblemDataFiles);
                 if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(originalProblemDataFiles)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
@@ -584,6 +596,11 @@ public class EditProblemPane extends JPanePlugin {
          */
         SerializedFile lastDataFile = null;
         
+        if (debug22EditProblem){
+            Utilities.dump(newProblemDataFiles,"debug 22 in getProblemFromFields start");
+        }
+
+        
         /**
          * Answer file from General Tab.
          */
@@ -600,6 +617,10 @@ public class EditProblemPane extends JPanePlugin {
 //            newProblemDataFiles = new ProblemDataFiles(problem);
             isAdding = false;
             
+        }
+        
+        if (debug22EditProblem){
+            Utilities.dump(newProblemDataFiles,"debug 22 in getProblemFromFields after IF");
         }
         
         checkProblem.setUsingExternalDataFiles(usingExternalDataFiles);
@@ -813,21 +834,31 @@ public class EditProblemPane extends JPanePlugin {
         
         checkProblem.setExternalDataFileLocation(loadPath);
 
-
-        if (lastAnsFile != null) {
-            newProblemDataFiles.setJudgesAnswerFile(lastAnsFile);
+        if (debug22EditProblem){
+            Utilities.dump(newProblemDataFiles,"debug 22 before populateProblemTestSetFilenames");
         }
 
-        if (lastDataFile != null) {
-            newProblemDataFiles.setJudgesDataFile(lastDataFile);
-        }
-
+        
         if (dataFiles == null) {
+            
+            if (lastAnsFile != null) {
+                newProblemDataFiles.setJudgesAnswerFile(lastAnsFile);
+            }
+            
+            if (lastDataFile != null) {
+                newProblemDataFiles.setJudgesDataFile(lastDataFile);
+            }
+
             checkProblem.addTestCaseFilenames(getNane(lastAnsFile), getNane(lastDataFile));
 
         } else {
             populateProblemTestSetFilenames(checkProblem, dataFiles);
         }
+        
+        if (debug22EditProblem){
+            Utilities.dump(newProblemDataFiles,"debug 22 after populateProblemTestSetFilenames");
+        }
+
         
         return checkProblem;
 
@@ -893,9 +924,6 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * pad list with nulls if needed.
-     * 
-     *  
-     * 
      * 
      * @param list
      * @param filelist
@@ -978,7 +1006,6 @@ public class EditProblemPane extends JPanePlugin {
         newProblemDataFiles = multipleDataSetPane.getProblemDataFiles();
         
         if (debug22EditProblem){
-
             Utilities.dump(newProblemDataFiles,"debug 22 in getProblemDataFilesFromFields");
         }
 
@@ -1153,8 +1180,16 @@ public class EditProblemPane extends JPanePlugin {
 
         fileNameOne = createProblemReport (inProblem, problemDataFiles, "stuf1");
         
+        if (debug22EditProblem){
+            Utilities.dump(originalProblemDataFiles,"debug 22   ORIGINAL  setProblem");
+        }
+
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                
+                getMultipleDataSetPane().clearDataFiles();
+
                 
                 populateGUI(inProblem);
 //                populatingGUI = true;
@@ -1269,6 +1304,8 @@ public class EditProblemPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                getMultipleDataSetPane().clearDataFiles();
+                
                 populateGUI(problem);
                 // do not automatically set this to no update, the files may have changed on disk
                 if (problem == null) {
@@ -1284,13 +1321,18 @@ public class EditProblemPane extends JPanePlugin {
     private void populateGUI(Problem inProblem) {
 
         populatingGUI = true;
+        
+        if (debug22EditProblem){
+            Utilities.dump(originalProblemDataFiles,"debug 22   ORIGINAL  populateGUI A");
+        }
+
 
         if (inProblem != null) {
 
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
 
-            setForm(inProblem, getController().getProblemDataFiles(inProblem));
+            setForm(inProblem, originalProblemDataFiles);
 
             getCcsValidationEnabledCheckBox().setSelected(inProblem.isCcsMode());
 
@@ -1312,10 +1354,9 @@ public class EditProblemPane extends JPanePlugin {
 
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
         
-        getMultipleDataSetPane().clearDataFiles();
         
         if (debug22EditProblem){
-            Utilities.dump(originalProblemDataFiles,"debug 22 in EPP");
+            Utilities.dump(originalProblemDataFiles,"debug 22 ORIGINAL  populateGUI B");
         }
         
         try {
@@ -1332,6 +1373,11 @@ public class EditProblemPane extends JPanePlugin {
         // select the general tab
         getMainTabbedPane().setSelectedIndex(0);
         populatingGUI = false;
+        
+        if (debug22EditProblem){
+            Utilities.dump(originalProblemDataFiles,"debug 22   ORIGINAL  populateGUI Z");
+        }
+
     }
     
     @SuppressWarnings("unused")
@@ -2723,11 +2769,11 @@ public class EditProblemPane extends JPanePlugin {
     void saveAndCopmpare(){
         
         try {
-            System.out.println("debug 22 orig load dump");
+            System.out.println("debug 22   ORIGINAL  load dump");
             Utilities.dump(originalProblemDataFiles,"debug 22 in load orig");
             
             String[] s2 = getTestDataList(originalProblemDataFiles);
-            System.out.println("debug 22 Number of orig problem data files is "+s2.length);
+            System.out.println("debug 22 Number of   ORIGINAL  problem data files is "+s2.length);
             
             String[] s = getTestDataList(newProblemDataFiles);
             System.out.println("debug 22 B4 Number of new problem data files is "+s.length);

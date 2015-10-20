@@ -219,9 +219,13 @@ public class MultipleDataSetPane extends JPanePlugin {
      * 
      * @param listOne
      * @param listTwo
-     * @return 0 if identical, non-zero if different.
+     * @return 0 if identical, non-zero if different, returns 2 if either input are null. 
      */
     private int compare(SerializedFile[] listOne, SerializedFile[] listTwo) {
+        
+        if (listOne == null || listTwo == null){
+            return 2;
+        }
 
         if (listOne.length != listTwo.length) {
             return listTwo.length - listOne.length;
