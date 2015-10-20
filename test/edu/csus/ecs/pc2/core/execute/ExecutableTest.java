@@ -400,9 +400,7 @@ public class ExecutableTest extends AbstractTestCase {
             System.err.println("ERROR - pc2 jar path not a directory '"+jarPath+"'");
             System.out.println("TODO 636 - unable to unit test - testFindPC2Jar fails so no ability to judge run");
             fail("ERROR - pc2 jar path not a directory '"+jarPath+"'");
-        } 
-        else 
-        {
+        } else {
             if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
 
                 if (solved) {
@@ -894,8 +892,7 @@ public class ExecutableTest extends AbstractTestCase {
 //        ensureDirectory(testBaseDirname);
 //        startExplorer(new File(testBaseDirname));
 
-        testBaseDirname = testBaseDirname + File.separator + problemName +
-                File.separator +"data"+File.separator+"secret";
+        testBaseDirname = testBaseDirname + File.separator + problemName + File.separator + "data" + File.separator + "secret";
         testBaseDirname = new File(testBaseDirname).getCanonicalPath();
 //        ContestYAMLLoader loader = new ContestYAMLLoader();
 //        loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem);
