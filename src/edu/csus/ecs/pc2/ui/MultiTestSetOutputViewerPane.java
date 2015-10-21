@@ -1282,11 +1282,18 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         getCurrentViewer().setViewerCommand(currentViewerCmd);
 
         //get a title based on what column was selected
-        String title = col == COLUMN.TEAM_OUTPUT_VIEW.ordinal() ? "Team Output" : col == COLUMN.JUDGE_OUTPUT.ordinal() 
-                ? "Judge's Output" : col == COLUMN.JUDGE_DATA.ordinal() 
-                ? "Judge's Data" : col == COLUMN.VALIDATOR_OUTPUT.ordinal() 
-                ? "Validator Output" : col == COLUMN.VALIDATOR_ERR.ordinal() 
-                ? "Validator STDERR" : "<unknown>";
+        String title = "<unknown>";
+        if (col == COLUMN.TEAM_OUTPUT_VIEW.ordinal()) {
+            title = "Team Output"; 
+        } else if (col == COLUMN.JUDGE_OUTPUT.ordinal()) {
+            title = "Judge's Output";
+        } else if (col == COLUMN.JUDGE_DATA.ordinal()) {
+            title = "Judge's Data";
+        } else if (col == COLUMN.VALIDATOR_OUTPUT.ordinal()) {
+            title = "Validator Output";
+        } else if (col == COLUMN.VALIDATOR_ERR.ordinal()) {
+            title = "Validator STDERR";
+        }
         
         //get the file associated with the specified cell
         String targetFile = getFileForTableCell(row,col);
@@ -1479,7 +1486,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private void showFile(MultipleFileViewer fileViewer, String file, String title, String tabLabel, boolean visible) {
         System.out.println ("MTSVPane.showFile():");
-        String viewerString = fileViewer==null?"<null>":fileViewer.getClass().toString();
+        String viewerString = "<null>";
+        if (fileViewer != null) {
+            viewerString = fileViewer.getClass().toString();
+        }
         System.out.println ("  Viewer='" + viewerString + "'" 
                             + "  File='" + file + "'"
                             + "  Title='" + title + "'"

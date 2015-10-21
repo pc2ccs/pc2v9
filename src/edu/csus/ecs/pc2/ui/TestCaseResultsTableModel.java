@@ -44,7 +44,11 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
             
             //test case result (passed/failed)
             boolean result = testCases[row].isPassed();
-            JLabel resultLabel = new JLabel(result?"Pass":"Fail");
+            String resultString = "Fail";
+            if (result) {
+                resultString = "Pass";
+            }
+            JLabel resultLabel = new JLabel(resultString);
             
             //elapsed time of test case
             String time = new String(Long.toString(testCases[row].getElapsedMS()));
