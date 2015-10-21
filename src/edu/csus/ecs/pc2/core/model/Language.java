@@ -185,7 +185,7 @@ public class Language implements IElementObject {
             if (! StringUtilities.stringSame(programExecuteCommandLine, language.getProgramExecuteCommandLine())) {
                 return false;
             }
-            if (!StringUtilities.stringSame(getJudgeProgramExecuteCommandLine(), language.getProgramExecuteCommandLine())){
+            if (!StringUtilities.stringSame(judgeProgramExecuteCommandLine, language.getJudgeProgramExecuteCommandLine())){
                 return false;
             }
             if (usingJudgeProgramExecuteCommandLine != language.isUsingJudgeProgramExecuteCommandLine()) {
@@ -194,8 +194,6 @@ public class Language implements IElementObject {
             if (interpreted != language.isInterpreted()) {
                 return false;
             }
-
-            
             return true;
         } catch (Exception e) {
             StaticLog.log("Exception in Language.isSameAs",  e);
