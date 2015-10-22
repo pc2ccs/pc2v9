@@ -852,6 +852,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         sendValidatorStderrFileNames();
         // only if do not show output is not checked
         if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
+            // the run gets modified in Executable to have testCases, so resend the data
+            Problem problem = getContest().getProblem(run.getProblemId());
+            getMultiTestSetOutputViewerFrame().setData(run, runFiles, problem, getProblemDataFiles());
             getMultiTestSetOutputViewerFrame().setVisible(true);
         }
         executeTimeMS = executable.getExecutionData().getExecuteTimeMS();
