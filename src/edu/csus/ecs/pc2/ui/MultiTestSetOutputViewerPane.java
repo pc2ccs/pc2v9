@@ -1044,14 +1044,16 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         RunTestCase[] testCases = null;
         RunTestCase[] allTestCases = run.getRunTestCases();
         // hope the lastTestCase has the highest testNumber....
-        testCases = new RunTestCase[allTestCases[allTestCases.length-1].getTestNumber()];
-        for (int i = allTestCases.length-1; i >= 0; i--) {
-            RunTestCase runTestCase = allTestCases[i];
-            int testCaseNumIndex = runTestCase.getTestNumber()-1;
-            if (testCases[testCaseNumIndex] == null) {
-                testCases[testCaseNumIndex] = runTestCase;
-                if (testCaseNumIndex == 0) {
-                    break;
+        if (allTestCases != null && allTestCases.length > 0) {
+            testCases = new RunTestCase[allTestCases[allTestCases.length-1].getTestNumber()];
+            for (int i = allTestCases.length-1; i >= 0; i--) {
+                RunTestCase runTestCase = allTestCases[i];
+                int testCaseNumIndex = runTestCase.getTestNumber()-1;
+                if (testCases[testCaseNumIndex] == null) {
+                    testCases[testCaseNumIndex] = runTestCase;
+                    if (testCaseNumIndex == 0) {
+                        break;
+                    }
                 }
             }
         }
