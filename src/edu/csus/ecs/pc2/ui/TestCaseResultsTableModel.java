@@ -33,49 +33,51 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
             super.setColumnIdentifiers(columnNames);
         }
         
-        //add the row data for each test case to the model
-        for (int row=0; row< testCases.length; row++) {
-            
-            //selection checkbox state
-            Boolean selected = new Boolean (!testCases[row].isPassed());
-            
-            //test case number (row+1)
-            String testCaseNum = new String(Integer.toString(row+1));
-            
-            //test case result (passed/failed)
-            boolean result = testCases[row].isPassed();
-            String resultString = "Fail";
-            if (result) {
-                resultString = "Pass";
+            if (testCases != null) {
+            //add the row data for each test case to the model
+            for (int row=0; row< testCases.length; row++) {
+                
+                //selection checkbox state
+                Boolean selected = new Boolean (!testCases[row].isPassed());
+                
+                //test case number (row+1)
+                String testCaseNum = new String(Integer.toString(row+1));
+                
+                //test case result (passed/failed)
+                boolean result = testCases[row].isPassed();
+                String resultString = "Fail";
+                if (result) {
+                    resultString = "Pass";
+                }
+                JLabel resultLabel = new JLabel(resultString);
+                
+                //elapsed time of test case
+                String time = new String(Long.toString(testCases[row].getElapsedMS()));
+                
+                //link for viewing team output
+                JLabel teamOutputViewLabel = new JLabel("View");
+                
+                //link for comparing team output with corresponding judge's output
+                JLabel teamOutputCompareLabel = new JLabel("Compare");
+                
+                //link for viewing judge's output
+                JLabel judgesOutputViewLabel = new JLabel("View");
+                
+                JLabel judgesDataViewLabel = new JLabel("View");
+                
+                // link for validator stdout
+                JLabel validatorOutputViewLabel = new JLabel("View");
+                
+                // link for validator stderr
+                JLabel validatorStderrViewLabel = new JLabel("View");
+                
+                //build the row object and add it to the model
+                Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, time, 
+                        teamOutputViewLabel, teamOutputCompareLabel, judgesOutputViewLabel, 
+                        judgesDataViewLabel, validatorOutputViewLabel, validatorStderrViewLabel };
+    
+                super.addRow(rowData);
             }
-            JLabel resultLabel = new JLabel(resultString);
-            
-            //elapsed time of test case
-            String time = new String(Long.toString(testCases[row].getElapsedMS()));
-            
-            //link for viewing team output
-            JLabel teamOutputViewLabel = new JLabel("View");
-            
-            //link for comparing team output with corresponding judge's output
-            JLabel teamOutputCompareLabel = new JLabel("Compare");
-            
-            //link for viewing judge's output
-            JLabel judgesOutputViewLabel = new JLabel("View");
-            
-            JLabel judgesDataViewLabel = new JLabel("View");
-            
-            // link for validator stdout
-            JLabel validatorOutputViewLabel = new JLabel("View");
-            
-            // link for validator stderr
-            JLabel validatorStderrViewLabel = new JLabel("View");
-            
-            //build the row object and add it to the model
-            Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, time, 
-                    teamOutputViewLabel, teamOutputCompareLabel, judgesOutputViewLabel, 
-                    judgesDataViewLabel, validatorOutputViewLabel, validatorStderrViewLabel };
-
-            super.addRow(rowData);
         }
 
     }

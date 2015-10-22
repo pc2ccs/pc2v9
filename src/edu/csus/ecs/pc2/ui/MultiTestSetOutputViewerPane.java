@@ -911,18 +911,21 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 RunTestCase[] testCases = getCurrentTestCases(currentRun);
 
                 // fill in the test case summary information
-                getNumTestCasesLabel().setText("Test Cases:  " + testCases.length);
-                
-                System.out.println("MTSVPane.populateGUI(): loading " + testCases.length + " test cases into GUI pane...");
-//                for (int i = 0; i < testCases.length; i++) {
+                if (testCases == null) {
+                    getNumTestCasesLabel().setText("Test Cases:  0");
+                } else {
+                    getNumTestCasesLabel().setText("Test Cases:  " + testCases.length);
+                    System.out.println("MTSVPane.populateGUI(): loading " + testCases.length + " test cases into GUI pane...");
+//                  for (int i = 0; i < testCases.length; i++) {
 //                    System.out.println("  Test Case " + testCases[i].getTestNumber() + ": " + testCases[i]);
-//                }
+//                  }
+                }
 
                 int failedCount = getNumFailedTestCases(testCases);
                 if (failedCount > 0) {
                     getNumFailedTestCasesLabel().setForeground(Color.red);
                     getNumFailedTestCasesLabel().setText("Failed:  " + failedCount);
-                } else if (testCases.length == 0) {
+                } else if (testCases == null || testCases.length == 0) {
                     getNumFailedTestCasesLabel().setForeground(Color.ORANGE);
                     getNumFailedTestCasesLabel().setText("ERROR");
                 } else {
@@ -1012,11 +1015,13 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private int getNumFailedTestCases(RunTestCase[] testCases) {
         int failed = 0 ;
-        for (int i = 0; i < testCases.length; i++) {
-            if (!testCases[i].isPassed()) {
-                failed++;
-//                int num = i+1;
-//                System.out.println("Found failed test case: " + num);
+        if (testCases != null) {
+            for (int i = 0; i < testCases.length; i++) {
+                if (!testCases[i].isPassed()) {
+                    failed++;
+                    // int num = i+1;
+                    // System.out.println("Found failed test case: " + num);
+                }
             }
         }
         System.out.println ("  (including " + failed + " failed cases)");
