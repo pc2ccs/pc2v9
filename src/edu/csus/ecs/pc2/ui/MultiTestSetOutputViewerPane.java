@@ -902,7 +902,27 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 populateCompilerOutput();
                 getMultiTestSetTabbedPane().setSelectedIndex(0);
                 // fill in the basic header information
-                getProblemTitleLabel().setText("Problem:  " + currentProblem.getLetter() + " - " + currentProblem.getShortName());
+                String letter = currentProblem.getLetter();
+                String shortName = currentProblem.getShortName();
+                // HACK around EditProblemPane not requiring (or setting) a letter
+                if (letter == null || letter.equals("null") || letter.equals("")) {
+                    Problem[] problems = getContest().getProblems();
+                    for (int i = 0; i < problems.length; i++) {
+                        if (problems[i].equals(currentProblem)) {
+                            int asciiLetter = i+65;
+                            letter = Character.toString((char)asciiLetter);
+                        }
+                    }
+                }
+                // HACK around EditProblempane not requiring (or setting) a shortName
+                if (shortName == null || shortName.equals("")) {
+                    shortName = currentProblem.getDisplayName().toLowerCase().trim();
+                    int spaceIndex = shortName.indexOf(" ");
+                    if (spaceIndex > 0) {
+                        shortName = shortName.substring(0, spaceIndex);
+                    }
+                }
+                getProblemTitleLabel().setText("Problem:  " + letter + " - " + shortName);
                 getTeamNumberLabel().setText("Team:  " + currentRun.getSubmitter().getClientNumber());
                 getRunIDLabel().setText("Run ID:  " + currentRun.getNumber());
                 getLanguageLabel().setText("Language:  " + getCurrentRunLanguageName());
