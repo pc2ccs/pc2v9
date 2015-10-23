@@ -396,7 +396,7 @@ public class EditProblemPane extends JPanePlugin {
         Problem newProblem = null;
         try {
             newProblemDataFiles = getProblemDataFilesFromFields();
-            newProblem = getProblemFromFields(null, newProblemDataFiles);
+            newProblem = getProblemFromFields(null, newProblemDataFiles, true);
 
             SerializedFile sFile;
             sFile = newProblemDataFiles.getJudgesDataFile();
@@ -459,10 +459,9 @@ public class EditProblemPane extends JPanePlugin {
         if (problem != null) {
 
             try {
-                Problem changedProblem = getProblemFromFields(problem, originalProblemDataFiles);
-                System.err.println("problem.getShortName='"+problem.getShortName()+"'");
-                System.err.println("changedProblem.getShortName='"+changedProblem.getShortName()+"'");
-                if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(originalProblemDataFiles)) {
+                ProblemDataFiles myProblemDataFiles = new ProblemDataFiles(problem);
+                Problem changedProblem = getProblemFromFields(null, newProblemDataFiles, false);
+                if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(myProblemDataFiles)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
                 }
@@ -590,9 +589,7 @@ public class EditProblemPane extends JPanePlugin {
      * @return Problem based on fields
      * @throws InvalidFieldValue
      */
-    public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
-        boolean isAdding = true;
-
+    public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles, boolean isAdding) {
         /**
          * Data file from General tab.
          */
@@ -972,7 +969,7 @@ public class EditProblemPane extends JPanePlugin {
 
         try {
             ProblemDataFiles dataFiles = getProblemDataFilesFromFields();
-            newProblem = getProblemFromFields(problem, dataFiles);
+            newProblem = getProblemFromFields(problem, dataFiles, false);
             
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -1338,7 +1335,7 @@ public class EditProblemPane extends JPanePlugin {
 
             try {
                 @SuppressWarnings("unused")
-                Problem changedProblem = getProblemFromFields(inProblem, originalProblemDataFiles);
+                Problem changedProblem = getProblemFromFields(inProblem, originalProblemDataFiles, false);
             } catch (InvalidFieldValue e) {
                 logException("Problem with input Problem fields", e);
                 e.printStackTrace(System.err);
@@ -2783,7 +2780,7 @@ public class EditProblemPane extends JPanePlugin {
             s = getTestDataList(newProblemDataFiles);
             System.out.println("debug 22 B5 Number of new problem data files is "+s.length);
             
-            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
+            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles, false);
 
             s = getTestDataList(newProblemDataFiles);
             System.out.println("debug 22 B6 Number of new problem data files is "+s.length);
@@ -2840,7 +2837,7 @@ public class EditProblemPane extends JPanePlugin {
             
             
             newProblemDataFiles = getProblemDataFilesFromFields();
-            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
+            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles, false);
             
             String problemYamlFile = nextDirectory + File.separator + ExportYAML.PROBLEM_FILENAME;
             String[] filelist = exportYAML.writeProblemYAML(getContest(), newProblem, problemYamlFile, newProblemDataFiles);
@@ -2916,7 +2913,7 @@ public class EditProblemPane extends JPanePlugin {
 
         try {
             newProblemDataFiles = getProblemDataFilesFromFields();
-            newProblem = getProblemFromFields(problem, newProblemDataFiles);
+            newProblem = getProblemFromFields(problem, newProblemDataFiles, false);
 
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
@@ -2992,7 +2989,7 @@ public class EditProblemPane extends JPanePlugin {
 
         try {
             newProblemDataFiles = getProblemDataFilesFromFields();
-            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
+            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles, false);
             singleProblemReport.setProblem(newProblem, newProblemDataFiles);
             Utilities.viewReport(singleProblemReport, "Problem Report " + getProblemNameTextField().getText(), getContest(), getController());
         } catch (InvalidFieldValue e) {
