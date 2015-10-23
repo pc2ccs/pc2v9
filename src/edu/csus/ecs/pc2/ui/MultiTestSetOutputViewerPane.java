@@ -99,7 +99,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     /**
      * list of columns
      */
-    static enum COLUMN {
+    enum COLUMN {
         SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, 
             JUDGE_OUTPUT, JUDGE_DATA, VALIDATOR_OUTPUT, VALIDATOR_ERR
     };
