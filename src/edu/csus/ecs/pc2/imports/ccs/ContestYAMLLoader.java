@@ -71,7 +71,11 @@ public class ContestYAMLLoader {
 
     public static final String COMPUTER_JUDGING_KEY = "computer-judged";
     
-    public static final String SEND_PRELIMINARY_JUDGEMENT_KEY = "send-prelim-judgement";;
+    public static final String SEND_PRELIMINARY_JUDGEMENT_KEY = "send-prelim-judgement";
+    
+    public static final String USE_JUDGE_CMD_KEY = "use-judge-cmd";
+    
+    public static final String INTERPRETED_LANGUAGE_KEY = "interpreted";
     
     public static final String ACCOUNTS_KEY = "accounts";
 
@@ -1321,7 +1325,10 @@ public class ContestYAMLLoader {
                     language.setJudgeProgramExecuteCommandLine(judgeExecuteCommandLine);
                 }
 
-                // TODO handle interpreted languages, seems it should be in the export
+                String interpretLangFlag = getSequenceValue(sequenceLines, INTERPRETED_LANGUAGE_KEY);
+                boolean interpretedLangauge = getBooleanValue(interpretLangFlag, false);
+                language.setInterpreted(interpretedLangauge);
+                
 
                 if (valid(language, name)) {
                     languageList.addElement(language);
