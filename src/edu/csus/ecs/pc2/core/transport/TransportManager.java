@@ -13,14 +13,14 @@ import edu.csus.ecs.pc2.core.security.CryptoException;
 /**
  * Transport Manager Class used to control all communication between modules.
  * <P>
- * Each TransportManager is established as either a {@link TransportManager.tmTypes#CLIENT CLIENT} or a
- * {@link TransportManager.tmTypes#SERVER  SERVER} type connector.
+ * Each TransportManager is established as either a {@link TransportManager.TMTypes#CLIENT CLIENT} or a
+ * {@link TransportManager.TMTypes#SERVER  SERVER} type connector.
  * <P>
- * A {@link TransportManager.tmTypes#SERVER SERVER} will start a listener on the input port and wait for connections from
- * {@link TransportManager.tmTypes#CLIENT CLIENT} TransportManagers.
+ * A {@link TransportManager.TMTypes#SERVER SERVER} will start a listener on the input port and wait for connections from
+ * {@link TransportManager.TMTypes#CLIENT CLIENT} TransportManagers.
  * <P>
- * A {@link TransportManager.tmTypes#CLIENT CLIENT} will contact a {@link TransportManager.tmTypes#SERVER SERVER} and establish a
- * connection. Note that a PC<sup>2</sup> server module can also be a {@link TransportManager.tmTypes#CLIENT CLIENT} if it joins a
+ * A {@link TransportManager.TMTypes#CLIENT CLIENT} will contact a {@link TransportManager.TMTypes#SERVER SERVER} and establish a
+ * connection. Note that a PC<sup>2</sup> server module can also be a {@link TransportManager.TMTypes#CLIENT CLIENT} if it joins a
  * contest.
  * <P>
  * To instantiate a Server:
@@ -54,7 +54,7 @@ public class TransportManager implements ITransportManager {
      * @author pc2@ecs.csus.edu
      */
 
-    public enum tmTypes {
+    public enum TMTypes {
         /**
          * Always contacts a server.
          * 
@@ -90,7 +90,7 @@ public class TransportManager implements ITransportManager {
 
     private ConnectionHandlerList serversConnectionHandlerList = null;
 
-    private tmTypes tmType;
+    private TMTypes tmType;
 
     private ITwoToOne appServerCallBack = null;
 
@@ -116,7 +116,7 @@ public class TransportManager implements ITransportManager {
      */
     public void startServerTransport(ITwoToOne appCallBack) {
         setConnectionHandlerThreadList(new ConnectionHandlerThreadList());
-        setTmType(tmTypes.SERVER);
+        setTmType(TMTypes.SERVER);
         setAppServerCallBack(appCallBack);
         setServersConnectionHandlerList(new ConnectionHandlerList());
     }
@@ -131,7 +131,7 @@ public class TransportManager implements ITransportManager {
     public void startClientTransport(String serverIP, int port, IBtoA appCallBack) {
         setMyServerPort(port);
         setMyServerIP(serverIP);
-        setTmType(tmTypes.CLIENT);
+        setTmType(TMTypes.CLIENT);
         setAppClientCallBack(appCallBack);
     }
 
@@ -143,7 +143,7 @@ public class TransportManager implements ITransportManager {
         
         info("******************* SHUTTING down transport on command ************************");
         
-        if (getTmType() == tmTypes.CLIENT) { // we are a client transport
+        if (getTmType() == TMTypes.CLIENT) { // we are a client transport
             info("******************* SHUTTING down client ************************");
             getMyConnection().getConnectionHandlerClientThread().setStillListening(false);
         } else { // we are a server transport
@@ -327,7 +327,7 @@ public class TransportManager implements ITransportManager {
             getLog().log(Log.INFO,"Could not decrypt Packet!", e);
         }
         if (incomingMsg != null) {
-            if (getTmType() == tmTypes.SERVER) {
+            if (getTmType() == TMTypes.SERVER) {
                 final Serializable fIncomingMsg = incomingMsg;
                 final ConnectionHandlerID fConnectionHandlerID = connectionHandlerID;
                 new Thread(new Runnable() {
@@ -358,7 +358,7 @@ public class TransportManager implements ITransportManager {
         getLog().info("connectionDropped(ConnectionHandlerID myConnectionID) ");
 
         // UnRegister incoming connection with the Application
-        if (getTmType() == tmTypes.SERVER) {
+        if (getTmType() == TMTypes.SERVER) {
             ConnectionHandlerThread connectionHandlerThread = getConnectionHandlerThreadList().get(myConnectionID);
             if (connectionHandlerThread != null) {
                 connectionHandlerThread.shutdownConnection();
@@ -385,7 +385,7 @@ public class TransportManager implements ITransportManager {
         getLog().info("unregisterConnection(ConnectionHandlerID myConnectionID) ");
 
         // UnRegister incoming connection with the Application
-        if (getTmType() == tmTypes.SERVER) {
+        if (getTmType() == TMTypes.SERVER) {
             ConnectionHandlerThread connectionHandlerThread = getConnectionHandlerThreadList().get(myConnectionID);
             connectionHandlerThread.setStillListening(false);
             connectionHandlerThread.shutdownConnection();
@@ -594,7 +594,7 @@ public class TransportManager implements ITransportManager {
      * 
      * @return the tmType
      */
-    protected tmTypes getTmType() {
+    protected TMTypes getTmType() {
         return tmType;
     }
 
@@ -604,7 +604,7 @@ public class TransportManager implements ITransportManager {
      * 
      * @param tmType
      */
-    protected void setTmType(tmTypes tmType) {
+    protected void setTmType(TMTypes tmType) {
         this.tmType = tmType;
     }
 

@@ -91,7 +91,7 @@ class EventFeeder implements Runnable {
 
     private ContestInformationListener contestInformationListener = null;
     
-    public EventFeeder() {
+    EventFeeder() {
         initListeners();
     }
     
@@ -115,7 +115,7 @@ class EventFeeder implements Runnable {
      * @param out
      * @param contestTimeWhenJudgementsNoLongerSentMinutes 0 fro no filtered free, else the freeze time.
      */
-    public EventFeeder(IInternalContest contest, OutputStreamWriter out, long contestTimeWhenJudgementsNoLongerSentMinutes) {
+    EventFeeder(IInternalContest contest, OutputStreamWriter out, long contestTimeWhenJudgementsNoLongerSentMinutes) {
         this();
         
         this.contest = contest;
@@ -132,7 +132,7 @@ class EventFeeder implements Runnable {
      * @param contest
      * @param runnable
      */
-    public EventFeeder(IInternalContest contest, IEventFeedRunnable runnable) {
+    EventFeeder(IInternalContest contest, IEventFeedRunnable runnable) {
         this();
 
         this.contest = contest;

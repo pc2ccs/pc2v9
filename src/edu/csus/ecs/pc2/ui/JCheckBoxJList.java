@@ -91,7 +91,7 @@ public class JCheckBoxJList extends JList<Object> {
 
         private JCheckBoxJList jCheckBoxJList;
 
-        public CheckBoxListener(JCheckBoxJList list) {
+        CheckBoxListener(JCheckBoxJList list) {
             jCheckBoxJList = list;
         }
 

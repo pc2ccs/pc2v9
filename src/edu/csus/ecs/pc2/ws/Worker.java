@@ -59,7 +59,7 @@ class Worker extends WebServer implements Runnable {
         System.out.println("debug 22 Starting worker");
     }
     
-    public Worker(ResponseHandler responseHandler) {
+    Worker(ResponseHandler responseHandler) {
         this();
         this.responseHandler = responseHandler;
     }

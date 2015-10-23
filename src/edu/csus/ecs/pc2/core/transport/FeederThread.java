@@ -33,7 +33,7 @@ class FeederThread implements Runnable {
 
     private boolean filteredFeed = false;
 
-    public FeederThread(ServerSocket server, IInternalContest contest, boolean filteredFeed) {
+    FeederThread(ServerSocket server, IInternalContest contest, boolean filteredFeed) {
         super();
         this.server = server;
         this.contest = contest;

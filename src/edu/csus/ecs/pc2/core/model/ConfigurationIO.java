@@ -489,7 +489,7 @@ public class ConfigurationIO {
 
         private IStorage storage;
 
-        public Configuration(IStorage storage) {
+        Configuration(IStorage storage) {
             this.storage = storage;
         }
 

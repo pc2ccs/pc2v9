@@ -19,7 +19,7 @@ public interface IClient {
     /**
      * This enumerates the Client types defined in the system (that is, the types of Clients visible through the PC<sup>2</sup> API).
      */
-    public enum ClientType {
+    enum ClientType {
         /**
          * Unknown client type.
          */

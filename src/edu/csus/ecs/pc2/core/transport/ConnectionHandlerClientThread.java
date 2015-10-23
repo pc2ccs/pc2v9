@@ -9,7 +9,7 @@ import java.net.SocketException;
 import javax.crypto.SealedObject;
 
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.transport.TransportManager.tmTypes;
+import edu.csus.ecs.pc2.core.transport.TransportManager.TMTypes;
 
 /**
  * A Client ConnectionHandler.
@@ -28,10 +28,10 @@ import edu.csus.ecs.pc2.core.transport.TransportManager.tmTypes;
 public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
     public static final String SVN_ID = "$Id$";
 
-    private tmTypes tmType = null;
+    private TMTypes tmType = null;
 
     public ConnectionHandlerClientThread(Socket socket, TransportManager tmCallBack, ConnectionHandler chCallBack,
-            tmTypes incomingTmType, Log log) {
+            TMTypes incomingTmType, Log log) {
         super(socket, tmCallBack, chCallBack);
         chCallBack.setConnectionHandlerClientThread(this);
         setTmType(incomingTmType);
@@ -45,7 +45,7 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
             InputStream iss = getMySocket().getInputStream();
             setFromOtherModule(new ObjectInputStream(iss));
 
-            if (getTmType() == tmTypes.SERVER) {
+            if (getTmType() == TMTypes.SERVER) {
                 getTmCallBack().registerIncomingConnectionRequest(getMyConnectionID(), this);
             }
 
@@ -86,11 +86,11 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
         getTmCallBack().connectionDropped(getMyConnectionID());
     }
 
-    private tmTypes getTmType() {
+    private TMTypes getTmType() {
         return tmType;
     }
 
-    private void setTmType(tmTypes tmType) {
+    private void setTmType(TMTypes tmType) {
         this.tmType = tmType;
     }
 }

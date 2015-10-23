@@ -460,6 +460,8 @@ public class EditProblemPane extends JPanePlugin {
 
             try {
                 Problem changedProblem = getProblemFromFields(problem, originalProblemDataFiles);
+                System.err.println("problem.getShortName='"+problem.getShortName()+"'");
+                System.err.println("changedProblem.getShortName='"+changedProblem.getShortName()+"'");
                 if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(originalProblemDataFiles)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";

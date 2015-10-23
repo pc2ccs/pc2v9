@@ -11,7 +11,7 @@ import java.net.UnknownHostException;
 import javax.crypto.SealedObject;
 
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.transport.TransportManager.tmTypes;
+import edu.csus.ecs.pc2.core.transport.TransportManager.TMTypes;
 
 /**
  * A sing connection handler, serves as a base class for client and server connection handlers.
@@ -63,7 +63,7 @@ public class ConnectionHandler implements Runnable {
      * @param tmType
      * @throws TransportException
      */
-    protected ConnectionHandler(Log log, String host, int port, TransportManager tmCallBack, tmTypes tmType)
+    protected ConnectionHandler(Log log, String host, int port, TransportManager tmCallBack, TMTypes tmType)
             throws TransportException {
         super();
 
@@ -122,7 +122,7 @@ public class ConnectionHandler implements Runnable {
 
     public void send(SealedObject msgToSend) throws TransportException {
         try {
-            if (getTmCallBack().getTmType() == tmTypes.SERVER) {
+            if (getTmCallBack().getTmType() == TMTypes.SERVER) {
                 getConnectionHandlerServerThread().send(msgToSend);
             } else {
                 getConnectionHandlerClientThread().send(msgToSend);
@@ -134,7 +134,7 @@ public class ConnectionHandler implements Runnable {
 
     public void send(TransportWrapper msgToSend) throws TransportException {
         try {
-            if (getTmCallBack().getTmType() == tmTypes.SERVER) {
+            if (getTmCallBack().getTmType() == TMTypes.SERVER) {
                 getConnectionHandlerServerThread().send(msgToSend);
             } else {
                 getConnectionHandlerClientThread().send(msgToSend);
