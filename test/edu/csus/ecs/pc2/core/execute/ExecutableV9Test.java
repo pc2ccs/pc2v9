@@ -322,7 +322,7 @@ public class ExecutableV9Test extends AbstractTestCase {
         String executeDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(executeDirectoryName);
         
-        ExecutableV9 executable = new ExecutableV9(contest, controller, run, runFiles);
+        ExecutableV9 executable = new ExecutableOverride(contest, controller, run, runFiles,executeDirectoryName);
         executable.setExecuteDirectoryName(executeDirectoryName);
         executable.setUsingGUI(false);
         executable.execute();
@@ -439,7 +439,7 @@ public class ExecutableV9Test extends AbstractTestCase {
         }
 
         public void setExecuteDirectoryName(String directory) {
-            this.executeDirectoryName = "execute" + directory;
+            this.executeDirectoryName = directory;
         }
     }
 

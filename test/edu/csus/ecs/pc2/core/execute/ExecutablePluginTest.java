@@ -339,7 +339,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         String executeDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(executeDirectoryName);
         
-        ExecutablePlugin executablePlugin = new ExecutablePlugin(contest, controller, run, runFiles);
+        ExecutablePlugin executablePlugin = new ExecutableOverride(contest, controller, run, runFiles, executeDirectoryName);
         executablePlugin.setExecuteDirectoryName(executeDirectoryName);
         executablePlugin.setUsingGUI(false);
         executablePlugin.execute();
@@ -510,7 +510,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         }
 
         public void setExecuteDirectoryName(String directory) {
-            this.executeDirectoryName = "execute" + directory;
+            this.executeDirectoryName = directory;
         }
     }
 
