@@ -425,6 +425,9 @@ public class ExecutableTest extends AbstractTestCase {
                 assertEquals(expectedJudgement, executionData.getValidationResults());
             } else {
                 assertFalse("Judgement should not be solved ", solved);
+                if (expectedJudgement != null) {
+                    assertEquals("not solved:",expectedJudgement, executionData.getValidationResults());
+                }
             }
         }
         
@@ -875,7 +878,7 @@ public class ExecutableTest extends AbstractTestCase {
         RunFiles runFiles = new RunFiles(run, sumitFilename);
 
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
-        runExecutableTest(run, runFiles, false, yesJudgement);
+        runExecutableTest(run, runFiles, false, null);
 
     }
 
@@ -915,6 +918,35 @@ public class ExecutableTest extends AbstractTestCase {
 
         return problem;
 
+    }
+    
+    private Problem createMiddleFailure(IInternalContest contest2, String problemName) throws IOException {
+        Problem problem = new Problem(problemName);
+
+        problem.setShowValidationToJudges(false);
+        problem.setHideOutputWindow(true);
+        problem.setShowCompareWindow(false);
+        problem.setTimeOutInSeconds(10);
+
+        String testBaseDirname = getDataDirectory(this.getName());
+        testBaseDirname = testBaseDirname + File.separator + problemName + File.separator + "data" + File.separator + "secret";
+        testBaseDirname = new File(testBaseDirname).getCanonicalPath();
+        setupUsingPC2Validator(problem);
+        
+        
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+        setDataFiles(problem, problemDataFiles, testBaseDirname, true);
+        problem.setUsingExternalDataFiles(true);
+
+        int numberJudgesFiles = problemDataFiles.getJudgesDataFiles().length;
+        assertEquals("Expected number of judge data files ", 7, numberJudgesFiles);
+
+        int numberJudgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles().length;
+        assertEquals("Expected number of judge answer files ", 7, numberJudgesAnswerFiles);
+
+        contest2.addProblem(problem, problemDataFiles);
+
+        return problem;
     }
     
     
@@ -1085,6 +1117,28 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, false, null);
     }
+
+    public void testMiddleFailure() throws Exception {
+      String sumitFilename = getSamplesSourceFilename("wrap_failure.java");
+      
+      ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+      Problem problem = createMiddleFailure(contest, "wrap");
+
+      problem.setDataFileName("wrapper.in");
+      problem.setAnswerFileName("wrapper.ans");
+      problem.setTimeOutInSeconds(30);
+      problem.setReadInputDataFromSTDIN(true);
+
+      Run run = createRun (submitter, javaLanguage, problem, 45, 120);
+
+      assertFileExists(sumitFilename);
+      RunFiles runFiles = new RunFiles(run, sumitFilename);
+
+      contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+      
+      runExecutableTest(run, runFiles, false, "No - Wrong Answer");
+  }
 }
 
 
