@@ -299,10 +299,17 @@ public class SampleContest {
         // 1 Compiler Command Line
         // 2 Executable Identifier Mask
         // 3 Execute command line
+        // 4 is the Title again????
+        // 5 isInterpreted
 
         language.setCompileCommandLine(values[1]);
         language.setExecutableIdentifierMask(values[2]);
         language.setProgramExecuteCommandLine(values[3]);
+        if (LanguageAutoFill.INTERPRETER_VALUE.equals(values[5])) {
+            language.setInterpreted(true);
+        } else {
+            language.setInterpreted(false);
+        }
     }
 
     public IInternalController createController(IInternalContest contest, boolean isServer, boolean isRemote) {

@@ -226,7 +226,7 @@ public class ExportYAML {
                 contestWriter.println(PAD4 + "runner-args: " + quote(runnerArguments));
             }
             
-            contestWriter.println(PAD4 + ContestYAMLLoader.INTERPRETED_LANGUAGE_KEY + language.isInterpreted());
+            contestWriter.println(PAD4 + ContestYAMLLoader.INTERPRETED_LANGUAGE_KEY + ": " + language.isInterpreted());
             contestWriter.println(PAD4 + "use-judge-cmd: " + language.isUsingJudgeProgramExecuteCommandLine());
             contestWriter.println(PAD4 + "judge-exec-cmd: " + quote(language.getJudgeProgramExecuteCommandLine()));
 

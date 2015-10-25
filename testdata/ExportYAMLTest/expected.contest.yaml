@@ -24,6 +24,7 @@ languages:
     execCmd: 'java {:basename}'
     runner: 'java'
     runner-args: '{:basename}'
+    interpreted: false
     use-judge-cmd: false
     judge-exec-cmd: 'java {:basename}'
 
@@ -32,6 +33,7 @@ languages:
     compilerCmd: '<Compiler> {:mainfile}'
     exemask: '{:basename}.exe'
     execCmd: '{:basename}.exe'
+    interpreted: false
     use-judge-cmd: false
     judge-exec-cmd: '{:basename}.exe'
 
@@ -42,6 +44,7 @@ languages:
     execCmd: '.\{:basename}.exe'
     runner: '.\{:basename}.exe'
     runner-args: ''
+    interpreted: false
     use-judge-cmd: false
     judge-exec-cmd: '.\{:basename}.exe'
 
@@ -52,6 +55,7 @@ languages:
     execCmd: 'perl {:mainfile}'
     runner: 'perl'
     runner-args: '{:mainfile}'
+    interpreted: true
     use-judge-cmd: false
     judge-exec-cmd: 'perl {:mainfile}'
 
@@ -62,6 +66,7 @@ languages:
     execCmd: '.\{:basename}.exe'
     runner: '.\{:basename}.exe'
     runner-args: ''
+    interpreted: false
     use-judge-cmd: false
     judge-exec-cmd: '.\{:basename}.exe'
 
@@ -70,6 +75,7 @@ languages:
     compilerCmd: '<Compiler> {:mainfile}'
     exemask: '{:basename}.exe'
     execCmd: '{:basename}.exe'
+    interpreted: false
     use-judge-cmd: false
     judge-exec-cmd: '{:basename}.exe'
 
