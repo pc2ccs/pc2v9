@@ -483,6 +483,24 @@ class EventFeeder implements Runnable {
         public void languageRefreshAll(LanguageEvent event) {
             // ignore
         }
+
+        @Override
+        public void languagesAdded(LanguageEvent event) {
+            Language[] languages = event.getLanguages();
+            for (Language language : languages) {
+                int languageNumber = getLanguageNumber(language);
+                sendXML(eventFeedXML.createElement(contest, language, languageNumber));
+            }
+        }
+
+        @Override
+        public void languagesChanged(LanguageEvent event) {
+            Language[] languages = event.getLanguages();
+            for (Language language : languages) {
+                int languageNumber = getLanguageNumber(language);
+                sendXML(eventFeedXML.createElement(contest, language, languageNumber));
+            }
+        }
     }
 
     /**
@@ -508,6 +526,20 @@ class EventFeeder implements Runnable {
             // ignore
         }
 
+        public void groupsAdded(GroupEvent groupEvent) {
+            Group[] groups = groupEvent.getGroups();
+            for (Group group : groups) {
+                sendXML(eventFeedXML.createElement(contest, group));
+            }
+        }
+
+        public void groupsChanged(GroupEvent groupEvent) {
+            Group[] groups = groupEvent.getGroups();
+            for (Group group : groups) {
+                sendXML(eventFeedXML.createElement(contest, group));
+            }
+        }
+        
         public void groupRefreshAll(GroupEvent groupEvent) {
             // ignore
         }

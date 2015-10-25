@@ -379,11 +379,19 @@ public interface IInternalController {
 
     void addNewLanguage(Language language);
 
+    void addNewLanguages(Language[] languages);
+    
     void updateLanguage(Language language);
 
+    void updateLanguages(Language[] languages);
+
     void addNewGroup(Group group);
+    
+    void addNewGroups(Group[] groups);
 
     void updateGroup(Group group);
+
+    void updateGroups(Group[] groups);
 
     void addNewAccount(Account account);
 

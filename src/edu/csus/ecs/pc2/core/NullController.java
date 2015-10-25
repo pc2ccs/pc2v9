@@ -496,4 +496,24 @@ public class NullController implements IInternalController {
     public void setConnectionManager(ITransportManager connectionManager) {
         
     }
+
+    @Override
+    public void addNewLanguages(Language[] languages) {
+        
+    }
+
+    @Override
+    public void updateLanguages(Language[] languages) {
+        
+    }
+
+    @Override
+    public void addNewGroups(Group[] groups) {
+        
+    }
+
+    @Override
+    public void updateGroups(Group[] groups) {
+        
+    }
 }

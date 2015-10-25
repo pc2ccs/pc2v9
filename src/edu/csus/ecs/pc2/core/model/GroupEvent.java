@@ -32,6 +32,14 @@ public class GroupEvent {
          */
         CHANGED,
         /**
+         * More then 1 group was added
+         */
+        ADDED_GROUPS,
+        /**
+         * More then 1 group was updated
+         */
+        CHANGED_GROUPS,
+        /**
          * Reload/Refresh all groups.
          */
         REFRESH_ALL,
@@ -42,10 +50,18 @@ public class GroupEvent {
 
     private Group group;
 
+    private Group[] groups;
+
     public GroupEvent(Action groupAction, Group group) {
         super();
         this.action = groupAction;
         this.group = group;
+    }
+
+    public GroupEvent(Action groupAction, Group[] groups) {
+        super();
+        this.action = groupAction;
+        this.setGroups(groups);
     }
 
     public Action getAction() {
@@ -54,6 +70,20 @@ public class GroupEvent {
 
     public Group getGroup() {
         return group;
+    }
+
+    /**
+     * @return the groups
+     */
+    public Group[] getGroups() {
+        return groups;
+    }
+
+    /**
+     * @param groups the groups to set
+     */
+    public void setGroups(Group[] groups) {
+        this.groups = groups;
     }
 
 }

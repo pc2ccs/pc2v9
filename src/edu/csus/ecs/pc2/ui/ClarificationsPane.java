@@ -153,6 +153,20 @@ public class ClarificationsPane extends JPanePlugin {
             languageChanged(event);
         }
 
+        @Override
+        public void languagesAdded(LanguageEvent event) {
+            // ignore, does not affect this pane
+        }
+
+        @Override
+        public void languagesChanged(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
     }
 
     /**

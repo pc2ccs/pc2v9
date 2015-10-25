@@ -539,6 +539,16 @@ public class ICPCLoadPane extends JPanePlugin {
         public void groupRefreshAll(GroupEvent groupEvent) {
             getImportAccountsButton().setEnabled(getContest().getGroups() != null);
         }
+
+        @Override
+        public void groupsAdded(GroupEvent event) {
+            getImportAccountsButton().setEnabled(getContest().getGroups() != null);
+        }
+
+        @Override
+        public void groupsChanged(GroupEvent event) {
+            getImportAccountsButton().setEnabled(getContest().getGroups() != null);
+        }
     }
 
     /**

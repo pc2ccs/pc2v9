@@ -31,6 +31,14 @@ public class LanguageEvent {
          */
         CHANGED,
         /**
+         * More then 1 language was added
+         */
+        ADDED_LANGUAGES,
+        /**
+         * More then 1 language was updated
+         */
+        CHANGED_LANGUAGES,
+        /**
          * Refresh all languages
          */
         REFRESH_ALL,
@@ -41,10 +49,18 @@ public class LanguageEvent {
 
     private Language language;
 
+    private Language[] languages;
+
     public LanguageEvent(Action problemAction, Language language) {
         super();
         this.action = problemAction;
         this.language = language;
+    }
+
+    public LanguageEvent(Action action, Language[] languages) {
+        super();
+        this.action = action;
+        this.setLanguages(languages);
     }
 
     public Action getAction() {
@@ -53,6 +69,20 @@ public class LanguageEvent {
 
     public Language getLanguage() {
         return language;
+    }
+
+    /**
+     * @return the languages
+     */
+    public Language[] getLanguages() {
+        return languages;
+    }
+
+    /**
+     * @param languages the languages to set
+     */
+    public void setLanguages(Language[] languages) {
+        this.languages = languages;
     }
 
 }

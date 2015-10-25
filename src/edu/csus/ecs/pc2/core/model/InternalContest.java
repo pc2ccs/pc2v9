@@ -527,6 +527,10 @@ public class InternalContest implements IInternalContest {
                 languageListenerList.elementAt(i).languageRemoved(languageEvent);
             } else if (languageEvent.getAction() == LanguageEvent.Action.REFRESH_ALL) {
                 languageListenerList.elementAt(i).languageRefreshAll(languageEvent);
+            } else if (languageEvent.getAction() == LanguageEvent.Action.ADDED_LANGUAGES) {
+                languageListenerList.elementAt(i).languagesAdded(languageEvent);
+            } else if (languageEvent.getAction() == LanguageEvent.Action.CHANGED_LANGUAGES) {
+                languageListenerList.elementAt(i).languagesChanged(languageEvent);
             } else {
                 languageListenerList.elementAt(i).languageChanged(languageEvent);
             }
@@ -2027,6 +2031,10 @@ public class InternalContest implements IInternalContest {
                 groupListenerList.elementAt(i).groupRemoved(groupEvent);
             } else if (groupEvent.getAction() == GroupEvent.Action.REFRESH_ALL) {
                 groupListenerList.elementAt(i).groupRefreshAll(groupEvent);
+            } else if (groupEvent.getAction() == GroupEvent.Action.ADDED_GROUPS) {
+                groupListenerList.elementAt(i).groupRefreshAll(groupEvent);
+            } else if (groupEvent.getAction() == GroupEvent.Action.CHANGED_GROUPS) {
+                groupListenerList.elementAt(i).groupRefreshAll(groupEvent);
             } else {
                 groupListenerList.elementAt(i).groupChanged(groupEvent);
             }
@@ -2768,7 +2776,7 @@ public class InternalContest implements IInternalContest {
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.REFRESH_ALL, null);
         fireProblemListener(problemEvent);
 
-        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.REFRESH_ALL, null);
+        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.REFRESH_ALL, getLanguages());
         fireLanguageListener(languageEvent);
 
         LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.REFRESH_ALL, null, null);
@@ -2802,7 +2810,7 @@ public class InternalContest implements IInternalContest {
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent (ContestInformationEvent.Action.REFRESH_ALL, null);
         fireContestInformationListener(contestInformationEvent);
 
-        GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.REFRESH_ALL, null);
+        GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.REFRESH_ALL, getGroups());
         fireGroupListener(groupEvent);
 
         fireCategoryListener(null, CategoryEvent.Action.REFRESH_ALL);
@@ -3058,5 +3066,45 @@ public class InternalContest implements IInternalContest {
 
     public EventFeedDefinition getEventFeedDefinition(ElementId elementId) {
         return (EventFeedDefinition) eventFeedDefinitionsList.get(elementId);
+    }
+
+    @Override
+    public void addLanguages(Language[] languages) {
+        for (Language language : languages) {
+            languageDisplayList.add(language);
+            languageList.add(language);
+        }        
+        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.ADDED_LANGUAGES, languages);
+        fireLanguageListener(languageEvent);
+    }
+
+    @Override
+    public void updateLanguages(Language[] languages) {
+        for (Language language : languages) {
+            languageList.update(language);
+            languageDisplayList.update(language);
+        }
+        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.CHANGED_LANGUAGES, languages);
+        fireLanguageListener(languageEvent);
+    }
+
+    @Override
+    public void addGroups(Group[] groups) {
+        for (Group group : groups) {
+            groupDisplayList.add(group);
+            groupList.add(group);
+        }
+        GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.ADDED_GROUPS, groups);
+        fireGroupListener(groupEvent);
+    }
+
+    @Override
+    public void updateGroups(Group[] groups) {
+        for (Group group : groups) {
+            groupList.update(group);
+            groupDisplayList.update(group);
+        }
+        GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.CHANGED_GROUPS, groups);
+        fireGroupListener(groupEvent);
     }
 }

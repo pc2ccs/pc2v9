@@ -2224,4 +2224,38 @@ public final class PacketFactory {
         prop.put(ACCOUNT, account);
         return createPacket(Type.AUTO_REGISTRATION_SUCCESS, source, destination, prop);
     }
+
+    public static Packet createAddSetting(ClientId source, ClientId destination, Language[] languages) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(LANGUAGE_LIST, languages);
+        return createPacket(PacketType.Type.ADD_SETTING, source, destination, prop);
+    }
+
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Language[] languages) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(LANGUAGE_LIST, languages);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createAddSetting(ClientId source, ClientId destination, Group[] groups) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(GROUP_LIST, groups);
+        return createPacket(PacketType.Type.ADD_SETTING, source, destination, prop);
+    }
+
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Group[] groups) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(GROUP_LIST, groups);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
 }

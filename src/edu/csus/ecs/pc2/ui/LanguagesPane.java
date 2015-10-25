@@ -247,6 +247,24 @@ public class LanguagesPane extends JPanePlugin {
                 }
             });
         }
+
+        @Override
+        public void languagesAdded(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        @Override
+        public void languagesChanged(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
     }
 
     /**

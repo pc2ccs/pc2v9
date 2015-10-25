@@ -224,6 +224,24 @@ public class GroupsPane extends JPanePlugin {
                 }
             });
         }
+
+        @Override
+        public void groupsAdded(GroupEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        @Override
+        public void groupsChanged(GroupEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
     }
 
     /**

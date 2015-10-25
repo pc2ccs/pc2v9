@@ -301,9 +301,7 @@ public class ContestYAMLLoader {
         // TODO CCS scoreboard-freeze: 4:00:00
         
         Language[] languages = getLanguages(yamlLines);
-        for (Language language : languages) {
-            contest.addLanguage(language);
-        }
+        contest.addLanguages(languages);
 
         String defaultValidatorCommandLine = getSequenceValue(yamlLines, DEFAULT_VALIDATOR_KEY); 
         

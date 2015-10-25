@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
@@ -2609,11 +2610,17 @@ public class PacketHandler {
             sendToTeams = true;
         }
 
+        Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
+        sendToTeams |= handleLanguageList(languages);
+
         Group group = (Group) PacketFactory.getObjectValue(packet, PacketFactory.GROUP);
         if (group != null) {
             contest.addGroup(group);
             sendToTeams = true;
         }
+
+        Group[] groups = (Group[]) PacketFactory.getObjectValue(packet, PacketFactory.GROUP_LIST);
+        sendToTeams |= handleGroupList(groups);
 
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         ProblemDataFiles problemDataFiles = (ProblemDataFiles) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_DATA_FILES);
@@ -2810,11 +2817,17 @@ public class PacketHandler {
             sendToTeams = true;
         }
 
+        Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
+        sendToTeams |= handleLanguageList(languages);
+
         Group group = (Group) PacketFactory.getObjectValue(packet, PacketFactory.GROUP);
         if (group != null) {
             contest.updateGroup(group);
             sendToTeams = true;
         }
+
+        Group[] groups = (Group[]) PacketFactory.getObjectValue(packet, PacketFactory.GROUP_LIST);
+        sendToTeams |= handleGroupList(groups);
 
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         ProblemDataFiles problemDataFiles = (ProblemDataFiles) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_DATA_FILES);
@@ -2974,6 +2987,52 @@ public class PacketHandler {
                 }
             }
         }
+    }
+
+    private boolean handleLanguageList(Language[] languages) {
+        boolean sendToTeams = false;
+        if (languages != null) {
+            ArrayList<Language> addLangList = new ArrayList<Language>();
+            ArrayList<Language> updateLangList = new ArrayList<Language>();
+            for (Language language : languages) {
+                if (contest.getLanguage(language.getElementId()) == null) {
+                    addLangList.add(language);
+                } else {
+                    updateLangList.add(language);
+                }
+                sendToTeams = true;
+            }
+            if (addLangList.size() > 0) {
+                contest.addLanguages(addLangList.toArray(new Language[addLangList.size()]));
+            }
+            if (updateLangList.size() > 0) {
+                contest.updateLanguages(updateLangList.toArray(new Language[updateLangList.size()]));
+            }
+        }
+        return sendToTeams;
+    }
+
+    private boolean handleGroupList(Group[] groups) {
+        boolean sendToTeams = false;
+        if (groups != null) {
+            ArrayList<Group> addLangList = new ArrayList<Group>();
+            ArrayList<Group> updateLangList = new ArrayList<Group>();
+            for (Group group : groups) {
+                if (contest.getGroup(group.getElementId()) == null) {
+                    addLangList.add(group);
+                } else {
+                    updateLangList.add(group);
+                }
+                sendToTeams = true;
+            }
+            if (addLangList.size() > 0) {
+                contest.addLanguages(addLangList.toArray(new Language[addLangList.size()]));
+            }
+            if (updateLangList.size() > 0) {
+                contest.updateLanguages(updateLangList.toArray(new Language[updateLangList.size()]));
+            }
+        }
+        return sendToTeams;
     }
 
     private PlaybackInfo updatePlaybackInfo(PlaybackInfo newPlaybackInfo) {

@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.GroupEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
@@ -28,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.JudgementEvent;
+import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
@@ -126,6 +128,16 @@ public class ConfigurationListenerList {
         public void languageRefreshAll(LanguageEvent event) {
             // FIXME API code
         }
+
+        @Override
+        public void languagesAdded(LanguageEvent event) {
+            fireLanguageListener(event);
+        }
+
+        @Override
+        public void languagesChanged(LanguageEvent event) {
+            fireLanguageListener(event);
+        }
     }
 
     private void fireLanguageListener(LanguageEvent languageEvent) {
@@ -140,6 +152,20 @@ public class ConfigurationListenerList {
                     break;
                 case DELETED:
                     listenerList.elementAt(i).configurationItemRemoved(contestEvent);
+                    break;
+                case ADDED_LANGUAGES:
+                    for (Language language2 : languageEvent.getLanguages()) {
+                        language = new LanguageImplementation(language2.getElementId(), contest);
+                        contestEvent = new ContestEvent(EventType.LANGUAGE, language);
+                        listenerList.elementAt(i).configurationItemAdded(contestEvent);
+                    }
+                    break;
+                case CHANGED_LANGUAGES:
+                    for (Language language2 : languageEvent.getLanguages()) {
+                        language = new LanguageImplementation(language2.getElementId(), contest);
+                        contestEvent = new ContestEvent(EventType.LANGUAGE, language);
+                        listenerList.elementAt(i).configurationItemUpdated(contestEvent);
+                    }
                     break;
                 case REFRESH_ALL: // FIXME API code
                 case CHANGED:
@@ -172,6 +198,16 @@ public class ConfigurationListenerList {
         public void groupRefreshAll(GroupEvent groupEvent) {
             // FIXME API code
         }
+
+        @Override
+        public void groupsAdded(GroupEvent event) {
+            fireGroupListener(event);
+        }
+
+        @Override
+        public void groupsChanged(GroupEvent event) {
+            fireGroupListener(event);
+        }
     }
 
     private void fireGroupListener(GroupEvent groupEvent) {
@@ -186,6 +222,20 @@ public class ConfigurationListenerList {
                     break;
                 case DELETED:
                     listenerList.elementAt(i).configurationItemRemoved(contestEvent);
+                    break;
+                case ADDED_GROUPS:
+                    for (Group group2 : groupEvent.getGroups()) {
+                        group = new GroupImplementation(group2.getElementId(), contest);
+                        contestEvent = new ContestEvent(EventType.GROUP, group);
+                        listenerList.elementAt(i).configurationItemAdded(contestEvent);
+                    }
+                    break;
+                case CHANGED_GROUPS:
+                    for (Group group2 : groupEvent.getGroups()) {
+                        group = new GroupImplementation(group2.getElementId(), contest);
+                        contestEvent = new ContestEvent(EventType.GROUP, group);
+                        listenerList.elementAt(i).configurationItemUpdated(contestEvent);
+                    }
                     break;
                 case CHANGED:
                 default:

@@ -3859,5 +3859,29 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public boolean isHaltOnFatalError() {
         return haltOnFatalError;
     }
+
+    @Override
+    public void addNewLanguages(Language[] languages) {
+        Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), languages);
+        sendToLocalServer(addPacket);
+    }
+
+    @Override
+    public void updateLanguages(Language[] languages) {
+        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), languages);
+        sendToLocalServer(updatePacket);
+    }
+
+    @Override
+    public void addNewGroups(Group[] groups) {
+        Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), groups);
+        sendToLocalServer(addPacket);
+    }
+
+    @Override
+    public void updateGroups(Group[] groups) {
+        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), groups);
+        sendToLocalServer(updatePacket);
+    }
     
 }

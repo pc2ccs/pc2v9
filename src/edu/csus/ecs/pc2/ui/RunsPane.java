@@ -1620,6 +1620,24 @@ public class RunsPane extends JPanePlugin {
                 }
             });
         }
+
+        @Override
+        public void languagesAdded(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            });
+        }
+
+        @Override
+        public void languagesChanged(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            });
+        }
     }
 
     /**

@@ -1200,4 +1200,11 @@ public interface IInternalContest {
      */
     EventFeedDefinition getEventFeedDefinition(ElementId elementId);
 
+    void addLanguages(Language[] languages);
+
+    void updateLanguages(Language[] languages);
+    
+    void addGroups(Group[] groups);
+
+    void updateGroups(Group[] groups);
 }

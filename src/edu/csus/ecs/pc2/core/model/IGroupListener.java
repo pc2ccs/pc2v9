@@ -30,6 +30,18 @@ public interface IGroupListener {
     void groupRemoved(GroupEvent event);
 
     /**
+     * Groups have been added
+     * @param event
+     */
+    void groupsAdded(GroupEvent event);
+    
+    /**
+     * Groups have been updated
+     * @param event
+     */
+    void groupsChanged(GroupEvent event);
+    
+    /**
      * Refresh/reload all Groups.
      * 
      * @param groupEvent

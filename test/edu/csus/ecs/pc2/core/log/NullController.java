@@ -615,4 +615,24 @@ public class NullController implements IInternalController{
         
     }
 
+    @Override
+    public void addNewLanguages(Language[] languages) {
+        
+    }
+
+    @Override
+    public void updateLanguages(Language[] languages) {
+        
+    }
+
+    @Override
+    public void addNewGroups(Group[] groups) {
+        
+    }
+
+    @Override
+    public void updateGroups(Group[] groups) {
+        
+    }
+
 }

@@ -30,6 +30,18 @@ public interface ILanguageListener {
     void languageRemoved(LanguageEvent event);
     
     /**
+     * Languages were added
+     * @param event
+     */
+    void languagesAdded(LanguageEvent event);
+    
+    /**
+     * Languages were changed
+     * @param event
+     */
+    void languagesChanged(LanguageEvent event);
+
+    /**
      * Languages need to be reloaded/refreshed
      * @param event
      */

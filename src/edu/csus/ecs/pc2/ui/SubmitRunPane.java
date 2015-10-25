@@ -321,6 +321,24 @@ public class SubmitRunPane extends JPanePlugin {
                 }
             });
         }
+
+        @Override
+        public void languagesAdded(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadLanguages();
+                }
+            });
+        }
+
+        @Override
+        public void languagesChanged(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadLanguages();
+                }
+            });
+        }
     }
 
     /**

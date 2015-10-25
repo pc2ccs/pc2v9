@@ -112,6 +112,8 @@ public class ContestImporter {
                 }
             }
 
+            ArrayList<Language> addLangList = new ArrayList<Language>();
+            ArrayList<Language> updateLangList = new ArrayList<Language>();
             for (Language language : newContest.getLanguages()) {
                 if (langHash.containsKey(language.getDisplayName())) {
                     Language newLanguage = langHash.get(language.getDisplayName());
@@ -119,11 +121,17 @@ public class ContestImporter {
                         newLanguage.setCompileCommandLine(language.getCompileCommandLine());
                         newLanguage.setExecutableIdentifierMask(language.getExecutableIdentifierMask());
                         newLanguage.setProgramExecuteCommandLine(language.getProgramExecuteCommandLine());
-                        theController.updateLanguage(newLanguage);
+                        updateLangList.add(newLanguage);
                     }
                 } else {
-                    theController.addNewLanguage(language);
+                    addLangList.add(language);
                 }
+            }
+            if (updateLangList.size() > 0) {
+                theController.updateLanguages(updateLangList.toArray(new Language[updateLangList.size()]));
+            }
+            if (addLangList.size() > 0) {
+                theController.addNewLanguages(addLangList.toArray(new Language[addLangList.size()]));
             }
 
         } catch (Exception e) {
