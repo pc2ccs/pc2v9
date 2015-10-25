@@ -364,13 +364,15 @@ public class Executable extends Plugin implements IExecutable {
                         if (!passed) {
                             log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber()+" reason "+getFailureReason());
                             passFailed = true;
-                            failedResults = executionData.getValidationResults();
+                            if ("".equals(failedResults)) {
+                                failedResults = executionData.getValidationResults();
+                            }
                         }
                     }
                 }
 
                 if (passFailed) {
-                    // replace the final executionData with the last failed pass
+                    // replace the final executionData with the 1st failed pass
                     executionData.setValidationResults(failedResults);
                     log.info("Test results: test failed " + run + " reason = "+getFailureReason() );
                 } else {
