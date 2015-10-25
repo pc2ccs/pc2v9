@@ -340,6 +340,8 @@ public class Executable extends Plugin implements IExecutable {
                 
                 int dataSetNumber = 0;
                 boolean passed = true;
+                boolean passFailed = false;
+                String failedResults = "";
 
                 if (dataFiles == null || dataFiles.length <= 1) {
                     // Only a single (at most) data set,
@@ -347,7 +349,11 @@ public class Executable extends Plugin implements IExecutable {
                     log.info("Test cases: 1 for run " + run.getNumber());
 
                     passed = executeAndValidateDataSet(dataSetNumber);
-
+                    if (!passed) {
+                        passFailed = true;
+                        failedResults = executionData.getValidationResults();
+                    }
+                    
                 } else {
 
                     log.info("Test cases: " + dataFiles.length + " for run " + run.getNumber());
@@ -355,18 +361,20 @@ public class Executable extends Plugin implements IExecutable {
                     while (dataSetNumber < dataFiles.length) {
                         passed = executeAndValidateDataSet(dataSetNumber);
                         dataSetNumber++;
+                        if (!passed) {
+                            log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber()+" reason "+getFailureReason());
+                            passFailed = true;
+                            failedResults = executionData.getValidationResults();
+                        }
                     }
-
-                    if (!passed) {
-                        log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber()+" reason "+getFailureReason());
-                    }
-
                 }
 
-                if (passed) {
-                    log.info("Test results: ALL passed for run " + run);
-                } else {
+                if (passFailed) {
+                    // replace the final executionData with the last failed pass
+                    executionData.setValidationResults(failedResults);
                     log.info("Test results: test failed " + run + " reason = "+getFailureReason() );
+                } else {
+                    log.info("Test results: ALL passed for run " + run);
                 }
             } else {
                 /**
