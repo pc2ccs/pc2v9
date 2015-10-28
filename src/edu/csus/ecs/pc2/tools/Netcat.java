@@ -51,7 +51,7 @@ public class Netcat {
             socket = new Socket(host, port);
 
             readAndPrintSocketInput(socket);
-            System.out.println("*EOF* socket read locahost " + port);
+            System.err.println("*EOF* socket read locahost " + port);
         } catch (ConnectException e) {
             System.err.println("Host: '"+host+"' port="+port);
             System.err.println(e);
