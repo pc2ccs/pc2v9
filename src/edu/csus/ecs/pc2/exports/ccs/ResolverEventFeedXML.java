@@ -365,6 +365,12 @@ public class ResolverEventFeedXML {
         
         memento.createChildNode("id", Integer.toString(id));
         memento.createChildNode("name", problem.toString());
+        // this is not currently in the CCS spec for EventFeed
+        // but is in the contest feed and the ICPC Resolver will use it
+        String letter = problem.getLetter();
+        if (letter != null && !letter.trim().equals("")) {
+            memento.createChildNode("letter", letter.trim());
+        }
         return memento;
     }
 
