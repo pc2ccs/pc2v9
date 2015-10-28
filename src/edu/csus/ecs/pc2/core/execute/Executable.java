@@ -340,7 +340,11 @@ public class Executable extends Plugin implements IExecutable {
                 
                 int dataSetNumber = 0;
                 boolean passed = true;
-                boolean passFailed = false;
+                
+                /**
+                 * Did one test case fail flag.
+                 */
+                boolean oneTestFailed = false;
                 String failedResults = "";
 
                 if (dataFiles == null || dataFiles.length <= 1) {
@@ -350,7 +354,7 @@ public class Executable extends Plugin implements IExecutable {
 
                     passed = executeAndValidateDataSet(dataSetNumber);
                     if (!passed) {
-                        passFailed = true;
+                        oneTestFailed = true;
                         failedResults = executionData.getValidationResults();
                     }
                     
@@ -363,7 +367,7 @@ public class Executable extends Plugin implements IExecutable {
                         dataSetNumber++;
                         if (!passed) {
                             log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber()+" reason "+getFailureReason());
-                            passFailed = true;
+                            oneTestFailed = true;
                             if ("".equals(failedResults)) {
                                 failedResults = executionData.getValidationResults();
                             }
@@ -371,9 +375,10 @@ public class Executable extends Plugin implements IExecutable {
                     }
                 }
 
-                if (passFailed) {
+                if (oneTestFailed) {
                     // replace the final executionData with the 1st failed pass
                     executionData.setValidationResults(failedResults);
+                    executionData.setValidationSuccess(false);
                     log.info("Test results: test failed " + run + " reason = "+getFailureReason() );
                 } else {
                     log.info("Test results: ALL passed for run " + run);
@@ -1310,7 +1315,7 @@ public class Executable extends Plugin implements IExecutable {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
                 executionData.setRunTimeLimitExceeded(executionTimer.isRunTimeLimitExceeded());
-                // TODO - this happens much too much find out why time limit is 10 when should be 30 by default.
+                // SOMEDAY - this happens much too much find out why time limit is 10 when should be 30 by default.
                 log.info("Run exceeded time limit "+problem.getTimeOutInSeconds()+" secs, Run = "+run);
             }
 
