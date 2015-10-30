@@ -373,6 +373,14 @@ public class Executable extends Plugin implements IExecutable {
                             }
                         }
                     }
+                    // re-create 1st test set data if this is an internal file
+                    if (!problem.isUsingExternalDataFiles()) {
+                        // if internal the 1st file has been re-written by datasets 1..n so we need to re-write 0
+                        createFile(problemDataFiles.getJudgesDataFiles(), 0, prefixExecuteDirname(problem.getDataFileName()));
+    
+                        // Create the correct output file, aka answer file
+                        createFile(problemDataFiles.getJudgesAnswerFiles(), 0, prefixExecuteDirname(problem.getAnswerFileName()));
+                    }
                 }
 
                 if (oneTestFailed) {
