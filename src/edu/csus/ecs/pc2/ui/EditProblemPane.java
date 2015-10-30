@@ -396,20 +396,26 @@ public class EditProblemPane extends JPanePlugin {
         Problem newProblem = null;
         try {
             newProblemDataFiles = getProblemDataFilesFromFields();
+
             newProblem = getProblemFromFields(null, newProblemDataFiles, true);
 
             SerializedFile sFile;
-            sFile = newProblemDataFiles.getJudgesDataFile();
-            if (sFile != null) {
-                checkFileFormat(sFile);
-                if (checkFileFormat(sFile)) {
-                    newProblemDataFiles.setJudgesDataFile(sFile);
+            // TODO should we loop thru the files doing the check?
+            if (newProblemDataFiles.getJudgesDataFiles().length == 1) {
+                sFile = newProblemDataFiles.getJudgesDataFile();
+                if (sFile != null) {
+                    checkFileFormat(sFile);
+                    if (checkFileFormat(sFile)) {
+                        newProblemDataFiles.setJudgesDataFile(sFile);
+                    }
                 }
             }
-            sFile = newProblemDataFiles.getJudgesAnswerFile();
-            if (sFile != null) {
-                if (checkFileFormat(sFile)) {
-                    newProblemDataFiles.setJudgesAnswerFile(sFile);
+            if (newProblemDataFiles.getJudgesAnswerFiles().length == 1) {
+                sFile = newProblemDataFiles.getJudgesAnswerFile();
+                if (sFile != null) {
+                    if (checkFileFormat(sFile)) {
+                        newProblemDataFiles.setJudgesAnswerFile(sFile);
+                    }
                 }
             }
             sFile = newProblemDataFiles.getValidatorFile();
@@ -418,12 +424,25 @@ public class EditProblemPane extends JPanePlugin {
                     newProblemDataFiles.setValidatorFile(sFile);
                 }
             }
-
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
             return;
         }
 
+        if (!newProblem.getElementId().equals(newProblemDataFiles.getProblemId())) {
+            // this is like ProblemDataFiles.copy but without overwriting the ProblemId, which is the problem
+            // we are trying to fix here
+            ProblemDataFiles clone = new ProblemDataFiles(newProblem);
+            clone.setSiteNumber(newProblemDataFiles.getSiteNumber());
+            clone.setValidatorFile(newProblemDataFiles.getValidatorFile());
+            clone.setValidatorRunCommand(newProblemDataFiles.getValidatorRunCommand());
+            clone.setValidatorFile(newProblemDataFiles.getValidatorRunFile());
+            clone.setJudgesAnswerFiles(newProblemDataFiles.getJudgesAnswerFiles());
+            clone.setJudgesDataFiles(newProblemDataFiles.getJudgesDataFiles());
+            clone.setValidatorFiles(newProblemDataFiles.getValidatorFiles());
+            // without this the problemId is wrong in newProblemDataFiles. so the controller.getProblemDataFiles(problem) does not find it
+            newProblemDataFiles = clone;
+        }
         getController().addNewProblem(newProblem, newProblemDataFiles);
 
         cancelButton.setText("Close");
@@ -608,7 +627,10 @@ public class EditProblemPane extends JPanePlugin {
         if (checkProblem == null) {
             checkProblem = new Problem(problemNameTextField.getText());
             isAdding = true;
-            newProblemDataFiles = new ProblemDataFiles(checkProblem);
+            if (newProblemDataFiles == null) {
+                // only overwrite if they do not exist already
+                newProblemDataFiles = new ProblemDataFiles(checkProblem);
+            }
         } else {
             checkProblem.setDisplayName(problemNameTextField.getText());
             checkProblem.setElementId(problem);  // duplicate ElementId so that Problem key/lookup is identical
@@ -695,7 +717,10 @@ public class EditProblemPane extends JPanePlugin {
                 }
                 
                 checkProblem.setAnswerFileName(serializedFile.getName());
-                newProblemDataFiles.setJudgesAnswerFile(serializedFile);
+                // only do this if we do not already have a JudgesAnswerFile
+                if (newProblemDataFiles.getJudgesAnswerFiles().length == 0) {
+                    newProblemDataFiles.setJudgesAnswerFile(serializedFile);
+                }
                 lastAnsFile = serializedFile;
             } else {
                 SerializedFile serializedFile = originalProblemDataFiles.getJudgesAnswerFile();
@@ -839,7 +864,6 @@ public class EditProblemPane extends JPanePlugin {
 
         
         if (dataFiles == null) {
-            
             if (lastAnsFile != null) {
                 newProblemDataFiles.setJudgesAnswerFile(lastAnsFile);
             }
@@ -1186,9 +1210,11 @@ public class EditProblemPane extends JPanePlugin {
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                
-                getMultipleDataSetPane().clearDataFiles();
 
+                // first clear the old ones
+                getMultipleDataSetPane().clearDataFiles();
+                // now set the new ones
+                getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
                 
                 populateGUI(inProblem);
 //                populatingGUI = true;
