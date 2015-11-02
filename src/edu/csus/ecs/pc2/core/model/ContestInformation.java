@@ -229,7 +229,10 @@ public class ContestInformation implements Serializable{
                 return false;
             }
             
-
+            if (!StringUtilities.stringSame(adminCDPBasePath, contestInformation.getAdminCDPBasePath())) {
+                return false;
+            }
+            
             return true;
         } catch (Exception e) {
             e.printStackTrace(System.err); // TODO log this exception 
