@@ -30,6 +30,8 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * ICPC CMS Import Pane.
@@ -63,6 +65,9 @@ public class ICPCLoadPane extends JPanePlugin {
     private ICPCAccountFrame icpcAccountFrame = null;
 
     private String lastDirectory;
+    private JButton editCDPPathButton;
+
+    private EditCDPPathFrame editCDPPathFrame;
 
     /**
      * This method initializes
@@ -86,6 +91,7 @@ public class ICPCLoadPane extends JPanePlugin {
         this.add(getChangeDisplayFormatButton(), null);
         this.add(getImportSitesButton(), null);
         this.add(getImportTSVButton(), null);
+        this.add(getEditCDPPathButton());
     }
 
     @Override
@@ -564,5 +570,37 @@ public class ICPCLoadPane extends JPanePlugin {
     }
     
     
+    private JButton getEditCDPPathButton() {
+        if (editCDPPathButton == null) {
+        	editCDPPathButton = new JButton("Set/Edit CDP");
+        	editCDPPathButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        editCDPPath();
+        	    }
+        	});
+        }
+        return editCDPPathButton;
+    }
 
+    /**
+     * Displays a frame which allows the user to edit the currently-defined CDP paths
+     * on both the Admin machine and the Judge's machines.
+     */
+    private void editCDPPath() {
+        getEditCDPFrame().setContestAndController(getContest(), getController());
+        getEditCDPFrame().setVisible(true);
+    }
+
+    /** Returns a singleton instance of the Frame used to edit the CDP path(s).
+     * 
+     * @return the EditCDPPathFrame
+     */
+    private EditCDPPathFrame getEditCDPFrame() {
+        if (editCDPPathFrame == null) {
+            editCDPPathFrame = new EditCDPPathFrame();
+        }
+        return editCDPPathFrame ;
+    }
+    
+    
 } // @jve:decl-index=0:visual-constraint="10,10"
