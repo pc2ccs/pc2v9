@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 
 /**
- * InternalContest Wide Information.
+ * Contest-wied Information/settings.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -43,6 +43,8 @@ public class ContestInformation implements Serializable{
     private boolean sendAdditionalRunStatusInformation = false;
     
     private String judgeCDPBasePath = null;
+    
+    private String adminCDPBasePath = null;
     
     /**
      * Test mode allow run submission with override elapsed time.
@@ -426,5 +428,16 @@ public class ContestInformation implements Serializable{
      */
     public String getJudgeCDPBasePath() {
         return judgeCDPBasePath;
+    }
+    
+    public void setAdminCDPBasePath(String adminCDPBasePath) {
+        this.adminCDPBasePath = adminCDPBasePath;
+    }
+    
+    /**
+     * Get base path for CDP on Admin.
+     */
+    public String getAdminCDPBasePath() {
+        return adminCDPBasePath;
     }
 }

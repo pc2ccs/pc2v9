@@ -218,9 +218,16 @@ public class ProblemsReport implements IReport {
             if (judgeCDPBasePath == null) {
                 judgeCDPBasePath = "";
             }
-
+            
             printWriter.println();
             printWriter.println("  Location for Judges CDP / problem config : '" + judgeCDPBasePath + "'");
+            
+            String adminCDPPath = info.getAdminCDPBasePath();
+            if (adminCDPPath == null) {
+                adminCDPPath = "";
+            }
+            printWriter.println("  Location for  Admin CDP / problem config : '" + adminCDPPath + "'");
+            
         }
 
         for (Problem problem : contest.getProblems()) {
