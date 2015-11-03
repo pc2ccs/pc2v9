@@ -3172,7 +3172,7 @@ public class EditProblemPaneNew extends JPanePlugin {
         	problemNameLabel.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
         	problemNameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
         	problemDescriptionPanel.add(problemNameLabel);
-        	problemNameLabel.setText("        Problem name");
+        	problemNameLabel.setText("        Problem Name");
         	problemDescriptionPanel.add(getProblemNameTextField());
         	problemDescriptionPanel.add(getLblSpacer1());
         	
