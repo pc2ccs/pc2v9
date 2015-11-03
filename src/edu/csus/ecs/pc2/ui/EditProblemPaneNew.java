@@ -424,6 +424,10 @@ public class EditProblemPaneNew extends JPanePlugin {
             showMessage("Enter a problem name");
             return;
         }
+        if (getShortNameTextfield().getText().trim().length() < 1) {
+            showMessage("Enter a problem short name");
+            return;
+        }
 
         if (!validateProblemFields()) {
             // new problem is invalid, just return, message issued by validateProblemFields
