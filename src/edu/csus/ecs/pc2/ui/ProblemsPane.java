@@ -684,6 +684,7 @@ public class ProblemsPane extends JPanePlugin {
      */
     private void editCDPPath() {
         getEditCDPFrame().setContestAndController(getContest(), getController());
+        getEditCDPFrame().loadCurrentCDPPathsIntoGUI();
         getEditCDPFrame().setVisible(true);
     }
 
