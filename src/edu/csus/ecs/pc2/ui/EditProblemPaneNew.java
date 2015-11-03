@@ -258,7 +258,7 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JTextField textFieldSingleAnswerFile;
     private JButton btnBrowseForSingleAnswerFile;
     private JPanel answerFileCDPSelectionPanel;
-    private JRadioButton radioButton_1;
+    private JRadioButton rdbtnAnswerSelectCDP;
     private JPanel multipleAnswerFileSelectionPanel;
     private JRadioButton rdbtnMultipleAnswerFiles;
     private Component horizontalStrut_3;
@@ -3514,22 +3514,24 @@ public class EditProblemPaneNew extends JPanePlugin {
         	answerFileCDPSelectionPanel.setMaximumSize(new Dimension(400, 35));
         	answerFileCDPSelectionPanel.setBorder(new EmptyBorder(0, 10, 0, 0));
         	answerFileCDPSelectionPanel.setAlignmentX(0.0f);
-        	answerFileCDPSelectionPanel.add(getRadioButton_1());
+        	answerFileCDPSelectionPanel.add(getRdbtnAnswerSelectCDP());
         }
         return answerFileCDPSelectionPanel;
     }
-    private JRadioButton getRadioButton_1() {
-        if (radioButton_1 == null) {
-        	radioButton_1 = new JRadioButton("Contest Data Package (CDP)");
-        	answerFileSourceButtonGroup.add(radioButton_1);
-        	radioButton_1.setToolTipText("This option is only available if a CDP location has been set on the ConfigureContest>ICPC screen");
-        	radioButton_1.setSelected(true);
-        	radioButton_1.setPreferredSize(new Dimension(200, 23));
-        	radioButton_1.setMinimumSize(new Dimension(200, 23));
-        	radioButton_1.setMaximumSize(new Dimension(200, 23));
+
+    private JRadioButton getRdbtnAnswerSelectCDP() {
+        if (rdbtnAnswerSelectCDP == null) {
+            rdbtnAnswerSelectCDP = new JRadioButton("Contest Data Package (CDP)");
+            answerFileSourceButtonGroup.add(rdbtnAnswerSelectCDP);
+            rdbtnAnswerSelectCDP.setToolTipText("This option is only available if a CDP location has been set on the ConfigureContest>ICPC screen");
+            rdbtnAnswerSelectCDP.setSelected(true);
+            rdbtnAnswerSelectCDP.setPreferredSize(new Dimension(200, 23));
+            rdbtnAnswerSelectCDP.setMinimumSize(new Dimension(200, 23));
+            rdbtnAnswerSelectCDP.setMaximumSize(new Dimension(200, 23));
         }
-        return radioButton_1;
+        return rdbtnAnswerSelectCDP;
     }
+
     private JPanel getMultipleAnswerFileSelectionPanel() {
         if (multipleAnswerFileSelectionPanel == null) {
         	multipleAnswerFileSelectionPanel = new JPanel();
