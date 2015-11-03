@@ -21,6 +21,7 @@ import javax.swing.border.LineBorder;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
@@ -119,14 +120,12 @@ public class EditCDPPathFrame extends JFrame {
      * Returns true if the current client is logged in as an Admin; false otherwise.
      * @return whether or not the current client is an Admin
      */
-    private boolean isAdmin() {
-        //TODO: fix this method to return true when the logged in client is an Admin...
-        System.err.println("EditCDPPathFrame.isAdmin(): warning: hardcoded to return true");
-//        if (getContest().getClientId().getClientType() == ClientType.ADMINISTRATOR)) {
+    private boolean isAdmin() {        
+        if (getContest().getClientId().getClientType() == ClientType.Type.ADMINISTRATOR) {
             return true;
-//        } else {
-//            return false;
-//        }
+        } else {
+            return false;
+        }
     }
     
     /**
@@ -134,9 +133,11 @@ public class EditCDPPathFrame extends JFrame {
      * @return whether or not the current client is a Judge
      */
     private boolean isJudge() {
-        //TODO: fix this method to return true when the logged in client is a Judge...
-        System.err.println("EditCDPPathFrame.isJudge(): warning: hardcoded to return false");
-        return false;
+        if (getContest().getClientId().getClientType() == ClientType.Type.JUDGE) {
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /**
