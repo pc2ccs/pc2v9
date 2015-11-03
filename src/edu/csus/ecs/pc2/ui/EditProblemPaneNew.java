@@ -183,7 +183,7 @@ public class EditProblemPaneNew extends JPanePlugin {
 
     private JButton validatorProgramJButton = null;
 
-    private JLabel jLabel = null;
+    private JLabel lblValidatorCommandLine = null;
 
     private JTextField validatorCommandLineTextBox = null;
 
@@ -238,14 +238,14 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JLabel lblSpacer2;
     private JPanel judgesAnswerFilePanel;
     private JLabel lblSingleDataFileName;
-    private JTextField textField;
+    private JTextField textFieldSingleDataFile;
     private JPanel judgingDisplayOptionsPanel;
     private JPanel inputDataCDPSelectionPanel;
     private JButton btnBrowseForSingleDataFile;
     private JPanel multipleDataFileSelectionPanel;
     private JRadioButton rdbtnSelectMultipleFileInput;
     private JLabel lblMultipleDataFileName;
-    private JTextField textField_1;
+    private JTextField textFieldDataFileFolder;
     private JButton btnBrowseForMultipleDataFile;
     private JPanel singleDataFileSelectionPanel;
     private JPanel inputDataStoragePanel;
@@ -259,16 +259,16 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JRadioButton rdbtnSingleAnswerFile;
     private Component horizontalStrut_2;
     private JLabel lblAnswerFileName;
-    private JTextField textField_2;
-    private JButton button;
+    private JTextField textFieldSingleAnswerFile;
+    private JButton btnBrowseForSingleAnswerFile;
     private JPanel answerFileCDPSelectionPanel;
     private JRadioButton radioButton_1;
     private JPanel multipleAnswerFileSelectionPanel;
     private JRadioButton rdbtnMultipleAnswerFiles;
     private Component horizontalStrut_3;
     private JLabel lblAnswerFileFolder;
-    private JTextField textField_3;
-    private JButton button_1;
+    private JTextField textFieldAnswerFileFolder;
+    private JButton btnBrowserForMultipleAnswerFile;
     private Component horizontalStrut_4;
     private Component horizontalStrut_5;
     
@@ -1722,7 +1722,7 @@ public class EditProblemPaneNew extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getJTextField() {
+    private JTextField getTimeOutSecondTextField() {
         if (timeOutSecondTextField == null) {
             timeOutSecondTextField = new JTextField();
             timeOutSecondTextField.setPreferredSize(new Dimension(150, 20));
@@ -1857,7 +1857,7 @@ public class EditProblemPaneNew extends JPanePlugin {
             singleDataFileSelectionPanel.add(rdbtnSelectSingleFileInput);
             singleDataFileSelectionPanel.add(getHorizontalStrut());
             singleDataFileSelectionPanel.add(getLblSingleDataFileName());
-            singleDataFileSelectionPanel.add(getTextField());
+            singleDataFileSelectionPanel.add(getTextFieldSingleDataFile());
             singleDataFileSelectionPanel.add(getBtnBrowseForSingleDataFile());
         }
 
@@ -2149,9 +2149,9 @@ public class EditProblemPaneNew extends JPanePlugin {
      */
     private JPanel getExternalValidatorFrame() {
         if (externalValidatorFrame == null) {
-            jLabel = new JLabel();
-            jLabel.setBounds(new java.awt.Rectangle(14, 53, 177, 16));
-            jLabel.setText("Validator Command Line");
+            lblValidatorCommandLine = new JLabel();
+            lblValidatorCommandLine.setBounds(new java.awt.Rectangle(14, 53, 177, 16));
+            lblValidatorCommandLine.setText("Validator Command Line");
             validatorProgramLabel = new JLabel();
             validatorProgramLabel.setText("Validator Program");
             validatorProgramLabel.setBounds(new java.awt.Rectangle(13, 26, 121, 16));
@@ -2163,7 +2163,7 @@ public class EditProblemPaneNew extends JPanePlugin {
             externalValidatorFrame.add(validatorProgramLabel, null);
             externalValidatorFrame.add(getExternalValidatorPane(), null);
             externalValidatorFrame.add(getValidatorProgramJButton(), null);
-            externalValidatorFrame.add(jLabel, null);
+            externalValidatorFrame.add(lblValidatorCommandLine, null);
             externalValidatorFrame.add(getValidatorCommandLineTextBox(), null);
         }
         return externalValidatorFrame;
@@ -3170,7 +3170,7 @@ public class EditProblemPaneNew extends JPanePlugin {
         	timeoutLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         	problemDescriptionPanel.add(timeoutLabel);
         	timeoutLabel.setText("        Run Timeout Limit (Secs)");
-        	problemDescriptionPanel.add(getJTextField());
+        	problemDescriptionPanel.add(getTimeOutSecondTextField());
 
         }
         return problemDescriptionPanel;
@@ -3270,19 +3270,19 @@ public class EditProblemPaneNew extends JPanePlugin {
         }
         return lblSingleDataFileName;
     }
-    private JTextField getTextField() {
-        if (textField == null) {
-        	textField = new JTextField();
-        	textField.setMinimumSize(new Dimension(100, 20));
-        	textField.setPreferredSize(new Dimension(100, 20));
-        	textField.setColumns(10);
+    private JTextField getTextFieldSingleDataFile() {
+        if (textFieldSingleDataFile == null) {
+        	textFieldSingleDataFile = new JTextField();
+        	textFieldSingleDataFile.setMinimumSize(new Dimension(100, 20));
+        	textFieldSingleDataFile.setPreferredSize(new Dimension(100, 20));
+        	textFieldSingleDataFile.setColumns(10);
         }
-        return textField;
+        return textFieldSingleDataFile;
     }
     private JPanel getJudgingDisplayOptionsPanel() {
         if (judgingDisplayOptionsPanel == null) {
         	judgingDisplayOptionsPanel = new JPanel();
-        	judgingDisplayOptionsPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Judging Display Options", TitledBorder.LEADING, TitledBorder.TOP,  new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new Color(0, 0, 0)));
+            judgingDisplayOptionsPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Judging Display Options", TitledBorder.LEADING, TitledBorder.TOP,  new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new Color(0, 0, 0)));
         	judgingDisplayOptionsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         	judgingDisplayOptionsPanel.add(getShowCompareCheckBox());
         	judgingDisplayOptionsPanel.add(getHorizontalStrut_4());
@@ -3324,7 +3324,7 @@ public class EditProblemPaneNew extends JPanePlugin {
         	multipleDataFileSelectionPanel.add(getRdbtnSelectMultipleFileInput());
         	multipleDataFileSelectionPanel.add(getHorizontalStrut_1());
         	multipleDataFileSelectionPanel.add(getLblMultipleDataFileName());
-        	multipleDataFileSelectionPanel.add(getTextField_1());
+        	multipleDataFileSelectionPanel.add(getTextFieldDataFileFolder());
         	multipleDataFileSelectionPanel.add(getBtnBrowseForMultipleDataFile());
         }
         return multipleDataFileSelectionPanel;
@@ -3346,14 +3346,14 @@ public class EditProblemPaneNew extends JPanePlugin {
         }
         return lblMultipleDataFileName;
     }
-    private JTextField getTextField_1() {
-        if (textField_1 == null) {
-        	textField_1 = new JTextField();
-        	textField_1.setMinimumSize(new Dimension(200, 20));
-        	textField_1.setPreferredSize(new Dimension(200, 20));
-        	textField_1.setColumns(10);
+    private JTextField getTextFieldDataFileFolder() {
+        if (textFieldDataFileFolder == null) {
+        	textFieldDataFileFolder = new JTextField();
+        	textFieldDataFileFolder.setMinimumSize(new Dimension(200, 20));
+        	textFieldDataFileFolder.setPreferredSize(new Dimension(200, 20));
+        	textFieldDataFileFolder.setColumns(10);
         }
-        return textField_1;
+        return textFieldDataFileFolder;
     }
     private JButton getBtnBrowseForMultipleDataFile() {
         if (btnBrowseForMultipleDataFile == null) {
@@ -3459,8 +3459,8 @@ public class EditProblemPaneNew extends JPanePlugin {
         	singleAnswerFileSelectionPanel.add(getRdbtnSingleAnswerFile());
         	singleAnswerFileSelectionPanel.add(getHorizontalStrut_2());
         	singleAnswerFileSelectionPanel.add(getLblAnswerFileName());
-        	singleAnswerFileSelectionPanel.add(getTextField_2());
-        	singleAnswerFileSelectionPanel.add(getButton());
+        	singleAnswerFileSelectionPanel.add(getTextFieldSingleAnswerFile());
+        	singleAnswerFileSelectionPanel.add(getBtnBrowseForSingleAnswerFile());
         }
         return singleAnswerFileSelectionPanel;
     }
@@ -3486,20 +3486,20 @@ public class EditProblemPaneNew extends JPanePlugin {
         }
         return lblAnswerFileName;
     }
-    private JTextField getTextField_2() {
-        if (textField_2 == null) {
-        	textField_2 = new JTextField();
-        	textField_2.setPreferredSize(new Dimension(100, 20));
-        	textField_2.setMinimumSize(new Dimension(100, 20));
-        	textField_2.setColumns(10);
+    private JTextField getTextFieldSingleAnswerFile() {
+        if (textFieldSingleAnswerFile == null) {
+        	textFieldSingleAnswerFile = new JTextField();
+        	textFieldSingleAnswerFile.setPreferredSize(new Dimension(100, 20));
+        	textFieldSingleAnswerFile.setMinimumSize(new Dimension(100, 20));
+        	textFieldSingleAnswerFile.setColumns(10);
         }
-        return textField_2;
+        return textFieldSingleAnswerFile;
     }
-    private JButton getButton() {
-        if (button == null) {
-        	button = new JButton("Browse");
+    private JButton getBtnBrowseForSingleAnswerFile() {
+        if (btnBrowseForSingleAnswerFile == null) {
+        	btnBrowseForSingleAnswerFile = new JButton("Browse");
         }
-        return button;
+        return btnBrowseForSingleAnswerFile;
     }
     private JPanel getAnswerFileCDPSelectionPanel() {
         if (answerFileCDPSelectionPanel == null) {
@@ -3536,8 +3536,8 @@ public class EditProblemPaneNew extends JPanePlugin {
         	multipleAnswerFileSelectionPanel.add(getRdbtnMultipleAnswerFiles());
         	multipleAnswerFileSelectionPanel.add(getHorizontalStrut_3());
         	multipleAnswerFileSelectionPanel.add(getLblAnswerFileFolder());
-        	multipleAnswerFileSelectionPanel.add(getTextField_3());
-        	multipleAnswerFileSelectionPanel.add(getButton_1());
+        	multipleAnswerFileSelectionPanel.add(getTextFieldAnswerFileFolder());
+        	multipleAnswerFileSelectionPanel.add(getBtnBrowserForMultipleAnswerFile());
         }
         return multipleAnswerFileSelectionPanel;
     }
@@ -3564,20 +3564,20 @@ public class EditProblemPaneNew extends JPanePlugin {
         }
         return lblAnswerFileFolder;
     }
-    private JTextField getTextField_3() {
-        if (textField_3 == null) {
-        	textField_3 = new JTextField();
-        	textField_3.setPreferredSize(new Dimension(200, 20));
-        	textField_3.setMinimumSize(new Dimension(200, 20));
-        	textField_3.setColumns(10);
+    private JTextField getTextFieldAnswerFileFolder() {
+        if (textFieldAnswerFileFolder == null) {
+        	textFieldAnswerFileFolder = new JTextField();
+        	textFieldAnswerFileFolder.setPreferredSize(new Dimension(200, 20));
+        	textFieldAnswerFileFolder.setMinimumSize(new Dimension(200, 20));
+        	textFieldAnswerFileFolder.setColumns(10);
         }
-        return textField_3;
+        return textFieldAnswerFileFolder;
     }
-    private JButton getButton_1() {
-        if (button_1 == null) {
-        	button_1 = new JButton("Browse");
+    private JButton getBtnBrowserForMultipleAnswerFile() {
+        if (btnBrowserForMultipleAnswerFile == null) {
+        	btnBrowserForMultipleAnswerFile = new JButton("Browse");
         }
-        return button_1;
+        return btnBrowserForMultipleAnswerFile;
     }
     private Component getHorizontalStrut_4() {
         if (horizontalStrut_4 == null) {
