@@ -122,10 +122,6 @@ public class EditProblemPaneNew extends JPanePlugin {
 
     private JCheckBox chkboxJudgesHaveAnswerFiles = null;
 
-    private JLabel inputDataFileLabel = null;
-
-    private JLabel answerFileNameLabel = null;
-
     private JLabel problemNameLabel = null;
 
     private JLabel timeoutLabel = null;
@@ -699,13 +695,13 @@ public class EditProblemPaneNew extends JPanePlugin {
 
         if (problemRequiresDataCheckBox.isSelected()) {
 
-            String fileName = inputDataFileLabel.getText();
+            String fileName = getTextFieldSingleDataFile().getText();
             if (fileName == null || fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
             }
             
-            if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
-                fileName = inputDataFileLabel.getToolTipText() + "";
+            if (fileName.trim().length() != getTextFieldSingleDataFile().getToolTipText().length()) {
+                fileName = getTextFieldSingleDataFile().getToolTipText() + "";
             }
 
             if (isAdding) {
@@ -737,14 +733,14 @@ public class EditProblemPaneNew extends JPanePlugin {
         }
 
         if (chkboxJudgesHaveAnswerFiles.isSelected()) {
-            
-            String fileName = answerFileNameLabel.getText();
+            // TODO BUG 957 update this for the radio select
+            String fileName = getTextFieldSingleAnswerFile().getText();
             if (fileName == null || fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
             }
 
-            if (fileName.trim().length() != answerFileNameLabel.getToolTipText().length()) {
-                fileName = answerFileNameLabel.getToolTipText() + "";
+            if (fileName.trim().length() != getTextFieldSingleAnswerFile().getToolTipText().length()) {
+                fileName = getTextFieldSingleAnswerFile().getToolTipText() + "";
             }
 
             if (isAdding) {
@@ -1094,15 +1090,15 @@ public class EditProblemPaneNew extends JPanePlugin {
 
         if (getProblemRequiresDataCheckBox().isSelected()) {
 
-            String fileName = inputDataFileLabel.getText();
+            String fileName = getTextFieldSingleDataFile().getText();
             // this check is outside so we can provide a specific message
             if (fileName == null || fileName.trim().length() == 0) {
                 showMessage("Problem Requires Input Data checked, select a file ");
                 return false;
             }
 
-            if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
-                fileName = inputDataFileLabel.getToolTipText() + "";
+            if (fileName.trim().length() != getTextFieldSingleDataFile().getToolTipText().length()) {
+                fileName = getTextFieldSingleDataFile().getToolTipText() + "";
             }
 
             if (!checkFile(fileName)) {
@@ -1113,7 +1109,7 @@ public class EditProblemPaneNew extends JPanePlugin {
 
         if (getChkboxJudgesHaveAnswerFiles().isSelected()) {
 
-            String answerFileName = answerFileNameLabel.getText();
+            String answerFileName = getTextFieldSingleAnswerFile().getText();
 
             // this check is outside so we can provide a specific message
             if (answerFileName == null || answerFileName.trim().length() == 0) {
@@ -1121,8 +1117,8 @@ public class EditProblemPaneNew extends JPanePlugin {
                 return false;
             }
 
-            if (answerFileName.trim().length() != answerFileNameLabel.getToolTipText().length()) {
-                answerFileName = answerFileNameLabel.getToolTipText() + "";
+            if (answerFileName.trim().length() != getTextFieldSingleAnswerFile().getToolTipText().length()) {
+                answerFileName = getTextFieldSingleAnswerFile().getToolTipText() + "";
             }
 
             if (!checkFile(answerFileName)) {
@@ -1305,13 +1301,13 @@ public class EditProblemPaneNew extends JPanePlugin {
                 
                 SerializedFile[] files = datafiles.getJudgesDataFiles();
                 if (files.length > 0) {
-                    inputDataFileLabel.setText(files[0].getName());
-                    inputDataFileLabel.setToolTipText(files[0].getAbsolutePath());
+                    getTextFieldSingleDataFile().setText(files[0].getName());
+                    getTextFieldSingleDataFile().setToolTipText(files[0].getAbsolutePath());
                 }
                 files = datafiles.getJudgesAnswerFiles();
                 if (files.length > 0) {
-                    answerFileNameLabel.setText(files[0].getName());
-                    answerFileNameLabel.setToolTipText(files[0].getAbsolutePath());
+                    getTextFieldSingleAnswerFile().setText(files[0].getName());
+                    getTextFieldSingleAnswerFile().setToolTipText(files[0].getAbsolutePath());
                 }
                 
                 assignedValues = true;
@@ -1324,10 +1320,10 @@ public class EditProblemPaneNew extends JPanePlugin {
             chkboxJudgesHaveAnswerFiles.setSelected(false);
             problemRequiresDataCheckBox.setSelected(false);
             
-            inputDataFileLabel.setText("");
-            inputDataFileLabel.setToolTipText("");
-            answerFileNameLabel.setText("");
-            answerFileNameLabel.setToolTipText("");
+            getTextFieldSingleDataFile().setText("");
+            getTextFieldSingleDataFile().setToolTipText("");
+            getTextFieldSingleAnswerFile().setText("");
+            getTextFieldSingleAnswerFile().setToolTipText("");
             
         }
         
@@ -1483,23 +1479,23 @@ public class EditProblemPaneNew extends JPanePlugin {
         problemNameTextField.setText(inProblem.getDisplayName());
         timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
 
-        inputDataFileLabel.setText(inProblem.getDataFileName());
-        answerFileNameLabel.setText(inProblem.getAnswerFileName());
+        getTextFieldSingleDataFile().setText(inProblem.getDataFileName());
+        getTextFieldSingleAnswerFile().setText(inProblem.getAnswerFileName());
         /**
          * Set tool tip with complete paths.
          */
 
-        inputDataFileLabel.setToolTipText("");
-        answerFileNameLabel.setToolTipText("");
+        getTextFieldSingleDataFile().setToolTipText("");
+        getTextFieldSingleAnswerFile().setToolTipText("");
 
         if (problemDataFiles != null) {
             SerializedFile[] files = problemDataFiles.getJudgesDataFiles();
             if (files.length > 0){
-                inputDataFileLabel.setToolTipText(files[0].getAbsolutePath());
+                getTextFieldSingleDataFile().setToolTipText(files[0].getAbsolutePath());
             }
             files = problemDataFiles.getJudgesAnswerFiles();
             if (files.length > 0){
-                answerFileNameLabel.setToolTipText(files[0].getAbsolutePath());
+                getTextFieldSingleAnswerFile().setToolTipText(files[0].getAbsolutePath());
             }
         }
 
@@ -2505,10 +2501,10 @@ public class EditProblemPaneNew extends JPanePlugin {
         chkboxJudgesHaveAnswerFiles.setSelected(false);
         problemRequiresDataCheckBox.setSelected(false);
 
-        inputDataFileLabel.setText("");
-        inputDataFileLabel.setToolTipText("");
-        answerFileNameLabel.setText("");
-        answerFileNameLabel.setToolTipText("");
+        textFieldSingleDataFile.setText("");
+        textFieldAnswerFileFolder.setText("");
+        textFieldDataFileFolder.setText("");
+        textFieldSingleAnswerFile.setText("");
 
         fileRadioButton.setSelected(false);
         stdinRadioButton.setSelected(false);
