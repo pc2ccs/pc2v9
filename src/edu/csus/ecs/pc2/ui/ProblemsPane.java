@@ -17,7 +17,6 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
-import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
@@ -66,7 +65,6 @@ public class ProblemsPane extends JPanePlugin {
     private JButton reportButton = null;
     private JPanel centerPanel;
 
-    private String savedJudgeCDPLocation = "";
     private JButton setCDPPathButton;
 
     private EditCDPPathFrame editCDPPathFrame;
@@ -656,16 +654,17 @@ public class ProblemsPane extends JPanePlugin {
         return centerPanel;
     }
     
-    private void updateContestInformation() {
-        ContestInformation contestInformation = getFromFields();
-        getController().updateContestInformation(contestInformation);
-    }
-
-    private ContestInformation getFromFields() {
-        
-        ContestInformation newInfo = getContest().getContestInformation();
-        return newInfo;
-    }
+//    private void updateContestInformation() {
+//        ContestInformation contestInformation = getFromFields();
+//        getController().updateContestInformation(contestInformation);
+//    }
+//
+//    private ContestInformation getFromFields() {
+//        
+//        ContestInformation newInfo = getContest().getContestInformation();
+//        return newInfo;
+//    }
+    
     private JButton getSetCDPPathButton() {
         if (setCDPPathButton == null) {
         	setCDPPathButton = new JButton("Set CDP Path");
