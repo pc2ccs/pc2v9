@@ -1760,15 +1760,25 @@ public class EditProblemPaneNew extends JPanePlugin {
     }
 
     protected void enableRequiresInputDataComponents(boolean enableButtons) {
-        getInputDataSourcePanel().setEnabled(enableButtons);
         getFileRadioButton().setEnabled(enableButtons);
         getStdinRadioButton().setEnabled(enableButtons);
         getTeamReadsFromPanel().setEnabled(enableButtons);
 
+        getBtnBrowseForSingleDataFile().setEnabled(enableButtons);
+        getBtnBrowseForMultipleDataFile().setEnabled(enableButtons);
+        getTextFieldSingleDataFile().setEnabled(enableButtons);
+        getTextFieldDataFileFolder().setEditable(enableButtons);
+        getRdbtnSelectCDP().setEnabled(enableButtons);
+        // no getter for this one.... :(
+        rdbtnSelectSingleFileInput.setEnabled(enableButtons);
+        getRdbtnSelectMultipleFileInput().setEnabled(enableButtons);
+        getLblSingleDataFileName().setEnabled(enableButtons);
+        getLblMultipleDataFileName().setEnabled(enableButtons);
         getInputDataSourcePanel().setEnabled(enableButtons);
 
-        getInputDataSourcePanel().setEnabled(enableButtons);
-
+        getRdbtnCopyFilesToInternal().setEnabled(enableButtons);
+        getRdbtnKeepFilesExternal().setEnabled(enableButtons);
+        getInputDataStoragePanel().setEnabled(enableButtons);
     }
 
     /**
@@ -1921,8 +1931,17 @@ public class EditProblemPaneNew extends JPanePlugin {
     }
 
     protected void enableProvideAnswerFileComponents(boolean enableComponents) {
-        getAnswerFileCDPSelectionPanel().setEnabled(enableComponents);
+        getLblAnswerFileFolder().setEnabled(enableComponents);
+        getLblAnswerFileName().setEnabled(enableComponents);
+        getTextFieldSingleAnswerFile().setEnabled(enableComponents);
+        getTextFieldAnswerFileFolder().setEnabled(enableComponents);
+        getRdbtnAnswerSelectCDP().setEnabled(enableComponents);
+        getRdbtnSingleAnswerFile().setEnabled(enableComponents);
+        getRdbtnMultipleAnswerFiles().setEnabled(enableComponents);
+        getBtnBrowseForSingleAnswerFile().setEnabled(enableComponents);
+        getBtnBrowserForMultipleAnswerFile().setEnabled(enableComponents);
         getAnswerFileSourcePanel().setEnabled(enableComponents);
+        
     }
 
     public void showMessage(final String message) {
