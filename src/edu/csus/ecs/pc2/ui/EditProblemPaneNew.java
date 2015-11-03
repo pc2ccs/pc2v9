@@ -267,6 +267,9 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JButton btnBrowserForMultipleAnswerFile;
     private Component horizontalStrut_4;
     private Component horizontalStrut_5;
+    private final ButtonGroup internalDataStorageButtonGroup = new ButtonGroup();
+    private final ButtonGroup inputDataSourceButtonGroup = new ButtonGroup();
+    private final ButtonGroup answerFileSourceButtonGroup = new ButtonGroup();
     
     /**
      * This method initializes
@@ -1810,6 +1813,7 @@ public class EditProblemPaneNew extends JPanePlugin {
             inputDataSourcePanel.setPreferredSize(new Dimension(400, 200));
                         
             rdbtnSelectSingleFileInput = new JRadioButton("Single Data File");
+            inputDataSourceButtonGroup.add(rdbtnSelectSingleFileInput);
             rdbtnSelectSingleFileInput.setHorizontalAlignment(SwingConstants.LEFT);
             GroupLayout gl_inputDataSourcePanel = new GroupLayout(inputDataSourcePanel);
             gl_inputDataSourcePanel.setHorizontalGroup(
@@ -3119,6 +3123,7 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JRadioButton getRdbtnSelectCDP() {
         if (rdbtnSelectCDP == null) {
         	rdbtnSelectCDP = new JRadioButton("Contest Data Package (CDP)");
+        	inputDataSourceButtonGroup.add(rdbtnSelectCDP);
         	rdbtnSelectCDP.setPreferredSize(new Dimension(200, 23));
         	rdbtnSelectCDP.setMinimumSize(new Dimension(200, 23));
         	rdbtnSelectCDP.setMaximumSize(new Dimension(200, 23));
@@ -3328,6 +3333,7 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JRadioButton getRdbtnSelectMultipleFileInput() {
         if (rdbtnSelectMultipleFileInput == null) {
         	rdbtnSelectMultipleFileInput = new JRadioButton("Multiple Data Files");
+        	inputDataSourceButtonGroup.add(rdbtnSelectMultipleFileInput);
         	rdbtnSelectMultipleFileInput.setPreferredSize(new Dimension(150, 23));
         	rdbtnSelectMultipleFileInput.setMinimumSize(new Dimension(150, 23));
         	rdbtnSelectMultipleFileInput.setMaximumSize(new Dimension(150, 23));
@@ -3373,6 +3379,7 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JRadioButton getRdbtnCopyFilesToInternal() {
         if (rdbtnCopyFilesToInternal == null) {
         	rdbtnCopyFilesToInternal = new JRadioButton("Copy Data Files into PC2 (more efficient, but not recommended for files over 5MB)");
+        	internalDataStorageButtonGroup.add(rdbtnCopyFilesToInternal);
         	rdbtnCopyFilesToInternal.setSelected(true);
         	rdbtnCopyFilesToInternal.setMaximumSize(new Dimension(550, 30));
         	rdbtnCopyFilesToInternal.setMinimumSize(new Dimension(550, 30));
@@ -3384,6 +3391,7 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JRadioButton getRdbtnKeepFilesExternal() {
         if (rdbtnKeepFilesExternal == null) {
         	rdbtnKeepFilesExternal = new JRadioButton("Keep Data Files external to PC2 (requires you to copy files to Judge's machines)");
+        	internalDataStorageButtonGroup.add(rdbtnKeepFilesExternal);
         	rdbtnKeepFilesExternal.setMaximumSize(new Dimension(550, 30));
         	rdbtnKeepFilesExternal.setMinimumSize(new Dimension(550, 30));
         	rdbtnKeepFilesExternal.setPreferredSize(new Dimension(550, 30));
@@ -3463,6 +3471,7 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JRadioButton getRdbtnSingleAnswerFile() {
         if (rdbtnSingleAnswerFile == null) {
         	rdbtnSingleAnswerFile = new JRadioButton("Single Answer File");
+        	answerFileSourceButtonGroup.add(rdbtnSingleAnswerFile);
         	rdbtnSingleAnswerFile.setHorizontalAlignment(SwingConstants.LEFT);
         }
         return rdbtnSingleAnswerFile;
@@ -3512,6 +3521,7 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JRadioButton getRadioButton_1() {
         if (radioButton_1 == null) {
         	radioButton_1 = new JRadioButton("Contest Data Package (CDP)");
+        	answerFileSourceButtonGroup.add(radioButton_1);
         	radioButton_1.setToolTipText("This option is only available if a CDP location has been set on the ConfigureContest>ICPC screen");
         	radioButton_1.setSelected(true);
         	radioButton_1.setPreferredSize(new Dimension(200, 23));
@@ -3540,6 +3550,7 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JRadioButton getRdbtnMultipleAnswerFiles() {
         if (rdbtnMultipleAnswerFiles == null) {
         	rdbtnMultipleAnswerFiles = new JRadioButton("Multiple Answer Files");
+        	answerFileSourceButtonGroup.add(rdbtnMultipleAnswerFiles);
         	rdbtnMultipleAnswerFiles.setPreferredSize(new Dimension(150, 23));
         	rdbtnMultipleAnswerFiles.setMinimumSize(new Dimension(150, 23));
         	rdbtnMultipleAnswerFiles.setMaximumSize(new Dimension(150, 23));
