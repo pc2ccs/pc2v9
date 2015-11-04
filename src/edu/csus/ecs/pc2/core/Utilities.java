@@ -334,6 +334,14 @@ public final class Utilities {
             return "No";
         }
     }
+    
+    public static String trueFalseString(boolean value, String trueString, String falseString) {
+        if (value) {
+            return trueString;
+        } else {
+            return falseString;
+        }
+    }
 
     /**
      * Load INI file.

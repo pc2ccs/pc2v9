@@ -25,7 +25,6 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -386,7 +385,6 @@ public class Executable extends Plugin implements IExecutable {
                 if (oneTestFailed) {
                     // replace the final executionData with the 1st failed pass
                     executionData.setValidationResults(failedResults);
-                    executionData.setValidationSuccess(false);
                     log.info("Test results: test failed " + run + " reason = "+getFailureReason() );
                 } else {
                     log.info("Test results: ALL passed for run " + run);
@@ -557,15 +555,15 @@ public class Executable extends Plugin implements IExecutable {
         if (reason == null) {
             reason = "";
         } else {
-            reason = " Reason is " + reason;
+            reason = "; validator returns: " + reason;
         }
 
         log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " " + reason);
 
         JudgementRecord record = JudgementUtilites.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
-        Judgement judgement = getContest().getJudgement(record.getJudgementId());
-
-        log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement =  " + judgement);
+        
+//        Judgement judgement = getContest().getJudgement(record.getJudgementId());
+//        log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement =  " + judgement);
     
         RunTestCase runTestCase = new RunTestCase(run, record, testNumber, passed);
         run.addTestCase(runTestCase);

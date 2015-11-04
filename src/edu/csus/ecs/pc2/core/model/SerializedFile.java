@@ -265,16 +265,17 @@ public class SerializedFile implements Serializable {
      *            java.lang.String
      * @throws IOException
      */
+
     public void writeFile(String fileName) throws IOException {
 
-        if (buffer != null && buffer.length > 0) {
-            FileOutputStream outputStream = null;
-            outputStream = new FileOutputStream(fileName);
-            outputStream.write(buffer, 0, buffer.length);
-            outputStream.close();
-        } else {
-            throw new IOException("Unable to write file, buffer is null or buffer.length is zero");
+        if (buffer == null || buffer.length == 0) {
+            buffer = new byte[0];
         }
+
+        FileOutputStream outputStream = null;
+        outputStream = new FileOutputStream(fileName);
+        outputStream.write(buffer, 0, buffer.length);
+        outputStream.close();
     }
 
     /**

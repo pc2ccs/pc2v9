@@ -1,9 +1,13 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -162,8 +166,51 @@ public class UtilitiesTest extends AbstractTestCase {
             
             actual = Utilities.findDataBasePath(input);
             assertEquals("Expecting same path", expected, actual);
-
+        }
+        
+        public void testCreateZeroByteFile() throws Exception {
             
+            String outdir = getOutputDataDirectory(this.getName());
+            ensureDirectory(outdir);
+//            startExplorer(outdir);
+            
+            String zeroByteFile = outdir + File.separator + "zerobyte";
+            
+            createZeroByteFile (zeroByteFile);
+            
+            SerializedFile serializedFile = new SerializedFile(zeroByteFile);
+            
+            String newfilename = outdir + File.separator + "zerobyte";
+            Utilities.createFile(serializedFile, newfilename);
+            
+            assertFileExists(newfilename, "zero byte file");
+            
+            File file = new File(newfilename);
+            assertEquals("Expecting zero byte file for "+newfilename, 0, file.length());
+            
+            newfilename = outdir + File.separator + "afile";
+            
+             serializedFile = new SerializedFile(newfilename);
+            Utilities.createFile(serializedFile, newfilename);
+            
+            assertFileExists(newfilename, "zero byte file");
+            file = new File(newfilename);
+            assertEquals("Expecting zero byte file for "+newfilename, 0, file.length());
+         
             
         }
+        
+   
+        private void createZeroByteFile(String filename) throws FileNotFoundException {
+            
+            PrintWriter printWriter = null;
+            printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+            printWriter.print("");
+            printWriter.close();
+            
+        }
+
+   
+
+        
 }
