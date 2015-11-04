@@ -920,23 +920,25 @@ public class ResolverEventFeedXML {
 
         for (Run run : runs) {
 
-            if (filter.matches(run)) {
-                sb.append(toXML(createElement(contest, run))); // add RUN
-                
-                RunTestCase[] runTestCases = getLastJudgementTestCases(run);
-                Arrays.sort(runTestCases, new RunTestCaseComparator());
-                for (RunTestCase runTestCase : runTestCases) {
-                    if (filter.matchesElapsedTime(runTestCase)){
-                        sb.append(toXML(createElement(contest, runTestCase, run))); // add TESTCASE
+            if (contest.isAllowed(run.getSubmitter(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                if (filter.matches(run)) {
+                    sb.append(toXML(createElement(contest, run))); // add RUN
+                    
+                    RunTestCase[] runTestCases = getLastJudgementTestCases(run);
+                    Arrays.sort(runTestCases, new RunTestCaseComparator());
+                    for (RunTestCase runTestCase : runTestCases) {
+                        if (filter.matchesElapsedTime(runTestCase)){
+                            sb.append(toXML(createElement(contest, runTestCase, run))); // add TESTCASE
+                        }
                     }
+                } else if ( ! filter.matchesElapsedTime(run)) {
+                    /**
+                     * This is for a frozen event feed.  We will send out
+                     * run information without judgement information, essentially
+                     * we sent out that the run is 'NEW'.
+                     */
+                    sb.append(toXML(createElement(contest, run))); // add RUN
                 }
-            } else if ( ! filter.matchesElapsedTime(run)) {
-                /**
-                 * This is for a frozen event feed.  We will send out
-                 * run information without judgement information, essentially
-                 * we sent out that the run is 'NEW'.
-                 */
-                sb.append(toXML(createElement(contest, run))); // add RUN
             }
         }
         return sb.toString();
