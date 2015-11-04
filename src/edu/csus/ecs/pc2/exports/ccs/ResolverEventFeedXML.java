@@ -170,26 +170,29 @@ public class ResolverEventFeedXML {
         Arrays.sort(runs, new RunComparator());
 
         for (Run run : runs) {
-            if (filter.matches(run)) {
-                memento = mementoRoot.createChild(RUN_TAG);
-                addMemento(memento, contest, run); // add RUN
-                
-                RunTestCase[] runTestCases = getLastJudgementTestCases(run);
-                Arrays.sort(runTestCases, new RunTestCaseComparator());
-                for (RunTestCase runTestCase : runTestCases) {
-                    if (filter.matchesElapsedTime(runTestCase)){
-                        memento = mementoRoot.createChild(TESTCASE_TAG);
-                        addMemento(memento, contest, runTestCase, run); // add TESTCASE
+            // only emit runs that are for submitters that can be displayed on the scoreboard
+            if (contest.isAllowed(run.getSubmitter(),Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                if (filter.matches(run)) {
+                    memento = mementoRoot.createChild(RUN_TAG);
+                    addMemento(memento, contest, run); // add RUN
+                    
+                    RunTestCase[] runTestCases = getLastJudgementTestCases(run);
+                    Arrays.sort(runTestCases, new RunTestCaseComparator());
+                    for (RunTestCase runTestCase : runTestCases) {
+                        if (filter.matchesElapsedTime(runTestCase)){
+                            memento = mementoRoot.createChild(TESTCASE_TAG);
+                            addMemento(memento, contest, runTestCase, run); // add TESTCASE
+                        }
                     }
+                } else if ( ! run.isDeleted() && ! filter.matchesElapsedTime(run)) {
+                    /**
+                     * This is for a frozen event feed.  We will send out
+                     * run information without judgement information, essentially
+                     * we sent out that the run is 'NEW'.
+                     */
+                    memento = mementoRoot.createChild(RUN_TAG);
+                    addMemento(memento, contest, run); // add RUN
                 }
-            } else if ( ! run.isDeleted() && ! filter.matchesElapsedTime(run)) {
-                /**
-                 * This is for a frozen event feed.  We will send out
-                 * run information without judgement information, essentially
-                 * we sent out that the run is 'NEW'.
-                 */
-                memento = mementoRoot.createChild(RUN_TAG);
-                addMemento(memento, contest, run); // add RUN
             }
         }
 
