@@ -774,7 +774,7 @@ public class ResolverEventFeedXML {
             }
         }
         
-        if (problem.isManualReview() && run.getJudgementRecord().isComputerJudgement()) {
+        if (!run.isSolved() || (problem.isManualReview() && run.getJudgementRecord().isComputerJudgement())) {
             XMLUtilities.addChild(memento, "solved", "false");
         } else {
             XMLUtilities.addChild(memento, "solved", run.isSolved());
