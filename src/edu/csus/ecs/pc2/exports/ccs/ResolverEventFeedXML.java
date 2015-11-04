@@ -774,7 +774,11 @@ public class ResolverEventFeedXML {
             }
         }
         
-        XMLUtilities.addChild(memento, "solved", run.isSolved());
+        if (problem.isManualReview() && run.getJudgementRecord().isComputerJudgement()) {
+            XMLUtilities.addChild(memento, "solved", "false");
+        } else {
+            XMLUtilities.addChild(memento, "solved", run.isSolved());
+        }
         XMLUtilities.addChild(memento, "status", getStatus(run.isJudged()));
         
 //    <team>2</team>
