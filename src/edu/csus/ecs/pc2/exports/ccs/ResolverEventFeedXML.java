@@ -761,8 +761,17 @@ public class ResolverEventFeedXML {
         
         if (run.isJudged()){
             Judgement judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId());
+            boolean isFinalResult = true;
+            if (problem.isManualReview() && run.getJudgementRecord().isComputerJudgement()) {
+                isFinalResult = false;
+            }
             String acronym = getAcronym(judgement);
-            XMLUtilities.addChild(memento, "result", acronym);
+            if (isFinalResult) {
+                XMLUtilities.addChild(memento, "result", acronym);
+            } else {
+                // could be changed when manually reviewed
+                XMLUtilities.addChild(memento, "preliminaryResult", acronym);
+            }
         }
         
         XMLUtilities.addChild(memento, "solved", run.isSolved());
