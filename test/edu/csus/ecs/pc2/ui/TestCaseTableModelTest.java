@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * @author ICPC
  *
  */
-public class TestCaseableModelTest extends AbstractTestCase{
+public class TestCaseTableModelTest extends AbstractTestCase{
 
     public static void main(String[] args) {
 
