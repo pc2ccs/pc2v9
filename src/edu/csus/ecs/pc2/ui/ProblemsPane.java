@@ -668,6 +668,7 @@ public class ProblemsPane extends JPanePlugin {
     private JButton getSetCDPPathButton() {
         if (setCDPPathButton == null) {
         	setCDPPathButton = new JButton("Set CDP Path");
+        	setCDPPathButton.setMnemonic(KeyEvent.VK_S);            
         	setCDPPathButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
                     editCDPPath();

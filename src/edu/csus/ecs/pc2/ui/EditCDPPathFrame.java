@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -17,15 +14,20 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.exception.MultipleIssuesException;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
+ * Edit Admin and Judge CDP paths.
+ * 
  * This Frame supports editing the current Contest Data Package (CDP) path values stored in the system.
  * There are two CDP paths:  one for the Administrator and one for the Judge machines.  These might have
  * the same path value, or they might be different.  The actual path values (Strings) are stored in
@@ -34,12 +36,20 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * after this class is instantiated.  Clients should then call this class's loadCurrentCDPPathsIntoGUI() method
  * to update the GUI for proper display.
  * 
- * @author John
- *
+ * @author $Author$ John
+ * @version $Id$
  */
-public class EditCDPPathFrame extends JFrame {
+public class EditCDPPathFrame extends JFrame implements UIPlugin  {
 
-    private static final long serialVersionUID = 1L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8570718182014642771L;
+
+    /**
+     * Special String value for any field that is null,
+     */
+    private static final String NULL_STRING_VALUE = "<null>";
 
     private IInternalContest contest;
 
@@ -48,6 +58,9 @@ public class EditCDPPathFrame extends JFrame {
     private JTextField judgeCDPPathTextField;
 
     private JButton cancelButton;
+    private JButton updateButton = null;
+
+    private Log log;
     
     public EditCDPPathFrame() {
         
@@ -62,49 +75,63 @@ public class EditCDPPathFrame extends JFrame {
     protected void handleCDPSaveButton() {
         
         boolean validCDP ;
-        if (isAdmin()) {
+        
             validCDP = validateCDP(getAdminCDPPathTextField().getText());
             if (validCDP) {
-                saveCDPPaths();
+                updateCDPPaths();
             } else {
                 JOptionPane.showMessageDialog(this, "No valid CDP found at " + getAdminCDPPathTextField().getText(), "Invalid CDP", JOptionPane.OK_OPTION);
             }
-            
-        } else if (isJudge()) {
-            // (This is really provided just for the eventuality that sometime this EditCDPPathFrame might get used by the Judge code...)
-            validCDP = validateCDP(getJudgeCDPPathTextField().getText());
-            if (validCDP) {
-                saveCDPPaths();
-            } else {
-                JOptionPane.showMessageDialog(this, "No valid CDP found at " + getJudgeCDPPathTextField().getText(), "Invalid CDP", JOptionPane.OK_OPTION);
-            }
-        }
+   
+       // A global setting should not be updated on a client.
+//        } else if (isJudge()) {
+//            // (This is really provided just for the eventuality that sometime this EditCDPPathFrame might get used by the Judge code...)
+//            validCDP = validateCDP(getJudgeCDPPathTextField().getText());
+//            if (validCDP) {
+//                saveCDPPaths();
+//            } else {
+//                JOptionPane.showMessageDialog(this, "No valid CDP found at " + getJudgeCDPPathTextField().getText(), "Invalid CDP", JOptionPane.OK_OPTION);
+//            }
+//        }
     }
 
     /**
-     * Saves the currently-defined CDP Paths into the ContestInformation.
+     * Update CDPPaths on server.
      */
-    private void saveCDPPaths() {
+    private void updateCDPPaths() {
         
         if (getContest() != null) {
-            ContestInformation ci = getContest().getContestInformation();
+            ContestInformation ci = getContestInformation();
+            
+            if (ci == null){
+                log.warning("Initializing ContestInformation in Contest, should have already been initialized");
+                ci = new ContestInformation();
+            }
         
             String curAdminPath = getAdminCDPPathTextField().getText();
-            if (curAdminPath != null && curAdminPath.equals("<null>")) {
+            if (curAdminPath != null && curAdminPath.equals(NULL_STRING_VALUE)) {
                 curAdminPath = null;
             }
             ci.setAdminCDPBasePath(curAdminPath);
             
             String curJudgePath = getJudgeCDPPathTextField().getText();
-            if (curJudgePath != null && curJudgePath.equals("<null>")) {
+            if (curJudgePath != null && curJudgePath.equals(NULL_STRING_VALUE)) {
                 curJudgePath = null;
             }
             ci.setJudgeCDPBasePath(curJudgePath);
             
-            //once we've saved, change "Cancel" to "Close" since we don't support "Cancel" in the sense of "Undo Save"
-            getCancelButton().setText("Close");
+            getController().updateContestInformation(ci);
+            this.setVisible(false);
             
         } else {
+            
+            
+            /**
+             * This should never happen because setContestandController will initialize the contest and
+             * controller.   If this does happen then the setContestandController must be called/used 
+             * from the calling frame.
+             */
+            
             //getContest() returned null
             IInternalController contr = getController();
             if (contr != null) {
@@ -113,32 +140,37 @@ public class EditCDPPathFrame extends JFrame {
                 System.err.println ("EditCDPPathFrame.saveCDPPaths(): getContest() or getController() returned null");
             }
         }
-        
     }
 
-    /**
-     * Returns true if the current client is logged in as an Admin; false otherwise.
-     * @return whether or not the current client is an Admin
-     */
-    private boolean isAdmin() {        
-        if (getContest().getClientId().getClientType() == ClientType.Type.ADMINISTRATOR) {
-            return true;
-        } else {
-            return false;
-        }
+    private ContestInformation getContestInformation() {
+
+        return getContest().getContestInformation();
     }
-    
-    /**
-     * Returns true if the current client is logged in as a Judge; false otherwise.
-     * @return whether or not the current client is a Judge
-     */
-    private boolean isJudge() {
-        if (getContest().getClientId().getClientType() == ClientType.Type.JUDGE) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+
+    // SOMEDAY - remove this unused code.
+//    /**
+//     * Returns true if the current client is logged in as an Admin; false otherwise.
+//     * @return whether or not the current client is an Admin
+//     */
+//    private boolean isAdmin() {        
+//        if (getContest().getClientId().getClientType() == ClientType.Type.ADMINISTRATOR) {
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
+//    
+//    /**
+//     * Returns true if the current client is logged in as a Judge; false otherwise.
+//     * @return whether or not the current client is a Judge
+//     */
+//    private boolean isJudge() {
+//        if (getContest().getClientId().getClientType() == ClientType.Type.JUDGE) {
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
     
     /**
      * Returns true if it finds what it considers a valid Contest Data Package structure at the specified path.
@@ -146,11 +178,40 @@ public class EditCDPPathFrame extends JFrame {
      * @return true if it appears there is a valid CDP at the specified path root
      */
     private boolean validateCDP(String path) {
-        //TODO: implement this method: verify that a reasonable CDP structure is found at the given path
-        System.err.println("EditCDPPathFrame.validateCDP(): missing code; would have checked for a CDP at '" + path + "'; assuming valid and returning true" );
-        return true ;
+        
+        // TODO: implement this method: verify that a reasonable CDP structure is found at the given path
+        System.err.println("TODO EditCDPPathFrame.validateCDP(): missing code; would have checked for a CDP at '" + path + "'; assuming valid and returning true");
+        try {
+            Utilities.validateCDP(getContest(), path);
+        } catch (MultipleIssuesException e) {
+
+            showMessage("Not valid CDP for path " + path, "Invalid CDP");
+
+            String[] messages = e.getIssueList();
+            System.err.println("Errors in CDP at path '" + path + "'");
+            for (String message : messages) {
+                System.err.println(message);
+                log.warning(message);
+            }
+            
+            // TODO Figure out how strict we should be after the regionals.
+            
+            int result = FrameUtilities.yesNoCancelDialog(this, "TEMPORARY DEBUGGING THING. CDP is invalid - save anyways?", "TEMPORARY DEBUGGING THING. debug 22");
+
+            if (result == JOptionPane.YES_OPTION) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        return true;
     }
     
+    private void showMessage(String string, String title) {
+        JOptionPane.showMessageDialog(null, string, title, JOptionPane.WARNING_MESSAGE);
+    }
+
     private void initialize() {
 
       this.setSize(new java.awt.Dimension(549, 312));
@@ -185,6 +246,11 @@ public class EditCDPPathFrame extends JFrame {
       adminCDPPathPanel.add(lblAdminCDPPath);
       
       adminCDPPathTextField = getAdminCDPPathTextField();
+      adminCDPPathTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+          public void keyReleased(java.awt.event.KeyEvent e) {
+              enableUpdateButton();
+          }
+      });
       adminCDPPathPanel.add(adminCDPPathTextField);
       
       JPanel judgesCDPPathPanel = new JPanel();
@@ -195,18 +261,17 @@ public class EditCDPPathFrame extends JFrame {
       judgesCDPPathPanel.add(lblJudgesCDPPath);
       
       judgeCDPPathTextField = getJudgeCDPPathTextField();
+      judgeCDPPathTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+          public void keyReleased(java.awt.event.KeyEvent e) {
+              enableUpdateButton();
+          }
+      });
       judgesCDPPathPanel.add(judgeCDPPathTextField);
       
       JPanel buttonPanel = new JPanel();
       mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-      
-      JButton btnSaveCDPPathValues = new JButton("Save");
-      btnSaveCDPPathValues.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-              handleCDPSaveButton();
-          }
-      });
-      buttonPanel.add(btnSaveCDPPathValues);
+  
+      buttonPanel.add(getUpdateButton());
       buttonPanel.add(getCancelButton()); 
     }
     
@@ -239,14 +304,64 @@ public class EditCDPPathFrame extends JFrame {
     }
 
     protected void handleCancelButton() {
-        this.dispose();
+       
+        if (updateButton.isEnabled()){
+            // something was changed, ask them if they want to save it?
+            
+            int result = FrameUtilities.yesNoCancelDialog(this, "CDP Path(s) modified, save changes?", "Confirm Choice");
+
+            if (result == JOptionPane.YES_OPTION) {
+                updateCDPPaths();
+                this.dispose();
+            } else if (result == JOptionPane.NO_OPTION) {
+                this.dispose();
+            } // else cancel do nothing
+            
+        } else {
+            // nothing updated hide me!!
+            this.setVisible(false);
+        }
+            
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
         controller = inController;
+        
+        log =  inController.getLog();
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                populateUI();
+                enableUpdateButtons(false);
+            }
+        });
     }
-    
+
+    /**
+     * Populate UI fields.
+     */
+    protected void populateUI() {
+        
+        ContestInformation info = getContestInformation();
+        
+        String judgeCDP = info.getJudgeCDPBasePath();
+        
+        if (judgeCDP == null){
+            judgeCDP = NULL_STRING_VALUE;
+        }
+        
+        String adminCDP = info.getAdminCDPBasePath();
+        
+        if (adminCDP == null){
+            adminCDP = NULL_STRING_VALUE;
+        }
+        
+         getAdminCDPPathTextField().setText(adminCDP);
+         getJudgeCDPPathTextField().setText(judgeCDP);
+        
+    }
+
     public IInternalContest getContest() {
         return contest;
     }
@@ -265,13 +380,13 @@ public class EditCDPPathFrame extends JFrame {
         
             String curAdminPath = ci.getAdminCDPBasePath();
             if (curAdminPath == null) {
-                curAdminPath = "<null>";
+                curAdminPath = "";
             }
             getAdminCDPPathTextField().setText(curAdminPath);
             
             String curJudgePath = ci.getJudgeCDPBasePath();
             if (curJudgePath == null) {
-                curJudgePath = "<null>";
+                curJudgePath = "";
             }
             getJudgeCDPPathTextField().setText(curJudgePath);
             
@@ -286,7 +401,78 @@ public class EditCDPPathFrame extends JFrame {
             }
         }
     }
+    
+    /**
+     * Enable or disable Update button based on comparison fields.
+     * 
+     */
+    public void enableUpdateButton() {
+
+        boolean enableButton = false;
+
+        ContestInformation information = getContest().getContestInformation();
+
+        if (information != null) {
             
+            String fieldValue = getTextFieldValue(adminCDPPathTextField);
+            if (!StringUtilities.stringSame(information.getAdminCDPBasePath(), fieldValue)) {
+                enableButton = true;
+            }
 
+            String judgeFieldValue = getTextFieldValue(judgeCDPPathTextField);
+            if (!StringUtilities.stringSame(information.getJudgeCDPBasePath(), judgeFieldValue)) {
+                enableButton = true;
+            }
 
+        } else {
+            enableButton = true;
+        }
+            
+        enableUpdateButtons(enableButton);
+    }
+    
+    /**
+     * Returns JTextField value, iv falue is {@value #NULL_STRING_VALUE} then returns null.
+     * @param textField
+     * @return null if value is {@value #NULL_STRING_VALUE}, else return text field value.
+     */
+    private String getTextFieldValue(JTextField textField) {
+        
+        String fieldValue = textField.getText();
+        
+        if (fieldValue.equalsIgnoreCase(NULL_STRING_VALUE))
+        {
+            fieldValue = null; 
+        }
+        
+        return fieldValue;
+    }
+
+    public JButton getUpdateButton() {
+
+        if (updateButton == null) {
+            updateButton = new JButton("Update");
+            updateButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    handleCDPSaveButton();
+                }
+            });
+        }
+        return updateButton;
+    }
+    
+    protected void enableUpdateButtons(boolean editedText) {
+        getUpdateButton().setEnabled(editedText);
+        
+        if (editedText) {
+            cancelButton.setText("Cancel");
+        } else {
+            cancelButton.setText("Close");
+        }
+    }
+
+    @Override
+    public String getPluginTitle() {
+        return "Edit CDP Frame";
+    }
 }

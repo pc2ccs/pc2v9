@@ -26,6 +26,7 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.exception.MultipleIssuesException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -175,6 +176,11 @@ public final class Utilities {
     public static boolean isFileThere(String filename) {
         File file = new File(filename);
         return file.isFile();
+    }
+    
+    public static boolean isDirThere(String filename) {
+        File file = new File(filename);
+        return file.isDirectory();
     }
 
     /**
@@ -1138,6 +1144,48 @@ public final class Utilities {
             return filePath.substring(0, idx);
         }
         return filePath;
+    }
+
+    /**
+     * 
+     * @param contest
+     * @param path
+     * @return
+     */
+    public static boolean validateCDP(IInternalContest contest, String cdpPath) throws MultipleIssuesException
+    {
+        List<String> messages = new ArrayList<>();
+        
+        if (!isDirThere(cdpPath))
+        {
+            messages.add("No such directory "+cdpPath);
+        }
+        
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+            if (problem.getShortName() == null){
+                messages.add("No problem short name for problem "+problem);
+            } else {
+                
+                
+                // check for directory
+                String problemDir = cdpPath + File.separator +problem.getShortName();
+                if (! isDirThere(problemDir))
+                {
+                    messages.add("Directory missing for "+problem+" expected at "+problemDir);
+                }
+                else
+                {
+                    // TODO check for the rest of the problem required files.
+                }
+            }
+        }
+        
+        if (messages.size() == 0){
+            return true;
+        } else {
+            throw new MultipleIssuesException(messages.get(0), messages);
+        }
     }
 
 }
