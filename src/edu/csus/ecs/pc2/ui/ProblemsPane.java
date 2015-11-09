@@ -61,6 +61,8 @@ public class ProblemsPane extends JPanePlugin {
     private Log log = null;
 
     private EditProblemFrame editProblemFrame = null;
+    
+    private EditProblemFrameNew editProblemFrameNew = null;
 
     private JButton reportButton = null;
     private JPanel centerPanel;
@@ -90,6 +92,8 @@ public class ProblemsPane extends JPanePlugin {
         this.add(getProblemButtonPane(), java.awt.BorderLayout.SOUTH);
 
         editProblemFrame = new EditProblemFrame();
+        
+        editProblemFrameNew = new EditProblemFrameNew();
 
     }
 
@@ -253,9 +257,11 @@ public class ProblemsPane extends JPanePlugin {
                 if (pdf != null) {
                     newProblemDataFiles = pdf.copy(newProblem);
                 }
+                
                 // just bring up the ui, let the user add/cancel the copied problem
                 editProblemFrame.setProblemCopy(newProblem, newProblemDataFiles);
                 editProblemFrame.setVisible(true);
+
             }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
@@ -297,6 +303,7 @@ public class ProblemsPane extends JPanePlugin {
         log = getController().getLog();
 
         editProblemFrame.setContestAndController(inContest, inController);
+        editProblemFrameNew.setContestAndController(inContest, inController);
 
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
@@ -348,8 +355,21 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected void addProblem() {
-        editProblemFrame.setProblem(null);
-        editProblemFrame.setVisible(true);
+        if (Utilities.isDebugMode()) {
+            int result = FrameUtilities.yesNoCancelDialog(this, "Do you want to use  EditProblemFrameNew ? ", "TEMPORARY DEBUGGING THING. debug 22");
+
+            if (result == JOptionPane.YES_OPTION) {
+                editProblemFrameNew.setProblem(null);
+                editProblemFrameNew.setVisible(true);
+            } else {
+                editProblemFrame.setProblem(null);
+                editProblemFrame.setVisible(true);
+            }
+        } else {
+            // just bring up the ui, let the user add/cancel the copied problem
+            editProblemFrame.setProblem(null);
+            editProblemFrame.setVisible(true);
+        }
     }
 
     /**
@@ -406,8 +426,24 @@ public class ProblemsPane extends JPanePlugin {
             Problem problemToEdit = getContest().getProblem(elementId);
 
             ProblemDataFiles newProblemDataFiles = getController().getProblemDataFiles(problemToEdit);
-            editProblemFrame.setProblem(problemToEdit, newProblemDataFiles);
-            editProblemFrame.setVisible(true);
+            
+            if (Utilities.isDebugMode()) {
+
+                int result = FrameUtilities.yesNoCancelDialog(this, "Do you want to use  EditProblemFrameNew ? ", "TEMPORARY DEBUGGING THING. debug 22");
+
+                if (result == JOptionPane.YES_OPTION) {
+                    editProblemFrameNew.setProblemCopy(problemToEdit, newProblemDataFiles);
+                    editProblemFrameNew.setVisible(true);
+                } else {
+                    editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
+                    editProblemFrame.setVisible(true);
+                }
+            } else {
+                // just bring up the ui, let the user add/cancel the copied problem
+                editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
+                editProblemFrame.setVisible(true);
+            }
+            
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to edit problem, check log ("+e.getMessage()+")");
