@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.exception.MultipleIssuesException;
+import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -38,6 +39,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
+import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 
@@ -1147,45 +1149,142 @@ public final class Utilities {
     }
 
     /**
+     * Validate problem files.
+     * 
+     * Only checks for files on disk if {@link Problem#isUsingExternalDataFiles()} is true.
+     * 
+     * Will throw a MultipleIssuesException if any directories or files are missing,
+     * use {@link MultipleIssuesException#getIssueList()) for list of missing files or errors.
      * 
      * @param contest
-     * @param path
-     * @return
+     * @param cdpPath - base path for CDP config directory
+     * @param problem problem to validate
+     * @param allProblemDCPFiles include problem.tex and problem.yaml files.
+     * @return true if all files present
+     * @throws MultipleIssuesException
      */
-    public static boolean validateCDP(IInternalContest contest, String cdpPath) throws MultipleIssuesException
-    {
+    public static boolean validateCDP(IInternalContest contest, String cdpPath, Problem problem, boolean allProblemDCPFiles) throws MultipleIssuesException {
         List<String> messages = new ArrayList<>();
-        
-        if (!isDirThere(cdpPath))
-        {
-            messages.add("No such directory "+cdpPath);
+
+        if (problem == null) {
+            messages.add("problem is null (cannot validate problem)");
         }
-        
-        Problem[] problems = contest.getProblems();
-        for (Problem problem : problems) {
-            if (problem.getShortName() == null){
-                messages.add("No problem short name for problem "+problem);
+         else if (problem.isUsingExternalDataFiles()){
+             /**
+              * Only validate if external files.
+              */
+       
+            if (problem.getShortName() == null) {
+                messages.add("No problem short name for problem " + problem);
             } else {
-                
-                
                 // check for directory
-                String problemDir = cdpPath + File.separator +problem.getShortName();
-                if (! isDirThere(problemDir))
-                {
-                    messages.add("Directory missing for "+problem+" expected at "+problemDir);
-                }
-                else
-                {
-                    // TODO check for the rest of the problem required files.
+                String problemDir = cdpPath + File.separator + problem.getShortName() + File.separator;
+                if (!isDirThere(problemDir)) {
+                    messages.add("Directory missing for " + problem + " expected at " + problemDir);
+
+                } else {
+                    // Check for secret problem files - only if external files.
+
+                    String dataPath = getSecretDataPath(cdpPath, problem);
+
+                    if (!isDirThere(dataPath)) {
+                        messages.add("Missing data directory, expected at: " + dataPath);
+
+                    } else {
+                        String[] inDataFiles = getFileNames(dataPath, ".in");
+
+                        if (inDataFiles != null && inDataFiles.length > 0) {
+                            String[] answerDataFiles = getFileNames(dataPath, ".ans");
+                            if (answerDataFiles != null && answerDataFiles.length > 0) {
+
+                                // found both judge and answer files
+
+                                if (answerDataFiles.length != inDataFiles.length) {
+                                    messages.add("Expecting same number of judge and answer files to match " + inDataFiles.length + " vs " + answerDataFiles.length);
+                                }
+
+                                for (String inDataFilename : inDataFiles) {
+                                    String ansFilename = dataPath + File.separator + inDataFilename.replaceFirst("[.]in", ".ans");
+
+                                    if (!isFileThere(ansFilename)) {
+                                        // did not find answer file
+                                        String basename = basename(ansFilename);
+                                        System.out.println("debug 22 missing: '" + ansFilename + "'");
+                                        messages.add("Missing answer file '" + basename + "' in " + dataPath);
+                                    }
+                                }
+
+                            } else {
+                                messages.add("Expecting " + inDataFiles.length + " judges answer files (.ans) in: " + dataPath);
+                            }
+                        } else {
+                            messages.add("Expecting judges data files (.in) in: " + dataPath);
+                        }
+                    }
+
+                    if (allProblemDCPFiles) {
+
+                        // check for problem.tex
+                        String laTextProblemFilename = problemDir + ContestYAMLLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
+                        if (!isFileThere(laTextProblemFilename)) {
+                            messages.add("Missing LaTex problem file, expected at " + laTextProblemFilename);
+                        }
+
+                        // check for problem.yaml
+                        String problemYamlFilename = problemDir + ExportYAML.PROBLEM_FILENAME;
+                        if (!isFileThere(problemYamlFilename)) {
+                            messages.add("Missing LaTex problem YAML file, expected at " + problemYamlFilename);
+                        }
+                    }
                 }
             }
-        }
+
+         }
         
-        if (messages.size() == 0){
+        if (messages.size() == 0) {
             return true;
         } else {
             throw new MultipleIssuesException(messages.get(0), messages);
         }
     }
 
+    /**
+     * Validate all problem data files.
+     * 
+     * Only checks for files on disk if {@link Problem#isUsingExternalDataFiles()} is true.
+     * 
+     * @see #validateCDP(IInternalContest, String, Problem, boolean)
+     */
+    public static boolean validateCDP(IInternalContest contest, String cdpPath) throws MultipleIssuesException {
+        List<String> messages = new ArrayList<>();
+
+        if (!isDirThere(cdpPath)) {
+            messages.add("No such directory " + cdpPath);
+        }
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+            if (problem.getShortName() == null) {
+                messages.add("No problem short name for problem " + problem);
+            } else {
+
+                try {
+
+                    // Check for all problem files
+                    validateCDP(contest, cdpPath, problem, true);
+
+                } catch (MultipleIssuesException e) {
+
+                    // Add all issues.problem lines
+                    messages.addAll(Arrays.asList(e.getIssueList()));
+                }
+            }
+        }
+
+        if (messages.size() == 0) {
+            return true;
+        } else {
+            throw new MultipleIssuesException(messages.get(0), messages);
+        }
+    }
 }
