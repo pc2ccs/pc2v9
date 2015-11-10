@@ -488,7 +488,10 @@ public class EditProblemPane extends JPanePlugin {
                 if (pdf != null) {
                     int fileChanged = 0;
                     SerializedFile[] judgesDataFiles = pdf.getJudgesDataFiles();
-                    SerializedFile[] judgesDataFilesNew = proposedPDF.getJudgesDataFiles();
+                    SerializedFile[] judgesDataFilesNew = null;
+                    if (proposedPDF != null) {
+                        judgesDataFilesNew = proposedPDF.getJudgesDataFiles();
+                    }
                     if ((judgesDataFiles == null && judgesDataFilesNew != null) || (judgesDataFiles != null & judgesDataFilesNew == null)) {
                         // one was null the other was not
                         if (updateToolTip.equals("")) {
@@ -534,7 +537,10 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                     SerializedFile[] judgesAnswerFiles = pdf.getJudgesAnswerFiles();
-                    SerializedFile[] judgesAnswerFilesNew = proposedPDF.getJudgesAnswerFiles();
+                    SerializedFile[] judgesAnswerFilesNew = null;
+                    if (proposedPDF != null) {
+                        proposedPDF.getJudgesAnswerFiles();
+                    }
                     if ((judgesAnswerFiles == null && judgesAnswerFilesNew != null) || (judgesAnswerFiles != null & judgesAnswerFilesNew == null)) {
                         // one was null the other was not
                         if (updateToolTip.equals("")) {
