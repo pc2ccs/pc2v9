@@ -14,7 +14,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.DataLoader;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -1201,49 +1200,6 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     /**
-     * Test Multiple data sets with a single failure.
-     * 
-     * @throws Exception
-     */
-    public void TODOtestMultipleTestCaseExternalFileWithFailedTestCases() throws Exception {
-
-        String testBaseDirname = getDataDirectory(this.getName());
-//        ensureDirectory(testBaseDirname);
-//        startExplorer(testBaseDirname);
-
-        String sumitFilename = getSamplesSourceFilename("ISumit.java");
-
-        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
-
-        Problem problem = createMultiTestCaseProblemExternalFiles(contest, "barcodes", 10);
-
-        problem.setDataFileName("sumit.in");
-        problem.setAnswerFileName("sumit.ans");
-        problem.setTimeOutInSeconds(15);
-        problem.setReadInputDataFromSTDIN(true);
-
-        assertTrue("Expecting all problem files external ", areDataFilesExternal(contest.getProblemDataFile(problem)));
-
-        assertTrue("Expecting using external data files ", problem.isUsingExternalDataFiles());
-
-        Run run = createRun(submitter, javaLanguage, problem, 45, 120);
-
-        assertFileExists(sumitFilename);
-        RunFiles runFiles = new RunFiles(run, sumitFilename);
-
-        contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 3, true);
-        contest.setClientId(getLastAccount(contest, Type.JUDGE).getClientId());
-
-//        addConsoleHandler(controller.getLog());
-
-        String noJudgement = "No - Wrong Answer";
-        Executable executable = runExecutableTest(run, runFiles, true, noJudgement, false);
-
-        assertValidationFailure(run, executable, 9, 1, noJudgement);
-
-    }
-
-    /**
      * Test validation results for runs that fail validation.
      * 
      * @param run
@@ -1265,8 +1221,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         assertEquals("Expected validator results string", expectedValidatorResults, results);
 
-        boolean passedValidation = data.isValidationSuccess();
-        assertFalse("Expected to fail validation, there are " + failures + " failed tests", passedValidation);
+        // isValidationSuccess is a reflection of whether the validator program ran, not the actual result of validation
 
     }
 
@@ -1295,97 +1250,4 @@ public class ExecutableTest extends AbstractTestCase {
         assertValidationFailure(run, executable, 1, 6, noJudgement);
 
     }
-
-    /**
-     * Test Multiple data sets with first, middle and last failure (3 failures);
-     * 
-     * @throws Exception
-     */
-    public void TODOtestMultipleTestCaseExternalFileLastTestCaseFails() throws Exception {
-
-        String testBaseDirname = getDataDirectory(this.getName());
-//        ensureDirectory(testBaseDirname);
-        // startExplorer(testBaseDirname);
-
-        String sumitFilename = getSamplesSourceFilename("ISumit.java");
-
-        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
-
-//        String secretDataDirectory = getSecretDir(this.getName(), "barcodes");
-//        ensureDirectory(secretDataDirectory);
-//        startExplorer(secretDataDirectory);
-        
-        Problem problem = createMultiTestCaseProblemExternalFiles(contest, "barcodes", 10);
-
-        problem.setDataFileName("sumit.in");
-        problem.setAnswerFileName("sumit.ans");
-        problem.setTimeOutInSeconds(15);
-        problem.setReadInputDataFromSTDIN(true);
-
-        assertTrue("Expecting all problem files external ", areDataFilesExternal(contest.getProblemDataFile(problem)));
-
-        assertTrue("Expecting using external data files ", problem.isUsingExternalDataFiles());
-
-        Run run = createRun(submitter, javaLanguage, problem, 45, 120);
-
-        assertFileExists(sumitFilename);
-        RunFiles runFiles = new RunFiles(run, sumitFilename);
-
-        contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 3, true);
-        contest.setClientId(getLastAccount(contest, Type.JUDGE).getClientId());
-
-        // addConsoleHandler(controller.getLog());
-
-        String noJudgement = "No - Wrong Answer";
-        Executable executable = runExecutableTest(run, runFiles, true, noJudgement, false);
-
-        assertValidationFailure(run, executable, 7, 3, noJudgement);
-    }
-    
-    
-    public void TODOtestMultipleTestCaseExternalFileAlternateNoAnswer() throws Exception {
-        
-        String testBaseDirname = getDataDirectory(this.getName());
-//        ensureDirectory(testBaseDirname);
-        // startExplorer(testBaseDirname);
-        
-//        String secretDataDirectory = getSecretDir(this.getName(), "sumit55");
-//        ensureDirectory(secretDataDirectory);
-//        startExplorer(secretDataDirectory);
-
-
-        String sumitFilename = getSamplesSourceFilename("ISumit.java");
-
-        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
-
-        Problem problem = createMultiTestCaseProblemExternalFiles(contest, "sumit55", 10);
-
-        problem.setDataFileName("sumit.in");
-        problem.setAnswerFileName("sumit.ans");
-        problem.setTimeOutInSeconds(15);
-        problem.setReadInputDataFromSTDIN(true);
-        
-        setupMockPC2Validator(problem);
-
-        assertTrue("Expecting all problem files external ", areDataFilesExternal(contest.getProblemDataFile(problem)));
-
-        assertTrue("Expecting using external data files ", problem.isUsingExternalDataFiles());
-
-        Run run = createRun(submitter, javaLanguage, problem, 45, 120);
-
-        assertFileExists(sumitFilename);
-        RunFiles runFiles = new RunFiles(run, sumitFilename);
-
-        contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 3, true);
-        contest.setClientId(getLastAccount(contest, Type.JUDGE).getClientId());
-
-         addConsoleHandler(controller.getLog());
-         
-        String noJudgement = "undetermined";
-        Executable executable = runExecutableTest(run, runFiles, true, noJudgement, false);
-
-        assertValidationFailure(run, executable, 7, 3, noJudgement);
-        
-    }
-
 }
