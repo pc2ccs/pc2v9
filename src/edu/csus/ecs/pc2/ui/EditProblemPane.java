@@ -567,7 +567,7 @@ public class EditProblemPane extends JPanePlugin {
                                 SerializedFile serializedFile = judgesAnswerFiles[i];
                                 // external true, we just the sha we do not need to load the data
                                 SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), true);
-                                if (!serializedFile.equals(judgesAnswerFilesNew[i])) {
+                                if (!serializedFile.getName().equals(judgesAnswerFilesNew[i].getName())) {
                                     fileChanged++;
                                     changed = true;
                                 } else if (!serializedFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
