@@ -283,6 +283,11 @@ public class ResolverEventFeedXML {
                 formattedSeconds = XMLUtilities.formatSeconds(time.getContestStartTime().getTimeInMillis());
             }
         }
+        
+        if (info.getStartDate() != null)
+        {
+            formattedSeconds = XMLUtilities.formatSeconds(info.getStartDate().getTime());
+        }
 
         XMLUtilities.addChild(memento, "length", contestLengthString); 
         XMLUtilities.addChild(memento, "penalty", DefaultScoringAlgorithm.getDefaultProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO));

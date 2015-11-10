@@ -3,8 +3,11 @@ package edu.csus.ecs.pc2.imports.ccs;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -87,7 +90,7 @@ public class ContestYAMLLoader {
      * Base path/location where config (CDP) problem files found.
      */
     public static final String JUDGE_CONFIG_PATH_KEY = "judge-config-path";
-
+    
     /**
      * Run execution time limit, in seconds.
      */
@@ -278,10 +281,32 @@ public class ContestYAMLLoader {
             setTitle(contest, contestTitle);
         }
         
+        // TODO CCS SCOREBOARD_FREEZE
+        
+        String startTime = getSequenceValue(yamlLines, CONTEST_START_TIME);
+        if (startTime != null) {
+            try {
+                Date date = parseStartTime(startTime);
+                setContestStartDateTime(contest, date);
+            } catch (ParseException e) {
+                throw new YamlLoadException("Invalid start-time value '" + startTime + " expected form yyyy-MM-dd HH:mm, " + e.getMessage(), e);
+            }
+        }
+        
         String judgeCDPath = getSequenceValue(yamlLines, JUDGE_CONFIG_PATH_KEY);
         if (judgeCDPath != null) {
             setCDPPath(contest, judgeCDPath);
         }
+        
+        // TODO 917 set Admin Path
+//        String adminCDPath = directoryName;
+//        setAdminCDPPath(contest, adminCDPath);
+//        
+//        private void setAdminCDPPath(IInternalContest contest, String path) {
+//            ContestInformation contestInformation = contest.getContestInformation();
+//            contestInformation.setAdminCDPBasePath(path);;
+//        }
+        
 
         int defaultTimeout = getIntegerValue(getSequenceValue(yamlLines, TIMEOUT_KEY), DEFAULT_TIME_OUT);
 
@@ -387,6 +412,31 @@ public class ContestYAMLLoader {
     }
 
  
+    /**
+     * Parse and convert dateString to Date.
+     * 
+     * <br>
+     * SOMEDAY handle format: yyyy-MM-dd HH:mmZ
+     * 
+     * @param dateString date string in form: yyyy-MM-dd HH:mm or yyyy-MM-dd HH:mmZ
+     * @return date for input string
+     * @throws ParseException
+     */
+    public static Date parseStartTime(String dateString) throws ParseException {
+        // String pattern = "yyyy-MM-dd HH:mmZ";
+        String pattern = "yyyy-MM-dd HH:mm";
+
+        String dateTime = dateString;
+
+        if (dateString.length() == pattern.length() + 1) {
+            // Strip off Z
+            dateTime = dateString.substring(0, pattern.length());
+        }
+        SimpleDateFormat parser = new SimpleDateFormat(pattern);
+        Date date = parser.parse(dateTime);
+        return date;
+    }
+
     private void setCDPPath(IInternalContest contest, String path) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setJudgeCDPBasePath(path);
@@ -1619,6 +1669,13 @@ public class ContestYAMLLoader {
         contestInformation.setContestTitle(title);
     }
 
+
+    private void setContestStartDateTime(IInternalContest contest, Date date) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setStartDate(date);
+    }
+
+    
     public AutoJudgeSetting[] getAutoJudgeSettings(String[] yamlLines, Problem[] problems)  {
 
         String[] sectionLines = getSectionLines(AUTO_JUDGE_KEY, yamlLines);

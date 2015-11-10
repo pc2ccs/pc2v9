@@ -4,11 +4,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Vector;
 
 import junit.framework.TestSuite;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
 import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.list.AutoJudgeSettingComparator;
@@ -19,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -31,6 +38,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
 
 /**
  * Unit tests.
@@ -64,7 +72,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     public void testGetTitle() throws IOException {
 
-        String title = loader.getContestTitle(getYamlTestFileName());
+        String title = loader.getContestTitle(getContestYamlTestFilename());
 
         // name: ACM-ICPC World Finals 2011
         assertEquals("Contest title", "ACM-ICPC World Finals 2011", title);
@@ -94,13 +102,13 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         IInternalContest contest = loader.fromYaml(null, new String[0], "NAD");
         assertNotNull(contest);
         
-//        editFile(getYamlTestFileName());
+//        editFile(getContestYamlTestFilename());
 
-        String[] contents = Utilities.loadFile(getYamlTestFileName());
+        String[] contents = Utilities.loadFile(getContestYamlTestFilename());
 
-        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+        assertFalse("File missing " + getContestYamlTestFilename(), contents.length == 0);
 
-//        editFile(getYamlTestFileName());
+//        editFile(getContestYamlTestFilename());
         contest = loader.fromYaml(null, contents, getDataDirectory());
 
         assertNotNull(contest);
@@ -159,7 +167,12 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     }
 
-    private String getYamlTestFileName() {
+    /**
+     * Return contest.yaml for this JUnit.
+     * 
+     * @return filename for contest.yaml file.
+     */
+    private String getContestYamlTestFilename() {
         return getTestFilename(ExportYAML.CONTEST_FILENAME);
     }
 
@@ -481,9 +494,9 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     public void testLoadClarCategories() throws Exception {
 
-        String[] contents = Utilities.loadFile(getYamlTestFileName());
+        String[] contents = Utilities.loadFile(getContestYamlTestFilename());
 
-        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+        assertFalse("File missing " + getContestYamlTestFilename(), contents.length == 0);
 
         String[] answers = loader.getClarificationCategories(contents);
 
@@ -495,9 +508,9 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     public void testLoadSites() throws Exception {
 
-        String[] contents = Utilities.loadFile(getYamlTestFileName());
+        String[] contents = Utilities.loadFile(getContestYamlTestFilename());
 
-        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+        assertFalse("File missing " + getContestYamlTestFilename(), contents.length == 0);
 
         Site[] sites = loader.getSites(contents);
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
@@ -525,9 +538,9 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     }
 
     public void testGeneralAnswsers() throws Exception {
-        String[] contents = Utilities.loadFile(getYamlTestFileName());
+        String[] contents = Utilities.loadFile(getContestYamlTestFilename());
 
-        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+        assertFalse("File missing " + getContestYamlTestFilename(), contents.length == 0);
 
         String[] strings = loader.getGeneralAnswers(contents);
 
@@ -537,7 +550,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     public void testgetSectionLines() throws Exception {
 
-        String contestYamlFilename = getYamlTestFileName();
+        String contestYamlFilename = getContestYamlTestFilename();
 
         assertTrue("Test file does not exist " + contestYamlFilename, Utilities.isFileThere(contestYamlFilename));
         String[] contents = Utilities.loadFile(contestYamlFilename);
@@ -650,7 +663,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     
     public void testgetAutoJudgeSettings() throws Exception {
 
-        String contestYamlFilename = getYamlTestFileName();
+        String contestYamlFilename = getContestYamlTestFilename();
 
         assertTrue("Test file does not exist " + contestYamlFilename, Utilities.isFileThere(contestYamlFilename));
         String[] yamlLines = Utilities.loadFile(contestYamlFilename);
@@ -781,7 +794,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
     public void testReplayLoad() throws Exception {
         
-        String contestYamlFilename = getYamlTestFileName();
+        String contestYamlFilename = getContestYamlTestFilename();
 
         assertTrue("Test file does not exist " + contestYamlFilename, Utilities.isFileThere(contestYamlFilename));
         String[] yamlLines = Utilities.loadFile(contestYamlFilename);
@@ -964,8 +977,8 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         // TODO CCS JUnit Test Multiple Data sets.
 //        String dirname = getDataDirectory(getName());
         
-//        String[] contents = Utilities.loadFile(getYamlTestFileName(dirname));
-//        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+//        String[] contents = Utilities.loadFile(getContestYamlTestFilename(dirname));
+//        assertFalse("File missing " + getContestYamlTestFilename(), contents.length == 0);
 //        loader.loadCCSProblem(contest, dirname, problem, contents);
 //        contest = loader.fromYaml(null, contents, getDataDirectory());
 
@@ -1350,7 +1363,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     
     public void testJudgeCDPPath() throws Exception {
         
-        String testDirName =getDataDirectory(this.getName());
+        String testDirName = getDataDirectory(this.getName());
 //        ensureDirectory(testDirName);
 //        startExplorer(testDirName);
         
@@ -1517,5 +1530,48 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
             PAD4 + ContestYAMLLoader.SEND_PRELIMINARY_JUDGEMENT_KEY + ":" +preliminaryJudge, 
         };
         return yaml;
+    }
+    
+    /**
+     * Test Load of Yaml  start-time.
+     * 
+     * Bug 955.
+     * 
+     * @throws Exception
+     */
+    public void testStartTimeLoad() throws Exception {
+        
+        String dateString = "2011-02-04 01:23Z";
+        Date date = ContestYAMLLoader.parseStartTime(dateString);
+        
+        assertEquals("Expected contest time ", "Fri Feb 04 01:23:00 PST 2011", date.toString());
+        
+        String expectedFormattedTime = XMLUtilities.formatSeconds(date.getTime());
+        assertEquals("Expected contest start time ", "1296811380.000", expectedFormattedTime);
+        
+        String inputYamlFile = getContestYamlTestFilename();
+        String[] lines = Utilities.loadFile(inputYamlFile);
+        IInternalContest contest = loader.fromYaml(null, lines, getDataDirectory());
+        
+        ContestInformation info = contest.getContestInformation();
+        
+        assertNotNull("Expecting getStartDate() populated ", info.getStartDate());
+        assertEquals("Expected contest time ", date.toString(), info.getStartDate().toString());
+        
+        // Test ExportYaml 
+        
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
+        String xmlString = eventFeedXML.toXML(contest);
+        
+        Document document = getDocument(xmlString);
+        NodeList nodes = document.getElementsByTagName("starttime");
+        assertNotNull("Expecting starttime element in XML ", nodes);
+        
+        /**
+         * value for starttime element
+         */
+        String value = nodes.item(0).getFirstChild().getNodeValue();
+        assertEquals("Expected contest start time ", expectedFormattedTime, value);
+
     }
 }
