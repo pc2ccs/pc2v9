@@ -2850,7 +2850,11 @@ public class EditProblemPane extends JPanePlugin {
             exportButton.setMnemonic(KeyEvent.VK_X);
             exportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    saveAndCopmpare();
+                    if (Utilities.isDebugMode()){
+                        saveAndCopmpare();
+                    } else {
+                        showMessage("Export not implmented yet"); // TODO 
+                    }
                 }
             });
         }

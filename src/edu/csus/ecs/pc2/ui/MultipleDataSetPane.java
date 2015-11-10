@@ -6,8 +6,10 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -15,6 +17,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -280,16 +283,20 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return btnReload;
     }
+    
+    private void showMessage(String string, String title) {
+        JOptionPane.showMessageDialog(null, string, title, JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void showMessage(String string) {
+        showMessage(string, "Note");
+    }
+
 
     /**
      * Load new data files.
      */
     protected void loadDataFiles() {
-
-        /**
-         * cdp config directory with problem subdirectories.
-         */
-        String baseDirectoryName = "workspace";
         
         /**
          * short name or base directory
@@ -300,21 +307,45 @@ public class MultipleDataSetPane extends JPanePlugin {
             showMessage(this, "Must enter short problem name to load","Enter short problems name (on General tab)");
             return;
         }
+
+        ContestInformation info = getContest().getContestInformation();
+        
+        String adminPath = info.getAdminCDPBasePath();
+        
+        if (adminPath == null){
+            showMessage("Cannot load - Set Admin CDP path first");
+            return;
+        }
+        
+        if (!Utilities.isDirThere(adminPath)){
+            showMessage("Cannot load - Admin CDP path directory missing: "+adminPath);
+            return;
+        }
+        
+        /**
+         * cdp config directory with problem subdirectories.
+         */
+        String baseDirectoryName = adminPath;
         
         boolean externalFiles = false;
-        
-//        String problemFilesDirectory = baseDirectoryName + File.separator +  shortProblemName; 
-        
-        if (problem != null){
+        if (problem != null) {
             externalFiles = problem.isUsingExternalDataFiles();
-//            problemFilesDirectory = Utilities.getSecretDataPath(baseDirectoryName, problem);
-            
         } else {
             problem = new Problem(shortProblemName);
         }
         
         // check for answer files
         String secretDirPath = Utilities.getSecretDataPath(baseDirectoryName, shortProblemName);
+        
+        if (! Utilities.isDirThere(secretDirPath)){
+            secretDirPath = baseDirectoryName + File.separator + shortProblemName;
+        }
+
+        if (! Utilities.isDirThere(secretDirPath)){
+            showMessage(this, "Cannot read/find test data set directory"+secretDirPath,"No such directory");
+            return;
+        }
+        
         String[] inputFileNames = Utilities.getFileNames(secretDirPath, ".ans");
         
         if (inputFileNames.length == 0){
