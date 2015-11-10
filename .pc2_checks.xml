@@ -122,7 +122,7 @@ $Log$
             <property name="max" value="200"/>
         </module>
         <module name="MethodLength">
-            <property name="max" value="200"/>
+            <property name="max" value="250"/>
             <property name="countEmpty" value="false"/>
         </module>
         <module name="ParameterNumber"/>
