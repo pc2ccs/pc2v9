@@ -117,13 +117,6 @@ public class MultipleDataSetPane extends JPanePlugin {
         tableModel.setFiles(problemDataFiles);
         tableModel.fireTableDataChanged();
      
-        // TODO 917 remove debugging
-        if (EditProblemPane.debug22EditProblem) {
-            System.out.println("debug 22 fire data changed ");
-            dump(problemDataFiles, "populateUI debug 22 ");
-            dump(getProblemDataFiles(), "populateUI debug 22 B");
-        }
-
         // TODO 917 re-add auto size columns
         resizeColumnWidth(testDataSetsListBox);
     }

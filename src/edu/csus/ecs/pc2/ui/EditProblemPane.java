@@ -66,7 +66,7 @@ public class EditProblemPane extends JPanePlugin {
     
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
     
-    public static boolean debug22EditProblem = false;
+    private static boolean debug22EditProblem = false;
 
     /**
      *  
@@ -720,11 +720,9 @@ public class EditProblemPane extends JPanePlugin {
         
         checkProblem.setUsingExternalDataFiles(usingExternalDataFiles);
 
-        int secs = getIntegerValue(timeOutSecondTextField.getText());
-        checkProblem.setTimeOutInSeconds(secs);
+        checkProblem.setTimeOutInSeconds(getIntegerValue(timeOutSecondTextField.getText()));
 
-        boolean deleted = getDeleteProblemCheckBox().isSelected();
-        checkProblem.setActive(!deleted);
+        checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
         
         checkProblem.setCcsMode(getCcsValidationEnabledCheckBox().isSelected());
         
@@ -824,18 +822,7 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setAnswerFileName(null);
         }
 
-        if (stdinRadioButton.isSelected() && fileRadioButton.isSelected()) {
-            throw new InvalidFieldValue("Pick just one radio button");
-        }
-
-        if (fileRadioButton.isSelected()) {
-
-            checkProblem.setReadInputDataFromSTDIN(false);
-
-        } else if (stdinRadioButton.isSelected()) {
-
-            checkProblem.setReadInputDataFromSTDIN(true);
-        }
+        checkProblem.setReadInputDataFromSTDIN(stdinRadioButton.isSelected());
 
         /**
          * The 3 radio buttons for which validator are fit into 2 boolean fields in checkProblem. If the checkProblem is validated and usePC2 validator then use pc2validator if the checkProblem is

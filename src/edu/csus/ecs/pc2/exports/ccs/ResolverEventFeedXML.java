@@ -284,8 +284,7 @@ public class ResolverEventFeedXML {
             }
         }
         
-        if (info.getStartDate() != null)
-        {
+        if (info.getStartDate() != null) {
             formattedSeconds = XMLUtilities.formatSeconds(info.getStartDate().getTime());
         }
 
