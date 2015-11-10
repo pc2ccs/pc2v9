@@ -433,14 +433,29 @@ public class ProblemsPane extends JPanePlugin {
 
                 if (result == JOptionPane.YES_OPTION) {
                     editProblemFrameNew.setProblemCopy(problemToEdit, newProblemDataFiles);
+                    if (problemToEdit.isUsingExternalDataFiles()) {
+                        editProblemFrameNew.setTitle("Edit Problem " + problemToEdit.getDisplayName()+" ("+problemToEdit.getExternalDataFileLocation()+")");
+                    } else {
+                        editProblemFrameNew.setTitle("Edit Problem " + problemToEdit.getDisplayName());
+                    }
                     editProblemFrameNew.setVisible(true);
                 } else {
                     editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
+                    if (problemToEdit.isUsingExternalDataFiles()) {
+                        editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName()+" ("+problemToEdit.getExternalDataFileLocation()+")");
+                    } else {
+                        editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName());
+                    }
                     editProblemFrame.setVisible(true);
                 }
             } else {
                 // just bring up the ui, let the user add/cancel the copied problem
                 editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
+                if (problemToEdit.isUsingExternalDataFiles()) {
+                    editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName()+" ("+problemToEdit.getExternalDataFileLocation()+")");
+                } else {
+                    editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName());
+                }
                 editProblemFrame.setVisible(true);
             }
             
