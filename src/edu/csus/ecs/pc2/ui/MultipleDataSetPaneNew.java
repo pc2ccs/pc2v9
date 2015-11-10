@@ -61,7 +61,7 @@ public class MultipleDataSetPaneNew extends JPanePlugin {
 
     private ProblemDataFiles problemDataFiles;
     private JButton btnDelete;
-    private JButton btnReload;
+    private JButton btnImportFromCDP;
     private JButton btnLoad;
 
     private EditProblemPane editProblemPane = null;
@@ -122,7 +122,7 @@ public class MultipleDataSetPaneNew extends JPanePlugin {
             dataFilesButtonPanel.add(btnEditButton);
             dataFilesButtonPanel.add(getBtnDelete());
             dataFilesButtonPanel.add(getBtnLoad());
-            dataFilesButtonPanel.add(getBtnReload());
+            dataFilesButtonPanel.add(getBtnImportFromCDP());
         }
         return dataFilesButtonPanel;
     }
@@ -343,17 +343,17 @@ public class MultipleDataSetPaneNew extends JPanePlugin {
         // Warn if they delete row one ??
     }
 
-    private JButton getBtnReload() {
-        if (btnReload == null) {
-            btnReload = new JButton("Import From CDP");
-            btnReload.setToolTipText("Refresh/Reload data sets from disk");
-            btnReload.addActionListener(new ActionListener() {
+    private JButton getBtnImportFromCDP() {
+        if (btnImportFromCDP == null) {
+            btnImportFromCDP = new JButton("Import From CDP");
+            btnImportFromCDP.setToolTipText("Refresh/Reload data sets from an ICPC Contest Data Package (CDP); see https://clics.ecs.baylor.edu/index.php/CDP");
+            btnImportFromCDP.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     reloadDataFiles();
                 }
             });
         }
-        return btnReload;
+        return btnImportFromCDP;
     }
 
     /**
