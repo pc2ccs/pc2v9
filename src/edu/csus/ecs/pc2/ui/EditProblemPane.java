@@ -756,18 +756,23 @@ public class EditProblemPane extends JPanePlugin {
                 lastDataFile = serializedFile;
                 
             } else {
-
-                SerializedFile serializedFile = originalProblemDataFiles.getJudgesDataFile();
-                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
-                    // they've added a new file
-                    serializedFile = new SerializedFile(fileName);
-                    checkFileFormat(serializedFile);
-                } else {
-                    serializedFile = freshenIfNeeded(serializedFile, fileName);
+                if (originalProblemDataFiles.getJudgesDataFiles().length < 2) {
+                    // TODO this is not MTS safe
+                    SerializedFile serializedFile = originalProblemDataFiles.getJudgesDataFile();
+                    if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
+                        // they've added a new file
+                        serializedFile = new SerializedFile(fileName);
+                        checkFileFormat(serializedFile);
+                    } else {
+                        serializedFile = freshenIfNeeded(serializedFile, fileName);
+                    }
+                    
+                    checkProblem.setDataFileName(serializedFile.getName());
+                    lastDataFile = serializedFile;
+                } else if (originalProblemDataFiles.getJudgesDataFiles().length > 1) {
+                    lastDataFile = originalProblemDataFiles.getJudgesDataFiles()[0];
+                    checkProblem.setDataFileName(lastDataFile.getName());
                 }
-                
-                checkProblem.setDataFileName(serializedFile.getName());
-                lastDataFile = serializedFile;
             }
         } else {
             checkProblem.setDataFileName(null);
@@ -798,17 +803,23 @@ public class EditProblemPane extends JPanePlugin {
                 }
                 lastAnsFile = serializedFile;
             } else {
-                SerializedFile serializedFile = originalProblemDataFiles.getJudgesAnswerFile();
-                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
-                    // they've added a new file
-                    serializedFile = new SerializedFile(fileName);
-                    checkFileFormat(serializedFile);
-                } else {
-                    serializedFile = freshenIfNeeded(serializedFile, fileName);
+                if (originalProblemDataFiles.getJudgesAnswerFiles().length < 2) {
+                    // TODO this is not MTS safe
+                    SerializedFile serializedFile = originalProblemDataFiles.getJudgesAnswerFile();
+                    if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
+                        // they've added a new file
+                        serializedFile = new SerializedFile(fileName);
+                        checkFileFormat(serializedFile);
+                    } else {
+                        serializedFile = freshenIfNeeded(serializedFile, fileName);
+                    }
+                    lastAnsFile = serializedFile;
+    
+                    checkProblem.setAnswerFileName(serializedFile.getName());
+                } else if (originalProblemDataFiles.getJudgesAnswerFiles().length > 0) {
+                    lastAnsFile = originalProblemDataFiles.getJudgesAnswerFiles()[0];
+                    checkProblem.setAnswerFileName(lastAnsFile.getName());
                 }
-                lastAnsFile = serializedFile;
-
-                checkProblem.setAnswerFileName(serializedFile.getName());
             }
         } else {
             checkProblem.setAnswerFileName(null);
@@ -1291,6 +1302,8 @@ public class EditProblemPane extends JPanePlugin {
                 // now set the new ones
                 getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
                 
+                // this sets the tableModel files list, which is what the getProblemDataFiles uses
+                getMultipleDataSetPane().populateUI();
                 populateGUI(inProblem);
                 // do not automatically set this to no update, the files may have changed on disk
                 if (inProblem == null) {
