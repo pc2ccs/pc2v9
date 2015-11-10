@@ -550,28 +550,24 @@ public class ProblemDataFiles implements IElementObject {
         int curDataFileCount = judgesDataFiles.length;
         int curAnswerFileCount = judgesAnswerFiles.length;
 
-        if (curDataFileCount == 1 || curAnswerFileCount == 1) {
-            ;
-        } else {
-            if (curDataFileCount > 0) {
-                newDataFiles = new SerializedFile[judgesDataFiles.length - 1];
-                int newIdx = 0;
-                for (int i = 0; i < judgesDataFiles.length; i++) {
-                    if (index != i) {
-                        newDataFiles[newIdx] = judgesDataFiles[i];
-                        newIdx++;
-                    }
+        if (curDataFileCount > 1) {
+            newDataFiles = new SerializedFile[judgesDataFiles.length - 1];
+            int newIdx = 0;
+            for (int i = 0; i < judgesDataFiles.length; i++) {
+                if (index != i) {
+                    newDataFiles[newIdx] = judgesDataFiles[i];
+                    newIdx++;
                 }
             }
+        }
 
-            if (curAnswerFileCount > 0) {
-                newAnswerFiles = new SerializedFile[judgesAnswerFiles.length - 1];
-                int newIdx = 0;
-                for (int i = 0; i < judgesAnswerFiles.length; i++) {
-                    if (index != i) {
-                        newAnswerFiles[newIdx] = judgesAnswerFiles[i];
-                        newIdx++;
-                    }
+        if (curAnswerFileCount > 1) {
+            newAnswerFiles = new SerializedFile[judgesAnswerFiles.length - 1];
+            int newIdx = 0;
+            for (int i = 0; i < judgesAnswerFiles.length; i++) {
+                if (index != i) {
+                    newAnswerFiles[newIdx] = judgesAnswerFiles[i];
+                    newIdx++;
                 }
             }
         }
