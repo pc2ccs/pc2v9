@@ -4,18 +4,18 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+/**
+ * A collection of test case file name sets (pairs) for a Problem.
+ * Note that per the Collection/Iterator Design Pattern, the fact that the collection is stored in a
+ * particular data structure is hidden from the outside world; the
+ * only things the outside world can do are defined in the public methods of this class, and
+ * those things do NOT include accessing any information about the internal storage data type.
+ * In particular, external clients cannot rely on using any sort of "index" related to the position
+ * of a particular test case in the collection, because a "collection" is by definition not
+ * a linear data structure.
+ */
 public class TestCaseFileNameCollection implements Collection<TestCaseFileNameSet> {
     
-    /**
-     * A collection of test case file name sets (pairs) for a Problem.
-     * Note that per the Collection/Iterator Design Pattern, the fact that the collection is stored in a
-     * particular data structure is hidden from the outside world; the
-     * only things the outside world can do are defined in the public methods of this class, and
-     * those things do NOT include accessing any information about the internal storage data type.
-     * In particular, external clients cannot rely on using any sort of "index" related to the position
-     * of a particular test case in the collection, because a "collection" is by definition not
-     * a linear data structure.
-     */
     
     //the internal storage for the test sets in the collection (see the class header comments...)
     private Vector<TestCaseFileNameSet> testCaseFileNameSets = new Vector<TestCaseFileNameSet>();
@@ -173,11 +173,7 @@ public class TestCaseFileNameCollection implements Collection<TestCaseFileNameSe
             if (testCaseFileNameSets.size() <= 0) {
                 return false;
             }
-            if (curIndex == testCaseFileNameSets.size() - 1) {
-                return false;
-            } else {
-                return true;
-            }
+            return !(curIndex == (testCaseFileNameSets.size() - 1));
             
         }
 
@@ -190,6 +186,12 @@ public class TestCaseFileNameCollection implements Collection<TestCaseFileNameSe
         public TestCaseFileNameSet next() {
             curIndex ++ ;
             return (testCaseFileNameSets.get(curIndex));
+        }
+
+        @Override
+        public void remove() {
+            // TODO Auto-generated method stub
+            // added to eliminate java error
         }
         
     }
