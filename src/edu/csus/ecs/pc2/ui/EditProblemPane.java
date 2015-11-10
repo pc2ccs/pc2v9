@@ -478,40 +478,107 @@ public class EditProblemPane extends JPanePlugin {
         if (problem != null) {
 
             try {
-                ProblemDataFiles myProblemDataFiles = new ProblemDataFiles(problem);
                 Problem changedProblem = getProblemFromFields(null, newProblemDataFiles, false);
-                if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(myProblemDataFiles)) {
+                if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(originalProblemDataFiles)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
                 }
                 ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
+                ProblemDataFiles proposedPDF = getMultipleDataSetPane().getProblemDataFiles();
                 if (pdf != null) {
                     int fileChanged = 0;
-                    String fileName = changedProblem.getDataFileName();
-                    if (fileName != null && fileName.length() > 0) {
-                        if (!fileSameAs(pdf.getJudgesDataFile(), changedProblem.getDataFileName())) {
-                            enableButton = true;
-                            fileChanged++;
-                            if (updateToolTip.equals("")) {
-                                updateToolTip = "Judges data";
-                            } else {
-                                updateToolTip = ", Judges data";
+                    SerializedFile[] judgesDataFiles = pdf.getJudgesDataFiles();
+                    SerializedFile[] judgesDataFilesNew = proposedPDF.getJudgesDataFiles();
+                    if ((judgesDataFiles == null && judgesDataFilesNew != null) || (judgesDataFiles != null & judgesDataFilesNew == null)) {
+                        // one was null the other was not
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Judges data";
+                        } else {
+                            updateToolTip += ", Judges data";
+                        }
+                        enableButton = true;
+                    } else if (judgesDataFiles.length != judgesDataFilesNew.length) {
+                        fileChanged += Math.abs(judgesDataFiles.length-judgesDataFilesNew.length);
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Judges data";
+                        } else {
+                            updateToolTip += ", Judges data";
+                        }
+                        enableButton = true;
+                    } else {
+                        // compare each file
+                        boolean changed = false;
+                        if (judgesDataFiles != null) {
+                            for (int i = 0; i < judgesDataFiles.length; i++) {
+                                SerializedFile serializedFile = judgesDataFiles[i];
+                                // external true, we just the sha we do not need to load the data
+                                SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(),true);
+                                if (!serializedFile.getName().equals(judgesDataFilesNew[i].getName())) {
+                                    // name changed
+                                    fileChanged++;
+                                    changed = true;
+                                } else if (!serializedFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
+                                    // contents have changed on disk
+                                    fileChanged++;
+                                    changed = true;
+                                }
+                            }
+                            if (changed) {
+                                if (updateToolTip.equals("")) {
+                                    updateToolTip = "Judges data";
+                                } else {
+                                    updateToolTip += ", Judges data";
+                                }
+                                enableButton = true;
                             }
                         }
                     }
-                    fileName = changedProblem.getAnswerFileName();
-                    if (fileName != null && fileName.length() > 0) {
-                        if (!fileSameAs(pdf.getJudgesAnswerFile(), changedProblem.getAnswerFileName())) {
-                            enableButton = true;
-                            fileChanged++;
-                            if (updateToolTip.equals("")) {
-                                updateToolTip = "Judges answer";
-                            } else {
-                                updateToolTip += ", Judges answer";
+                    SerializedFile[] judgesAnswerFiles = pdf.getJudgesAnswerFiles();
+                    SerializedFile[] judgesAnswerFilesNew = proposedPDF.getJudgesAnswerFiles();
+                    if ((judgesAnswerFiles == null && judgesAnswerFilesNew != null) || (judgesAnswerFiles != null & judgesAnswerFilesNew == null)) {
+                        // one was null the other was not
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Judges answer";
+                        } else {
+                            updateToolTip += ", Judges answer";
+                        }
+                        enableButton = true;
+                    } else if (judgesAnswerFiles.length != judgesAnswerFilesNew.length) {
+                        fileChanged += Math.abs(judgesAnswerFiles.length-judgesAnswerFilesNew.length);
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Judges answer";
+                        } else {
+                            updateToolTip += ", Judges answer";
+                        }
+                        enableButton = true;
+                    } else {
+                        // compare each file
+                        boolean changed = false;
+                        if (judgesAnswerFiles != null) {
+                            for (int i = 0; i < judgesAnswerFiles.length; i++) {
+                                SerializedFile serializedFile = judgesAnswerFiles[i];
+                                // external true, we just the sha we do not need to load the data
+                                SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), true);
+                                if (!serializedFile.equals(judgesAnswerFilesNew[i])) {
+                                    fileChanged++;
+                                    changed = true;
+                                } else if (!serializedFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
+                                    // contents have changed on disk
+                                    fileChanged++;
+                                    changed = true;
+                                }
+                            }
+                            if (changed) {
+                                if (updateToolTip.equals("")) {
+                                    updateToolTip = "Judges answer";
+                                } else {
+                                    updateToolTip += ", Judges answer";
+                                }
+                                enableButton = true;
                             }
                         }
                     }
-                    fileName = changedProblem.getValidatorProgramName();
+                    String fileName = changedProblem.getValidatorProgramName();
                     if (!problem.isUsingPC2Validator() && fileName != null && fileName.length() > 0) {
                         if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
                             enableButton = true;
@@ -532,14 +599,14 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                 } else {
-                    logDebugException( "No ProblemDataFiles for " + problem);
+                    logDebugException("No ProblemDataFiles for " + problem);
                 }
 
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
-                logDebugException ("Input Problem (but not saving) ", e);
-                
+                logDebugException("Input Problem (but not saving) ", e);
+
                 enableButton = true;
             } catch (Exception ex) {
                 logDebugException("Edit Problem ", ex);
@@ -1217,6 +1284,13 @@ public class EditProblemPane extends JPanePlugin {
                 getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
                 
                 populateGUI(inProblem);
+                // do not automatically set this to no update, the files may have changed on disk
+                if (inProblem == null) {
+                    // new problem
+                    enableUpdateButtons(false);
+                } else {
+                    enableUpdateButton();
+                }
 //                populatingGUI = true;
 //                setForm(inProblem, problemDataFiles);
 //                getAddButton().setVisible(true);
