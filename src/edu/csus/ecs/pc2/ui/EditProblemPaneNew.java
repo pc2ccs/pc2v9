@@ -34,7 +34,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -110,17 +109,13 @@ public class EditProblemPaneNew extends JPanePlugin {
 
     private JTextField timeOutSecondTextField = null;
 
-    private JCheckBox problemRequiresDataCheckBox = null;
+    private JCheckBox problemRequiresInputDataCheckBox = null;
 
     private JPanel teamReadsFromPanel = null;
-
-    private JPanel inputDataSourcePanel = null;
 
     private JRadioButton stdinRadioButton = null;
 
     private JRadioButton fileRadioButton = null;
-
-    private JCheckBox chkboxJudgesHaveAnswerFiles = null;
 
     private JLabel problemNameLabel = null;
 
@@ -213,8 +208,6 @@ public class EditProblemPaneNew extends JPanePlugin {
 
     private JButton reportButton = null;
 
-    private MultipleDataSetPane multipleDataSetPane = null;
-
     private JPanel judgeTypeInnerPane = null;
 
     private JPanel ccsSettingsPane = null;
@@ -227,49 +220,25 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JTextField shortNameTextfield;
 
     private String fileNameOne;
-    private JRadioButton rdbtnSelectCDP;
     private JPanel problemDescriptionPanel;
-    private JPanel problemInputDataPanel;
+    private JPanel problemDataFilesPanel;
     private JLabel lblSpacer1;
     private JLabel lblSpacer2;
-    private JPanel judgesAnswerFilePanel;
-    private JLabel lblSingleDataFileName;
-    private JTextField textFieldSingleDataFile;
     private JPanel judgingDisplayOptionsPanel;
-    private JPanel inputDataCDPSelectionPanel;
-    private JButton btnBrowseForSingleDataFile;
-    private JPanel multipleDataFileSelectionPanel;
-    private JRadioButton rdbtnSelectMultipleFileInput;
-    private JLabel lblMultipleDataFileName;
-    private JTextField textFieldDataFileFolder;
-    private JButton btnBrowseForMultipleDataFile;
-    private JPanel singleDataFileSelectionPanel;
     private JPanel inputDataStoragePanel;
     private JRadioButton rdbtnCopyFilesToInternal;
     private JRadioButton rdbtnKeepFilesExternal;
-    private JRadioButton rdbtnSelectSingleFileInput;
-    private Component horizontalStrut;
-    private Component horizontalStrut_1;
-    private JPanel answerFileSourcePanel;
-    private JPanel singleAnswerFileSelectionPanel;
-    private JRadioButton rdbtnSingleAnswerFile;
-    private Component horizontalStrut_2;
-    private JLabel lblAnswerFileName;
-    private JTextField textFieldSingleAnswerFile;
-    private JButton btnBrowseForSingleAnswerFile;
-    private JPanel answerFileCDPSelectionPanel;
-    private JRadioButton rdbtnAnswerSelectCDP;
-    private JPanel multipleAnswerFileSelectionPanel;
-    private JRadioButton rdbtnMultipleAnswerFiles;
-    private Component horizontalStrut_3;
-    private JLabel lblAnswerFileFolder;
-    private JTextField textFieldAnswerFileFolder;
-    private JButton btnBrowserForMultipleAnswerFile;
     private Component horizontalStrut_4;
     private Component horizontalStrut_5;
-    private final ButtonGroup internalDataStorageButtonGroup = new ButtonGroup();
-    private final ButtonGroup inputDataSourceButtonGroup = new ButtonGroup();
-    private final ButtonGroup answerFileSourceButtonGroup = new ButtonGroup();
+//    private final ButtonGroup internalDataStorageButtonGroup = new ButtonGroup();
+//    private final ButtonGroup inputDataSourceButtonGroup = new ButtonGroup();
+//    private final ButtonGroup answerFileSourceButtonGroup = new ButtonGroup();
+    private JTextField teamFileNameTextField;
+
+    private JLabel lblTeamReadsFromFileName;
+    private JCheckBox judgesHaveProvidedAnswerFilesCheckBox;
+
+    private MultipleDataSetPaneNew multipleDataSetPane;
     
     /**
      * This method initializes
@@ -277,8 +246,8 @@ public class EditProblemPaneNew extends JPanePlugin {
      */
     public EditProblemPaneNew() {
         super();
-        setMaximumSize(new Dimension(700, 800));
-        setPreferredSize(new Dimension(650, 1000));
+        setMaximumSize(new Dimension(900, 500));
+        setPreferredSize(new Dimension(900, 576));
         initialize();
     }
     
@@ -288,7 +257,7 @@ public class EditProblemPaneNew extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(603, 750));
+//        this.setSize(new Dimension(603, 750));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -660,10 +629,10 @@ public class EditProblemPaneNew extends JPanePlugin {
         }
 
         
-        /**
-         * Answer file from General Tab.
-         */
-        SerializedFile lastAnsFile = null;
+//        /**
+//         * Answer file from General Tab.
+//         */
+//        SerializedFile lastAnsFile = null;
                 
         if (checkProblem == null) {
             checkProblem = new Problem(problemNameTextField.getText());
@@ -700,84 +669,88 @@ public class EditProblemPaneNew extends JPanePlugin {
             throw new InvalidFieldValue("Invalid problem short name");
         }
 
-        if (problemRequiresDataCheckBox.isSelected()) {
+        if (getProblemRequiresInputDataCheckBox().isSelected()) {
+            System.err.println("EditProblemPaneNew.getProblemFromFields(): Warning: processing for 'problem requires data' checkbox is commented out!");
 
-            String fileName = getTextFieldSingleDataFile().getText();
-            if (fileName == null || fileName.trim().length() == 0) {
-                throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
-            }
-            
-            if (fileName.trim().length() != getTextFieldSingleDataFile().getToolTipText().length()) {
-                fileName = getTextFieldSingleDataFile().getToolTipText() + "";
-            }
-
-            if (isAdding) {
-                SerializedFile serializedFile = new SerializedFile(fileName);
-
-                if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (adding)");
-                }
-
-                checkProblem.setDataFileName(serializedFile.getName());
-                lastDataFile = serializedFile;
-                
-            } else {
-
-                SerializedFile serializedFile = originalProblemDataFiles.getJudgesDataFile();
-                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
-                    // they've added a new file
-                    serializedFile = new SerializedFile(fileName);
-                    checkFileFormat(serializedFile);
-                } else {
-                    serializedFile = freshenIfNeeded(serializedFile, fileName);
-                }
-                
-                checkProblem.setDataFileName(serializedFile.getName());
-                lastDataFile = serializedFile;
-            }
-        } else {
-            checkProblem.setDataFileName(null);
+            //TODO: replace the following with a check verifying that every currently-defined test case has a data file
+//            String fileName = getTextFieldSingleDataFile().getText();
+//            if (fileName == null || fileName.trim().length() == 0) {
+//                throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
+//            }
+//            
+//            if (fileName.trim().length() != getTextFieldSingleDataFile().getToolTipText().length()) {
+//                fileName = getTextFieldSingleDataFile().getToolTipText() + "";
+//            }
+//
+//            if (isAdding) {
+//                SerializedFile serializedFile = new SerializedFile(fileName);
+//
+//                if (serializedFile.getBuffer() == null) {
+//                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (adding)");
+//                }
+//
+//                checkProblem.setDataFileName(serializedFile.getName());
+//                lastDataFile = serializedFile;
+//                
+//            } else {
+//
+//                SerializedFile serializedFile = originalProblemDataFiles.getJudgesDataFile();
+//                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
+//                    // they've added a new file
+//                    serializedFile = new SerializedFile(fileName);
+//                    checkFileFormat(serializedFile);
+//                } else {
+//                    serializedFile = freshenIfNeeded(serializedFile, fileName);
+//                }
+//                
+//                checkProblem.setDataFileName(serializedFile.getName());
+//                lastDataFile = serializedFile;
+//            }
+//        } else {
+//            checkProblem.setDataFileName(null);
         }
 
-        if (chkboxJudgesHaveAnswerFiles.isSelected()) {
-            // TODO BUG 957 update this for the radio select
-            String fileName = getTextFieldSingleAnswerFile().getText();
-            if (fileName == null || fileName.trim().length() == 0) {
-                throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
-            }
+        if (getJudgesHaveProvidedAnswerFilesCheckBox().isSelected()) {
+            System.err.println("EditProblemPaneNew.getProblemFromFields(): Warning: processing for 'judges have provided answer files' checkbox is commented out!");
 
-            if (fileName.trim().length() != getTextFieldSingleAnswerFile().getToolTipText().length()) {
-                fileName = getTextFieldSingleAnswerFile().getToolTipText() + "";
-            }
-
-            if (isAdding) {
-                SerializedFile serializedFile = new SerializedFile(fileName);
-
-                if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (adding)");
-                }
-                
-                checkProblem.setAnswerFileName(serializedFile.getName());
-                // only do this if we do not already have a JudgesAnswerFile
-                if (newProblemDataFiles.getJudgesAnswerFiles().length == 0) {
-                    newProblemDataFiles.setJudgesAnswerFile(serializedFile);
-                }
-                lastAnsFile = serializedFile;
-            } else {
-                SerializedFile serializedFile = originalProblemDataFiles.getJudgesAnswerFile();
-                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
-                    // they've added a new file
-                    serializedFile = new SerializedFile(fileName);
-                    checkFileFormat(serializedFile);
-                } else {
-                    serializedFile = freshenIfNeeded(serializedFile, fileName);
-                }
-                lastAnsFile = serializedFile;
-
-                checkProblem.setAnswerFileName(serializedFile.getName());
-            }
-        } else {
-            checkProblem.setAnswerFileName(null);
+//            // TODO BUG 957 update this for the radio select
+//            String fileName = getTextFieldSingleAnswerFile().getText();
+//            if (fileName == null || fileName.trim().length() == 0) {
+//                throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
+//            }
+//
+//            if (fileName.trim().length() != getTextFieldSingleAnswerFile().getToolTipText().length()) {
+//                fileName = getTextFieldSingleAnswerFile().getToolTipText() + "";
+//            }
+//
+//            if (isAdding) {
+//                SerializedFile serializedFile = new SerializedFile(fileName);
+//
+//                if (serializedFile.getBuffer() == null) {
+//                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (adding)");
+//                }
+//                
+//                checkProblem.setAnswerFileName(serializedFile.getName());
+//                // only do this if we do not already have a JudgesAnswerFile
+//                if (newProblemDataFiles.getJudgesAnswerFiles().length == 0) {
+//                    newProblemDataFiles.setJudgesAnswerFile(serializedFile);
+//                }
+//                lastAnsFile = serializedFile;
+//            } else {
+//                SerializedFile serializedFile = originalProblemDataFiles.getJudgesAnswerFile();
+//                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
+//                    // they've added a new file
+//                    serializedFile = new SerializedFile(fileName);
+//                    checkFileFormat(serializedFile);
+//                } else {
+//                    serializedFile = freshenIfNeeded(serializedFile, fileName);
+//                }
+//                lastAnsFile = serializedFile;
+//
+//                checkProblem.setAnswerFileName(serializedFile.getName());
+//            }
+//        } else {
+//            checkProblem.setAnswerFileName(null);
         }
 
         if (stdinRadioButton.isSelected() && fileRadioButton.isSelected()) {
@@ -905,16 +878,19 @@ public class EditProblemPaneNew extends JPanePlugin {
 
         
         if (dataFiles == null) {
-            if (lastAnsFile != null) {
-                newProblemDataFiles.setJudgesAnswerFile(lastAnsFile);
-            }
             
-            if (lastDataFile != null) {
-                newProblemDataFiles.setJudgesDataFile(lastDataFile);
-            }
+            System.err.println("EditProblemPaneNew.getProblemFromFields(): Warning: processing for 'input parameter datafiles is null' is commented out!");
 
-            checkProblem.addTestCaseFilenames(getNane(lastAnsFile), getNane(lastDataFile));
-
+//            if (lastAnsFile != null) {
+//                newProblemDataFiles.setJudgesAnswerFile(lastAnsFile);
+//            }
+//            
+//            if (lastDataFile != null) {
+//                newProblemDataFiles.setJudgesDataFile(lastDataFile);
+//            }
+//
+//            checkProblem.addTestCaseFilenames(getName(lastAnsFile), getName(lastDataFile));
+//
         } else {
             populateProblemTestSetFilenames(checkProblem, dataFiles);
         }
@@ -928,7 +904,7 @@ public class EditProblemPaneNew extends JPanePlugin {
 
     }
 
-    private String getNane(SerializedFile serializedFile) {
+    private String getName(SerializedFile serializedFile) {
         if (serializedFile != null){
             return serializedFile.getName();
         }
@@ -1095,43 +1071,46 @@ public class EditProblemPaneNew extends JPanePlugin {
             }
         }
 
-        if (getProblemRequiresDataCheckBox().isSelected()) {
+        if (getProblemRequiresInputDataCheckBox().isSelected()) {
+            System.err.println("EditProblemPaneNew.validateProblemFields(): Warning: processing for 'problem requires data' checkbox is commented out!");
 
-            String fileName = getTextFieldSingleDataFile().getText();
-            // this check is outside so we can provide a specific message
-            if (fileName == null || fileName.trim().length() == 0) {
-                showMessage("Problem Requires Input Data checked, select a file ");
-                return false;
-            }
-
-            if (fileName.trim().length() != getTextFieldSingleDataFile().getToolTipText().length()) {
-                fileName = getTextFieldSingleDataFile().getToolTipText() + "";
-            }
-
-            if (!checkFile(fileName)) {
-                // note: if error, then checkFile will showMessage
-                return false;
-            }
+//            String fileName = getTextFieldSingleDataFile().getText();
+//            // this check is outside so we can provide a specific message
+//            if (fileName == null || fileName.trim().length() == 0) {
+//                showMessage("Problem Requires Input Data checked, select a file ");
+//                return false;
+//            }
+//
+//            if (fileName.trim().length() != getTextFieldSingleDataFile().getToolTipText().length()) {
+//                fileName = getTextFieldSingleDataFile().getToolTipText() + "";
+//            }
+//
+//            if (!checkFile(fileName)) {
+//                // note: if error, then checkFile will showMessage
+//                return false;
+//            }
         }
 
-        if (getChkboxJudgesHaveAnswerFiles().isSelected()) {
+        if (getJudgesHaveProvidedAnswerFilesCheckBox().isSelected()) {
+            System.err.println("EditProblemPaneNew.getProblemFromFields(): Warning: processing for 'judges have provided answer files' checkbox is commented out!");
 
-            String answerFileName = getTextFieldSingleAnswerFile().getText();
-
-            // this check is outside so we can provide a specific message
-            if (answerFileName == null || answerFileName.trim().length() == 0) {
-                showMessage("Problem Requires Judges' Answer File checked, select a file ");
-                return false;
-            }
-
-            if (answerFileName.trim().length() != getTextFieldSingleAnswerFile().getToolTipText().length()) {
-                answerFileName = getTextFieldSingleAnswerFile().getToolTipText() + "";
-            }
-
-            if (!checkFile(answerFileName)) {
-                // note: if error, then checkFile will showMessage
-                return false;
-            }
+//
+//            String answerFileName = getTextFieldSingleAnswerFile().getText();
+//
+//            // this check is outside so we can provide a specific message
+//            if (answerFileName == null || answerFileName.trim().length() == 0) {
+//                showMessage("Problem Requires Judges' Answer File checked, select a file ");
+//                return false;
+//            }
+//
+//            if (answerFileName.trim().length() != getTextFieldSingleAnswerFile().getToolTipText().length()) {
+//                answerFileName = getTextFieldSingleAnswerFile().getToolTipText() + "";
+//            }
+//
+//            if (!checkFile(answerFileName)) {
+//                // note: if error, then checkFile will showMessage
+//                return false;
+//            }
         }
 
         if (getComputerJudging().isSelected()) {
@@ -1145,6 +1124,8 @@ public class EditProblemPaneNew extends JPanePlugin {
 
         return true;
     }
+    
+    
 
     /**
      * Checks to ensure the fileName exists, is a file, and is readable.
@@ -1257,29 +1238,23 @@ public class EditProblemPaneNew extends JPanePlugin {
                 // now set the new ones
                 getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
                 
-                populateGUI(inProblem);
-//                populatingGUI = true;
-//                setForm(inProblem, problemDataFiles);
-//                getAddButton().setVisible(true);
-//                getUpdateButton().setVisible(false);
-//                enableUpdateButtons(true);
-//
-//                enableValidatorComponents();
-//                enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
-//                enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
+                populateGUI(inProblem);  //sets populatingGUI true on entrance; resets it false on exit
                 
-//                populatingGUI = false;
+                //protect additional GUI updates
+                populatingGUI = true;
+
+                setForm(inProblem, problemDataFiles);
+                getAddButton().setVisible(true);
+                getUpdateButton().setVisible(false);
+                enableUpdateButtons(true);
+
+                enableValidatorComponents();
+                enableRequiresInputDataComponents(getProblemRequiresInputDataCheckBox().isSelected());
+                enableProvideAnswerFileComponents(getJudgesHaveProvidedAnswerFilesCheckBox().isSelected());
+                
+                populatingGUI = false;
             }
         });
-    }
-
-    public MultipleDataSetPane getMultipleDataSetPane() {
-        if (multipleDataSetPane == null) {
-            multipleDataSetPane = new MultipleDataSetPane();
-            multipleDataSetPane.setContestAndController(getContest(), getController());
-        }
-        return multipleDataSetPane;
-        
     }
     
     /**
@@ -1303,18 +1278,18 @@ public class EditProblemPaneNew extends JPanePlugin {
             if (answerFiles.length > 0) {
                 
                 // Replace data files on General tab
-                chkboxJudgesHaveAnswerFiles.setSelected(true);
-                problemRequiresDataCheckBox.setSelected(true);
+                getJudgesHaveProvidedAnswerFilesCheckBox().setSelected(true);
+                getProblemRequiresInputDataCheckBox().setSelected(true);
                 
                 SerializedFile[] files = datafiles.getJudgesDataFiles();
                 if (files.length > 0) {
-                    getTextFieldSingleDataFile().setText(files[0].getName());
-                    getTextFieldSingleDataFile().setToolTipText(files[0].getAbsolutePath());
+//                    getTextFieldSingleDataFile().setText(files[0].getName());
+//                    getTextFieldSingleDataFile().setToolTipText(files[0].getAbsolutePath());
                 }
                 files = datafiles.getJudgesAnswerFiles();
                 if (files.length > 0) {
-                    getTextFieldSingleAnswerFile().setText(files[0].getName());
-                    getTextFieldSingleAnswerFile().setToolTipText(files[0].getAbsolutePath());
+//                    getTextFieldSingleAnswerFile().setText(files[0].getName());
+//                    getTextFieldSingleAnswerFile().setToolTipText(files[0].getAbsolutePath());
                 }
                 
                 assignedValues = true;
@@ -1324,18 +1299,18 @@ public class EditProblemPaneNew extends JPanePlugin {
         if (!assignedValues){
             
             // Replace data files on General tab
-            chkboxJudgesHaveAnswerFiles.setSelected(false);
-            problemRequiresDataCheckBox.setSelected(false);
+            getJudgesHaveProvidedAnswerFilesCheckBox().setSelected(false);
+            getProblemRequiresInputDataCheckBox().setSelected(false);
             
-            getTextFieldSingleDataFile().setText("");
-            getTextFieldSingleDataFile().setToolTipText("");
-            getTextFieldSingleAnswerFile().setText("");
-            getTextFieldSingleAnswerFile().setToolTipText("");
+//            getTextFieldSingleDataFile().setText("");
+//            getTextFieldSingleDataFile().setToolTipText("");
+//            getTextFieldSingleAnswerFile().setText("");
+//            getTextFieldSingleAnswerFile().setToolTipText("");
             
         }
         
-        enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
-        enableProvideAnswerFileComponents(chkboxJudgesHaveAnswerFiles.isSelected());
+        enableRequiresInputDataComponents(getProblemRequiresInputDataCheckBox().isSelected());
+        enableProvideAnswerFileComponents(getJudgesHaveProvidedAnswerFilesCheckBox().isSelected());
 
     }
   
@@ -1413,9 +1388,9 @@ public class EditProblemPaneNew extends JPanePlugin {
 
         enableValidatorComponents();
 
-        enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
+        enableRequiresInputDataComponents(getProblemRequiresInputDataCheckBox().isSelected());
 
-        enableProvideAnswerFileComponents(chkboxJudgesHaveAnswerFiles.isSelected());
+        enableProvideAnswerFileComponents(getJudgesHaveProvidedAnswerFilesCheckBox().isSelected());
         
         
         if (debug22EditProblem){
@@ -1486,35 +1461,18 @@ public class EditProblemPaneNew extends JPanePlugin {
         problemNameTextField.setText(inProblem.getDisplayName());
         timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
 
-        getTextFieldSingleDataFile().setText(inProblem.getDataFileName());
-        getTextFieldSingleAnswerFile().setText(inProblem.getAnswerFileName());
-        /**
-         * Set tool tip with complete paths.
-         */
-
-        getTextFieldSingleDataFile().setToolTipText("");
-        getTextFieldSingleAnswerFile().setToolTipText("");
-
-        if (problemDataFiles != null) {
-            SerializedFile[] files = problemDataFiles.getJudgesDataFiles();
-            if (files.length > 0){
-                getTextFieldSingleDataFile().setToolTipText(files[0].getAbsolutePath());
-            }
-            files = problemDataFiles.getJudgesAnswerFiles();
-            if (files.length > 0){
-                getTextFieldSingleAnswerFile().setToolTipText(files[0].getAbsolutePath());
-            }
-        }
-
-        chkboxJudgesHaveAnswerFiles.setSelected(inProblem.getAnswerFileName() != null);
-        problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName() != null);
+        getProblemRequiresInputDataCheckBox().setSelected(inProblem.getDataFileName() != null);
 
         if (inProblem.isReadInputDataFromSTDIN()) {
-            fileRadioButton.setSelected(false);
-            stdinRadioButton.setSelected(true);
+            getFileRadioButton().setSelected(false);
+            getLblTeamReadsFromFileName().setEnabled(false);
+            getTeamFileNameTextField().setEnabled(false);
+            getStdinRadioButton().setSelected(true);
         } else {
-            fileRadioButton.setSelected(true);
-            stdinRadioButton.setSelected(false);
+            getFileRadioButton().setSelected(true);
+            getLblTeamReadsFromFileName().setEnabled(true);
+            getTeamFileNameTextField().setEnabled(true);
+            getStdinRadioButton().setSelected(false);
         }
 
         getPc2ValidatorComboBox().setSelectedIndex(0);
@@ -1628,16 +1586,22 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             
-            JScrollPane scrollPane = new JScrollPane(getMultipleDataSetPane());
-            
             mainTabbedPane = new JTabbedPane();
-            mainTabbedPane.setPreferredSize(new Dimension(600, 800));
-            mainTabbedPane.insertTab("Test Data Sets", null, scrollPane, null, 0);
-            mainTabbedPane.insertTab("Validator", null, getValidatorPane(), null, 0);
-            mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
-            mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);
+            mainTabbedPane.setPreferredSize(new Dimension(800, 600));
+            mainTabbedPane.insertTab("Data Files", null, getMultipleDataSetPane(), "Specify the set of data files to be used for this problem", 0);
+            mainTabbedPane.insertTab("Validator", null, getValidatorPane(), "Configure the Validator to be used for this problem", 0);
+            mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), "Specify how judging is to be done for this problem", 0);
+            mainTabbedPane.insertTab("General", null, getGeneralPane(), "General settings and definitions for this problem", 0);
         }
         return mainTabbedPane;
+    }
+
+    private MultipleDataSetPaneNew getMultipleDataSetPane() {
+        if (multipleDataSetPane == null) {
+            multipleDataSetPane = new MultipleDataSetPaneNew();
+            multipleDataSetPane.setContestAndController(getContest(), getController());
+        }
+        return multipleDataSetPane;
     }
 
     /**
@@ -1664,23 +1628,22 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JPanel getGeneralPane() {
         if (generalPane == null) {
             generalPane = new JPanel();
-            generalPane.setMinimumSize(new Dimension(500, 700));
+            generalPane.setMaximumSize(new Dimension(500, 500));
+            generalPane.setMinimumSize(new Dimension(500, 500));
             generalPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-            generalPane.setPreferredSize(new Dimension(500, 700));
+            generalPane.setPreferredSize(new Dimension(500, 500));
             GroupLayout gl_generalPane = new GroupLayout(generalPane);
             gl_generalPane.setHorizontalGroup(
                 gl_generalPane.createParallelGroup(Alignment.LEADING)
-                    .addGroup(gl_generalPane.createSequentialGroup()
+                    .addGroup(Alignment.TRAILING, gl_generalPane.createSequentialGroup()
                         .addGroup(gl_generalPane.createParallelGroup(Alignment.TRAILING)
-                            .addComponent(getProblemDescriptionPanel(), Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE)
                             .addGroup(Alignment.LEADING, gl_generalPane.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(getJudgingDisplayOptionsPanel(), GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE))
-                            .addGroup(Alignment.LEADING, gl_generalPane.createSequentialGroup()
+                                .addComponent(getProblemDataFilesPanel(), GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE))
+                            .addComponent(getProblemDescriptionPanel(), GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE)
+                            .addGroup(gl_generalPane.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(gl_generalPane.createParallelGroup(Alignment.LEADING)
-                                    .addComponent(getProblemInputDataPanel(), Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE)
-                                    .addComponent(getJudgesAnswerFilePanel(), GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE))))
+                                .addComponent(getJudgingDisplayOptionsPanel(), GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)))
                         .addContainerGap())
             );
             gl_generalPane.setVerticalGroup(
@@ -1688,12 +1651,10 @@ public class EditProblemPaneNew extends JPanePlugin {
                     .addGroup(gl_generalPane.createSequentialGroup()
                         .addComponent(getProblemDescriptionPanel(), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(getProblemInputDataPanel(), GroupLayout.PREFERRED_SIZE, 407, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(getProblemDataFilesPanel(), GroupLayout.PREFERRED_SIZE, 278, GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(getJudgesAnswerFilePanel(), GroupLayout.PREFERRED_SIZE, 255, GroupLayout.PREFERRED_SIZE)
-                        .addGap(18)
                         .addComponent(getJudgingDisplayOptionsPanel(), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addGap(81))
+                        .addGap(483))
             );
             gl_generalPane.setAutoCreateGaps(true);
             gl_generalPane.setAutoCreateContainerGaps(true);
@@ -1744,46 +1705,51 @@ public class EditProblemPaneNew extends JPanePlugin {
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getProblemRequiresDataCheckBox() {
-        if (problemRequiresDataCheckBox == null) {
-            problemRequiresDataCheckBox = new JCheckBox();
-            problemRequiresDataCheckBox.setAlignmentX(Component.RIGHT_ALIGNMENT);
-            problemRequiresDataCheckBox.setPreferredSize(new Dimension(200, 30));
-            problemRequiresDataCheckBox.setMaximumSize(new Dimension(200, 30));
-            problemRequiresDataCheckBox.setMinimumSize(new Dimension(200, 30));
-            problemRequiresDataCheckBox.setBorder(new EmptyBorder(0, 10, 0, 0));
-            problemRequiresDataCheckBox.setText("Problem Requires Input Data");
-            problemRequiresDataCheckBox.addActionListener(new java.awt.event.ActionListener() {
+    private JCheckBox getProblemRequiresInputDataCheckBox() {
+        if (problemRequiresInputDataCheckBox == null) {
+            problemRequiresInputDataCheckBox = new JCheckBox();
+            problemRequiresInputDataCheckBox.setAlignmentX(Component.RIGHT_ALIGNMENT);
+            problemRequiresInputDataCheckBox.setPreferredSize(new Dimension(200, 30));
+            problemRequiresInputDataCheckBox.setMaximumSize(new Dimension(200, 30));
+            problemRequiresInputDataCheckBox.setMinimumSize(new Dimension(200, 30));
+            problemRequiresInputDataCheckBox.setBorder(new EmptyBorder(0, 10, 0, 0));
+            problemRequiresInputDataCheckBox.setText("Problem Requires Input Data");
+            problemRequiresInputDataCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
+                    enableRequiresInputDataComponents(problemRequiresInputDataCheckBox.isSelected());
                     enableUpdateButton();
                 }
             });
         }
-        return problemRequiresDataCheckBox;
+        return problemRequiresInputDataCheckBox;
     }
 
     protected void enableRequiresInputDataComponents(boolean enableButtons) {
         getFileRadioButton().setEnabled(enableButtons);
         getStdinRadioButton().setEnabled(enableButtons);
+        getTeamFileNameTextField().setEnabled(enableButtons);
         getTeamReadsFromPanel().setEnabled(enableButtons);
-
-        getBtnBrowseForSingleDataFile().setEnabled(enableButtons);
-        getBtnBrowseForMultipleDataFile().setEnabled(enableButtons);
-        getTextFieldSingleDataFile().setEnabled(enableButtons);
-        getTextFieldDataFileFolder().setEditable(enableButtons);
-        getRdbtnSelectCDP().setEnabled(enableButtons);
-        // no getter for this one.... :(
-        rdbtnSelectSingleFileInput.setEnabled(enableButtons);
-        getRdbtnSelectMultipleFileInput().setEnabled(enableButtons);
-        getLblSingleDataFileName().setEnabled(enableButtons);
-        getLblMultipleDataFileName().setEnabled(enableButtons);
-        getInputDataSourcePanel().setEnabled(enableButtons);
 
         getRdbtnCopyFilesToInternal().setEnabled(enableButtons);
         getRdbtnKeepFilesExternal().setEnabled(enableButtons);
         getInputDataStoragePanel().setEnabled(enableButtons);
     }
+    
+    protected void enableProvideAnswerFileComponents(boolean enableComponents) {
+        System.err.println ("EditProblemNew.enableProvideAnswerFileComponents(): Warning: not implemented...");
+//        getLblAnswerFileFolder().setEnabled(enableComponents);
+//        getLblAnswerFileName().setEnabled(enableComponents);
+//        getTextFieldSingleAnswerFile().setEnabled(enableComponents);
+//        getTextFieldAnswerFileFolder().setEnabled(enableComponents);
+//        getRdbtnAnswerSelectCDP().setEnabled(enableComponents);
+//        getRdbtnSingleAnswerFile().setEnabled(enableComponents);
+//        getRdbtnMultipleAnswerFiles().setEnabled(enableComponents);
+//        getBtnBrowseForSingleAnswerFile().setEnabled(enableComponents);
+//        getBtnBrowserForMultipleAnswerFile().setEnabled(enableComponents);
+//        getAnswerFileSourcePanel().setEnabled(enableComponents);
+        
+    }
+
 
     /**
      * This method initializes readsFromPane
@@ -1804,78 +1770,39 @@ public class EditProblemPaneNew extends JPanePlugin {
             teamReadsFromPanel.setLayout(fl_teamReadsFromPanel);
             teamReadsFromPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Team Reads From", TitledBorder.LEADING, TitledBorder.TOP, 
                     new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new Color(0, 0, 0)));
-            teamReadsFromPanel.add(getFileRadioButton(), null);
+            
             teamReadsFromPanel.add(getStdinRadioButton(), null);
+            
+            Component verticalStrut = Box.createVerticalStrut(20);
+            teamReadsFromPanel.add(verticalStrut);
+            
+            teamReadsFromPanel.add(getFileRadioButton(), null);
+            teamReadsFromPanel.add(getLblTeamReadsFromFileName());
+            
+            teamReadsFromPanel.add(getTeamFileNameTextField());
+            
             getTeamReadsFrombuttonGroup().setSelected(getStdinRadioButton().getModel(), true);
             getValidatorChoiceButtonGroup().setSelected(getUseNOValidatatorRadioButton().getModel(), true);
         }
         return teamReadsFromPanel;
     }
 
-    /**
-     * This method initializes inputDataFilePane
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getInputDataSourcePanel() {
-        if (inputDataSourcePanel == null) {
-            inputDataSourcePanel = new JPanel();
-            inputDataSourcePanel.setMaximumSize(new Dimension(400, 200));
-            inputDataSourcePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            inputDataSourcePanel.setMinimumSize(new Dimension(400, 200));
-            inputDataSourcePanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Input Data Source", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new Color(0, 0, 0)));
-            inputDataSourcePanel.setPreferredSize(new Dimension(400, 200));
-                        
-            rdbtnSelectSingleFileInput = new JRadioButton("Single Data File");
-            inputDataSourceButtonGroup.add(rdbtnSelectSingleFileInput);
-            rdbtnSelectSingleFileInput.setHorizontalAlignment(SwingConstants.LEFT);
-            GroupLayout gl_inputDataSourcePanel = new GroupLayout(inputDataSourcePanel);
-            gl_inputDataSourcePanel.setHorizontalGroup(
-                gl_inputDataSourcePanel.createParallelGroup(Alignment.LEADING)
-                    .addGroup(gl_inputDataSourcePanel.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(getInputDataCDPSelectionPanel(), GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(351, Short.MAX_VALUE))
-                    .addGroup(gl_inputDataSourcePanel.createSequentialGroup()
-                        .addGap(20)
-                        .addGroup(gl_inputDataSourcePanel.createParallelGroup(Alignment.TRAILING, false)
-                            .addComponent(getSingleDataFileSelectionPanel(), Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(getMultipleDataFileSelectionPanel(), Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 487, Short.MAX_VALUE))
-                        .addGap(54))
-            );
-            gl_inputDataSourcePanel.setVerticalGroup(
-                gl_inputDataSourcePanel.createParallelGroup(Alignment.LEADING)
-                    .addGroup(gl_inputDataSourcePanel.createSequentialGroup()
-                        .addComponent(getInputDataCDPSelectionPanel(), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(getSingleDataFileSelectionPanel(), GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(getMultipleDataFileSelectionPanel(), GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
-            );
-            inputDataSourcePanel.setLayout(gl_inputDataSourcePanel);
+    private JLabel getLblTeamReadsFromFileName() {
+        if (lblTeamReadsFromFileName == null) {
+            lblTeamReadsFromFileName = new JLabel("Name of file which teams open:");
+            lblTeamReadsFromFileName.setEnabled(false);
         }
-        return inputDataSourcePanel;
+        return lblTeamReadsFromFileName;
     }
 
-    private Component getSingleDataFileSelectionPanel() {
-        if (singleDataFileSelectionPanel == null) {
-
-            singleDataFileSelectionPanel = new JPanel();
-            singleDataFileSelectionPanel.setMaximumSize(new Dimension(300, 70));
-            singleDataFileSelectionPanel.setMinimumSize(new Dimension(300, 70));
-            singleDataFileSelectionPanel.setPreferredSize(new Dimension(300, 70));
-            singleDataFileSelectionPanel.setBorder(null);
-            singleDataFileSelectionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            singleDataFileSelectionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-            singleDataFileSelectionPanel.add(rdbtnSelectSingleFileInput);
-            singleDataFileSelectionPanel.add(getHorizontalStrut());
-            singleDataFileSelectionPanel.add(getLblSingleDataFileName());
-            singleDataFileSelectionPanel.add(getTextFieldSingleDataFile());
-            singleDataFileSelectionPanel.add(getBtnBrowseForSingleDataFile());
+    private JTextField getTeamFileNameTextField() {
+        if (teamFileNameTextField == null) {
+            teamFileNameTextField = new JTextField();
+            teamFileNameTextField.setToolTipText("Enter the name of the file which the problem statement specifies the team program should open and read");
+            teamFileNameTextField.setEnabled(false);
+            teamFileNameTextField.setColumns(15);
         }
-
-        return singleDataFileSelectionPanel;
+        return teamFileNameTextField;
     }
 
     /**
@@ -1915,38 +1842,6 @@ public class EditProblemPaneNew extends JPanePlugin {
         return fileRadioButton;
     }
 
-    /**
-     * This method initializes jCheckBox
-     * 
-     * @return javax.swing.JCheckBox
-     */
-    private JCheckBox getChkboxJudgesHaveAnswerFiles() {
-        if (chkboxJudgesHaveAnswerFiles == null) {
-            chkboxJudgesHaveAnswerFiles = new JCheckBox();
-            chkboxJudgesHaveAnswerFiles.setText("Judges Have Provided Answer Files");
-            chkboxJudgesHaveAnswerFiles.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableProvideAnswerFileComponents(chkboxJudgesHaveAnswerFiles.isSelected());
-                    enableUpdateButton();
-                }
-            });
-        }
-        return chkboxJudgesHaveAnswerFiles;
-    }
-
-    protected void enableProvideAnswerFileComponents(boolean enableComponents) {
-        getLblAnswerFileFolder().setEnabled(enableComponents);
-        getLblAnswerFileName().setEnabled(enableComponents);
-        getTextFieldSingleAnswerFile().setEnabled(enableComponents);
-        getTextFieldAnswerFileFolder().setEnabled(enableComponents);
-        getRdbtnAnswerSelectCDP().setEnabled(enableComponents);
-        getRdbtnSingleAnswerFile().setEnabled(enableComponents);
-        getRdbtnMultipleAnswerFiles().setEnabled(enableComponents);
-        getBtnBrowseForSingleAnswerFile().setEnabled(enableComponents);
-        getBtnBrowserForMultipleAnswerFile().setEnabled(enableComponents);
-        getAnswerFileSourcePanel().setEnabled(enableComponents);
-        
-    }
 
     public void showMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -2525,13 +2420,13 @@ public class EditProblemPaneNew extends JPanePlugin {
 
         problemNameTextField.setText("");
         timeOutSecondTextField.setText(Integer.toString(Problem.DEFAULT_TIMEOUT_SECONDS));
-        chkboxJudgesHaveAnswerFiles.setSelected(false);
-        problemRequiresDataCheckBox.setSelected(false);
+        getProblemRequiresInputDataCheckBox().setSelected(false);
+        getJudgesHaveProvidedAnswerFilesCheckBox().setSelected(false);
 
-        textFieldSingleDataFile.setText("");
-        textFieldAnswerFileFolder.setText("");
-        textFieldDataFileFolder.setText("");
-        textFieldSingleAnswerFile.setText("");
+//        textFieldSingleDataFile.setText("");
+//        textFieldAnswerFileFolder.setText("");
+//        textFieldDataFileFolder.setText("");
+//        textFieldSingleAnswerFile.setText("");
 
         fileRadioButton.setSelected(false);
         stdinRadioButton.setSelected(false);
@@ -3143,18 +3038,20 @@ public class EditProblemPaneNew extends JPanePlugin {
     public JTextField getShortNameTextfield() {
         return shortNameTextfield;
     }
-    private JRadioButton getRdbtnSelectCDP() {
-        if (rdbtnSelectCDP == null) {
-        	rdbtnSelectCDP = new JRadioButton("Contest Data Package (CDP)");
-        	inputDataSourceButtonGroup.add(rdbtnSelectCDP);
-        	rdbtnSelectCDP.setPreferredSize(new Dimension(200, 23));
-        	rdbtnSelectCDP.setMinimumSize(new Dimension(200, 23));
-        	rdbtnSelectCDP.setMaximumSize(new Dimension(200, 23));
-        	rdbtnSelectCDP.setSelected(true);
-        	rdbtnSelectCDP.setToolTipText("This option is only available if a CDP location has been set on the ConfigureContest>ICPC screen");
-        }
-        return rdbtnSelectCDP;
-    }
+    
+//    private JRadioButton getRdbtnSelectCDP() {
+//        if (rdbtnSelectCDP == null) {
+//            rdbtnSelectCDP = new JRadioButton("Contest Data Package (CDP)");
+//            inputDataSourceButtonGroup.add(rdbtnSelectCDP);
+//            rdbtnSelectCDP.setPreferredSize(new Dimension(200, 23));
+//            rdbtnSelectCDP.setMinimumSize(new Dimension(200, 23));
+//            rdbtnSelectCDP.setMaximumSize(new Dimension(200, 23));
+//            rdbtnSelectCDP.setSelected(true);
+//            rdbtnSelectCDP.setToolTipText("This option is only available if a CDP location has been set on the ConfigureContest>ICPC screen");
+//        }
+//        return rdbtnSelectCDP;
+//    }
+    
     private JPanel getProblemDescriptionPanel() {
         if (problemDescriptionPanel == null) {
         	problemDescriptionPanel = new JPanel();
@@ -3199,50 +3096,50 @@ public class EditProblemPaneNew extends JPanePlugin {
         }
         return problemDescriptionPanel;
     }
-    private JPanel getProblemInputDataPanel() {
-        if (problemInputDataPanel == null) {
-        	problemInputDataPanel = new JPanel();
-        	problemInputDataPanel.setMaximumSize(new Dimension(600, 500));
-        	problemInputDataPanel.setMinimumSize(new Dimension(600, 500));
-        	problemInputDataPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        	problemInputDataPanel.setPreferredSize(new Dimension(600, 500));
-        	problemInputDataPanel.setBorder(new TitledBorder(null, "Problem Input Data", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), null));
+    private JPanel getProblemDataFilesPanel() {
+        if (problemDataFilesPanel == null) {
+        	problemDataFilesPanel = new JPanel();
+        	problemDataFilesPanel.setMaximumSize(new Dimension(600, 500));
+        	problemDataFilesPanel.setMinimumSize(new Dimension(600, 500));
+        	problemDataFilesPanel.setPreferredSize(new Dimension(600, 500));
+        	problemDataFilesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        	problemDataFilesPanel.setPreferredSize(new Dimension(600, 500));
+        	problemDataFilesPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Problem Data Files", TitledBorder.LEADING, TitledBorder.TOP, 
+        	        new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new Color(0, 0, 0)));
         	
-        	GroupLayout gl_problemInputDataPanel = new GroupLayout(problemInputDataPanel);
-        	gl_problemInputDataPanel.setHorizontalGroup(
-        	    gl_problemInputDataPanel.createParallelGroup(Alignment.LEADING)
-        	        .addGroup(gl_problemInputDataPanel.createSequentialGroup()
-        	            .addGap(30)
-        	            .addComponent(getInputDataSourcePanel(), GroupLayout.DEFAULT_SIZE, 553, Short.MAX_VALUE))
-        	        .addGroup(gl_problemInputDataPanel.createSequentialGroup()
-        	            .addGroup(gl_problemInputDataPanel.createParallelGroup(Alignment.TRAILING, false)
-        	                .addGroup(Alignment.LEADING, gl_problemInputDataPanel.createSequentialGroup()
+        	GroupLayout gl_problemDataFilesPanel = new GroupLayout(problemDataFilesPanel);
+        	gl_problemDataFilesPanel.setHorizontalGroup(
+        	    gl_problemDataFilesPanel.createParallelGroup(Alignment.LEADING)
+        	        .addGroup(gl_problemDataFilesPanel.createSequentialGroup()
+        	            .addGroup(gl_problemDataFilesPanel.createParallelGroup(Alignment.LEADING, false)
+        	                .addGroup(gl_problemDataFilesPanel.createSequentialGroup()
         	                    .addGap(30)
-        	                    .addComponent(getTeamReadsFromPanel(), 0, 0, Short.MAX_VALUE))
-        	                .addGroup(Alignment.LEADING, gl_problemInputDataPanel.createSequentialGroup()
+        	                    .addGroup(gl_problemDataFilesPanel.createParallelGroup(Alignment.LEADING)
+        	                        .addComponent(getInputDataStoragePanel(), GroupLayout.DEFAULT_SIZE, 583, Short.MAX_VALUE)
+        	                        .addComponent(getTeamReadsFromPanel(), 0, 0, Short.MAX_VALUE)))
+        	                .addGroup(gl_problemDataFilesPanel.createSequentialGroup()
         	                    .addContainerGap()
-        	                    .addComponent(getProblemRequiresDataCheckBox())))
-        	            .addContainerGap(403, Short.MAX_VALUE))
-        	        .addGroup(gl_problemInputDataPanel.createSequentialGroup()
-        	            .addGap(30)
-        	            .addComponent(getInputDataStoragePanel(), GroupLayout.DEFAULT_SIZE, 583, Short.MAX_VALUE))
+        	                    .addGroup(gl_problemDataFilesPanel.createParallelGroup(Alignment.LEADING)
+        	                        .addComponent(getJudgesHaveProvidedAnswerFilesCheckBox())
+        	                        .addComponent(getProblemRequiresInputDataCheckBox()))))
+        	            .addContainerGap())
         	);
-        	gl_problemInputDataPanel.setVerticalGroup(
-        	    gl_problemInputDataPanel.createParallelGroup(Alignment.LEADING)
-        	        .addGroup(gl_problemInputDataPanel.createSequentialGroup()
+        	gl_problemDataFilesPanel.setVerticalGroup(
+        	    gl_problemDataFilesPanel.createParallelGroup(Alignment.LEADING)
+        	        .addGroup(gl_problemDataFilesPanel.createSequentialGroup()
         	            .addContainerGap()
-        	            .addComponent(getProblemRequiresDataCheckBox())
+        	            .addComponent(getProblemRequiresInputDataCheckBox())
         	            .addGap(9)
         	            .addComponent(getTeamReadsFromPanel(), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-        	            .addGap(10)
-        	            .addComponent(getInputDataSourcePanel(), GroupLayout.PREFERRED_SIZE, 158, GroupLayout.PREFERRED_SIZE)
-        	            .addPreferredGap(ComponentPlacement.UNRELATED)
+        	            .addGap(18)
         	            .addComponent(getInputDataStoragePanel(), GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
-        	            .addGap(10))
+        	            .addPreferredGap(ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+        	            .addComponent(getJudgesHaveProvidedAnswerFilesCheckBox())
+        	            .addContainerGap())
         	);
-        	problemInputDataPanel.setLayout(gl_problemInputDataPanel);
+        	problemDataFilesPanel.setLayout(gl_problemDataFilesPanel);
         }
-        return problemInputDataPanel;
+        return problemDataFilesPanel;
     }
     private JLabel getLblSpacer1() {
         if (lblSpacer1 == null) {
@@ -3256,53 +3153,6 @@ public class EditProblemPaneNew extends JPanePlugin {
         }
         return lblSpacer2;
     }
-    private JPanel getJudgesAnswerFilePanel() {
-        if (judgesAnswerFilePanel == null) {
-        	judgesAnswerFilePanel = new JPanel();
-        	judgesAnswerFilePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        	judgesAnswerFilePanel.setPreferredSize(new Dimension(40, 100));
-        	judgesAnswerFilePanel.setBorder(new TitledBorder(null, "Judge's Answer Files", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), null));
-        	GroupLayout gl_judgesAnswerFilePanel = new GroupLayout(judgesAnswerFilePanel);
-        	gl_judgesAnswerFilePanel.setHorizontalGroup(
-        	    gl_judgesAnswerFilePanel.createParallelGroup(Alignment.LEADING)
-        	        .addGroup(gl_judgesAnswerFilePanel.createSequentialGroup()
-        	            .addGroup(gl_judgesAnswerFilePanel.createParallelGroup(Alignment.LEADING)
-        	                .addGroup(gl_judgesAnswerFilePanel.createSequentialGroup()
-        	                    .addContainerGap()
-        	                    .addComponent(getChkboxJudgesHaveAnswerFiles()))
-        	                .addGroup(gl_judgesAnswerFilePanel.createSequentialGroup()
-        	                    .addGap(27)
-        	                    .addComponent(getAnswerFileSourcePanel(), GroupLayout.DEFAULT_SIZE, 576, Short.MAX_VALUE)))
-        	            .addContainerGap())
-        	);
-        	gl_judgesAnswerFilePanel.setVerticalGroup(
-        	    gl_judgesAnswerFilePanel.createParallelGroup(Alignment.LEADING)
-        	        .addGroup(gl_judgesAnswerFilePanel.createSequentialGroup()
-        	            .addContainerGap()
-        	            .addComponent(getChkboxJudgesHaveAnswerFiles())
-        	            .addGap(18)
-        	            .addComponent(getAnswerFileSourcePanel(), GroupLayout.PREFERRED_SIZE, 158, GroupLayout.PREFERRED_SIZE)
-        	            .addContainerGap(24, Short.MAX_VALUE))
-        	);
-        	judgesAnswerFilePanel.setLayout(gl_judgesAnswerFilePanel);
-        }
-        return judgesAnswerFilePanel;
-    }
-    private JLabel getLblSingleDataFileName() {
-        if (lblSingleDataFileName == null) {
-        	lblSingleDataFileName = new JLabel("Data File Name: ");
-        }
-        return lblSingleDataFileName;
-    }
-    private JTextField getTextFieldSingleDataFile() {
-        if (textFieldSingleDataFile == null) {
-        	textFieldSingleDataFile = new JTextField();
-        	textFieldSingleDataFile.setMinimumSize(new Dimension(100, 20));
-        	textFieldSingleDataFile.setPreferredSize(new Dimension(100, 20));
-        	textFieldSingleDataFile.setColumns(10);
-        }
-        return textFieldSingleDataFile;
-    }
     private JPanel getJudgingDisplayOptionsPanel() {
         if (judgingDisplayOptionsPanel == null) {
         	judgingDisplayOptionsPanel = new JPanel();
@@ -3315,76 +3165,6 @@ public class EditProblemPaneNew extends JPanePlugin {
         	judgingDisplayOptionsPanel.add(getDeleteProblemCheckBox());
         }
         return judgingDisplayOptionsPanel;
-    }
-    private JPanel getInputDataCDPSelectionPanel() {
-        if (inputDataCDPSelectionPanel == null) {
-        	inputDataCDPSelectionPanel = new JPanel();
-        	inputDataCDPSelectionPanel.setMaximumSize(new Dimension(400, 35));
-        	inputDataCDPSelectionPanel.setPreferredSize(new Dimension(400, 35));
-        	FlowLayout fl_inputDataCDPSelectionPanel = (FlowLayout) inputDataCDPSelectionPanel.getLayout();
-        	fl_inputDataCDPSelectionPanel.setAlignment(FlowLayout.LEFT);
-        	inputDataCDPSelectionPanel.setBorder(new EmptyBorder(0, 10, 0, 0));
-        	inputDataCDPSelectionPanel.setMinimumSize(new Dimension(400, 35));
-        	inputDataCDPSelectionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        	inputDataCDPSelectionPanel.add(getRdbtnSelectCDP());
-        }
-        return inputDataCDPSelectionPanel;
-    }
-    private JButton getBtnBrowseForSingleDataFile() {
-        if (btnBrowseForSingleDataFile == null) {
-        	btnBrowseForSingleDataFile = new JButton("Browse");
-        }
-        return btnBrowseForSingleDataFile;
-    }
-    private JPanel getMultipleDataFileSelectionPanel() {
-        if (multipleDataFileSelectionPanel == null) {
-        	multipleDataFileSelectionPanel = new JPanel();
-        	multipleDataFileSelectionPanel.setPreferredSize(new Dimension(800, 100));
-        	multipleDataFileSelectionPanel.setMinimumSize(new Dimension(800, 100));
-        	multipleDataFileSelectionPanel.setMaximumSize(new Dimension(800, 100));
-        	multipleDataFileSelectionPanel.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        	multipleDataFileSelectionPanel.setBorder(null);
-        	multipleDataFileSelectionPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        	multipleDataFileSelectionPanel.add(getRdbtnSelectMultipleFileInput());
-        	multipleDataFileSelectionPanel.add(getHorizontalStrut_1());
-        	multipleDataFileSelectionPanel.add(getLblMultipleDataFileName());
-        	multipleDataFileSelectionPanel.add(getTextFieldDataFileFolder());
-        	multipleDataFileSelectionPanel.add(getBtnBrowseForMultipleDataFile());
-        }
-        return multipleDataFileSelectionPanel;
-    }
-    private JRadioButton getRdbtnSelectMultipleFileInput() {
-        if (rdbtnSelectMultipleFileInput == null) {
-        	rdbtnSelectMultipleFileInput = new JRadioButton("Multiple Data Files");
-        	inputDataSourceButtonGroup.add(rdbtnSelectMultipleFileInput);
-        	rdbtnSelectMultipleFileInput.setPreferredSize(new Dimension(150, 23));
-        	rdbtnSelectMultipleFileInput.setMinimumSize(new Dimension(150, 23));
-        	rdbtnSelectMultipleFileInput.setMaximumSize(new Dimension(150, 23));
-        	rdbtnSelectMultipleFileInput.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        	rdbtnSelectMultipleFileInput.setHorizontalAlignment(SwingConstants.LEFT);
-        }
-        return rdbtnSelectMultipleFileInput;
-    }
-    private JLabel getLblMultipleDataFileName() {
-        if (lblMultipleDataFileName == null) {
-        	lblMultipleDataFileName = new JLabel("Data File Folder:");
-        }
-        return lblMultipleDataFileName;
-    }
-    private JTextField getTextFieldDataFileFolder() {
-        if (textFieldDataFileFolder == null) {
-        	textFieldDataFileFolder = new JTextField();
-        	textFieldDataFileFolder.setMinimumSize(new Dimension(200, 20));
-        	textFieldDataFileFolder.setPreferredSize(new Dimension(200, 20));
-        	textFieldDataFileFolder.setColumns(10);
-        }
-        return textFieldDataFileFolder;
-    }
-    private JButton getBtnBrowseForMultipleDataFile() {
-        if (btnBrowseForMultipleDataFile == null) {
-        	btnBrowseForMultipleDataFile = new JButton("Browse");
-        }
-        return btnBrowseForMultipleDataFile;
     }
     private JPanel getInputDataStoragePanel() {
         if (inputDataStoragePanel == null) {
@@ -3401,8 +3181,8 @@ public class EditProblemPaneNew extends JPanePlugin {
     }
     private JRadioButton getRdbtnCopyFilesToInternal() {
         if (rdbtnCopyFilesToInternal == null) {
-        	rdbtnCopyFilesToInternal = new JRadioButton("Copy Data Files into PC2 (more efficient, but not recommended for files over 5MB)");
-        	internalDataStorageButtonGroup.add(rdbtnCopyFilesToInternal);
+        	rdbtnCopyFilesToInternal = new JRadioButton("Copy Data Files into PC2 (more efficient, but to 5MB total per problem)");
+//        	internalDataStorageButtonGroup.add(rdbtnCopyFilesToInternal);
         	rdbtnCopyFilesToInternal.setSelected(true);
         	rdbtnCopyFilesToInternal.setMaximumSize(new Dimension(550, 30));
         	rdbtnCopyFilesToInternal.setMinimumSize(new Dimension(550, 30));
@@ -3414,202 +3194,13 @@ public class EditProblemPaneNew extends JPanePlugin {
     private JRadioButton getRdbtnKeepFilesExternal() {
         if (rdbtnKeepFilesExternal == null) {
         	rdbtnKeepFilesExternal = new JRadioButton("Keep Data Files external to PC2 (requires you to copy files to Judge's machines)");
-        	internalDataStorageButtonGroup.add(rdbtnKeepFilesExternal);
+//        	internalDataStorageButtonGroup.add(rdbtnKeepFilesExternal);
         	rdbtnKeepFilesExternal.setMaximumSize(new Dimension(550, 30));
         	rdbtnKeepFilesExternal.setMinimumSize(new Dimension(550, 30));
         	rdbtnKeepFilesExternal.setPreferredSize(new Dimension(550, 30));
         	rdbtnKeepFilesExternal.setBorder(new EmptyBorder(0, 15, 0, 0));
         }
         return rdbtnKeepFilesExternal;
-    }
-    private Component getHorizontalStrut() {
-        if (horizontalStrut == null) {
-        	horizontalStrut = Box.createHorizontalStrut(20);
-        	horizontalStrut.setMaximumSize(new Dimension(49, 32767));
-        	horizontalStrut.setPreferredSize(new Dimension(40, 0));
-        	horizontalStrut.setMinimumSize(new Dimension(40, 0));
-        }
-        return horizontalStrut;
-    }
-    private Component getHorizontalStrut_1() {
-        if (horizontalStrut_1 == null) {
-        	horizontalStrut_1 = Box.createHorizontalStrut(20);
-        }
-        return horizontalStrut_1;
-    }
-    private JPanel getAnswerFileSourcePanel() {
-        if (answerFileSourcePanel == null) {
-        	answerFileSourcePanel = new JPanel();
-        	answerFileSourcePanel.setPreferredSize(new Dimension(400, 200));
-        	answerFileSourcePanel.setMinimumSize(new Dimension(400, 200));
-        	answerFileSourcePanel.setMaximumSize(new Dimension(400, 200));
-        	answerFileSourcePanel.setBorder(new TitledBorder(null, "Answer File Source", TitledBorder.LEADING, TitledBorder.TOP, 
-        	        new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), null));
-        	answerFileSourcePanel.setAlignmentX(0.0f);
-        	GroupLayout gl_answerFileSourcePanel = new GroupLayout(answerFileSourcePanel);
-        	gl_answerFileSourcePanel.setHorizontalGroup(
-        	    gl_answerFileSourcePanel.createParallelGroup(Alignment.LEADING)
-        	        .addGroup(gl_answerFileSourcePanel.createSequentialGroup()
-        	            .addGroup(gl_answerFileSourcePanel.createParallelGroup(Alignment.LEADING)
-        	                .addGroup(gl_answerFileSourcePanel.createSequentialGroup()
-        	                    .addContainerGap()
-        	                    .addComponent(getAnswerFileCDPSelectionPanel(), GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE))
-        	                .addGroup(gl_answerFileSourcePanel.createSequentialGroup()
-        	                    .addGap(10)
-        	                    .addComponent(getSingleAnswerFileSelectionPanel(), GroupLayout.DEFAULT_SIZE, 544, Short.MAX_VALUE))
-        	                .addComponent(getMultipleAnswerFileSelectionPanel(), GroupLayout.PREFERRED_SIZE, 554, Short.MAX_VALUE))
-        	            .addContainerGap())
-        	);
-        	gl_answerFileSourcePanel.setVerticalGroup(
-        	    gl_answerFileSourcePanel.createParallelGroup(Alignment.LEADING)
-        	        .addGroup(gl_answerFileSourcePanel.createSequentialGroup()
-        	            .addComponent(getAnswerFileCDPSelectionPanel(), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-        	            .addPreferredGap(ComponentPlacement.RELATED)
-        	            .addComponent(getSingleAnswerFileSelectionPanel(), GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE)
-        	            .addPreferredGap(ComponentPlacement.RELATED)
-        	            .addComponent(getMultipleAnswerFileSelectionPanel(), GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
-        	            .addGap(43))
-        	);
-        	answerFileSourcePanel.setLayout(gl_answerFileSourcePanel);
-        }
-        return answerFileSourcePanel;
-    }
-    private JPanel getSingleAnswerFileSelectionPanel() {
-        if (singleAnswerFileSelectionPanel == null) {
-        	singleAnswerFileSelectionPanel = new JPanel();
-        	singleAnswerFileSelectionPanel.setPreferredSize(new Dimension(300, 70));
-        	singleAnswerFileSelectionPanel.setMinimumSize(new Dimension(300, 70));
-        	singleAnswerFileSelectionPanel.setMaximumSize(new Dimension(300, 70));
-        	singleAnswerFileSelectionPanel.setBorder(null);
-        	singleAnswerFileSelectionPanel.setAlignmentX(0.0f);
-        	singleAnswerFileSelectionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        	singleAnswerFileSelectionPanel.add(getRdbtnSingleAnswerFile());
-        	singleAnswerFileSelectionPanel.add(getHorizontalStrut_2());
-        	singleAnswerFileSelectionPanel.add(getLblAnswerFileName());
-        	singleAnswerFileSelectionPanel.add(getTextFieldSingleAnswerFile());
-        	singleAnswerFileSelectionPanel.add(getBtnBrowseForSingleAnswerFile());
-        }
-        return singleAnswerFileSelectionPanel;
-    }
-    private JRadioButton getRdbtnSingleAnswerFile() {
-        if (rdbtnSingleAnswerFile == null) {
-        	rdbtnSingleAnswerFile = new JRadioButton("Single Answer File");
-        	answerFileSourceButtonGroup.add(rdbtnSingleAnswerFile);
-        	rdbtnSingleAnswerFile.setHorizontalAlignment(SwingConstants.LEFT);
-        }
-        return rdbtnSingleAnswerFile;
-    }
-    private Component getHorizontalStrut_2() {
-        if (horizontalStrut_2 == null) {
-        	horizontalStrut_2 = Box.createHorizontalStrut(20);
-        	horizontalStrut_2.setPreferredSize(new Dimension(40, 0));
-        	horizontalStrut_2.setMinimumSize(new Dimension(40, 0));
-        	horizontalStrut_2.setMaximumSize(new Dimension(49, 32767));
-        }
-        return horizontalStrut_2;
-    }
-    private JLabel getLblAnswerFileName() {
-        if (lblAnswerFileName == null) {
-        	lblAnswerFileName = new JLabel("Answer File Name: ");
-        }
-        return lblAnswerFileName;
-    }
-    private JTextField getTextFieldSingleAnswerFile() {
-        if (textFieldSingleAnswerFile == null) {
-        	textFieldSingleAnswerFile = new JTextField();
-        	textFieldSingleAnswerFile.setPreferredSize(new Dimension(100, 20));
-        	textFieldSingleAnswerFile.setMinimumSize(new Dimension(100, 20));
-        	textFieldSingleAnswerFile.setColumns(10);
-        }
-        return textFieldSingleAnswerFile;
-    }
-    private JButton getBtnBrowseForSingleAnswerFile() {
-        if (btnBrowseForSingleAnswerFile == null) {
-        	btnBrowseForSingleAnswerFile = new JButton("Browse");
-        }
-        return btnBrowseForSingleAnswerFile;
-    }
-    private JPanel getAnswerFileCDPSelectionPanel() {
-        if (answerFileCDPSelectionPanel == null) {
-        	answerFileCDPSelectionPanel = new JPanel();
-        	answerFileCDPSelectionPanel.setPreferredSize(new Dimension(400, 35));
-        	answerFileCDPSelectionPanel.setMinimumSize(new Dimension(400, 35));
-        	answerFileCDPSelectionPanel.setMaximumSize(new Dimension(400, 35));
-        	answerFileCDPSelectionPanel.setBorder(new EmptyBorder(0, 10, 0, 0));
-        	answerFileCDPSelectionPanel.setAlignmentX(0.0f);
-        	answerFileCDPSelectionPanel.add(getRdbtnAnswerSelectCDP());
-        }
-        return answerFileCDPSelectionPanel;
-    }
-
-    private JRadioButton getRdbtnAnswerSelectCDP() {
-        if (rdbtnAnswerSelectCDP == null) {
-            rdbtnAnswerSelectCDP = new JRadioButton("Contest Data Package (CDP)");
-            answerFileSourceButtonGroup.add(rdbtnAnswerSelectCDP);
-            rdbtnAnswerSelectCDP.setToolTipText("This option is only available if a CDP location has been set on the ConfigureContest>ICPC screen");
-            rdbtnAnswerSelectCDP.setSelected(true);
-            rdbtnAnswerSelectCDP.setPreferredSize(new Dimension(200, 23));
-            rdbtnAnswerSelectCDP.setMinimumSize(new Dimension(200, 23));
-            rdbtnAnswerSelectCDP.setMaximumSize(new Dimension(200, 23));
-        }
-        return rdbtnAnswerSelectCDP;
-    }
-
-    private JPanel getMultipleAnswerFileSelectionPanel() {
-        if (multipleAnswerFileSelectionPanel == null) {
-        	multipleAnswerFileSelectionPanel = new JPanel();
-        	multipleAnswerFileSelectionPanel.setPreferredSize(new Dimension(800, 100));
-        	multipleAnswerFileSelectionPanel.setMinimumSize(new Dimension(800, 100));
-        	multipleAnswerFileSelectionPanel.setMaximumSize(new Dimension(800, 100));
-        	multipleAnswerFileSelectionPanel.setBorder(null);
-        	multipleAnswerFileSelectionPanel.setAlignmentX(1.0f);
-        	multipleAnswerFileSelectionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        	multipleAnswerFileSelectionPanel.add(getRdbtnMultipleAnswerFiles());
-        	multipleAnswerFileSelectionPanel.add(getHorizontalStrut_3());
-        	multipleAnswerFileSelectionPanel.add(getLblAnswerFileFolder());
-        	multipleAnswerFileSelectionPanel.add(getTextFieldAnswerFileFolder());
-        	multipleAnswerFileSelectionPanel.add(getBtnBrowserForMultipleAnswerFile());
-        }
-        return multipleAnswerFileSelectionPanel;
-    }
-    private JRadioButton getRdbtnMultipleAnswerFiles() {
-        if (rdbtnMultipleAnswerFiles == null) {
-        	rdbtnMultipleAnswerFiles = new JRadioButton("Multiple Answer Files");
-        	answerFileSourceButtonGroup.add(rdbtnMultipleAnswerFiles);
-        	rdbtnMultipleAnswerFiles.setPreferredSize(new Dimension(150, 23));
-        	rdbtnMultipleAnswerFiles.setMinimumSize(new Dimension(150, 23));
-        	rdbtnMultipleAnswerFiles.setMaximumSize(new Dimension(150, 23));
-        	rdbtnMultipleAnswerFiles.setHorizontalAlignment(SwingConstants.LEFT);
-        	rdbtnMultipleAnswerFiles.setAlignmentX(1.0f);
-        }
-        return rdbtnMultipleAnswerFiles;
-    }
-    private Component getHorizontalStrut_3() {
-        if (horizontalStrut_3 == null) {
-        	horizontalStrut_3 = Box.createHorizontalStrut(20);
-        }
-        return horizontalStrut_3;
-    }
-    private JLabel getLblAnswerFileFolder() {
-        if (lblAnswerFileFolder == null) {
-        	lblAnswerFileFolder = new JLabel("Answer File Folder:");
-        }
-        return lblAnswerFileFolder;
-    }
-    private JTextField getTextFieldAnswerFileFolder() {
-        if (textFieldAnswerFileFolder == null) {
-        	textFieldAnswerFileFolder = new JTextField();
-        	textFieldAnswerFileFolder.setPreferredSize(new Dimension(200, 20));
-        	textFieldAnswerFileFolder.setMinimumSize(new Dimension(200, 20));
-        	textFieldAnswerFileFolder.setColumns(10);
-        }
-        return textFieldAnswerFileFolder;
-    }
-    private JButton getBtnBrowserForMultipleAnswerFile() {
-        if (btnBrowserForMultipleAnswerFile == null) {
-        	btnBrowserForMultipleAnswerFile = new JButton("Browse");
-        }
-        return btnBrowserForMultipleAnswerFile;
     }
     private Component getHorizontalStrut_4() {
         if (horizontalStrut_4 == null) {
@@ -3622,6 +3213,19 @@ public class EditProblemPaneNew extends JPanePlugin {
         	horizontalStrut_5 = Box.createHorizontalStrut(20);
         }
         return horizontalStrut_5;
+    }
+    private JCheckBox getJudgesHaveProvidedAnswerFilesCheckBox() {
+        if (judgesHaveProvidedAnswerFilesCheckBox == null) {
+        	judgesHaveProvidedAnswerFilesCheckBox = new JCheckBox("Judges Have Provided Answer Files");
+        	judgesHaveProvidedAnswerFilesCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableProvideAnswerFileComponents(getJudgesHaveProvidedAnswerFilesCheckBox().isSelected());
+                    enableUpdateButton();
+                }
+            });
+
+        }
+        return judgesHaveProvidedAnswerFilesCheckBox;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
