@@ -482,6 +482,7 @@ public class EditProblemPane extends JPanePlugin {
                 if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(originalProblemDataFiles)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
+                    System.err.println("problem changed fired");
                 }
                 ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
                 ProblemDataFiles proposedPDF = getMultipleDataSetPane().getProblemDataFiles();
@@ -539,7 +540,7 @@ public class EditProblemPane extends JPanePlugin {
                     SerializedFile[] judgesAnswerFiles = pdf.getJudgesAnswerFiles();
                     SerializedFile[] judgesAnswerFilesNew = null;
                     if (proposedPDF != null) {
-                        proposedPDF.getJudgesAnswerFiles();
+                        judgesAnswerFilesNew = proposedPDF.getJudgesAnswerFiles();
                     }
                     if ((judgesAnswerFiles == null && judgesAnswerFilesNew != null) || (judgesAnswerFiles != null & judgesAnswerFilesNew == null)) {
                         // one was null the other was not
@@ -549,6 +550,7 @@ public class EditProblemPane extends JPanePlugin {
                             updateToolTip += ", Judges answer";
                         }
                         enableButton = true;
+                        fileChanged++;
                     } else if (judgesAnswerFiles.length != judgesAnswerFilesNew.length) {
                         fileChanged += Math.abs(judgesAnswerFiles.length-judgesAnswerFilesNew.length);
                         if (updateToolTip.equals("")) {
