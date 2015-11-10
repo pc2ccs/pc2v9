@@ -572,13 +572,13 @@ public class ICPCLoadPane extends JPanePlugin {
     
     private JButton getEditCDPPathButton() {
         if (editCDPPathButton == null) {
-        	editCDPPathButton = new JButton("Set CDP Path");
-        	editCDPPathButton.setToolTipText("Specify the path to an ICPC Contest Data Package (see https://clics.ecs.baylor.edu/index.php/CDP)");
-        	editCDPPathButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        editCDPPath();
-        	    }
-        	});
+            editCDPPathButton = new JButton("Set CDP Path");
+            editCDPPathButton.setToolTipText("Specify the path to an ICPC Contest Data Package (see https://clics.ecs.baylor.edu/index.php/CDP)");
+            editCDPPathButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    editCDPPath();
+                }
+            });
         }
         return editCDPPathButton;
     }

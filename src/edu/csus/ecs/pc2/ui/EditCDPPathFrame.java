@@ -440,8 +440,7 @@ public class EditCDPPathFrame extends JFrame implements UIPlugin  {
         
         String fieldValue = textField.getText();
         
-        if (fieldValue.equalsIgnoreCase(NULL_STRING_VALUE))
-        {
+        if (fieldValue.equalsIgnoreCase(NULL_STRING_VALUE)) {
             fieldValue = null; 
         }
         

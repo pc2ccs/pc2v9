@@ -718,14 +718,14 @@ public class ProblemsPane extends JPanePlugin {
     
     private JButton getSetCDPPathButton() {
         if (setCDPPathButton == null) {
-        	setCDPPathButton = new JButton("Set CDP Path");
-        	setCDPPathButton.setMnemonic(KeyEvent.VK_S);            
-        	setCDPPathButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
+            setCDPPathButton = new JButton("Set CDP Path");
+            setCDPPathButton.setMnemonic(KeyEvent.VK_S);            
+            setCDPPathButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
                     editCDPPath();
-        	    }
-        	});
-        	setCDPPathButton.setToolTipText("Specify a path to the root of a Contest Data Package (see https://clics.ecs.baylor.edu/index.php/CDP) ");
+                    }
+            });
+            setCDPPathButton.setToolTipText("Specify a path to the root of a Contest Data Package (see https://clics.ecs.baylor.edu/index.php/CDP) ");
         }
         return setCDPPathButton;
     }

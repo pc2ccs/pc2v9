@@ -26,7 +26,7 @@ public class EventFeederModule implements UIPlugin {
 
     private static final long serialVersionUID = 4459685961401012498L;
 
-    public int port = DEFAULT_EVENT_FEED_PORT_NUMBER;
+    private int port = DEFAULT_EVENT_FEED_PORT_NUMBER;
 
     private IInternalContest contest;
 

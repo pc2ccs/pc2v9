@@ -1168,8 +1168,7 @@ public final class Utilities {
 
         if (problem == null) {
             messages.add("problem is null (cannot validate problem)");
-        }
-         else if (problem.isUsingExternalDataFiles()){
+        } else if (problem.isUsingExternalDataFiles()){
              /**
               * Only validate if external files.
               */
