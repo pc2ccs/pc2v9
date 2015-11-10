@@ -149,6 +149,9 @@ public class ExportYAML {
         contestWriter.println("running: " + contestTime.isContestRunning());
 
         // start-time: 2011-02-04 01:23Z
+        if (info.getStartDate() == null) {
+            info.setStartDate(new Date());
+        }
         contestWriter.println("start-time: " + formatDate(info.getStartDate()));
 
         // TODO CCS duration: 5:00:00
