@@ -41,7 +41,7 @@ public class EditProblemFrameNew extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549,535));
+        this.setSize(new java.awt.Dimension(700,650));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getProblemPane());
         this.setTitle("New Problem");
