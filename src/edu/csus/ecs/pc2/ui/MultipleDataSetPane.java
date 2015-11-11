@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import javax.swing.ButtonGroup;
 
 /**
  * Multiple Test Data set UI.
@@ -68,12 +69,13 @@ public class MultipleDataSetPane extends JPanePlugin {
     /**
      * Keep Data Files external to PC2 - aka external
      */
-    private JRadioButton radioButton_1;
+    private JRadioButton rdBtnKeepDataFilesExternal;
     private JPanel controlPanel;
     private JPanel buttonPanel;
     private Component horizontalStrut;
     private Component verticalStrut;
     private Component verticalStrut_1;
+    private final ButtonGroup inputStorageButtonGroup = new ButtonGroup();
 
     /**
      * This method initializes
@@ -289,7 +291,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     
     private boolean isUsingExternalDataFiles() {
-        return radioButton_1.isSelected();
+        return rdBtnKeepDataFilesExternal.isSelected();
     }
    
     private String selectDirectory(String dialogTitle) {
@@ -409,7 +411,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
 
         if (answerFileNames.length != inputFileNames.length) {
-            throw new RuntimeException("Miss match expecting same " + dataExtension + " and " + answerExtension + " files (" + inputFileNames.length + " vs " + answerFileNames.length);
+            throw new RuntimeException("Mismatch: expecting same number of " + dataExtension + " and " + answerExtension + " files (" + inputFileNames.length + " vs " + answerFileNames.length);
         }
 
         SerializedFile[] inputFiles = Utilities.createSerializedFiles(dataFileBaseDirectory, inputFileNames, externalDataFiles);
@@ -433,13 +435,14 @@ public class MultipleDataSetPane extends JPanePlugin {
         	inputDataStoragePanel.setAlignmentX(0.0f);
         	inputDataStoragePanel.setLayout(new BoxLayout((Container) inputDataStoragePanel, BoxLayout.Y_AXIS));
         	inputDataStoragePanel.add(getRdbtnCopyDataFiles());
-        	inputDataStoragePanel.add(getRadioButton_1());
+        	inputDataStoragePanel.add(getRdBtnKeepDataFilesExternal());
         }
         return inputDataStoragePanel;
     }
     private JRadioButton getRdbtnCopyDataFiles() {
         if (rdbtnCopyDataFiles == null) {
         	rdbtnCopyDataFiles = new JRadioButton("Copy Data Files into PC2 (more efficient, but limited to 5MB total per problem)");
+        	inputStorageButtonGroup.add(rdbtnCopyDataFiles);
         	rdbtnCopyDataFiles.setSelected(true);
         	rdbtnCopyDataFiles.setPreferredSize(new Dimension(550, 30));
         	rdbtnCopyDataFiles.setMinimumSize(new Dimension(550, 30));
@@ -448,15 +451,16 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return rdbtnCopyDataFiles;
     }
-    private JRadioButton getRadioButton_1() {
-        if (radioButton_1 == null) {
-        	radioButton_1 = new JRadioButton("Keep Data Files external to PC2 (requires you to copy files to Judge's machines)");
-        	radioButton_1.setPreferredSize(new Dimension(550, 30));
-        	radioButton_1.setMinimumSize(new Dimension(550, 30));
-        	radioButton_1.setMaximumSize(new Dimension(550, 30));
-        	radioButton_1.setBorder(new EmptyBorder(0, 15, 0, 0));
+    private JRadioButton getRdBtnKeepDataFilesExternal() {
+        if (rdBtnKeepDataFilesExternal == null) {
+        	rdBtnKeepDataFilesExternal = new JRadioButton("Keep Data Files external to PC2 (requires you to copy files to Judge's machines)");
+        	inputStorageButtonGroup.add(rdBtnKeepDataFilesExternal);
+        	rdBtnKeepDataFilesExternal.setPreferredSize(new Dimension(550, 30));
+        	rdBtnKeepDataFilesExternal.setMinimumSize(new Dimension(550, 30));
+        	rdBtnKeepDataFilesExternal.setMaximumSize(new Dimension(550, 30));
+        	rdBtnKeepDataFilesExternal.setBorder(new EmptyBorder(0, 15, 0, 0));
         }
-        return radioButton_1;
+        return rdBtnKeepDataFilesExternal;
     }
     private JPanel getControlPanel() {
         if (controlPanel == null) {
