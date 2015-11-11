@@ -67,7 +67,7 @@ public class ICPCLoadPane extends JPanePlugin {
     private String lastDirectory;
     private JButton editCDPPathButton;
 
-    private EditCDPPathFrame editCDPPathFrame;
+    private EditJudgesDataFilePathFrame editCDPPathFrame;
 
     /**
      * This method initializes
@@ -597,9 +597,9 @@ public class ICPCLoadPane extends JPanePlugin {
      * 
      * @return the EditCDPPathFrame
      */
-    private EditCDPPathFrame getEditCDPFrame() {
+    private EditJudgesDataFilePathFrame getEditCDPFrame() {
         if (editCDPPathFrame == null) {
-            editCDPPathFrame = new EditCDPPathFrame();
+            editCDPPathFrame = new EditJudgesDataFilePathFrame();
         }
         return editCDPPathFrame ;
     }

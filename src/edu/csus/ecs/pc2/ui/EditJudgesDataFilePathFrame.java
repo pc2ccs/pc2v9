@@ -39,7 +39,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * @author $Author$ John
  * @version $Id$
  */
-public class EditCDPPathFrame extends JFrame implements UIPlugin  {
+public class EditJudgesDataFilePathFrame extends JFrame implements UIPlugin  {
 
     /**
      * 
@@ -62,7 +62,7 @@ public class EditCDPPathFrame extends JFrame implements UIPlugin  {
 
     private Log log;
     
-    public EditCDPPathFrame() {
+    public EditJudgesDataFilePathFrame() {
         
         initialize();
     }

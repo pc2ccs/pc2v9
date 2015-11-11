@@ -69,7 +69,7 @@ public class ProblemsPane extends JPanePlugin {
 
     private JButton setJudgesDataPathButton;
 
-    private EditCDPPathFrame editCDPPathFrame;
+    private EditJudgesDataFilePathFrame editCDPPathFrame;
     
     /**
      * This method initializes
@@ -744,9 +744,9 @@ public class ProblemsPane extends JPanePlugin {
      * 
      * @return the EditCDPPathFrame
      */
-    private EditCDPPathFrame getEditCDPFrame() {
+    private EditJudgesDataFilePathFrame getEditCDPFrame() {
         if (editCDPPathFrame == null) {
-            editCDPPathFrame = new EditCDPPathFrame();
+            editCDPPathFrame = new EditJudgesDataFilePathFrame();
         }
         return editCDPPathFrame ;
     }
