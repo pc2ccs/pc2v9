@@ -1413,6 +1413,11 @@ public class EditProblemPane extends JPanePlugin {
                 if (problem == null) {
                     // new problem
                     enableUpdateButtons(false);
+
+                    getMultipleDataSetPane().getInputDataStoragePanel().setEnabled(true);
+                    getMultipleDataSetPane().getRdbtnCopyDataFiles().setEnabled(true);
+                    getMultipleDataSetPane().getRdBtnKeepDataFilesExternal().setEnabled(true);
+
                 } else {
                     enableUpdateButton();
                 }
