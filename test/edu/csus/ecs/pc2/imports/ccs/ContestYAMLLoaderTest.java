@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.imports.ccs;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
@@ -1544,7 +1545,8 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         String dateString = "2011-02-04 01:23Z";
         Date date = ContestYAMLLoader.parseStartTime(dateString);
         
-        assertEquals("Expected contest time ", "Fri Feb 04 01:23:00 PST 2011", date.toString());
+        String timezone = new SimpleDateFormat("zzz").format(date);
+        assertEquals("Expected contest time ", "Fri Feb 04 01:23:00 "+timezone+" 2011", date.toString());
         
         String expectedFormattedTime = XMLUtilities.formatSeconds(date.getTime());
         assertEquals("Expected contest start time ", "1296811380.000", expectedFormattedTime);
