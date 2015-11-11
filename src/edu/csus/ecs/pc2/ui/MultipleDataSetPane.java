@@ -339,11 +339,11 @@ public class MultipleDataSetPane extends JPanePlugin {
         String shortProblemName = getEditProblemPane().getShortNameTextfield().getText();
         
         if (shortProblemName == null || shortProblemName.trim().length() == 0){
-            showMessage(this, "Must enter short problem name to load","Enter short problems name (on General tab)");
+            showMessage(this, "Missing Problem Short Name", "You must define a 'Short Name' for the problem (on the 'General' tab) before you can load data files.");
             return;
         }
 
-        String baseDirectoryName =selectDirectory("Select diretory where files are at");
+        String baseDirectoryName = selectDirectory("Select directory where data files are located");
         
         if (baseDirectoryName == null){
             return;
@@ -354,20 +354,13 @@ public class MultipleDataSetPane extends JPanePlugin {
             problem = new Problem(shortProblemName);
         }
         problem.setUsingExternalDataFiles(externalFiles);
-        
-        String[] answerFilenames = Utilities.getFileNames(baseDirectoryName, ".ans");
-        
-        if (answerFilenames.length == 0) {
-            showMessage(this, "No answer files found", "No .ans files found in " + baseDirectoryName);
-            return;
-        }
-        
+                
         dump(problemDataFiles, "debug 22 before load");
         try {
             problemDataFiles = loadDataFiles(problem, problemDataFiles, baseDirectoryName, ".in", ".ans", externalFiles);
         } catch (Exception e) {
             getController().getLog().log(Log.INFO, e.getMessage(), e);
-            showMessage(this, e.getMessage(),"Unable to import files");
+            showMessage(this, "Import Failed", e.getMessage());
         }
         dump(problemDataFiles, "debug 22 after load");
         
@@ -403,7 +396,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             files = new ProblemDataFiles(aProblem);
         } else {
             /**
-             * A check. It makes no sense to update an existing ProblemDataFiles for a different Problem.
+             * A sanity check. It makes no sense to update an existing ProblemDataFiles for a different Problem.
              */
             if (aProblem != null && !files.getProblemId().equals(aProblem.getElementId())) {
                 throw new RuntimeException("problem and data files are not for the same problem " + aProblem.getElementId() + " vs " + files.getProblemId());
@@ -415,15 +408,16 @@ public class MultipleDataSetPane extends JPanePlugin {
         String[] answerFileNames = Utilities.getFileNames(dataFileBaseDirectory, answerExtension);
 
         if (inputFileNames.length == 0) {
-            throw new RuntimeException("No input files with extension " + dataExtension + " in "+dataFileBaseDirectory);
+            throw new RuntimeException("No input data files with required  '" + dataExtension + "'  extension found in " + dataFileBaseDirectory);
         }
 
         if (answerFileNames.length == 0) {
-            throw new RuntimeException("No answer  files with extension " + answerExtension+ " in "+dataFileBaseDirectory);
+            throw new RuntimeException("No Judge's answer files with required  '" + answerExtension + "'  extension found in " + dataFileBaseDirectory);
         }
-
+        
         if (answerFileNames.length != inputFileNames.length) {
-            throw new RuntimeException("Mismatch: expecting same number of " + dataExtension + " and " + answerExtension + " files (" + inputFileNames.length + " vs " + answerFileNames.length);
+            throw new RuntimeException("Mismatch: expecting the same number of  '" + dataExtension + "'  and  '" + answerExtension + "'  files in " + dataFileBaseDirectory
+                    + "\n (found " + inputFileNames.length + "  '" + dataExtension +  "'  files vs. " + answerFileNames.length + "  '" + answerExtension + "'  files)");
         }
 
         SerializedFile[] inputFiles = Utilities.createSerializedFiles(dataFileBaseDirectory, inputFileNames, externalDataFiles);
