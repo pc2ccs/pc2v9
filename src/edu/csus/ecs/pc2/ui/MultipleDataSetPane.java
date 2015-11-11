@@ -135,7 +135,10 @@ public class MultipleDataSetPane extends JPanePlugin {
         
         if (problem != null) {
             getRdBtnKeepDataFilesExternal().setSelected(problem.isUsingExternalDataFiles()); //button group will set the Copy button to the opposite
-        }
+            getInputDataStoragePanel().setEnabled(false);
+            getRdbtnCopyDataFiles().setEnabled(false);
+            getRdBtnKeepDataFilesExternal().setEnabled(false);
+        } 
      
         // TODO 917 re-add auto size columns
         resizeColumnWidth(testDataSetsListBox);
@@ -430,7 +433,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         return editProblemPane;
     }
     
-    private JPanel getInputDataStoragePanel() {
+    public JPanel getInputDataStoragePanel() {
         if (inputDataStoragePanel == null) {
         	inputDataStoragePanel = new JPanel();
         	inputDataStoragePanel.setPreferredSize(new Dimension(470, 100));
@@ -443,7 +446,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return inputDataStoragePanel;
     }
-    private JRadioButton getRdbtnCopyDataFiles() {
+    public JRadioButton getRdbtnCopyDataFiles() {
         if (rdbtnCopyDataFiles == null) {
         	rdbtnCopyDataFiles = new JRadioButton("Copy Data Files into PC2 (more efficient, but limited to 5MB total per problem)");
         	inputStorageButtonGroup.add(rdbtnCopyDataFiles);
@@ -455,7 +458,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return rdbtnCopyDataFiles;
     }
-    private JRadioButton getRdBtnKeepDataFilesExternal() {
+    public JRadioButton getRdBtnKeepDataFilesExternal() {
         if (rdBtnKeepDataFilesExternal == null) {
         	rdBtnKeepDataFilesExternal = new JRadioButton("Keep Data Files external to PC2 (requires you to copy files to Judge's machines)");
         	inputStorageButtonGroup.add(rdBtnKeepDataFilesExternal);
