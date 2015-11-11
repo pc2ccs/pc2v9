@@ -229,8 +229,6 @@ public class EditProblemPane extends JPanePlugin {
 
     private JCheckBox ccsValidationEnabledCheckBox = null;
 
-    private boolean usingExternalDataFiles = false;
-
     private String loadPath;
     private JTextField shortNameTextfield;
 
@@ -720,7 +718,7 @@ public class EditProblemPane extends JPanePlugin {
             Utilities.dump(newProblemDataFiles,"debug 22 in getProblemFromFields after IF");
         }
         
-        checkProblem.setUsingExternalDataFiles(usingExternalDataFiles);
+        checkProblem.setUsingExternalDataFiles(getMultipleDataSetPane().isUsingExternalDataFiles());
 
         checkProblem.setTimeOutInSeconds(getIntegerValue(timeOutSecondTextField.getText()));
 
@@ -1403,8 +1401,6 @@ public class EditProblemPane extends JPanePlugin {
         this.newProblemDataFiles = null;
         this.originalProblemDataFiles = null;
         
-        this.usingExternalDataFiles = false;
-        
         fileNameOne = createProblemReport (problem, originalProblemDataFiles, "stuf1");
         System.out.println("Created problem report "+fileNameOne);
 
@@ -1602,7 +1598,6 @@ public class EditProblemPane extends JPanePlugin {
 
         populateJudging(inProblem);
         
-        usingExternalDataFiles = inProblem.isUsingExternalDataFiles();
         loadPath = inProblem.getExternalDataFileLocation();
 
         /**
