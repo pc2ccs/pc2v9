@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.transport.EventFeedServer;
-import edu.csus.ecs.pc2.exports.ccs.EventFeedXML2013;
+import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
 
 /**
  * Event Feed Server Pane.
@@ -362,7 +362,7 @@ public class EventFeedServerPane extends JPanePlugin {
 //        String[] lines = SocketUtilities.readLinesFromPort(port);
 //
         
-        EventFeedXML2013 eventFeedXML = new EventFeedXML2013();
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
         String eventFeed = null;
         if (! showFilteredFeed) {

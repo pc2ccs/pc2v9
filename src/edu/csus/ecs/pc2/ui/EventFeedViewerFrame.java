@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.EventFeedDefinition;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
+import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
 
 /**
  * View a selected Event Feed.
@@ -173,7 +174,7 @@ public class EventFeedViewerFrame extends JFrame implements UIPlugin {
         
         try {
             setTitle("Event Feed: " + definition.getDisplayName());
-            EventFeedXML eventFeedXML = new EventFeedXML();
+            ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
             String xml = eventFeedXML.toXML(contest);
             getEventFeedTextArea().setText(xml);
             
