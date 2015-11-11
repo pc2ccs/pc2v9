@@ -883,11 +883,23 @@ public final class Utilities {
                 }
             }
 
-            // Search under CCS secret
+            String secretPathPattern = File.separator + SECRET_DATA_DIR + File.separator;
+            String fullPathName = serializedFile.getAbsolutePath();
+            
+            secretPathPattern = secretPathPattern.replace('\\', '.');
 
-            testFileName = getSecretDataPath(problem.getCCSfileDirectory(), problem) +File.separator + serializedFile.getName();
+            if (fullPathName.matches(secretPathPattern)){
 
-            if (fileExists(testFileName)){
+                // return filename if source file under /data/secret/ somewhere
+                testFileName = getSecretDataPath(problem.getCCSfileDirectory(), problem) +File.separator + serializedFile.getName();
+                if (fileExists(testFileName)){
+                    return testFileName;
+                }
+            }
+            
+            testFileName = alternateCDPPath + File.separator + problem.getShortName() + File.separator + serializedFile.getName();
+            if (fileExists(testFileName)) {
+                // return filename if under shortname/ path
                 return testFileName;
             }
 
@@ -1168,11 +1180,11 @@ public final class Utilities {
 
         if (problem == null) {
             messages.add("problem is null (cannot validate problem)");
-        } else if (problem.isUsingExternalDataFiles()){
-             /**
-              * Only validate if external files.
-              */
-       
+        } else if (problem.isUsingExternalDataFiles()) {
+            /**
+             * Only validate if external files.
+             */
+
             if (problem.getShortName() == null) {
                 messages.add("No problem short name for problem " + problem);
             } else {
@@ -1184,40 +1196,41 @@ public final class Utilities {
                 } else {
                     // Check for secret problem files - only if external files.
 
+                    String problemTitle = problem.getDisplayName();
+
                     String dataPath = getSecretDataPath(cdpPath, problem);
 
                     if (!isDirThere(dataPath)) {
-                        messages.add("Missing data directory, expected at: " + dataPath);
+                        messages.add(problemTitle + "::Missing data directory, expected at: " + dataPath);
 
                     } else {
-                        String[] inDataFiles = getFileNames(dataPath, ".in");
 
-                        if (inDataFiles != null && inDataFiles.length > 0) {
-                            String[] answerDataFiles = getFileNames(dataPath, ".ans");
-                            if (answerDataFiles != null && answerDataFiles.length > 0) {
+                        int missingData = 0;
+                        int missingAnswer = 0;
 
-                                // found both judge and answer files
+                        for (int i = 0; i < problem.getNumberTestCases(); i++) {
+                            String dataFile = problem.getDataFileName(i + 1);
+                            String ansFile = problem.getAnswerFileName(i + 1);
 
-                                if (answerDataFiles.length != inDataFiles.length) {
-                                    messages.add("Expecting same number of judge and answer files to match " + inDataFiles.length + " vs " + answerDataFiles.length);
-                                }
+                            String judgeFileName = dataPath + File.separator + dataFile;
+                            String answerFilename = dataPath + File.separator + ansFile;
+                            System.out.println("debug 22 judge = "+judgeFileName);
+                            System.out.println("debug 22 ans   = "+answerFilename);
+                            
 
-                                for (String inDataFilename : inDataFiles) {
-                                    String ansFilename = dataPath + File.separator + inDataFilename.replaceFirst("[.]in", ".ans");
-
-                                    if (!isFileThere(ansFilename)) {
-                                        // did not find answer file
-                                        String basename = basename(ansFilename);
-                                        System.out.println("debug 22 missing: '" + ansFilename + "'");
-                                        messages.add("Missing answer file '" + basename + "' in " + dataPath);
-                                    }
-                                }
-
-                            } else {
-                                messages.add("Expecting " + inDataFiles.length + " judges answer files (.ans) in: " + dataPath);
+                            if (dataFile != null && !isFileThere(judgeFileName)) {
+                                messages.add(problemTitle + "::Missing judge file '" + dataFile + "' in " + dataPath);
+                                missingData++;
                             }
-                        } else {
-                            messages.add("Expecting judges data files (.in) in: " + dataPath);
+
+                            if (ansFile != null && !isFileThere(answerFilename)) {
+                                messages.add(problemTitle + "::Missing answer file '" + ansFile + "' in " + dataPath);
+                                missingAnswer++;
+                            }
+
+                            if (missingData + missingAnswer > 0) {
+                                messages.add(problemTitle + "::total files missing = " + missingData + missingAnswer);
+                            }
                         }
                     }
 
@@ -1238,8 +1251,8 @@ public final class Utilities {
                 }
             }
 
-         }
-        
+        }
+
         if (messages.size() == 0) {
             return true;
         } else {
@@ -1270,7 +1283,7 @@ public final class Utilities {
                 try {
 
                     // Check for all problem files
-                    validateCDP(contest, cdpPath, problem, true);
+                    validateCDP(contest, cdpPath, problem, false);
 
                 } catch (MultipleIssuesException e) {
 
