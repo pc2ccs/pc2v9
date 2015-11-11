@@ -273,6 +273,8 @@ public class MultipleDataSetPane extends JPanePlugin {
                     reloadDataFiles();
                 }
             });
+            btnReload.setEnabled(false);
+            btnReload.setVisible(false);
         }
         return btnReload;
     }
