@@ -1977,6 +1977,7 @@ public class EditProblemPane extends JPanePlugin {
         getAnswerFilenamePane().setEnabled(enableComponents);
         getAnswerBrowseButton().setEnabled(enableComponents);
         answerFileNameLabel.setEnabled(enableComponents);
+        answerFilePane.setEnabled(enableComponents);
     }
 
     /**
