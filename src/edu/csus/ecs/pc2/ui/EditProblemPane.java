@@ -235,6 +235,8 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField shortNameTextfield;
 
     private String fileNameOne;
+
+    private Component multipleDataSetScrollPane;
     
     /**
      * This method initializes
@@ -1668,17 +1670,21 @@ public class EditProblemPane extends JPanePlugin {
      */
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
-            
-            JScrollPane scrollPane = new JScrollPane(getMultipleDataSetPane());
-            
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new java.awt.Dimension(400, 400));
-            mainTabbedPane.insertTab("Test Data Sets", null, scrollPane, null, 0);
+            mainTabbedPane.insertTab("Data Files", null, getMultipleDataSetScrollPane(), null, 0);
             mainTabbedPane.insertTab("Validator", null, getValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
             mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);
         }
         return mainTabbedPane;
+    }
+
+    private Component getMultipleDataSetScrollPane() {
+        if (multipleDataSetScrollPane == null) {
+            multipleDataSetScrollPane = new JScrollPane(getMultipleDataSetPane());
+        }
+        return multipleDataSetScrollPane ;
     }
 
     /**

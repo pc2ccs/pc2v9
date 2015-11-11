@@ -6,6 +6,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import java.awt.Dimension;
 
 /**
  * Edit Problem.
@@ -44,7 +45,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549,535));
+        this.setSize(new Dimension(700, 535));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getProblemPane());
         this.setTitle("New Problem");

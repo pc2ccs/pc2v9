@@ -1,18 +1,25 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
@@ -39,7 +46,7 @@ public class MultipleDataSetPane extends JPanePlugin {
      */
     private static final long serialVersionUID = -5975163495479418935L;
 
-    private JPanel centerPane = null;
+    private JPanel listBoxScrollPanePanel = null;
 
     private TestCaseTableModel tableModel = new TestCaseTableModel();
 
@@ -47,12 +54,19 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     private ProblemDataFiles problemDataFiles;
     private JButton btnDelete;
-    private JButton btnReload;
     private JButton btnLoad;
 
     private EditProblemPane editProblemPane = null;
 
     private Problem problem;
+    private JPanel inputDataStoragePanel;
+    private JRadioButton rdbtnCopyDataFiles;
+    private JRadioButton radioButton_1;
+    private JPanel controlPanel;
+    private JPanel buttonPanel;
+    private Component horizontalStrut;
+    private Component verticalStrut;
+    private Component verticalStrut_1;
 
     /**
      * This method initializes
@@ -60,6 +74,7 @@ public class MultipleDataSetPane extends JPanePlugin {
      */
     public MultipleDataSetPane() {
         super();
+        setMinimumSize(new Dimension(10, 500));
         initialize();
     }
 
@@ -69,17 +84,9 @@ public class MultipleDataSetPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(440, 229));
-        this.add(getCenterPane(), BorderLayout.CENTER);
-        
-        JPanel buttonPanel = new JPanel();
-        FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
-        flowLayout.setHgap(45);
-        buttonPanel.setPreferredSize(new Dimension(35, 35));
-        add(buttonPanel, BorderLayout.SOUTH);
-        buttonPanel.add(getBtnLoad());
-        buttonPanel.add(getBtnDelete());
-        buttonPanel.add(getBtnReload());
+        this.setSize(new Dimension(766, 526));
+        this.add(getListBoxScrollPanePanel(), BorderLayout.CENTER);
+        add(getControlPanel(), BorderLayout.SOUTH);
     }
 
     @Override
@@ -143,13 +150,14 @@ public class MultipleDataSetPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getCenterPane() {
-        if (centerPane == null) {
-            centerPane = new JPanel();
-            centerPane.setLayout(new BorderLayout());
-            centerPane.add(getTestDataSetsListBox(), BorderLayout.CENTER);
+    private JPanel getListBoxScrollPanePanel() {
+        if (listBoxScrollPanePanel == null) {
+            listBoxScrollPanePanel = new JPanel();
+            listBoxScrollPanePanel.setBorder(new LineBorder(Color.RED));
+            listBoxScrollPanePanel.setLayout(new BorderLayout());
+            listBoxScrollPanePanel.add(getTestDataSetsListBox(), BorderLayout.CENTER);
         }
-        return centerPane;
+        return listBoxScrollPanePanel;
     }
 
 
@@ -263,21 +271,6 @@ public class MultipleDataSetPane extends JPanePlugin {
         // TODO 917 if row one is deleted, update the data and answer file on the General Tab 
         // Warn if they delete row one ??
     }
-
-    private JButton getBtnReload() {
-        if (btnReload == null) {
-            btnReload = new JButton("Re-Load");
-            btnReload.setToolTipText("Refresh/Reload data sets from disk");
-            btnReload.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    reloadDataFiles();
-                }
-            });
-            btnReload.setEnabled(false);
-            btnReload.setVisible(false);
-        }
-        return btnReload;
-    }
     
     private void showMessage(String string, String title) {
         JOptionPane.showMessageDialog(null, string, title, JOptionPane.WARNING_MESSAGE);
@@ -374,19 +367,6 @@ public class MultipleDataSetPane extends JPanePlugin {
         return btnLoad;
     }
 
-    /**
-     * Refresh/Reload the already loaded data sets.
-     */
-    protected void reloadDataFiles() {
-
-        // TODO 917 reload/refresh data files.
-        showMessage(this, "Not implemented Yet", "reloadDataFiles not implemented, yet");
-
-        // load the data and answer file on the General Tab
-        editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
-
-    }
-
     public void setParentPane(EditProblemPane pane) {
         editProblemPane = pane;
     }
@@ -433,4 +413,81 @@ public class MultipleDataSetPane extends JPanePlugin {
         return editProblemPane;
     }
     
+    private JPanel getInputDataStoragePanel() {
+        if (inputDataStoragePanel == null) {
+        	inputDataStoragePanel = new JPanel();
+        	inputDataStoragePanel.setPreferredSize(new Dimension(470, 100));
+        	inputDataStoragePanel.setMaximumSize(new Dimension(500, 200));
+        	inputDataStoragePanel.setBorder(new TitledBorder(null, "Input Data Storage", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), null));
+        	inputDataStoragePanel.setAlignmentX(0.0f);
+        	inputDataStoragePanel.setLayout(new BoxLayout((Container) inputDataStoragePanel, BoxLayout.Y_AXIS));
+        	inputDataStoragePanel.add(getRdbtnCopyDataFiles());
+        	inputDataStoragePanel.add(getRadioButton_1());
+        }
+        return inputDataStoragePanel;
+    }
+    private JRadioButton getRdbtnCopyDataFiles() {
+        if (rdbtnCopyDataFiles == null) {
+        	rdbtnCopyDataFiles = new JRadioButton("Copy Data Files into PC2 (more efficient, but limited to 5MB total per problem)");
+        	rdbtnCopyDataFiles.setSelected(true);
+        	rdbtnCopyDataFiles.setPreferredSize(new Dimension(550, 30));
+        	rdbtnCopyDataFiles.setMinimumSize(new Dimension(550, 30));
+        	rdbtnCopyDataFiles.setMaximumSize(new Dimension(550, 30));
+        	rdbtnCopyDataFiles.setBorder(new EmptyBorder(0, 15, 0, 0));
+        }
+        return rdbtnCopyDataFiles;
+    }
+    private JRadioButton getRadioButton_1() {
+        if (radioButton_1 == null) {
+        	radioButton_1 = new JRadioButton("Keep Data Files external to PC2 (requires you to copy files to Judge's machines)");
+        	radioButton_1.setPreferredSize(new Dimension(550, 30));
+        	radioButton_1.setMinimumSize(new Dimension(550, 30));
+        	radioButton_1.setMaximumSize(new Dimension(550, 30));
+        	radioButton_1.setBorder(new EmptyBorder(0, 15, 0, 0));
+        }
+        return radioButton_1;
+    }
+    private JPanel getControlPanel() {
+        if (controlPanel == null) {
+        	controlPanel = new JPanel();
+        	controlPanel.setPreferredSize(new Dimension(10, 200));
+        	controlPanel.setMinimumSize(new Dimension(10, 200));
+        	controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+        	controlPanel.add(getVerticalStrut_1());
+        	controlPanel.add(getInputDataStoragePanel());
+        	controlPanel.add(getVerticalStrut());
+        	controlPanel.add(getButtonPanel());
+        }
+        return controlPanel;
+    }
+    private JPanel getButtonPanel() {
+        if (buttonPanel == null) {
+        	buttonPanel = new JPanel();
+        	buttonPanel.setPreferredSize(new Dimension(10, 30));
+        	buttonPanel.add(getBtnLoad());
+        	buttonPanel.add(getHorizontalStrut());
+        	buttonPanel.add(getBtnDelete());
+        }
+        return buttonPanel;
+    }
+    private Component getHorizontalStrut() {
+        if (horizontalStrut == null) {
+        	horizontalStrut = Box.createHorizontalStrut(20);
+        	horizontalStrut.setPreferredSize(new Dimension(30, 0));
+        	horizontalStrut.setMinimumSize(new Dimension(30, 0));
+        }
+        return horizontalStrut;
+    }
+    private Component getVerticalStrut() {
+        if (verticalStrut == null) {
+        	verticalStrut = Box.createVerticalStrut(20);
+        }
+        return verticalStrut;
+    }
+    private Component getVerticalStrut_1() {
+        if (verticalStrut_1 == null) {
+        	verticalStrut_1 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_1;
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"
