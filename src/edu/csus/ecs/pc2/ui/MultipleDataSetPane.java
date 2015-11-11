@@ -335,7 +335,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
 
         if (! Utilities.isDirThere(secretDirPath)){
-            showMessage(this, "Cannot read/find test data set directory"+secretDirPath,"No such directory");
+            showMessage("Cannot read/find test data set directory"+secretDirPath,"No such directory");
             return;
         }
         
