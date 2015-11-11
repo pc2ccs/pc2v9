@@ -132,6 +132,10 @@ public class MultipleDataSetPane extends JPanePlugin {
 
         tableModel.setFiles(problemDataFiles);
         tableModel.fireTableDataChanged();
+        
+        if (problem != null) {
+            getRdBtnKeepDataFilesExternal().setSelected(problem.isUsingExternalDataFiles()); //button group will set the Copy button to the opposite
+        }
      
         // TODO 917 re-add auto size columns
         resizeColumnWidth(testDataSetsListBox);
@@ -290,7 +294,7 @@ public class MultipleDataSetPane extends JPanePlugin {
     }
 
     
-    private boolean isUsingExternalDataFiles() {
+    public boolean isUsingExternalDataFiles() {
         return rdBtnKeepDataFilesExternal.isSelected();
     }
    
