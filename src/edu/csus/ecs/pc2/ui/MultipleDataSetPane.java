@@ -7,11 +7,11 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -24,7 +24,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -60,7 +60,14 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     private Problem problem;
     private JPanel inputDataStoragePanel;
+    
+    /**
+     * Copy Data Files into PC2 - aka Internal
+     */
     private JRadioButton rdbtnCopyDataFiles;
+    /**
+     * Keep Data Files external to PC2 - aka external
+     */
     private JRadioButton radioButton_1;
     private JPanel controlPanel;
     private JPanel buttonPanel;
@@ -280,6 +287,32 @@ public class MultipleDataSetPane extends JPanePlugin {
         showMessage(string, "Note");
     }
 
+    
+    private boolean isUsingExternalDataFiles() {
+        return radioButton_1.isSelected();
+    }
+   
+    private String selectDirectory(String dialogTitle) {
+
+        String directory = null;
+
+        JFileChooser chooser = new JFileChooser();
+
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        if (dialogTitle != null) {
+            chooser.setDialogTitle(dialogTitle);
+        }
+        try {
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                directory = chooser.getSelectedFile().toString();
+            }
+        } catch (Exception e) {
+            getController().getLog().log(Log.INFO, "Error getting selected file, try again.", e);
+        }
+        chooser = null;
+        return directory;
+    }
 
     /**
      * Load new data files.
@@ -296,54 +329,32 @@ public class MultipleDataSetPane extends JPanePlugin {
             return;
         }
 
-        ContestInformation info = getContest().getContestInformation();
+        String baseDirectoryName =selectDirectory("Select diretory where files are at");
         
-        String adminPath = info.getAdminCDPBasePath();
-        
-        if (adminPath == null){
-            showMessage("Cannot load - Set Admin CDP path first");
+        if (baseDirectoryName == null){
             return;
         }
         
-        if (!Utilities.isDirThere(adminPath)){
-            showMessage("Cannot load - Admin CDP path directory missing: "+adminPath);
-            return;
-        }
-        
-        /**
-         * cdp config directory with problem subdirectories.
-         */
-        String baseDirectoryName = adminPath;
-        
-        boolean externalFiles = false;
-        if (problem != null) {
-            externalFiles = problem.isUsingExternalDataFiles();
-        } else {
+        boolean externalFiles = isUsingExternalDataFiles();
+        if (problem == null) {
             problem = new Problem(shortProblemName);
         }
+        problem.setUsingExternalDataFiles(externalFiles);
         
-        // check for answer files
-        String secretDirPath = Utilities.getSecretDataPath(baseDirectoryName, shortProblemName);
+        String[] answerFilenames = Utilities.getFileNames(baseDirectoryName, ".ans");
         
-        if (! Utilities.isDirThere(secretDirPath)){
-            secretDirPath = baseDirectoryName + File.separator + shortProblemName;
-        }
-
-        if (! Utilities.isDirThere(secretDirPath)){
-            showMessage("Cannot read/find test data set directory"+secretDirPath,"No such directory");
-            return;
-        }
-        
-        String[] inputFileNames = Utilities.getFileNames(secretDirPath, ".ans");
-        
-        if (inputFileNames.length == 0){
-            System.out.println("debug 22 "+"No .ans files found in "+secretDirPath);
-            showMessage(this, "No answer files found", "No .ans files found in "+secretDirPath);
+        if (answerFilenames.length == 0) {
+            showMessage(this, "No answer files found", "No .ans files found in " + baseDirectoryName);
             return;
         }
         
         dump(problemDataFiles, "debug 22 before load");
-        problemDataFiles = loadDataFiles(problem, problemDataFiles, secretDirPath, ".in", ".ans", externalFiles);
+        try {
+            problemDataFiles = loadDataFiles(problem, problemDataFiles, baseDirectoryName, ".in", ".ans", externalFiles);
+        } catch (Exception e) {
+            getController().getLog().log(Log.INFO, e.getMessage(), e);
+            showMessage(this, e.getMessage(),"Unable to import files");
+        }
         dump(problemDataFiles, "debug 22 after load");
         
         populateUI();
