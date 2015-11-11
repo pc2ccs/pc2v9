@@ -69,6 +69,11 @@ public class ContestInformation implements Serializable{
     
     private int lastRunNumberSubmitted = 0;
 
+    /*
+     * are the problem data files external, defaults to false
+     */
+    private boolean usingExternalFiles = false;
+    
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -442,5 +447,19 @@ public class ContestInformation implements Serializable{
      */
     public String getAdminCDPBasePath() {
         return adminCDPBasePath;
+    }
+
+    /**
+     * @return the externalFiles
+     */
+    public boolean isUsingExternalFiles() {
+        return usingExternalFiles;
+    }
+
+    /**
+     * @param externalFiles the externalFiles to set
+     */
+    public void setUsingExternalFiles(boolean usingExternalFiles) {
+        this.usingExternalFiles = usingExternalFiles;
     }
 }
