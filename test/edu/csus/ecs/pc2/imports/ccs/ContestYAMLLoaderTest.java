@@ -1552,7 +1552,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         String actualTime = "1296811380.000";
         System.err.println("timezone="+timezone);
         if ("GMT".equals(timezone) || "UTC".equals(timezone)) {
-            actualTime = "1296811380.000";
+            actualTime = "1296782580.000";
         }
         assertEquals("Expected contest start time ", actualTime, expectedFormattedTime);
         
