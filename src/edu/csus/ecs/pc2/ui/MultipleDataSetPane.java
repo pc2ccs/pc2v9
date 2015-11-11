@@ -30,6 +30,8 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 import javax.swing.ButtonGroup;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 /**
  * Multiple Test Data set UI.
@@ -464,6 +466,13 @@ public class MultipleDataSetPane extends JPanePlugin {
     public JRadioButton getRdBtnKeepDataFilesExternal() {
         if (rdBtnKeepDataFilesExternal == null) {
         	rdBtnKeepDataFilesExternal = new JRadioButton("Keep Data Files external to PC2 (requires you to copy files to Judge's machines)");
+        	rdBtnKeepDataFilesExternal.addItemListener(new ItemListener() {
+        	    public void itemStateChanged(ItemEvent e) {
+                    if (rdBtnKeepDataFilesExternal.isSelected()) {
+                        verifyJudgeDataPathIsSet();       	        
+                    }
+        	    }
+        	});
         	inputStorageButtonGroup.add(rdBtnKeepDataFilesExternal);
         	rdBtnKeepDataFilesExternal.setPreferredSize(new Dimension(550, 30));
         	rdBtnKeepDataFilesExternal.setMinimumSize(new Dimension(550, 30));
@@ -472,6 +481,13 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return rdBtnKeepDataFilesExternal;
     }
+    
+    protected void verifyJudgeDataPathIsSet() {
+        //TODO *** need a MODAL dialog to pop up...
+        EditJudgesDataFilePathFrame frame = new EditJudgesDataFilePathFrame();
+        frame.setVisible(true);    
+    }
+
     private JPanel getControlPanel() {
         if (controlPanel == null) {
         	controlPanel = new JPanel();
