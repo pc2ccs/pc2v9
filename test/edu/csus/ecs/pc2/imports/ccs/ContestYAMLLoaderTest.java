@@ -1549,7 +1549,11 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected contest time ", "Fri Feb 04 01:23:00 "+timezone+" 2011", date.toString());
         
         String expectedFormattedTime = XMLUtilities.formatSeconds(date.getTime());
-        assertEquals("Expected contest start time ", "1296811380.000", expectedFormattedTime);
+        String actualTime = "1296811380.000";
+        if ("UTC".equals(timezone)) {
+            actualTime = "1296811380.000";
+        }
+        assertEquals("Expected contest start time ", actualTime, expectedFormattedTime);
         
         String inputYamlFile = getContestYamlTestFilename();
         String[] lines = Utilities.loadFile(inputYamlFile);
