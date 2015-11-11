@@ -168,9 +168,11 @@ public class SerializedFile implements Serializable {
         if (!StringUtilities.stringSame(name, otherFile.name)) {
             return false;
         }
-        if (!buffer.equals(otherFile.buffer)) {
+
+        if (!java.util.Arrays.equals(buffer, otherFile.buffer)) {
             return false;
         }
+        
         if (fileType != otherFile.fileType) {
             return false;
         }
