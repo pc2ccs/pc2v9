@@ -1,9 +1,12 @@
 package edu.csus.ecs.pc2.core.export;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
@@ -102,7 +105,7 @@ public class ExportYAMLTest extends AbstractTestCase {
         if (File.separator.equals("/")) {
             expectedContestYamlFile = getTestFilename("expected.unix.contest.yaml");
         }
-//        editFile(actualContestYamlFile);
+        stripStartTime(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
         
         assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4);
@@ -123,6 +126,32 @@ public class ExportYAMLTest extends AbstractTestCase {
 //          idx++;
 //      }
 //  }
+    
+    private void stripStartTime(String filename) {
+        File actualFile = new File(filename);
+        try {
+            File newFile = new File(filename+".tmp");
+            PrintWriter printWriter = new PrintWriter(newFile);
+            String [] actualContents = Utilities.loadFile(actualFile.getAbsolutePath());
+            String [] newContents = new String[actualContents.length];
+            for (int i = 0; i < actualContents.length; i++) {
+                String string = actualContents[i];
+                if(string.startsWith("start-time:")) {
+                    string = "start-time: ";
+                }
+                newContents[i] = string;
+                printWriter.println(string);
+            }
+            printWriter.close();
+            actualFile.delete();
+            boolean result = newFile.renameTo(actualFile);
+            assertTrue("rename Failed", result);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
 
       private void asertProblemShortAssigned(IInternalContest contest) throws Exception {
     
