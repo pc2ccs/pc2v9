@@ -366,20 +366,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
             String xml = toContestXML(eventFeedXML.createElement(contest, run));
             debugPrintln(xml);
             if (run.isJudged()) {
-                String acronymn = contest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
-                String expectedResult = "True";
-                switch (acronymn) {
-                    case "AC":
-                        // fall thru
-                    case "CE":
-                        // fall thru
-                    case "JE":
-                        expectedResult = "False";
-                        break;
-                    default:
-                        break;
-                }
-                assertXMLNodeValueEquals(xml, "penalty", expectedResult);
+                assertXMLNodeValueEquals(xml, "judged", "True");
             }
         }
     }
