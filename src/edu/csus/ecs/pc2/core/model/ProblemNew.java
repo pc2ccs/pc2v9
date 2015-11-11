@@ -93,10 +93,10 @@ public class ProblemNew extends Problem {
 
     /**
      * Makes the specified Collection as the current collection of Test Case File Name Sets for this Problem.
-     * @param testCases - a Collection of TestCaseFileNameSets 
+     * @param theTestCases - a Collection of TestCaseFileNameSets 
      */
-    private void setTestCaseFiles(TestCaseFileNameCollection testCases) {
-       this.testCases = testCases;
+    private void setTestCaseFiles(TestCaseFileNameCollection theTestCases) {
+       this.testCases = theTestCases;
     }
 
     /**
@@ -112,6 +112,10 @@ public class ProblemNew extends Problem {
         } else {
             throw new ClassCastException("expected a Problem found: " + obj.getClass().getName());
         }
+    }
+
+    public int hashCode() {
+        return getElementId().toString().hashCode();
     }
 
     

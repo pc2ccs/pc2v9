@@ -474,7 +474,8 @@ public class MultipleDataSetPaneNew extends JPanePlugin {
     public EditProblemPane getEditProblemPane() {
         return editProblemPane;
     }
-    
+ 
+    @SuppressWarnings("unused")
     private JPanel getProblemDataFilesPanel() {
         if (problemDataFilesPanel == null) {
             problemDataFilesPanel = new JPanel();
@@ -529,7 +530,8 @@ public class MultipleDataSetPaneNew extends JPanePlugin {
             inputDataStoragePanel = new JPanel();
             inputDataStoragePanel.setPreferredSize(new Dimension(470, 80));
             inputDataStoragePanel.setMaximumSize(new Dimension(500, 200));
-            inputDataStoragePanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Input Data Storage", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new Color(0, 0, 0)));
+            inputDataStoragePanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Input Data Storage", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("Dialog",
+                    java.awt.Font.BOLD, 12), new Color(0, 0, 0)));
             inputDataStoragePanel.setAlignmentX(0.0f);
             inputDataStoragePanel.setLayout(new BoxLayout(inputDataStoragePanel, BoxLayout.Y_AXIS));
             inputDataStoragePanel.add(getRadioButtonCopyFilesIntoPC2());
