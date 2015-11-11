@@ -229,7 +229,6 @@ public class EditProblemPane extends JPanePlugin {
 
     private JCheckBox ccsValidationEnabledCheckBox = null;
 
-    private String loadPath;
     private JTextField shortNameTextfield;
 
     private String fileNameOne;
@@ -928,7 +927,7 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setPrelimaryNotification(false);
         }
         
-        checkProblem.setExternalDataFileLocation(loadPath);
+        checkProblem.setExternalDataFileLocation(getMultipleDataSetPane().getLoadDirectory());
 
         if (debug22EditProblem){
             Utilities.dump(newProblemDataFiles,"debug 22 before populateProblemTestSetFilenames");
@@ -1603,7 +1602,7 @@ public class EditProblemPane extends JPanePlugin {
 
         populateJudging(inProblem);
         
-        loadPath = inProblem.getExternalDataFileLocation();
+        getMultipleDataSetPane().setLoadDirectory(inProblem.getExternalDataFileLocation());
 
         /**
          * Short problem name
@@ -2592,20 +2591,18 @@ public class EditProblemPane extends JPanePlugin {
             }
 
             question = question + "'." + NL + NL;
-
             question = question + "The Current OS is '" + System.getProperty("os.name", "?");
-
             question = question + "'." + NL + NL;
-
             question = question + "Do you want the file converted to the current OS file format as it is loaded into PC^2?";
 
-            int answer = JOptionPane.showConfirmDialog(this, question, "File Format Mismatch", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-
-            if (answer == JOptionPane.YES_OPTION) {
-                newFile.convertFile(currentOS);
-                return true;
-            } else if (answer == JOptionPane.CANCEL_OPTION) {
-                throw new InvalidFieldValue("Update canceled");
+            if (! newFile.isExternalFile()){
+                int answer = JOptionPane.showConfirmDialog(this, question, "File Format Mismatch", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (answer == JOptionPane.YES_OPTION) {
+                    newFile.convertFile(currentOS);
+                    return true;
+                } else if (answer == JOptionPane.CANCEL_OPTION) {
+                    throw new InvalidFieldValue("Update canceled");
+                }
             }
 
         }

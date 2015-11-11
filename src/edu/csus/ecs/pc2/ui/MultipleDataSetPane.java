@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+
 import javax.swing.ButtonGroup;
 
 /**
@@ -76,6 +77,8 @@ public class MultipleDataSetPane extends JPanePlugin {
     private Component verticalStrut;
     private Component verticalStrut_1;
     private final ButtonGroup inputStorageButtonGroup = new ButtonGroup();
+
+    private String loadDirectory;
 
     /**
      * This method initializes
@@ -209,28 +212,27 @@ public class MultipleDataSetPane extends JPanePlugin {
     boolean hasChanged(ProblemDataFiles originalFiles) {
 
         if (originalFiles == null && problemDataFiles == null) {
-            return true;
+            return false;
         }
 
         if (originalFiles == null || problemDataFiles == null) {
-            return false;
+            return true;
         }
 
         int comp = compare(originalFiles.getJudgesDataFiles(), problemDataFiles.getJudgesDataFiles());
         if (comp != 0) {
-            return false;
+            return true;
         }
 
         comp = compare(originalFiles.getJudgesAnswerFiles(), problemDataFiles.getJudgesAnswerFiles());
         if (comp != 0) {
-            return false;
+            return true;
         }
         
         System.out.println("debug 22 Are problemId's identical ?" + //
                 problemDataFiles.getProblemId().equals(originalFiles.getProblemId()));
 
-        return true;
-
+        return false;
     }
 
     /**
@@ -315,6 +317,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 directory = chooser.getSelectedFile().toString();
+                loadDirectory = directory;
             }
         } catch (Exception e) {
             getController().getLog().log(Log.INFO, "Error getting selected file, try again.", e);
@@ -512,4 +515,13 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return verticalStrut_1;
     }
+
+    public void setLoadDirectory(String externalDataFileLocation) {
+        loadDirectory = externalDataFileLocation;
+    }
+    
+    public String getLoadDirectory() {
+        return loadDirectory;
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"
