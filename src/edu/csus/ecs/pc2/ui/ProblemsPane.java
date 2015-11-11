@@ -67,7 +67,7 @@ public class ProblemsPane extends JPanePlugin {
     private JButton reportButton = null;
     private JPanel centerPanel;
 
-    private JButton setCDPPathButton;
+    private JButton setJudgesDataPathButton;
 
     private EditCDPPathFrame editCDPPathFrame;
     
@@ -118,7 +118,7 @@ public class ProblemsPane extends JPanePlugin {
             problemButtonPane.add(getCopyButton(), null);
             problemButtonPane.add(getEditButton(), null);
             problemButtonPane.add(getReportButton(), null);
-            problemButtonPane.add(getSetCDPPathButton());
+            problemButtonPane.add(getSetJudgesDataPathButton());
         }
         return problemButtonPane;
     }
@@ -331,7 +331,7 @@ public class ProblemsPane extends JPanePlugin {
         getAddButton().setVisible(isAllowed(Permission.Type.ADD_PROBLEM));
         getEditButton().setVisible(isAllowed(Permission.Type.EDIT_PROBLEM));
         getCopyButton().setVisible(isAllowed(Permission.Type.EDIT_PROBLEM));
-        getSetCDPPathButton().setVisible(isAllowed(Permission.Type.EDIT_PROBLEM));
+        getSetJudgesDataPathButton().setVisible(isAllowed(Permission.Type.EDIT_PROBLEM));
     }
 
     /**
@@ -716,25 +716,25 @@ public class ProblemsPane extends JPanePlugin {
 //        return newInfo;
 //    }
     
-    private JButton getSetCDPPathButton() {
-        if (setCDPPathButton == null) {
-            setCDPPathButton = new JButton("Set CDP Path");
-            setCDPPathButton.setMnemonic(KeyEvent.VK_S);            
-            setCDPPathButton.addActionListener(new ActionListener() {
+    private JButton getSetJudgesDataPathButton() {
+        if (setJudgesDataPathButton == null) {
+            setJudgesDataPathButton = new JButton("Set Judge's Data Path");
+            setJudgesDataPathButton.setMnemonic(KeyEvent.VK_S);            
+            setJudgesDataPathButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    editCDPPath();
+                    editJudgesDataFilePath();
                     }
             });
-            setCDPPathButton.setToolTipText("Specify a path to the root of a Contest Data Package (see https://clics.ecs.baylor.edu/index.php/CDP) ");
+            setJudgesDataPathButton.setToolTipText("Specify a path to external data files on the Judge machines");
         }
-        return setCDPPathButton;
+        return setJudgesDataPathButton;
     }
     
     /**
      * Displays a frame which allows the user to edit the currently-defined CDP paths
      * on both the Admin machine and the Judge's machines.
      */
-    private void editCDPPath() {
+    private void editJudgesDataFilePath() {
         getEditCDPFrame().setContestAndController(getContest(), getController());
         getEditCDPFrame().loadCurrentCDPPathsIntoGUI();
         getEditCDPFrame().setVisible(true);
