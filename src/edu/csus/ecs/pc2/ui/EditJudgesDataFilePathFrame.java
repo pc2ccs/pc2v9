@@ -143,6 +143,7 @@ public class EditJudgesDataFilePathFrame extends JFrame implements UIPlugin  {
      * @param path - the path to the root folder of the purported CDP
      * @return true if it appears there is a valid CDP at the specified path root
      */
+    @SuppressWarnings("unused")
     private boolean validateCDP(String path) {
         
         // TODO: implement this method: verify that a reasonable CDP structure is found at the given path
@@ -297,6 +298,7 @@ public class EditJudgesDataFilePathFrame extends JFrame implements UIPlugin  {
         contest = inContest;
         controller = inController;
         
+        System.err.println("called setContestAndController");
         log =  inController.getLog();
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -344,6 +346,7 @@ public class EditJudgesDataFilePathFrame extends JFrame implements UIPlugin  {
      */
     public void loadCurrentCDPPathsIntoGUI() {
         
+        System.err.println("loadCurrentCDPPathsIntoGUI called");
         if (getContest() != null) {
             ContestInformation ci = getContest().getContestInformation();
         
