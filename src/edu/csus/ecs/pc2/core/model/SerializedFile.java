@@ -169,7 +169,11 @@ public class SerializedFile implements Serializable {
             return false;
         }
 
-        if (!java.util.Arrays.equals(buffer, otherFile.buffer)) {
+        if (buffer == null) {
+            if (otherFile != null) {
+                return(false);
+            }
+        } else  if (!buffer.equals(otherFile.buffer)) {
             return false;
         }
         
