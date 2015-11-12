@@ -15,6 +15,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -34,6 +35,9 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import javax.swing.JLabel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * Multiple Test Data set UI.
@@ -93,6 +97,7 @@ public class MultipleDataSetPane extends JPanePlugin {
     private Component verticalStrut_1;
 
     private Component verticalStrut_2;
+    private JLabel lblWhatsThis;
 
     /**
      * This method initializes
@@ -534,6 +539,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             inputDataStoragePanel.setLayout(new BoxLayout((Container) inputDataStoragePanel, BoxLayout.Y_AXIS));
             inputDataStoragePanel.add(getRdbtnCopyDataFiles());
             inputDataStoragePanel.add(getRdBtnKeepDataFilesExternal());
+            inputDataStoragePanel.add(getLblWhatsThis());
         }
         return inputDataStoragePanel;
     }
@@ -626,4 +632,32 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return verticalStrut_2;
     }
+    
+    private JLabel getLblWhatsThis() {
+        if (lblWhatsThis == null) {
+        	lblWhatsThis = new JLabel("<What's This?>");
+        	lblWhatsThis.setForeground(Color.blue);
+        	lblWhatsThis.addMouseListener(new MouseAdapter() {
+        	    @Override
+        	    public void mousePressed(MouseEvent e) {
+        	        JOptionPane.showMessageDialog(null, whatsThisMessage, "Internal vs. External Files", JOptionPane.INFORMATION_MESSAGE, null);
+        	    }
+        	});
+        	lblWhatsThis.setBorder(new EmptyBorder(0, 15, 0, 0));
+        }
+        return lblWhatsThis;
+    }
+    
+    private String whatsThisMessage = "PC2 has two different ways of handling data files: Internal and External.  "
+            + "\n\n'Internal' means that PC2 will load the file data internally into PC2 memory.  "
+            + "\nThe advantage of this is that it allows PC2 to automatically transmit the file data to a Judge each time the Judge requests to judge a submission."
+            + "\nThe drawback of this approach is that it does not work well for large data files, because it requires substantial system memory and large"
+            + "\namounts of network traffic."
+            + "\n\n'External' means that PC2 keeps track of the file names, but that the files themselves remain outside the PC2 system and hence do not use "
+            + "\nsystem memory or require network bandwidth for transmission.  "
+            + "\nThe advantage of this approach is that it allows the use of arbitrarily large data files for a contest problem."
+            + "\nThe drawback of this approach is that it requires you to insure that a copy of the data files is placed on the Judge's machines.  This "
+            + "\nmust be done externally to the PC2 system, and the files must be placed at the exact location specified by the value "
+            + "\nof the 'Judges Data Path' setting (see the 'Set Judge's Data Path' button on the Contest Configuration->Problems tab)."
+            + "\n\nYou must choose which type of data storage you want to use for each contest problem prior to loading the data for that problem.  ";
 } // @jve:decl-index=0:visual-constraint="10,10"
