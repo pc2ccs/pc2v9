@@ -78,9 +78,14 @@ public class TestCaseTableModel extends DefaultTableModel {
         return obj;
     }
 
+    /**
+     * Remove the specified row from the table.  Note that row numbers start with zero!
+     * 
+     * @param row - the row number to be removed, where the first row is row zero
+     */
     @Override
     public void removeRow(int row) {
-        files.removeDataSet(row - 1);
+        files.removeDataSet(row);
         super.removeRow(row);
     }
     

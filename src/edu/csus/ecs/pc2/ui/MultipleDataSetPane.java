@@ -340,6 +340,12 @@ public class MultipleDataSetPane extends JPanePlugin {
         return btnDelete;
     }
 
+    /**
+     * Remove the specified ROW from the table model holding Test Cases.
+     * Note that while Test Cases are numbered starting from 1, ROW NUMBERS start from 0!
+     * 
+     * @param rowNumber - the row to remove, where the first row is row 0
+     */
     protected void removeRow(int rowNumber) {
 
         if (tableModel.getRowCount() == 1) {
