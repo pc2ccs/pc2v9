@@ -30,7 +30,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -232,8 +231,6 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField shortNameTextfield;
 
     private String fileNameOne;
-
-    private Component multipleDataSetScrollPane;
     
     /**
      * This method initializes
@@ -1671,7 +1668,7 @@ public class EditProblemPane extends JPanePlugin {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new java.awt.Dimension(400, 400));
-            mainTabbedPane.insertTab("Data Files", null, getMultipleDataSetScrollPane(), null, 0);
+            mainTabbedPane.insertTab("Data Files", null, getMultipleDataSetPane(), null, 0);
             mainTabbedPane.insertTab("Validator", null, getValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
             mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);
@@ -1679,12 +1676,6 @@ public class EditProblemPane extends JPanePlugin {
         return mainTabbedPane;
     }
 
-    private Component getMultipleDataSetScrollPane() {
-        if (multipleDataSetScrollPane == null) {
-            multipleDataSetScrollPane = new JScrollPane(getMultipleDataSetPane());
-        }
-        return multipleDataSetScrollPane ;
-    }
 
     /**
      * This method initializes generalPane

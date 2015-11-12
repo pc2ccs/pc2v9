@@ -5,33 +5,35 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-
-import javax.swing.ButtonGroup;
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
 
 /**
  * Multiple Test Data set UI.
@@ -50,7 +52,7 @@ public class MultipleDataSetPane extends JPanePlugin {
      */
     private static final long serialVersionUID = -5975163495479418935L;
 
-    private JPanel listBoxScrollPanePanel = null;
+    private JScrollPane listBoxScrollPane = null;
 
     private TestCaseTableModel tableModel = new TestCaseTableModel();
 
@@ -99,7 +101,7 @@ public class MultipleDataSetPane extends JPanePlugin {
     private void initialize() {
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(766, 526));
-        this.add(getListBoxScrollPanePanel(), BorderLayout.CENTER);
+        this.add(getListBoxScrollPane(), BorderLayout.CENTER);
         add(getControlPanel(), BorderLayout.SOUTH);
     }
 
@@ -146,21 +148,64 @@ public class MultipleDataSetPane extends JPanePlugin {
         } 
      
         // TODO 917 re-add auto size columns
-        resizeColumnWidth(testDataSetsListBox);
+        resizeColumnWidth(getTestDataSetsListBox());
     }
     
     public void resizeColumnWidth(JTable table) {
-        final TableColumnModel columnModel = table.getColumnModel();
-        for (int column = 0; column < table.getColumnCount(); column++) {
-            int width = 50; // Min width
-            for (int row = 0; row < table.getRowCount(); row++) {
-                TableCellRenderer renderer = table.getCellRenderer(row, column);
-                Component comp = table.prepareRenderer(renderer, row, column);
-                width = Math.max(comp.getPreferredSize().width +1 , width);
+        
+//        final TableColumnModel columnModel = table.getColumnModel();
+//        for (int column = 0; column < table.getColumnCount(); column++) {
+//            int width = 50; // Min width
+//            for (int row = 0; row < table.getRowCount(); row++) {
+//                TableCellRenderer renderer = table.getCellRenderer(row, column);
+//                Component comp = table.prepareRenderer(renderer, row, column);
+//                width = Math.max(comp.getPreferredSize().width +1 , width);
+//            }
+//            columnModel.getColumn(column).setPreferredWidth(width);
+//        }
+
+//        table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+        for (int col=0; col<table.getColumnCount(); col++) {
+            int width = 10;
+            switch (col) {
+                case 0: width = 100; break;
+                case 1: width = 300; break;
+                case 2: width = 300; break;
             }
-            columnModel.getColumn(column).setPreferredWidth(width);
+            TableColumn column = table.getColumnModel().getColumn(col);
+            column.setPreferredWidth(width);
         }
+    
+
+            
+//        table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+//
+//        for (int column = 0; column < table.getColumnCount(); column++)
+//        {
+//            TableColumn tableColumn = table.getColumnModel().getColumn(column);
+//            int preferredWidth = tableColumn.getMinWidth();
+//            int maxWidth = tableColumn.getMaxWidth();
+//    
+//            for (int row = 0; row < table.getRowCount(); row++)
+//            {
+//                TableCellRenderer cellRenderer = table.getCellRenderer(row, column);
+//                Component c = table.prepareRenderer(cellRenderer, row, column);
+//                int width = c.getPreferredSize().width + table.getIntercellSpacing().width;
+//                preferredWidth = Math.max(preferredWidth, width);
+//    
+//                //  We've exceeded the maximum width, no need to check other rows
+//    
+//                if (preferredWidth >= maxWidth)
+//                {
+//                    preferredWidth = maxWidth;
+//                    break;
+//                }
+//            }
+//    
+//            tableColumn.setPreferredWidth( preferredWidth );
+//        }
     }
+                       
 
     private void dump(ProblemDataFiles problemDataFiles2, String string) {
         Utilities.dump(problemDataFiles2, string);
@@ -171,14 +216,12 @@ public class MultipleDataSetPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getListBoxScrollPanePanel() {
-        if (listBoxScrollPanePanel == null) {
-            listBoxScrollPanePanel = new JPanel();
-            listBoxScrollPanePanel.setBorder(new LineBorder(Color.RED));
-            listBoxScrollPanePanel.setLayout(new BorderLayout());
-            listBoxScrollPanePanel.add(getTestDataSetsListBox(), BorderLayout.CENTER);
+    private JScrollPane getListBoxScrollPane() {
+        if (listBoxScrollPane == null) {
+            listBoxScrollPane = new JScrollPane(getTestDataSetsListBox());
+            listBoxScrollPane.setBorder(new LineBorder(Color.RED));
         }
-        return listBoxScrollPanePanel;
+        return listBoxScrollPane;
     }
 
 
@@ -189,8 +232,25 @@ public class MultipleDataSetPane extends JPanePlugin {
      */
     private JTable getTestDataSetsListBox() {
         if (testDataSetsListBox == null) {
+            
+            //construct a new JTable
             testDataSetsListBox = new JTable(tableModel);
-
+            
+            //insert a renderer that will center cell contents
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
+            
+            for (int i=0; i<testDataSetsListBox.getColumnCount(); i++) {
+                testDataSetsListBox.getColumnModel().getColumn(i).setCellRenderer( centerRenderer );
+            }
+//            testDataSetsListBox.setDefaultRenderer(String.class, centerRenderer);
+            
+            //also center column headers (which use a different CellRenderer)
+            ((DefaultTableCellRenderer)testDataSetsListBox.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+            
+            //change the header font
+            JTableHeader header = testDataSetsListBox.getTableHeader();
+            header.setFont(new Font("Dialog", Font.BOLD, 12));
         }
         return testDataSetsListBox;
     }
@@ -291,16 +351,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         // TODO 917 if row one is deleted, update the data and answer file on the General Tab 
         // Warn if they delete row one ??
     }
-    
-    private void showMessage(String string, String title) {
-        JOptionPane.showMessageDialog(null, string, title, JOptionPane.WARNING_MESSAGE);
-    }
 
-    private void showMessage(String string) {
-        showMessage(string, "Note");
-    }
-
-    
     public boolean isUsingExternalDataFiles() {
         return rdBtnKeepDataFilesExternal.isSelected();
     }
