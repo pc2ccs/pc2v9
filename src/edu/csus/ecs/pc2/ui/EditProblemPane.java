@@ -1062,6 +1062,47 @@ public class EditProblemPane extends JPanePlugin {
         try {
             ProblemDataFiles dataFiles = getProblemDataFilesFromFields();
             newProblem = getProblemFromFields(problem, dataFiles, false);
+            if (dataFiles != null) {
+                // ensure what we got from the fields is what is actually on disk
+                // enableUpdateButton() would enable if the sha1 sums changed.
+                boolean changed = false;
+                SerializedFile[] judgesDataFiles = dataFiles.getJudgesDataFiles();
+                if (judgesDataFiles != null) {
+                    if (judgesDataFiles.length > 1) {
+                        for (int i = 0; i < judgesDataFiles.length; i++) {
+                            SerializedFile serializedFile = judgesDataFiles[i];
+                            SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), newProblem.isUsingExternalDataFiles());
+                            if (!serializedFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
+                                // contents have changed on disk
+                                judgesDataFiles[i]=serializedFile2;
+                                changed = true;
+                            }
+                        }
+                        if (changed) {
+                            dataFiles.setJudgesDataFiles(judgesDataFiles);
+                        }
+                    }
+                }
+                SerializedFile[] judgesAnswerFiles = dataFiles.getJudgesAnswerFiles();
+                if (judgesAnswerFiles != null) {
+                    // compare each file
+                    changed = false;
+                    if (judgesAnswerFiles.length > 1) {
+                        for (int i = 0; i < judgesAnswerFiles.length; i++) {
+                            SerializedFile serializedFile = judgesAnswerFiles[i];
+                            SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), newProblem.isUsingExternalDataFiles());
+                            if (!serializedFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
+                                // contents have changed on disk
+                                judgesAnswerFiles[i] = serializedFile2;
+                                changed = true;
+                            }
+                        }
+                        if (changed) {
+                            dataFiles.setJudgesAnswerFiles(judgesAnswerFiles);
+                        }
+                    }
+                }
+            }
             
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
