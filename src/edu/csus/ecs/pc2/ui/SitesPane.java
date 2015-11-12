@@ -250,13 +250,13 @@ public class SitesPane extends JPanePlugin {
             updateSiteButton = new JButton();
             updateSiteButton.setText("Apply");
             updateSiteButton.setMnemonic(KeyEvent.VK_P);
-            updateSiteButton.setToolTipText("Apply all site changes");
+            updateSiteButton.setToolTipText("Apply changes to all sites");
             updateSiteButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateSitesData();
                 }
             });
-            updateSiteButton.setText("Update Site");
+            updateSiteButton.setText("Update");
         }
         return updateSiteButton;
     }
