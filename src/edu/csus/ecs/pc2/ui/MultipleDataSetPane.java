@@ -334,6 +334,7 @@ public class MultipleDataSetPane extends JPanePlugin {
                     if (rowNumber != -1){
                         removeRow (rowNumber);
                     }
+                    getEditProblemPane().enableUpdateButton();
                 }
             });
         }
