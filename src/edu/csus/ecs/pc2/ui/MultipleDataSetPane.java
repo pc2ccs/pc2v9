@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -22,6 +21,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
@@ -75,14 +75,14 @@ public class MultipleDataSetPane extends JPanePlugin {
      * Keep Data Files external to PC2 - aka external
      */
     private JRadioButton rdBtnKeepDataFilesExternal;
-    private JPanel controlPanel;
     private JPanel buttonPanel;
     private Component horizontalStrut;
-    private Component verticalStrut;
-    private Component verticalStrut_1;
     private final ButtonGroup inputStorageButtonGroup = new ButtonGroup();
 
     private String loadDirectory;
+    private Component verticalStrut;
+    private Component verticalStrut_1;
+    private Component verticalStrut_2;
 
     /**
      * This method initializes
@@ -99,10 +99,14 @@ public class MultipleDataSetPane extends JPanePlugin {
      * 
      */
     private void initialize() {
-        this.setLayout(new BorderLayout());
         this.setSize(new Dimension(766, 526));
-        this.add(getListBoxScrollPane(), BorderLayout.CENTER);
-        add(getControlPanel(), BorderLayout.SOUTH);
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        add(getVerticalStrut_2());
+        add(getInputDataStoragePanel());
+        add(getVerticalStrut());
+        this.add(getListBoxScrollPane());
+        add(getVerticalStrut_1());
+        add(getButtonPanel());
     }
 
     @Override
@@ -495,7 +499,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         	inputDataStoragePanel = new JPanel();
         	inputDataStoragePanel.setPreferredSize(new Dimension(470, 100));
         	inputDataStoragePanel.setMaximumSize(new Dimension(500, 200));
-        	inputDataStoragePanel.setBorder(new TitledBorder(null, "Input Data Storage", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), null));
+        	inputDataStoragePanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Choose storage option before loading data files:", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new Color(0, 0, 0)));
         	inputDataStoragePanel.setAlignmentX(0.0f);
         	inputDataStoragePanel.setLayout(new BoxLayout((Container) inputDataStoragePanel, BoxLayout.Y_AXIS));
         	inputDataStoragePanel.add(getRdbtnCopyDataFiles());
@@ -539,20 +543,6 @@ public class MultipleDataSetPane extends JPanePlugin {
         EditJudgesDataFilePathFrame frame = new EditJudgesDataFilePathFrame();
         frame.setVisible(true);    
     }
-
-    private JPanel getControlPanel() {
-        if (controlPanel == null) {
-        	controlPanel = new JPanel();
-        	controlPanel.setPreferredSize(new Dimension(10, 200));
-        	controlPanel.setMinimumSize(new Dimension(10, 200));
-        	controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-        	controlPanel.add(getVerticalStrut_1());
-        	controlPanel.add(getInputDataStoragePanel());
-        	controlPanel.add(getVerticalStrut());
-        	controlPanel.add(getButtonPanel());
-        }
-        return controlPanel;
-    }
     private JPanel getButtonPanel() {
         if (buttonPanel == null) {
         	buttonPanel = new JPanel();
@@ -571,6 +561,14 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return horizontalStrut;
     }
+
+    public void setLoadDirectory(String externalDataFileLocation) {
+        loadDirectory = externalDataFileLocation;
+    }
+    
+    public String getLoadDirectory() {
+        return loadDirectory;
+    }
     private Component getVerticalStrut() {
         if (verticalStrut == null) {
         	verticalStrut = Box.createVerticalStrut(20);
@@ -583,13 +581,10 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return verticalStrut_1;
     }
-
-    public void setLoadDirectory(String externalDataFileLocation) {
-        loadDirectory = externalDataFileLocation;
+    private Component getVerticalStrut_2() {
+        if (verticalStrut_2 == null) {
+        	verticalStrut_2 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_2;
     }
-    
-    public String getLoadDirectory() {
-        return loadDirectory;
-    }
-    
 } // @jve:decl-index=0:visual-constraint="10,10"
