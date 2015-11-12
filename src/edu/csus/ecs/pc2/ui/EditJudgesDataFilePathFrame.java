@@ -298,7 +298,6 @@ public class EditJudgesDataFilePathFrame extends JFrame implements UIPlugin  {
         contest = inContest;
         controller = inController;
         
-        System.err.println("called setContestAndController");
         log =  inController.getLog();
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -346,7 +345,6 @@ public class EditJudgesDataFilePathFrame extends JFrame implements UIPlugin  {
      */
     public void loadCurrentCDPPathsIntoGUI() {
         
-        System.err.println("loadCurrentCDPPathsIntoGUI called");
         if (getContest() != null) {
             ContestInformation ci = getContest().getContestInformation();
         
