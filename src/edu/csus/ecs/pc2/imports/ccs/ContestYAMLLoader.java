@@ -318,7 +318,6 @@ public class ContestYAMLLoader {
         }
         
         loadDataFileContents = getBooleanValue(getSequenceValue(yamlLines, PROBLEM_LOAD_DATA_FILES_KEY), loadDataFileContents);
-        setUsingExternalFiles(contest, loadDataFileContents);
         
         // TODO CCS add contest settings
         // TODO CCS short-name: ICPC WF 2011
@@ -413,11 +412,6 @@ public class ContestYAMLLoader {
     }
 
  
-    private void setUsingExternalFiles(IInternalContest contest, boolean loadDataFileContents) {
-        ContestInformation contestInformation = contest.getContestInformation();
-        contestInformation.setUsingExternalFiles(loadDataFileContents);
-    }
-
     /**
      * Parse and convert dateString to Date.
      * 
