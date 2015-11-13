@@ -140,6 +140,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         if (aProblem != null) {
             setProblemDataFiles(aProblemDataFiles.copy(aProblem));
         } else {
+            getRdbtnCopyDataFiles().setSelected(true);
             clearDataFiles();
         }
     }
