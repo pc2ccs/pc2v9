@@ -169,13 +169,18 @@ public class SerializedFile implements Serializable {
             return false;
         }
 
-        if (buffer == null) {
-            if (otherFile.buffer != null) {
-                return(false);
-            }
-        } else  if (!buffer.equals(otherFile.buffer)) {
+        // XXX this breaks the testEqual junit test
+        if (!java.util.Arrays.equals(buffer, otherFile.buffer)) {
             return false;
         }
+        // XXX but doing this breaks EditProblemPane
+//        if (buffer == null) {
+//            if (otherFile.buffer != null) {
+//                return(false);
+//            }
+//        } else  if (!buffer.equals(otherFile.buffer)) {
+//            return false;
+//        }
         
         if (fileType != otherFile.fileType) {
             return false;
