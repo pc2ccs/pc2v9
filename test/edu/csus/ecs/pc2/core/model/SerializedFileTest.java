@@ -88,7 +88,7 @@ public class SerializedFileTest extends AbstractTestCase {
         assertTrue("the same file instance should be equal", file1.equals(file1));
 
         SerializedFile file2 = new SerializedFile(filename);
-        assertFalse("a different file shold not be equal ", file1.equals(file2));
+        assertTrue("the same file shold be equal ", file1.equals(file2));
 
         filename = sample.createSampleAnswerFile(getOutputTestFilename("datafile3"));
 
