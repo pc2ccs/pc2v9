@@ -635,15 +635,15 @@ public class MultipleDataSetPane extends JPanePlugin {
     
     private JLabel getLblWhatsThis() {
         if (lblWhatsThis == null) {
-        	lblWhatsThis = new JLabel("<What's This?>");
-        	lblWhatsThis.setForeground(Color.blue);
-        	lblWhatsThis.addMouseListener(new MouseAdapter() {
-        	    @Override
-        	    public void mousePressed(MouseEvent e) {
-        	        JOptionPane.showMessageDialog(null, whatsThisMessage, "Internal vs. External Files", JOptionPane.INFORMATION_MESSAGE, null);
-        	    }
-        	});
-        	lblWhatsThis.setBorder(new EmptyBorder(0, 15, 0, 0));
+            lblWhatsThis = new JLabel("<What's This?>");
+            lblWhatsThis.setForeground(Color.blue);
+            lblWhatsThis.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, whatsThisMessage, "Internal vs. External Files", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+            lblWhatsThis.setBorder(new EmptyBorder(0, 15, 0, 0));
         }
         return lblWhatsThis;
     }
