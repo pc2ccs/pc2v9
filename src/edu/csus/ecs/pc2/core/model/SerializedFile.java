@@ -170,7 +170,7 @@ public class SerializedFile implements Serializable {
         }
 
         if (buffer == null) {
-            if (otherFile != null) {
+            if (otherFile.buffer != null) {
                 return(false);
             }
         } else  if (!buffer.equals(otherFile.buffer)) {
