@@ -32,10 +32,13 @@ import javax.swing.table.TableColumn;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+
 import javax.swing.JLabel;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -579,10 +582,15 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     protected void verifyJudgeDataPathIsSet() {
         // TODO *** need a MODAL dialog to pop up...
-        EditJudgesDataFilePathFrame frame = new EditJudgesDataFilePathFrame();
-        frame.setContestAndController(getContest(), getController());
-        frame.loadCurrentCDPPathsIntoGUI();
-        frame.setVisible(true);
+        ContestInformation ci = getContest().getContestInformation();
+        String judgeCDPBasePath = ci.getJudgeCDPBasePath();
+        // no need to verify if already set
+        if (judgeCDPBasePath == null || judgeCDPBasePath.trim().equals("")) {
+            EditJudgesDataFilePathFrame frame = new EditJudgesDataFilePathFrame();
+            frame.setContestAndController(getContest(), getController());
+            frame.loadCurrentCDPPathsIntoGUI();
+            frame.setVisible(true);
+        }
     }
 
     private JPanel getButtonPanel() {
