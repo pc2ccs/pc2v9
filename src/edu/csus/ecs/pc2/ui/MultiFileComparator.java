@@ -364,6 +364,9 @@ public class MultiFileComparator extends JFrame  {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.controller = inController;
         this.contest = inContest;
+        if (inController != null) {
+            log = inController.getLog();
+        }
     }
     
     /**
