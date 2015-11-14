@@ -1003,6 +1003,10 @@ public final class Utilities {
             
             if (!"".equals(judgeDataFilesPath)) {
                 judgeDataFilesPath = Utilities.getSecretDataPath(judgeDataFilesPath, problem) + File.separator;
+                File judgeDir = new File(judgeDataFilesPath);
+                if (!judgeDir.isDirectory()) {
+                    judgeDataFilesPath = judgeDataFilesPath.replaceFirst(".data.secret", "");
+                }
             }
 
             for (SerializedFile serializedFile : serializedFiles) {
