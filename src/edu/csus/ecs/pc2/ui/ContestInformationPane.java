@@ -273,6 +273,16 @@ public class ContestInformationPane extends JPanePlugin {
 
         if (savedContestInformation != null) {
             contestInformation.setJudgementNotificationsList(savedContestInformation.getJudgementNotificationsList());
+                
+            contestInformation.setJudgeCDPBasePath(savedContestInformation.getJudgeCDPBasePath());
+            contestInformation.setStartDate(savedContestInformation.getStartDate());
+            
+            contestInformation.setAdminCDPBasePath(savedContestInformation.getAdminCDPBasePath());
+            contestInformation.setContestShortName(savedContestInformation.getContestShortName());
+            contestInformation.setExternalYamlPath(savedContestInformation.getExternalYamlPath());
+            
+            contestInformation.setFreezeTime(savedContestInformation.getFreezeTime());
+            contestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
         }
 
         contestInformation.setScoringProperties(changedScoringProperties);
@@ -428,8 +438,6 @@ public class ContestInformationPane extends JPanePlugin {
                     break;
             }
         }
-        // TODO Auto-generated method stub
-
         // getDisplayNameButtonGroup().setSelected(getDisplayNoneButton(), false)
 
     }
