@@ -142,6 +142,8 @@ public final class Reports {
         
         reports.add(new AutoJudgingSettingsReport());
         
+        reports.add(new JudgingAnalysisReport());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }

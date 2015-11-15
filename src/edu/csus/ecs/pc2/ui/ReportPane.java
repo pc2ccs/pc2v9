@@ -73,6 +73,7 @@ import edu.csus.ecs.pc2.core.report.InternalDumpReport;
 import edu.csus.ecs.pc2.core.report.JSONReport;
 import edu.csus.ecs.pc2.core.report.JudgementNotificationsReport;
 import edu.csus.ecs.pc2.core.report.JudgementReport;
+import edu.csus.ecs.pc2.core.report.JudgingAnalysisReport;
 import edu.csus.ecs.pc2.core.report.LanguagesReport;
 import edu.csus.ecs.pc2.core.report.ListRunLanguages;
 import edu.csus.ecs.pc2.core.report.LoginReport;
@@ -90,11 +91,11 @@ import edu.csus.ecs.pc2.core.report.RunStatisticsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
-import edu.csus.ecs.pc2.core.report.SubmissionsTSVReport;
 import edu.csus.ecs.pc2.core.report.ScoreboardTSVReport;
 import edu.csus.ecs.pc2.core.report.SitesReport;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
+import edu.csus.ecs.pc2.core.report.SubmissionsTSVReport;
 import edu.csus.ecs.pc2.core.report.TeamsTSVReport;
 import edu.csus.ecs.pc2.core.report.UserdataTSVReport;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -282,6 +283,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new ResolverEventFeedReport());
         
         reports.add(new AutoJudgingSettingsReport());
+        
+        reports.add(new JudgingAnalysisReport());
         
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());
