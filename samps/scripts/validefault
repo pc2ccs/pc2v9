@@ -1,21 +1,32 @@
-#!/bin/bash -x
+#!/bin/bash
 
-validir=$HOME/cdp/config
+# attempt to locate default_validator
+if [ -f `dirname $0`/default_validator ]; then
+   validir=`dirname $0`
+else
+   if [ -f $HOME/cdp/config ]; then
+      validir=$HOME/cdp/config
+   else
+      validir=$HOME/yaml
+   fi
+fi
 val=$validir/default_validator
 vargs=
 
-# args for this should be: {:infile} {:outfile} {:ansfile} {:resfile}
+# args for this should be: {:infile} {:outfile} {:ansfile} {:resfile} {:probletter}
+# new args, also add {:probletter}
 
-if [ $# -ne "4" ]; then
+if [ $# -ne "5" ]; then
     cat <<EOM
 Usage:
-    $0 infile outfile ansfile resfile
+    $0 infile outfile ansfile resfile problemletter
 
 where 
     infile is the judges input data file
     outfile is the teams output file
     ansfile is the judges answer file
     resfile is the results xml file
+    problemletter is the letter of the problem
 EOM
     exit 1
 fi
@@ -29,37 +40,58 @@ fi
 # input judge_answer feedback_dir [additional_arguments] < team_output [ > team_input ]
 # args for pc2 should be: {:infile} {:outfile} {:ansfile} {:resfile}
 
-if [ -f EXITCODE.TXT ]; then
-cat >$4<<EOM
-<?xml version="1.0"?>
-<result outcome =  "No - Run-time Error" security = "$4">Team execution exited non-zero, this is a possible run-time error
-</result>
-EOM
-fi
+BASE="Completed"
 
 # populate vargs based on problem.yaml for the problem.
 pfile=`echo $1 | sed 's#data/.*#problem.yaml#'`
-vargs=`grep validator_flags: $pfile | cut -d: -f2-`
+if [ -f $pfile ]; then
+  vargs=`grep validator_flags: $pfile | cut -d: -f2-`
+else
+  vargs=""
+fi
 mkdir -p feedback
 $val $1 $3 feedback/ $vargs < $2
 result=$?
+# send the feedback to stderr
+echo "----- begin test case ----" >&2
+cat feedback/*.txt >&2
+if [ -f EXITCODE.TXT ]; then
+  BASE="Runtime Error"
+  cat >>$2<<EOM
+
+EOM
+  echo -n "PC2: Team program exit code = " >> $2
+  cat EXITCODE.TXT >> $2
+fi
+if [ -f timelimit.txt ]; then
+   BASE="Time Limit Exceeded"
+fi
+echo "----- end test case ----" >&2
 if [ $result -eq "43" ]; then
 # output is incorrect
-cat >$4<<EOM
+  cat >$4<<EOM
 <?xml version="1.0"?>
-<result outcome =  "No - Wrong Answer" security = "$4">$val returned 43
+<result outcome =  "No - $BASE - Wrong Answer" security = "$4">$val returned 43
 </result>
 EOM
-exit 0
+  exit 0
 fi
 if [ $result -eq "42" ]; then
 # correct output
-cat >$4<<EOM
+  if [ -f EXITCODE.TXT ]; then
+    cat >$4<<EOM
+<?xml version="1.0"?>
+<result outcome =  "No - $BASE - Correct Output" security = "$4">$val returned 42
+</result>
+EOM
+  else
+    cat >$4<<EOM
 <?xml version="1.0"?>
 <result outcome =  "Accepted" security = "$4">$val returned 42
 </result>
 EOM
-exit 0
+  fi
+  exit 0
 fi
 
 # validator failed for some reason
