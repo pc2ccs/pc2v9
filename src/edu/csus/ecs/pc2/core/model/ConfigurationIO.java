@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -113,6 +114,7 @@ public class ConfigurationIO {
     }
 
     private IStorage storage = null;
+    private LinkedList<String> backupList = new LinkedList<String>();
 
     /**
      * 
@@ -470,7 +472,16 @@ public class ConfigurationIO {
 
         configuration.writeToDisk(getFileName());
 
-        configuration.writeToDisk(getBackupFilename());
+        String backupFilename = getBackupFilename();
+        configuration.writeToDisk(backupFilename);
+        backupList.add(backupFilename);
+        while(backupList.size() > 100) {
+            String removeBackupFile = backupList.removeFirst();
+            File file = new File(removeBackupFile);
+            if (file.exists()) {
+                file.delete();
+            }
+        }
 
         configuration = null;
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.LinkedList;
 
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -46,6 +47,8 @@ public class ClarificationList implements Serializable {
 
 
     private IStorage storage = null;
+
+    private LinkedList<String> backupList = new LinkedList<String>();
 
     public ClarificationList() {
         saveToDisk = false;
@@ -250,7 +253,17 @@ public class ClarificationList implements Serializable {
         
         boolean stored = storage.store(getFileName(), clarHash);
         
-        storage.store(getBackupFilename(), clarHash);
+        String backupFilename = getBackupFilename();
+        storage.store(backupFilename, clarHash);
+        backupList.add(backupFilename);
+        while(backupList.size() > 100) {
+            String removeBackupFile = backupList.removeFirst();
+            File file = new File(removeBackupFile);
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+
 
         return stored;
     }

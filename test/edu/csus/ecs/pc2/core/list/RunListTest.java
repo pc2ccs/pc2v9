@@ -179,7 +179,8 @@ public class RunListTest extends AbstractTestCase {
 
 //        startExplorer(new File(testDir));
         
-        assertExpectedFileCount("Expecting dir entries ", new File(testDir), numRuns * 2 + 1);
+        // 101 because we only keep 100 backups + 1 runlist.dat
+        assertExpectedFileCount("Expecting dir entries ", new File(testDir), 101);
         
         assertNoZeroSizeFiles(new File(testDir));
         

@@ -289,7 +289,8 @@ public class ConfigurationIOTest extends AbstractTestCase {
         
 //        startExplorer(new File (configDirName));
         
-        assertExpectedFileCount("Expected number of files", new File(configDirName), iterations + 1);
+        // 101 because we only keep 100 backups + 1 settings.dat
+        assertExpectedFileCount("Expected number of files", new File(configDirName), 101);
         
         assertNoZeroSizeFiles(new File(configDirName));
         

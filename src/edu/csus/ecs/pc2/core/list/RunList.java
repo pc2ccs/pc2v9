@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.LinkedList;
 
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -49,6 +50,8 @@ public class RunList implements Serializable {
     private int nextRunNumber = 1;
 
     private IStorage storage;
+
+    private LinkedList<String> backupList = new LinkedList<String>();
     
     public RunList() {
         saveToDisk = false;
@@ -250,7 +253,17 @@ public class RunList implements Serializable {
         
         boolean stored = storage.store(getFileName(), runHash);
         
-        storage.store(getBackupFilename(), runHash);
+        String backupFilename = getBackupFilename();
+        storage.store(backupFilename, runHash);
+
+        backupList.add(backupFilename);
+        while(backupList.size() > 100) {
+            String removeBackupFile = backupList.removeFirst();
+            File file = new File(removeBackupFile);
+            if (file.exists()) {
+                file.delete();
+            }
+        }
 
         return stored;
     }
