@@ -62,9 +62,7 @@ public class AutoJudgeModule implements UIPlugin {
             ContestInformation ci = contest.getContestInformation();
             if (ci != null) {
                 String cdpPath = ci.getJudgeCDPBasePath();
-                if (cdpPath != null && !"".equals(cdpPath.trim())) {
-                    Utilities.validateCDP(contest, cdpPath);
-                }
+                Utilities.validateCDP(contest, cdpPath);
             }
         } catch(MultipleIssuesException e) {
             System.err.println("Cannot perform Judging");
