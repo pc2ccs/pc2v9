@@ -1479,7 +1479,7 @@ public class InternalContest implements IInternalContest {
         ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
         ClientId whoChangedItId = judgementRecord.getJudgerClientId();
 
-        if (whoCheckedOut == null) {
+        if (whoCheckedOut == null && !whoChangedItId.getClientType().equals(Type.ADMINISTRATOR)) {
             // No one did this ?
 
             Exception ex = new Exception("addRunJudgement - not in checkedout list, whoCheckedOut is null ");

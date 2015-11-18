@@ -2242,10 +2242,13 @@ public class PacketHandler {
                 if (isSuperUser(packet.getSourceId())) {
                     info("updateRun by " + packet.getSourceId() + " " + run);
                     if (judgementRecord != null) {
-                        // SOMEDAY  code add runResultsFiles
-                        run.addJudgement(judgementRecord);
-                        contest.updateRun(run, whoChangedRun);
-
+                        RunResultFiles[] runResultFilesArray = contest.getRunResultFiles(run);
+                        RunResultFiles runResultFiles = null;
+                        if (runResultFilesArray != null && runResultFilesArray.length > 0) {
+                            runResultFiles = runResultFilesArray[runResultFilesArray.length-1];
+                        }
+                        // this will add the judgement to the run (and write out the judgement record)
+                        contest.addRunJudgement(run, judgementRecord, runResultFiles, packet.getSourceId());
                     } else {
                         contest.updateRun(run, whoChangedRun);
                     }
