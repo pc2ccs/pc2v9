@@ -15,8 +15,10 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.exception.MultipleIssuesException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -238,6 +240,29 @@ public class JudgeView extends JFrame implements UIPlugin {
                             e.printStackTrace(System.err);
                         }
                     }
+                }
+                try {
+                    ContestInformation ci = contest.getContestInformation();
+                    if (ci != null) {
+                        String cdpPath = ci.getJudgeCDPBasePath();
+                        if (cdpPath != null && !"".equals(cdpPath.trim())) {
+                            Utilities.validateCDP(contest, cdpPath);
+                        }
+                    }
+                } catch(MultipleIssuesException e) {
+                    String[] issueList = e.getIssueList();
+                    StringBuffer message = new StringBuffer();
+                    message.append("The following errors exist:\n");
+                    for (int i = 0; i < issueList.length; i++) {
+                        // tabs are not rendered in JOptionPane.showMessageDialog();
+                        issueList[i] = issueList[i].replace("\t", " ");
+                        message.append(issueList[i]+"\n");
+                    }
+                    message.append("\nPlease correct and restart");
+                    System.err.println(message);
+
+                    JOptionPane.showMessageDialog(getParent(), message, "Cannot perform Judging", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
                 }
                 
                 SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();

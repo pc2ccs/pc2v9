@@ -1189,7 +1189,7 @@ public final class Utilities {
              * Only validate if external files.
              */
 
-            if (problem.getShortName() == null) {
+            if (problem.getShortName() == null || "".equals(problem.getShortName().trim())) {
                 messages.add("No problem short name for problem " + problem);
             } else {
                 // check for directory
@@ -1200,13 +1200,14 @@ public final class Utilities {
                 } else {
                     // Check for secret problem files - only if external files.
 
-                    String problemTitle = problem.getDisplayName();
+                    String problemTitle = problem.getShortName();
 
                     String dataPath = getSecretDataPath(cdpPath, problem);
-
                     if (!isDirThere(dataPath)) {
-                        messages.add(problemTitle + "::Missing data directory, expected at: " + dataPath);
-
+                        dataPath = dataPath.replaceFirst(".data.secret", "");
+                    }
+                    if (!isDirThere(dataPath)) {
+                        messages.add(problemTitle + "\tMissing data directory, expected at: " + dataPath + " or ("+dataPath+File.separator+"data"+File.separator+"secret)");
                     } else {
 
                         int missingData = 0;
@@ -1218,23 +1219,21 @@ public final class Utilities {
 
                             String judgeFileName = dataPath + File.separator + dataFile;
                             String answerFilename = dataPath + File.separator + ansFile;
-                            System.out.println("debug 22 judge = "+judgeFileName);
-                            System.out.println("debug 22 ans   = "+answerFilename);
                             
 
                             if (dataFile != null && !isFileThere(judgeFileName)) {
-                                messages.add(problemTitle + "::Missing judge file '" + dataFile + "' in " + dataPath);
+                                messages.add(problemTitle + "\tMissing judge file '" + dataFile + "' in " + dataPath);
                                 missingData++;
                             }
 
                             if (ansFile != null && !isFileThere(answerFilename)) {
-                                messages.add(problemTitle + "::Missing answer file '" + ansFile + "' in " + dataPath);
+                                messages.add(problemTitle + "\tMissing answer file '" + ansFile + "' in " + dataPath);
                                 missingAnswer++;
                             }
 
-                            if (missingData + missingAnswer > 0) {
-                                messages.add(problemTitle + "::total files missing = " + missingData + missingAnswer);
-                            }
+                        }
+                        if ((missingData + missingAnswer) > 0) {
+                            messages.add(problemTitle + "\ttotal files missing = " + (missingData + missingAnswer));
                         }
                     }
 

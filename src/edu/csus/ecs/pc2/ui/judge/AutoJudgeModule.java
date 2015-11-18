@@ -7,8 +7,10 @@ import java.util.Locale;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.exception.MultipleIssuesException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AutoJudgingMonitor;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -56,6 +58,26 @@ public class AutoJudgeModule implements UIPlugin {
         log = controller.getLog();
 
         autoJudgingMonitor.setContestAndController(getContest(), getController());
+        try {
+            ContestInformation ci = contest.getContestInformation();
+            if (ci != null) {
+                String cdpPath = ci.getJudgeCDPBasePath();
+                if (cdpPath != null && !"".equals(cdpPath.trim())) {
+                    Utilities.validateCDP(contest, cdpPath);
+                }
+            }
+        } catch(MultipleIssuesException e) {
+            System.err.println("Cannot perform Judging");
+            String[] issueList = e.getIssueList();
+            StringBuffer message = new StringBuffer();
+            message.append("The following errors exist:\n");
+            for (int i = 0; i < issueList.length; i++) {
+                message.append(issueList[i]+"\n");
+            }
+            message.append("\nPlease correct and restart");
+            System.err.println(message);
+            System.exit(1);
+        }
 
         if (isAutoJudgingEnabled()) {
             startAutoJudging();
