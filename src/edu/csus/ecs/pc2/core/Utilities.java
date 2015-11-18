@@ -1188,30 +1188,34 @@ public final class Utilities {
             /**
              * Only validate if external files.
              */
-            
-            if (cdpPath == null){
-                messages.add("Judge's data path not set (is null)");
-            } else  if (!isDirThere(cdpPath)) {
-                messages.add("Judge's data path does not exist at \""+cdpPath+"\"");
+            String problemTitle = "(unset problem short name) ";
+            if (problem.getShortName() != null) {
+                problemTitle = problem.getShortName();
+            }
+
+            if (cdpPath == null) {
+                messages.add(problemTitle + "\tJudge's data path not set (is null)");
+            } else if (!isDirThere(cdpPath)) {
+                messages.add(problemTitle + "\tJudge's data path does not exist at \"" + cdpPath + "\"");
             } else if (problem.getShortName() == null || "".equals(problem.getShortName().trim())) {
-                messages.add("No problem short name for problem " + problem);
+                messages.add(problemTitle + "\tNo problem short name for problem " + problem);
             } else {
                 // check for directory
                 String problemDir = cdpPath + File.separator + problem.getShortName() + File.separator;
                 if (!isDirThere(problemDir)) {
-                    messages.add("Directory missing for " + problem + " expected at " + problemDir);
+                    messages.add(problemTitle + "\tDirectory missing for " + problem + " expected at " + problemDir);
 
                 } else {
-                    // Check for secret problem files - only if external files.
 
-                    String problemTitle = problem.getShortName();
-
+                    // search shortName/data/secret
                     String dataPath = getSecretDataPath(cdpPath, problem);
+
                     if (!isDirThere(dataPath)) {
+                        // change to shortName
                         dataPath = dataPath.replaceFirst(".data.secret", "");
                     }
                     if (!isDirThere(dataPath)) {
-                        messages.add(problemTitle + "\tMissing data directory, expected at: " + dataPath + " or ("+dataPath+File.separator+"data"+File.separator+"secret)");
+                        messages.add(problemTitle + "\tMissing data directory, expected at: " + dataPath + " or (" + dataPath + File.separator + "data" + File.separator + "secret)");
                     } else {
 
                         int missingData = 0;
@@ -1223,7 +1227,6 @@ public final class Utilities {
 
                             String judgeFileName = dataPath + File.separator + dataFile;
                             String answerFilename = dataPath + File.separator + ansFile;
-                            
 
                             if (dataFile != null && !isFileThere(judgeFileName)) {
                                 messages.add(problemTitle + "\tMissing judge file '" + dataFile + "' in " + dataPath);
@@ -1246,13 +1249,13 @@ public final class Utilities {
                         // check for problem.tex
                         String laTextProblemFilename = problemDir + ContestYAMLLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
                         if (!isFileThere(laTextProblemFilename)) {
-                            messages.add("Missing LaTex problem file, expected at " + laTextProblemFilename);
+                            messages.add(problemTitle + "\tMissing LaTex problem file, expected at " + laTextProblemFilename);
                         }
 
                         // check for problem.yaml
                         String problemYamlFilename = problemDir + ExportYAML.PROBLEM_FILENAME;
                         if (!isFileThere(problemYamlFilename)) {
-                            messages.add("Missing LaTex problem YAML file, expected at " + problemYamlFilename);
+                            messages.add(problemTitle + "\tMissing LaTex problem YAML file, expected at " + problemYamlFilename);
                         }
                     }
                 }
