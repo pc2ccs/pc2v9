@@ -2247,8 +2247,11 @@ public class PacketHandler {
                         if (runResultFilesArray != null && runResultFilesArray.length > 0) {
                             runResultFiles = runResultFilesArray[runResultFilesArray.length-1];
                         }
-                        // this will add the judgement to the run (and write out the judgement record)
+                        // write out the judgement record, using the existing run in runList
                         contest.addRunJudgement(run, judgementRecord, runResultFiles, packet.getSourceId());
+                        // now the old way which just updates the other run elements
+                        run.addJudgement(judgementRecord);
+                        contest.updateRun(run, whoChangedRun);
                     } else {
                         contest.updateRun(run, whoChangedRun);
                     }
