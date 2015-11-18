@@ -58,7 +58,7 @@ public class ClarificationListTest extends AbstractTestCase {
     
     
     /**
-     * Test that backup file creted when settings written to disk.
+     * Test that backup file created when settings written to disk.
      * 
      * Unit test bug 876.
      * 
@@ -73,7 +73,7 @@ public class ClarificationListTest extends AbstractTestCase {
         new File(clarificationStorageDirectory).mkdirs();
 
         SampleContest sample = new SampleContest();
-        IInternalContest contest = sample.createContest(2, 12, 22, 12, true);
+        IInternalContest contest = sample.createContest(2, 12, 150, 12, true);
 
         FileStorage storage = new FileStorage(clarificationStorageDirectory);
 
@@ -92,11 +92,11 @@ public class ClarificationListTest extends AbstractTestCase {
             list.addNewClarification(clarification);
         }
         
-        int numberOfClarifications = accounts.length * 2 + 1;
-        
 //        startExplorer(new File(clarificationStorageDirectory));
-        
-        assertExpectedFileCount("Expecting dir entries ", new File(clarificationStorageDirectory), numberOfClarifications);
+
+//        int numberOfClarifications = accounts.length * 2 + 1;
+        // Use 101 because we only keep 100 backups + 1 clarlist.dat
+        assertExpectedFileCount("Expecting dir entries ", new File(clarificationStorageDirectory), 101);
         
         assertNoZeroSizeFiles(new File(clarificationStorageDirectory));
         

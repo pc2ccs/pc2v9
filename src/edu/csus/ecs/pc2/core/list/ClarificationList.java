@@ -225,7 +225,7 @@ public class ClarificationList implements Serializable {
     }
     
     public String getBackupFilename() {
-        return storage.getDirectoryName() + File.separator + "clarlist" + Utilities.getDateTime() + "." + System.nanoTime() + ".dat";
+        return storage.getDirectoryName() + File.separator + "clarlist." + Utilities.getDateTime() + "." + System.nanoTime() + ".dat";
     }
 
 
