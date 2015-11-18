@@ -285,7 +285,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
         IInternalContest contest = new SampleContest().createStandardContest();
         Problem firstProblem = contest.getProblems()[0];
-        firstProblem.setUsingExternalDataFiles(true);;
+        firstProblem.setUsingExternalDataFiles(true);
 
         String problemDir = judgeCDP + File.separator + firstProblem.getShortName();
 
