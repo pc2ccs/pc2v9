@@ -1188,8 +1188,12 @@ public final class Utilities {
             /**
              * Only validate if external files.
              */
-
-            if (problem.getShortName() == null || "".equals(problem.getShortName().trim())) {
+            
+            if (cdpPath == null){
+                messages.add("Judge's data path not set (is null)");
+            } else  if (!isDirThere(cdpPath)) {
+                messages.add("Judge's data path does not exist at \""+cdpPath+"\"");
+            } else if (problem.getShortName() == null || "".equals(problem.getShortName().trim())) {
                 messages.add("No problem short name for problem " + problem);
             } else {
                 // check for directory
@@ -1273,10 +1277,6 @@ public final class Utilities {
     public static boolean validateCDP(IInternalContest contest, String cdpPath) throws MultipleIssuesException {
         List<String> messages = new ArrayList<>();
 
-        if (!isDirThere(cdpPath)) {
-            messages.add("No such directory " + cdpPath);
-        }
-
         Problem[] problems = contest.getProblems();
         for (Problem problem : problems) {
             if (problem.getShortName() == null) {
@@ -1284,7 +1284,6 @@ public final class Utilities {
             } else {
 
                 try {
-
                     // Check for all problem files
                     validateCDP(contest, cdpPath, problem, false);
 

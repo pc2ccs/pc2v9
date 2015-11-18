@@ -7,16 +7,23 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import edu.csus.ecs.pc2.core.Utilities.DataFileType;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
 /**
+ * Unit test.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  *
  */
 public class UtilitiesTest extends AbstractTestCase {
+
 
     public void testOne() {
         char[] array1 = null;
@@ -209,8 +216,117 @@ public class UtilitiesTest extends AbstractTestCase {
             printWriter.close();
             
         }
+        
+        /**
+         * 
+         * @throws Exception
+         */
+        public void testvalidateCDP() throws Exception {
+            
+            String testDirectory = getDataDirectory(this.getName());
 
-   
+            // create contest.yaml and dirs
+//            SampleContest sample = new SampleContest();
+//            IInternalContest contest = sample.createStandardContest();
+//            ExportYAML exportYAML = new ExportYAML();
+//            exportYAML.exportFiles(testDirectory, contest);
+            
+//            startExplorer(testDirectory);
+            
+            ContestYAMLLoader loader = new ContestYAMLLoader();
+            IInternalContest contest = loader.fromYaml(null, testDirectory);
+            
+            Problem[] problems = contest.getProblems();
+            Problem problem1 = problems[0];
+            assertEquals("test data sets for "+problem1, 5,problem1.getNumberTestCases());
+            
+            Utilities.validateCDP(contest, testDirectory);
+        }
+        
+//        private static String selectFile(String dialogTitle) {
+//
+//            String directory = null;
+//
+//            JFileChooser chooser = new JFileChooser();
+//            
+//            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//            if (dialogTitle != null) {
+//                chooser.setDialogTitle(dialogTitle);
+//            }
+//            try {
+////                int returnVal = chooser.showOpenDialog(this);
+//                int returnVal = chooser.showOpenDialog(null);
+//                if (returnVal == JFileChooser.APPROVE_OPTION) {
+//                    directory = chooser.getSelectedFile().toString();
+//                }
+//            } catch (Exception e) {
+////                getController().getLog().log(Log.INFO, "Error getting selected file, try again.", e);
+//            }
+//            chooser = null;
+//            return directory;
+//        }
+//        
+//        public static void main(String[] args) {
+//          String dir = selectFile("Poo Poo");
+//          System.out.println("dir is "+dir);
+//      }
+        
+        
+    /**
+     * test
+     * 
+     * @throws Exception
+     */
+    public void testTestLocateFile() throws Exception {
+
+        String testDir = getDataDirectory(this.getName());
+
+        String judgeCDP = testDir + File.separator + "jcdp";
+
+        IInternalContest contest = new SampleContest().createStandardContest();
+        Problem firstProblem = contest.getProblems()[0];
+        firstProblem.setUsingExternalDataFiles(true);;
+
+        String problemDir = judgeCDP + File.separator + firstProblem.getShortName();
+
+//        startExplorer(problemDir, true);
+        
+        String problemFileName = problemDir + File.separator + "testdata.in";
+        
+        assertFileExists(problemFileName);
+
+        // create external problem name
+        SerializedFile serializedFile = new SerializedFile(problemFileName, true);
+        
+        DataFileType judgeDataFile = DataFileType.JUDGE_DATA_FILE;
+
+        String location = Utilities.locateJudgesDataFile(firstProblem, serializedFile, judgeCDP, judgeDataFile);
+        
+        assertEquals("Expecting location ", problemFileName, location);
+        
+        
+    }
+        
+        /**
+         * Test java.util.Arrays.equals.
+         * @throws Exception
+         */
+        public void testArrayCompare() throws Exception {
+            
+            char [] buf1 = null;
+            char [] buf2 = null;
+            
+            boolean b = java.util.Arrays.equals(buf1, buf2);
+            assertTrue(b);
+            
+            buf1 = "foo".toCharArray();
+             b = java.util.Arrays.equals(buf1, buf2);
+            assertFalse("Expected to not be equal",b);
+            
+            b = java.util.Arrays.equals(buf2, buf1);
+            assertFalse("Expected to not be equal",b);
+        }
 
         
+//       
 }
