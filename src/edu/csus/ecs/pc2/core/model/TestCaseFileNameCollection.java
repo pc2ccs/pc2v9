@@ -160,7 +160,7 @@ public class TestCaseFileNameCollection implements Collection<TestCaseFileNameSe
 
         private int curIndex;
         
-        public TestCaseFileNameVectorIterator() {
+        TestCaseFileNameVectorIterator() {
             curIndex = -1;
         }
         
