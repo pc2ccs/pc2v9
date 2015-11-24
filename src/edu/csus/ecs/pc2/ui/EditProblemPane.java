@@ -1323,7 +1323,13 @@ public class EditProblemPane extends JPanePlugin {
                 // first clear the old ones
                 getMultipleDataSetPane().clearDataFiles();
                 // now set the new ones
-                getMultipleDataSetPane().setProblemDataFiles(problemDataFiles);
+                try {
+                    // bug 1002: if we do not send the problem here, the default for the pane will be used 
+                    // for the data source.
+                    getMultipleDataSetPane().setProblemDataFiles(inProblem, problemDataFiles);
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                }
                 
                 // this sets the tableModel files list, which is what the getProblemDataFiles uses
                 getMultipleDataSetPane().populateUI();
