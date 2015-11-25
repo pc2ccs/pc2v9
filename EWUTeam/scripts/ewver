@@ -5,8 +5,8 @@
 # $HeadURL$
 #
 
-. `dirname $0`/ewuenv
+. `dirname $0`/ewenv
 
 java -cp $libdir/PC2JavaServer.jar  edu.csus.pc2.ewuteam.VersionInfo
 
-# eof ewuver $Id$ 
+# eof ewver $Id$ 

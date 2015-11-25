@@ -28,4 +28,4 @@ java -Xms64M -Xmx768M -jar PC2JavaServer.jar %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
 
-rem eof ewurun.bat $Id$
+rem eof ewrun.bat $Id$

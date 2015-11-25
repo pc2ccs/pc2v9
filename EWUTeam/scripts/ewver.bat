@@ -6,15 +6,15 @@ rem $HeadURL$
 
 rem Windows 2000 and beyond syntax
 set EWUBIN=%~dp0
-if exist %EWUBIN%\ewuenv.bat goto :continue
+if exist %EWUBIN%\ewenv.bat goto :continue
 
 rem fallback to path (or current directory)
 set EWUBIN=%0\..
-if exist %EWUBIN%\ewuenv.bat goto :continue
+if exist %EWUBIN%\ewenv.bat goto :continue
 
 rem else rely on EWUINSTALL variable
 set EWUBIN=%EWUINSTALL%\bin
-if exist %EWUBIN%\ewuenv.bat goto :continue
+if exist %EWUBIN%\ewenv.bat goto :continue
 
 echo.
 echo ERROR: Could not locate scripts.
@@ -27,10 +27,10 @@ goto end
 
 :continue
 
-call %EWUBIN%\ewuenv.bat
+call %EWUBIN%\ewenv.bat
 
 echo java -cp %libdir%\PC2JavaServer.jar edu.csus.pc2.ewuteam.VersionInfo
 java -cp %libdir%\PC2JavaServer.jar edu.csus.pc2.ewuteam.VersionInfo
 
 :end
-rem eof ewuver.bat $Id$
+rem eof ewver.bat $Id$

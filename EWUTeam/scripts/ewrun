@@ -5,7 +5,7 @@
 # $HeadURL$
 #
 
-. `dirname $0`/ewuenv
+. `dirname $0`/ewenv
 
 # MacOS or not
 if [ -f /mach_kernel ]; then
@@ -17,4 +17,4 @@ fi
 
 java $EWUOPTS -Xms64M -Xmx1600M -cp $libdir/pc2.jar -jar $libdir/PC2JavaServer.jar $*
 
-# ewurun $Id$
+# ewrun $Id$

@@ -36,4 +36,4 @@ fi
 
 pc2_classpath=$libdir/pc2.jar:$mclbdir/mclb.jar:$mclbdir/activation.jar:$mclbdir/mailapi.jar:$mclbdir/smtp.jar
 
-# eof ewuenv $Id$
+# eof ewenv $Id$

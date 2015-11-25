@@ -27,4 +27,4 @@ rem pause
 
 set pc2_classpath=%libdir%\pc2.jar
 
-rem eof ewuenv.bat $Id$
+rem eof ewenv.bat $Id$
