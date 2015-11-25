@@ -48,9 +48,10 @@ Sacramento (CSUS), and is available on the World Wide Web at
 http://pc2.ecs.csus.edu/.
 
 The most recent version, V9, is written in Java (using Eclipse)
-and is intended to run on any Java 1.5 (or greater) platform,
-including Windows (98/ME/2000/XP/Vista), Mac OS X (10.4+) and a
-variety of Unix-based systems including Solaris, Linux, and FreeBSD.
+and is intended to run on any Java 1.7 (or greater) platform,
+including Windows XP (or greater, ex Vista, 7, 8, 8.1, 10), 
+Mac OS X (10.4+) and a variety of Unix-based systems including
+Solaris, Linux, and FreeBSD.
 
 %prep
 %setup -q
@@ -79,6 +80,6 @@ cp -p -r * %{buildroot}/usr/pc2
 /usr/pc2/samps
 
 %changelog
-* Sat Oct 24 2009 - boudreat AatT ecs DdOoTt csus DdOoTt edu
+* Tue Nov 24 2015 - boudreat AatT ecs DdOoTt csus DdOoTt edu
 - Initial release.
 
