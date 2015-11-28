@@ -465,7 +465,7 @@ public class ExecuteUtilities extends Plugin {
             String defaultPath = new File(DEFAULT_PC2_JAR_PATH).getCanonicalPath();
             // for CruiseControl, will not be needed with jenkins
             if (! new File(defaultPath).exists()) {
-                defaultPath = "/software/pc2/cc/projects/pc2v9/build/prod";
+                defaultPath = "/software/pc2/cc/projects/pc2-9.3/build/prod";
             }
             jarDir = defaultPath;
             String cp = System.getProperty("java.class.path");

@@ -56,7 +56,7 @@ public final class JUnitUtilities {
         // that tells us where we are :(  as of 20091206
         // XXX this is cruise control specific, and really should be changed
         //    when a branch is copied off
-        String newBase = search(fileOrDir, "projects"+File.separator+"pc2v9"); //$NON-NLS-1$ //$NON-NLS-2$
+        String newBase = search(fileOrDir, "projects"+File.separator+"pc2-9.3"); //$NON-NLS-1$ //$NON-NLS-2$
         if (newBase != null) {
             baseDir=newBase;
             return newBase;

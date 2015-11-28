@@ -1006,7 +1006,7 @@ public class Executable extends Plugin implements IExecutable {
             String defaultPath = new File("./build/prod").getCanonicalPath(); 
             // for CruiseControl, will not be needed with jenkins
             if (! new File(defaultPath).exists()) {
-                defaultPath = "/software/pc2/cc/projects/pc2v9/build/prod";
+                defaultPath = "/software/pc2/cc/projects/pc2-9.3/build/prod";
             }
             jarDir = defaultPath;
             String cp = System.getProperty("java.class.path");
