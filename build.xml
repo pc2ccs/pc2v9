@@ -96,9 +96,13 @@
         </fileset>
     </path>
 
+    <property environment="env"/>
 
     <target name="properties">
         <available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <condition property="git_hash" value="${env.GIT_COMMIT}" else="HEAD">
+            <isset property="env.GIT_COMMIT"/>
+        </condition>
     </target>
 
     <target name="init" depends="properties">
@@ -106,11 +110,17 @@
         <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpathref="checkstyle.classpath"/>
         <!-- Create the time stamp -->
         <tstamp />
-        <java classname="org.tmatesoft.svn.cli.SVNVersion" dir="${basedir}"
-            fork="true" outputproperty="repo.version"
-            classpathref="project.classpath">
-            <arg line="-n ."/>
-        </java>
+        <exec executable="git" outputproperty="repo.version" failifexecutionfails="false" errorproperty="">
+            <arg value="rev-list"/>
+            <arg value="${git_hash}"/>
+            <arg value="--count"/>
+        </exec>
+        <!-- if above failed, set the repo.version to 0 -->
+        <condition property="repo.version" value="0">
+            <not>
+               <isset property="repo.version"/>
+            </not>
+        </condition>
     </target>
 
     <target name="compile" depends="init,checkstyle" description="compile the source ">
