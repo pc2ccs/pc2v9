@@ -37,7 +37,7 @@ call %PC2BIN%\pc2env.bat
 
 :CheckJavaVersion
 REM Check Java architecture and set max Heap size 
-java -d64 -version 2>&1 | findstr "Unrecognized Error" > NUL
+java -d64 -version 2>&1 | findstr "Error" > NUL
 IF ERRORLEVEL 1 goto :Java64
 IF ERRORLEVEL 0 goto :Java32
 
