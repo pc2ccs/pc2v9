@@ -1,9 +1,14 @@
 #!/bin/sh
 #
-# Purpose: print version number
+# Purpose: Start the server
 # Author : pc2@ecs.csus.edu
 # $HeadURL$
 #
+
+
+# Set the default Heap Size for 32-bit and 64-bit Java
+JAVA64BIT_HEAPSIZE=4G
+JAVA32BIT_HEAPSIZE=1600M
 
 . `dirname $0`/pc2env
 
@@ -15,6 +20,25 @@ else
   PC2XOPS=""
 fi
 
-java $PC2XOPS -Xms64M -Xmx1600M -cp $pc2_classpath edu.csus.ecs.pc2.Starter --server $*
+# default to 4G
+HEAPPARAM=$JAVA64BIT_HEAPSIZE
+JAVA32=0
+# if we are not running a 64bit java reduce to 1.6G
+java -d64 -version |& grep -q "Error" && JAVA32=1
+# found a 32bit java
+if [ $JAVA32 == "1" ]; then
+# reduce the heap size
+HEAPPARAM=$JAVA32BIT_HEAPSIZE
+# now check the OS, checking for 64 bit
+uname -m |& grep -q "x86_64" && clear && echo WARNING: We detected a 32 bit java running on a 64 bit OS. && echo && echo We recommend that you run PC^2 Server using a 64 bit version of Java to allow && echo for the best results. && echo
+echo Note: We have set the Java Heap size to $HEAPPARAM for your 32-bit Java system,
+echo but this may be too small to run the PC^2 Server.
+echo
+echo You can increase the Heap size to whatever the maximum allowed on your machine
+echo is by editing the JAVA32BIT_HEAPSIZE constant at the start of the
+echo \"pc2server\" file.
+fi
+
+java $PC2XOPS -Xmx$HEAPPARAM -cp $pc2_classpath edu.csus.ecs.pc2.Starter --server $*
 
 # eof pc2team $Id$ 
