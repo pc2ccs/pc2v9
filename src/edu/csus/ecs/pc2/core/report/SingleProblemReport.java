@@ -103,7 +103,6 @@ public class SingleProblemReport implements IReport {
             } catch (Exception e) {
                 printWriter.println("Exception in report: " + e.getMessage());
                 e.printStackTrace(printWriter);
-                e.printStackTrace(); // debug 22
             }
 
             printWriter.close();
