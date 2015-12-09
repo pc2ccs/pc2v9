@@ -853,7 +853,7 @@ public class ResolverEventFeedXML {
      */
     protected String toXML(XMLMemento mementoRoot)  {
         try {
-            return mementoRoot.saveToString(true) + getXMLFooterComment();
+            return mementoRoot.saveToString(true);
         } catch (IOException e) {
             logWarning("Error in creating XML", e);
             return "";
@@ -877,8 +877,9 @@ public class ResolverEventFeedXML {
 
         StringBuffer sb = new StringBuffer("<" + CONTEST_TAG + ">");
 
+        sb.append(getXMLFooterComment());
         sb.append(toXML(createInfoElement(contest, contest.getContestInformation())));
-
+        
         int idx;
 
         idx = 1;
@@ -998,6 +999,7 @@ public class ResolverEventFeedXML {
 
         sb.append(toXML(memento));
 
+        sb.append(getXMLFooterComment());
         sb.append("</");
         sb.append(CONTEST_TAG);
         sb.append(">");
