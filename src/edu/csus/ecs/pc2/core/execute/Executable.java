@@ -566,8 +566,8 @@ public class Executable extends Plugin implements IExecutable {
 //        log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement =  " + judgement);
     
         RunTestCase runTestCase = new RunTestCase(run, record, testNumber, passed);
+        runTestCase.setElapsedMS(executionData.getExecuteTimeMS());
         run.addTestCase(runTestCase);
-
         return passed;
     }
 
