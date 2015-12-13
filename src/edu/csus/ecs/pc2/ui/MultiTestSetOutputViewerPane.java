@@ -537,8 +537,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             JButton btnClose_1 = new JButton("Close");
             btnClose_1.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    Window parentFrame = SwingUtilities.getWindowAncestor(btnClose);
-                    parentFrame.dispose();
+                    if (getMultiTestSetTabbedPane().getSelectedIndex() > 0) {
+                        getMultiTestSetTabbedPane().setSelectedIndex(0);
+                    } else {
+                        Window parentFrame = SwingUtilities.getWindowAncestor(btnClose);
+                        parentFrame.dispose();
+                    }
                 }
             });
             panelFooterButtons.add(btnClose_1);

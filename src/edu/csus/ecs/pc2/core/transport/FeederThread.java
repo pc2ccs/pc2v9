@@ -53,12 +53,12 @@ class FeederThread implements Runnable {
                 OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
 
                 if (filteredFeed){
-                    System.out.println("debug 22 - starting a filtered feed");
+                    System.out.println("Starting a filtered feed");
                     // freeze time 1 hour before end of contest.
                     long freezeTimeMins = (getContest().getContestTime().getContestLengthSecs() / Constants.SECONDS_PER_MINUTE) - (Constants.MINUTES_PER_HOUR);
                     eventFeeder = new EventFeeder(contest, out, freezeTimeMins);
                 } else {
-                    System.out.println("debug 22 - starting a un-filtered feed");
+                    System.out.println("starting a event feed");
                     // no freeze time
                     eventFeeder = new EventFeeder(contest, out, 0);
                 }
