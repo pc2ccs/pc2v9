@@ -35,7 +35,7 @@
 
 
     <!-- Compiler settings. -->
-    <property name="javacFailOnError" value="false"/>
+    <property name="javacFailOnError" value="true"/>
     <property name="javacDebugInfo" value="true"/>
     <property name="javacVerbose" value="off"/>
     <property name="logExtension" value=".log"/>
