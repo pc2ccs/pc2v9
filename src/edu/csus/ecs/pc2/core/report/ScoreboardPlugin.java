@@ -56,27 +56,27 @@ public class ScoreboardPlugin implements UIPlugin {
      * Write all standings to output directory.
      * 
      * @param xmlString
-     * @param log
+     * @param aLog
      * @param outputDir
      */
-    public void writeHTML(String xmlString, Log log, String outputDir) {
+    public void writeHTML(String xmlString, Log aLog, String outputDir) {
 
         File inputDir = new File(xslDir);
         if (!inputDir.isDirectory()) {
-            log.warning("xslDir is not a directory");
+            aLog.warning("xslDir is not a directory");
             return;
         }
         File outputDirFile = new File(outputDir);
         if (!outputDirFile.exists() && !outputDirFile.mkdirs()) {
-            log.warning("Could not create " + outputDirFile.getAbsolutePath() + ", defaulting to current directory");
+            aLog.warning("Could not create " + outputDirFile.getAbsolutePath() + ", defaulting to current directory");
             outputDir = ".";
             outputDirFile = new File(outputDir);
         }
         if (!outputDirFile.isDirectory()) {
-            log.warning(outputDir + " is not a directory.");
+            aLog.warning(outputDir + " is not a directory.");
             return;
         } else {
-            log.fine("Sending output to " + outputDirFile.getAbsolutePath());
+            aLog.fine("Sending output to " + outputDirFile.getAbsolutePath());
         }
         try {
             File output = File.createTempFile("__t", ".tmp", new File("."));
@@ -90,19 +90,19 @@ public class ScoreboardPlugin implements UIPlugin {
                     // otherwise fallback to the delete then rename
                     outputFile.delete();
                     if (!output.renameTo(outputFile)) {
-                        log.warning("Could not create " + outputFile.getCanonicalPath());
+                        aLog.warning("Could not create " + outputFile.getCanonicalPath());
                     }
                 }
             } else {
                 // 0 length file
-                log.warning("New results.xml is empty, not updating");
+                aLog.warning("New results.xml is empty, not updating");
                 output.delete();
             }
             output = null;
         } catch (FileNotFoundException e1) {
-            log.log(Log.WARNING, "Could not write to " + "results.xml", e1);
+            aLog.log(Log.WARNING, "Could not write to " + "results.xml", e1);
         } catch (IOException e) {
-            log.log(Log.WARNING, "Problem writing to " + "results.xml", e);
+            aLog.log(Log.WARNING, "Problem writing to " + "results.xml", e);
         }
 
         String[] inputFiles = inputDir.list();
@@ -131,26 +131,26 @@ public class ScoreboardPlugin implements UIPlugin {
                             // otherwise fallback to the delete then rename
                             outputFile.delete();
                             if (!output.renameTo(outputFile)) {
-                                log.warning("Could not create " + outputFile.getCanonicalPath());
+                                aLog.warning("Could not create " + outputFile.getCanonicalPath());
                             } else {
-                                log.finest("rename2 to " + outputFile.getCanonicalPath() + " succeeded.");
+                                aLog.finest("rename2 to " + outputFile.getCanonicalPath() + " succeeded.");
                             }
                         } else {
-                            log.finest("rename to " + outputFile.getCanonicalPath() + " succeeded.");
+                            aLog.finest("rename to " + outputFile.getCanonicalPath() + " succeeded.");
                         }
                     } else {
                         // 0 length file
-                        log.warning("output from tranformation " + xslFilename + " was empty");
+                        aLog.warning("output from tranformation " + xslFilename + " was empty");
                         output.delete();
                     }
                     output = null;
                 } catch (IOException e) {
-                    log.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
+                    aLog.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
                 } catch (TransformerConfigurationException e) {
                     // unfortunately this prints the details to stdout (or maybe stderr)
-                    log.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
+                    aLog.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
                 } catch (Exception e) {
-                    log.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
+                    aLog.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
                 }
             }
         }

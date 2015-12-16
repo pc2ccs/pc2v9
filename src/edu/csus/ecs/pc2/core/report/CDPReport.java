@@ -66,7 +66,7 @@ public class CDPReport implements IReport {
     // TODO MOVE TO ContestYAMLLoader.PROBLEM_SET_KEY
     private static final String PROBLEM_SET_KEY = "problemset";
 
-    public SimpleDateFormat formatter = new SimpleDateFormat(FORMAT_YYYY_MM_DD_HH_MM_SS);
+    private SimpleDateFormat formatter = new SimpleDateFormat(FORMAT_YYYY_MM_DD_HH_MM_SS);
 
     private void writeContestTime(PrintWriter printWriter) {
         printWriter.println();
@@ -91,8 +91,8 @@ public class CDPReport implements IReport {
         return newName;
     }
 
-    private String getProblemBalloonColor(IInternalContest contest, Problem problem) {
-        BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
+    private String getProblemBalloonColor(IInternalContest aContest, Problem problem) {
+        BalloonSettings balloonSettings = aContest.getBalloonSettings(aContest.getSiteNumber());
         String name = null;
         if (balloonSettings != null) {
             name = balloonSettings.getColor(problem);
