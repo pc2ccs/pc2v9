@@ -714,13 +714,8 @@ public class Executable extends Plugin implements IExecutable {
 
         }
 
-        // teams output file - single file name
-        SerializedFile userOutputFile = executionData.getExecuteProgramOutput();
-        createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
+        String teamsOutputFilename = getTeamOutputFilename(dataSetNumber);
         
-        String teamsOutputFilename = prefixExecuteDirname("teamoutput." + dataSetNumber + ".txt");
-        createFile(userOutputFile, teamsOutputFilename); // Create a per test case Team's output file
-        teamsOutputFilenames.add(teamsOutputFilename); // add to list
         if (executionData.getExecuteExitValue() != 0) {
             long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
@@ -933,6 +928,10 @@ public class Executable extends Plugin implements IExecutable {
         }
 
         return executionData.isValidationSuccess();
+    }
+
+    private String getTeamOutputFilename(int dataSetNumber) {
+        return prefixExecuteDirname("teamoutput." + dataSetNumber + ".txt");
     }
 
     /**
@@ -1339,6 +1338,14 @@ public class Executable extends Plugin implements IExecutable {
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
             
+            // teams output file - single file name
+            SerializedFile userOutputFile = executionData.getExecuteProgramOutput();
+            createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
+            
+            String teamsOutputFilename = getTeamOutputFilename(dataSetNumber);
+            
+            createFile(userOutputFile, teamsOutputFilename); // Create a per test case Team's output file
+            teamsOutputFilenames.add(teamsOutputFilename); // add to list
             if (executionData.getExecuteExitValue() != 0) {
                 long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
