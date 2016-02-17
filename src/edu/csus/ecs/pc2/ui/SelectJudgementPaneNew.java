@@ -919,15 +919,23 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         if (getMultiTestSetOutputViewerFrame() != null) {
 
-            String[] teamOutputNames = new String[getProblemDataFiles().getJudgesDataFiles().length];
-
-            // null out list
-            for (int i = 0; i < teamOutputNames.length; i++) {
-                teamOutputNames[i] = null;
-            }
+            String[] teamOutputNames = null;
 
             // add entries from acutal team test output
             if (saveOutputFileNames != null) {
+                int size = getProblemDataFiles().getJudgesDataFiles().length;
+                if (size < saveOutputFileNames.size()) {
+                    size = saveOutputFileNames.size();
+                }
+                if (size < 1) {
+                    size = 1;
+                }
+                teamOutputNames = new String[size];
+
+                // null out list
+                for (int i = 0; i < size; i++) {
+                    teamOutputNames[i] = null;
+                }
 
                 for (int i = 0; i < saveOutputFileNames.size(); i++) {
                     teamOutputNames[i] = saveOutputFileNames.get(i);
