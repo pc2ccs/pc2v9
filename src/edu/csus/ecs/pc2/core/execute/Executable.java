@@ -714,39 +714,6 @@ public class Executable extends Plugin implements IExecutable {
 
         }
 
-        String teamsOutputFilename = getTeamOutputFilename(dataSetNumber);
-        
-        if (executionData.getExecuteExitValue() != 0) {
-            long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
-
-            PrintWriter exitCodeFile = null;
-            try {
-                exitCodeFile = new PrintWriter(new FileOutputStream(teamsOutputFilename, true), true);
-                exitCodeFile.write("Team program exit code = 0x"+Long.toHexString(returnValue).toUpperCase()+NL);
-            } catch (FileNotFoundException e) {
-                log.log(Log.WARNING, "Unable to append to file "+teamsOutputFilename, e);
-                exitCodeFile = null;
-            } finally {
-                if (exitCodeFile != null) {
-                    exitCodeFile.close();
-                }
-            }
-        }
-        if (executionData.getExecuteStderr() != null) {
-            byte[] errBuff = executionData.getExecuteStderr().getBuffer();
-            FileOutputStream outputStream = null;
-            try {
-                if (errBuff != null && errBuff.length > 0) {
-                    outputStream = new FileOutputStream(teamsOutputFilename, true);
-                    outputStream.write(("*** Team STDERR Follows:"+NL).getBytes());
-                    outputStream.write(errBuff, 0, errBuff.length);
-                    outputStream.close();
-                }
-            } catch (IOException e) {
-                log.log(Log.WARNING, "Unable to append to file "+teamsOutputFilename, e);
-            }
-        }
-        
         String secs = Long.toString((new Date().getTime()) % 100);
 
         // Answer/results XML file name
@@ -1360,6 +1327,20 @@ public class Executable extends Plugin implements IExecutable {
                     if (exitCodeFile != null) {
                         exitCodeFile.close();
                     }
+                }
+            }
+            if (executionData.getExecuteStderr() != null) {
+                byte[] errBuff = executionData.getExecuteStderr().getBuffer();
+                FileOutputStream outputStream = null;
+                try {
+                    if (errBuff != null && errBuff.length > 0) {
+                        outputStream = new FileOutputStream(teamsOutputFilename, true);
+                        outputStream.write(("*** Team STDERR Follows:"+NL).getBytes());
+                        outputStream.write(errBuff, 0, errBuff.length);
+                        outputStream.close();
+                    }
+                } catch (IOException e) {
+                    log.log(Log.WARNING, "Unable to append to file "+teamsOutputFilename, e);
                 }
             }
             passed = true;

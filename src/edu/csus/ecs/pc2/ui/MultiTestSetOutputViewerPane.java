@@ -1389,9 +1389,14 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         for (int i=0; i<rows.length; i++) {
             //get the test case defined in the second column of the current table row
             testCases[i] = (int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1))));
-            //get the full path to the judge's answer and data files 
-            judgesOutputFileNames[i] = judgesAnswerFiles[testCases[i]-1];
-            judgesDataFileNames[i] = judgesDataFiles[testCases[i]-1];
+            //get the full path to the judge's answer and data files
+            int testCaseIndex = testCases[i]-1;
+            if (judgesAnswerFiles.length > testCaseIndex) {
+                judgesOutputFileNames[i] = judgesAnswerFiles[testCaseIndex];
+            }
+            if (judgesDataFiles.length > testCaseIndex) {
+                judgesDataFileNames[i] = judgesDataFiles[testCaseIndex];
+            }
             //make sure the team output file(s) were defined (they have to be loaded by a client
             // making a separate call to setTeamOutputFileNames; make sure the client complied)
             if (currentTeamOutputFileNames == null || currentTeamOutputFileNames.length<teamOutputFileNames.length) {
@@ -1499,13 +1504,21 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             //get validator output file corresponding to test case "row"
             if (currentValidatorOutputFileNames != null && currentValidatorOutputFileNames.length >= row) {
                 // this will either be null or contain the filename
-                returnFile = currentValidatorOutputFileNames[row];
+                if (row >= currentValidatorOutputFileNames.length) {
+                    returnFile = null;
+                } else {
+                    returnFile = currentValidatorOutputFileNames[row];
+                }
             }
         } else if (col == COLUMN.VALIDATOR_ERR.ordinal()) {
             //get validator output file corresponding to test case "row"
             if (currentValidatorStderrFileNames != null && currentValidatorStderrFileNames.length >= row) {
                 // this will either be null or contain the filename
-                returnFile = currentValidatorStderrFileNames[row];
+                if (row >= currentValidatorStderrFileNames.length) {
+                    returnFile = null;
+                } else {
+                    returnFile = currentValidatorStderrFileNames[row];
+                }
             }
         } else {
             //the column is not one of those containing "view" links; return null
