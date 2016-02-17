@@ -956,7 +956,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 }
 
                 int failedCount = getNumFailedTestCases(testCases);
-                if (failedCount > 0) {
+                if (!currentProblem.isValidatedProblem()) {
+                    // problem is not validated, cannot be failed or passed
+                    getNumFailedTestCasesLabel().setForeground(Color.black);
+                    getNumFailedTestCasesLabel().setText("");
+                } else  if (failedCount > 0) {
                     getNumFailedTestCasesLabel().setForeground(Color.red);
                     getNumFailedTestCasesLabel().setText("Failed:  " + failedCount);
                 } else if (testCases == null || testCases.length == 0) {
@@ -1586,7 +1590,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
         public void setValue(Object value) {
             String testResult = ((JLabel) value).getText();
-            if (testResult.equalsIgnoreCase("Pass")) {
+            if (!currentProblem.isValidatedProblem()) {
+                setBackground(Color.yellow);
+                setText("N/A");
+            } else if (testResult.equalsIgnoreCase("Pass")) {
                 setBackground(Color.green);
                 setForeground(Color.black);
                 setText("Pass");
