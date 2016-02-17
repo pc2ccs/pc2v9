@@ -1353,7 +1353,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 JOptionPane.showMessageDialog(getParentFrame(), msg, 
                         "File Not Found", JOptionPane.WARNING_MESSAGE);
             } else {
-                String msg = "No output found";
+                String msg = "No "+title+" found";
                 JOptionPane.showMessageDialog(getParentFrame(), msg, 
                         "File Not Found", JOptionPane.INFORMATION_MESSAGE);
                 
