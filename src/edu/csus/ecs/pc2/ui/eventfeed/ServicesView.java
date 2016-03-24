@@ -32,14 +32,17 @@ import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * Event Feeder and other feeders.
+ * This class presents a graphical user interface for controlling the services exposed to external clients.
+ * These include the Event Feed and various Web Services.  The GUI provides the contest administrator
+ * with the ability to both start and stop each of these services, as well as to define the port(s)
+ * on which the services appear to external clients.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class FeederView extends JFrame implements UIPlugin {
+public class ServicesView extends JFrame implements UIPlugin {
 
     /**
      * 
@@ -74,7 +77,7 @@ public class FeederView extends JFrame implements UIPlugin {
      * This method initializes
      * 
      */
-    public FeederView() {
+    public ServicesView() {
         super();
         initialize();
     }
@@ -108,7 +111,7 @@ public class FeederView extends JFrame implements UIPlugin {
         this.setSize(new java.awt.Dimension(515, 319));
         this.setContentPane(getMainViewPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setTitle("Feeder");
+        this.setTitle("Services");
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -146,7 +149,7 @@ public class FeederView extends JFrame implements UIPlugin {
         contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
         log = controller.getLog();
-        log.info("Started Feeder View");
+        log.info("Started Services View");
         
         contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
         contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
@@ -164,7 +167,7 @@ public class FeederView extends JFrame implements UIPlugin {
 
                 try {
                     EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
-                    addUIPlugin(getMainTabbedPane(), "Event Server", eventFeedServerPane);
+                    addUIPlugin(getMainTabbedPane(), "Services", eventFeedServerPane);
                 } catch (Exception e) {
                     if (StaticLog.getLog() != null) {
                         StaticLog.getLog().log(Log.WARNING, "Exception", e);
