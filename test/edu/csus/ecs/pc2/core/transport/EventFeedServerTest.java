@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.services.eventFeed.EventFeedServer;
 
 /**
  * tester client for Event Feed Server.

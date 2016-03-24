@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.transport;
+package edu.csus.ecs.pc2.services.eventFeed;
 
 import java.io.IOException;
 import java.text.DateFormat;
