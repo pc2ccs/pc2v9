@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import edu.csus.ecs.pc2.ui.WebServerPane;
 
 /**
  * This class presents a graphical user interface for controlling the services exposed to external clients.
@@ -167,7 +168,7 @@ public class ServicesView extends JFrame implements UIPlugin {
 
                 try {
                     EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
-                    addUIPlugin(getMainTabbedPane(), "Services", eventFeedServerPane);
+                    addUIPlugin(getMainTabbedPane(), "Event Feed", eventFeedServerPane);
                 } catch (Exception e) {
                     if (StaticLog.getLog() != null) {
                         StaticLog.getLog().log(Log.WARNING, "Exception", e);
@@ -177,7 +178,19 @@ public class ServicesView extends JFrame implements UIPlugin {
                     }
                 }
                 
-                if (Utilities.isDebugMode()) {
+                try {
+                    WebServerPane eventFeedServerPane = new WebServerPane();
+                    addUIPlugin(getMainTabbedPane(), "Web Services", eventFeedServerPane);
+                } catch (Exception e) {
+                    if (StaticLog.getLog() != null) {
+                        StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                        e.printStackTrace(System.err);
+                    } else {
+                        e.printStackTrace(System.err);
+                    }
+                }
+                
+               if (Utilities.isDebugMode()) {
                     
                     try {
                         PacketMonitorPane pane = new PacketMonitorPane();
@@ -295,7 +308,7 @@ public class ServicesView extends JFrame implements UIPlugin {
         if (exitButton == null) {
             exitButton = new JButton();
             exitButton.setText("Exit");
-            exitButton.setToolTipText("Click here to Shutdown PC^2");
+            exitButton.setToolTipText("Click here to shutdown this PC^2 client");
             exitButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             exitButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

@@ -9,5 +9,7 @@
 	<classpathentry kind="lib" path="vendor/lib/mclb.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/smtp.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/quick-json-1.0.2.3.jar"/>
+	<classpathentry kind="lib" path="/pc2v10/lib/jetty-server-9.2.11.v20150529.jar" sourcepath="/pc2v10/libsrc/jetty-server-9.2.11.v20150529-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/jetty-util-9.2.11.v20150529.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>
