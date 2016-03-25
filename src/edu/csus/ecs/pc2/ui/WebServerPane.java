@@ -23,8 +23,12 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.services.web.LanguageService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
 import edu.csus.ecs.pc2.services.web.ScoreboardService;
+import edu.csus.ecs.pc2.services.web.StarttimeService;
+
+import javax.swing.JCheckBox;
 
 
 /**
@@ -62,6 +66,11 @@ public class WebServerPane extends JPanePlugin {
     private Server jettyServer = null ;
 
     private JLabel webServerStatusLabel = null;
+    private JCheckBox chckbxscoreboard;
+    private JLabel lblEnabledWebServices;
+    private JCheckBox chckbxproblems;
+    private JCheckBox chckbxlanguages;
+    private JCheckBox chckbxstarttime;
 
     /**
      * Constructs a new WebServerPane.
@@ -160,11 +169,7 @@ public class WebServerPane extends JPanePlugin {
 
             // Tells the Jersey Servlet which REST service/classes to load.
             //  Note that class names must be semi-colon separated in the second String parameter.
-            jerseyServlet.setInitParameter(
-                    "jersey.config.server.provider.classnames",
-                    ScoreboardService.class.getCanonicalName()+";"+
-                    ProblemService.class.getCanonicalName()
-                    );
+            jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", getServiceClassesList());
 
             jettyServer.start();
             
@@ -187,6 +192,59 @@ public class WebServerPane extends JPanePlugin {
         }
 
         updateGUI();
+    }
+    
+    /**
+     * Returns a String of semicolon-separated class names for the services which should be
+     * registered with Jetty.
+     * @return a String of service class names
+     */
+    private String getServiceClassesList() {
+        
+        //the list of service class names
+        String classList = "";
+        
+        //check the next service
+        if (getChckbxscoreboard().isSelected()) {
+            //need to add it; add a semicolon to the end of the list if the list is not empty
+            if (classList.length()>0) {
+                classList += ";";
+            }
+            //add the service class name to the list
+            classList += ScoreboardService.class.getCanonicalName();
+        }
+        
+        //check the next service
+        if (getChckbxproblems().isSelected()) {
+            //need to add it; add a semicolon to the end of the list if the list is not empty
+            if (classList.length()>0) {
+                classList += ";";
+            }
+            //add the service class name to the list
+            classList += ProblemService.class.getCanonicalName();
+        }
+        
+        //check the next service
+        if (getChckbxlanguages().isSelected()) {
+            //need to add it; add a semicolon to the end of the list if the list is not empty
+            if (classList.length()>0) {
+                classList += ";";
+            }
+            //add the service class name to the list
+            classList += LanguageService.class.getCanonicalName();
+        }
+        
+        //check the next service
+        if (getChckbxstarttime().isSelected()) {
+            //need to add it; add a semicolon to the end of the list if the list is not empty
+            if (classList.length()>0) {
+                classList += ";";
+            }
+            //add the service class name to the list
+            classList += StarttimeService.class.getCanonicalName();
+        }
+        
+        return classList;
     }
 
     private void showMessage(String string) {
@@ -245,9 +303,9 @@ public class WebServerPane extends JPanePlugin {
             centerPanel = new JPanel();
             GridBagLayout gblCenterPanel = new GridBagLayout();
             gblCenterPanel.columnWidths = new int[]{198, 57, 167, 0};
-            gblCenterPanel.rowHeights = new int[]{36, 23, 32, 23, 0};
+            gblCenterPanel.rowHeights = new int[]{36, 23, 32, 23, 0, 0, 0};
             gblCenterPanel.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
-            gblCenterPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+            gblCenterPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
             centerPanel.setLayout(gblCenterPanel);
             webServerStatusLabel = new JLabel();
             webServerStatusLabel.setFont(new Font("Dialog", Font.BOLD, 14));
@@ -276,6 +334,31 @@ public class WebServerPane extends JPanePlugin {
             gbcunFilteredPortTextField.gridx = 1;
             gbcunFilteredPortTextField.gridy = 1;
             centerPanel.add(getPortTextField(), gbcunFilteredPortTextField);
+            GridBagConstraints gbc_lblEnabledWebServices = new GridBagConstraints();
+            gbc_lblEnabledWebServices.insets = new Insets(0, 0, 5, 5);
+            gbc_lblEnabledWebServices.gridx = 0;
+            gbc_lblEnabledWebServices.gridy = 3;
+            centerPanel.add(getLblEnabledWebServices(), gbc_lblEnabledWebServices);
+            GridBagConstraints gbc_chckbxscoreboard = new GridBagConstraints();
+            gbc_chckbxscoreboard.insets = new Insets(0, 0, 5, 5);
+            gbc_chckbxscoreboard.gridx = 1;
+            gbc_chckbxscoreboard.gridy = 3;
+            centerPanel.add(getChckbxscoreboard(), gbc_chckbxscoreboard);
+            GridBagConstraints gbc_chckbxstarttime = new GridBagConstraints();
+            gbc_chckbxstarttime.insets = new Insets(0, 0, 5, 0);
+            gbc_chckbxstarttime.gridx = 2;
+            gbc_chckbxstarttime.gridy = 3;
+            centerPanel.add(getChckbxstarttime(), gbc_chckbxstarttime);
+            GridBagConstraints gbc_chckbxproblems = new GridBagConstraints();
+            gbc_chckbxproblems.insets = new Insets(0, 0, 5, 5);
+            gbc_chckbxproblems.gridx = 1;
+            gbc_chckbxproblems.gridy = 4;
+            centerPanel.add(getChckbxproblems(), gbc_chckbxproblems);
+            GridBagConstraints gbc_chckbxlanguages = new GridBagConstraints();
+            gbc_chckbxlanguages.insets = new Insets(0, 0, 0, 5);
+            gbc_chckbxlanguages.gridx = 1;
+            gbc_chckbxlanguages.gridy = 5;
+            centerPanel.add(getChckbxlanguages(), gbc_chckbxlanguages);
 
         }
         return centerPanel;
@@ -317,4 +400,40 @@ public class WebServerPane extends JPanePlugin {
         }
     }
 
+    private JCheckBox getChckbxscoreboard() {
+        if (chckbxscoreboard == null) {
+        	chckbxscoreboard = new JCheckBox("/Scoreboard");
+        	chckbxscoreboard.setHorizontalAlignment(SwingConstants.LEFT);
+        	chckbxscoreboard.setToolTipText("Enable getting contest scoreboard");
+        }
+        return chckbxscoreboard;
+    }
+    private JLabel getLblEnabledWebServices() {
+        if (lblEnabledWebServices == null) {
+        	lblEnabledWebServices = new JLabel("Enabled Web Services:");
+        }
+        return lblEnabledWebServices;
+    }
+    private JCheckBox getChckbxproblems() {
+        if (chckbxproblems == null) {
+        	chckbxproblems = new JCheckBox("/Problems");
+        	chckbxproblems.setToolTipText("Enable getting contest problems");
+        	chckbxproblems.setHorizontalAlignment(SwingConstants.LEFT);
+        }
+        return chckbxproblems;
+    }
+    private JCheckBox getChckbxlanguages() {
+        if (chckbxlanguages == null) {
+        	chckbxlanguages = new JCheckBox("/Languages");
+        	chckbxlanguages.setHorizontalAlignment(SwingConstants.LEFT);
+        	chckbxlanguages.setToolTipText("Enable getting contest languages");
+        }
+        return chckbxlanguages;
+    }
+    private JCheckBox getChckbxstarttime() {
+        if (chckbxstarttime == null) {
+        	chckbxstarttime = new JCheckBox("/Starttime");
+        }
+        return chckbxstarttime;
+    }
 }
