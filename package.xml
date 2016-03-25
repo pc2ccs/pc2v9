@@ -69,7 +69,6 @@
                 <exclude name="junit-*.jar"/>
                 <exclude name="checkstyle-*.jar"/>
                 <exclude name="svnkit*.jar"/>
-                <exclude name="validation*.jar"/>
                 <exclude name="quick-json*.jar"/>
             </zipfileset>
             <zipfileset dir="${samps.dir}" filemode="644" prefix="${release}/samps">
