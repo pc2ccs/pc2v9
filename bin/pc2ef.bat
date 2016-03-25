@@ -2,7 +2,6 @@
 
 rem Purpose: start pc2
 rem Author : pc2@ecs.csus.edu
-rem $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/bin/pc2judge.bat $
 
 rem Windows 2000 and beyond syntax
 set PC2BIN=%~dp0
@@ -27,7 +26,7 @@ goto :end
 
 :continue
 call %PC2BIN%\pc2env.bat
-java -Xms64M -Xmx768M -cp %libdir%\pc2.jar;%mclbdir%\mclb.jar edu.csus.ecs.pc2.Starter %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Xms64M -Xmx768M -cp "%libdir%\*" edu.csus.ecs.pc2.Starter %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
-rem eof pc2judge.bat $Id: pc2judge.bat 1761 2009-02-14 21:02:24Z boudreat $
+rem eof 
