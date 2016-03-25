@@ -152,11 +152,13 @@ public class WebServerPane extends JPanePlugin {
             ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
             jerseyServlet.setInitOrder(0);
 
-            // Tells the Jersey Servlet which REST service/class to load.
+            // Tells the Jersey Servlet which REST service/classes to load.
+            //  Note that class names must be semi-colon separated in the second String parameter.
             jerseyServlet.setInitParameter(
                     "jersey.config.server.provider.classnames",
                     ScoreboardService.class.getCanonicalName()+";"+
-                    ProblemService.class.getCanonicalName());
+                    ProblemService.class.getCanonicalName()
+                    );
 
             jettyServer.start();
         } 
