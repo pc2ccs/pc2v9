@@ -82,7 +82,7 @@ public class WebServerPane extends JPanePlugin {
         this.add(getButtonPanel(), BorderLayout.SOUTH);
         this.add(getCenterPanel(), BorderLayout.CENTER);
 
-        enableButtons();
+        updateGUI();
     }
     
     @Override
@@ -161,6 +161,7 @@ public class WebServerPane extends JPanePlugin {
                     );
 
             jettyServer.start();
+            
         } 
         catch (NumberFormatException e) {
             showMessage("Unable to start web services: invalid port number: "+ e.getMessage());
@@ -179,7 +180,7 @@ public class WebServerPane extends JPanePlugin {
   
         }
 
-        enableButtons();
+        updateGUI();
     }
 
     private void showMessage(String string) {
@@ -216,7 +217,7 @@ public class WebServerPane extends JPanePlugin {
             getLog().log(Log.INFO, e1.getMessage(), e1);
         }
         jettyServer.destroy();
-        enableButtons();
+        updateGUI();
     }
 
     /**
@@ -279,18 +280,26 @@ public class WebServerPane extends JPanePlugin {
         return portTextField;
     }
 
-    private void enableButtons () {
+    /**
+     * Updates the state of the web server status label and Start/Stop buttons to 
+     * correspond to the state of the Jetty Server.
+     */
+    private void updateGUI () {
         
-        //TODO: update this method for Jetty
-//        boolean serverRunning = eventFeedServer.isListening();
-//        getStartButton().setEnabled(! serverRunning);
-//        getStopButton().setEnabled(serverRunning);
-//
-//        if (serverRunning){
-//            webServerStatusLabel.setText("Event Feed server running");
-//        } else {
-//            webServerStatusLabel.setText("Event Feed server STOPPED");
-//        }
+        boolean serverRunning;
+        if (jettyServer==null) {
+            serverRunning = false;
+        } else {
+            serverRunning = jettyServer.isRunning();
+        }
+        getStartButton().setEnabled(! serverRunning);
+        getStopButton().setEnabled(serverRunning);
+
+        if (serverRunning){
+            webServerStatusLabel.setText("Web Server is running...");
+        } else {
+            webServerStatusLabel.setText("Web Server STOPPED");
+        }
     }
 
 }
