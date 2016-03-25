@@ -9,25 +9,25 @@
 	<classpathentry kind="lib" path="vendor/lib/mclb.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/smtp.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/quick-json-1.0.2.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/hibernate-validator-5.1.3.Final.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/hk2-api-2.4.0-b25.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/hk2-locator-2.4.0-b25.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/hk2-utils-2.4.0-b25.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/javax.annotation-api-1.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/javax.inject-2.4.0-b25.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/javax.servlet-api-3.1.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/javax.ws.rs-api-2.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jersey-client-2.19.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jersey-common-2.19.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jersey-container-servlet-core-2.19.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jersey-guava-2.19.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jersey-server-2.19.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jetty-http-9.2.11.v20150529.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jetty-io-9.2.11.v20150529.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jetty-security-9.2.11.v20150529.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jetty-server-9.2.11.v20150529.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jetty-servlet-9.2.11.v20150529.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jetty-util-9.2.11.v20150529.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/validation-api-1.1.0.Final.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/hibernate-validator-5.1.3.Final.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/hk2-api-2.4.0-b25.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/hk2-locator-2.4.0-b25.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/hk2-utils-2.4.0-b25.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/javax.annotation-api-1.2.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/javax.inject-2.4.0-b25.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/javax.servlet-api-3.1.0.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/javax.ws.rs-api-2.0.1.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jersey-client-2.19.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jersey-common-2.19.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jersey-container-servlet-core-2.19.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jersey-guava-2.19.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jersey-server-2.19.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jetty-http-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jetty-io-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jetty-security-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jetty-server-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jetty-servlet-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jetty-util-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/validation-api-1.1.0.Final.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>
