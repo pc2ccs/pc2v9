@@ -416,7 +416,7 @@ public class WebServerPane extends JPanePlugin {
     }
     private JLabel getLblEnabledWebServices() {
         if (lblEnabledWebServices == null) {
-        	lblEnabledWebServices = new JLabel("Enabled Web Services:");
+        	lblEnabledWebServices = new JLabel("Enable Web Services:");
         }
         return lblEnabledWebServices;
     }
