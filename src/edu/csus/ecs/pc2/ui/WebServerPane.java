@@ -23,6 +23,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.services.web.ProblemService;
 import edu.csus.ecs.pc2.services.web.ScoreboardService;
 
 
@@ -154,7 +155,8 @@ public class WebServerPane extends JPanePlugin {
             // Tells the Jersey Servlet which REST service/class to load.
             jerseyServlet.setInitParameter(
                     "jersey.config.server.provider.classnames",
-                    ScoreboardService.class.getCanonicalName());
+                    ScoreboardService.class.getCanonicalName()+";"+
+                    ProblemService.class.getCanonicalName());
 
             jettyServer.start();
         } 
