@@ -408,6 +408,7 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxscoreboard() {
         if (chckbxscoreboard == null) {
         	chckbxscoreboard = new JCheckBox("/Scoreboard");
+        	chckbxscoreboard.setSelected(true);
         	chckbxscoreboard.setHorizontalAlignment(SwingConstants.LEFT);
         	chckbxscoreboard.setToolTipText("Enable getting contest scoreboard");
         }
@@ -422,6 +423,7 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxproblems() {
         if (chckbxproblems == null) {
         	chckbxproblems = new JCheckBox("/Problems");
+        	chckbxproblems.setSelected(true);
         	chckbxproblems.setToolTipText("Enable getting contest problems");
         	chckbxproblems.setHorizontalAlignment(SwingConstants.LEFT);
         }
@@ -430,6 +432,7 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxlanguages() {
         if (chckbxlanguages == null) {
         	chckbxlanguages = new JCheckBox("/Languages");
+        	chckbxlanguages.setSelected(true);
         	chckbxlanguages.setHorizontalAlignment(SwingConstants.LEFT);
         	chckbxlanguages.setToolTipText("Enable getting contest languages");
         }
@@ -438,6 +441,7 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxstarttime() {
         if (chckbxstarttime == null) {
         	chckbxstarttime = new JCheckBox("/Starttime");
+        	chckbxstarttime.setSelected(true);
         }
         return chckbxstarttime;
     }
