@@ -128,6 +128,12 @@ public class WebServerPane extends JPanePlugin {
         return startButton;
     }
 
+    /**
+     * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers
+     * a set of default REST (Jersey/JAX-RS) services with Jetty.
+     * TODO:  need to provide support for dynamically reconfiguring the registered services.
+     * 
+     */
     private void startWebServer() {
         
         if (portTextField.getText() == null) {
@@ -207,16 +213,25 @@ public class WebServerPane extends JPanePlugin {
         return stopButton;
     }
 
+    /**
+     * Stops the Jetty web server if it is running.
+     * Also destroys the web server.
+     * TODO:  shouldn't really destroy the webserver; just stop it and cache the reference so
+     * that it can be quickly restarted.  (However, need to consider what happens if the user
+     * selects a different set of services to be enabled...)
+     */
     protected void stopWebServer() {
 
-        try {
-            jettyServer.stop();
-        } catch (Exception e1) {
-            showMessage("Unable to stop Jetty webserver: " + e1.getMessage());
-            e1.printStackTrace();
-            getLog().log(Log.INFO, e1.getMessage(), e1);
+        if (jettyServer != null) {
+            try {
+                jettyServer.stop();
+            } catch (Exception e1) {
+                showMessage("Unable to stop Jetty webserver: " + e1.getMessage());
+                e1.printStackTrace();
+                getLog().log(Log.INFO, e1.getMessage(), e1);
+            }
+            jettyServer.destroy();
         }
-        jettyServer.destroy();
         updateGUI();
     }
 
@@ -267,7 +282,7 @@ public class WebServerPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes portTextField
+     * This method initializes portTextField to contain the default web server port number.
      * 
      * @return javax.swing.JTextField
      */
