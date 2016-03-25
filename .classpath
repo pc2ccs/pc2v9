@@ -11,5 +11,32 @@
 	<classpathentry kind="lib" path="vendor/lib/quick-json-1.0.2.3.jar"/>
 	<classpathentry kind="lib" path="/pc2v10/lib/jetty-server-9.2.11.v20150529.jar" sourcepath="/pc2v10/libsrc/jetty-server-9.2.11.v20150529-sources.jar"/>
 	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/jetty-util-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="/pc2v10/lib/javax.ws.rs-api-2.0.1.jar" sourcepath="/pc2v10/libsrc/javax.ws.rs-api-2.0.1-sources.jar"/>
+	<classpathentry kind="lib" path="/pc2v10/lib/jersey-server-2.19.jar" sourcepath="/pc2v10/libsrc/jersey-server-2.19-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/.m2/repository/javax/ws/rs/javax.ws.rs-api/2.0.1/javax.ws.rs-api-2.0.1.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="javax.ws.rs"/>
+			<attribute name="maven.artifactId" value="javax.ws.rs-api"/>
+			<attribute name="maven.version" value="2.0.1"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/pc2v10/lib/jetty-servlet-9.2.11.v20150529.jar" sourcepath="/pc2v10/libsrc/jetty-servlet-9.2.11.v20150529-sources.jar"/>
+	<classpathentry kind="lib" path="/pc2v10/lib/jersey-container-servlet-core-2.19.jar" sourcepath="/pc2v10/libsrc/jersey-container-servlet-core-2.19-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/javax.servlet-api-3.1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/jetty-security-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/jetty-io-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/jetty-http-9.2.11.v20150529.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/jersey-common-2.19.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/hk2-api-2.4.0-b25.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/jersey-guava-2.19.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/javax.inject-2.4.0-b25.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/hk2-locator-2.4.0-b25.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/hk2-utils-2.4.0-b25.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/javax.annotation-api-1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/jersey-client-2.19.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/hibernate-validator-5.1.3.Final.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/git/pc2v10/pc2v10/lib/validation-api-1.1.0.Final.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>

@@ -18,8 +18,12 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.services.web.ScoreboardService;
 
 
 /**
@@ -123,11 +127,7 @@ public class WebServerPane extends JPanePlugin {
         return startButton;
     }
 
-    protected void startWebServer() {
-        startWebServer(jettyServer, portTextField);
-    }
-
-    private void startWebServer(Server jettyServer, JTextField portTextField) {
+    private void startWebServer() {
         
         if (portTextField.getText() == null) {
             showMessage("You must enter a port number");
@@ -141,21 +141,27 @@ public class WebServerPane extends JPanePlugin {
 
         try {
             int port = Integer.parseInt(portTextField.getText());
-            
-            //replace the following with code to start Jetty with Jersey REST services
-//            server.startSocketListener(port, getContest(), filteredFeed);
-            
-            if (jettyServer == null) {
-                jettyServer = new Server(port);
-            }
-            jettyServer.start();
 
+            ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+            context.setContextPath("/");
+
+            jettyServer = new Server(port);
+            jettyServer.setHandler(context);
+
+            ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
+            jerseyServlet.setInitOrder(0);
+
+            // Tells the Jersey Servlet which REST service/class to load.
+            jerseyServlet.setInitParameter(
+                    "jersey.config.server.provider.classnames",
+                    ScoreboardService.class.getCanonicalName());
+
+            jettyServer.start();
         } 
         catch (NumberFormatException e) {
             showMessage("Unable to start web services: invalid port number: "+ e.getMessage());
             e.printStackTrace(); 
             getLog().log(Log.INFO, e.getMessage(), e);
-            
         }
         catch (IOException e1) {
             showMessage("Unable to start web services: "+ e1.getMessage());
@@ -168,7 +174,6 @@ public class WebServerPane extends JPanePlugin {
             getLog().log(Log.INFO, e2.getMessage(), e2);
   
         }
-
 
         enableButtons();
     }
@@ -197,21 +202,16 @@ public class WebServerPane extends JPanePlugin {
         return stopButton;
     }
 
-    //TODO: update this method for Jetty
     protected void stopWebServer() {
 
-//        if (eventFeedServer.isListening()) {
-//            try {
-//                eventFeedServer.halt();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                getLog().log(Log.INFO,e.getMessage(),e);
-//            }
-//        }
-//        if (! eventFeedServer.isListening()) {
-//            webServerStatusLabel.setText("Event Feed NOT running");
-//        }
-
+        try {
+            jettyServer.stop();
+        } catch (Exception e1) {
+            showMessage("Unable to stop Jetty webserver: " + e1.getMessage());
+            e1.printStackTrace();
+            getLog().log(Log.INFO, e1.getMessage(), e1);
+        }
+        jettyServer.destroy();
         enableButtons();
     }
 
