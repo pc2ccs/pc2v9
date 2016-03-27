@@ -397,12 +397,22 @@ public class WebServerPane extends JPanePlugin {
         }
         getStartButton().setEnabled(! serverRunning);
         getStopButton().setEnabled(serverRunning);
+        updateWebServerSettings(serverRunning);
 
         if (serverRunning){
             webServerStatusLabel.setText("Web Server is running...");
         } else {
             webServerStatusLabel.setText("Web Server STOPPED");
         }
+    }
+
+    private void updateWebServerSettings(boolean serverRunning) {
+        // if server is running, do not allow these settings to be changed
+        getPortTextField().setEditable(!serverRunning);
+        getChckbxlanguages().setEnabled(!serverRunning);
+        getChckbxproblems().setEnabled(!serverRunning);
+        getChckbxscoreboard().setEnabled(!serverRunning);
+        getChckbxstarttime().setEnabled(!serverRunning);
     }
 
     private JCheckBox getChckbxscoreboard() {
