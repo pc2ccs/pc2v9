@@ -8,7 +8,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.KeyStore;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -17,9 +20,17 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -49,7 +60,7 @@ public class WebServerPane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
 
-    public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = 50080;
+    public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = 50443;
 
     private JPanel buttonPanel = null;
 
@@ -158,10 +169,56 @@ public class WebServerPane extends JPanePlugin {
         try {
             int port = Integer.parseInt(portTextField.getText());
 
+            File keystoreFile = new File("cacerts.pc2");
+            if (!keystoreFile.exists()) {
+                KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                char[] password = "i don't care".toCharArray();
+                ks.load(null, password);
+                /**
+                 * TODO: 
+                 *  create a self signed cert and add it to the keystore
+                 *  with alias of jetty, replacing command line of
+                 * keytool -keystore cacert.pc2 -alias jetty -genkey -keyalg RSA -sigalg SHA256withRSA
+                 * something like this will do:
+                 * CN=pc2 jetty, OU=PC^2, O=PC^2, L=Unknown, ST=Unknown, C=Unknown
+                 */
+
+                // Store away the keystore
+                FileOutputStream fos = new FileOutputStream(keystoreFile);
+                ks.store(fos, password);
+                fos.close();
+            }
+            
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
             context.setContextPath("/");
 
-            jettyServer = new Server(port);
+            jettyServer = new Server();
+            HttpConfiguration http_config = new HttpConfiguration();
+            http_config.setSecureScheme("https");
+            http_config.setSecurePort(port);
+            http_config.setOutputBufferSize(32768);
+
+            // set to trustAll
+            SslContextFactory sslContextFactory = new SslContextFactory(true);
+            sslContextFactory.setKeyStorePath(keystoreFile.getAbsolutePath());
+            sslContextFactory.setKeyStorePassword("i don't care");
+            sslContextFactory.setKeyManagerPassword("i don't care");
+            // suggestions from http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html
+            sslContextFactory.setIncludeCipherSuites("TLS_DHE_RSA.*", "TLS_ECDHE.*");
+            sslContextFactory.setExcludeProtocols("SSL", "SSLv2", "SSLv2Hello", "SSLv3");
+            sslContextFactory.setRenegotiationAllowed(false);
+
+            HttpConfiguration https_config = new HttpConfiguration(http_config);
+            https_config.addCustomizer(new SecureRequestCustomizer());
+
+            ServerConnector https = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()), new HttpConnectionFactory(https_config));
+            https.setPort(port);
+            // do not timeout
+            https.setIdleTimeout(0);
+
+            // only enable https
+            jettyServer.setConnectors(new Connector[] { https });
+                
             jettyServer.setHandler(context);
 
             ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
