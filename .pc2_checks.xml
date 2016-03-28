@@ -110,8 +110,7 @@ $Log$
         <!-- See http://checkstyle.sf.net/config_import.html -->
         <module name="AvoidStarImport"/>
 	<!-- disable since we want sun.security.x509 packages
-        <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
-        -->
+	<module name="IllegalImport"/>--> <!-- defaults to sun.* packages -->
         <module name="RedundantImport"/>
 
 
