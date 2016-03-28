@@ -47,7 +47,6 @@ public class LanguageService {
             jsonLanguages = mapper.writeValueAsString(languages);
         } catch (JsonProcessingException e) {
             // TODO: log exception
-            // TODO Auto-generated catch block
             e.printStackTrace();
             // TODO: return HTTP error
         }
