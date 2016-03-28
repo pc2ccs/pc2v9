@@ -461,7 +461,7 @@ public class WebServerPane extends JPanePlugin {
 
     private JCheckBox getChckbxScoreboard() {
         if (chckbxScoreboard == null) {
-            chckbxScoreboard = new JCheckBox("/Scoreboard");
+            chckbxScoreboard = new JCheckBox("/scoreboard");
             chckbxScoreboard.setSelected(true);
             chckbxScoreboard.setHorizontalAlignment(SwingConstants.LEFT);
             chckbxScoreboard.setToolTipText("Enable getting contest scoreboard");
@@ -478,7 +478,7 @@ public class WebServerPane extends JPanePlugin {
 
     private JCheckBox getChckbxProblems() {
         if (chckbxProblems == null) {
-            chckbxProblems = new JCheckBox("/Problems");
+            chckbxProblems = new JCheckBox("/problems");
             chckbxProblems.setSelected(true);
             chckbxProblems.setToolTipText("Enable getting contest problems");
             chckbxProblems.setHorizontalAlignment(SwingConstants.LEFT);
@@ -488,7 +488,7 @@ public class WebServerPane extends JPanePlugin {
 
     private JCheckBox getChckbxLanguages() {
         if (chckbxLanguages == null) {
-            chckbxLanguages = new JCheckBox("/Languages");
+            chckbxLanguages = new JCheckBox("/languages");
             chckbxLanguages.setSelected(true);
             chckbxLanguages.setHorizontalAlignment(SwingConstants.LEFT);
             chckbxLanguages.setToolTipText("Enable getting contest languages");
@@ -498,7 +498,7 @@ public class WebServerPane extends JPanePlugin {
 
     private JCheckBox getChckbxStarttime() {
         if (chckbxStarttime == null) {
-            chckbxStarttime = new JCheckBox("/Starttime");
+            chckbxStarttime = new JCheckBox("/starttime");
             chckbxStarttime.setSelected(true);
         }
         return chckbxStarttime;
@@ -506,7 +506,7 @@ public class WebServerPane extends JPanePlugin {
 
     private JCheckBox getChckbxTeams() {
         if (chckbxTeams == null) {
-            chckbxTeams = new JCheckBox("/Teams");
+            chckbxTeams = new JCheckBox("/teams");
             chckbxTeams.setToolTipText("Enable getting contest teams");
             chckbxTeams.setSelected(true);
             chckbxTeams.setHorizontalAlignment(SwingConstants.LEFT);
