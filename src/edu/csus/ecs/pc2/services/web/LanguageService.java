@@ -15,46 +15,44 @@ import edu.csus.ecs.pc2.core.model.Language;
 @Path("/languages")
 @Produces(MediaType.APPLICATION_JSON)
 public class LanguageService {
-	
-	
-    private IInternalContest contest ;
-    
-    public LanguageService(IInternalContest contest, IInternalController controller){
+
+    private IInternalContest contest;
+
+    public LanguageService(IInternalContest contest, IInternalController controller) {
         super();
         this.contest = contest;
     }
-    
+
     /**
-     * This method returns a String representation of the current contest languages in JSON format.
-     * The returned string is a JSON array with one language description per array element.
+     * This method returns a String representation of the current contest languages in JSON format. The returned string is a JSON array with one language description per array element.
      * 
      * @return a String containing the contest languages in JSON form
      */
-	@GET
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
-	public String getLanguages() {
-		
-        //get the problems from the contest
-        Language [] languages = contest.getLanguages();
-        
-        //map the language descriptions into JSON form
+    public String getLanguages() {
+
+        // get the problems from the contest
+        Language[] languages = contest.getLanguages();
+
+        // map the language descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
-        String jsonLanguages = "{" + "\"languages\"" + ":" + "\"empty\"" + "}" ;
+        String jsonLanguages = "{" + "\"languages\"" + ":" + "\"empty\"" + "}";
         try {
             jsonLanguages = mapper.writeValueAsString(languages);
         } catch (JsonProcessingException e) {
-            //TODO: log exception
+            // TODO: log exception
             // TODO Auto-generated catch block
             e.printStackTrace();
-            //TODO: return HTTP error
+            // TODO: return HTTP error
         }
 
-        //TODO: figure out how to set the Response to "OK" (or whether this is necessary)
-//      return Response.status(Response.Status.OK).build(); 
-        
-        //output the response to the requester (note that this actually returns it to Jersey, 
-        // which forwards it to the caller as the HTTP response).
-        return jsonLanguages ;
+        // TODO: figure out how to set the Response to "OK" (or whether this is necessary)
+        // return Response.status(Response.Status.OK).build();
 
-	}
+        // output the response to the requester (note that this actually returns it to Jersey,
+        // which forwards it to the caller as the HTTP response).
+        return jsonLanguages;
+
+    }
 }
