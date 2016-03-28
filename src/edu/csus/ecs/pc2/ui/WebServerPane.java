@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -41,7 +43,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import sun.security.tools.keytool.CertAndKeyGen;
 import sun.security.x509.CertificateExtensions;
 import sun.security.x509.KeyIdentifier;
 import sun.security.x509.SubjectKeyIdentifierExtension;
@@ -262,14 +263,39 @@ public class WebServerPane extends JPanePlugin {
         char[] password = KEYSTORE_PASSWORD.toCharArray();
         ks.load(null, password);
         try {
-            CertAndKeyGen keyGen = new CertAndKeyGen("RSA", "SHA256WithRSA", null);
-            keyGen.generate(2048);
-            PrivateKey rootPrivateKey = keyGen.getPrivateKey();
+            // taken from https://svn.forgerock.org/opendj/trunk/opends/src/server/org/opends/server/util/Platform.java
+            String certAndKeyGen;
+            // and this is why you are not suppose to use sun classes
+            if (System.getProperty("java.version").matches("^1\\.[67]\\..*")) {
+                certAndKeyGen = "sun.security.x509" + ".CertAndKeyGen";
+            } else {
+                // Java 8 moved the CertAndKeyGen class to sun.security.tools.keytool
+                certAndKeyGen = "sun.security.tools.keytool" + ".CertAndKeyGen";
+            }
+            String X500Name = "sun.security.x509" + ".X500Name";
+            Class<?> certKeyGenClass = Class.forName(certAndKeyGen);
+            Class<?> X500NameClass = Class.forName(X500Name);
+            Constructor<?> certKeyGenCons = certKeyGenClass.getConstructor(String.class,
+                    String.class);
+            Constructor<?> X500NameCons = X500NameClass.getConstructor(String.class);
+            Object keypair = certKeyGenCons.newInstance("RSA",  "SHA256WithRSA");
+            String dn = "CN=pc2 jetty, OU=PC^2, O=PC^2, L=Unknown, ST=Unknown, C=Unknown";
+            Object subject = X500NameCons.newInstance(dn);
+            Method certAndKeyGenGenerate = certKeyGenClass.getMethod(
+                    "generate", int.class);
+            certAndKeyGenGenerate.invoke(keypair, 2048);
+            Method certAndKeyGenPrivateKey = certKeyGenClass.getMethod(
+                    "getPrivateKey");
+            PrivateKey rootPrivateKey = (PrivateKey)certAndKeyGenPrivateKey.invoke(keypair);
+            Method getSelfCertificate = certKeyGenClass.getMethod(
+                    "getSelfCertificate", X500NameClass, long.class);
 
-            // Generate self signed certificate
             X509Certificate[] chain = new X509Certificate[1];
             // create with a length of 1 (non-leap) year
-            chain[0] = keyGen.getSelfCertificate(new X500Name("CN=pc2 jetty, OU=PC^2, O=PC^2, L=Unknown, ST=Unknown, C=Unknown"), (long) 365 * 24 * 3600);
+            long days = (long) 365 * 24 * 3600;
+            // Generate self signed certificate
+            chain[0] = (X509Certificate) getSelfCertificate.invoke(keypair,
+                    subject, days);
 
             Principal issuer = chain[0].getSubjectDN();
             String issuerSigAlg = chain[0].getSigAlgName();
