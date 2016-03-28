@@ -15,6 +15,11 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
+/**
+ * WebService for handling teams
+ * @author ICPC
+ *
+ */
 @Path("/teams")
 @Produces(MediaType.APPLICATION_JSON)
 public class TeamService {

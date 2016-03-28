@@ -12,6 +12,11 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 
+/**
+ * WebService to handle problems
+ * @author ICPC
+ *
+ */
 @Path("/problems")
 @Produces(MediaType.APPLICATION_JSON)
 public class ProblemService {

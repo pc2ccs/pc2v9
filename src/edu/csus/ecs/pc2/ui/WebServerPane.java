@@ -197,10 +197,10 @@ public class WebServerPane extends JPanePlugin {
 
             jettyServer = new Server();
 
-            HttpConfiguration http_config = new HttpConfiguration();
-            http_config.setSecureScheme("https");
-            http_config.setSecurePort(port);
-            http_config.setOutputBufferSize(32768);
+            HttpConfiguration httpConfig = new HttpConfiguration();
+            httpConfig.setSecureScheme("https");
+            httpConfig.setSecurePort(port);
+            httpConfig.setOutputBufferSize(32768);
 
             // set to trustAll
             SslContextFactory sslContextFactory = new SslContextFactory(true);
@@ -212,10 +212,10 @@ public class WebServerPane extends JPanePlugin {
             sslContextFactory.setExcludeProtocols("SSL", "SSLv2", "SSLv2Hello", "SSLv3");
             sslContextFactory.setRenegotiationAllowed(false);
 
-            HttpConfiguration https_config = new HttpConfiguration(http_config);
-            https_config.addCustomizer(new SecureRequestCustomizer());
+            HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
+            httpsConfig.addCustomizer(new SecureRequestCustomizer());
 
-            ServerConnector https = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()), new HttpConnectionFactory(https_config));
+            ServerConnector https = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()), new HttpConnectionFactory(httpsConfig));
             https.setPort(port);
             // do not timeout
             https.setIdleTimeout(0);

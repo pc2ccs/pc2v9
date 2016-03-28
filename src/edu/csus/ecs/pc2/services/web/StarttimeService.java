@@ -12,6 +12,12 @@ import javax.ws.rs.core.MediaType;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
+/**
+ * WebService to handle starttime.
+ * 
+ * @author ICPC
+ *
+ */
 @Path("/starttime")
 @Produces(MediaType.APPLICATION_JSON)
 public class StarttimeService {
@@ -72,7 +78,12 @@ public class StarttimeService {
         } else {
             startTime = startDate.getTime();
         }
-        String stringTime = startTime == 0 ? "\"undefined\"" : new Long(startTime).toString();
+        String stringTime = "";
+        if(startTime == 0) {
+            stringTime = "\"undefined\"";
+        } else {
+            stringTime = new Long(startTime).toString();
+        }
 
         String jsonStartTime = "{" + "\"starttime\"" + ":" + stringTime + "}";
 

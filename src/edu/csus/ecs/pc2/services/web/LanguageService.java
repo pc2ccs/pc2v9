@@ -12,6 +12,11 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 
+/**
+ * WebService to handle languages
+ * @author ICPC
+ *
+ */
 @Path("/languages")
 @Produces(MediaType.APPLICATION_JSON)
 public class LanguageService {

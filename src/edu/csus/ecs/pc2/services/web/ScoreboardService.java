@@ -10,6 +10,11 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.StandingsJSON;
 
+/**
+ * WebService to handle scoreboard
+ * @author ICPC
+ *
+ */
 @Path("/scoreboard")
 @Produces(MediaType.APPLICATION_JSON)
 public class ScoreboardService {
