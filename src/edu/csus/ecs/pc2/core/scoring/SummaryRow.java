@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.core.scoring;
 import java.io.Serializable;
 import java.util.Hashtable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * A single team row of problem info.
  *
@@ -23,6 +25,7 @@ public class SummaryRow implements Serializable {
     /**
      * storage of problemsummaryinfo for a given problem.
      */
+    @JsonProperty
     private Hashtable<Integer, ProblemSummaryInfo> listOfSummaryInfo = new Hashtable<Integer, ProblemSummaryInfo>();
 
     /**
@@ -32,6 +35,7 @@ public class SummaryRow implements Serializable {
      *            which problem
      * @return the ProblemSummaryInfo
      */
+    @JsonProperty
     public final ProblemSummaryInfo get(int problemNumber) {
         return (ProblemSummaryInfo) listOfSummaryInfo.get(new Integer(
                 problemNumber));
