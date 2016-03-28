@@ -29,8 +29,8 @@
 	<classpathentry kind="lib" path="vendor/lib/jetty-servlet-9.2.11.v20150529.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/jetty-util-9.2.11.v20150529.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/validation-api-1.1.0.Final.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jackson-databind-2.5.4.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jackson-core-2.5.4.jar"/>
-	<classpathentry kind="lib" path="C:/Users/John/git/pc2v9/vendor/lib/jackson-annotations-2.5.4.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jackson-databind-2.5.4.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jackson-core-2.5.4.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jackson-annotations-2.5.4.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>
