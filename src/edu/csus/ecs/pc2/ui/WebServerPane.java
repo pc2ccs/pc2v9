@@ -272,15 +272,15 @@ public class WebServerPane extends JPanePlugin {
                 // Java 8 moved the CertAndKeyGen class to sun.security.tools.keytool
                 certAndKeyGen = "sun.security.tools.keytool" + ".CertAndKeyGen";
             }
-            String X500Name = "sun.security.x509" + ".X500Name";
+            String x500Name = "sun.security.x509" + ".X500Name";
             Class<?> certKeyGenClass = Class.forName(certAndKeyGen);
-            Class<?> X500NameClass = Class.forName(X500Name);
+            Class<?> x500NameClass = Class.forName(x500Name);
             Constructor<?> certKeyGenCons = certKeyGenClass.getConstructor(String.class,
                     String.class);
-            Constructor<?> X500NameCons = X500NameClass.getConstructor(String.class);
+            Constructor<?> x500NameCons = x500NameClass.getConstructor(String.class);
             Object keypair = certKeyGenCons.newInstance("RSA",  "SHA256WithRSA");
             String dn = "CN=pc2 jetty, OU=PC^2, O=PC^2, L=Unknown, ST=Unknown, C=Unknown";
-            Object subject = X500NameCons.newInstance(dn);
+            Object subject = x500NameCons.newInstance(dn);
             Method certAndKeyGenGenerate = certKeyGenClass.getMethod(
                     "generate", int.class);
             certAndKeyGenGenerate.invoke(keypair, 2048);
@@ -288,7 +288,7 @@ public class WebServerPane extends JPanePlugin {
                     "getPrivateKey");
             PrivateKey rootPrivateKey = (PrivateKey)certAndKeyGenPrivateKey.invoke(keypair);
             Method getSelfCertificate = certKeyGenClass.getMethod(
-                    "getSelfCertificate", X500NameClass, long.class);
+                    "getSelfCertificate", x500NameClass, long.class);
 
             X509Certificate[] chain = new X509Certificate[1];
             // create with a length of 1 (non-leap) year
