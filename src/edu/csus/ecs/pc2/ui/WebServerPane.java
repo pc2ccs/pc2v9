@@ -31,6 +31,7 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -38,6 +39,7 @@ import edu.csus.ecs.pc2.services.web.LanguageService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
 import edu.csus.ecs.pc2.services.web.ScoreboardService;
 import edu.csus.ecs.pc2.services.web.StarttimeService;
+import edu.csus.ecs.pc2.services.web.TeamService;
 
 import javax.swing.JCheckBox;
 
@@ -77,11 +79,12 @@ public class WebServerPane extends JPanePlugin {
     private Server jettyServer = null ;
 
     private JLabel webServerStatusLabel = null;
-    private JCheckBox chckbxscoreboard;
+    private JCheckBox chckbxScoreboard;
     private JLabel lblEnabledWebServices;
-    private JCheckBox chckbxproblems;
-    private JCheckBox chckbxlanguages;
-    private JCheckBox chckbxstarttime;
+    private JCheckBox chckbxProblems;
+    private JCheckBox chckbxLanguages;
+    private JCheckBox chckbxStarttime;
+    private JCheckBox chckbxTeams;
 
     /**
      * Constructs a new WebServerPane.
@@ -192,7 +195,11 @@ public class WebServerPane extends JPanePlugin {
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
             context.setContextPath("/");
 
+            // adds Jersey ServletContainer with a ResourceConfig customized with enabled REST service classes
+            context.addServlet(new ServletHolder(new ServletContainer(getResourceConfig())), "/*");
+
             jettyServer = new Server();
+            
             HttpConfiguration http_config = new HttpConfiguration();
             http_config.setSecureScheme("https");
             http_config.setSecurePort(port);
@@ -221,12 +228,12 @@ public class WebServerPane extends JPanePlugin {
                 
             jettyServer.setHandler(context);
 
-            ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
-            jerseyServlet.setInitOrder(0);
-
-            // Tells the Jersey Servlet which REST service/classes to load.
-            //  Note that class names must be semi-colon separated in the second String parameter.
-            jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", getServiceClassesList());
+//            ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
+//            jerseyServlet.setInitOrder(0);
+//
+//            // Tells the Jersey Servlet which REST service/classes to load.
+//            //  Note that class names must be semi-colon separated in the second String parameter.
+//            jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", getServiceClassesList());
 
             jettyServer.start();
             
@@ -251,57 +258,43 @@ public class WebServerPane extends JPanePlugin {
         updateGUI();
     }
     
+    
     /**
-     * Returns a String of semicolon-separated class names for the services which should be
-     * registered with Jetty.
-     * @return a String of service class names
+     * This method constructs a Jersey {@link ResourceConfig} containing a Resource (Service class)
+     * for each REST service marked as "enabled" by the user on the WebServerPane GUI.
+     * Each Resource is constructed with the current contest and controller so that it has access to
+     * the contest data.
+     * 
+     * @return a ResourceConfig containing the enabled REST service resources
      */
-    private String getServiceClassesList() {
+    private ResourceConfig getResourceConfig() {
         
-        //the list of service class names
-        String classList = "";
+        //create and (empty) ResourceConfig
+        ResourceConfig resConfig = new ResourceConfig();
         
-        //check the next service
-        if (getChckbxscoreboard().isSelected()) {
-            //need to add it; add a semicolon to the end of the list if the list is not empty
-            if (classList.length()>0) {
-                classList += ";";
-            }
-            //add the service class name to the list
-            classList += ScoreboardService.class.getCanonicalName();
+        //add each of the enabled services to the config:
+        
+        if (getChckbxScoreboard().isSelected()) {
+            resConfig.register(new ScoreboardService(getContest(), getController()));
         }
         
-        //check the next service
-        if (getChckbxproblems().isSelected()) {
-            //need to add it; add a semicolon to the end of the list if the list is not empty
-            if (classList.length()>0) {
-                classList += ";";
-            }
-            //add the service class name to the list
-            classList += ProblemService.class.getCanonicalName();
+        if (getChckbxProblems().isSelected()) {
+            resConfig.register(new ProblemService(getContest(), getController()));
         }
         
-        //check the next service
-        if (getChckbxlanguages().isSelected()) {
-            //need to add it; add a semicolon to the end of the list if the list is not empty
-            if (classList.length()>0) {
-                classList += ";";
-            }
-            //add the service class name to the list
-            classList += LanguageService.class.getCanonicalName();
+        if (getChckbxLanguages().isSelected()) {
+            resConfig.register(new LanguageService(getContest(), getController()));
         }
         
-        //check the next service
-        if (getChckbxstarttime().isSelected()) {
-            //need to add it; add a semicolon to the end of the list if the list is not empty
-            if (classList.length()>0) {
-                classList += ";";
-            }
-            //add the service class name to the list
-            classList += StarttimeService.class.getCanonicalName();
+        if (getChckbxStarttime().isSelected()) {
+            resConfig.register(new StarttimeService(getContest(), getController()));
         }
         
-        return classList;
+        if (getChckbxTeams().isSelected()) {
+            resConfig.register(new TeamService(getContest(), getController()));
+        }
+        
+        return resConfig;
     }
 
     private void showMessage(String string) {
@@ -397,30 +390,36 @@ public class WebServerPane extends JPanePlugin {
             gbc_lblEnabledWebServices.gridx = 0;
             gbc_lblEnabledWebServices.gridy = 2;
             centerPanel.add(getLblEnabledWebServices(), gbc_lblEnabledWebServices);
-            GridBagConstraints gbc_chckbxscoreboard = new GridBagConstraints();
-            gbc_chckbxscoreboard.anchor = GridBagConstraints.WEST;
-            gbc_chckbxscoreboard.insets = new Insets(0, 0, 5, 5);
-            gbc_chckbxscoreboard.gridx = 1;
-            gbc_chckbxscoreboard.gridy = 2;
-            centerPanel.add(getChckbxscoreboard(), gbc_chckbxscoreboard);
-            GridBagConstraints gbc_chckbxstarttime = new GridBagConstraints();
-            gbc_chckbxstarttime.anchor = GridBagConstraints.WEST;
-            gbc_chckbxstarttime.insets = new Insets(0, 0, 5, 0);
-            gbc_chckbxstarttime.gridx = 2;
-            gbc_chckbxstarttime.gridy = 2;
-            centerPanel.add(getChckbxstarttime(), gbc_chckbxstarttime);
-            GridBagConstraints gbc_chckbxproblems = new GridBagConstraints();
-            gbc_chckbxproblems.anchor = GridBagConstraints.WEST;
-            gbc_chckbxproblems.insets = new Insets(0, 0, 5, 5);
-            gbc_chckbxproblems.gridx = 1;
-            gbc_chckbxproblems.gridy = 3;
-            centerPanel.add(getChckbxproblems(), gbc_chckbxproblems);
-            GridBagConstraints gbc_chckbxlanguages = new GridBagConstraints();
-            gbc_chckbxlanguages.anchor = GridBagConstraints.WEST;
-            gbc_chckbxlanguages.insets = new Insets(0, 0, 5, 5);
-            gbc_chckbxlanguages.gridx = 1;
-            gbc_chckbxlanguages.gridy = 4;
-            centerPanel.add(getChckbxlanguages(), gbc_chckbxlanguages);
+            GridBagConstraints gbc_chckbxScoreboard = new GridBagConstraints();
+            gbc_chckbxScoreboard.anchor = GridBagConstraints.WEST;
+            gbc_chckbxScoreboard.insets = new Insets(0, 0, 5, 5);
+            gbc_chckbxScoreboard.gridx = 1;
+            gbc_chckbxScoreboard.gridy = 2;
+            centerPanel.add(getChckbxScoreboard(), gbc_chckbxScoreboard);
+            GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
+            gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
+            gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 0);
+            gbc_chckbxStarttime.gridx = 2;
+            gbc_chckbxStarttime.gridy = 2;
+            centerPanel.add(getChckbxStarttime(), gbc_chckbxStarttime);
+            GridBagConstraints gbc_chckbxProblems = new GridBagConstraints();
+            gbc_chckbxProblems.anchor = GridBagConstraints.WEST;
+            gbc_chckbxProblems.insets = new Insets(0, 0, 5, 5);
+            gbc_chckbxProblems.gridx = 1;
+            gbc_chckbxProblems.gridy = 3;
+            centerPanel.add(getChckbxProblems(), gbc_chckbxProblems);
+            GridBagConstraints gbc_chckbxTeams = new GridBagConstraints();
+            gbc_chckbxTeams.anchor = GridBagConstraints.WEST;
+            gbc_chckbxTeams.insets = new Insets(0, 0, 5, 0);
+            gbc_chckbxTeams.gridx = 2;
+            gbc_chckbxTeams.gridy = 3;
+            centerPanel.add(getChckbxTeams(), gbc_chckbxTeams);
+            GridBagConstraints gbc_chckbxLanguages = new GridBagConstraints();
+            gbc_chckbxLanguages.anchor = GridBagConstraints.WEST;
+            gbc_chckbxLanguages.insets = new Insets(0, 0, 5, 5);
+            gbc_chckbxLanguages.gridx = 1;
+            gbc_chckbxLanguages.gridy = 4;
+            centerPanel.add(getChckbxLanguages(), gbc_chckbxLanguages);
 
         }
         return centerPanel;
@@ -466,20 +465,21 @@ public class WebServerPane extends JPanePlugin {
     private void updateWebServerSettings(boolean serverRunning) {
         // if server is running, do not allow these settings to be changed
         getPortTextField().setEditable(!serverRunning);
-        getChckbxlanguages().setEnabled(!serverRunning);
-        getChckbxproblems().setEnabled(!serverRunning);
-        getChckbxscoreboard().setEnabled(!serverRunning);
-        getChckbxstarttime().setEnabled(!serverRunning);
+        getChckbxLanguages().setEnabled(!serverRunning);
+        getChckbxProblems().setEnabled(!serverRunning);
+        getChckbxScoreboard().setEnabled(!serverRunning);
+        getChckbxStarttime().setEnabled(!serverRunning);
+        getChckbxTeams().setEnabled(!serverRunning);
     }
 
-    private JCheckBox getChckbxscoreboard() {
-        if (chckbxscoreboard == null) {
-        	chckbxscoreboard = new JCheckBox("/Scoreboard");
-        	chckbxscoreboard.setSelected(true);
-        	chckbxscoreboard.setHorizontalAlignment(SwingConstants.LEFT);
-        	chckbxscoreboard.setToolTipText("Enable getting contest scoreboard");
+    private JCheckBox getChckbxScoreboard() {
+        if (chckbxScoreboard == null) {
+        	chckbxScoreboard = new JCheckBox("/Scoreboard");
+        	chckbxScoreboard.setSelected(true);
+        	chckbxScoreboard.setHorizontalAlignment(SwingConstants.LEFT);
+        	chckbxScoreboard.setToolTipText("Enable getting contest scoreboard");
         }
-        return chckbxscoreboard;
+        return chckbxScoreboard;
     }
     private JLabel getLblEnabledWebServices() {
         if (lblEnabledWebServices == null) {
@@ -487,29 +487,38 @@ public class WebServerPane extends JPanePlugin {
         }
         return lblEnabledWebServices;
     }
-    private JCheckBox getChckbxproblems() {
-        if (chckbxproblems == null) {
-        	chckbxproblems = new JCheckBox("/Problems");
-        	chckbxproblems.setSelected(true);
-        	chckbxproblems.setToolTipText("Enable getting contest problems");
-        	chckbxproblems.setHorizontalAlignment(SwingConstants.LEFT);
+    private JCheckBox getChckbxProblems() {
+        if (chckbxProblems == null) {
+        	chckbxProblems = new JCheckBox("/Problems");
+        	chckbxProblems.setSelected(true);
+        	chckbxProblems.setToolTipText("Enable getting contest problems");
+        	chckbxProblems.setHorizontalAlignment(SwingConstants.LEFT);
         }
-        return chckbxproblems;
+        return chckbxProblems;
     }
-    private JCheckBox getChckbxlanguages() {
-        if (chckbxlanguages == null) {
-        	chckbxlanguages = new JCheckBox("/Languages");
-        	chckbxlanguages.setSelected(true);
-        	chckbxlanguages.setHorizontalAlignment(SwingConstants.LEFT);
-        	chckbxlanguages.setToolTipText("Enable getting contest languages");
+    private JCheckBox getChckbxLanguages() {
+        if (chckbxLanguages == null) {
+        	chckbxLanguages = new JCheckBox("/Languages");
+        	chckbxLanguages.setSelected(true);
+        	chckbxLanguages.setHorizontalAlignment(SwingConstants.LEFT);
+        	chckbxLanguages.setToolTipText("Enable getting contest languages");
         }
-        return chckbxlanguages;
+        return chckbxLanguages;
     }
-    private JCheckBox getChckbxstarttime() {
-        if (chckbxstarttime == null) {
-        	chckbxstarttime = new JCheckBox("/Starttime");
-        	chckbxstarttime.setSelected(true);
+    private JCheckBox getChckbxStarttime() {
+        if (chckbxStarttime == null) {
+        	chckbxStarttime = new JCheckBox("/Starttime");
+        	chckbxStarttime.setSelected(true);
         }
-        return chckbxstarttime;
+        return chckbxStarttime;
+    }
+    private JCheckBox getChckbxTeams() {
+        if (chckbxTeams == null) {
+        	chckbxTeams = new JCheckBox("/Teams");
+        	chckbxTeams.setToolTipText("Enable getting contest teams");
+        	chckbxTeams.setSelected(true);
+        	chckbxTeams.setHorizontalAlignment(SwingConstants.LEFT);
+        }
+        return chckbxTeams;
     }
 }
