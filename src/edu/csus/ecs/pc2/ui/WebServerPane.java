@@ -9,9 +9,16 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
+import java.security.PrivateKey;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -34,6 +41,13 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import sun.security.tools.keytool.CertAndKeyGen;
+import sun.security.x509.CertificateExtensions;
+import sun.security.x509.KeyIdentifier;
+import sun.security.x509.SubjectKeyIdentifierExtension;
+import sun.security.x509.X500Name;
+import sun.security.x509.X509CertImpl;
+import sun.security.x509.X509CertInfo;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.services.web.LanguageService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
@@ -87,6 +101,8 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox chckbxStarttime;
 
     private JCheckBox chckbxTeams;
+
+    private String KEYSTORE_PASSWORD = "i don't care";
 
     /**
      * Constructs a new WebServerPane.
@@ -154,8 +170,8 @@ public class WebServerPane extends JPanePlugin {
     }
 
     /**
-     * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty. TODO: need to provide support for
-     * dynamically reconfiguring the registered services.
+     * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty. 
+     * TODO: need to provide support for dynamically reconfiguring the registered services.
      * 
      */
     private void startWebServer() {
@@ -175,18 +191,7 @@ public class WebServerPane extends JPanePlugin {
 
             File keystoreFile = new File("cacerts.pc2");
             if (!keystoreFile.exists()) {
-                KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                char[] password = "i don't care".toCharArray();
-                ks.load(null, password);
-                /**
-                 * TODO: create a self signed cert and add it to the keystore with alias of jetty, replacing command line of keytool -keystore cacert.pc2 -alias jetty -genkey -keyalg RSA -sigalg
-                 * SHA256withRSA something like this will do: CN=pc2 jetty, OU=PC^2, O=PC^2, L=Unknown, ST=Unknown, C=Unknown
-                 */
-
-                // Store away the keystore
-                FileOutputStream fos = new FileOutputStream(keystoreFile);
-                ks.store(fos, password);
-                fos.close();
+                createKeyStoreAndKey(keystoreFile);
             }
 
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -205,8 +210,8 @@ public class WebServerPane extends JPanePlugin {
             // set to trustAll
             SslContextFactory sslContextFactory = new SslContextFactory(true);
             sslContextFactory.setKeyStorePath(keystoreFile.getAbsolutePath());
-            sslContextFactory.setKeyStorePassword("i don't care");
-            sslContextFactory.setKeyManagerPassword("i don't care");
+            sslContextFactory.setKeyStorePassword(KEYSTORE_PASSWORD);
+            sslContextFactory.setKeyManagerPassword(KEYSTORE_PASSWORD);
             // suggestions from http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html
             sslContextFactory.setIncludeCipherSuites("TLS_DHE_RSA.*", "TLS_ECDHE.*");
             sslContextFactory.setExcludeProtocols("SSL", "SSLv2", "SSLv2Hello", "SSLv3");
@@ -250,6 +255,45 @@ public class WebServerPane extends JPanePlugin {
         }
 
         updateGUI();
+    }
+
+    private void createKeyStoreAndKey(File keystoreFile) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, FileNotFoundException {
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] password = KEYSTORE_PASSWORD.toCharArray();
+        ks.load(null, password);
+        try {
+            CertAndKeyGen keyGen = new CertAndKeyGen("RSA", "SHA256WithRSA", null);
+            keyGen.generate(2048);
+            PrivateKey rootPrivateKey = keyGen.getPrivateKey();
+
+            // Generate self signed certificate
+            X509Certificate[] chain = new X509Certificate[1];
+            // create with a length of 1 (non-leap) year
+            chain[0] = keyGen.getSelfCertificate(new X500Name("CN=pc2 jetty, OU=PC^2, O=PC^2, L=Unknown, ST=Unknown, C=Unknown"), (long) 365 * 24 * 3600);
+
+            Principal issuer = chain[0].getSubjectDN();
+            String issuerSigAlg = chain[0].getSigAlgName();
+            byte[] inCertBytes = chain[0].getTBSCertificate();
+            X509CertInfo info = new X509CertInfo(inCertBytes);
+            info.set(X509CertInfo.ISSUER, (X500Name) issuer);
+
+            CertificateExtensions exts = new CertificateExtensions();
+            exts.set(SubjectKeyIdentifierExtension.NAME, new SubjectKeyIdentifierExtension(new KeyIdentifier(chain[0].getPublicKey()).getIdentifier()));
+            info.set(X509CertInfo.EXTENSIONS, exts);
+            
+            X509CertImpl outCert = new X509CertImpl(info);
+            outCert.sign(rootPrivateKey, issuerSigAlg);
+
+            ks.setCertificateEntry("jetty", outCert);
+            ks.setKeyEntry("jetty", rootPrivateKey, KEYSTORE_PASSWORD.toCharArray(), chain);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // Store away the keystore
+        FileOutputStream fos = new FileOutputStream(keystoreFile);
+        ks.store(fos, password);
+        fos.close();
     }
 
     /**
@@ -313,7 +357,8 @@ public class WebServerPane extends JPanePlugin {
     }
 
     /**
-     * Stops the Jetty web server if it is running. Also destroys the web server. TODO: shouldn't really destroy the webserver; just stop it and cache the reference so that it can be quickly
+     * Stops the Jetty web server if it is running. Also destroys the web server. 
+     * TODO: shouldn't really destroy the webserver; just stop it and cache the reference so that it can be quickly
      * restarted. (However, need to consider what happens if the user selects a different set of services to be enabled...)
      */
     protected void stopWebServer() {
