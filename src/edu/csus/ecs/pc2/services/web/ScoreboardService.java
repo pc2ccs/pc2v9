@@ -8,7 +8,7 @@ import javax.ws.rs.core.MediaType;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.exports.ccs.StandingsJSON;
+import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
 
 /**
  * WebService to handle scoreboard
@@ -35,7 +35,7 @@ public class ScoreboardService {
     @Produces(MediaType.APPLICATION_JSON)
     public String getScoreboard() {
 
-        StandingsJSON standings = new StandingsJSON();
+        StandingsJSON2016 standings = new StandingsJSON2016();
 
         String jsonScoreboard = "{" + "\"scoreboard\"" + ":" + "null" + "}";
         try {
