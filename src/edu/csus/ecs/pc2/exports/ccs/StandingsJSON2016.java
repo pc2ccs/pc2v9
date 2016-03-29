@@ -57,9 +57,15 @@ public class StandingsJSON2016 {
 
         StringBuffer buffer = new StringBuffer();
 
+        int rank = 1;
         for (StandingsRecord sr : standingsRecords) {
             
             //start a new JSON element for the current standings record
+            //if it's not the first rank being output, add a comma separator
+            if (rank!=1) {
+                buffer.append(",");
+            }
+            rank++ ;
             buffer.append('{');
             
             ClientId clientId = sr.getClientId();
@@ -89,7 +95,7 @@ public class StandingsJSON2016 {
             //add the 'score' components (num_solved and total_time) to the buffer
             long numSolved = sr.getNumberSolved();
             long totalTime = sr.getPenaltyPoints();
-            buffer.append( "score:{" + pair("num_solved",numSolved) + "," + pair("total_time",totalTime) + "},");
+            buffer.append( "\"score\":{" + pair("num_solved",numSolved) + "," + pair("total_time",totalTime) + "},");
             
             //add the "problems" array to the buffer
             buffer.append("\"problems\":[");
