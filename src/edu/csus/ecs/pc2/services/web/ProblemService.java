@@ -5,15 +5,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.exports.ccs.ProblemsJSON;
 
 /**
  * WebService to handle problems
+ * 
  * @author ICPC
  *
  */
@@ -38,18 +38,20 @@ public class ProblemService {
     public String getProblems() {
 
         // get the problems from the contest
-        Problem[] problems = contest.getProblems();
+        ProblemsJSON problems = new ProblemsJSON();
 
-        // map the problem descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonProblems = "{" + "\"problems\"" + ":" + "\"empty\"" + "}";
+        String jsonProblems = "[]";
         try {
-            jsonProblems = mapper.writeValueAsString(problems);
-        } catch (JsonProcessingException e) {
-            // TODO: log exception
-            // TODO Auto-generated catch block
+            ContestTime contestTime = contest.getContestTime();
+            // do not show the problems if the contest has not
+            // been started
+            if (contestTime.getElapsedMS() > 0) {
+                jsonProblems = problems.createJSON(contest);
+            }
+        } catch (IllegalContestState e) {
+            // TODO: log error
             e.printStackTrace();
-            // TODO: return HTTP error
+            // TODO: return HTTP error response code
         }
 
         // TODO: figure out how to set the Response to "OK" (or whether this is necessary)
@@ -58,7 +60,6 @@ public class ProblemService {
         // output the response to the requester (note that this actually returns it to Jersey,
         // which forwards it to the caller as the HTTP response).
         return jsonProblems;
-
     }
 
 }
