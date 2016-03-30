@@ -61,7 +61,7 @@ public class TeamsJSON {
             int teamNum = account.getClientId().getClientNumber();
             String groupName = "null";
             if (account.getGroupId() != null && groupMap.containsKey(account.getGroupId())) {
-                groupName = groupMap.getOrDefault(account.getGroupId(), null);
+                groupName = groupMap.get(account.getGroupId());
             }
             buffer.append(pair("id", teamNum) + "," + pair("name", account.getTeamName()) + "," + pair("nationality", account.getCountryCode()) + ","
                     + pair("affliliation", account.getLongSchoolName()) + "," + pair("group", groupName));
