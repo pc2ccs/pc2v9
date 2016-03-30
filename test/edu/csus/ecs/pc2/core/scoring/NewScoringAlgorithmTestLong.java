@@ -911,7 +911,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
     }
 
     /**
-     * Test whether SA respects send to team
+     * Test whether SA respects send to team, it should _not_!
      */
     public void testSendToTeams() {
 
@@ -923,21 +923,19 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
         // Fifth Sort = clientId (low to high)
 
         // RunID TeamID Prob Time Result
-
         String[] runsData = { "5,5,A,12,No", "6,5,A,12,Yes", // t5 solves A, 32 pts = 20 + 12
 
-                "7,6,A,12,No,Yes", "8,6,A,12,Yes,No", // t6 does not solve, 0 solve, 0 pts
+                "7,6,A,12,No,Yes", "8,6,A,13,Yes,No", // t6 33 pts
 
-                "15,5,B,21,No", "16,5,B,22,Yes,No", // t5 does solve B, but not sent to team/used 0 pts 0 solved
-
-                "25,6,B,21,No,No", "26,6,B,22,Yes,Yes", // t6 solves B, 22 pts because No at 21 is NOT counted.
-        };
+                "15,5,B,21,No", "16,5,B,22,Yes,No", // t5  42 pts
+                "25,6,B,21,No,No", "26,6,B,23,Yes,Yes", // t6 solves B, 43 pts
+                };
 
         // Rank TeamId Solved Penalty
 
         String[] rankData = {
         // rank, team, solved, pts
-                "1,team6,1,22", "2,team5,1,32", "3,team1,0,0", "3,team2,0,0", "3,team3,0,0", "3,team4,0,0", };
+                "1,team5,2,74", "2,team6,2,76", "3,team1,0,0", "3,team2,0,0", "3,team3,0,0", "3,team4,0,0", };
 
         scoreboardTest(6, runsData, rankData, true);
     }
