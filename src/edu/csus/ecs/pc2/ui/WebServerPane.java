@@ -103,7 +103,7 @@ public class WebServerPane extends JPanePlugin {
 
     private JCheckBox chckbxTeams;
 
-    private String KEYSTORE_PASSWORD = "i don't care";
+    private String keystorePassword = "i don't care";
 
     /**
      * Constructs a new WebServerPane.
@@ -211,8 +211,8 @@ public class WebServerPane extends JPanePlugin {
             // set to trustAll
             SslContextFactory sslContextFactory = new SslContextFactory(true);
             sslContextFactory.setKeyStorePath(keystoreFile.getAbsolutePath());
-            sslContextFactory.setKeyStorePassword(KEYSTORE_PASSWORD);
-            sslContextFactory.setKeyManagerPassword(KEYSTORE_PASSWORD);
+            sslContextFactory.setKeyStorePassword(keystorePassword);
+            sslContextFactory.setKeyManagerPassword(keystorePassword);
             // suggestions from http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html
             sslContextFactory.setIncludeCipherSuites("TLS_DHE_RSA.*", "TLS_ECDHE.*");
             sslContextFactory.setExcludeProtocols("SSL", "SSLv2", "SSLv2Hello", "SSLv3");
@@ -260,7 +260,7 @@ public class WebServerPane extends JPanePlugin {
 
     private void createKeyStoreAndKey(File keystoreFile) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, FileNotFoundException {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        char[] password = KEYSTORE_PASSWORD.toCharArray();
+        char[] password = keystorePassword.toCharArray();
         ks.load(null, password);
         try {
             // taken from https://svn.forgerock.org/opendj/trunk/opends/src/server/org/opends/server/util/Platform.java
@@ -311,7 +311,7 @@ public class WebServerPane extends JPanePlugin {
             outCert.sign(rootPrivateKey, issuerSigAlg);
 
             ks.setCertificateEntry("jetty", outCert);
-            ks.setKeyEntry("jetty", rootPrivateKey, KEYSTORE_PASSWORD.toCharArray(), chain);
+            ks.setKeyEntry("jetty", rootPrivateKey, keystorePassword.toCharArray(), chain);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
