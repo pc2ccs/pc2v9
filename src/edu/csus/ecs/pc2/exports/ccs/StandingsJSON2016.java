@@ -135,7 +135,10 @@ public class StandingsJSON2016 {
                     buffer.append(pair("num_pending",numPending) + ",");
                     
                     //add the field indicating whether the problem has been solved
-                    String isSolved = summaryInfo.isSolved() ? "true" : "false";
+                    String isSolved = "false";
+                    if (summaryInfo.isSolved()) {
+                        isSolved = "true";
+                    }
                     buffer.append("\"solved\":" + isSolved);
                     
                     //if the problem was solved, add the fields showing solution time and whether the solution was the first-to-solve
@@ -143,7 +146,10 @@ public class StandingsJSON2016 {
                         long solutionTime = summaryInfo.getSolutionTime();
                         buffer.append("," + pair("time",solutionTime));
                         Problem prob = contest.getProblem(summaryInfo.getProblemId());
-                        String fts = runStatistics.isFirstToSolve(clientId, prob) ? "true" : "false";
+                        String fts = "false";
+                        if (runStatistics.isFirstToSolve(clientId, prob)) {
+                            fts = "true";
+                        }
                         buffer.append("," + "\"first_to_solve\":" + fts);
                     }
                     
