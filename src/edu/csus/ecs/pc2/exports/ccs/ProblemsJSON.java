@@ -15,10 +15,9 @@ import edu.csus.ecs.pc2.core.model.Problem;
 public class ProblemsJSON {
 
     /**
-     * Returns a JSON string describing the current contest standings in the format defined by the 2016 CLI JSON Scoreboard.
+     * Returns a JSON string describing the current contest problems in the format defined by the 2016 CLI JSON Scoreboard.
      * 
-     * @param contest
-     *            - the current contest
+     * @param contest - the current contest
      * @return a JSON string giving contest problems in 2016 format
      * @throws IllegalContestState
      */

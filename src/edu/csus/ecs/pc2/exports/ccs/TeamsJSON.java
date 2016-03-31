@@ -21,11 +21,10 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 public class TeamsJSON {
 
     /**
-     * Returns a JSON string describing the current contest standings in the format defined by the 2016 CLI JSON Scoreboard.
+     * Returns a JSON string listing the current contest teams in the format defined by the 2016 CLI JSON Scoreboard.
      * 
-     * @param contest
-     *            - the current contest
-     * @return a JSON string giving contest standings in 2016 format
+     * @param contest - the current contest
+     * @return a JSON string giving contest teams in 2016 format
      * @throws IllegalContestState
      */
     public String createJSON(IInternalContest contest) throws IllegalContestState {
