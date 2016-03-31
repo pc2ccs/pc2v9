@@ -24,13 +24,13 @@ fi
 HEAPPARAM=$JAVA64BIT_HEAPSIZE
 JAVA32=0
 # if we are not running a 64bit java reduce to 1.6G
-java -d64 -version |& grep -q "Error" && JAVA32=1
+java -d64 -version 2>&1 | grep -q "Error" && JAVA32=1
 # found a 32bit java
 if [ $JAVA32 == "1" ]; then
 # reduce the heap size
 HEAPPARAM=$JAVA32BIT_HEAPSIZE
 # now check the OS, checking for 64 bit
-uname -m |& grep -q "x86_64" && clear && echo WARNING: We detected a 32 bit java running on a 64 bit OS. && echo && echo We recommend that you run PC^2 Server using a 64 bit version of Java to allow && echo for the best results. && echo
+uname -m 2>&1 | grep -q "x86_64" && clear && echo WARNING: We detected a 32 bit java running on a 64 bit OS. && echo && echo We recommend that you run PC^2 Server using a 64 bit version of Java to allow && echo for the best results. && echo
 echo Note: We have set the Java Heap size to $HEAPPARAM for your 32-bit Java system,
 echo but this may be too small to run the PC^2 Server.
 echo
