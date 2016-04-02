@@ -1,7 +1,9 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,8 +12,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author pc2@ecs.csus.edu
  * @version $Id$
- *
- *
  */
 
 // $HeadURL$
@@ -37,8 +37,7 @@ public class SummaryRow implements Serializable {
      */
     @JsonProperty
     public final ProblemSummaryInfo get(int problemNumber) {
-        return (ProblemSummaryInfo) listOfSummaryInfo.get(new Integer(
-                problemNumber));
+        return (ProblemSummaryInfo) listOfSummaryInfo.get(new Integer(problemNumber));
     }
 
     /**
@@ -49,9 +48,19 @@ public class SummaryRow implements Serializable {
      * @param problemSummaryInfo
      *            info for given problem
      */
-    public final void put(int problemNumber,
-            ProblemSummaryInfo problemSummaryInfo) {
+    public final void put(int problemNumber, ProblemSummaryInfo problemSummaryInfo) {
         listOfSummaryInfo.put(new Integer(problemNumber), problemSummaryInfo);
     }
 
+    /**
+     * List of sorted keys to fetch ProblemSummaryInfo.
+     * 
+     * @return
+     */
+    public Integer[] getSortedKeys() {
+        Set<Integer> keySet = listOfSummaryInfo.keySet();
+        Integer[] keys = (Integer[]) keySet.toArray(new Integer[keySet.size()]);
+        Arrays.sort(keys);
+        return keys;
+    }
 }

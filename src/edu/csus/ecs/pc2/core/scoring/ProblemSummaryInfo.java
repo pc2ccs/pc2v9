@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.Serializable;
+
 import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
@@ -27,7 +28,11 @@ public class ProblemSummaryInfo implements Serializable {
     private int penaltyPoints = 0;
 
     private boolean unJudgedRuns = false;
-    
+
+    private int pendingRunCount = 0;
+
+    private int judgedRunCount = 0;
+
     private ElementId problemId = null;
 
     /**
@@ -111,6 +116,22 @@ public class ProblemSummaryInfo implements Serializable {
 
     public void setUnJudgedRuns(boolean unJudgedRuns) {
         this.unJudgedRuns = unJudgedRuns;
+    }
+
+    public void setPendingRunCount(int pendingRunCount) {
+        this.pendingRunCount = pendingRunCount;
+    }
+
+    public void setJudgedRunCount(int judgedRunCount) {
+        this.judgedRunCount = judgedRunCount;
+    }
+
+    public int getPendingRunCount() {
+        return pendingRunCount;
+    }
+
+    public int getJudgedRunCount() {
+        return judgedRunCount;
     }
 
 }
