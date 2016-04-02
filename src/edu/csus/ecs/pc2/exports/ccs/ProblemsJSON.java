@@ -15,10 +15,9 @@ import edu.csus.ecs.pc2.core.model.Problem;
 public class ProblemsJSON {
 
     /**
-     * Returns a JSON string describing the current contest standings in the format defined by the 2016 CLI JSON Scoreboard.
+     * Returns a JSON string describing the current contest problems in the format defined by the 2016 CLI JSON Scoreboard.
      * 
-     * @param contest
-     *            - the current contest
+     * @param contest - the current contest
      * @return a JSON string giving contest problems in 2016 format
      * @throws IllegalContestState
      */
@@ -42,12 +41,35 @@ public class ProblemsJSON {
             }
             // start problem entry
             buffer.append('{');
+            
+            //contruct the JSON data for the current problem, using the format defined in the 2106 JSON Scoreboard spec, which is as follows:
             /*
              * {"id":1,"label":"A","short_name":"asteroids","name":"Asteroid Rangers","rgb":"#00f","color":"blue"}
              */
-            buffer.append(pair("id", rowCount) + "," + pair("label", problem.getLetter()) + "," + pair("short_name", problem.getShortName()) + "," + pair("name", problem.getDisplayName()) + ","
-                    + pair("rgb", problem.getColorRGB()) + "," + pair("color", problem.getColorName()));
-            // close the entry for the current problem entry
+            String problemLetter = problem.getLetter();
+            if (problemLetter==null || problemLetter.trim().equals("")) {
+                problemLetter = "null";
+            }
+            String problemShortName = problem.getShortName();
+            if (problemShortName==null || problemShortName.trim().equals("")) {
+                problemShortName = "null";
+            }
+            String problemName = problem.getDisplayName();
+            if (problemName==null || problemName.trim().equals("")) {
+                problemName = "null";
+            }
+            String problemRGB = problem.getColorRGB();
+            if (problemRGB==null || problemRGB.trim().equals("")) {
+                problemRGB = "null";
+            }
+            String problemColorName = problem.getColorName();
+            if (problemColorName==null || problemColorName.trim().equals("")) {
+                problemColorName = "null";
+            }
+            //add the current problem data to the output buffer
+            buffer.append(pair("id", rowCount) + "," + pair("label", problemLetter) + "," + pair("short_name", problemShortName) + "," 
+                        + pair("name", problemName) + "," + pair("rgb", problemRGB) + "," + pair("color", problemColorName));
+            // close the entry for the current problem
             buffer.append('}');
             rowCount++;
         }

@@ -21,11 +21,10 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 public class TeamsJSON {
 
     /**
-     * Returns a JSON string describing the current contest standings in the format defined by the 2016 CLI JSON Scoreboard.
+     * Returns a JSON string listing the current contest teams in the format defined by the 2016 CLI JSON Scoreboard.
      * 
-     * @param contest
-     *            - the current contest
-     * @return a JSON string giving contest standings in 2016 format
+     * @param contest - the current contest
+     * @return a JSON string giving contest teams in 2016 format
      * @throws IllegalContestState
      */
     public String createJSON(IInternalContest contest) throws IllegalContestState {
@@ -54,17 +53,39 @@ public class TeamsJSON {
                 buffer.append(',');
             }
             buffer.append('{');
+            
+            //build the team data entry for the current team, using the format defined in the 2016 JSON Scoreboard spec which is as follows:
             /*
              * [{"id":42,"name":"Shanghai Tigers","nationality":"CHN","affiliation":"Shanghai Jiao Tong University","group":"Asia"},
              * {"id":11,"name":"CMU1","nationality":"USA","affiliation":"Carnegie Mellon University","group":"North America"}, ... ]
              */
+            //get team number
             int teamNum = account.getClientId().getClientNumber();
+            
+            //get team name, force to "null" if undefined
+            String teamName = account.getTeamName();
+            if (teamName==null || teamName.trim().equals("")) {
+                teamName = "null";
+            }
+            //get country code, force to "null" if undefined
+            String countryCode = account.getCountryCode();
+            if (countryCode==null || countryCode.trim().equals("")) {
+                countryCode = "null";
+            }
+            //get "affiliation" (school); force to "null" if undefined
+            String schoolName = account.getLongSchoolName();
+            if (schoolName==null || schoolName.trim().equals("")) {
+                schoolName = "null";
+            }
+            //get group name, forcing to "null" if undefined
             String groupName = "null";
             if (account.getGroupId() != null && groupMap.containsKey(account.getGroupId())) {
                 groupName = groupMap.get(account.getGroupId());
             }
-            buffer.append(pair("id", teamNum) + "," + pair("name", account.getTeamName()) + "," + pair("nationality", account.getCountryCode()) + ","
-                    + pair("affliliation", account.getLongSchoolName()) + "," + pair("group", groupName));
+            //add the above team data to the output buffer
+            buffer.append(pair("id", teamNum) + "," + pair("name", teamName) + "," + pair("nationality", countryCode) + ","
+                    + pair("affliliation", schoolName) + "," + pair("group", groupName));
+            
             // close the entry for the current team entry
             buffer.append('}');
             rowCount++;

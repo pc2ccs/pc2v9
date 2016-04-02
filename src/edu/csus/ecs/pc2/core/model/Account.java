@@ -374,6 +374,10 @@ public class Account implements IElementObject {
      * Team name, ex. Hornets.
      */
     public String getTeamName() {
-        return teamName;
+        if (teamName==null || teamName.trim().equals("")) {
+            return getDisplayName();
+        } else {
+            return teamName;
+        }
     }
 }
