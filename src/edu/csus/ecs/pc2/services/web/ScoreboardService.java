@@ -20,10 +20,12 @@ import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
 public class ScoreboardService {
 
     private IInternalContest contest;
+    private IInternalController controller;
 
     public ScoreboardService(IInternalContest contest, IInternalController controller) {
         super();
         this.contest = contest;
+        this.controller = controller;
     }
 
     /**
@@ -39,9 +41,9 @@ public class ScoreboardService {
 
         String jsonScoreboard = "{" + "\"scoreboard\"" + ":" + "null" + "}";
         try {
-            jsonScoreboard = standings.createJSON(contest);
+            jsonScoreboard = standings.createJSON(contest,controller);
         } catch (IllegalContestState e) {
-            // TODO: log error
+            controller.getLog().warning("ScoreboardService: IllegalState exception creating JSON scoreboard: " + e);
             e.printStackTrace();
             // TODO: return HTTP error response code
         }

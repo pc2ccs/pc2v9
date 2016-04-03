@@ -3,12 +3,12 @@ package edu.csus.ecs.pc2.exports.ccs;
 import java.util.List;
 import java.util.Properties;
 
-import org.eclipse.jetty.util.log.Log;
-
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
@@ -28,12 +28,29 @@ public class StandingsJSON2016 {
 
     /**
      * Returns a JSON string describing the current contest standings in the format defined by the 2016 CLI JSON Scoreboard.
+     * The format follows this JSON example, from the CLI Wiki JSON Scoreboard page:
+     * 
+     * <pre>
+     *  [ {
+     *     "rank":1,"team":42,"score":{"num_solved":3,"total_time":340},
+     *     "problems":[
+     *       {"label":"A","num_judged":3,"num_pending":1,"solved":false},
+     *       {"label":"B","num_judged":1,"num_pending":0,"solved":true,"time":20,"first_to_solve":true},
+     *       {"label":"C","num_judged":2,"num_pending":0,"solved":true,"time":55,"first_to_solve":false},
+     *       {"label":"D","num_judged":0,"num_pending":0,"solved":false},
+     *       {"label":"E","num_judged":3,"num_pending":0,"solved":true,"time":205,"first_to_solve":false}
+     *      ]
+     *    },
+     *    ...
+     *  ]
+     * </pre>
      * 
      * @param contest - the current contest
+     * @param controller - the current contest controller
      * @return a JSON string giving contest standings in 2016 format
      * @throws IllegalContestState
      */
-    public String createJSON(IInternalContest contest) throws IllegalContestState {
+    public String createJSON(IInternalContest contest, IInternalController controller) throws IllegalContestState {
 
         if (contest == null || contest.getRuns().length == 0) {
             return "[]";
@@ -48,9 +65,6 @@ public class StandingsJSON2016 {
             }
         }
         
-        System.out.println("Debug: Scoring Properties:");
-        System.out.println(properties);
-
         StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
 
         RunStatistics runStatistics = new RunStatistics(contest);
@@ -72,24 +86,7 @@ public class StandingsJSON2016 {
             Account account = contest.getAccount(clientId);
             int teamNum = account.getClientId().getClientNumber();
 
-            // OLD FORM:  {"id":"<Rank>","name":"<University_name>","group":"<Group_name>"
-            // 2016 Form: an array of elements, each of the form
-            //            {
-            //             "rank":<intRank>,
-            //             "team":<intTeamNumber>,
-            //             "score":{
-            //                "num_solved":<intSolved>,"total_time":intTime
-            //                },
-            //             "problems":[
-            //                 {"label":"<probLabel>","num_judged":int,"num_pending":int,"solved":boolean,"time":int,"first_to_solve:boolean},
-            //                 ...
-            //              ]
-            //            }
-            //               
-
             //add the rank and team number to the buffer
-            System.out.println ("StandingsJSON2016: got StandingRecord:");
-            System.out.println (sr);
             buffer.append( pair("rank", sr.getRankNumber()) + "," + pair("team", teamNum) + "," );
 
             //add the 'score' components (num_solved and total_time) to the buffer
@@ -116,22 +113,33 @@ public class StandingsJSON2016 {
                     buffer.append("{");
 
                     // add the problem label (letter) to the buffer
-                    buffer.append(pair("label", contest.getProblem(summaryInfo.getProblemId()).getLetter()) + ",");
+                    ElementId probID = summaryInfo.getProblemId();
+                    String letter = contest.getProblem(probID).getLetter();
+                    buffer.append(pair("label", letter) + ",");
+
+                    //get data on submitted runs
+                    int numSubmitted = summaryInfo.getNumberSubmitted();
+                    int numPending = summaryInfo.getPendingRunCount();
+                    int numJudged = summaryInfo.getJudgedRunCount();
+                    
+                    System.out.println ("StandingsJSON2016: " 
+                            + "Team: "+ teamNum + "  problem id: " + probID + "  problem letter: '" + letter + "'" 
+                            + "  numSubmitted: " + numSubmitted
+                            + "  numPending: " + numPending 
+                            + "  numJudged: " + numJudged);
+                    
+                    //verify data makes sense
+                    if ((numPending+numJudged) != numSubmitted) {
+                        System.err.println ("StandingsJSON2016: mismatch: numPendingRuns+numJudgedRuns!=numSubmittedRuns ("
+                                + "(" + numPending + "+" + numJudged + ")!=" + numSubmitted + ")");
+                        controller.getLog().warning("StandingsJSON2016: mismatch: numPendingRuns+numJudgedRuns!=numSubmittedRuns ("
+                                + "(" + numPending + "+" + numJudged + ")!=" + numSubmitted + ")");
+                    }
 
                     // add the number of judging-completed runs to the buffer
-                    int numSubmitted = summaryInfo.getNumberSubmitted();
-
-                    //FIXME: ********************
-                    // TODO: this needs to be fixed!! numSubmitted is NOT NECESSARILY equal to numJudged -- there could be pending runs
-                    // either in the queue or due to a scoreboard freeze!!!
-                    int numJudged = numSubmitted;
-
                     buffer.append(pair("num_judged", numJudged) + ",");
                     
-                    //FIXME: ********************
-                    //TODO: this needs to be fixed!! numPending needs to be explicitly determined!!! See above comment!!!!
                     //add the number of pending runs to the buffer
-                    int numPending = 0;
                     buffer.append(pair("num_pending",numPending) + ",");
                     
                     //add the field indicating whether the problem has been solved
@@ -157,7 +165,7 @@ public class StandingsJSON2016 {
                     buffer.append("}");
 
                 } else {
-                    Log.getLog().info("StandingsJSON2016: missing problem summary info for problem " + problemIndex);
+                    controller.getLog().info("StandingsJSON2016: missing problem summary info for problem " + problemIndex);
                 }
             }
             //close the "problems" array

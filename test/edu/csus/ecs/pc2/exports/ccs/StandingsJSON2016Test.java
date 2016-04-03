@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -32,6 +33,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
     public void test12Runs() throws Exception {
 
         InternalContest contest = new InternalContest();
+        InternalController controller = new InternalController(contest);
 
         int numTeams = 22;
         int numProblems = 5;
@@ -50,7 +52,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         }
 
         StandingsJSON2016 standingsJSON2016 = new StandingsJSON2016();
-        String json = standingsJSON2016.createJSON(contest);
+        String json = standingsJSON2016.createJSON(contest,controller);
         // System.out.println("JSON="+json);
 
         assertEquals("Expecting JSON length ", 8250, json.length());
@@ -111,6 +113,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
     public void test90Runs() throws Exception {
 
         InternalContest contest = new InternalContest();
+        InternalController controller = new InternalController(contest);
 
         int numTeams = 22;
         int numProblems = 5;
@@ -154,7 +157,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         }
 
         StandingsJSON2016 standingsJSON2016 = new StandingsJSON2016();
-        String json = standingsJSON2016.createJSON(contest);
+        String json = standingsJSON2016.createJSON(contest,controller);
 
         // System.out.println("JSON="+json);
 
