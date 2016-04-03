@@ -45,6 +45,8 @@ public class ProblemTest extends TestCase {
         p2.setShowCompareWindow(true);
         p2.setTimeOutInSeconds(120);
 
+        p2.setLetter("F");
+
         p2.setSiteNumber(4);
 
         return p2;
@@ -216,7 +218,7 @@ public class ProblemTest extends TestCase {
         Problem p1 = getProblemAnew();
 
         String[] badPathNames = { //
-                File.separator + "temp", //
+        File.separator + "temp", //
                 "C:temp", //
                 "/tmp/name", //
                 "\\tmp\\name", //
@@ -234,7 +236,7 @@ public class ProblemTest extends TestCase {
         Problem p1 = getProblemAnew();
 
         String[] dataFile = { //
-                "", //
+        "", //
                 "A", //
                 "_", //
                 "()!@#$%^&{}|;',.?", //
@@ -245,17 +247,17 @@ public class ProblemTest extends TestCase {
 
         for (String name : dataFile) {
             p1.setShortName(name);
-            assertTrue ("Expecting good problem short name '"+name+"'", p1.isValidShortName());
+            assertTrue("Expecting good problem short name '" + name + "'", p1.isValidShortName());
         }
     }
-    
+
     public void testDefaultTimeout() throws Exception {
-        
+
         Problem problem = new Problem("Foo");
-        
-        assertEquals ("Time limit", Problem.DEFAULT_TIMEOUT_SECONDS, problem.getTimeOutInSeconds());
-        assertEquals ("Time limit", 30, problem.getTimeOutInSeconds());
-        
+
+        assertEquals("Time limit", Problem.DEFAULT_TIMEOUT_SECONDS, problem.getTimeOutInSeconds());
+        assertEquals("Time limit", 30, problem.getTimeOutInSeconds());
+
     }
 
 }

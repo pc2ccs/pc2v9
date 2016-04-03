@@ -52,16 +52,16 @@ import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 
 // $HeadURL$
 public final class Utilities {
-    
+
     private static boolean debugMode = false;
+
     /**
-     * LETTERS is a lookup always 1-26
-     * String.substring starts at 0, so letters begin at 1
+     * LETTERS is a lookup always 1-26 String.substring starts at 0, so letters begin at 1
      */
-    private static final String LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
-    
+    private static final String LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
     public static final String DATE_TIME_FORMAT_STRING = "yyyyddMMhhmmss.SSS";
-    
+
     /**
      * CCS directory where data files are stored (under problem short name).
      * 
@@ -71,16 +71,16 @@ public final class Utilities {
     public static final String SECRET_DATA_DIR = "data" + File.separator + "secret";
 
     private static SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
-    
+
     /**
      * File Types.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
-    public enum  DataFileType {
+    public enum DataFileType {
         /**
          * Judge's input/test data file.
          */
@@ -92,24 +92,23 @@ public final class Utilities {
     }
 
     /**
-     * Constructor is private as this is a utility class which
-     * should not be extended or invoked.
+     * Constructor is private as this is a utility class which should not be extended or invoked.
      */
     private Utilities() {
         super();
     }
-    
-    /**
-     * Return CCS path for input data and answer file names. 
-     */
-    public static String getSecretDataPath(String baseCDPPath, String problemShortName){
-        return baseCDPPath + File.separator + problemShortName + File.separator + SECRET_DATA_DIR;
-    }
-    
+
     /**
      * Return CCS path for input data and answer file names.
      */
-    public static String getSecretDataPath(String baseCDPPath, Problem problem){
+    public static String getSecretDataPath(String baseCDPPath, String problemShortName) {
+        return baseCDPPath + File.separator + problemShortName + File.separator + SECRET_DATA_DIR;
+    }
+
+    /**
+     * Return CCS path for input data and answer file names.
+     */
+    public static String getSecretDataPath(String baseCDPPath, Problem problem) {
         return getSecretDataPath(baseCDPPath, problem.getShortName());
     }
 
@@ -127,8 +126,7 @@ public final class Utilities {
         dir = new File(dirName);
         if (!dir.exists() && !dir.mkdir()) {
             // TODO show user that couldn't create this directory
-            System.out.println("insureDir Directory " + dir.getName()
-                    + " could not be created.");
+            System.out.println("insureDir Directory " + dir.getName() + " could not be created.");
         }
 
         return dir.isDirectory();
@@ -142,15 +140,15 @@ public final class Utilities {
      * @throws ClassNotFoundException
      * @throws IOException
      */
-//    public static Object readObjectFromFile(String filename)
-//            throws IOException, ClassNotFoundException {
-//        
-//        try {
-//            return FileSecurity.readSealedFile(filename);
-//        } catch (Exception e) {
-//            throw new IOException(e.getMessage());
-//        }
-//    }
+    // public static Object readObjectFromFile(String filename)
+    // throws IOException, ClassNotFoundException {
+    //
+    // try {
+    // return FileSecurity.readSealedFile(filename);
+    // } catch (Exception e) {
+    // throw new IOException(e.getMessage());
+    // }
+    // }
 
     /**
      *
@@ -159,15 +157,15 @@ public final class Utilities {
      * @return true, otherwise throws an exception
      * @throws IOException
      */
-//    public static boolean writeObjectToFile(String filename,
-//            Serializable serializable) throws IOException {
-//        try {
-//            FileSecurity.writeSealedFile(filename, serializable);
-//        } catch (Exception e) {
-//            throw new IOException(e.getMessage());
-//        }
-//        return true;
-//    }
+    // public static boolean writeObjectToFile(String filename,
+    // Serializable serializable) throws IOException {
+    // try {
+    // FileSecurity.writeSealedFile(filename, serializable);
+    // } catch (Exception e) {
+    // throw new IOException(e.getMessage());
+    // }
+    // return true;
+    // }
 
     /**
      *
@@ -179,7 +177,7 @@ public final class Utilities {
         File file = new File(filename);
         return file.isFile();
     }
-    
+
     public static boolean isDirThere(String filename) {
         File file = new File(filename);
         return file.isDirectory();
@@ -194,7 +192,7 @@ public final class Utilities {
      */
     public static boolean isEquals(char[] oldBuffer, char[] newBuffer) {
         if (oldBuffer == null) {
-            return(newBuffer == null);
+            return (newBuffer == null);
         } else if (newBuffer == null) {
             // oldBuffer not null, but new buffer is
             return false;
@@ -210,7 +208,7 @@ public final class Utilities {
         }
         return true;
     }
-    
+
     /**
      * Returns lines from file.
      * 
@@ -255,6 +253,7 @@ public final class Utilities {
 
     /**
      * Get Current Working Directory.
+     * 
      * @return current working directory.
      */
     public static String getCurrentDirectory() {
@@ -267,7 +266,7 @@ public final class Utilities {
             return ".";
         }
     }
-    
+
     /**
      * @return the current dateTime in a local-sensitive manner in the full date/long time style
      */
@@ -276,9 +275,9 @@ public final class Utilities {
         Date today = new Date();
         DateFormat dateFormatter;
         dateFormatter = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.LONG, currentLocale);
-        return(dateFormatter.format(today));
+        return (dateFormatter.format(today));
     }
-    
+
     /**
      * @param dateStyle
      * @param timeStyle
@@ -289,12 +288,11 @@ public final class Utilities {
         Date today = new Date();
         DateFormat dateFormatter;
         dateFormatter = DateFormat.getDateTimeInstance(dateStyle, timeStyle, currentLocale);
-        return(dateFormatter.format(today));
+        return (dateFormatter.format(today));
     }
-    
+
     /**
-     * Returns a date-time String as defined by RFC 2822 section 3.3
-     * Useful for mail messages.
+     * Returns a date-time String as defined by RFC 2822 section 3.3 Useful for mail messages.
      * 
      * @return the date in rfc2822 format
      */
@@ -302,36 +300,37 @@ public final class Utilities {
         Calendar calendar = new GregorianCalendar();
         // per rfc 2822
         // date-time = [ day-of-week "," ] date time CFWS
-        //date-time       =       [ day-of-week "," ] date FWS time [CFWS]
-        //day-of-week     =       ([FWS] day-name) / obs-day-of-week
-        //day-name        =       "Mon" / "Tue" / "Wed" / "Thu" /
-        //                        "Fri" / "Sat" / "Sun"
-        //date            =       day month year
-        //year            =       4*DIGIT / obs-year
-        //month           =       (FWS month-name FWS) / obs-month
-        //month-name      =       "Jan" / "Feb" / "Mar" / "Apr" /
-        //                        "May" / "Jun" / "Jul" / "Aug" /
-        //                        "Sep" / "Oct" / "Nov" / "Dec"
-        //day             =       ([FWS] 1*2DIGIT) / obs-day
-        //time            =       time-of-day FWS zone
-        //time-of-day     =       hour ":" minute [ ":" second ]
-        //hour            =       2DIGIT / obs-hour
-        //minute          =       2DIGIT / obs-minute
-        //second          =       2DIGIT / obs-second
-        //zone            =       (( "+" / "-" ) 4DIGIT) / obs-zone
+        // date-time = [ day-of-week "," ] date FWS time [CFWS]
+        // day-of-week = ([FWS] day-name) / obs-day-of-week
+        // day-name = "Mon" / "Tue" / "Wed" / "Thu" /
+        // "Fri" / "Sat" / "Sun"
+        // date = day month year
+        // year = 4*DIGIT / obs-year
+        // month = (FWS month-name FWS) / obs-month
+        // month-name = "Jan" / "Feb" / "Mar" / "Apr" /
+        // "May" / "Jun" / "Jul" / "Aug" /
+        // "Sep" / "Oct" / "Nov" / "Dec"
+        // day = ([FWS] 1*2DIGIT) / obs-day
+        // time = time-of-day FWS zone
+        // time-of-day = hour ":" minute [ ":" second ]
+        // hour = 2DIGIT / obs-hour
+        // minute = 2DIGIT / obs-minute
+        // second = 2DIGIT / obs-second
+        // zone = (( "+" / "-" ) 4DIGIT) / obs-zone
 
         // Formatter Date/Time Conversions
-        // 'a '   Locale-specific short name of the day of the week, e.g. "Sun", "Mon"
-        // 'e'    Day of month, formatted as two digits, i.e. 1 - 31.
-        // 'b'    Locale-specific abbreviated month name, e.g. "Jan", "Feb".
-        // 'Y'    Year, formatted as at least four digits with leading zeros as necessary, e.g. 0092 equals 92 CE for the Gregorian calendar.
-        // 'T'    Time formatted for the 24-hour clock as "%tH:%tM:%tS".
-        // 'z'    RFC 822  style numeric time zone offset from GMT, e.g. -0800.
+        // 'a ' Locale-specific short name of the day of the week, e.g. "Sun", "Mon"
+        // 'e' Day of month, formatted as two digits, i.e. 1 - 31.
+        // 'b' Locale-specific abbreviated month name, e.g. "Jan", "Feb".
+        // 'Y' Year, formatted as at least four digits with leading zeros as necessary, e.g. 0092 equals 92 CE for the Gregorian calendar.
+        // 'T' Time formatted for the 24-hour clock as "%tH:%tM:%tS".
+        // 'z' RFC 822 style numeric time zone offset from GMT, e.g. -0800.
         return String.format("%1$ta, %1$te %1$tb %1$tY %1$tT %1$tz", calendar);
     }
 
     /**
      * Returns Yes if true, No if false.
+     * 
      * @param b
      * @return Yes or No
      */
@@ -342,7 +341,7 @@ public final class Utilities {
             return "No";
         }
     }
-    
+
     public static String trueFalseString(boolean value, String trueString, String falseString) {
         if (value) {
             return trueString;
@@ -354,12 +353,12 @@ public final class Utilities {
     /**
      * Load INI file.
      * 
-     * This will read a text file and strip out blank/empty lines
-     * and lines that start with a hash mark.
+     * This will read a text file and strip out blank/empty lines and lines that start with a hash mark.
      * <P>
      * This will also trim the input lines.
      * 
-     * @param filename file to be read
+     * @param filename
+     *            file to be read
      * @return String [] null if can't read/find file, else lines infile
      */
     public static String[] loadINIFile(String filename) {
@@ -384,11 +383,10 @@ public final class Utilities {
         } catch (Exception e) {
             return null;
         }
-        
+
         return (String[]) v.toArray(new String[v.size()]);
     }
 
-    
     public static String forHTML(String aText) {
         final StringBuilder result = new StringBuilder();
         final StringCharacterIterator iterator = new StringCharacterIterator(aText);
@@ -437,7 +435,7 @@ public final class Utilities {
     public static void setDebugMode(boolean debugMode) {
         Utilities.debugMode = debugMode;
     }
-    
+
     public static String basename(String path) {
         int lastIndex = path.lastIndexOf(File.separator);
         if (lastIndex == -1) {
@@ -450,20 +448,21 @@ public final class Utilities {
     /**
      * Converts index > 0 to an uppercase letter, eg 1 => 'A'
      *
-     * @param index > 0 and index < 703 (A..ZZ)
+     * @param index
+     *            > 0 and index < 703 (A..ZZ)
      * @return letter corresponding to number (base 26)
      */
     public static String convertNumber(int index) {
         String letter = String.valueOf(index);
         if (index > 26) {
-            int i2=index;
+            int i2 = index;
             int count = 0;
-            while(index > 26) {
+            while (index > 26) {
                 index = index - 26;
                 count++;
             }
-            int mod=i2 -(count * 26);
-            letter = convertBase26Number(count)+convertBase26Number(mod);
+            int mod = i2 - (count * 26);
+            letter = convertBase26Number(count) + convertBase26Number(mod);
         } else {
             letter = convertBase26Number(index);
         }
@@ -471,32 +470,32 @@ public final class Utilities {
     }
 
     private static String convertBase26Number(int index) {
-        return LETTERS.substring(index, index+1);
+        return LETTERS.substring(index, index + 1);
     }
 
     public static String dirname(String path) {
         int lastIndex = path.lastIndexOf(File.separator);
         if (lastIndex == -1) {
             return path;
-        } else if (lastIndex == 0){
+        } else if (lastIndex == 0) {
             return path;
         } else {
             return path.substring(0, lastIndex);
         }
     }
 
-    public static String getReportFilename (IReport selectedReport) {
+    public static String getReportFilename(IReport selectedReport) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
         // "yyMMdd HHmmss.SSS");
         String reportName = selectedReport.getReportTitle();
-        
-        while (reportName.indexOf(' ') > -1){
+
+        while (reportName.indexOf(' ') > -1) {
             reportName = reportName.replace(" ", "_");
         }
-        return "report."+ reportName+ "." + simpleDateFormat.format(new Date()) + ".txt";
+        return "report." + reportName + "." + simpleDateFormat.format(new Date()) + ".txt";
 
     }
-    
+
     /**
      * Create/Write a report to file.
      * 
@@ -548,7 +547,7 @@ public final class Utilities {
         }
         return filename;
     }
-    
+
     private static void printReportHeader(PrintWriter printWriter, IReport report, IInternalContest contest) {
 
         printWriter.println(new VersionInfo().getSystemName());
@@ -583,7 +582,8 @@ public final class Utilities {
      * Create and view report.
      * 
      * @param report
-     * @param title title for tab in pane for this report
+     * @param title
+     *            title for tab in pane for this report
      * @param contest
      * @param controller
      */
@@ -632,15 +632,15 @@ public final class Utilities {
     }
 
     public static void debugPrint(String s) {
-        if (debugMode){
-            System.err.println(new Date() + " debug: "+s);
+        if (debugMode) {
+            System.err.println(new Date() + " debug: " + s);
             System.err.flush();
         }
     }
 
     public static void debugPrint(Exception e) {
-        if (debugMode){
-            System.err.println(new Date() + " debug: Exception "+e.getMessage());
+        if (debugMode) {
+            System.err.println(new Date() + " debug: Exception " + e.getMessage());
             e.printStackTrace(System.err);
             System.err.flush();
         }
@@ -656,10 +656,8 @@ public final class Utilities {
      * @param controller
      */
     public static void viewReport(IReport report, String title, IInternalContest contest, IInternalController controller) {
-       viewReport(report, title, contest, controller, true);
+        viewReport(report, title, contest, controller, true);
     }
-    
-
 
     /**
      * Create disk file for input SerializedFile.
@@ -679,9 +677,7 @@ public final class Utilities {
 
         return false;
     }
-    
-    
-    
+
     /**
      * Join a list with a delimiter.
      */
@@ -694,15 +690,15 @@ public final class Utilities {
             buffer.append(delimiter);
         }
         if (list.size() > 0) {
-            buffer.append(list.get(list.size()-1));
+            buffer.append(list.get(list.size() - 1));
         }
         return buffer;
     }
-    
+
     /**
      * Join an array of string with a delimiter.
      */
-    public static StringBuffer join(String delimiter, String [] strings) {
+    public static StringBuffer join(String delimiter, String[] strings) {
         return join(delimiter, Arrays.asList(strings));
     }
 
@@ -719,11 +715,12 @@ public final class Utilities {
 
         return new File(fullpath).getAbsolutePath();
     }
-    
+
     /**
-     * Convert String to second. 
+     * Convert String to second.
      * 
-     * @param s  string in form hh:mm:ss, ss or mm:ss
+     * @param s
+     *            string in form hh:mm:ss, ss or mm:ss
      * @return -1 if invalid time string, else returns number of seconds
      */
     public static long convertStringToSeconds(String s) {
@@ -736,8 +733,8 @@ public final class Utilities {
         long hh = 0;
         long mm = 0;
         long ss = 0;
-        
-        switch (fields.length ) {
+
+        switch (fields.length) {
             case 3:
                 hh = stringToLong(fields[0]);
                 mm = stringToLong(fields[1]);
@@ -802,7 +799,7 @@ public final class Utilities {
     public static String getDateTime() {
         return format.format(new Date());
     }
-    
+
     /**
      * Convert String to second. Expects input in form: ss or mm:ss or hh:mm:ss
      * 
@@ -820,8 +817,8 @@ public final class Utilities {
         long hh = 0;
         long mm = 0;
         long ss = 0;
-        
-        switch (fields.length ) {
+
+        switch (fields.length) {
             case 3:
                 hh = stringToLong(fields[0]);
                 mm = stringToLong(fields[1]);
@@ -866,15 +863,15 @@ public final class Utilities {
      * 
      * @param problem
      * @param serializedFile
-     * @param judgeDataFile 
+     * @param judgeDataFile
      * @return
      */
     public static String locateJudgesDataFile(Problem problem, SerializedFile serializedFile, String alternateCDPPath, DataFileType judgeDataFile) {
 
-        if (serializedFile.isExternalFile()){
+        if (serializedFile.isExternalFile()) {
 
             String testFileName;
-            
+
             if (alternateCDPPath != null && alternateCDPPath.trim().length() > 0) {
 
                 testFileName = getSecretDataPath(alternateCDPPath, problem) + File.separator + serializedFile.getName();
@@ -885,32 +882,32 @@ public final class Utilities {
 
             String secretPathPattern = File.separator + SECRET_DATA_DIR + File.separator;
             String fullPathName = serializedFile.getAbsolutePath();
-            
+
             secretPathPattern = secretPathPattern.replace('\\', '.');
 
-            if (fullPathName.matches(secretPathPattern)){
+            if (fullPathName.matches(secretPathPattern)) {
 
                 // return filename if source file under /data/secret/ somewhere
-                testFileName = getSecretDataPath(problem.getCCSfileDirectory(), problem) +File.separator + serializedFile.getName();
-                if (fileExists(testFileName)){
+                testFileName = getSecretDataPath(problem.getCCSfileDirectory(), problem) + File.separator + serializedFile.getName();
+                if (fileExists(testFileName)) {
                     return testFileName;
                 }
             }
-            
+
             testFileName = alternateCDPPath + File.separator + problem.getShortName() + File.separator + serializedFile.getName();
             if (fileExists(testFileName)) {
                 // return filename if under shortname/ path
                 return testFileName;
             }
 
-            testFileName = problem.getExternalDataFileLocation() + File.separator  + serializedFile.getName();
-            if (fileExists(testFileName)){
+            testFileName = problem.getExternalDataFileLocation() + File.separator + serializedFile.getName();
+            if (fileExists(testFileName)) {
                 return testFileName;
             }
 
             testFileName = serializedFile.getAbsolutePath();
 
-            if (fileExists(testFileName)){
+            if (fileExists(testFileName)) {
                 return testFileName;
             }
         }
@@ -924,6 +921,7 @@ public final class Utilities {
 
     /**
      * Write file to output printWriter.
+     * 
      * @param printWriter
      * @param outputfilename
      */
@@ -940,7 +938,7 @@ public final class Utilities {
             e.printStackTrace(printWriter);
         }
     }
-    
+
     public static String getJudgeCDPLocation(IInternalContest contest) {
 
         String value = null;
@@ -949,7 +947,7 @@ public final class Utilities {
         if (info != null) {
             value = info.getJudgeCDPBasePath();
         }
-        if (value == null){
+        if (value == null) {
             value = "";
         }
         return value;
@@ -972,21 +970,20 @@ public final class Utilities {
 
         return getProblemfullFilenames(contest, problem, serializedFiles, executableDir);
     }
-    
+
     /**
      * Get the full data files names for input files.
      * <P>
-     * For internal data files, the base path is the executableDir.
-     * <br>
-     * For external files (aka CDP files) on the JUDGE the path is from {@link ContestInformation#getJudgeCDPBasePath()} where
-     * ContestInformation is in {@link IInternalContest#getContestInformation()}.
-     * <br>
+     * For internal data files, the base path is the executableDir. <br>
+     * For external files (aka CDP files) on the JUDGE the path is from {@link ContestInformation#getJudgeCDPBasePath()} where ContestInformation is in {@link IInternalContest#getContestInformation()}
+     * . <br>
      * For external files (aka CDP files) on the ADMIN (or JUDGE without the CDP path set) the path is stored in the {@link Problem#getExternalDataFileLocation()}
      * 
      * @param contest
-     * @param problem 
-     * @param serializedFiles list of files
-     * @param executableDir 
+     * @param problem
+     * @param serializedFiles
+     *            list of files
+     * @param executableDir
      * @return
      */
     public static String[] getProblemfullFilenames(IInternalContest contest, Problem problem, SerializedFile[] serializedFiles, String executableDir) {
@@ -1000,7 +997,7 @@ public final class Utilities {
             }
 
             String judgeDataFilesPath = getJudgeCDPLocation(contest);
-            
+
             if (!"".equals(judgeDataFilesPath)) {
                 judgeDataFilesPath = Utilities.getSecretDataPath(judgeDataFilesPath, problem) + File.separator;
                 File judgeDir = new File(judgeDataFilesPath);
@@ -1031,7 +1028,7 @@ public final class Utilities {
         } else {
 
             for (SerializedFile serializedFile : serializedFiles) {
-                
+
                 if (executableDir == null) {
                     output.add(serializedFile.getName());
                 } else {
@@ -1041,39 +1038,41 @@ public final class Utilities {
         }
         return (String[]) output.toArray(new String[output.size()]);
     }
-    
+
     /**
      * Start Windows Explorer.
      * 
-     * @param dir directory to display
+     * @param dir
+     *            directory to display
      * @throws IOException
      */
     public static void startExplorer(File dir) {
-        String command = "explorer.exe /e,"+dir.getAbsolutePath();
+        String command = "explorer.exe /e," + dir.getAbsolutePath();
         try {
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {
-            throw new RuntimeException("Exception running "+command, e);
+            throw new RuntimeException("Exception running " + command, e);
         }
     }
-    
+
     /**
-     * Start Windows Explorer on  directory.
+     * Start Windows Explorer on directory.
      */
     public static void startExplorer(String directoryName) {
         File dir = new File(directoryName);
         startExplorer(dir);
     }
-    
+
     /**
      * Dump contents of ProblemDataFiles using ProblemReport
      * 
      * <pre>
      * PrintWriter printWriter = new PrintWriter(System.out);
-     * dump(problemDataFiles, "dump this");
+     * dump(problemDataFiles, &quot;dump this&quot;);
      * printWriter.close();
      * printWriter = null;
      * </pre>
+     * 
      * @param printWriter
      * @param dataFiles
      * @param message
@@ -1082,7 +1081,7 @@ public final class Utilities {
 
         ProblemsReport report = new ProblemsReport();
         printWriter.println("dump ProblemDataFiles " + message);
-        if (dataFiles == null){
+        if (dataFiles == null) {
             printWriter.println("dump problem data files - no ProblemDataFiles defined");
         } else {
             printWriter.println("dump problem data files for " + dataFiles.getProblemId());
@@ -1090,20 +1089,20 @@ public final class Utilities {
         }
         printWriter.println("dump done");
         printWriter.flush();
-  
+
     }
-    
+
     /**
      * Dump problem data files to System.out.
+     * 
      * @param dataFiles
      * @param message
      */
     public static void dump(ProblemDataFiles dataFiles, String message) {
-         PrintWriter printWriter = new PrintWriter(System.out);
-         dump(printWriter, dataFiles, message);
-         printWriter = null;  
+        PrintWriter printWriter = new PrintWriter(System.out);
+        dump(printWriter, dataFiles, message);
+        printWriter = null;
     }
-
 
     /**
      * Return list of directory entries (including dirs) with extension.
@@ -1133,8 +1132,7 @@ public final class Utilities {
         return (String[]) list.toArray(new String[list.size()]);
     }
 
-    
-    public static  SerializedFile[] createSerializedFiles(String dataFileBaseDirectory, String[] inputFileNames, boolean externalFilesFlag) {
+    public static SerializedFile[] createSerializedFiles(String dataFileBaseDirectory, String[] inputFileNames, boolean externalFilesFlag) {
 
         ArrayList<SerializedFile> outfiles = new ArrayList<SerializedFile>();
 
@@ -1149,22 +1147,21 @@ public final class Utilities {
     /**
      * Find base data path for problems.
      * 
-     * If {@value #SECRET_DATA_DIR} in filePath will strop off anything
-     * including and after {@value #SECRET_DATA_DIR}.
+     * If {@value #SECRET_DATA_DIR} in filePath will strop off anything including and after {@value #SECRET_DATA_DIR}.
      * 
      * @param filePath
      * @return directory name up to {@value #SECRET_DATA_DIR}
      */
     public static String findDataBasePath(String filePath) {
-        
+
         int idx = filePath.indexOf(SECRET_DATA_DIR);
-        if (idx != -1){
+        if (idx != -1) {
             return filePath.substring(0, idx);
         }
         return filePath;
     }
 
-    /**
+/**
      * Validate problem files.
      * 
      * Only checks for files on disk if {@link Problem#isUsingExternalDataFiles()} is true.
@@ -1304,4 +1301,40 @@ public final class Utilities {
             throw new MultipleIssuesException(messages.get(0), messages);
         }
     }
+
+    /**
+     * For the input number, returns an upper-case letter.
+     * 
+     * 1 = A, 2 = B, etc.
+     * 
+     * @param id
+     *            problem number, base one (not zero).
+     * @return single upper case letter.
+     */
+    public static String getProblemLetter(int id) {
+        char let = 'A';
+        let += (id - 1);
+        return Character.toString(let);
+    }
+
+    /**
+     * The problem number, base 1.
+     * 
+     * A = 1, B = 2, etc.
+     * 
+     * @param contest
+     * @param problem
+     * @return the problem number, base 1. Returns 0 if not found.
+     */
+    public static int getProblemNumber(IInternalContest contest, Problem problem) {
+        int idx = 1;
+        for (Problem problem2 : contest.getProblems()) {
+            if (problem2.equals(problem)) {
+                return idx;
+            }
+            idx++;
+        }
+        return 0;
+    }
+
 }
