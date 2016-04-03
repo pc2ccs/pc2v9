@@ -396,8 +396,9 @@ public class ResolverEventFeedXML {
         String letter = problem.getLetter();
         if (letter == null || letter.trim().equals("")) {
             // letter is defined as being 'A'+problemIndex
-            letter = String.valueOf((int)'A'+id);
-            System.err.println("created letter of '"+letter+"'");
+//            letter = String.valueOf((int)'A'+id);
+            letter = String.valueOf((char)(id + 'A'));
+            System.err.println("Problem " + id + " has no defined letter (label); assigned letter '"+letter+"'");
         }
         memento.createChildNode("letter", letter.trim());
         String colorName = problem.getColorName();
