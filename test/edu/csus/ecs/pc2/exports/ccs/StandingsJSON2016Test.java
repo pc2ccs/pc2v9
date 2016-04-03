@@ -38,7 +38,8 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         initData(contest, numTeams, numProblems);
 
         String[] runsDataList = { //
-        "1,16,B,1,No", "2,8,C,1,No", "3,5,B,1,No", //
+        //
+                "1,16,B,1,No", "2,8,C,1,No", "3,5,B,1,No", //
                 "4,4,C,1,No", "5,4,D,1,No", "6,3,A,1,No", "7,1,A,1,No", //
                 "8,6,B,1,New", "9,18,A,1,No", "10,6,A,1,No", "11,21,D,1,Yes", //
                 "12,6,D,1,No", //
@@ -53,43 +54,39 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         // System.out.println("JSON="+json);
 
         assertEquals("Expecting JSON length ", 8250, json.length());
-        
-//        ensureDirectory(getDataDirectory());
-//        startExplorer(getDataDirectory());
-        
+
+        // ensureDirectory(getDataDirectory());
+        // startExplorer(getDataDirectory());
+
         /**
          * File containing one line of the expected JSON output
          */
         String expectedJSONFilename = getTestFilename("test12Runs.json.txt");
-        
-        /**
-         * This write file will overwrite the expected output, if the createJSON method changes
-         * the output, uncomment the writeFormattedJson to write the newer, better expected json.
-         */
-        // TODO MUST - add expected JSON into git
-        System.out.println(" TODO MUST - add expected JSON into git, filename  "+expectedJSONFilename);
-        writeFormattedJson (expectedJSONFilename, json);
+
+        // This write file will overwrite the expected output,
+        // if the createJSON method changes the output, uncomment the writeFormattedJson
+        // to write the newer, better expected json.
+        // writeFormattedJson(expectedJSONFilename, json);
 
         // System.out.println("Expected file at  "+expectedJSONFilename);
-        
+
         assertFileExists(expectedJSONFilename);
 
-        String [] lines = edu.csus.ecs.pc2.core.Utilities.loadFile(expectedJSONFilename);
+        String[] lines = edu.csus.ecs.pc2.core.Utilities.loadFile(expectedJSONFilename);
         String expectedJSON = StringUtilities.join("", lines);
         assertJSONEquals(json, expectedJSON);
 
     }
-    
+
     /**
      * Write crudely formatted JSON.
      * 
      * @param fileName
      * @param oneLine
-     * @throws IOException 
+     * @throws IOException
      */
-    @SuppressWarnings("unused")
-    private void writeFormattedJson(String fileName, String oneLine) throws IOException
-    {
+    // SOMEDAY produce a nicer formatter output
+    protected void writeFormattedJson(String fileName, String oneLine) throws IOException {
         String newString = oneLine.replaceAll("},", "},\n");
         createFile(fileName, newString);
     }
@@ -102,13 +99,13 @@ public class StandingsJSON2016Test extends AbstractTestCase {
      * @throws IOException
      */
     private void createFile(String fileName, String oneLine) throws IOException {
-        
+
         FileOutputStream outputStream = null;
         outputStream = new FileOutputStream(fileName);
         byte[] buffer = oneLine.getBytes();
         outputStream.write(buffer, 0, buffer.length);
         outputStream.close();
-        
+
     }
 
     public void test90Runs() throws Exception {
@@ -162,33 +159,29 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         // System.out.println("JSON="+json);
 
         assertEquals("Expecting JSON length ", 8761, json.length());
-        
+
         /**
          * File containing one line of the expected JSON output
          */
         String expectedJSONFilename = getTestFilename("test90Runs.json.txt");
-        
-        /**
-         * This write file will overwrite the expected output, if the createJSON method changes
-         * the output, uncomment the writeFormattedJson to write the newer, better expected json.
-         */
-        // TODO MUST - add expected JSON into git
-         System.out.println(" TODO MUST - add expected JSON into git, filename  "+expectedJSONFilename);
-         writeFormattedJson (expectedJSONFilename, json);
 
-        
+        // This write file will overwrite the expected output,
+        // if the createJSON method changes the output, uncomment the writeFormattedJson
+        // to write the newer, better expected json.
+        // writeFormattedJson(expectedJSONFilename, json);
+
         // System.out.println("Expected file at  "+expectedJSONFilename);
-        
+
         assertFileExists(expectedJSONFilename);
-        
-        String [] lines = edu.csus.ecs.pc2.core.Utilities.loadFile(expectedJSONFilename);
+
+        String[] lines = edu.csus.ecs.pc2.core.Utilities.loadFile(expectedJSONFilename);
         String expectedJSON = StringUtilities.join("", lines);
         assertJSONEquals(json, expectedJSON);
 
     }
 
     private void assertJSONEquals(String expectedJSON, String actualJson) {
-        
+
         // SOMEDAY create a more sophisticated/granular comparison.
         assertEquals(expectedJSON, actualJson);
     }
