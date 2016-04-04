@@ -36,7 +36,7 @@
 {"label":"E","num_judged":0,"num_pending":0,"solved":false}]},
 {"rank":2,"team":6,"score":{"num_solved":0,"total_time":0},
 "problems":[{"label":"A","num_judged":1,"num_pending":0,"solved":false},
-{"label":"B","num_judged":1,"num_pending":0,"solved":false},
+{"label":"B","num_judged":0,"num_pending":1,"solved":false},
 {"label":"C","num_judged":0,"num_pending":0,"solved":false},
 {"label":"D","num_judged":1,"num_pending":0,"solved":false},
 {"label":"E","num_judged":0,"num_pending":0,"solved":false}]},

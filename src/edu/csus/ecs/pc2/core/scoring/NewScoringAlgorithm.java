@@ -595,21 +595,21 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
 
             numberSubmissions++;
 
+            if (run.isJudged()) {
+                numberJudged++;
+            } else {
+                numberPending++;
+            }
+
             if (run.isSolved() && solutionTime == 0) {
+                // set to solved, set solution time
                 solved = true;
                 solutionTime = run.getElapsedMins();
                 solvingRun = run;
             }
-            if (!solved) {
-                // Not solved, yet
 
-                numberPending++;
-
-                if (run.isJudged() && (!run.isSolved())) {
-                    submissionsBeforeYes++;
-                }
-            } else {
-                numberJudged++;
+            if (run.isJudged() && (!run.isSolved())) {
+                submissionsBeforeYes++;
             }
         }
 

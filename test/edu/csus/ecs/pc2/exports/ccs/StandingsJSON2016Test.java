@@ -18,6 +18,11 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
+import edu.csus.ecs.pc2.core.scoring.ProblemSummaryInfo;
+import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
+import edu.csus.ecs.pc2.core.scoring.SummaryRow;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -30,6 +35,13 @@ public class StandingsJSON2016Test extends AbstractTestCase {
 
     private boolean debugMode = false;
 
+    /**
+     * Write sample data.
+     * 
+     * Will overwrite expected data/sample and output length of JSON.
+     */
+    private boolean WRITE_SAMPLE_DATA = false;
+
     public void test12Runs() throws Exception {
 
         InternalContest contest = new InternalContest();
@@ -40,7 +52,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         initData(contest, numTeams, numProblems);
 
         String[] runsDataList = { //
-        //
+        // id, team, problem, elapsed, judgement
                 "1,16,B,1,No", "2,8,C,1,No", "3,5,B,1,No", //
                 "4,4,C,1,No", "5,4,D,1,No", "6,3,A,1,No", "7,1,A,1,No", //
                 "8,6,B,1,New", "9,18,A,1,No", "10,6,A,1,No", "11,21,D,1,Yes", //
@@ -52,7 +64,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         }
 
         StandingsJSON2016 standingsJSON2016 = new StandingsJSON2016();
-        String json = standingsJSON2016.createJSON(contest,controller);
+        String json = standingsJSON2016.createJSON(contest, controller);
         // System.out.println("JSON="+json);
 
         assertEquals("Expecting JSON length ", 8250, json.length());
@@ -68,7 +80,10 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         // This write file will overwrite the expected output,
         // if the createJSON method changes the output, uncomment the writeFormattedJson
         // to write the newer, better expected json.
-        // writeFormattedJson(expectedJSONFilename, json);
+        if (WRITE_SAMPLE_DATA) {
+            System.out.println("JSON String length = " + json.length());
+            writeFormattedJson(expectedJSONFilename, json);
+        }
 
         // System.out.println("Expected file at  "+expectedJSONFilename);
 
@@ -78,6 +93,103 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         String expectedJSON = StringUtilities.join("", lines);
         assertJSONEquals(json, expectedJSON);
 
+    }
+
+    public void test4Runs() throws Exception {
+
+        InternalContest contest = new InternalContest();
+        InternalController controller = new InternalController(contest);
+
+        int numTeams = 4;
+        int numProblems = 4;
+        initData(contest, numTeams, numProblems);
+
+        String[] runsDataList = { //
+        // id, team, problem, elapsed, judgement
+                "1,1,B,1,New", "2,1,C,1,No", "3,2,B,2,No", "4,2,C,2,Yes", //
+
+        };
+
+        for (String runInfoLine : runsDataList) {
+            addTheRun(contest, runInfoLine);
+        }
+
+        Run[] runs = contest.getRuns();
+        for (Run run : runs) {
+            System.out.println("Run is " + run);
+        }
+
+        NewScoringAlgorithm algo = new NewScoringAlgorithm();
+        StandingsRecord[] records = algo.getStandingsRecords(contest, DefaultScoringAlgorithm.getDefaultProperties());
+
+        // testing team
+        String actualProblemResultString = getSRString(records, 0, 3);
+        String expectedResultString = "team2 Prob 3 Pena = 2 Subs = 1 Time = 2 Pend = 0 Judg = 1";
+        assertEquals("Expected standings record ", expectedResultString, actualProblemResultString);
+
+        // Testing team2
+        actualProblemResultString = getSRString(records, 1, 2);
+        expectedResultString = "team1 Prob 2 Pena = 0 Subs = 1 Time = 0 Pend = 1 Judg = 0";
+        assertEquals("Expected standings record ", expectedResultString, actualProblemResultString);
+
+        StandingsJSON2016 standingsJSON2016 = new StandingsJSON2016();
+        String json = standingsJSON2016.createJSON(contest, controller);
+        // System.out.println("JSON=" + json);
+
+        assertEquals("Expecting JSON length ", 1283, json.length());
+
+        // ensureDirectory(getDataDirectory());
+        // startExplorer(getDataDirectory());
+
+        /**
+         * File containing one line of the expected JSON output
+         */
+        String expectedJSONFilename = getTestFilename("test4Runs.json.txt");
+
+        // This write file will overwrite the expected output,
+        // if the createJSON method changes the output, uncomment the writeFormattedJson
+        // to write the newer, better expected json.
+        if (WRITE_SAMPLE_DATA) {
+            System.out.println("JSON String length = " + json.length());
+            writeFormattedJson(expectedJSONFilename, json);
+        }
+
+        // System.out.println("Expected file at  "+expectedJSONFilename);
+
+        assertFileExists(expectedJSONFilename);
+
+        String[] lines = edu.csus.ecs.pc2.core.Utilities.loadFile(expectedJSONFilename);
+        String expectedJSON = StringUtilities.join("", lines);
+        assertJSONEquals(json, expectedJSON);
+
+    }
+
+    /**
+     * Get a string representation for ProblemSummaryInfo for a team/rank and problem.
+     * 
+     * @param records
+     * @param rank
+     * @param problemNumber
+     * @return
+     */
+    private String getSRString(StandingsRecord[] records, int rank, int problemNumber) {
+        StandingsRecord standingsRecord = records[rank];
+
+        SummaryRow sum = standingsRecord.getSummaryRow();
+        ProblemSummaryInfo val = sum.get(problemNumber);
+        String summaryString = getPSIString(val);
+
+        return standingsRecord.getClientId().getName() + " " + //
+                "Prob " + problemNumber + " " + //
+                summaryString;
+    }
+
+    private String getPSIString(ProblemSummaryInfo psi) {
+        return "Pena = " + psi.getPenaltyPoints() + //
+                " Subs = " + psi.getNumberSubmitted() + //
+                " Time = " + psi.getSolutionTime() + //
+                " Pend = " + psi.getPendingRunCount() + //
+                " Judg = " + psi.getJudgedRunCount();
     }
 
     /**
@@ -120,7 +232,8 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         initData(contest, numTeams, numProblems);
 
         String[] runsDataList = { //
-        "1,16,B,1,No", "2,8,C,1,No", "3,5,B,1,No", //
+        // id, team, problem, elapsed, judgement
+                "1,16,B,1,No", "2,8,C,1,No", "3,5,B,1,No", //
                 "4,4,C,1,No", "5,4,D,1,No", "6,3,A,1,No", "7,1,A,1,No", //
                 "8,6,B,1,New", "9,18,A,1,No", "10,6,A,1,No", "11,21,D,1,Yes", //
                 "12,6,D,1,No", "13,12,A,1,Yes", "14,13,A,1,No", //
@@ -161,7 +274,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
 
         // System.out.println("JSON="+json);
 
-        assertEquals("Expecting JSON length ", 8761, json.length());
+        assertEquals("Expecting JSON length ", 8766, json.length());
 
         /**
          * File containing one line of the expected JSON output
@@ -171,7 +284,10 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         // This write file will overwrite the expected output,
         // if the createJSON method changes the output, uncomment the writeFormattedJson
         // to write the newer, better expected json.
-        // writeFormattedJson(expectedJSONFilename, json);
+        if (WRITE_SAMPLE_DATA) {
+            System.out.println("JSON String length = " + json.length());
+            writeFormattedJson(expectedJSONFilename, json);
+        }
 
         // System.out.println("Expected file at  "+expectedJSONFilename);
 
