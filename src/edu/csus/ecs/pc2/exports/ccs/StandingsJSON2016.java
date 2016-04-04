@@ -8,7 +8,6 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
@@ -113,8 +112,7 @@ public class StandingsJSON2016 {
                     buffer.append("{");
 
                     // add the problem label (letter) to the buffer
-                    ElementId probID = summaryInfo.getProblemId();
-                    String letter = contest.getProblem(probID).getLetter();
+                    String letter = contest.getProblem(summaryInfo.getProblemId()).getLetter();
                     buffer.append(pair("label", letter) + ",");
 
                     //get data on submitted runs
@@ -122,11 +120,12 @@ public class StandingsJSON2016 {
                     int numPending = summaryInfo.getPendingRunCount();
                     int numJudged = summaryInfo.getJudgedRunCount();
                     
-                    System.out.println ("StandingsJSON2016: " 
-                            + "Team: "+ teamNum + "  problem id: " + probID + "  problem letter: '" + letter + "'" 
-                            + "  numSubmitted: " + numSubmitted
-                            + "  numPending: " + numPending 
-                            + "  numJudged: " + numJudged);
+//                    //debug:
+//                    System.out.println ("StandingsJSON2016: " 
+//                            + "Team: "+ teamNum + "  problem: '" + letter + "'" 
+//                            + "  numSubmitted: " + numSubmitted
+//                            + "  numPending: " + numPending 
+//                            + "  numJudged: " + numJudged);
                     
                     //verify data makes sense
                     if ((numPending+numJudged) != numSubmitted) {

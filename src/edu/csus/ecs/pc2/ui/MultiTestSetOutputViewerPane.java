@@ -1062,7 +1062,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 }
             }
         }
-        System.out.println ("  (including " + failed + " failed cases)");
+//        System.out.println ("  (including " + failed + " failed cases)");
         return failed;
     }
 
