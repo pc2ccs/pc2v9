@@ -16,6 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -838,7 +839,8 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
     public void testScoreboardForBeingJudgedState() {
         // RunID TeamID Prob Time Result
 
-        String[] runsData = { "1,1,A,1,No", // 20 (a No before first yes)
+        String[] runsData = { //
+                "1,1,A,1,No", // 20 (a No before first yes)
                 "2,1,A,3,Yes", // 3 (first yes counts Minute points but never Run Penalty points)
                 "3,1,A,5,No", // zero -- after Yes
                 "4,1,A,7,Yes", // zero -- after Yes
@@ -1104,6 +1106,11 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
             assertTrue("Error in XML output " + e.getMessage(), true);
             e.printStackTrace();
         }
+        
+        
+        if (debugMode){
+            dumpSAInfo (contest, scoreProps, true);
+        }
 
         // skip past nodes to find teamStanding node
         NodeList list = document.getDocumentElement().getChildNodes();
@@ -1128,6 +1135,51 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
                 compareRanking(rankIndex + 1, standingsRow, cols);
                 rankIndex++;
             }
+        }
+    }
+
+    private void dumpSAInfo(InternalContest contest, Properties properties, boolean showProblemDetails) {
+        
+        try {
+            NewScoringAlgorithm algo = new NewScoringAlgorithm();
+            StandingsRecord[] standingsRecords = algo.getStandingsRecords(contest, properties);
+            
+            
+            for (StandingsRecord standingsRecord : standingsRecords) {
+
+                System.out.println( //
+                        standingsRecord.getClientId().getName() + " rank=" + //
+                                standingsRecord.getRankNumber() + " solved= " + //
+                                standingsRecord.getNumberSolved() + " points=" + //
+                                standingsRecord.getPenaltyPoints() + " last=" + //
+                                standingsRecord.getLastSolved() + "." //
+                        );
+
+                SummaryRow row = standingsRecord.getSummaryRow();
+
+                if (showProblemDetails) {
+                    System.out.print("   " + standingsRecord.getClientId().getName() + " problems: ");
+
+                    Integer[] problemNumbers = row.getSortedKeys();
+                    for (Integer integer : problemNumbers) {
+                        ProblemSummaryInfo problemSummaryInfo = row.get(integer);
+                        String rowInfo = Utilities.getProblemLetter(integer) + ":" + //
+                                integer + " " + //
+                                problemSummaryInfo.getNumberSubmitted() + "," + //
+                                problemSummaryInfo.getPenaltyPoints() + "," + //
+                                problemSummaryInfo.getJudgedRunCount() + "," + //
+                                problemSummaryInfo.getPendingRunCount() + "; " //
+                        ;
+                        System.out.print(rowInfo.replaceAll("0[,;]", "-,"));
+                    }
+                }
+
+                System.out.println();
+            }
+            
+        } catch (Exception e) {
+            System.out.println("Error dumping StandingsRecords");
+            e.printStackTrace(System.err);
         }
     }
 
@@ -1598,11 +1650,11 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
          * name, rank, solved, lastsolved, points; then for each problem: problem#, numRuns, points, judgedCount, pendingCount ;
          */
         String[] rep = { //
-        "team5, 1,2,155,327; 1,0,0,0,0; 2,1,155,1,0; 3,0,0,0,0; 4,3,172,1,2; 5,0,0,0,0; ", //
-                "team1, 2,1,3,23; 1,5,23,4,1; 2,2,0,0,2; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", //
-                "team2, 3,1,30,30; 1,1,30,1,0; 2,2,0,0,2; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", //
-                "team3, 4,1,50,50; 1,0,0,0,0; 2,2,50,1,1; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", //
-                "team4, 5,1,145,145; 1,0,0,0,0; 2,2,145,2,0; 3,2,0,0,2; 4,0,0,0,0; 5,0,0,0,0; ", //
+                "team5, 1,2,155,327; 1,0,0,0,0; 2,1,155,1,0; 3,0,0,0,0; 4,3,172,2,1; 5,0,0,0,0; ", // 
+                "team1, 2,1,3,23; 1,5,23,5,0; 2,2,0,2,0; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", // 
+                "team2, 3,1,30,30; 1,1,30,1,0; 2,2,0,1,1; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", // 
+                "team3, 4,1,50,50; 1,0,0,0,0; 2,2,50,1,1; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", // 
+                "team4, 5,1,145,145; 1,0,0,0,0; 2,2,145,2,0; 3,2,0,0,2; 4,0,0,0,0; 5,0,0,0,0; ", // 
         };
 
         int i = 0;
@@ -1617,11 +1669,19 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
         for (StandingsRecord standingsRecord : recs) {
             // System.out.println("rec = " + standingsRecord);
-            // dumpStandingsRecordSampleData(standingsRecord);
+            if ( OUTPUT_SAMPLE_DATA_FLAG ){
+                dumpStandingsRecordSampleData(standingsRecord);
+            } else {
+                String expected = rep[i];
+                String actual = getStndingsRecordRepresenation(standingsRecord);
+                
+//                System.out.println(expected); 
+//                System.out.println(actual);
+//                System.out.println("");
+                
+                assertEquals("Expecting same rep ", expected, actual);
+            }
 
-            String expected = rep[i];
-            String actual = getStndingsRecordRepresenation(standingsRecord);
-            assertEquals("Expecting same rep ", expected, actual);
             i++;
         }
     }
@@ -1641,6 +1701,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Returns sample/test data.
+     * 
+     * name,  rank, solved, lastsolvedtime, penalty then <br>
+     *     probbNum, points, judgecount, pendingcount
      * 
      * @param standingsRecord
      * @return

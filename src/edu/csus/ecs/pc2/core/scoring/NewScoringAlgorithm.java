@@ -42,7 +42,7 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  */
 
 // $HeadURL$
-public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm, ICalculateScore {
+public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm {
 
     /**
      * 
@@ -594,21 +594,23 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
             }
 
             numberSubmissions++;
-
+            
+//            System.out.println(numberSubmissions + " "+run.getElapsedMins()+ " "+run);
+            
             if (run.isJudged()) {
                 numberJudged++;
             } else {
                 numberPending++;
             }
-
+            
             if (run.isSolved() && solutionTime == 0) {
                 // set to solved, set solution time
                 solved = true;
                 solutionTime = run.getElapsedMins();
                 solvingRun = run;
             }
-
-            if (run.isJudged() && (!run.isSolved())) {
+            
+            if (run.isJudged() && (!solved)) {
                 submissionsBeforeYes++;
             }
         }
@@ -616,6 +618,22 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
         if (solved) {
             points = (solutionTime * getMinutePenalty(properties) + getYesPenalty(properties)) + (submissionsBeforeYes * getNoPenalty(properties));
         }
+        
+//        if (solvingRun != null){
+//            System.out.print("Solved " + String.format("%3d -- ", points));
+//        } else {
+//            System.out.print("       ");
+//        }
+//        
+//        System.out.println("debug 22 befores = " + //
+//                runs[0].getSubmitter().getName()+ " " + //
+//                submissionsBeforeYes + " Prob =  " + //
+//                problem + " points=" + //
+//                String.format("%3d", points)+ " " + //
+//                solutionTime * getMinutePenalty(properties) +" + "+ //
+//                getYesPenalty(properties)+" + " + // 
+//                (submissionsBeforeYes * getNoPenalty(properties)) + " "+ //
+//                runs[0]);
 
         return new ProblemScoreRecord(solved, solvingRun, problem, points, solutionTime, numberSubmissions, submissionsBeforeYes, numberPending, numberJudged);
 

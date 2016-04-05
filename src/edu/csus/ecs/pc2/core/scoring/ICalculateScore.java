@@ -6,13 +6,13 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * Calcuate score methods.
+ * Calculate score methods.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
+ * @deprecated Use {@link INewScoringAlgorithm}
  */
 
-// $HeadURL$
 public interface ICalculateScore {
 
     /**
