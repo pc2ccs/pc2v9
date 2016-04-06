@@ -126,7 +126,10 @@ $Log$
             <property name="max" value="250"/>
             <property name="countEmpty" value="false"/>
         </module>
-        <module name="ParameterNumber"/>
+        <module name="ParameterNumber">
+            <!-- ProblemSscoreRecord :( -->
+            <property name="max" value="9"/>
+        </module>
 
 
         <!-- Checks for whitespace                               -->
