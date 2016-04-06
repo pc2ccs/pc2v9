@@ -65,7 +65,7 @@ public class ICPCLoadPane extends JPanePlugin {
     private String lastDirectory;
 //    private JButton editCDPPathButton;
 
-    private EditJudgesDataFilePathFrame editCDPPathFrame;
+//    private EditJudgesDataFilePathFrame editCDPPathFrame;
 
     /**
      * This method initializes
@@ -581,26 +581,26 @@ public class ICPCLoadPane extends JPanePlugin {
 //        return editCDPPathButton;
 //    }
 
-    /**
-     * Displays a frame which allows the user to edit the currently-defined CDP paths
-     * on both the Admin machine and the Judge's machines.
-     */
-    private void editCDPPath() {
-        getEditCDPFrame().setContestAndController(getContest(), getController());
-        getEditCDPFrame().loadCurrentCDPPathsIntoGUI();
-        getEditCDPFrame().setVisible(true);
-    }
+//    /**
+//     * Displays a frame which allows the user to edit the currently-defined CDP paths
+//     * on both the Admin machine and the Judge's machines.
+//     */
+//    private void editCDPPath() {
+//        getEditCDPFrame().setContestAndController(getContest(), getController());
+//        getEditCDPFrame().loadCurrentCDPPathsIntoGUI();
+//        getEditCDPFrame().setVisible(true);
+//    }
 
-    /** Returns a singleton instance of the Frame used to edit the CDP path(s).
-     * 
-     * @return the EditCDPPathFrame
-     */
-    private EditJudgesDataFilePathFrame getEditCDPFrame() {
-        if (editCDPPathFrame == null) {
-            editCDPPathFrame = new EditJudgesDataFilePathFrame();
-        }
-        return editCDPPathFrame ;
-    }
+//    /** Returns a singleton instance of the Frame used to edit the CDP path(s).
+//     * 
+//     * @return the EditCDPPathFrame
+//     */
+//    private EditJudgesDataFilePathFrame getEditCDPFrame() {
+//        if (editCDPPathFrame == null) {
+//            editCDPPathFrame = new EditJudgesDataFilePathFrame();
+//        }
+//        return editCDPPathFrame ;
+//    }
     
     
 } // @jve:decl-index=0:visual-constraint="10,10"
