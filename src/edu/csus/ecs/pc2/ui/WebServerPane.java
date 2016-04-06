@@ -30,6 +30,11 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -39,8 +44,11 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import sun.security.x509.CertificateExtensions;
@@ -220,14 +228,16 @@ public class WebServerPane extends JPanePlugin {
 
             HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
             httpsConfig.addCustomizer(new SecureRequestCustomizer());
-
+            
             ServerConnector https = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()), new HttpConnectionFactory(httpsConfig));
             https.setPort(port);
             // do not timeout
             https.setIdleTimeout(0);
-
+            
             // only enable https
             jettyServer.setConnectors(new Connector[] { https });
+            
+            context.setSecurityHandler(basicAuth("scott", "tiger", "my realm", new String[]{"admin"}) );
 
             jettyServer.setHandler(context);
 
@@ -332,7 +342,8 @@ public class WebServerPane extends JPanePlugin {
 
         // create and (empty) ResourceConfig
         ResourceConfig resConfig = new ResourceConfig();
-
+        resConfig.register(RolesAllowedDynamicFeature.class);
+        
         // add each of the enabled services to the config:
 
         if (getChckbxScoreboard().isSelected()) {
@@ -583,5 +594,35 @@ public class WebServerPane extends JPanePlugin {
             chckbxTeams.setHorizontalAlignment(SwingConstants.LEFT);
         }
         return chckbxTeams;
+    }
+    
+    private static final SecurityHandler basicAuth(String username, String password, String realm, String[] roles) {
+
+        HashLoginService l = new HashLoginService();
+        l.putUser(username, Credential.getCredential(password), roles);
+        l.setName(realm);
+        
+        Constraint constraint = new Constraint();
+        constraint.setName(Constraint.__BASIC_AUTH);
+        constraint.setRoles(roles);
+        constraint.setAuthenticate(true);
+         
+        ConstraintMapping cm = new ConstraintMapping();
+        cm.setConstraint(constraint);
+        cm.setPathSpec("/teams");
+
+        ConstraintMapping cm2 = new ConstraintMapping();
+        cm2.setConstraint(constraint);
+        cm2.setPathSpec("/scoreboard");
+
+        ConstraintSecurityHandler csh = new ConstraintSecurityHandler();
+        csh.setAuthenticator(new BasicAuthenticator());
+        csh.setRealmName("myrealm");
+        csh.addConstraintMapping(cm);
+        csh.addConstraintMapping(cm2);
+        csh.setLoginService(l);
+        
+        return csh;
+        
     }
 }
