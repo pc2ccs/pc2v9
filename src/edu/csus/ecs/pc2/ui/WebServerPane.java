@@ -601,25 +601,49 @@ public class WebServerPane extends JPanePlugin {
         HashLoginService l = new HashLoginService();
         l.putUser(username, Credential.getCredential(password), roles);
         l.setName(realm);
+        File f = new File("realm.properties");
+        if (f.exists() && f.isFile() && f.canRead()) {
+            System.err.println("Loading "+f.getAbsolutePath());
+            // per 9.2 docs this is seconds not ms and 60*1000 didn't seem to work
+            l.setRefreshInterval(60); // seconds or ms?
+            l.setConfig(f.getAbsolutePath());
+            try {
+                l.start();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else if (!f.exists()) {
+            System.err.println("WARNING: "+f.getAbsolutePath()+" does not exist");
+        } else if (!f.isFile()) {
+            System.err.println("WARNING: "+f.getAbsolutePath()+" is not a file");
+        } else {
+            System.err.println("WARNING: Cannot read "+f.getAbsolutePath());
+        }
         
-        Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);
-        constraint.setRoles(roles);
-        constraint.setAuthenticate(true);
+        Constraint constraintPublic = new Constraint();
+        constraintPublic.setName(Constraint.__BASIC_AUTH);
+        constraintPublic.setRoles(new String[]{"public","balloon","blue","admin"});
+        constraintPublic.setAuthenticate(true);
          
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint(constraint);
-        cm.setPathSpec("/teams");
+        ConstraintMapping cmRoot = new ConstraintMapping();
+        cmRoot.setConstraint(constraintPublic);
+        cmRoot.setPathSpec("/");
 
-        ConstraintMapping cm2 = new ConstraintMapping();
-        cm2.setConstraint(constraint);
-        cm2.setPathSpec("/scoreboard");
+        Constraint constraintAdmin = new Constraint();
+        constraintAdmin.setName(Constraint.__BASIC_AUTH);
+        constraintAdmin.setRoles(new String[]{"admin"});
+        constraintAdmin.setAuthenticate(true);
 
+        ConstraintMapping cmStartTime = new ConstraintMapping();
+        cmStartTime.setConstraint(constraintAdmin);
+        cmStartTime.setPathSpec("/starttime");
+        
         ConstraintSecurityHandler csh = new ConstraintSecurityHandler();
         csh.setAuthenticator(new BasicAuthenticator());
         csh.setRealmName("myrealm");
-        csh.addConstraintMapping(cm);
-        csh.addConstraintMapping(cm2);
+        csh.addConstraintMapping(cmRoot);
+        csh.addConstraintMapping(cmStartTime);
         csh.setLoginService(l);
         
         return csh;
