@@ -3,7 +3,9 @@ package edu.csus.ecs.pc2.services.web;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
@@ -35,7 +37,7 @@ public class ProblemService {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getProblems() {
+    public String getProblems(@Context SecurityContext sc) {
 
         // get the problems from the contest
         ProblemsJSON problems = new ProblemsJSON();
@@ -44,8 +46,8 @@ public class ProblemService {
         try {
             ContestTime contestTime = contest.getContestTime();
             // do not show the problems if the contest has not
-            // been started
-            if (contestTime.getElapsedMS() > 0) {
+            // been started (unless your are an admin)
+            if (contestTime.getElapsedMS() > 0 || sc.isUserInRole("admin")) {
                 jsonProblems = problems.createJSON(contest);
             }
         } catch (IllegalContestState e) {

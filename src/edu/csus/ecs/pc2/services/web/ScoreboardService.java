@@ -3,10 +3,13 @@ package edu.csus.ecs.pc2.services.web;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
 
@@ -35,13 +38,19 @@ public class ScoreboardService {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getScoreboard() {
+    public String getScoreboard(@Context SecurityContext sc) {
 
         StandingsJSON2016 standings = new StandingsJSON2016();
 
-        String jsonScoreboard = "{" + "\"scoreboard\"" + ":" + "null" + "}";
+        String jsonScoreboard = "[]";
         try {
-            jsonScoreboard = standings.createJSON(contest,controller);
+            ContestTime contestTime = contest.getContestTime();
+            // do not show the scoreboard if the contest has not
+            // been started (unless your are an admin)
+            // though really we should show a 0 problem 0 run scoreboard in the else case
+            if (contestTime.getElapsedMS() > 0 || sc.isUserInRole("admin")) {
+                jsonScoreboard = standings.createJSON(contest,controller);
+            }
         } catch (IllegalContestState e) {
             controller.getLog().warning("ScoreboardService: IllegalState exception creating JSON scoreboard: " + e);
             e.printStackTrace();
