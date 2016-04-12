@@ -719,6 +719,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             if (problem.isActive()) {
                 problemNumber++;
                 ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
+                problemSummaryInfo.setProblemId(problem.getElementId());
                 summaryRow.put(problemNumber, problemSummaryInfo);
             }
         }

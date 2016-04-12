@@ -51,7 +51,7 @@ public class StandingsJSON2016 {
      */
     public String createJSON(IInternalContest contest, IInternalController controller) throws IllegalContestState {
 
-        if (contest == null || contest.getRuns().length == 0) {
+        if (contest == null) {
             return "[]";
         }
 
