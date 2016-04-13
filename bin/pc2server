@@ -39,6 +39,6 @@ echo is by editing the JAVA32BIT_HEAPSIZE constant at the start of the
 echo \"pc2server\" file.
 fi
 
-java $PC2XOPS -Xmx$HEAPPARAM -cp $pc2_classpath edu.csus.ecs.pc2.Starter --server $*
+java $PC2XOPS -Xmx$HEAPPARAM -cp "$libdir/*" edu.csus.ecs.pc2.Starter --server $*
 
 # eof pc2team $Id$ 
