@@ -31,12 +31,11 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.FinalizeReport;
 
 /**
+ * Finalize pane/components.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
-
-// $HeadURL$
 public class FinalizePane extends JPanePlugin {
 
     /**
@@ -379,26 +378,26 @@ public class FinalizePane extends JPanePlugin {
     private JPanel getCenterPane() {
         if (centerPane == null) {
             certificationCommentLabel = new JLabel();
-            certificationCommentLabel.setBounds(new Rectangle(30, 19, 402, 26));
+            certificationCommentLabel.setBounds(new Rectangle(83, 19, 349, 26));
             certificationCommentLabel.setFont(new Font("Dialog", Font.BOLD, 14));
             certificationCommentLabel.setHorizontalAlignment(SwingConstants.CENTER);
             certificationCommentLabel.setText("Contest Not Certified");
             certifierLabel = new JLabel();
-            certifierLabel.setBounds(new Rectangle(53, 171, 125, 22));
+            certifierLabel.setBounds(new Rectangle(107, 167, 125, 22));
             certifierLabel.setText("Who certifies");
             certifierLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             bronzeLabel = new JLabel();
-            bronzeLabel.setBounds(new Rectangle(53, 134, 125, 22));
-            bronzeLabel.setText("Last Bronze Rank");
+            bronzeLabel.setBounds(new Rectangle(84, 130, 148, 22));
+            bronzeLabel.setText("Number of bronze medals");
             bronzeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             silverLabel = new JLabel();
-            silverLabel.setBounds(new Rectangle(53, 97, 125, 22));
-            silverLabel.setText("Last Silver Rank");
+            silverLabel.setBounds(new Rectangle(74, 93, 158, 22));
+            silverLabel.setText("Number of silver medals");
             silverLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             goldLabel = new JLabel();
-            goldLabel.setBounds(new Rectangle(53, 60, 125, 22));
+            goldLabel.setBounds(new Rectangle(64, 56, 168, 22));
             goldLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            goldLabel.setText("Last Gold Rank");
+            goldLabel.setText("Number of gold medals");
             centerPane = new JPanel();
             centerPane.setLayout(null);
             centerPane.add(goldLabel, null);
@@ -422,7 +421,7 @@ public class FinalizePane extends JPanePlugin {
     private JTextField getGoldRankTextField() {
         if (goldRankTextField == null) {
             goldRankTextField = new JTextField();
-            goldRankTextField.setBounds(new Rectangle(196, 61, 40, 20));
+            goldRankTextField.setBounds(new Rectangle(250, 57, 40, 20));
             goldRankTextField.setDocument(new IntegerDocument());
         }
         return goldRankTextField;
@@ -436,7 +435,7 @@ public class FinalizePane extends JPanePlugin {
     private JTextField getSilverRankTextField() {
         if (silverRankTextField == null) {
             silverRankTextField = new JTextField();
-            silverRankTextField.setBounds(new Rectangle(196, 98, 40, 20));
+            silverRankTextField.setBounds(new Rectangle(250, 94, 40, 20));
             silverRankTextField.setDocument(new IntegerDocument());
         }
         return silverRankTextField;
@@ -450,7 +449,7 @@ public class FinalizePane extends JPanePlugin {
     private JTextField getBronzeRankTextField() {
         if (bronzeRankTextField == null) {
             bronzeRankTextField = new JTextField();
-            bronzeRankTextField.setBounds(new Rectangle(196, 135, 40, 20));
+            bronzeRankTextField.setBounds(new Rectangle(250, 131, 40, 20));
             goldRankTextField.setDocument(new IntegerDocument());
         }
         return bronzeRankTextField;
@@ -464,7 +463,7 @@ public class FinalizePane extends JPanePlugin {
     private JTextField getCommentTextField() {
         if (commentTextField == null) {
             commentTextField = new JTextField();
-            commentTextField.setBounds(new Rectangle(196, 172, 207, 20));
+            commentTextField.setBounds(new Rectangle(250, 168, 207, 20));
         }
         return commentTextField;
     }
