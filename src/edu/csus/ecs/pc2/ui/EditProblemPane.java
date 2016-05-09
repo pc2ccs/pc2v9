@@ -397,7 +397,6 @@ public class EditProblemPane extends JPanePlugin {
             if (newProblemDataFiles.getJudgesDataFiles().length == 1) {
                 sFile = newProblemDataFiles.getJudgesDataFile();
                 if (sFile != null) {
-                    checkFileFormat(sFile);
                     if (checkFileFormat(sFile)) {
                         newProblemDataFiles.setJudgesDataFile(sFile);
                     }
@@ -1068,7 +1067,7 @@ public class EditProblemPane extends JPanePlugin {
                 boolean changed = false;
                 SerializedFile[] judgesDataFiles = dataFiles.getJudgesDataFiles();
                 if (judgesDataFiles != null) {
-                    if (judgesDataFiles.length > 1) {
+                    if (judgesDataFiles.length > 0) {
                         for (int i = 0; i < judgesDataFiles.length; i++) {
                             SerializedFile serializedFile = judgesDataFiles[i];
                             SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), newProblem.isUsingExternalDataFiles());
@@ -1078,16 +1077,25 @@ public class EditProblemPane extends JPanePlugin {
                                 changed = true;
                             }
                         }
-                        if (changed) {
-                            dataFiles.setJudgesDataFiles(judgesDataFiles);
+                    } else {
+                        // judgesDataFile.length is 0, but maybe the user has loaded something on the main page
+                        if (problemRequiresDataCheckBox.isSelected()) {
+                            // use it
+                            SerializedFile serializedFile = new SerializedFile(inputDataFileLabel.getText(), newProblem.isUsingExternalDataFiles());
+                            judgesDataFiles = new SerializedFile[1];
+                            judgesDataFiles[0] = serializedFile;
+                            changed = true;
                         }
+                    }
+                    if (changed) {
+                        dataFiles.setJudgesDataFiles(judgesDataFiles);
                     }
                 }
                 SerializedFile[] judgesAnswerFiles = dataFiles.getJudgesAnswerFiles();
                 if (judgesAnswerFiles != null) {
                     // compare each file
                     changed = false;
-                    if (judgesAnswerFiles.length > 1) {
+                    if (judgesAnswerFiles.length > 0) {
                         for (int i = 0; i < judgesAnswerFiles.length; i++) {
                             SerializedFile serializedFile = judgesAnswerFiles[i];
                             SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), newProblem.isUsingExternalDataFiles());
@@ -1097,9 +1105,18 @@ public class EditProblemPane extends JPanePlugin {
                                 changed = true;
                             }
                         }
-                        if (changed) {
-                            dataFiles.setJudgesAnswerFiles(judgesAnswerFiles);
+                    } else {
+                        // judgesAnswerFile.length is 0, but maybe the user has loaded something on the main page
+                        if (judgesHaveAnswerFiles.isSelected()) {
+                            // use it
+                            SerializedFile serializedFile = new SerializedFile(answerFileNameLabel.getText(), newProblem.isUsingExternalDataFiles());
+                            judgesAnswerFiles = new SerializedFile[1];
+                            judgesAnswerFiles[0] = serializedFile;
+                            changed = true;
                         }
+                    }
+                    if (changed) {
+                        dataFiles.setJudgesAnswerFiles(judgesAnswerFiles);
                     }
                 }
             }
@@ -2002,6 +2019,18 @@ public class EditProblemPane extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (selectFile(inputDataFileLabel, "Open Input Data File")) {
                         inputDataFileLabel.setToolTipText(inputDataFileLabel.getText());
+                        ProblemDataFiles datafiles = multipleDataSetPane.getProblemDataFiles();
+                        if (datafiles != null) {
+                            SerializedFile[] sFiles = datafiles.getJudgesDataFiles();
+                            if (sFiles != null && sFiles.length > 0) {
+                                sFiles[0] = new SerializedFile(inputDataFileLabel.getText());
+                            } else {
+                                sFiles = new SerializedFile[1];
+                                sFiles[0] = new SerializedFile(inputDataFileLabel.getText());
+                            }
+                            datafiles.setJudgesDataFiles(sFiles);
+                            multipleDataSetPane.setProblemDataFiles(datafiles);
+                        } // else previous handling will take care of it
                     }
                     enableUpdateButton();
                 }
@@ -2087,6 +2116,18 @@ public class EditProblemPane extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (selectFile(answerFileNameLabel, "Open Judges Answer File")) {
                         answerFileNameLabel.setToolTipText(answerFileNameLabel.getText());
+                        ProblemDataFiles datafiles = multipleDataSetPane.getProblemDataFiles();
+                        if (datafiles != null) {
+                            SerializedFile[] sFiles = datafiles.getJudgesAnswerFiles();
+                            if (sFiles.length > 0) {
+                                sFiles[0] = new SerializedFile(answerFileNameLabel.getText());
+                            } else {
+                                sFiles = new SerializedFile[1];
+                                sFiles[0] = new SerializedFile(answerFileNameLabel.getText());
+                            }
+                            datafiles.setJudgesAnswerFiles(sFiles);
+                            multipleDataSetPane.setProblemDataFiles(datafiles);
+                        } // else previous handling will take care of it
                     }
                     enableUpdateButton();
                 }
@@ -2676,6 +2717,7 @@ public class EditProblemPane extends JPanePlugin {
         judgesHaveAnswerFiles.setSelected(false);
         problemRequiresDataCheckBox.setSelected(false);
 
+        stdinRadioButton.setSelected(true);
         inputDataFileLabel.setText("");
         inputDataFileLabel.setToolTipText("");
         answerFileNameLabel.setText("");
