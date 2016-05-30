@@ -273,13 +273,14 @@ public class JudgeView extends JFrame implements UIPlugin {
                 submissionBiffPane.setContestAndController(contest, controller);
                 controller.register(submissionBiffPane);
                 
-                setVisible(true);           
-                //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs
-                getMainTabbedPane().setSelectedComponent(submitClarificationPane);
-                getMainTabbedPane().doLayout();
-                getMainTabbedPane().setSelectedComponent(submitRunPane);
-                getMainTabbedPane().doLayout();
-                getMainTabbedPane().setSelectedComponent(newRunsPane);
+                setVisible(true);  
+                //the following was fixed under Bug 800        
+//                //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs
+//                getMainTabbedPane().setSelectedComponent(submitClarificationPane);
+//                getMainTabbedPane().doLayout();
+//                getMainTabbedPane().setSelectedComponent(submitRunPane);
+//                getMainTabbedPane().doLayout();
+//                getMainTabbedPane().setSelectedComponent(newRunsPane);
 
                 if (Utilities.isDebugMode()){
                     
