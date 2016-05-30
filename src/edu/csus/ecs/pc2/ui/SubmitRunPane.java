@@ -707,7 +707,7 @@ public class SubmitRunPane extends JPanePlugin {
                 populateGUI();
                 updateGUIperPermissions();
                 
-                setVisible(true);
+//                setVisible(true);
             }
         });
 
