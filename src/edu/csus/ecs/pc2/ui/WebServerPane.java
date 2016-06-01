@@ -535,7 +535,6 @@ public class WebServerPane extends JPanePlugin {
         // if server is running, do not allow these settings to be changed
         getPortTextField().setEditable(!serverRunning);
         getChckbxLanguages().setEnabled(false);
-        getChckbxProblems().setEnabled(false);
         getChckbxScoreboard().setEnabled(!serverRunning);
         getChckbxStarttime().setEnabled(false);
     }
@@ -560,6 +559,7 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxProblems() {
         if (chckbxProblems == null) {
             chckbxProblems = new JCheckBox("/problems");
+            chckbxProblems.setSelected(true);
             chckbxProblems.setToolTipText("Enable getting contest problems");
             chckbxProblems.setHorizontalAlignment(SwingConstants.LEFT);
         }
