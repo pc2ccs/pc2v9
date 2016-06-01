@@ -466,24 +466,24 @@ public class WebServerPane extends JPanePlugin {
             gbc_chckbxScoreboard.gridx = 1;
             gbc_chckbxScoreboard.gridy = 2;
             centerPanel.add(getChckbxScoreboard(), gbc_chckbxScoreboard);
-            GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
-            gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
-            gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 0);
-            gbc_chckbxStarttime.gridx = 2;
-            gbc_chckbxStarttime.gridy = 2;
-            centerPanel.add(getChckbxStarttime(), gbc_chckbxStarttime);
+            GridBagConstraints gbc_chckbxTeams = new GridBagConstraints();
+            gbc_chckbxTeams.anchor = GridBagConstraints.WEST;
+            gbc_chckbxTeams.insets = new Insets(0, 0, 5, 0);
+            gbc_chckbxTeams.gridx = 2;
+            gbc_chckbxTeams.gridy = 2;
+            centerPanel.add(getChckbxTeams(), gbc_chckbxTeams);
             GridBagConstraints gbc_chckbxProblems = new GridBagConstraints();
             gbc_chckbxProblems.anchor = GridBagConstraints.WEST;
             gbc_chckbxProblems.insets = new Insets(0, 0, 5, 5);
             gbc_chckbxProblems.gridx = 1;
             gbc_chckbxProblems.gridy = 3;
             centerPanel.add(getChckbxProblems(), gbc_chckbxProblems);
-            GridBagConstraints gbc_chckbxTeams = new GridBagConstraints();
-            gbc_chckbxTeams.anchor = GridBagConstraints.WEST;
-            gbc_chckbxTeams.insets = new Insets(0, 0, 5, 0);
-            gbc_chckbxTeams.gridx = 2;
-            gbc_chckbxTeams.gridy = 3;
-            centerPanel.add(getChckbxTeams(), gbc_chckbxTeams);
+            GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
+            gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
+            gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 0);
+            gbc_chckbxStarttime.gridx = 2;
+            gbc_chckbxStarttime.gridy = 3;
+            centerPanel.add(getChckbxStarttime(), gbc_chckbxStarttime);
             GridBagConstraints gbc_chckbxLanguages = new GridBagConstraints();
             gbc_chckbxLanguages.anchor = GridBagConstraints.WEST;
             gbc_chckbxLanguages.insets = new Insets(0, 0, 5, 5);
@@ -534,11 +534,10 @@ public class WebServerPane extends JPanePlugin {
     private void updateWebServerSettings(boolean serverRunning) {
         // if server is running, do not allow these settings to be changed
         getPortTextField().setEditable(!serverRunning);
-        getChckbxLanguages().setEnabled(!serverRunning);
-        getChckbxProblems().setEnabled(!serverRunning);
+        getChckbxLanguages().setEnabled(false);
+        getChckbxProblems().setEnabled(false);
         getChckbxScoreboard().setEnabled(!serverRunning);
-        getChckbxStarttime().setEnabled(!serverRunning);
-        getChckbxTeams().setEnabled(!serverRunning);
+        getChckbxStarttime().setEnabled(false);
     }
 
     private JCheckBox getChckbxScoreboard() {
@@ -561,7 +560,6 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxProblems() {
         if (chckbxProblems == null) {
             chckbxProblems = new JCheckBox("/problems");
-            chckbxProblems.setSelected(true);
             chckbxProblems.setToolTipText("Enable getting contest problems");
             chckbxProblems.setHorizontalAlignment(SwingConstants.LEFT);
         }
@@ -571,7 +569,6 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxLanguages() {
         if (chckbxLanguages == null) {
             chckbxLanguages = new JCheckBox("/languages");
-            chckbxLanguages.setSelected(true);
             chckbxLanguages.setHorizontalAlignment(SwingConstants.LEFT);
             chckbxLanguages.setToolTipText("Enable getting contest languages");
         }
@@ -581,7 +578,6 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxStarttime() {
         if (chckbxStarttime == null) {
             chckbxStarttime = new JCheckBox("/starttime");
-            chckbxStarttime.setSelected(true);
         }
         return chckbxStarttime;
     }
@@ -589,8 +585,8 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxTeams() {
         if (chckbxTeams == null) {
             chckbxTeams = new JCheckBox("/teams");
-            chckbxTeams.setToolTipText("Enable getting contest teams");
             chckbxTeams.setSelected(true);
+            chckbxTeams.setToolTipText("Enable getting contest teams");
             chckbxTeams.setHorizontalAlignment(SwingConstants.LEFT);
         }
         return chckbxTeams;
