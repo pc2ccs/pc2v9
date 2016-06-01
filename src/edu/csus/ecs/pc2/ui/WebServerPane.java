@@ -534,8 +534,12 @@ public class WebServerPane extends JPanePlugin {
     private void updateWebServerSettings(boolean serverRunning) {
         // if server is running, do not allow these settings to be changed
         getPortTextField().setEditable(!serverRunning);
-        getChckbxLanguages().setEnabled(false);
         getChckbxScoreboard().setEnabled(!serverRunning);
+        getChckbxProblems().setEnabled(!serverRunning);
+        getChckbxTeams().setEnabled(!serverRunning);
+        
+        //these services are currently unimplemented; disallow enabling them
+        getChckbxLanguages().setEnabled(false);
         getChckbxStarttime().setEnabled(false);
     }
 
