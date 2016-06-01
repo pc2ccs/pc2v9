@@ -31,7 +31,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.FinalizeReport;
 
 /**
- * Finalize pane/components.
+ * Edit Finalize settings pane.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -261,14 +261,6 @@ public class FinalizePane extends JPanePlugin {
                 throw new InvalidFieldValue("Cannot finalize contest - contest not over - remaining time: " + contestTime.getRemainingTimeStr());
             }
             
-//            if (data.getGoldRank() == 0) {
-//                throw new InvalidFieldValue("Cannot finalize contest - Number of golds must be greater than zero");
-//            }
-//            
-//            if (data.getSilverRank() == 0) {
-//                throw new InvalidFieldValue("Cannot finalize contest - Silver rank must be greater than zero");
-//            }
-            
             if (data.getBronzeRank() == 0) {
                 throw new InvalidFieldValue("Cannot finalize contest - Bronze rank must be greater than zero");
             }
@@ -383,21 +375,21 @@ public class FinalizePane extends JPanePlugin {
             certificationCommentLabel.setHorizontalAlignment(SwingConstants.CENTER);
             certificationCommentLabel.setText("Contest Not Certified");
             certifierLabel = new JLabel();
-            certifierLabel.setBounds(new Rectangle(107, 167, 125, 22));
+            certifierLabel.setBounds(new Rectangle(64, 167, 170, 22));
             certifierLabel.setText("Who certifies");
             certifierLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             bronzeLabel = new JLabel();
-            bronzeLabel.setBounds(new Rectangle(84, 130, 148, 22));
-            bronzeLabel.setText("Number of bronze medals");
+            bronzeLabel.setBounds(new Rectangle(64, 134, 170, 22));
+            bronzeLabel.setText("Last Bronze Rank");
             bronzeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             silverLabel = new JLabel();
-            silverLabel.setBounds(new Rectangle(74, 93, 158, 22));
-            silverLabel.setText("Number of silver medals");
+            silverLabel.setBounds(new Rectangle(64, 97, 170, 22));
+            silverLabel.setText("Last Silver Rank");
             silverLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             goldLabel = new JLabel();
-            goldLabel.setBounds(new Rectangle(64, 56, 168, 22));
+            goldLabel.setBounds(new Rectangle(64, 56, 170, 22));
             goldLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            goldLabel.setText("Number of gold medals");
+            goldLabel.setText("Last Gold Rank");
             centerPane = new JPanel();
             centerPane.setLayout(null);
             centerPane.add(goldLabel, null);
@@ -526,13 +518,6 @@ public class FinalizePane extends JPanePlugin {
     void enableButtons(){
         
         boolean certified = false;
-//        
-//        FinalizeData finalizeData = getContest().getFinalizeData();
-//        
-//        if (finalizeData != null){
-//            certified = finalizeData.isCertified();
-//        }
-        
         getUpdateButton().setEnabled(! certified);
         getFinalizeButton().setEnabled(! certified);
         
