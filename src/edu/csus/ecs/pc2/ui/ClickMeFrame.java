@@ -26,29 +26,20 @@ import javax.swing.border.LineBorder;
  * 
  * @author john clevenger
  * 
- * TODO: 
- *      Add to Admin panel?
- *      add count of failed clicks
- *      add "score" == percent of success vs. failed clicks
- *      Enforce minimum size on chase panel
- *      restart game on "I Give Up/ No"
- *      improved (harder) success algorithm 
- *        -- move clickme on window shown?
- *        -- differentiate between mouse MOVE and DRAG?
- *      difficulty levels
+ *         TODO: Add to Admin panel? add count of failed clicks add "score" == percent of success vs. failed clicks Enforce minimum size on chase panel restart game on "I Give Up/ No" improved
+ *         (harder) success algorithm -- move clickme on window shown? -- differentiate between mouse MOVE and DRAG? difficulty levels
  *
  */
-public class ClickMeFrame extends JFrame implements ActionListener, ComponentListener, MouseListener, 
-                                                    MouseMotionListener, WindowListener {
+public class ClickMeFrame extends JFrame implements ActionListener, ComponentListener, MouseListener, MouseMotionListener, WindowListener {
 
     private static final long serialVersionUID = 1L;
 
-    //the message on the Success label in the top panel
+    // the message on the Success label in the top panel
     private static final String SUCCESS_MESSAGE = "Successful clicks = ";
 
-    //the count of successful "clickme's" that will go into the SuccessMessage
+    // the count of successful "clickme's" that will go into the SuccessMessage
     private int successCount = 0;
-    
+
     private JPanel clickMeContentPane = null;
 
     private JLabel clickMeLabel = null;
@@ -57,12 +48,16 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
 
     private JLabel successLabel = null;
 
-    private final int MAX_MOVE = 500;
+    private final static int MAX_MOVE = 500;
 
     private double oldDist = java.lang.Double.MAX_VALUE;
+
     private JPanel scorePanel;
+
     private JLabel scoreLabel;
+
     private JPanel buttonPanel;
+
     private JPanel chasePanel;
 
     private JButton replayButton;
@@ -70,7 +65,8 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     /**
      * Constructs a ClickMe frame with the specified title.
      * 
-     * @param title - the String to be displayed in the frame's title bar.
+     * @param title
+     *            - the String to be displayed in the frame's title bar.
      */
     public ClickMeFrame(String title) {
         super(title);
@@ -101,11 +97,9 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
             handleException(ivjExc);
         }
     }
-    
+
     /**
-     * Returns the ClickMe JFrame's ContentPane, which contains a score panel at the top,
-     * a "chase" panel (on which the ClickMe label moves around) in the center, and a
-     * button panel at the bottom.
+     * Returns the ClickMe JFrame's ContentPane, which contains a score panel at the top, a "chase" panel (on which the ClickMe label moves around) in the center, and a button panel at the bottom.
      * 
      * @return a JPanel to be used as the frame's ContentPane
      */
@@ -119,22 +113,22 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
                 clickMeContentPane.add(getScorePanel(), BorderLayout.NORTH);
                 clickMeContentPane.add(getChasePanel(), BorderLayout.CENTER);
                 clickMeContentPane.add(getButtonPanel(), BorderLayout.SOUTH);
-                clickMeContentPane.setMinimumSize(new Dimension(200,200));
-                
-//                clickMeContentPane.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-//              clickMeContentPane.add(getScorePanel());
-//              clickMeContentPane.add(getChasePanel());
-//              clickMeContentPane.add(getButtonPanel());
-                
+                clickMeContentPane.setMinimumSize(new Dimension(200, 200));
+
+                // clickMeContentPane.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+                // clickMeContentPane.add(getScorePanel());
+                // clickMeContentPane.add(getChasePanel());
+                // clickMeContentPane.add(getButtonPanel());
+
             } catch (java.lang.Throwable ivjExc) {
                 handleException(ivjExc);
             }
         }
         return clickMeContentPane;
     }
+
     /**
-     * Handles ActionEvents on the Quit button by forwarding them to 
-     * {@link ClickMeFrame#quitButton}.
+     * Handles ActionEvents on the Quit button by forwarding them to {@link ClickMeFrame#quitButton}.
      */
     public void actionPerformed(ActionEvent e) {
 
@@ -143,9 +137,10 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     }
 
     /**
-     * Handles delegated MouseDragged events
-     * by forwarding them to {@link ClickMeFrame#moveIt(MouseEvent)}.
-     * @param mouseEvent - the MouseEvent that was generated by a mouse drag
+     * Handles delegated MouseDragged events by forwarding them to {@link ClickMeFrame#moveIt(MouseEvent)}.
+     * 
+     * @param mouseEvent
+     *            - the MouseEvent that was generated by a mouse drag
      */
     public void clickMeChasePanel_MouseDragged(MouseEvent mouseEvent) {
         moveIt(mouseEvent);
@@ -153,9 +148,10 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     }
 
     /**
-     * Handles delegated MouseMoved events 
-     * by forwarding them to {@link ClickMeFrame#moveIt(MouseEvent)}.
-     * @param mouseEvent - the MouseEvent that was generated by a mouse move
+     * Handles delegated MouseMoved events by forwarding them to {@link ClickMeFrame#moveIt(MouseEvent)}.
+     * 
+     * @param mouseEvent
+     *            - the MouseEvent that was generated by a mouse move
      */
     public void clickMeChasePanel_MouseMoved(MouseEvent mouseEvent) {
         moveIt(mouseEvent);
@@ -184,7 +180,8 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
 
     /**
      * Handles a successful mouse click on the ClickMe label (the objective of the game) by changing the label text.
-     * @param e 
+     * 
+     * @param e
      */
     public void clickMeLabel_MouseClicked(MouseEvent e) {
         this.getClickMeLabel().setVisible(false);
@@ -195,17 +192,12 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
         return;
     }
 
-
     /**
      * Asks the user if they really want to quit, and disposes the frame if so.
      */
     public void quitButton_ActionPerformed() {
 
-        int result = javax.swing.JOptionPane.showConfirmDialog(
-                this, 
-                "Awww... Are you sure you want to give up?", 
-                "Nice Try...", 
-                javax.swing.JOptionPane.YES_NO_OPTION,
+        int result = javax.swing.JOptionPane.showConfirmDialog(this, "Awww... Are you sure you want to give up?", "Nice Try...", javax.swing.JOptionPane.YES_NO_OPTION,
                 javax.swing.JOptionPane.QUESTION_MESSAGE);
         if (result == javax.swing.JOptionPane.YES_OPTION) {
             this.dispose();
@@ -216,22 +208,26 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     /**
      * ComponentHidden events are currently ignored.
      * 
-     * @param e java.awt.event.ComponentEvent
+     * @param e
+     *            java.awt.event.ComponentEvent
      */
-    public void componentHidden(ComponentEvent e) { }
+    public void componentHidden(ComponentEvent e) {
+    }
 
     /**
      * ComponentMoved events are currently ignored.
      * 
-     * @param e java.awt.event.ComponentEvent
+     * @param e
+     *            java.awt.event.ComponentEvent
      */
-    public void componentMoved(ComponentEvent e) { }
+    public void componentMoved(ComponentEvent e) {
+    }
 
     /**
-     * Handles ComponentResized events for the frame by delegating them to
-     * {@link ClickMeFrame#clickMeDlg_ComponentResized(ComponentEvent)}.
+     * Handles ComponentResized events for the frame by delegating them to {@link ClickMeFrame#clickMeDlg_ComponentResized(ComponentEvent)}.
      * 
-     * @param e java.awt.event.ComponentEvent
+     * @param e
+     *            java.awt.event.ComponentEvent
      */
     public void componentResized(java.awt.event.ComponentEvent e) {
         if (e.getSource() == this)
@@ -241,10 +237,11 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     /**
      * Handles ComponentShown events for the frame.
      * 
-     * @param e java.awt.event.ComponentEvent
+     * @param e
+     *            java.awt.event.ComponentEvent
      */
     public void componentShown(java.awt.event.ComponentEvent e) {
-        //shouldn't we do something when the frame is shown, in case the user is switching
+        // shouldn't we do something when the frame is shown, in case the user is switching
         // between frames to try to solve the puzzle?
         System.out.println("ComponentShown event fired...");
     }
@@ -311,18 +308,19 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     /**
      * Returns the distance between the specified X,Y point and the ClickMe label center
      * 
-     * @param X,Y - the x/y coordinates of a point
+     * @param inX
+     *            ,inY - the x/y coordinates of a point
      * 
      * @return the distance between the specified point and the ClickMe label center
      */
-    public double getDistance(int X, int Y) {
+    public double getDistance(int inX, int inY) {
 
         Point midPoint = getClickMeLabelMidpoint();
 
         int labelMidX = midPoint.x;
         int labelMidY = midPoint.y;
 
-        return Math.sqrt(Math.pow((labelMidX - X), 2) + java.lang.Math.pow((labelMidY - Y), 2));
+        return Math.sqrt(Math.pow((labelMidX - inX), 2) + java.lang.Math.pow((labelMidY - inY), 2));
 
     }
 
@@ -356,15 +354,14 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     }
 
     private void handleException(Throwable t) {
-        System.err.println ("Exception in ClickMe frame: " + t);
+        System.err.println("Exception in ClickMe frame: " + t);
     }
 
     /**
-     * Handles MouseClicked on the ClickMe label by forwarding it to
-     * {@link ClickMeFrame#clickMeLabel_MouseClicked()};
-     * ignores all other mouse clicks.
+     * Handles MouseClicked on the ClickMe label by forwarding it to {@link ClickMeFrame#clickMeLabel_MouseClicked()}; ignores all other mouse clicks.
      * 
-     * @param e the MouseEvent generated by the mouse click
+     * @param e
+     *            the MouseEvent generated by the mouse click
      */
     public void mouseClicked(MouseEvent e) {
 
@@ -373,11 +370,10 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     }
 
     /**
-     * Handles MouseDragged events by checking if the Drag was on the Chase Panel
-     * and if so delegating handling to
-     * {@link ClickMeFrame#clickMeChasePanel_MouseDragged(e)}.
+     * Handles MouseDragged events by checking if the Drag was on the Chase Panel and if so delegating handling to {@link ClickMeFrame#clickMeChasePanel_MouseDragged(e)}.
      * 
-     * @param e the MouseEvent generated by a mouse drag
+     * @param e
+     *            the MouseEvent generated by a mouse drag
      */
     public void mouseDragged(java.awt.event.MouseEvent e) {
         if (e.getSource() == getChasePanel())
@@ -387,23 +383,27 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     /**
      * MouseEntered is currently ignored.
      * 
-     * @param e java.awt.event.MouseEvent
+     * @param e
+     *            java.awt.event.MouseEvent
      */
-    public void mouseEntered(java.awt.event.MouseEvent e) { }
+    public void mouseEntered(java.awt.event.MouseEvent e) {
+    }
 
     /**
      * MouseExited is currently ignored.
      * 
-     * @param e java.awt.event.MouseEvent
+     * @param e
+     *            java.awt.event.MouseEvent
      */
-    public void mouseExited(java.awt.event.MouseEvent e) { }
+    public void mouseExited(java.awt.event.MouseEvent e) {
+    }
 
     /**
-     * Handles mouse moved by checking the source of the mouse movement event
-     * and if was movement on the Chase Panel delegating handling to 
+     * Handles mouse moved by checking the source of the mouse movement event and if was movement on the Chase Panel delegating handling to
      * {@link ClickMeFrame#clickMeChasePanel_MouseMoved(MouseEvent)}.
      * 
-     * @param e - the MouseEvent which was generated by the mouse being moved
+     * @param e
+     *            - the MouseEvent which was generated by the mouse being moved
      */
     public void mouseMoved(MouseEvent e) {
         if (e.getSource() == getChasePanel())
@@ -413,16 +413,20 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     /**
      * MousePressed events are ignored.
      */
-    public void mousePressed(MouseEvent e) { }
+    public void mousePressed(MouseEvent e) {
+    }
 
     /**
      * MouseReleased events are ignored.
      */
-    public void mouseReleased(MouseEvent e) { }
+    public void mouseReleased(MouseEvent e) {
+    }
 
     /**
      * Invoked to move the ClickMe label away from the mouse.
-     * @param mouseEvent - a mouse event which triggered the need to move the label
+     * 
+     * @param mouseEvent
+     *            - a mouse event which triggered the need to move the label
      */
     public void moveIt(MouseEvent mouseEvent) {
 
@@ -502,26 +506,36 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
     /**
      * Methods to handle events for the WindowListener interface.
      */
-    public void windowActivated(java.awt.event.WindowEvent e) { 
+    public void windowActivated(java.awt.event.WindowEvent e) {
         this.clickMe_windowActivated(e);
     }
-    
+
     private void clickMe_windowActivated(WindowEvent e) {
-        //add code here to move the label so hiding/restoring the window isn't as obvious
+        // add code here to move the label so hiding/restoring the window isn't as obvious
         // a winning strategy.
-        // Move the label to a new position which can be determined algorithmically if a 
+        // Move the label to a new position which can be determined algorithmically if a
         // user is observant enough (e.g. the center of one of four quadrants chosen
         // based on the current clock time or something...
     }
 
-    public void windowClosed(WindowEvent e) { }
+    public void windowClosed(WindowEvent e) {
+    }
+
     public void windowClosing(WindowEvent e) {
         this.clickMe_WindowClosing();
     }
-    public void windowDeactivated(WindowEvent e) { }
-    public void windowDeiconified(WindowEvent e) { }
-    public void windowIconified(WindowEvent e) { }
-    public void windowOpened(WindowEvent e) { }
+
+    public void windowDeactivated(WindowEvent e) {
+    }
+
+    public void windowDeiconified(WindowEvent e) {
+    }
+
+    public void windowIconified(WindowEvent e) {
+    }
+
+    public void windowOpened(WindowEvent e) {
+    }
 
     /**
      * main entry point - starts the part when it is run as an application
@@ -538,63 +552,63 @@ public class ClickMeFrame extends JFrame implements ActionListener, ComponentLis
             exception.printStackTrace(System.out);
         }
     }
-    
+
     private JPanel getScorePanel() {
         if (scorePanel == null) {
-        	scorePanel = new JPanel();
-        	scorePanel.setBorder(new EtchedBorder());
-        	scorePanel.add(getScoreLabel());
-        	scorePanel.setMinimumSize(new Dimension(100,100));
+            scorePanel = new JPanel();
+            scorePanel.setBorder(new EtchedBorder());
+            scorePanel.add(getScoreLabel());
+            scorePanel.setMinimumSize(new Dimension(100, 100));
         }
         return scorePanel;
     }
-    
+
     private JLabel getScoreLabel() {
         if (scoreLabel == null) {
-        	scoreLabel = new JLabel(SUCCESS_MESSAGE + successCount);
+            scoreLabel = new JLabel(SUCCESS_MESSAGE + successCount);
         }
         return scoreLabel;
     }
-    
+
     private JPanel getButtonPanel() {
         if (buttonPanel == null) {
-        	buttonPanel = new JPanel();
-        	buttonPanel.setBorder(new EtchedBorder());
-        	buttonPanel.add(getQuitButton());
-        	buttonPanel.add(getReplayButton());
+            buttonPanel = new JPanel();
+            buttonPanel.setBorder(new EtchedBorder());
+            buttonPanel.add(getQuitButton());
+            buttonPanel.add(getReplayButton());
         }
         return buttonPanel;
     }
-    
+
     private JPanel getChasePanel() {
         if (chasePanel == null) {
-        	chasePanel = new JPanel();
-        	chasePanel.setBorder(new LineBorder(Color.blue, 2, true));
-        	chasePanel.add(getClickMeLabel());
-        	chasePanel.add(getSuccessLabel());
-        	chasePanel.setMinimumSize(new Dimension(100,100));
+            chasePanel = new JPanel();
+            chasePanel.setBorder(new LineBorder(Color.blue, 2, true));
+            chasePanel.add(getClickMeLabel());
+            chasePanel.add(getSuccessLabel());
+            chasePanel.setMinimumSize(new Dimension(100, 100));
         }
         return chasePanel;
     }
-    
+
     private JButton getReplayButton() {
         if (replayButton == null) {
             try {
                 replayButton = new JButton();
                 replayButton.setName("ReplayButton");
-                replayButton.setText ("Replay");
+                replayButton.setText("Replay");
                 replayButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-//                        System.out.println ("Replay pushed");
+                        // System.out.println ("Replay pushed");
                         getSuccessLabel().setVisible(false);
                         getClickMeLabel().setVisible(true);
-                    } 
+                    }
                 });
             } catch (Throwable t) {
                 handleException(t);
             }
         }
-        return replayButton ;
+        return replayButton;
     }
 }

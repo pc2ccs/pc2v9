@@ -523,3 +523,4 @@ public class JudgeView extends JFrame implements UIPlugin {
     
 
 } // @jve:decl-index=0:visual-constraint="10,10"
+

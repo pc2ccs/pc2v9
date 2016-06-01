@@ -592,7 +592,7 @@ public class WebServerPane extends JPanePlugin {
         return chckbxTeams;
     }
     
-    private static final SecurityHandler basicAuth(String username, String password, String realm, String[] roles) {
+    private static SecurityHandler basicAuth(String username, String password, String realm, String[] roles) {
 
         HashLoginService l = new HashLoginService();
         l.putUser(username, Credential.getCredential(password), roles);
