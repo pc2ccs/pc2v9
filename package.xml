@@ -54,6 +54,7 @@
                 <include name="LICENSE"/>
                 <include name="pc2v9.ini"/>
                 <include name="pc2.ico"/>
+            	<include name="realm.properties"/>
             </zipfileset>
             <zipfileset dir="${build.dir}" filemode="644" prefix="${release}">
                 <include name="VERSION"/>
