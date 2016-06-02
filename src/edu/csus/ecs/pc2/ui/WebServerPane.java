@@ -537,9 +537,9 @@ public class WebServerPane extends JPanePlugin {
         getChckbxScoreboard().setEnabled(!serverRunning);
         getChckbxProblems().setEnabled(!serverRunning);
         getChckbxTeams().setEnabled(!serverRunning);
+        getChckbxLanguages().setEnabled(!serverRunning);
         
-        //these services are currently unimplemented; disallow enabling them
-        getChckbxLanguages().setEnabled(false);
+        // these services are currently unimplemented; disallow enabling them
         getChckbxStarttime().setEnabled(false);
     }
 
@@ -573,6 +573,7 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxLanguages() {
         if (chckbxLanguages == null) {
             chckbxLanguages = new JCheckBox("/languages");
+            chckbxLanguages.setSelected(true);
             chckbxLanguages.setHorizontalAlignment(SwingConstants.LEFT);
             chckbxLanguages.setToolTipText("Enable getting contest languages");
         }
