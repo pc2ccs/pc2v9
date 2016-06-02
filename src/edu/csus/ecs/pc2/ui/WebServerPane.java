@@ -478,18 +478,18 @@ public class WebServerPane extends JPanePlugin {
             gbc_chckbxProblems.gridx = 1;
             gbc_chckbxProblems.gridy = 3;
             centerPanel.add(getChckbxProblems(), gbc_chckbxProblems);
-            GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
-            gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
-            gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 0);
-            gbc_chckbxStarttime.gridx = 2;
-            gbc_chckbxStarttime.gridy = 3;
-            centerPanel.add(getChckbxStarttime(), gbc_chckbxStarttime);
             GridBagConstraints gbc_chckbxLanguages = new GridBagConstraints();
             gbc_chckbxLanguages.anchor = GridBagConstraints.WEST;
-            gbc_chckbxLanguages.insets = new Insets(0, 0, 5, 5);
-            gbc_chckbxLanguages.gridx = 1;
-            gbc_chckbxLanguages.gridy = 4;
+            gbc_chckbxLanguages.insets = new Insets(0, 0, 5, 0);
+            gbc_chckbxLanguages.gridx = 2;
+            gbc_chckbxLanguages.gridy = 3;
             centerPanel.add(getChckbxLanguages(), gbc_chckbxLanguages);
+            GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
+            gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
+            gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 5);
+            gbc_chckbxStarttime.gridx = 1;
+            gbc_chckbxStarttime.gridy = 4;
+            centerPanel.add(getChckbxStarttime(), gbc_chckbxStarttime);
 
         }
         return centerPanel;
@@ -541,6 +541,7 @@ public class WebServerPane extends JPanePlugin {
         
         // these services are currently unimplemented; disallow enabling them
         getChckbxStarttime().setEnabled(false);
+        getChckbxStarttime().setVisible(false);
     }
 
     private JCheckBox getChckbxScoreboard() {
