@@ -400,7 +400,7 @@ public class PacketExplorerPane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
-        setVisible (true);
+//        setVisible (true);    //per JDK 6+ API docs, components being added to JTabbedPanes should call setVisible()
     }
     
     public String getPluginTitle() {
