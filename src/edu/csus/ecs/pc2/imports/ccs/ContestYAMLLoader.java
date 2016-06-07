@@ -507,12 +507,9 @@ public class ContestYAMLLoader {
         clientSettings.setAutoJudgeFilter(auto.getProblemFilter());
         clientSettings.setAutoJudging(auto.isActive());
 
-        // dumpAJSettings(clientSettings.getClientId(), clientSettings.isAutoJudging(), clientSettings.getAutoJudgeFilter());
-
         contest.addClientSettings(clientSettings);
     }
 
-    // TODO 669 remove after debugged
     @SuppressWarnings("unused")
     private void dumpAJSettings(ClientId clientId, boolean autoJudging, Filter autoJudgeFilter) {
         ElementId[] ids = autoJudgeFilter.getProblemIdList();

@@ -70,6 +70,7 @@ import edu.csus.ecs.pc2.core.report.HTMLReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.IReportFile;
 import edu.csus.ecs.pc2.core.report.InternalDumpReport;
+import edu.csus.ecs.pc2.core.report.JSON2016Report;
 import edu.csus.ecs.pc2.core.report.JSONReport;
 import edu.csus.ecs.pc2.core.report.JudgementNotificationsReport;
 import edu.csus.ecs.pc2.core.report.JudgementReport;
@@ -142,7 +143,7 @@ public class ReportPane extends JPanePlugin {
 
     private Log log;
 
-    private String reportDirectory = "reports";  //  @jve:decl-index=0:
+    private String reportDirectory = "reports"; // @jve:decl-index=0:
 
     private JCheckBox thisClientFilterButton = null;
 
@@ -155,13 +156,13 @@ public class ReportPane extends JPanePlugin {
     private JLabel filterLabel = null;
 
     private Filter filter = new Filter();
-    
+
     private EditFilterFrame editFilterFrame = null;
 
     private JCheckBox xmlOutputCheckbox = null;
 
     private JButton generateSummaryButton = null;
-    
+
     public String getReportDirectory() {
         return reportDirectory;
     }
@@ -197,11 +198,11 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        Vector <IReport> reports = new Vector <IReport> ();
-        
+        Vector<IReport> reports = new Vector<IReport>();
+
         reports.add(new AccountsReport());
         reports.add(new BalloonSummaryReport());
-        
+
         reports.add(new EventFeedReport());
         reports.add(new EventFeed2013Report());
         reports.add(new NotificationsReport());
@@ -213,7 +214,7 @@ public class ReportPane extends JPanePlugin {
         reports.add(new ContestAnalysisReport());
         reports.add(new SolutionsByProblemReport());
         reports.add(new ListRunLanguages());
-        
+
         reports.add(new FastestSolvedSummaryReport());
         reports.add(new FastestSolvedReport());
 
@@ -221,7 +222,7 @@ public class ReportPane extends JPanePlugin {
         reports.add(new LoginReport());
         reports.add(new ProfilesReport());
         reports.add(new PluginsReport());
-        
+
         reports.add(new RunsReport());
         reports.add(new ClarificationsReport());
         reports.add(new ProblemsReport());
@@ -241,51 +242,53 @@ public class ReportPane extends JPanePlugin {
         reports.add(new AccountPermissionReport());
         reports.add(new BalloonDeliveryReport());
         reports.add(new ExtractPlaybackLoadFilesReport());
-        
+
         reports.add(new RunJudgementNotificationsReport());
         reports.add(new JudgementNotificationsReport());
-        
+
         reports.add(new ProfileCloneSettingsReport());
         reports.add(new SitesReport());
-        
+
         reports.add(new FinalizeReport());
-        
+
         reports.add(new InternalDumpReport());
-        
+
         reports.add(new HTMLReport());
-        
+
         reports.add(new ExportYamlReport());
-        
+
         reports.add(new CategoryReport());
-        
+
         reports.add(new RunStatisticsReport());
 
         reports.add(new PlaybackDumpReport());
-        
+
         reports.add(new PasswordsReport());
-        
+
         reports.add(new AccountsTSVReportTeamAndJudges());
-        
+
         reports.add(new AccountsTSVReport());
-        
+
         reports.add(new SubmissionsTSVReport());
 
         reports.add(new JSONReport());
-        
+
         reports.add(new UserdataTSVReport());
-        
+
         reports.add(new GroupsTSVReport());
-        
+
         reports.add(new TeamsTSVReport());
-        
+
         reports.add(new ScoreboardTSVReport());
-        
+
         reports.add(new ResolverEventFeedReport());
-        
+
         reports.add(new AutoJudgingSettingsReport());
-        
+
         reports.add(new JudgingAnalysisReport());
-        
+
+        reports.add(new JSON2016Report());
+
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());
     }
@@ -294,16 +297,16 @@ public class ReportPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
 
         this.log = getController().getLog();
-        
+
         if (isServer()) {
             String reportDir = getReportDirectory();
             setReportDirectory(inContest.getProfile().getProfilePath() + File.separator + reportDir);
         }
-        
+
         getContest().addAccountListener(new AccountListenerImplementation());
-        
+
         initializePermissions();
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getEditFilterFrame().setContestAndController(getContest(), getController());
@@ -311,18 +314,18 @@ public class ReportPane extends JPanePlugin {
                 updateGUIperPermissions();
             }
         });
-        
+
     }
-    
+
     private void updateGUIperPermissions() {
         generateSummaryButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
         viewReportButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
     }
-    
+
     private boolean isServer() {
         return getContest().getClientId() != null && isServer(getContest().getClientId());
     }
-    
+
     private boolean isServer(ClientId clientId) {
         return clientId.getClientType().equals(ClientType.Type.SERVER);
     }
@@ -421,7 +424,7 @@ public class ReportPane extends JPanePlugin {
             viewReportButton.setMnemonic(java.awt.event.KeyEvent.VK_V);
             viewReportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (getBreakdownBySiteCheckbox().isSelected()){
+                    if (getBreakdownBySiteCheckbox().isSelected()) {
                         generateSelectedReportBySite();
                     } else {
                         generateSelectedReport();
@@ -436,11 +439,11 @@ public class ReportPane extends JPanePlugin {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
         // "yyMMdd HHmmss.SSS");
         String reportName = selectedReport.getReportTitle();
-        
-        while (reportName.indexOf(' ') > -1){
+
+        while (reportName.indexOf(' ') > -1) {
             reportName = reportName.replace(" ", "_");
         }
-        return "report."+ reportName+ "." + simpleDateFormat.format(new Date()) + "." + extension;
+        return "report." + reportName + "." + simpleDateFormat.format(new Date()) + "." + extension;
 
     }
 
@@ -451,8 +454,8 @@ public class ReportPane extends JPanePlugin {
         FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
         multipleFileViewer.setVisible(true);
     }
-    
-    protected void createHeader(PrintWriter printWriter, IReport report){
+
+    protected void createHeader(PrintWriter printWriter, IReport report) {
         /**
          * Create/write standardized header for all reports
          */
@@ -466,7 +469,7 @@ public class ReportPane extends JPanePlugin {
         }
         printWriter.println("Contest Title: " + contestTitle);
         printWriter.print("On: " + Utilities.getL10nDateTime());
-        
+
         GregorianCalendar resumeTime = null;
         if (getContest() != null) {
             resumeTime = getContest().getContestTime().getResumeTime();
@@ -477,19 +480,19 @@ public class ReportPane extends JPanePlugin {
             printWriter.print("  Contest date/time: " + resumeTime.getTime());
 
         }
-        
+
         printWriter.println();
         Profile profile = null;
         if (getContest() != null) {
             profile = getContest().getProfile();
         }
-      
+
         if (profile != null) {
             printWriter.println("Profile: " + profile.getName() + " (" + profile.getDescription() + ")");
         } else {
             printWriter.println("Profile: none defined");
         }
-        
+
         printWriter.println();
         printWriter.println();
         printWriter.println("** " + report.getReportTitle() + " Report");
@@ -501,9 +504,9 @@ public class ReportPane extends JPanePlugin {
                 printWriter.println();
             }
         }
- 
+
     }
-    
+
     public void createReportFile(IReport report, boolean suppressHeaderFooter, String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
@@ -511,12 +514,12 @@ public class ReportPane extends JPanePlugin {
 
         try {
 
-            if ( ! suppressHeaderFooter) {
+            if (!suppressHeaderFooter) {
                 createHeader(printWriter, report);
             }
 
             try {
-                if (report instanceof ExtractPlaybackLoadFilesReport){
+                if (report instanceof ExtractPlaybackLoadFilesReport) {
                     ((ExtractPlaybackLoadFilesReport) report).setReportFilename(filename);
                     ((ExtractPlaybackLoadFilesReport) report).setReportDirectory(getReportDirectory());
                 }
@@ -526,7 +529,7 @@ public class ReportPane extends JPanePlugin {
                 e.printStackTrace(printWriter);
             }
 
-            if ( ! suppressHeaderFooter) {
+            if (!suppressHeaderFooter) {
                 report.printFooter(printWriter);
             }
 
@@ -544,9 +547,9 @@ public class ReportPane extends JPanePlugin {
         try {
 
             FrameUtilities.waitCursor(this);
-            
+
             showXMLCheckbox();
-            
+
             IReport selectedReport = null;
 
             String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
@@ -555,15 +558,15 @@ public class ReportPane extends JPanePlugin {
                     selectedReport = report;
                 }
             }
-            
+
             boolean writeXML = getXmlOutputCheckbox().isSelected();
-            
+
             String extension = "txt";
-            if ( writeXML ) {
+            if (writeXML) {
                 extension = "xml";
             }
             String filename = getFileName(selectedReport, extension);
-            
+
             File reportDirectoryFile = new File(getReportDirectory());
             if (reportDirectoryFile.exists()) {
                 if (reportDirectoryFile.isDirectory()) {
@@ -572,17 +575,17 @@ public class ReportPane extends JPanePlugin {
             } else {
                 if (reportDirectoryFile.mkdirs()) {
                     filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
-                 }
+                }
             }
 
             selectedReport.setContestAndController(getContest(), getController());
-            
+
             // SOMEDAY insure that each report createReportFile sets the filter too
             /**
              * Using setFilter because createReportFile may not set the filter
              */
             selectedReport.setFilter(filter);
-            if (writeXML){
+            if (writeXML) {
                 createXMLFile(selectedReport, filename, filter);
             } else {
                 boolean suppressHeaderFooter = false;
@@ -592,20 +595,20 @@ public class ReportPane extends JPanePlugin {
                 }
                 createReportFile(selectedReport, suppressHeaderFooter, filename, filter);
             }
-            
+
             viewFile(filename, selectedReport.getReportTitle());
 
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception outputting a report ", e);
-            showMessage("Unable to output report, check logs "+e.getMessage());
-    } finally {
-        FrameUtilities.regularCursor(this);
-    }
+            showMessage("Unable to output report, check logs " + e.getMessage());
+        } finally {
+            FrameUtilities.regularCursor(this);
+        }
 
     }
-    
-    public String notImplementedXML (IReport report) throws IOException{
-        
+
+    public String notImplementedXML(IReport report) throws IOException {
+
         ContestXML contestXML = new ContestXML();
         contestXML.setShowPasswords(getContest().isAllowed(Type.VIEW_PASSWORDS));
 
@@ -614,17 +617,17 @@ public class ReportPane extends JPanePlugin {
         IMemento memento = mementoRoot.createChild("message");
         memento.putString("name", "Not implemented");
         memento.putString("reportName", report.getReportTitle());
-        
-        contestXML.addVersionInfo (mementoRoot, getContest());
-        
-        contestXML.addFileInfo (mementoRoot);
-        
+
+        contestXML.addVersionInfo(mementoRoot, getContest());
+
+        contestXML.addFileInfo(mementoRoot);
+
         return mementoRoot.saveToString();
-       
+
     }
-    
+
     private void createXMLFile(IReport report, String filename, Filter inFilter) {
-        
+
         PrintWriter printWriter = null;
 
         filter = inFilter;
@@ -634,7 +637,7 @@ public class ReportPane extends JPanePlugin {
             printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
             try {
-                
+
                 String xmlString = report.createReportXML(inFilter);
                 printWriter.println(xmlString);
 
@@ -645,7 +648,7 @@ public class ReportPane extends JPanePlugin {
                     printWriter.println("Exception in report: " + e.getMessage());
                     e.printStackTrace(printWriter);
                 }
-                
+
             } catch (Exception e) {
                 printWriter.println("Exception in report: " + e.getMessage());
                 e.printStackTrace(printWriter);
@@ -658,7 +661,7 @@ public class ReportPane extends JPanePlugin {
             log.log(Log.INFO, "Exception creating report", e);
             printWriter.println("Exception creating report " + e.getMessage());
         }
-        
+
     }
 
     private void showXMLCheckbox() {
@@ -674,7 +677,7 @@ public class ReportPane extends JPanePlugin {
         try {
 
             FrameUtilities.waitCursor(this);
-            
+
             IReport selectedReport = null;
 
             String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
@@ -683,16 +686,16 @@ public class ReportPane extends JPanePlugin {
                     selectedReport = report;
                 }
             }
-            
+
             boolean writeXML = getXmlOutputCheckbox().isSelected();
-            
+
             String extension = "txt";
-            if ( writeXML ) {
+            if (writeXML) {
                 extension = "xml";
             }
-            
+
             String filename = getFileName(selectedReport, extension);
-            
+
             File reportDirectoryFile = new File(getReportDirectory());
             if (reportDirectoryFile.exists()) {
                 if (reportDirectoryFile.isDirectory()) {
@@ -703,19 +706,19 @@ public class ReportPane extends JPanePlugin {
                     filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
                 }
             }
-            
+
             PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
-            
+
             printWriter.println();
             printWriter.println(new VersionInfo().getSystemName());
             printWriter.println("Date: " + Utilities.getL10nDateTime());
             printWriter.println(new VersionInfo().getSystemVersionInfo());
             printWriter.println();
-            printWriter.println("Report "+selectedReport.getReportTitle() + " Report ");
+            printWriter.println("Report " + selectedReport.getReportTitle() + " Report ");
             printWriter.println();
 
             selectedReport.setContestAndController(getContest(), getController());
-            
+
             Site[] sites = getContest().getSites();
             Arrays.sort(sites, new SiteComparatorBySiteNumber());
             for (Site site : sites) {
@@ -724,20 +727,20 @@ public class ReportPane extends JPanePlugin {
                     reportFitler.addSite(site);
                     selectedReport.setFilter(reportFitler);
                     printWriter.println();
-                    printWriter.println("Report   "+selectedReport.getReportTitle() + " Report ");
-                    printWriter.println("For site "+site.getSiteNumber()+" "+site.getDisplayName());
-                    
+                    printWriter.println("Report   " + selectedReport.getReportTitle() + " Report ");
+                    printWriter.println("For site " + site.getSiteNumber() + " " + site.getDisplayName());
+
                     selectedReport.writeReport(printWriter);
-                    
+
                 } catch (Exception e) {
                     printWriter.println("Exception in report: " + e.getMessage());
                     e.printStackTrace(printWriter);
                 }
             }
-            
+
             printWriter.println();
             printWriter.println("end report");
-            
+
             viewFile(filename, selectedReport.getReportTitle());
 
         } catch (Exception e) {
@@ -786,15 +789,15 @@ public class ReportPane extends JPanePlugin {
     }
 
     protected void changeSiteFiltering() {
-//        if (getThisClientFilterButton().isSelected()){
-//            filter.setFilterOn();
-//            filter.setSiteNumber(getContest().getSiteNumber());
-//            filter.setThisSiteOnly(true);
-//        } else {
-//            filter.setThisSiteOnly(false);
-//        }
-//        
-//        refreshFilterLabel();
+        // if (getThisClientFilterButton().isSelected()){
+        // filter.setFilterOn();
+        // filter.setSiteNumber(getContest().getSiteNumber());
+        // filter.setThisSiteOnly(true);
+        // } else {
+        // filter.setThisSiteOnly(false);
+        // }
+        //
+        // refreshFilterLabel();
     }
 
     /**
@@ -825,7 +828,7 @@ public class ReportPane extends JPanePlugin {
             reportsComboBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-                        if (getBreakdownBySiteCheckbox().isSelected()){
+                        if (getBreakdownBySiteCheckbox().isSelected()) {
                             generateSelectedReportBySite();
                         } else {
                             generateSelectedReport();
@@ -845,7 +848,7 @@ public class ReportPane extends JPanePlugin {
     private JCheckBox getThisClientFilterButton() {
         if (thisClientFilterButton == null) {
             thisClientFilterButton = new JCheckBox();
-            thisClientFilterButton.setBounds(new java.awt.Rectangle(21,114,192,21));
+            thisClientFilterButton.setBounds(new java.awt.Rectangle(21, 114, 192, 21));
             thisClientFilterButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             thisClientFilterButton.setText("Filter for this client only");
             thisClientFilterButton.setVisible(false);
@@ -859,7 +862,7 @@ public class ReportPane extends JPanePlugin {
     }
 
     protected void changeThisClientFiltering() {
-        if (thisClientFilterButton.isSelected()){
+        if (thisClientFilterButton.isSelected()) {
             filter.clearAccountList();
 
         } else {
@@ -867,7 +870,7 @@ public class ReportPane extends JPanePlugin {
             filter.clearAccountList();
             filter.addAccount(getContest().getClientId());
         }
-        
+
         refreshFilterLabel();
     }
 
@@ -937,12 +940,12 @@ public class ReportPane extends JPanePlugin {
 
         getEditFilterFrame().setFilter(filter);
         getEditFilterFrame().validate();
-        
+
         getEditFilterFrame().setVisible(true);
     }
 
     public EditFilterFrame getEditFilterFrame() {
-        if (editFilterFrame == null){
+        if (editFilterFrame == null) {
             Runnable callback = new Runnable() {
                 public void run() {
                     refreshFilterLabel();
@@ -998,7 +1001,7 @@ public class ReportPane extends JPanePlugin {
             contestReports.setContestAndController(getContest(), getController());
             contestReports.generateReports();
             System.out.println("Reports Generated to " + Utilities.getCurrentDirectory() + File.separator + contestReports.getReportDirectory());
-            JOptionPane.showMessageDialog(this, "Reports Generated to "+contestReports.getReportDirectory());
+            JOptionPane.showMessageDialog(this, "Reports Generated to " + contestReports.getReportDirectory());
         } catch (Exception e) {
             logException("Unable to produce reports", e);
             JOptionPane.showMessageDialog(this, "Unable to produce reports " + e.getMessage());
@@ -1069,6 +1072,5 @@ public class ReportPane extends JPanePlugin {
             });
         }
     }
-   
-    
+
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -39,7 +39,7 @@ public class ProblemsReport implements IReport {
     private Log log;
 
     private Filter filter;
-    
+
     private void writeContestTime(PrintWriter printWriter) {
         printWriter.println();
         GregorianCalendar resumeTime = contest.getContestTime().getResumeTime();
@@ -52,7 +52,7 @@ public class ProblemsReport implements IReport {
     }
 
     public void writeRow(PrintWriter printWriter, Problem problem, ProblemDataFiles problemDataFiles) {
-        
+
         String deletedText = "";
         if (!problem.isActive()) {
             deletedText = " [HIDDEN] ";
@@ -60,6 +60,7 @@ public class ProblemsReport implements IReport {
 
         printWriter.println("  Problem '" + problem + deletedText + "' ver=" + problem.getElementId().getVersionNumber() + " id=" + problem.getElementId());
         printWriter.println("       Short name       : " + problem.getShortName());
+        printWriter.println("       Letter           : " + problem.getLetter());
         printWriter.println("       Data file name   : " + problem.getDataFileName());
         printWriter.println("       Answer file name : " + problem.getAnswerFileName());
         printWriter.println("       Read from stdin  : " + Utilities.yesNoString(problem.isReadInputDataFromSTDIN()));
@@ -71,7 +72,7 @@ public class ProblemsReport implements IReport {
             printWriter.print(" (no time limit when zero seconds)");
         }
         printWriter.println();
-        
+
         printWriter.println("        Computer Judged : " + problem.isComputerJudged());
 
         if (problem.isComputerJudged()) {
@@ -81,7 +82,7 @@ public class ProblemsReport implements IReport {
         }
 
         printWriter.println("  Show Prelim Judgement : " + problem.isPrelimaryNotification());
-        
+
         printWriter.println();
 
         printWriter.println("        Using validator : " + problem.isValidatedProblem());
@@ -129,7 +130,7 @@ public class ProblemsReport implements IReport {
     }
 
     public void writeProblemDataFiles(PrintWriter printWriter, ProblemDataFiles problemDataFiles) {
-        
+
         if (problemDataFiles != null) {
             SerializedFile[] judgesDataFiles = problemDataFiles.getJudgesDataFiles();
             SerializedFile[] judgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles();
@@ -218,16 +219,16 @@ public class ProblemsReport implements IReport {
             if (judgeCDPBasePath == null) {
                 judgeCDPBasePath = "";
             }
-            
+
             printWriter.println();
             printWriter.println("  Location for Judges CDP / problem config : '" + judgeCDPBasePath + "'");
-            
+
             String adminCDPPath = info.getAdminCDPBasePath();
             if (adminCDPPath == null) {
                 adminCDPPath = "";
             }
             printWriter.println("  Location for  Admin CDP / problem config : '" + adminCDPPath + "'");
-            
+
         }
 
         for (Problem problem : contest.getProblems()) {

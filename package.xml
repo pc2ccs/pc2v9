@@ -54,6 +54,7 @@
                 <include name="LICENSE"/>
                 <include name="pc2v9.ini"/>
                 <include name="pc2.ico"/>
+            	<include name="realm.properties"/>
             </zipfileset>
             <zipfileset dir="${build.dir}" filemode="644" prefix="${release}">
                 <include name="VERSION"/>
@@ -66,10 +67,10 @@
             <zipfileset dir="${dist.dir}" filemode="644" includes="${jar.name}" 
                                                  prefix="${release}/lib"/>
             <zipfileset dir="${vendor.lib.dir}" filemode="644" prefix="${release}/lib">
-                <include name="activation.jar"/>
-                <include name="mailapi.jar"/>
-                <include name="mclb.jar"/>
-                <include name="smtp.jar"/>
+                <exclude name="junit-*.jar"/>
+                <exclude name="checkstyle-*.jar"/>
+                <exclude name="svnkit*.jar"/>
+                <exclude name="quick-json*.jar"/>
             </zipfileset>
             <zipfileset dir="${samps.dir}" filemode="644" prefix="${release}/samps">
                 <exclude name="**/compile*"/>

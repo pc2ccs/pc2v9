@@ -69,7 +69,7 @@ echo "pc2server.bat" file.
 goto :startJava
 
 :startJava
-java %HeapParam% -cp %libdir%\pc2.jar;%mclbdir%\mclb.jar edu.csus.ecs.pc2.Starter --server %1 %2 %3 %4 %5 %6 %7 %8 %9
+java %HeapParam% -cp "%libdir%\*" edu.csus.ecs.pc2.Starter --server %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
 rem eof pc2server.bat $Id$

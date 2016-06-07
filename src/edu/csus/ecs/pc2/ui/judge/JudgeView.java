@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.ImBoredPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
@@ -209,6 +210,10 @@ public class JudgeView extends JFrame implements UIPlugin {
 
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
+                
+                ImBoredPane boredPane = new ImBoredPane();
+                addUIPlugin(getMainTabbedPane(), "I\'m Bored", boredPane);
+
 
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
@@ -268,13 +273,14 @@ public class JudgeView extends JFrame implements UIPlugin {
                 submissionBiffPane.setContestAndController(contest, controller);
                 controller.register(submissionBiffPane);
                 
-                setVisible(true);           
-                //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs
-                getMainTabbedPane().setSelectedComponent(submitClarificationPane);
-                getMainTabbedPane().doLayout();
-                getMainTabbedPane().setSelectedComponent(submitRunPane);
-                getMainTabbedPane().doLayout();
-                getMainTabbedPane().setSelectedComponent(newRunsPane);
+                setVisible(true);  
+                //the following was fixed under Bug 800        
+//                //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs
+//                getMainTabbedPane().setSelectedComponent(submitClarificationPane);
+//                getMainTabbedPane().doLayout();
+//                getMainTabbedPane().setSelectedComponent(submitRunPane);
+//                getMainTabbedPane().doLayout();
+//                getMainTabbedPane().setSelectedComponent(newRunsPane);
 
                 if (Utilities.isDebugMode()){
                     
@@ -515,4 +521,6 @@ public class JudgeView extends JFrame implements UIPlugin {
         }
     }
     
+
 } // @jve:decl-index=0:visual-constraint="10,10"
+

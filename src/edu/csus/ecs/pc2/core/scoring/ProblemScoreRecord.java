@@ -27,6 +27,10 @@ public class ProblemScoreRecord {
 
     private Problem problem;
 
+    private int numberPendingSubmissions = 0;
+
+    private int numberJudgedSubmissions = 0;
+
     private int submissionsBeforeYes;
 
     /**
@@ -38,8 +42,11 @@ public class ProblemScoreRecord {
      * @param solutionTime
      * @param numberSubmissions
      * @param submissionsBeforeYes
+     * @param numberPendingSubmissions
+     * @param numberJudgedSubmissions
      */
-    public ProblemScoreRecord(boolean solved, Run solvingRun, Problem problem, long points, long solutionTime, int numberSubmissions, int submissionsBeforeYes) {
+    public ProblemScoreRecord(boolean solved, Run solvingRun, Problem problem, long points, long solutionTime, int numberSubmissions, int submissionsBeforeYes, int numberPendingSubmissions,
+            int numberJudgedSubmissions) {
         super();
         this.solved = solved;
         this.solvingRun = solvingRun;
@@ -48,26 +55,24 @@ public class ProblemScoreRecord {
         this.numberSubmissions = numberSubmissions;
         this.problem = problem;
         this.submissionsBeforeYes = submissionsBeforeYes;
+        this.numberPendingSubmissions = numberPendingSubmissions;
+        this.numberJudgedSubmissions = numberJudgedSubmissions;
     }
-
 
     /**
      * Constructor deprecated.
      * 
-     * This class is now used to store values, before it was used to both calculate
-     * and store values.
-     * <br>
-     * See {@link IScoringAlgorithm#createProblemScoreRecord(Run[], Problem, Properties)} as an example
-     * of how to compute values.
+     * This class is now used to store values, before it was used to both calculate and store values. <br>
+     * See {@link IScoringAlgorithm#createProblemScoreRecord(Run[], Problem, Properties)} as an example of how to compute values.
      */
-    @Deprecated  
+    @Deprecated
     public ProblemScoreRecord(Run[] teamProblemRuns, Problem problem2, Properties properties) {
         // TODO Auto-generated constructor stub
     }
 
-
     /**
      * Has problem been solved?.
+     * 
      * @return true if problem solved.
      */
     public boolean isSolved() {
@@ -90,7 +95,7 @@ public class ProblemScoreRecord {
     /**
      * Time/Penalty points for this problem.
      * 
-     * @return number of points 
+     * @return number of points
      */
     public long getPoints() {
         return points;
@@ -104,9 +109,10 @@ public class ProblemScoreRecord {
     public Run getSolvingRun() {
         return solvingRun;
     }
-    
+
     /**
      * Number of submissions before first yes.
+     * 
      * @return
      */
     public int getSubmissionsBeforeYes() {
@@ -115,7 +121,23 @@ public class ProblemScoreRecord {
 
     @Override
     public String toString() {
-        return " Problem " + problem.getDisplayName() + " Solved=" + isSolved() + " pts=" + getPoints() + " runs"
-                + getNumberSubmissions();
+        return " Problem " + problem.getDisplayName() + " Solved=" + isSolved() + " pts=" + getPoints() + " runs" + getNumberSubmissions();
     }
+
+    public void setNumberJudgedSubmissions(int numberJudgedSubmissions) {
+        this.numberJudgedSubmissions = numberJudgedSubmissions;
+    }
+
+    public int getNumberJudgedSubmissions() {
+        return numberJudgedSubmissions;
+    }
+
+    public void setNumberPendingSubmissions(int numberPendingSubmissions) {
+        this.numberPendingSubmissions = numberPendingSubmissions;
+    }
+
+    public int getNumberPendingSubmissions() {
+        return numberPendingSubmissions;
+    }
+
 }

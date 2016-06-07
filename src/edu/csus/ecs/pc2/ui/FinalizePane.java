@@ -31,12 +31,11 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.FinalizeReport;
 
 /**
+ * Edit Finalize settings pane.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
-
-// $HeadURL$
 public class FinalizePane extends JPanePlugin {
 
     /**
@@ -262,14 +261,6 @@ public class FinalizePane extends JPanePlugin {
                 throw new InvalidFieldValue("Cannot finalize contest - contest not over - remaining time: " + contestTime.getRemainingTimeStr());
             }
             
-//            if (data.getGoldRank() == 0) {
-//                throw new InvalidFieldValue("Cannot finalize contest - Number of golds must be greater than zero");
-//            }
-//            
-//            if (data.getSilverRank() == 0) {
-//                throw new InvalidFieldValue("Cannot finalize contest - Silver rank must be greater than zero");
-//            }
-            
             if (data.getBronzeRank() == 0) {
                 throw new InvalidFieldValue("Cannot finalize contest - Bronze rank must be greater than zero");
             }
@@ -379,24 +370,24 @@ public class FinalizePane extends JPanePlugin {
     private JPanel getCenterPane() {
         if (centerPane == null) {
             certificationCommentLabel = new JLabel();
-            certificationCommentLabel.setBounds(new Rectangle(30, 19, 402, 26));
+            certificationCommentLabel.setBounds(new Rectangle(83, 19, 349, 26));
             certificationCommentLabel.setFont(new Font("Dialog", Font.BOLD, 14));
             certificationCommentLabel.setHorizontalAlignment(SwingConstants.CENTER);
             certificationCommentLabel.setText("Contest Not Certified");
             certifierLabel = new JLabel();
-            certifierLabel.setBounds(new Rectangle(53, 171, 125, 22));
+            certifierLabel.setBounds(new Rectangle(64, 167, 170, 22));
             certifierLabel.setText("Who certifies");
             certifierLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             bronzeLabel = new JLabel();
-            bronzeLabel.setBounds(new Rectangle(53, 134, 125, 22));
+            bronzeLabel.setBounds(new Rectangle(64, 134, 170, 22));
             bronzeLabel.setText("Last Bronze Rank");
             bronzeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             silverLabel = new JLabel();
-            silverLabel.setBounds(new Rectangle(53, 97, 125, 22));
+            silverLabel.setBounds(new Rectangle(64, 97, 170, 22));
             silverLabel.setText("Last Silver Rank");
             silverLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             goldLabel = new JLabel();
-            goldLabel.setBounds(new Rectangle(53, 60, 125, 22));
+            goldLabel.setBounds(new Rectangle(64, 56, 170, 22));
             goldLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             goldLabel.setText("Last Gold Rank");
             centerPane = new JPanel();
@@ -422,7 +413,7 @@ public class FinalizePane extends JPanePlugin {
     private JTextField getGoldRankTextField() {
         if (goldRankTextField == null) {
             goldRankTextField = new JTextField();
-            goldRankTextField.setBounds(new Rectangle(196, 61, 40, 20));
+            goldRankTextField.setBounds(new Rectangle(250, 57, 40, 20));
             goldRankTextField.setDocument(new IntegerDocument());
         }
         return goldRankTextField;
@@ -436,7 +427,7 @@ public class FinalizePane extends JPanePlugin {
     private JTextField getSilverRankTextField() {
         if (silverRankTextField == null) {
             silverRankTextField = new JTextField();
-            silverRankTextField.setBounds(new Rectangle(196, 98, 40, 20));
+            silverRankTextField.setBounds(new Rectangle(250, 94, 40, 20));
             silverRankTextField.setDocument(new IntegerDocument());
         }
         return silverRankTextField;
@@ -450,7 +441,7 @@ public class FinalizePane extends JPanePlugin {
     private JTextField getBronzeRankTextField() {
         if (bronzeRankTextField == null) {
             bronzeRankTextField = new JTextField();
-            bronzeRankTextField.setBounds(new Rectangle(196, 135, 40, 20));
+            bronzeRankTextField.setBounds(new Rectangle(250, 131, 40, 20));
             goldRankTextField.setDocument(new IntegerDocument());
         }
         return bronzeRankTextField;
@@ -464,7 +455,7 @@ public class FinalizePane extends JPanePlugin {
     private JTextField getCommentTextField() {
         if (commentTextField == null) {
             commentTextField = new JTextField();
-            commentTextField.setBounds(new Rectangle(196, 172, 207, 20));
+            commentTextField.setBounds(new Rectangle(250, 168, 207, 20));
         }
         return commentTextField;
     }
@@ -527,13 +518,6 @@ public class FinalizePane extends JPanePlugin {
     void enableButtons(){
         
         boolean certified = false;
-//        
-//        FinalizeData finalizeData = getContest().getFinalizeData();
-//        
-//        if (finalizeData != null){
-//            certified = finalizeData.isCertified();
-//        }
-        
         getUpdateButton().setEnabled(! certified);
         getFinalizeButton().setEnabled(! certified);
         

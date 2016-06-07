@@ -2,7 +2,6 @@
 #
 # Purpose: start pc2
 # Author : pc2@ecs.csus.edu
-# $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/bin/pc2judge $
 #
 
 . `dirname $0`/pc2env
@@ -15,6 +14,6 @@ else
   PC2XOPS=""
 fi
 
-java $PC2XOPS -Xms64M -Xmx768M -cp $libdir/pc2.jar:$mclbdir/mclb.jar edu.csus.ecs.pc2.Starter $*
+java $PC2XOPS -Xms64M -Xmx768M -cp "$libdir/*" edu.csus.ecs.pc2.Starter $*
 
-# eof pc2judge $Id: pc2judge 1892 2009-07-14 17:08:28Z boudreat $ 
+# eof

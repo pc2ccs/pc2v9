@@ -289,17 +289,12 @@ public class EditProblemPaneNew extends JPanePlugin {
             }
         });
 
-        try {
-            if (IniFile.isFilePresent()) {
-                String value = IniFile.getValue("client.debug");
-                if (value != null) {
-                    debug22EditProblem = value.equalsIgnoreCase("true");
-                }
+        if (IniFile.isFilePresent()) {
+            String value = IniFile.getValue("client.debug");
+            if (value != null) {
+                debug22EditProblem = value.equalsIgnoreCase("true");
             }
-        } catch (Exception e) {
-            e.printStackTrace(System.err); // debug 22 remove try/catch
         }
-
     }
 
     private void addWindowListeners() {
@@ -804,8 +799,6 @@ public class EditProblemPaneNew extends JPanePlugin {
         }
 
         checkProblem.setShowValidationToJudges(showValidatorToJudges.isSelected());
-
-        // debug 22 getCcsValidationEnabledCheckBox().isSelected();
 
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
@@ -1409,7 +1402,7 @@ public class EditProblemPaneNew extends JPanePlugin {
             showMessage(message + " check logs.");
             getLog().log(Log.WARNING, message, e);
             if (debug22EditProblem) {
-                e.printStackTrace(); // debug 22
+                e.printStackTrace(); // debug 22 
             }
         }
 
@@ -2649,7 +2642,9 @@ public class EditProblemPaneNew extends JPanePlugin {
             exportButton.setMnemonic(KeyEvent.VK_X);
             exportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    saveAndCopmpare();
+                    if (debug22EditProblem){
+                        saveAndCopmpare();
+                    }
                 }
             });
         }
@@ -2668,6 +2663,9 @@ public class EditProblemPaneNew extends JPanePlugin {
 
     }
 
+    /**
+     * Save current problem and data files, then compare to currently edited data.
+     */
     void saveAndCopmpare() {
 
         try {
@@ -2755,7 +2753,9 @@ public class EditProblemPaneNew extends JPanePlugin {
                 System.out.println("Wrote " + string);
             }
         } catch (Exception e) {
-            e.printStackTrace(); // debug 22
+            showMessage("Error attempting to write Yaml, check logs" + e.getMessage());
+            getLog().log(Log.WARNING,  "Error attempting to write Yaml, check logs" + e.getMessage(), e);
+            e.printStackTrace(System.err); // debug 22
         }
     }
 

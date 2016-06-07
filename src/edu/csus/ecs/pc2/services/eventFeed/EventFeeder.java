@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.transport;
+package edu.csus.ecs.pc2.services.eventFeed;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -55,7 +55,7 @@ import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
  */
 
 // $HeadURL$
-class EventFeeder implements Runnable {
+public class EventFeeder implements Runnable {
 
     private IInternalContest contest;
     
@@ -115,7 +115,7 @@ class EventFeeder implements Runnable {
      * @param out
      * @param contestTimeWhenJudgementsNoLongerSentMinutes 0 fro no filtered free, else the freeze time.
      */
-    EventFeeder(IInternalContest contest, OutputStreamWriter out, long contestTimeWhenJudgementsNoLongerSentMinutes) {
+    public EventFeeder(IInternalContest contest, OutputStreamWriter out, long contestTimeWhenJudgementsNoLongerSentMinutes) {
         this();
         
         this.contest = contest;
@@ -132,7 +132,7 @@ class EventFeeder implements Runnable {
      * @param contest
      * @param runnable
      */
-    EventFeeder(IInternalContest contest, IEventFeedRunnable runnable) {
+    public EventFeeder(IInternalContest contest, IEventFeedRunnable runnable) {
         this();
 
         this.contest = contest;

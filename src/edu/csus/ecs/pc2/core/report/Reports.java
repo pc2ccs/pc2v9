@@ -106,44 +106,46 @@ public final class Reports {
         reports.add(new JudgementNotificationsReport());
 
         reports.add(new ProfileCloneSettingsReport());
-        
-        reports.add(new  SitesReport());
-        
+
+        reports.add(new SitesReport());
+
         reports.add(new EventFeedReport());
         reports.add(new NotificationsReport());
-        
+
         reports.add(new FinalizeReport());
-        
+
         reports.add(new InternalDumpReport());
-        
+
         reports.add(new PasswordsReport());
-        
+
         reports.add(new AccountsTSVReportTeamAndJudges());
 
         reports.add(new AccountsTSVReport());
-        
+
         reports.add(new RunsTSVReport());
-        
+
         reports.add(new JSONReport());
 
         reports.add(new EventFeed2013Report());
-        
+
         reports.add(new UserdataTSVReport());
-        
+
         reports.add(new GroupsTSVReport());
-        
+
         reports.add(new TeamsTSVReport());
-        
+
         reports.add(new ScoreboardTSVReport());
 
         reports.add(new SubmissionsTSVReport());
-        
+
         reports.add(new ResolverEventFeedReport());
-        
+
         reports.add(new AutoJudgingSettingsReport());
-        
+
         reports.add(new JudgingAnalysisReport());
-        
+
+        reports.add(new JSON2016Report());
+
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }
@@ -167,16 +169,16 @@ public final class Reports {
     public static void usage() {
 
         String[] lines = { "Usage: [options] reportName|## [[reportName|##][...]]", //
-                "", // 
-                "--profile name - profile name, default uses current profile.  name may be a ## from --listp listing", // 
-                "--contestPassword padd  - password needed to decrypt pc2 data", // 
-                "--xml          - output only XML for report", // 
-                "--list         - list names of reports (and the report numbers)", // 
-                "--dir name     - alternate base directory name, by default uses profile dir name", // 
-                "--site ##      - specify the site number", // 
-                "--listp        - list all profile names with numbers", // 
+                "", //
+                "--profile name - profile name, default uses current profile.  name may be a ## from --listp listing", //
+                "--contestPassword padd  - password needed to decrypt pc2 data", //
+                "--xml          - output only XML for report", //
+                "--list         - list names of reports (and the report numbers)", //
+                "--dir name     - alternate base directory name, by default uses profile dir name", //
+                "--site ##      - specify the site number", //
+                "--listp        - list all profile names with numbers", //
                 "--noProfile - do not use profile directory use pre version 9.2 location", //
-                "", // 
+                "", //
                 "reportName - name of report to print (or report number)",//
                 "##         - number of report to print (numbers found using --list)", //
                 "", //
@@ -212,7 +214,8 @@ public final class Reports {
     /**
      * Get an integer for the input string.
      * 
-     * @param s a string containing an integer
+     * @param s
+     *            a string containing an integer
      * @return 0 if can not parse string otherwise converts the string contents to an integer.
      */
     protected static int getInteger(String s) {
@@ -228,10 +231,10 @@ public final class Reports {
     /**
      * Gets the report for the input arg (integer).
      * 
-     * Looks up the report by number and returns the report for that
-     * input integer.
+     * Looks up the report by number and returns the report for that input integer.
      * 
-     * @param arg a string containing an integer.
+     * @param arg
+     *            a string containing an integer.
      * @return reporrt for input integer (from arg)
      * @throws Exception
      */
@@ -266,8 +269,7 @@ public final class Reports {
     /**
      * Returns a filename for the input report.
      * 
-     * The report filename has the name of the report {@link IReport#getReportTitle()} and
-     * the current time in form MM.dd.SSS (SimpleDateFormat)
+     * The report filename has the name of the report {@link IReport#getReportTitle()} and the current time in form MM.dd.SSS (SimpleDateFormat)
      * 
      * @param selectedReport
      * @return a filename for the input report
@@ -287,8 +289,9 @@ public final class Reports {
     /**
      * Print a report.
      * 
-     * @param arg either number or name for the report
-     * @param outputXML 
+     * @param arg
+     *            either number or name for the report
+     * @param outputXML
      */
     private void printReport(String arg, boolean outputXML) {
 
@@ -390,13 +393,13 @@ public final class Reports {
     }
 
     private void writeFile(String filename, String s) throws IOException {
-        
+
         FileOutputStream fis = new FileOutputStream(filename, false);
         fis.write(s.getBytes());
         fis.close();
         fis = null;
         // TODO Auto-generated method stub
-        
+
     }
 
     /**
@@ -425,7 +428,8 @@ public final class Reports {
     /**
      * Write filename to stdout.
      * 
-     * @param filename filename to echo to stdout
+     * @param filename
+     *            filename to echo to stdout
      */
     private void catfile(String filename) {
 
@@ -459,7 +463,9 @@ public final class Reports {
 
     /**
      * Main starting point for Reports
-     * @param args command line arguments
+     * 
+     * @param args
+     *            command line arguments
      */
     public static void main(String[] args) {
 
@@ -493,7 +499,7 @@ public final class Reports {
             System.exit(2);
 
         }
-        
+
         boolean xmlOutputOption = arguments.isOptPresent("--xml");
 
         String password = arguments.getOptValue("--contestPassword");
@@ -526,9 +532,7 @@ public final class Reports {
     /**
      * Looks up profile # in profile list.
      * 
-     * If the input name is a integer only will return the profile
-     * id (ContestId) that cooresponds to the profile in the profiles.properties
-     * list.
+     * If the input name is a integer only will return the profile id (ContestId) that cooresponds to the profile in the profiles.properties list.
      * 
      * @param name
      * @return
@@ -600,15 +604,16 @@ public final class Reports {
 
     /**
      * Create an empty XML element/report.
+     * 
      * @param report
      * @return
      * @throws IOException
      */
-    public static String notImplementedXML (IReport report) throws IOException{
-        return notImplementedXML(report,"");
+    public static String notImplementedXML(IReport report) throws IOException {
+        return notImplementedXML(report, "");
     }
 
-    public static String notImplementedXML (IReport report, String message) throws IOException{
+    public static String notImplementedXML(IReport report, String message) throws IOException {
 
         ContestXML contestXML = new ContestXML();
 
@@ -616,14 +621,14 @@ public final class Reports {
 
         IMemento memento = mementoRoot.createChild("message");
         memento.putString("name", "Not implemented");
-        if (message != null && message.length() > 0){
+        if (message != null && message.length() > 0) {
             memento.putString("info", message);
         }
         memento.putString("reportName", report.getReportTitle());
 
-        contestXML.addVersionInfo (mementoRoot, null);
+        contestXML.addVersionInfo(mementoRoot, null);
 
-        contestXML.addFileInfo (mementoRoot);
+        contestXML.addFileInfo(mementoRoot);
 
         return mementoRoot.saveToString();
 

@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.exports.ccs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -86,6 +87,8 @@ public class ResolverEventFeedXML {
     private VersionInfo versionInfo = new VersionInfo();
     
     private Log log = null;
+    
+    private static String contestId = "unset";
     
     public String toXML(IInternalContest contest) {
         return toXML(contest, new Filter());
@@ -293,6 +296,23 @@ public class ResolverEventFeedXML {
         XMLUtilities.addChild(memento, "started", titleCaseBoolean(running));
         XMLUtilities.addChild(memento, "starttime", formattedSeconds);
         XMLUtilities.addChild(memento, "title", info.getContestTitle());
+        String shortTitle;
+        if (info.getContestShortName() != null && !info.getContestShortName().trim().equals("")) {
+            shortTitle = info.getContestShortName();
+        } else {
+            shortTitle = info.getContestTitle();
+        }
+        XMLUtilities.addChild(memento, "short-title", shortTitle);
+        String myContestId = contest.getContestIdentifier();
+        if (myContestId != null && !myContestId.equals("")) {
+            contestId = myContestId;
+        } else if (contestId != null) {
+            // need to create one
+            // if we ever get a real one this will be overwritten by above if
+            UUID uuid = UUID.randomUUID();
+            contestId = uuid.toString();
+        }
+        XMLUtilities.addChild(memento, "contest-id", contestId.toLowerCase());
         return memento;
     }
 
@@ -372,11 +392,27 @@ public class ResolverEventFeedXML {
         
         memento.createChildNode("id", Integer.toString(id));
         memento.createChildNode("name", problem.toString());
-        // this is not currently in the CCS spec for EventFeed
-        // but is in the contest feed and the ICPC Resolver will use it
+        // added in wf2016 version
         String letter = problem.getLetter();
-        if (letter != null && !letter.trim().equals("")) {
-            memento.createChildNode("letter", letter.trim());
+        if (letter == null || letter.trim().equals("")) {
+            // letter is defined as being 'A'+problemIndex
+//            letter = String.valueOf((int)'A'+id);
+            letter = String.valueOf((char)(id + 'A'));
+            System.err.println("Problem " + id + " has no defined letter (label); assigned letter '"+letter+"'");
+        }
+        memento.createChildNode("letter", letter.trim());
+        String colorName = problem.getColorName();
+        if (colorName != null && !colorName.trim().equals("")) {
+            memento.createChildNode("color", colorName);
+        }
+        // added in wf2016 version
+        String rgb = problem.getColorRGB();
+        if (rgb != null && !rgb.trim().equals("")) {
+            String hash = "#";
+            if (rgb.startsWith("#")) {
+                hash = "";
+            }
+            memento.createChildNode("rgb", hash+rgb);
         }
         return memento;
     }
@@ -537,7 +573,7 @@ public class ResolverEventFeedXML {
         XMLUtilities.addChild(memento, "region", regionName);
         
         XMLUtilities.addChild(memento, "university", account.getDisplayName());
-        
+        XMLUtilities.addChild(memento, "university-short-name", account.getShortSchoolName());
         return memento;
     }
 

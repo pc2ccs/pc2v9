@@ -30,8 +30,6 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 /**
  * ICPC CMS Import Pane.
@@ -65,9 +63,9 @@ public class ICPCLoadPane extends JPanePlugin {
     private ICPCAccountFrame icpcAccountFrame = null;
 
     private String lastDirectory;
-    private JButton editCDPPathButton;
+//    private JButton editCDPPathButton;
 
-    private EditJudgesDataFilePathFrame editCDPPathFrame;
+//    private EditJudgesDataFilePathFrame editCDPPathFrame;
 
     /**
      * This method initializes
@@ -91,7 +89,7 @@ public class ICPCLoadPane extends JPanePlugin {
         this.add(getChangeDisplayFormatButton(), null);
         this.add(getImportSitesButton(), null);
         this.add(getImportTSVButton(), null);
-        this.add(getEditCDPPathButton());
+//        this.add(getEditCDPPathButton());
     }
 
     @Override
@@ -570,39 +568,39 @@ public class ICPCLoadPane extends JPanePlugin {
     }
     
     
-    private JButton getEditCDPPathButton() {
-        if (editCDPPathButton == null) {
-            editCDPPathButton = new JButton("Set CDP Path");
-            editCDPPathButton.setToolTipText("Specify the path to an ICPC Contest Data Package (see https://clics.ecs.baylor.edu/index.php/CDP)");
-            editCDPPathButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    editCDPPath();
-                }
-            });
-        }
-        return editCDPPathButton;
-    }
+//    private JButton getEditCDPPathButton() {
+//        if (editCDPPathButton == null) {
+//            editCDPPathButton = new JButton("Set CDP Path");
+//            editCDPPathButton.setToolTipText("Specify the path to an ICPC Contest Data Package (see https://clics.ecs.baylor.edu/index.php/CDP)");
+//            editCDPPathButton.addActionListener(new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    editCDPPath();
+//                }
+//            });
+//        }
+//        return editCDPPathButton;
+//    }
 
-    /**
-     * Displays a frame which allows the user to edit the currently-defined CDP paths
-     * on both the Admin machine and the Judge's machines.
-     */
-    private void editCDPPath() {
-        getEditCDPFrame().setContestAndController(getContest(), getController());
-        getEditCDPFrame().loadCurrentCDPPathsIntoGUI();
-        getEditCDPFrame().setVisible(true);
-    }
+//    /**
+//     * Displays a frame which allows the user to edit the currently-defined CDP paths
+//     * on both the Admin machine and the Judge's machines.
+//     */
+//    private void editCDPPath() {
+//        getEditCDPFrame().setContestAndController(getContest(), getController());
+//        getEditCDPFrame().loadCurrentCDPPathsIntoGUI();
+//        getEditCDPFrame().setVisible(true);
+//    }
 
-    /** Returns a singleton instance of the Frame used to edit the CDP path(s).
-     * 
-     * @return the EditCDPPathFrame
-     */
-    private EditJudgesDataFilePathFrame getEditCDPFrame() {
-        if (editCDPPathFrame == null) {
-            editCDPPathFrame = new EditJudgesDataFilePathFrame();
-        }
-        return editCDPPathFrame ;
-    }
+//    /** Returns a singleton instance of the Frame used to edit the CDP path(s).
+//     * 
+//     * @return the EditCDPPathFrame
+//     */
+//    private EditJudgesDataFilePathFrame getEditCDPFrame() {
+//        if (editCDPPathFrame == null) {
+//            editCDPPathFrame = new EditJudgesDataFilePathFrame();
+//        }
+//        return editCDPPathFrame ;
+//    }
     
     
 } // @jve:decl-index=0:visual-constraint="10,10"

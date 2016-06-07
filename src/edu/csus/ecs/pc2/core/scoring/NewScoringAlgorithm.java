@@ -42,7 +42,7 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  */
 
 // $HeadURL$
-public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm, ICalculateScore {
+public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm {
 
     /**
      * 
@@ -63,8 +63,8 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
     /**
      * Return a list of regional winners.
      * 
-     *  <br>
-     *  If there is more than one winner (tie) in a region will all winners (rank 1).
+     * <br>
+     * If there is more than one winner (tie) in a region will all winners (rank 1).
      * 
      * @param contest
      * @param properties
@@ -73,25 +73,24 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
      */
     // TODO SA SOMEDAY Move this to a SA Utility Class
     public StandingsRecord[] getRegionalWinners(IInternalContest contest, Properties properties) throws IllegalContestState {
-        
+
         StandingsRecord[] records = getStandingsRecords(contest, properties);
-        
+
         Vector<StandingsRecord> outVector = new Vector<StandingsRecord>();
-        
-        for (StandingsRecord record: records ) {
+
+        for (StandingsRecord record : records) {
             if (record.getGroupRankNumber() == 1) {
                 outVector.addElement(record);
             }
         }
-        
+
         return (StandingsRecord[]) outVector.toArray(new StandingsRecord[outVector.size()]);
     }
-    
+
     /**
      * Get Regional Winner.
      * 
-     * Will return StandingsRecord for a single regional winner.  If there
-     * is a tie for first place this method will return null.
+     * Will return StandingsRecord for a single regional winner. If there is a tie for first place this method will return null.
      * 
      * @param contest
      * @param properties
@@ -101,14 +100,14 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
      */
     // TODO SA SOMEDAY Move this to a SA Utility Class
     public StandingsRecord getRegionalWinner(IInternalContest contest, Properties properties, Group group) throws IllegalContestState {
-        
+
         StandingsRecord[] records = getStandingsRecords(contest, properties);
-        
+
         StandingsRecord outRecord = null;
-        
-        for (StandingsRecord record: records ) {
+
+        for (StandingsRecord record : records) {
             if (record.getGroupRankNumber() == 1) {
-                
+
                 Account account = contest.getAccount(record.getClientId());
                 if (account == null) {
                     // TODO throw exception/indicate an error.
@@ -119,7 +118,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
                     // TODO throw exception/indicate an error.
                     continue;
                 }
-                
+
                 if (teamGroup.equals(group)) {
                     if (outRecord != null) {
                         // More than one winner
@@ -129,10 +128,10 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
                 }
             }
         }
-        
+
         return outRecord;
     }
- 
+
     @Override
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties) throws IllegalContestState {
 
@@ -190,7 +189,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
 
         return (Run[]) vector.toArray(new Run[vector.size()]);
     }
-
 
     @Override
     // TODO SA SOMEDAY Move this to a SA Utility Class
@@ -255,7 +253,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
         }
         return true;
     }
-    
+
     // TODO SA SOMEDAY Move this to a SA Utility Class
     private void assignRanksBlock(StandingsRecord[] standings) {
 
@@ -336,7 +334,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
                     // TODO throw exception/indicate an error.
                     continue;
                 }
-                
+
                 Group teamGroup = contest.getGroup(groupElementId);
                 if (teamGroup == null) {
                     // TODO throw exception/indicate an error.
@@ -380,7 +378,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
 
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             for (int i = 0; i < problems.length; i++) {
-                ProblemSummaryInfo problemSummaryInfo = summaryRow.get(i+1);
+                ProblemSummaryInfo problemSummaryInfo = summaryRow.get(i + 1);
 
                 if (problemSummaryInfo != null) {
                     long solveTime = problemSummaryInfo.getSolutionTime();
@@ -422,7 +420,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
 
     /**
      * Create an XML teamStanding element for a team.
-     *  
+     * 
      * @param mementoRoot
      * @param contest
      * @param standingsRecord
@@ -433,11 +431,11 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
     private IMemento addTeamMemento(IMemento mementoRoot, IInternalContest contest, StandingsRecord standingsRecord, int indexNumber) {
 
         IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
-        
-//        if (standingsRecord.getNumberSolved() > 0){
+
+        // if (standingsRecord.getNumberSolved() > 0){
         standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
         standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
-    
+
         standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
         standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
         standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
@@ -463,17 +461,15 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
             // standingsRecordMemento.putInteger("teamGroupId", group.get()+1);
             standingsRecordMemento.putInteger("teamGroupExternalId", group.getGroupId());
         }
-        Problem [] problems = contest.getProblems();
-        
-        for (int i = 0 ; i < problems.length; i++){
-            ProblemSummaryInfo summaryInfo =          standingsRecord.getSummaryRow().get(i+1);
-            addProblemSummaryRow(standingsRecordMemento, i+1, summaryInfo);
+        Problem[] problems = contest.getProblems();
+
+        for (int i = 0; i < problems.length; i++) {
+            ProblemSummaryInfo summaryInfo = standingsRecord.getSummaryRow().get(i + 1);
+            addProblemSummaryRow(standingsRecordMemento, i + 1, summaryInfo);
         }
 
         return standingsRecordMemento;
     }
-    
-    
 
     /**
      * Creates all standings records for all teams, unsorted/unranked.
@@ -484,8 +480,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
      * @param problems
      * @return
      */
-    private StandingsRecord[] computeStandingStandingsRecords(Run[] runs, Account[] accounts, Properties properties,
-            Problem[] problems) {
+    private StandingsRecord[] computeStandingStandingsRecords(Run[] runs, Account[] accounts, Properties properties, Problem[] problems) {
 
         Arrays.sort(runs, new RunComparatorByTeam());
 
@@ -508,7 +503,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
                 Run[] teamProblemRuns = getRuns(runs, account.getClientId(), problem);
 
                 if (teamProblemRuns.length > 0) {
-                    
+
                     // old ProblemScoreRecord problemScoreRecord = new ProblemScoreRecord(teamProblemRuns, problem, properties);
                     ProblemScoreRecord problemScoreRecord = createProblemScoreRecord(teamProblemRuns, problem, properties);
 
@@ -541,17 +536,17 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
             standingsRecords[standRecCount] = standingsRecord;
             standRecCount++;
         }
-        
 
         return standingsRecords;
     }
-    
+
     private long getYesPenalty(Properties properties) {
         return getPropIntValue(properties, DefaultScoringAlgorithm.BASE_POINTS_PER_YES, "0");
     }
 
     /**
-     * @param key property to lookup
+     * @param key
+     *            property to lookup
      * @param defaultValue
      * @return
      */
@@ -572,7 +567,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
         return getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_YES_MINUTE, "1");
     }
 
-    
     @Override
     public ProblemScoreRecord createProblemScoreRecord(Run[] runs, Problem problem, Properties properties) {
 
@@ -588,6 +582,10 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
 
         int submissionsBeforeYes = 0;
 
+        int numberPending = 0;
+
+        int numberJudged = 0;
+
         Arrays.sort(runs, new RunCompartorByElapsed());
 
         for (Run run : runs) {
@@ -596,20 +594,24 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
             }
 
             numberSubmissions++;
-
-            if (run.isSendToTeams()) {
-                if (run.isSolved() && solutionTime == 0) {
-                    solved = true;
-                    solutionTime = run.getElapsedMins();
-                    solvingRun = run;
-                }
-                if (!solved) {
-                    // Not solved, yet
-
-                    if (run.isJudged() && (!run.isSolved())) {
-                        submissionsBeforeYes++;
-                    }
-                }
+            
+//            System.out.println(numberSubmissions + " "+run.getElapsedMins()+ " "+run);
+            
+            if (run.isJudged()) {
+                numberJudged++;
+            } else {
+                numberPending++;
+            }
+            
+            if (run.isSolved() && solutionTime == 0) {
+                // set to solved, set solution time
+                solved = true;
+                solutionTime = run.getElapsedMins();
+                solvingRun = run;
+            }
+            
+            if (run.isJudged() && (!solved)) {
+                submissionsBeforeYes++;
             }
         }
 
@@ -617,8 +619,23 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
             points = (solutionTime * getMinutePenalty(properties) + getYesPenalty(properties)) + (submissionsBeforeYes * getNoPenalty(properties));
         }
         
-        
-        return new ProblemScoreRecord(solved, solvingRun, problem, points, solutionTime, numberSubmissions, submissionsBeforeYes);
+//        if (solvingRun != null){
+//            System.out.print("Solved " + String.format("%3d -- ", points));
+//        } else {
+//            System.out.print("       ");
+//        }
+//        
+//        System.out.println("debug 22 befores = " + //
+//                runs[0].getSubmitter().getName()+ " " + //
+//                submissionsBeforeYes + " Prob =  " + //
+//                problem + " points=" + //
+//                String.format("%3d", points)+ " " + //
+//                solutionTime * getMinutePenalty(properties) +" + "+ //
+//                getYesPenalty(properties)+" + " + // 
+//                (submissionsBeforeYes * getNoPenalty(properties)) + " "+ //
+//                runs[0]);
+
+        return new ProblemScoreRecord(solved, solvingRun, problem, points, solutionTime, numberSubmissions, submissionsBeforeYes, numberPending, numberJudged);
 
     }
 
@@ -630,8 +647,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
      * @param summaryInfo
      * @return
      */
-    // TODO SA SOMEDAY Move this to a SA Utility Class
-    private IMemento addProblemSummaryRow(IMemento mementoRoot, int index, ProblemSummaryInfo summaryInfo){
+    private IMemento addProblemSummaryRow(IMemento mementoRoot, int index, ProblemSummaryInfo summaryInfo) {
         IMemento summaryInfoMemento = mementoRoot.createChild("problemSummaryInfo");
         summaryInfoMemento.putInteger("index", index);
         summaryInfoMemento.putString("problemId", summaryInfo.getProblemId().toString());
@@ -643,12 +659,12 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
         return summaryInfoMemento;
     }
 
-    // TODO SA SOMEDAY Move this to a SA Utility Class
-    private ProblemSummaryInfo createProblemSummaryInfo(Run[] runs, Problem problem, int problemNumber,
-            ProblemScoreRecord problemScoreRecord) {
+    private ProblemSummaryInfo createProblemSummaryInfo(Run[] runs, Problem problem, int problemNumber, ProblemScoreRecord problemScoreRecord) {
         ProblemSummaryInfo summaryInfo = new ProblemSummaryInfo();
 
         summaryInfo.setNumberSubmitted(problemScoreRecord.getNumberSubmissions());
+        summaryInfo.setJudgedRunCount(problemScoreRecord.getNumberJudgedSubmissions());
+        summaryInfo.setPendingRunCount(problemScoreRecord.getNumberPendingSubmissions());
         summaryInfo.setPenaltyPoints((int) problemScoreRecord.getPoints());
         summaryInfo.setSolutionTime(problemScoreRecord.getSolutionTime());
         summaryInfo.setUnJudgedRuns(false);
@@ -660,12 +676,13 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
 
     /**
      * Get all runs for a team/clientid and problem.
+     * 
      * @param runs
      * @param clientId
      * @param problem
      * @return
      */
-    private Run[] getRuns(Run[] runs, ClientId clientId, Problem problem) {
+    public Run[] getRuns(Run[] runs, ClientId clientId, Problem problem) {
         Vector<Run> vector = new Vector<Run>();
 
         for (Run run : runs) {
@@ -702,6 +719,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
             if (problem.isActive()) {
                 problemNumber++;
                 ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
+                problemSummaryInfo.setProblemId(problem.getElementId());
                 summaryRow.put(problemNumber, problemSummaryInfo);
             }
         }
@@ -804,23 +822,23 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
         return memento;
     }
 
-//    private ProblemSummaryInfo calcProblemScoreData(Run[] runs, Problem problem) throws IllegalContestState {
-//        ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
-//
-//        int score = 0;
-//        int attempts = 0;
-//        long solutionTime = -1;
-//        boolean solved = false;
-//        boolean unJudgedRun = false;
-//
-//        problemSummaryInfo.setSolved(solved);
-//        problemSummaryInfo.setSolutionTime(solutionTime);
-//        problemSummaryInfo.setProblemId(problem.getElementId());
-//        problemSummaryInfo.setNumberSubmitted(attempts);
-//        problemSummaryInfo.setPenaltyPoints(score);
-//        problemSummaryInfo.setUnJudgedRuns(unJudgedRun);
-//        return problemSummaryInfo;
-//    }
+    // private ProblemSummaryInfo calcProblemScoreData(Run[] runs, Problem problem) throws IllegalContestState {
+    // ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
+    //
+    // int score = 0;
+    // int attempts = 0;
+    // long solutionTime = -1;
+    // boolean solved = false;
+    // boolean unJudgedRun = false;
+    //
+    // problemSummaryInfo.setSolved(solved);
+    // problemSummaryInfo.setSolutionTime(solutionTime);
+    // problemSummaryInfo.setProblemId(problem.getElementId());
+    // problemSummaryInfo.setNumberSubmitted(attempts);
+    // problemSummaryInfo.setPenaltyPoints(score);
+    // problemSummaryInfo.setUnJudgedRuns(unJudgedRun);
+    // return problemSummaryInfo;
+    // }
 
     /**
      * Create XML groupList.
@@ -849,6 +867,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
 
     /**
      * Grand totals per team.
+     * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -889,9 +908,9 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm,
 
     @Override
     public void dispose() {
-        
+
         // nothing to dispose of.
-        
+
     }
 
 }

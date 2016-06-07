@@ -393,11 +393,11 @@ public class MultipleDataSetPane extends JPanePlugin {
     protected void removeRow(int rowNumber) {
 
         if (tableModel.getRowCount() == 1) {
-            editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
+            // this was the last row we are deleting
+            editProblemPane.setJudgingTestSetOne(null);
         }
 
         tableModel.removeRow(rowNumber);
-
         // TODO 917 if row one is deleted, update the data and answer file on the General Tab
         // Warn if they delete row one ??
     }

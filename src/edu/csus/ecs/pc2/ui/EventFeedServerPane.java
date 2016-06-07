@@ -21,8 +21,8 @@ import javax.swing.SwingConstants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
-import edu.csus.ecs.pc2.core.transport.EventFeedServer;
 import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
+import edu.csus.ecs.pc2.services.eventFeed.EventFeedServer;
 
 /**
  * Event Feed Server Pane.

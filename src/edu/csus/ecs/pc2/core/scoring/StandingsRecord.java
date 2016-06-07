@@ -1,5 +1,9 @@
 package edu.csus.ecs.pc2.core.scoring;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.model.ClientId;
 
 /**
@@ -58,6 +62,7 @@ public class StandingsRecord {
     /**
      * @return Returns the numberSolved.
      */
+    @JsonProperty
     public int getNumberSolved() {
         return numberSolved;
     }
@@ -66,6 +71,7 @@ public class StandingsRecord {
      * @param numberSolved
      *            The numberSolved to set.
      */
+    @JsonProperty
     public void setNumberSolved(int numberSolved) {
         this.numberSolved = numberSolved;
     }
@@ -73,6 +79,7 @@ public class StandingsRecord {
     /**
      * @return Returns the penaltyPoints.
      */
+    @JsonProperty
     public long getPenaltyPoints() {
         return penaltyPoints;
     }
@@ -88,6 +95,7 @@ public class StandingsRecord {
     /**
      * @return Returns the rankNumber.
      */
+    @JsonProperty
     public int getRankNumber() {
         return rankNumber;
     }
@@ -103,6 +111,7 @@ public class StandingsRecord {
     /**
      * @return Returns the firstSolved.
      */
+    @JsonProperty
     public long getFirstSolved() {
         return firstSolved;
     }
@@ -118,6 +127,7 @@ public class StandingsRecord {
     /**
      * @return Returns the lastSolved.
      */
+    @JsonProperty
     public long getLastSolved() {
         return lastSolved;
     }
@@ -133,6 +143,7 @@ public class StandingsRecord {
     /**
      * @return Returns the clientId.
      */
+    @JsonProperty
     public ClientId getClientId() {
         return clientId;
     }
@@ -148,6 +159,7 @@ public class StandingsRecord {
     /**
      * @return Returns the summaryRow.
      */
+    @JsonProperty
     public SummaryRow getSummaryRow() {
         return summaryRow;
     }
@@ -163,6 +175,7 @@ public class StandingsRecord {
     /**
      * @return Returns the groupRankNumber.
      */
+    @JsonProperty
     public int getGroupRankNumber() {
         return groupRankNumber;
     }
@@ -172,6 +185,23 @@ public class StandingsRecord {
      */
     public void setGroupRankNumber(int groupRankNumber) {
         this.groupRankNumber = groupRankNumber;
+    }
+    
+    /**
+     * Returns a String representation of this object in JSON format.
+     */
+    @Override
+    public String toString() {
+        ObjectMapper mapper = new ObjectMapper();
+      
+        String jsonString = "{}";
+        try {
+            jsonString = mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            // TODO: log exception
+            e.printStackTrace();
+        }
+        return jsonString;
     }
 
 }

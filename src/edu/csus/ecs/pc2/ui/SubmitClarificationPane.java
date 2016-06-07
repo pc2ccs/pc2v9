@@ -387,7 +387,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI();
-                setVisible(true);
+//                setVisible(true);
             }
         });
         

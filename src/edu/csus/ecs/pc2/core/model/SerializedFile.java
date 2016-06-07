@@ -153,16 +153,6 @@ public class SerializedFile implements Serializable {
             return false;
         }
         
-//        System.out.println("debug 22 exception = "+exception);
-//        System.out.println("debug 22 otherFile = "+otherFile.exception);
-//        System.out.println(""
-//                + "");
-//        if ((exception != null)){
-//            if (exception.equals(otherFile.exception)){
-//                return false;
-//            }
-//        }
-        
 //    clone.setFile(getFile());
         
         if (!StringUtilities.stringSame(name, otherFile.name)) {

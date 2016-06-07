@@ -7,7 +7,6 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Category;
-import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -327,7 +326,6 @@ public class ContestImporter {
         try {
             if (settings.length > 0) {
                 Thread.sleep(2000); // kludge wait for accounts to be created on server
-                // System.out.println("debug 22 - ContestImporer there are "+settings.length+" settings found");
                 for (ClientSettings setting : settings) {
 
                     ClientSettings clientSettings = theContest.getClientSettings(setting.getClientId());
@@ -338,7 +336,6 @@ public class ContestImporter {
                         // existing setting update it
                         theController.updateClientSettings(setting);
                     }
-                    // dumpAJSettings(setting.getClientId(), setting.isAutoJudging(), setting.getAutoJudgeFilter());
                 }
             }
         } catch (Exception e) {
@@ -346,20 +343,6 @@ public class ContestImporter {
             throw new LoadContestDataException(noteList.size() + " errors in sending Client Information/Auto Judge settings");
         }
         
-    }
-
-    // TODO 669 remove after debugged
-    @SuppressWarnings("unused")
-    private void dumpAJSettings(ClientId clientId, boolean autoJudging, Filter autoJudgeFilter) {
-        ElementId[] ids = autoJudgeFilter.getProblemIdList();
-        System.out.println("-----------------------------------------------------------------");
-        System.out.println("debug 22 Auto Judge for " + clientId + "  " + ids.length + " problems, aj on = " + autoJudging);
-
-        System.out.print("debug 22     sent      ");
-        for (ElementId id : ids) {
-            System.out.print(id + " ");
-        }
-        System.out.println();
     }
 
     private void updateProblemFields(Problem newProblem, Problem problem) throws Exception {

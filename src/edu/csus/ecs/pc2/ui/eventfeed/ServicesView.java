@@ -30,20 +30,21 @@ import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import edu.csus.ecs.pc2.ui.WebServerPane;
 
 /**
- * Event Feeder and other feeders.
+ * This class presents a graphical user interface for controlling the services exposed to external clients.
+ * These include the Event Feed and various Web Services.  The GUI provides the ability to both start and stop 
+ * each of these services, as well as to define the port(s)
+ * on which the services appear to external clients.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class FeederView extends JFrame implements UIPlugin {
+public class ServicesView extends JFrame implements UIPlugin {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 2157337344457051296L;
 
     private IInternalContest contest;
@@ -71,34 +72,14 @@ public class FeederView extends JFrame implements UIPlugin {
     private JPanel clockPanel = null;
     
     /**
-     * This method initializes
+     * Constructs a new ServicesView with a default set of components, including
+     * a tabbed pane with Event Feed and Web Server control tabs.
      * 
      */
-    public FeederView() {
+    public ServicesView() {
         super();
         initialize();
     }
-
-
-//    /**
-//     * 
-//     * @author pc2@ecs.csus.edu
-//     * @version $Id$
-//     */
-//    
-//    // $HeadURL$
-//    public class PropertyChangeListenerImplementation implements PropertyChangeListener {
-//
-//        public void propertyChange(PropertyChangeEvent evt) {
-//            if (evt.getPropertyName().equalsIgnoreCase("standings")) {
-//                if (evt.getNewValue() != null && !evt.getNewValue().equals(evt.getOldValue())) {
-//                    // standings have changed
-//                    // SOMEDAY take this off the awt thread
-//                    generateOutput((String) evt.getNewValue());
-//                }
-//            }
-//        }
-//    }
 
     /**
      * This method initializes this
@@ -108,7 +89,7 @@ public class FeederView extends JFrame implements UIPlugin {
         this.setSize(new java.awt.Dimension(515, 319));
         this.setContentPane(getMainViewPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setTitle("Feeder");
+        this.setTitle("Services");
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -146,7 +127,7 @@ public class FeederView extends JFrame implements UIPlugin {
         contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
         log = controller.getLog();
-        log.info("Started Feeder View");
+        log.info("Started Services View");
         
         contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
         contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
@@ -164,7 +145,7 @@ public class FeederView extends JFrame implements UIPlugin {
 
                 try {
                     EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
-                    addUIPlugin(getMainTabbedPane(), "Event Server", eventFeedServerPane);
+                    addUIPlugin(getMainTabbedPane(), "Event Feed", eventFeedServerPane);
                 } catch (Exception e) {
                     if (StaticLog.getLog() != null) {
                         StaticLog.getLog().log(Log.WARNING, "Exception", e);
@@ -174,7 +155,19 @@ public class FeederView extends JFrame implements UIPlugin {
                     }
                 }
                 
-                if (Utilities.isDebugMode()) {
+                try {
+                    WebServerPane webServerPane = new WebServerPane();
+                    addUIPlugin(getMainTabbedPane(), "Web Services", webServerPane);
+                } catch (Exception e) {
+                    if (StaticLog.getLog() != null) {
+                        StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                        e.printStackTrace(System.err);
+                    } else {
+                        e.printStackTrace(System.err);
+                    }
+                }
+                
+               if (Utilities.isDebugMode()) {
                     
                     try {
                         PacketMonitorPane pane = new PacketMonitorPane();
@@ -208,7 +201,7 @@ public class FeederView extends JFrame implements UIPlugin {
     }
 
     public String getPluginTitle() {
-        return "Feeder View";
+        return "Services View";
     }
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
@@ -256,6 +249,7 @@ public class FeederView extends JFrame implements UIPlugin {
             messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
             messageLabel.setText("JLabel");
             clockLabel = new JLabel();
+            clockLabel.setToolTipText("Time remaining in contest");
             clockLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
             clockLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             clockLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -292,7 +286,7 @@ public class FeederView extends JFrame implements UIPlugin {
         if (exitButton == null) {
             exitButton = new JButton();
             exitButton.setText("Exit");
-            exitButton.setToolTipText("Click here to Shutdown PC^2");
+            exitButton.setToolTipText("Click here to shutdown this PC^2 client");
             exitButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             exitButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -376,35 +370,6 @@ public class FeederView extends JFrame implements UIPlugin {
         });
 
     }
-
-    /**
-     * This method initializes refreshButton
-     * 
-     * @return javax.swing.JButton
-     */
-//    private JButton getRefreshButton() {
-//        if (refreshButton == null) {
-//            refreshButton = new JButton();
-//            refreshButton.setPreferredSize(new java.awt.Dimension(100, 26));
-//            refreshButton.setToolTipText("Re-generate the HTML");
-//            refreshButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
-//            refreshButton.setText("Refresh");
-//            refreshButton.addActionListener(new java.awt.event.ActionListener() {
-//                public void actionPerformed(java.awt.event.ActionEvent e) {
-//                    if (currentXMLString.length() > 0) {
-//                        new Thread(new Runnable() {
-//                            public void run() {
-//                                generateOutput(currentXMLString);
-//                            }
-//                        }).start();
-//                    } else{
-//                        JOptionPane.showMessageDialog(getParent(), "XML currently unavailable", "Please wait", JOptionPane.WARNING_MESSAGE);
-//                    }
-//                }
-//            });
-//        }
-//        return refreshButton;
-//    }
     
     private void logException(Exception e) {
 
@@ -430,5 +395,4 @@ public class FeederView extends JFrame implements UIPlugin {
         }
         return clockPanel;
     }
-    
-} // @jve:decl-index=0:visual-constraint="10,10"
+}

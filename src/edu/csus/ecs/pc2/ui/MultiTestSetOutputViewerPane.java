@@ -107,8 +107,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     // define the column headers for the table of results
     private String[] columnNames = { "Select", "Data Set #", "Result", "Time (ms)", 
                                         "Team Output", "Compare Outputs", 
-                                        "Judge's Output", "Judge's Data", "Validator Output",
-                                        "Validator STDERR" };
+                                        "Judge's Output", "Judge's Data", "Validator StdOut",
+                                        "Validator StdErr" };
 
     private JPanel centerPanel = null;
 
@@ -1062,7 +1062,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 }
             }
         }
-        System.out.println ("  (including " + failed + " failed cases)");
+//        System.out.println ("  (including " + failed + " failed cases)");
         return failed;
     }
 
@@ -1335,7 +1335,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         } else if (col == COLUMN.JUDGE_DATA.ordinal()) {
             title = "Judge's Data";
         } else if (col == COLUMN.VALIDATOR_OUTPUT.ordinal()) {
-            title = "Validator Output";
+            title = "Validator STDOUT";
         } else if (col == COLUMN.VALIDATOR_ERR.ordinal()) {
             title = "Validator STDERR";
         }

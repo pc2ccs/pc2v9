@@ -2717,7 +2717,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 } else if (isJudge(client)) {
                     overRideUIName = "edu.csus.ecs.pc2.ui.judge.AutoJudgeModule";
                 } else if (isEventFeeder(client)) {
-                    overRideUIName = "edu.csus.ecs.pc2.core.transport.EventFeederModule"; 
+                    overRideUIName = "edu.csus.ecs.pc2.services.eventFeed.EventFeederModule"; 
                 } else {
                     fatalError(NO_GUI_OPTION_STRING + " can only be used with a judge or server login, login '" + loginName + "' is not a judge or server login.");
                 }

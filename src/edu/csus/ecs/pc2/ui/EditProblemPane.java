@@ -61,10 +61,10 @@ import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 // $HeadURL$
 public class EditProblemPane extends JPanePlugin {
 
-    // TODO 917 automatic check on load when external/internal data  sets changed
-    
+    // TODO 917 automatic check on load when external/internal data sets changed
+
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
-    
+
     private static boolean debug22EditProblem = false;
 
     /**
@@ -101,6 +101,8 @@ public class EditProblemPane extends JPanePlugin {
 
     private JTextField timeOutSecondTextField = null;
 
+    private JTextField problemLetterTextField = null;
+
     private JCheckBox problemRequiresDataCheckBox = null;
 
     private JPanel dataProblemPane = null;
@@ -136,8 +138,7 @@ public class EditProblemPane extends JPanePlugin {
     private Log log = null;
 
     /**
-     * Is the form/GUI being currently populated?
-     * Used to avoid reEntry/race conditions populating GUI.
+     * Is the form/GUI being currently populated? Used to avoid reEntry/race conditions populating GUI.
      */
     private boolean populatingGUI = true;
 
@@ -148,9 +149,9 @@ public class EditProblemPane extends JPanePlugin {
 
     @SuppressWarnings("unused")
     private String lastYamlLoadDirectory;
-    
+
     /**
-     * The current/original data files, used to compare with chaneges. 
+     * The current/original data files, used to compare with chaneges.
      */
     protected ProblemDataFiles originalProblemDataFiles;
 
@@ -231,7 +232,7 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField shortNameTextfield;
 
     private String fileNameOne;
-    
+
     /**
      * This method initializes
      * 
@@ -240,7 +241,7 @@ public class EditProblemPane extends JPanePlugin {
         super();
         initialize();
     }
-    
+
     /**
      * This method initializes this
      * 
@@ -253,11 +254,11 @@ public class EditProblemPane extends JPanePlugin {
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         this.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
     }
-    
+
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         addWindowListeners();
-        
+
         getMultipleDataSetPane().setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -266,16 +267,12 @@ public class EditProblemPane extends JPanePlugin {
                 getExportButton().setVisible(Utilities.isDebugMode());
             }
         });
-        
-        try {
-            if (IniFile.isFilePresent()) {
-                String value = IniFile.getValue("client.debug");
-                if (value != null){
-                    debug22EditProblem = value.equalsIgnoreCase("true");
-                }
+
+        if (IniFile.isFilePresent()) {
+            String value = IniFile.getValue("client.debug");
+            if (value != null) {
+                debug22EditProblem = value.equalsIgnoreCase("true");
             }
-        } catch (Exception e) {
-            e.printStackTrace(System.err); // debug 22 remove try/catch 
         }
 
     }
@@ -396,11 +393,10 @@ public class EditProblemPane extends JPanePlugin {
             newProblem = getProblemFromFields(null, newProblemDataFiles, true);
 
             SerializedFile sFile;
-            // TODO should we loop thru the files doing the check?
+            // SOMEDAY should we loop thru the files doing the check?
             if (newProblemDataFiles.getJudgesDataFiles().length == 1) {
                 sFile = newProblemDataFiles.getJudgesDataFile();
                 if (sFile != null) {
-                    checkFileFormat(sFile);
                     if (checkFileFormat(sFile)) {
                         newProblemDataFiles.setJudgesDataFile(sFile);
                     }
@@ -439,6 +435,12 @@ public class EditProblemPane extends JPanePlugin {
             // without this the problemId is wrong in newProblemDataFiles. so the controller.getProblemDataFiles(problem) does not find it
             newProblemDataFiles = clone;
         }
+
+        // Add next letter to problem.
+        int numberProblems = getContest().getProblems().length;
+        String nextLetter = Utilities.getProblemLetter(numberProblems + 1);
+        newProblem.setLetter(nextLetter);
+
         getController().addNewProblem(newProblem, newProblemDataFiles);
 
         cancelButton.setText("Close");
@@ -497,7 +499,7 @@ public class EditProblemPane extends JPanePlugin {
                         }
                         enableButton = true;
                     } else if (judgesDataFiles.length != judgesDataFilesNew.length) {
-                        fileChanged += Math.abs(judgesDataFiles.length-judgesDataFilesNew.length);
+                        fileChanged += Math.abs(judgesDataFiles.length - judgesDataFilesNew.length);
                         if (updateToolTip.equals("")) {
                             updateToolTip = "Judges data";
                         } else {
@@ -511,7 +513,7 @@ public class EditProblemPane extends JPanePlugin {
                             for (int i = 0; i < judgesDataFiles.length; i++) {
                                 SerializedFile serializedFile = judgesDataFiles[i];
                                 // external true, we just the sha we do not need to load the data
-                                SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(),true);
+                                SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), true);
                                 if (!serializedFile.getName().equals(judgesDataFilesNew[i].getName())) {
                                     // name changed
                                     fileChanged++;
@@ -547,7 +549,7 @@ public class EditProblemPane extends JPanePlugin {
                         enableButton = true;
                         fileChanged++;
                     } else if (judgesAnswerFiles.length != judgesAnswerFilesNew.length) {
-                        fileChanged += Math.abs(judgesAnswerFiles.length-judgesAnswerFilesNew.length);
+                        fileChanged += Math.abs(judgesAnswerFiles.length - judgesAnswerFilesNew.length);
                         if (updateToolTip.equals("")) {
                             updateToolTip = "Judges answer";
                         } else {
@@ -646,7 +648,7 @@ public class EditProblemPane extends JPanePlugin {
             e.printStackTrace(System.err);
         }
         getLog().log(Log.DEBUG, string, e);
-        
+
     }
 
     /**
@@ -674,7 +676,7 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @param checkProblem
      *            will update this Problem if supplied, if null creates a new Problem
-     * @param dataFiles 
+     * @param dataFiles
      * @return Problem based on fields
      * @throws InvalidFieldValue
      */
@@ -683,17 +685,16 @@ public class EditProblemPane extends JPanePlugin {
          * Data file from General tab.
          */
         SerializedFile lastDataFile = null;
-        
-        if (debug22EditProblem){
-            Utilities.dump(newProblemDataFiles,"debug 22 in getProblemFromFields start");
+
+        if (debug22EditProblem) {
+            Utilities.dump(newProblemDataFiles, "debug 22 in getProblemFromFields start");
         }
 
-        
         /**
          * Answer file from General Tab.
          */
         SerializedFile lastAnsFile = null;
-                
+
         if (checkProblem == null) {
             checkProblem = new Problem(problemNameTextField.getText());
             isAdding = true;
@@ -703,27 +704,29 @@ public class EditProblemPane extends JPanePlugin {
             }
         } else {
             checkProblem.setDisplayName(problemNameTextField.getText());
-            checkProblem.setElementId(problem);  // duplicate ElementId so that Problem key/lookup is identical
+            checkProblem.setElementId(problem); // duplicate ElementId so that Problem key/lookup is identical
             newProblemDataFiles = dataFiles;
-//            newProblemDataFiles = new ProblemDataFiles(problem);
+            // newProblemDataFiles = new ProblemDataFiles(problem);
             isAdding = false;
-            
+
         }
-        
-        if (debug22EditProblem){
-            Utilities.dump(newProblemDataFiles,"debug 22 in getProblemFromFields after IF");
+
+        if (debug22EditProblem) {
+            Utilities.dump(newProblemDataFiles, "debug 22 in getProblemFromFields after IF");
         }
-        
+
         checkProblem.setUsingExternalDataFiles(getMultipleDataSetPane().isUsingExternalDataFiles());
 
         checkProblem.setTimeOutInSeconds(getIntegerValue(timeOutSecondTextField.getText()));
 
+        checkProblem.setLetter(problemLetterTextField.getText());
+
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
-        
+
         checkProblem.setCcsMode(getCcsValidationEnabledCheckBox().isSelected());
-        
+
         checkProblem.setShortName(shortNameTextfield.getText());
-        if (! checkProblem.isValidShortName()){
+        if (!checkProblem.isValidShortName()) {
             throw new InvalidFieldValue("Invalid problem short name");
         }
 
@@ -733,7 +736,7 @@ public class EditProblemPane extends JPanePlugin {
             if (fileName == null || fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
             }
-            
+
             if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
                 fileName = inputDataFileLabel.getToolTipText() + "";
             }
@@ -747,7 +750,7 @@ public class EditProblemPane extends JPanePlugin {
 
                 checkProblem.setDataFileName(serializedFile.getName());
                 lastDataFile = serializedFile;
-                
+
             } else {
                 if (originalProblemDataFiles.getJudgesDataFiles().length < 2) {
                     // TODO this is not MTS safe
@@ -759,7 +762,7 @@ public class EditProblemPane extends JPanePlugin {
                     } else {
                         serializedFile = freshenIfNeeded(serializedFile, fileName);
                     }
-                    
+
                     checkProblem.setDataFileName(serializedFile.getName());
                     lastDataFile = serializedFile;
                 } else if (originalProblemDataFiles.getJudgesDataFiles().length > 1) {
@@ -772,7 +775,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (judgesHaveAnswerFiles.isSelected()) {
-            
+
             String fileName = answerFileNameLabel.getText();
             if (fileName == null || fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
@@ -788,7 +791,7 @@ public class EditProblemPane extends JPanePlugin {
                 if (serializedFile.getBuffer() == null) {
                     throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (adding)");
                 }
-                
+
                 checkProblem.setAnswerFileName(serializedFile.getName());
                 // only do this if we do not already have a JudgesAnswerFile
                 if (newProblemDataFiles.getJudgesAnswerFiles().length == 0) {
@@ -807,7 +810,7 @@ public class EditProblemPane extends JPanePlugin {
                         serializedFile = freshenIfNeeded(serializedFile, fileName);
                     }
                     lastAnsFile = serializedFile;
-    
+
                     checkProblem.setAnswerFileName(serializedFile.getName());
                 } else if (originalProblemDataFiles.getJudgesAnswerFiles().length > 0) {
                     lastAnsFile = originalProblemDataFiles.getJudgesAnswerFiles()[0];
@@ -847,8 +850,6 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         checkProblem.setShowValidationToJudges(showValidatorToJudges.isSelected());
-        
-        // debug 22 getCcsValidationEnabledCheckBox().isSelected();
 
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
@@ -861,9 +862,9 @@ public class EditProblemPane extends JPanePlugin {
             newValidatorFileName = "";
         }
         if (useExternalValidatorRadioButton.isSelected() && newValidatorFileName.length() > 0) {
-            
+
             // external and they have a validator file name
-            
+
             String existingValidatorFilename = newValidatorFileName;
             if (existingValidatorFilename.length() != externalValidatorLabel.getToolTipText().length()) {
                 existingValidatorFilename = externalValidatorLabel.getToolTipText() + "";
@@ -884,12 +885,12 @@ public class EditProblemPane extends JPanePlugin {
 
                 // existing validator loaded name.
                 SerializedFile serializedFile = getController().getProblemDataFiles(problem).getValidatorFile();
-                
-                if (newValidatorFileName.equals(existingValidatorFilename)){
-                    
+
+                if (newValidatorFileName.equals(existingValidatorFilename)) {
+
                     // refresh/check validator file
-                    
-                    if (serializedFile != null){
+
+                    if (serializedFile != null) {
                         serializedFile = freshenIfNeeded(serializedFile, existingValidatorFilename);
                         newProblemDataFiles.setValidatorFile(serializedFile);
                         checkProblem.setValidatorProgramName(serializedFile.getName());
@@ -897,11 +898,11 @@ public class EditProblemPane extends JPanePlugin {
                         newProblemDataFiles.setValidatorFile(null);
                         checkProblem.setValidatorProgramName(existingValidatorFilename);
                     }
-                    
+
                 } else {
-                    
+
                     // different file name
-                    
+
                     serializedFile = new SerializedFile(newValidatorFileName);
                     checkFileFormat(serializedFile);
                     newProblemDataFiles.setValidatorFile(serializedFile);
@@ -923,19 +924,18 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setManualReview(false);
             checkProblem.setPrelimaryNotification(false);
         }
-        
+
         checkProblem.setExternalDataFileLocation(getMultipleDataSetPane().getLoadDirectory());
 
-        if (debug22EditProblem){
-            Utilities.dump(newProblemDataFiles,"debug 22 before populateProblemTestSetFilenames");
+        if (debug22EditProblem) {
+            Utilities.dump(newProblemDataFiles, "debug 22 before populateProblemTestSetFilenames");
         }
 
-        
         if (dataFiles == null) {
             if (lastAnsFile != null) {
                 newProblemDataFiles.setJudgesAnswerFile(lastAnsFile);
             }
-            
+
             if (lastDataFile != null) {
                 newProblemDataFiles.setJudgesDataFile(lastDataFile);
             }
@@ -945,21 +945,20 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             populateProblemTestSetFilenames(checkProblem, dataFiles);
         }
-        
-        if (debug22EditProblem){
-            Utilities.dump(newProblemDataFiles,"debug 22 after populateProblemTestSetFilenames");
+
+        if (debug22EditProblem) {
+            Utilities.dump(newProblemDataFiles, "debug 22 after populateProblemTestSetFilenames");
         }
 
-        
         return checkProblem;
 
     }
 
     private String getNane(SerializedFile serializedFile) {
-        if (serializedFile != null){
+        if (serializedFile != null) {
             return serializedFile.getName();
         }
-        
+
         return null;
     }
 
@@ -973,7 +972,7 @@ public class EditProblemPane extends JPanePlugin {
 
         String[] dataList = getTestDataList(dataFiles);
         String[] answerList = getTestAnswerList(dataFiles);
-        
+
         inProblem.removeAllTestCaseFilenames();
         if (dataList != null) {
             for (int i = 0; i < dataList.length; i++) {
@@ -983,9 +982,9 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     private String[] getTestAnswerList(ProblemDataFiles dataFiles) {
-        
+
         ArrayList<String> list = new ArrayList<String>();
-        
+
         SerializedFile[] filelist = dataFiles.getJudgesAnswerFiles();
         SerializedFile[] dataFileList = dataFiles.getJudgesDataFiles();
 
@@ -993,23 +992,23 @@ public class EditProblemPane extends JPanePlugin {
             list.add(serializedFile.getName());
         }
 
-        padListIfNeeded (list, filelist, dataFileList);
-        
+        padListIfNeeded(list, filelist, dataFileList);
+
         return (String[]) list.toArray(new String[list.size()]);
     }
 
     private String[] getTestDataList(ProblemDataFiles dataFiles) {
-        
+
         ArrayList<String> list = new ArrayList<String>();
         SerializedFile[] filelist = dataFiles.getJudgesAnswerFiles();
         SerializedFile[] dataFileList = dataFiles.getJudgesDataFiles();
-        
+
         for (SerializedFile serializedFile : dataFileList) {
             list.add(serializedFile.getName());
         }
-        
-        padListIfNeeded (list, filelist, dataFileList);
-        
+
+        padListIfNeeded(list, filelist, dataFileList);
+
         return (String[]) list.toArray(new String[list.size()]);
     }
 
@@ -1021,10 +1020,10 @@ public class EditProblemPane extends JPanePlugin {
      * @param dataFileList
      */
     private void padListIfNeeded(ArrayList<String> stringList, SerializedFile[] filelist, SerializedFile[] dataFileList) {
-       
+
         // find max of both lists
         int max = Math.max(filelist.length, dataFileList.length);
-        
+
         for (int i = 0; i < max - stringList.size(); i++) {
             stringList.add("");
         }
@@ -1068,26 +1067,35 @@ public class EditProblemPane extends JPanePlugin {
                 boolean changed = false;
                 SerializedFile[] judgesDataFiles = dataFiles.getJudgesDataFiles();
                 if (judgesDataFiles != null) {
-                    if (judgesDataFiles.length > 1) {
+                    if (judgesDataFiles.length > 0) {
                         for (int i = 0; i < judgesDataFiles.length; i++) {
                             SerializedFile serializedFile = judgesDataFiles[i];
                             SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), newProblem.isUsingExternalDataFiles());
                             if (!serializedFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
                                 // contents have changed on disk
-                                judgesDataFiles[i]=serializedFile2;
+                                judgesDataFiles[i] = serializedFile2;
                                 changed = true;
                             }
                         }
-                        if (changed) {
-                            dataFiles.setJudgesDataFiles(judgesDataFiles);
+                    } else {
+                        // judgesDataFile.length is 0, but maybe the user has loaded something on the main page
+                        if (problemRequiresDataCheckBox.isSelected()) {
+                            // use it
+                            SerializedFile serializedFile = new SerializedFile(inputDataFileLabel.getText(), newProblem.isUsingExternalDataFiles());
+                            judgesDataFiles = new SerializedFile[1];
+                            judgesDataFiles[0] = serializedFile;
+                            changed = true;
                         }
+                    }
+                    if (changed) {
+                        dataFiles.setJudgesDataFiles(judgesDataFiles);
                     }
                 }
                 SerializedFile[] judgesAnswerFiles = dataFiles.getJudgesAnswerFiles();
                 if (judgesAnswerFiles != null) {
                     // compare each file
                     changed = false;
-                    if (judgesAnswerFiles.length > 1) {
+                    if (judgesAnswerFiles.length > 0) {
                         for (int i = 0; i < judgesAnswerFiles.length; i++) {
                             SerializedFile serializedFile = judgesAnswerFiles[i];
                             SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), newProblem.isUsingExternalDataFiles());
@@ -1097,17 +1105,34 @@ public class EditProblemPane extends JPanePlugin {
                                 changed = true;
                             }
                         }
-                        if (changed) {
-                            dataFiles.setJudgesAnswerFiles(judgesAnswerFiles);
+                    } else {
+                        // judgesAnswerFile.length is 0, but maybe the user has loaded something on the main page
+                        if (judgesHaveAnswerFiles.isSelected()) {
+                            // use it
+                            SerializedFile serializedFile = new SerializedFile(answerFileNameLabel.getText(), newProblem.isUsingExternalDataFiles());
+                            judgesAnswerFiles = new SerializedFile[1];
+                            judgesAnswerFiles[0] = serializedFile;
+                            changed = true;
                         }
+                    }
+                    if (changed) {
+                        dataFiles.setJudgesAnswerFiles(judgesAnswerFiles);
                     }
                 }
             }
-            
+
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
             // showMessage(e.getMessage());
             return;
+        }
+
+        if (newProblem.getLetter() == null || newProblem.getLetter().length() == 0) {
+
+            // Update/Add next letter to problem.
+            int problemNumber = Utilities.getProblemNumber(getContest(), problem);
+            String letter = Utilities.getProblemLetter(problemNumber);
+            newProblem.setLetter(letter);
         }
 
         getController().updateProblem(newProblem, newProblemDataFiles);
@@ -1123,22 +1148,22 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Populate new data sets.
-     * @param problem2 
+     * 
+     * @param problem2
      * 
      * @param problem2
      * @return
      */
     protected ProblemDataFiles getProblemDataFilesFromFields() {
-        
+
         /**
-         * These are the judge data and ans from the first pane, 
-         * they need to replace the first data set files.
+         * These are the judge data and ans from the first pane, they need to replace the first data set files.
          */
 
         newProblemDataFiles = multipleDataSetPane.getProblemDataFiles();
-        
-        if (debug22EditProblem){
-            Utilities.dump(newProblemDataFiles,"debug 22 in getProblemDataFilesFromFields");
+
+        if (debug22EditProblem) {
+            Utilities.dump(newProblemDataFiles, "debug 22 in getProblemDataFilesFromFields");
         }
 
         return newProblemDataFiles;
@@ -1237,8 +1262,8 @@ public class EditProblemPane extends JPanePlugin {
                 return false;
             }
         } else {
-            Object[] options = {"Ok", "Cancel", "Ignore"};
-            int n = JOptionPane.showOptionDialog(null, fileName +" does not exist", "Message", JOptionPane.OK_CANCEL_OPTION,JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+            Object[] options = { "Ok", "Cancel", "Ignore" };
+            int n = JOptionPane.showOptionDialog(null, fileName + " does not exist", "Message", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
             if (n < 2) {
                 return false;
             } // only Ignore will fall thru to true
@@ -1299,24 +1324,21 @@ public class EditProblemPane extends JPanePlugin {
         return problem;
     }
 
-
-    
     /**
      * Set Prbblem and ProblemDataFiles to be edited.
      */
     public void setProblem(final Problem inProblem, final ProblemDataFiles problemDataFiles) {
-        
+
         problem = inProblem;
         this.newProblemDataFiles = null;
         originalProblemDataFiles = problemDataFiles;
 
-        fileNameOne = createProblemReport (inProblem, problemDataFiles, "stuf1");
-        
-        if (debug22EditProblem){
-            Utilities.dump(originalProblemDataFiles,"debug 22   ORIGINAL  setProblem");
+        fileNameOne = createProblemReport(inProblem, problemDataFiles, "stuf1");
+
+        if (debug22EditProblem) {
+            Utilities.dump(originalProblemDataFiles, "debug 22   ORIGINAL  setProblem");
         }
 
-        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
 
@@ -1324,13 +1346,13 @@ public class EditProblemPane extends JPanePlugin {
                 getMultipleDataSetPane().clearDataFiles();
                 // now set the new ones
                 try {
-                    // bug 1002: if we do not send the problem here, the default for the pane will be used 
+                    // bug 1002: if we do not send the problem here, the default for the pane will be used
                     // for the data source.
                     getMultipleDataSetPane().setProblemDataFiles(inProblem, problemDataFiles);
                 } catch (CloneNotSupportedException e) {
                     e.printStackTrace();
                 }
-                
+
                 // this sets the tableModel files list, which is what the getProblemDataFiles uses
                 getMultipleDataSetPane().populateUI();
                 populateGUI(inProblem);
@@ -1341,17 +1363,17 @@ public class EditProblemPane extends JPanePlugin {
                 } else {
                     enableUpdateButton();
                 }
-//                populatingGUI = true;
-//                setForm(inProblem, problemDataFiles);
-//                getAddButton().setVisible(true);
-//                getUpdateButton().setVisible(false);
-//                enableUpdateButtons(true);
-//
-//                enableValidatorComponents();
-//                enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
-//                enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
-                
-//                populatingGUI = false;
+                // populatingGUI = true;
+                // setForm(inProblem, problemDataFiles);
+                // getAddButton().setVisible(true);
+                // getUpdateButton().setVisible(false);
+                // enableUpdateButtons(true);
+                //
+                // enableValidatorComponents();
+                // enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
+                // enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
+
+                // populatingGUI = false;
             }
         });
     }
@@ -1363,9 +1385,9 @@ public class EditProblemPane extends JPanePlugin {
             multipleDataSetPane.setParentPane(this);
         }
         return multipleDataSetPane;
-        
+
     }
-    
+
     /**
      * Set/populate (or remove) General tab judge's files.
      * 
@@ -1373,7 +1395,7 @@ public class EditProblemPane extends JPanePlugin {
      * 
      */
     public void setJudgingTestSetOne(ProblemDataFiles datafiles) {
-        
+
         /**
          * Were fields assigned values from dataFiles ?
          */
@@ -1383,13 +1405,13 @@ public class EditProblemPane extends JPanePlugin {
             deleteAllDataSets();
         } else {
             SerializedFile[] answerFiles = datafiles.getJudgesAnswerFiles();
-            
+
             if (answerFiles.length > 0) {
-                
+
                 // Replace data files on General tab
                 judgesHaveAnswerFiles.setSelected(true);
                 problemRequiresDataCheckBox.setSelected(true);
-                
+
                 SerializedFile[] files = datafiles.getJudgesDataFiles();
                 if (files.length > 0) {
                     inputDataFileLabel.setText(files[0].getName());
@@ -1400,35 +1422,35 @@ public class EditProblemPane extends JPanePlugin {
                     answerFileNameLabel.setText(files[0].getName());
                     answerFileNameLabel.setToolTipText(files[0].getAbsolutePath());
                 }
-                
+
                 assignedValues = true;
             }
         }
-        
-        if (!assignedValues){
-            
+
+        if (!assignedValues) {
+
             // Replace data files on General tab
             judgesHaveAnswerFiles.setSelected(false);
             problemRequiresDataCheckBox.setSelected(false);
-            
+
             inputDataFileLabel.setText("");
             inputDataFileLabel.setToolTipText("");
             answerFileNameLabel.setText("");
             answerFileNameLabel.setToolTipText("");
-            
+
         }
-        
+
         enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
 
     }
-  
+
     /**
      * Remove all data sets
      */
     private void deleteAllDataSets() {
         ProblemDataFiles dataFiles = getMultipleDataSetPane().getProblemDataFiles();
-        if (dataFiles != null){
+        if (dataFiles != null) {
             dataFiles.removeAll();
         }
         getMultipleDataSetPane().setProblemDataFiles(dataFiles);
@@ -1436,21 +1458,22 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Set new Problem to be edited.
+     * 
      * @param problem
      */
     public void setProblem(final Problem problem) {
-        
+
         this.problem = problem;
         this.newProblemDataFiles = null;
         this.originalProblemDataFiles = null;
-        
-        fileNameOne = createProblemReport (problem, originalProblemDataFiles, "stuf1");
-        System.out.println("Created problem report "+fileNameOne);
+
+        fileNameOne = createProblemReport(problem, originalProblemDataFiles, "stuf1");
+        System.out.println("Created problem report " + fileNameOne);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getMultipleDataSetPane().clearDataFiles();
-                
+
                 populateGUI(problem);
                 // do not automatically set this to no update, the files may have changed on disk
                 if (problem == null) {
@@ -1471,11 +1494,10 @@ public class EditProblemPane extends JPanePlugin {
     private void populateGUI(Problem inProblem) {
 
         populatingGUI = true;
-        
-        if (debug22EditProblem){
-            Utilities.dump(originalProblemDataFiles,"debug 22   ORIGINAL  populateGUI A");
-        }
 
+        if (debug22EditProblem) {
+            Utilities.dump(originalProblemDataFiles, "debug 22   ORIGINAL  populateGUI A");
+        }
 
         if (inProblem != null) {
 
@@ -1503,47 +1525,45 @@ public class EditProblemPane extends JPanePlugin {
         enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
 
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
-        
-        
-        if (debug22EditProblem){
-            Utilities.dump(originalProblemDataFiles,"debug 22 ORIGINAL  populateGUI B");
+
+        if (debug22EditProblem) {
+            Utilities.dump(originalProblemDataFiles, "debug 22 ORIGINAL  populateGUI B");
         }
-        
+
         try {
             getMultipleDataSetPane().setProblemDataFiles(problem, originalProblemDataFiles);
         } catch (Exception e) {
             String message = "Error loading/editing problem data files: " + e.getMessage();
             showMessage(message + " check logs.");
             getLog().log(Log.WARNING, message, e);
-            if (debug22EditProblem){
-                       e.printStackTrace(); // debug 22
+            if (debug22EditProblem) {
+                e.printStackTrace(); // debug 22
             }
         }
 
         // select the general tab
         getMainTabbedPane().setSelectedIndex(0);
         populatingGUI = false;
-        
-        if (debug22EditProblem){
-            Utilities.dump(originalProblemDataFiles,"debug 22   ORIGINAL  populateGUI Z");
+
+        if (debug22EditProblem) {
+            Utilities.dump(originalProblemDataFiles, "debug 22   ORIGINAL  populateGUI Z");
         }
 
     }
-    
+
     @SuppressWarnings("unused")
-    
     private void dumpProblem(String filename, ProblemDataFiles pdf) {
-        
+
         PrintWriter out = new PrintWriter(System.out, true);
         ProblemsReport report = new ProblemsReport();
         report.setContestAndController(getContest(), getController());
-        report.writeProblemDataFiles(out,pdf);
+        report.writeProblemDataFiles(out, pdf);
 
         if (filename != null) {
             try {
                 FileOutputStream stream = new FileOutputStream(filename, false);
                 out = new PrintWriter(stream, true);
-                out.println("Problem = "+problem);
+                out.println("Problem = " + problem);
                 report.writeProblemDataFiles(out, pdf);
                 out.close();
                 out = null;
@@ -1560,18 +1580,19 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Set Form dataa.
      * 
-     * Populates the form, no error checking is performed. 
+     * Populates the form, no error checking is performed.
      * 
      * @param inProblem
      * @param problemDataFiles
      */
     private void setForm(Problem inProblem, ProblemDataFiles problemDataFiles) {
-        
+
         problem = inProblem;
         originalProblemDataFiles = problemDataFiles;
-        
+
         problemNameTextField.setText(inProblem.getDisplayName());
         timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
+        problemLetterTextField.setText(inProblem.getLetter());
 
         inputDataFileLabel.setText(inProblem.getDataFileName());
         answerFileNameLabel.setText(inProblem.getAnswerFileName());
@@ -1584,11 +1605,11 @@ public class EditProblemPane extends JPanePlugin {
 
         if (problemDataFiles != null) {
             SerializedFile[] files = problemDataFiles.getJudgesDataFiles();
-            if (files.length > 0){
+            if (files.length > 0) {
                 inputDataFileLabel.setToolTipText(files[0].getAbsolutePath());
             }
             files = problemDataFiles.getJudgesAnswerFiles();
-            if (files.length > 0){
+            if (files.length > 0) {
                 answerFileNameLabel.setToolTipText(files[0].getAbsolutePath());
             }
         }
@@ -1624,7 +1645,7 @@ public class EditProblemPane extends JPanePlugin {
                 externalValidatorLabel.setToolTipText(inProblem.getValidatorProgramName());
                 SerializedFile sFile = problemDataFiles.getValidatorFile();
                 if (sFile != null) {
-                    if (sFile.getAbsolutePath() != null){
+                    if (sFile.getAbsolutePath() != null) {
                         externalValidatorLabel.setToolTipText(sFile.getAbsolutePath());
                     } else {
                         externalValidatorLabel.setToolTipText("");
@@ -1645,15 +1666,15 @@ public class EditProblemPane extends JPanePlugin {
         getDeleteProblemCheckBox().setSelected(!inProblem.isActive());
 
         populateJudging(inProblem);
-        
+
         getMultipleDataSetPane().setLoadDirectory(inProblem.getExternalDataFileLocation());
 
         /**
          * Short problem name
          */
-        
+
         shortNameTextfield.setText(inProblem.getShortName());
-        
+
     }
 
     /*
@@ -1690,7 +1711,8 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * update/enable Update button.
      * 
-     * @param fieldsChanged if false assumes changest must be undone aka Canceled.
+     * @param fieldsChanged
+     *            if false assumes changest must be undone aka Canceled.
      */
     protected void enableUpdateButtons(boolean fieldsChanged) {
         if (fieldsChanged) {
@@ -1698,7 +1720,7 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             cancelButton.setText("Close");
         }
-        
+
         if (getUpdateButton().isVisible()) {
             getUpdateButton().setEnabled(fieldsChanged);
         } else {
@@ -1722,7 +1744,6 @@ public class EditProblemPane extends JPanePlugin {
         }
         return mainTabbedPane;
     }
-
 
     /**
      * This method initializes generalPane
@@ -1766,13 +1787,15 @@ public class EditProblemPane extends JPanePlugin {
             generalPane.add(getShowCompareCheckBox(), null);
             generalPane.add(getDoShowOutputWindowCheckBox(), null);
             generalPane.add(getDeleteProblemCheckBox(), null);
-            
+
+            generalPane.add(getProblemLetterTextField(), null);
+
             JLabel lblShortName = new JLabel();
             lblShortName.setText("Short Name");
             lblShortName.setBounds(new Rectangle(23, 14, 179, 16));
             lblShortName.setBounds(285, 46, 84, 16);
             generalPane.add(lblShortName);
-            
+
             shortNameTextfield = new JTextField();
             shortNameTextfield.setPreferredSize(new Dimension(120, 20));
             shortNameTextfield.setBounds(new Rectangle(220, 44, 120, 20));
@@ -1825,6 +1848,14 @@ public class EditProblemPane extends JPanePlugin {
             });
         }
         return timeOutSecondTextField;
+    }
+
+    public JTextField getProblemLetterTextField() {
+        // SOMEDAY - add field to form, define and make visible.
+        if (problemLetterTextField == null) {
+            problemLetterTextField = new JTextField();
+        }
+        return problemLetterTextField;
     }
 
     /**
@@ -1988,6 +2019,18 @@ public class EditProblemPane extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (selectFile(inputDataFileLabel, "Open Input Data File")) {
                         inputDataFileLabel.setToolTipText(inputDataFileLabel.getText());
+                        ProblemDataFiles datafiles = multipleDataSetPane.getProblemDataFiles();
+                        if (datafiles != null) {
+                            SerializedFile[] sFiles = datafiles.getJudgesDataFiles();
+                            if (sFiles != null && sFiles.length > 0) {
+                                sFiles[0] = new SerializedFile(inputDataFileLabel.getText());
+                            } else {
+                                sFiles = new SerializedFile[1];
+                                sFiles[0] = new SerializedFile(inputDataFileLabel.getText());
+                            }
+                            datafiles.setJudgesDataFiles(sFiles);
+                            multipleDataSetPane.setProblemDataFiles(datafiles);
+                        } // else previous handling will take care of it
                     }
                     enableUpdateButton();
                 }
@@ -2073,6 +2116,18 @@ public class EditProblemPane extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (selectFile(answerFileNameLabel, "Open Judges Answer File")) {
                         answerFileNameLabel.setToolTipText(answerFileNameLabel.getText());
+                        ProblemDataFiles datafiles = multipleDataSetPane.getProblemDataFiles();
+                        if (datafiles != null) {
+                            SerializedFile[] sFiles = datafiles.getJudgesAnswerFiles();
+                            if (sFiles.length > 0) {
+                                sFiles[0] = new SerializedFile(answerFileNameLabel.getText());
+                            } else {
+                                sFiles = new SerializedFile[1];
+                                sFiles[0] = new SerializedFile(answerFileNameLabel.getText());
+                            }
+                            datafiles.setJudgesAnswerFiles(sFiles);
+                            multipleDataSetPane.setProblemDataFiles(datafiles);
+                        } // else previous handling will take care of it
                     }
                     enableUpdateButton();
                 }
@@ -2093,7 +2148,8 @@ public class EditProblemPane extends JPanePlugin {
      * select file, if file picked updates label.
      * 
      * @param label
-     * @param dialogTitle title for file chooser
+     * @param dialogTitle
+     *            title for file chooser
      * @return True is a file was select and label updated
      * @throws Exception
      */
@@ -2370,9 +2426,10 @@ public class EditProblemPane extends JPanePlugin {
         }
         return ignoreCaseCheckBox;
     }
-    
+
     /**
      * Show diff between files using gvim.exe.
+     * 
      * @param fileOne
      * @param fileTwo
      */
@@ -2576,7 +2633,7 @@ public class EditProblemPane extends JPanePlugin {
             } // else no need to refresh, no file found.
 
         } catch (Exception ex99) {
-            logDebugException( "Exception ", ex99);
+            logDebugException("Exception ", ex99);
         }
 
         return false;
@@ -2587,9 +2644,8 @@ public class EditProblemPane extends JPanePlugin {
      * @return true if the file was converted
      */
     public boolean checkFileFormat(SerializedFile newFile) {
-        
-        
-        if (newFile == null){
+
+        if (newFile == null) {
             showMessage("Warning new file is null");
             return false;
         }
@@ -2633,7 +2689,7 @@ public class EditProblemPane extends JPanePlugin {
             question = question + "'." + NL + NL;
             question = question + "Do you want the file converted to the current OS file format as it is loaded into PC^2?";
 
-            if (! newFile.isExternalFile()){
+            if (!newFile.isExternalFile()) {
                 int answer = JOptionPane.showConfirmDialog(this, question, "File Format Mismatch", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (answer == JOptionPane.YES_OPTION) {
                     newFile.convertFile(currentOS);
@@ -2661,6 +2717,7 @@ public class EditProblemPane extends JPanePlugin {
         judgesHaveAnswerFiles.setSelected(false);
         problemRequiresDataCheckBox.setSelected(false);
 
+        stdinRadioButton.setSelected(true);
         inputDataFileLabel.setText("");
         inputDataFileLabel.setToolTipText("");
         answerFileNameLabel.setText("");
@@ -2682,7 +2739,7 @@ public class EditProblemPane extends JPanePlugin {
         getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
 
         getDeleteProblemCheckBox().setSelected(false);
-        
+
         shortNameTextfield.setText("");
 
         populateJudging(null);
@@ -2815,23 +2872,19 @@ public class EditProblemPane extends JPanePlugin {
         }
         return loadButton;
     }
-    
-    
+
     /**
      * Load problem info.
      * 
-     * If selects problem.yaml then load yaml and files
-     * If selects directory will scan for .in and .ans files and load them
+     * If selects problem.yaml then load yaml and files If selects directory will scan for .in and .ans files and load them
      * 
      */
     protected void loadProblemInfoFile() {
-        
+
         showMessage("Load not implemented, yet.");
-    
+
         // huh
     }
-    
-    
 
     public File selectYAMLFileDialog(Component parent, String title, String startDirectory) {
 
@@ -2861,17 +2914,17 @@ public class EditProblemPane extends JPanePlugin {
         return null;
     }
 
-//    private String selectFileName(String title, String dirname) throws IOException {
-//
-//        String chosenFile = null;
-//        File file = selectYAMLFileDialog(this, title, lastDirectory);
-//        if (file != null) {
-//            chosenFile = file.getCanonicalFile().toString();
-//            return chosenFile;
-//        } else {
-//            return null;
-//        }
-//    }
+    // private String selectFileName(String title, String dirname) throws IOException {
+    //
+    // String chosenFile = null;
+    // File file = selectYAMLFileDialog(this, title, lastDirectory);
+    // if (file != null) {
+    // chosenFile = file.getCanonicalFile().toString();
+    // return chosenFile;
+    // } else {
+    // return null;
+    // }
+    // }
 
     public ContestYAMLLoader getLoader() {
         if (loader == null) {
@@ -2893,74 +2946,74 @@ public class EditProblemPane extends JPanePlugin {
             exportButton.setMnemonic(KeyEvent.VK_X);
             exportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (Utilities.isDebugMode()){
+                    if (Utilities.isDebugMode()) {
                         saveAndCopmpare();
                     } else {
-                        showMessage("Export not implmented yet"); // TODO 
+                        showMessage("Export not implmented yet"); // SOMEDAY export problem data
                     }
                 }
             });
         }
         return exportButton;
     }
-    
-    public static String getReportFilename (String prefix, IReport selectedReport) {
+
+    public static String getReportFilename(String prefix, IReport selectedReport) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
         // "yyMMdd HHmmss.SSS");
         String reportName = selectedReport.getReportTitle();
-        
-        while (reportName.indexOf(' ') > -1){
+
+        while (reportName.indexOf(' ') > -1) {
             reportName = reportName.replace(" ", "_");
         }
-        return prefix + "report."+ reportName+ "." + simpleDateFormat.format(new Date()) + ".txt";
+        return prefix + "report." + reportName + "." + simpleDateFormat.format(new Date()) + ".txt";
 
     }
-    
-    void saveAndCopmpare(){
-        
+
+    void saveAndCopmpare() {
+
         try {
             System.out.println("debug 22   ORIGINAL  load dump");
-            Utilities.dump(originalProblemDataFiles,"debug 22 in load orig");
-            
+            Utilities.dump(originalProblemDataFiles, "debug 22 in load orig");
+
             String[] s2 = getTestDataList(originalProblemDataFiles);
-            System.out.println("debug 22 Number of   ORIGINAL  problem data files is "+s2.length);
-            
+            System.out.println("debug 22 Number of   ORIGINAL  problem data files is " + s2.length);
+
             String[] s = getTestDataList(newProblemDataFiles);
-            System.out.println("debug 22 B4 Number of new problem data files is "+s.length);
-            
+            System.out.println("debug 22 B4 Number of new problem data files is " + s.length);
+
             newProblemDataFiles = getProblemDataFilesFromFields();
-            
+
             s = getTestDataList(newProblemDataFiles);
-            System.out.println("debug 22 B5 Number of new problem data files is "+s.length);
-            
+            System.out.println("debug 22 B5 Number of new problem data files is " + s.length);
+
             Problem newProblem = getProblemFromFields(problem, newProblemDataFiles, false);
 
             s = getTestDataList(newProblemDataFiles);
-            System.out.println("debug 22 B6 Number of new problem data files is "+s.length);
-            
-            Utilities.dump(newProblemDataFiles,"debug 22 in load new");
+            System.out.println("debug 22 B6 Number of new problem data files is " + s.length);
+
+            Utilities.dump(newProblemDataFiles, "debug 22 in load new");
             System.out.flush();
 
-            String fileNameTwo = createProblemReport (newProblem, newProblemDataFiles, "stuf2");
-            System.out.println("Created problem report "+fileNameOne);
+            String fileNameTwo = createProblemReport(newProblem, newProblemDataFiles, "stuf2");
+            System.out.println("Created problem report " + fileNameOne);
 
             showFilesDiff(fileNameOne, fileNameTwo);
         } catch (Exception e) {
-            e.printStackTrace(); // debug 22 
+            e.printStackTrace(); // debug 22
         }
- 
+
     }
-    
+
     private String createProblemReport(Problem prob, ProblemDataFiles datafiles, String fileNamePrefix) {
 
         ProblemsReport report = new ProblemsReport();
         report.setContestAndController(getContest(), getController());
-        String filename = getReportFilename(fileNamePrefix+".prob.txt", report);
-        
+        String filename = getReportFilename(fileNamePrefix + ".prob.txt", report);
+
         try {
             PrintWriter printWriter = null;
             printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
-            if (problem == null){
+            if (problem == null) {
                 printWriter.println("  Problem is null");
             } else {
                 report.writeRow(printWriter, prob, datafiles);
@@ -2978,37 +3031,34 @@ public class EditProblemPane extends JPanePlugin {
     protected void saveProblemYaml() {
 
         try {
-            
-            if (lastSaveDirectory == null){
+
+            if (lastSaveDirectory == null) {
                 lastSaveDirectory = new File(".").getCanonicalPath() + File.separator + "export";
             }
-            
+
             char currentLetter = currentDirectoryLetter(lastSaveDirectory);
-            
+
             String nextDirectory = findNextDirectory(lastSaveDirectory);
             ExportYAML exportYAML = new ExportYAML();
-            
-            
+
             newProblemDataFiles = getProblemDataFilesFromFields();
             Problem newProblem = getProblemFromFields(problem, newProblemDataFiles, false);
-            
+
             String problemYamlFile = nextDirectory + File.separator + ExportYAML.PROBLEM_FILENAME;
             String[] filelist = exportYAML.writeProblemYAML(getContest(), newProblem, problemYamlFile, newProblemDataFiles);
-            
-            String results = compareDirectories(lastSaveDirectory + File.separator + currentLetter, nextDirectory);
-            System.out.println("Comparison : "+results);
 
-            System.out.println("Last dir: "+lastSaveDirectory);
-            System.out.println("Wrote "+problemYamlFile);
+            String results = compareDirectories(lastSaveDirectory + File.separator + currentLetter, nextDirectory);
+            System.out.println("Comparison : " + results);
+
+            System.out.println("Last dir: " + lastSaveDirectory);
+            System.out.println("Wrote " + problemYamlFile);
             for (String string : filelist) {
-                System.out.println("Wrote "+string);
+                System.out.println("Wrote " + string);
             }
         } catch (Exception e) {
             e.printStackTrace(); // debug 22
         }
     }
-    
-
 
     /**
      * get Letter.
@@ -3023,40 +3073,39 @@ public class EditProblemPane extends JPanePlugin {
         File file = new File(nextDirectory);
 
         while (file.isDirectory()) {
-            System.out.println("Found directory: "+nextDirectory);
+            System.out.println("Found directory: " + nextDirectory);
 
-            letter ++;
+            letter++;
             nextDirectory = directory + File.separator + letter;
             file = new File(nextDirectory);
-            if (!file.isDirectory()){
-                letter --;
+            if (!file.isDirectory()) {
+                letter--;
             }
         }
-        
 
         return letter;
 
     }
 
     private String findNextDirectory(String directory) {
-        
+
         char letter = currentDirectoryLetter(directory);
         String nextDirectory = directory + File.separator + letter;
         File file = new File(nextDirectory);
-        
-        while (file.isDirectory()){
-            System.out.println("Found directory: "+nextDirectory);
-            
-            letter ++;
+
+        while (file.isDirectory()) {
+            System.out.println("Found directory: " + nextDirectory);
+
+            letter++;
             nextDirectory = directory + File.separator + letter;
             file = new File(nextDirectory);
         }
-        
+
         if (!file.isDirectory()) {
             file.mkdirs();
             System.out.println("Created dir " + nextDirectory);
         }
-        
+
         return nextDirectory;
     }
 
@@ -3197,7 +3246,7 @@ public class EditProblemPane extends JPanePlugin {
             ccsValidationEnabledCheckBox.setToolTipText("Use validator that uses exit code to return judgement");
             ccsValidationEnabledCheckBox.setBounds(new Rectangle(27, 33, 375, 28));
             ccsValidationEnabledCheckBox.setText("Use CCS validator interface");
-            
+
             ccsValidationEnabledCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -3206,7 +3255,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         return ccsValidationEnabledCheckBox;
     }
-    
+
     /**
      * 
      * @param string
@@ -3214,26 +3263,26 @@ public class EditProblemPane extends JPanePlugin {
      * @return
      */
     public String compareDirectories(String directory, String nextDirectory) {
-        
+
         ArrayList<String> filelist = getFileEntries(directory, "", 0);
         ArrayList<String> filelistTwo = getFileEntries(nextDirectory, "", 0);
-        
-        int matching  = 0;
-        
-        if(filelist.size() == filelistTwo.size()){
+
+        int matching = 0;
+
+        if (filelist.size() == filelistTwo.size()) {
             for (int i = 0; i < filelist.size(); i++) {
                 String name1 = filelist.get(i);
                 String name2 = filelistTwo.get(i);
-                if (name1.equals(name2)){
-                    matching ++;
+                if (name1.equals(name2)) {
+                    matching++;
                 } else {
-                    System.err.println("Miss match "+name1 +" vs " + name2);
+                    System.err.println("Miss match " + name1 + " vs " + name2);
                 }
             }
         }
-        
-        if (matching == filelist.size()){
-            return "All "+matching+" matching";
+
+        if (matching == filelist.size()) {
+            return "All " + matching + " matching";
         } else {
             return filelist.size() + " vs " + filelistTwo.size();
         }
@@ -3242,8 +3291,7 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Returns all filenames (relative path) under input directory.
      * 
-     * The list does not contain the string directory.  Only directories
-     * under the directory will be included.
+     * The list does not contain the string directory. Only directories under the directory will be included.
      * 
      * @param directory
      * @param relativeDirectory
@@ -3255,8 +3303,8 @@ public class EditProblemPane extends JPanePlugin {
         ArrayList<String> list = new ArrayList<>();
 
         File[] files = new File(directory).listFiles();
-        
-        if (relativeDirectory.length() > 0){
+
+        if (relativeDirectory.length() > 0) {
             relativeDirectory += File.separator;
         }
 
@@ -3265,24 +3313,22 @@ public class EditProblemPane extends JPanePlugin {
                 list.add(relativeDirectory + entry.getName());
             }
         }
-        
+
         // recurse
 
         for (File entry : files) {
             if (entry.isDirectory() && !(entry.getName().equals(".") || entry.getName().equals(".."))) {
-                list.addAll(getFileEntries(directory + File.separator + entry.getName(),  //
+                list.addAll(getFileEntries(directory + File.separator + entry.getName(), //
                         relativeDirectory + entry.getName(), level + 1));
             }
         }
 
         return list;
     }
-    
+
     public JTextField getShortNameTextfield() {
         return shortNameTextfield;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
-
-
 
