@@ -56,6 +56,7 @@ public class ResultsFile {
         }
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
+        scoringAlgorithm.setContest(contest);
 
         Properties properties = getScoringProperties(contest);
 

@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
@@ -581,7 +582,9 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         Run solvingRun = null;
 
         int submissionsBeforeYes = 0;
-
+        int compilationErrorsBeforeYes = 0;
+        int securityViolationBeforeYes = 0;
+        
         int numberPending = 0;
 
         int numberJudged = 0;
@@ -611,12 +614,28 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             }
             
             if (run.isJudged() && (!solved)) {
-                submissionsBeforeYes++;
+                
+                // before first yes.
+                
+                ElementId elementId = run.getJudgementRecord().getJudgementId();
+                Judgement judgment = getContest().getJudgement(elementId);
+                
+                if (Judgement.ACRONYM_COMPILATION_ERROR.equals(judgment.getAcronym())) {
+                    compilationErrorsBeforeYes++;
+                }
+                else if (Judgement.ACRONYM_SECURITY_VIOLATION.equals(judgment.getAcronym())) {
+                    securityViolationBeforeYes++;
+                } else {
+                    submissionsBeforeYes++;     
+                }
             }
         }
 
         if (solved) {
-            points = (solutionTime * getMinutePenalty(properties) + getYesPenalty(properties)) + (submissionsBeforeYes * getNoPenalty(properties));
+            points = (solutionTime * getMinutePenalty(properties) + getYesPenalty(properties)) + // 
+                    (submissionsBeforeYes * getNoPenalty(properties)) + //
+                    (compilationErrorsBeforeYes * getCEPenalty(properties)) + //
+                    (securityViolationBeforeYes * getSVPenalty(properties));
         }
         
 //        if (solvingRun != null){
@@ -637,6 +656,14 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
         return new ProblemScoreRecord(solved, solvingRun, problem, points, solutionTime, numberSubmissions, submissionsBeforeYes, numberPending, numberJudged);
 
+    }
+
+    private int getCEPenalty(Properties properties) {
+        return getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_NO_COMPILATION_ERROR, "0");
+    }
+
+    private int getSVPenalty(Properties properties) {
+        return getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_NO_SECURITY_VIOLATION, "0");
     }
 
     /**
