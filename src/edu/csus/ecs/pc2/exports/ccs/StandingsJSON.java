@@ -33,6 +33,8 @@ public class StandingsJSON {
         }
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
+        scoringAlgorithm.setContest(contest);
+        
         ContestInformation info = contest.getContestInformation();
         Properties properties = new Properties();
         if (info != null) {

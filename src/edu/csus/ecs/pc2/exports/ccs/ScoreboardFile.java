@@ -37,6 +37,7 @@ public class ScoreboardFile {
         Vector<String> lines = new Vector<String>();
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
+        scoringAlgorithm.setContest(contest);
 
         Properties properties = getScoringProperties(contest);
 
