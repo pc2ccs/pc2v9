@@ -622,8 +622,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                 
                 if (Judgement.ACRONYM_COMPILATION_ERROR.equals(judgment.getAcronym())) {
                     compilationErrorsBeforeYes++;
-                }
-                else if (Judgement.ACRONYM_SECURITY_VIOLATION.equals(judgment.getAcronym())) {
+                } else if (Judgement.ACRONYM_SECURITY_VIOLATION.equals(judgment.getAcronym())) {
                     securityViolationBeforeYes++;
                 } else {
                     submissionsBeforeYes++;     
