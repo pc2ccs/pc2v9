@@ -52,6 +52,7 @@ public class LanguageService {
             boolean addedOne = false;
             
             //for each defined language
+            int index = 1;
             for (Language lang : languages) {
 
                 //if we've already added one or more langs, add a comma separator
@@ -63,10 +64,8 @@ public class LanguageService {
                 jsonOutput += "{";
                 
                 //add the ID of the language to the output JSON.  The spec requires the ID to be an integer; it is
-                //based on the fact that the toString() for an ElementID is assumed to be of the form "someString-someUniqueNumber"
-                String idString = lang.getElementId().toString();
-                Long id = new Long(idString.substring(idString.lastIndexOf('-')+1));
-                jsonOutput += "\"id\":" + mapper.writeValueAsString(id) + ",";
+                //based on the integer position of the language in the Languages array
+                jsonOutput += "\"id\":" + mapper.writeValueAsString(index) + ",";
                 
                 //add the language name to the output JSON
                 String name = lang.getDisplayName();
@@ -76,6 +75,7 @@ public class LanguageService {
                 jsonOutput += "}";
                 
                 addedOne = true;
+                index++;
             }
 
         } catch (JsonProcessingException e) {
