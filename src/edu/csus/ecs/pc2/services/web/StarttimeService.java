@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 /**
  * WebService to handle starttime.
  * 
- * @author ICPC
+ * @author pc2@ecs.csus.edu
  *
  */
 @Path("/starttime")
@@ -70,7 +70,7 @@ public class StarttimeService {
         // or:
         // { "starttime":"undefined" }
 
-        // get the problems from the contest
+        // get the start time from the contest
         Date startDate = contest.getContestInformation().getStartDate();
         long startTime;
         if (startDate == null) {
