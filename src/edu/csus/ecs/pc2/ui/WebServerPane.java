@@ -14,15 +14,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -44,20 +51,26 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import sun.security.x509.CertificateExtensions;
-import sun.security.x509.KeyIdentifier;
-import sun.security.x509.SubjectKeyIdentifierExtension;
-import sun.security.x509.X500Name;
-import sun.security.x509.X509CertImpl;
-import sun.security.x509.X509CertInfo;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.services.web.LanguageService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
 import edu.csus.ecs.pc2.services.web.ScoreboardService;
 import edu.csus.ecs.pc2.services.web.StarttimeService;
 import edu.csus.ecs.pc2.services.web.TeamService;
-
-import javax.swing.JCheckBox;
+import sun.security.x509.AlgorithmId;
+import sun.security.x509.CertificateAlgorithmId;
+import sun.security.x509.CertificateExtensions;
+import sun.security.x509.CertificateIssuerName;
+import sun.security.x509.CertificateSerialNumber;
+import sun.security.x509.CertificateSubjectName;
+import sun.security.x509.CertificateValidity;
+import sun.security.x509.CertificateVersion;
+import sun.security.x509.CertificateX509Key;
+import sun.security.x509.KeyIdentifier;
+import sun.security.x509.SubjectKeyIdentifierExtension;
+import sun.security.x509.X500Name;
+import sun.security.x509.X509CertImpl;
+import sun.security.x509.X509CertInfo;
 
 /**
  * This class provides a GUI for configuring the embedded Jetty webserver. It allows specifying the port on which Jetty will listen and the REST service endpoints to which Jetty will respond. (Note
@@ -259,60 +272,119 @@ public class WebServerPane extends JPanePlugin {
         updateGUI();
     }
 
+    /**
+     * Create a self-signed X.509 Certificate
+     * 
+     * @param dn
+     *            the X.509 Distinguished Name, eg "CN=Test, L=London, C=GB"
+     * @param pair
+     *            the KeyPair
+     * @param days
+     *            how many days from now the Certificate is valid for
+     * @param algorithm
+     *            the signing algorithm, eg "SHA1withRSA"
+     */
+    private X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm) throws GeneralSecurityException, IOException {
+        PrivateKey privkey = pair.getPrivate();
+        X509CertInfo info = new X509CertInfo();
+        Date from = new Date();
+        Date to = new Date(from.getTime() + days * 86400000l);
+        CertificateValidity interval = new CertificateValidity(from, to);
+        BigInteger sn = new BigInteger(64, new SecureRandom());
+        X500Name owner = new X500Name(dn);
+
+        info.set(X509CertInfo.VALIDITY, interval);
+        info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
+        info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(owner));
+        info.set(X509CertInfo.ISSUER, new CertificateIssuerName(owner));
+        info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
+        info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
+        AlgorithmId algo = new AlgorithmId(AlgorithmId.md5WithRSAEncryption_oid);
+        info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));
+
+        // Sign the cert to identify the algorithm that's used.
+        X509CertImpl cert = new X509CertImpl(info);
+        cert.sign(privkey, algorithm);
+
+        // Update the algorith, and resign.
+        algo = (AlgorithmId) cert.get(X509CertImpl.SIG_ALG);
+        info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algo);
+        cert = new X509CertImpl(info);
+        cert.sign(privkey, algorithm);
+        return cert;
+    }
+
     private void createKeyStoreAndKey(File keystoreFile) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, FileNotFoundException {
+
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = keystorePassword.toCharArray();
         ks.load(null, password);
         try {
-            // taken from https://svn.forgerock.org/opendj/trunk/opends/src/server/org/opends/server/util/Platform.java
-            String certAndKeyGen;
-            // and this is why you are not suppose to use sun classes
-            if (System.getProperty("java.version").matches("^1\\.[67]\\..*")) {
-                certAndKeyGen = "sun.security.x509" + ".CertAndKeyGen";
-            } else {
-                // Java 8 moved the CertAndKeyGen class to sun.security.tools.keytool
-                certAndKeyGen = "sun.security.tools.keytool" + ".CertAndKeyGen";
-            }
-            String x500Name = "sun.security.x509" + ".X500Name";
-            Class<?> certKeyGenClass = Class.forName(certAndKeyGen);
-            Class<?> x500NameClass = Class.forName(x500Name);
-            Constructor<?> certKeyGenCons = certKeyGenClass.getConstructor(String.class, String.class);
-            Constructor<?> x500NameCons = x500NameClass.getConstructor(String.class);
-            Object keypair = certKeyGenCons.newInstance("RSA", "SHA256WithRSA");
             String dn = "CN=pc2 jetty, OU=PC^2, O=PC^2, L=Unknown, ST=Unknown, C=Unknown";
-            Object subject = x500NameCons.newInstance(dn);
-            Method certAndKeyGenGenerate = certKeyGenClass.getMethod("generate", int.class);
-            certAndKeyGenGenerate.invoke(keypair, 2048);
-            Method certAndKeyGenPrivateKey = certKeyGenClass.getMethod("getPrivateKey");
-            PrivateKey rootPrivateKey = (PrivateKey) certAndKeyGenPrivateKey.invoke(keypair);
-            Method getSelfCertificate = certKeyGenClass.getMethod("getSelfCertificate", x500NameClass, long.class);
+            if (System.getProperty("java.version").matches("^1\\.[7]\\..*")) {
 
-            X509Certificate[] chain = new X509Certificate[1];
-            // create with a length of 1 (non-leap) year
-            long days = (long) 365 * 24 * 3600;
-            // Generate self signed certificate
-            chain[0] = (X509Certificate) getSelfCertificate.invoke(keypair, subject, days);
+                int days = 365;
+                KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+                KeyPair keypair = keyGen.generateKeyPair();
 
-            Principal issuer = chain[0].getSubjectDN();
-            String issuerSigAlg = chain[0].getSigAlgName();
-            byte[] inCertBytes = chain[0].getTBSCertificate();
-            X509CertInfo info = new X509CertInfo(inCertBytes);
-            info.set(X509CertInfo.ISSUER, (X500Name) issuer);
+                X509Certificate tmpCert = generateCertificate(dn, keypair, days, "SHA256WithRSA");
+                X509Certificate[] chain = new X509Certificate[1];
+                chain[0] = tmpCert;
 
-            CertificateExtensions exts = new CertificateExtensions();
-            exts.set(SubjectKeyIdentifierExtension.NAME, new SubjectKeyIdentifierExtension(new KeyIdentifier(chain[0].getPublicKey()).getIdentifier()));
-            info.set(X509CertInfo.EXTENSIONS, exts);
+                ks.setCertificateEntry("jetty", tmpCert);
+                ks.setKeyEntry("jetty", keypair.getPrivate(), keystorePassword.toCharArray(), chain);
 
-            X509CertImpl outCert = new X509CertImpl(info);
-            outCert.sign(rootPrivateKey, issuerSigAlg);
+            } else {
 
-            ks.setCertificateEntry("jetty", outCert);
-            ks.setKeyEntry("jetty", rootPrivateKey, keystorePassword.toCharArray(), chain);
+                // taken from https://svn.forgerock.org/opendj/trunk/opends/src/server/org/opends/server/util/Platform.java
+                String certAndKeyGen;
+                // and this is why you are not suppose to use sun classes
+                if (System.getProperty("java.version").matches("^1\\.[67]\\..*")) {
+                    certAndKeyGen = "sun.security.x509" + ".CertAndKeyGen";
+                } else {
+                    // Java 8 moved the CertAndKeyGen class to sun.security.tools.keytool
+                    certAndKeyGen = "sun.security.tools.keytool" + ".CertAndKeyGen";
+                }
+                String x500Name = "sun.security.x509" + ".X500Name";
+                Class<?> certKeyGenClass = Class.forName(certAndKeyGen);
+                Class<?> x500NameClass = Class.forName(x500Name);
+                Constructor<?> certKeyGenCons = certKeyGenClass.getConstructor(String.class, String.class);
+                Constructor<?> x500NameCons = x500NameClass.getConstructor(String.class);
+                Object keypair = certKeyGenCons.newInstance("RSA", "SHA256WithRSA");
+                Object subject = x500NameCons.newInstance(dn);
+                Method certAndKeyGenGenerate = certKeyGenClass.getMethod("generate", int.class);
+                certAndKeyGenGenerate.invoke(keypair, 2048);
+                Method certAndKeyGenPrivateKey = certKeyGenClass.getMethod("getPrivateKey");
+                PrivateKey rootPrivateKey = (PrivateKey) certAndKeyGenPrivateKey.invoke(keypair);
+                Method getSelfCertificate = certKeyGenClass.getMethod("getSelfCertificate", x500NameClass, long.class);
 
-            // Store the keystore
+                X509Certificate[] chain = new X509Certificate[1];
+                // create with a length of 1 (non-leap) year
+                long days = (long) 365 * 24 * 3600;
+                // Generate self signed certificate
+                chain[0] = (X509Certificate) getSelfCertificate.invoke(keypair, subject, days);
+
+                Principal issuer = chain[0].getSubjectDN();
+                String issuerSigAlg = chain[0].getSigAlgName();
+                byte[] inCertBytes = chain[0].getTBSCertificate();
+                X509CertInfo info = new X509CertInfo(inCertBytes);
+                info.set(X509CertInfo.ISSUER, (X500Name) issuer);
+
+                CertificateExtensions exts = new CertificateExtensions();
+                exts.set(SubjectKeyIdentifierExtension.NAME, new SubjectKeyIdentifierExtension(new KeyIdentifier(chain[0].getPublicKey()).getIdentifier()));
+                info.set(X509CertInfo.EXTENSIONS, exts);
+
+                X509CertImpl outCert = new X509CertImpl(info);
+                outCert.sign(rootPrivateKey, issuerSigAlg);
+
+                ks.setCertificateEntry("jetty", outCert);
+                ks.setKeyEntry("jetty", rootPrivateKey, keystorePassword.toCharArray(), chain);
+            }
+            // Store away the keystore
             FileOutputStream fos = new FileOutputStream(keystoreFile);
             ks.store(fos, password);
             fos.close();
+
         } catch (Exception ex) {
             System.out.println("ERROR: cannot create "+keystoreFile+", "+ex.getMessage());
             System.out.println("This is known problem with java7, works properly with java8");
