@@ -288,7 +288,7 @@ public class WebServerPane extends JPanePlugin {
         PrivateKey privkey = pair.getPrivate();
         X509CertInfo info = new X509CertInfo();
         Date from = new Date();
-        Date to = new Date(from.getTime() + days * 86400000l);
+        Date to = new Date(from.getTime() + days * 86400000L);
         CertificateValidity interval = new CertificateValidity(from, to);
         BigInteger sn = new BigInteger(64, new SecureRandom());
         X500Name owner = new X500Name(dn);
