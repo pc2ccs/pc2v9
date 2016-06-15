@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
 import edu.csus.ecs.pc2.exports.ccs.Teamdata;
 import edu.csus.ecs.pc2.exports.ccs.Userdata;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Export Data Pane.
@@ -405,7 +406,7 @@ public class ExportDataPane extends JPanePlugin {
             ExportYAML exportYAML = new ExportYAML();
             try {
                 exportYAML.exportFiles(dir.getAbsolutePath(), getContest());
-                String outfilename = dir.getCanonicalPath() + File.separator + ExportYAML.CONTEST_FILENAME;
+                String outfilename = dir.getCanonicalPath() + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
                 viewFile(outfilename, outfilename);
             } catch (IOException e) {
                 FrameUtilities.showMessage(this, "Error exporting contest.yaml", "Error exporting YAML " + e.getMessage());

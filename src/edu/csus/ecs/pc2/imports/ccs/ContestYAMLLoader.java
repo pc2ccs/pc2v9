@@ -44,6 +44,9 @@ import edu.csus.ecs.pc2.core.model.Site;
  */
 
 // TODO CCS REALLY IMPORTANT USER INTERFACE WORK - MUST SHOW SYNTAX ERRORS AND INPUT FILE PROBLEMS TO USER!!!
+//   Replace with Snake Yaml to better handle syntax and other errors.
+
+// TODO implements IContestLoader
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoader.java $
 public class ContestYAMLLoader {
@@ -100,11 +103,11 @@ public class ContestYAMLLoader {
 
     private static final String DELIMIT = ":";
 
-    public static final String DEFAULT_CONTEST_YAML_FILENAME = "contest.yaml";
+    public static final String DEFAULT_CONTEST_YAML_FILENAME = IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
 
-    public static final String DEFAULT_PROBLEM_YAML_FILENAME = "problem.yaml";
+    public static final String DEFAULT_PROBLEM_YAML_FILENAME = IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
 
-    public static final String DEFAULT_PROBLEM_LATEX_FILENAME = "problem.tex";
+    public static final String DEFAULT_PROBLEM_LATEX_FILENAME = IContestLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
 
     /**
      * problem title key in problem.yaml

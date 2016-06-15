@@ -174,7 +174,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
      * @return filename for contest.yaml file.
      */
     private String getContestYamlTestFilename() {
-        return getTestFilename(ExportYAML.CONTEST_FILENAME);
+        return getTestFilename(IContestLoader.DEFAULT_CONTEST_YAML_FILENAME);
     }
 
     public void testLoader() throws Exception {
@@ -1052,11 +1052,11 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     }
     
     private String getProblemSetYamlTestFileName() {
-        return getTestFilename(ExportYAML.PROBLEM_SET_FILENAME);
+        return getTestFilename(IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME);
     }
     
     private String getContestYamlTestFileName() {
-        return getTestFilename(ExportYAML.CONTEST_FILENAME);
+        return getTestFilename(IContestLoader.DEFAULT_CONTEST_YAML_FILENAME);
     }
     
     /**
@@ -1304,7 +1304,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         exportYAML.exportFiles(testDirectory, originalContest);
         
-//        String filename = testDirectory + File.separator + ExportYAML.CONTEST_FILENAME;
+//        String filename = testDirectory + File.separator + ExportYAML.DEFAULT_CONTEST_YAML_FILENAME;
 //        editFile(filename);
 
         exportYAML = null;

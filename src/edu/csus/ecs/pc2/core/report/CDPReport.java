@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Contest Data Package Report
@@ -60,14 +61,11 @@ public class CDPReport implements IReport {
 
     private static final String PAD2 = "  ";
 
-    // TODO move to Utility class
-    public static final String FORMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss z";
 
     // TODO MOVE TO ContestYAMLLoader.PROBLEM_SET_KEY
     private static final String PROBLEM_SET_KEY = "problemset";
 
-    private SimpleDateFormat formatter = new SimpleDateFormat(FORMAT_YYYY_MM_DD_HH_MM_SS);
-
+    
     private void writeContestTime(PrintWriter printWriter) {
         printWriter.println();
         GregorianCalendar resumeTime = contest.getContestTime().getResumeTime();
@@ -139,17 +137,7 @@ public class CDPReport implements IReport {
         return Character.toString(let);
     }
 
-    /**
-     * Return date/time string for now.
-     * 
-     * Uses format {@value #FORMAT_YYYY_MM_DD_HH_MM_SS}.
-     * 
-     * @return
-     */
-    // TODO move to utility class
-    public String getDateTimeString() {
-        return formatter.format(new Date());
-    }
+
 
     // TODO move to ExportYAML class
     public void writeProblemYaml(PrintWriter printWriter) {
@@ -163,7 +151,7 @@ public class CDPReport implements IReport {
 
         printWriter.println("# Problem Set Configuration, version 1.0 ");
         printWriter.println("# PC^2 Version: " + new VersionInfo().getSystemVersionInfo());
-        printWriter.println("# Created: " + getDateTimeString());
+        printWriter.println("# Created: " + Utilities.getDateTimeString());
         printWriter.println("--- ");
 
         printWriter.println();
@@ -238,7 +226,7 @@ public class CDPReport implements IReport {
         }
 
         if (outputfilename == null) {
-            outputfilename = directoryName + File.separator + ExportYAML.CONTEST_FILENAME;
+            outputfilename = directoryName + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
         }
 
         /**
@@ -315,7 +303,7 @@ public class CDPReport implements IReport {
          * Write problemset.yaml
          */
 
-        String problemSetYamlFilename = directoryName + File.separator + ExportYAML.PROBLEM_SET_FILENAME;
+        String problemSetYamlFilename = directoryName + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
         try {
             writeProblemYaml(problemSetYamlFilename);
         } catch (Exception e) {

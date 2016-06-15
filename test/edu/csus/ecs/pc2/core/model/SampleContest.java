@@ -1777,5 +1777,13 @@ public class SampleContest {
         return (SerializedFile[]) outfiles.toArray(new SerializedFile[outfiles.size()]);
     }
 
+    public void setAliases(IInternalContest inContest) {
+
+        int idx = 0;
+        for (Account account : getTeamAccounts(inContest)) {
+            account.setAliasName(GIRL_NAMES[idx]);
+            idx++;
+        }
+    }
     
 }

@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Test for YAML export.
@@ -99,7 +100,7 @@ public class ExportYAMLTest extends AbstractTestCase {
 
         exportYAML.exportFiles(testDirectory, contest);
         
-        String actualContestYamlFile = testDirectory+File.separator+ExportYAML.CONTEST_FILENAME;
+        String actualContestYamlFile = testDirectory+File.separator+IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
         
         String expectedContestYamlFile = getTestFilename("expected.contest.yaml");
         if (File.separator.equals("/")) {
@@ -110,7 +111,7 @@ public class ExportYAMLTest extends AbstractTestCase {
         
         assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4);
         
-//        String filename = testDirectory + File.separator + ExportYAML.CONTEST_FILENAME;
+//        String filename = testDirectory + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
 
         exportYAML = null;
 

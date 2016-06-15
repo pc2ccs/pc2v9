@@ -6,7 +6,6 @@ import java.util.Arrays;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IStorage;
-import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.list.FileComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
@@ -16,6 +15,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Unit Test.
@@ -114,7 +114,7 @@ public class CDPReportTest extends AbstractTestCase {
 
         "userdata.tsv", "scoreboard.tsv", "groups.tsv", "teams.tsv",
 
-        ExportYAML.CONTEST_FILENAME, ExportYAML.PROBLEM_SET_FILENAME,
+        IContestLoader.DEFAULT_CONTEST_YAML_FILENAME, IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME,
                 // "system.yaml",
 
                 "s3r1/run.properties",
