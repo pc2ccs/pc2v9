@@ -308,14 +308,16 @@ public class WebServerPane extends JPanePlugin {
 
             ks.setCertificateEntry("jetty", outCert);
             ks.setKeyEntry("jetty", rootPrivateKey, keystorePassword.toCharArray(), chain);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
 
-        // Store away the keystore
-        FileOutputStream fos = new FileOutputStream(keystoreFile);
-        ks.store(fos, password);
-        fos.close();
+            // Store the keystore
+            FileOutputStream fos = new FileOutputStream(keystoreFile);
+            ks.store(fos, password);
+            fos.close();
+        } catch (Exception ex) {
+            System.out.println("ERROR: cannot create "+keystoreFile+", "+ex.getMessage());
+            System.out.println("This is known problem with java7, works properly with java8");
+            getLog().throwing("WebServerPane", "createKeyStoreAndKey", ex);
+        }
     }
 
     /**
