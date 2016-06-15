@@ -30,11 +30,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.HashLoginService;
-import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -44,8 +39,6 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.security.Constraint;
-import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
@@ -179,8 +172,8 @@ public class WebServerPane extends JPanePlugin {
     }
 
     /**
-     * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty. 
-     * TODO: need to provide support for dynamically reconfiguring the registered services.
+     * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty. TODO: need to provide support for
+     * dynamically reconfiguring the registered services.
      * 
      */
     private void startWebServer() {
@@ -228,16 +221,14 @@ public class WebServerPane extends JPanePlugin {
 
             HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
             httpsConfig.addCustomizer(new SecureRequestCustomizer());
-            
+
             ServerConnector https = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()), new HttpConnectionFactory(httpsConfig));
             https.setPort(port);
             // do not timeout
             https.setIdleTimeout(0);
-            
+
             // only enable https
             jettyServer.setConnectors(new Connector[] { https });
-            
-            context.setSecurityHandler(basicAuth("scott", "tiger", "my realm", new String[]{"admin"}) );
 
             jettyServer.setHandler(context);
 
@@ -285,27 +276,22 @@ public class WebServerPane extends JPanePlugin {
             String x500Name = "sun.security.x509" + ".X500Name";
             Class<?> certKeyGenClass = Class.forName(certAndKeyGen);
             Class<?> x500NameClass = Class.forName(x500Name);
-            Constructor<?> certKeyGenCons = certKeyGenClass.getConstructor(String.class,
-                    String.class);
+            Constructor<?> certKeyGenCons = certKeyGenClass.getConstructor(String.class, String.class);
             Constructor<?> x500NameCons = x500NameClass.getConstructor(String.class);
-            Object keypair = certKeyGenCons.newInstance("RSA",  "SHA256WithRSA");
+            Object keypair = certKeyGenCons.newInstance("RSA", "SHA256WithRSA");
             String dn = "CN=pc2 jetty, OU=PC^2, O=PC^2, L=Unknown, ST=Unknown, C=Unknown";
             Object subject = x500NameCons.newInstance(dn);
-            Method certAndKeyGenGenerate = certKeyGenClass.getMethod(
-                    "generate", int.class);
+            Method certAndKeyGenGenerate = certKeyGenClass.getMethod("generate", int.class);
             certAndKeyGenGenerate.invoke(keypair, 2048);
-            Method certAndKeyGenPrivateKey = certKeyGenClass.getMethod(
-                    "getPrivateKey");
-            PrivateKey rootPrivateKey = (PrivateKey)certAndKeyGenPrivateKey.invoke(keypair);
-            Method getSelfCertificate = certKeyGenClass.getMethod(
-                    "getSelfCertificate", x500NameClass, long.class);
+            Method certAndKeyGenPrivateKey = certKeyGenClass.getMethod("getPrivateKey");
+            PrivateKey rootPrivateKey = (PrivateKey) certAndKeyGenPrivateKey.invoke(keypair);
+            Method getSelfCertificate = certKeyGenClass.getMethod("getSelfCertificate", x500NameClass, long.class);
 
             X509Certificate[] chain = new X509Certificate[1];
             // create with a length of 1 (non-leap) year
             long days = (long) 365 * 24 * 3600;
             // Generate self signed certificate
-            chain[0] = (X509Certificate) getSelfCertificate.invoke(keypair,
-                    subject, days);
+            chain[0] = (X509Certificate) getSelfCertificate.invoke(keypair, subject, days);
 
             Principal issuer = chain[0].getSubjectDN();
             String issuerSigAlg = chain[0].getSigAlgName();
@@ -316,7 +302,7 @@ public class WebServerPane extends JPanePlugin {
             CertificateExtensions exts = new CertificateExtensions();
             exts.set(SubjectKeyIdentifierExtension.NAME, new SubjectKeyIdentifierExtension(new KeyIdentifier(chain[0].getPublicKey()).getIdentifier()));
             info.set(X509CertInfo.EXTENSIONS, exts);
-            
+
             X509CertImpl outCert = new X509CertImpl(info);
             outCert.sign(rootPrivateKey, issuerSigAlg);
 
@@ -343,7 +329,7 @@ public class WebServerPane extends JPanePlugin {
         // create and (empty) ResourceConfig
         ResourceConfig resConfig = new ResourceConfig();
         resConfig.register(RolesAllowedDynamicFeature.class);
-        
+
         // add each of the enabled services to the config:
 
         if (getChckbxScoreboard().isSelected()) {
@@ -394,8 +380,7 @@ public class WebServerPane extends JPanePlugin {
     }
 
     /**
-     * Stops the Jetty web server if it is running. Also destroys the web server. 
-     * TODO: shouldn't really destroy the webserver; just stop it and cache the reference so that it can be quickly
+     * Stops the Jetty web server if it is running. Also destroys the web server. TODO: shouldn't really destroy the webserver; just stop it and cache the reference so that it can be quickly
      * restarted. (However, need to consider what happens if the user selects a different set of services to be enabled...)
      */
     protected void stopWebServer() {
@@ -538,7 +523,7 @@ public class WebServerPane extends JPanePlugin {
         getChckbxProblems().setEnabled(!serverRunning);
         getChckbxTeams().setEnabled(!serverRunning);
         getChckbxLanguages().setEnabled(!serverRunning);
-        
+
         // these services are currently unimplemented; disallow enabling them
         getChckbxStarttime().setEnabled(false);
         getChckbxStarttime().setVisible(false);
@@ -597,58 +582,5 @@ public class WebServerPane extends JPanePlugin {
         }
         return chckbxTeams;
     }
-    
-    private static SecurityHandler basicAuth(String username, String password, String realm, String[] roles) {
 
-        HashLoginService l = new HashLoginService();
-        l.putUser(username, Credential.getCredential(password), roles);
-        l.setName(realm);
-        File f = new File("realm.properties");
-        if (f.exists() && f.isFile() && f.canRead()) {
-            System.err.println("Loading "+f.getAbsolutePath());
-            // per 9.2 docs this is seconds not ms and 60*1000 didn't seem to work
-            l.setRefreshInterval(60); // seconds or ms?
-            l.setConfig(f.getAbsolutePath());
-            try {
-                l.start();
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        } else if (!f.exists()) {
-            System.err.println("WARNING: "+f.getAbsolutePath()+" does not exist");
-        } else if (!f.isFile()) {
-            System.err.println("WARNING: "+f.getAbsolutePath()+" is not a file");
-        } else {
-            System.err.println("WARNING: Cannot read "+f.getAbsolutePath());
-        }
-        
-        Constraint constraintPublic = new Constraint();
-        constraintPublic.setName(Constraint.__BASIC_AUTH);
-        constraintPublic.setRoles(new String[]{"public","balloon","blue","admin"});
-        constraintPublic.setAuthenticate(true);
-         
-        ConstraintMapping cmRoot = new ConstraintMapping();
-        cmRoot.setConstraint(constraintPublic);
-        cmRoot.setPathSpec("/");
-
-        Constraint constraintAdmin = new Constraint();
-        constraintAdmin.setName(Constraint.__BASIC_AUTH);
-        constraintAdmin.setRoles(new String[]{"admin"});
-        constraintAdmin.setAuthenticate(true);
-
-        ConstraintMapping cmStartTime = new ConstraintMapping();
-        cmStartTime.setConstraint(constraintAdmin);
-        cmStartTime.setPathSpec("/starttime");
-        
-        ConstraintSecurityHandler csh = new ConstraintSecurityHandler();
-        csh.setAuthenticator(new BasicAuthenticator());
-        csh.setRealmName("myrealm");
-        csh.addConstraintMapping(cmRoot);
-        csh.addConstraintMapping(cmStartTime);
-        csh.setLoginService(l);
-        
-        return csh;
-        
-    }
 }
