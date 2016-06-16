@@ -11,10 +11,7 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  * User/Login Account.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class Account implements IElementObject {
 
     /**
@@ -69,6 +66,10 @@ public class Account implements IElementObject {
     private String externalName = "";
 
     private String countryCode = "";
+    
+    private String institutionName = "";
+    private String institutionShortName= "";
+    private String institutionCode  = "";
     
     private String teamName = "";
     
@@ -165,7 +166,15 @@ public class Account implements IElementObject {
     public void setClientId(ClientId clientId) {
         this.clientId = clientId;
     }
-
+    
+    // TODO TODAY add comparisons for 
+//    Institution name 
+//    Institution short name
+//    Institution Code    
+    
+    // The special case is that the previous instances could have a null value which
+    // needs to be compareed as equal to an empty string.
+    
     public boolean isSameAs(Account account) {
         try {
             if (!displayName.equals(account.getDisplayName())) {
@@ -211,6 +220,7 @@ public class Account implements IElementObject {
             if (!shortSchoolName.equals(account.getShortSchoolName())) {
                 return false;
             }
+            
             if (permissionList == null || account.getPermissionList() == null) {
                 // if only 1 is null then return false
                 if (!(permissionList == null && account.getPermissionList() == null)) {
@@ -380,4 +390,30 @@ public class Account implements IElementObject {
             return teamName;
         }
     }
+
+    public String getInstitutionName() {
+        return institutionName;
+    }
+
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
+    }
+
+    public String getInstitutionShortName() {
+        return institutionShortName;
+    }
+
+    public void setInstitutionShortName(String institutionShortName) {
+        this.institutionShortName = institutionShortName;
+    }
+
+    public String getInstitutionCode() {
+        return institutionCode;
+    }
+
+    public void setInstitutionCode(String institutionCode) {
+        this.institutionCode = institutionCode;
+    }
+    
+    
 }
