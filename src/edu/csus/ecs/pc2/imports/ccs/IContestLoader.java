@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
+import java.io.File;
 import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
@@ -223,4 +224,12 @@ public interface IContestLoader {
     boolean getBooleanValue(String string, boolean defaultBoolean);
 
     void assignJudgingType(String[] yaml, Problem problem, boolean overrideManualReviewFlag);
+    
+    /**
+     * Load contest with settings from file/CDP.
+     * @param contest
+     * @param entry can be CDP directory, contest.yaml file, or other initialize file.
+     * @throws Exception 
+     */
+    IInternalContest initializeContest (IInternalContest contest, File entry) throws Exception;
 }

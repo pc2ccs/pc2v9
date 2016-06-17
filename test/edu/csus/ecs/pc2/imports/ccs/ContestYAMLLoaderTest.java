@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
@@ -1581,4 +1582,115 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected contest start time ", expectedFormattedTime, value);
 
     }
+    
+    // New test from bug 770
+    
+    public void testSimpleInitializeContest() throws Exception {
+        
+        String yamlFilename = getContestYamlTestFilename();
+        
+        IInternalContest contest = new InternalContest();
+        
+        contest = loader.initializeContest(contest, new File(yamlFilename));
+        assertNotNull(contest);
+
+        Language[] languages = contest.getLanguages();
+        assertEquals("Number of languages", 3, languages.length);
+
+        Account[] accounts = contest.getAccounts();
+        assertEquals("Number of accounts", 85, accounts.length);
+        
+        ClientType.Type type = ClientType.Type.TEAM;
+        assertEquals("Number of accounts " + type.toString(), 65, getClientCount(contest, type));
+        type = ClientType.Type.JUDGE;
+        assertEquals("Number of accounts " + type.toString(), 20, getClientCount(contest, type));
+        type = ClientType.Type.ADMINISTRATOR;
+        assertEquals("Number of accounts " + type.toString(), 0, getClientCount(contest, type));
+        type = ClientType.Type.SCOREBOARD;
+        assertEquals("Number of accounts " + type.toString(), 0, getClientCount(contest, type));
+        
+        Problem[] problems = contest.getProblems();
+        assertEquals("Number of problems", 5, problems.length);
+        
+        AutoJudgeSetting [] ajs = getAutoJudgeSettings(contest);
+        assertEquals("Number of auto judges", 7, ajs.length);
+        
+        ajs = getAutoJudgeSettings(contest, true);
+        assertEquals("Number of active auto judges", 7, ajs.length);
+
+    }
+    
+    public void testLoadSumitSample() throws Exception {
+        
+        IInternalContest contest = new InternalContest();
+        
+        contest = loader.initializeContest(contest, new File("sumithello"));
+        assertNotNull(contest);
+        
+        Problem[] problems = contest.getProblems();
+        assertEquals("Number of problems", 2, problems.length);
+    }
+    
+    // 
+    
+    
+    public void testLoadccs1Sample() throws Exception {
+        
+        IInternalContest contest = new InternalContest();
+        
+        contest = loader.initializeContest(contest, new File("ccs1"));
+        assertNotNull(contest);
+        
+        Problem[] problems = contest.getProblems();
+        assertEquals("Number of problems", 5, problems.length);
+        
+        Language[] languages = contest.getLanguages();
+        assertEquals("Number of languages", 3, languages.length);
+
+        Account[] accounts = contest.getAccounts();
+        assertEquals("Number of accounts", 0, accounts.length);
+    }
+    
+    /**
+     * Get active auto judges.
+     * @param contest
+     * @return
+     */
+    public AutoJudgeSetting[] getAutoJudgeSettings(IInternalContest contest) {
+        return getAutoJudgeSettings(contest, false);
+    }
+
+    /**
+     * Get auto judge accounts.
+     * @param contest
+     * @param activeOnly if true only returns enabled/active auto judge accounts.
+     * @return
+     */
+    public AutoJudgeSetting[] getAutoJudgeSettings(IInternalContest contest, boolean activeOnly) {
+        
+        ArrayList<AutoJudgeSetting> ajLIst = new ArrayList<>();
+        
+        Account[] accounts = contest.getAccounts();
+        
+        for (Account account : accounts) {
+            
+            ClientId id = account.getClientId();
+            ClientSettings settings = contest.getClientSettings (id);
+
+            if(settings != null) {
+                if (settings.isAutoJudging() || ! activeOnly){
+
+                    AutoJudgeSetting autoJudgeSetting = new AutoJudgeSetting(account.getDisplayName());
+                    autoJudgeSetting.setClientId(id);
+                    autoJudgeSetting.setActive(settings.isAutoJudging());
+                    autoJudgeSetting.setProblemFilter(settings.getAutoJudgeFilter());
+                    ajLIst.add(autoJudgeSetting);
+                }
+            }
+        }
+        
+        return (AutoJudgeSetting[]) ajLIst.toArray(new AutoJudgeSetting[ajLIst.size()]);
+    }
+
+    
 }

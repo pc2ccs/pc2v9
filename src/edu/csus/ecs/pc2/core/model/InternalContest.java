@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
@@ -254,6 +255,8 @@ public class InternalContest implements IInternalContest {
     private PlaybackManager playbackManager = new PlaybackManager();
 
     private EventFeedDefinitionsList eventFeedDefinitionsList = null;
+
+    private ParseArguments parseArguments = new ParseArguments();
 
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
@@ -3106,5 +3109,25 @@ public class InternalContest implements IInternalContest {
         }
         GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.CHANGED_GROUPS, groups);
         fireGroupListener(groupEvent);
+    }
+    
+    @Override
+    public boolean isCommandLineOptionPresent(String optionName) {
+        return parseArguments.isOptPresent(optionName);
+    }
+    
+    @Override
+    public void setCommandLineArguments(ParseArguments parseArguments) {
+        this.parseArguments = parseArguments;
+    }
+
+    @Override
+    public boolean doesCommandLineArgumentHaveParameter(String optionName) {
+        return parseArguments.optHasValue(optionName);
+    }
+
+    @Override
+    public String getCommandLineOptionValue(String optionNaeme) {
+        return parseArguments.getOptValue(optionNaeme);
     }
 }

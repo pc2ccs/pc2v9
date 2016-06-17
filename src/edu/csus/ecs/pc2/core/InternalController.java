@@ -71,6 +71,8 @@ import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
+import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.ILogWindow;
@@ -130,6 +132,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * 
      */
     private static final String PROFILE_OPTION_STRING = "--profile";
+    
+    private static final String LOAD_OPTION_STRING = "--load";
 
     private static final String FILE_OPTION_STRING = "-F";
 
@@ -285,7 +289,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private static final String LOGIN_UI_GUI_CLASSNAME = "edu.csus.ecs.pc2.ui.LoginFrame";
 
-    private static final String COUNTDOWN_UI_CLASSNAME = "edu.csus.ecs.pc2.ui.CountDownMessage";;
+    private static final String COUNTDOWN_UI_CLASSNAME = "edu.csus.ecs.pc2.ui.CountDownMessage";
+
+    private static final String PORT_OPTION_STRING = "--port";
+
+    private static final String REMOTE_SERVER_OPTION_STRING = "--remoteServer";
+
+    private static final Object FIRST_SERVER_OPTION_STRING = "--first";
 
     private String loginClassName = LOGIN_UI_GUI_CLASSNAME;
 
@@ -737,6 +747,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
 
         public void setContest(IInternalContest contest) {
+            contest.setCommandLineArguments(parseArguments);
             this.contest = contest;
         }
 
@@ -2296,8 +2307,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 port = getPortForSite(contest.getSiteNumber());
 
-                if (parseArguments.getOptValue("--port") != null) {
-                    String portString = parseArguments.getOptValue("--port");
+                if (parseArguments.getOptValue(PORT_OPTION_STRING) != null) {
+                    String portString = parseArguments.getOptValue(PORT_OPTION_STRING);
                     getLog().log(Log.INFO, "Attempting to use port from --port '" + portString + "'");
                     port = Integer.parseInt(portString);
                 }
@@ -2329,6 +2340,25 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                                 throw new Exception("Class not loaded "+uiClassName);
                             }
                             info("Loaded UI class " + uiClassName);
+                        }
+                    }
+                    
+                    if (contest.isCommandLineOptionPresent(LOAD_OPTION_STRING)){
+                        
+                        IContestLoader loader = new ContestYAMLLoader();
+                        /**
+                         * Name of CDP dir or file to be loaded.
+                         */
+                        String entryLocation = contest.getCommandLineOptionValue(LOAD_OPTION_STRING);
+                        
+                        try {
+                            loader.initializeContest(contest, new File(entryLocation));
+                        } catch (Exception e) {
+                            fatalError("Error loading from "+entryLocation, e);
+                        }
+                        finally
+                        {
+                            loader = null;
                         }
                     }
 
@@ -2370,13 +2400,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         TransportException savedTransportException = null;
 
         String[] requireArguementArgs = { // 
-                "--login", "--id", "--password", // 
-                MAIN_UI_OPTION, "--remoteServer", // 
-                "--port", //
+                "--login", //
+                "--password", // 
+                MAIN_UI_OPTION, 
+                REMOTE_SERVER_OPTION_STRING, //
+                PORT_OPTION_STRING, //
+                LOAD_OPTION_STRING, //
                 PROFILE_OPTION_STRING, //
                 INI_FILENAME_OPTION_STRING, //
                 CONTEST_PASSWORD_OPTION, //
-//                LOAD_YAML_OPTION_STRING, // TODO 770 - add         
+                "--id", // 
                 FILE_OPTION_STRING };
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
         
@@ -2423,7 +2456,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         handleCommandLineOptions();
 
         for (String arg : stringArray) {
-            if (arg.equals("--first")) {
+            if (arg.equals(FIRST_SERVER_OPTION_STRING)) {
                 setContactingRemoteServer(false);
             }
         }
@@ -2492,7 +2525,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             serverModule = true;
 
             contactingRemoteServer = false;
-            setServerRemoteHostAndPort(parseArguments.getOptValue("--remoteServer"));
+            setServerRemoteHostAndPort(parseArguments.getOptValue(REMOTE_SERVER_OPTION_STRING));
 
             if (!isContactingRemoteServer()) {
                 theProfile = getCurrentProfile();
@@ -2502,9 +2535,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             try {
-                setServerPort(parseArguments.getOptValue("--port"));
+                setServerPort(parseArguments.getOptValue(PORT_OPTION_STRING));
             } catch (NumberFormatException numException) {
-                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue("--port") + "'");
+                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue(PORT_OPTION_STRING) + "'");
                 log.log(Log.WARNING, "Exception logged ", numException);
             }
 
@@ -2513,12 +2546,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             try {
 
-                setClientServerAndPort(parseArguments.getOptValue("--port"));
+                setClientServerAndPort(parseArguments.getOptValue(PORT_OPTION_STRING));
 
                 info("Contacting server at " + remoteHostName + ":" + remoteHostPort);
                 connectionManager.startClientTransport(remoteHostName, remoteHostPort, this);
             } catch (NumberFormatException numException) {
-                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue("--port") + "'");
+                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue(PORT_OPTION_STRING) + "'");
                 log.log(Log.WARNING, "Exception logged ", numException);
             }
 
@@ -2664,11 +2697,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         if (parseArguments.isOptPresent("--help")) {
             // -F is the ParseArguements internal option to pre-load command line options from a file
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [" 
-//            + LOAD_YAML_OPTION_STRING 
-                    + "] [--skipini] " + //
+
+            String[] usage = { //
+                    "Usage: Starter [--help] [-F filename] [--server] [--first] [--login <login>] [--password <pass>] " + //
+                    "[" + LOAD_OPTION_STRING + " <dir>|<file> ] " + //
+                    "[--skipini] " + //
                     "[" + INI_FILENAME_OPTION_STRING + " filename] [" + //
-                    CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] [" + NO_GUI_OPTION_STRING + "] [" + MAIN_UI_OPTION + " classname]");
+                    CONTEST_PASSWORD_OPTION + " <pass>] [" + NO_GUI_OPTION_STRING + "] "+ //
+                    " [" + MAIN_UI_OPTION + " classname]", // 
+                    "", //
+                    "See http://pc2.ecs.csus.edu/wiki/Command_Line for more information", // 
+            };
+            for (String string : usage) {
+                System.out.println(string);
+            }
             System.exit(0);
         }
 
@@ -3495,6 +3537,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void setContest(IInternalContest newContest) {
         this.contest = newContest;
+        contest.setCommandLineArguments(parseArguments);
         packetHandler = new PacketHandler(this, newContest);
         runSubmitterInterfaceManager.setContestAndController(newContest, this);
     }

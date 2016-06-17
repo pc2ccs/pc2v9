@@ -40,16 +40,11 @@ import edu.csus.ecs.pc2.core.model.Site;
  * Create contest from YAML.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: ContestYAMLLoader.java 225 2011-09-02 05:22:43Z laned $
  */
 
 // TODO CCS REALLY IMPORTANT USER INTERFACE WORK - MUST SHOW SYNTAX ERRORS AND INPUT FILE PROBLEMS TO USER!!!
 //   Replace with Snake Yaml to better handle syntax and other errors.
-
-// TODO implements IContestLoader
-
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoader.java $
-public class ContestYAMLLoader {
+public class ContestYAMLLoader implements IContestLoader {
     
 //    private boolean debugMode = true;
 
@@ -760,7 +755,7 @@ public class ContestYAMLLoader {
         problem.setReadInputDataFromSTDIN(readFromStdin);
     }
 
-    protected void assignJudgingType(String[] sectionLines, Problem problem, boolean overrideManualReviewFlag) {
+    public void assignJudgingType(String[] sectionLines, Problem problem, boolean overrideManualReviewFlag) {
         
         boolean sendPreliminary = getBooleanValue(getSequenceValue(sectionLines, SEND_PRELIMINARY_JUDGEMENT_KEY), false);
         if (sendPreliminary){
@@ -805,7 +800,7 @@ public class ContestYAMLLoader {
         System.err.println("Warning - "+message);
     }
 
-    protected String getProblemNameFromLaTex(String filename) {
+    public String getProblemNameFromLaTex(String filename) {
 
         String[] lines;
         try {
@@ -1010,7 +1005,7 @@ public class ContestYAMLLoader {
      * @param extension
      * @return
      */
-    protected String[] getFileNames(String directoryName, String extension) {
+    public String[] getFileNames(String directoryName, String extension) {
 
         Vector<String> list = new Vector<String>();
         File dir = new File(directoryName);
@@ -1576,7 +1571,7 @@ public class ContestYAMLLoader {
      * @param quoteChar 
      * @return
      */
-    protected String unquote(String string, String quoteChar) {
+    public String unquote(String string, String quoteChar) {
         if (string.startsWith(quoteChar)){
             String newString = string.substring(1);
             if (newString.endsWith(quoteChar)){
@@ -1790,7 +1785,7 @@ public class ContestYAMLLoader {
 
     }
 
-    protected Problem[] getProblemsFromLetters(Problem[] problems, String problemLettersString)  {
+    public Problem[] getProblemsFromLetters(Problem[] problems, String problemLettersString)  {
 
         String[] list = problemLettersString.split(",");
         Problem[] out = new Problem[list.length];
@@ -1852,7 +1847,7 @@ public class ContestYAMLLoader {
      * @param defaultBoolean
      * @return default if string does not match (case-insensitive) string
      */
-    protected boolean getBooleanValue(String string, boolean defaultBoolean) {
+    public boolean getBooleanValue(String string, boolean defaultBoolean) {
 
         boolean value = defaultBoolean;
 
@@ -1929,6 +1924,88 @@ public class ContestYAMLLoader {
     
     public boolean isLoadProblemDataFiles() {
         return loadProblemDataFiles;
+    }
+    
+
+    /**
+     * Find sample conetst by name.
+     * @param name
+     * @return
+     */
+    protected String findSampleContestYaml(String name) {
+        
+        System.out.println("debug 22 findSampleContestYaml ( "+name+")");
+        
+        String sampleDir = "samps"+File.separator+"contests";
+        
+        String conestYamleFilename = sampleDir + File.separator + name + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+        
+        if (new File( conestYamleFilename).isFile()){
+            return conestYamleFilename;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public IInternalContest initializeContest(IInternalContest contest, File entry) throws Exception {
+        
+        File cdpPath = entry;
+        
+        if (IContestLoader.DEFAULT_CONTEST_YAML_FILENAME.equals(entry.getName())){
+            // found config/contest.yaml
+            
+            cdpPath = entry.getParentFile();
+        }
+
+        String contestYamlFileName = cdpPath.getAbsolutePath() + File.separator+ "config" + //
+        File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+        
+        if (! new File(contestYamlFileName).isFile()){
+            
+            String sampleContestYamlFile = findSampleContestYaml(entry.getName());
+            if (sampleContestYamlFile != null){
+                
+                File samp = new File(sampleContestYamlFile);
+                cdpPath = samp.getAbsoluteFile().getParentFile();
+                
+                contestYamlFileName = cdpPath.getAbsolutePath() + //
+                        File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+            }
+        }
+        
+        if (! new File(contestYamlFileName).isFile()){
+            throw new Exception("Cannot load from CDP, missing yaml file "+contestYamlFileName);
+        }
+        
+        fromYaml(contest, cdpPath.getAbsolutePath());
+        
+        return contest;
+    }
+
+
+    @Override
+    public Problem loadCCSProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void loadPc2ProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles2, String dataFileName, String answerFileName) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public String getCCSDataFileDirectory(String yamlDirectory, Problem problem) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getCCSDataFileDirectory(String yamlDirectory, String shortDirName) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
