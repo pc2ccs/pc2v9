@@ -350,6 +350,7 @@ public class WebServer {
         } else {
             return "true".equalsIgnoreCase(value.trim()) || //
                     "yes".equalsIgnoreCase(value) || //
+                    "on".equalsIgnoreCase(value) || //
                     "enabled".equalsIgnoreCase(value.trim());
         }
 
@@ -384,15 +385,15 @@ public class WebServer {
 
         prop.put(PORT_NUMBER_KEY, DEFAULT_WEB_SERVER_PORT_NUMBER + "");
 
-        prop.put(SCOREBOARD_SERVICE_ENABLED_KEY, "no");
+        prop.put(SCOREBOARD_SERVICE_ENABLED_KEY, "yes");
 
-        prop.put(PROBLEM_SERVICE_ENABLED_KEY, "no");
+        prop.put(PROBLEM_SERVICE_ENABLED_KEY, "yes");
 
-        prop.put(LANGUAGE_SERVICE_ENABLED_KEY, "no");
+        prop.put(LANGUAGE_SERVICE_ENABLED_KEY, "yes");
 
-        prop.put(STARTTIME_SERVICE_ENABLED_KEY, "no");
+        prop.put(STARTTIME_SERVICE_ENABLED_KEY, "yes");
 
-        prop.put(TEAMS_SERVICE_ENABLED_KEY, "no");
+        prop.put(TEAMS_SERVICE_ENABLED_KEY, "yes");
 
         return prop;
     }
