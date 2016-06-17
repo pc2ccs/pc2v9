@@ -877,8 +877,4 @@ public class SitesPane extends JPanePlugin {
         }
     }
 
-    private boolean isServer() {
-        return isServer(getContest().getClientId());
-    } 
-    
 } // @jve:decl-index=0:visual-constraint="10,10"

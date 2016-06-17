@@ -32,8 +32,6 @@ import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
-import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
@@ -320,14 +318,6 @@ public class ReportPane extends JPanePlugin {
     private void updateGUIperPermissions() {
         generateSummaryButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
         viewReportButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
-    }
-
-    private boolean isServer() {
-        return getContest().getClientId() != null && isServer(getContest().getClientId());
-    }
-
-    private boolean isServer(ClientId clientId) {
-        return clientId.getClientType().equals(ClientType.Type.SERVER);
     }
 
     protected void refreshGUI() {

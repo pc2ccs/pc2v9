@@ -12,7 +12,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IChangePasswordListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -275,10 +274,6 @@ public class OptionsPane extends JPanePlugin {
     protected boolean isAllowedToViewSecurityWindow() {
 
         return isAllowed(Permission.Type.VIEW_SECURITY_ALERTS) || isServer();
-    }
-
-    private boolean isServer() {
-        return getContest().getClientId().getClientType().equals(Type.SERVER);
     }
 
     /**
