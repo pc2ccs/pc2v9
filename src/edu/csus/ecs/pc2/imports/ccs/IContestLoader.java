@@ -26,7 +26,7 @@ public interface IContestLoader {
 
     public static final String DEFAULT_PROBLEM_YAML_FILENAME = "problem.yaml";
 
-    public static final String DEFAULT_PROBLEM_SET_YAML_FILENAME = "problem.yaml";
+    public static final String DEFAULT_PROBLEM_SET_YAML_FILENAME = "problemset.yaml";
     
     public static final String DEFAULT_PROBLEM_LATEX_FILENAME = "problem.tex";
 
