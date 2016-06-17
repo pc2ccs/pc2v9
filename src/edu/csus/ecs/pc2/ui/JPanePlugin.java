@@ -74,6 +74,9 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
                         developmentFrame = new DevelopmentFrame();
                         developmentFrame.setContestAndController(getContest(), getController());
                         FrameUtilities.centerFrame(developmentFrame);
+                        
+                    }
+                    if (developmentFrame != null){
                         developmentFrame.setVisible(true);
                     }
                 }
