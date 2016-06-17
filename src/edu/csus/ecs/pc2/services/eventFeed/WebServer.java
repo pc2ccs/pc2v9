@@ -53,6 +53,7 @@ import edu.csus.ecs.pc2.services.web.ProblemService;
 import edu.csus.ecs.pc2.services.web.ScoreboardService;
 import edu.csus.ecs.pc2.services.web.StarttimeService;
 import edu.csus.ecs.pc2.services.web.TeamService;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Web Server.
@@ -62,25 +63,30 @@ import edu.csus.ecs.pc2.services.web.TeamService;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
-public class WebServer {
+public class WebServer implements UIPlugin {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -731087652687843222L;
 
     public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = 50443;
 
-    private static final String PC2_KEYSTORE_FILE = "cacerts.pc2";
+    public static final String PC2_KEYSTORE_FILE = "cacerts.pc2";
 
     // keys for web service properties
 
-    private static final String PORT_NUMBER_KEY = "port";
+    public static final String PORT_NUMBER_KEY = "port";
 
-    private static final String SCOREBOARD_SERVICE_ENABLED_KEY = "enableScoreboard";
+    public static final String SCOREBOARD_SERVICE_ENABLED_KEY = "enableScoreboard";
 
-    private static final String PROBLEM_SERVICE_ENABLED_KEY = "enableProblem";
+    public static final String PROBLEM_SERVICE_ENABLED_KEY = "enableProblem";
 
-    private static final String LANGUAGE_SERVICE_ENABLED_KEY = "enableLanguage";
+    public static final String LANGUAGE_SERVICE_ENABLED_KEY = "enableLanguage";
 
-    private static final String STARTTIME_SERVICE_ENABLED_KEY = "enableStartTime";
+    public static final String STARTTIME_SERVICE_ENABLED_KEY = "enableStartTime";
 
-    private static final String TEAMS_SERVICE_ENABLED_KEY = "enableTeams";
+    public static final String TEAMS_SERVICE_ENABLED_KEY = "enableTeams";
 
     Properties wsProperties = new Properties();
 
@@ -154,14 +160,14 @@ public class WebServer {
     }
 
     /**
+     * Start Web Server.
+     * <P>
      * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty. TODO: need to provide support for
      * dynamically reconfiguring the registered services.
      */
     public void startWebServer(IInternalContest contest, IInternalController controller, Properties properties) {
 
-        this.contest = contest;
-        this.controller = controller;
-        this.log = controller.getLog();
+        setContestAndController(contest,controller);
         wsProperties = properties;
 
         try {
@@ -396,6 +402,43 @@ public class WebServer {
         prop.put(TEAMS_SERVICE_ENABLED_KEY, "yes");
 
         return prop;
+    }
+
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+
+        this.contest = inContest;
+        this.controller = inController;
+        this.log = controller.getLog();
+    }
+
+    @Override
+    public String getPluginTitle() {
+        return "Web Server (non-GUI)";
+    }
+
+    public void stop() {
+        try {
+            jettyServer.stop();
+        } catch (Exception e1) {
+            showMessage("Unable to stop Jetty webserver: " + e1.getMessage());
+            e1.printStackTrace();
+            getLog().log(Log.INFO, e1.getMessage(), e1);
+        }
+        jettyServer.destroy();
+    }
+
+    public boolean isServerRunning() {
+        
+        boolean serverRunning;
+        
+        if (jettyServer == null) {
+            serverRunning = false;
+        } else {
+            serverRunning = jettyServer.isRunning();
+        }
+        
+        return serverRunning;
     }
 
 }
