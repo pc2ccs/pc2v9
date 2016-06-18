@@ -10,7 +10,6 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
-import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithmTest;
 
 /**
  * Test ResultsFile class.
@@ -61,38 +60,19 @@ public class ResultsFileTest extends TestCase {
         return list;
     }
 
-    /**
-     * Assign unique reservation id to account.
-     * 
-     * Loops through team accounts and assigned external id (Reservation ID) sequential numbers/ids starting at startId
-     * 
-     * @param contest
-     * @param startId
-     *            - start with id
-     */
-    public void assignReservationIds(IInternalContest contest, int startId) {
 
-        int id = startId;
-        for (Account account : getTeamAccounts(contest)) {
-            account.setExternalId(Integer.toString(id));
-            id++;
-        }
-    }
 
     /**
      * Add runs to contest.
      * 
-     * Uses {@link DefaultScoringAlgorithmTest#addTheRun(IInternalContest, String)}.
-     * 
      * @param contest
      * @param runsData
+     * @throws Exception 
      */
-    private void addRuns(IInternalContest contest, String[] runsData) {
-
-        DefaultScoringAlgorithmTest sa = new DefaultScoringAlgorithmTest();
+    private void addRuns(IInternalContest contest, String[] runsData) throws Exception {
 
         for (String runInfoLine : runsData) {
-            sa.addTheRun(contest, runInfoLine);
+            SampleContest.addRunFromInfo(contest, runInfoLine);
         }
     }
 
@@ -135,7 +115,7 @@ public class ResultsFileTest extends TestCase {
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createContest(1, 1, numTeams, 12, true);
 
-        assignReservationIds(contest, 2020);
+        SampleContest.assignReservationIds(contest, 2020);
         
         contest.setFinalizeData(finalizeData);
 
@@ -247,7 +227,7 @@ public class ResultsFileTest extends TestCase {
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createContest(1, 1, numTeams, 12, true);
 
-        assignReservationIds(contest, 2020);
+        SampleContest.assignReservationIds(contest, 2020);
 
         addRuns(contest, runsData);
         
