@@ -1,0 +1,11 @@
+# group.tsv test file
+# $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/testdata/ccs/groups.tsv $
+#
+groups	1
+201	Europe
+202	Africa
+503	Asia
+204	Austrailia
+905	North America
+206	South America
+# eof $Id: groups.tsv 178 2011-04-08 19:33:23Z laned $
