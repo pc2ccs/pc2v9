@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -1551,7 +1552,9 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         String expectedFormattedTime = XMLUtilities.formatSeconds(date.getTime());
         String actualTime = "1296811380.000";
-        System.err.println("timezone="+timezone);
+        
+//        System.err.println("timezone="+timezone);
+        
         if ("GMT".equals(timezone) || "UTC".equals(timezone)) {
             actualTime = "1296782580.000";
         }
@@ -1591,6 +1594,9 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         IInternalContest contest = new InternalContest();
         
+//        startExplorer(getDataDirectory());
+//        System.out.println(yamlFilename);
+        
         contest = loader.initializeContest(contest, new File(yamlFilename));
         assertNotNull(contest);
 
@@ -1617,6 +1623,10 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         ajs = getAutoJudgeSettings(contest, true);
         assertEquals("Number of active auto judges", 7, ajs.length);
+        
+        Group[] groups = contest.getGroups();
+        assertEquals("Number of groups", 6, groups.length);
+
 
     }
     
@@ -1629,6 +1639,10 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         Problem[] problems = contest.getProblems();
         assertEquals("Number of problems", 2, problems.length);
+        
+        Group[] groups = contest.getGroups();
+        assertEquals("Number of groups", 0, groups.length);
+
     }
     
     // 
@@ -1649,6 +1663,11 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         Account[] accounts = contest.getAccounts();
         assertEquals("Number of accounts", 0, accounts.length);
+
+        Group[] groups = contest.getGroups();
+        assertEquals("Number of groups", 0, groups.length);
+
+        
     }
     
     /**

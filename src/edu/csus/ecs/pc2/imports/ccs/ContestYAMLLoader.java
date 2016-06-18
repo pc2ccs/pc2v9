@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
+import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -177,7 +178,7 @@ public class ContestYAMLLoader implements IContestLoader {
      * 
      * @param contest
      * @param directoryName
-     *            directory to load files from.
+     *            directory to load files from, the config/ directory
      * @return contest
      * 
      */
@@ -191,7 +192,7 @@ public class ContestYAMLLoader implements IContestLoader {
      * 
      * @param contest
      * @param directoryName
-     *            directory to load files from.
+     *            directory to load files from, config/ directory.
      * @param loadDataFileContents true - load files, false do not load files (files considered external). 
      * @return contest
      * 
@@ -265,7 +266,7 @@ public class ContestYAMLLoader implements IContestLoader {
      * 
      * @param contest update/overwrite contest, if null creates new contest.
      * @param yamlLines input YAML lines from contest.yaml
-     * @param directoryName location for contest.yaml and problem data files 
+     * @param directoryName location for contest.yaml and problem data files, config/ directory.
      * @param loadDataFileContents if true load the file's contents, if true buffer = null.
      */
     public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName, boolean loadDataFileContents)  {
@@ -1934,7 +1935,7 @@ public class ContestYAMLLoader implements IContestLoader {
      */
     protected String findSampleContestYaml(String name) {
         
-        System.out.println("debug 22 findSampleContestYaml ( "+name+")");
+//        System.out.println("findSampleContestYaml ( "+name+")");
         
         String sampleDir = "samps"+File.separator+"contests";
         
@@ -1950,39 +1951,98 @@ public class ContestYAMLLoader implements IContestLoader {
     @Override
     public IInternalContest initializeContest(IInternalContest contest, File entry) throws Exception {
         
-        File cdpPath = entry;
-        
-        if (IContestLoader.DEFAULT_CONTEST_YAML_FILENAME.equals(entry.getName())){
-            // found config/contest.yaml
-            
-            cdpPath = entry.getParentFile();
+        if (contest == null){
+            throw new IllegalArgumentException("contest is null");
         }
-
-        String contestYamlFileName = cdpPath.getAbsolutePath() + File.separator+ "config" + //
-        File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
         
-        if (! new File(contestYamlFileName).isFile()){
+
+        File cdpConfigDirectory = null;
+        
+        if (entry.isDirectory()){
+            
+            // found a directory
+            cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
+            
+        }  else if (entry.isFile()) {
+            
+            // a file
+            
+            if (IContestLoader.DEFAULT_CONTEST_YAML_FILENAME.equals(entry.getName())){
+                // found contest.yaml
+                
+                cdpConfigDirectory = entry.getParentFile();
+            }
+            
+            
+        } else {
+            
+            // A CDP in the samples directory
             
             String sampleContestYamlFile = findSampleContestYaml(entry.getName());
+            
             if (sampleContestYamlFile != null){
-                
-                File samp = new File(sampleContestYamlFile);
-                cdpPath = samp.getAbsoluteFile().getParentFile();
-                
-                contestYamlFileName = cdpPath.getAbsolutePath() + //
-                        File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+                File yamlFile = new File(sampleContestYamlFile);
+                String configDirPath = yamlFile.getParentFile().getAbsoluteFile().toString();
+                cdpConfigDirectory = new File(configDirPath); 
             }
+            
         }
         
-        if (! new File(contestYamlFileName).isFile()){
-            throw new Exception("Cannot load from CDP, missing yaml file "+contestYamlFileName);
+        if (cdpConfigDirectory == null){
+            throw new Exception("Cannot find CDP for "+entry);
+        } else {
+            contest = fromYaml(contest, cdpConfigDirectory.getAbsolutePath());
+            
+            if (contest.getSites().length == 0){
+                // Create default site.
+                Site site = createFirstSite(contest.getSiteNumber(), "localhost", Constants.DEFAULT_PC2_PORT);
+                contest.addSite(site);
+            }
+            
+            loadCCSTSVFiles (contest, cdpConfigDirectory);
         }
-        
-        fromYaml(contest, cdpPath.getAbsolutePath());
         
         return contest;
     }
+    
+    
+    public static Site createFirstSite(int siteNumber, String hostName, int portNumber) {
+        Site site = new Site("Site " + siteNumber, siteNumber);
+        Properties props = new Properties();
+        props.put(Site.IP_KEY, hostName);
+        props.put(Site.PORT_KEY, "" + portNumber);
+        site.setConnectionInfo(props);
+        site.setPassword("site" + siteNumber);
+        return site;
+    }
 
+
+    /**
+     * Load groups.tsv and teams.tsv.
+     * 
+     * @param contest
+     * @param cdpConfigDirectory
+     * @throws Exception 
+     */
+    private boolean loadCCSTSVFiles(IInternalContest contest, File cdpConfigDirectory) throws Exception {
+        
+        boolean loaded = false;
+        
+        String teamsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS_FILENAME;
+        
+        String groupsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.GROUPS_FILENAME;
+
+        // only load if both tsv files are present.
+        
+        if (new File(teamsTSVFile).isFile() && new File(groupsTSVFile).isFile()){
+
+            LoadICPCTSVData loadTSVData = new LoadICPCTSVData();
+            loadTSVData.setContestAndController(contest, null);
+            loaded = loadTSVData.loadFiles(teamsTSVFile, false, false);
+        }
+        
+       return loaded;
+    }
 
     @Override
     public Problem loadCCSProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles) {

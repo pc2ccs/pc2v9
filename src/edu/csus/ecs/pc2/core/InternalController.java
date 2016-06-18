@@ -2345,19 +2345,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     
                     if (contest.isCommandLineOptionPresent(LOAD_OPTION_STRING)){
                         
+                        
                         IContestLoader loader = new ContestYAMLLoader();
                         /**
                          * Name of CDP dir or file to be loaded.
                          */
                         String entryLocation = contest.getCommandLineOptionValue(LOAD_OPTION_STRING);
-                        
+
+                        info("Loading CDP from " + entryLocation);
+
                         try {
+
                             loader.initializeContest(contest, new File(entryLocation));
+                            info("Loaded CDP/config values from " + entryLocation);
                         } catch (Exception e) {
-                            fatalError("Error loading from "+entryLocation, e);
-                        }
-                        finally
-                        {
+                            fatalError("Error loading from " + entryLocation, e);
+                        } finally {
                             loader = null;
                         }
                     }
@@ -2412,6 +2415,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 "--id", // 
                 FILE_OPTION_STRING };
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
+        
+        contest.setCommandLineArguments(parseArguments);
         
         if (parseArguments.isOptPresent("--server")) {
             if (!isContactingRemoteServer()) {

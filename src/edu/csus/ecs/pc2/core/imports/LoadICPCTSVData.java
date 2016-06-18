@@ -53,7 +53,26 @@ public class LoadICPCTSVData implements UIPlugin {
         return contest;
     }
 
+    /**
+     * Load both teams.tsv and groups.tsv into contest and sends results to server.
+     * 
+     * @param filename
+     * @return
+     * @throws Exception
+     */
     public boolean loadFiles(String filename) throws Exception {
+        return loadFiles(filename, true, true);
+    }
+    
+    /**
+     * Load both teams.tsv and groups.tsv into contest and optionally sends results to server.
+     * @param filename
+     * @param sendToServer if true sends to server via controller, if false just loads into contest.
+     * @param usingGUI prompt using GUI to add accounts and groups.s
+     * @return
+     * @throws Exception
+     */
+    public boolean loadFiles(String filename, boolean sendToServer, boolean useConfirmGUI) throws Exception {
 
         if (checkFiles(filename)) {
 
@@ -65,12 +84,15 @@ public class LoadICPCTSVData implements UIPlugin {
             
             Account[] accounts = ICPCTSVLoader.loadAccounts(teamsFilename);
 
-            String nl = System.getProperty("line.separator");
+            int result = JOptionPane.YES_OPTION;
 
-            String message = "Add " + nl + accounts.length + " accounts and " + nl + groups.length + " groups?";
-            
+            if (useConfirmGUI){
+                
+                String nl = System.getProperty("line.separator");
+                String message = "Add " + nl + accounts.length + " accounts and " + nl + groups.length + " groups?";
 
-            int result = FrameUtilities.yesNoCancelDialog(null, message, "Load TSV files");
+                result = FrameUtilities.yesNoCancelDialog(null, message, "Load TSV files");
+            }
             
             if (result == JOptionPane.YES_OPTION) {
                 
@@ -82,23 +104,43 @@ public class LoadICPCTSVData implements UIPlugin {
                  */
                 updateGroupsAndAccounts (contest, groupList, accountList);
                 
-                /**
-                 * Update Groups
-                 */
-                Group [] updatedGroups = (Group[]) groupList.toArray(new Group[groupList.size()]);
-                for (Group group : updatedGroups) {
-                    getController().updateGroup(group);
-                }
-                
-                /**
-                 * UpdateAccounts
-                 */
-                Account [] updatedAccounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
+                if (sendToServer) {
 
-                getController().updateAccounts(updatedAccounts);
+                    /**
+                     * Update Groups
+                     */
+                    Group[] updatedGroups = (Group[]) groupList.toArray(new Group[groupList.size()]);
+                    for (Group group : updatedGroups) {
+                        getController().updateGroup(group);
+                    }
+
+                    info("Sent groups from " + groupsFilename + " to server");
+
+                    /**
+                     * UpdateAccounts
+                     */
+                    Account[] updatedAccounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
+
+                    getController().updateAccounts(updatedAccounts);
+                    info("Sent accounts from " + teamsFilename + " to server");
+                } else {
+                    
+                    // since not sending to server, add to existing contest.
+                    
+                    Group[] updatedGroups = (Group[]) groupList.toArray(new Group[groupList.size()]);
+                    for (Group group : updatedGroups) {
+                        contest.updateGroup(group);
+                    }
+                    
+                    Account[] updatedAccounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
+                    for (Account account : updatedAccounts) {
+                        contest.updateAccount(account);
+                    }
+                }
 
                 info("Load from file " + groupsFilename);
                 info("Load from file " + teamsFilename);
+                
                 info("Added " + accounts.length + " accounts and " + groups.length + " groups.");
 
                 return true;
@@ -112,7 +154,11 @@ public class LoadICPCTSVData implements UIPlugin {
     }
 
     private void info(String message) {
-        getController().getLog().info(message);
+        if (getController() == null) {
+            System.out.println(message);
+        } else {
+            getController().getLog().info(message);
+        }
     }
 
     /**
@@ -140,7 +186,6 @@ public class LoadICPCTSVData implements UIPlugin {
             }
             
             groupList.set(i, existingGroup);
-            
             i++;
         }
         
