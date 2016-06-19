@@ -83,15 +83,13 @@ public class ContestTest extends AbstractTestCase {
 
         IInternalContest contest = sampleContest.createContest(1, 3, 12, 12, true);
 
+        int problemtoDelete = 3; // added for Bug 993
+
         ensureOutputDirectory();
         String storageDirectory = getOutputDataDirectory();
 
         IInternalController controller = sampleContest.createController(contest, storageDirectory, true, false);
         Log log = createLog(getName());
-
-        Contest apiContestInst = new Contest(contest, controller, log);
-        IContest apiContest = apiContestInst;
-        
 
         Problem[] problems = contest.getProblems();
         for (Problem problem : problems) {
@@ -99,26 +97,44 @@ public class ContestTest extends AbstractTestCase {
             run.setProblemId(problem.getElementId());
         }
 
+        assertEquals("Expected problem count ", 6, problems.length);
+        problems[problemtoDelete].setActive(false);
+
+        Contest apiContestInst = new Contest(contest, controller, log);
+        IContest apiContest = apiContestInst;
+
         int expectedNumberOfRuns = problems.length;
 
         IRun[] runs = apiContest.getRuns();
         assertEquals("Expecting runs ", expectedNumberOfRuns, runs.length);
 
         ITeam team = runs[0].getTeam();
-
         IProblemDetails[] details = apiContest.getProblemDetails();
 
-//        dumpDetails(apiContestInst, details);
-//        System.out.println("number of runs  " + runs.length);
+        // dumpDetails(apiContestInst, details);
+        // System.out.println("number of runs  " + runs.length);
 
-        ITeam [] teams = apiContestInst.getTeams();
-        assertEquals("Expecting run details  ", problems.length *teams.length, details.length);
+        ITeam[] teams = apiContestInst.getTeams();
+
+        int actualDetailCount = problems.length * teams.length;
+
+        actualDetailCount -= teams.length; // subtract # teams because each no longer has problem problemtoDelete
+
+        assertEquals("Expecting run details  ", actualDetailCount, details.length);
 
         IStanding standing = apiContest.getStanding(team);
-        assertNotNull("Expecting standing ", standing);
+        assertNotNull("Expecting standing not null", standing);
 
         IProblemDetails[] teamDet = standing.getProblemDetails();
-        assertEquals("Expecting run detail for team " + team,  expectedNumberOfRuns, teamDet.length);
+        expectedNumberOfRuns--; // subtract one because team has one fewer run because problem problemtoDelete not counted
+        assertEquals("Expecting run detail for team " + team, expectedNumberOfRuns, teamDet.length);
+
+        IProblem[] problemsApi = apiContest.getProblems();
+
+        // Test for Bug 993    
+        assertEquals("Same problems for API ", problems.length, problemsApi.length);
+        assertTrue("Expecting problem " + problemtoDelete + " to be deleted ", problemsApi[problemtoDelete].isDeleted());
+
     }
 
     protected void dumpDetails(IContest contest, IProblemDetails[] details) {
