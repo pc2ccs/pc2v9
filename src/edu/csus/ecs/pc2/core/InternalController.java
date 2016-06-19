@@ -3506,19 +3506,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
 
         if (usingGUI) {
+            if (ex != null) {
+                ex.printStackTrace(System.err);
+            }
             showErrorMessage(message + " check logs", "PC^2 Halted");
-            if (Utilities.isDebugMode()) {
-                if (ex != null) {
-                    ex.printStackTrace(System.err);
-                }
-            }
         } else {
-            System.err.println(message);
-            if (Utilities.isDebugMode()) {
-                if (ex != null) {
-                    ex.printStackTrace(System.err);
-                }
+            if (ex != null) {
+                ex.printStackTrace(System.err);
             }
+            System.err.println(message);
 
             if (haltOnFatalError) {
                 System.err.println("PC^2 Halted - check logs");
