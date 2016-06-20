@@ -251,7 +251,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      */
     public void testLoaderDoubleQuotedStrings() throws Exception {
 
-        // startExplorer(new File(getDataDirectory()));
+        // kplorer(new File(getDataDirectory()));
 
         String inputYamlFile = getTestFilename("contest_double.yaml");
 
@@ -1340,8 +1340,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     public void testJudgeCDPPath() throws Exception {
 
         String testDirName = getDataDirectory(this.getName());
-         ensureDirectory(testDirName);
-         startExplorer(testDirName);
+//        ensureDirectory(testDirName);
+//        startExplorer(testDirName);
 
         String yamlFileName = testDirName + File.separator + "contest.yaml";
         // editFile(yamlFileName);
