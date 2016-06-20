@@ -9,6 +9,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ProblemsJSON;
@@ -24,10 +25,12 @@ import edu.csus.ecs.pc2.exports.ccs.ProblemsJSON;
 public class ProblemService {
 
     private IInternalContest contest;
+    private IInternalController controller;
 
     public ProblemService(IInternalContest contest, IInternalController controller) {
         super();
         this.contest = contest;
+        this.controller = controller;
     }
 
     /**
@@ -51,7 +54,7 @@ public class ProblemService {
                 jsonProblems = problems.createJSON(contest);
             }
         } catch (IllegalContestState e) {
-            // TODO: log error
+            controller.getLog().log(Log.WARNING, "Problem creating problem JSON: " + e, e);
             e.printStackTrace();
             // TODO: return HTTP error response code
         }
