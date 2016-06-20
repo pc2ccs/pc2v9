@@ -1,0 +1,53 @@
+# Contest configuration
+# Source: http://scrool.se/icpc/wiki/index.php/Contest_Control_System
+# $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/testdata/ContestYAMLLoaderTest/testValidatorKeys/contest.yaml $
+# $Id: contest.yaml 2546 2012-04-24 13:30:35Z laned $
+---
+name:              ACM-ICPC World Finals 2011
+short-name:        ICPC WF 2011
+start-time:        2011-02-04 01:23Z
+duration:          5:00:00
+scoreboard-freeze: 4:00:00
+
+timeout:  20
+
+default-validator: /bin/true
+# override-validator: /usr/local/bin/mtsv {:problemletter} {:resfile} {:basename}
+
+default-clars:
+  - No comment, read problem statement.
+  - This will be answered during the answers to questions session.
+
+clar-categories:
+  - General
+  - SysOps
+  - Operations
+
+languages:
+  - name: C++
+
+  - name: C
+
+  - name: Java
+
+  - name: Python 3
+
+problemset:
+  - letter:     S
+    short-name: sumit
+    color:      yellow
+    rgb:        #ffff00
+    validator: /usr/local/bin/mtsv
+
+  - letter:     E
+    short-name: channel
+    color:      white
+    rgb:        #ffffff
+    
+  - letter:     X
+    short-name: biobots
+    color:      green
+    rgb:        #00ff00
+    validator: /bin/false
+
+# eof $Id: contest.yaml 2546 2012-04-24 13:30:35Z laned $
