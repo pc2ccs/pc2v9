@@ -1,16 +1,17 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
+
+import javax.swing.JTabbedPane;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import javax.swing.JTabbedPane;
-import java.awt.BorderLayout;
 
 /**
  * Developer tools pane.
  * 
  * @author pc2@ecs.csus.edu
  */
-
 public class DevelopmentPane extends JPanePlugin {
 
     private static final long serialVersionUID = -6902750741500529883L;
@@ -20,6 +21,8 @@ public class DevelopmentPane extends JPanePlugin {
     private ReportPane reportPane = new ReportPane();
 
     private OptionsPane optionsPane = new OptionsPane();
+
+    private LogSettingsPane logSettingsPane = new LogSettingsPane();
 
     public DevelopmentPane() {
         super();
@@ -31,6 +34,8 @@ public class DevelopmentPane extends JPanePlugin {
         tabbedPane.addTab("Plugins", null, pluginPane, null);
 
         tabbedPane.addTab("Reports", null, reportPane, null);
+
+        tabbedPane.addTab("Log Settings", null, logSettingsPane, null);
 
         tabbedPane.addTab("Options", null, optionsPane, null);
     }
@@ -46,6 +51,7 @@ public class DevelopmentPane extends JPanePlugin {
         pluginPane.setContestAndController(inContest, inController);
         reportPane.setContestAndController(inContest, inController);
         optionsPane.setContestAndController(inContest, inController);
+        logSettingsPane.setContestAndController(inContest, inController);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
