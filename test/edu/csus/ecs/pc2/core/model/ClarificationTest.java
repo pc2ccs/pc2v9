@@ -18,7 +18,7 @@ public class ClarificationTest extends TestCase {
         
         IInternalContest contest = sample.createContest(1, 1, 12, 12, true);
         
-        Account[] teamAccounts = sample.getTeamAccounts(contest);
+        Account[] teamAccounts = SampleContest.getTeamAccounts(contest);
         ClientId team = teamAccounts[0].getClientId();
         
         Account[] judgeAccounts = sample.getJudgeAccounts(contest);
@@ -45,7 +45,7 @@ public class ClarificationTest extends TestCase {
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createContest(1, 1, 12, 12, true);
         
-        ClientId team = sample.getTeamAccounts(contest)[0].getClientId();
+        ClientId team = SampleContest.getTeamAccounts(contest)[0].getClientId();
         Problem problem = contest.getProblems()[0];
         
         Clarification clarification = new Clarification(team, problem, "Foo");

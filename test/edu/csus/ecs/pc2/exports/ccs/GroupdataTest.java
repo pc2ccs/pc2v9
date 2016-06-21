@@ -83,7 +83,7 @@ public class GroupdataTest extends TestCase {
             contest.addGroup(group3);
         }
 
-        Account[] teams = sample.getTeamAccounts(contest);
+        Account[] teams = SampleContest.getTeamAccounts(contest);
 
         Group[] groups = contest.getGroups();
         Arrays.sort(groups, new GroupComparator());

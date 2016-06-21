@@ -77,7 +77,7 @@ public class NotificationListTest extends AbstractTestCase {
 
         // Create runs
 
-        Account[] teamAccounts = sample.getTeamAccounts(contest);
+        Account[] teamAccounts = SampleContest.getTeamAccounts(contest);
         Arrays.sort(teamAccounts, new AccountComparator());
 
         for (Account account : teamAccounts) {

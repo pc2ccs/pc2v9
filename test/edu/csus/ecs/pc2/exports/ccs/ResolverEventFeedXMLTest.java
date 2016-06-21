@@ -851,7 +851,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
 
-        Account acc = sample.getTeamAccounts(testCaseContest)[0];
+        Account acc = SampleContest.getTeamAccounts(testCaseContest)[0];
         ClientId clientId = acc.getClientId();
         Problem problem = testCaseContest.getProblems()[0];
         Run run = sample.createRun(testCaseContest, clientId, problem);

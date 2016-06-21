@@ -50,7 +50,7 @@ public class TeamdataTest extends TestCase {
             contest.addGroup(group2);
         }
 
-        Account[] teams = sample.getTeamAccounts(contest);
+        Account[] teams = SampleContest.getTeamAccounts(contest);
         
         Group [] groups = contest.getGroups();
         Arrays.sort(groups, new GroupComparator());

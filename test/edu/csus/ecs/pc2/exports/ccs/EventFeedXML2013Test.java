@@ -909,6 +909,7 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         int siteNumber = 2;
 
         IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+        
         String xmlString = eventFeedXML.toXML(testCaseContest);
         
         testForValidXML(xmlString);
@@ -919,13 +920,11 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         
         assertEquals("external id count ", 22,nodes.getLength());
         
-        String baseValue = "836577";
-
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
             String value = node.getTextContent();
-            // System.out.println("value = " + value);
-            String expectedValue = baseValue + (i + 1);
+            String expectedValue = Integer.toString( siteNumber*1000 + (i + 1) );
+//            System.out.println("i = "+i+" value = " + value+" expected value "+expectedValue);
             assertNotNull("Expect value for external-id", value);
             assertFalse("Expect value " + expectedValue + "for external-id", "".equals(value));
             assertEquals("Expecting same value", expectedValue, value);
@@ -944,7 +943,7 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
         
 
-        Account acc = sample.getTeamAccounts(testCaseContest)[0];
+        Account acc = SampleContest.getTeamAccounts(testCaseContest)[0];
         ClientId clientId = acc.getClientId();
         Problem problem = testCaseContest.getProblems()[0];
         Run run = sample.createRun(testCaseContest, clientId, problem);

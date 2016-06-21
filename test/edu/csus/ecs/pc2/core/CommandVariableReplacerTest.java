@@ -71,7 +71,7 @@ public class CommandVariableReplacerTest extends AbstractTestCase {
         long elapsed = 612345;
         Problem problem = contest.getProblems()[2];
         Language language = contest.getLanguages()[3];
-        Account account = sample.getTeamAccounts(contest)[8];
+        Account account = SampleContest.getTeamAccounts(contest)[8];
         ClientId teamId = account.getClientId();
         problem.setShortName("probShort");
 
@@ -136,7 +136,7 @@ public class CommandVariableReplacerTest extends AbstractTestCase {
         long elapsed = 612345;
         Problem problem = contest.getProblems()[2];
         Language language = contest.getLanguages()[3];
-        Account account = sample.getTeamAccounts(contest)[8];
+        Account account = SampleContest.getTeamAccounts(contest)[8];
         ClientId teamId = account.getClientId();
         problem.setShortName("probShort");
 

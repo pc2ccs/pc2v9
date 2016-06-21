@@ -178,7 +178,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:pc2home};"+ExecuteUtilities.getPC2Home(), // 
         };
 
-        Account[] teams = sampleContest.getTeamAccounts(contest);
+        Account[] teams = SampleContest.getTeamAccounts(contest);
 
         Problem[] problems = contest.getProblems();
         Language[] languages = contest.getLanguages();
@@ -258,7 +258,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:pc2home};"+ExecuteUtilities.getPC2Home(), //
         };
 
-        Account[] teams = sampleContest.getTeamAccounts(contest);
+        Account[] teams = SampleContest.getTeamAccounts(contest);
 
         Problem[] problems = contest.getProblems();
         Language[] languages = contest.getLanguages();
@@ -327,7 +327,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         SampleContest sampleContest = new SampleContest();
         IInternalContest contest = sampleContest.createContest(2, 2, 12, 12, true);
         
-        Account[] teams = sampleContest.getTeamAccounts(contest);
+        Account[] teams = SampleContest.getTeamAccounts(contest);
 
         Problem[] problems = contest.getProblems();
         Language[] languages = contest.getLanguages();

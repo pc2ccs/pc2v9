@@ -44,6 +44,7 @@ public class LogSettingsPane extends JPanePlugin {
     
     JCheckBox chckbxAddConsoleLogger = new JCheckBox("Add Console logger");
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public LogSettingsPane() {
         super();
         setLayout(new BorderLayout(0, 0));
@@ -58,7 +59,6 @@ public class LogSettingsPane extends JPanePlugin {
         JLabel logLevelLabel = new JLabel("Log Level");
         logLevelPane.add(logLevelLabel);
         
-        @SuppressWarnings("rawtypes")
         JComboBox comboBox = new JComboBox();
         comboBox.setModel(new DefaultComboBoxModel(LogLevels.values()));
         comboBox.setSelectedIndex(3);

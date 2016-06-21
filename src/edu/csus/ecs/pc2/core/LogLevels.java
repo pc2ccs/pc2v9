@@ -19,7 +19,6 @@ public enum LogLevels {
     FINEST(Level.FINEST), //
     ALL(Level.ALL); //
 
-    @SuppressWarnings("unused")
     private final Level level;
     
     private LogLevels(final Level level) {

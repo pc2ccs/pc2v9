@@ -135,8 +135,14 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     @Override
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties) throws IllegalContestState {
+        
+        if (contest == null){
+            throw new IllegalArgumentException("contest is null");
+        }
+        
+        setContest(contest);
 
-        Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
+        Vector<Account> accountVector = getContest().getAccounts(Type.TEAM);
         Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
 
         // Kludge for DefaultStandingsRecordComparator
@@ -146,15 +152,15 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         }
         comparator.setCachedAccountList(accountList);
 
-        Run[] runs = contest.getRuns();
+        Run[] runs = getContest().getRuns();
 
-        respectEOC = isAllowed(contest, contest.getClientId(), Permission.Type.RESPECT_EOC_SUPPRESSION);
+        respectEOC = isAllowed(getContest(), getContest().getClientId(), Permission.Type.RESPECT_EOC_SUPPRESSION);
 
         if (respectEOC) {
-            runs = filterRunsbyEOC(contest, runs);
+            runs = filterRunsbyEOC(getContest(), runs);
         }
 
-        StandingsRecord[] standings = computeStandingStandingsRecords(runs, accounts, properties, contest.getProblems());
+        StandingsRecord[] standings = computeStandingStandingsRecords(runs, accounts, properties, getContest().getProblems());
 
         Arrays.sort(standings, comparator);
 
@@ -164,7 +170,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             assignRanks(standings);
         }
 
-        assignGroupRanks(contest, standings);
+        assignGroupRanks(getContest(), standings);
 
         return standings;
     }

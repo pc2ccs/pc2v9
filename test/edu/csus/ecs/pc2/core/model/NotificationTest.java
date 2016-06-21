@@ -31,7 +31,7 @@ public class NotificationTest extends TestCase {
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createContest(1, 1, 12, 12, true);
         
-        ClientId team = sample.getTeamAccounts(contest)[0].getClientId();
+        ClientId team = SampleContest.getTeamAccounts(contest)[0].getClientId();
         Problem problem = contest.getProblems()[0];
 
         Run run =  sample.createRun(contest, team, problem);

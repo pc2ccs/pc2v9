@@ -5,6 +5,11 @@ import java.io.File;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
+/**
+ * Sample CDP access methods
+ * 
+ * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
+ */
 public class SampleCDP
 {
 	/**
