@@ -1,0 +1,37 @@
+#
+# File:     systems.yaml
+# Purpose:  World /inals System settings
+#
+
+event-feed-port:   4713
+
+default-clars:
+  - No comment, read problem statement.
+
+clar-categories:
+  - General
+  - SysOps
+  - Operations
+
+# TODO update java and other compiler paths/dirs
+
+languages:
+ - name: Java
+   compiler: /user/bin/javac
+   compiler-args: -encoding UTF-8 -sourcepath . -d . {files}
+   runner: /user/bin/java
+   runner-args: -client -Xss8m
+
+# memory limits are enforced on a per problem basis os e.g. -Xmx1024Mb might be used for java
+
+ - name: C++
+   compiler: /usr/bin/g++
+   compiler-args: -g -O2 -std=gnu++0x -static {files} 
+
+# add runner and runner-args
+
+ - name: C
+   compiler: /usr/bin/gcc
+   compiler-args: -g -O2 -std=gnu99 -static {files} -lm
+
+# add runner and runner-args

@@ -1,0 +1,16 @@
+
+keyboard-01--04  sample
+keyboard-05      to kill a greedy algorithm
+keyboard-06      minimal case
+keyboard-07      minimal case
+keyboard-08      connected, but not simply connected keys. Unreachable keys.
+keyboard-09
+keyboard-10      many unreachable squares
+keyboard-11      many unreachable squares
+keyboard-12      normal keyboard, Dutch poem (Kopland)
+keyboard-13      larger keyboard, German poem (Rilke)
+keyboard-14      test case with large keys - and long input
+keyboard-15      test case with large keys - and long input
+keyboard-16      test case with large answer - and unreachable squares
+
+

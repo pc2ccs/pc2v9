@@ -1,0 +1,48 @@
+\problemname{Weather Report}
+
+\illustration{0.4}{rain}{}%
+You have been hired by the Association for Climatological Measurement, a
+scientific organization interested in tracking global weather trends over a
+long period of time.  Of course, this is no easy task.  They have deployed
+many small devices around the world, designed to take periodic
+measurements of the local weather conditions.
+%
+These are cheap devices with somewhat restricted capabilities.
+Every day they observe which of the four standard kinds of weather occurred:
+\emph{Sunny}, \emph{Cloudy}, \emph{Rainy}, or \emph{Frogs}.  After every $n$ of
+these observations have been made, the results are reported to the
+main server for analysis.
+%
+However, the massive number of devices
+has caused the available communication bandwidth to be overloaded.
+%have been overloading the available communication bandwidth.
+The Association
+needs your help to come up with a method of compressing these reports into
+fewer bits.
+
+For a particular device's location, you may assume that the weather
+each day is an independent random event, and you are given the
+predicted probabilities of the four 
+possible weather types. Each of the $4^n$ possible weather reports for a
+device must be encoded as a unique sequence of bits, such that no
+sequence is a prefix of any other sequence (an important property, or
+else the server would not know when each sequence ends). The goal
+is to use an encoding that minimizes the expected number of
+transmitted bits.
+
+
+\section*{Input}
+The first line of input contains an integer $1 \le n \le 20$,
+the number of observations that go into each report.
+%
+The second line contains
+four positive floating-point numbers,
+$p_{\text{sunny}}$, $p_{\text{cloudy}}$,
+$p_{\text{rainy}}$, and $p_{\text{frogs}}$,
+representing the respective weather probabilities.
+These probabilities have at most 6~digits after the decimal point and
+sum to~1.
+
+\section*{Output}
+Display the minimum expected number of bits in the encoding of a report, with an
+absolute or relative error of at most $10^{-4}$.

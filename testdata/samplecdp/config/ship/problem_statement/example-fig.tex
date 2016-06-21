@@ -1,0 +1,24 @@
+\documentclass{article}
+
+\usepackage[pdftex,active,tightpage]{preview}
+\usepackage{tikz}
+
+\begin{document}
+\begin{preview}
+    \begin{tikzpicture}[auto,>=stealth,inner sep=0.5mm]
+    \foreach \x in {-6,-5,...,-1,1,2,...,6} \path [dotted] (\x,0) edge (\x,3);
+    \foreach \y in {0,1,2,3} \path (-6,\y) edge (6,\y);
+    \path [dashed,->] (0,0) edge (0,3);
+    \draw [fill] (0,0) circle (0.5mm);
+    \draw [fill=gray] (-1.5,0.25) -- (-1.25,0.25) -- (-1.0,0.5) -- (-1.25,0.75) -- (-1.5,0.75) -- (-1.5,0.25);
+    \draw [fill=gray] (-4.0,0.25) -- (-3.25,0.25) -- (-3.0,0.5) -- (-3.25,0.75) -- (-4.0,0.75) -- (-4.0,0.25);
+    \draw [fill=gray] ( 6.0,1.25) -- ( 4.25,1.25) -- ( 4.0,1.5) -- ( 4.25,1.75) -- ( 6.0,1.75) -- ( 6.0,1.25);
+    \draw [fill=gray] ( 2.5,1.25) -- ( 2.25,1.25) -- ( 2.0,1.5) -- ( 2.25,1.75) -- ( 2.5,1.75) -- ( 2.5,1.25);
+    \draw [fill=gray] ( 0.7,1.25) -- ( 0.6,1.5) -- ( 0.7,1.75) -- ( 0.7,1.25);
+    \draw [fill=gray] (-4.0,2.25) -- (-3.25,2.25) -- (-3.0,2.5) -- (-3.25,2.75) -- (-4.0,2.75) -- (-4.0,2.25);
+    \draw [dotted] (1,-0.5) node [anchor=north west] { Ferry } -- (0,0);
+    \draw [->] (8,1) node [anchor=north] { S } -- (8,2) node [anchor=south] { N };
+    \draw (7.5,1.5) node [anchor=east] { W } -- (8.5,1.5) node [anchor=west] { E };
+  \end{tikzpicture}
+\end{preview}
+\end{document}

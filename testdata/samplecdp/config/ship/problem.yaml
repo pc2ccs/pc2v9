@@ -1,0 +1,7 @@
+source: ACM-ICPC World Finals 2015
+license: permission
+
+validator_flags: float_tolerance 1e-3
+
+limits:
+   time_multiplier: 5

@@ -1,0 +1,34 @@
+\problemname{Pipe Stream}
+
+\illustration{0.30}{flubber}{Picture by Nevit via Wikimedia Commons}%
+Your hometown has hired some contractors -- including you! -- to manage its municipal pipe network.
+They built the network, at great expense, to supply Flubber to every home in town.
+Unfortunately, nobody has found a use for Flubber yet, but never mind.
+It was a Flubber network or a fire department, and honestly, houses burn down so rarely, a fire department hardly seems necessary.
+
+In the possible event that somebody somewhere decides they want some Flubber, they would like to know how quickly it will flow through the pipes.
+Measuring its rate of flow is your job.
+
+You have access to one of the pipes connected to the network.
+The pipe is $l$ meters long, and you can start the flow of Flubber through this pipe at a time of your choosing.
+You know that it flows with a constant real-valued speed, which is at least $v_1$ meters/second and at most $v_2$ meters/second.
+You want to estimate this speed with an absolute error of at most $\frac{t}{2}$ meters/second.
+
+Unfortunately, the pipe is opaque, so the only thing you can do is to knock on the pipe at any point along its length, that is, in the closed real-valued range $[0,l]$.
+Listening to the sound of the knock will tell you whether or not the Flubber has reached that point.
+You are not infinitely fast.  Your first knock must be at least $s$ seconds after starting the flow, and there must be at least $s$ seconds between knocks.
+
+Determine a strategy that will require the fewest knocks, in the worst case, to estimate how fast the Flubber is flowing.
+Note that in some cases the desired estimation might be impossible (for example, if the Flubber reaches the end of the pipe too quickly).
+
+\section*{Input}
+
+The input consists of multiple test cases. The first line of input contains an integer  $c$ ($1 \leq c \leq 100$), the number of test cases.
+Each of the next $c$ lines describes one test case.
+Each test case contains the five integers $l$, $v_1$, $v_2$, $t$ and $s$ ($1 \leq l, v_1, v_2, t, s \leq 10^9$ and $v_1 < v_2$), which are described above.
+
+\section*{Output}
+
+For each test case, display the minimal number of knocks required to estimate the flow speed in the worst case.
+If it might be impossible to measure the flow speed accurately enough, display \texttt{impossible} instead.
+

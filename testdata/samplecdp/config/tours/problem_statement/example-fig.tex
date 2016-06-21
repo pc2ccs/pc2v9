@@ -1,0 +1,20 @@
+\documentclass{article}
+
+\usepackage[pdftex,active,tightpage]{preview}
+\usepackage{tikz}
+
+\begin{document}
+\begin{preview}
+	\begin{picture}(150,110)(-25,-5)
+	\put(10,10){\circle{10}} \put( 4, 4){\makebox(0,0)[tr]{Site 1}}
+	\put(90,10){\circle{10}} \put( 4,96){\makebox(0,0)[br]{Site 2}}
+	\put(90,90){\circle{10}} \put(96,96){\makebox(0,0)[bl]{Site 3}}
+	\put(10,90){\circle{10}} \put(96, 4){\makebox(0,0)[tl]{Site 4}}
+	\put(15,10){\line(1,0){70}}
+	\put(15,90){\line(1,0){70}}
+	\put(10,15){\line(0,1){70}}
+	\put(90,15){\line(0,1){70}}
+	\put(13.9,13.9){\line(1,1){72.2}}
+	\end{picture}
+\end{preview}
+\end{document}
