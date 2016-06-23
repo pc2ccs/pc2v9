@@ -12,27 +12,27 @@ running: false
 scoreboard-freeze: 
 
 languages:
- - name: Java
-   active: true
+  - name: Java
+    active: true
 
- - name: Perl
-   active: true
+  - name: Perl
+    active: true
 
- - name: GNU C++
-   active: true
+  - name: GNU C++
+    active: true
 
- - name: GNU C
-   active: true
+  - name: GNU C
+    active: true
 
 problemset:
   - letter: A
-   short-name: hello
+    short-name: hello
 #     2 data files written
 #     wrote reports\yaml09.18.40.546\hello\problem.yaml
 #     wrote reports\yaml09.18.40.546\hello\data\secret\hello.ans
 
   - letter: B
-   short-name: sumit
+    short-name: sumit
 #     3 data files written
 #     wrote reports\yaml09.18.40.546\sumit\problem.yaml
 #     wrote reports\yaml09.18.40.546\sumit\data\secret\sumit.dat
@@ -40,22 +40,21 @@ problemset:
 
 sites:
  - number: 1
-     name: Site 1
-       IP: localhost
-     port: 50002
+   name: Site 1
+   IP: localhost
+   port: 50002
 
 accounts:
   - account: TEAM
-      site: 1
-     count: 22
+    site: 1
+    count: 22
 
   - account: JUDGE
-      site: 1
-     count: 12
+    site: 1
+    count: 12
 
   - account: SCOREBOARD
-      site: 1
-     count: 1
-
+    site: 1
+    count: 1
 
 # EOF Contest Configuration
