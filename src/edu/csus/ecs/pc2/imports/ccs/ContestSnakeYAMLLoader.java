@@ -1698,60 +1698,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
     }
 
-    @Override
-    public IInternalContest initializeContest(IInternalContest contest, File entry) throws Exception {
 
-        if (contest == null) {
-            throw new IllegalArgumentException("contest is null");
-        }
-
-        File cdpConfigDirectory = null;
-
-        if (entry.isDirectory()) {
-
-            // found a directory
-            cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
-
-        } else if (entry.isFile()) {
-
-            // a file
-
-            if (IContestLoader.DEFAULT_CONTEST_YAML_FILENAME.equals(entry.getName())) {
-                // found contest.yaml
-
-                cdpConfigDirectory = entry.getParentFile();
-            }
-
-        } else {
-
-            // A CDP in the samples directory
-
-            String sampleContestYamlFile = findSampleContestYaml(entry.getName());
-
-            if (sampleContestYamlFile != null) {
-                File yamlFile = new File(sampleContestYamlFile);
-                String configDirPath = yamlFile.getParentFile().getAbsoluteFile().toString();
-                cdpConfigDirectory = new File(configDirPath);
-            }
-
-        }
-
-        if (cdpConfigDirectory == null) {
-            throw new Exception("Cannot find CDP for " + entry);
-        } else {
-            contest = fromYaml(contest, cdpConfigDirectory.getAbsolutePath());
-
-            if (contest.getSites().length == 0) {
-                // Create default site.
-                Site site = createFirstSite(contest.getSiteNumber(), "localhost", Constants.DEFAULT_PC2_PORT);
-                contest.addSite(site);
-            }
-
-            loadCCSTSVFiles(contest, cdpConfigDirectory);
-        }
-
-        return contest;
-    }
 
     /**
      * Load groups.tsv and teams.tsv.
@@ -1789,5 +1736,70 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         site.setPassword("site" + siteNumber);
         return site;
     }
+
+    
+    @Override
+    public File findCDPConfigDirectory(File entry) {
+        File cdpConfigDirectory = null;
+
+        if (entry.isDirectory()) {
+
+            // found a directory
+            cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
+
+        } else if (entry.isFile()) {
+
+            // a file
+
+            if (IContestLoader.DEFAULT_CONTEST_YAML_FILENAME.equals(entry.getName())) {
+                // found contest.yaml
+
+                cdpConfigDirectory = entry.getParentFile();
+            }
+
+        } else {
+
+            // A CDP in the samples directory
+
+            String sampleContestYamlFile = findSampleContestYaml(entry.getName());
+
+            if (sampleContestYamlFile != null) {
+                File yamlFile = new File(sampleContestYamlFile);
+                String configDirPath = yamlFile.getParentFile().getAbsoluteFile().toString();
+                cdpConfigDirectory = new File(configDirPath);
+            }
+
+        }
+        return cdpConfigDirectory;
+    }
+
+
+
+    @Override
+    public IInternalContest initializeContest(IInternalContest contest, File entry) throws Exception {
+        
+        if (contest == null){
+            throw new IllegalArgumentException("contest is null");
+        }
+        
+        File cdpConfigDirectory = findCDPConfigDirectory(entry);
+        
+        if (cdpConfigDirectory == null){
+            throw new Exception("Cannot find CDP for "+entry);
+        } else {
+            contest = fromYaml(contest, cdpConfigDirectory.getAbsolutePath());
+            
+            if (contest.getSites().length == 0){
+                // Create default site.
+                Site site = createFirstSite(contest.getSiteNumber(), "localhost", Constants.DEFAULT_PC2_PORT);
+                contest.addSite(site);
+            }
+            
+            loadCCSTSVFiles (contest, cdpConfigDirectory);
+        }
+        
+        return contest;
+    }
+    
 
 }

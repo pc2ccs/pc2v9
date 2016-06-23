@@ -1934,14 +1934,14 @@ public class ContestYAMLLoader implements IContestLoader {
      * @return
      */
     protected String findSampleContestYaml(String name) {
-        
-//        System.out.println("findSampleContestYaml ( "+name+")");
-        
-        String sampleDir = "samps"+File.separator+"contests";
-        
+
+        // System.out.println("findSampleContestYaml ( "+name+")");
+
+        String sampleDir = "samps" + File.separator + "contests";
+
         String conestYamleFilename = sampleDir + File.separator + name + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
-        
-        if (new File( conestYamleFilename).isFile()){
+
+        if (new File(conestYamleFilename).isFile()) {
             return conestYamleFilename;
         } else {
             return null;
@@ -1955,38 +1955,7 @@ public class ContestYAMLLoader implements IContestLoader {
             throw new IllegalArgumentException("contest is null");
         }
         
-
-        File cdpConfigDirectory = null;
-        
-        if (entry.isDirectory()){
-            
-            // found a directory
-            cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
-            
-        }  else if (entry.isFile()) {
-            
-            // a file
-            
-            if (IContestLoader.DEFAULT_CONTEST_YAML_FILENAME.equals(entry.getName())){
-                // found contest.yaml
-                
-                cdpConfigDirectory = entry.getParentFile();
-            }
-            
-            
-        } else {
-            
-            // A CDP in the samples directory
-            
-            String sampleContestYamlFile = findSampleContestYaml(entry.getName());
-            
-            if (sampleContestYamlFile != null){
-                File yamlFile = new File(sampleContestYamlFile);
-                String configDirPath = yamlFile.getParentFile().getAbsoluteFile().toString();
-                cdpConfigDirectory = new File(configDirPath); 
-            }
-            
-        }
+        File cdpConfigDirectory = findCDPConfigDirectory(entry);
         
         if (cdpConfigDirectory == null){
             throw new Exception("Cannot find CDP for "+entry);
@@ -2016,6 +1985,41 @@ public class ContestYAMLLoader implements IContestLoader {
         return site;
     }
 
+    
+    @Override
+    public File findCDPConfigDirectory(File entry) {
+        File cdpConfigDirectory = null;
+
+        if (entry.isDirectory()) {
+
+            // found a directory
+            cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
+
+        } else if (entry.isFile()) {
+
+            // a file
+
+            if (IContestLoader.DEFAULT_CONTEST_YAML_FILENAME.equals(entry.getName())) {
+                // found contest.yaml
+
+                cdpConfigDirectory = entry.getParentFile();
+            }
+
+        } else {
+
+            // A CDP in the samples directory
+
+            String sampleContestYamlFile = findSampleContestYaml(entry.getName());
+
+            if (sampleContestYamlFile != null) {
+                File yamlFile = new File(sampleContestYamlFile);
+                String configDirPath = yamlFile.getParentFile().getAbsoluteFile().toString();
+                cdpConfigDirectory = new File(configDirPath);
+            }
+
+        }
+        return cdpConfigDirectory;
+    }
 
     /**
      * Load groups.tsv and teams.tsv.

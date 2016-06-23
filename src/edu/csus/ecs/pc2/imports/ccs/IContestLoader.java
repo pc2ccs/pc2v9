@@ -111,6 +111,10 @@ public interface IContestLoader {
 
     static final String JUDGING_TYPE_KEY = "judging-type";
 
+    static final String EVENT_FEED_DIRNAME = "eventFeed";
+
+    static final String EVENT_FEED_XML_FILENAME = "events.xml";
+
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 
     void dumpSerialzedFileList(Problem problem, String logPrefixId, SerializedFile[] sfList);
@@ -232,4 +236,13 @@ public interface IContestLoader {
      * @throws Exception 
      */
     IInternalContest initializeContest (IInternalContest contest, File entry) throws Exception;
+
+    /**
+     * Locates the CDP config directory.
+     * 
+     * @param entry
+     *            a directory, filename or PC^2 sample CCS contest directory name.
+     * @return location for file or null if not found.
+     */
+    File findCDPConfigDirectory(File entry);
 }

@@ -9,6 +9,7 @@ import java.lang.management.ManagementFactory;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.ConsoleHandler;
@@ -16,6 +17,8 @@ import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.ccs.RunSubmitterInterfaceManager;
+import edu.csus.ecs.pc2.convert.EventFeedRun;
+import edu.csus.ecs.pc2.convert.LoadRuns;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
@@ -134,6 +137,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private static final String PROFILE_OPTION_STRING = "--profile";
     
     private static final String LOAD_OPTION_STRING = "--load";
+    
+    private static final String LOAD_EF_JUDGEMENTS = "--addefjs";
 
     private static final String FILE_OPTION_STRING = "-F";
 
@@ -2384,13 +2389,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * Handles --load option, loads CDP.
      * @param allowedToLoadConfig if true will overwrite config with CDP, else does nothing.
      */
-    private void handleCDPLoad(boolean allowedToLoadConfig) {
+    protected void handleCDPLoad(boolean allowedToLoadConfig) {
         
         /**
          * Name of CDP dir or file to be loaded.
          */
         String entryLocation = contest.getCommandLineOptionValue(LOAD_OPTION_STRING);
-        
         
         if (contest.isCommandLineOptionPresent(LOAD_OPTION_STRING)){
             
@@ -2401,13 +2405,72 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 
                 try {
                     
+                    // Load Configuration from CDP
+                    
                     loader.initializeContest(contest, new File(entryLocation));
+                    
                     info("Loaded CDP/config values from " + entryLocation);
+                    
+                    File cdpConfigDir = loader.findCDPConfigDirectory(new File(entryLocation));
                     
                     if (saveCofigurationToDisk) {
                         // save newly merged profiles
                         contest.storeConfiguration(getLog());
                     }
+                    
+                    // Load Submissions from CDP
+                    
+                    String submissionsDir = entryLocation + File.separator + IContestLoader.SUBMISSIONS_DIRNAME;
+                    
+                    String eventFeedDirectory = entryLocation + File.separator + IContestLoader.EVENT_FEED_DIRNAME; 
+                    String eventFeedfilename = eventFeedDirectory + File.separator + IContestLoader.EVENT_FEED_XML_FILENAME;
+                    
+                    
+                    if (new File(submissionsDir).isDirectory()){
+                        
+                        if (new File(eventFeedfilename).isFile()){
+                            
+                            info("Loading event feed runs... ");
+                            info("Event feed file is "+eventFeedfilename);
+                            
+                            LoadRuns loadRuns = new LoadRuns();
+                            
+                            List<EventFeedRun> eventFeedRuns = loadRuns.loadRunsFromEventFeed(eventFeedfilename);
+                            
+                            info("Found "+eventFeedRuns.size()+" runs.");
+                            
+                            info("Validating event feed runs");
+                            
+                            loadRuns.validateEventFeedRuns(contest, eventFeedRuns);
+                            
+                            info("Validated "+eventFeedRuns.size()+" event feed runs.");
+                            
+                            info("Loading "+eventFeedRuns.size()+" event feed runs.");
+                            
+                            boolean addRuneJudgementsFromEventFeed = contest.isCommandLineOptionPresent(LOAD_EF_JUDGEMENTS);
+                            
+                            loadRuns.updateContestFromEFRuns(contest, eventFeedRuns, cdpConfigDir.getParent(), addRuneJudgementsFromEventFeed);
+                            
+                            info("Loaded "+eventFeedRuns.size()+" event feed runs.");
+                            if (addRuneJudgementsFromEventFeed){
+                                info("Loaded judgments for "+eventFeedRuns.size()+" event feed runs.");
+                            } else {
+                                info("No judgements were added for "+eventFeedRuns.size()+" event feed runs, all are 'new' runs.");
+                            }
+                            
+                            eventFeedRuns = null;
+                            loadRuns = null;
+                            
+                        } else {
+                            info("No submissions loaded, no event feed at "+eventFeedfilename);
+                        }
+                        
+                    } else {
+                        info("No submissions loaded, no submissions at "+submissionsDir);
+                    }
+                    
+                    
+                    
                 } catch (Exception e) {
                     fatalError("Error loading from " + entryLocation, e);
                 } finally {
@@ -2415,7 +2478,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
             } else {
                 
-                info("Not loading CDP from " + entryLocation+" contest config alread exists.");
+                info("** Not loading (--load) CDP from " + entryLocation+" contest config ALREADY exists. **");
                 
             }
         }

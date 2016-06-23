@@ -14,13 +14,12 @@ import java.util.Vector;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-import junit.framework.TestSuite;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Filter;
@@ -40,16 +39,15 @@ import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
+ * Unit Tests.
  * 
- * @author dlane
- *
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class LoadRunsTest extends AbstractTestCase {
 	
-	
-    public static final String TEAMS_FILENAME = "teams.tsv";
+    public static final String TEAMS_FILENAME = LoadICPCTSVData.TEAMS_FILENAME;
 
-    public static final String GROUPS_FILENAME = "groups.tsv";
+    public static final String GROUPS_FILENAME = LoadICPCTSVData.GROUPS_FILENAME;
 
     private String teamsFilename = "";
 
@@ -208,15 +206,14 @@ public class LoadRunsTest extends AbstractTestCase {
 
         LoadRuns loader = new LoadRuns();
 
-        Properties properties = new Properties();
-
-        properties.put(LoadRuns.CDPPATH, SampleCDP.getDir());
+//        Properties properties = new Properties();
+//        properties.put(LoadRuns.CDPPATH, SampleCDP.getDir());
         
         try {
             
             loadDefaultJudgements(contest);
             
-            contest = loader.updateContestFromEFRuns(contest, runs, properties);
+            contest = loader.updateContestFromEFRuns(contest, runs, SampleCDP.getDir());
             
             updateGroupAndTeams (contest, SampleCDP.getConfigDir());
             
@@ -320,8 +317,6 @@ public class LoadRunsTest extends AbstractTestCase {
         
     }
 
-
-
     private void writeFile(String filename, String xml) throws FileNotFoundException {
 
         PrintWriter printWriter = null;
@@ -386,7 +381,6 @@ public class LoadRunsTest extends AbstractTestCase {
         NodeList nodes = parse1.getNodes(document, path);
 
         Properties[] runPropertyList = parse1.create(nodes, EventFeedRun.ID_TAG_NAME);
-
         List<EventFeedRun> runs = EventFeedRun.toRuns(runPropertyList, true);
         
         SampleContest sampleContest= new SampleContest();
@@ -410,15 +404,10 @@ public class LoadRunsTest extends AbstractTestCase {
 
         LoadRuns loader = new LoadRuns();
 
-        Properties properties = new Properties();
-
-        properties.put(LoadRuns.CDPPATH, SampleCDP.getDir());
-        
         try {
             
-            contest = loader.updateContestFromEFRuns(contest, runs, properties);
-            
-            updateGroupAndTeams (contest, SampleCDP.getDir());
+            contest = loader.updateContestFromEFRuns(contest, runs, SampleCDP.getDir());
+            updateGroupAndTeams (contest, SampleCDP.getConfigDir());
             
             Run[] runs2 = contest.getRuns();
             
@@ -641,80 +630,25 @@ public class LoadRunsTest extends AbstractTestCase {
 
     
 
-//    public boolean loadFiles(String filename) throws Exception {
+
+//	public static TestSuite suite() {
+//        //
+//        TestSuite suite = new TestSuite("LoadRunsTest");
 //
-//        if (checkFiles(filename)) {
+//        String singletonTestName = "";
+////         singletonTestName = "testLoadCDP";
+//         singletonTestName = "testLoadContestRuns";
+////         singletonTestName = "testLoadEFRuns";     
+//         
 //
-//            Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename);
-//            
-//            for (Group group : groups) {
-//                group.setSite(getContest().getSites()[0].getElementId());
-//            }
-//            
-//            Account[] accounts = ICPCTSVLoader.loadAccounts(teamsFilename);
-//
-//            String nl = System.getProperty("line.separator");
-//
-//            String message = "Add " + nl + accounts.length + " accounts and " + nl + groups.length + " groups?";
-//            
-//
-//            int result = FrameUtilities.yesNoCancelDialog(null, message, "Load TSV files");
-//            
-//            if (result == JOptionPane.YES_OPTION) {
-//                
-//                List<Group> groupList = Arrays.asList(groups);
-//                List<Account> accountList = Arrays.asList(accounts);
-//
-//                /**
-//                 * Merge/update groups and account into existing groups and accounts, create if necessary
-//                 */
-//                updateGroupsAndAccounts (contest, groupList, accountList);
-//                
-//                /**
-//                 * Update Groups
-//                 */
-//                Group [] updatedGroups = (Group[]) groupList.toArray(new Group[groupList.size()]);
-//                for (Group group : updatedGroups) {
-//                    getController().updateGroup(group);
-//                }
-//                
-//                /**
-//                 * UpdateAccounts
-//                 */
-//                Account [] updatedAccounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
-//
-//                getController().updateAccounts(updatedAccounts);
-//
-//                return true;
-//            } else {
-//                return false;
-//            }
-//
+//        if (!"".equals(singletonTestName)) {
+//            suite.addTest(new LoadRunsTest(singletonTestName));
 //        } else {
-//            return false;
+//
+//            suite.addTest(new LoadRunsTest("testLoadEFRuns"));
+//            suite.addTest(new LoadRunsTest("testLoadContestRuns"));
+//            
 //        }
+//        return suite;
 //    }
-
-
-
-	public static TestSuite suite() {
-        //
-        TestSuite suite = new TestSuite("LoadRunsTest");
-
-        String singletonTestName = "";
-//         singletonTestName = "testLoadCDP";
-         singletonTestName = "testLoadContestRuns";
-//         singletonTestName = "testLoadEFRuns";     
-         
-
-        if (!"".equals(singletonTestName)) {
-            suite.addTest(new LoadRunsTest(singletonTestName));
-        } else {
-
-            suite.addTest(new LoadRunsTest("testLoadEFRuns"));
-            suite.addTest(new LoadRunsTest("testLoadContestRuns"));
-            
-        }
-        return suite;
-    }
 }

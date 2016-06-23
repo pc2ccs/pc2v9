@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.convert;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
@@ -27,6 +31,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
+ * Methods to load event feed runs into the contest.
  * 
  * @author Douglas A. Lane <laned@ecs.csus.edu>
  */
@@ -35,9 +40,6 @@ public class LoadRuns {
 //    private boolean debugMode = true;
     private boolean debugMode = false;
     
-    public static final String CDPPATH = "CDPPATH";
-
-    String[] requiredProps = { CDPPATH };
 
     private Language[] allLanguages;
 
@@ -85,6 +87,7 @@ public class LoadRuns {
     
     /**
      * Add judgement to run, as if judge had judged it.
+     * 
      * @param contest
      * @param run
      * @param judgement
@@ -111,6 +114,8 @@ public class LoadRuns {
     /**
      * Add EF runs to contest.
      * 
+     * @see #loadRunsFromEventFeed(String).
+     * 
      * @param contest
      * @param runs
      * @param properties
@@ -121,15 +126,7 @@ public class LoadRuns {
      * @throws FileSecurityException
      * @throws RunUnavailableException
      */
-    public IInternalContest updateContestFromEFRuns(IInternalContest contest, List<EventFeedRun> runs, Properties properties) throws IllegalContestState, ClassNotFoundException, IOException, FileSecurityException, RunUnavailableException {
-
-        for (String propName : requiredProps) {
-            String value = properties.getProperty(propName);
-            if (value == null) {
-                throw new IllegalArgumentException(propName + " in Properties must be assigned");
-            }
-
-        }
+    public IInternalContest updateContestFromEFRuns(IInternalContest contest, List<EventFeedRun> runs, String cdpBasePath,  boolean addJudgements) throws IllegalContestState, ClassNotFoundException, IOException, FileSecurityException, RunUnavailableException {
 
         if (contest == null) {
             throw new IllegalArgumentException("contest must not be null");
@@ -139,7 +136,6 @@ public class LoadRuns {
 
         Collections.sort(runs, new CompareByRunId());
         
-        String cdpBasePath = properties.getProperty(CDPPATH);
         String submissionDir = cdpBasePath + File.separator + IContestLoader.SUBMISSIONS_DIRNAME + File.separator;
         
         ClientId firstJudge = getFirstJudge(contest).getClientId();
@@ -173,7 +169,10 @@ public class LoadRuns {
             notFound("Lanaguage for " + evRun.getLanguage(), language);
             notFound("Problem for " + evRun.getProblem(), problem);
             notFound("Team for " + evRun.getTeam(), teamAccount);
-            notFound("Judgement  for " + evRun.getResult(), judgement);
+            
+            if ( addJudgements ){
+                notFound("Judgement  for " + evRun.getResult(), judgement);
+            }
 
             Run run = new Run(teamAccount.getClientId(), language, problem);
             
@@ -187,8 +186,9 @@ public class LoadRuns {
 
             contest.addRun(run, runFiles);
             
-            addJudgement(contest, run, judgement, firstJudge);
-
+            if ( addJudgements ){
+                addJudgement(contest, run, judgement, firstJudge);
+            }
         }
 
         return contest;
@@ -306,11 +306,13 @@ public class LoadRuns {
 
     /**
      * 
+     * @see #loadRunsFromEventFeed(String).
+     * 
      * @param contest
      * @param runs
      * @throws IllegalContestState
      */
-    private void validateEventFeedRuns(IInternalContest contest, List<EventFeedRun> runs) throws IllegalContestState {
+    public void validateEventFeedRuns(IInternalContest contest, List<EventFeedRun> runs) throws IllegalContestState {
     	
     	int zeroElapsedCount = 0;
     	for (EventFeedRun eventFeedRun : runs)
@@ -409,6 +411,54 @@ public class LoadRuns {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Reads event feed creates EventFeedRuns.
+     * 
+     * @param eventFeedFileName
+     * @return
+     * @throws Exception
+     */
+    public List<EventFeedRun> loadRunsFromEventFeed (String eventFeedFileName) throws Exception{
+
+        List<EventFeedRun> runs = new ArrayList<EventFeedRun>();
+        
+        try {
+
+            XMLDomParse1 parse1 = new XMLDomParse1();
+            Document document = parse1.create(eventFeedFileName);
+
+            // find nodes for path
+            String path = "/contest/run/*";
+            NodeList nodes = parse1.getNodes(document, path);
+
+            Properties[] runPropertyList = parse1.create(nodes, EventFeedRun.ID_TAG_NAME);
+            runs = EventFeedRun.toRuns(runPropertyList, true);
+        
+        } catch (Exception e) {
+            throw new Exception("Problem parsing "+eventFeedFileName, e.getCause());
+        }
+
+        
+        return runs;
+    }
+
+    /**
+     * Load Event Feed runs, adds run judgements.
+     * 
+     * @param contest
+     * @param runs
+     * @param cdpBasePath
+     * @return
+     * @throws ClassNotFoundException
+     * @throws IllegalContestState
+     * @throws IOException
+     * @throws FileSecurityException
+     * @throws RunUnavailableException
+     */
+    public IInternalContest updateContestFromEFRuns(IInternalContest contest, List<EventFeedRun> runs, String cdpBasePath) throws ClassNotFoundException, IllegalContestState, IOException, FileSecurityException, RunUnavailableException {
+        return updateContestFromEFRuns(contest, runs, cdpBasePath, true);
     }
 
 }
