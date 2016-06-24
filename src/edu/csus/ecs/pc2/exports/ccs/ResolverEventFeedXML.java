@@ -102,7 +102,7 @@ public class ResolverEventFeedXML {
      */
     public String toXMLFreeze(IInternalContest contest, long minutesFromEnd) {
         
-        long mins = contest.getContestTime().getConestLengthMins() - minutesFromEnd;
+        long mins = contest.getContestTime().getContestLengthMins() - minutesFromEnd;
         
         Filter filter = new Filter();
         filter.setFilteringDeleted(true);
