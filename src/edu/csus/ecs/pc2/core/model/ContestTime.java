@@ -7,24 +7,25 @@ import java.util.TimeZone;
 
 /**
  * This class represents the abstract notion of "Contest Time" - that is, a "clock"
- * which is initialized when the contest first starts and "counts down" to the
- * end of the contest -- but only counting down when the contest is marked as "running".
- * In this way the ContestTime object keeps track of the amount of elapsed time which is considered
+ * which is initialized to the value representing the length of the contest 
+ * when the contest first starts and "counts down" to the
+ * end of the contest -- but only counts down when the contest is marked as "running".
+ * In this way the ContestTime object keeps track of the amount of elapsed/remaining time which is considered
  * to be part of the contest (similar to the way the "game clock" is stopped and subsequently restarted
  * in, for example, a football game).
- * 
+ * <P>
  * The contest can be "stopped" at any time (e.g. by pushing the "Stop"
  * button on the PC2 Admin); this causes the "contest time clock" to stop counting down until
  * the contest is subsequently "restarted" (e.g. by pushing the "Start" button on the PC2 Admin).
  * When a contest is "stopped" (also called "paused") after having been started, and then the
  * "Start" button is again pushed to restart the contest, any real time which elapsed between 
  * the "stop" and subsequent "restart' is not included in the Contest Clock time.
- * 
+ * <P>
  * Note that in a multi-site contest (one running multiple PC2 Servers), each PC2 Server has
  * its own instance of ContestTime.  This allows different sites to pause the contest at different
  * times and for different lengths of time if necessary; each site's ContestTime object insures that
  * the site runs the contest for the correct length of time independently of the other sites.  
- * 
+ * <P>
  * Methods used to access contest time as well as start and stop contest time. <br>
  * Start clock: {@link #startContestClock()}. <br>
  * Stop contest clock: {@link #stopContestClock()}. <br>
@@ -182,6 +183,15 @@ public class ContestTime implements IElementObject {
      */
     public boolean isContestRunning() {
         return contestRunning;
+    }
+    
+    /**
+     * Returns true if the contest has been started, regardless of whether
+     * the contest is currently running (that is, regardless of whether the
+     * contest has been paused after being started).
+     */
+    public boolean isContestStarted() {
+        return actualTimeContestFirstStarted != null ;
     }
 
     /**
@@ -585,6 +595,23 @@ public class ContestTime implements IElementObject {
         contestRunning = false;
     }
 
+    /**
+     * Returns a {@link Calendar} object indicating the date/time the contest started --
+     * that is, the time when the first "start contest" operation (such as pushing
+     * the "Start" button on the PC2 Admin) occurred -- or null if the contest has not yet 
+     * been started.
+     * 
+     * Note that if the "Start" button has been pushed, but then the "Stop" (pause
+     * contest) button was pushed, this method returns the time at which the FIRST
+     * "Start" operation occurred -- even if multiple subsequent "stop" and then
+     * "Start' operations have taken place.
+     * 
+     * Note also that the returned value is unrelated to the value returned by
+     * {@link ContestInformation#getScheduledStartTime()}; that value is only relevant
+     * prior to the contest being started.
+     * 
+     * @return the date/time when the contest was first started, or null 
+     */
     public Calendar getContestStartTime() {
         return actualTimeContestFirstStarted;
     }
