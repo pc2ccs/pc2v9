@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.text.SimpleDateFormat;
+import java.util.GregorianCalendar;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -22,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -715,8 +717,10 @@ public class ContestTimesPane extends JPanePlugin {
 
         ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[selectedSites[0]];
         ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
+        ContestInformation contestInfo = getContest().getContestInformation();
+        GregorianCalendar scheduledStartTime = contestInfo.getScheduledStartTime();
 
-        editContestTimeFrame.setContestTime(contestTime);
+        editContestTimeFrame.setContestTime(contestTime, scheduledStartTime);
         editContestTimeFrame.setVisible(true);
 
     }

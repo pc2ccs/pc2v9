@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.util.GregorianCalendar;
+
 import javax.swing.JFrame;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -61,13 +63,13 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
         getContestTimePane().setParentFrame(this);
     }
 
-    public void setContestTime(ContestTime contestTime) {
+    public void setContestTime(ContestTime contestTime, GregorianCalendar scheduledStartTime) {
         if (contestTime == null) {
             setTitle("Add New Contest Time");
         } else {
             setTitle("Edit Contest Time for Site " + contestTime.getSiteNumber());
         }
-        getContestTimePane().setContestTime(contestTime);
+        getContestTimePane().setContestTime(contestTime, scheduledStartTime);
         
    }
 

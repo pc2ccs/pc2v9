@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.DateUtilities;
@@ -10,7 +11,7 @@ import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 
 /**
- * Contest-wied Information/settings.
+ * Contest-wide Information/settings.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -125,6 +126,38 @@ public class ContestInformation implements Serializable{
     private String freezeTime;
 
     private String contestShortName;
+    
+    /**
+     * The date/time when the contest is scheduled (intended) to start.
+     * This value is null (undefined) if no scheduled start time has been set.
+     * This value ONLY applies BEFORE THE CONTEST STARTS; once 
+     * any "start contest" operation (e.g. pushing the "Start Button") has occurred,
+     * this value no longer has meaning.
+     */
+    private GregorianCalendar scheduledStartTime = null ;
+    
+    /**
+     * Returns the date/time when the contest is scheduled (intended) to start.
+     * This value is null (undefined) if no scheduled start time has been set,
+     * or if the contest has already started.  
+     * @see ContestTime#getContestStartTime()
+     */
+    public GregorianCalendar getScheduledStartTime() {
+        return scheduledStartTime;
+    }
+    
+    /**
+     * Receives a {@link GregorianCalendar} object specifying a (future) instant in time;
+     * sets the specified date/time as the scheduled (intended) start time for the
+     * contest.  Note that it is an error to invoke this method after the contest
+     * has started, since the value of "scheduled start time" is meaningless after
+     * the contest is under way.  It is the responsibility of clients to insure
+     * this method is only invoked before the contest has been started.
+     * 
+     */
+    public void setScheduledStartTime(GregorianCalendar newScheduledStartTime) {
+        scheduledStartTime = newScheduledStartTime; 
+    }
 
     public String getContestTitle() {
         return contestTitle;

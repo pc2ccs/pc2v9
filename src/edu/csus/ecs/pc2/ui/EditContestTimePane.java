@@ -15,7 +15,14 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+
 import javax.swing.JCheckBox;
+
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Dimension;
+import java.util.GregorianCalendar;
 
 /**
  * Add/Edit ContestTime Pane.
@@ -27,9 +34,6 @@ import javax.swing.JCheckBox;
 // $HeadURL$
 public class EditContestTimePane extends JPanePlugin {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -1060536964672397704L;
 
     private JPanel messagePane = null;
@@ -61,6 +65,9 @@ public class EditContestTimePane extends JPanePlugin {
     private JTextField contestLengthTextBox = null;
 
     private JCheckBox stopAtEndofContestCheckBox = null;
+    private JLabel scheduledStartTimeLabel;
+    private JTextField scheduledStartTimeTextBox;
+    private JCheckBox chckbxStartContestAutomatically;
 
     /**
      * This method initializes
@@ -77,7 +84,7 @@ public class EditContestTimePane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(418, 243));
+        this.setSize(new Dimension(479, 291));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -348,26 +355,34 @@ public class EditContestTimePane extends JPanePlugin {
         return contestTime;
     }
 
-    public void setContestTime(final ContestTime contestTime) {
+    public void setContestTime(final ContestTime contestTime, final GregorianCalendar scheduledStartTime) {
 
         this.contestTime = contestTime;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                populateGUI(contestTime);
+                populateGUI(contestTime, scheduledStartTime);
                 enableUpdateButtons(false);
                 showMessage("");
             }
         });
     }
 
-    private void populateGUI(ContestTime inContestTime) {
+    private void populateGUI(ContestTime inContestTime, GregorianCalendar scheduledStartTime) {
 
         populatingGUI = true;
 
         getRemainingTimeTextBox().setText(inContestTime.getRemainingTimeStr());
         getElapsedTimeTextBox().setText(inContestTime.getElapsedTimeStr());
         getContestLengthTextBox().setText(inContestTime.getContestLengthStr());
+        
+        String displayStartTime = "";
+        if (scheduledStartTime == null) {
+            displayStartTime += "<undefined>";
+        } else {
+            displayStartTime += getDisplayableDateTime(scheduledStartTime);
+        }
+        getScheduledStartTimeTextBox().setText(displayStartTime);
 
         getUpdateButton().setVisible(true);
         enableUpdateButtons(false);
@@ -399,27 +414,80 @@ public class EditContestTimePane extends JPanePlugin {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
+            centerPane = new JPanel();
+            GridBagLayout gbl_centerPane = new GridBagLayout();
+            gbl_centerPane.columnWidths = new int[] {30, 110, 205, 20};
+            gbl_centerPane.rowHeights = new int[] {29, 29, 29, 29, 20, 0, 0, 0};
+            gbl_centerPane.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
+            gbl_centerPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+            centerPane.setLayout(gbl_centerPane);
+            GridBagConstraints gbc_scheduledStartTimeLabel = new GridBagConstraints();
+            gbc_scheduledStartTimeLabel.anchor = GridBagConstraints.EAST;
+            gbc_scheduledStartTimeLabel.insets = new Insets(0, 0, 5, 10);
+            gbc_scheduledStartTimeLabel.gridx = 1;
+            gbc_scheduledStartTimeLabel.gridy = 1;
+            centerPane.add(getScheduledStartTimeLabel(), gbc_scheduledStartTimeLabel);
+            GridBagConstraints gbc_scheduledStartTimeTextBox = new GridBagConstraints();
+            gbc_scheduledStartTimeTextBox.insets = new Insets(0, 0, 5, 0);
+            gbc_scheduledStartTimeTextBox.fill = GridBagConstraints.HORIZONTAL;
+            gbc_scheduledStartTimeTextBox.gridx = 2;
+            gbc_scheduledStartTimeTextBox.gridy = 1;
+            centerPane.add(getScheduledStartTimeTextBox(), gbc_scheduledStartTimeTextBox);
             contestLengthLabel = new JLabel();
-            contestLengthLabel.setBounds(new java.awt.Rectangle(60, 103, 110, 23));
             contestLengthLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             contestLengthLabel.setText("Contest Length");
+            GridBagConstraints gbc_contestLengthLabel = new GridBagConstraints();
+            gbc_contestLengthLabel.fill = GridBagConstraints.BOTH;
+            gbc_contestLengthLabel.insets = new Insets(0, 0, 5, 10);
+            gbc_contestLengthLabel.gridx = 1;
+            gbc_contestLengthLabel.gridy = 2;
+            centerPane.add(contestLengthLabel, gbc_contestLengthLabel);
+            GridBagConstraints gbc_contestLengthTextBox = new GridBagConstraints();
+            gbc_contestLengthTextBox.fill = GridBagConstraints.BOTH;
+            gbc_contestLengthTextBox.insets = new Insets(0, 0, 5, 0);
+            gbc_contestLengthTextBox.gridx = 2;
+            gbc_contestLengthTextBox.gridy = 2;
+            centerPane.add(getContestLengthTextBox(), gbc_contestLengthTextBox);
             elapsedTimeLabel = new JLabel();
-            elapsedTimeLabel.setBounds(new java.awt.Rectangle(60, 60, 110, 23));
             elapsedTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            elapsedTimeLabel.setText("Elapsed Time");
+            elapsedTimeLabel.setText("Current Elapsed Time");
+            GridBagConstraints gbc_elapsedTimeLabel = new GridBagConstraints();
+            gbc_elapsedTimeLabel.fill = GridBagConstraints.BOTH;
+            gbc_elapsedTimeLabel.insets = new Insets(0, 0, 5, 10);
+            gbc_elapsedTimeLabel.gridx = 1;
+            gbc_elapsedTimeLabel.gridy = 3;
+            centerPane.add(elapsedTimeLabel, gbc_elapsedTimeLabel);
+            GridBagConstraints gbc_elapsedTimeTextBox = new GridBagConstraints();
+            gbc_elapsedTimeTextBox.fill = GridBagConstraints.BOTH;
+            gbc_elapsedTimeTextBox.insets = new Insets(0, 0, 5, 0);
+            gbc_elapsedTimeTextBox.gridx = 2;
+            gbc_elapsedTimeTextBox.gridy = 3;
+            centerPane.add(getElapsedTimeTextBox(), gbc_elapsedTimeTextBox);
             remaingingTimeLabel = new JLabel();
-            remaingingTimeLabel.setBounds(new java.awt.Rectangle(60, 17, 110, 23));
             remaingingTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            remaingingTimeLabel.setText("Remaining Time");
-            centerPane = new JPanel();
-            centerPane.setLayout(null);
-            centerPane.add(remaingingTimeLabel, null);
-            centerPane.add(getRemainingTimeTextBox(), null);
-            centerPane.add(elapsedTimeLabel, null);
-            centerPane.add(getElapsedTimeTextBox(), null);
-            centerPane.add(contestLengthLabel, null);
-            centerPane.add(getContestLengthTextBox(), null);
-            centerPane.add(getStopAtEndofContestCheckBox(), null);
+            remaingingTimeLabel.setText("Current Remaining Time");
+            GridBagConstraints gbc_remaingingTimeLabel = new GridBagConstraints();
+            gbc_remaingingTimeLabel.fill = GridBagConstraints.BOTH;
+            gbc_remaingingTimeLabel.insets = new Insets(0, 0, 5, 10);
+            gbc_remaingingTimeLabel.gridx = 1;
+            gbc_remaingingTimeLabel.gridy = 4;
+            centerPane.add(remaingingTimeLabel, gbc_remaingingTimeLabel);
+            GridBagConstraints gbc_remainingTimeTextBox = new GridBagConstraints();
+            gbc_remainingTimeTextBox.fill = GridBagConstraints.BOTH;
+            gbc_remainingTimeTextBox.insets = new Insets(0, 0, 5, 0);
+            gbc_remainingTimeTextBox.gridx = 2;
+            gbc_remainingTimeTextBox.gridy = 4;
+            centerPane.add(getRemainingTimeTextBox(), gbc_remainingTimeTextBox);
+            GridBagConstraints gbc_chckbxStartContestAutomatically = new GridBagConstraints();
+            gbc_chckbxStartContestAutomatically.insets = new Insets(0, 0, 0, 5);
+            gbc_chckbxStartContestAutomatically.gridx = 1;
+            gbc_chckbxStartContestAutomatically.gridy = 6;
+            centerPane.add(getChckbxStartContestAutomatically(), gbc_chckbxStartContestAutomatically);
+            GridBagConstraints gbc_stopAtEndofContestCheckBox = new GridBagConstraints();
+            gbc_stopAtEndofContestCheckBox.fill = GridBagConstraints.VERTICAL;
+            gbc_stopAtEndofContestCheckBox.gridx = 2;
+            gbc_stopAtEndofContestCheckBox.gridy = 6;
+            centerPane.add(getStopAtEndofContestCheckBox(), gbc_stopAtEndofContestCheckBox);
         }
         return centerPane;
     }
@@ -432,7 +500,6 @@ public class EditContestTimePane extends JPanePlugin {
     private JTextField getRemainingTimeTextBox() {
         if (remainingTimeTextBox == null) {
             remainingTimeTextBox = new JTextField();
-            remainingTimeTextBox.setBounds(new java.awt.Rectangle(191, 14, 115, 29));
             remainingTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -450,7 +517,6 @@ public class EditContestTimePane extends JPanePlugin {
     private JTextField getElapsedTimeTextBox() {
         if (elapsedTimeTextBox == null) {
             elapsedTimeTextBox = new JTextField();
-            elapsedTimeTextBox.setBounds(new java.awt.Rectangle(191, 57, 115, 29));
             elapsedTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -461,14 +527,13 @@ public class EditContestTimePane extends JPanePlugin {
     }
 
     /**
-     * This method initializes contestLenthTextBox
+     * This method initializes contestLengthTextBox
      * 
      * @return javax.swing.JTextField
      */
     private JTextField getContestLengthTextBox() {
         if (contestLengthTextBox == null) {
             contestLengthTextBox = new JTextField();
-            contestLengthTextBox.setBounds(new java.awt.Rectangle(191, 100, 115, 29));
             contestLengthTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -486,8 +551,8 @@ public class EditContestTimePane extends JPanePlugin {
     private JCheckBox getStopAtEndofContestCheckBox() {
         if (stopAtEndofContestCheckBox == null) {
             stopAtEndofContestCheckBox = new JCheckBox();
-            stopAtEndofContestCheckBox.setBounds(new java.awt.Rectangle(194, 143, 202, 21));
-            stopAtEndofContestCheckBox.setText("Stop Clock at end of contest");
+            stopAtEndofContestCheckBox.setToolTipText("Check to cause PC2 to automatically stop the contest (cease accepting submissions) when the contest clock (remaining time) reaches zero");
+            stopAtEndofContestCheckBox.setText("Stop contest automatically");
             stopAtEndofContestCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -495,6 +560,28 @@ public class EditContestTimePane extends JPanePlugin {
             });
         }
         return stopAtEndofContestCheckBox;
+    }
+    
+    /**
+     * Convert a GregorianCalendar date/time to a displayable string in yyyy:mm:dd:hh:mm form.
+     */
+    private String getDisplayableDateTime(GregorianCalendar inDate) {
+        
+        String retString = "<undefined>";
+        if (inDate != null) {
+            //extract fields from inDate and build string
+            //TODO:  need to deal with the difference between displaying LOCAL time and storing UTC
+            int year = inDate.get(GregorianCalendar.YEAR);
+            int month = inDate.get(GregorianCalendar.MONTH);
+            int day = inDate.get(GregorianCalendar.DAY_OF_MONTH);
+            int hour = inDate.get(GregorianCalendar.HOUR_OF_DAY);
+            int min = inDate.get(GregorianCalendar.MINUTE);
+            retString = "" + year + ":" + month + ":" + day + ":" + hour + ":" + min;
+        }
+
+        System.out.println ("EditContestTimePane.getDisplayableDateTime(): received GregorianCalendar value \n'"
+                + inDate + "'; returning display representation \n'" + retString + "'");
+        return retString;
     }
 
     /**
@@ -572,4 +659,32 @@ public class EditContestTimePane extends JPanePlugin {
         }
     }
 
+    private JLabel getScheduledStartTimeLabel() {
+        if (scheduledStartTimeLabel == null) {
+        	scheduledStartTimeLabel = new JLabel("Scheduled Start Time");
+        	scheduledStartTimeLabel.setToolTipText("The date/time when the contest is scheduled to start; must be a time in the future.");
+        }
+        return scheduledStartTimeLabel;
+    }
+    
+    private JTextField getScheduledStartTimeTextBox() {
+        if (scheduledStartTimeTextBox == null) {
+        	scheduledStartTimeTextBox = new JTextField();
+        	scheduledStartTimeTextBox.setToolTipText("Enter the future date/time when the contest is scheduled to start, in format yyyy:mm:dd:hh:mm (yyyy, mm, and dd default to \"today\" if omitted).");
+        	scheduledStartTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return scheduledStartTimeTextBox;
+    }
+    
+    private JCheckBox getChckbxStartContestAutomatically() {
+        if (chckbxStartContestAutomatically == null) {
+        	chckbxStartContestAutomatically = new JCheckBox("Start contest automatically");
+        	chckbxStartContestAutomatically.setToolTipText("Check to cause PC2 to automatically start the contest when the specified \"Scheduled Start Time\" is reached");
+        }
+        return chckbxStartContestAutomatically;
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"
