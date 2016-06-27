@@ -2,16 +2,14 @@ package edu.csus.ecs.pc2.core.model;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit Tests.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class ContestTimeTest extends AbstractTestCase {
 
     private SampleContest sampleContest = new SampleContest();
@@ -40,7 +38,7 @@ public class ContestTimeTest extends AbstractTestCase {
         int secondsToWait = 10;
         int siteNumber = 2;
 
-        long ms = secondsToWait * ContestTime.MS_PER_SECONDS;
+        long ms = secondsToWait * Constants.MS_PER_SECONDS;
 
         IInternalContest contest = sampleContest.createContest(siteNumber, siteNumber, 12, 12, true);
 
@@ -84,7 +82,7 @@ public class ContestTimeTest extends AbstractTestCase {
          */
         int secondsToWait = 3;
 
-        long ms = secondsToWait * ContestTime.MS_PER_SECONDS;
+        long ms = secondsToWait * Constants.MS_PER_SECONDS;
 
         ContestTime contestTime = new ContestTime();
 
@@ -125,58 +123,56 @@ public class ContestTimeTest extends AbstractTestCase {
          */
         int secondsToWait = 3;
 
-        long ms = secondsToWait * ContestTime.MS_PER_SECONDS;
+        long ms = secondsToWait * Constants.MS_PER_SECONDS;
 
         ContestTime contestTime = new ContestTime();
 
-        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / ContestTime.MS_PER_SECONDS, contestTime.getElapsedSecs());
-        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / ContestTime.MS_PER_MINUTE, contestTime.getElapsedMins());
+        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / Constants.MS_PER_SECONDS, contestTime.getElapsedSecs());
+        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / Constants.MS_PER_MINUTE, contestTime.getElapsedMins());
 
-        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / ContestTime.MS_PER_SECONDS, contestTime.getRemainingSecs());
-        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / ContestTime.MS_PER_MINUTE, contestTime.getRemainingSecs() / ContestTime.SECONDS_PER_MINUTE);
+        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / Constants.MS_PER_SECONDS, contestTime.getRemainingSecs());
+        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / Constants.MS_PER_MINUTE, contestTime.getRemainingSecs() / Constants.SECONDS_PER_MINUTE);
 
         contestTime.stopContestClock();
 
-        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / ContestTime.MS_PER_SECONDS, contestTime.getElapsedSecs());
-        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / ContestTime.MS_PER_MINUTE, contestTime.getElapsedMins());
+        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / Constants.MS_PER_SECONDS, contestTime.getElapsedSecs());
+        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / Constants.MS_PER_MINUTE, contestTime.getElapsedMins());
 
-        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / ContestTime.MS_PER_SECONDS, contestTime.getRemainingSecs());
-        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / ContestTime.MS_PER_MINUTE, contestTime.getRemainingSecs() / ContestTime.SECONDS_PER_MINUTE);
+        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / Constants.MS_PER_SECONDS, contestTime.getRemainingSecs());
+        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / Constants.MS_PER_MINUTE, contestTime.getRemainingSecs() / Constants.SECONDS_PER_MINUTE);
 
         debugPrint(testName + ": sleep for " + secondsToWait + " seconds.");
         Thread.sleep(ms);
 
-        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / ContestTime.MS_PER_SECONDS, contestTime.getElapsedSecs());
-        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / ContestTime.MS_PER_MINUTE, contestTime.getElapsedMins());
+        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / Constants.MS_PER_SECONDS, contestTime.getElapsedSecs());
+        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / Constants.MS_PER_MINUTE, contestTime.getElapsedMins());
 
-        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / ContestTime.MS_PER_SECONDS, contestTime.getRemainingSecs());
-        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / ContestTime.MS_PER_MINUTE, contestTime.getRemainingSecs() / ContestTime.SECONDS_PER_MINUTE);
+        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / Constants.MS_PER_SECONDS, contestTime.getRemainingSecs());
+        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / Constants.MS_PER_MINUTE, contestTime.getRemainingSecs() / Constants.SECONDS_PER_MINUTE);
         
-        contestTime.setElapsedSecs(3 * ContestTime.SECONDS_PER_MINUTE);
+        contestTime.setElapsedSecs(3 * Constants.SECONDS_PER_MINUTE);
         
-        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / ContestTime.MS_PER_SECONDS, contestTime.getElapsedSecs());
-        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / ContestTime.MS_PER_MINUTE, contestTime.getElapsedMins());
+        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / Constants.MS_PER_SECONDS, contestTime.getElapsedSecs());
+        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / Constants.MS_PER_MINUTE, contestTime.getElapsedMins());
 
-        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / ContestTime.MS_PER_SECONDS, contestTime.getRemainingSecs());
-        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / ContestTime.MS_PER_MINUTE, contestTime.getRemainingSecs() / ContestTime.SECONDS_PER_MINUTE);
+        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / Constants.MS_PER_SECONDS, contestTime.getRemainingSecs());
+        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / Constants.MS_PER_MINUTE, contestTime.getRemainingSecs() / Constants.SECONDS_PER_MINUTE);
 
         contestTime.resetClock();
         
-        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / ContestTime.MS_PER_SECONDS, contestTime.getElapsedSecs());
-        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / ContestTime.MS_PER_MINUTE, contestTime.getElapsedMins());
+        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / Constants.MS_PER_SECONDS, contestTime.getElapsedSecs());
+        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / Constants.MS_PER_MINUTE, contestTime.getElapsedMins());
 
-        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / ContestTime.MS_PER_SECONDS, contestTime.getRemainingSecs());
-        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / ContestTime.MS_PER_MINUTE, contestTime.getRemainingSecs() / ContestTime.SECONDS_PER_MINUTE);
+        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / Constants.MS_PER_SECONDS, contestTime.getRemainingSecs());
+        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / Constants.MS_PER_MINUTE, contestTime.getRemainingSecs() / Constants.SECONDS_PER_MINUTE);
        
         contestTime.setElapsedMins(40);
 
-        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / ContestTime.MS_PER_SECONDS, contestTime.getElapsedSecs());
-        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / ContestTime.MS_PER_MINUTE, contestTime.getElapsedMins());
+        assertEquals("Elapsed seconds ", contestTime.getElapsedMS() / Constants.MS_PER_SECONDS, contestTime.getElapsedSecs());
+        assertEquals("Elapsed minutes  ", contestTime.getElapsedMS() / Constants.MS_PER_MINUTE, contestTime.getElapsedMins());
 
-        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / ContestTime.MS_PER_SECONDS, contestTime.getRemainingSecs());
-        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / ContestTime.MS_PER_MINUTE, contestTime.getRemainingSecs() / ContestTime.SECONDS_PER_MINUTE);
-       
-        
+        assertEquals("Remaining seconds ", contestTime.getRemainingMS() / Constants.MS_PER_SECONDS, contestTime.getRemainingSecs());
+        assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / Constants.MS_PER_MINUTE, contestTime.getRemainingSecs() / Constants.SECONDS_PER_MINUTE);
     }
 
     public static Test suite() {

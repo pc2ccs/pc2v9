@@ -5,6 +5,8 @@ import java.util.GregorianCalendar;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import edu.csus.ecs.pc2.core.Constants;
+
 /**
  * Contest Time.
  * 
@@ -27,36 +29,36 @@ public class ContestTime implements IElementObject {
      */
     public static final long serialVersionUID = 6967329985187819728L;
     
-    /**
-     * number of ms in a second.
-     */
-    public static final long MS_PER_SECONDS = 1000;
-
-    /**
-     * number of seconds in a minute.
-     */
-    public static final long SECONDS_PER_MINUTE = 60;
-
-    /**
-     * number of ms in a minute.
-     */
-    public static final long MS_PER_MINUTE = SECONDS_PER_MINUTE * MS_PER_SECONDS;
-
-    /**
-     * number of minutes in an hour.
-     */
-    public static final long MINUTES_PER_HOUR = 60;
-    
-    /**
-     * number of seconds in an hour.
-     */
-    public static final long SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
-
-
-    /**
-     * Default contest length.
-     */
-    public static final long DEFAULT_CONTEST_LENGTH_SECONDS = 18000; // 5 * 60 * 60
+//    /**
+//     * number of ms in a second.
+//     */
+//    public static final long MS_PER_SECONDS = 1000;
+//
+//    /**
+//     * number of seconds in a minute.
+//     */
+//    public static final long SECONDS_PER_MINUTE = 60;
+//
+//    /**
+//     * number of ms in a minute.
+//     */
+//    public static final long MS_PER_MINUTE = SECONDS_PER_MINUTE * MS_PER_SECONDS;
+//
+//    /**
+//     * number of minutes in an hour.
+//     */
+//    public static final long MINUTES_PER_HOUR = 60;
+//    
+//    /**
+//     * number of seconds in an hour.
+//     */
+//    public static final long SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+//
+//
+//    /**
+//     * Default contest length.
+//     */
+//    public static final long DEFAULT_CONTEST_LENGTH_SECONDS = 18000; // 5 * 60 * 60
 
     /**
      * Resume time, used in calculating elapsed time.
@@ -87,7 +89,7 @@ public class ContestTime implements IElementObject {
      */
     private long elapsedMS = 0;
 
-    private long contestLengthSecs = DEFAULT_CONTEST_LENGTH_SECONDS;
+    private long contestLengthSecs = Constants.DEFAULT_CONTEST_LENGTH_SECONDS;
 
     /**
      * Is contest clock running (counting down) ?
@@ -315,12 +317,12 @@ public class ContestTime implements IElementObject {
     }
 
     public void setElapsedMins(long minutes) {
-        setElapsedSecs(minutes * SECONDS_PER_MINUTE);
+        setElapsedSecs(minutes * Constants.SECONDS_PER_MINUTE);
     }
 
     public void setElapsedSecs(long eSecs) {
         elapsedSecs = eSecs;
-        elapsedMS = eSecs * MS_PER_SECONDS;
+        elapsedMS = eSecs * Constants.MS_PER_SECONDS;
     }
 
     public void setHaltContestAtTimeZero(boolean newHaltContestAtTimeZero) {

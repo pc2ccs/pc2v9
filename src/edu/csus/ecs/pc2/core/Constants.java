@@ -3,12 +3,8 @@ package edu.csus.ecs.pc2.core;
 /**
  * Constants for pc2.
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-
-// $HeadURL$
-
 public final class Constants {
 
     private Constants() {
@@ -78,7 +74,16 @@ public final class Constants {
      * Default file name for judgement ini file.
      */
     public static final String JUDGEMENT_INIT_FILENAME = "reject.ini";
+    
 
+    /**
+     * Minimum java major version value.
+     */
+    public static final int MIN_MAJOR_JAVA_VERSION = 1;
 
+    /**
+     * Minimum Java minor version value
+     */
+    public static final int MIN_MINOR_JAVA_VERSION = 7;
     
 }
