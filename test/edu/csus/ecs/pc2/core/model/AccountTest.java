@@ -5,13 +5,10 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
- * JUnit test for Account class.
+ * JUnit tests.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class AccountTest extends AbstractTestCase {
 
     private Account account = null;
@@ -91,5 +88,93 @@ public class AccountTest extends AbstractTestCase {
         assertTrue("Account isSameAs ", account.isSameAs(account2));
 
     }
+    
+    /**
+     * Test .updateFrom.
+     * 
+     * @throws Exception
+     */
+    public void testupdateFrom() throws Exception {
+
+        ClientId clientId = new ClientId(siteNumber, clientType, 3);
+        Account account2 = new Account(clientId, testPassword, clientId.getSiteNumber());
+        
+        setIvalues(account2,"XX", "UCLA", "University of California Los Angeles");
+        
+        Account account3 = new Account(clientId, testPassword, clientId.getSiteNumber());
+        account3.updateFrom(account2);
+
+        assertEquals("Inst Code", account2.getInstitutionCode(), account3.getInstitutionCode());
+        assertEquals("Inst Name", account2.getInstitutionName(), account3.getInstitutionName());
+        assertEquals("Inst Short Name", account2.getInstitutionShortName(), account3.getInstitutionShortName());
+    }
+    
+    private void setIvalues(Account inAccount, String code, String shortName, String name) {
+        
+        inAccount.setInstitutionCode(code);
+        inAccount.setInstitutionShortName(shortName);
+        inAccount.setInstitutionName(name);
+        
+    }
+
+    public void testSameinstitutionCode() throws Exception {
+        
+        ClientId clientId = new ClientId(siteNumber, clientType, 3);
+        Account account2 = new Account(clientId, testPassword, clientId.getSiteNumber());
+        
+        setIvalues(account2,"XX", "", "");
+        
+        Account account3 = new Account(clientId, testPassword, clientId.getSiteNumber());
+        
+        assertFalse(account2.isSameAs(account3));
+        account3.updateFrom(account2);
+        assertTrue(account2.isSameAs(account3));
+
+    }
+    
+    
+   public void testSameinstitutionShortName() throws Exception {
+
+       
+       ClientId clientId = new ClientId(siteNumber, clientType, 3);
+       Account account2 = new Account(clientId, testPassword, clientId.getSiteNumber());
+       
+       setIvalues(account2,"", "UCLA", "");
+       
+       Account account3 = new Account(clientId, testPassword, clientId.getSiteNumber());
+       assertFalse(account2.isSameAs(account3));
+       
+       account3.updateFrom(account2);
+       assertTrue(account2.isSameAs(account3));
+
+
+    }
+   
+   public void testSameinstitutionName() throws Exception {
+
+       ClientId clientId = new ClientId(siteNumber, clientType, 3);
+       Account account2 = new Account(clientId, testPassword, clientId.getSiteNumber());
+       
+       setIvalues(account2,"", "", "University of California Los Angeles");
+       
+       Account account3 = new Account(clientId, testPassword, clientId.getSiteNumber());
+       assertFalse(account2.isSameAs(account3));
+       
+       account3.updateFrom(account2);
+       assertTrue(account2.isSameAs(account3));
+
+   }
+//  
+//  if (!StringUtilities.stringSame(institutionCode, account.getInstitutionCode())) {
+//      return false;
+//  }
+//
+//  if (!StringUtilities.stringSame(institutionShortName, account.getInstitutionName())) {
+//      return false;
+//  }
+//
+//  if (!StringUtilities.stringSame(institutionName, account.getInstitutionName())) {
+//      return false;
+//  }
 
 }

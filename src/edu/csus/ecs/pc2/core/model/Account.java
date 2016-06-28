@@ -166,15 +166,17 @@ public class Account implements IElementObject {
     public void setClientId(ClientId clientId) {
         this.clientId = clientId;
     }
-    
-    // TODO TODAY add comparisons for 
-//    Institution name 
-//    Institution short name
-//    Institution Code    
+ 
     
     // The special case is that the previous instances could have a null value which
     // needs to be compareed as equal to an empty string.
-    
+
+    /**
+     * Deep compare of Account.
+     * 
+     * @param account
+     * @return true if same, else false.
+     */
     public boolean isSameAs(Account account) {
         try {
             if (!displayName.equals(account.getDisplayName())) {
@@ -218,6 +220,18 @@ public class Account implements IElementObject {
                 return false;
             }
             if (!shortSchoolName.equals(account.getShortSchoolName())) {
+                return false;
+            }
+
+            if (!StringUtilities.stringSame(institutionCode, account.getInstitutionCode())) {
+                return false;
+            }
+
+            if (!StringUtilities.stringSame(institutionShortName, account.getInstitutionShortName())) {
+                return false;
+            }
+
+            if (!StringUtilities.stringSame(institutionName, account.getInstitutionName())) {
                 return false;
             }
             
@@ -370,6 +384,10 @@ public class Account implements IElementObject {
         password = account.password;
         shortSchoolName = account.shortSchoolName;
         teamName = account.getTeamName();
+        
+        institutionCode = account.getInstitutionCode();
+        institutionShortName = account.getInstitutionShortName();
+        institutionName = account.getInstitutionName();
 
         permissionList = account.permissionList;
 
