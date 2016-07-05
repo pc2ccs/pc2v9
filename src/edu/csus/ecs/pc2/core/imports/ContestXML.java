@@ -211,7 +211,7 @@ public class ContestXML {
         memento.putString("remainingTimeStr", contestTime.getRemainingTimeStr());
         memento.putString("contestLengthStr", contestTime.getContestLengthStr());
 
-        memento.putLong("conestLengthMins", contestTime.getConestLengthMins());
+        memento.putLong("conestLengthMins", contestTime.getContestLengthMins());
         memento.putLong("remainingSecs", contestTime.getRemainingSecs());
         if (contestTime.getResumeTime() != null) {
             memento.putLong("resumeTime", contestTime.getResumeTime().getTimeInMillis());

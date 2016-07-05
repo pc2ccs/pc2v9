@@ -2485,9 +2485,8 @@ public class PacketHandler {
     /**
      * Starts the contest clock and sends notification to other servers/clients.
      * 
+     * @param packet
      * @param connectionHandlerID
-     * @param contestTime
-     * @param sourceServerId
      * @throws ContestSecurityException
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 

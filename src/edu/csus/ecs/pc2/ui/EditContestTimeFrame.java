@@ -1,10 +1,13 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.util.GregorianCalendar;
+
 import javax.swing.JFrame;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import java.awt.Dimension;
 
 /**
  * Edit InternalContest Time Frame.
@@ -43,7 +46,7 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549, 278));
+        this.setSize(new Dimension(549, 400));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getContestTimePane());
         this.setTitle("New Contest Time");
@@ -61,13 +64,13 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
         getContestTimePane().setParentFrame(this);
     }
 
-    public void setContestTime(ContestTime contestTime) {
+    public void setContestTime(ContestTime contestTime, GregorianCalendar scheduledStartTime) {
         if (contestTime == null) {
             setTitle("Add New Contest Time");
         } else {
             setTitle("Edit Contest Time for Site " + contestTime.getSiteNumber());
         }
-        getContestTimePane().setContestTime(contestTime);
+        getContestTimePane().setContestTime(contestTime, scheduledStartTime);
         
    }
 

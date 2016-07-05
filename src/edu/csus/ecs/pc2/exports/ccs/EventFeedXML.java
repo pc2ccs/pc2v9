@@ -152,7 +152,7 @@ public class EventFeedXML {
      */
     public String toXMLFreeze(IInternalContest contest, long minutesFromEnd) {
         
-        long mins = contest.getContestTime().getConestLengthMins() - minutesFromEnd;
+        long mins = contest.getContestTime().getContestLengthMins() - minutesFromEnd;
         
         Filter filter = new Filter();
         // only get XML elements for events before mins
