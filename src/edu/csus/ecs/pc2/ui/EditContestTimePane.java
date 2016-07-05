@@ -67,7 +67,7 @@ public class EditContestTimePane extends JPanePlugin {
 
     private JTextField contestLengthTextBox = null;
 
-    private JCheckBox stopAtEndofContestCheckBox = null;
+    private JCheckBox autoStopAtEndofContestCheckBox = null;
     private JLabel scheduledStartTimeLabel;
     private JTextField scheduledStartTimeTextBox;
     private JCheckBox chckbxStartContestAutomatically;
@@ -566,7 +566,7 @@ public class EditContestTimePane extends JPanePlugin {
             gbc_stopAtEndofContestCheckBox.fill = GridBagConstraints.VERTICAL;
             gbc_stopAtEndofContestCheckBox.gridx = 2;
             gbc_stopAtEndofContestCheckBox.gridy = 6;
-            centerPane.add(getStopAtEndofContestCheckBox(), gbc_stopAtEndofContestCheckBox);
+            centerPane.add(getAutoStopAtEndofContestCheckBox(), gbc_stopAtEndofContestCheckBox);
         }
         return centerPane;
     }
@@ -623,22 +623,22 @@ public class EditContestTimePane extends JPanePlugin {
     }
 
     /**
-     * This method initializes jCheckBox
+     * This method initializes the "Automatically Stop at End of Contest" checkbox.
      * 
-     * @return javax.swing.JCheckBox
+     * @return the checkbox indicating whether PC2 should automatically stop the contest when the remaining time reaches zero
      */
-    private JCheckBox getStopAtEndofContestCheckBox() {
-        if (stopAtEndofContestCheckBox == null) {
-            stopAtEndofContestCheckBox = new JCheckBox();
-            stopAtEndofContestCheckBox.setToolTipText("Check to cause PC2 to automatically stop the contest (cease accepting submissions) when the contest clock (remaining time) reaches zero");
-            stopAtEndofContestCheckBox.setText("Stop contest automatically");
-            stopAtEndofContestCheckBox.addActionListener(new java.awt.event.ActionListener() {
+    private JCheckBox getAutoStopAtEndofContestCheckBox() {
+        if (autoStopAtEndofContestCheckBox == null) {
+            autoStopAtEndofContestCheckBox = new JCheckBox();
+            autoStopAtEndofContestCheckBox.setToolTipText("Check to cause PC2 to automatically stop the contest (cease accepting submissions) when the contest clock (remaining time) reaches zero");
+            autoStopAtEndofContestCheckBox.setText("Stop contest automatically");
+            autoStopAtEndofContestCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
             });
         }
-        return stopAtEndofContestCheckBox;
+        return autoStopAtEndofContestCheckBox;
     }
     
     /**
