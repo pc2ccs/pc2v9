@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 import javax.swing.JCheckBox;
 
+import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -48,6 +49,8 @@ public class EditContestTimePane extends JPanePlugin {
 
     private ContestTime contestTime = null;
 
+    private GregorianCalendar scheduledStartTime;
+    
     private boolean populatingGUI = true;
 
     private JPanel centerPane = null;
@@ -69,12 +72,14 @@ public class EditContestTimePane extends JPanePlugin {
     private JTextField scheduledStartTimeTextBox;
     private JCheckBox chckbxStartContestAutomatically;
 
+
     /**
      * This method initializes
      * 
      */
     public EditContestTimePane() {
         super();
+        setPreferredSize(new Dimension(530, 350));
         initialize();
     }
 
@@ -84,7 +89,7 @@ public class EditContestTimePane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(479, 291));
+        this.setSize(new Dimension(530, 350));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -151,42 +156,44 @@ public class EditContestTimePane extends JPanePlugin {
     }
 
     /**
-     * Enable or disable Update button based on comparison of run to fields.
+     * Enable or disable Update button based on comparison of current time values with
+     * values in the GUI.
      * 
      */
-    public void enableUpdateButton() {
+    private void enableUpdateButton() {
 
         if (populatingGUI) {
             return;
         }
 
-        boolean enableButton = false;
+        //assume the "Update" button should NOT be enabled, then see if something changed such that it SHOULD be
+        boolean updateButtonShouldBeEnabled = false;
 
         if (contestTime != null) {
 
             try {
                 ContestTime changedContestTime = getContestTimeFromFields(null);
 
-                enableButton |= contestTime.isHaltContestAtTimeZero() == changedContestTime.isHaltContestAtTimeZero();
-                enableButton |= contestTime.getElapsedTimeStr().equals(changedContestTime.getElapsedTimeStr());
-                enableButton |= contestTime.getContestLengthStr().equals(changedContestTime.getContestLengthStr());
-                enableButton |= contestTime.getRemainingTimeStr().equals(changedContestTime.getRemainingTimeStr());
+                updateButtonShouldBeEnabled |= contestTime.isHaltContestAtTimeZero() == changedContestTime.isHaltContestAtTimeZero();
+                updateButtonShouldBeEnabled |= contestTime.getElapsedTimeStr().equals(changedContestTime.getElapsedTimeStr());
+                updateButtonShouldBeEnabled |= contestTime.getContestLengthStr().equals(changedContestTime.getContestLengthStr());
+                updateButtonShouldBeEnabled |= contestTime.getRemainingTimeStr().equals(changedContestTime.getRemainingTimeStr());
 
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
                 StaticLog.getLog().log(Log.DEBUG, "Input ContestTime (but not saving) ", e);
-                enableButton = true;
+                updateButtonShouldBeEnabled = true;
             }
         }
 
-        enableUpdateButtons(enableButton);
+        setButtonStatesAndLabels(updateButtonShouldBeEnabled);
     }
 
     /**
      * Create a ContestTime from the fields.
      * 
-     * This also populates newContestTimeDataFiles for the data files.
+     * This also populates newContestTimeDataFiles for the data files.  (Huh?  This makes no sense.... jlc)
      * 
      * @param checkContestTime
      *            will update this ContestTime if supplied, if null creates a new ContestTime
@@ -219,7 +226,7 @@ public class EditContestTimePane extends JPanePlugin {
         long actualRemaining = contestLength - elapsedTime;
 
         if (actualRemaining != remainingTime) {
-            throw new InvalidFieldValue("Invalid contest times, set remaining to " + ContestTime.formatTime(actualRemaining));
+            throw new InvalidFieldValue("Invalid contest times: Elapsed+Remaining must equal Length\n (set Remaining to " + ContestTime.formatTime(actualRemaining) + "?)");
         }
 
         if (checkContestTime == null) {
@@ -259,6 +266,14 @@ public class EditContestTimePane extends JPanePlugin {
             return;
         }
 
+        //check ScheduledStartTime in the GUI textbox and return if it is invalid
+        if (!validateScheduledStartTimeField()) {
+            //new scheduled start time is invalid; just return (message issued by validateScheduledStartTimeField())
+            return;
+        }
+
+        // all fields are valid; copy data from fields into model via controller
+        
         ContestTime newContestTime = null;
 
         try {
@@ -267,8 +282,11 @@ public class EditContestTimePane extends JPanePlugin {
             showMessage(e.getMessage());
             return;
         }
-
+        
         getController().updateContestTime(newContestTime);
+        
+        //TODO: implement the following:
+        //getController().updateContestScheduledStartTime(newStartTime);
 
         cancelButton.setText("Close");
         updateButton.setEnabled(false);
@@ -305,6 +323,60 @@ public class EditContestTimePane extends JPanePlugin {
 
         return true;
     }
+    
+    /**
+     * Verify that the Scheduled Start Time entry is valid. Valid start times are
+     * strings of the form "[[[yyyy:]mm:]dd:]hh:mm" or "<undefined>".
+     * 
+     * @return true if the ScheduledStartTimeTextbox field contains either a valid
+     *     start date/time (in the future and in the proper format) or the string "<undefined>";
+     *     false otherwise.
+     */
+    
+//    maybe this method should return a GregorianCalendar object (if the textbox time is valid), or null if invalid?
+//            The problem is, what about "<undefined>" ?
+//    maybe the method should set a global variable to a GregorianCalendar (if valid)?
+    private boolean validateScheduledStartTimeField() {
+        
+        String textBoxStartTime = getScheduledStartTimeTextBox().getText() ;
+        
+        int startYear, startMonth, startDay, startHour, startMin ;
+        if (textBoxStartTime.trim().equalsIgnoreCase("<undefined>")) {
+            return true;
+        } else {
+            //get the year,month,day,hour, and minute from the textbox string
+            String [] dateValues = textBoxStartTime.split(":");
+            
+            //require at least two fields (hh and mm) and allow at most five fields (optional yyyy, mm, dd)
+            if (dateValues.length < 2 || dateValues.length > 5) {
+                showMessage ("Invalid Scheduled Start Time (must be '[[[yyyy:]mm:]dd:]hh:mm', or '<undefined>'");
+                return false;
+            } else {
+                //valid number of fields; extract the specified date values
+                switch (dateValues.length) {
+                    case 2:
+                        startHour = new Integer(dateValues[0]).intValue();
+                        startMin = new Integer(dateValues[1]).intValue();
+//                        startDay = today ;
+//                        startMonth = thisMonth ;
+//                        startYear = thisYear ;
+                        if (startHour<0 || startHour>23 || startMin<0 || startMin>59) {
+                            showMessage ("Invalid Scheduled Start Time (must have 00<=hh<=23 and 00<=mm<=59)");
+                            return false;
+                        } else {
+                            //construct a Date with the current year, month, and day
+                            //....
+//                            if (!constructedDateIsInFuture) {
+//                                showMessage("Invalid Scheduled Start Time (must be in the future)");
+//                                return false;
+                            }
+                            
+                        }
+                }
+            }
+                    
+        return false ;
+    }
 
     /**
      * This method initializes cancelButton
@@ -330,7 +402,8 @@ public class EditContestTimePane extends JPanePlugin {
         if (getUpdateButton().isEnabled()) {
             // Something changed, are they sure ?
 
-            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "ContestTime modified, save changes?", "Confirm Choice");
+            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Contest Time data has been modified;"
+                    + "\n do you want to save the changes?\n", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
                 updateContestTime();
@@ -358,11 +431,12 @@ public class EditContestTimePane extends JPanePlugin {
     public void setContestTime(final ContestTime contestTime, final GregorianCalendar scheduledStartTime) {
 
         this.contestTime = contestTime;
+        this.scheduledStartTime = scheduledStartTime;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI(contestTime, scheduledStartTime);
-                enableUpdateButtons(false);
+                setButtonStatesAndLabels(false);    //false = "Update" button should NOT be enabled
                 showMessage("");
             }
         });
@@ -372,25 +446,27 @@ public class EditContestTimePane extends JPanePlugin {
 
         populatingGUI = true;
 
+        //put the fields from the ContestTime object into the GUI
         getRemainingTimeTextBox().setText(inContestTime.getRemainingTimeStr());
         getElapsedTimeTextBox().setText(inContestTime.getElapsedTimeStr());
         getContestLengthTextBox().setText(inContestTime.getContestLengthStr());
         
+        //put the ScheduledStartTime into the GUI
         String displayStartTime = "";
         if (scheduledStartTime == null) {
-            displayStartTime += "<undefined>";
+            displayStartTime = "<undefined>";
         } else {
-            displayStartTime += getDisplayableDateTime(scheduledStartTime);
+            displayStartTime = getScheduledStartTimeStr(scheduledStartTime);
         }
         getScheduledStartTimeTextBox().setText(displayStartTime);
 
         getUpdateButton().setVisible(true);
-        enableUpdateButtons(false);
+        setButtonStatesAndLabels(false);
 
         populatingGUI = false;
     }
 
-    protected void enableUpdateButtons(boolean fieldsChanged) {
+    protected void setButtonStatesAndLabels(boolean fieldsChanged) {
         if (fieldsChanged) {
             cancelButton.setText("Cancel");
         } else {
@@ -402,6 +478,7 @@ public class EditContestTimePane extends JPanePlugin {
     public void showMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                messageLabel.setForeground(Color.RED);
                 messageLabel.setText(message);
             }
         });
@@ -415,23 +492,24 @@ public class EditContestTimePane extends JPanePlugin {
     private JPanel getCenterPane() {
         if (centerPane == null) {
             centerPane = new JPanel();
+            centerPane.setMinimumSize(new Dimension(10, 500));
             GridBagLayout gbl_centerPane = new GridBagLayout();
-            gbl_centerPane.columnWidths = new int[] {30, 110, 205, 20};
-            gbl_centerPane.rowHeights = new int[] {29, 29, 29, 29, 20, 0, 0, 0};
+            gbl_centerPane.columnWidths = new int[] {30, 110, 150, 80};
+            gbl_centerPane.rowHeights = new int[] {30, 30, 30, 30, 30, 30, 30};
             gbl_centerPane.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
-            gbl_centerPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+            gbl_centerPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
             centerPane.setLayout(gbl_centerPane);
             GridBagConstraints gbc_scheduledStartTimeLabel = new GridBagConstraints();
             gbc_scheduledStartTimeLabel.anchor = GridBagConstraints.EAST;
             gbc_scheduledStartTimeLabel.insets = new Insets(0, 0, 5, 10);
             gbc_scheduledStartTimeLabel.gridx = 1;
-            gbc_scheduledStartTimeLabel.gridy = 1;
+            gbc_scheduledStartTimeLabel.gridy = 0;
             centerPane.add(getScheduledStartTimeLabel(), gbc_scheduledStartTimeLabel);
             GridBagConstraints gbc_scheduledStartTimeTextBox = new GridBagConstraints();
             gbc_scheduledStartTimeTextBox.insets = new Insets(0, 0, 5, 0);
-            gbc_scheduledStartTimeTextBox.fill = GridBagConstraints.HORIZONTAL;
+            gbc_scheduledStartTimeTextBox.fill = GridBagConstraints.BOTH;
             gbc_scheduledStartTimeTextBox.gridx = 2;
-            gbc_scheduledStartTimeTextBox.gridy = 1;
+            gbc_scheduledStartTimeTextBox.gridy = 0;
             centerPane.add(getScheduledStartTimeTextBox(), gbc_scheduledStartTimeTextBox);
             contestLengthLabel = new JLabel();
             contestLengthLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -479,11 +557,12 @@ public class EditContestTimePane extends JPanePlugin {
             gbc_remainingTimeTextBox.gridy = 4;
             centerPane.add(getRemainingTimeTextBox(), gbc_remainingTimeTextBox);
             GridBagConstraints gbc_chckbxStartContestAutomatically = new GridBagConstraints();
-            gbc_chckbxStartContestAutomatically.insets = new Insets(0, 0, 0, 5);
+            gbc_chckbxStartContestAutomatically.insets = new Insets(0, 0, 5, 0);
             gbc_chckbxStartContestAutomatically.gridx = 1;
             gbc_chckbxStartContestAutomatically.gridy = 6;
             centerPane.add(getChckbxStartContestAutomatically(), gbc_chckbxStartContestAutomatically);
             GridBagConstraints gbc_stopAtEndofContestCheckBox = new GridBagConstraints();
+            gbc_stopAtEndofContestCheckBox.insets = new Insets(0, 0, 5, 0);
             gbc_stopAtEndofContestCheckBox.fill = GridBagConstraints.VERTICAL;
             gbc_stopAtEndofContestCheckBox.gridx = 2;
             gbc_stopAtEndofContestCheckBox.gridy = 6;
@@ -565,7 +644,7 @@ public class EditContestTimePane extends JPanePlugin {
     /**
      * Convert a GregorianCalendar date/time to a displayable string in yyyy:mm:dd:hh:mm form.
      */
-    private String getDisplayableDateTime(GregorianCalendar inDate) {
+    private String getScheduledStartTimeStr(GregorianCalendar inDate) {
         
         String retString = "<undefined>";
         if (inDate != null) {
