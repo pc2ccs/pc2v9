@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import java.awt.Dimension;
 
 /**
  * Edit InternalContest Time Frame.
@@ -45,7 +46,7 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549, 278));
+        this.setSize(new Dimension(549, 400));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getContestTimePane());
         this.setTitle("New Contest Time");
