@@ -341,40 +341,92 @@ public class EditContestTimePane extends JPanePlugin {
         String textBoxStartTime = getScheduledStartTimeTextBox().getText() ;
         
         int startYear, startMonth, startDay, startHour, startMin ;
-        if (textBoxStartTime.trim().equalsIgnoreCase("<undefined>")) {
+        GregorianCalendar startDateFromField;
+        
+        if (textBoxStartTime.equalsIgnoreCase("<undefined>")) {
             return true;
         } else {
-            //get the year,month,day,hour, and minute from the textbox string
+            
+            //get the fields from the textbox string
             String [] dateValues = textBoxStartTime.split(":");
             
-            //require at least two fields (hh and mm) and allow at most five fields (optional yyyy, mm, dd)
+            //get the current date/time for comparison
+            GregorianCalendar now = new GregorianCalendar();
+            startYear = now.get(GregorianCalendar.YEAR);
+            startMonth = now.get(GregorianCalendar.MONTH);
+            startDay = now.get(GregorianCalendar.DAY_OF_MONTH);
+            startHour = now.get(GregorianCalendar.HOUR);
+            startMin = now.get(GregorianCalendar.MINUTE);
+            
+            //require at least two textbox fields (hh and mm) and allow at most five fields (optional yyyy, mm, dd)
             if (dateValues.length < 2 || dateValues.length > 5) {
                 showMessage ("Invalid Scheduled Start Time (must be '[[[yyyy:]mm:]dd:]hh:mm', or '<undefined>'");
                 return false;
             } else {
-                //valid number of fields; extract the specified date values
-                switch (dateValues.length) {
-                    case 2:
-                        startHour = new Integer(dateValues[0]).intValue();
-                        startMin = new Integer(dateValues[1]).intValue();
-//                        startDay = today ;
-//                        startMonth = thisMonth ;
-//                        startYear = thisYear ;
-                        if (startHour<0 || startHour>23 || startMin<0 || startMin>59) {
-                            showMessage ("Invalid Scheduled Start Time (must have 00<=hh<=23 and 00<=mm<=59)");
-                            return false;
-                        } else {
-                            //construct a Date with the current year, month, and day
-                            //....
-//                            if (!constructedDateIsInFuture) {
-//                                showMessage("Invalid Scheduled Start Time (must be in the future)");
-//                                return false;
-                            }
-                            
-                        }
-                }
-            }
+                
+                //be prepared for invalid non-numeric input data
+                try {
                     
+
+                    //valid number of fields; extract the specified date values
+                    switch (dateValues.length) {
+                        case 2:
+                            startHour = new Integer(dateValues[0]).intValue();
+                            startMin = new Integer(dateValues[1]).intValue();
+                            break;
+                        case 3:
+                            startDay = new Integer(dateValues[0]).intValue();
+                            startHour = new Integer(dateValues[1]).intValue();
+                            startMin = new Integer(dateValues[2]).intValue();
+                            break;
+                        case 4:
+                            startMonth = new Integer(dateValues[0]).intValue();
+                            startDay = new Integer(dateValues[1]).intValue();
+                            startHour = new Integer(dateValues[2]).intValue();
+                            startMin = new Integer(dateValues[3]).intValue();
+                            break;
+                        case 5:
+                            startYear = new Integer(dateValues[0]).intValue();
+                            startMonth = new Integer(dateValues[1]).intValue();
+                            startDay = new Integer(dateValues[2]).intValue();
+                            startHour = new Integer(dateValues[3]).intValue();
+                            startMin = new Integer(dateValues[4]).intValue();
+                            break;
+                    }
+                        
+                    if (startHour<0 || startHour>23 || startMin<0 || startMin>59) {
+                        showMessage ("Invalid Scheduled Start Time (must have 00<=hh<=23 and 00<=mm<=59)");
+                        return false;
+                    };
+
+               } catch (NumberFormatException e) {
+                       showMessage("Invalid number format in Scheduled Start Date field");
+                       return false;
+               }
+                
+                try {
+                    //construct a Date/Time from the input values
+                    startDateFromField = new GregorianCalendar(startYear, startMonth, startDay, startHour, startMin);
+                
+                    //compare startDateFromField with "now" to make sure start is in the future
+                    if (!dateIsInTheFuture(startDateFromField)) {
+                        showMessage ("Invalid Scheduled Start Date - must be at least 2 minutes in the future");
+                        return false;
+                    }
+                }
+                catch (Exception e) {
+                    showMessage(e.getMessage());
+                    return false;
+                }
+                      
+            }
+        }
+                    
+        return true ;
+    }
+    
+    //TODO: implement me
+    private boolean dateIsInTheFuture(GregorianCalendar date) {
         return false ;
     }
 
