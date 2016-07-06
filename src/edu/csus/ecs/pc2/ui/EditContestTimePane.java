@@ -13,6 +13,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
@@ -285,8 +286,9 @@ public class EditContestTimePane extends JPanePlugin {
         
         getController().updateContestTime(newContestTime);
         
-        //TODO: implement the following:
-        //getController().updateContestScheduledStartTime(newStartTime);
+        ContestInformation contestInfo = getContest().getContestInformation();
+        contestInfo.setScheduledStartTime(getScheduledStartTime());
+        getController().updateContestInformation(contestInfo);
 
         cancelButton.setText("Close");
         updateButton.setEnabled(false);
@@ -294,6 +296,12 @@ public class EditContestTimePane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+    }
+
+    //TODO: implement the following:
+    private GregorianCalendar getScheduledStartTime() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /**
