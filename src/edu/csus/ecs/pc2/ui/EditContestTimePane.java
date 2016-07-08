@@ -24,6 +24,11 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Dimension;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**
@@ -253,27 +258,28 @@ public class EditContestTimePane extends JPanePlugin {
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    updateContestTime();
+                    updateContestTimes();
                 }
             });
         }
         return updateButton;
     }
 
-    protected void updateContestTime() {
+    protected void updateContestTimes() {
 
+        //check contest length, elapsed, and remaining times in GUI textboxes
         if (!validateContestTimeFields()) {
-            // new contestTime is invalid, just return, message issued by validateContestTimeFields
+            // new contestTime is invalid, just return (message issued by validateContestTimeFields())
             return;
         }
 
-        //check ScheduledStartTime in the GUI textbox and return if it is invalid
+        //check ScheduledStartTime in the GUI textbox
         if (!validateScheduledStartTimeField()) {
             //new scheduled start time is invalid; just return (message issued by validateScheduledStartTimeField())
             return;
         }
 
-        // all fields are valid; copy data from fields into model via controller
+        // all fields are valid; copy data from GUI fields into model via controller
         
         ContestTime newContestTime = null;
 
@@ -298,10 +304,13 @@ public class EditContestTimePane extends JPanePlugin {
         }
     }
 
-    //TODO: implement the following:
+    /**
+     * Returns the current scheduled start time.  This value will be null if the user has not
+     * entered a new valid time in the GUI.
+     * @return the scheduled start time, in the form of a GregorianCalendar
+     */
     private GregorianCalendar getScheduledStartTime() {
-        // TODO Auto-generated method stub
-        return null;
+       return this.scheduledStartTime;
     }
 
     /**
@@ -334,109 +343,51 @@ public class EditContestTimePane extends JPanePlugin {
     
     /**
      * Verify that the Scheduled Start Time entry is valid. Valid start times are
-     * strings of the form "[[[yyyy:]mm:]dd:]hh:mm" or "<undefined>".
+     * strings of the form "[[[yyyy/]mm/]dd:]hh:mm" or "<undefined>".
      * 
      * @return true if the ScheduledStartTimeTextbox field contains either a valid
      *     start date/time (in the future and in the proper format) or the string "<undefined>";
      *     false otherwise.
      */
-    
-//    maybe this method should return a GregorianCalendar object (if the textbox time is valid), or null if invalid?
-//            The problem is, what about "<undefined>" ?
-//    maybe the method should set a global variable to a GregorianCalendar (if valid)?
     private boolean validateScheduledStartTimeField() {
         
         String textBoxStartTime = getScheduledStartTimeTextBox().getText() ;
-        
-        int startYear, startMonth, startDay, startHour, startMin ;
-        GregorianCalendar startDateFromField;
+        GregorianCalendar scheduledStartTime ;
         
         if (textBoxStartTime.equalsIgnoreCase("<undefined>")) {
+            this.scheduledStartTime = null ;
             return true;
         } else {
             
-            //get the fields from the textbox string
-            String [] dateValues = textBoxStartTime.split(":");
+            //parse the scheduled start time to be sure it's valid
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd:HH:mm"); //TODO: add support for yyyy/MM/dd being optional
+            Date date;
+            try {
+                date = df.parse(textBoxStartTime);
+            } catch (ParseException e1) {
+                //the input text does not parse as a date matching the format (pattern)
+                showMessage("Invalid Scheduled Start Time (must match  yyyy-mm-dd:hh:mm)");
+                return false ;
+            }
             
-            //get the current date/time for comparison
-            GregorianCalendar now = new GregorianCalendar();
-            startYear = now.get(GregorianCalendar.YEAR);
-            startMonth = now.get(GregorianCalendar.MONTH);
-            startDay = now.get(GregorianCalendar.DAY_OF_MONTH);
-            startHour = now.get(GregorianCalendar.HOUR);
-            startMin = now.get(GregorianCalendar.MINUTE);
+            //date parses properly; put it into a Calendar object
+            //TODO: should put the calender in non-lient mode and catch exceptions due to, e.g. month=13
+            scheduledStartTime = (GregorianCalendar) Calendar.getInstance();
+            scheduledStartTime.setTime(date);
             
-            //require at least two textbox fields (hh and mm) and allow at most five fields (optional yyyy, mm, dd)
-            if (dateValues.length < 2 || dateValues.length > 5) {
-                showMessage ("Invalid Scheduled Start Time (must be '[[[yyyy:]mm:]dd:]hh:mm', or '<undefined>'");
+            //verify the scheduled start time is in the future
+            GregorianCalendar now = (GregorianCalendar) Calendar.getInstance();
+            if (!scheduledStartTime.after(now)) {
+                showMessage("Scheduled start date/time must be in the future");
                 return false;
-            } else {
-                
-                //be prepared for invalid non-numeric input data
-                try {
-                    
-
-                    //valid number of fields; extract the specified date values
-                    switch (dateValues.length) {
-                        case 2:
-                            startHour = new Integer(dateValues[0]).intValue();
-                            startMin = new Integer(dateValues[1]).intValue();
-                            break;
-                        case 3:
-                            startDay = new Integer(dateValues[0]).intValue();
-                            startHour = new Integer(dateValues[1]).intValue();
-                            startMin = new Integer(dateValues[2]).intValue();
-                            break;
-                        case 4:
-                            startMonth = new Integer(dateValues[0]).intValue();
-                            startDay = new Integer(dateValues[1]).intValue();
-                            startHour = new Integer(dateValues[2]).intValue();
-                            startMin = new Integer(dateValues[3]).intValue();
-                            break;
-                        case 5:
-                            startYear = new Integer(dateValues[0]).intValue();
-                            startMonth = new Integer(dateValues[1]).intValue();
-                            startDay = new Integer(dateValues[2]).intValue();
-                            startHour = new Integer(dateValues[3]).intValue();
-                            startMin = new Integer(dateValues[4]).intValue();
-                            break;
-                    }
-                        
-                    if (startHour<0 || startHour>23 || startMin<0 || startMin>59) {
-                        showMessage ("Invalid Scheduled Start Time (must have 00<=hh<=23 and 00<=mm<=59)");
-                        return false;
-                    };
-
-               } catch (NumberFormatException e) {
-                       showMessage("Invalid number format in Scheduled Start Date field");
-                       return false;
-               }
-                
-                try {
-                    //construct a Date/Time from the input values
-                    startDateFromField = new GregorianCalendar(startYear, startMonth, startDay, startHour, startMin);
-                
-                    //compare startDateFromField with "now" to make sure start is in the future
-                    if (!dateIsInTheFuture(startDateFromField)) {
-                        showMessage ("Invalid Scheduled Start Date - must be at least 2 minutes in the future");
-                        return false;
-                    }
-                }
-                catch (Exception e) {
-                    showMessage(e.getMessage());
-                    return false;
-                }
-                      
             }
         }
-                    
+                   
+        //if we get here, the date/time in the text box must have been valid
+        this.scheduledStartTime = scheduledStartTime;
         return true ;
     }
     
-    //TODO: implement me
-    private boolean dateIsInTheFuture(GregorianCalendar date) {
-        return false ;
-    }
 
     /**
      * This method initializes cancelButton
@@ -466,7 +417,7 @@ public class EditContestTimePane extends JPanePlugin {
                     + "\n do you want to save the changes?\n", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
-                updateContestTime();
+                updateContestTimes();
 
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
@@ -702,24 +653,21 @@ public class EditContestTimePane extends JPanePlugin {
     }
     
     /**
-     * Convert a GregorianCalendar date/time to a displayable string in yyyy:mm:dd:hh:mm form.
+     * Convert a GregorianCalendar date/time to a displayable string in yyyy-mm-dd:hh:mm form.
      */
-    private String getScheduledStartTimeStr(GregorianCalendar inDate) {
+    private String getScheduledStartTimeStr(GregorianCalendar cal) {
         
         String retString = "<undefined>";
-        if (inDate != null) {
-            //extract fields from inDate and build string
+        if (cal != null) {
+            //extract fields from input and build string
             //TODO:  need to deal with the difference between displaying LOCAL time and storing UTC
-            int year = inDate.get(GregorianCalendar.YEAR);
-            int month = inDate.get(GregorianCalendar.MONTH);
-            int day = inDate.get(GregorianCalendar.DAY_OF_MONTH);
-            int hour = inDate.get(GregorianCalendar.HOUR_OF_DAY);
-            int min = inDate.get(GregorianCalendar.MINUTE);
-            retString = "" + year + ":" + month + ":" + day + ":" + hour + ":" + min;
-        }
 
-        System.out.println ("EditContestTimePane.getDisplayableDateTime(): received GregorianCalendar value \n'"
-                + inDate + "'; returning display representation \n'" + retString + "'");
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd:HH:mm");
+            fmt.setCalendar(cal);
+            retString = fmt.format(cal.getTime());
+
+            }
+
         return retString;
     }
 
@@ -809,7 +757,7 @@ public class EditContestTimePane extends JPanePlugin {
     private JTextField getScheduledStartTimeTextBox() {
         if (scheduledStartTimeTextBox == null) {
         	scheduledStartTimeTextBox = new JTextField();
-        	scheduledStartTimeTextBox.setToolTipText("Enter the future date/time when the contest is scheduled to start, in format yyyy:mm:dd:hh:mm (yyyy, mm, and dd default to \"today\" if omitted).");
+        	scheduledStartTimeTextBox.setToolTipText("Enter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd:hh:mm.");
         	scheduledStartTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
