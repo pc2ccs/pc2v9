@@ -343,7 +343,7 @@ public class EditContestTimePane extends JPanePlugin {
     
     /**
      * Verify that the Scheduled Start Time entry is valid. Valid start times are
-     * strings of the form "[[[yyyy/]mm/]dd:]hh:mm" or "<undefined>".
+     * strings of the form "yyyy-mm-dd:hh:mm" or "<undefined>".
      * 
      * @return true if the ScheduledStartTimeTextbox field contains either a valid
      *     start date/time (in the future and in the proper format) or the string "<undefined>";
@@ -371,7 +371,7 @@ public class EditContestTimePane extends JPanePlugin {
             }
             
             //date parses properly; put it into a Calendar object
-            //TODO: should put the calender in non-lient mode and catch exceptions due to, e.g. month=13
+            //TODO: should put the calendar in non-lenient mode and catch exceptions due to, e.g. month=13
             scheduledStartTime = (GregorianCalendar) Calendar.getInstance();
             scheduledStartTime.setTime(date);
             
