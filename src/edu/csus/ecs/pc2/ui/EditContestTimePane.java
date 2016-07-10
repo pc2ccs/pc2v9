@@ -294,6 +294,8 @@ public class EditContestTimePane extends JPanePlugin {
         
         ContestInformation contestInfo = getContest().getContestInformation();
         contestInfo.setScheduledStartTime(getScheduledStartTime());
+        contestInfo.setAutoStartContest(getAutoStartContestCheckBox().isSelected());
+        contestInfo.setAutoStopContest(getAutoStopAtEndofContestCheckBox().isSelected());
         getController().updateContestInformation(contestInfo);
 
         cancelButton.setText("Close");
@@ -571,7 +573,7 @@ public class EditContestTimePane extends JPanePlugin {
             gbc_chckbxStartContestAutomatically.insets = new Insets(0, 0, 5, 0);
             gbc_chckbxStartContestAutomatically.gridx = 1;
             gbc_chckbxStartContestAutomatically.gridy = 6;
-            centerPane.add(getChckbxStartContestAutomatically(), gbc_chckbxStartContestAutomatically);
+            centerPane.add(getAutoStartContestCheckBox(), gbc_chckbxStartContestAutomatically);
             GridBagConstraints gbc_stopAtEndofContestCheckBox = new GridBagConstraints();
             gbc_stopAtEndofContestCheckBox.insets = new Insets(0, 0, 5, 0);
             gbc_stopAtEndofContestCheckBox.fill = GridBagConstraints.VERTICAL;
@@ -767,7 +769,7 @@ public class EditContestTimePane extends JPanePlugin {
         return scheduledStartTimeTextBox;
     }
     
-    private JCheckBox getChckbxStartContestAutomatically() {
+    private JCheckBox getAutoStartContestCheckBox() {
         if (chckbxStartContestAutomatically == null) {
         	chckbxStartContestAutomatically = new JCheckBox("Start contest automatically");
         	chckbxStartContestAutomatically.setToolTipText("Check to cause PC2 to automatically start the contest when the specified \"Scheduled Start Time\" is reached");
