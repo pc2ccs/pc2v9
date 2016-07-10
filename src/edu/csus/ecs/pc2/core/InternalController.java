@@ -3276,8 +3276,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void updateContestInformation(ContestInformation contestInformation) {
-        Packet addAccountPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contestInformation);
-        sendToLocalServer(addAccountPacket);
+        Packet contestInfoPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contestInformation);
+        sendToLocalServer(contestInfoPacket);
     }
 
     public void setJudgementList(Judgement[] judgementList) {
