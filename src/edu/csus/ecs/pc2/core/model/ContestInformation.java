@@ -113,7 +113,7 @@ public class ContestInformation implements Serializable{
      */
     private PasswordType autoRegistrationPasswordType = PasswordType.RANDOM;
 
-//    /** replaced with scheduledStarTime; see below
+//    /** replaced with scheduledStartTime; see below
 //     * Contest Start/Date Time.
 //     */
 //    private Date startDate;
@@ -129,12 +129,15 @@ public class ContestInformation implements Serializable{
     
     private boolean autoStartContest = false;
 
+    private boolean autoStopContest = false ;
+    
     /**
      * Scoreboard freeze time.
      */
     private String freezeTime;
 
     private String contestShortName;
+
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -465,7 +468,15 @@ public class ContestInformation implements Serializable{
     public void setAutoStartContest(boolean autoStartContest) {
         this.autoStartContest = autoStartContest;
     }
+    
+    public void setAutoStopContest(boolean autoStopContest) {
+        this.autoStopContest = autoStopContest;
+    }
 
+    public boolean isAutoStopContest() {
+        return autoStopContest;
+    }
+    
     public String getFreezeTime() {
         return freezeTime;
     }
