@@ -1,13 +1,22 @@
 package edu.csus.ecs.pc2.core.model;
 
+import static java.util.concurrent.TimeUnit.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+
+import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.PermissionGroup;
@@ -254,6 +263,8 @@ public class InternalContest implements IInternalContest {
     private PlaybackManager playbackManager = new PlaybackManager();
 
     private EventFeedDefinitionsList eventFeedDefinitionsList = null;
+
+    private ArrayList<ScheduledFuture<?>> startTimeTaskList;
 
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
@@ -1932,6 +1943,53 @@ public class InternalContest implements IInternalContest {
         this.contestInformation = inContestInformation;
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.CHANGED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
+        
+        //if the new contest info includes a scheduled (future) auto-start time, schedule it
+        if (inContestInformation != null) {
+            GregorianCalendar startTime = inContestInformation.getScheduledStartTime();
+            GregorianCalendar now = new GregorianCalendar();
+            if (startTime != null  &&  startTime.after(now)  && inContestInformation.isAutoStartContest()) {
+                //delete any previously-scheduled start tasks
+                removeAnyScheduledStartContestTasks();
+                //schedule a new task to auto-start the contest at the specified time
+                scheduleFutureStartContestTask(startTime);
+            } else {
+                //starttime is null or before now, or contest is not auto-start; 
+                // any of these cases means we shouldn't have a scheduled start task...
+                removeAnyScheduledStartContestTasks();
+            }
+        }
+    }
+    
+    private void scheduleFutureStartContestTask(GregorianCalendar startTime) {
+        //get a thread to handle the execution of the scheduled task
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        //create a runnable that will actually start the contest
+        final Runnable contestStarter = new Runnable() {
+            public void run() { 
+                startContest(getSiteNumber()); 
+                JOptionPane.showMessageDialog(null, "Contest Automatically Started!");
+            }
+          };
+        //schedule the runnable to execute at the specified future time
+        GregorianCalendar now = new GregorianCalendar();
+        long delay = startTime.getTimeInMillis() - now.getTimeInMillis();
+        final ScheduledFuture<?> starterHandle = scheduler.schedule(contestStarter, delay, MILLISECONDS);
+        
+        //save the handle so the task can be killed later (before it executes) if necessary
+        if (startTimeTaskList == null) {
+            startTimeTaskList = new ArrayList<ScheduledFuture<?>>();
+        }
+        startTimeTaskList.add(starterHandle);
+    }
+    
+    private void removeAnyScheduledStartContestTasks() {
+        if (startTimeTaskList != null) {
+            for (ScheduledFuture<?> task : startTimeTaskList) {
+                task.cancel(true);
+            }
+            startTimeTaskList.clear();
+        }
     }
 
     public void addContestInformationListener(IContestInformationListener contestInformationListener) {
