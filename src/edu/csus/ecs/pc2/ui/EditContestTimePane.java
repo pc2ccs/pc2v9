@@ -76,7 +76,7 @@ public class EditContestTimePane extends JPanePlugin {
     private JCheckBox autoStopAtEndofContestCheckBox = null;
     private JLabel scheduledStartTimeLabel;
     private JTextField scheduledStartTimeTextBox;
-    private JCheckBox chckbxStartContestAutomatically;
+    private JCheckBox autoStartContestCheckBox;
 
 
     /**
@@ -770,10 +770,15 @@ public class EditContestTimePane extends JPanePlugin {
     }
     
     private JCheckBox getAutoStartContestCheckBox() {
-        if (chckbxStartContestAutomatically == null) {
-        	chckbxStartContestAutomatically = new JCheckBox("Start contest automatically");
-        	chckbxStartContestAutomatically.setToolTipText("Check to cause PC2 to automatically start the contest when the specified \"Scheduled Start Time\" is reached");
+        if (autoStartContestCheckBox == null) {
+        	autoStartContestCheckBox = new JCheckBox("Start contest automatically");
+        	autoStartContestCheckBox.setToolTipText("Check to cause PC2 to automatically start the contest when the specified \"Scheduled Start Time\" is reached");
+        	autoStartContestCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
-        return chckbxStartContestAutomatically;
+        return autoStartContestCheckBox;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
