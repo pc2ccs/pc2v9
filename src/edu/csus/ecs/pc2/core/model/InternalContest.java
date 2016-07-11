@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import static java.util.concurrent.TimeUnit.*;
 
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -1968,7 +1969,12 @@ public class InternalContest implements IInternalContest {
         final Runnable contestStarter = new Runnable() {
             public void run() { 
                 startContest(getSiteNumber()); 
-                JOptionPane.showMessageDialog(null, "Contest Automatically Started!");
+                try {
+                    JOptionPane.showMessageDialog(null, "Contest Automatically Started!");
+                } catch (HeadlessException e) {
+                    //ignore; we just can't pop up a dialog in headless (no-GUI) mode
+                    //TODO: Should actually LOG this -- but how?  
+                }
             }
           };
         //schedule the runnable to execute at the specified future time
