@@ -345,7 +345,7 @@ public class EditContestTimePane extends JPanePlugin {
     
     /**
      * Verify that the Scheduled Start Time entry is valid. Valid start times are
-     * strings of the form "yyyy-mm-dd:hh:mm" or "<undefined>".
+     * strings of the form "yyyy-mm-dd:hh:mm" or "<undefined>" or an empty string.
      * 
      * @return true if the ScheduledStartTimeTextbox field contains either a valid
      *     start date/time (in the future and in the proper format) or the string "<undefined>";
@@ -356,7 +356,7 @@ public class EditContestTimePane extends JPanePlugin {
         String textBoxStartTime = getScheduledStartTimeTextBox().getText() ;
         GregorianCalendar scheduledStartTime ;
         
-        if (textBoxStartTime.equalsIgnoreCase("<undefined>")) {
+        if (textBoxStartTime.equalsIgnoreCase("<undefined>") || textBoxStartTime.equals("")) {
             this.scheduledStartTime = null ;
             return true;
         } else {
