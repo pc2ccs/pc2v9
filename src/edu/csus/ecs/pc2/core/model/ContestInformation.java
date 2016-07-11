@@ -428,7 +428,7 @@ public class ContestInformation implements Serializable{
     }
 
     /**
-     * Returns the scheduled start time from the specified Date.
+     * Sets the contest scheduled start time from the specified Date.
      * Note: previously, ContestInformation stored "startDate" as an object of
      * class {@link Date}.  It nows stores the scheduled start time as a 
      * {@link GregorianCalendar}; however, this method is maintained for compatibility.
@@ -436,7 +436,7 @@ public class ContestInformation implements Serializable{
      * @param startDate - the date at which the contest is scheduled to start; 
      *      specifying "null" as the start date causes the scheduled start time to become undefined
      */
-    public void setStartDate(Date startDate) {
+    public void setScheduledStartDate(Date startDate) {
         if (startDate == null) {
             this.scheduledStartTime = null;
         } else {
@@ -450,9 +450,10 @@ public class ContestInformation implements Serializable{
      * Returns a {@link Date} object representing the scheduled start time for the contest,
      * or null if no scheduled start time has been set.
      * @return the scheduled start time as a Date
-     * @see #setStartDate(Date)
+     * @see #setScheduledStartDate(Date)
+     * @see #getScheduledStartTime()
      */
-    public Date getStartDate() {
+    public Date getScheduledStartDate() {
         if (scheduledStartTime == null) {
             return null;
         } else {
