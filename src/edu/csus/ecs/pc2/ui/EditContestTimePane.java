@@ -759,7 +759,7 @@ public class EditContestTimePane extends JPanePlugin {
     private JTextField getScheduledStartTimeTextBox() {
         if (scheduledStartTimeTextBox == null) {
         	scheduledStartTimeTextBox = new JTextField();
-        	scheduledStartTimeTextBox.setToolTipText("Enter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd:hh:mm.");
+        	scheduledStartTimeTextBox.setToolTipText("Enter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd:hh:mm; or enter \"<undefined>\" or an empty string to clear any scheduled start time.");
         	scheduledStartTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
