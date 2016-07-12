@@ -405,7 +405,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         
         assertFirstValueFound(xml,"starttime", "0.0");
         
-        System.out.println("xml  = "+xml);
+//        System.out.println("xml  = "+xml);
     }
 
    
@@ -565,7 +565,6 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         // assertXMLCounts(xml, ResolverEventFeedXML.RUN_TAG, numruns);
 
         assertXMLCounts(xml, ResolverEventFeedXML.TESTCASE_TAG, numruns * 5);
-
     }
 
     private void validateUsingSchema(String xml) throws Exception {
