@@ -71,7 +71,7 @@ public class StarttimeService {
         // { "starttime":"undefined" }
 
         // get the start time from the contest
-        Date startDate = contest.getContestInformation().getStartDate();
+        Date startDate = contest.getContestInformation().getScheduledStartDate();
         long startTime;
         if (startDate == null) {
             startTime = 0;

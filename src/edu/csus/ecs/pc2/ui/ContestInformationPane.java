@@ -275,7 +275,7 @@ public class ContestInformationPane extends JPanePlugin {
             contestInformation.setJudgementNotificationsList(savedContestInformation.getJudgementNotificationsList());
                 
             contestInformation.setJudgeCDPBasePath(savedContestInformation.getJudgeCDPBasePath());
-            contestInformation.setStartDate(savedContestInformation.getStartDate());
+            contestInformation.setScheduledStartDate(savedContestInformation.getScheduledStartDate());
             
             contestInformation.setAdminCDPBasePath(savedContestInformation.getAdminCDPBasePath());
             contestInformation.setContestShortName(savedContestInformation.getContestShortName());

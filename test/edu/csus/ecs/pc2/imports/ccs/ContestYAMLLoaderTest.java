@@ -1562,8 +1562,8 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         ContestInformation info = contest.getContestInformation();
         
-        assertNotNull("Expecting getStartDate() populated ", info.getStartDate());
-        assertEquals("Expected contest time ", date.toString(), info.getStartDate().toString());
+        assertNotNull("Expecting getStartDate() populated ", info.getScheduledStartDate());
+        assertEquals("Expected contest time ", date.toString(), info.getScheduledStartDate().toString());
         
         // Test ExportYaml 
         
