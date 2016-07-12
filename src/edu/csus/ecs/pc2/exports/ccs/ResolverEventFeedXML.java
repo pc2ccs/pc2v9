@@ -303,6 +303,7 @@ public class ResolverEventFeedXML {
             shortTitle = info.getContestTitle();
         }
         XMLUtilities.addChild(memento, "short-title", shortTitle);
+        
         String myContestId = contest.getContestIdentifier();
         if (myContestId != null && !myContestId.equals("")) {
             contestId = myContestId;
@@ -313,6 +314,11 @@ public class ResolverEventFeedXML {
             contestId = uuid.toString();
         }
         XMLUtilities.addChild(memento, "contest-id", contestId.toLowerCase());
+        
+        String scoreboardFreezeLength = info.getFreezeTime();
+        XMLUtilities.addChild(memento, "scoreboard-freeze-length", scoreboardFreezeLength);
+        
+        //TODO: generate a JUnit test for consistency of the entire <info> element
         return memento;
     }
 
