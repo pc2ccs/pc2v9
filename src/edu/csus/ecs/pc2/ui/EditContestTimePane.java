@@ -258,14 +258,14 @@ public class EditContestTimePane extends JPanePlugin {
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    updateContestTimes();
+                    handleUpdate();
                 }
             });
         }
         return updateButton;
     }
 
-    protected void updateContestTimes() {
+    protected void handleUpdate() {
 
         //check contest length, elapsed, and remaining times in GUI textboxes
         if (!validateContestTimeFields()) {
@@ -419,7 +419,7 @@ public class EditContestTimePane extends JPanePlugin {
                     + "\n do you want to save the changes?\n", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
-                updateContestTimes();
+                handleUpdate();
 
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
