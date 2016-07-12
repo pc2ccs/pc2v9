@@ -277,7 +277,7 @@ public class ResolverEventFeedXML {
 
         String contestLengthString = "0:0:0";
         boolean running = false;
-        String formattedSeconds = "0.0";
+        String formattedSeconds = "undefined";
 
         if (time != null) {
             contestLengthString = time.getContestLengthStr();
@@ -287,8 +287,8 @@ public class ResolverEventFeedXML {
             }
         }
         
-        if (info.getStartDate() != null) {
-            formattedSeconds = XMLUtilities.formatSeconds(info.getStartDate().getTime());
+        if (info.getScheduledStartDate() != null) {
+            formattedSeconds = XMLUtilities.formatSeconds(info.getScheduledStartDate().getTime());
         }
 
         XMLUtilities.addChild(memento, "length", contestLengthString); 
