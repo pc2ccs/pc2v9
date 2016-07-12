@@ -50,11 +50,8 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 /**
  * Unit Test.
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
  */
-
-// $HeadURL$
 public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     private static final String CONTEST_END_TAG = "</contest>";
@@ -405,9 +402,13 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
         assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, 9);
         assertXMLCounts(xml, ResolverEventFeedXML.REGION_TAG, 24);
-
+        
+        assertFirstValueFound(xml,"starttime", "0.0");
+        
+        System.out.println("xml  = "+xml);
     }
 
+   
     /**
      * Print counts in xml string for EventFeed elements.
      * 

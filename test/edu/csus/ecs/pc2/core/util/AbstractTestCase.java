@@ -1205,4 +1205,36 @@ public class AbstractTestCase extends TestCase {
         return fastJUnitTesting;
     }
     
+
+    /**
+     * Test xml tag for value, compare against expected value.
+     * 
+     * @param xml - input string
+     * @param tagName - XML tag name, ex. info
+     * @param expectedValue - value that should be in the first matched tag
+     */
+    public void assertFirstValueFound(String xml, String tagName, String expectedValue) {
+
+        String startTag = "<" + tagName + ">";
+
+        int startIndex = xml.indexOf(startTag);
+        if (startIndex == -1) {
+            fail("No tag " + tagName + " found in XML ");
+        }
+
+        String endTag = "</" + tagName + ">";
+        int endIndex = xml.indexOf(endTag);
+        if (endIndex == -1) {
+            fail("No end tag " + tagName + " found in XML ");
+        }
+
+        if (endIndex <= startIndex) {
+            fail("End tag appears before start tag " + tagName);
+        }
+
+        String value = xml.substring(startIndex + startTag.length(), endIndex);
+        assertEquals("Expecting tag value for " + startTag, expectedValue, value);
+
+    }
+    
 }
