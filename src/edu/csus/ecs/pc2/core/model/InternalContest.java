@@ -1,8 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,8 +15,6 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-
-import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.PermissionGroup;
@@ -460,6 +457,8 @@ public class InternalContest implements IInternalContest {
                 contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
             } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.REFRESH_ALL) {
                 contestTimeListenerList.elementAt(i).refreshAll(contestTimeEvent);
+            } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.CLOCK_AUTO_STARTED) {
+                contestTimeListenerList.elementAt(i).contestAutoStarted(contestTimeEvent);
             } else {
                 contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
             }
@@ -1969,14 +1968,15 @@ public class InternalContest implements IInternalContest {
         final Runnable contestStarter = new Runnable() {
             public void run() { 
                 startContest(getSiteNumber()); 
-                try {
-                    JOptionPane.showMessageDialog(null, "Contest Automatically Started!");
-                } catch (HeadlessException e) {
-                    //ignore; we just can't pop up a dialog in headless (no-GUI) mode
-                    //TODO: Should actually LOG this -- but how?  
-                }
+                ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_AUTO_STARTED, 
+                        new ContestTime(), getSiteNumber());
+                
+                //TODO: it probably doesn't make sense to be constructing a NEW "ContestTime" object -- but what?
+                // Maybe getContestTime() out of the contest just started with the above call to startContest(siteNum)?
+                
+                fireContestTimeListener(contestTimeEvent);
             }
-          };
+        };
         //schedule the runnable to execute at the specified future time
         GregorianCalendar now = new GregorianCalendar();
         long delay = startTime.getTimeInMillis() - now.getTimeInMillis();

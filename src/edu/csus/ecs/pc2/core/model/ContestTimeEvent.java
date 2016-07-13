@@ -43,6 +43,10 @@ public class ContestTimeEvent {
          */
         CLOCK_STOPPED,
         /**
+         * Clock has been auto-started by a separate timer task
+         */
+        CLOCK_AUTO_STARTED,
+        /**
          * Refresh ALL contest times.
          */
         REFRESH_ALL,
