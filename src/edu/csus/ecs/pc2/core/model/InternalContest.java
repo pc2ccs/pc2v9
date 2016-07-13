@@ -1961,34 +1961,50 @@ public class InternalContest implements IInternalContest {
         }
     }
     
+    /**
+     * Creates a task to automatically start the contest at the specified future time.
+     * A handle to the scheduled task is saved in the global startTimeTaskList, allowing it
+     * to be accessed (e.g. killed) by other code.
+     * If the given start time is not in the future, the method silently does nothing.
+     * 
+     * @param startTime - the time in the future when the contest should automatically start
+     */
     private void scheduleFutureStartContestTask(GregorianCalendar startTime) {
-        //get a thread to handle the execution of the scheduled task
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        //create a runnable that will actually start the contest
-        final Runnable contestStarter = new Runnable() {
-            public void run() { 
-                startContest(getSiteNumber()); 
-                ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_AUTO_STARTED, 
-                        new ContestTime(), getSiteNumber());
-                
-                //TODO: it probably doesn't make sense to be constructing a NEW "ContestTime" object -- but what?
-                // Maybe getContestTime() out of the contest just started with the above call to startContest(siteNum)?
-                
-                fireContestTimeListener(contestTimeEvent);
-            }
-        };
-        //schedule the runnable to execute at the specified future time
-        GregorianCalendar now = new GregorianCalendar();
-        long delay = startTime.getTimeInMillis() - now.getTimeInMillis();
-        final ScheduledFuture<?> starterHandle = scheduler.schedule(contestStarter, delay, MILLISECONDS);
         
-        //save the handle so the task can be killed later (before it executes) if necessary
-        if (startTimeTaskList == null) {
-            startTimeTaskList = new ArrayList<ScheduledFuture<?>>();
+        GregorianCalendar now = new GregorianCalendar();
+        
+        if (startTime.after(now)) {
+            
+            //get a thread to handle the execution of the scheduled task
+            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            
+            //create a runnable that will actually start the contest
+            final Runnable contestStarter = new Runnable() {
+                public void run() { 
+                    startContest(getSiteNumber()); 
+                    ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_AUTO_STARTED, 
+                            getContestTime(), getSiteNumber());
+                    
+                    fireContestTimeListener(contestTimeEvent);
+                }
+            };
+            
+            //schedule the runnable to execute at the specified future time
+            long delay = startTime.getTimeInMillis() - now.getTimeInMillis();
+            final ScheduledFuture<?> starterHandle = scheduler.schedule(contestStarter, delay, MILLISECONDS);
+            
+            //save the handle so the task can be killed later (before it executes) if necessary
+            if (startTimeTaskList == null) {
+                startTimeTaskList = new ArrayList<ScheduledFuture<?>>();
+            }
+            startTimeTaskList.add(starterHandle);
         }
-        startTimeTaskList.add(starterHandle);
     }
     
+    /**
+     * Removes from the global startTimeTaskList any currently scheduled tasks (that is, invokes cancel()
+     * on each task in the list and then clears the list).
+     */
     private void removeAnyScheduledStartContestTasks() {
         if (startTimeTaskList != null) {
             for (ScheduledFuture<?> task : startTimeTaskList) {
