@@ -329,16 +329,22 @@ public class ServerView extends JFrame implements UIPlugin {
             }
         }
         
-        /** This method exists to support differentiation between manual and automatic starts,
-         * in the event this is desired in the future.
-         * Currently it just delegates the handling to the contestStarted() method.
+        /** This method exists to support differentiation between manual and automatic starts.
+         * Currently it delegates the handling to the contestStarted() method, while
+         * also popping up a notification dialog if the Server is in GUI mode and also
+         * logging the auto-start event.
          */
         @Override
         public void contestAutoStarted(ContestTimeEvent event) {
             contestStarted(event);
+            info("Contest automatically started due to arrival of enabled scheduled start time.");
+            if (controller != null && controller.isUsingGUI()) {
+                    JOptionPane.showMessageDialog(null, "Scheduled Start Time has arrived; contest has been automatically started!", "Contest Started",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
         }
-
     }
+    
     /**
      * This method initializes mainViewPane
      * 
