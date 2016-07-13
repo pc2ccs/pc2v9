@@ -723,6 +723,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         @Override
         public void contestAutoStarted(ContestTimeEvent event) {
             contestStarted(event);
+            JOptionPane.showMessageDialog(null, "Scheduled Start Time has arrived; contest has been automatically started!", "Contest Started",
+                    JOptionPane.INFORMATION_MESSAGE);
         }
 
     }
