@@ -134,7 +134,7 @@ public class ContestInformation implements Serializable{
     /**
      * Scoreboard freeze time.
      */
-    private String freezeTime;
+    private String freezeTime="null";
 
     private String contestShortName;
 
