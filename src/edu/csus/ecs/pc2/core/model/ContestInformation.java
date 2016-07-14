@@ -253,10 +253,27 @@ public class ContestInformation implements Serializable{
 
             //new code:
             //DateUtilities.dateSame() expects Date objects but ContestInformation now maintains
-            // scheduledStartTime (formerly "StartDate") as a GregorianCalendar; need to convert
-            if (!DateUtilities.dateSame(scheduledStartTime.getTime(), 
-                    contestInformation.getScheduledStartTime().getTime())) {
-                return false;
+            // scheduledStartTime (formerly "StartDate") as a GregorianCalendar; need to convert.
+            //Also need to first check for null references (to avoid NPEs on fetch of Date from GregorianCalendar)
+            
+            //If the references to scheduledStartTime in the two ContestInfos are such that one is null and the other 
+            // is not, the ContestInfos are not the same so return false.  
+            // Note that "one is null and the other is not null" can be computed with the ^ (XOR) operator:
+            //   "A XOR B" = true iff A != B
+            if (scheduledStartTime==null ^ contestInformation.getScheduledStartTime()==null) {
+                 return false;
+            }
+            //at this point either both scheduledStartTime references are null, or both are non-null
+            //If both are null, this test for equality passes and we fall through to other cases
+            //If both non-null, get Dates from both and compare them
+            if (scheduledStartTime!=null /*and therefore contestInformation.getScheduledStartTime() also != null*/) {
+                if (!DateUtilities.dateSame(scheduledStartTime.getTime(), 
+                        contestInformation.getScheduledStartTime().getTime())) {
+                    return false;
+                }
+            } else {
+                //both scheduledStartTime and contestInformation.getScheduledStartTime() must be null (hence, "same")
+                //continue;
             }
 
             if (autoStartContest != contestInformation.autoStartContest) {
