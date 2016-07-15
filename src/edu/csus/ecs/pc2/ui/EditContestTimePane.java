@@ -441,21 +441,21 @@ public class EditContestTimePane extends JPanePlugin {
         return contestTime;
     }
 
-    public void setContestTime(final ContestTime contestTime, final GregorianCalendar scheduledStartTime) {
+    public void setContestTime(final ContestTime contestTime, final ContestInformation contestInfo) {
 
         this.contestTime = contestTime;
-        this.scheduledStartTime = scheduledStartTime;
+        this.scheduledStartTime = contestInfo.getScheduledStartTime();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                populateGUI(contestTime, scheduledStartTime);
+                populateGUI(contestTime, contestInfo);
                 setButtonStatesAndLabels(false);    //false = "Update" button should NOT be enabled
                 showMessage("");
             }
         });
     }
 
-    private void populateGUI(ContestTime inContestTime, GregorianCalendar scheduledStartTime) {
+    private void populateGUI(ContestTime inContestTime, ContestInformation inContestInfo) {
 
         populatingGUI = true;
 
@@ -465,6 +465,7 @@ public class EditContestTimePane extends JPanePlugin {
         getContestLengthTextBox().setText(inContestTime.getContestLengthStr());
         
         //put the ScheduledStartTime into the GUI
+        scheduledStartTime = inContestInfo.getScheduledStartTime();
         String displayStartTime = "";
         if (scheduledStartTime == null) {
             displayStartTime = "<undefined>";
@@ -472,6 +473,10 @@ public class EditContestTimePane extends JPanePlugin {
             displayStartTime = getScheduledStartTimeStr(scheduledStartTime);
         }
         getScheduledStartTimeTextBox().setText(displayStartTime);
+        
+        //put the state of the auto-start/stop checkboxes into the GUI
+        getAutoStartContestCheckBox().setSelected(inContestInfo.isAutoStartContest());
+        getAutoStopAtEndofContestCheckBox().setSelected(inContestInfo.isAutoStopContest());
 
         getUpdateButton().setVisible(true);
         setButtonStatesAndLabels(false);
