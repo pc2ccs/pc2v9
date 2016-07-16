@@ -137,8 +137,9 @@ public class EditContestTimePane extends JPanePlugin {
             messageLabel.setText("");
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePane = new JPanel();
+            messagePane.setMinimumSize(new Dimension(10, 30));
             messagePane.setLayout(new BorderLayout());
-            messagePane.setPreferredSize(new java.awt.Dimension(25, 25));
+            messagePane.setPreferredSize(new Dimension(25, 30));
             messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
         }
         return messagePane;
@@ -345,7 +346,7 @@ public class EditContestTimePane extends JPanePlugin {
     
     /**
      * Verify that the Scheduled Start Time entry is valid. Valid start times are
-     * strings of the form "yyyy-mm-dd:hh:mm" or "<undefined>" or an empty string.
+     * strings of the form "yyyy-mm-dd hh:mm" or "<undefined>" or an empty string.
      * 
      * @return true if the ScheduledStartTimeTextbox field contains either a valid
      *     start date/time (in the future and in the proper format) or the string "<undefined>";
@@ -362,13 +363,13 @@ public class EditContestTimePane extends JPanePlugin {
         } else {
             
             //parse the scheduled start time to be sure it's valid
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd:HH:mm"); //TODO: add support for yyyy/MM/dd being optional
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm"); //TODO: add support for yyyy/MM/dd being optional
             Date date;
             try {
                 date = df.parse(textBoxStartTime);
             } catch (ParseException e1) {
                 //the input text does not parse as a date matching the format (pattern)
-                showMessage("Invalid Scheduled Start Time (must match  yyyy-mm-dd:hh:mm)");
+                showMessage("<html>Invalid Scheduled Start Time (must match yyyy-mm-dd hh:mm<br> or the string \"&lt;undefined&gt;\" or the empty string)");
                 return false ;
             }
             
@@ -660,7 +661,7 @@ public class EditContestTimePane extends JPanePlugin {
     }
     
     /**
-     * Convert a GregorianCalendar date/time to a displayable string in yyyy-mm-dd:hh:mm form.
+     * Convert a GregorianCalendar date/time to a displayable string in yyyy-mm-dd hh:mm form.
      */
     private String getScheduledStartTimeStr(GregorianCalendar cal) {
         
@@ -669,7 +670,7 @@ public class EditContestTimePane extends JPanePlugin {
             //extract fields from input and build string
             //TODO:  need to deal with the difference between displaying LOCAL time and storing UTC
 
-            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd:HH:mm");
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             fmt.setCalendar(cal);
             retString = fmt.format(cal.getTime());
 
@@ -764,7 +765,7 @@ public class EditContestTimePane extends JPanePlugin {
     private JTextField getScheduledStartTimeTextBox() {
         if (scheduledStartTimeTextBox == null) {
         	scheduledStartTimeTextBox = new JTextField();
-        	scheduledStartTimeTextBox.setToolTipText("Enter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd:hh:mm; or enter \"<undefined>\" or an empty string to clear any scheduled start time.");
+        	scheduledStartTimeTextBox.setToolTipText("<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm; \r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time. \r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
         	scheduledStartTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
