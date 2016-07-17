@@ -2502,7 +2502,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 MAIN_UI_OPTION, 
                 REMOTE_SERVER_OPTION_STRING, //
                 PORT_OPTION_STRING, //
-                LOAD_OPTION_STRING, //
+                LOAD_OPTION_STRING + " dir|file " + //
                 PROFILE_OPTION_STRING, //
                 INI_FILENAME_OPTION_STRING, //
                 CONTEST_PASSWORD_OPTION, //
@@ -2525,33 +2525,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             startLog(null, "pc2.startup."+System.currentTimeMillis(), null, null);
         }
         
-        // TODO 770 untested code for bug
-//        if (parseArguments.isOptPresent("--server") && parseArguments.isOptPresent(LOAD_YAML_OPTION_STRING)) {
-//
-//            // Get directory name
-//            yamlDirectory = parseArguments.getOptValue(LOAD_YAML_OPTION_STRING);
-//
-//            if (isEmpty(yamlDirectory)) {
-//                fatalError("Cannot start PC^2, missing directory name after "+LOAD_YAML_OPTION_STRING+" option");
-//            }
-//            
-//            if (!new File(yamlDirectory).isDirectory()){
-//                fatalError("Cannot start PC^2, specified directory '"+yamlDirectory+"' does not exist ("+LOAD_YAML_OPTION_STRING+" option)");
-//            }
-//  
-//            String contestYamlFilename = yamlDirectory + File.separator + "contest.yaml";
-//            if (!new File(contestYamlFilename).isFile()){
-//                fatalError("Cannot start PC^2, No contest.yaml found in '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)");
-//            }
-//            
-//            try {
-//                log.log(Log.INFO, "Loading YAML from directory "+yamlDirectory);
-//                loadContestYaml(yamlDirectory);
-//            } catch (Exception e) {
-//                fatalError("Cannot start PC^2, Errors loading contest YAML '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)", e);
-//            }
-//        }
-
         handleCommandLineOptions();
 
         for (String arg : stringArray) {
