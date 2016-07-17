@@ -35,7 +35,7 @@ public class EvaluationLogTest extends AbstractTestCase {
      */
     public void testNewGetDateMethodBug845() throws Exception {
 
-        String logFileName = getTestFilename("example.evals.log");
+        String logFileName = getOutputTestFilename("example.evals.log");
 
         // delete output log file if exists
         File file = new File(logFileName);
@@ -90,7 +90,7 @@ public class EvaluationLogTest extends AbstractTestCase {
      */
     public void testNewGetDateMethodBug845WithJudgement() throws Exception {
 
-        String logFileName = getTestFilename("testWithJudgement.evals.log");
+        String logFileName = getOutputTestFilename("testWithJudgement.evals.log");
 
         // delete output log file if exists
         File file = new File(logFileName);

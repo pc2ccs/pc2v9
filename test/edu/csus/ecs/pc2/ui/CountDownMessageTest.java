@@ -11,6 +11,10 @@ import junit.framework.TestCase;
 // $HeadURL$
 public class CountDownMessageTest extends TestCase {
     
+    public void testNull() throws Exception {
+        
+    }
+    
     public static void main(String[] args) {
         CountDownMessage countDownMessage = new CountDownMessage();
         countDownMessage.setExitOnClose(true);

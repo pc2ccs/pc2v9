@@ -13,6 +13,10 @@ import edu.csus.ecs.pc2.core.report.IReport;
 // $HeadURL$
 public class ContestSummaryReportsTest extends TestCase {
 
+    public void testNull() throws Exception {
+    
+}
+    
     public static void main(String[] args) {
         ContestSummaryReports report = new ContestSummaryReports();
 

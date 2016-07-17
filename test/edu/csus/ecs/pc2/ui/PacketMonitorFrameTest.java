@@ -22,12 +22,8 @@ import edu.csus.ecs.pc2.core.packet.PacketFactory;
 // $HeadURL$
 public class PacketMonitorFrameTest extends TestCase {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
+    public void testNull() throws Exception {
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
     }
 
     public static void main(String[] args) {
