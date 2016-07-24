@@ -1258,6 +1258,11 @@ public class InternalContest implements IInternalContest {
             contestTime.startContestClock();
             ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STARTED, contestTime, inSiteNumber);
             fireContestTimeListener(contestTimeEvent);
+            
+            //clear any scheduled start and remove any future "auto-start" tasks
+            getContestInformation().setScheduledStartDate(null);
+            removeAnyScheduledStartContestTasks();
+
         } else {
             throw new SecurityException("Unable to start clock site " + inSiteNumber + " not found");
         }
