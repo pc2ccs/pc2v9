@@ -280,10 +280,10 @@ public class EditContestTimePane extends JPanePlugin {
             return;
         }
 
-        // all fields are valid; copy data from GUI fields into model via controller
+        // all fields are valid
         
+        //extract a new ContestTime from the GUI fields and double-check it is valid
         ContestTime newContestTime = null;
-
         try {
             newContestTime = getContestTimeFromFields(contestTime);
         } catch (InvalidFieldValue e) {
@@ -291,12 +291,22 @@ public class EditContestTimePane extends JPanePlugin {
             return;
         }
         
-        getController().updateContestTime(newContestTime);
-        
+        //make sure that if the GUI indicates "start automatically" there is a valid (defined) start date/time
+        if (getAutoStartContestCheckBox().isSelected()) {
+            if (getScheduledStartTime()==null || !(getScheduledStartTime().after(new GregorianCalendar()))) {
+                showMessage("Must enter a valid (future) start time when 'Start Automatically' is selected");
+                return;
+            }
+        }
+
+        //get the existing ContestInfo from the contest, insert new contest info data into it
         ContestInformation contestInfo = getContest().getContestInformation();
         contestInfo.setScheduledStartTime(getScheduledStartTime());
         contestInfo.setAutoStartContest(getAutoStartContestCheckBox().isSelected());
         contestInfo.setAutoStopContest(getAutoStopAtEndofContestCheckBox().isSelected());
+
+        //put the updated ContestTime and ContestInfo back into the Controller
+        getController().updateContestTime(newContestTime);
         getController().updateContestInformation(contestInfo);
 
         cancelButton.setText("Close");
