@@ -449,17 +449,19 @@ public class ContestInformation implements Serializable{
      * Note: previously, ContestInformation stored "startDate" as an object of
      * class {@link Date}.  It nows stores the scheduled start time as a 
      * {@link GregorianCalendar}; however, this method is maintained for compatibility.
-     * The method converts the given {@link Date} into an equivalent {@link GregorianCalendar}.
+     * The method converts the given {@link Date} into an equivalent {@link GregorianCalendar}
+     * and invokes {@link #scheduledStartTime} with the resulting {@link GregorianCalendar} object.
+     * 
      * @param startDate - the date at which the contest is scheduled to start; 
      *      specifying "null" as the start date causes the scheduled start time to become undefined
      */
     public void setScheduledStartDate(Date startDate) {
         if (startDate == null) {
-            this.scheduledStartTime = null;
+            setScheduledStartTime(null);
         } else {
             GregorianCalendar newStartDate = new GregorianCalendar();
             newStartDate.setTime(startDate);
-            this.scheduledStartTime = newStartDate;
+            setScheduledStartTime(newStartDate);
         }
     }
     
