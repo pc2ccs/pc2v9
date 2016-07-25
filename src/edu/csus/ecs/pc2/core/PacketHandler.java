@@ -2560,8 +2560,8 @@ public class PacketHandler {
             if (packet.getType().equals(Type.STOP_ALL_CLOCKS)) {
                 ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
                 for (ClientId clientId : clientIds) {
-                    Packet startContestPacket = PacketFactory.createStopContestClock(contest.getClientId(), PacketFactory.ALL_SERVERS, siteNumber, packet.getSourceId());
-                    controller.sendToRemoteServer(clientId.getSiteNumber(), startContestPacket);
+                    Packet stopContestPacket = PacketFactory.createStopContestClock(contest.getClientId(), PacketFactory.ALL_SERVERS, siteNumber, packet.getSourceId());
+                    controller.sendToRemoteServer(clientId.getSiteNumber(), stopContestPacket);
                 }
             } else {
                 controller.sendToRemoteServer(siteNumber, packet);
