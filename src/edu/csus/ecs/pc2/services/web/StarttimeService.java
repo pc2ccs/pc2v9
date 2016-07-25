@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * WebService to handle starttime.
+ * WebService to handle "starttime" REST endpoint as described by the CLICS wiki.
  * 
  * @author pc2@ecs.csus.edu
  *
@@ -30,7 +30,9 @@ public class StarttimeService {
     }
 
     /**
-     * This method returns a representation of the current contest starttime in JSON format.
+     * This method resets the current contest scheduled start time according to the
+     * received (input) string, which it expects to be in JSON format as described
+     * in the CLICS Wiki "StartTime" interface specification.
      * 
      * @return a String containing the contest starttime
      */
@@ -60,6 +62,13 @@ public class StarttimeService {
 
     }
 
+    /**
+     * This method returns a representation of the current contest scheduled start time in JSON format
+     * as described on the CLICS wiki.
+     * 
+     * @return a JSON String containing the scheduled contest start time, or "undefined" if no start
+     * time is currently scheduled.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public String getStartTime() {
