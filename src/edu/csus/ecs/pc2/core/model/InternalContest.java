@@ -1274,6 +1274,12 @@ public class InternalContest implements IInternalContest {
             contestTime.stopContestClock();
             ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STOPPED, contestTime, inSiteNumber);
             fireContestTimeListener(contestTimeEvent);
+            
+            //clear any scheduled start and remove any future "auto-start" tasks
+            // (these should have been cleared when the contest STARTED, but let's make sure...)
+            getContestInformation().setScheduledStartDate(null);
+            removeAnyScheduledStartContestTasks();
+            
         } else {
             throw new SecurityException("Unable to stop clock site " + inSiteNumber + " not found");
         }
