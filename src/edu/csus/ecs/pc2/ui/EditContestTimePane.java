@@ -367,7 +367,7 @@ public class EditContestTimePane extends JPanePlugin {
         String textBoxStartTime = getScheduledStartTimeTextBox().getText() ;
         GregorianCalendar scheduledStartTime ;
         
-        if (textBoxStartTime.equalsIgnoreCase("<undefined>") || textBoxStartTime.equals("")) {
+        if (textBoxStartTime.equalsIgnoreCase("<undefined>") || textBoxStartTime.equals("") || textBoxStartTime.equals("<already started>") ) {
             this.scheduledStartTime = null ;
             return true;
         } else {
@@ -483,7 +483,13 @@ public class EditContestTimePane extends JPanePlugin {
         } else {
             displayStartTime = getScheduledStartTimeStr(scheduledStartTime);
         }
-        getScheduledStartTimeTextBox().setText(displayStartTime);
+        if (inContestTime.isContestStarted()) {
+            getScheduledStartTimeTextBox().setText("<already started>"); 
+            getScheduledStartTimeTextBox().setEditable(false);
+        } else {
+            getScheduledStartTimeTextBox().setText(displayStartTime);
+            getScheduledStartTimeTextBox().setEditable(true);
+        }
         
         //put the state of the auto-start/stop checkboxes into the GUI
         getAutoStartContestCheckBox().setSelected(inContestInfo.isAutoStartContest());
