@@ -32,5 +32,6 @@
 	<classpathentry kind="lib" path="vendor/lib/jackson-databind-2.5.4.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/jackson-core-2.5.4.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/jackson-annotations-2.5.4.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/snakeyaml-1.16.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>
