@@ -15,6 +15,10 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 // $HeadURL$
 public class EditFilterPaneTest extends TestCase {
+    
+    public void testNull() throws Exception {
+        
+    }
 
     public void showFrame(EditFilterFrame frame, Filter filter, ListNames[] panenames) {
 

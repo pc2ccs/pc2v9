@@ -17,6 +17,10 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 
 // $HeadURL$
 public class EditAutoJudgeSettingFrameTest extends TestCase {
+    
+    public void testNull() throws Exception {
+        
+    }
 
 //    private static boolean canBeAutoJudged(Problem problem) {
 //        return problem.isComputerJudged() && problem.isValidatedProblem();

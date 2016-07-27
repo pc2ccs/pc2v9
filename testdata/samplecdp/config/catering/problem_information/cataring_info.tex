@@ -1,0 +1,51 @@
+\documentclass[10pt]{article}
+
+\textheight 9in	% 11 - 1 - 1
+\textwidth 6.5in	% 8.5 - 1 - 1
+\topmargin -0.5in
+\oddsidemargin 0.0in
+\evensidemargin 0.0in
+
+\begin{document}
+
+\section*{Difficulty}
+Hard
+
+\section*{Algorithm Description}
+We can solve this problem with a minimum cost maximum flow algorithm.  If  we  have  $k$  catering teams  $x_l, \dots , x_k$ and $n$ requests $y_1, ..., y_n$, we  build  the following $(2+k+2n)$-vertex network:  the  set of vertices is  $\{s, x_1, ..., x_k, y_1, y'_1, y_2, y'_2, \dots, y_n, y'_n, t\}$, where the vertices $s$ and $t$ are the source and sink. The following edges have capacity $1$. There is an edge of cost $0$ from $s$ to each $x_i$, an edge of cost $0$ from each $x_i$ to $t$, and an edge of cost $0$ from each $y'_j$ to $t$. There is an edge from $x_i$ to $y_j$ with cost equal to the cost of moving a set of equipment from the company to location $i$. For $i < j$, there is an edge from $y'_i$ to $y_j$ with cost equal to the cost of moving a set of equipments from location $i$ to location $j$. There is an edge from $y_i$ to $y'_i$ of cost $-M$ for a large enough number $M$. We choose $M$ such that any minimum cost maximum flow saturates all $y_iy'_i$ edges. 
+
+The value of maximum flow in this network is $k$ and it is not hard to see that a minimum cost maximum flow gives the optimal value for the problem. Since this network is acyclic, we can use the minimum cost augmentation algorithm to find a minimum cost maximum flow in time $O(kn^2)$. The minimum cost augmentation algorithm is the standard algorithm to solve the minimum cost maximum flow problem, which finds a shortest path in the residual graph to augment the current flow (this augmentation happens k times and we find the shortest path in $O(n^2)$ with the Dijkstra algorithm). 
+
+\section*{Annotation of Test Cases}
+\begin{itemize}
+\item 
+	Input 1 (Also, in sample input): A simple non-trivial test case that can be verified with hand.
+\item 
+	Input 2 (Also, in sample input): A test case to rule out the following greedy algorithm: 
+	serve the requests in order and send the closest catering team to serve each request.
+
+\item 
+	Input 3, 4, 5, 6: Checking some boundary values.
+
+\item 
+	Input 7: Another test case to rule out the above greedy algorithm implemented in some other 
+	order. 
+	
+\item 
+	Next 20 inputs: Random test cases with $10 \le n \le 30$ and random $1 \le k \le n$.
+
+\item 
+	Next 10 inputs: Random test cases with $31 \le n \le 60$ and random $1 \le k \le n$.
+
+\item 
+	Next 5 inputs: Random test cases with $61 \le n \le 100$ and random $1 \le k \le n$.
+
+\item 
+	Next 3 inputs: Random test cases with $n = 100$ and random $5 \le k \le 20$.
+
+\item 
+	Next input: A test case with $n = k = 100$ and all distances equal to 1000000.
+
+\end{itemize}
+
+\end{document}

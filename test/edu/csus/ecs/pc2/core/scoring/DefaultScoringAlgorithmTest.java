@@ -17,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -26,7 +27,6 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestTime;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -38,6 +38,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -384,6 +385,17 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         
     }
 
+    private void checkOutRun(IInternalContest contest, Run run, ClientId who) {
+        // TODO REFACTOR remove this method, replace with instances of SampleContest.checkOutRun
+        
+        try {
+            SampleContest.checkOutRun(contest, run, who);
+        } catch (ClassNotFoundException | RunUnavailableException | IOException | FileSecurityException e) {
+            e.printStackTrace();
+        }
+        
+    }
+
     /**
      * Submit and judge a run.
      * 
@@ -471,21 +483,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         checkOutputXML(contest);
     }
     
-    private int getIntegerValue(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-    
-    private void checkOutRun (IInternalContest contest, Run run, ClientId judgeId){
-        try {
-            contest.checkoutRun(run, judgeId, false, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+
     
     /**
      * CASE (1): "When Solved, all runs before Yes".
@@ -976,6 +974,17 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         confirmRanks(contest, rankData);
     }
 
+    private void addTheRun(InternalContest contest, String runInfoLine) {
+        // TODO REFACTOR - remove local method, replace method calls with SampleContest.addRunFromInfo
+
+        try {
+            SampleContest.addRunFromInfo(contest, runInfoLine);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     /**
      * Test tie breaker down to last yes submission time. 
      * 
@@ -1440,109 +1449,6 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         confirmRanks(contest, rankDataList);
     }
 
-    /**
-     * add run to list of runs in a contest.
-     * 
-     * Files found in runInfoLine, comma delmited
-     * 
-     * <pre>
-     * 0 - run id, int
-     * 1 - team id, int
-     * 2 - problem letter, char
-     * 3 - elapsed, int
-     * 4 - solved, String &quot;Yes&quot; or No
-     * 5 - send to teams, Yes or No
-     * 6 - No Judgement index
-     * 
-     * Example:
-     * &quot;6,5,A,12,Yes&quot;
-     * &quot;6,5,A,12,Yes,Yes&quot;
-     * 
-     * </pre>
-     * 
-     * @param contest
-     * @param runInfoLine
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     */
-    public void addTheRun(IInternalContest contest, String runInfoLine) {
-
-        // get 5th judge
-        ClientId judgeId = contest.getAccounts(Type.JUDGE).elementAt(4).getClientId();
-        
-        Problem[] problemList = contest.getProblems();
-        Language languageId = contest.getLanguages()[0];
-
-        Judgement yesJudgement = contest.getJudgements()[0];
-        Judgement[] judgement = contest.getJudgements();
-        Judgement noJudgement = null;
-        for (int i = 0; i < judgement.length; i++) {
-            if (judgement[i].getAcronym().equals("WA")) {
-                noJudgement = judgement[i];
-                break;
-            }
-        }
-        
-        String[] data = runInfoLine.split(",");
-        
-        // Line is: runId,teamId,problemLetter,elapsed,solved[,sendToTeamsYN]
-
-        int runId = getIntegerValue(data[0]);
-        int teamId = getIntegerValue(data[1]);
-        String probLet = data[2];
-        int elapsed = getIntegerValue(data[3]);
-        boolean solved = data[4].equals("Yes");
-        
-        boolean sendToTeams = true;
-        if (data.length > 5){
-            sendToTeams = data[5].equals("Yes");
-        }
-        if (data.length > 6) {
-            noJudgement = contest.getJudgements()[getIntegerValue(data[6])];
-        }
-
-        int problemIndex = probLet.charAt(0) - 'A';
-        Problem problem = problemList[problemIndex];
-        ClientId clientId = new ClientId(contest.getSiteNumber(), Type.TEAM, teamId);
-
-        Run run = new Run(clientId, languageId, problem);
-        run.setNumber(runId);
-        run.setElapsedMins(elapsed);
-        ElementId judgementId = noJudgement.getElementId();
-        if (solved) {
-            judgementId = yesJudgement.getElementId();
-        }
-        JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
-        judgementRecord.setSendToTeam(sendToTeams);
-
-        try {
-            contest.addRun(run);
-
-            checkOutRun(contest, run, judgeId);
-
-            contest.addRunJudgement(run, judgementRecord, null, judgeId);
-            
-        } catch (IOException e) {
-            e.printStackTrace();
-            assertFalse("Unable to add run from run: "+run, false);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            assertFalse("Unable to add run from run: "+run, false);
-        } catch (FileSecurityException e) {
-            e.printStackTrace();
-            assertFalse("Unable to add run from run: "+run, false);
-        }
-
-        if (debugMode){
-            System.out.print("Send to teams "+run.getJudgementRecord().isSendToTeam()+" ");
-            System.out.println("Added run "+run);
-        }
-        
-    }
-    
-    
-
     
 
     /**
@@ -1621,6 +1527,17 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     protected void tearDown() throws Exception {
         super.tearDown();
+    }
+
+    public void addTheRun(IInternalContest contest, String runInfoLine) {
+        // TODO REFACTOR remove this method use SampleContest.addRunFromInfo 
+        // for test methods that use SampleContest.addRunFromInfo add throws Exception
+        try {
+            SampleContest.addRunFromInfo(contest, runInfoLine);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
     }
 
 }

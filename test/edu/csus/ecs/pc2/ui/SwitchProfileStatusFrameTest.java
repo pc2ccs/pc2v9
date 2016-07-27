@@ -15,6 +15,10 @@ import edu.csus.ecs.pc2.core.model.Site;
 // $HeadURL$
 public class SwitchProfileStatusFrameTest extends TestCase {
     
+    public void testNull() throws Exception {
+        
+    }
+    
     public static void main(String[] args) {
 
         SampleContest sample = new SampleContest();

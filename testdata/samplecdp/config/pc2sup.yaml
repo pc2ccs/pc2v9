@@ -1,0 +1,24 @@
+#
+# File:     pc2sup.yaml
+# Purpose:  Supplemental YAML settings for pc2
+#
+
+accounts:
+  - account: JUDGE
+    site: 1
+    count: 10
+
+  - account: SCOREBOARD
+    site: 1
+    count: 2
+
+  - account: TEAM
+    site: 1
+    count: 128
+
+auto-judging:
+  - account: JUDGE
+    number: 6
+    site: 1
+    letters: A,B,C,D,E,F,G
+    enabled: yes

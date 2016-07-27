@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
@@ -1207,4 +1208,32 @@ public interface IInternalContest {
     void addGroups(Group[] groups);
 
     void updateGroups(Group[] groups);
+
+    /**
+     * Is command line option present on the command line
+     * @param optionName option name without leading dashes
+     * @return true if present
+     */
+    boolean isCommandLineOptionPresent(String optionName);
+
+    /**
+     * Set command line parrameters
+     * @param parseArguments command line arguments 
+     */
+    void setCommandLineArguments(ParseArguments parseArguments);
+
+    /**
+     * Does option have a parameter?
+     * @param optionName
+     * @return
+     */
+    boolean doesCommandLineArgumentHaveParameter(String optionName);
+
+    /**
+     * get the parameter after the optionName.
+     * 
+     * @param optionNaeme
+     * @return
+     */
+    String getCommandLineOptionValue(String optionNaeme);
 }

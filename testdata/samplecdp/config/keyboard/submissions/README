@@ -1,0 +1,10 @@
+There are four possible types of provided test submissions for a
+problem: "accepted", "time_limit_exceeded", "run_time_error", and
+"wrong_answer", depending on which judgement the program is supposed
+to get.  Each test submission is placed in a subdirectory
+"submissions/<TYPE>" where <TYPE> is the type of the test submission.
+
+At least one accepted solution is required. It is in general
+recommended to supply at least one wrong answer and one time limit
+exceeded solution (for test data coverage verification), but their
+usefulness depends on the specific problem.

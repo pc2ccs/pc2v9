@@ -16,12 +16,9 @@ import junit.framework.TestCase;
 // $HeadURL$
 public class PropertiesEditFrameTest extends TestCase {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    public void testNull() throws Exception {
+        
     }
 
     public static void main(String[] args) {

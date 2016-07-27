@@ -4,6 +4,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
+
 /**
  * Balloon and Balloon Distribution Settings (per Site).
  * 
@@ -372,27 +374,7 @@ public class BalloonSettings implements IElementObject {
     protected ElementId [] getProblemIDList() {
         return (ElementId[]) colorList.keySet().toArray(new ElementId[colorList.keySet().size()]);
     }
-    
-    /**
-     * Compares string, handles if either string is null.
-     * 
-     * @param s1
-     * @param s2
-     * @return true if both null or equal, false otherwise
-     */
-    // TODO move this into a string utility class.
-    private boolean stringSame (String s1, String s2){
-        if (s1 == null && s2 == null) {
-            return true;
-        }
-        
-        if (s1 == null && s2 != null){
-            return false;
-        }
-        
-        return s1.equals(s2);
-            
-    }
+
 
     /**
      * Are classes the same?
@@ -416,13 +398,13 @@ public class BalloonSettings implements IElementObject {
             if (isPrintBalloons() != balloonSettings.isPrintBalloons()) {
                 return false;
             }
-            if (! stringSame(getPrintDevice(),balloonSettings.getPrintDevice())) {
+            if (! StringUtilities.stringSame(getPrintDevice(),balloonSettings.getPrintDevice())) {
                 return false;
             }
             if (isPostscriptCapable() != balloonSettings.isPostscriptCapable()) {
                 return false;
             }
-            if (! stringSame(getEmailContact(),balloonSettings.getEmailContact())) {
+            if (! StringUtilities.stringSame(getEmailContact(),balloonSettings.getEmailContact())) {
                 return false;
             }
             if (getLinesPerPage() != balloonSettings.getLinesPerPage()) {

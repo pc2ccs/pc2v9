@@ -450,7 +450,7 @@ public class SampleContest {
      * @param contest
      * @return
      */
-    public Account[] getTeamAccounts(IInternalContest contest) {
+    public static Account[] getTeamAccounts(IInternalContest contest) {
         return getAccounts(contest, Type.TEAM);
     }
     
@@ -850,7 +850,7 @@ public class SampleContest {
         return contest.getRun(run.getElementId());
     }
 
-    private void checkOutRun(IInternalContest contest, Run run, ClientId judgeId) throws RunUnavailableException, IOException, ClassNotFoundException, FileSecurityException {
+    public static void checkOutRun(IInternalContest contest, Run run, ClientId judgeId) throws RunUnavailableException, IOException, ClassNotFoundException, FileSecurityException {
         
             if (run == null) {
                 throw  new IllegalArgumentException("run is null");
@@ -862,6 +862,7 @@ public class SampleContest {
             
             contest.checkoutRun(run, judgeId, false, false);
     }
+    
 
     /**
      * Assign a color to a problem.
@@ -903,7 +904,7 @@ public class SampleContest {
         settings.setBalloonList(hashtable);
     }
 
-    private int getIntegerValue(String s) {
+    private static int getIntegerValue(String s) {
         try {
             return Integer.parseInt(s);
         } catch (Exception e) {
@@ -1334,7 +1335,7 @@ public class SampleContest {
         contest.updateProblem(problem, dataFiles);
     }
 
-    public Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
+    public static Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
         Vector<Account> accountVector = contest.getAccounts(type);
         Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
@@ -1777,5 +1778,128 @@ public class SampleContest {
         return (SerializedFile[]) outfiles.toArray(new SerializedFile[outfiles.size()]);
     }
 
+    public void setAliases(IInternalContest inContest) {
+
+        int idx = 0;
+        for (Account account : getTeamAccounts(inContest)) {
+            account.setAliasName(GIRL_NAMES[idx]);
+            idx++;
+        }
+    }
+    
+    /**
+     * add run to list of runs in a contest.
+     * 
+     * Files found in runInfoLine, comma delmited
+     * 
+     * <pre>
+     * 0 - run id, int
+     * 1 - team id, int
+     * 2 - problem letter, char
+     * 3 - elapsed, int
+     * 4 - solved, String &quot;Yes&quot; or No
+     * 5 - send to teams, Yes or No
+     * 6 - No Judgement index
+     * 
+     * Example:
+     * &quot;6,5,A,12,Yes&quot;
+     * &quot;6,5,A,12,Yes,Yes&quot;
+     * 
+     * </pre>
+     * 
+     * @param contest
+     * @param runInfoLine
+     * @throws Exception 
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
+     */
+    public static void addRunFromInfo(IInternalContest contest, String runInfoLine) throws Exception {
+
+        // get 5th judge
+        ClientId judgeId = contest.getAccounts(Type.JUDGE).elementAt(4).getClientId();
+        
+        Problem[] problemList = contest.getProblems();
+        Language languageId = contest.getLanguages()[0];
+
+        Judgement yesJudgement = contest.getJudgements()[0];
+        Judgement[] judgement = contest.getJudgements();
+        Judgement noJudgement = null;
+        for (int i = 0; i < judgement.length; i++) {
+            if (judgement[i].getAcronym().equals("WA")) {
+                noJudgement = judgement[i];
+                break;
+            }
+        }
+        
+        String[] data = runInfoLine.split(",");
+        
+        // Line is: runId,teamId,problemLetter,elapsed,solved[,sendToTeamsYN]
+
+        int runId = getIntegerValue(data[0]);
+        int teamId = getIntegerValue(data[1]);
+        String probLet = data[2];
+        int elapsed = getIntegerValue(data[3]);
+        boolean solved = data[4].equals("Yes");
+        
+        boolean sendToTeams = true;
+        if (data.length > 5){
+            sendToTeams = data[5].equals("Yes");
+        }
+        if (data.length > 6) {
+            noJudgement = contest.getJudgements()[getIntegerValue(data[6])];
+        }
+
+        int problemIndex = probLet.charAt(0) - 'A';
+        Problem problem = problemList[problemIndex];
+        ClientId clientId = new ClientId(contest.getSiteNumber(), Type.TEAM, teamId);
+
+        Run run = new Run(clientId, languageId, problem);
+        run.setNumber(runId);
+        run.setElapsedMins(elapsed);
+        ElementId judgementId = noJudgement.getElementId();
+        if (solved) {
+            judgementId = yesJudgement.getElementId();
+        }
+        JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
+        judgementRecord.setSendToTeam(sendToTeams);
+
+        try {
+            contest.addRun(run);
+
+            checkOutRun(contest, run, judgeId);
+
+            contest.addRunJudgement(run, judgementRecord, null, judgeId);
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw new Exception("Unable to add run from run info " + runInfoLine);
+        }
+
+    }
+
+    public static void addRunFromInfo(IInternalContest contest, String[] runInfoLines) throws Exception {
+        for (String runInfoLine  : runInfoLines) {
+            addRunFromInfo(contest, runInfoLine);
+        }
+    }
+
+    /**
+     * Assign unique reservation id to account.
+     * 
+     * Loops through team accounts and assigned external id (Reservation ID) sequential numbers/ids starting at startId
+     * 
+     * @param contest
+     * @param startId
+     *            - start with id
+     */
+    public static void assignReservationIds(IInternalContest contest, int startId) {
+
+        int id = startId;
+        for (Account account : getTeamAccounts(contest)) {
+            account.setExternalId(Integer.toString(id));
+            id++;
+        }
+    }
     
 }

@@ -197,4 +197,11 @@ public interface IProblem {
      * @return An integer hashcode for this object.
      */
     int hashCode();
+    
+    /**
+     * Returns true if the Contest Administrator has hidden this problem false otherwise.
+     * 
+     * @return true if hidden/deleted, false otherwise.
+     */
+    boolean isDeleted();
 }

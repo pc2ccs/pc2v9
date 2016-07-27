@@ -17,9 +17,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
  * @see edu.csus.ecs.pc2.core.model.ProblemDataFiles
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-// $HeadURL$
 public class Problem implements IElementObject {
 
     /**
@@ -322,7 +320,8 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @return Returns the active.
+     * Return whether is active (is not hidden).
+     * @return true if active, false if hidden/deleted.
      */
     public boolean isActive() {
         return active;

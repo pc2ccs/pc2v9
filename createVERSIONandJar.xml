@@ -1,25 +1,23 @@
 <?xml version="1.0"?>
-<project name="v9VersionAndJarBuild" default="jar" basedir=".">
-	<!-- $Id$ -->
-	<!-- $HeadURL$ -->
-	<!-- 
+<project name="Create jars and VERSION file" default="jar" basedir=".">
+<!-- 
 
 Purpose: Create of dist/pc2.jar and VERSION file, no testing, no code style, 
 just a .jar file that can be used for unit testing using
 pc2.jar (instead of inside eclipse).
 
-Dependencies: define JAVA_HOME to point to java directory,
-$JAVA_HOME/bin/java.exe should exist.
+Dependencies: 
+    define JAVA_HOME to point to java directory
+    $JAVA_HOME/bin/java.exe should exist.
 
 To Use this:
   To run/use this file, insure JAVA_HOME is defined and
   then Run As... Ant Build
   
-dal
-  
 -->
+	
 	<description>
-         simple v9 build of pc2.jar and create VERSION file for testing.
+         Create pc2.jar and create VERSION file for testing.
     </description>
 	<!-- set global properties for this build -->
     <property name="apt.build.javac.target" value="1.7" />
@@ -53,6 +51,7 @@ dal
 			<include name="*.jar" />
 		</fileset>
 	</path>
+	
 
 	<property name="bootclasspath" refid="path_bootclasspath" />
 	<property name="bundleJavacSource" value="${javacSource}" />
@@ -62,6 +61,9 @@ dal
 	<property name="name" value="pc2" />
 	<property name="jar.name" value="${name}.jar" />
 	<property name="jar.path" value="${dist.dir}/${jar.name}" />
+	
+	<property name="test.jar.name" value="${name}.test.jar" />
+	<property name="test.jar.path" value="${dist.dir}/${test.jar.name}" />
 
 	<tstamp>
 		<format property="date" pattern="yyyyMMdd" timezone="UTC" />
@@ -70,10 +72,17 @@ dal
 		<format property="time" pattern="HHmm" timezone="UTC" />
 	</tstamp>
 	<property name="timestamp" value="${date}${time}" />
+	
+	<tstamp>
+			<format property="millisecond" pattern="S" timezone="UTC" />
+	</tstamp>
+	<property name="build.number" value="${millisecond}" />
+
 	<!-- version is used in the jar manifest & in package.xml -->
 	<property name="old_version" value="9_0_${timestamp}" />
 	<property name="version" value="9.DEBUG"/>
 	<property name="new_version" value="9"/>
+	
 
 	<target name="properties">
 		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
@@ -85,6 +94,7 @@ dal
 		<!-- Create the build directory structure used by compile -->
 		<mkdir dir="${build.prod.dir}" />
 		<mkdir dir="${build.test.dir}" />
+		<mkdir dir="${dist.dir}" />
 		
 	</target>
 
@@ -99,12 +109,48 @@ dal
 	</target>
 
 
+	<target name="compile-test" depends="init, jar" description="compile the test class source">
+		<!-- Compile the java code from ${test.dir} into ${build.dir} -->
+		
+		<!-- had to move test boot classes here because dist/ does not exist, so
+			target jar must be run to create dist			 
+		    -->
+		<path id="path_bootclasspath_test">
+			<fileset dir="${java.home}/lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="${vendor.lib.dir}">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="${dist.dir}" includes="**/pc2*.jar"/>
+		</path>
+		
+		<property name="testBootclasspath" refid="path_bootclasspath_test" />
+		<property name="testBundleBootClasspath" value="${testBootclasspath}" />
+		
+		<javac srcdir="${test.dir}" destdir="${build.test.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" 
+		bootclasspath="${testBundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
+			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
+			<compilerarg line="-log '${build.dir}/${name}.test${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
+		</javac>
+	</target>
+	
+	<target name="test-jar" depends="jar, compile-test" description="creates a jar of test classes ">
+		
+		<jar jarfile="${test.jar.path}" basedir="${build.test.dir}">
+			<manifest>
+                <attribute name="Specification-Version" value="${version}"/>
+                <attribute name="Implementation-Title" value="CSUS Programming Contest Control System Testing"/>
+                <attribute name="Implementation-Version" value="${build.number}"/>
+                <attribute name="Built-On" value="${timestamp.english}"/>
+                <attribute name="Main-Class" value="edu.csus.ecs.pc2.Starter"/>
+			</manifest>
+		</jar>
+		
+	</target>
+
 	<target name="jar" depends="compile" description="creates a jar of our classes">
 		<mkdir dir="${dist.dir}" />
-		<tstamp>
-			<format property="millisecond" pattern="S" timezone="UTC" />
-		</tstamp>
-		<property name="build.number" value="${millisecond}" />
 
 		<!-- include the images in the jar -->
 		<copy file="images/csus_logo.png" todir="${build.prod.dir}/images"/>
@@ -121,6 +167,7 @@ dal
                 <attribute name="Main-Class" value="edu.csus.ecs.pc2.Starter"/>
 			</manifest>
 		</jar>
+		
 		<tstamp>
 			<format property="longdate" pattern="EEEE, MMMM dd yyyy" timezone="UTC" />
 		</tstamp>

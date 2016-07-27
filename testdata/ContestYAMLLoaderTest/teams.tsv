@@ -1,0 +1,7 @@
+# test.tsv test file 1
+# $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/testdata/ccs/team1.tsv $
+#
+teams	1
+1	3232	905	Hoos	University of Virginia	U Virginia	USA
+2	3234	905	Rams	University of Colorado	U Colorado	USA
+3	3236	206	Natural Log	University of Chile	U Chile	CL

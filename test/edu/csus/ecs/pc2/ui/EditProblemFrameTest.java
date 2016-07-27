@@ -19,6 +19,11 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 
 // $HeadURL$
 public class EditProblemFrameTest extends TestCase {
+    
+    
+    public void testNull() throws Exception {
+        
+    }
 
     public static void main(String[] args) {
 

@@ -41,6 +41,8 @@ public class ProblemImplementation implements IProblem {
 
     private String shortName;
 
+    private boolean deleted = false;
+
     public ProblemImplementation(ElementId problemId, IInternalContest internalContest) {
         this(internalContest.getProblem(problemId), internalContest);
     }
@@ -67,6 +69,7 @@ public class ProblemImplementation implements IProblem {
         }
         
         readsInputFromSTDIN = problem.isReadInputDataFromSTDIN();
+        deleted = ! problem.isActive();
         
         ProblemDataFiles problemDataFiles = internalContest.getProblemDataFile(problem);
         if (problemDataFiles != null) {
@@ -172,5 +175,10 @@ public class ProblemImplementation implements IProblem {
     @Override
     public String getShortName() {
         return shortName;
+    }
+
+    @Override
+    public boolean isDeleted() {
+        return deleted;
     }
 }

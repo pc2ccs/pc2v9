@@ -58,6 +58,7 @@ import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Add/Edit Problem Pane.
@@ -2741,7 +2742,7 @@ public class EditProblemPaneNew extends JPanePlugin {
             newProblemDataFiles = getProblemDataFilesFromFields();
             Problem newProblem = getProblemFromFields(problem, newProblemDataFiles, false);
 
-            String problemYamlFile = nextDirectory + File.separator + ExportYAML.PROBLEM_FILENAME;
+            String problemYamlFile = nextDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
             String[] filelist = exportYAML.writeProblemYAML(getContest(), newProblem, problemYamlFile, newProblemDataFiles);
 
             String results = compareDirectories(lastSaveDirectory + File.separator + currentLetter, nextDirectory);

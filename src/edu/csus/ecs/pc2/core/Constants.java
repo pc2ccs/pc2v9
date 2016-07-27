@@ -85,5 +85,11 @@ public final class Constants {
      * Minimum Java minor version value
      */
     public static final int MIN_MINOR_JAVA_VERSION = 7;
+
+    /**
+     * Default port that a pc2 server listens on.
+     * 
+     */
+    public static final int DEFAULT_PC2_PORT = 50002;
     
 }

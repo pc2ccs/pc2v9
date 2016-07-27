@@ -1,0 +1,13 @@
+01-07: Babak's first 7 test cases, including two sample cases
+08: 1, 100 solution uses 1 team
+09: 100, 1 solution uses 1 team
+10: 100, 100 solution uses 1 team
+11: 100, 100 solution uses 100 teams
+12: 100, 10 solution uses 10 teams 1, 2, ..., 10 repeated
+13: 100, 100 same solution as c06
+14: 100, 9 same value as c06
+15-19: 100,100 all use at least 20 teams
+20: 21,21 10 smallest edges not used
+21: 6,6 optimal solution does not used optimal for 5,6, 4,6, etc.
+22-26: 100,100 all use at least 30 teams
+27-50: random cases, in pairs - second in each pair has smaller number of teams

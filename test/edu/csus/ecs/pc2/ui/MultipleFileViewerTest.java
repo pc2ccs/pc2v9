@@ -15,6 +15,10 @@ import junit.framework.TestCase;
 
 // $HeadURL$
 public class MultipleFileViewerTest extends TestCase {
+    
+    public void testNull() throws Exception {
+        
+    }
 
     public static void main(String[] args) {
 

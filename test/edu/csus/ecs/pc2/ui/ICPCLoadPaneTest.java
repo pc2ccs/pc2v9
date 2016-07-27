@@ -11,6 +11,10 @@ import junit.framework.TestCase;
 // $HeadURL$
 public class ICPCLoadPaneTest extends TestCase {
     
+    public void testNull() throws Exception {
+        
+    }
+    
     public static void main(String[] args) {
         
         ICPCLoadPane plugin = new ICPCLoadPane();

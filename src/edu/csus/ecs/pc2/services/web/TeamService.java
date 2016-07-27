@@ -7,6 +7,7 @@ import javax.ws.rs.core.MediaType;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.TeamsJSON;
 
@@ -21,10 +22,12 @@ import edu.csus.ecs.pc2.exports.ccs.TeamsJSON;
 public class TeamService {
 
     private IInternalContest contest;
+    private IInternalController controller;
 
     public TeamService(IInternalContest contest, IInternalController controller) {
         super();
         this.contest = contest;
+        this.controller = controller;
     }
 
     /**
@@ -35,14 +38,15 @@ public class TeamService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public String getTeams() {
-        TeamsJSON standings = new TeamsJSON();
+        TeamsJSON teams = new TeamsJSON();
 
         String jsonTeams = "[]";
         try {
-            jsonTeams = standings.createJSON(contest);
+            jsonTeams = teams.createJSON(contest);
         } catch (IllegalContestState e) {
-            // TODO: log error
+            controller.getLog().log(Log.WARNING, "Problem creating teams JSON ", e);
             e.printStackTrace();
+
             // TODO: return HTTP error response code
         }
 

@@ -2,15 +2,12 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
 
-
 /**
  * String utilities.
  *
  * @author pc2@ecs.csus.edu
- * @version $Id: Utilities.java 2244 2010-10-28 03:35:33Z laned $
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/core/Utilities.java $
 public final class StringUtilities implements Serializable {
     
     /**
@@ -27,7 +24,7 @@ public final class StringUtilities implements Serializable {
     }
     
     /**
-     * Compares string, handles if either string is null.
+     * null-safe string compare.
      * 
      * @param s1
      * @param s2
@@ -47,7 +44,7 @@ public final class StringUtilities implements Serializable {
     }
 
     /**
-     * Compares string arrays, handles if either array is null.
+     * null-safe string arrays compare.
      * 
      * @param s1[]
      * @param s2[]
@@ -157,7 +154,5 @@ public final class StringUtilities implements Serializable {
         
         return names;
     }
-
-    
     
 }

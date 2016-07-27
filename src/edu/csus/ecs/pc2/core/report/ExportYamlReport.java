@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.list.FileComparator;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Write All YAML files (report).
@@ -101,7 +102,7 @@ public class ExportYamlReport implements IReport {
         }
 
         if (outputfilename == null) {
-            outputfilename = directoryName + File.separator + ExportYAML.CONTEST_FILENAME;
+            outputfilename = directoryName + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
         }
 
         exportYAML.writeContestYAMLFiles(contest, directoryName, outputfilename);

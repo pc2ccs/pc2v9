@@ -1,0 +1,53 @@
+\problemname{Ship Traffic}
+
+Ferries crossing the Strait of Gibraltar from Morocco to Spain must carefully navigate to avoid the heavy ship traffic along the strait.
+Write a program to help ferry captains find the largest gaps in strait traffic for a safe crossing.
+
+Your program will use a simple model as follows.
+The strait has several parallel shipping lanes in east-west direction.
+Ships run with the same constant speed either eastbound or westbound.
+All ships in the same lane run in the same direction.
+%Lanes with ships heading in the same direction need not be next to each other.
+Satellite data provides the positions of the ships in each lane.
+The ships may have different lengths.
+%Each ship has a certain length and may occupy the whole width of a lane.
+Ships do not change lanes and do not change speed for the crossing ferry.
+
+The ferry waits for an appropriate time when there is an adequate gap in the ship traffic.
+It then crosses the strait heading northbound along a north-south line at a constant speed.
+From the moment a ferry enters a lane until the moment it leaves the lane, no ship in that lane may touch the crossing line.
+Ferries are so small you can neglect their size.
+Figure \ref{fig:ship} illustrates the lanes and ships for Sample Input 1.
+Your task is to find the largest time interval within which the ferry can safely cross the strait.
+
+\begin{figure}[!h]
+	\centering
+    \includegraphics[width=0.75\textwidth]{example-fig}
+	\caption{Sample Input 1.}
+	\label{fig:ship}
+\end{figure}
+
+\section*{Input}
+
+The first line of input contains six integers: the number of lanes $n$ ($1 \leq n \leq 10^5$), the width $w$ of each lane ($1 \leq w \leq 1\,000$), the speed $u$ of ships and the speed $v$ of the ferry ($1 \leq u, v \leq 100$), the ferry's earliest start time $t_1$ and the ferry's latest start time $t_2$ ($0 \leq t_1 < t_2 \leq 10^6$). All lengths are given in meters, all speeds are given in meters/second, and all times are given in seconds.
+
+Each of the next $n$ lines contains the data for one lane.
+Each line starts with either \texttt{E} or \texttt{W}, where \texttt{E} indicates that ships in this lane are eastbound and \texttt{W} indicates that ships in this lane are westbound.
+Next in the line is an integer $m_i$, the number of ships in this lane ($0 \leq m_i \leq 10^5$ for each $1 \leq i \leq n$).
+It is followed by $m_i$ pairs of integers $l_{ij}$ and $p_{ij}$ ($1 \leq l_{ij} \leq 1\,000$ and $-10^6 \leq p_{ij} \leq 10^6$).
+The length of ship $j$ in lane $i$ is $l_{ij}$, and $p_{ij}$ is the position at time $0$ of its forward end, that is, its front in the direction it moves.
+
+Ship positions within each lane are relative to the ferry's crossing line.
+Negative positions are west of the crossing line and positive positions are east of it.
+Ships do not overlap or touch, and are sorted in increasing order of their positions.
+Lanes are ordered by increasing distance from the ferry's starting point, which is just south of the first lane.
+There is no space between lanes.
+The total number of ships is at least $1$ and at most $10^5$.
+
+\section*{Output}
+
+Display the maximal value $d$ for which there is a time $s$ such that the ferry can start a crossing at any time $t$ with $s \leq t \leq s+d$.
+Additionally the crossing must not start before time $t_1$ and must start no later than time $t_2$.
+The output must have an absolute or relative error of at most $10^{-3}$.
+You may assume that there is a time interval with $d > 0.1$ seconds for the ferry to cross.
+

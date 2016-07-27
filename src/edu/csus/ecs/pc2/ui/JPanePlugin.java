@@ -17,6 +17,8 @@ import edu.csus.ecs.pc2.core.NoteList;
 import edu.csus.ecs.pc2.core.NoteMessage;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.IReport;
@@ -36,6 +38,24 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
      * 
      */
     private static final long serialVersionUID = 3600350449535614012L;
+    
+    public DevelopmentFrame developmentFrame = null;
+    
+    /**
+     * Is this logged in as a server module? 
+     */
+    public boolean isServer() {
+        return getContest().getClientId() != null && isServer(getContest().getClientId());
+    }
+    
+
+    /**
+     * Is the client a server ?
+     * @param clientId
+     */
+    private boolean isServer(ClientId clientId) {
+        return clientId.getClientType().equals(ClientType.Type.SERVER);
+    }
 
     private IInternalController controller;
 
@@ -46,9 +66,24 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.controller = inController;
         this.contest = inContest;
+        
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (e.getClickCount() > 1 && e.isControlDown()) {
+                    if (developmentFrame == null){
+                        developmentFrame = new DevelopmentFrame();
+                        developmentFrame.setContestAndController(getContest(), getController());
+                        FrameUtilities.centerFrame(developmentFrame);
+                        
+                    }
+                    if (developmentFrame != null){
+                        developmentFrame.setVisible(true);
+                    }
+                }
+            }
+        });
     }
     
-
     public abstract String getPluginTitle();
 
     public IInternalController getController() {

@@ -12,12 +12,8 @@ import edu.csus.ecs.pc2.core.model.Profile;
 // $HeadURL$
 public class StartupContestDialogTest extends TestCase {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    public void testNull() throws Exception {
+        
     }
     
     public static void main(String[] args) {

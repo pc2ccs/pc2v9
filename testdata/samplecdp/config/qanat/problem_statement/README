@@ -1,0 +1,58 @@
+This directory contains problem statements, in Latex, in one or more
+languages. Typically it will just contain a file `problem.tex' which
+contains a problem statement in English.
+
+The Latex files should contain the problem text itself, including
+input and output specifications, but not sample input and output. They
+should reference auxiliary files (e.g., images) as if the working
+directory is this directory.
+
+Problem statements in other languages are provided in files named
+`problem.<language>.tex', where <language> is an ISO 639-1 alpha-2
+language code (e.g., "en" for English or "sv" for Swedish). For
+English, either problem.tex or problem.en.tex can be used (but only
+one of them).
+
+GENERAL GUIDELINES
+
+Try to keep your LATEX code as clean as possible, avoiding contorted
+tweaks to get your problem to look like you want. It should be
+possible to convert the problem statement to both pdf and html
+reliably.
+
+IMAGES
+
+The graphics file formats supported are .jpg, .jpeg, .png, .gif, and
+.pdf. When including a file, say, "snarks.png", you can omit the
+extension and just write "snarks", and let the system find the
+appropriate file for you.
+
+We distinguish between two types of pictures used in problem
+statements: illustrations and figures.  
+
+An illustration is a non-essential picture whose only purpose is to
+make the problem statement look prettier. The template provides a
+command \illustration{width%}{image}{attribution} to typeset
+illustrations. Its arguments are:
+- width%: a number between 0 and 1, the desired width of the
+          illustration, as fraction of the total page width.
+- image: the image file to be included.
+- attribution: attribution for the image
+
+A figure is an essential picture explaining or clarifying some part of
+the problem statement. Figures should be typeset using the standard
+Latex figure environment and \includegraphics (and possibly the
+\subfigure command).  A typical use would be:
+\begin{figure}[!h]
+\includegraphics[width=0.5\textwidth]{snarks}
+\caption{The seven different snarks}
+\label{fig:snarks}
+\end{figure}
+
+SPECIAL COMMANDS
+
+The problem name is expected to not contain any Latex special
+characters. In case it does, say if the problem name is $x^2 + y^2 =
+z^2$, a "plain" version of the problem name can be specified by
+writing
+%% plainproblemname: x^2 + y^2 = z^2

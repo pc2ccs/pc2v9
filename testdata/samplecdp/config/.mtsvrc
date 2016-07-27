@@ -1,0 +1,11 @@
+#
+# File:    .mtsvrc
+# Purpose: Configuration File for mtsv
+#
+# Created by: $Id: mtsv 2899 2014-12-03 00:46:56Z boudreat $
+#
+
+# directory where contest.yaml is
+yamldir=.
+
+# eof mtsv $Id$

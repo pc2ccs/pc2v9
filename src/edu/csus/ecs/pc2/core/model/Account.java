@@ -11,10 +11,7 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  * User/Login Account.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class Account implements IElementObject {
 
     /**
@@ -69,6 +66,10 @@ public class Account implements IElementObject {
     private String externalName = "";
 
     private String countryCode = "";
+    
+    private String institutionName = "";
+    private String institutionShortName= "";
+    private String institutionCode  = "";
     
     private String teamName = "";
     
@@ -165,7 +166,17 @@ public class Account implements IElementObject {
     public void setClientId(ClientId clientId) {
         this.clientId = clientId;
     }
+ 
+    
+    // The special case is that the previous instances could have a null value which
+    // needs to be compareed as equal to an empty string.
 
+    /**
+     * Deep compare of Account.
+     * 
+     * @param account
+     * @return true if same, else false.
+     */
     public boolean isSameAs(Account account) {
         try {
             if (!displayName.equals(account.getDisplayName())) {
@@ -211,6 +222,19 @@ public class Account implements IElementObject {
             if (!shortSchoolName.equals(account.getShortSchoolName())) {
                 return false;
             }
+
+            if (!StringUtilities.stringSame(institutionCode, account.getInstitutionCode())) {
+                return false;
+            }
+
+            if (!StringUtilities.stringSame(institutionShortName, account.getInstitutionShortName())) {
+                return false;
+            }
+
+            if (!StringUtilities.stringSame(institutionName, account.getInstitutionName())) {
+                return false;
+            }
+            
             if (permissionList == null || account.getPermissionList() == null) {
                 // if only 1 is null then return false
                 if (!(permissionList == null && account.getPermissionList() == null)) {
@@ -360,6 +384,10 @@ public class Account implements IElementObject {
         password = account.password;
         shortSchoolName = account.shortSchoolName;
         teamName = account.getTeamName();
+        
+        institutionCode = account.getInstitutionCode();
+        institutionShortName = account.getInstitutionShortName();
+        institutionName = account.getInstitutionName();
 
         permissionList = account.permissionList;
 
@@ -380,4 +408,30 @@ public class Account implements IElementObject {
             return teamName;
         }
     }
+
+    public String getInstitutionName() {
+        return institutionName;
+    }
+
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
+    }
+
+    public String getInstitutionShortName() {
+        return institutionShortName;
+    }
+
+    public void setInstitutionShortName(String institutionShortName) {
+        this.institutionShortName = institutionShortName;
+    }
+
+    public String getInstitutionCode() {
+        return institutionCode;
+    }
+
+    public void setInstitutionCode(String institutionCode) {
+        this.institutionCode = institutionCode;
+    }
+    
+    
 }

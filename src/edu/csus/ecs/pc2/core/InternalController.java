@@ -9,6 +9,7 @@ import java.lang.management.ManagementFactory;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.ConsoleHandler;
@@ -16,6 +17,8 @@ import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.ccs.RunSubmitterInterfaceManager;
+import edu.csus.ecs.pc2.convert.EventFeedRun;
+import edu.csus.ecs.pc2.convert.LoadRuns;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
@@ -71,6 +74,8 @@ import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
+import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.ILogWindow;
@@ -130,6 +135,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * 
      */
     private static final String PROFILE_OPTION_STRING = "--profile";
+    
+    private static final String LOAD_OPTION_STRING = "--load";
+    
+    private static final String LOAD_EF_JUDGEMENTS = "--addefjs";
 
     private static final String FILE_OPTION_STRING = "-F";
 
@@ -285,7 +294,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private static final String LOGIN_UI_GUI_CLASSNAME = "edu.csus.ecs.pc2.ui.LoginFrame";
 
-    private static final String COUNTDOWN_UI_CLASSNAME = "edu.csus.ecs.pc2.ui.CountDownMessage";;
+    private static final String COUNTDOWN_UI_CLASSNAME = "edu.csus.ecs.pc2.ui.CountDownMessage";
+
+    private static final String PORT_OPTION_STRING = "--port";
+
+    private static final String REMOTE_SERVER_OPTION_STRING = "--remoteServer";
+
+    private static final Object FIRST_SERVER_OPTION_STRING = "--first";
 
     private String loginClassName = LOGIN_UI_GUI_CLASSNAME;
 
@@ -680,7 +695,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 } catch (Exception e) {
                     fatalError("Port " + port + " in use, server already running?", e);
                 }
-                info("Primary Server has .");
                 startMainUI(clientId);
             }
 
@@ -737,6 +751,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
 
         public void setContest(IInternalContest contest) {
+            contest.setCommandLineArguments(parseArguments);
             this.contest = contest;
         }
 
@@ -915,7 +930,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             info("initialized controller Site " + inContest.getSiteNumber());
-
+            
+            handleCDPLoad(true);
+            
             try {
                 manager.mergeProfiles(inContest);
             } catch (Exception e) {
@@ -939,6 +956,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 // save newly merged profiles
                 inContest.storeConfiguration(getLog());
             }
+            handleCDPLoad(false);
         }
 
         theProfile = inContest.getProfile();
@@ -953,7 +971,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 info("evals.log is opened at " + logDirectory);
             }
         } catch (Exception e) {
-            getLog().log(Log.WARNING, "Exception logged ", e);
+            getLog().log(Log.WARNING, "Exception creating evals.log ", e);
         }
 
     }
@@ -1599,7 +1617,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             packetArchiver.writeNextPacket(packet);
             log.info("Login failure packet written to " + packetArchiver.getLastArchiveFilename() + " " + packet);
         } catch (Exception e) {
-            log.log(Log.WARNING, "Exception logged trying to write packet ", e);
+            log.log(Log.WARNING, "Exception trying to write packet ", e);
         }
 
         String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
@@ -2137,20 +2155,30 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
     }
     
-    public void info(String s) {
-        log.log(Log.INFO, s);
+    public void info(String message) {
+        if (! isUsingGUI()){
+            System.out.println(message);
+        }
+        log.log(Log.INFO, message);
     }
     
     public void error(String message, Exception ex){
+        if (! isUsingGUI()){
+            System.err.println(message+" exception "+ex.getMessage());
+        }
         log.log(Log.SEVERE, message, ex);
     }
 
-    public void info(String s, Exception exception) {
+    public void info(String message, Exception exception) {
+        
+        if (! isUsingGUI()){
+            System.out.println(message);
+        }
         // HOWTO print thread name to output println
         // System.err.println(Thread.currentThread().getName() + " " + s);
         // System.err.flush();
         // exception.printStackTrace(System.err);
-        log.log(Log.INFO, s, exception);
+        log.log(Log.INFO, message, exception);
     }
 
     public void setSiteNumber(int number) {
@@ -2268,7 +2296,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
         } catch (Exception e) {
-            info("Exception logged ", e);
+            info("Exception getting port for site "+inSiteNumber, e);
             throw new SecurityException("Unable to determine port for site " + inSiteNumber);
         }
 
@@ -2296,8 +2324,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 port = getPortForSite(contest.getSiteNumber());
 
-                if (parseArguments.getOptValue("--port") != null) {
-                    String portString = parseArguments.getOptValue("--port");
+                if (parseArguments.getOptValue(PORT_OPTION_STRING) != null) {
+                    String portString = parseArguments.getOptValue(PORT_OPTION_STRING);
                     getLog().log(Log.INFO, "Attempting to use port from --port '" + portString + "'");
                     port = Integer.parseInt(portString);
                 }
@@ -2331,7 +2359,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             info("Loaded UI class " + uiClassName);
                         }
                     }
-
+                    
                     uiPlugin.setContestAndController(contest, this);
 
                     if (loginUI != null) {
@@ -2358,6 +2386,105 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     /**
+     * Handles --load option, loads CDP.
+     * @param allowedToLoadConfig if true will overwrite config with CDP, else does nothing.
+     */
+    protected void handleCDPLoad(boolean allowedToLoadConfig) {
+        
+        /**
+         * Name of CDP dir or file to be loaded.
+         */
+        String entryLocation = contest.getCommandLineOptionValue(LOAD_OPTION_STRING);
+        
+        if (contest.isCommandLineOptionPresent(LOAD_OPTION_STRING)){
+            
+            if (allowedToLoadConfig){
+                
+                IContestLoader loader = new ContestYAMLLoader();
+                info("Loading CDP from " + entryLocation);
+                
+                try {
+                    
+                    // Load Configuration from CDP
+                    
+                    loader.initializeContest(contest, new File(entryLocation));
+                    
+                    info("Loaded CDP/config values from " + entryLocation);
+                    
+                    File cdpConfigDir = loader.findCDPConfigDirectory(new File(entryLocation));
+                    
+                    if (saveCofigurationToDisk) {
+                        // save newly merged profiles
+                        contest.storeConfiguration(getLog());
+                    }
+                    
+                    // Load Submissions from CDP
+                    
+                    String submissionsDir = entryLocation + File.separator + IContestLoader.SUBMISSIONS_DIRNAME;
+                    
+                    String eventFeedDirectory = entryLocation + File.separator + IContestLoader.EVENT_FEED_DIRNAME; 
+                    String eventFeedfilename = eventFeedDirectory + File.separator + IContestLoader.EVENT_FEED_XML_FILENAME;
+                    
+                    
+                    if (new File(submissionsDir).isDirectory()){
+                        
+                        if (new File(eventFeedfilename).isFile()){
+                            
+                            info("Loading event feed runs... ");
+                            info("Event feed file is "+eventFeedfilename);
+                            
+                            LoadRuns loadRuns = new LoadRuns();
+                            
+                            List<EventFeedRun> eventFeedRuns = loadRuns.loadRunsFromEventFeed(eventFeedfilename);
+                            
+                            info("Found "+eventFeedRuns.size()+" runs.");
+                            
+                            info("Validating event feed runs");
+                            
+                            loadRuns.validateEventFeedRuns(contest, eventFeedRuns);
+                            
+                            info("Validated "+eventFeedRuns.size()+" event feed runs.");
+                            
+                            info("Loading "+eventFeedRuns.size()+" event feed runs.");
+                            
+                            boolean addRuneJudgementsFromEventFeed = contest.isCommandLineOptionPresent(LOAD_EF_JUDGEMENTS);
+                            
+                            loadRuns.updateContestFromEFRuns(contest, eventFeedRuns, cdpConfigDir.getParent(), addRuneJudgementsFromEventFeed);
+                            
+                            info("Loaded "+eventFeedRuns.size()+" event feed runs.");
+                            if (addRuneJudgementsFromEventFeed){
+                                info("Loaded judgments for "+eventFeedRuns.size()+" event feed runs.");
+                            } else {
+                                info("No judgements were added for "+eventFeedRuns.size()+" event feed runs, all are 'new' runs.");
+                            }
+                            
+                            eventFeedRuns = null;
+                            loadRuns = null;
+                            
+                        } else {
+                            info("No submissions loaded, no event feed at "+eventFeedfilename);
+                        }
+                        
+                    } else {
+                        info("No submissions loaded, no submissions at "+submissionsDir);
+                    }
+                    
+                    
+                    
+                } catch (Exception e) {
+                    fatalError("Error loading from " + entryLocation, e);
+                } finally {
+                    loader = null;
+                }
+            } else {
+                
+                info("** Not loading (--load) CDP from " + entryLocation+" contest config ALREADY exists. **");
+                
+            }
+        }
+    }
+
+    /**
      * Start the UI.
      */
     public void start(String[] stringArray) {
@@ -2370,15 +2497,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         TransportException savedTransportException = null;
 
         String[] requireArguementArgs = { // 
-                "--login", "--id", "--password", // 
-                MAIN_UI_OPTION, "--remoteServer", // 
-                "--port", //
+                "--login", //
+                "--password", // 
+                MAIN_UI_OPTION, 
+                REMOTE_SERVER_OPTION_STRING, //
+                PORT_OPTION_STRING, //
+                LOAD_OPTION_STRING + " dir|file " + //
                 PROFILE_OPTION_STRING, //
                 INI_FILENAME_OPTION_STRING, //
                 CONTEST_PASSWORD_OPTION, //
-//                LOAD_YAML_OPTION_STRING, // TODO 770 - add         
+                "--id", // 
                 FILE_OPTION_STRING };
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
+        
+        contest.setCommandLineArguments(parseArguments);
         
         if (parseArguments.isOptPresent("--server")) {
             if (!isContactingRemoteServer()) {
@@ -2393,37 +2525,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             startLog(null, "pc2.startup."+System.currentTimeMillis(), null, null);
         }
         
-        // TODO 770 untested code for bug
-//        if (parseArguments.isOptPresent("--server") && parseArguments.isOptPresent(LOAD_YAML_OPTION_STRING)) {
-//
-//            // Get directory name
-//            yamlDirectory = parseArguments.getOptValue(LOAD_YAML_OPTION_STRING);
-//
-//            if (isEmpty(yamlDirectory)) {
-//                fatalError("Cannot start PC^2, missing directory name after "+LOAD_YAML_OPTION_STRING+" option");
-//            }
-//            
-//            if (!new File(yamlDirectory).isDirectory()){
-//                fatalError("Cannot start PC^2, specified directory '"+yamlDirectory+"' does not exist ("+LOAD_YAML_OPTION_STRING+" option)");
-//            }
-//  
-//            String contestYamlFilename = yamlDirectory + File.separator + "contest.yaml";
-//            if (!new File(contestYamlFilename).isFile()){
-//                fatalError("Cannot start PC^2, No contest.yaml found in '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)");
-//            }
-//            
-//            try {
-//                log.log(Log.INFO, "Loading YAML from directory "+yamlDirectory);
-//                loadContestYaml(yamlDirectory);
-//            } catch (Exception e) {
-//                fatalError("Cannot start PC^2, Errors loading contest YAML '"+yamlDirectory+"' ("+LOAD_YAML_OPTION_STRING+" option)", e);
-//            }
-//        }
-
         handleCommandLineOptions();
 
         for (String arg : stringArray) {
-            if (arg.equals("--first")) {
+            if (arg.equals(FIRST_SERVER_OPTION_STRING)) {
                 setContactingRemoteServer(false);
             }
         }
@@ -2492,7 +2597,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             serverModule = true;
 
             contactingRemoteServer = false;
-            setServerRemoteHostAndPort(parseArguments.getOptValue("--remoteServer"));
+            setServerRemoteHostAndPort(parseArguments.getOptValue(REMOTE_SERVER_OPTION_STRING));
 
             if (!isContactingRemoteServer()) {
                 theProfile = getCurrentProfile();
@@ -2502,10 +2607,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             try {
-                setServerPort(parseArguments.getOptValue("--port"));
+                setServerPort(parseArguments.getOptValue(PORT_OPTION_STRING));
             } catch (NumberFormatException numException) {
-                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue("--port") + "'");
-                log.log(Log.WARNING, "Exception logged ", numException);
+                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue(PORT_OPTION_STRING) + "'");
+                log.log(Log.WARNING, "Exception parsing --port ", numException);
             }
 
         } else {
@@ -2513,20 +2618,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             try {
 
-                setClientServerAndPort(parseArguments.getOptValue("--port"));
+                setClientServerAndPort(parseArguments.getOptValue(PORT_OPTION_STRING));
 
                 info("Contacting server at " + remoteHostName + ":" + remoteHostPort);
                 connectionManager.startClientTransport(remoteHostName, remoteHostPort, this);
             } catch (NumberFormatException numException) {
-                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue("--port") + "'");
-                log.log(Log.WARNING, "Exception logged ", numException);
+                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue(PORT_OPTION_STRING) + "'");
+                log.log(Log.WARNING, "Exception setting remote host and port ", numException);
             }
 
             try {
                 connectionManager.connectToMyServer();
             } catch (TransportException transportException) {
                 savedTransportException = transportException;
-                log.log(Log.INFO, "Exception logged ", transportException);
+                log.log(Log.INFO, "Exception contacting my server ", transportException);
                 info("Unable to contact server at " + remoteHostName + ":" + port + " " + transportException.getMessage());
             }
         }
@@ -2566,7 +2671,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
 
             } catch (Exception e) {
-                log.log(Log.INFO, "Exception logged ", e);
+                log.log(Log.INFO, "Exception while logging in ", e);
                 if (usingGUI) {
                     loginUI.setStatusMessage(e.getMessage());
                 } else {
@@ -2588,23 +2693,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
 //    /**
-//     * Check syntax and load contest.yaml.
-//     * @param directory
+//     * Is string null or trimmed length zero?.
+//     * @param string
+//     * @return
 //     */
-//    private void loadContestYaml(String directory) {
-//        
-//        ContestYAMLLoader loader = new ContestYAMLLoader();
-//        // TODO Bug 439 - find a way to load current Internal Contest from this yaml
-////        IInternalContest loadedContest = 
-//        loader.fromYaml(null, directory);
-//
-//    }
-
-    /**
-     * Is string null or trimmed length zero?.
-     * @param string
-     * @return
-     */
 //    private boolean isEmpty(String string) {
 //        return string == null || string.trim().length() == 0;
 //    }
@@ -2664,11 +2756,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         if (parseArguments.isOptPresent("--help")) {
             // -F is the ParseArguements internal option to pre-load command line options from a file
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [" 
-//            + LOAD_YAML_OPTION_STRING 
-                    + "] [--skipini] " + //
+
+            String[] usage = { //
+                    "Usage: Starter [--help] [-F filename] [--server] [--first] [--login <login>] [--password <pass>] " + //
+                    "[" + LOAD_OPTION_STRING + " <dir>|<file> ] " + //
+                    "[--skipini] " + //
                     "[" + INI_FILENAME_OPTION_STRING + " filename] [" + //
-                    CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] [" + NO_GUI_OPTION_STRING + "] [" + MAIN_UI_OPTION + " classname]");
+                    CONTEST_PASSWORD_OPTION + " <pass>] [" + NO_GUI_OPTION_STRING + "] "+ //
+                    " [" + MAIN_UI_OPTION + " classname]", // 
+                    "", //
+                    "See http://pc2.ecs.csus.edu/wiki/Command_Line for more information", // 
+            };
+            for (String string : usage) {
+                System.out.println(string);
+            }
             System.exit(0);
         }
 
@@ -3459,19 +3560,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
 
         if (usingGUI) {
+            if (ex != null) {
+                ex.printStackTrace(System.err);
+            }
             showErrorMessage(message + " check logs", "PC^2 Halted");
-            if (Utilities.isDebugMode()) {
-                if (ex != null) {
-                    ex.printStackTrace(System.err);
-                }
-            }
         } else {
-            System.err.println(message);
-            if (Utilities.isDebugMode()) {
-                if (ex != null) {
-                    ex.printStackTrace(System.err);
-                }
+            if (ex != null) {
+                ex.printStackTrace(System.err);
             }
+            System.err.println(message);
 
             if (haltOnFatalError) {
                 System.err.println("PC^2 Halted - check logs");
@@ -3495,6 +3592,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void setContest(IInternalContest newContest) {
         this.contest = newContest;
+        contest.setCommandLineArguments(parseArguments);
         packetHandler = new PacketHandler(this, newContest);
         runSubmitterInterfaceManager.setContestAndController(newContest, this);
     }

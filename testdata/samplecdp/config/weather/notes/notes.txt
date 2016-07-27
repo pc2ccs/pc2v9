@@ -1,0 +1,27 @@
+Solution and Analysis (based on early draft with N \leq 66)
+
+This is a slight twist on the Huffman Code algorithm, but it shouldn't
+be hard to figure out for students familiar with Huffman. It's a
+fairly easy problem.
+
+You'll basically be running Huffman, but there are too many "symbols"
+(4^66) to handle each one individually. However, there are a much more
+reasonable number of different probabilities represented: less than
+66^3, for each choice of #Sunny, #Cloudy, and #Rainy (#Frogs is forced
+since they sum to N). So instead of keeping a priority queue of
+individual nodes, you keep one of groups of nodes that have the same
+probability, tracking their size (requiring some basic multinomial
+calculations). At each step you'll take the lowest-probability group
+and pair its nodes up with each other (halving the size and doubling
+the probability). If there's one left over, it can join with a single
+node from a different group, becoming a new group of size 1. (This can
+only happen O(log(N)) times per group, so the number of groups won't
+blow up.)
+
+One complication is that the group sizes don't fit into 64-bit
+integers. You could use bigints, but it's not necessary; doubles will
+be fine. You can ignore the parity of groups at that size, since the
+small number of single-node groups will have an extremely tiny
+contribution to the final result. You can't ignore the parity if the
+numbers are small, but doubles represent small integers with perfect
+precision, so things work out.

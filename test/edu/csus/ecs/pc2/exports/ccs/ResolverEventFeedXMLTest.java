@@ -51,11 +51,8 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 /**
  * Unit Test.
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
  */
-
-// $HeadURL$
 public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     private static final String CONTEST_END_TAG = "</contest>";
@@ -413,9 +410,13 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
         assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, 9);
         assertXMLCounts(xml, ResolverEventFeedXML.REGION_TAG, 24);
-
+        
+        assertFirstValueFound(xml,"starttime", "0.0");
+        
+//        System.out.println("xml  = "+xml);
     }
 
+   
     /**
      * Print counts in xml string for EventFeed elements.
      * 
@@ -572,7 +573,6 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         // assertXMLCounts(xml, ResolverEventFeedXML.RUN_TAG, numruns);
 
         assertXMLCounts(xml, ResolverEventFeedXML.TESTCASE_TAG, numruns * 5);
-
     }
 
     private void validateUsingSchema(String xml) throws Exception {
@@ -859,7 +859,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
 
-        Account acc = sample.getTeamAccounts(testCaseContest)[0];
+        Account acc = SampleContest.getTeamAccounts(testCaseContest)[0];
         ClientId clientId = acc.getClientId();
         Problem problem = testCaseContest.getProblems()[0];
         Run run = sample.createRun(testCaseContest, clientId, problem);

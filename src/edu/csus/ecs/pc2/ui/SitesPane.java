@@ -21,8 +21,6 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
-import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -814,16 +812,6 @@ public class SitesPane extends JPanePlugin {
         return shutdownButton;
     }
     
-    /**
-     * Is the input ClientId a server.
-     * 
-     * @param id
-     * @return
-     */
-    private boolean isServer(ClientId id) {
-        return id != null && id.getClientType().equals(ClientType.Type.SERVER);
-    }
-
     protected void handleShutdownAction() {
 
         boolean shutdownAll = false;
@@ -877,8 +865,4 @@ public class SitesPane extends JPanePlugin {
         }
     }
 
-    private boolean isServer() {
-        return isServer(getContest().getClientId());
-    } 
-    
 } // @jve:decl-index=0:visual-constraint="10,10"

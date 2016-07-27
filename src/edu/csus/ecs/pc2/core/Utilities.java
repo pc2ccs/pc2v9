@@ -27,7 +27,6 @@ import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.exception.MultipleIssuesException;
-import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -39,7 +38,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 
@@ -61,6 +60,9 @@ public final class Utilities {
     private static final String LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     public static final String DATE_TIME_FORMAT_STRING = "yyyyddMMhhmmss.SSS";
+    
+    public static final String FORMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss z";
+
 
     /**
      * CCS directory where data files are stored (under problem short name).
@@ -71,6 +73,9 @@ public final class Utilities {
     public static final String SECRET_DATA_DIR = "data" + File.separator + "secret";
 
     private static SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
+
+    public static SimpleDateFormat formatterYYYY_MM_DD_HH_MM_SS = new SimpleDateFormat(FORMAT_YYYY_MM_DD_HH_MM_SS);
+
 
     /**
      * File Types.
@@ -1244,13 +1249,13 @@ public final class Utilities {
                     if (allProblemDCPFiles) {
 
                         // check for problem.tex
-                        String laTextProblemFilename = problemDir + ContestYAMLLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
+                        String laTextProblemFilename = problemDir + IContestLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
                         if (!isFileThere(laTextProblemFilename)) {
                             messages.add(problemTitle + "\tMissing LaTex problem file, expected at " + laTextProblemFilename);
                         }
 
                         // check for problem.yaml
-                        String problemYamlFilename = problemDir + ExportYAML.PROBLEM_FILENAME;
+                        String problemYamlFilename = problemDir + IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
                         if (!isFileThere(problemYamlFilename)) {
                             messages.add(problemTitle + "\tMissing LaTex problem YAML file, expected at " + problemYamlFilename);
                         }
@@ -1337,4 +1342,16 @@ public final class Utilities {
         return 0;
     }
 
+    /**
+     * Return date/time string for now.
+     * 
+     * Uses format {@value #FORMAT_YYYY_MM_DD_HH_MM_SS}.
+     * 
+     * @return
+     */
+    // TODO move to utility class
+    public static String getDateTimeString() {
+        return formatterYYYY_MM_DD_HH_MM_SS.format(new Date());
+    }
+    
 }

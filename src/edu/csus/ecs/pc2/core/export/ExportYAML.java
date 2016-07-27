@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Create CCS contest.yaml and problem.yaml files.
@@ -46,12 +47,6 @@ import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/export/ExportYAML.java $
 public class ExportYAML {
-
-    public static final String CONTEST_FILENAME = "contest.yaml";
-
-    public static final String PROBLEM_SET_FILENAME = "problemset.yaml";
-
-    public static final String PROBLEM_FILENAME = "problem.yaml";
 
     private static final String PAD4 = "    ";
 
@@ -81,7 +76,7 @@ public class ExportYAML {
      */
     public void exportFiles(String directoryName, IInternalContest contest) throws IOException {
 
-        String contestFileName = CONTEST_FILENAME;
+        String contestFileName = IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
         if (directoryName != null && directoryName.length() != 0) {
             contestFileName = directoryName + File.separator + contestFileName;
         }
@@ -474,7 +469,7 @@ public class ExportYAML {
      */
     public String[] writeProblemYAML(IInternalContest contest, String directoryName, Problem problem, String shortName) throws IOException {
         String targetDirectoryName = directoryName + File.separator + shortName;
-        String problemFileName = targetDirectoryName + File.separator + PROBLEM_FILENAME;
+        String problemFileName = targetDirectoryName + File.separator + IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
         ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
         return writeProblemYAML(contest, problem, problemFileName, problemDataFiles);
     }

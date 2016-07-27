@@ -9,14 +9,12 @@ import javax.ws.rs.core.SecurityContext;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
-
-/**
- * WebService to handle scoreboard
+/*
  * @author ICPC
- *
  */
 @Path("/scoreboard")
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,7 +30,7 @@ public class ScoreboardService {
     }
 
     /**
-     * This method returns a representation of the current contest scoreboard in JSON format. The return JSON is in the format defined by {@link StandingsJSON#createJSON(IInternalContest)}.
+     * This method returns a representation of the current contest scoreboard in JSON format. The return JSON is in the format defined by {@link StandingsJSON2016#createJSON(IInternalContest)}.
      * 
      * @return a String containing the JSON scoreboard
      */
@@ -52,7 +50,7 @@ public class ScoreboardService {
                 jsonScoreboard = standings.createJSON(contest,controller);
             }
         } catch (IllegalContestState e) {
-            controller.getLog().warning("ScoreboardService: IllegalState exception creating JSON scoreboard: " + e);
+            controller.getLog().log(Log.WARNING, "Problem creating scoreboard JSON:  " + e, e);
             e.printStackTrace();
             // TODO: return HTTP error response code
         }

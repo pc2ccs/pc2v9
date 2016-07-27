@@ -162,8 +162,14 @@ public class AccountsReport implements IReport {
             printWriter.print("group ''");
         }
         printWriter.println();
+        String PAD7 = "       ";
         
-        printWriter.print("       Member Names: ");
+        printWriter.println(PAD7 + "Country code '" + account.getCountryCode() + "'");
+        printWriter.print(PAD7 + "Institution '" + account.getInstitutionName() + "'");
+        printWriter.print(" code '" + account.getInstitutionCode() + "'");
+        printWriter.println(" short '" + account.getInstitutionShortName() + "'");
+
+        printWriter.print(PAD7 + "Member Names: ");
         
         String [] names = account.getMemberNames();
         

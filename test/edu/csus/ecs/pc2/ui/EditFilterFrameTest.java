@@ -11,20 +11,15 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 /**
  * Test for Edit Filter Frame
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Douglas A. Lane, PC^2 Team, <pc2@ecs.csus.edu>
  */
 
-// $HeadURL$
 public class EditFilterFrameTest extends TestCase {
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    public void testNull() throws Exception {
+        
     }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     public static void main(String[] args) {
 
