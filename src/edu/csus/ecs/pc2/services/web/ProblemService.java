@@ -5,6 +5,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -37,8 +38,10 @@ public class ProblemService {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getProblems(@Context SecurityContext sc) {
+    public Response getProblems(@Context SecurityContext sc) {
 
+        //TODO: check the SecurityContext to make sure the user is allowed to do this HTTP request...
+        
         // get the problems from the contest
         ProblemsJSON problems = new ProblemsJSON();
 
@@ -59,9 +62,13 @@ public class ProblemService {
         // TODO: figure out how to set the Response to "OK" (or whether this is necessary)
         // return Response.status(Response.Status.OK).build();
 
+
+//            return Response.status(Response.Status.BAD_REQUEST).entity("Bad request - No Content").build();
+
         // output the response to the requester (note that this actually returns it to Jersey,
         // which forwards it to the caller as the HTTP response).
-        return jsonProblems;
+//        return jsonProblems;
+        return Response.ok(jsonProblems,MediaType.APPLICATION_JSON).build();
     }
 
 }
