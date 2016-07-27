@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -208,6 +209,9 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         ContestInformation info = new ContestInformation();
         info.setContestTitle("Title One");
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTimeInMillis(1);
+        info.setScheduledStartTime(cal);
 
         String xml = toContestXML(eventFeedXML.createInfoElement(contest, info));
 
@@ -222,6 +226,10 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         debugPrintln(xml);
 
         testForValidXML(xml);
+        
+        System.out.println (xml);
+        
+//        assertXMLNodeValueEquals(xml, ", expectedValue);
     }
 
     public void testLanguageElement() throws Exception {
