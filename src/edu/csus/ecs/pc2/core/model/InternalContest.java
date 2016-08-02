@@ -3117,8 +3117,8 @@ public class InternalContest implements IInternalContest {
     }
     
     @Override
-    public void setCommandLineArguments(ParseArguments parseArguments) {
-        this.parseArguments = parseArguments;
+    public void setCommandLineArguments(ParseArguments aParseArguments) {
+        this.parseArguments = aParseArguments;
     }
 
     @Override

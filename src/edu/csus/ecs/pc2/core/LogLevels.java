@@ -21,7 +21,7 @@ public enum LogLevels {
 
     private final Level level;
     
-    private LogLevels(final Level level) {
+    LogLevels(final Level level) {
         this.level = level;
     }
     

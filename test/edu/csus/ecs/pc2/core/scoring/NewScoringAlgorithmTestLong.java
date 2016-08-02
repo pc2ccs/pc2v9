@@ -51,10 +51,10 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
-    
-    public NewScoringAlgorithmTestLong(String name){
+    public NewScoringAlgorithmTestLong(String name) {
         setName(name);
     }
+
     /**
      * output sample data rather than do the tests.
      */
@@ -714,30 +714,30 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
         // Rank TeamId Solved Penalty
 
-        String[] rankData = { 
-                
-                "1,team8,3,4", // 
-                "2,team20,2,2", // 
-                "3,team12,2,23", // 
-                "4,team5,2,24", // 
-                "5,team10,1,1", // 
-                "5,team18,1,1", // 
-                "5,team21,1,1", // 
-                "8,team9,1,2", // 
-                "8,team14,1,2", // 
-                "10,team4,1,21", // 
-                "11,team3,1,22", // 
-                "11,team19,1,22", // 
-                "13,team1,0,0", // 
-                "13,team2,0,0", // 
-                "13,team6,0,0", // 
-                "13,team7,0,0", // 
-                "13,team11,0,0", // 
-                "13,team13,0,0", // 
-                "13,team15,0,0", // 
-                "13,team16,0,0", // 
-                "13,team17,0,0", // 
-                "13,team22,0,0", // 
+        String[] rankData = {
+
+        "1,team8,3,4", //
+                "2,team20,2,2", //
+                "3,team12,2,23", //
+                "4,team5,2,24", //
+                "5,team10,1,1", //
+                "5,team18,1,1", //
+                "5,team21,1,1", //
+                "8,team9,1,2", //
+                "8,team14,1,2", //
+                "10,team4,1,21", //
+                "11,team3,1,22", //
+                "11,team19,1,22", //
+                "13,team1,0,0", //
+                "13,team2,0,0", //
+                "13,team6,0,0", //
+                "13,team7,0,0", //
+                "13,team11,0,0", //
+                "13,team13,0,0", //
+                "13,team15,0,0", //
+                "13,team16,0,0", //
+                "13,team17,0,0", //
+                "13,team22,0,0", //
         };
 
         scoreboardTest(22, runsData, rankData);
@@ -760,34 +760,31 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
         // Rank TeamId Solved Penalty
 
-        String[] groupRankData = { 
-                "1,team8,3,4", // 
-                "1,team20,2,2", // 
-                "1,team12,2,23", // 
-                "1,team5,2,24", // 
-                "2,team10,1,1", // 
-                "1,team18,1,1", // 
-                "1,team21,1,1", // 
-                "2,team9,1,2", // 
-                "1,team14,1,2", // 
-                "2,team4,1,21", // 
-                "1,team3,1,22", // 
-                "3,team19,1,22", // 
-                "4,team1,0,0", // 
-                "2,team2,0,0", // 
-                "2,team6,0,0", // 
-                "2,team7,0,0", // 
-                "2,team11,0,0", // 
-                "2,team13,0,0", // 
-                "2,team15,0,0", // 
-                "2,team16,0,0", // 
-                "2,team17,0,0", // 
-                "4,team22,0,0", // 
+        String[] groupRankData = { "1,team8,3,4", //
+                "1,team20,2,2", //
+                "1,team12,2,23", //
+                "1,team5,2,24", //
+                "2,team10,1,1", //
+                "1,team18,1,1", //
+                "1,team21,1,1", //
+                "2,team9,1,2", //
+                "1,team14,1,2", //
+                "2,team4,1,21", //
+                "1,team3,1,22", //
+                "3,team19,1,22", //
+                "4,team1,0,0", //
+                "2,team2,0,0", //
+                "2,team6,0,0", //
+                "2,team7,0,0", //
+                "2,team11,0,0", //
+                "2,team13,0,0", //
+                "2,team15,0,0", //
+                "2,team16,0,0", //
+                "2,team17,0,0", //
+                "4,team22,0,0", //
         };
 
-
-        String[] groupAssignments = {
-                "8,1", //
+        String[] groupAssignments = { "8,1", //
                 "20,5", //
                 "12,4", //
                 "5,10", //
@@ -845,7 +842,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
         // RunID TeamID Prob Time Result
 
         String[] runsData = { //
-                "1,1,A,1,No", // 20 (a No before first yes)
+        "1,1,A,1,No", // 20 (a No before first yes)
                 "2,1,A,3,Yes", // 3 (first yes counts Minute points but never Run Penalty points)
                 "3,1,A,5,No", // zero -- after Yes
                 "4,1,A,7,Yes", // zero -- after Yes
@@ -1094,7 +1091,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
         try {
             NewScoringAlgorithm newScoringAlgorithm = new NewScoringAlgorithm();
             newScoringAlgorithm.setContest(contest);
-            
+
             String xmlString = newScoringAlgorithm.getStandings(contest, scoreProps, log);
 
             if (compareGroupRanks && debugMode) {
@@ -1113,10 +1110,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
             assertTrue("Error in XML output " + e.getMessage(), true);
             e.printStackTrace();
         }
-        
-        
-        if (debugMode){
-            dumpSAInfo (contest, scoreProps, true);
+
+        if (debugMode) {
+            dumpSAInfo(contest, scoreProps, true);
         }
 
         // skip past nodes to find teamStanding node
@@ -1146,14 +1142,13 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
     }
 
     private void dumpSAInfo(InternalContest contest, Properties properties, boolean showProblemDetails) {
-        
+
         try {
             NewScoringAlgorithm algo = new NewScoringAlgorithm();
             algo.setContest(contest);
-            
+
             StandingsRecord[] standingsRecords = algo.getStandingsRecords(contest, properties);
-            
-            
+
             for (StandingsRecord standingsRecord : standingsRecords) {
 
                 System.out.println( //
@@ -1185,7 +1180,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
                 System.out.println();
             }
-            
+
         } catch (Exception e) {
             System.out.println("Error dumping StandingsRecords");
             e.printStackTrace(System.err);
@@ -1338,7 +1333,6 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
         int elapsed = getIntegerValue(data[3]);
         boolean solved = "Yes".equals(data[4]);
 
-
         boolean sendToTeams = true;
         if (data.length > 5) {
             sendToTeams = "Yes".equals(data[5]);
@@ -1481,7 +1475,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
     private void compareRanking(int rankIndex, String[] standingsRow, String[] expectedRow) {
 
         // Object[] cols = { "Rank", "Name", "Solved", "Points" };
-        
+
         if (OUTPUT_SAMPLE_DATA_FLAG) {
             System.out.print("\"");
             for (int i = 0; i < standingsRow.length; i++) {
@@ -1491,9 +1485,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
                 }
             }
             System.out.println("\", // ");
-        }
-        else 
-        {
+        } else {
             int idx = 0;
             assertEquals("Standings row " + rankIndex + " rank incorrect, ", expectedRow[idx], standingsRow[idx]);
             // assertTrue ("Standings row "+rankIndex+" rank wrong expected "+expectedRow[idx]+" found "+standingsRow[idx],
@@ -1577,18 +1569,18 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
         Vector<Account> acc = contest.getAccounts(Type.TEAM);
 
         String[] expectedData = { //
-                "TEAM5 @ site 1 A=0 B=1 C=0 D=3 E=0 ", //
+        "TEAM5 @ site 1 A=0 B=1 C=0 D=3 E=0 ", //
                 "TEAM4 @ site 1 A=0 B=2 C=2 D=0 E=0 ", //
                 "TEAM3 @ site 1 A=0 B=2 C=0 D=0 E=0 ", //
                 "TEAM2 @ site 1 A=1 B=2 C=0 D=0 E=0 ", //
                 "TEAM1 @ site 1 A=5 B=2 C=0 D=0 E=0 ", //
         };
-        
+
         int expectedIndex = 0;
         for (Account account : acc) {
             String actual = "";
             actual += account.getClientId() + " ";
-            
+
             for (Problem problem : problems) {
                 Run[] theruns = algorithm.getRuns(runs, account.getClientId(), problem);
                 actual += problem.getLetter() + "=" + theruns.length + " ";
@@ -1661,11 +1653,11 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
          * name, rank, solved, lastsolved, points; then for each problem: problem#, numRuns, points, judgedCount, pendingCount ;
          */
         String[] rep = { //
-                "team5, 1,2,155,327; 1,0,0,0,0; 2,1,155,1,0; 3,0,0,0,0; 4,3,172,2,1; 5,0,0,0,0; ", // 
-                "team1, 2,1,3,23; 1,5,23,5,0; 2,2,0,2,0; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", // 
-                "team2, 3,1,30,30; 1,1,30,1,0; 2,2,0,1,1; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", // 
-                "team3, 4,1,50,50; 1,0,0,0,0; 2,2,50,1,1; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", // 
-                "team4, 5,1,145,145; 1,0,0,0,0; 2,2,145,2,0; 3,2,0,0,2; 4,0,0,0,0; 5,0,0,0,0; ", // 
+        "team5, 1,2,155,327; 1,0,0,0,0; 2,1,155,1,0; 3,0,0,0,0; 4,3,172,2,1; 5,0,0,0,0; ", //
+                "team1, 2,1,3,23; 1,5,23,5,0; 2,2,0,2,0; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", //
+                "team2, 3,1,30,30; 1,1,30,1,0; 2,2,0,1,1; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", //
+                "team3, 4,1,50,50; 1,0,0,0,0; 2,2,50,1,1; 3,0,0,0,0; 4,0,0,0,0; 5,0,0,0,0; ", //
+                "team4, 5,1,145,145; 1,0,0,0,0; 2,2,145,2,0; 3,2,0,0,2; 4,0,0,0,0; 5,0,0,0,0; ", //
         };
 
         int i = 0;
@@ -1680,16 +1672,16 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
         for (StandingsRecord standingsRecord : recs) {
             // System.out.println("rec = " + standingsRecord);
-            if ( OUTPUT_SAMPLE_DATA_FLAG ){
+            if (OUTPUT_SAMPLE_DATA_FLAG) {
                 dumpStandingsRecordSampleData(standingsRecord);
             } else {
                 String expected = rep[i];
                 String actual = getStndingsRecordRepresenation(standingsRecord);
-                
-//                System.out.println(expected); 
-//                System.out.println(actual);
-//                System.out.println("");
-                
+
+                // System.out.println(expected);
+                // System.out.println(actual);
+                // System.out.println("");
+
                 assertEquals("Expecting same rep ", expected, actual);
             }
 
@@ -1713,8 +1705,8 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
     /**
      * Returns sample/test data.
      * 
-     * name,  rank, solved, lastsolvedtime, penalty then <br>
-     *     probbNum, points, judgecount, pendingcount
+     * name, rank, solved, lastsolvedtime, penalty then <br>
+     * probbNum, points, judgecount, pendingcount
      * 
      * @param standingsRecord
      * @return
@@ -1747,40 +1739,40 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
         return buf.toString();
 
     }
-    
-//    public static TestSuite suite() {
-//
-//        TestSuite suite = new TestSuite("NSATL");
-////        String singletonTestName = null;
-//        
-////        suite.addTest(new ExecutablePluginTest(singletonTestName));
-//        
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testNoData"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testOneRunUnjudged"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testMixedjudged"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testOneRunJudged"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testFiveRunsJudged"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseOne"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseOneGroupRanks"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseOneA"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testNoBeforeYesSameElapsed"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseTwo"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseThree"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseFour"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboard55"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboard55Groups"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testNoYes"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardForBeingJudgedState"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testTieBreakerSubmissionTime"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testSendToTeams"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testAltScoring"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testZZZZEOCSettings"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testgetRuns"));
-//        suite.addTest ( new NewScoringAlgorithmTestLong("testRankings1028"));
-//
-//        
-//        
-//        return suite;
-//
-//    }
+
+    // public static TestSuite suite() {
+    //
+    // TestSuite suite = new TestSuite("NSATL");
+    // // String singletonTestName = null;
+    //
+    // // suite.addTest(new ExecutablePluginTest(singletonTestName));
+    //
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testNoData"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testOneRunUnjudged"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testMixedjudged"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testOneRunJudged"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testFiveRunsJudged"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseOne"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseOneGroupRanks"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseOneA"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testNoBeforeYesSameElapsed"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseTwo"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseThree"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseFour"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboard55"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboard55Groups"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testNoYes"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardForBeingJudgedState"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testTieBreakerSubmissionTime"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testSendToTeams"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testAltScoring"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testZZZZEOCSettings"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testgetRuns"));
+    // suite.addTest ( new NewScoringAlgorithmTestLong("testRankings1028"));
+    //
+    //
+    //
+    // return suite;
+    //
+    // }
 }

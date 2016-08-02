@@ -39,7 +39,7 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
      */
     private static final long serialVersionUID = 3600350449535614012L;
     
-    public DevelopmentFrame developmentFrame = null;
+    private DevelopmentFrame developmentFrame = null;
     
     /**
      * Is this logged in as a server module? 

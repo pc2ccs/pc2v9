@@ -74,7 +74,7 @@ public final class Utilities {
 
     private static SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
 
-    public static SimpleDateFormat formatterYYYY_MM_DD_HH_MM_SS = new SimpleDateFormat(FORMAT_YYYY_MM_DD_HH_MM_SS);
+    private static SimpleDateFormat formatterYYYYMMDDHHMMSS = new SimpleDateFormat(FORMAT_YYYY_MM_DD_HH_MM_SS);
 
 
     /**
@@ -1351,7 +1351,7 @@ public final class Utilities {
      */
     // TODO move to utility class
     public static String getDateTimeString() {
-        return formatterYYYY_MM_DD_HH_MM_SS.format(new Date());
+        return formatterYYYYMMDDHHMMSS.format(new Date());
     }
     
 }

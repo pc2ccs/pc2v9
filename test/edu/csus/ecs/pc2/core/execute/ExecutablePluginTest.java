@@ -498,7 +498,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
          */
         private String executeDirectoryName = null;
 
-        public ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles,
+        ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles,
                 String executionDir) {
             super(inContest, inController, run, runFiles);
             setExecuteDirectoryName(executionDir);

@@ -11,7 +11,11 @@ import java.awt.datatransfer.StringSelection;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  * @author laned@ecs.csus.edu
  */
-public class ClipboardUtilities {
+public final class ClipboardUtilities {
+    
+    private ClipboardUtilities() {
+        super();
+    }
     
     /**
      * Put text into clipboard.

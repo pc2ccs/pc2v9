@@ -153,7 +153,7 @@ public class InternalControllerTest extends AbstractTestCase {
         private String message;
         private Exception ex;
         
-        public OverrideFatalErrorController(IInternalContest contest) {
+        OverrideFatalErrorController(IInternalContest contest) {
             super(contest);
             if (contest.getClientId() == null){
                 throw new InvalidParameterException("Must be logged in, clientId in contest is null");

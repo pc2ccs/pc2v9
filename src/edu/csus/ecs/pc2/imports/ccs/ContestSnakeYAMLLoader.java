@@ -439,7 +439,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         time.setContestLengthSecs(parseTimeIntoSeconds(contestLength, Constants.DEFAULT_CONTEST_LENGTH_SECONDS));
         contest.updateContestTime(time);
-        ;
     }
 
     /**
@@ -530,7 +529,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Vector<Account> accountVector = new Vector<Account>();
         AccountList accountList = new AccountList();
 
-        Map<String, Object> yamlContent = loadYaml(yamlLines);
+        yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, ACCOUNTS_KEY);
 
         if (list != null) {
@@ -593,7 +592,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         PlaybackInfo info = new PlaybackInfo();
 
-        Map<String, Object> yamlContent = loadYaml(yamlLines);
+        yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, REPLAY_KEY);
 
         if (list != null) {
@@ -634,7 +633,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public Site[] getSites(String[] yamlLines) {
 
-        Map<String, Object> yamlContent = loadYaml(yamlLines);
+        yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, SITES_KEY);
         ArrayList<Site> sitesVector = new ArrayList<Site>();
 
@@ -881,7 +880,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     public Language[] getLanguages(String[] yamlLines) {
         ArrayList<Language> languageList = new ArrayList<Language>();
 
-        Map<String, Object> yamlContent = loadYaml(yamlLines);
+        yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, LANGUAGE_KEY);
 
         if (list != null) {
@@ -967,7 +966,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         Vector<Problem> problemList = new Vector<Problem>();
 
-        Map<String, Object> yamlContent = loadYaml(yamlLines);
+        yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, PROBLEMS_KEY);
 
         if (list != null) {
@@ -1108,7 +1107,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         ArrayList<AutoJudgeSetting> ajList = new ArrayList<AutoJudgeSetting>();
 
-        Map<String, Object> yamlContent = loadYaml(yamlLines);
+        yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, AUTO_JUDGE_KEY);
 
         if (list != null) {
@@ -1588,7 +1587,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public void assignJudgingType(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
 
-        Map<String, Object> yamlContent = loadYaml(yaml);
+        yamlContent = loadYaml(yaml);
 
         @SuppressWarnings("unchecked")
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, IContestLoader.JUDGING_TYPE_KEY);

@@ -88,7 +88,7 @@ public class WebServer implements UIPlugin {
 
     public static final String TEAMS_SERVICE_ENABLED_KEY = "enableTeams";
 
-    Properties wsProperties = new Properties();
+    private Properties wsProperties = new Properties();
 
     private Server jettyServer = null;
 
@@ -165,9 +165,9 @@ public class WebServer implements UIPlugin {
      * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty. TODO: need to provide support for
      * dynamically reconfiguring the registered services.
      */
-    public void startWebServer(IInternalContest contest, IInternalController controller, Properties properties) {
+    public void startWebServer(IInternalContest aContest, IInternalController aController, Properties properties) {
 
-        setContestAndController(contest,controller);
+        setContestAndController(aContest,aController);
         wsProperties = properties;
 
         try {

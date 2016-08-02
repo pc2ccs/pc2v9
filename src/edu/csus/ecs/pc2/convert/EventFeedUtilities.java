@@ -7,11 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class EventFeedUtilities
-{
+/**
+ * Event Feed Utilities
+ * 
+ * @author ICPC
+ *
+ */
+public final class EventFeedUtilities {
 
     public static final long MS_PER_SECOND = 1000;
     
+    private EventFeedUtilities() {
+        super();
+    }
+
     public static String[] getAllLanguages(List<EventFeedRun> runs) {
 
         Map<String, String> map = new HashMap<String, String>();
@@ -42,7 +51,7 @@ public class EventFeedUtilities
         }
         return max;
     }
-    
+
     /**
      * Convert decimal string to ms.
      * 
@@ -82,8 +91,6 @@ public class EventFeedUtilities
             } else {
                 return Long.parseLong(decimalSeconds) * MS_PER_SECOND;
             }
-        } else {
-
         }
         return 0;
     }
@@ -96,7 +103,7 @@ public class EventFeedUtilities
      * @param runId
      *            run id.
      */
-  public static List<String> fetchRunFileNames(String dirname, String runId) {
+    public static List<String> fetchRunFileNames(String dirname, String runId) {
 
         ArrayList<String> list = new ArrayList<>();
 
@@ -115,6 +122,4 @@ public class EventFeedUtilities
         return list;
     }
 
-
-    
 }
