@@ -436,9 +436,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ContestTime time = contest.getContestTime();
         if (time == null) {
             time = new ContestTime();
+            time.setSiteNumber(contest.getSiteNumber());
         }
         time.setContestLengthSecs(parseTimeIntoSeconds(contestLength, Constants.DEFAULT_CONTEST_LENGTH_SECONDS));
         contest.updateContestTime(time);
+        ;
     }
 
     /**
@@ -529,7 +531,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Vector<Account> accountVector = new Vector<Account>();
         AccountList accountList = new AccountList();
 
-        yamlContent = loadYaml(yamlLines);
+        Map<String, Object> yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, ACCOUNTS_KEY);
 
         if (list != null) {
@@ -592,7 +594,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         PlaybackInfo info = new PlaybackInfo();
 
-        yamlContent = loadYaml(yamlLines);
+        Map<String, Object> yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, REPLAY_KEY);
 
         if (list != null) {
@@ -633,7 +635,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public Site[] getSites(String[] yamlLines) {
 
-        yamlContent = loadYaml(yamlLines);
+        Map<String, Object> yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, SITES_KEY);
         ArrayList<Site> sitesVector = new ArrayList<Site>();
 
@@ -733,7 +735,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String problemYamlFilename = problemDirectory + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
 
         Map<String, Object> content = loadYaml(problemYamlFilename);
-
+        
         String problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_PROBLEM_LATEX_FILENAME;
 
         String problemTitle = fetchValue(content, PROBLEM_NAME_KEY);
@@ -880,7 +882,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     public Language[] getLanguages(String[] yamlLines) {
         ArrayList<Language> languageList = new ArrayList<Language>();
 
-        yamlContent = loadYaml(yamlLines);
+        Map<String, Object> yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, LANGUAGE_KEY);
 
         if (list != null) {
@@ -962,11 +964,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @SuppressWarnings("unchecked")
     @Override
     public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
-            boolean todobool) {
+            boolean manualReviewOverride) {
 
         Vector<Problem> problemList = new Vector<Problem>();
 
-        yamlContent = loadYaml(yamlLines);
+        Map<String, Object> yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, PROBLEMS_KEY);
 
         if (list != null) {
@@ -1017,6 +1019,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setLetter(problemLetter);
                 problem.setColorName(colorName);
                 problem.setColorRGB(colorRGB);
+
+                // assign global judging type values.
+                assignDefaultJudgingTypes(yamlLines, problem, manualReviewOverride);
+                
+                // assign individual judging type values.
+                assignJudgingType(map, problem, manualReviewOverride);
 
                 boolean loadFilesFlag = fetchBooleanValue(map, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
                 problem.setUsingExternalDataFiles(!loadFilesFlag);
@@ -1107,7 +1115,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         ArrayList<AutoJudgeSetting> ajList = new ArrayList<AutoJudgeSetting>();
 
-        yamlContent = loadYaml(yamlLines);
+        Map<String, Object> yamlContent = loadYaml(yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, AUTO_JUDGE_KEY);
 
         if (list != null) {
@@ -1583,24 +1591,44 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             syntaxError("Missing " + fieldName);
         }
     }
+    
 
     @Override
-    public void assignJudgingType(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
+    public void assignDefaultJudgingTypes(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
 
-        yamlContent = loadYaml(yaml);
+//        Map<String, Object> map = loadYaml(yaml);
 
-        @SuppressWarnings("unchecked")
-        ArrayList<Map<String, Object>> list = fetchList(yamlContent, IContestLoader.JUDGING_TYPE_KEY);
-
-        if (list != null) {
-            Map<String, Object> map = (Map<String, Object>) list.get(0);
+        // TODO TODAY
+        
+        // handle assigning problem from set of default judgement types
+        
+//        boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
+//        if (sendPreliminary) {
+//            problem.setPrelimaryNotification(true);
+//        }
+//
+//        boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, true);
+//        problem.setComputerJudged(computerJudged);
+//
+//        boolean manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
+//        problem.setManualReview(true);
+        
+    }
+    
+    /**
+     * Assign individual problem judging type based on map values.
+     * @param map
+     * @param problem
+     * @param overrideManualReviewFlag
+     */
+    protected void assignJudgingType(Map<String, Object> map, Problem problem, boolean overrideManualReviewFlag) {
 
             boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
             if (sendPreliminary) {
                 problem.setPrelimaryNotification(true);
             }
 
-            boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, problem.isComputerJudged());
+            boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, true);
             problem.setComputerJudged(computerJudged);
 
             boolean manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
@@ -1612,9 +1640,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (manualReview) {
                 problem.setManualReview(true);
             }
-
         }
-    }
 
     /**
      * Convert String to second. Expects input in form: ss or mm:ss or hh:mm:ss
@@ -1800,5 +1826,4 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return contest;
     }
     
-
 }

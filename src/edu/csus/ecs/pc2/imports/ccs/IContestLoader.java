@@ -167,7 +167,7 @@ public interface IContestLoader {
     Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine);
 
     Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
-            boolean todobool);
+            boolean manualReviewOverride);
 
     Problem[] getProblemsFromLetters(Problem[] contestProblems, String string);
 
@@ -227,7 +227,7 @@ public interface IContestLoader {
 
     boolean getBooleanValue(String string, boolean defaultBoolean);
 
-    void assignJudgingType(String[] yaml, Problem problem, boolean overrideManualReviewFlag);
+    void assignDefaultJudgingTypes(String[] yaml, Problem problem, boolean overrideManualReviewFlag);
     
     /**
      * Load contest with settings from file/CDP.
