@@ -787,8 +787,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         if (!pc2FormatProblemYamlFile) {
-            problem.setComputerJudged(true);
-
             // TODO CCS add CCS validator derived based on build script
 
             /**
@@ -803,9 +801,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             addCCSValidator(problem, problemDataFiles, baseDirectoryName);
 
         } else {
-            problem.setComputerJudged(true);
             addDefaultPC2Validator(problem, 1);
         }
+        
+        assignJudgingType(content, problem, overrideManualReview);
+
 
         boolean manualReview = fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
         if (overrideManualReview) {
@@ -1592,55 +1592,70 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
     }
     
-
     @Override
     public void assignDefaultJudgingTypes(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
 
-//        Map<String, Object> map = loadYaml(yaml);
-
-        // TODO TODAY
-        
-        // handle assigning problem from set of default judgement types
-        
-//        boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
-//        if (sendPreliminary) {
-//            problem.setPrelimaryNotification(true);
-//        }
-//
-//        boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, true);
-//        problem.setComputerJudged(computerJudged);
-//
-//        boolean manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
-//        problem.setManualReview(true);
-        
+        Map<String, Object> map = loadYaml(yaml);
+        assignJudgingType(map, problem, overrideManualReviewFlag);
     }
     
     /**
      * Assign individual problem judging type based on map values.
+     * 
      * @param map
      * @param problem
      * @param overrideManualReviewFlag
      */
     protected void assignJudgingType(Map<String, Object> map, Problem problem, boolean overrideManualReviewFlag) {
 
-            boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
-            if (sendPreliminary) {
-                problem.setPrelimaryNotification(true);
-            }
+//        if (map == null || map.entrySet().isEmpty()){
+//            System.out.println("debug problem "+problem.getShortName()+" has NO map");
+//        } else {
+//            System.out.println("debug problem "+problem.getShortName()+" "+map);
+//        }
 
-            boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, true);
-            problem.setComputerJudged(computerJudged);
-
-            boolean manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
-
-            if (overrideManualReviewFlag) {
-                manualReview = true;
-            }
-
-            if (manualReview) {
-                problem.setManualReview(true);
-            }
+        boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
+        
+        if (sendPreliminary) {
+            problem.setPrelimaryNotification(true);
         }
+
+        boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, true);
+        problem.setComputerJudged(computerJudged);
+
+        boolean manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
+
+        if (overrideManualReviewFlag) {
+            manualReview = true;
+        }
+
+        if (manualReview) {
+            problem.setManualReview(true);
+        }
+
+//        printKeyFound("debug ", map, COMPUTER_JUDGING_KEY);
+//        printKeyFound("debug ", map, MANUAL_REVIEW_KEY);
+//        printKeyFound("debug ", map, SEND_PRELIMINARY_JUDGEMENT_KEY);
+//        System.out.println("debug  " + toStringTwo(problem));
+//        System.out.println();
+
+    }
+
+    protected void printKeyFound(String message, Map<String, Object> map, String key) {
+        Object object = map.get(key);
+        String value = "MISSING";
+        if (object != null) {
+            value = object.toString();
+        }
+        System.out.println(message + " " + key + " = " + value);
+    }
+
+    protected String toStringTwo(Problem problem) {
+        
+        return "Problem "+problem.getShortName()+"  cj/man/prelim = "+problem.isComputerJudged()+ //
+                " / " +problem.isManualReview() + //
+                " / " +problem.isPrelimaryNotification();
+    }
 
     /**
      * Convert String to second. Expects input in form: ss or mm:ss or hh:mm:ss

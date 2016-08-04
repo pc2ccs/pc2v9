@@ -4,6 +4,10 @@
 # $Id: problem.yaml 2352 2011-09-20 21:38:11Z laned $
 --- 
 
+computer-judged: false
+manual-review: true
+send-prelim-judgement: false
+
 name: biobots
 source: 
 author: 

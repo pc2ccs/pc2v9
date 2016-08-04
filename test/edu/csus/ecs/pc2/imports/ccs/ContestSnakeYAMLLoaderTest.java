@@ -97,18 +97,18 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     public void testLoaderMethods() throws Exception {
 
 
-        // editFile(getYamlTestFileName());
+        String yamlFilename= getTestFilename("contest.jt.yaml");
 
-        String[] contents = Utilities.loadFile(getYamlTestFileName());
+        String[] contents = Utilities.loadFile(yamlFilename);
 
-        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+        assertFalse("File missing " + yamlFilename, contents.length == 0);
         
 //        startExplorer(getDataDirectory());
+//        editFile(yamlFilename);jj
         
         IInternalContest contest = loader.fromYaml(null, contents, getDataDirectory());
 
         assertNotNull(contest);
-
 
         // name: ACM-ICPC World Finals 2011
         assertEquals("Contest title", "ACM-ICPC World Finals 2011", contest.getContestInformation().getContestTitle());
@@ -135,10 +135,12 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Problem problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "apl", problem.getDisplayName());
         assertEquals("Expected default timeout ", IContestLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
-        
+
         assertTrue(problem.isComputerJudged());  // IS
         assertFalse(problem.isManualReview());
         assertFalse(problem.isPrelimaryNotification());
+        
+        assertJudgementTypes(problem, true, false, false);
 
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "barcodes", problem.getDisplayName());
@@ -147,33 +149,39 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertTrue(problem.isComputerJudged());   // IS
         assertFalse(problem.isManualReview());
         assertFalse(problem.isPrelimaryNotification());
-
-        // TODO TODAY - uncomment and fix code.
         
-//        problem = problems[problemIndex++];
-//        assertEquals("Expected problem name ", "biobots", problem.getDisplayName());
-//        assertEquals("Expecting problem timeout for " + problem, 23, problem.getTimeOutInSeconds());
-//        
+        assertJudgementTypes(problem, true, false, false);
+
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "biobots", problem.getDisplayName());
+        assertEquals("Expecting problem timeout for " + problem, 23, problem.getTimeOutInSeconds());
+
 //        assertFalse(problem.isComputerJudged());
 //        assertTrue(problem.isManualReview());     // IS
 //        assertFalse(problem.isPrelimaryNotification());
-//
-//        problem = problems[problemIndex++];
-//        assertEquals("Expected problem name ", "castles", problem.getDisplayName());
-//        assertEquals("Expecting problem timeout for " + problem, 4, problem.getTimeOutInSeconds());
-//        
+        
+        assertJudgementTypes(problem, false, true, false);
+
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "castles", problem.getDisplayName());
+        assertEquals("Expecting problem timeout for " + problem, 4, problem.getTimeOutInSeconds());
+
 //        assertTrue(problem.isComputerJudged());   // IS 
 //        assertTrue(problem.isManualReview());     // IS
 //        assertFalse(problem.isPrelimaryNotification());
-//
-//        problem = problems[problemIndex++];
-//        assertEquals("Expected problem name ", "channel", problem.getDisplayName());
-//        assertEquals("Expected default timeout ", IContestLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
-//
+//        
+        assertJudgementTypes(problem, true, true, false);
+
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "channel", problem.getDisplayName());
+        assertEquals("Expected default timeout ", IContestLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
+
 //        assertTrue(problem.isComputerJudged());   // IS
 //        assertTrue(problem.isManualReview());   // IS
 //        assertTrue(problem.isPrelimaryNotification());   // IS
 
+        assertJudgementTypes(problem, true, true, true);
+      
     }
     
     /**
@@ -196,9 +204,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected problem name ", "apl", problem.getDisplayName());
         assertEquals("Expected default timeout ", IContestLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
 
-        assertFalse(problem.isComputerJudged());
-        assertTrue(problem.isManualReview());
-        assertFalse(problem.isPrelimaryNotification());
+        assertJudgementTypes(problem, false, true, false);
+//        assertFalse(problem.isComputerJudged());
+//        assertTrue(problem.isManualReview());
+//        assertFalse(problem.isPrelimaryNotification());
     }
     
     public void testProblemSetJudgingTypesTwo() throws Exception {
@@ -212,9 +221,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         Problem problem = problems[0];
        
-        assertTrue(problem.isComputerJudged()); 
-        assertFalse(problem.isManualReview());
-        assertFalse(problem.isPrelimaryNotification());
+        assertJudgementTypes(problem, true, false, false);
     }
     
     
@@ -236,10 +243,11 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         assertEquals("Expected problem name ", "biobots", problem.getDisplayName());
 
-        // TODO TODAY uncomment and fix code.
-//        assertTrue(problem.isComputerJudged()); 
-//        assertTrue(problem.isManualReview());
-//        assertTrue(problem.isPrelimaryNotification());
+        assertTrue(problem.isComputerJudged()); 
+        assertTrue(problem.isManualReview());
+        assertTrue(problem.isPrelimaryNotification());
+        
+        assertJudgementTypes(problem, true, true, true);
     }
     
     
@@ -249,13 +257,22 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      */
     public void testDefaultJudgingTypes() throws Exception {
         
-        
         String inputYamlFile = getDataDirectory("contest.yaml");
-        System.out.println(inputYamlFile);
+//        System.out.println("input Filename: "+inputYamlFile);
         
+        String[] lines = Utilities.loadFile(inputYamlFile);
+
+        IInternalContest contest = loader.fromYaml(null, lines, getDataDirectory());
+
+        assertNotNull(contest);
         
-        // TODO TODAY code unit test
-//        fail();  // TODO
+        Problem[] problems = contest.getProblems();
+        
+        assertEquals("Expecting number of problems ",5, problems.length);
+        
+        Problem problem = problems[0];
+        
+        assertJudgementTypes(problem, true, false, false);
     }
     
     /**
@@ -265,23 +282,54 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     public void testJudgementTypesinProblemYaml() throws Exception {
 
         String dir = getDataDirectory(this.getName());
-        String filename = dir + File.separator + IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
-//        System.out.println("filename " + filename);
-
-//         ensureDirectory(dir);
-//         editFile(filename);
         
-        // TODO TODAY uncomment and make pass, write unit test
-//        Problem problem = new Problem("testdefaulta");
-//
-//        IInternalContest contest = new InternalContest();
-//
-//        problem.setShortName("td");
-//        
-//        boolean overrideUsePc2Validator = true;
+        String problemShortName = "td";
+//        ensureDirectory(dir);
+        
+//        String filename = dir + File.separator + problemShortName + File.separator +IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
+//        System.out.println("filename " + filename);
+//        editFile(filename);
+        
+//        startExplorer(dir);
+        String problemTitlte = "sumit Title"; // note also set in problem.yaml
+        Problem problem = new Problem(problemTitlte);
+        problem.setShortName("BeforeLoad");
+        
+        assertJudgementTypes(problem, false, false, false);
 
-//        loader.loadProblemInformationAndDataFiles(contest, dir, problem, overrideUsePc2Validator);
+        IInternalContest contest = new InternalContest();
 
+        problem.setShortName(problemShortName);
+
+        boolean overrideUsePc2Validator = false;
+
+        loader.loadProblemInformationAndDataFiles(contest, dir, problem, overrideUsePc2Validator);
+
+        Problem[] problems = contest.getProblems();
+
+        assertEquals("Expecting number of problems ", 1, problems.length);
+
+        Problem problem2 = problems[0];
+
+        assertEquals("Problem title", problemTitlte, problem2.getDisplayName());
+        
+        assertJudgementTypes(problem2, false, true, true);
+    }
+    
+   
+
+    /**
+     * Tests problem judgement types.
+     * 
+     * @param problem
+     * @param computerJudged
+     * @param manualReview
+     * @param prelimaryNotification
+     */
+    private void assertJudgementTypes(Problem problem, boolean computerJudged, boolean manualReview, boolean prelimaryNotification) {
+        assertEquals("Expecting comptuer judged for " + problem.getShortName(), computerJudged, problem.isComputerJudged());
+        assertEquals("Expecting manual review for " + problem.getShortName(), manualReview, problem.isManualReview());
+        assertEquals("Expecting prelim notification  for " + problem.getShortName(), prelimaryNotification, problem.isPrelimaryNotification());
     }
 
     private String getYamlTestFileName() {
@@ -374,6 +422,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected default timeout for " + problem, 20, problem.getTimeOutInSeconds());
 
         assertTrue("Expecting comptuer judged", problem.isComputerJudged());
+        
+        assertJudgementTypes(problem, true, false, false);
 
     }
     
