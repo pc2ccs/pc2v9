@@ -22,6 +22,10 @@ problemset:
     rgb:        #00ff00
     timeout:    23
 
+    computer-judged: true
+    manual-review: true
+    send-prelim-judgement: true
+
   - letter:     D
     short-name: castles
     color:      blue
