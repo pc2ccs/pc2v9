@@ -106,7 +106,6 @@
     </target>
 
     <target name="init" depends="properties">
-<!--        <taskdef resource="checkstyletask.properties" classpathref="checkstyle.classpath"/> -->
         <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpathref="checkstyle.classpath"/>
         <!-- Create the time stamp -->
         <tstamp />
@@ -220,6 +219,7 @@
     </target>
 
     <target name="checkstyle" description="Generates a report of code convention violations." depends="init">
+        <mkdir dir="${build.dir}"/>
         <checkstyle config="${basedir}/.pc2_checks.xml" failureProperty="checkstyle.failure" failOnViolation="false">
             <formatter type="xml" tofile="${build.dir}/checkstyle-result.xml" />
             <fileset dir="src" includes="**/*.java" />
