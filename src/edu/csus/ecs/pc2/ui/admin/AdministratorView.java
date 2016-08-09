@@ -2,11 +2,13 @@ package edu.csus.ecs.pc2.ui.admin;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -188,6 +190,10 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         }
     }
 
+//    Show ScheduledStartTime (if any) on AdminView in place of Contest Clock.
+//    Need to add a ContestInformationListener to the AdminView frame, and register it in AdminView.setContestAndController().
+//    Then in the ContestInformationChanged() listener method, check if there is a ScheduledStartTime set AND if the contest
+//        is NOT started; if both are true then get the ScheduledStartTime, format it, and display it on the Frame.
 
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -718,13 +724,25 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
         /** This method exists to support differentiation between manual and automatic starts,
          * in the event this is desired in the future.
-         * Currently it just delegates the handling to the contestStarted() method.
+         * Currently it just delegates the handling to the contestStarted() method,
+         * although it also pops up a notification dialog that the contest has been "auto-started".
          */
         @Override
         public void contestAutoStarted(ContestTimeEvent event) {
             contestStarted(event);
-            JOptionPane.showMessageDialog(null, "Scheduled Start Time has arrived; contest has been automatically started!", "Contest Started",
-                    JOptionPane.INFORMATION_MESSAGE);
+//            JOptionPane.showMessageDialog(null, "Scheduled Start Time has arrived; contest has been automatically started!", "Contest Started",
+//                    JOptionPane.INFORMATION_MESSAGE);
+            
+            //force the notification dialog to always be on top even if the Admin isn't the active program
+            // (Note: this works on Windows; it may not work under Linux -- and/or it may be window-system dependent...)
+            JOptionPane optionPane = new JOptionPane();
+            optionPane.setMessage("Scheduled Start Time has arrived; contest has been automatically started!");
+            optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE); //for some reason this doesn't set an icon...
+            JDialog dialog = optionPane.createDialog("Contest Started");
+            dialog.setLocationRelativeTo(null); //center the dialog
+            dialog.setModalityType(ModalityType.APPLICATION_MODAL);
+            dialog.setAlwaysOnTop(true);
+            dialog.setVisible(true);
         }
 
     }
