@@ -20,6 +20,8 @@ import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -92,30 +94,24 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         printWriter.println("    program execute cmd : " + language.getProgramExecuteCommandLine());
     }
 
-    /**
-     * 
-     * @throws Exception
-     */
     public void testLoaderMethods() throws Exception {
 
-        // editFile(getYamlTestFileName());
 
-        String[] contents = Utilities.loadFile(getYamlTestFileName());
+        String yamlFilename= getTestFilename("contest.jt.yaml");
 
-        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+        String[] contents = Utilities.loadFile(yamlFilename);
 
-        // editFile(getYamlTestFileName());
+        assertFalse("File missing " + yamlFilename, contents.length == 0);
+        
+//        startExplorer(getDataDirectory());
+//        editFile(yamlFilename);jj
+        
         IInternalContest contest = loader.fromYaml(null, contents, getDataDirectory());
 
         assertNotNull(contest);
 
         // name: ACM-ICPC World Finals 2011
         assertEquals("Contest title", "ACM-ICPC World Finals 2011", contest.getContestInformation().getContestTitle());
-
-        // short-name: ICPC WF 2011
-        // start-time: 2011-02-04 01:23Z
-        // duration: 5:00:00
-        // scoreboard-freeze: 4:00:00
 
         Language[] languages = loader.getLanguages(contents);
 
@@ -134,33 +130,206 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         assertEquals("Number of problems", 5, problems.length);
 
-        for (Problem problem : problems) {
-            assertFalse("Expecting NOT manual review", problem.isManualReview());
-        }
-
         int problemIndex = 0;
 
         Problem problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "apl", problem.getDisplayName());
         assertEquals("Expected default timeout ", IContestLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
 
+        assertTrue(problem.isComputerJudged());  // IS
+        assertFalse(problem.isManualReview());
+        assertFalse(problem.isPrelimaryNotification());
+        
+        assertJudgementTypes(problem, true, false, false);
+
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "barcodes", problem.getDisplayName());
         assertEquals("Expecting problem timeout for " + problem, 10, problem.getTimeOutInSeconds());
+        
+        assertTrue(problem.isComputerJudged());   // IS
+        assertFalse(problem.isManualReview());
+        assertFalse(problem.isPrelimaryNotification());
+        
+        assertJudgementTypes(problem, true, false, false);
 
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "biobots", problem.getDisplayName());
         assertEquals("Expecting problem timeout for " + problem, 23, problem.getTimeOutInSeconds());
 
+//        assertFalse(problem.isComputerJudged());
+//        assertTrue(problem.isManualReview());     // IS
+//        assertFalse(problem.isPrelimaryNotification());
+        
+        assertJudgementTypes(problem, false, true, false);
+
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "castles", problem.getDisplayName());
         assertEquals("Expecting problem timeout for " + problem, 4, problem.getTimeOutInSeconds());
 
+//        assertTrue(problem.isComputerJudged());   // IS 
+//        assertTrue(problem.isManualReview());     // IS
+//        assertFalse(problem.isPrelimaryNotification());
+//        
+        assertJudgementTypes(problem, true, true, false);
+
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "channel", problem.getDisplayName());
         assertEquals("Expected default timeout ", IContestLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
-        assertFalse("Expecting not comptuer judged", problem.isComputerJudged());
 
+//        assertTrue(problem.isComputerJudged());   // IS
+//        assertTrue(problem.isManualReview());   // IS
+//        assertTrue(problem.isPrelimaryNotification());   // IS
+
+        assertJudgementTypes(problem, true, true, true);
+      
+    }
+    
+    /**
+     * Test judgement types in problemset: 
+     */
+    public void testProblemSetJudgingTypes () throws Exception {
+
+        String[] yamlLines = { //
+        "problemset:", //
+                "  - letter:     A", //
+                "    short-name: apl", //
+                "    color:      yellow", //
+                "    rgb:        #ffff00", //
+                "    computer-judged: false", "    manual-review: true", "    send-prelim-judgement: false", };
+
+        Problem[] problems = loader.getProblems(yamlLines, IContestLoader.DEFAULT_TIME_OUT);
+        int problemIndex = 0;
+
+        Problem problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "apl", problem.getDisplayName());
+        assertEquals("Expected default timeout ", IContestLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
+
+        assertJudgementTypes(problem, false, true, false);
+//        assertFalse(problem.isComputerJudged());
+//        assertTrue(problem.isManualReview());
+//        assertFalse(problem.isPrelimaryNotification());
+    }
+    
+    public void testProblemSetJudgingTypesTwo() throws Exception {
+        String inputYamlFile = getProblemSetYamlTestFileName();
+        
+        String[] yamlLines = Utilities.loadFile(inputYamlFile);
+        
+        Problem[] problems = loader.getProblems(yamlLines, IContestLoader.DEFAULT_TIME_OUT);
+        
+        assertEquals("Expecting number of problems ",5, problems.length);
+        
+        Problem problem = problems[0];
+       
+        assertJudgementTypes(problem, true, false, false);
+    }
+    
+    
+    /**
+     * Test Judging Type in problem.
+     * 
+     * @throws Exception
+     */
+    public void testProblemSetJudgingTypesThree() throws Exception {
+        String inputYamlFile = getProblemSetYamlTestFileName();
+        
+        String[] yamlLines = Utilities.loadFile(inputYamlFile);
+        
+        Problem[] problems = loader.getProblems(yamlLines, IContestLoader.DEFAULT_TIME_OUT);
+        
+        assertEquals("Expecting number of problems ",5, problems.length);
+        
+        Problem problem = problems[2];
+        
+        assertEquals("Expected problem name ", "biobots", problem.getDisplayName());
+
+        assertTrue(problem.isComputerJudged()); 
+        assertTrue(problem.isManualReview());
+        assertTrue(problem.isPrelimaryNotification());
+        
+        assertJudgementTypes(problem, true, true, true);
+    }
+    
+    
+    /**
+     * Test Judgement types in main contest.yaml.
+     * 
+     */
+    public void testDefaultJudgingTypes() throws Exception {
+        
+        String inputYamlFile = getDataDirectory("contest.yaml");
+//        System.out.println("input Filename: "+inputYamlFile);
+        
+        String[] lines = Utilities.loadFile(inputYamlFile);
+
+        IInternalContest contest = loader.fromYaml(null, lines, getDataDirectory());
+
+        assertNotNull(contest);
+        
+        Problem[] problems = contest.getProblems();
+        
+        assertEquals("Expecting number of problems ",5, problems.length);
+        
+        Problem problem = problems[0];
+        
+        assertJudgementTypes(problem, true, false, false);
+    }
+    
+    /**
+     * Test default Judgement types problem.yaml
+     * 
+     */
+    public void testJudgementTypesinProblemYaml() throws Exception {
+
+        String dir = getDataDirectory(this.getName());
+        
+        String problemShortName = "td";
+//        ensureDirectory(dir);
+        
+//        String filename = dir + File.separator + problemShortName + File.separator +IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
+//        System.out.println("filename " + filename);
+//        editFile(filename);
+        
+//        startExplorer(dir);
+        String problemTitlte = "sumit Title"; // note also set in problem.yaml
+        Problem problem = new Problem(problemTitlte);
+        problem.setShortName("BeforeLoad");
+        
+        assertJudgementTypes(problem, false, false, false);
+
+        IInternalContest contest = new InternalContest();
+
+        problem.setShortName(problemShortName);
+
+        boolean overrideUsePc2Validator = false;
+
+        loader.loadProblemInformationAndDataFiles(contest, dir, problem, overrideUsePc2Validator);
+
+        Problem[] problems = contest.getProblems();
+
+        assertEquals("Expecting number of problems ", 1, problems.length);
+
+        Problem problem2 = problems[0];
+
+        assertEquals("Problem title", problemTitlte, problem2.getDisplayName());
+        
+        assertJudgementTypes(problem2, false, true, true);
+    }
+    
+   
+
+    /**
+     * Tests problem judgement types.
+     * 
+     * @param problem
+     * @param computerJudged
+     * @param manualReview
+     * @param prelimaryNotification
+     */
+    private void assertJudgementTypes(Problem problem, boolean computerJudged, boolean manualReview, boolean prelimaryNotification) {
+        assertEquals("Expecting comptuer judged for " + problem.getShortName(), computerJudged, problem.isComputerJudged());
+        assertEquals("Expecting manual review for " + problem.getShortName(), manualReview, problem.isManualReview());
+        assertEquals("Expecting prelim notification  for " + problem.getShortName(), prelimaryNotification, problem.isPrelimaryNotification());
     }
 
     private String getYamlTestFileName() {
@@ -171,13 +340,27 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         IInternalContest contest = loader.fromYaml(null, getDataDirectory());
         assertNotNull(contest);
+        
+//        startExplorer(getDataDirectory());
 
         assertEquals("Contest title", "ACM-ICPC World Finals 2011", contest.getContestInformation().getContestTitle());
 
+        ContestInformation info = contest.getContestInformation();
+        
         // short-name: ICPC WF 2011
+        assertEquals("ICPC WF 2011", info.getContestShortName());
+        
         // start-time: 2011-02-04 01:23Z
+        assertEquals("Fri Feb 04 01:23:00 PST 2011", info.getStartDate().toString());
+        
+        ContestTime time = contest.getContestTime();
+        assertNotNull("Expecting non-null contest time ",time);
+        
         // duration: 5:00:00
+        assertEquals(18000, time.getContestLengthSecs());
+        
         // scoreboard-freeze: 4:00:00
+        assertEquals("14400", info.getFreezeTime());
 
         Language[] languages = contest.getLanguages();
 
@@ -239,7 +422,35 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected default timeout for " + problem, 20, problem.getTimeOutInSeconds());
 
         assertTrue("Expecting comptuer judged", problem.isComputerJudged());
+        
+        assertJudgementTypes(problem, true, false, false);
 
+    }
+    
+    
+    public void testContestInformation() throws Exception {
+
+        IInternalContest contest = loader.fromYaml(null, getDataDirectory());
+        assertNotNull(contest);
+        
+        assertEquals("Contest title", "ACM-ICPC World Finals 2011", contest.getContestInformation().getContestTitle());
+        
+        ContestInformation info = contest.getContestInformation();
+        
+        // short-name: ICPC WF 2011
+        assertEquals("ICPC WF 2011", info.getContestShortName());
+        
+        // start-time: 2011-02-04 01:23Z
+        assertEquals("Fri Feb 04 01:23:00 PST 2011", info.getStartDate().toString());
+        
+        ContestTime time = contest.getContestTime();
+        assertNotNull("Expecting non-null contest time ",time);
+        
+        // duration: 5:00:00
+        assertEquals(18000, time.getContestLengthSecs());
+        
+        // scoreboard-freeze: 4:00:00
+        assertEquals("14400", info.getFreezeTime());
     }
 
     /**
@@ -266,10 +477,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         assertEquals("Contest title", "ACM-ICPC World Finals 2011", contest.getContestInformation().getContestTitle());
 
-        // short-name: ICPC WF 2011
-        // start-time: 2011-02-04 01:23Z
-        // duration: 5:00:00
-        // scoreboard-freeze: 4:00:00
 
         Language[] languages = contest.getLanguages();
 
@@ -1494,4 +1701,109 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     }
 
+    
+    /**
+     * Test AUTO_JUDGE_KEY aka keyword auto-judging
+     */
+    public void testAUTO_JUDGE_KEY() {
+        
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+    /**
+     * Test DEFAULT_VALIDATOR_KEY aka keyword default-validator
+     */
+    public void testDEFAULT_VALIDATOR_KEY() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+    /**
+     * Test INPUT_KEY aka keyword input
+     */
+    public void testINPUT_KEY() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+    /**
+     * Test JUDGE_EXECUTE_COMMAND_KEY aka keyword judge-exec-cmd
+     */
+    public void testJUDGE_EXECUTE_COMMAND_KEY() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+    /**
+     * Test OVERRIDE_VALIDATOR_KEY aka keyword override-validator
+     */
+    public void testOVERRIDE_VALIDATOR_KEY() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+    /**
+     * Test PROBLEM_INPUT_KEY aka keyword input
+     */
+    public void testPROBLEM_INPUT_KEY() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+    /**
+     * Test PROBLEM_LOAD_DATA_FILES_KEY aka keyword load-data-files
+     */
+    public void testPROBLEM_LOAD_DATA_FILES_KEY() {
+        failIfInDebugMode();
+    }
+
+    /**
+     * Test READ_FROM_STDIN_KEY aka keyword readFromSTDIN
+     */
+    public void testREAD_FROM_STDIN_KEY() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+
+    }
+
+    /**
+     * Test SEND_PRELIMINARY_JUDGEMENT_KEY aka keyword send-prelim-judgement
+     */
+    public void testSEND_PRELIMINARY_JUDGEMENT_KEY() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+    /**
+     * Test USE_JUDGE_COMMAND_KEY aka keyword use-judge-cmd
+     */
+    public void testUSE_JUDGE_COMMAND_KEY() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+    /**
+     * Test USING_PC2_VALIDATOR aka keyword use-internal-validator
+     */
+    public void testUSING_PC2_VALIDATOR() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+
+    /**
+     * Test VALIDATOR_KEY aka keyword validator
+     */
+    public void testVALIDATOR_KEY() {
+        // SOMEDAY write unit test
+        failIfInDebugMode();
+    }
+
+
+    private void failIfInDebugMode() {
+        if(isDebugMode()){
+            fail();
+        }
+    }
 }

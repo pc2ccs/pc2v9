@@ -40,7 +40,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
      * 
      * Will overwrite expected data/sample and output length of JSON.
      */
-    private boolean WRITE_SAMPLE_DATA = false;
+    private boolean writeSampleData = false;
 
     public void test12Runs() throws Exception {
 
@@ -80,7 +80,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         // This write file will overwrite the expected output,
         // if the createJSON method changes the output, uncomment the writeFormattedJson
         // to write the newer, better expected json.
-        if (WRITE_SAMPLE_DATA) {
+        if (writeSampleData) {
             System.out.println("JSON String length = " + json.length());
             writeFormattedJson(expectedJSONFilename, json);
         }
@@ -149,7 +149,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         // This write file will overwrite the expected output,
         // if the createJSON method changes the output, uncomment the writeFormattedJson
         // to write the newer, better expected json.
-        if (WRITE_SAMPLE_DATA) {
+        if (writeSampleData) {
             System.out.println("JSON String length = " + json.length());
             writeFormattedJson(expectedJSONFilename, json);
         }
@@ -284,7 +284,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         // This write file will overwrite the expected output,
         // if the createJSON method changes the output, uncomment the writeFormattedJson
         // to write the newer, better expected json.
-        if (WRITE_SAMPLE_DATA) {
+        if (writeSampleData) {
             System.out.println("JSON String length = " + json.length());
             writeFormattedJson(expectedJSONFilename, json);
         }

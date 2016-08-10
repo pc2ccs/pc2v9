@@ -44,7 +44,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class LoadRunsTest extends AbstractTestCase {
-	
+
     public static final String TEAMS_FILENAME = LoadICPCTSVData.TEAMS_FILENAME;
 
     public static final String GROUPS_FILENAME = LoadICPCTSVData.GROUPS_FILENAME;
@@ -52,11 +52,11 @@ public class LoadRunsTest extends AbstractTestCase {
     private String teamsFilename = "";
 
     private String groupsFilename = "";
-    
+
     public LoadRunsTest(String name) {
         super(name);
     }
-    
+
     public void testLoadCDP() throws Exception {
 
         String configDir = SampleCDP.getDir() + IContestLoader.CONFIG_DIRNAME;
@@ -66,27 +66,27 @@ public class LoadRunsTest extends AbstractTestCase {
         try {
 
             IInternalContest contest = new InternalContest();
-            
+
             contest = loadYaml(contest, configDir);
 
             Problem[] problems = contest.getProblems();
 
             assertEquals("Expecting N problems", 13, problems.length);
-            
-            Account [] teamAccounts = getTeamAccounts(contest);
-            
-            assertEquals("Expecting N problems", 13,problems.length);
-            
-            assertEquals("Expecting N Teams ", 128,teamAccounts.length);
-            
+
+            Account[] teamAccounts = getTeamAccounts(contest);
+
+            assertEquals("Expecting N problems", 13, problems.length);
+
+            assertEquals("Expecting N Teams ", 128, teamAccounts.length);
+
         } catch (Exception e) {
-            
+
             System.err.println(e.getMessage());
             throw e;
         }
-        
+
     }
-    
+
     /**
      * Load contest from contest.yaml.
      * 
@@ -95,7 +95,7 @@ public class LoadRunsTest extends AbstractTestCase {
      * @return
      */
     private IInternalContest loadYaml(IInternalContest contest, String configDir) {
-        
+
         // startExplorer(configDir);
 
         String contestYamlFile = configDir + File.separator + ContestYAMLLoader.DEFAULT_CONTEST_YAML_FILENAME;
@@ -110,12 +110,11 @@ public class LoadRunsTest extends AbstractTestCase {
 
     }
 
-
     private Account[] getTeamAccounts(IInternalContest contest) {
         Vector<Account> accounts = contest.getAccounts(Type.TEAM);
         return (Account[]) accounts.toArray(new Account[accounts.size()]);
     }
-    
+
     /**
      * Test loading runs and EF runs content.
      * 
@@ -123,73 +122,70 @@ public class LoadRunsTest extends AbstractTestCase {
      */
     public void testLoadEFRuns() throws Exception {
 
-    	String configDir = SampleCDP.getDir() + IContestLoader.CONFIG_DIRNAME;
+        String configDir = SampleCDP.getDir() + IContestLoader.CONFIG_DIRNAME;
 
-    	String inputEventFeed = SampleCDP.getEventFeedFilename();
+        String inputEventFeed = SampleCDP.getEventFeedFilename();
 
-    	IInternalContest contest = new InternalContest();
+        IInternalContest contest = new InternalContest();
 
-		contest = loadYaml(contest, configDir);
+        contest = loadYaml(contest, configDir);
 
-		XMLDomParse1 parse1 = new XMLDomParse1();
-		Document document = parse1.create(inputEventFeed);
+        XMLDomParse1 parse1 = new XMLDomParse1();
+        Document document = parse1.create(inputEventFeed);
 
-		assertNotNull(document);
+        assertNotNull(document);
 
-		String path = "/contest/run/*";
-		NodeList nodes = parse1.getNodes(document, path);
+        String path = "/contest/run/*";
+        NodeList nodes = parse1.getNodes(document, path);
 
-		Properties[] runPropertyList = parse1.create(nodes, EventFeedRun.ID_TAG_NAME);
+        Properties[] runPropertyList = parse1.create(nodes, EventFeedRun.ID_TAG_NAME);
 
-		List<EventFeedRun> runs = EventFeedRun.toRuns(runPropertyList, true);
+        List<EventFeedRun> runs = EventFeedRun.toRuns(runPropertyList, true);
 
-		assertEquals("Expected run count ", 1494, runs.size());
+        assertEquals("Expected run count ", 1494, runs.size());
 
-		String startTimeDecimalString = "1432116000.00000"; // 2015 finals
+        String startTimeDecimalString = "1432116000.00000"; // 2015 finals
 
-		int zeroCount = 0;
+        int zeroCount = 0;
 
-		for (EventFeedRun evRun : runs)
-		{
-			long ms = evRun.getElapsedMS();
+        for (EventFeedRun evRun : runs) {
+            long ms = evRun.getElapsedMS();
 
-			if (ms <= 0)
-			{
-				zeroCount++;
-			}
+            if (ms <= 0) {
+                zeroCount++;
+            }
 
-			if (isDebugMode() && zeroCount < 10)
-			{
-				long startMS = EventFeedUtilities.toMS(startTimeDecimalString);
-				long runMS = EventFeedUtilities.toMS(evRun.getTime());
-				long min = runMS / 60 / 100;
-				System.out.println(" time is " + evRun.getTime() + " runMS = " + runMS + " contest start " + startMS + " min = " + min);
-			}
-		}
-		
-		assertEquals("Expecting no zero ms elapsed time ", 0, zeroCount);
-		
-	}
-    
+            if (isDebugMode() && zeroCount < 10) {
+                long startMS = EventFeedUtilities.toMS(startTimeDecimalString);
+                long runMS = EventFeedUtilities.toMS(evRun.getTime());
+                long min = runMS / 60 / 100;
+                System.out.println(" time is " + evRun.getTime() + " runMS = " + runMS + " contest start " + startMS + " min = " + min);
+            }
+        }
+
+        assertEquals("Expecting no zero ms elapsed time ", 0, zeroCount);
+
+    }
+
     /**
      * Load contest runs based on yaml.
      * 
      * @throws Exception
      */
     public void testLoadContestRuns() throws Exception {
-        
+
         String configDir = SampleCDP.getDir() + IContestLoader.CONFIG_DIRNAME;
-        
+
         String inputEventFeed = SampleCDP.getEventFeedFilename();
-        
-        String outputEventFeedFilename = getOutputTestFilename("ef."+this.getName()+".xml");
-        
+
+        String outputEventFeedFilename = getOutputTestFilename("ef." + this.getName() + ".xml");
+
         IInternalContest contest = new InternalContest();
-        
-//        startExplorer(getOutputDataDirectory());
+
+        // startExplorer(getOutputDataDirectory());
 
         contest = loadYaml(contest, configDir);
-        
+
         IInternalController controller = new SampleContest().createController(contest, true, false);
 
         XMLDomParse1 parse1 = new XMLDomParse1();
@@ -206,77 +202,75 @@ public class LoadRunsTest extends AbstractTestCase {
 
         LoadRuns loader = new LoadRuns();
 
-//        Properties properties = new Properties();
-//        properties.put(LoadRuns.CDPPATH, SampleCDP.getDir());
-        
+        // Properties properties = new Properties();
+        // properties.put(LoadRuns.CDPPATH, SampleCDP.getDir());
+
         try {
-            
+
             loadDefaultJudgements(contest);
-            
+
             contest = loader.updateContestFromEFRuns(contest, runs, SampleCDP.getDir());
-            
-            updateGroupAndTeams (contest, SampleCDP.getConfigDir());
-            
+
+            updateGroupAndTeams(contest, SampleCDP.getConfigDir());
+
             finalizeContest(contest);
-            
+
             Run[] runs2 = contest.getRuns();
-            
+
             assertEquals("Expecting all runs loaded ", runs.size(), runs2.length);
-            
+
             ResolverEventFeedReport report = new ResolverEventFeedReport();
-            
+
             report.setContestAndController(contest, controller);
 
-//            report.createReportFile(outputEventFeedFilename, new Filter());
-            
+            // report.createReportFile(outputEventFeedFilename, new Filter());
+
             String xml = report.createReportXML(new Filter());
-            
+
             writeFile(outputEventFeedFilename, xml);
-            
-            compareFeeds (inputEventFeed, outputEventFeedFilename);
-            
+
+            compareFeeds(inputEventFeed, outputEventFeedFilename);
+
         } catch (Exception e) {
-//            e.printStackTrace();
+            // e.printStackTrace();
             System.err.println(e.getMessage());
             throw e;
         }
     }
-    
+
     /**
      * Compare event feeds.
      * 
      * @param inputEventFeed
      * @param outputEventFeedFilename
-     * @throws ParserConfigurationException 
-     * @throws IOException 
-     * @throws SAXException 
-     * @throws XPathExpressionException 
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
+     * @throws XPathExpressionException
      */
     private void compareFeeds(String inputEventFeed, String outputEventFeedFilename) throws XPathExpressionException, SAXException, IOException, ParserConfigurationException {
 
-        String inFile = getOutputTestFilename("eventfile.in.txt"); 
+        String inFile = getOutputTestFilename("eventfile.in.txt");
         String outFile = getOutputTestFilename("eventfile.out.txt");
-        
-        createEventFeedMetaFile (inputEventFeed, inFile);
-        System.out.println("Wrote file: "+inFile);
-        createEventFeedMetaFile (outputEventFeedFilename, outFile);
-        System.out.println("Wrote file: "+outFile);
-        
-//        startExplorer(getOutputDataDirectory());
+
+        createEventFeedMetaFile(inputEventFeed, inFile);
+        System.out.println("Wrote file: " + inFile);
+        createEventFeedMetaFile(outputEventFeedFilename, outFile);
+        System.out.println("Wrote file: " + outFile);
+
+        // startExplorer(getOutputDataDirectory());
     }
 
+    private void createEventFeedMetaFile(String eventFeedFile, String outputfilename) throws XPathExpressionException, SAXException, IOException, ParserConfigurationException {
 
-
-    private void createEventFeedMetaFile(String eventFeedFile , String outputfilename) throws XPathExpressionException, SAXException, IOException, ParserConfigurationException {
-        
         List<EventFeedRun> runs = new EFLoader().loadFile(eventFeedFile);
         Collections.sort(runs, new CompareByRunId());
-        
+
         PrintWriter writer = null;
         writer = new PrintWriter(new FileOutputStream(outputfilename, false), true);
-        
+
         for (EventFeedRun evRun : runs) {
-            
+
             writer.print(" Run " + evRun.getId());
             writer.print(" teamAccount = " + evRun.getTeam());
             writer.print(" result  = " + evRun.getResult());
@@ -290,31 +284,29 @@ public class LoadRunsTest extends AbstractTestCase {
         writer = null;
     }
 
-
-
     private void finalizeContest(IInternalContest contest) {
-        
-//        <finalized>
-//        <comment>Certified by: Jeff, entered by Mikael</comment>
-//        <last-bronze>12</last-bronze>
-//        <last-gold>4</last-gold>
-//        <last-silver>8</last-silver>
-//        <time>18000.000000</time>
-//        <timestamp>1432135103.277650</timestamp>
-//        </finalized>
-//        </contest>
-        
+
+        // <finalized>
+        // <comment>Certified by: Jeff, entered by Mikael</comment>
+        // <last-bronze>12</last-bronze>
+        // <last-gold>4</last-gold>
+        // <last-silver>8</last-silver>
+        // <time>18000.000000</time>
+        // <timestamp>1432135103.277650</timestamp>
+        // </finalized>
+        // </contest>
+
         FinalizeData finalizeData = new FinalizeData();
-        
+
         finalizeData.setGoldRank(4);
         finalizeData.setSilverRank(8);
         finalizeData.setBronzeRank(12);
-        
+
         finalizeData.setCertified(true);
-        finalizeData.setComment("Created by "+this.getName());
-        
+        finalizeData.setComment("Created by " + this.getName());
+
         contest.setFinalizeData(finalizeData);
-        
+
     }
 
     private void writeFile(String filename, String xml) throws FileNotFoundException {
@@ -328,7 +320,7 @@ public class LoadRunsTest extends AbstractTestCase {
     }
 
     private String[] acronymList = { //
-            "Yes;AC", //
+    "Yes;AC", //
             "No - Compilation Error;CE", //
             "No - Security Violation;SV", //
             "No - Time Limit Exceeded;TLE", //
@@ -339,12 +331,12 @@ public class LoadRunsTest extends AbstractTestCase {
     };
 
     private void loadDefaultJudgements(IInternalContest contest) {
-        
-//        Judgement[] judgements = contest.getJudgements();
-//        for (Judgement judgement : judgements) {
-//            System.out.println("debug 22 found "+judgement.getAcronym()+" "+judgement.getDisplayName());
-//        }
-//        System.out.println("debug 22 there are "+judgements.length+" judgements.");
+
+        // Judgement[] judgements = contest.getJudgements();
+        // for (Judgement judgement : judgements) {
+        // System.out.println("debug 22 found "+judgement.getAcronym()+" "+judgement.getDisplayName());
+        // }
+        // System.out.println("debug 22 there are "+judgements.length+" judgements.");
 
         for (String line : acronymList) {
 
@@ -361,17 +353,17 @@ public class LoadRunsTest extends AbstractTestCase {
      * @throws Exception
      */
     public void testLoadRuns() throws Exception {
-        
+
         String inputEventFeed = SampleCDP.getEventFeedFilename();
-        
-        String outputEventFeedFilename = getOutputTestFilename("ef."+this.getName()+".xml");
-        
+
+        String outputEventFeedFilename = getOutputTestFilename("ef." + this.getName() + ".xml");
+
         String dir = SampleCDP.getDir();
         ensureDirectory(dir);
-//        startExplorer(dir);
-        
+        // startExplorer(dir);
+
         assertFileExists(inputEventFeed);
-       
+
         XMLDomParse1 parse1 = new XMLDomParse1();
         Document document = parse1.create(inputEventFeed);
 
@@ -382,12 +374,12 @@ public class LoadRunsTest extends AbstractTestCase {
 
         Properties[] runPropertyList = parse1.create(nodes, EventFeedRun.ID_TAG_NAME);
         List<EventFeedRun> runs = EventFeedRun.toRuns(runPropertyList, true);
-        
-        SampleContest sampleContest= new SampleContest();
+
+        SampleContest sampleContest = new SampleContest();
 
         IInternalContest contest = sampleContest.createStandardContest();
         IInternalController controller = sampleContest.createController(contest, true, false);
-        
+
         int numTeams = 128 - contest.getAccounts(Type.TEAM).size();
         contest.generateNewAccounts(Type.TEAM.toString(), numTeams, true);
 
@@ -396,162 +388,154 @@ public class LoadRunsTest extends AbstractTestCase {
         int numProblems = contest.getProblems().length;
         int missingProblems = pCount - numProblems;
         for (int i = 0; i < missingProblems; i++) {
-            Problem problem = new Problem("Problem "+(i+1));
+            Problem problem = new Problem("Problem " + (i + 1));
             contest.addProblem(problem);
         }
-        
+
         numProblems = contest.getProblems().length;
 
         LoadRuns loader = new LoadRuns();
 
         try {
-            
+
             contest = loader.updateContestFromEFRuns(contest, runs, SampleCDP.getDir());
-            updateGroupAndTeams (contest, SampleCDP.getConfigDir());
-            
+            updateGroupAndTeams(contest, SampleCDP.getConfigDir());
+
             Run[] runs2 = contest.getRuns();
-            
+
             assertEquals("Expecting all runs loaded ", runs.size(), runs2.length);
-            
+
             ResolverEventFeedReport report = new ResolverEventFeedReport();
-            
+
             report.setContestAndController(contest, controller);
             report.createReportFile(outputEventFeedFilename, new Filter());
-            
+
         } catch (Exception e) {
-//            e.printStackTrace();
+            // e.printStackTrace();
             System.err.println(e.getMessage());
             throw e;
         }
-        
+
         assertFileExists(outputEventFeedFilename);
-        
-//        startExplorer(".");
-        
-        
+
+        // startExplorer(".");
+
     }
 
-//    
-//    public void testEventFeedLoad() throws Exception {
-//        
-//        String dir = SampleCDP.getDir();
-//        String inputEventFeed = SampleCDP.getEventFeedFilename();
-//        
-//        ensureDirectory(dir);
-////        startExplorer(dir);
-//        
-//        assertFileExists(inputEventFeed);
-//
-//        XMLDomParse1 parse1 = new XMLDomParse1();
-//        Document document = parse1.create(inputEventFeed);
-//
-//        assertNotNull(document);
-//
-//        String xPath = "/contest/run/*";
-//        NodeList nodes = parse1.getNodes(document, xPath);
-//
-//        Properties[] runPropertyList = parse1.create(nodes, EventFeedRun.ID_TAG_NAME);
-//
-//        List<EventFeedRun> runs = EventFeedRun.toRuns(runPropertyList, true);
-//
-//        Collections.sort(runs, new CompareByRunId());
-//
-//        // print runs
-////        for (EventFeedRun eventFeedRun : runs) {
-////            System.out.println(eventFeedRun.getId() + " " + eventFeedRun.getResult() + " " + //
-////                    eventFeedRun.getTime() + " " + eventFeedRun.getTimestamp());
-////        }
-//        
-//        assertEquals("Expecting runs ", 1494, runs.size());
-//        assertEquals("Expecting first runid ", "20", runs.get(0).getId());
-//        assertEquals("Expecting last  runid ", "1518", runs.get(runs.size()-1).getId());
-//        
-//        // fetch all runs.
-//        runs = EventFeedRun.toRuns(runPropertyList, false);
-//        assertEquals("Expecting runs ", 2988, runs.size());
-//        
-//    }
+    //
+    // public void testEventFeedLoad() throws Exception {
+    //
+    // String dir = SampleCDP.getDir();
+    // String inputEventFeed = SampleCDP.getEventFeedFilename();
+    //
+    // ensureDirectory(dir);
+    // // startExplorer(dir);
+    //
+    // assertFileExists(inputEventFeed);
+    //
+    // XMLDomParse1 parse1 = new XMLDomParse1();
+    // Document document = parse1.create(inputEventFeed);
+    //
+    // assertNotNull(document);
+    //
+    // String xPath = "/contest/run/*";
+    // NodeList nodes = parse1.getNodes(document, xPath);
+    //
+    // Properties[] runPropertyList = parse1.create(nodes, EventFeedRun.ID_TAG_NAME);
+    //
+    // List<EventFeedRun> runs = EventFeedRun.toRuns(runPropertyList, true);
+    //
+    // Collections.sort(runs, new CompareByRunId());
+    //
+    // // print runs
+    // // for (EventFeedRun eventFeedRun : runs) {
+    // // System.out.println(eventFeedRun.getId() + " " + eventFeedRun.getResult() + " " + //
+    // // eventFeedRun.getTime() + " " + eventFeedRun.getTimestamp());
+    // // }
+    //
+    // assertEquals("Expecting runs ", 1494, runs.size());
+    // assertEquals("Expecting first runid ", "20", runs.get(0).getId());
+    // assertEquals("Expecting last  runid ", "1518", runs.get(runs.size()-1).getId());
+    //
+    // // fetch all runs.
+    // runs = EventFeedRun.toRuns(runPropertyList, false);
+    // assertEquals("Expecting runs ", 2988, runs.size());
+    //
+    // }
 
-    
     /**
      * Load groups.tsv and teams.tsv files.
      * 
      * @param contest
      * @param dir
-     * @throws Exception 
+     * @throws Exception
      */
-	private void updateGroupAndTeams(IInternalContest contest, String dir) throws Exception
-	{
+    private void updateGroupAndTeams(IInternalContest contest, String dir) throws Exception {
 
-		if (contest.getSites().length == 0){
-			contest.addSite(new Site("Site 1", 1));
-		}
-		// TODO GF 3363 load groups.tsv
+        if (contest.getSites().length == 0) {
+            contest.addSite(new Site("Site 1", 1));
+        }
+        // TODO GF 3363 load groups.tsv
 
-		// TODO GF 3363 load teams.tsv
+        // TODO GF 3363 load teams.tsv
 
-		String filename = dir + File.separator + TEAMS_FILENAME;
+        String filename = dir + File.separator + TEAMS_FILENAME;
 
-		if (checkFiles(filename))
-		{
+        if (checkFiles(filename)) {
 
-			Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename);
+            Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename);
 
-			for (Group group : groups)
-			{
-				group.setSite(contest.getSites()[0].getElementId());
-			}
+            for (Group group : groups) {
+                group.setSite(contest.getSites()[0].getElementId());
+            }
 
-			Account[] accounts = ICPCTSVLoader.loadAccounts(teamsFilename);
+            Account[] accounts = ICPCTSVLoader.loadAccounts(teamsFilename);
 
-			List<Group> groupList = Arrays.asList(groups);
-			List<Account> accountList = Arrays.asList(accounts);
+            List<Group> groupList = Arrays.asList(groups);
+            List<Account> accountList = Arrays.asList(accounts);
 
-			/**
-			 * Merge/update groups and account into existing groups and accounts, create if necessary
-			 */
-			updateGroupsAndAccounts(contest, groupList, accountList);
+            /**
+             * Merge/update groups and account into existing groups and accounts, create if necessary
+             */
+            updateGroupsAndAccounts(contest, groupList, accountList);
 
-			/**
-			 * Update Groups
-			 */
-			Group[] updatedGroups = (Group[]) groupList.toArray(new Group[groupList.size()]);
-			for (Group group : updatedGroups)
-			{
-				//                    getController().updateGroup(group);
-				contest.updateGroup(group);
-			}
-			//                
-			/**
-			 * UpdateAccounts
-			 */
-			Account[] updatedAccounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
-			//                getController().updateAccounts(updatedAccounts);
-			for (Account account : updatedAccounts)
-			{
-				contest.updateAccount(account);
-			}
-		}
-	}
-    
-    
+            /**
+             * Update Groups
+             */
+            Group[] updatedGroups = (Group[]) groupList.toArray(new Group[groupList.size()]);
+            for (Group group : updatedGroups) {
+                // getController().updateGroup(group);
+                contest.updateGroup(group);
+            }
+            //
+            /**
+             * UpdateAccounts
+             */
+            Account[] updatedAccounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
+            // getController().updateAccounts(updatedAccounts);
+            for (Account account : updatedAccounts) {
+                contest.updateAccount(account);
+            }
+        }
+    }
+
     /**
      * Lookup group by externalId
+     * 
      * @param contest2
      * @param externalId
      * @return
      */
     private Group lookupGroup(IInternalContest contest2, int externalId) {
 
-        Group [] groups = contest2.getGroups();
+        Group[] groups = contest2.getGroups();
         for (Group group : groups) {
-            if (group.getGroupId() == externalId){
+            if (group.getGroupId() == externalId) {
                 return group;
             }
         }
         return null;
     }
-
 
     protected void updateGroupsAndAccounts(IInternalContest inContest, List<Group> groupList, List<Account> accountList) {
 
@@ -559,8 +543,8 @@ public class LoadRunsTest extends AbstractTestCase {
 
         for (Group group : groupList) {
 
-            Group existingGroup = lookupGroup (inContest, group.getGroupId());
-            if (existingGroup != null){
+            Group existingGroup = lookupGroup(inContest, group.getGroupId());
+            if (existingGroup != null) {
 
                 /**
                  * Update certain fields in group
@@ -582,19 +566,18 @@ public class LoadRunsTest extends AbstractTestCase {
 
             Account existingAccount = inContest.getAccount(account.getClientId());
 
-            if (existingAccount != null){
+            if (existingAccount != null) {
                 existingAccount.updateFrom(account);
             } else {
                 existingAccount = account;
             }
 
             accountList.set(i, existingAccount);
-            i ++;
+            i++;
         }
 
     }
 
-    
     protected boolean checkFiles(String filename) throws Exception {
 
         File file = new File(filename);
@@ -628,27 +611,24 @@ public class LoadRunsTest extends AbstractTestCase {
 
     }
 
-    
-
-
-//	public static TestSuite suite() {
-//        //
-//        TestSuite suite = new TestSuite("LoadRunsTest");
-//
-//        String singletonTestName = "";
-////         singletonTestName = "testLoadCDP";
-//         singletonTestName = "testLoadContestRuns";
-////         singletonTestName = "testLoadEFRuns";     
-//         
-//
-//        if (!"".equals(singletonTestName)) {
-//            suite.addTest(new LoadRunsTest(singletonTestName));
-//        } else {
-//
-//            suite.addTest(new LoadRunsTest("testLoadEFRuns"));
-//            suite.addTest(new LoadRunsTest("testLoadContestRuns"));
-//            
-//        }
-//        return suite;
-//    }
+    // public static TestSuite suite() {
+    // //
+    // TestSuite suite = new TestSuite("LoadRunsTest");
+    //
+    // String singletonTestName = "";
+    // // singletonTestName = "testLoadCDP";
+    // singletonTestName = "testLoadContestRuns";
+    // // singletonTestName = "testLoadEFRuns";
+    //
+    //
+    // if (!"".equals(singletonTestName)) {
+    // suite.addTest(new LoadRunsTest(singletonTestName));
+    // } else {
+    //
+    // suite.addTest(new LoadRunsTest("testLoadEFRuns"));
+    // suite.addTest(new LoadRunsTest("testLoadContestRuns"));
+    //
+    // }
+    // return suite;
+    // }
 }

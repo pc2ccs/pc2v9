@@ -140,7 +140,7 @@ public class EventFeederModule implements UIPlugin {
                 //logging:
                 System.out.println("Log:  Loaded " + properties.size() + " properties from '" + filename + "'");
         } catch (Exception e) {
-            ; // exception ignored. No need to report, if exception then fall through.
+            // exception ignored. No need to report, if exception then fall through.
         }
 
         return properties;

@@ -42,7 +42,7 @@ public class LogSettingsPane extends JPanePlugin {
     
     private ConsoleHandler consoleHandler = null;
     
-    JCheckBox chckbxAddConsoleLogger = new JCheckBox("Add Console logger");
+    private JCheckBox chckbxAddConsoleLogger = new JCheckBox("Add Console logger");
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public LogSettingsPane() {

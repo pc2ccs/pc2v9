@@ -427,7 +427,7 @@ public class ExecutableV9Test extends AbstractTestCase {
         private static final long serialVersionUID = -2626038377310038069L;
         private String executeDirectoryName = null;
 
-        public ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles,
+        ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles,
                 String executionDir) {
             super(inContest, inController, run, runFiles);
             setExecuteDirectoryName(executionDir);

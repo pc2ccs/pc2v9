@@ -2050,26 +2050,32 @@ public class ContestYAMLLoader implements IContestLoader {
 
     @Override
     public Problem loadCCSProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles) {
-        // TODO Auto-generated method stub
+        // TODO TODAY code  loadCCSProblemFiles
         return null;
     }
 
     @Override
     public void loadPc2ProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles2, String dataFileName, String answerFileName) {
-        // TODO Auto-generated method stub
+        // TODO TODAY code  loadPc2ProblemFiles
         
     }
 
     @Override
     public String getCCSDataFileDirectory(String yamlDirectory, Problem problem) {
-        // TODO Auto-generated method stub
+        // TODO TODAY code getCCSDataFileDirectory
         return null;
     }
 
     @Override
     public String getCCSDataFileDirectory(String yamlDirectory, String shortDirName) {
-        // TODO Auto-generated method stub
+        // TODO TODAY code getCCSDataFileDirectory
         return null;
+    }
+
+    @Override
+    public void assignDefaultJudgingTypes(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
+        // TODO TODAY code getCCSDataFileDirectory
+        
     }
 
 }

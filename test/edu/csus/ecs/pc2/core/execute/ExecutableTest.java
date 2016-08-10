@@ -583,7 +583,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         private String executeDirectoryName = null;
 
-        public ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, String executionDir) {
+        ExecutableOverride(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, String executionDir) {
             super(inContest, inController, run, runFiles);
             setExecuteDirectoryName(executionDir);
         }

@@ -436,6 +436,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ContestTime time = contest.getContestTime();
         if (time == null) {
             time = new ContestTime();
+            time.setSiteNumber(contest.getSiteNumber());
         }
         time.setContestLengthSecs(parseTimeIntoSeconds(contestLength, Constants.DEFAULT_CONTEST_LENGTH_SECONDS));
         contest.updateContestTime(time);
@@ -734,7 +735,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String problemYamlFilename = problemDirectory + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
 
         Map<String, Object> content = loadYaml(problemYamlFilename);
-
+        
         String problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_PROBLEM_LATEX_FILENAME;
 
         String problemTitle = fetchValue(content, PROBLEM_NAME_KEY);
@@ -786,8 +787,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         if (!pc2FormatProblemYamlFile) {
-            problem.setComputerJudged(true);
-
             // TODO CCS add CCS validator derived based on build script
 
             /**
@@ -802,9 +801,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             addCCSValidator(problem, problemDataFiles, baseDirectoryName);
 
         } else {
-            problem.setComputerJudged(true);
             addDefaultPC2Validator(problem, 1);
         }
+        
+        assignJudgingType(content, problem, overrideManualReview);
+
 
         boolean manualReview = fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
         if (overrideManualReview) {
@@ -963,7 +964,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @SuppressWarnings("unchecked")
     @Override
     public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
-            boolean todobool) {
+            boolean manualReviewOverride) {
 
         Vector<Problem> problemList = new Vector<Problem>();
 
@@ -1018,6 +1019,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setLetter(problemLetter);
                 problem.setColorName(colorName);
                 problem.setColorRGB(colorRGB);
+
+                // assign global judging type values.
+                assignDefaultJudgingTypes(yamlLines, problem, manualReviewOverride);
+                
+                // assign individual judging type values.
+                assignJudgingType(map, problem, manualReviewOverride);
 
                 boolean loadFilesFlag = fetchBooleanValue(map, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
                 problem.setUsingExternalDataFiles(!loadFilesFlag);
@@ -1584,37 +1591,70 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             syntaxError("Missing " + fieldName);
         }
     }
-
+    
     @Override
-    public void assignJudgingType(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
+    public void assignDefaultJudgingTypes(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
 
-        Map<String, Object> yamlContent = loadYaml(yaml);
+        Map<String, Object> map = loadYaml(yaml);
+        assignJudgingType(map, problem, overrideManualReviewFlag);
+    }
+    
+    /**
+     * Assign individual problem judging type based on map values.
+     * 
+     * @param map
+     * @param problem
+     * @param overrideManualReviewFlag
+     */
+    protected void assignJudgingType(Map<String, Object> map, Problem problem, boolean overrideManualReviewFlag) {
 
-        @SuppressWarnings("unchecked")
-        ArrayList<Map<String, Object>> list = fetchList(yamlContent, IContestLoader.JUDGING_TYPE_KEY);
+//        if (map == null || map.entrySet().isEmpty()){
+//            System.out.println("debug problem "+problem.getShortName()+" has NO map");
+//        } else {
+//            System.out.println("debug problem "+problem.getShortName()+" "+map);
+//        }
 
-        if (list != null) {
-            Map<String, Object> map = (Map<String, Object>) list.get(0);
-
-            boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
-            if (sendPreliminary) {
-                problem.setPrelimaryNotification(true);
-            }
-
-            boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, problem.isComputerJudged());
-            problem.setComputerJudged(computerJudged);
-
-            boolean manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
-
-            if (overrideManualReviewFlag) {
-                manualReview = true;
-            }
-
-            if (manualReview) {
-                problem.setManualReview(true);
-            }
-
+        boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
+        
+        if (sendPreliminary) {
+            problem.setPrelimaryNotification(true);
         }
+
+        boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, true);
+        problem.setComputerJudged(computerJudged);
+
+        boolean manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
+
+        if (overrideManualReviewFlag) {
+            manualReview = true;
+        }
+
+        if (manualReview) {
+            problem.setManualReview(true);
+        }
+
+//        printKeyFound("debug ", map, COMPUTER_JUDGING_KEY);
+//        printKeyFound("debug ", map, MANUAL_REVIEW_KEY);
+//        printKeyFound("debug ", map, SEND_PRELIMINARY_JUDGEMENT_KEY);
+//        System.out.println("debug  " + toStringTwo(problem));
+//        System.out.println();
+
+    }
+
+    protected void printKeyFound(String message, Map<String, Object> map, String key) {
+        Object object = map.get(key);
+        String value = "MISSING";
+        if (object != null) {
+            value = object.toString();
+        }
+        System.out.println(message + " " + key + " = " + value);
+    }
+
+    protected String toStringTwo(Problem problem) {
+        
+        return "Problem "+problem.getShortName()+"  cj/man/prelim = "+problem.isComputerJudged()+ //
+                " / " +problem.isManualReview() + //
+                " / " +problem.isPrelimaryNotification();
     }
 
     /**
@@ -1801,5 +1841,4 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return contest;
     }
     
-
 }
