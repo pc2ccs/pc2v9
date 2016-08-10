@@ -737,12 +737,14 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             }
 
             //display a popup message notification that the contest has auto-started
+            //Note: previously the following line of code was used for the popup; however, showMessageDialog() does
+            // not allow to call setAlwaysOnTop()
 //            JOptionPane.showMessageDialog(null, "Scheduled Start Time has arrived; contest has been automatically started!", "Contest Started",
 //                    JOptionPane.INFORMATION_MESSAGE);
             
             JOptionPane optionPane = new JOptionPane();
             optionPane.setMessage("Scheduled Start Time has arrived; contest has been automatically started!");
-            optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE); //for some reason this doesn't set an icon...
+            optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE); 
             JDialog dialog = optionPane.createDialog("Contest Started");
             dialog.setLocationRelativeTo(null); //center the dialog
             dialog.setModalityType(ModalityType.APPLICATION_MODAL);
