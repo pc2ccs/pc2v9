@@ -351,7 +351,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("ICPC WF 2011", info.getContestShortName());
         
         // start-time: 2011-02-04 01:23Z
-        assertEquals("Fri Feb 04 01:23:00 PST 2011", info.getStartDate().toString());
+        assertEquals("Fri Feb 04 01:23:00 PST 2011", info.getScheduledStartDate().toString());
         
         ContestTime time = contest.getContestTime();
         assertNotNull("Expecting non-null contest time ",time);
@@ -441,7 +441,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("ICPC WF 2011", info.getContestShortName());
         
         // start-time: 2011-02-04 01:23Z
-        assertEquals("Fri Feb 04 01:23:00 PST 2011", info.getStartDate().toString());
+        assertEquals("Fri Feb 04 01:23:00 PST 2011", info.getScheduledStartDate().toString());
         
         ContestTime time = contest.getContestTime();
         assertNotNull("Expecting non-null contest time ",time);
