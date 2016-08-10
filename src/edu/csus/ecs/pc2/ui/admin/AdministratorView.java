@@ -730,18 +730,27 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         @Override
         public void contestAutoStarted(ContestTimeEvent event) {
             contestStarted(event);
+            
+            Log log = controller.getLog();
+            if (log != null) {
+                log.info("Contest automatically started due to arrival of enabled scheduled start time.");
+            }
+
+            //display a popup message notification that the contest has auto-started
 //            JOptionPane.showMessageDialog(null, "Scheduled Start Time has arrived; contest has been automatically started!", "Contest Started",
 //                    JOptionPane.INFORMATION_MESSAGE);
             
-            //force the notification dialog to always be on top even if the Admin isn't the active program
-            // (Note: this works on Windows; it may not work under Linux -- and/or it may be window-system dependent...)
             JOptionPane optionPane = new JOptionPane();
             optionPane.setMessage("Scheduled Start Time has arrived; contest has been automatically started!");
             optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE); //for some reason this doesn't set an icon...
             JDialog dialog = optionPane.createDialog("Contest Started");
             dialog.setLocationRelativeTo(null); //center the dialog
             dialog.setModalityType(ModalityType.APPLICATION_MODAL);
+            
+            //force the notification dialog to always be on top even if the Admin isn't the active program
+            // (Note: this works on Windows; it may not work under Linux -- and/or it may be window-system dependent...)
             dialog.setAlwaysOnTop(true);
+            
             dialog.setVisible(true);
         }
 
