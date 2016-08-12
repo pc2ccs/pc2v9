@@ -271,11 +271,10 @@ public class ContestInformation implements Serializable{
                         contestInformation.getScheduledStartTime().getTime())) {
                     return false;
                 }
-            } else {
-                //both scheduledStartTime and contestInformation.getScheduledStartTime() must be null (hence, "same")
-                //continue;
-                ;
-            }
+            } 
+            
+            //both scheduledStartTime and contestInformation.getScheduledStartTime() must be null (hence, "same")
+            //continue;
 
             if (autoStartContest != contestInformation.autoStartContest) {
                 return false;
