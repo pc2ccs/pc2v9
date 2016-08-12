@@ -365,7 +365,7 @@ public class EditContestTimePane extends JPanePlugin {
     private boolean validateScheduledStartTimeField() {
         
         String textBoxStartTime = getScheduledStartTimeTextBox().getText() ;
-        GregorianCalendar scheduledStartTime ;
+        GregorianCalendar tempScheduledStartTime ;
         
         if (textBoxStartTime.equalsIgnoreCase("<undefined>") || textBoxStartTime.equals("") || textBoxStartTime.equals("<already started>") ) {
             this.scheduledStartTime = null ;
@@ -385,19 +385,19 @@ public class EditContestTimePane extends JPanePlugin {
             
             //date parses properly; put it into a Calendar object
             //TODO: should put the calendar in non-lenient mode and catch exceptions due to, e.g. month=13
-            scheduledStartTime = (GregorianCalendar) Calendar.getInstance();
-            scheduledStartTime.setTime(date);
+            tempScheduledStartTime = (GregorianCalendar) Calendar.getInstance();
+            tempScheduledStartTime.setTime(date);
             
             //verify the scheduled start time is in the future
             GregorianCalendar now = (GregorianCalendar) Calendar.getInstance();
-            if (!scheduledStartTime.after(now)) {
+            if (!tempScheduledStartTime.after(now)) {
                 showMessage("Scheduled start date/time must be in the future");
                 return false;
             }
         }
                    
         //if we get here, the date/time in the text box must have been valid
-        this.scheduledStartTime = scheduledStartTime;
+        this.scheduledStartTime = tempScheduledStartTime;
         return true ;
     }
     
