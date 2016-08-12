@@ -452,14 +452,14 @@ public class EditContestTimePane extends JPanePlugin {
         return contestTime;
     }
 
-    public void setContestTime(final ContestTime contestTime, final ContestInformation contestInfo) {
+    public void setContestTime(final ContestTime inputContestTime, final ContestInformation inputContestInfo) {
 
-        this.contestTime = contestTime;
-        this.scheduledStartTime = contestInfo.getScheduledStartTime();
+        this.contestTime = inputContestTime;
+        this.scheduledStartTime = inputContestInfo.getScheduledStartTime();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                populateGUI(contestTime, contestInfo);
+                populateGUI(inputContestTime, inputContestInfo);
                 setButtonStatesAndLabels(false);    //false = "Update" button should NOT be enabled
                 showMessage("");
             }
@@ -772,17 +772,20 @@ public class EditContestTimePane extends JPanePlugin {
 
     private JLabel getScheduledStartTimeLabel() {
         if (scheduledStartTimeLabel == null) {
-        	scheduledStartTimeLabel = new JLabel("Scheduled Start Time");
-        	scheduledStartTimeLabel.setToolTipText("The date/time when the contest is scheduled to start; must be a time in the future.");
+            scheduledStartTimeLabel = new JLabel("Scheduled Start Time");
+            scheduledStartTimeLabel.setToolTipText("The date/time when the contest is scheduled to start; must be a time in the future.");
         }
         return scheduledStartTimeLabel;
     }
-    
+
     private JTextField getScheduledStartTimeTextBox() {
         if (scheduledStartTimeTextBox == null) {
-        	scheduledStartTimeTextBox = new JTextField();
-        	scheduledStartTimeTextBox.setToolTipText("<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm; \r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time. \r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
-        	scheduledStartTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+            scheduledStartTimeTextBox = new JTextField();
+            scheduledStartTimeTextBox
+                    .setToolTipText("<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm;"
+                                    + "\r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time."
+                                    + "\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
+            scheduledStartTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
