@@ -485,9 +485,14 @@ public class EditContestTimePane extends JPanePlugin {
         }
         if (inContestTime.isContestStarted()) {
             getScheduledStartTimeTextBox().setText("<already started>"); 
+            getScheduledStartTimeTextBox().setToolTipText("Scheduled start time cannot be set when the contest has already started.");
             getScheduledStartTimeTextBox().setEditable(false);
         } else {
             getScheduledStartTimeTextBox().setText(displayStartTime);
+            getScheduledStartTimeTextBox().setToolTipText(
+                    "<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm;"
+                    + "\r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time."
+                    + "\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
             getScheduledStartTimeTextBox().setEditable(true);
         }
         
