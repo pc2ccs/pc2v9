@@ -37,7 +37,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit tests.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
@@ -102,10 +102,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String[] contents = Utilities.loadFile(yamlFilename);
 
         assertFalse("File missing " + yamlFilename, contents.length == 0);
-        
+
 //        startExplorer(getDataDirectory());
 //        editFile(yamlFilename);jj
-        
+
         IInternalContest contest = loader.fromYaml(null, contents, getDataDirectory());
 
         assertNotNull(contest);
@@ -139,17 +139,17 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertTrue(problem.isComputerJudged());  // IS
         assertFalse(problem.isManualReview());
         assertFalse(problem.isPrelimaryNotification());
-        
+
         assertJudgementTypes(problem, true, false, false);
 
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "barcodes", problem.getDisplayName());
         assertEquals("Expecting problem timeout for " + problem, 10, problem.getTimeOutInSeconds());
-        
+
         assertTrue(problem.isComputerJudged());   // IS
         assertFalse(problem.isManualReview());
         assertFalse(problem.isPrelimaryNotification());
-        
+
         assertJudgementTypes(problem, true, false, false);
 
         problem = problems[problemIndex++];
@@ -159,17 +159,17 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        assertFalse(problem.isComputerJudged());
 //        assertTrue(problem.isManualReview());     // IS
 //        assertFalse(problem.isPrelimaryNotification());
-        
+
         assertJudgementTypes(problem, false, true, false);
 
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "castles", problem.getDisplayName());
         assertEquals("Expecting problem timeout for " + problem, 4, problem.getTimeOutInSeconds());
 
-//        assertTrue(problem.isComputerJudged());   // IS 
+//        assertTrue(problem.isComputerJudged());   // IS
 //        assertTrue(problem.isManualReview());     // IS
 //        assertFalse(problem.isPrelimaryNotification());
-//        
+//
         assertJudgementTypes(problem, true, true, false);
 
         problem = problems[problemIndex++];
@@ -181,11 +181,11 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        assertTrue(problem.isPrelimaryNotification());   // IS
 
         assertJudgementTypes(problem, true, true, true);
-      
+
     }
-    
+
     /**
-     * Test judgement types in problemset: 
+     * Test judgement types in problemset:
      */
     public void testProblemSetJudgingTypes () throws Exception {
 
@@ -209,92 +209,92 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        assertTrue(problem.isManualReview());
 //        assertFalse(problem.isPrelimaryNotification());
     }
-    
+
     public void testProblemSetJudgingTypesTwo() throws Exception {
         String inputYamlFile = getProblemSetYamlTestFileName();
-        
+
         String[] yamlLines = Utilities.loadFile(inputYamlFile);
-        
+
         Problem[] problems = loader.getProblems(yamlLines, IContestLoader.DEFAULT_TIME_OUT);
-        
+
         assertEquals("Expecting number of problems ",5, problems.length);
-        
+
         Problem problem = problems[0];
-       
+
         assertJudgementTypes(problem, true, false, false);
     }
-    
-    
+
+
     /**
      * Test Judging Type in problem.
-     * 
+     *
      * @throws Exception
      */
     public void testProblemSetJudgingTypesThree() throws Exception {
         String inputYamlFile = getProblemSetYamlTestFileName();
-        
+
         String[] yamlLines = Utilities.loadFile(inputYamlFile);
-        
+
         Problem[] problems = loader.getProblems(yamlLines, IContestLoader.DEFAULT_TIME_OUT);
-        
+
         assertEquals("Expecting number of problems ",5, problems.length);
-        
+
         Problem problem = problems[2];
-        
+
         assertEquals("Expected problem name ", "biobots", problem.getDisplayName());
 
-        assertTrue(problem.isComputerJudged()); 
+        assertTrue(problem.isComputerJudged());
         assertTrue(problem.isManualReview());
         assertTrue(problem.isPrelimaryNotification());
-        
+
         assertJudgementTypes(problem, true, true, true);
     }
-    
-    
+
+
     /**
      * Test Judgement types in main contest.yaml.
-     * 
+     *
      */
     public void testDefaultJudgingTypes() throws Exception {
-        
+
         String inputYamlFile = getDataDirectory("contest.yaml");
 //        System.out.println("input Filename: "+inputYamlFile);
-        
+
         String[] lines = Utilities.loadFile(inputYamlFile);
 
         IInternalContest contest = loader.fromYaml(null, lines, getDataDirectory());
 
         assertNotNull(contest);
-        
+
         Problem[] problems = contest.getProblems();
-        
+
         assertEquals("Expecting number of problems ",5, problems.length);
-        
+
         Problem problem = problems[0];
-        
+
         assertJudgementTypes(problem, true, false, false);
     }
-    
+
     /**
      * Test default Judgement types problem.yaml
-     * 
+     *
      */
     public void testJudgementTypesinProblemYaml() throws Exception {
 
         String dir = getDataDirectory(this.getName());
-        
+
         String problemShortName = "td";
 //        ensureDirectory(dir);
-        
+
 //        String filename = dir + File.separator + problemShortName + File.separator +IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
 //        System.out.println("filename " + filename);
 //        editFile(filename);
-        
+
 //        startExplorer(dir);
         String problemTitlte = "sumit Title"; // note also set in problem.yaml
         Problem problem = new Problem(problemTitlte);
         problem.setShortName("BeforeLoad");
-        
+
         assertJudgementTypes(problem, false, false, false);
 
         IInternalContest contest = new InternalContest();
@@ -312,15 +312,15 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Problem problem2 = problems[0];
 
         assertEquals("Problem title", problemTitlte, problem2.getDisplayName());
-        
+
         assertJudgementTypes(problem2, false, true, true);
     }
-    
-   
+
+
 
     /**
      * Tests problem judgement types.
-     * 
+     *
      * @param problem
      * @param computerJudged
      * @param manualReview
@@ -340,25 +340,25 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         IInternalContest contest = loader.fromYaml(null, getDataDirectory());
         assertNotNull(contest);
-        
+
 //        startExplorer(getDataDirectory());
 
         assertEquals("Contest title", "ACM-ICPC World Finals 2011", contest.getContestInformation().getContestTitle());
 
         ContestInformation info = contest.getContestInformation();
-        
+
         // short-name: ICPC WF 2011
         assertEquals("ICPC WF 2011", info.getContestShortName());
-        
+
         // start-time: 2011-02-04 01:23Z
         assertEquals("Fri Feb 04 01:23:00 PST 2011", info.getStartDate().toString());
-        
+
         ContestTime time = contest.getContestTime();
         assertNotNull("Expecting non-null contest time ",time);
-        
+
         // duration: 5:00:00
         assertEquals(18000, time.getContestLengthSecs());
-        
+
         // scoreboard-freeze: 4:00:00
         assertEquals("14400", info.getFreezeTime());
 
@@ -422,42 +422,42 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected default timeout for " + problem, 20, problem.getTimeOutInSeconds());
 
         assertTrue("Expecting comptuer judged", problem.isComputerJudged());
-        
+
         assertJudgementTypes(problem, true, false, false);
 
     }
-    
-    
+
+
     public void testContestInformation() throws Exception {
 
         IInternalContest contest = loader.fromYaml(null, getDataDirectory());
         assertNotNull(contest);
-        
+
         assertEquals("Contest title", "ACM-ICPC World Finals 2011", contest.getContestInformation().getContestTitle());
-        
+
         ContestInformation info = contest.getContestInformation();
-        
+
         // short-name: ICPC WF 2011
         assertEquals("ICPC WF 2011", info.getContestShortName());
-        
+
         // start-time: 2011-02-04 01:23Z
         assertEquals("Fri Feb 04 01:23:00 PST 2011", info.getStartDate().toString());
-        
+
         ContestTime time = contest.getContestTime();
         assertNotNull("Expecting non-null contest time ",time);
-        
+
         // duration: 5:00:00
         assertEquals(18000, time.getContestLengthSecs());
-        
+
         // scoreboard-freeze: 4:00:00
         assertEquals("14400", info.getFreezeTime());
     }
 
     /**
      * Test contest.yaml with double quotes.
-     * 
+     *
      * Test for Bug 829
-     * 
+     *
      * @throws Exception
      */
     public void testLoaderDoubleQuotedStrings() throws Exception {
@@ -550,9 +550,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Test contest title with double quoted strings.
-     * 
+     *
      * Test for Bug 829
-     * 
+     *
      * @throws Exception
      */
     public void testDoubleQuoteImport() throws Exception {
@@ -568,9 +568,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Test that single quote in contest title is stripped off.
-     * 
+     *
      * Test for Bug 829
-     * 
+     *
      * @throws Exception
      */
     public void testContestTitle() throws Exception {
@@ -587,7 +587,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Test default SerializedFile attributes.
-     * 
+     *
      */
     public void testDefaultSerializeFileAttributes() throws Exception {
 
@@ -979,7 +979,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Basic tests for snake yaml loader.
-     * 
+     *
      * @throws IOException
      */
     public void testYamlLoad() throws IOException {
@@ -1172,7 +1172,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Get contest.yaml file in test directory.
-     * 
+     *
      * @see #getTestFilename(String)
      * @param dirname
      * @return
@@ -1246,7 +1246,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Dump lines to stdout.
-     * 
+     *
      * @param comment
      *            phrase that identifis these lines
      * @param lines
@@ -1276,7 +1276,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Test load problemset.yaml.
-     * 
+     *
      * @throws Exception
      */
     public void testLoadProblemSet() throws Exception {
@@ -1337,9 +1337,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Tests CCS load.
-     * 
+     *
      * Especially test that the file contents are not loaded {@link SerializedFile#isExternalFile()}.
-     * 
+     *
      * @throws Exception
      */
     public void testCCSLoad() throws Exception {
@@ -1570,9 +1570,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * The list of the tests to run/test.
-     * 
+     *
      * JUnit3 only use.
-     * 
+     *
      * @return list of classes to test.
      */
 
@@ -1660,8 +1660,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Test internal load data files.
-     * 
-     * 
+     *
+     *
      * @throws Exception
      */
     public void testExternalFileLoad() throws Exception {
@@ -1700,12 +1700,12 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     }
 
-    
+
     /**
      * Test AUTO_JUDGE_KEY aka keyword auto-judging
      */
-    public void testAUTO_JUDGE_KEY() {
-        
+    public void testAutojudgekey() {
+
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1713,7 +1713,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test DEFAULT_VALIDATOR_KEY aka keyword default-validator
      */
-    public void testDEFAULT_VALIDATOR_KEY() {
+    public void testDefaultvalidatorkey() {
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1721,7 +1721,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test INPUT_KEY aka keyword input
      */
-    public void testINPUT_KEY() {
+    public void testInputkey() {
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1729,7 +1729,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test JUDGE_EXECUTE_COMMAND_KEY aka keyword judge-exec-cmd
      */
-    public void testJUDGE_EXECUTE_COMMAND_KEY() {
+    public void testJudgeexecutecommandkey() {
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1737,7 +1737,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test OVERRIDE_VALIDATOR_KEY aka keyword override-validator
      */
-    public void testOVERRIDE_VALIDATOR_KEY() {
+    public void testOverridevalidatorkey() {
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1745,7 +1745,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test PROBLEM_INPUT_KEY aka keyword input
      */
-    public void testPROBLEM_INPUT_KEY() {
+    public void testProbleminputkey() {
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1753,14 +1753,14 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test PROBLEM_LOAD_DATA_FILES_KEY aka keyword load-data-files
      */
-    public void testPROBLEM_LOAD_DATA_FILES_KEY() {
+    public void testProblemloaddatafileskey() {
         failIfInDebugMode();
     }
 
     /**
      * Test READ_FROM_STDIN_KEY aka keyword readFromSTDIN
      */
-    public void testREAD_FROM_STDIN_KEY() {
+    public void testReadfromstdinkey() {
         // SOMEDAY write unit test
         failIfInDebugMode();
 
@@ -1769,7 +1769,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test SEND_PRELIMINARY_JUDGEMENT_KEY aka keyword send-prelim-judgement
      */
-    public void testSEND_PRELIMINARY_JUDGEMENT_KEY() {
+    public void testSendpreliminaryjudgementkey() {
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1777,7 +1777,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test USE_JUDGE_COMMAND_KEY aka keyword use-judge-cmd
      */
-    public void testUSE_JUDGE_COMMAND_KEY() {
+    public void testUsejudgecommandkey() {
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1785,7 +1785,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test USING_PC2_VALIDATOR aka keyword use-internal-validator
      */
-    public void testUSING_PC2_VALIDATOR() {
+    public void testUsingpc2validator() {
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1794,7 +1794,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Test VALIDATOR_KEY aka keyword validator
      */
-    public void testVALIDATOR_KEY() {
+    public void testValidatorkey() {
         // SOMEDAY write unit test
         failIfInDebugMode();
     }
@@ -1806,3 +1806,4 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
 }
+

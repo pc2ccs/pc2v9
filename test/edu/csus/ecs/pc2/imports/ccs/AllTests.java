@@ -20,6 +20,7 @@ public final class AllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(ICPCTSVLoaderTest.class);
         suite.addTestSuite(ContestYAMLLoaderTest.class);
+        suite.addTestSuite(ContestSnakeYAMLLoaderTest.class);
         //$JUnit-END$
         return suite;
     }
