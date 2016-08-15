@@ -57,7 +57,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     /**
      * Full content of yaml file.
      */
-    private Map<String, Object> yamlContent = null;
+    private Map<String, Object> fullYamlContent = null;
 
     /**
      * Load Problem Data File Contents
@@ -170,11 +170,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     private Map<String, Object> getContent(String filename) {
-        if (yamlContent == null) {
-            yamlContent = loadYaml(filename);
+        if (fullYamlContent == null) {
+            fullYamlContent = loadYaml(filename);
         }
 
-        return yamlContent;
+        return fullYamlContent;
     }
 
     @Override
@@ -440,7 +440,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         time.setContestLengthSecs(parseTimeIntoSeconds(contestLength, Constants.DEFAULT_CONTEST_LENGTH_SECONDS));
         contest.updateContestTime(time);
-        ;
     }
 
     /**

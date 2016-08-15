@@ -1576,7 +1576,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      * @return list of classes to test.
      */
 
-    public static TestSuite SuiteNotUsed() {
+    public static TestSuite suiteNotUsed() {
         // public static TestSuite suite() {
         /**
          * This is a way to test a single test method using JUnit3
@@ -1586,7 +1586,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         String singletonTestName = "";
         // singletonTestName = "testYamlWriteAndLoad";
-        ;
         singletonTestName = "testLoadLanguages";
         singletonTestName = "testLoader";
 
