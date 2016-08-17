@@ -955,8 +955,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private void sendValidatorOutputFileNames() {
 
         if (getMultiTestSetOutputViewerFrame() != null) {
-
-            String[] validatorOutputNames = new String[getProblemDataFiles().getJudgesDataFiles().length];
+            // start with answer files, as there should be validator output for each
+            int arrayCount = getProblemDataFiles().getJudgesAnswerFiles().length;
+            // but if there are more data files, then go with that count
+            if (getProblemDataFiles().getJudgesDataFiles().length > arrayCount) {
+                arrayCount = getProblemDataFiles().getJudgesDataFiles().length;
+            }
+            String[] validatorOutputNames = new String[arrayCount];
 
             // null out list
             for (int i = 0; i < validatorOutputNames.length; i++) {
@@ -984,8 +989,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private void sendValidatorStderrFileNames() {
 
         if (getMultiTestSetOutputViewerFrame() != null) {
-
-            String[] validatorErrFileNames = new String[getProblemDataFiles().getJudgesDataFiles().length];
+            // start with answer files, as there should be validator output for each
+            int arrayCount = getProblemDataFiles().getJudgesAnswerFiles().length;
+            // but if there are more data files, then go with that count
+            if (getProblemDataFiles().getJudgesDataFiles().length > arrayCount) {
+                arrayCount = getProblemDataFiles().getJudgesDataFiles().length;
+            }
+            String[] validatorErrFileNames = new String[arrayCount];
 
             // null out list
             for (int i = 0; i < validatorErrFileNames.length; i++) {
