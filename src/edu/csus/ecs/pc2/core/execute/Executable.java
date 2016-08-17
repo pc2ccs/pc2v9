@@ -1093,7 +1093,7 @@ public class Executable extends Plugin implements IExecutable {
                  * Team executing run
                  */
 
-                if (problem.isReadInputDataFromSTDIN()) {
+                if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
                     selectAndCopyDataFile(inputDataFileName);
                 } else if (inputDataFileName != null) {
                     String sourceFileName = getDirName(runFiles.getMainFile()) + File.separator + problem.getDataFileName();
@@ -1262,7 +1262,7 @@ public class Executable extends Plugin implements IExecutable {
             stdoutCollector.start();
             stderrCollector.start();
 
-            if ( problem.isReadInputDataFromSTDIN()) {
+            if ( inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
                 log.info("Using STDIN from file " +inputDataFileName);
                     
                 BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
