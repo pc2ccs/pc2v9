@@ -48,6 +48,8 @@ public final class Reports {
     private String directory = null;
 
     private boolean usingProfile = true;
+    
+    private static final String FILE_OPTION_STRING = "-F";
 
     public Reports(String profileName, char[] charArray) {
         super();
@@ -170,6 +172,7 @@ public final class Reports {
 
         String[] lines = { "Usage: [options] reportName|## [[reportName|##][...]]", //
                 "", //
+                "-F filename    - specify command line options in filename", //
                 "--profile name - profile name, default uses current profile.  name may be a ## from --listp listing", //
                 "--contestPassword padd  - password needed to decrypt pc2 data", //
                 "--xml          - output only XML for report", //
@@ -460,6 +463,30 @@ public final class Reports {
     public void setDirectory(String directory) {
         this.directory = directory;
     }
+    
+    /**
+     * Fatal error - log error and show user message before exiting.
+     * 
+     * @param message
+     * @param ex
+     */
+    protected static void fatalError(String message, Exception ex) {
+        
+        System.err.println(message);
+        ex.printStackTrace(System.err);
+        System.exit(2);
+    }
+    
+
+    /**
+     * 
+     * @see #fatalError(String, Exception)
+     * @param message
+     */
+    protected static void fatalError(String message) {
+        fatalError(message, null);
+    }
+
 
     /**
      * Main starting point for Reports
@@ -470,7 +497,7 @@ public final class Reports {
     public static void main(String[] args) {
 
         String[] requireArguementArgs = { "--contestPassword", //
-                "--profile", "--dir", "--site" };
+                "--profile", "--dir", "--site", FILE_OPTION_STRING };
 
         ParseArguments arguments = new ParseArguments(args, requireArguementArgs);
 
@@ -482,6 +509,20 @@ public final class Reports {
         if (arguments.isOptPresent("--help")) {
             usage();
             System.exit(0);
+        }
+        
+        if (arguments.isOptPresent(FILE_OPTION_STRING)) {
+            String propertiesFileName = arguments.getOptValue(FILE_OPTION_STRING);
+
+            if (!(new File(propertiesFileName).exists())) {
+                fatalError(propertiesFileName + " does not exist (pwd: " + Utilities.getCurrentDirectory() + ")", null);
+            }
+
+            try {
+                arguments.overRideOptions(propertiesFileName);
+            } catch (IOException e) {
+                fatalError("Unable to read file " + propertiesFileName, e);
+            }
         }
 
         if (arguments.isOptPresent("--list")) {
@@ -495,9 +536,7 @@ public final class Reports {
         }
 
         if (arguments.getArgCount() == 0) {
-            System.err.println("No reports specified, none printed");
-            System.exit(2);
-
+            fatalError("No reports specified, none printed");
         }
 
         boolean xmlOutputOption = arguments.isOptPresent("--xml");
@@ -511,8 +550,7 @@ public final class Reports {
         }
 
         if (password == null) {
-            System.err.println("Contest Password (--contestPassword) is required");
-            System.exit(2);
+            fatalError("Contest Password (--contestPassword) is required");
         }
 
         profileName = lookupProfileName(profileName);
