@@ -8,15 +8,19 @@ import java.io.IOException;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.NoteList;
 import edu.csus.ecs.pc2.core.NoteMessage;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Filter;
@@ -70,20 +74,63 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 if (e.getClickCount() > 1 && e.isControlDown()) {
-                    if (developmentFrame == null){
-                        developmentFrame = new DevelopmentFrame();
-                        developmentFrame.setContestAndController(getContest(), getController());
-                        FrameUtilities.centerFrame(developmentFrame);
-                        
-                    }
-                    if (developmentFrame != null){
-                        developmentFrame.setVisible(true);
-                    }
+                    showDevelopmentFrame();
                 }
             }
         });
     }
     
+    protected void showDevelopmentFrame() {
+        
+        if (isValidPassword()){
+
+            StaticLog.info("Dev password matches, frame displayed");
+            
+            if (developmentFrame == null) {
+                developmentFrame = new DevelopmentFrame();
+                developmentFrame.setContestAndController(getContest(), getController());
+                FrameUtilities.centerFrame(developmentFrame);
+
+            }
+            if (developmentFrame != null) {
+                developmentFrame.setVisible(true);
+            }
+        } else {
+            
+            StaticLog.info("Dev password did not match");
+        }
+    }
+
+
+    /**
+     * Prompt for password in GUI.
+     * @return true if matches override.
+     */
+    private boolean isValidPassword() {
+
+        boolean validPassword = false;
+
+        JPanel panel = new JPanel();
+        JLabel label = new JLabel("Enter password:");
+        JPasswordField passwordField = new JPasswordField(32);
+        panel.add(label);
+        panel.add(passwordField);
+
+        String[] options = new String[] { "OK", "Cancel" };
+        int option = JOptionPane.showOptionDialog(this, panel, "Authorization Required", JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+        
+        if (option == JOptionPane.YES_OPTION) {
+            char[] passchars = passwordField.getPassword();
+            String password = new String(passchars);
+            validPassword = InternalController.matchOverride(password);
+        }
+
+        label = null;
+        panel = null;
+
+        return validPassword;
+    }
+
     public abstract String getPluginTitle();
 
     public IInternalController getController() {

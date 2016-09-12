@@ -1670,7 +1670,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Returns true if the password matches the hash for the override password.
      */
-    private boolean matchOverride(String password) {
+    public static boolean matchOverride(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA");
             md.reset();

@@ -23,6 +23,8 @@ public class DevelopmentPane extends JPanePlugin {
     private OptionsPane optionsPane = new OptionsPane();
 
     private LogSettingsPane logSettingsPane = new LogSettingsPane();
+    
+    private ContestPreloadPane contestPreloadPane = new ContestPreloadPane();
 
     public DevelopmentPane() {
         super();
@@ -34,6 +36,8 @@ public class DevelopmentPane extends JPanePlugin {
         tabbedPane.addTab("Plugins", null, pluginPane, null);
 
         tabbedPane.addTab("Reports", null, reportPane, null);
+        
+        tabbedPane.addTab("Sample Contests", null, contestPreloadPane, null);
 
         tabbedPane.addTab("Log Settings", null, logSettingsPane, null);
 
@@ -52,6 +56,7 @@ public class DevelopmentPane extends JPanePlugin {
         reportPane.setContestAndController(inContest, inController);
         optionsPane.setContestAndController(inContest, inController);
         logSettingsPane.setContestAndController(inContest, inController);
+        contestPreloadPane.setContestAndController(inContest, inController);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
