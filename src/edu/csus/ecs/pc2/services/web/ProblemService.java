@@ -6,6 +6,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -51,26 +52,22 @@ public class ProblemService {
         String jsonProblems = "[]";
         try {
             ContestTime contestTime = contest.getContestTime();
-            // do not show the problems if the contest has not
-            // been started (unless your are an admin)
             if (contestTime.getElapsedMS() > 0 || sc.isUserInRole("admin")) {
+                //contest is started or user is an admin; get the contest problems
                 jsonProblems = problems.createJSON(contest);
+            } else {
+                // do not show (return) the problems if the contest has not
+                // been started and the requester is not an admin)
+                return Response.status(Status.FORBIDDEN).build();
             }
         } catch (IllegalContestState e) {
             controller.getLog().log(Log.WARNING, "Problem creating problem JSON: " + e, e);
             e.printStackTrace();
-            // TODO: return HTTP error response code
+            //return HTTP error response code containing the exception message
+            return Response.serverError().entity(e.getMessage()).build();
+            // or: return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
 
-        // TODO: figure out how to set the Response to "OK" (or whether this is necessary)
-        // return Response.status(Response.Status.OK).build();
-
-
-//            return Response.status(Response.Status.BAD_REQUEST).entity("Bad request - No Content").build();
-
-        // output the response to the requester (note that this actually returns it to Jersey,
-        // which forwards it to the caller as the HTTP response).
-//        return jsonProblems;
         return Response.ok(jsonProblems,MediaType.APPLICATION_JSON).build();
     }
 
