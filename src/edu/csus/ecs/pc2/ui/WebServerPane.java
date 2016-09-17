@@ -76,7 +76,7 @@ import sun.security.x509.X509CertInfo;
  * This class provides a GUI for configuring the embedded Jetty webserver. It allows specifying the port on which Jetty will listen and the REST service endpoints to which Jetty will respond. (Note
  * that REST endpoints are handled using Jersey, the JAX-RS implementation.)
  * 
- * By default the Jetty webserver is configured to listen on port 50080.
+ * By default the Jetty webserver is configured to listen on port 50443.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
