@@ -4,11 +4,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 
@@ -22,10 +24,12 @@ import edu.csus.ecs.pc2.core.model.Language;
 public class LanguageService {
 
     private IInternalContest contest;
+    private IInternalController controller;
 
-    public LanguageService(IInternalContest contest, IInternalController controller) {
+    public LanguageService(IInternalContest inContest, IInternalController inController) {
         super();
-        this.contest = contest;
+        this.contest = inContest;
+        this.controller = inController;
     }
 
     /**
@@ -37,7 +41,7 @@ public class LanguageService {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getLanguages() {
+    public Response getLanguages() {
 
         // get the problems from the contest
         Language[] languages = contest.getLanguages();
@@ -79,24 +83,26 @@ public class LanguageService {
             }
 
         } catch (JsonProcessingException e) {
-            // TODO: log exception
-            System.err.println ("LanguageService: error: " + e.getMessage());
+            //log exception
+            controller.getLog().log(Log.WARNING, "LanguageService: JsonProcessingException while creating language JSON: " + e, e);
             e.printStackTrace();
-            // TODO: return HTTP error
+            //return HTTP error response code containing the exception message
+            return Response.serverError().entity(e.getMessage()).build();
+            
         } catch (Exception e) {
-            // TODO: log exception
-            System.err.println ("LanguageService: error: " + e.getMessage());
+            //log exception
+            controller.getLog().log(Log.WARNING, "LanguageService: Exception creating language JSON: " + e, e);
             e.printStackTrace();
-            // TODO: return HTTP error
+            //return HTTP error response code containing the exception message
+            return Response.serverError().entity(e.getMessage()).build();
         }
+        
+        //if we get here, everything went ok building the language JSON string
         jsonOutput += "]";
-
-        // TODO: figure out how to set the Response to "OK" (or whether this is necessary)
-        // return Response.status(Response.Status.OK).build();
 
         // output the response to the requester (note that this actually returns it to Jersey,
         // which forwards it to the caller as the HTTP response).
-        return jsonOutput;
+        return Response.ok(jsonOutput,MediaType.APPLICATION_JSON).build();
 
     }
 }
