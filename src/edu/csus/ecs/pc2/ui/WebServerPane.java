@@ -597,10 +597,11 @@ public class WebServerPane extends JPanePlugin {
         getChckbxProblems().setEnabled(!serverRunning);
         getChckbxTeams().setEnabled(!serverRunning);
         getChckbxLanguages().setEnabled(!serverRunning);
+        getChckbxStarttime().setEnabled(!serverRunning);
 
         // these services are currently unimplemented; disallow enabling them
-        getChckbxStarttime().setEnabled(false);
-        getChckbxStarttime().setVisible(false);
+//        getChckbxStarttime().setEnabled(false);
+//        getChckbxStarttime().setVisible(false);
     }
 
     private JCheckBox getChckbxScoreboard() {
@@ -643,6 +644,9 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox getChckbxStarttime() {
         if (chckbxStarttime == null) {
             chckbxStarttime = new JCheckBox("/starttime");
+            chckbxStarttime.setSelected(true);
+            chckbxStarttime.setHorizontalAlignment(SwingConstants.LEFT);
+            chckbxStarttime.setToolTipText("Enable getting/setting contest start time");
         }
         return chckbxStarttime;
     }
