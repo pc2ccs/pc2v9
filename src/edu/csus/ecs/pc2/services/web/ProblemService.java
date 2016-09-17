@@ -36,9 +36,10 @@ public class ProblemService {
     }
 
     /**
-     * This method returns a String representation of the current contest problem set in JSON format. The returned string is a JSON array with one problem description per array element.
+     * This method returns a representation of the current contest problem set in JSON format. 
+     * The returned value is a JSON array with one problem description per array element.
      * 
-     * @return a String containing the contest problems in JSON form
+     * @return a {@link Response} object containing the contest problems in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

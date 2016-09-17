@@ -33,11 +33,11 @@ public class LanguageService {
     }
 
     /**
-     * This method returns a String representation of the current contest languages in JSON format. 
-     * The returned string is a JSON array with one language description per array element, matching the
+     * This method returns a representation of the current contest languages in JSON format. 
+     * The returned value is a JSON array with one language description per array element, matching the
      * description at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
      * 
-     * @return a String containing the contest languages in JSON form
+     * @return a {@link Response} object containing the contest languages in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

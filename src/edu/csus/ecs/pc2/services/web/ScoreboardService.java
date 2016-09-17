@@ -34,9 +34,10 @@ public class ScoreboardService {
     }
 
     /**
-     * This method returns a representation of the current contest scoreboard in JSON format. The return JSON is in the format defined by {@link StandingsJSON2016#createJSON(IInternalContest)}.
+     * This method returns a representation of the current contest scoreboard in JSON format. 
+     * The return JSON is in the format defined by {@link StandingsJSON2016#createJSON(IInternalContest)}.
      * 
-     * @return a String containing the JSON scoreboard
+     * @return a {@link Response} object containing the JSON scoreboard
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
