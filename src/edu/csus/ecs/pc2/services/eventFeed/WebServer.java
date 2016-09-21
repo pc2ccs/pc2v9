@@ -321,27 +321,27 @@ public class WebServer implements UIPlugin {
 
         if (getBooleanProperty(SCOREBOARD_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new ScoreboardService(getContest(), getController()));
-            showMessage("Staring /scoreboard web service");
+            showMessage("Starting /scoreboard web service");
         }
 
         if (getBooleanProperty(PROBLEM_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new ProblemService(getContest(), getController()));
-            showMessage("Staring /problem web service");
+            showMessage("Starting /problem web service");
         }
 
         if (getBooleanProperty(LANGUAGE_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new LanguageService(getContest(), getController()));
-            showMessage("Staring /languages web service");
+            showMessage("Starting /languages web service");
             }
 
         if (getBooleanProperty(STARTTIME_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new StarttimeService(getContest(), getController()));
-            showMessage("Staring /starttime web service");
+            showMessage("Starting /starttime web service");
         }
 
         if (getBooleanProperty(TEAMS_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new TeamService(getContest(), getController()));
-            showMessage("Staring /teams web service");
+            showMessage("Starting /teams web service");
         }
 
         return resConfig;
@@ -355,8 +355,8 @@ public class WebServer implements UIPlugin {
             return b;
         } else {
             return "true".equalsIgnoreCase(value.trim()) || //
-                    "yes".equalsIgnoreCase(value) || //
-                    "on".equalsIgnoreCase(value) || //
+                    "yes".equalsIgnoreCase(value.trim()) || //
+                    "on".equalsIgnoreCase(value.trim()) || //
                     "enabled".equalsIgnoreCase(value.trim());
         }
 
