@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Purpose: print version number
+# Author : pc2@ecs.csus.edu
+# $HeadURL$
+#
+
+. `dirname $0`/ewenv
+
+java -cp $libdir/PC2JavaServer.jar  edu.csus.pc2.ewuteam.VersionInfo
+
+# eof ewver $Id$ 

@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Purpose: Create archive of log and other data
+# Author : pc2@ecs.csus.edu
+# $HeadURL$
+#
+
+. `dirname $0`/ewenv
+
+java  -Xms64M -Xmx768M -cp $libdir/pc2.jar:$libdir/PC2JavaServer.jar edu.csus.pc2.ewuteam.Zip $*
+
+# eof ewver $Id$ 

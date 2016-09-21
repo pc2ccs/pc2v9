@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<project name="EWTeam" default="stage_files" basedir=".">
+	<!-- $Id: build.xml 76 2013-11-06 04:01:20Z laned $ -->
+	<!-- $HeadURL: http://pc2.ecs.csus.edu/repos/pc2projects/trunk/EWUTeam/build.xml $ -->
+	<!-- 
+
+Purpose: To create a PC2JavaServer.jar 
+
+To Use this:
+  To run/use this file, insure JAVA_HOME is defined and
+  then Run As... Ant Build
+
+Notes
+
+No need for Javadoc - this is not an API.
+
+-->
+	<description>
+         Build of EWTeam.jar
+    </description>
+	
+	<property name="version" value="2.0" />
+	
+    <!-- Compiler settings. -->
+    <property name="compilerArg" value=""/>
+
+	<!-- Name of JAR -->
+	<property name="name" value="EWTeam" />
+	<property name="ewuname" value="PC2JavaServer" />
+	<property name="jar.name" value="${ewuname}.jar" />
+
+	<!-- set global properties for this build -->
+	<property name="src.dir" location="src" />
+	<property name="lib.dir" location="lib" />
+	<property name="doc.dir" location="doc" />
+	<property name="project.dir" location="." />
+	<property name="project.dir" location="." />
+	<property name="php.src.dir" location="src/php" />
+	<property name="test.dir" location="test" />
+	<property name="build.dir" location="build" />
+	<property name="build.prod.dir" location="${build.dir}/prod" />
+	<property name="build.test.dir" location="${build.dir}/test" />
+	<property name="test.xml.dir" location="${build.dir}/test-results" />
+  <!-- this is the location for the dist/ directory where the generarated .jar files is created -->
+	<property name="dist.dir" location="dist" />
+
+  <!-- root of the distribution -->
+	<property name="staging.dir" value="${dist.dir}/staging" />
+
+  <!-- this is the location for the dist/ directory in the distribution -->
+	<property name="staging.dist.dir" value="${dist.dir}/staging/dist" />
+	
+	<property name="jar.path" value="${dist.dir}/${jar.name}" />
+		
+	<property name="version.path" value="${build.dir}/VERSION.EWTEAM"/>
+    <property name="spec.path" value="${build.dir}/ewu.spec"/>
+
+	<path id="project.classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="properties">
+		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+	</target>
+
+	<target name="init" depends="properties,clean">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build.prod.dir}" />
+		<mkdir dir="${build.test.dir}" />
+		<mkdir dir="${staging.dir}" />
+
+		<!-- 
+		Fetch the SVN build version 
+		<exec executable="svnversion" outputproperty="repo.version">
+            <arg line="-n ."/>
+		</exec>
+		-->
+		
+        <!-- XXX this requires svnkit-cli.jar & svnkit.jar in the project
+        <java classname="org.tmatesoft.svn.cli.SVNVersion" dir="${basedir}" fork="true" outputproperty="repo.version"
+            classpathref="project.classpath">
+            <arg line="-n ."/>
+        </java>
+        -->
+
+		<!-- 
+		A hard coded version number 
+		-->
+		<tstamp>
+			<format property="millisecond" pattern="S" timezone="UTC" />
+		</tstamp>
+		<property name="repo.version" value="${millisecond}" />
+		
+	    <tstamp>
+	        <format property="date" pattern="yyyyMMdd" timezone="UTC" />
+	    </tstamp>
+	    <tstamp>
+	        <format property="time" pattern="HHmm" timezone="UTC" />
+	    </tstamp>
+	    <property name="timestamp" value="${date}${time}" />
+	    <tstamp>
+	        <format
+	            property="date.english"
+	            pattern="EEEE, MMMM d yyyy"
+	            timezone="UTC" />
+	    </tstamp>
+	    <tstamp>
+	        <format
+	            property="time.english"
+	            pattern="HH:mm z"
+	            timezone="UTC" />
+	    </tstamp>
+	    <property
+	        name="timestamp.english"
+	        value="${date.english} ${time.english}" />
+
+	</target>
+
+	<!-- Compile the java code from ${src.dir} into ${build.dir} -->
+	<target name="compile" depends="init" description="compile the source ">
+		<javac srcdir="${src.dir}" source="1.6" target="1.6" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no">
+			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
+			<classpath refid="project.classpath" />
+			<compilerarg line="-log '${build.dir}/${ewuname}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile,version" description="create distribution jar ">
+		<jar jarfile="${jar.path}" basedir="${build.prod.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="PC2JavaMiniserver" />
+				<attribute name="Class-Path" value="pc2.jar JavaBridge.jar" />
+				<attribute name="Specification-Version" value="${version}" />
+				<attribute name="Implementation-Title" value="EWU Web Team Client" />
+				<attribute name="Implementation-Version" value="${repo.version}" />
+				<attribute name="Built-On" value="${timestamp.english}" />
+			</manifest>
+		</jar>
+		<echo message="created ${jar.path} Version ${version} build number ${repo.version}"/>
+	</target>
+	
+    <target name="version" depends="init" description="re-creates the VERSION file">
+        <delete file="${version.path}"/>
+        <echo message="PC^2 Project EWU Team ${line.separator}" file="${version.path}"/>
+        <echo message="Version ${version} ${date} ${repo.version} (${timestamp.english})${line.separator}" file="${version.path}" append="true"/>
+        <delete file="${spec.path}"/>
+        <echo message="Version: ${version}${line.separator}Release: ${repo.version}${line.separator}" file="${spec.path}"/>
+        <concat destfile="${spec.path}" append="true">
+             <fileset file=".spec.base"/>
+        </concat>
+    	<echo message="Created version info in ${version.path}" />
+    </target>
+	
+	<target name="stage_files" depends="jar" description="Stages project deliverables in distribution directory to be packed">
+		
+		<property name="dist.lib.dir" value="${staging.dist.dir}/lib" />
+		<mkdir dir="${dist.lib.dir}" />
+
+    <!-- Copy to staging dist/lib/ directory -->
+		
+		<copy file="${jar.path}" todir="${dist.lib.dir}"/>
+		<copy file="${src.dir}/pc2v9.ini" todir="${dist.lib.dir}"/>
+		<copy todir="${dist.lib.dir}"> 
+		    <fileset dir="${lib.dir}"> 
+		       <include name="*"/>
+		    </fileset>
+		</copy>
+
+    <!-- Copy to staging dist/ directory -->
+
+		<mkdir dir="${staging.dist.dir}/Login" />
+		<mkdir dir="${staging.dist.dir}/Team" />
+		<mkdir dir="${staging.dist.dir}/doc" />
+			
+		<copy todir="${staging.dist.dir}/Login">  <fileset dir="${php.src.dir}/Login"/>  </copy>
+		<copy todir="${staging.dist.dir}/Team">  <fileset dir="${php.src.dir}/Team"/>  </copy>
+
+		<!-- copy user doc  -->
+		<copy file="${doc.dir}/pc2userguide.pdf" todir="${staging.dist.dir}/doc" />
+
+		<!-- create/copy refresh web page -->
+		<copy file="${php.src.dir}/index.html" todir="${staging.dist.dir}" />
+
+   	    <!-- Copy to staging (root of distribution) directory -->
+
+		<copy file="${project.dir}/README.txt" todir="${staging.dir}"/>
+		<copy file="${project.dir}/SETUP.txt" todir="${staging.dir}"/>
+		<copy file="${project.dir}/LICENSE.txt" todir="${staging.dir}"/>
+
+		<copy file="${src.dir}/index.html" todir="${staging.dir}"/>
+
+		<mkdir dir="${staging.dist.dir}/uploads" />
+		<chmod dir="${staging.dist.dir}/uploads" perm="777"/>
+
+		<copy file="${build.dir}/VERSION.EWTEAM" todir="${staging.dir}"/>
+		
+		<echo message="Staged project files at ${staging.dir}"/>
+
+	</target>
+	
+	<target name="realclean" depends="clean">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${dist.dir}" />
+	</target>
+
+</project>

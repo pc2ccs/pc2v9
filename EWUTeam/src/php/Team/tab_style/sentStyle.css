@@ -1,0 +1,79 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+form {
+	background:white;
+	 float: left;
+	 margin-left: 10px;
+	 overflow: hidden;
+}
+
+form * {
+	padding-bottom: 5px;
+}
+
+.sendButton {
+	float: left;
+	padding: 2px 5px 2px 5px;
+}
+
+.scoreboardButton {
+	margin: 10px;
+	height: 25px;
+	width: 100px;
+}
+
+input {
+	background: #f3f1eb;
+    border: 1px solid #dedbd1;
+    padding-bottom: 0px;
+    padding: 2px 5px 2px 5px;
+}
+
+input:hover {
+	background: #dedbd1;
+		color: #222;
+		text-decoration: none;
+}
+
+
+
+select {
+	width: 100%;
+	background: #f3f1eb;
+	//background: #ffffff;
+    	border: 1px solid #dedbd1;
+    	padding-bottom: 0px;
+}
+
+select:hover {
+	background: #dedbd1;
+	//background: #ff0000;
+	color: #222;
+	//color: #fff;
+	text-decoration: none;
+}
+
+
+#sent-box {
+	
+    opacity: 0.5; 
+    background:#000;
+	position: relative; 
+	z-index: 1;
+	border-radius: 10px;
+	display:none;
+	vertical-align: middle;
+	padding-bottom:0;
+	float: left;
+}
+
+#sent-message {
+	padding:2px 5px 2px 5px;
+	z-index: 10;
+    color: #FFFFFF;
+    text-align: center;
+    
+}

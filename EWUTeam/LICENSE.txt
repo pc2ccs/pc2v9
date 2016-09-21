@@ -1,0 +1,10 @@
+LICENSE
+
+End-User Licensing:
+http://pc2.ecs.csus.edu/pc2projects/EWUTeam
+
+Contact Information:
+http://pc2.ecs.csus.edu/pc2projects/EWUTeam
+mailto:pc2@ecs.csus.edu
+
+eof LICENSE $Id$

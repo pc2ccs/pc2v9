@@ -1,0 +1,99 @@
+$Id$
+$HeadURL$
+
+------------------------------------------------------------
+Contains: bugs, enhancements, installation tasks, todo's.
+------------------------------------------------------------
+
+------------------------------------------------------------
+CATEGORY 1 - HIGH PRIORITY
+------------------------------------------------------------
+
+- rename project from EWUTeam to EWTeam (no more U)
+  - repo  (with scmbug the glue.conf will need to be tweaked)
+  RESOLVED - artifacts
+  RESOLVED - web pages
+
+- Read scoreboard2 password from .ini
+
+RESOLVED FIX IT, up limit to: 512K
+  File limit size needs to be larger than 20k
+  To change the input file size:
+  edit Team/submitProblem.php, change 3 lines.
+
+Line 8:
+	if($_FILES["file"]["size"] > 512000) {
+Line 9:
+	$_SESSION['error'] = "Input file larger than max input size (512KB).";
+Line 34:
+	$_SESSION['error'] = "Input file larger than max input size (512KB).";
+
+RESOLVED replace index.html with proper version that has REFRESH
+
+FIX move index.html under dist/
+
+RESOLVED move pc2v9.ini into lib/
+
+Source file, reorg
+    Remove CodeFreeze dir, put PHP under src/ put .java under src/
+    rename JAR to lib
+
+--
+
+- ASSIGNED to Doug to figure out LOE
+The Team UI will not show that a run has not been accepted by
+the server when the contest clock is stopped, the exception
+is written to the API console.  
+The UI should show a message to the team about the run being rejected.
+
+- ASSIGNED to Doug to figure out LOE
+Cosmetic: Move the Team Interface: <login> from the
+top of the display to the title bar.
+
+------------------------------------------------------------
+CATEGORY 2 - LOWER PRIORITY
+------------------------------------------------------------
+
+- No confirmation on submit nothing to tell you that the
+item was submitted.
+
+- Test: 
+  submit run - is there a confirm?
+  submit clar - is there a confirm?
+
+- Enh: make the directory "file_uploads" configurable instead of
+hard coded to under the JAR/ directory.
+
+- The special effect when changing menu items (disappear/reappear) is a bit annoying. :)
+
+- On change of tab, refresh data on that tab.
+
+- We should include scripts that run/start the EWU Team backend aka
+	cd JAR
+	java -jar PC2JavaServer.jar
+
+- We should test whether chmod 777 file_uploads is needed.
+
+	Per Troy, source should not be under CodeFreeze.  Should just
+	remove that directory and move things down libs should be under
+	lib not JAR source should be under source not JAR PHP source
+	directories should be moved under src/ as well.
+
+Per Troy, there should be a tag marking the original code
+delivered on version/build 2.
+
+NOTES
+
+May need to install PHP5 on web server.  ubuntu command to install php
+on a web server 
+sudo apt-get install libapache2-mod-php5
+
+- PHP using insecure include statements
+fix: Must update php.ini, in PHP they are using include (URL)
+should not be using that, oh well.
+
+In: /etc/php5/apache2/php.ini
+; http://php.net/allow-url-include
+allow_url_include = On
+
+*eof* $Id$
