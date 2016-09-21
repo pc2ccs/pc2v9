@@ -33,7 +33,6 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
-import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
@@ -213,7 +212,7 @@ public class WebServer implements UIPlugin {
             // only enable https
             jettyServer.setConnectors(new Connector[] { https });
 
-            context.setSecurityHandler(basicAuth("scott", "tiger", "my realm", new String[] { "admin" }));
+            context.setSecurityHandler(basicAuth());
 
             jettyServer.setHandler(context);
 
@@ -252,11 +251,9 @@ public class WebServer implements UIPlugin {
     }
 
 
-    private SecurityHandler basicAuth(String username, String password, String realm, String[] roles) {
+    private SecurityHandler basicAuth() {
 
         HashLoginService l = new HashLoginService();
-        l.putUser(username, Credential.getCredential(password), roles);
-        l.setName(realm);
         File f = new File("realm.properties");
         if (f.exists() && f.isFile() && f.canRead()) {
             showMessage("Loading " + f.getAbsolutePath());
