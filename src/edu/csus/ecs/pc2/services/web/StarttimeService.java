@@ -8,8 +8,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -67,10 +69,17 @@ public class StarttimeService {
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setStartime(String jsonInputString) {
+    public Response setStartime(@Context SecurityContext sc, String jsonInputString) {
 
         System.out.println ("Starttime PUT: received the following request body: '" + jsonInputString + "'");
-        
+ 
+        //check authorization (verify requestor is allowed to make this request)
+        if (!sc.isUserInRole("admin")) {
+            controller.getLog().log(Log.WARNING, "Starttime Service: unauthorized user request");
+            //return HTTP 401 response code per CLICS spec
+            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
+        }
+
         //check to insure received payload (request) is valid
         if (!validRequest(jsonInputString)) {
             //invalid payload -- log, return error status, and otherwise ignore
@@ -78,8 +87,6 @@ public class StarttimeService {
             //return HTTP 400 (Bad Request) response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("Invalid data in Starttime request").build();
         }
-        
-        //TODO: check authentication (verify requestor is allowed to make this request)
         
         //check to insure contest has not already been started
         if (contest.getContestTime().isContestStarted()) {
