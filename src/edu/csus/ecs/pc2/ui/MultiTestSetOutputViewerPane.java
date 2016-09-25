@@ -1592,7 +1592,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             String testResult = ((JLabel) value).getText();
             if (!currentProblem.isValidatedProblem()) {
                 setBackground(Color.yellow);
-                setText("N/A");
+                setText("(No Validator)");
             } else if (testResult.equalsIgnoreCase("Pass")) {
                 setBackground(Color.green);
                 setForeground(Color.black);
