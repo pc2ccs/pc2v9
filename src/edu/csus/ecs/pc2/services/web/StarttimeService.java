@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.services.web;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -16,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapType;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -38,7 +41,10 @@ public class StarttimeService {
 
     private IInternalContest contest;
     private IInternalController controller;
-
+    private boolean requestToSetStartTimeToUndefined;
+    private boolean requestToSetStartTimeToExplicitValue;
+    private Date requestedStartDate;
+   
     public StarttimeService(IInternalContest inContest, IInternalController inController) {
         super();
         this.contest = inContest;
@@ -71,108 +77,206 @@ public class StarttimeService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response setStartime(@Context SecurityContext sc, String jsonInputString) {
 
+        //DEBUG:
         System.out.println ("Starttime PUT: received the following request body: '" + jsonInputString + "'");
  
-        //check authorization (verify requestor is allowed to make this request)
+        //check authorization (verify requester is allowed to make this request)
         if (!sc.isUserInRole("admin")) {
-            controller.getLog().log(Log.WARNING, "Starttime Service: unauthorized user request");
+            controller.getLog().log(Log.WARNING, "Starttime Service: unauthorized Starttime PUT request (user not in admin role)");
             //return HTTP 401 response code per CLICS spec
             return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
         }
 
+        //check for empty request
+        if (jsonInputString == null) {
+            controller.getLog().log(Log.WARNING, "Starttime Service: received invalid (empty) JSON starttime string");
+            //return HTTP 400 response code per CLICS spec
+            return Response.status(Status.BAD_REQUEST).entity("Empty starttime request").build();
+  
+        }
+        
+        //check which kind of request we've received
+        requestToSetStartTimeToUndefined = false ;
+        requestToSetStartTimeToExplicitValue = false ;
+        
+        if (jsonInputString.equalsIgnoreCase("\"starttime\":\"undefined\"")) {
+            requestToSetStartTimeToUndefined = true;
+        } else {
+            requestToSetStartTimeToExplicitValue = requestHasValidStarttimeDate(jsonInputString);
+        }
+        
         //check to insure received payload (request) is valid
-        if (!validRequest(jsonInputString)) {
-            //invalid payload -- log, return error status, and otherwise ignore
-            controller.getLog().log(Log.WARNING, "Starttime Service: received invalid data in request");
+        if (!requestToSetStartTimeToUndefined && !requestToSetStartTimeToExplicitValue) {
+            //invalid payload -- log, return error status
+            controller.getLog().log(Log.WARNING, "Starttime Service: received invalid data in request: '" + jsonInputString + "'");
             //return HTTP 400 (Bad Request) response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("Invalid data in Starttime request").build();
         }
         
+        //if we get here, the JSON input either indicates "undefined" start or a valid start Date,
+        // and if a valid start Date then the Date is contained in field "startDate" (otherwise the field is null)
+        
+        //check the following error conditions (per the CLICS spec) and return 403 Forbidden:
+        // 403: if contest is already started
+        // 403: if setting to 'undefined' with less than 10s left to previous start time.
+        // 403: if setting to new (defined) start time with less than 30s left to previous start time.
+        // 403: if the new start time is less than 30s from now.
+
         //check to insure contest has not already been started
         if (contest.getContestTime().isContestStarted()) {
-            //contest has started, cannot set scheduled start time -- ignore, log, and return error status
+            //contest has started, cannot set scheduled start time -- log, and return error status
             controller.getLog().log(Log.WARNING, 
                 "Starttime Service: received request to set start time when contest has already started; ignored");
             //return HTTP 403 (Forbidden) response code per CLICS spec
             return Response.status(Status.FORBIDDEN).entity("Contest already started").build();
         }
         
-        //TODO: add code here to check the following error conditions (per the CLICS spec) and return 403 Forbidden:
-        // 403: if setting to 'undefined' with less than 10s left to previous start time.
-        // 403: if setting to new (defined) start time with less than 30s left to previous start time.
-        // 403: if the new start time is less than 30s from now.
+        //get the scheduled start date (if any) and the current date (time)
+        Date scheduledStartDate = contest.getContestInformation().getScheduledStartDate() ;
+        GregorianCalendar now = new GregorianCalendar();
 
-
-        //if we get here then we have a valid starttime request
-        //TODO: add code here to actually set the contest scheduled start time
-        
-        // output an "OK" response to the requester (note that this actually returns it to Jersey,
-        // which forwards it to the caller as the HTTP.response).
-        return Response.ok().build();
-        // or:  return Response.status(Response.Status.OK).build();
-
-
-    }
-    
-    /**
-     * Examines the specified JSON string to see whether it constitutes a valid starttime request
-     * per the CLICS Starttime specification.
-     * Tests include verifying the string is valid JSON and that the specified starttime value in 
-     * the string represents a valid start time of the form
-     * { "starttime":1265335138.26 } or { "starttime":"undefined" }.
-     * 
-     * @param jsonRequestString a JSON string specifying a starttime request
-     * @return true if the input JSON is a valid starttime request string; false otherwise
-     */
-    private boolean validRequest(String jsonRequestString) {
-        
-        //create ObjectMapper instance
-        ObjectMapper objectMapper = new ObjectMapper();
-        
-        String temp ;
-        Date date ;
-        //convert json string to object
-        if (jsonRequestString.contains("undefined")) {
-            try {
-                temp = objectMapper.readValue(jsonRequestString, String.class);
-                System.out.println("StarttimePut.validRequest(): received start time value '" + temp + "'");
-                if (temp !=null && temp.equalsIgnoreCase("undefined")) {
-                    return true;
-                }
-            } catch (JsonMappingException e) {
-                controller.getLog().log(Log.WARNING, "StarttimePUT.validRequest(): error parsing JSON input '"
-                        + jsonRequestString + "'");
-                e.printStackTrace();
-                return false;
-            } catch (IOException e) {
-                controller.getLog().log(Log.WARNING, "StarttimePUT.validRequest(): IOException parsing JSON input '"
-                        + jsonRequestString + "'");
-                e.printStackTrace();
-                return false;
+        //check if setting to "undefined" with less than 10s left to previous start time.
+        if (requestToSetStartTimeToUndefined) {
+            if (scheduledStartDate!=null && scheduledStartDate.getTime()<(now.getTimeInMillis()+10000)) {
+                //we have request to set start to "undefined", but we have a scheduled start date and we're 
+                // within 10 secs of it; cannot set scheduled start time to undefined (per CLICS spec);
+                // log, return error status, and ignore (meaning, the contest is going to start!)
+                controller.getLog().log(Log.WARNING, 
+                    "Starttime Service: received request to set start time to 'undefined' with less than 10 seconds to go before start; ignored");
+                //return HTTP 403 (Forbidden) response code per CLICS spec
+                return Response.status(Status.FORBIDDEN).entity("Cannot change start time to 'undefined' within 10 seconds of already-scheduled start").build();
             }
-        } else {
-            try {
-                date = objectMapper.readValue(jsonRequestString, Date.class);
-                System.out.println("StarttimePut.validRequest(): received start time value '" + date + "'");
-                if (date != null) {
-                    //got a non-null date without any exceptions
-                    return true;
+        }
+        
+        //check if setting to new (defined) start time with less than 30s left to previously-defined start time.
+        if (requestToSetStartTimeToExplicitValue) {
+            if (requestedStartDate!=null) {
+                if (scheduledStartDate!=null && scheduledStartDate.getTime()<(now.getTimeInMillis()+30000)) {
+                    //we're within 30 secs of scheduled start; cannot set scheduled start time to new value (per CLICS spec);
+                    // log, return error status, and ignore (meaning, the contest is going to start!)
+                    controller.getLog().log(Log.WARNING, 
+                            "Starttime Service: received request to set start time with less than 30 seconds to go before start; ignored");
+                    //return HTTP 403 (Forbidden) response code per CLICS spec
+                    return Response.status(Status.FORBIDDEN).entity("Cannot change to new start time within 30 seconds of already-scheduled start").build();
                 }
-            } catch (JsonMappingException e) {
-                controller.getLog().log(Log.WARNING, "StarttimePUT.validRequest(): error parsing JSON input '"
-                        + jsonRequestString + "'");
-                e.printStackTrace();
-                return false;
-            } catch (IOException e) {
-                controller.getLog().log(Log.WARNING, "StarttimePUT.validRequest(): IOException parsing JSON input '"
-                        + jsonRequestString + "'");
-                e.printStackTrace();
-                return false;
+            } else {
+                //huh? we got a valid request to set a specific start date but the requestedStartDate is null -- coding error!
+                controller.getLog().log(Log.SEVERE, 
+                        "Starttime Service: Error: code says we got a valid start date but start date is null !?");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to handle request correctly").build();
+            }
+        }
+        
+        //check if the new start time is less than 30s from now.
+        if (requestToSetStartTimeToExplicitValue) {
+            if (requestedStartDate!=null) {
+                if (requestedStartDate.getTime()<(now.getTimeInMillis()+30000)) {
+                    //requested start time is less than 30sec from now; cannot set (per CLICS spec);
+                    // log, return error status, and ignore 
+                    controller.getLog().log(Log.WARNING, 
+                            "Starttime Service: received request to set start time less than 30 seconds in the future; ignored");
+                    //return HTTP 403 (Forbidden) response code per CLICS spec
+                    return Response.status(Status.FORBIDDEN).entity("Cannot set start time less than 30 seconds in the future").build();
+                }
+            } else {
+                //huh? we got a valid request to set a specific start date but the requestedStartDate is null -- coding error!
+                controller.getLog().log(Log.SEVERE, 
+                        "Starttime Service: Error: code says we got a valid start date but start date is null !?");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to handle request correctly").build();
             }
         }
 
-        return true ;
+        //if we get here then we have a valid starttime request; set the contest scheduled start time
+        if (requestToSetStartTimeToUndefined) {
+            contest.getContestInformation().setScheduledStartDate(null);
+        } else if (requestToSetStartTimeToExplicitValue) {
+            contest.getContestInformation().setScheduledStartDate(requestedStartDate);
+        } else {
+            //huh?  we should never get here; we are supposed to have a valid request either for "undefined" or for an explicit start date
+            controller.getLog().log(Log.SEVERE, 
+                    "Starttime Service: Error: code says we got a valid start date but start date is null !?");
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to handle request correctly").build();
+        }
+        
+        // output an "OK" response to the requester (note that this actually returns it to Jersey,
+        // which forwards it to the caller as the HTTP.response).
+        return Response.ok().entity("Contest start time updated").build();
+        // or:  return Response.status(Response.Status.OK).build();
     }
+    
+    /**
+     * Examines the specified JSON string to see whether it contains a valid starttime request date
+     * per the CLICS Starttime specification.
+     * Tests include verifying the string is valid JSON, contains a "starttime" key,
+     *  and that the specified starttime value in 
+     * the string represents a valid start time of the form
+     * { "starttime":1265335138.26 } .
+     * 
+     * If 'true' is returned then the field "startDate" is set to the Java Date object extracted from the JSON.
+     * 
+     * @param jsonRequestString a JSON string specifying a starttime request
+     * @return true if the input JSON is a valid starttime request with a valid date; false otherwise.  
+     */
+    private boolean requestHasValidStarttimeDate(String jsonRequestString) {
+        
+        //use Jackson's ObjectMapper to construct a Map of Strings-to-Objects from the JSON input
+        final ObjectMapper mapper = new ObjectMapper();
+        final MapType mapType = mapper.getTypeFactory().constructMapType(Map.class, String.class, Date.class);
+        final Map<String, Object> jsonDataMap;
+
+        try {
+            jsonDataMap = mapper.readValue(jsonRequestString, mapType);
+        } catch (JsonMappingException e) {
+            //log error
+            controller.getLog().log(Log.WARNING, "StarttimePUT.requestHasValidStarttimeDate(): JsonMappingException parsing JSON input '"
+                    + jsonRequestString + "'");
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            //log error
+            controller.getLog().log(Log.WARNING, "StarttimePUT.requestHasValidStarttimeDate(): IOException parsing JSON input '"
+                    + jsonRequestString + "'");
+            e.printStackTrace();
+            return false;
+        }
+
+        //if we get here then the JSON parsed correctly; see if it contained "starttime" as a key
+        if (!jsonDataMap.containsKey("starttime")) {
+            controller.getLog().log(Log.WARNING, "StarttimePUT.requestHasValidStarttimeDate(): JSON input missing 'starttime' key: '"
+                    + jsonRequestString + "'");
+            return false;
+        }
+        
+        //verify the JSON didn't contain any OTHER key/value information
+        if (jsonDataMap.size() != 1) {
+            controller.getLog().log(Log.WARNING, "StarttimePUT.requestHasValidStarttimeDate(): JSON input contains illegal extra data: '"
+                    + jsonRequestString + "'");
+            return false;
+        }
+        
+        //if we get here the JSON is valid and contains exactly one element: starttime
+        //get the Object corresponding to "starttime"
+        Object obj = jsonDataMap.get("starttime");
+        
+        //DEBUG:
+        System.out.println("StarttimePut.requestHasValidStarttimeDate(): received start time value '" + obj + "'");
+
+        //verify we got a valid date 
+        if (obj != null && obj instanceof Date) {
+            requestedStartDate = (Date)obj;
+            return true;
+        } else {
+            //the starttime value was not a valid Date object
+            controller.getLog().log(Log.WARNING, "StarttimePUT.requestHasValidStarttimeDate(): JSON input contains illegal date: '"
+                    + jsonRequestString + "'");
+            requestedStartDate = null;
+            return false ;
+        }
+        
+        //shouldn't ever get here; every one of the above branches has a return...
+        // (And don't try to claim this is a "Tammy" and the code should have a return statement here -- Eclipse won't allow it)
+    }
+    
 
     /**
      * This method returns a representation of the current contest scheduled start time in JSON format
