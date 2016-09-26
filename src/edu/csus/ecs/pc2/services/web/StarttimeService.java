@@ -88,18 +88,17 @@ public class StarttimeService {
         }
 
         //check for empty request
-        if (jsonInputString == null) {
+        if (jsonInputString==null || jsonInputString.length()==0) {
             controller.getLog().log(Log.WARNING, "Starttime Service: received invalid (empty) JSON starttime string");
             //return HTTP 400 response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("Empty starttime request").build();
-  
         }
         
         //check which kind of request we've received
         requestToSetStartTimeToUndefined = false ;
         requestToSetStartTimeToExplicitValue = false ;
         
-        if (jsonInputString.equalsIgnoreCase("\"starttime\":\"undefined\"")) {
+        if (jsonInputString.equalsIgnoreCase("{\"starttime\":\"undefined\"}")) {
             requestToSetStartTimeToUndefined = true;
         } else {
             requestToSetStartTimeToExplicitValue = requestHasValidStarttimeDate(jsonInputString);
@@ -188,20 +187,24 @@ public class StarttimeService {
 
         //if we get here then we have a valid starttime request; set the contest scheduled start time
         if (requestToSetStartTimeToUndefined) {
+            
+            controller.getLog().log(Log.INFO, "StarttimeService.setStarttime(): setting contest start time to \"undefined\".");
             contest.getContestInformation().setScheduledStartDate(null);
+            return Response.ok().entity("Contest start time updated to \"undefined\"").build();
+            
         } else if (requestToSetStartTimeToExplicitValue) {
+            
+            controller.getLog().log(Log.INFO, "StarttimeService.setStarttime(): setting contest start time to " + requestedStartDate);
             contest.getContestInformation().setScheduledStartDate(requestedStartDate);
+            return Response.ok().entity("Contest start time updated to " + requestedStartDate).build();
+            
         } else {
+            
             //huh?  we should never get here; we are supposed to have a valid request either for "undefined" or for an explicit start date
             controller.getLog().log(Log.SEVERE, 
                     "Starttime Service: Error: code says we got a valid start date but start date is null !?");
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to handle request correctly").build();
         }
-        
-        // output an "OK" response to the requester (note that this actually returns it to Jersey,
-        // which forwards it to the caller as the HTTP.response).
-        return Response.ok().entity("Contest start time updated").build();
-        // or:  return Response.status(Response.Status.OK).build();
     }
     
     /**
@@ -218,6 +221,11 @@ public class StarttimeService {
      * @return true if the input JSON is a valid starttime request with a valid date; false otherwise.  
      */
     private boolean requestHasValidStarttimeDate(String jsonRequestString) {
+        
+        controller.getLog().log(Log.INFO, "StarttimePUT.requestHasValidStarttimeDate(): checking JSON input '"
+                + jsonRequestString + "' for valid start date");
+        
+        System.out.println ("StarttimeService.requestHasValidStarttimeDate(): checking input string '" + jsonRequestString + "'");
         
         //use Jackson's ObjectMapper to construct a Map of Strings-to-Objects from the JSON input
         final ObjectMapper mapper = new ObjectMapper();
