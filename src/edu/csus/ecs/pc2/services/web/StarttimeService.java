@@ -39,15 +39,15 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 @Produces(MediaType.APPLICATION_JSON)
 public class StarttimeService {
 
-    private IInternalContest contest;
+    private IInternalContest model;
     private IInternalController controller;
     private boolean requestToSetStartTimeToUndefined;
     private boolean requestToSetStartTimeToExplicitValue;
     private Date requestedStartDate;
    
-    public StarttimeService(IInternalContest inContest, IInternalController inController) {
+    public StarttimeService(IInternalContest inModel, IInternalController inController) {
         super();
-        this.contest = inContest;
+        this.model = inModel;
         this.controller = inController;
     }
 
@@ -122,7 +122,7 @@ public class StarttimeService {
         // 403: if the new start time is less than 30s from now.
 
         //check to insure contest has not already been started
-        if (contest.getContestTime().isContestStarted()) {
+        if (model.getContestTime().isContestStarted()) {
             //contest has started, cannot set scheduled start time -- log, and return error status
             controller.getLog().log(Log.WARNING, 
                 "Starttime Service: received request to set start time when contest has already started; ignored");
@@ -131,7 +131,7 @@ public class StarttimeService {
         }
         
         //get the scheduled start date (if any) and the current date (time)
-        Date scheduledStartDate = contest.getContestInformation().getScheduledStartDate() ;
+        Date scheduledStartDate = model.getContestInformation().getScheduledStartDate() ;
         GregorianCalendar now = new GregorianCalendar();
 
         //check if setting to "undefined" with less than 10s left to previous start time.
@@ -189,13 +189,13 @@ public class StarttimeService {
         if (requestToSetStartTimeToUndefined) {
             
             controller.getLog().log(Log.INFO, "StarttimeService.setStarttime(): setting contest start time to \"undefined\".");
-            contest.getContestInformation().setScheduledStartDate(null);
+            model.getContestInformation().setScheduledStartDate(null);
             return Response.ok().entity("Contest start time updated to \"undefined\"").build();
             
         } else if (requestToSetStartTimeToExplicitValue) {
             
             controller.getLog().log(Log.INFO, "StarttimeService.setStarttime(): setting contest start time to " + requestedStartDate);
-            contest.getContestInformation().setScheduledStartDate(requestedStartDate);
+            model.getContestInformation().setScheduledStartDate(requestedStartDate);
             return Response.ok().entity("Contest start time updated to " + requestedStartDate).build();
             
         } else {
@@ -304,7 +304,7 @@ public class StarttimeService {
         // { "starttime":"undefined" }
 
         // get the start time from the contest
-        Date startDate = contest.getContestInformation().getScheduledStartDate();
+        Date startDate = model.getContestInformation().getScheduledStartDate();
         long startTime;
         if (startDate == null) {
             //there is no start time currently scheduled
