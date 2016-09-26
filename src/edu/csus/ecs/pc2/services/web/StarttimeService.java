@@ -186,17 +186,28 @@ public class StarttimeService {
         }
 
         //if we get here then we have a valid starttime request; set the contest scheduled start time
+        boolean success = false;
         if (requestToSetStartTimeToUndefined) {
             
             controller.getLog().log(Log.INFO, "StarttimeService.setStarttime(): setting contest start time to \"undefined\".");
-            model.getContestInformation().setScheduledStartDate(null);
-            return Response.ok().entity("Contest start time updated to \"undefined\"").build();
+            success = setScheduledStartDate(null);
+            if (success) {
+                return Response.ok().entity("Contest start time updated to \"undefined\"").build();
+            } else {
+                controller.getLog().log(Log.SEVERE, "StarttimeService.setStarttime(): error setting contest start time to \"undefined\".");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to set start time correctly").build();
+            }
             
         } else if (requestToSetStartTimeToExplicitValue) {
             
             controller.getLog().log(Log.INFO, "StarttimeService.setStarttime(): setting contest start time to " + requestedStartDate);
-            model.getContestInformation().setScheduledStartDate(requestedStartDate);
-            return Response.ok().entity("Contest start time updated to " + requestedStartDate).build();
+            success = setScheduledStartDate(requestedStartDate);
+            if (success) {
+                return Response.ok().entity("Contest start time updated to " + requestedStartDate).build();
+            } else {
+                controller.getLog().log(Log.SEVERE, "StarttimeService.setStarttime(): error setting contest start time to requested date.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to set start time correctly").build();
+            }
             
         } else {
             
@@ -207,6 +218,29 @@ public class StarttimeService {
         }
     }
     
+    /**
+     * 
+     * @param theDate the Date to which the automatic start of the contest should be set, or
+     *          null if the start date should be set to "undefined"
+     * @return true if the method was successful in setting the scheduled start time (including all the implied 
+     *          related tasks such as scheduling a "start contest" task); false otherwise
+     */
+    private boolean setScheduledStartDate(Date theDate) {
+        // TODO change this method to use the CONTROLLER to set the date (not the model)
+        //old code:
+        model.getContestInformation().setScheduledStartDate(null);
+        //note that the above doesn't work anyway; all it does is update the scheduledStartDate field in the model;
+        // what needs to happen is 
+        //  1) get the contest information from the model
+        //  2) put the new start date in the contest information
+        //  3) update the model contestInformation
+        //  4) schedule a new StartContest task if the Date isn't null.
+        // All this needs to be done in the CONTROLLER; in fact, it probably should be done by
+        // having the Controller send a packet to the SERVER and have all the above done on the Server.
+        
+        return false;
+    }
+
     /**
      * Examines the specified JSON string to see whether it contains a valid starttime request date
      * per the CLICS Starttime specification.
