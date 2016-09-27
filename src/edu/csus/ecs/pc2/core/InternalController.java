@@ -4035,7 +4035,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     startAllContestTimes();
                     
                     //TODO: previously, the following code appeared (when the auto-starting was being handled in the model
-                    // instead of in the controller.  Need to verify that this code isn't needed here...
+                    // instead of in the controller).  Now, with autostart being invoked from the Controller, there's
+                    // currently no way to generate the "CLOCK_AUTO_STARTED" event -- which is a problem.  
+                    // Need to figure out how to work the following back into the logic...
 //                    ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_AUTO_STARTED, 
 //                            contest.getContestTime(), getSiteNumber());
 //                    
