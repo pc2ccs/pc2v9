@@ -1,20 +1,13 @@
 package edu.csus.ecs.pc2.core.model;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.ParseArguments;
@@ -264,8 +257,6 @@ public class InternalContest implements IInternalContest {
     private EventFeedDefinitionsList eventFeedDefinitionsList = null;
 
     private ParseArguments parseArguments = new ParseArguments();
-
-    private ArrayList<ScheduledFuture<?>> startTimeTaskList;
 
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
@@ -1261,11 +1252,6 @@ public class InternalContest implements IInternalContest {
             contestTime.startContestClock();
             ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STARTED, contestTime, inSiteNumber);
             fireContestTimeListener(contestTimeEvent);
-            
-            //clear any scheduled start and remove any future "auto-start" tasks
-            getContestInformation().setScheduledStartDate(null);
-            removeAnyScheduledStartContestTasks();
-
         } else {
             throw new SecurityException("Unable to start clock site " + inSiteNumber + " not found");
         }
@@ -1276,13 +1262,7 @@ public class InternalContest implements IInternalContest {
         if (contestTime != null) {
             contestTime.stopContestClock();
             ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STOPPED, contestTime, inSiteNumber);
-            fireContestTimeListener(contestTimeEvent);
-            
-            //clear any scheduled start and remove any future "auto-start" tasks
-            // (these should have been cleared when the contest STARTED, but let's make sure...)
-            getContestInformation().setScheduledStartDate(null);
-            removeAnyScheduledStartContestTasks();
-            
+            fireContestTimeListener(contestTimeEvent);            
         } else {
             throw new SecurityException("Unable to stop clock site " + inSiteNumber + " not found");
         }
@@ -1957,77 +1937,8 @@ public class InternalContest implements IInternalContest {
         this.contestInformation = inContestInformation;
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.CHANGED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
-        
-        //if the new contest info includes a scheduled (future) auto-start time, schedule it
-        if (inContestInformation != null) {
-            GregorianCalendar startTime = inContestInformation.getScheduledStartTime();
-            GregorianCalendar now = new GregorianCalendar();
-            if (startTime != null  &&  startTime.after(now)  && inContestInformation.isAutoStartContest()) {
-                //delete any previously-scheduled start tasks
-                removeAnyScheduledStartContestTasks();
-                //schedule a new task to auto-start the contest at the specified time
-                scheduleFutureStartContestTask(startTime);
-            } else {
-                //starttime is null or before now, or contest is not auto-start; 
-                // any of these cases means we shouldn't have a scheduled start task...
-                removeAnyScheduledStartContestTasks();
-            }
-        }
     }
-    
-    /**
-     * Creates a task to automatically start the contest at the specified future time.
-     * A handle to the scheduled task is saved in the global startTimeTaskList, allowing it
-     * to be accessed (e.g. killed) by other code.
-     * If the given start time is not in the future, the method silently does nothing.
-     * 
-     * @param startTime - the time in the future when the contest should automatically start
-     */
-    private void scheduleFutureStartContestTask(GregorianCalendar startTime) {
-        
-        GregorianCalendar now = new GregorianCalendar();
-        
-        if (startTime.after(now)) {
-            
-            //get a thread to handle the execution of the scheduled task
-            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            
-            //create a runnable that will actually start the contest
-            final Runnable contestStarter = new Runnable() {
-                public void run() { 
-                    startContest(getSiteNumber()); 
-                    ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_AUTO_STARTED, 
-                            getContestTime(), getSiteNumber());
-                    
-                    fireContestTimeListener(contestTimeEvent);
-                }
-            };
-            
-            //schedule the runnable to execute at the specified future time
-            long delay = startTime.getTimeInMillis() - now.getTimeInMillis();
-            final ScheduledFuture<?> starterHandle = scheduler.schedule(contestStarter, delay, MILLISECONDS);
-            
-            //save the handle so the task can be killed later (before it executes) if necessary
-            if (startTimeTaskList == null) {
-                startTimeTaskList = new ArrayList<ScheduledFuture<?>>();
-            }
-            startTimeTaskList.add(starterHandle);
-        }
-    }
-    
-    /**
-     * Removes from the global startTimeTaskList any currently scheduled tasks (that is, invokes cancel()
-     * on each task in the list and then clears the list).
-     */
-    private void removeAnyScheduledStartContestTasks() {
-        if (startTimeTaskList != null) {
-            for (ScheduledFuture<?> task : startTimeTaskList) {
-                task.cancel(true);
-            }
-            startTimeTaskList.clear();
-        }
-    }
-
+           
     public void addContestInformationListener(IContestInformationListener contestInformationListener) {
         contestInformationListenerList.addElement(contestInformationListener);
     }

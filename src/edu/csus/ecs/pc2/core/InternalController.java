@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -7,11 +9,16 @@ import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
@@ -332,6 +339,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private ILogWindow logWindow = null;
 
     private RunSubmitterInterfaceManager runSubmitterInterfaceManager = new RunSubmitterInterfaceManager();
+
+    private ArrayList<ScheduledFuture<?>> startTimeTaskList;
 
     public InternalController(IInternalContest contest) {
         super();
@@ -3988,4 +3997,61 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(updatePacket);
     }
     
+    @Override
+    /**
+     * Removes from the controller's startTimeTaskList any currently scheduled tasks (that is, invokes cancel()
+     * on each task in the list and then clears the list).
+     */
+    public void removeAnyScheduledStartContestTasks() {
+        if (isServer() && startTimeTaskList != null) {
+            for (ScheduledFuture<?> task : startTimeTaskList) {
+                task.cancel(true);
+            }
+            startTimeTaskList.clear();
+        }
+    }
+
+    @Override
+    /**
+     * Creates a task (thread) to wake up and auto-start the contest at the specified time and adds that task
+     * task to a list of scheduled tasks.  If the specified start time is not in the future then the method
+     * silently does nothing.
+     */
+    public void scheduleFutureStartContestTask(GregorianCalendar startTime) {
+        
+        GregorianCalendar now = new GregorianCalendar();
+        
+        if (startTime.after(now)) {
+            
+            //get a thread to handle the execution of the scheduled task
+            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            
+            //create a runnable that will actually start the contest
+            final Runnable contestStarter = new Runnable() {
+                public void run() { 
+                    //TODO: need to decide whether "auto-start" should start THIS site or ALL sites
+                    // (i.e., which of the following should be used?)
+                    startContest(getSiteNumber()); 
+                    startAllContestTimes();
+                    
+                    //TODO: previously, the following code appeared (when the auto-starting was being handled in the model
+                    // instead of in the controller.  Need to verify that this code isn't needed here...
+//                    ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_AUTO_STARTED, 
+//                            contest.getContestTime(), getSiteNumber());
+//                    
+//                    contest.fireContestTimeListener(contestTimeEvent);
+                }
+            };
+            
+            //schedule the runnable to execute at the specified future time
+            long delay = startTime.getTimeInMillis() - now.getTimeInMillis();
+            final ScheduledFuture<?> starterHandle = scheduler.schedule(contestStarter, delay, MILLISECONDS);
+            
+            //save the handle so the task can be killed later (before it executes) if necessary
+            if (startTimeTaskList == null) {
+                startTimeTaskList = new ArrayList<ScheduledFuture<?>>();
+            }
+            startTimeTaskList.add(starterHandle);
+        }
+    }
 }

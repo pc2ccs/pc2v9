@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
@@ -2938,6 +2939,22 @@ public class PacketHandler {
         if (contestInformation != null) {
             contest.updateContestInformation(contestInformation);
             sendToTeams = true;
+            
+            //if I'm a server and the new contest info includes a scheduled (future) auto-start time, schedule it
+            if (isServer()) {
+                //get the scheduled start time (if any) and the time now
+                GregorianCalendar startTime = contestInformation.getScheduledStartTime();
+                GregorianCalendar now = new GregorianCalendar();
+                if (startTime != null  &&  startTime.after(now)  && contestInformation.isAutoStartContest()) {
+                    //schedule a new task to auto-start the contest at the specified time (this also removes any previously-scheduled start task(s))
+                    controller.removeAnyScheduledStartContestTasks();
+                    controller.scheduleFutureStartContestTask(startTime);
+                } else {
+                    //starttime is null or before now, or contest is not auto-start; 
+                    // any of these cases means we shouldn't have a scheduled start task...
+                    controller.removeAnyScheduledStartContestTasks();
+                }
+            }
         }
 
         ClientSettings clientSettings = (ClientSettings) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS);
@@ -2993,7 +3010,7 @@ public class PacketHandler {
             }
         }
     }
-
+    
     private boolean handleLanguageList(Language[] languages) {
         boolean sendToTeams = false;
         if (languages != null) {

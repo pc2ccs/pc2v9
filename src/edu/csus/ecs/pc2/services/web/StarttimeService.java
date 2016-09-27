@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.type.MapType;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -219,6 +220,12 @@ public class StarttimeService {
     }
     
     /**
+     * This method updates the Scheduled Start Date for the contest, including causing the scheduling of a "start contest"
+     * task for the specified date (which is assumed to be a valid date in the future).
+     * 
+     * This is accomplished by telling the controller to update the {@link ContestInformation} with the scheduled start date. 
+     * The controller then sends a packet to the server to do that; the server in turn creates a task to start the contest at the
+     * specified date/time. 
      * 
      * @param theDate the Date to which the automatic start of the contest should be set, or
      *          null if the start date should be set to "undefined"
@@ -226,19 +233,23 @@ public class StarttimeService {
      *          related tasks such as scheduling a "start contest" task); false otherwise
      */
     private boolean setScheduledStartDate(Date theDate) {
-        // TODO change this method to use the CONTROLLER to set the date (not the model)
-        //old code:
-        model.getContestInformation().setScheduledStartDate(null);
-        //note that the above doesn't work anyway; all it does is update the scheduledStartDate field in the model;
-        // what needs to happen is 
-        //  1) get the contest information from the model
-        //  2) put the new start date in the contest information
-        //  3) update the model contestInformation
-        //  4) schedule a new StartContest task if the Date isn't null.
-        // All this needs to be done in the CONTROLLER; in fact, it probably should be done by
-        // having the Controller send a packet to the SERVER and have all the above done on the Server.
         
-        return false;
+        //get the local model's ContestInformation 
+        ContestInformation ci = model.getContestInformation();
+        if (ci!=null) {
+            //set the new start date into the ContestInformation
+            ci.setScheduledStartDate(theDate);
+            if (theDate!=null) {
+                //if we have a valid start date, set the contest to auto-start
+                ci.setAutoStartContest(true);
+            }
+            //tell the Controller to update the ContestInformation
+            controller.updateContestInformation(ci);
+            return true;
+        } else {
+            //for some reason we failed to get ContestInformation
+            return false;
+        }
     }
 
     /**
