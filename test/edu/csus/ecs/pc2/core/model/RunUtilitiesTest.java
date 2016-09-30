@@ -214,7 +214,7 @@ public class RunUtilitiesTest extends TestCase {
      * @return
      */
     private long minutesBeforeEnd(IInternalContest contest, int mins) {
-        return contest.getContestTime().getConestLengthMins() - mins;
+        return contest.getContestTime().getContestLengthMins() - mins;
     }
 
 }

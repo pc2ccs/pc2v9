@@ -6,7 +6,9 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.Set;
 
@@ -101,6 +103,10 @@ public class ContestInformationPane extends JPanePlugin {
     private JLabel runSubmissionInterfaceLabel = null;
 
     private JCheckBox autoRegistrationCheckbox = null;
+    
+    private JTextField startTimeTextField;
+
+    private JLabel startTimeLabel;
 
     /**
      * This method initializes
@@ -117,7 +123,7 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(641, 461));
+        this.setSize(new Dimension(641, 520));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
     }
@@ -161,6 +167,7 @@ public class ContestInformationPane extends JPanePlugin {
             contestTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             contestTitleLabel.setText("Contest Title");
             centerPane = new JPanel();
+            centerPane.setToolTipText("");
             centerPane.setLayout(null);
             centerPane.add(contestTitleLabel, null);
             centerPane.add(getContestTitleTextField(), null);
@@ -177,8 +184,31 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(getRunSubmissionInterfaceCommandTextField(), null);
             centerPane.add(runSubmissionInterfaceLabel, null);
             centerPane.add(getAutoRegistrationCheckbox(), null);
+            centerPane.add(getStartTimeLabel(), null);
+            centerPane.add(getStartTimeTextField(), null);
+            
         }
         return centerPane;
+    }
+
+    private JTextField getStartTimeTextField() {
+        if (startTimeTextField == null) {
+            startTimeTextField = new JTextField();
+            startTimeTextField.setBounds(270, 424, 243, 31);
+            startTimeTextField.setColumns(25);
+            startTimeTextField.setEditable(false);
+            startTimeTextField.setToolTipText("Use Contest Times pane to edit Start Time");
+        }
+        return startTimeTextField ;
+    }
+
+    private JLabel getStartTimeLabel() {
+        if (startTimeLabel == null) {
+            startTimeLabel = new JLabel("Scheduled Start Time");
+            startTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            startTimeLabel.setBounds(95, 428, 158, 27);
+        }
+        return startTimeLabel ;
     }
 
     /**
@@ -275,7 +305,7 @@ public class ContestInformationPane extends JPanePlugin {
             contestInformation.setJudgementNotificationsList(savedContestInformation.getJudgementNotificationsList());
                 
             contestInformation.setJudgeCDPBasePath(savedContestInformation.getJudgeCDPBasePath());
-            contestInformation.setStartDate(savedContestInformation.getStartDate());
+            contestInformation.setScheduledStartDate(savedContestInformation.getScheduledStartDate());
             
             contestInformation.setAdminCDPBasePath(savedContestInformation.getAdminCDPBasePath());
             contestInformation.setContestShortName(savedContestInformation.getContestShortName());
@@ -342,12 +372,37 @@ public class ContestInformationPane extends JPanePlugin {
                     getRunSubmissionInterfaceCommandTextField().setText(cmd);
                 }
                 getAutoRegistrationCheckbox().setSelected(contestInformation.isEnableAutoRegistration());
+                
+                //add the scheduled start time to the GUI
+                GregorianCalendar cal = contestInformation.getScheduledStartTime();
+                getStartTimeTextField().setText(getScheduledStartTimeStr(cal));   
+                
                 setContestInformation(contestInformation);
                 setEnableButtons(false);
             }
         });
 
     }
+    
+    /**
+     * Convert a GregorianCalendar date/time to a displayable string in yyyy-mm-dd:hh:mm form.
+     */
+    private String getScheduledStartTimeStr(GregorianCalendar cal) {
+        
+        String retString = "<undefined>";
+        if (cal != null) {
+            //extract fields from input and build string
+            //TODO:  need to deal with the difference between displaying LOCAL time and storing UTC
+
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd:HH:mm");
+            fmt.setCalendar(cal);
+            retString = fmt.format(cal.getTime());
+
+            }
+
+        return retString;
+    }
+
 
     private void updateContestInformation() {
         ContestInformation contestInformation = getFromFields();
@@ -818,5 +873,4 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return autoRegistrationCheckbox;
     }
-
 } // @jve:decl-index=0:visual-constraint="10,10"

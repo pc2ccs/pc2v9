@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.DateUtilities;
@@ -10,7 +11,7 @@ import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 
 /**
- * Contest-wied Information/settings.
+ * Contest-wide Information/settings.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -112,19 +113,54 @@ public class ContestInformation implements Serializable{
      */
     private PasswordType autoRegistrationPasswordType = PasswordType.RANDOM;
 
+//    /** replaced with scheduledStartTime; see below
+//     * Contest Start/Date Time.
+//     */
+//    private Date startDate;
+    
     /**
-     * Contest Start/Date Time.
+     * The date/time when the contest is scheduled (intended) to start.
+     * This value is null (undefined) if no scheduled start time has been set.
+     * This value ONLY applies BEFORE THE CONTEST STARTS; once 
+     * any "start contest" operation (e.g. pushing the "Start Button") has occurred,
+     * this value no longer has meaning.
      */
-    private Date startDate;
+    private GregorianCalendar scheduledStartTime = null ;
     
     private boolean autoStartContest = false;
 
+    private boolean autoStopContest = false ;
+    
     /**
      * Scoreboard freeze time.
      */
-    private String freezeTime;
+    private String freezeTime="null";
 
     private String contestShortName;
+
+
+    /**
+     * Returns the date/time when the contest is scheduled (intended) to start.
+     * This value is null if no scheduled start time has been set,
+     * or if the contest has already started.  
+     * @see ContestTime#getContestStartTime()
+     */
+    public GregorianCalendar getScheduledStartTime() {
+        return scheduledStartTime;
+    }
+    
+    /**
+     * Receives a {@link GregorianCalendar} object specifying a (future) instant in time;
+     * sets the specified date/time as the scheduled (intended) start time for the
+     * contest.  Note that it is an error to invoke this method with a value other than "null"
+     * after the contest has started, since the value of "scheduled start time" is meaningless after
+     * the contest is under way.  It is the responsibility of clients to insure
+     * this method is only invoked with a non-null value before the contest has been started.
+     * 
+     */
+    public void setScheduledStartTime(GregorianCalendar newScheduledStartTime) {
+        scheduledStartTime = newScheduledStartTime; 
+    }
 
     public String getContestTitle() {
         return contestTitle;
@@ -210,9 +246,35 @@ public class ContestInformation implements Serializable{
                 return false;
             }
             
-            if (!DateUtilities.dateSame(startDate, contestInformation.startDate)) {
-                return false;
+            //old code:
+//            if (!DateUtilities.dateSame(startDate, contestInformation.startDate)) {
+//                return false;
+//            }
+
+            //new code:
+            //DateUtilities.dateSame() expects Date objects but ContestInformation now maintains
+            // scheduledStartTime (formerly "StartDate") as a GregorianCalendar; need to convert.
+            //Also need to first check for null references (to avoid NPEs on fetch of Date from GregorianCalendar)
+            
+            //If the references to scheduledStartTime in the two ContestInfos are such that one is null and the other 
+            // is not, the ContestInfos are not the same so return false.  
+            // Note that "one is null and the other is not null" can be computed with the ^ (XOR) operator:
+            //   "A XOR B" = true iff A != B
+            if (scheduledStartTime==null ^ contestInformation.getScheduledStartTime()==null) {
+                 return false;
             }
+            //at this point either both scheduledStartTime references are null, or both are non-null
+            //If both are null, this test for equality passes and we fall through to other cases
+            //If both non-null, get Dates from both and compare them
+            if (scheduledStartTime!=null /*and therefore contestInformation.getScheduledStartTime() also != null*/) {
+                if (!DateUtilities.dateSame(scheduledStartTime.getTime(), 
+                        contestInformation.getScheduledStartTime().getTime())) {
+                    return false;
+                }
+            } 
+            
+            //both scheduledStartTime and contestInformation.getScheduledStartTime() must be null (hence, "same")
+            //continue;
 
             if (autoStartContest != contestInformation.autoStartContest) {
                 return false;
@@ -382,12 +444,41 @@ public class ContestInformation implements Serializable{
         this.autoRegistrationPasswordType = autoRegistrationPasswordType;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    /**
+     * Sets the contest scheduled start time from the specified Date.
+     * Note: previously, ContestInformation stored "startDate" as an object of
+     * class {@link Date}.  It nows stores the scheduled start time as a 
+     * {@link GregorianCalendar}; however, this method is maintained for compatibility.
+     * The method converts the given {@link Date} into an equivalent {@link GregorianCalendar}
+     * and invokes {@link #scheduledStartTime} with the resulting {@link GregorianCalendar} object.
+     * 
+     * @param startDate - the date at which the contest is scheduled to start; 
+     *      specifying "null" as the start date causes the scheduled start time to become undefined
+     */
+    public void setScheduledStartDate(Date startDate) {
+        if (startDate == null) {
+            setScheduledStartTime(null);
+        } else {
+            GregorianCalendar newStartDate = new GregorianCalendar();
+            newStartDate.setTime(startDate);
+            setScheduledStartTime(newStartDate);
+        }
     }
     
-    public Date getStartDate() {
-        return startDate;
+    /**
+     * Returns a {@link Date} object representing the scheduled start time for the contest,
+     * or null if no scheduled start time has been set.
+     * @return the scheduled start time as a Date
+     * @see #setScheduledStartDate(Date)
+     * @see #getScheduledStartTime()
+     */
+    public Date getScheduledStartDate() {
+        if (scheduledStartTime == null) {
+            return null;
+        } else {
+            return scheduledStartTime.getTime();            
+        }
+
     }
     
     public boolean isAutoStartContest() {
@@ -397,7 +488,15 @@ public class ContestInformation implements Serializable{
     public void setAutoStartContest(boolean autoStartContest) {
         this.autoStartContest = autoStartContest;
     }
+    
+    public void setAutoStopContest(boolean autoStopContest) {
+        this.autoStopContest = autoStopContest;
+    }
 
+    public boolean isAutoStopContest() {
+        return autoStopContest;
+    }
+    
     public String getFreezeTime() {
         return freezeTime;
     }

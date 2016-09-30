@@ -8,11 +8,29 @@ import java.util.TimeZone;
 import edu.csus.ecs.pc2.core.Constants;
 
 /**
- * Contest Time.
- * 
+ * This class represents the abstract notion of "Contest Time" - that is, a "clock"
+ * which is initialized to the value representing the length of the contest 
+ * when the contest first starts and "counts down" to the
+ * end of the contest -- but only counts down when the contest is marked as "running".
+ * In this way the ContestTime object keeps track of the amount of elapsed/remaining time which is considered
+ * to be part of the contest (similar to the way the "game clock" is stopped and subsequently restarted
+ * in, for example, a football game).
+ * <P>
+ * The contest can be "stopped" at any time (e.g. by pushing the "Stop"
+ * button on the PC2 Admin); this causes the "contest time clock" to stop counting down until
+ * the contest is subsequently "restarted" (e.g. by pushing the "Start" button on the PC2 Admin).
+ * When a contest is "stopped" (also called "paused") after having been started, and then the
+ * "Start" button is again pushed to restart the contest, any real time which elapsed between 
+ * the "stop" and subsequent "restart' is not included in the Contest Clock time.
+ * <P>
+ * Note that in a multi-site contest (one running multiple PC2 Servers), each PC2 Server has
+ * its own instance of ContestTime.  This allows different sites to pause the contest at different
+ * times and for different lengths of time if necessary; each site's ContestTime object insures that
+ * the site runs the contest for the correct length of time independently of the other sites.  
+ * <P>
  * Methods used to access contest time as well as start and stop contest time. <br>
  * Start clock: {@link #startContestClock()}. <br>
- * Stop contest clock {@link #stopContestClock()}. <br>
+ * Stop contest clock: {@link #stopContestClock()}. <br>
  * <br>
  * Get remaining time (formatted) {@link #getRemainingTimeStr()} <br>
  * <br>
@@ -24,51 +42,27 @@ import edu.csus.ecs.pc2.core.Constants;
 // $HeadURL$
 public class ContestTime implements IElementObject {
 
-    /**
-     * 
-     */
     public static final long serialVersionUID = 6967329985187819728L;
-    
-//    /**
-//     * number of ms in a second.
-//     */
-//    public static final long MS_PER_SECONDS = 1000;
-//
-//    /**
-//     * number of seconds in a minute.
-//     */
-//    public static final long SECONDS_PER_MINUTE = 60;
-//
-//    /**
-//     * number of ms in a minute.
-//     */
-//    public static final long MS_PER_MINUTE = SECONDS_PER_MINUTE * MS_PER_SECONDS;
-//
-//    /**
-//     * number of minutes in an hour.
-//     */
-//    public static final long MINUTES_PER_HOUR = 60;
-//    
-//    /**
-//     * number of seconds in an hour.
-//     */
-//    public static final long SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
-//
-//
-//    /**
-//     * Default contest length.
-//     */
-//    public static final long DEFAULT_CONTEST_LENGTH_SECONDS = 18000; // 5 * 60 * 60
 
     /**
      * Resume time, used in calculating elapsed time.
+     * "resumeTime" is the real (wall-clock) time of the most recent "start contest"
+     * operation -- that is, the time at which the contest was either initially started
+     * or the time at which it was resumed following a "stop (pause) contest" operation.
+     * This value is null if the contest has never been started; otherwise it is the 
+     * time of the most recent start (or 'restart' following a pause/stop contest).
      */
     private GregorianCalendar resumeTime = null;
 
     /**
-     * First Time contest is started.
+     * The actual time the contest is first started. Prior to the contest ever having
+     * been started this field is always null; once the contest is started for the first
+     * time this field holds the real time at which that start occurred.  This field does not
+     * change if the contest is "paused" and restarted (e.g. if the "Stop Contest" button
+     * is pushed and then the "Start Contest" button is subsequently pushed); 
+     * the subsequent "Start Contest" does not change the value of this field.
      */
-    private GregorianCalendar contestStartTime = null;
+    private GregorianCalendar actualTimeContestFirstStarted = null;
  
     /**
      * serverTransmitTime is set by the server and is used to calculate clock differential between client & server clocks
@@ -80,14 +74,34 @@ public class ContestTime implements IElementObject {
     private boolean haltContestAtTimeZero = false;
 
     /**
-     * Elapsed seconds since start of contest.
+     * Elapsed seconds which accumulated between all past matched pairs of "start contest"
+     * and subsequent "stop (pause) contest" operations. 
+     * This value will be zero until and unless the
+     * contest is stopped after having been started; each "stop contest" operation
+     * causes this value to be updated to accumulate elapsed seconds up to the point of the "stop".
+     * Specifically, this value does NOT include time elapsed since the most
+     * recent "start contest" operation which has not yet been followed by at "stop contest"
+     * operation (that is, it does not include the time which elapses while the 
+     * contest is running as a result of the most recent "start contest" operation).
+     * @see ContestTime#stopContestClock()
+     * @see ContestTime#getElapsedSecs()
      */
-    private long elapsedSecs = 0;
+    private long previouslyAccumulatedElapsedSecs = 0;
     
     /**
-     * Elapsed milli-seconds since start of contest.
+     * Elapsed milliseconds which accumulated between all past matched pairs of "start contest"
+     * and subsequent "stop (pause) contest" operations. 
+     * This value will be zero until and unless the
+     * contest is stopped after having been started; each "stop contest" operation
+     * causes this value to be updated to accumulate elapsed milliseconds up to the point of the "stop".
+     * Specifically, this value does NOT include time elapsed since the most
+     * recent "start contest" operation which has not yet been followed by at "stop contest"
+     * operation (that is, it does not include the time which elapses while the 
+     * contest is running as a result of the most recent "start contest" operation).
+     * @see ContestTime#stopContestClock()
+     * @see ContestTime#getElapsedSecs()
      */
-    private long elapsedMS = 0;
+    private long previouslyAccumulatedElapsedMS = 0;
 
     private long contestLengthSecs = Constants.DEFAULT_CONTEST_LENGTH_SECONDS;
 
@@ -122,7 +136,7 @@ public class ContestTime implements IElementObject {
      * 
      * @return contest length in minutes.
      */
-    public long getConestLengthMins() {
+    public long getContestLengthMins() {
         return contestLengthSecs / 60;
     }
 
@@ -140,6 +154,15 @@ public class ContestTime implements IElementObject {
      */
     public boolean isContestRunning() {
         return contestRunning;
+    }
+    
+    /**
+     * Returns true if the contest has been started, regardless of whether
+     * the contest is currently running (that is, regardless of whether the
+     * contest has been paused after being started).
+     */
+    public boolean isContestStarted() {
+        return actualTimeContestFirstStarted != null ;
     }
 
     /**
@@ -221,24 +244,36 @@ public class ContestTime implements IElementObject {
     }
 
     /**
-     * @return elapsed time in minutes.
+     * @return total elapsed time in minutes.
      */
     public long getElapsedMins() {
         return getElapsedSecs() / 60;
     }
 
     /**
-     * @return elapsed time in seconds.
+     * This method returns the total number of seconds which have elapsed in the contest
+     * (that is, the number of seconds the "contest clock" has been running).
+     * If the contest has been started and subsequently paused, real time which
+     * elapsed between the "pause" and any subsequent "restart" operation is not
+     * considered "contest time" and is therefore not included in the returned total.
+     * 
+     * @return total elapsed contest time in seconds.
      */
     public long getElapsedSecs() {
-        return elapsedSecs + secsSinceContestStart();
+        return previouslyAccumulatedElapsedSecs + secsSinceMostRecentContestStartOperation();
     }
     
     /**
-     * @return elapsed time in milliseconds.
+     * This method returns the total number of milliseconds which have elapsed in the contest
+     * (that is, the number of milliseconds the "contest clock" has been running).
+     * If the contest has been started and subsequently paused, real time which
+     * elapsed between the "pause" and any subsequent "restart" operation is not
+     * considered "contest time" and is therefore not included in the returned total.
+     * 
+     * @return total elapsed contest time in milliseconds.
      */
     public long getElapsedMS() {
-        return elapsedMS + msSinceContestStart();
+        return previouslyAccumulatedElapsedMS + msSinceMostRecentContestStartOperation();
     }
 
     /**
@@ -252,11 +287,11 @@ public class ContestTime implements IElementObject {
 
     /**
      * 
-     * @return remainging seconds from contest clock.
+     * @return remaining seconds from contest clock.
      */
     public long getRemainingSecs() {
         // compute remaining time.
-        return contestLengthSecs - (elapsedSecs + secsSinceContestStart());
+        return contestLengthSecs - (previouslyAccumulatedElapsedSecs + secsSinceMostRecentContestStartOperation());
     }
 
     /**
@@ -286,9 +321,23 @@ public class ContestTime implements IElementObject {
         return formatTime(secsLeft);
     }
 
-    private long secsSinceContestStart() {
+    /**
+     * Returns the number of seconds since the most recent "Start Contest" operation,
+     * or zero if the contest is not currently running.
+     * If the contest has been started but has never subsequently been "paused" 
+     * (by pressing the "Stop Contest" button), the value returned will be the
+     * number of seconds since the actual start of the contest.  If the contest has
+     * been "paused" and subsequently restarted, the value returned will be the number
+     * of seconds since the "start" which followed the pause (i.e., since the restart).
+     * If the contest has been started and subsequently paused and NOT restarted then
+     * the contest is not running and, as stated above, zero is returned.
+     * 
+     * @return the number of seconds since the most recent occurrence of a "Start Contest" operation, 
+     *     or zero if the contest is not running
+     */
+    private long secsSinceMostRecentContestStartOperation() {
         if (contestRunning) {
-            long milliDiff = msSinceContestStart();
+            long milliDiff = msSinceMostRecentContestStartOperation();
             long totalSeconds = milliDiff / 1000;
             return totalSeconds;
         } else {
@@ -297,10 +346,20 @@ public class ContestTime implements IElementObject {
     }
     
     /**
-     * Milliseconds since start of contest
-     * @return MS since start of contest.
+     * Returns the number of milliseconds since the most recent "Start Contest" operation,
+     * or zero if the contest is not currently running.
+     * If the contest has been started but has never subsequently been "paused" 
+     * (by pressing the "Stop Contest" button), the value returned will be the
+     * number of milliseconds since the actual start of the contest.  If the contest has
+     * been "paused" and subsequently restarted, the value returned will be the number
+     * of milliseconds since the "start" which followed the pause (i.e., since the restart).
+     * If the contest has been started and subsequently paused and NOT restarted, then
+     * the contest is not running and, as stated above, zero is returned.
+     * 
+     * @return the number of milliseconds since the most recent occurrence of a "Start Contest" operation, 
+     *     or zero if the contest is not running
      */
-    private long msSinceContestStart() {
+    private long msSinceMostRecentContestStartOperation() {
         if (contestRunning) {
             TimeZone tz = TimeZone.getTimeZone("GMT");
             GregorianCalendar cal = new GregorianCalendar(tz);
@@ -321,8 +380,8 @@ public class ContestTime implements IElementObject {
     }
 
     public void setElapsedSecs(long eSecs) {
-        elapsedSecs = eSecs;
-        elapsedMS = eSecs * Constants.MS_PER_SECONDS;
+        previouslyAccumulatedElapsedSecs = eSecs;
+        previouslyAccumulatedElapsedMS = eSecs * Constants.MS_PER_SECONDS;
     }
 
     public void setHaltContestAtTimeZero(boolean newHaltContestAtTimeZero) {
@@ -334,19 +393,31 @@ public class ContestTime implements IElementObject {
     }
 
     /**
-     * Sets start time for contest to local machine's time.
-     * 
+     * Updates the "resume time" for the contest to be the local machine's current time.
      */
-    public void forceContestStartTimeResync() {
+    private void forceContestStartTimeResync() {
         TimeZone tz = TimeZone.getTimeZone("GMT");
         resumeTime = new GregorianCalendar(tz);
     }
 
+    /**
+     * If this is the first time a "Start Contest" operation has been invoked on this
+     * {@code ContestTime} object, this method sets the field holding the time at which the 
+     * contest actually started to be the current time on the local machine.
+     * Additionally, if the contest is not currently running then this method updates
+     * the "resume time" (the time at which the most recent "Start Contest" operation was
+     * invoked) to be the current time on the local machines.
+     * In any case the post-condition of this method is that the contest is running,
+     * the actual initial start time of the contest is saved, and the "resume time"
+     * (the time of the most recent "start contest" operation) is set.  
+     * Note that calling this method when the contest is already running 
+     * has no effect.
+     */
     public void startContestClock() {
         
-        if (contestStartTime == null) {
+        if (actualTimeContestFirstStarted == null) {
             TimeZone tz = TimeZone.getTimeZone("GMT");
-            contestStartTime = new GregorianCalendar(tz);
+            actualTimeContestFirstStarted = new GregorianCalendar(tz);
         }
         
         if (!contestRunning) {
@@ -361,8 +432,8 @@ public class ContestTime implements IElementObject {
      */
     public void stopContestClock() {
         if (contestRunning) {
-            elapsedSecs = elapsedSecs + secsSinceContestStart();
-            elapsedMS = elapsedMS + msSinceContestStart();
+            previouslyAccumulatedElapsedSecs = previouslyAccumulatedElapsedSecs + secsSinceMostRecentContestStartOperation();
+            previouslyAccumulatedElapsedMS = previouslyAccumulatedElapsedMS + msSinceMostRecentContestStartOperation();
             contestRunning = false;
         }
     }
@@ -446,7 +517,7 @@ public class ContestTime implements IElementObject {
     /**
      * Calculate Local Clock Offset.
      * 
-     * Should be callaed by the client after a ContestTime packet is received to adjust the local clock.
+     * Should be called by the client after a ContestTime packet is received to adjust the local clock.
      * 
      */
     public void calculateLocalClockOffset() {
@@ -495,8 +566,25 @@ public class ContestTime implements IElementObject {
         contestRunning = false;
     }
 
+    /**
+     * Returns a {@link Calendar} object indicating the date/time the contest started --
+     * that is, the time when the first "start contest" operation (such as pushing
+     * the "Start" button on the PC2 Admin) occurred -- or null if the contest has not yet 
+     * been started.
+     * 
+     * Note that if the "Start" button has been pushed, but then the "Stop" (pause
+     * contest) button was pushed, this method returns the time at which the FIRST
+     * "Start" operation occurred -- even if multiple subsequent "stop" and then
+     * "Start' operations have taken place.
+     * 
+     * Note also that the returned value is unrelated to the value returned by
+     * {@link ContestInformation#getScheduledStartTime()}; that value is only relevant
+     * prior to the contest being started.
+     * 
+     * @return the date/time when the contest was first started, or null 
+     */
     public Calendar getContestStartTime() {
-        return contestStartTime;
+        return actualTimeContestFirstStarted;
     }
 
     public long getRemainingMS() {

@@ -613,7 +613,7 @@ public class InternalContestTest extends AbstractTestCase {
     
     String toString(ContestTime contestTime) {
 
-        StringBuffer buffer = new StringBuffer().append(", getConestLengthMins=" + contestTime.getConestLengthMins()) //
+        StringBuffer buffer = new StringBuffer().append(", getConestLengthMins=" + contestTime.getContestLengthMins()) //
                 .append(", getContestLengthStr=" + contestTime.getContestLengthStr()) //
                 .append(", isContestRunning=" + contestTime.isContestRunning()) //
                 .append(", getElapsedTimeStr=" + contestTime.getElapsedTimeStr()) //

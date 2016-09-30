@@ -286,7 +286,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private void setContestStartDateTime(IInternalContest contest, Date date) {
         ContestInformation contestInformation = contest.getContestInformation();
-        contestInformation.setStartDate(date);
+        contestInformation.setScheduledStartDate(date);
     }
 
     @Override

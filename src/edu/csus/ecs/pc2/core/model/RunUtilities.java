@@ -85,7 +85,7 @@ public final class RunUtilities {
         /**
          * This is the remaining time in the contest when the run was submitted.
          */
-        long runRemainingTime = contestTime.getConestLengthMins() - run.getElapsedMins();
+        long runRemainingTime = contestTime.getContestLengthMins() - run.getElapsedMins();
 
         if (judgementRecord.isPreliminaryJudgement()) {
 

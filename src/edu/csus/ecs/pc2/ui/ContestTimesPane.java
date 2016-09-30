@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -434,6 +435,16 @@ public class ContestTimesPane extends JPanePlugin {
                 }
             });
         }
+        
+        /** This method exists to support differentiation between manual and automatic starts,
+         * in the event this is desired in the future.
+         * Currently it just delegates the handling to the contestStarted() method.
+         */
+        @Override
+        public void contestAutoStarted(ContestTimeEvent event) {
+            contestStarted(event);
+        }
+
     }
 
     /**
@@ -715,8 +726,9 @@ public class ContestTimesPane extends JPanePlugin {
 
         ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[selectedSites[0]];
         ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
+        ContestInformation contestInfo = getContest().getContestInformation();
 
-        editContestTimeFrame.setContestTime(contestTime);
+        editContestTimeFrame.setContestTime(contestTime, contestInfo);
         editContestTimeFrame.setVisible(true);
 
     }

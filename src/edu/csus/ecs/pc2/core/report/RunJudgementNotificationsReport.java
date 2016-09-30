@@ -180,7 +180,7 @@ public class RunJudgementNotificationsReport implements IReport {
 
                 printWriter.print("s" + run.getSiteNumber() + " ");
                 printWriter.print("at " + run.getElapsedMins() + " ");
-                printWriter.print("(rem = " + (contestTime.getConestLengthMins() - run.getElapsedMins()) + ") ");
+                printWriter.print("(rem = " + (contestTime.getContestLengthMins() - run.getElapsedMins()) + ") ");
                 printWriter.print(contest.getProblem(run.getProblemId()) + " ");
                 printWriter.println();
 

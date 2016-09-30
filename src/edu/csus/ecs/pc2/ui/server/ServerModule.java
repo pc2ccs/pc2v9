@@ -231,6 +231,15 @@ public class ServerModule implements UIPlugin {
         public void refreshAll(ContestTimeEvent event) {
             logClockInfo(event.getAction().toString(), event.getContestTime());
         }
+        
+        /** This method exists to support differentiation between manual and automatic starts,
+         * in the event this is desired in the future.
+         * Currently it just delegates the handling to the contestStarted() method.
+         */
+        @Override
+        public void contestAutoStarted(ContestTimeEvent event) {
+            contestStarted(event);
+        }
     }
 
     protected void infoLog(String string) {

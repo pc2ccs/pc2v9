@@ -230,6 +230,16 @@ public class SubmitRunPane extends JPanePlugin {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
+        
+        /** This method exists to support differentiation between manual and automatic starts,
+         * in the event this is desired in the future.
+         * Currently it just delegates the handling to the contestStarted() method.
+         */
+        @Override
+        public void contestAutoStarted(ContestTimeEvent event) {
+            contestStarted(event);
+        }
+
     }
 
     /**

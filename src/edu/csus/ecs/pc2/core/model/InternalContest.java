@@ -451,6 +451,8 @@ public class InternalContest implements IInternalContest {
                 contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
             } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.REFRESH_ALL) {
                 contestTimeListenerList.elementAt(i).refreshAll(contestTimeEvent);
+            } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.CLOCK_AUTO_STARTED) {
+                contestTimeListenerList.elementAt(i).contestAutoStarted(contestTimeEvent);
             } else {
                 contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
             }
@@ -1260,7 +1262,7 @@ public class InternalContest implements IInternalContest {
         if (contestTime != null) {
             contestTime.stopContestClock();
             ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STOPPED, contestTime, inSiteNumber);
-            fireContestTimeListener(contestTimeEvent);
+            fireContestTimeListener(contestTimeEvent);            
         } else {
             throw new SecurityException("Unable to stop clock site " + inSiteNumber + " not found");
         }
@@ -1936,7 +1938,7 @@ public class InternalContest implements IInternalContest {
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.CHANGED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
     }
-
+           
     public void addContestInformationListener(IContestInformationListener contestInformationListener) {
         contestInformationListenerList.addElement(contestInformationListener);
     }

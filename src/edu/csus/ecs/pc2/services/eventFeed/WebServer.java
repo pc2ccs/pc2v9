@@ -33,7 +33,6 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
-import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
@@ -213,7 +212,7 @@ public class WebServer implements UIPlugin {
             // only enable https
             jettyServer.setConnectors(new Connector[] { https });
 
-            context.setSecurityHandler(basicAuth("scott", "tiger", "my realm", new String[] { "admin" }));
+            context.setSecurityHandler(basicAuth());
 
             jettyServer.setHandler(context);
 
@@ -252,11 +251,9 @@ public class WebServer implements UIPlugin {
     }
 
 
-    private SecurityHandler basicAuth(String username, String password, String realm, String[] roles) {
+    private SecurityHandler basicAuth() {
 
         HashLoginService l = new HashLoginService();
-        l.putUser(username, Credential.getCredential(password), roles);
-        l.setName(realm);
         File f = new File("realm.properties");
         if (f.exists() && f.isFile() && f.canRead()) {
             showMessage("Loading " + f.getAbsolutePath());
@@ -321,27 +318,27 @@ public class WebServer implements UIPlugin {
 
         if (getBooleanProperty(SCOREBOARD_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new ScoreboardService(getContest(), getController()));
-            showMessage("Staring /scoreboard web service");
+            showMessage("Starting /scoreboard web service");
         }
 
         if (getBooleanProperty(PROBLEM_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new ProblemService(getContest(), getController()));
-            showMessage("Staring /problem web service");
+            showMessage("Starting /problem web service");
         }
 
         if (getBooleanProperty(LANGUAGE_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new LanguageService(getContest(), getController()));
-            showMessage("Staring /languages web service");
+            showMessage("Starting /languages web service");
             }
 
         if (getBooleanProperty(STARTTIME_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new StarttimeService(getContest(), getController()));
-            showMessage("Staring /starttime web service");
+            showMessage("Starting /starttime web service");
         }
 
         if (getBooleanProperty(TEAMS_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new TeamService(getContest(), getController()));
-            showMessage("Staring /teams web service");
+            showMessage("Starting /teams web service");
         }
 
         return resConfig;
@@ -355,8 +352,8 @@ public class WebServer implements UIPlugin {
             return b;
         } else {
             return "true".equalsIgnoreCase(value.trim()) || //
-                    "yes".equalsIgnoreCase(value) || //
-                    "on".equalsIgnoreCase(value) || //
+                    "yes".equalsIgnoreCase(value.trim()) || //
+                    "on".equalsIgnoreCase(value.trim()) || //
                     "enabled".equalsIgnoreCase(value.trim());
         }
 

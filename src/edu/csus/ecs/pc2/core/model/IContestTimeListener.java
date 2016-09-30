@@ -19,6 +19,8 @@ public interface IContestTimeListener {
     void contestStarted(ContestTimeEvent event);
 
     void contestStopped(ContestTimeEvent event);
+    
+    void contestAutoStarted(ContestTimeEvent event);
 
     void refreshAll(ContestTimeEvent event);
 

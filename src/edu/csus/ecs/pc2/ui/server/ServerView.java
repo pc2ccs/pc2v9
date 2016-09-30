@@ -4,10 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.KeyEvent;
 import java.util.Date;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -328,7 +330,43 @@ public class ServerView extends JFrame implements UIPlugin {
                 updateFrameTitle(event.getContestTime().isContestRunning());
             }
         }
+        
+        /** This method exists to support differentiation between manual and automatic starts.
+         * Currently it delegates the handling to the contestStarted() method, while
+         * also popping up a notification dialog if the Server is in GUI mode and also
+         * logging the auto-start event.
+         */
+        @Override
+        public void contestAutoStarted(ContestTimeEvent event) {
+            contestStarted(event);
+            
+            //log the automatic-start
+            info("Contest automatically started due to arrival of enabled scheduled start time.");
+            
+            //if using a GUI, display a popup notification of the automatic-start
+            if (controller != null && controller.isUsingGUI()) {
+                //Note: previously the following line of code was used for the popup; however, showMessageDialog() does
+                // not allow to call setAlwaysOnTop()
+                // JOptionPane.showMessageDialog(null, "Scheduled Start Time has arrived; contest has been automatically started!", "Contest Started",
+                // JOptionPane.INFORMATION_MESSAGE);
+
+                JOptionPane optionPane = new JOptionPane();
+                optionPane.setMessage("Scheduled Start Time has arrived; contest has been automatically started!");
+                optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
+                JDialog dialog = optionPane.createDialog("Contest Started");
+                dialog.setLocationRelativeTo(null); // center the dialog
+                dialog.setModalityType(ModalityType.APPLICATION_MODAL);
+
+                // force the notification dialog to always be on top even if the Admin isn't the active program
+                // (Note: this works on Windows; it may not work under Linux -- and/or it may be window-system dependent...)
+                dialog.setAlwaysOnTop(true);
+
+                dialog.setVisible(true);
+
+            }
+        }
     }
+    
     /**
      * This method initializes mainViewPane
      * 
@@ -518,7 +556,9 @@ public class ServerView extends JFrame implements UIPlugin {
     
     private void info(String string) {
         System.out.println(new Date() + " " + string);
-        log.info(string);
+        if (log != null) {
+            log.info(string);  
+        }
     }
 
     /**
