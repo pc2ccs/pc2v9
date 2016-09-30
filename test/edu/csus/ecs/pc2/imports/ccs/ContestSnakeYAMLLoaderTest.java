@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -9,6 +11,11 @@ import java.util.Set;
 import java.util.Vector;
 
 import junit.framework.TestSuite;
+
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.Mark;
+import org.yaml.snakeyaml.error.MarkedYAMLException;
+
 import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
@@ -1068,43 +1075,59 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     }
 
-    // TODO add test testdoNotLoadExternalFile ??
+    public void testdoNotLoadExternalFile() throws Exception {
 
-    // public void testdoNotLoadExternalFile() throws Exception {
-    //
-    // String dirname = getDataDirectory(getName());
-    // // String dirname = getDataDirectory("testValidatorKeys");
-    // // String dirname = getDataDirectory();
-    // Utilities.insureDir(dirname);
-    // assertDirectoryExists(dirname);
-    //
-    // String filename = dirname + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
-    // // System.out.println(filename);
-    // assertFileExists(filename);
-    //
-    // IInternalContest contest;
-    //
-    // // Load data files
-    // contest = loader.fromYaml(null, dirname, true);
-    //
-    // for (Problem problem : contest.getProblems()) {
-    // assertTrue(problem.isUsingExternalDataFiles());
-    // assertNotNull(problem.getExternalDataFileLocation());
-    // ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
-    // assertEquals("Expecting loaded answer files ", 12, dataFiles.getJudgesAnswerFiles().length);
-    // assertEquals("Expecting loaded data files ", 12, dataFiles.getJudgesDataFiles().length);
-    // }
-    //
-    // // Do not load data files
-    // contest = loader.fromYaml(null, dirname, false);
-    //
-    // for (Problem problem : contest.getProblems()) {
-    // assertFalse("Expecting false using data files", problem.isUsingExternalDataFiles());
-    // assertNotNull(problem.getExternalDataFileLocation());
-    // ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
-    // assertEquals("Expecting no loaded answer files ", 0, dataFiles.getJudgesAnswerFiles().length);
-    // }
-    // }
+        String dirname = getDataDirectory(getName());
+        // String dirname = getDataDirectory("testValidatorKeys");
+        // String dirname = getDataDirectory();
+        Utilities.insureDir(dirname);
+        assertDirectoryExists(dirname);
+
+        String filename = dirname + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+        // System.out.println(filename);
+        assertFileExists(filename);
+
+        IInternalContest contest;
+
+        // Load data files
+        try {
+            
+        contest = loader.fromYaml(null, dirname, true);
+        
+        } catch (YamlLoadException e) {
+            System.out.println("failed loading in file "+e.getFilename());
+            editFile(e.getFilename());
+            throw e;
+        }
+
+        for (Problem problem : contest.getProblems()) {
+            assertFalse(problem.isUsingExternalDataFiles());
+            assertNotNull(problem.getExternalDataFileLocation());
+            ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
+            assertEquals("Expecting loaded answer files ", 12, dataFiles.getJudgesAnswerFiles().length);
+            assertEquals("Expecting loaded data files ", 12, dataFiles.getJudgesDataFiles().length);
+            SerializedFile[] ansfiles = dataFiles.getJudgesAnswerFiles();
+            
+            for (SerializedFile serializedFile : ansfiles) {
+                assertTrue("Expecting Loaded filee", serializedFile.getBuffer().length != 0);
+            }
+            
+        }
+
+        // Do not load data files
+        contest = loader.fromYaml(null, dirname, false);
+
+        for (Problem problem : contest.getProblems()) {
+            assertTrue("Expecting false using data files", problem.isUsingExternalDataFiles());
+            assertNotNull(problem.getExternalDataFileLocation());
+            ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
+            SerializedFile[] ansfiles = dataFiles.getJudgesAnswerFiles();
+            for (SerializedFile serializedFile : ansfiles) {
+                assertTrue("Expecting external answer file ", serializedFile.getBuffer().length == 0);
+            }
+            
+        }
+    }
 
     public void testGetBooleanValue() throws Exception {
 
@@ -1179,7 +1202,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      */
     private String getYamlTestFileName(String dirname) {
         return getTestFilename(dirname + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME);
-        // TODO check and remove return getTestFilename(dirname + File.separator + IContest.CONTEST_FILENAME);
     }
 
     public void testMultipleDataSetsCCS() throws Exception {
@@ -1269,8 +1291,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     }
 
     private String getProblemSetYamlTestFileName() {
-        // TODO check and remove
-        // return getTestFilename(ExportYAML.PROBLEM_SET_FILENAME);
         return getTestFilename(IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME);
     }
 
@@ -1491,9 +1511,11 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         // TODO fix exportFiles to export properly Python spaced YAML.
         exportYAML.exportFiles(testDirectory, originalContest);
-
-        // String filename = testDirectory + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
-        // editFile(filename);
+        
+         String filename = testDirectory + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+//         editFile(filename);
+         
+         validateYamlFile(filename);
 
         exportYAML = null;
 
@@ -1529,6 +1551,38 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected validator name ", CCSConstants.INTERNAL_CCS_VALIDATOR_NAME, problem.getValidatorProgramName());
         assertEquals("Expected validator command ", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problem.getValidatorCommandLine());
 
+    }
+    
+    String getSnakeParserDetails(MarkedYAMLException markedYAMLException) {
+        // from ContetYamlLoader
+
+        Mark mark = markedYAMLException.getProblemMark();
+
+        int lineNumber = mark.getLine() + 1; // starts at zero
+        int columnNumber = mark.getColumn() + 1; // starts at zero
+
+        return "Parse error at line=" + lineNumber + " column=" + columnNumber + " message=" + markedYAMLException.getProblem();
+    }
+
+    /**
+     * validates yaml.
+     *  
+     * @param filename
+     * @throws YamlLoadException
+     */
+    private void validateYamlFile(String filename) throws YamlLoadException {
+        
+        try {
+            Yaml yaml = new Yaml();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) yaml.load(new FileInputStream(filename));
+            assertNotNull(map);
+        } catch (MarkedYAMLException e) {
+            throw new YamlLoadException(getSnakeParserDetails(e));
+        } catch (FileNotFoundException e) {
+            throw new YamlLoadException("File not found " + filename);
+        }
+        
     }
 
     public void testUnQuote() throws Exception {

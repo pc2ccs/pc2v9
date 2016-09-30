@@ -14,7 +14,7 @@ limits:
 
 validator: 
    validatorProg: pc2.jar edu.csus.ecs.pc2.validator.Validator
-   validatorCmd: {:validator} {:infile} {:outfile} {:ansfile} {:resfile}  -pc2 1 true
+   validatorCmd: "{:validator} {:infile} {:outfile} {:ansfile} {:resfile}  -pc2 1 true"
    usingInternal: true
    validatorOption: 1
 

@@ -199,10 +199,11 @@ public class ContestYAMLLoader implements IContestLoader {
      */
     public IInternalContest fromYaml(IInternalContest contest, String directoryName, boolean loadDataFileContents)  {
         String[] contents;
+        String contestYamlFilename = directoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME;
         try {
-            contents = loadFileWithIncludes(directoryName,  directoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME);
+            contents = loadFileWithIncludes(directoryName,  contestYamlFilename);
         } catch (IOException e) {
-            throw new YamlLoadException(e);
+            throw new YamlLoadException("Error loading " + contestYamlFilename, e, contestYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
     }
@@ -671,11 +672,11 @@ public class ContestYAMLLoader implements IContestLoader {
         try {
             contents = loadFileWithIncludes(baseDirectoryName, problemYamlFilename);
         } catch (IOException e) {
-            throw new YamlLoadException(e);
+            throw new YamlLoadException("Error loading "+problemYamlFilename, e, problemYamlFilename);
         }
 
         if (contents.length == 0) {
-            throw new YamlLoadException("Can not load problem.yaml: " + problemYamlFilename);
+            throw new YamlLoadException("No Yaml found in " + problemYamlFilename);
         }
 
         String problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_PROBLEM_LATEX_FILENAME;

@@ -20,23 +20,23 @@ languages:
  - name: Java
    active: true
    compilerCmd: javac {:mainfile}
-   exemask: {:basename}.class
+   exemask: "{:basename}.class"
    execCmd: java {:basename}
    runner: java
-   runner-args: {:basename}
+   runner-args: "{:basename}"
 
  - name: Perl
    active: true
    compilerCmd: perl -c {:mainfile}
-   exemask: {:noexe}
+   exemask: "{:noexe}"
    execCmd: perl {:mainfile}
    runner: perl
-   runner-args: {:mainfile}
+   runner-args: "{:mainfile}"
 
  - name: GNU C++
    active: true
    compilerCmd: g++ -lm -o {:basename}.exe {:mainfile}
-   exemask: {:basename}.exe
+   exemask: "{:basename}.exe"
    execCmd: .\{:basename}.exe
    runner: .\{:basename}.exe
    runner-args: 
@@ -44,7 +44,7 @@ languages:
  - name: GNU C
    active: true
    compilerCmd: gcc -lm -o {:basename}.exe {:mainfile}
-   exemask: {:basename}.exe
+   exemask: "{:basename}.exe"
    execCmd: .\{:basename}.exe
    runner: .\{:basename}.exe
    runner-args: 
