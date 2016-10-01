@@ -401,6 +401,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
         String xml = eventFeedXML.createStartupXML(contest);
 
+//        setDebugMode(true);
         debugPrintln(" -- testStartupElement ");
         debugPrintln(xml);
         xml = xml + CONTEST_END_TAG;
@@ -411,7 +412,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, 9);
         assertXMLCounts(xml, ResolverEventFeedXML.REGION_TAG, 24);
         
-        assertFirstValueFound(xml,"starttime", "0.0");
+        assertFirstValueFound(xml,"starttime", "undefined");
         
 //        System.out.println("xml  = "+xml);
     }
