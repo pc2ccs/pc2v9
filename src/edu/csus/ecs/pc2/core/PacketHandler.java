@@ -2942,18 +2942,29 @@ public class PacketHandler {
             
             //if I'm a server and the new contest info includes a scheduled (future) auto-start time, schedule it
             if (isServer()) {
+                
                 //get the scheduled start time (if any) and the time now
                 GregorianCalendar startTime = contestInformation.getScheduledStartTime();
                 GregorianCalendar now = new GregorianCalendar();
+                
                 if (startTime != null  &&  startTime.after(now)  && contestInformation.isAutoStartContest()) {
+                    
                     //schedule a new task to auto-start the contest at the specified time (this also removes any previously-scheduled start task(s))
-                    controller.removeAnyScheduledStartContestTasks();
-                    controller.scheduleFutureStartContestTask(startTime);
-                } else {
-                    //starttime is null or before now, or contest is not auto-start; 
-                    // any of these cases means we shouldn't have a scheduled start task...
-                    controller.removeAnyScheduledStartContestTasks();
-                }
+                    AutoStarter autoStarter = new AutoStarter(contest,controller);
+                    autoStarter.scheduleFutureStartContestTask(startTime);
+                    
+                    //log the scheduled start
+                    if (controller!= null) {
+                        Log log = controller.getLog();
+                        if (log!=null) {
+                            log.info("Scheduled automatic contest start at time " + startTime.getTimeInMillis());
+                        } else {
+                            System.err.println ("Scheduled automatic contest start at time " + startTime.getTimeInMillis() + " but couldn't get Log");
+                        }
+                    } else {
+                        System.err.println ("Scheduled automatic contest start at time " + startTime.getTimeInMillis() + " but couldn't get Controller (so no log)");
+                    }
+                } 
             }
         }
 

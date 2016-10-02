@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.core.log;
 
 import java.io.IOException;
-import java.util.GregorianCalendar;
 import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -635,17 +634,4 @@ public class NullController implements IInternalController{
     public void updateGroups(Group[] groups) {
         
     }
-
-    @Override
-    public void scheduleFutureStartContestTask(GregorianCalendar startTime) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void removeAnyScheduledStartContestTasks() {
-        // TODO Auto-generated method stub
-        
-    }
-
 }

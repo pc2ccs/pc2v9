@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
-import java.util.GregorianCalendar;
 
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -674,15 +673,4 @@ public interface IInternalController {
      */
     void setConnectionManager(ITransportManager connectionManager);
 
-    /**
-     * Create a task (thread) to wake up and start the contest at the specified time.
-     * 
-     * @param startTime the time at which the contest should automatically start
-     */
-    void scheduleFutureStartContestTask(GregorianCalendar startTime);
-
-    /**
-     * Remove (kill, cancel) any tasks which have previously been scheduled to auto-start the contest.
-     */
-    void removeAnyScheduledStartContestTasks();
 }
