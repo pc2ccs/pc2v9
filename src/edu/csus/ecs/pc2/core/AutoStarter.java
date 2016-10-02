@@ -86,7 +86,7 @@ public class AutoStarter {
                     
                     //log the automatic start
                     if (controller!=null) {
-                        Log log = controller.getLog();
+                        log = controller.getLog();
                         if (log!=null) {
                             log.info("Contest automatically started by AutoStarter scheduled task.");
                         } else {
