@@ -34,6 +34,10 @@ import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
+import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * InternalContest Times Pane/Grid.
@@ -50,15 +54,19 @@ public class ContestTimesPane extends JPanePlugin {
     /**
      * 
      */
-    private static final long serialVersionUID = -8946167067842024295L;
+    private static final long serialVersionUID = 2L;
 
     private EditContestTimeFrame editContestTimeFrame = new EditContestTimeFrame();
+
+    private EditScheduledStartTimeFrame editScheduledStartTimeFrame = new EditScheduledStartTimeFrame();
 
     private JPanel contestTimeButtonPane = null;
 
     private MCLB contestTimeListBox = null;
 
     private JButton refreshButton = null;
+
+    private JButton setScheduledStartTimeButton = null;
 
     private JButton startClockButton = null;
 
@@ -94,7 +102,7 @@ public class ContestTimesPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(564, 229));
+        this.setSize(new Dimension(621, 229));
         this.add(getContestTimeListBox(), java.awt.BorderLayout.CENTER);
         this.add(getContestTimeButtonPane(), java.awt.BorderLayout.SOUTH);
 
@@ -118,6 +126,7 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeButtonPane = new JPanel();
             contestTimeButtonPane.setLayout(flowLayout);
             contestTimeButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
+            contestTimeButtonPane.add(getSetScheduledStartTimeButton());
             contestTimeButtonPane.add(getStartClockButton(), null);
             contestTimeButtonPane.add(getRefreshButton(), null);
             contestTimeButtonPane.add(getEditButton(), null);
@@ -292,6 +301,8 @@ public class ContestTimesPane extends JPanePlugin {
         getContest().addAccountListener(new AccountListenerImplementation());
 
         editContestTimeFrame.setContestAndController(inContest, inController);
+        
+        editScheduledStartTimeFrame.setContestAndController(inContest, inController);
         
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -734,4 +745,33 @@ public class ContestTimesPane extends JPanePlugin {
     }
     
 
+    /**
+     * This method creates and initializes the Set Scheduled Start Time button
+     * 
+     * @return a JButton which invokes the EditScheduledStartTime frame
+     */
+    private JButton getSetScheduledStartTimeButton() {
+        if (setScheduledStartTimeButton == null) {
+        	setScheduledStartTimeButton = new JButton("Set Schedule");
+        	setScheduledStartTimeButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+                    editScheduledStartTime();
+        	    }
+        	});
+        	setScheduledStartTimeButton.setMnemonic(KeyEvent.VK_C);
+        	setScheduledStartTimeButton.setToolTipText("Set/update the Scheduled Start Time for the contest");
+        }
+        return setScheduledStartTimeButton;
+    }
+
+    /**
+     * Displays a frame allowing editing of the Scheduled Start Time for the contest.
+     */
+    protected void editScheduledStartTime() {
+        ContestInformation contestInfo = getContest().getContestInformation();
+
+        editScheduledStartTimeFrame.setContestInfo(contestInfo);
+        editScheduledStartTimeFrame.setVisible(true);
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"
