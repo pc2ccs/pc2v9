@@ -274,6 +274,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
 
         // System.out.println("JSON="+json);
 
+        // XXX TODO FIXME the test90Runs.json.txt looks nothing like the json that is created
         assertEquals("Expecting JSON length ", 8766, json.length());
 
         /**

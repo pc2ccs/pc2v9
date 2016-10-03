@@ -801,9 +801,9 @@ public class EditContestTimePane extends JPanePlugin {
     
     private JCheckBox getAutoStartContestCheckBox() {
         if (autoStartContestCheckBox == null) {
-        	autoStartContestCheckBox = new JCheckBox("Start contest automatically");
-        	autoStartContestCheckBox.setToolTipText("Check to cause PC2 to automatically start the contest when the specified \"Scheduled Start Time\" is reached");
-        	autoStartContestCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            autoStartContestCheckBox = new JCheckBox("Start contest automatically");
+            autoStartContestCheckBox.setToolTipText("Check to cause PC2 to automatically start the contest when the specified \"Scheduled Start Time\" is reached");
+            autoStartContestCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
