@@ -23,7 +23,7 @@ public class PacketFormatterTest extends TestCase {
 
         String s = PacketFormatter.getAccountBreakdown(contest.getAccounts());
         
-        assertEquals("22 TEAM 12 JUDGE", s);
+        assertEquals("1 ADMINISTRATOR 22 TEAM 12 JUDGE 1 SCOREBOARD", s);
     }
     
     public void testGetAccountBreakdownTestBySite() {
@@ -42,7 +42,7 @@ public class PacketFormatterTest extends TestCase {
         
         String [] results = {
                 "10 TEAM 1 SCOREBOARD", //
-                "22 TEAM 12 JUDGE", //
+                "1 ADMINISTRATOR 22 TEAM 12 JUDGE 1 SCOREBOARD", //
                 "no accounts", //
                 "40 TEAM 4 SCOREBOARD", //
                 "no accounts",

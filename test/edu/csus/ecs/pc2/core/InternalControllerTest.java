@@ -242,6 +242,8 @@ public class InternalControllerTest extends AbstractTestCase {
          * FATAL ERROR Attempted to load site 0 from Site 1
          * then System.exit(22).
          */
+        System.out.println("getMessage()='"+controller.getMessage()+"'");
+        // XXX TODO FIXME but controllger.getMessage is null
         assertNotNull("Expecting fatal error message ", controller.getMessage());
         assertEquals("Expecting messsage ","Halting server - configuration file corrupt", controller.getMessage());
 

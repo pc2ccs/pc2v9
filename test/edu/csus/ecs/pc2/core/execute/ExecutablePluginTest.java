@@ -353,6 +353,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         // System.out.println("expectedJudgement  = " + expectedJudgement);
         // System.out.println("expectedJudgementV = " + executionData.getValidationResults());
 
+        // XXX TODO FIXME 40000 is too low for windows, but fine for linux
         assertTrue("Excessive runtime", executionData.getExecuteTimeMS() < 40000);
         
 //        if (!executionData.isCompileSuccess()){

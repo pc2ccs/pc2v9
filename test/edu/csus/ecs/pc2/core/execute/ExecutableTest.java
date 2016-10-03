@@ -426,6 +426,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         // TODO: change the following println into an assert()
         // System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
+        // XXX TODO FIXME 40000 is too low for windows, but fine for linux
         assertTrue("Excessive runtime", executionData.getExecuteTimeMS() < 40000);
 
         if (!executionData.isCompileSuccess()) {

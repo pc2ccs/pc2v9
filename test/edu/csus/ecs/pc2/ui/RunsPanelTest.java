@@ -83,6 +83,7 @@ public class RunsPanelTest extends TestCase {
 
         setRunToYes(contest, theRun, judgeClient, false, false);
         judgementString = runsPanel.getJudgementResultString(theRun);
+        // XXX TODO FIXME runsPanel returned "Yes" but the 1st judgement is "Yes." so this fails
         assertEquals(judgementString, contest.getJudgements()[0].getDisplayName());
 
         // Judge run 2
@@ -168,6 +169,7 @@ public class RunsPanelTest extends TestCase {
 
         setRunToYes(contest, theRun, judgeClient, false, false);
         judgementString = runsPanel.getJudgementResultString(theRun);
+        // XXX TODO FIXME runsPanel returned "Yes" but the 1st judgement is "Yes." so this fails
         assertEquals(judgementString, contest.getJudgements()[0].getDisplayName());
 
         // Judge run 2

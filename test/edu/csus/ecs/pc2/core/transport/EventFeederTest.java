@@ -161,6 +161,7 @@ public class EventFeederTest extends AbstractTestCase {
             assertCount("Expecting tag " + tagName, 24, tagName, xmlString);
             
             tagName = "<clarification>";
+            System.out.println("XXX found="+xmlString);
             assertCount("Expecting tag " + tagName, 9, tagName, xmlString);
             
         } else {

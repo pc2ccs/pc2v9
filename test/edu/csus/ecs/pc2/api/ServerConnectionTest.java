@@ -976,6 +976,7 @@ public class ServerConnectionTest extends AbstractTestCase {
         expected.setProgramExecuteCommandLine(executionCommandLine);
         expected.setExecutableIdentifierMask(executableMask);
         expected.setInterpreted(interpreted);
+        expected.setJudgeProgramExecuteCommandLine(executionCommandLine);
         
         assertTrue("Expecting same", expected.isSameAs(language));
         assertFalse("Expecting to NOT be defined as interpreted ",language.isInterpreted());
@@ -1024,6 +1025,7 @@ public class ServerConnectionTest extends AbstractTestCase {
         expected.setProgramExecuteCommandLine(executionCommandLine);
         expected.setExecutableIdentifierMask(executableMask);
         expected.setInterpreted(interpreted);
+        expected.setJudgeProgramExecuteCommandLine(executionCommandLine);
         
         assertTrue("Expecting to be set to interpreted ",language.isInterpreted());
         assertTrue("Expecting same", expected.isSameAs(language));
