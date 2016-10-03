@@ -63,8 +63,9 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     private JPanel startTimeButtonPanel;
     private JButton clearStartTimeButton;
     private JButton setStartToNowButton;
-    private JComboBox timeIncrementComboBox;
+    private JComboBox<Integer> incrementTimeComboBox;
     private JButton incrementTimeButton;
+    private JButton decrementTimeButton;
 
 
     /**
@@ -127,13 +128,13 @@ public class EditScheduledStartTimePane extends JPanePlugin {
      */
     private JPanel getMessagePane() {
         if (messagePane == null) {
-            messageLabel = new JLabel();
-            messageLabel.setText("");
-            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePane = new JPanel();
             messagePane.setMinimumSize(new Dimension(10, 30));
             messagePane.setLayout(new BorderLayout());
             messagePane.setPreferredSize(new Dimension(25, 30));
+            messageLabel = new JLabel();
+            messageLabel.setText("");
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
         }
         return messagePane;
@@ -224,13 +225,41 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
     }
     
+    /**
+     * Extracts the Scheduled Start Time from the GUI and returns it as a GregorianCalendar (Date).
+     * 
+     * @return the GregorianCalendar representing the Scheduled Start Time in the GUI, or null if the GUI string does
+     *      not represent a valid Date
+     */
     private GregorianCalendar getScheduledStartTimeFromGUI() {
-        //TODO: pull the string out of the GUI, check for null, empty, or "undefined" and if so return null;
+        //Pull the string out of the GUI, check for null, empty, or "undefined" and if so return null;
         // otherwise, parse the time string and return a new GregorianCalendar (return null if the parse fails).
+        //get the Scheduled Start Time field from the GUI
+        String guiString = getScheduledStartTimeTextBox().getText();
         
-        System.out.println ("EditScheduledStartTimePane: method getScheduledStartTimeFromGUI() not implemented...");
-        
-        return null;
+        //check for values that represent "no Scheduled Start Time"
+        if (guiString==null || guiString.length()==0 || guiString.trim().equals("") || guiString.equalsIgnoreCase("<undefined>") ) {
+            return null;
+        } else {
+            
+            //try parsing the GUI string into a GregorianCalendar
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm"); //TODO: add support for yyyy/MM/dd being optional
+            Date date;
+            try {
+                date = df.parse(guiString);
+            } catch (ParseException e1) {
+                //the input text does not parse as a date matching the format (pattern)
+                showMessage("<html>Invalid Scheduled Start Time (must match yyyy-mm-dd hh:mm<br> or the string \"&lt;undefined&gt;\" or the empty string)");
+                return null ;
+            }
+            
+            //date parses properly; put it into a Calendar object
+            //TODO: should put the calendar in non-lenient mode and catch exceptions due to, e.g. month=13
+            GregorianCalendar parsedDate = (GregorianCalendar) Calendar.getInstance();
+            parsedDate.setTime(date);
+            
+            return parsedDate;
+        }
     }
     
     /**
@@ -362,7 +391,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         if (scheduledStartTime == null) {
             displayStartTime = "<undefined>";
         } else {
-            displayStartTime = getScheduledStartTimeAsString(scheduledStartTime);
+            displayStartTime = getGregorianTimeAsString(scheduledStartTime);
         }
         
         IInternalContest contest = getContest();
@@ -430,7 +459,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     /**
      * Convert a GregorianCalendar date/time to a displayable string in yyyy-mm-dd hh:mm form.
      */
-    private String getScheduledStartTimeAsString(GregorianCalendar cal) {
+    private String getGregorianTimeAsString(GregorianCalendar cal) {
         
         String retString = "<undefined>";
         if (cal != null) {
@@ -558,8 +587,9 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         	startTimeButtonPanel = new JPanel();
         	startTimeButtonPanel.add(getClearStartTimeButton());
         	startTimeButtonPanel.add(getSetStartToNowButton());
-        	startTimeButtonPanel.add(getTimeIncrementComboBox());
+        	startTimeButtonPanel.add(getIncrementTimeComboBox());
         	startTimeButtonPanel.add(getIncrementTimeButton());
+        	startTimeButtonPanel.add(getDecrementTimeButton());
         }
         return startTimeButtonPanel;
     }
@@ -576,13 +606,13 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         return clearStartTimeButton;
     }
     
+    /**
+     * Sets the Scheduled Start Time GUI textbox to "<undefined>", and enables the "Update" button.
+     */
     protected void setStartTimeToUndefined() {
-        // TODO Auto-generated method stub
-        System.out.println("EditScheduledStartTimePane: method setStartTimeToUndefined() not implemented...");
-        
-        //add code here to set the StartTimeTextbox to <"undefined>" 
-        
+        getScheduledStartTimeTextBox().setText("<undefined>");
         enableUpdateButton();
+        showMessage("");
     }
 
     private JButton getSetStartToNowButton() {
@@ -598,46 +628,113 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         return setStartToNowButton;
     }
     
+    /**
+     * Sets the Scheduled Start Time GUI textbox to the string representing the time Now + 30 seconds, 
+     * rounded up to the next whole minute (to comply with the CLICS specification that says the Start Time should not be
+     * able to be set to less than 30 seconds in the future; this specification refers to the Web /starttime interface but
+     * it makes sense to keep the GUI consistent with that spec).
+     */
     protected void setStartTimeToNow() {
-        // TODO Auto-generated method stub
-        System.out.println("EditScheduledStartTimePane: method setStartTimeToNow() not implemented...");
         
-        //add code here to set the StartTimeTextbox to "now, rounded up to the next whole minute, + 30 seconds"
+        GregorianCalendar now = new GregorianCalendar();
         
+        //add 30 seconds to the current time
+        now.add(Calendar.SECOND, 30);
+        
+        //bump the minute up by one and clear lower fields to zero
+        now.roll(Calendar.MINUTE, true);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
+        
+        getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(now));
+                
         enableUpdateButton();
-        
+        showMessage("");
     }
 
-    private JComboBox getTimeIncrementComboBox() {
-        if (timeIncrementComboBox == null) {
-        	timeIncrementComboBox = new JComboBox();
-        	timeIncrementComboBox.setModel(new DefaultComboBoxModel(new String[] {"0", "1", "2", "5", "10", "20", "30", "45", "60"}));
-        	timeIncrementComboBox.setToolTipText("Select the amount (in minutes) to be added to the Scheduled Start Time, then press \"Increment\"");
+    private JComboBox<Integer> getIncrementTimeComboBox() {
+        if (incrementTimeComboBox == null) {
+        	incrementTimeComboBox = new JComboBox<Integer>();
+        	incrementTimeComboBox.setMaximumRowCount(9);
+        	incrementTimeComboBox.setModel(new DefaultComboBoxModel(new String[] {"0", "1", "2", "5", "10", "20", "30", "45", "60"}));
+        	incrementTimeComboBox.setToolTipText("Select the amount (in minutes) to be added to the Scheduled Start Time, then press \"Increment\"");
+        	incrementTimeComboBox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (getIncrementTimeComboBox().getSelectedIndex()>0) {
+                        getIncrementTimeButton().setEnabled(true);
+                        getDecrementTimeButton().setEnabled(true);
+                    } else {
+                        getIncrementTimeButton().setEnabled(false);
+                        getDecrementTimeButton().setEnabled(false);
+                    }
+                    showMessage("");
+                }
+        	});
         }
-        return timeIncrementComboBox;
+        return incrementTimeComboBox;
     }
     
     private JButton getIncrementTimeButton() {
         if (incrementTimeButton == null) {
         	incrementTimeButton = new JButton("Increment");
+        	incrementTimeButton.setEnabled(false);
         	incrementTimeButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
-        	        incrementStartTime();
+        	        incrementGUIStartTime();
         	    }
         	});
         	incrementTimeButton.setToolTipText("Increments the Scheduled Start Time by the amount selected in the drop-down list");
         }
         return incrementTimeButton;
     }
-
-    protected void incrementStartTime() {
-        // TODO Auto-generated method stub
-        System.out.println("EditScheduledStartTimePane: method incrementStartTime() not implemented...");
-        
-        //add code here set the StartTimeTextbox to its current value (if a valid GregorianCalendar time) plus the currently-selected
-        // value in the IncrementTime combobox.
-        
-        enableUpdateButton();
-        
+    
+    private JButton getDecrementTimeButton() {
+        if (decrementTimeButton == null) {
+            decrementTimeButton = new JButton("Decrement");
+            decrementTimeButton.setEnabled(false);
+            decrementTimeButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    decrementGUIStartTime();
+                }
+            });
+            decrementTimeButton.setToolTipText("Decrements the Scheduled Start Time by the amount selected in the drop-down list");
+        }
+        return decrementTimeButton;
     }
+
+    /**
+     * Increments the Scheduled Start Time displayed in the GUI by the amount selected in the incrementTimeComboBox.
+     */
+    protected void incrementGUIStartTime() {
+        
+        GregorianCalendar currentTextboxStartTime = getScheduledStartTimeFromGUI();
+        
+        if (currentTextboxStartTime==null) {
+            showMessage("Invalid time in Scheduled Start Time textbox; cannot increment");
+        } else {
+            currentTextboxStartTime.add(Calendar.MINUTE, (Integer.parseInt((String)(getIncrementTimeComboBox().getSelectedItem()))));
+            getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(currentTextboxStartTime));
+            enableUpdateButton();  
+            showMessage("");
+        }
+    }
+
+    /**
+     * Decrements the Scheduled Start Time displayed in the GUI by the amount selected in the incrementTimeComboBox.
+     */
+    protected void decrementGUIStartTime() {
+        
+        GregorianCalendar currentTextboxStartTime = getScheduledStartTimeFromGUI();
+        
+        if (currentTextboxStartTime==null) {
+            showMessage("Invalid time in Scheduled Start Time textbox; cannot decrement");
+        } else {
+            currentTextboxStartTime.add(Calendar.MINUTE, -(Integer.parseInt((String)(getIncrementTimeComboBox().getSelectedItem()))));
+            getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(currentTextboxStartTime));
+            enableUpdateButton();  
+            showMessage("");
+        }
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
