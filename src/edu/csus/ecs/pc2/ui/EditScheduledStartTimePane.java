@@ -181,6 +181,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     private JButton getUpdateButton() {
         if (updateButton == null) {
             updateButton = new JButton();
+            updateButton.setToolTipText("Apply the specified Scheduled Start Time and (if not \"undefined\") set the contest to automatically start at the specified time)");
             updateButton.setText("Update");
             updateButton.setEnabled(false);
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
@@ -266,8 +267,9 @@ public class EditScheduledStartTimePane extends JPanePlugin {
      * Verify that the Scheduled Start Time entry is valid. Valid start times are
      * strings of the form "yyyy-mm-dd hh:mm" or "<undefined>" or an empty string.
      * 
-     * @return true if the ScheduledStartTimeTextbox field contains either a valid
-     *     start date/time (in the future and in the proper format) or the string "<undefined>";
+     * @return true if the ScheduledStartTimeTextbox field contains either (1) a valid
+     *     start date/time (in the future and in the proper format) or (2) the string "<undefined>"
+     *     or (3) the empty string;
      *     false otherwise.
      */
     private boolean validateScheduledStartTimeField() {
@@ -332,7 +334,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         if (getUpdateButton().isEnabled()) {
             // Something changed, are they sure ?
 
-            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Contest Time data has been modified;"
+            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Scheduled Start Time has been modified;"
                     + "\n do you want to save the changes?\n", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
@@ -601,7 +603,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         	        setStartTimeToUndefined();
         	    }
         	});
-        	clearStartTimeButton.setToolTipText("Resets the Scheduled Start Time to \"undefined\"");
+        	clearStartTimeButton.setToolTipText("Resets the Scheduled Start Time to \"undefined\" (which in turn means the contest will not start automatically)");
         }
         return clearStartTimeButton;
     }
@@ -623,7 +625,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         	        setStartTimeToNow();
         	    }
         	});
-        	setStartToNowButton.setToolTipText("Sets the Scheduled Start Time to the next whole minute which is at least 30 seconds from now");
+        	setStartToNowButton.setToolTipText("Sets the Scheduled Start Time to the next whole minute which is at least 30 seconds from now (and schedules the contest to automatically start at that time)");
         }
         return setStartToNowButton;
     }
@@ -656,7 +658,11 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         if (incrementTimeComboBox == null) {
         	incrementTimeComboBox = new JComboBox<Integer>();
         	incrementTimeComboBox.setMaximumRowCount(9);
-        	incrementTimeComboBox.setModel(new DefaultComboBoxModel(new String[] {"0", "1", "2", "5", "10", "20", "30", "45", "60"}));
+        	incrementTimeComboBox.setModel(new DefaultComboBoxModel<Integer>());
+        	String [] incrementValues = new String[] {"0", "1", "2", "5", "10", "20", "30", "45", "60"};
+        	for (String str : incrementValues) {
+        	    incrementTimeComboBox.addItem(Integer.parseInt(str));
+        	}
         	incrementTimeComboBox.setToolTipText("Select the amount (in minutes) to be added to the Scheduled Start Time, then press \"Increment\"");
         	incrementTimeComboBox.addActionListener(new ActionListener() {
                 @Override
@@ -713,7 +719,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         if (currentTextboxStartTime==null) {
             showMessage("Invalid time in Scheduled Start Time textbox; cannot increment");
         } else {
-            currentTextboxStartTime.add(Calendar.MINUTE, (Integer.parseInt((String)(getIncrementTimeComboBox().getSelectedItem()))));
+            currentTextboxStartTime.add(Calendar.MINUTE, ((Integer)(getIncrementTimeComboBox().getSelectedItem())));
             getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(currentTextboxStartTime));
             enableUpdateButton();  
             showMessage("");
@@ -730,7 +736,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         if (currentTextboxStartTime==null) {
             showMessage("Invalid time in Scheduled Start Time textbox; cannot decrement");
         } else {
-            currentTextboxStartTime.add(Calendar.MINUTE, -(Integer.parseInt((String)(getIncrementTimeComboBox().getSelectedItem()))));
+            currentTextboxStartTime.add(Calendar.MINUTE, -(((Integer)(getIncrementTimeComboBox().getSelectedItem()))));
             getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(currentTextboxStartTime));
             enableUpdateButton();  
             showMessage("");
