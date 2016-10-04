@@ -25,7 +25,7 @@ public class ScoreboardPluginTest extends AbstractTestCase {
         
         removeDirectory(outputDir); // remove previous test data
         
-        ensureDirectory(outputDir);
+        ensureDirectory(outputDir+File.separator+"cwd");
         
 //        startExplorer(outputDir);
         
@@ -40,6 +40,18 @@ public class ScoreboardPluginTest extends AbstractTestCase {
         
         plugin.writeHTML(outputDir);
         
+        // XXX would be nice if plugin did not write them to the CWD
+        // these 2 files are written to the current working directory
+        String [] cwdFiles = {
+                "results.xml",
+                "pc2export.dat"
+        };
+        // move then out of the CWD.
+        for (String filename : cwdFiles) {
+            File file = new File(filename);
+            File destFile = new File(outputDir+File.separator+"cwd", filename);
+            file.renameTo(destFile);
+        }
         /**
          * Files expected to be created.
          */
