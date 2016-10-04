@@ -1,9 +1,15 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -16,20 +22,6 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-
-import javax.swing.JCheckBox;
-
-import java.awt.Color;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.Dimension;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 /**
  * Add/Edit ContestTime Pane.
@@ -54,8 +46,6 @@ public class EditContestTimePane extends JPanePlugin {
     private JLabel messageLabel = null;
 
     private ContestTime contestTime = null;
-
-    private GregorianCalendar scheduledStartTime;
     
     private boolean populatingGUI = true;
 
@@ -74,9 +64,6 @@ public class EditContestTimePane extends JPanePlugin {
     private JTextField contestLengthTextBox = null;
 
     private JCheckBox autoStopAtEndofContestCheckBox = null;
-    private JLabel scheduledStartTimeLabel;
-    private JTextField scheduledStartTimeTextBox;
-    private JCheckBox autoStartContestCheckBox;
 
 
     /**
@@ -274,12 +261,6 @@ public class EditContestTimePane extends JPanePlugin {
             return;
         }
 
-        //check ScheduledStartTime in the GUI textbox
-        if (!validateScheduledStartTimeField()) {
-            //new scheduled start time is invalid; just return (message issued by validateScheduledStartTimeField())
-            return;
-        }
-
         // all fields are valid
         
         //extract a new ContestTime from the GUI fields and double-check it is valid
@@ -291,18 +272,9 @@ public class EditContestTimePane extends JPanePlugin {
             return;
         }
         
-        //make sure that if the GUI indicates "start automatically" there is a valid (defined) start date/time
-        if (getAutoStartContestCheckBox().isSelected()) {
-            if (getScheduledStartTime()==null || !(getScheduledStartTime().after(new GregorianCalendar()))) {
-                showMessage("Must enter a valid (future) start time when 'Start Automatically' is selected");
-                return;
-            }
-        }
 
         //get the existing ContestInfo from the contest, insert new contest info data into it
         ContestInformation contestInfo = getContest().getContestInformation();
-        contestInfo.setScheduledStartTime(getScheduledStartTime());
-        contestInfo.setAutoStartContest(getAutoStartContestCheckBox().isSelected());
         contestInfo.setAutoStopContest(getAutoStopAtEndofContestCheckBox().isSelected());
 
         //put the updated ContestTime and ContestInfo back into the Controller
@@ -317,14 +289,6 @@ public class EditContestTimePane extends JPanePlugin {
         }
     }
 
-    /**
-     * Returns the current scheduled start time.  This value will be null if the user has not
-     * entered a new valid time in the GUI.
-     * @return the scheduled start time, in the form of a GregorianCalendar
-     */
-    private GregorianCalendar getScheduledStartTime() {
-       return this.scheduledStartTime;
-    }
 
     /**
      * Validate that all contestTime fields are ok.
@@ -354,52 +318,6 @@ public class EditContestTimePane extends JPanePlugin {
         return true;
     }
     
-    /**
-     * Verify that the Scheduled Start Time entry is valid. Valid start times are
-     * strings of the form "yyyy-mm-dd hh:mm" or "<undefined>" or an empty string.
-     * 
-     * @return true if the ScheduledStartTimeTextbox field contains either a valid
-     *     start date/time (in the future and in the proper format) or the string "<undefined>";
-     *     false otherwise.
-     */
-    private boolean validateScheduledStartTimeField() {
-        
-        String textBoxStartTime = getScheduledStartTimeTextBox().getText() ;
-        GregorianCalendar tempScheduledStartTime ;
-        
-        if (textBoxStartTime.equalsIgnoreCase("<undefined>") || textBoxStartTime.equals("") || textBoxStartTime.equals("<already started>") ) {
-            this.scheduledStartTime = null ;
-            return true;
-        } else {
-            
-            //parse the scheduled start time to be sure it's valid
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm"); //TODO: add support for yyyy/MM/dd being optional
-            Date date;
-            try {
-                date = df.parse(textBoxStartTime);
-            } catch (ParseException e1) {
-                //the input text does not parse as a date matching the format (pattern)
-                showMessage("<html>Invalid Scheduled Start Time (must match yyyy-mm-dd hh:mm<br> or the string \"&lt;undefined&gt;\" or the empty string)");
-                return false ;
-            }
-            
-            //date parses properly; put it into a Calendar object
-            //TODO: should put the calendar in non-lenient mode and catch exceptions due to, e.g. month=13
-            tempScheduledStartTime = (GregorianCalendar) Calendar.getInstance();
-            tempScheduledStartTime.setTime(date);
-            
-            //verify the scheduled start time is in the future
-            GregorianCalendar now = (GregorianCalendar) Calendar.getInstance();
-            if (!tempScheduledStartTime.after(now)) {
-                showMessage("Scheduled start date/time must be in the future");
-                return false;
-            }
-        }
-                   
-        //if we get here, the date/time in the text box must have been valid
-        this.scheduledStartTime = tempScheduledStartTime;
-        return true ;
-    }
     
 
     /**
@@ -455,7 +373,6 @@ public class EditContestTimePane extends JPanePlugin {
     public void setContestTime(final ContestTime inputContestTime, final ContestInformation inputContestInfo) {
 
         this.contestTime = inputContestTime;
-        this.scheduledStartTime = inputContestInfo.getScheduledStartTime();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -474,30 +391,8 @@ public class EditContestTimePane extends JPanePlugin {
         getRemainingTimeTextBox().setText(inContestTime.getRemainingTimeStr());
         getElapsedTimeTextBox().setText(inContestTime.getElapsedTimeStr());
         getContestLengthTextBox().setText(inContestTime.getContestLengthStr());
-        
-        //put the ScheduledStartTime into the GUI
-        scheduledStartTime = inContestInfo.getScheduledStartTime();
-        String displayStartTime = "";
-        if (scheduledStartTime == null) {
-            displayStartTime = "<undefined>";
-        } else {
-            displayStartTime = getScheduledStartTimeStr(scheduledStartTime);
-        }
-        if (inContestTime.isContestStarted()) {
-            getScheduledStartTimeTextBox().setText("<already started>"); 
-            getScheduledStartTimeTextBox().setToolTipText("Scheduled start time cannot be set when the contest has already started.");
-            getScheduledStartTimeTextBox().setEditable(false);
-        } else {
-            getScheduledStartTimeTextBox().setText(displayStartTime);
-            getScheduledStartTimeTextBox().setToolTipText(
-                    "<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm;"
-                    + "\r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time."
-                    + "\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
-            getScheduledStartTimeTextBox().setEditable(true);
-        }
-        
-        //put the state of the auto-start/stop checkboxes into the GUI
-        getAutoStartContestCheckBox().setSelected(inContestInfo.isAutoStartContest());
+                
+        //put the state of the auto-stop checkbox into the GUI
         getAutoStopAtEndofContestCheckBox().setSelected(inContestInfo.isAutoStopContest());
 
         getUpdateButton().setVisible(true);
@@ -539,18 +434,6 @@ public class EditContestTimePane extends JPanePlugin {
             gbl_centerPane.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
             gbl_centerPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
             centerPane.setLayout(gbl_centerPane);
-            GridBagConstraints gbc_scheduledStartTimeLabel = new GridBagConstraints();
-            gbc_scheduledStartTimeLabel.anchor = GridBagConstraints.EAST;
-            gbc_scheduledStartTimeLabel.insets = new Insets(0, 0, 5, 10);
-            gbc_scheduledStartTimeLabel.gridx = 1;
-            gbc_scheduledStartTimeLabel.gridy = 0;
-            centerPane.add(getScheduledStartTimeLabel(), gbc_scheduledStartTimeLabel);
-            GridBagConstraints gbc_scheduledStartTimeTextBox = new GridBagConstraints();
-            gbc_scheduledStartTimeTextBox.insets = new Insets(0, 0, 5, 0);
-            gbc_scheduledStartTimeTextBox.fill = GridBagConstraints.BOTH;
-            gbc_scheduledStartTimeTextBox.gridx = 2;
-            gbc_scheduledStartTimeTextBox.gridy = 0;
-            centerPane.add(getScheduledStartTimeTextBox(), gbc_scheduledStartTimeTextBox);
             contestLengthLabel = new JLabel();
             contestLengthLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             contestLengthLabel.setText("Contest Length");
@@ -596,11 +479,6 @@ public class EditContestTimePane extends JPanePlugin {
             gbc_remainingTimeTextBox.gridx = 2;
             gbc_remainingTimeTextBox.gridy = 4;
             centerPane.add(getRemainingTimeTextBox(), gbc_remainingTimeTextBox);
-            GridBagConstraints gbc_chckbxStartContestAutomatically = new GridBagConstraints();
-            gbc_chckbxStartContestAutomatically.insets = new Insets(0, 0, 5, 0);
-            gbc_chckbxStartContestAutomatically.gridx = 1;
-            gbc_chckbxStartContestAutomatically.gridy = 6;
-            centerPane.add(getAutoStartContestCheckBox(), gbc_chckbxStartContestAutomatically);
             GridBagConstraints gbc_stopAtEndofContestCheckBox = new GridBagConstraints();
             gbc_stopAtEndofContestCheckBox.insets = new Insets(0, 0, 5, 0);
             gbc_stopAtEndofContestCheckBox.fill = GridBagConstraints.VERTICAL;
@@ -682,25 +560,6 @@ public class EditContestTimePane extends JPanePlugin {
     }
     
     /**
-     * Convert a GregorianCalendar date/time to a displayable string in yyyy-mm-dd hh:mm form.
-     */
-    private String getScheduledStartTimeStr(GregorianCalendar cal) {
-        
-        String retString = "<undefined>";
-        if (cal != null) {
-            //extract fields from input and build string
-            //TODO:  need to deal with the difference between displaying LOCAL time and storing UTC
-
-            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            fmt.setCalendar(cal);
-            retString = fmt.format(cal.getTime());
-
-            }
-
-        return retString;
-    }
-
-    /**
      * Convert String to second. Expects input in form: ss or mm:ss or hh:mm:ss
      * 
      * @param s
@@ -773,42 +632,5 @@ public class EditContestTimePane extends JPanePlugin {
         } catch (Exception e) {
             return -1;
         }
-    }
-
-    private JLabel getScheduledStartTimeLabel() {
-        if (scheduledStartTimeLabel == null) {
-            scheduledStartTimeLabel = new JLabel("Scheduled Start Time");
-            scheduledStartTimeLabel.setToolTipText("The date/time when the contest is scheduled to start; must be a time in the future.");
-        }
-        return scheduledStartTimeLabel;
-    }
-
-    private JTextField getScheduledStartTimeTextBox() {
-        if (scheduledStartTimeTextBox == null) {
-            scheduledStartTimeTextBox = new JTextField();
-            scheduledStartTimeTextBox
-                    .setToolTipText("<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm;"
-                                    + "\r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time."
-                                    + "\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
-            scheduledStartTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
-                }
-            });
-        }
-        return scheduledStartTimeTextBox;
-    }
-    
-    private JCheckBox getAutoStartContestCheckBox() {
-        if (autoStartContestCheckBox == null) {
-            autoStartContestCheckBox = new JCheckBox("Start contest automatically");
-            autoStartContestCheckBox.setToolTipText("Check to cause PC2 to automatically start the contest when the specified \"Scheduled Start Time\" is reached");
-            autoStartContestCheckBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableUpdateButton();
-                }
-            });
-        }
-        return autoStartContestCheckBox;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
