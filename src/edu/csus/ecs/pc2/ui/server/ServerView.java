@@ -57,6 +57,7 @@ import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import java.awt.Dimension;
 
 /**
  * GUI for Server.
@@ -115,7 +116,7 @@ public class ServerView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(580, 400));
+        this.setSize(new Dimension(700, 400));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Server View");
         this.setContentPane(getMainViewPane());
