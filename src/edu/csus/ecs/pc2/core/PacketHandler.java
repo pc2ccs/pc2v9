@@ -88,6 +88,8 @@ public class PacketHandler {
      */
     private EvaluationLog evaluationLog = null;
 
+    private AutoStarter autoStarter;
+
 
     public PacketHandler(IInternalController controller, IInternalContest contest) {
         this.controller = controller;
@@ -2947,10 +2949,36 @@ public class PacketHandler {
                 GregorianCalendar startTime = contestInformation.getScheduledStartTime();
                 GregorianCalendar now = new GregorianCalendar();
                 
+                //if starttime is null it means there should not be any autostart; clear any scheduled start
+                if (startTime == null && autoStarter != null) {
+                    
+                    GregorianCalendar scheduledStart = autoStarter.getScheduledFutureStartTime();
+                    autoStarter.cancelAnyScheduledStartContestTask();
+                    autoStarter = null;
+                    
+                    //log the cancellation of scheduled start
+                    if (controller!= null) {
+                        Log log = controller.getLog();
+                        if (log!=null) {
+                            log.info("Cancelled automatic contest start scheduled for time " + scheduledStart.getTimeInMillis());
+                        } else {
+                            System.err.println ("Cancelled automatic contest scheduled for time " + scheduledStart.getTimeInMillis() + " but couldn't get Log");
+                        }
+                    } else {
+                        System.err.println ("Cancelled automatic contest start scheduled for time " + scheduledStart.getTimeInMillis() + " but couldn't get Controller (so no log)");
+                    }
+                }
+                
+                //check if we should schedule a start task
                 if (startTime != null  &&  startTime.after(now)  && contestInformation.isAutoStartContest()) {
                     
+                    //get rid of any previously-scheduled autostart task
+                    if (autoStarter!=null) {
+                        autoStarter.cancelAnyScheduledStartContestTask();
+                    }
+                    
                     //schedule a new task to auto-start the contest at the specified time (this also removes any previously-scheduled start task(s))
-                    AutoStarter autoStarter = new AutoStarter(contest,controller);
+                    autoStarter = new AutoStarter(contest,controller);
                     autoStarter.scheduleFutureStartContestTask(startTime);
                     
                     //log the scheduled start

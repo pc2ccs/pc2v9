@@ -121,7 +121,7 @@ public class AutoStarter {
      * Removes any currently scheduled task (that is, invokes cancel()
      * on the task and then disposes of the task holder).
      */
-    private void cancelAnyScheduledStartContestTask() {
+    protected void cancelAnyScheduledStartContestTask() {
         
         //check if there's even any scheduled task
         if (startTimeTask != null) {
@@ -150,5 +150,19 @@ public class AutoStarter {
         startTimeTask = null;
     }
 
-
+    /**
+     * Returns a {@link GregorianCalendar} representing the date (time) at which the current AutoStart task will be executed.
+     * 
+     * @return a {@link GregorianCalendar}
+     */
+    protected GregorianCalendar getScheduledFutureStartTime() {
+        if (startTimeTask != null) {
+            long remainingDelay = startTimeTask.getDelay(TimeUnit.MILLISECONDS);
+            GregorianCalendar date = new GregorianCalendar();
+            date.add(GregorianCalendar.MILLISECOND, (int) remainingDelay);
+            return date;
+        } else {
+            return null;
+        }
+    }
 }
