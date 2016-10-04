@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.text.SimpleDateFormat;
+import java.util.GregorianCalendar;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -34,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
+
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionListener;
@@ -168,7 +170,7 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeListBox = new MCLB();
 
             contestTimeListBox.setMultipleSelections(true);
-            Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length", "Logged In", "Since" };
+            Object[] cols = { "Site", "Scheduled Start", "Started?", "Current State", "Remaining", "Elapsed", "Length", "Logged In", "Since"  };
 
 
             contestTimeListBox.addColumns(cols);
@@ -183,7 +185,7 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeListBox.setColumnSorter(0, accountNameSorter, 1);
 
             // State
-            contestTimeListBox.setColumnSorter(1, sorter, 2);
+            contestTimeListBox.setColumnSorter(3, sorter, 2);
 
             // TODO sort by times
 
@@ -211,48 +213,79 @@ public class ContestTimesPane extends JPanePlugin {
 
     protected String[] buildContestTimeRow(ContestTime contestTime) {
 
-//        Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length", "Logged In", "Since" };
-
+//        Object[] cols = { "Site", "Scheduled Start", "Started?", "Current State", "Remaining", "Elapsed", "Length", "Logged In", "Since"  };
 
         int numberColumns = contestTimeListBox.getColumnCount();
         String[] c = new String[numberColumns];
 
-        c[0] = "Site " + contestTime.getSiteNumber();
-        c[1] = "NO CONTACT";
+        //fill in the Site number
+        c[0] = "??";
+        if (contestTime != null) {
+            c[0] = "Site " + contestTime.getSiteNumber();           
+        }
 
+        //fill in the "Scheduled Start" field
+        c[1] = "<undefined>";
+        IInternalContest contest = getContest();
+        if (contest != null) {
+            ContestInformation contestInfo = contest.getContestInformation();
+            if (contestInfo != null) {
+                GregorianCalendar scheduledStartTime = contestInfo.getScheduledStartTime();
+                if (scheduledStartTime != null) {
+                    SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    fmt.setCalendar(scheduledStartTime);
+                    String dateFormatted = fmt.format(scheduledStartTime.getTime());
+                    c[1] = dateFormatted ;
+                }
+            }
+        }
+        
+        //fill in the "Started?" field
+        c[2] = "NO CONTACT";
+        if (contestTime != null) {
+            if (contestTime.isContestStarted()) {
+                c[2] = "Yes";
+            } else {
+                c[2] = "No";
+            }
+        }
+        
+        //fill in the "Current State" field
+        c[3] = "NO CONTACT";
         if (contestTime != null) {
             if (contestTime.isContestRunning()) {
-                c[1] = "STARTED";
+                c[3] = "RUNNING";
             } else {
-                c[1] = "STOPPED";
+                c[3] = "STOPPED";
             }
 
-            c[2] = contestTime.getRemainingTimeStr();
-            c[3] = contestTime.getElapsedTimeStr();
-            c[4] = contestTime.getContestLengthStr();
+            c[4] = contestTime.getRemainingTimeStr();
+            c[5] = contestTime.getElapsedTimeStr();
+            c[6] = contestTime.getContestLengthStr();
             
-            c[5] = "No";
+            c[7] = "No";
             if (isThisSite(contestTime.getSiteNumber())) {
-                c[5] = "N/A";
+                c[7] = "N/A";
             }
-            c[6] = "";
+            c[8] = "";
             
             try {
                 ClientId serverId = new ClientId(contestTime.getSiteNumber(), Type.SERVER, 0);
                 if (getContest().isLocalLoggedIn(serverId)) {
-                    c[5] = "YES";
-                    c[6] = formatter.format(getContest().getLocalLoggedInDate(serverId));
+                    c[7] = "YES";
+                    c[8] = formatter.format(getContest().getLocalLoggedInDate(serverId));
                 } else if (! isServer(getContest().getClientId())){
                     if (getContest().isRemoteLoggedIn(serverId)){
-                        c[5] = "YES";
+                        c[7] = "YES";
                         // TODO some day send when server was logged in
-                        c[6] = "";
+                        c[8] = "";
                     }
                 }
             } catch (Exception e) {
-                c[5] = "??";
+                c[7] = "??";
                 log.log(Log.WARNING, "Exception updating Contest Time for site "+contestTime.getSiteNumber(), e);
             }
+            
         }
 
         return c;
