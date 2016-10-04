@@ -72,7 +72,7 @@ public class CDPReportTest extends AbstractTestCase {
     public void testCreateCDP() throws Exception {
 
         // String testDir = getOutputDataDirectory(); // TODO replace
-        String testDir = "testout\\CDPReportTest";
+        String testDir = "testout"+ File.separator+"CDPReportTest";
 
         removeDirectory(testDir);
         ensureDirectory(testDir);
