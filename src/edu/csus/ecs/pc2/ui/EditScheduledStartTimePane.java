@@ -202,7 +202,13 @@ public class EditScheduledStartTimePane extends JPanePlugin {
      */
     protected void handleUpdate() {
 
-
+        //ignore attempts to update Scheduled Start Time if contest has already started
+        if (getContest().getContestTime().isContestStarted()) {
+            JOptionPane.showMessageDialog(getParentFrame(), "Contest has already started; it's too late to set a Scheduled Start time -- ignored",
+                    "Contest Already Started", JOptionPane.INFORMATION_MESSAGE); 
+            return;
+        }
+    
         //check ScheduledStartTime in the GUI textbox
         if (!validateScheduledStartTimeField()) {
             //new scheduled start time is invalid; just return (message issued by validateScheduledStartTimeField())
@@ -213,6 +219,11 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         //get the existing ContestInfo from the contest, insert new scheduled start time into it
         ContestInformation contestInfo = getContest().getContestInformation();
         contestInfo.setScheduledStartTime(getScheduledStartTimeFromGUI());
+        if (getScheduledStartTimeFromGUI() != null) {
+            contestInfo.setAutoStartContest(true);
+        } else {
+            contestInfo.setAutoStartContest(false);
+        }
 
         //put the updated ContestInfo back into the Controller
         getController().updateContestInformation(contestInfo);
