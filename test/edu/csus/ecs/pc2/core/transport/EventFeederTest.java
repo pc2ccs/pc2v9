@@ -160,8 +160,9 @@ public class EventFeederTest extends AbstractTestCase {
             tagName = "<language>";
             assertCount("Expecting tag " + tagName, 24, tagName, xmlString);
             
-            tagName = "<clarification>";
-            System.out.println("XXX found="+xmlString);
+            // per https://clics.ecs.baylor.edu/index.php/Event_Feed_2013 
+            // as of Oct 4th, 2016 the tag is <clar> not <clarification>
+            tagName = "<clar>";
             assertCount("Expecting tag " + tagName, 9, tagName, xmlString);
             
         } else {
