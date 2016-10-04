@@ -28,6 +28,9 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.Component;
+import javax.swing.Box;
+import javax.swing.border.EtchedBorder;
 
 /**
  * Add/Edit ContestTime Pane.
@@ -66,6 +69,8 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     private JComboBox<Integer> incrementTimeComboBox;
     private JButton incrementTimeButton;
     private JButton decrementTimeButton;
+    private JLabel dropdownListLabel;
+    private Component horizontalStrut;
 
 
     /**
@@ -75,7 +80,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
      */
     public EditScheduledStartTimePane() {
         super();
-        setPreferredSize(new Dimension(530, 350));
+        setPreferredSize(new Dimension(620, 350));
         initialize();
     }
 
@@ -590,6 +595,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     private JPanel getScheduledStartTimePanel() {
         if (scheduledStartTimePanel == null) {
         	scheduledStartTimePanel = new JPanel();
+        	scheduledStartTimePanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
         	scheduledStartTimePanel.add(getScheduledStartTimeLabel());
         	scheduledStartTimePanel.add(getScheduledStartTimeTextBox());
         }
@@ -600,6 +606,8 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         	startTimeButtonPanel = new JPanel();
         	startTimeButtonPanel.add(getClearStartTimeButton());
         	startTimeButtonPanel.add(getSetStartToNowButton());
+        	startTimeButtonPanel.add(getHorizontalStrut());
+        	startTimeButtonPanel.add(getDropdownListLabel());
         	startTimeButtonPanel.add(getIncrementTimeComboBox());
         	startTimeButtonPanel.add(getIncrementTimeButton());
         	startTimeButtonPanel.add(getDecrementTimeButton());
@@ -754,4 +762,16 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
     }
 
+    private JLabel getDropdownListLabel() {
+        if (dropdownListLabel == null) {
+        	dropdownListLabel = new JLabel("Change Minutes:");
+        }
+        return dropdownListLabel;
+    }
+    private Component getHorizontalStrut() {
+        if (horizontalStrut == null) {
+        	horizontalStrut = Box.createHorizontalStrut(20);
+        }
+        return horizontalStrut;
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"

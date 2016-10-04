@@ -45,7 +45,7 @@ public class EditScheduledStartTimeFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(549, 400));
+        this.setSize(new Dimension(601, 400));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getEditScheduledStartTimePane());
         this.setTitle("Set Contest Scheduled Start Time");
