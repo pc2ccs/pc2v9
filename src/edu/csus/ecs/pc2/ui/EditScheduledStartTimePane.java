@@ -581,8 +581,10 @@ public class EditScheduledStartTimePane extends JPanePlugin {
             scheduledStartTimeTextBox = new JTextField();
             scheduledStartTimeTextBox.setPreferredSize(new Dimension(200, 20));
             scheduledStartTimeTextBox.setMinimumSize(new Dimension(50, 20));
+            String tooltip = "<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm;\r\n<br>\r\nor enter \"&lt;undefined&gt;\" "
+                    + "or an empty string to clear any scheduled start time.\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>";
             scheduledStartTimeTextBox
-                    .setToolTipText("<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm;\r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time.\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
+                .setToolTipText(tooltip);
             scheduledStartTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -594,35 +596,35 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
     private JPanel getScheduledStartTimePanel() {
         if (scheduledStartTimePanel == null) {
-        	scheduledStartTimePanel = new JPanel();
-        	scheduledStartTimePanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-        	scheduledStartTimePanel.add(getScheduledStartTimeLabel());
-        	scheduledStartTimePanel.add(getScheduledStartTimeTextBox());
+            scheduledStartTimePanel = new JPanel();
+            scheduledStartTimePanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+            scheduledStartTimePanel.add(getScheduledStartTimeLabel());
+            scheduledStartTimePanel.add(getScheduledStartTimeTextBox());
         }
         return scheduledStartTimePanel;
     }
     private JPanel getStartTimeButtonPanel() {
         if (startTimeButtonPanel == null) {
-        	startTimeButtonPanel = new JPanel();
-        	startTimeButtonPanel.add(getClearStartTimeButton());
-        	startTimeButtonPanel.add(getSetStartToNowButton());
-        	startTimeButtonPanel.add(getHorizontalStrut());
-        	startTimeButtonPanel.add(getDropdownListLabel());
-        	startTimeButtonPanel.add(getIncrementTimeComboBox());
-        	startTimeButtonPanel.add(getIncrementTimeButton());
-        	startTimeButtonPanel.add(getDecrementTimeButton());
+            startTimeButtonPanel = new JPanel();
+            startTimeButtonPanel.add(getClearStartTimeButton());
+            startTimeButtonPanel.add(getSetStartToNowButton());
+            startTimeButtonPanel.add(getHorizontalStrut());
+            startTimeButtonPanel.add(getDropdownListLabel());
+            startTimeButtonPanel.add(getIncrementTimeComboBox());
+            startTimeButtonPanel.add(getIncrementTimeButton());
+            startTimeButtonPanel.add(getDecrementTimeButton());
         }
         return startTimeButtonPanel;
     }
     private JButton getClearStartTimeButton() {
         if (clearStartTimeButton == null) {
-        	clearStartTimeButton = new JButton("Clear");
-        	clearStartTimeButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        setStartTimeToUndefined();
-        	    }
-        	});
-        	clearStartTimeButton.setToolTipText("Resets the Scheduled Start Time to \"undefined\" (which in turn means the contest will not start automatically)");
+            clearStartTimeButton = new JButton("Clear");
+            clearStartTimeButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    setStartTimeToUndefined();
+                }
+            });
+            clearStartTimeButton.setToolTipText("Resets the Scheduled Start Time to \"undefined\" (which in turn means the contest will not start automatically)");
         }
         return clearStartTimeButton;
     }
@@ -638,13 +640,14 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
     private JButton getSetStartToNowButton() {
         if (setStartToNowButton == null) {
-        	setStartToNowButton = new JButton("Set to Now");
-        	setStartToNowButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        setStartTimeToNow();
-        	    }
-        	});
-        	setStartToNowButton.setToolTipText("Sets the Scheduled Start Time to the next whole minute which is at least 30 seconds from now (and schedules the contest to automatically start at that time)");
+            setStartToNowButton = new JButton("Set to Now");
+            setStartToNowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                    setStartTimeToNow();
+                }
+            });
+            String tooltip = "Sets the Scheduled Start Time to the next whole minute which is at least 30 seconds from now (and schedules the contest to automatically start at that time)";
+            setStartToNowButton.setToolTipText(tooltip);
         }
         return setStartToNowButton;
     }
@@ -675,18 +678,18 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
     private JComboBox<Integer> getIncrementTimeComboBox() {
         if (incrementTimeComboBox == null) {
-        	incrementTimeComboBox = new JComboBox<Integer>();
-        	incrementTimeComboBox.setMaximumRowCount(9);
-        	incrementTimeComboBox.setModel(new DefaultComboBoxModel<Integer>());
-        	String [] incrementValues = new String[] {"0", "1", "2", "5", "10", "20", "30", "45", "60"};
-        	for (String str : incrementValues) {
-        	    incrementTimeComboBox.addItem(Integer.parseInt(str));
-        	}
-        	incrementTimeComboBox.setToolTipText("Select the amount (in minutes) to be added to the Scheduled Start Time, then press \"Increment\"");
-        	incrementTimeComboBox.addActionListener(new ActionListener() {
+            incrementTimeComboBox = new JComboBox<Integer>();
+            incrementTimeComboBox.setMaximumRowCount(9);
+            incrementTimeComboBox.setModel(new DefaultComboBoxModel<Integer>());
+            String[] incrementValues = new String[] { "0", "1", "2", "5", "10", "20", "30", "45", "60" };
+            for (String str : incrementValues) {
+                incrementTimeComboBox.addItem(Integer.parseInt(str));
+            }
+            incrementTimeComboBox.setToolTipText("Select the amount (in minutes) to be added to the Scheduled Start Time, then press \"Increment\"");
+            incrementTimeComboBox.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (getIncrementTimeComboBox().getSelectedIndex()>0) {
+                    if (getIncrementTimeComboBox().getSelectedIndex() > 0) {
                         getIncrementTimeButton().setEnabled(true);
                         getDecrementTimeButton().setEnabled(true);
                     } else {
@@ -695,21 +698,21 @@ public class EditScheduledStartTimePane extends JPanePlugin {
                     }
                     showMessage("");
                 }
-        	});
+            });
         }
         return incrementTimeComboBox;
     }
     
     private JButton getIncrementTimeButton() {
         if (incrementTimeButton == null) {
-        	incrementTimeButton = new JButton("Increment");
-        	incrementTimeButton.setEnabled(false);
-        	incrementTimeButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        incrementGUIStartTime();
-        	    }
-        	});
-        	incrementTimeButton.setToolTipText("Increments the Scheduled Start Time by the amount selected in the drop-down list");
+            incrementTimeButton = new JButton("Increment");
+            incrementTimeButton.setEnabled(false);
+            incrementTimeButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    incrementGUIStartTime();
+                }
+            });
+            incrementTimeButton.setToolTipText("Increments the Scheduled Start Time by the amount selected in the drop-down list");
         }
         return incrementTimeButton;
     }
@@ -764,13 +767,14 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
     private JLabel getDropdownListLabel() {
         if (dropdownListLabel == null) {
-        	dropdownListLabel = new JLabel("Change Minutes:");
+            dropdownListLabel = new JLabel("Change Minutes:");
         }
         return dropdownListLabel;
     }
+
     private Component getHorizontalStrut() {
         if (horizontalStrut == null) {
-        	horizontalStrut = Box.createHorizontalStrut(20);
+            horizontalStrut = Box.createHorizontalStrut(20);
         }
         return horizontalStrut;
     }
