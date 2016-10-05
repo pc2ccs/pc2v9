@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -49,9 +51,15 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
-    private static final String TEST_CLASS_NAME = "IContestLoader";
+    private static final String TEST_CLASS_NAME = "ContestSnakeYAMLLoaderTest";
 
+    private static final String YYYY_MM_DD_FORMAT1 = "yyyy-MM-dd HH:mm";
+
+    // generica contest loader
     private IContestLoader loader = new ContestSnakeYAMLLoader();
+    
+    // specific snake loader
+    private ContestSnakeYAMLLoader snake = new ContestSnakeYAMLLoader();
 
     // private IContestLoader loader = new ContestYAMLLoaderOrig(); // test original Yaml loader
 
@@ -997,7 +1005,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         ensureDirectory(getDataDirectory(this.getName()));
         // startExplorer(getDataDirectory(this.getName()));
 
-        ContestSnakeYAMLLoader snake = new ContestSnakeYAMLLoader();
+        
         Map<String, Object> map = snake.loadYaml(contestYamlFilename);
 
         // System.out.println("object is type "+out.getClass().getName());
@@ -1008,6 +1016,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String[] list = (String[]) set.toArray(new String[set.size()]);
 
         assertTrue("Expecting more than one element ", list.length > 9);
+        
     }
 
     public void testReplayLoad() throws Exception {
@@ -1127,6 +1136,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
             
         }
+        
+        assertNoAutoStart(contest);
     }
 
     public void testGetBooleanValue() throws Exception {
@@ -1173,6 +1184,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             assertEquals("Problem letter ", letterList[idx], shortName);
             idx++;
         }
+        
+        assertAutoStart(contest, "2011-02-04 01:23", false);
 
     }
 
@@ -1263,7 +1276,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // dumpLines ("", lines, true);
 
         assertEquals("expected number of lines ", 51, lines.length);
-
+        
     }
 
     /**
@@ -1369,7 +1382,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // editFile(inputYamlFilename);
 
         assertFileExists(inputYamlFilename);
-
+        
         String[] contents = Utilities.loadFile(getProblemSetYamlTestFileName());
 
         assertFileExists(getProblemSetYamlTestFileName());
@@ -1380,6 +1393,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         IInternalContest contest = loader.fromYaml(null, contents, getDataDirectory(), true);
 
         assertNotNull(contest);
+        
+        assertNoAutoStart (contest);
 
         Problem[] problems = contest.getProblems();
         assertEquals("Number of problems", 5, problems.length);
@@ -1493,6 +1508,46 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             i++;
         }
 
+    }
+
+    /**
+     * Assert No Autostart
+     * @param contest
+     */
+    private void assertNoAutoStart(IInternalContest contest) {
+        assertAutoStart(contest, null, false);
+    }
+
+    /**
+     * Test auto start settings.
+     * 
+     * @param contest
+     * @param expectedTimeString - time string in format: "yyyy-MM-dd HH:mm"
+     * @param shouldAutoStart - set true if expecting to auto start contest
+     */
+    private void assertAutoStart(IInternalContest contest,  String expectedTimeString, boolean shouldAutoStart) {
+        
+        String scheduledStart = null;
+        Boolean actualShouldAutoStart = new Boolean(false);
+        ContestInformation info = contest.getContestInformation();
+        if (info != null){
+            // start-time:        2011-02-04 01:23Z
+            //   2011-02-04 01:23Z
+//            
+            SimpleDateFormat formatter = new SimpleDateFormat(YYYY_MM_DD_FORMAT1);
+            if (info.getScheduledStartDate() != null){
+                
+                scheduledStart = formatter.format(info.getScheduledStartDate());
+                actualShouldAutoStart = info.isAutoStartContest();
+            }
+        }
+        
+//        System.out.println("Auto start at: "+scheduledStart);
+//        System.out.println("Will auto start: "+actualShouldAutoStart);
+        
+        assertEquals("Expecting auto start time ", expectedTimeString, scheduledStart);
+        assertEquals("Expecting auto start ",  new Boolean( shouldAutoStart), actualShouldAutoStart);
+        
     }
 
     public void testYamlWriteAndLoad() throws Exception {
@@ -1858,6 +1913,129 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         if(isDebugMode()){
             fail();
         }
+    }
+    
+    /**
+     * Test load sample CCS contest.
+     * 
+     * @throws Exception
+     */
+    public void testCCS1Load() throws Exception {
+        
+        String entryLocation = "ccs1";
+        
+        InternalContest contest = new InternalContest();
+        
+        loader.initializeContest(contest, new File(entryLocation));
+        
+//        System.out.println("Loaded CDP/config values from " + entryLocation);
+        
+//        File cdpConfigDir = loader.findCDPConfigDirectory(new File(entryLocation));
+//        String yamlFilename =cdpConfigDir.getAbsolutePath() + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME; 
+//        editFile(yamlFilename);
+//        System.out.println("cds config dir = "+cdpConfigDir);
+        
+        assertAutoStart(contest, "2020-02-04 01:23", true);
+        
+        Language[] languages = contest.getLanguages();
+        assertEquals("Number of languages", 3, languages.length);
+        
+        Account[] accounts = contest.getAccounts();
+        assertEquals("Number of accounts", 0, accounts.length);
+
+        Site[] sites = contest.getSites();
+        assertEquals("Number of sites", 1, sites.length);
+        
+        Problem[] problems = contest.getProblems();
+        assertEquals("Number of problems", 5, problems.length);
+
+        int problemIndex = 0;
+
+        Problem problem = problems[problemIndex++];
+        assertNotNull(problem);
+        assertEquals("Expected problem name ", "APL", problem.getDisplayName());
+        assertEquals("Expected default timeout ",  120, problem.getTimeOutInSeconds());
+
+        assertJudgementTypes(problem, true, false, false);
+
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "barcodes", problem.getShortName());
+        assertEquals("Expecting problem timeout for " + problem, 120, problem.getTimeOutInSeconds());
+
+        assertJudgementTypes(problem, true, false, false);
+
+        
+    }
+    
+    
+    /**
+     * Test testFindCDPPaths.
+     * 
+     * @throws Exception
+     */
+    public void testFindCDPPaths() throws Exception {
+
+        String [] dirs = {
+
+                "ccs1", //
+                "ccs2", //
+                "sumithello", //
+// Doug's Local test directories
+//                "c:\\test\\cdps\\sum1\\config\\contest.yaml", //
+//                "/test/cdps/spring2015/config/contest.yaml", //
+//                "c:\\test\\cdps\\spring2015\\config\\contest.yaml", //
+//                "c:\\test\\cdps\\spring2015", //
+        };
+        
+        for (String name : dirs) {
+            
+            File actual = loader.findCDPConfigDirectory(new File(name));
+            
+            assertNotNull(actual);
+            assertTrue("Is a config directory? ", actual.isDirectory());
+//            System.out.println("For "+name+" found "+actual);
+        }
+    }
+    
+    /**
+     * Test non-existent CDP directories.
+     * 
+     * @throws Exception
+     */
+    public void testFindCDPPathsNegatives() throws Exception {
+
+        String[] dirs = { //
+                "/home/pc2/bad", // 
+                "/fargo", //
+                "/tmp2", //
+        };
+
+        for (String name : dirs) {
+
+            File actual = loader.findCDPConfigDirectory(new File(name));
+//            System.out.println("For "+name+" found "+actual);
+
+            assertNull(actual);
+        }
+    }
+    
+    public void testBeforeNow() throws Exception {
+
+        Date date  = new Date();
+        
+        // Not before now, just after now.
+        assertFalse ("Expected not to be before date "+date,snake.isBeforeNow(date));
+        
+        // very much after now 
+        date.setTime(date.getTime() + 30000);
+        assertTrue ("Expected not to be before date "+date,snake.isBeforeNow(date));
+
+        // very much before now
+        date.setTime(date.getTime() - 60000);
+        assertFalse ("Expected not to be before date "+date,snake.isBeforeNow(date));
+
+        
+        
     }
 }
 

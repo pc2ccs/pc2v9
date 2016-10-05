@@ -287,6 +287,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private void setContestStartDateTime(IInternalContest contest, Date date) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setScheduledStartDate(date);
+        contestInformation.setAutoStartContest(isBeforeNow(date));
+    }
+    
+    /**
+     * Input date before now, aka current date/time.
+     * @param date
+     * @return
+     */
+    protected boolean isBeforeNow(Date date) {
+        Date now = new Date();
+        return now.before(date);
     }
 
     @Override
