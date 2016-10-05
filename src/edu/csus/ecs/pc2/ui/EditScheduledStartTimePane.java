@@ -653,20 +653,23 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     }
     
     /**
-     * Sets the Scheduled Start Time GUI textbox to the string representing the time Now + 30 seconds, 
+     * Sets the Scheduled Start Time GUI textbox to the string representing the time Now/
+     * NOTE: previously, this method also added 30 seconds, and
      * rounded up to the next whole minute (to comply with the CLICS specification that says the Start Time should not be
      * able to be set to less than 30 seconds in the future; this specification refers to the Web /starttime interface but
-     * it makes sense to keep the GUI consistent with that spec).
+     * it seemed to make sense to keep the GUI consistent with that spec).
+     * However, others violently disagreed so it was changed to set it to the actual time now, truncating downward to
+     * the current whole minute.
      */
     protected void setStartTimeToNow() {
         
         GregorianCalendar now = new GregorianCalendar();
         
-        //add 30 seconds to the current time
-        now.add(Calendar.SECOND, 30);
-        
-        //bump the minute up by one and clear lower fields to zero
-        now.roll(Calendar.MINUTE, true);
+//        //add 30 seconds to the current time
+//        now.add(Calendar.SECOND, 30);
+//        
+//        //bump the minute up by one and clear lower fields to zero
+//        now.roll(Calendar.MINUTE, true);
         now.set(Calendar.SECOND, 0);
         now.set(Calendar.MILLISECOND, 0);
         
