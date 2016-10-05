@@ -222,16 +222,16 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         
         
         //get the existing ContestInfo from the contest, insert new scheduled start time into it
-        ContestInformation contestInfo = getContest().getContestInformation();
-        contestInfo.setScheduledStartTime(getScheduledStartTimeFromGUI());
+        ContestInformation localContestInfo = getContest().getContestInformation();
+        localContestInfo.setScheduledStartTime(getScheduledStartTimeFromGUI());
         if (getScheduledStartTimeFromGUI() != null) {
-            contestInfo.setAutoStartContest(true);
+            localContestInfo.setAutoStartContest(true);
         } else {
-            contestInfo.setAutoStartContest(false);
+            localContestInfo.setAutoStartContest(false);
         }
 
         //put the updated ContestInfo back into the Controller
-        getController().updateContestInformation(contestInfo);
+        getController().updateContestInformation(localContestInfo);
 
         cancelButton.setText("Close");
         updateButton.setEnabled(false);
@@ -399,12 +399,12 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
     }
     
-    private void populateGUI(ContestInformation contestInfo) {
+    private void populateGUI(ContestInformation inContestInfo) {
 
         populatingGUI = true;
         
         //put the ScheduledStartTime into the GUI
-        GregorianCalendar scheduledStartTime = contestInfo.getScheduledStartTime();
+        GregorianCalendar scheduledStartTime = inContestInfo.getScheduledStartTime();
         String displayStartTime = "";
         if (scheduledStartTime == null) {
             displayStartTime = "<undefined>";
