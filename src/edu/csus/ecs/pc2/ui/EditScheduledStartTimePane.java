@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Component;
+
 import javax.swing.Box;
 import javax.swing.border.EtchedBorder;
 
@@ -53,29 +54,37 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     private JButton cancelButton = null;
 
     private JLabel messageLabel = null;
-    
+
     private boolean populatingGUI = true;
 
     private JPanel centerPane = null;
 
     private JLabel scheduledStartTimeLabel;
+
     private JTextField scheduledStartTimeTextBox;
 
     private ContestInformation contestInfo;
+
     private JPanel scheduledStartTimePanel;
+
     private JPanel startTimeButtonPanel;
+
     private JButton clearStartTimeButton;
+
     private JButton setStartToNowButton;
+
     private JComboBox<Integer> incrementTimeComboBox;
+
     private JButton incrementTimeButton;
+
     private JButton decrementTimeButton;
+
     private JLabel dropdownListLabel;
+
     private Component horizontalStrut;
 
-
     /**
-     * This constructor creates an EditScheduledStartTimePane containing a message pane,
-     * a button pane with Update and Cancel buttons, and a center pane allowing editing of the Scheduled Start Time. 
+     * This constructor creates an EditScheduledStartTimePane containing a message pane, a button pane with Update and Cancel buttons, and a center pane allowing editing of the Scheduled Start Time.
      * 
      */
     public EditScheduledStartTimePane() {
@@ -85,8 +94,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     }
 
     /**
-     * This method initializes the EditScheduledStartTimePane with a message pane,
-     * a button pane and a center pane allowing editing of the Scheduled Start Time.
+     * This method initializes the EditScheduledStartTimePane with a message pane, a button pane and a center pane allowing editing of the Scheduled Start Time.
      * 
      */
     private void initialize() {
@@ -99,8 +107,8 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     }
 
     /**
-     * It is the responsibility of classes using this EditScheduledStartTimePane to call this method and
-     * provide a valid {@link IInternalContest} (model) and {@link IInternalController} before using the pane.
+     * It is the responsibility of classes using this EditScheduledStartTimePane to call this method and provide a valid {@link IInternalContest} (model) and {@link IInternalController} before using
+     * the pane.
      */
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
@@ -117,7 +125,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
                             handleCancelButton();
                         }
                     });
-                } 
+                }
             }
         });
     }
@@ -163,8 +171,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     }
 
     /**
-     * Enable the Update button.  This method should be invoked by any method which changes the state of
-     * any GUI component (such as editing the Scheduled Start Time textbox, or pressing buttons which 
+     * Enable the Update button. This method should be invoked by any method which changes the state of any GUI component (such as editing the Scheduled Start Time textbox, or pressing buttons which
      * indirectly update the textbox).
      * 
      */
@@ -176,7 +183,6 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
         setButtonStatesAndLabels(true);
     }
-
 
     /**
      * This method initializes updateButton
@@ -200,131 +206,114 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     }
 
     /**
-     * This method is called when the Update button is pressed.  It verifies that that contents of the
-     * Scheduled Start Time textbox represent a valid time (including "<undefined>" or null or the empty string);
-     * if so it stores the specified Scheduled Start Time in the Contest model.
+     * This method is called when the Update button is pressed. It verifies that that contents of the Scheduled Start Time textbox represent a valid time (including "<undefined>" or null or the empty
+     * string); if so it stores the specified Scheduled Start Time in the Contest model.
      * 
      */
     protected void handleUpdate() {
 
-        //ignore attempts to update Scheduled Start Time if contest has already started
+        // ignore attempts to update Scheduled Start Time if contest has already started
         if (getContest().getContestTime().isContestStarted()) {
             JOptionPane.showMessageDialog(getParentFrame(), "Contest has already started; it's too late to set a Scheduled Start time -- ignored",
-                    "Contest Already Started", JOptionPane.INFORMATION_MESSAGE); 
+                    "Contest Already Started", JOptionPane.INFORMATION_MESSAGE);
             return;
-        }
-    
-        //check ScheduledStartTime in the GUI textbox
-        if (!validateScheduledStartTimeField()) {
-            //new scheduled start time is invalid; just return (message issued by validateScheduledStartTimeField())
-            return;
-        }
-        
-        
-        //get the existing ContestInfo from the contest, insert new scheduled start time into it
-        ContestInformation localContestInfo = getContest().getContestInformation();
-        localContestInfo.setScheduledStartTime(getScheduledStartTimeFromGUI());
-        if (getScheduledStartTimeFromGUI() != null) {
-            localContestInfo.setAutoStartContest(true);
-        } else {
-            localContestInfo.setAutoStartContest(false);
         }
 
-        //put the updated ContestInfo back into the Controller
+        // get ScheduledStartTime in the GUI textbox
+        GregorianCalendar newStartTime = getScheduledStartTimeFromGUI();
+
+        if (newStartTime == null) {
+            // new scheduled start time is invalid (failed to parse correctly); just return
+            // (error message issued by getScheduledStartTimeFromGUI())
+            return;
+        }
+
+        // the GUI entry is valid -- it either represents "undefined" (time=0) or a valid start time
+
+        // get the existing ContestInfo from the contest
+        ContestInformation localContestInfo = getContest().getContestInformation();
+
+        // insert the new start time into the contest info
+        if (newStartTime.getTimeInMillis() == 0) {
+            // the time indicates "undefined"
+            localContestInfo.setScheduledStartTime(null);
+            localContestInfo.setAutoStartContest(false);
+        } else {
+            // the time is a valid date; make sure it's in the future
+            GregorianCalendar now = new GregorianCalendar();
+            if (!newStartTime.after(now)) {
+                showMessage("Scheduled start date/time must be in the future");
+                return;
+            } else {
+                // time is valid and in the future
+                localContestInfo.setScheduledStartTime(newStartTime);
+                localContestInfo.setAutoStartContest(true);
+            }
+        }
+
+        // put the updated ContestInfo back into the Controller
         getController().updateContestInformation(localContestInfo);
 
         cancelButton.setText("Close");
         updateButton.setEnabled(false);
 
-        //we're done; hide the GUI
+        // we're done; hide the GUI
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
     }
-    
+
     /**
-     * Extracts the Scheduled Start Time from the GUI and returns it as a GregorianCalendar (Date).
+     * Extracts the Scheduled Start Time from the GUI and returns it as a {@link GregorianCalendar} (Date). If the GUI indicates an undefined start time (e.g. "<undefined>", or the empty string), the
+     * returned GregorianCalendar will have a time value of zero. If the data in the GUI is not "<undefined>" and also not the empty string, but fails to parse as a valid date, null is returned
      * 
-     * @return the GregorianCalendar representing the Scheduled Start Time in the GUI, or null if the GUI string does
-     *      not represent a valid Date
+     * @return the GregorianCalendar representing the Scheduled Start Time in the GUI, or null if the GUI string does not represent a valid Date
      */
     private GregorianCalendar getScheduledStartTimeFromGUI() {
-        //Pull the string out of the GUI, check for null, empty, or "undefined" and if so return null;
-        // otherwise, parse the time string and return a new GregorianCalendar (return null if the parse fails).
-        //get the Scheduled Start Time field from the GUI
+
         String guiString = getScheduledStartTimeTextBox().getText();
-        
-        //check for values that represent "no Scheduled Start Time"
-        if (guiString==null || guiString.length()==0 || guiString.trim().equals("") || guiString.equalsIgnoreCase("<undefined>") ) {
-            return null;
+
+        // check for values that represent "no Scheduled Start Time"
+        if (guiString == null || guiString.length() == 0 || guiString.trim().equals("") || guiString.equalsIgnoreCase("<undefined>")) {
+            // return a date with a value of zero, indicating "undefined"
+            GregorianCalendar retDate = new GregorianCalendar();
+            retDate.setTimeInMillis(0);
+            return retDate;
+
         } else {
-            
-            //try parsing the GUI string into a GregorianCalendar
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm"); //TODO: add support for yyyy/MM/dd being optional
+
+            // the GUI doesn't contain something representing "undefined";
+            // try parsing the GUI string into a GregorianCalendar
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm"); // TODO: add support for yyyy/MM/dd being optional
+            df.setLenient(false);
             Date date;
             try {
                 date = df.parse(guiString);
             } catch (ParseException e1) {
-                //the input text does not parse as a date matching the format (pattern)
+                // the input text does not parse as a date matching the format (pattern)
+                if (getController() != null) {
+                    if (getController().getLog() != null) {
+                        getController().getLog().warning("ParseException: invalid Scheduled Start Date: '" + guiString + "'; " + e1.getMessage());
+                    } else {
+                        // log was null
+                        System.err.println("ParseException: invalid Scheduled Start Date; no log available");
+                    }
+                } else {
+                    // controller was null
+                    System.err.println("ParseException: invalid Scheduled Start Date; no controller (hence, no log) available");
+                }
                 showMessage("<html>Invalid Scheduled Start Time (must match yyyy-mm-dd hh:mm<br> or the string \"&lt;undefined&gt;\" or the empty string)");
-                return null ;
+                return null;
             }
-            
-            //date parses properly; put it into a Calendar object
-            //TODO: should put the calendar in non-lenient mode and catch exceptions due to, e.g. month=13
+
+            // date parses properly; put it into a Calendar object
+            // TODO: should put the calendar in non-lenient mode and catch exceptions due to, e.g. month=13
             GregorianCalendar parsedDate = (GregorianCalendar) Calendar.getInstance();
             parsedDate.setTime(date);
-            
+
             return parsedDate;
         }
     }
-    
-    /**
-     * Verify that the Scheduled Start Time entry is valid. Valid start times are
-     * strings of the form "yyyy-mm-dd hh:mm" or "<undefined>" or an empty string.
-     * 
-     * @return true if the ScheduledStartTimeTextbox field contains either (1) a valid
-     *     start date/time (in the future and in the proper format) or (2) the string "<undefined>"
-     *     or (3) the empty string;
-     *     false otherwise.
-     */
-    private boolean validateScheduledStartTimeField() {
-        
-        String textBoxStartTime = getScheduledStartTimeTextBox().getText() ;
-        GregorianCalendar tempScheduledStartTime ;
-        
-        if (textBoxStartTime.equalsIgnoreCase("<undefined>") || textBoxStartTime.equals("") || textBoxStartTime.equals("<already started>") ) {
-            return true;
-        } else {
-            
-            //parse the scheduled start time to be sure it's valid
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm"); //TODO: add support for yyyy/MM/dd being optional
-            Date date;
-            try {
-                date = df.parse(textBoxStartTime);
-            } catch (ParseException e1) {
-                //the input text does not parse as a date matching the format (pattern)
-                showMessage("<html>Invalid Scheduled Start Time (must match yyyy-mm-dd hh:mm<br> or the string \"&lt;undefined&gt;\" or the empty string)");
-                return false ;
-            }
-            
-            //date parses properly; put it into a Calendar object
-            //TODO: should put the calendar in non-lenient mode and catch exceptions due to, e.g. month=13
-            tempScheduledStartTime = (GregorianCalendar) Calendar.getInstance();
-            tempScheduledStartTime.setTime(date);
-            
-            //verify the scheduled start time is in the future
-            GregorianCalendar now = (GregorianCalendar) Calendar.getInstance();
-            if (!tempScheduledStartTime.after(now)) {
-                showMessage("Scheduled start date/time must be in the future");
-                return false;
-            }
-        }
-                   
-        //if we get here, the date/time in the text box must have been valid
-        return true ;
-    }
-    
 
     /**
      * This method initializes cancelButton
@@ -374,36 +363,36 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
     public void setContestInfo(ContestInformation inContestInfo) {
         this.contestInfo = inContestInfo;
-        if (contestInfo!=null) {
-            
+        if (contestInfo != null) {
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     populateGUI(contestInfo);
-                    setButtonStatesAndLabels(false);    //false = "Update" button should NOT be enabled
+                    setButtonStatesAndLabels(false); // false = "Update" button should NOT be enabled
                     showMessage("");
                 }
             });
-            
+
         } else {
-            //we got passed a null ContestInfo; not good
-            if (getController()!=null) {
+            // we got passed a null ContestInfo; not good
+            if (getController() != null) {
                 Log log = getController().getLog();
-                if (log!=null) {
+                if (log != null) {
                     log.warning("EditScheduledStartTimePane: received NULL ContestInformation; cannot continue");
                 } else {
-                    System.err.println ("EditScheduledStartTimePane: received NULL ContestInformation and cannot get Log from controller!");
+                    System.err.println("EditScheduledStartTimePane: received NULL ContestInformation and cannot get Log from controller!");
                 }
             } else {
-                System.err.println ("EditScheduledStartTimePane: received NULL ContestInformation and cannot get Controller (so, no Log)");
+                System.err.println("EditScheduledStartTimePane: received NULL ContestInformation and cannot get Controller (so, no Log)");
             }
         }
     }
-    
+
     private void populateGUI(ContestInformation inContestInfo) {
 
         populatingGUI = true;
-        
-        //put the ScheduledStartTime into the GUI
+
+        // put the ScheduledStartTime into the GUI
         GregorianCalendar scheduledStartTime = inContestInfo.getScheduledStartTime();
         String displayStartTime = "";
         if (scheduledStartTime == null) {
@@ -411,29 +400,29 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         } else {
             displayStartTime = getGregorianTimeAsString(scheduledStartTime);
         }
-        
+
         IInternalContest contest = getContest();
-        if (contest==null) {
+        if (contest == null) {
             System.out.println("EditScheduledStartTimePane: getContest() returned null");
         } else {
-            ContestTime time = contest.getContestTime() ;
-            if (time==null) {
+            ContestTime time = contest.getContestTime();
+            if (time == null) {
                 System.out.println("EditScheduledStartTimePane: getContestTime() returned null");
             }
         }
         if (getContest().getContestTime().isContestStarted()) {
-            getScheduledStartTimeTextBox().setText("<already started>"); 
+            getScheduledStartTimeTextBox().setText("<already started>");
             getScheduledStartTimeTextBox().setToolTipText("Scheduled start time cannot be set when the contest has already started.");
             getScheduledStartTimeTextBox().setEditable(false);
         } else {
             getScheduledStartTimeTextBox().setText(displayStartTime);
             getScheduledStartTimeTextBox().setToolTipText(
                     "<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm;"
-                    + "\r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time."
-                    + "\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
+                            + "\r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time."
+                            + "\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
             getScheduledStartTimeTextBox().setEditable(true);
         }
-        
+
         getUpdateButton().setVisible(true);
         setButtonStatesAndLabels(false);
 
@@ -473,21 +462,20 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
         return centerPane;
     }
-    
+
     /**
      * Convert a GregorianCalendar date/time to a displayable string in yyyy-mm-dd hh:mm form.
      */
     private String getGregorianTimeAsString(GregorianCalendar cal) {
-        
+
         String retString = "<undefined>";
         if (cal != null) {
-            //extract fields from input and build string
-            //TODO:  need to deal with the difference between displaying LOCAL time and storing UTC
+            // extract fields from input and build string
+            // TODO: need to deal with the difference between displaying LOCAL time and storing UTC
 
             SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             fmt.setCalendar(cal);
             retString = fmt.format(cal.getTime());
-
         }
 
         return retString;
@@ -510,8 +498,8 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         long hh = 0;
         long mm = 0;
         long ss = 0;
-        
-        switch (fields.length ) {
+
+        switch (fields.length) {
             case 3:
                 hh = stringToLong(fields[0]);
                 mm = stringToLong(fields[1]);
@@ -584,7 +572,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
             String tooltip = "<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm;\r\n<br>\r\nor enter \"&lt;undefined&gt;\" "
                     + "or an empty string to clear any scheduled start time.\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>";
             scheduledStartTimeTextBox
-                .setToolTipText(tooltip);
+                    .setToolTipText(tooltip);
             scheduledStartTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -603,6 +591,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
         return scheduledStartTimePanel;
     }
+
     private JPanel getStartTimeButtonPanel() {
         if (startTimeButtonPanel == null) {
             startTimeButtonPanel = new JPanel();
@@ -616,6 +605,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
         return startTimeButtonPanel;
     }
+
     private JButton getClearStartTimeButton() {
         if (clearStartTimeButton == null) {
             clearStartTimeButton = new JButton("Clear");
@@ -628,7 +618,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
         return clearStartTimeButton;
     }
-    
+
     /**
      * Sets the Scheduled Start Time GUI textbox to "<undefined>", and enables the "Update" button.
      */
@@ -642,7 +632,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         if (setStartToNowButton == null) {
             setStartToNowButton = new JButton("Set to Now");
             setStartToNowButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+                public void actionPerformed(ActionEvent e) {
                     setStartTimeToNow();
                 }
             });
@@ -651,30 +641,26 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
         return setStartToNowButton;
     }
-    
+
     /**
-     * Sets the Scheduled Start Time GUI textbox to the string representing the time Now/
-     * NOTE: previously, this method also added 30 seconds, and
-     * rounded up to the next whole minute (to comply with the CLICS specification that says the Start Time should not be
-     * able to be set to less than 30 seconds in the future; this specification refers to the Web /starttime interface but
-     * it seemed to make sense to keep the GUI consistent with that spec).
-     * However, others violently disagreed so it was changed to set it to the actual time now, truncating downward to
-     * the current whole minute.
+     * Sets the Scheduled Start Time GUI textbox to the string representing the time Now/ NOTE: previously, this method also added 30 seconds, and rounded up to the next whole minute (to comply with
+     * the CLICS specification that says the Start Time should not be able to be set to less than 30 seconds in the future; this specification refers to the Web /starttime interface but it seemed to
+     * make sense to keep the GUI consistent with that spec). However, others violently disagreed so it was changed to set it to the actual time now, truncating downward to the current whole minute.
      */
     protected void setStartTimeToNow() {
-        
+
         GregorianCalendar now = new GregorianCalendar();
-        
-//        //add 30 seconds to the current time
-//        now.add(Calendar.SECOND, 30);
-//        
-//        //bump the minute up by one and clear lower fields to zero
-//        now.roll(Calendar.MINUTE, true);
+
+        // //add 30 seconds to the current time
+        // now.add(Calendar.SECOND, 30);
+        //
+        // //bump the minute up by one and clear lower fields to zero
+        // now.roll(Calendar.MINUTE, true);
         now.set(Calendar.SECOND, 0);
         now.set(Calendar.MILLISECOND, 0);
-        
+
         getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(now));
-                
+
         enableUpdateButton();
         showMessage("");
     }
@@ -684,29 +670,29 @@ public class EditScheduledStartTimePane extends JPanePlugin {
             incrementTimeComboBox = new JComboBox<Integer>();
             incrementTimeComboBox.setMaximumRowCount(9);
             incrementTimeComboBox.setModel(new DefaultComboBoxModel<Integer>());
-            String[] incrementValues = new String[] {"1", "2", "5", "10", "20", "30", "45", "60" };
+            String[] incrementValues = new String[] { "1", "2", "5", "10", "20", "30", "45", "60" };
             for (String str : incrementValues) {
                 incrementTimeComboBox.addItem(Integer.parseInt(str));
             }
             incrementTimeComboBox.setSelectedIndex(2);
             incrementTimeComboBox.setToolTipText("Select the amount (in minutes) to be added to the Scheduled Start Time, then press \"Increment\"");
-//            incrementTimeComboBox.addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent e) {
-//                    if (getIncrementTimeComboBox().getSelectedIndex() > 0) {
-//                        getIncrementTimeButton().setEnabled(true);
-//                        getDecrementTimeButton().setEnabled(true);
-//                    } else {
-//                        getIncrementTimeButton().setEnabled(false);
-//                        getDecrementTimeButton().setEnabled(false);
-//                    }
-//                    showMessage("");
-//                }
-//            });
+            // incrementTimeComboBox.addActionListener(new ActionListener() {
+            // @Override
+            // public void actionPerformed(ActionEvent e) {
+            // if (getIncrementTimeComboBox().getSelectedIndex() > 0) {
+            // getIncrementTimeButton().setEnabled(true);
+            // getDecrementTimeButton().setEnabled(true);
+            // } else {
+            // getIncrementTimeButton().setEnabled(false);
+            // getDecrementTimeButton().setEnabled(false);
+            // }
+            // showMessage("");
+            // }
+            // });
         }
         return incrementTimeComboBox;
     }
-    
+
     private JButton getIncrementTimeButton() {
         if (incrementTimeButton == null) {
             incrementTimeButton = new JButton("Increment");
@@ -720,7 +706,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
         return incrementTimeButton;
     }
-    
+
     private JButton getDecrementTimeButton() {
         if (decrementTimeButton == null) {
             decrementTimeButton = new JButton("Decrement");
@@ -739,15 +725,15 @@ public class EditScheduledStartTimePane extends JPanePlugin {
      * Increments the Scheduled Start Time displayed in the GUI by the amount selected in the incrementTimeComboBox.
      */
     protected void incrementGUIStartTime() {
-        
+
         GregorianCalendar currentTextboxStartTime = getScheduledStartTimeFromGUI();
-        
-        if (currentTextboxStartTime==null) {
+
+        if (currentTextboxStartTime == null) {
             showMessage("Invalid time in Scheduled Start Time textbox; cannot increment");
         } else {
-            currentTextboxStartTime.add(Calendar.MINUTE, ((Integer)(getIncrementTimeComboBox().getSelectedItem())));
+            currentTextboxStartTime.add(Calendar.MINUTE, ((Integer) (getIncrementTimeComboBox().getSelectedItem())));
             getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(currentTextboxStartTime));
-            enableUpdateButton();  
+            enableUpdateButton();
             showMessage("");
         }
     }
@@ -756,15 +742,15 @@ public class EditScheduledStartTimePane extends JPanePlugin {
      * Decrements the Scheduled Start Time displayed in the GUI by the amount selected in the incrementTimeComboBox.
      */
     protected void decrementGUIStartTime() {
-        
+
         GregorianCalendar currentTextboxStartTime = getScheduledStartTimeFromGUI();
-        
-        if (currentTextboxStartTime==null) {
+
+        if (currentTextboxStartTime == null) {
             showMessage("Invalid time in Scheduled Start Time textbox; cannot decrement");
         } else {
-            currentTextboxStartTime.add(Calendar.MINUTE, -(((Integer)(getIncrementTimeComboBox().getSelectedItem()))));
+            currentTextboxStartTime.add(Calendar.MINUTE, -(((Integer) (getIncrementTimeComboBox().getSelectedItem()))));
             getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(currentTextboxStartTime));
-            enableUpdateButton();  
+            enableUpdateButton();
             showMessage("");
         }
     }
