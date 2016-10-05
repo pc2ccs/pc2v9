@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -26,6 +27,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
@@ -41,17 +43,13 @@ import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * Print/Report a number internal settings.
+ * Print/Report settings that may not be found in any other report.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$ 
  */
-
-// $HeadURL$
 public class InternalDumpReport implements IReport {
 
     /**
@@ -152,8 +150,20 @@ public class InternalDumpReport implements IReport {
         printWriter.println("-- Contest Information --");
         printWriter.println("  Title : '" + contestInformation.getContestTitle() + "'");
         printWriter.println("  URL   : '" + contestInformation.getContestURL() + "'");
-
+        
+        
         printWriter.println();
+        printWriter.println("  Auto Start Contest                   : " + Utilities.yesNoString(contestInformation.isAutoStartContest()));
+
+        String gregTimeString = null;
+        GregorianCalendar greg = contestInformation.getScheduledStartTime();
+        if (greg != null) {
+            gregTimeString = greg.getTime().toString();
+        }
+        printWriter.println("  Auto Start  Contest Date/time        : " + gregTimeString + " " + contestInformation.getScheduledStartTime());
+        printWriter.println("  Auto Start  Contest Date/time (Date) : " + contestInformation.getScheduledStartDate());
+        printWriter.println();
+        
         printWriter.println("  Include Preliminary Judgements in Scoring Algorithm : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
         printWriter.println("  Send Notifications for Preliminary Judgements       : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
         printWriter.println("  Send Additional Run Status Information              : " + Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));
@@ -557,7 +567,7 @@ public class InternalDumpReport implements IReport {
             }
             String state = "STOPPED";
             if (contestTime.isContestRunning()) {
-                state = "STARTED";
+                state = "RUNNING";
             }
 
             printWriter.println("  Site " + contestTime.getSiteNumber() + " " + state + " " + contestTime.getElapsedTimeStr() + " " + contestTime.getRemainingTimeStr() + " "

@@ -268,7 +268,7 @@ public final class FrameUtilities {
 
         String clockStateString = "STOPPED";
         if (clockStarted) {
-            clockStateString = "STARTED";
+            clockStateString = "RUNNING";
         }
         String versionNumber = versionInfo.getVersionNumber();
         String[] parts = versionNumber.split(" ");

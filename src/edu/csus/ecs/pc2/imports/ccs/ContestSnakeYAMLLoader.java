@@ -732,7 +732,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> fetchMap(Map<String, Object> content, String key) {
-        return (Map<String, Object>) content.get(key);
+        Object object = content.get(key);
+        if (object != null) {
+            if (object instanceof Map) {
+                return (Map<String, Object>) content.get(key);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     @Override
