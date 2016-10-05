@@ -393,6 +393,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         populatingGUI = true;
 
         // put the ScheduledStartTime into the GUI
+        // Note that an unscheduled start time is represented in ContestInformation as <null>
         GregorianCalendar scheduledStartTime = inContestInfo.getScheduledStartTime();
         String displayStartTime = "";
         if (scheduledStartTime == null) {
@@ -402,25 +403,47 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         }
 
         IInternalContest contest = getContest();
+        ContestTime localContestTime = null;
         if (contest == null) {
-            System.out.println("EditScheduledStartTimePane: getContest() returned null");
+            if (getController()!=null) {
+                if (getController().getLog()!=null) {
+                    getController().getLog().warning("EditScheduledStartTimePane: getContest() returned null !?");
+                } else {
+                    System.err.println("EditScheduledStartTimePane: getContest() returned null but no Log is available.");
+                }
+           } else {
+               System.out.println("EditScheduledStartTimePane: getContest() returned null but no Controller is available (hence, no Log)");
+           }
+            
         } else {
-            ContestTime time = contest.getContestTime();
-            if (time == null) {
-                System.out.println("EditScheduledStartTimePane: getContestTime() returned null");
+            
+            localContestTime = contest.getContestTime();
+            if (localContestTime == null) {
+                if (getController()!=null) {
+                    if (getController().getLog()!=null) {
+                        getController().getLog().warning("EditScheduledStartTimePane: getContestTime() returned null !?");
+                    } else {
+                        System.err.println("EditScheduledStartTimePane: getContestTime() returned null but no Log is available.");
+                    }
+               } else {
+                   System.out.println("EditScheduledStartTimePane: getContestTime() returned null but no Controller is available (hence, no Log)");
+               }
             }
         }
-        if (getContest().getContestTime().isContestStarted()) {
-            getScheduledStartTimeTextBox().setText("<already started>");
-            getScheduledStartTimeTextBox().setToolTipText("Scheduled start time cannot be set when the contest has already started.");
-            getScheduledStartTimeTextBox().setEditable(false);
-        } else {
-            getScheduledStartTimeTextBox().setText(displayStartTime);
-            getScheduledStartTimeTextBox().setToolTipText(
+        
+        if (localContestTime!=null) {
+            
+            if (localContestTime.isContestStarted()) {
+                getScheduledStartTimeTextBox().setToolTipText("Scheduled start time cannot be set when the contest has already started.");
+                getScheduledStartTimeTextBox().setEditable(false);
+            } else {
+                getScheduledStartTimeTextBox().setText(displayStartTime);
+                getScheduledStartTimeTextBox().setToolTipText(
                     "<html>\r\nEnter the future date/time when the contest is scheduled to start, in format yyyy-mm-dd hh:mm;"
                             + "\r\n<br>\r\nor enter \"&lt;undefined&gt;\" or an empty string to clear any scheduled start time."
                             + "\r\n<br>\r\nNote that hh:mm must be in \"24-hour\" time (e.g. 1pm = 13:00)\r\n</html>");
-            getScheduledStartTimeTextBox().setEditable(true);
+                getScheduledStartTimeTextBox().setEditable(true);
+            }
         }
 
         getUpdateButton().setVisible(true);
