@@ -346,7 +346,7 @@ public class RunsPane extends JPanePlugin {
         if (run.isJudged()) {
             
             if (run.isSolved()) {
-                result = "Yes";
+                result = getContest().getJudgements()[0].getDisplayName();
                 if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
                     if (!isTeam(getContest().getClientId())) {
                         result = RunStates.MANUAL_REVIEW + " (" + result + ")";

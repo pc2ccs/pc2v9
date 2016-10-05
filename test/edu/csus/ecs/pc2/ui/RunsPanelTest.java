@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -169,7 +170,6 @@ public class RunsPanelTest extends TestCase {
 
         setRunToYes(contest, theRun, judgeClient, false, false);
         judgementString = runsPanel.getJudgementResultString(theRun);
-        // XXX TODO FIXME runsPanel returned "Yes" but the 1st judgement is "Yes." so this fails
         assertEquals(judgementString, contest.getJudgements()[0].getDisplayName());
 
         // Judge run 2
@@ -195,7 +195,15 @@ public class RunsPanelTest extends TestCase {
         judgementString = runsPanel.getJudgementResultString(theRun);
         assertEquals(judgementString, contest.getJudgements()[noJudgementIndex].getDisplayName());
 
+        // change to the judge client, otherwise this run will show as NEW
+        
+        // the problem defaults to not send preliminaryNotifications
+        ElementId problemId = theRun.getProblemId();
+        Problem theProblem = contest.getProblem(problemId);
+        theProblem.setPrelimaryNotification(true);
+        contest.updateProblem(theProblem);
         theRun.setStatus(RunStates.BEING_JUDGED);
+        // setRunToYes true true changes this to MANUAL_REVIEW (Yes)
         setRunToYes(contest, theRun, judgeClient, true, true);
         judgementString = runsPanel.getJudgementResultString(theRun);
         assertEquals(judgementString, "PRELIMINARY (" + contest.getJudgements()[0].getDisplayName() + ")");
