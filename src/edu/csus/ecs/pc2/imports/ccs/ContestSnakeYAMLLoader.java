@@ -341,17 +341,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setShortContestName(contest, shortContestName);
         }
 
-        String contestLength = fetchValue(content, CONTEST_DURATION);
+        String contestLength = fetchValue(content, CONTEST_DURATION_KEY);
         if (contestLength != null) {
             setContestLength(contest, contestLength);
         }
 
-        String scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE);
+        String scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
         if (scoreboardFreezeTime != null) {
             setScoreboardFreezeTime(contest, scoreboardFreezeTime);
         }
 
-        String startTime = fetchValue(content, CONTEST_START_TIME);
+        String startTime = fetchValue(content, CONTEST_START_TIME_KEY);
         if (startTime != null) {
             try {
                 Date date = parseStartTime(startTime);
@@ -384,7 +384,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         boolean overrideUsePc2Validator = false;
-        String usingValidator = fetchValue(content, ContestYAMLLoader.USING_PC2_VALIDATOR);
+        String usingValidator = fetchValue(content, IContestLoader.USING_PC2_VALIDATOR);
 
         if (usingValidator != null && usingValidator.equalsIgnoreCase("true")) {
             overrideUsePc2Validator = true;
@@ -764,7 +764,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
 
         boolean pc2FormatProblemYamlFile = false;
-        String usingValidator = fetchValue(validatorContent, ContestYAMLLoader.USING_PC2_VALIDATOR);
+        String usingValidator = fetchValue(validatorContent, IContestLoader.USING_PC2_VALIDATOR);
 
         if (usingValidator != null && usingValidator.equalsIgnoreCase("true")) {
             pc2FormatProblemYamlFile = true;

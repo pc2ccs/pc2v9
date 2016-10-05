@@ -74,7 +74,7 @@ import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
@@ -2402,7 +2402,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
             if (allowedToLoadConfig){
                 
-                IContestLoader loader = new ContestYAMLLoader();
+                IContestLoader loader = new ContestSnakeYAMLLoader();
                 info("Loading CDP from " + entryLocation);
                 
                 try {

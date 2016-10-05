@@ -32,7 +32,6 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
@@ -156,7 +155,7 @@ public class CDPReport implements IReport {
 
         printWriter.println();
 
-        String problemKey = ContestYAMLLoader.PROBLEMS_KEY;
+        String problemKey = IContestLoader.PROBLEMS_KEY;
         if (useLatestProblemKey) {
             // printWriter.println(ContestYAMLLoader.PROBLEM_SET_KEY + ":");
             problemKey = PROBLEM_SET_KEY;
