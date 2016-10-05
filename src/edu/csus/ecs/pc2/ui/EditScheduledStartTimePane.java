@@ -684,24 +684,25 @@ public class EditScheduledStartTimePane extends JPanePlugin {
             incrementTimeComboBox = new JComboBox<Integer>();
             incrementTimeComboBox.setMaximumRowCount(9);
             incrementTimeComboBox.setModel(new DefaultComboBoxModel<Integer>());
-            String[] incrementValues = new String[] { "0", "1", "2", "5", "10", "20", "30", "45", "60" };
+            String[] incrementValues = new String[] {"1", "2", "5", "10", "20", "30", "45", "60" };
             for (String str : incrementValues) {
                 incrementTimeComboBox.addItem(Integer.parseInt(str));
             }
+            incrementTimeComboBox.setSelectedIndex(2);
             incrementTimeComboBox.setToolTipText("Select the amount (in minutes) to be added to the Scheduled Start Time, then press \"Increment\"");
-            incrementTimeComboBox.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (getIncrementTimeComboBox().getSelectedIndex() > 0) {
-                        getIncrementTimeButton().setEnabled(true);
-                        getDecrementTimeButton().setEnabled(true);
-                    } else {
-                        getIncrementTimeButton().setEnabled(false);
-                        getDecrementTimeButton().setEnabled(false);
-                    }
-                    showMessage("");
-                }
-            });
+//            incrementTimeComboBox.addActionListener(new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    if (getIncrementTimeComboBox().getSelectedIndex() > 0) {
+//                        getIncrementTimeButton().setEnabled(true);
+//                        getDecrementTimeButton().setEnabled(true);
+//                    } else {
+//                        getIncrementTimeButton().setEnabled(false);
+//                        getDecrementTimeButton().setEnabled(false);
+//                    }
+//                    showMessage("");
+//                }
+//            });
         }
         return incrementTimeComboBox;
     }
@@ -709,7 +710,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     private JButton getIncrementTimeButton() {
         if (incrementTimeButton == null) {
             incrementTimeButton = new JButton("Increment");
-            incrementTimeButton.setEnabled(false);
+            incrementTimeButton.setEnabled(true);
             incrementTimeButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     incrementGUIStartTime();
@@ -723,7 +724,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     private JButton getDecrementTimeButton() {
         if (decrementTimeButton == null) {
             decrementTimeButton = new JButton("Decrement");
-            decrementTimeButton.setEnabled(false);
+            decrementTimeButton.setEnabled(true);
             decrementTimeButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     decrementGUIStartTime();
