@@ -287,6 +287,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private void setContestStartDateTime(IInternalContest contest, Date date) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setScheduledStartDate(date);
+        contestInformation.setAutoStartContest(isBeforeNow(date));
+    }
+    
+    /**
+     * Input date before now, aka current date/time.
+     * @param date
+     * @return
+     */
+    protected boolean isBeforeNow(Date date) {
+        Date now = new Date();
+        return now.before(date);
     }
 
     @Override
@@ -330,17 +341,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setShortContestName(contest, shortContestName);
         }
 
-        String contestLength = fetchValue(content, CONTEST_DURATION);
+        String contestLength = fetchValue(content, CONTEST_DURATION_KEY);
         if (contestLength != null) {
             setContestLength(contest, contestLength);
         }
 
-        String scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE);
+        String scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
         if (scoreboardFreezeTime != null) {
             setScoreboardFreezeTime(contest, scoreboardFreezeTime);
         }
 
-        String startTime = fetchValue(content, CONTEST_START_TIME);
+        String startTime = fetchValue(content, CONTEST_START_TIME_KEY);
         if (startTime != null) {
             try {
                 Date date = parseStartTime(startTime);
@@ -373,7 +384,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         boolean overrideUsePc2Validator = false;
-        String usingValidator = fetchValue(content, ContestYAMLLoader.USING_PC2_VALIDATOR);
+        String usingValidator = fetchValue(content, IContestLoader.USING_PC2_VALIDATOR);
 
         if (usingValidator != null && usingValidator.equalsIgnoreCase("true")) {
             overrideUsePc2Validator = true;
@@ -721,7 +732,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> fetchMap(Map<String, Object> content, String key) {
-        return (Map<String, Object>) content.get(key);
+        Object object = content.get(key);
+        if (object != null) {
+            if (object instanceof Map) {
+                return (Map<String, Object>) content.get(key);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -753,7 +773,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
 
         boolean pc2FormatProblemYamlFile = false;
-        String usingValidator = fetchValue(validatorContent, ContestYAMLLoader.USING_PC2_VALIDATOR);
+        String usingValidator = fetchValue(validatorContent, IContestLoader.USING_PC2_VALIDATOR);
 
         if (usingValidator != null && usingValidator.equalsIgnoreCase("true")) {
             pc2FormatProblemYamlFile = true;

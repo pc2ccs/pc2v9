@@ -55,11 +55,11 @@ public interface IContestLoader {
 
     String SHORT_NAME_KEY = "short-name";
 
-    String CONTEST_START_TIME = "start-time";
+    String CONTEST_START_TIME_KEY = "start-time";
 
-    String CONTEST_DURATION = "duration";
+    String CONTEST_DURATION_KEY = "duration";
 
-    String SCOREBOARD_FREEZE = "scoreboard-freeze";
+    String SCOREBOARD_FREEZE_KEY = "scoreboard-freeze";
 
     String LANGUAGE_KEY = "languages";
 
@@ -114,6 +114,12 @@ public interface IContestLoader {
     String EVENT_FEED_DIRNAME = "eventFeed";
 
     String EVENT_FEED_XML_FILENAME = "events.xml";
+
+    String USE_JUDGE_CMD_KEY = "use-judge-cmd";
+
+    String INTERPRETED_LANGUAGE_KEY = "interpreted";
+
+    String READ_FROM_STDIN_KEY = "readFromSTDIN";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 

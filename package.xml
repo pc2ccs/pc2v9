@@ -89,7 +89,8 @@
                 <include name="**/distribute_score"/>
             </zipfileset>
             <zipfileset dir="${projects.dir}" filemode="755" prefix="${release}/projects">
-                <include name="**/*.zip"/>
+                <include name="*.zip"/>
+                <exclude name="EWTeam/*"/>
             </zipfileset>
             <zipfileset dir="${data.dir}" filemode="755" prefix="${release}/samps/data"/>
             <!-- bug 353: copy api and other docs to release -->
@@ -127,7 +128,7 @@
                 <exclude name="${release}/samps/**/rotate**"/>
             </tarfileset>
             <tarfileset dir="${projects.dir}" filemode="644" prefix="${release}/projects">
-                <include name="**/*.tar.gz"/>
+                <include name="*.tar.gz"/>
             </tarfileset>
         </tar>
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>

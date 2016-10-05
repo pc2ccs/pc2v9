@@ -34,6 +34,7 @@ No need for Javadoc - this is not an API.
 	<property name="src.dir" location="src" />
 	<property name="lib.dir" location="lib" />
 	<property name="doc.dir" location="doc" />
+	<property name="pc2.jar" location="../../dist/pc2.jar" />
 	<property name="project.dir" location="." />
 	<property name="project.dir" location="." />
 	<property name="php.src.dir" location="src/php" />
@@ -63,8 +64,30 @@ No need for Javadoc - this is not an API.
 		</fileset>
 	</path>
 
-	<target name="properties">
+    <target name="check-pc2jar">
+        <available file="${pc2.jar}" property="pc2jar.present"/>
+    </target>
+
+    <target name="copy-pc2jar" depends="check-pc2jar" if="pc2jar.present">
+        <copy file="${pc2.jar}" tofile="${lib.dir}/pc2.jar" overwrite="true"/>
+    </target>
+
+    <target name="properties" depends="copy-pc2jar">
 		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+         <condition property="git_hash" value="${env.GIT_COMMIT}" else="HEAD">
+            <isset property="env.GIT_COMMIT"/>
+        </condition>
+        <exec executable="git" outputproperty="repo.version" failifexecutionfails="false" errorproperty="">
+            <arg value="rev-list"/>
+            <arg value="${git_hash}"/>
+            <arg value="--count"/>
+        </exec>
+        <!-- if above failed, set the repo.version to 0 -->
+        <condition property="repo.version" value="0">
+            <not>
+               <isset property="repo.version"/>
+            </not>
+        </condition>
 	</target>
 
 	<target name="init" depends="properties,clean">
@@ -78,17 +101,7 @@ No need for Javadoc - this is not an API.
 		<!-- 
 		Fetch the SVN build version 
 		-->
-		<exec executable="svnversion" outputproperty="repo.version">
-            <arg line="-n ."/>
-		</exec>
 		
-        <!-- XXX this requires svnkit-cli.jar & svnkit.jar in the project
-        <java classname="org.tmatesoft.svn.cli.SVNVersion" dir="${basedir}" fork="true" outputproperty="repo.version"
-            classpathref="project.classpath">
-            <arg line="-n ."/>
-        </java>
-        -->
-
 		<!-- 
 		A hard coded version number 
 		<tstamp>

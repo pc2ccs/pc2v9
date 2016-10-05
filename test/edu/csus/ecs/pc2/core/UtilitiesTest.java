@@ -13,7 +13,8 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Unit test.
@@ -218,7 +219,9 @@ public class UtilitiesTest extends AbstractTestCase {
 
         // startExplorer(testDirectory);
 
-        ContestYAMLLoader loader = new ContestYAMLLoader();
+        // ContestYAMLLoader loader = new ContestYAMLLoader();
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        
         IInternalContest contest = loader.fromYaml(null, testDirectory);
 
         Problem[] problems = contest.getProblems();

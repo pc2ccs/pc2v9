@@ -74,7 +74,7 @@ import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
@@ -932,6 +932,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("initialized controller Site " + inContest.getSiteNumber());
             
             handleCDPLoad(true);
+            
+            dumpAutoStartInformation(contest.getContestInformation());
             
             try {
                 manager.mergeProfiles(inContest);
@@ -2400,7 +2402,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
             if (allowedToLoadConfig){
                 
-                IContestLoader loader = new ContestYAMLLoader();
+                IContestLoader loader = new ContestSnakeYAMLLoader();
                 info("Loading CDP from " + entryLocation);
                 
                 try {
@@ -2485,6 +2487,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     /**
+     * Dump Auto Start information to log.
+     * 
+     * @param contestInformation
+     */
+    private void dumpAutoStartInformation(ContestInformation contestInformation) {
+
+        if (contestInformation == null) {
+            info("NO auto start information set/found.");
+        } else {
+            if (contestInformation.getScheduledStartDate() != null && contestInformation.isAutoStartContest()) {
+                info("Will auto start contest at: " + contestInformation.getScheduledStartDate());
+            } else {
+                info("No auto start.  Date = " + contestInformation.getScheduledStartDate() + " set to start " + contestInformation.isAutoStartContest());
+            }
+        }
+    }
+
+    /**
      * Start the UI.
      */
     public void start(String[] stringArray) {
@@ -2502,13 +2522,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 MAIN_UI_OPTION, 
                 REMOTE_SERVER_OPTION_STRING, //
                 PORT_OPTION_STRING, //
-                LOAD_OPTION_STRING + " dir|file " + //
+                LOAD_OPTION_STRING, //
                 PROFILE_OPTION_STRING, //
                 INI_FILENAME_OPTION_STRING, //
                 CONTEST_PASSWORD_OPTION, //
                 "--id", // 
                 FILE_OPTION_STRING };
+        
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
+
+        if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)){
+            parseArguments.dumpArgs(System.out);
+        }
         
         contest.setCommandLineArguments(parseArguments);
         

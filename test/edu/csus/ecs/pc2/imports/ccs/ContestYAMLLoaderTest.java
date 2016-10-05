@@ -136,7 +136,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         // writeRow(System.out, language);
         // }
 
-        Problem[] problems = loader.getProblems(contents, ContestYAMLLoader.DEFAULT_TIME_OUT);
+        Problem[] problems = loader.getProblems(contents, IContestLoader.DEFAULT_TIME_OUT);
 
         assertEquals("Number of problems", 5, problems.length);
         
@@ -148,7 +148,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         Problem problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "apl", problem.getDisplayName());
-        assertEquals("Expected default timeout ", ContestYAMLLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
+        assertEquals("Expected default timeout ", IContestLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
         
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "barcodes", problem.getDisplayName());
@@ -164,7 +164,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "channel", problem.getDisplayName());
-        assertEquals("Expected default timeout ", ContestYAMLLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
+        assertEquals("Expected default timeout ", IContestLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
         assertFalse("Expecting not comptuer judged", problem.isComputerJudged());
 
 
@@ -560,36 +560,36 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 
         assertFalse("File missing " + contestYamlFilename, contents.length == 0);
 
-        String key = ContestYAMLLoader.LANGUAGE_KEY;
+        String key = IContestLoader.LANGUAGE_KEY;
         String[] sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 15, sectionLines.length);
 
-        key = ContestYAMLLoader.DEFAULT_CLARS_KEY;
+        key = IContestLoader.DEFAULT_CLARS_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 4, sectionLines.length);
 
-        key = ContestYAMLLoader.CLAR_CATEGORIES_KEY;
+        key = IContestLoader.CLAR_CATEGORIES_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 5, sectionLines.length);
 
-        key = ContestYAMLLoader.PROBLEMS_KEY;
+        key = IContestLoader.PROBLEMS_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 29, sectionLines.length);
 
-        key = ContestYAMLLoader.ACCOUNTS_KEY;
+        key = IContestLoader.ACCOUNTS_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 22, sectionLines.length);
 
-        key = ContestYAMLLoader.AUTO_JUDGE_KEY;
+        key = IContestLoader.AUTO_JUDGE_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 23, sectionLines.length);
 
         
-        key = ContestYAMLLoader.SITES_KEY;
+        key = IContestLoader.SITES_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 16, sectionLines.length);
         
-        key = ContestYAMLLoader.REPLAY_KEY;
+        key = IContestLoader.REPLAY_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 8, sectionLines.length);
     }
@@ -837,7 +837,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     }
     
     private String getLatexFilename (String problemShortName) {
-        return getDataDirectory() + File.separator + problemShortName + File.separator+ "problem_statement" + File.separator + ContestYAMLLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
+        return getDataDirectory() + File.separator + problemShortName + File.separator+ "problem_statement" + File.separator + IContestLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
     }
     
     public void testLatextProblem() throws Exception {
@@ -869,7 +869,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
 //        Utilities.insureDir(dirname);
 //        assertDirectoryExists(dirname);
 //        
-//        String filename = dirname + File.separator + ContestYAMLLoader.DEFAULT_CONTEST_YAML_FILENAME;
+//        String filename = dirname + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
 ////        System.out.println(filename);
 //        assertFileExists(filename);
 //        
@@ -1027,7 +1027,7 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         // AutoJudgeSetting[] autoJudgeSettings = loader.getAutoJudgeSettings(lines, contest.getProblems());
         // assertEquals ("Auto judge settings ", 1, autoJudgeSettings.length);
 
-        String[] other = loader.getSectionLines(ContestYAMLLoader.AUTO_JUDGE_KEY, lines);
+        String[] other = loader.getSectionLines(IContestLoader.AUTO_JUDGE_KEY, lines);
         // dumpLines("", other, true);
         assertEquals("expected number of AJ lines ", 21, other.length);
     }
@@ -1527,10 +1527,10 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
     private String[] getJudgeYaml(boolean computerJudged, boolean manualJudged, boolean preliminaryJudge) {
         
         String [] yaml =  {
-            ContestYAMLLoader.JUDGING_TYPE_KEY + ":",
-            PAD4 + ContestYAMLLoader.COMPUTER_JUDGING_KEY + ":" + computerJudged,
-            PAD4 + ContestYAMLLoader.MANUAL_REVIEW_KEY + ":" +manualJudged,
-            PAD4 + ContestYAMLLoader.SEND_PRELIMINARY_JUDGEMENT_KEY + ":" +preliminaryJudge, 
+            IContestLoader.JUDGING_TYPE_KEY + ":",
+            PAD4 + IContestLoader.COMPUTER_JUDGING_KEY + ":" + computerJudged,
+            PAD4 + IContestLoader.MANUAL_REVIEW_KEY + ":" +manualJudged,
+            PAD4 + IContestLoader.SEND_PRELIMINARY_JUDGEMENT_KEY + ":" +preliminaryJudge, 
         };
         return yaml;
     }

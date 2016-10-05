@@ -48,125 +48,9 @@ import edu.csus.ecs.pc2.core.model.Site;
 public class ContestYAMLLoader implements IContestLoader {
     
 //    private boolean debugMode = true;
-
-    public static final String CONTEST_NAME_KEY = "name";
-
-    public static final String SHORT_NAME_KEY = "short-name";
-
-    public static final String CONTEST_START_TIME = "start-time";
-
-    public static final String CONTEST_DURATION = "duration";
-
-    public static final String SCOREBOARD_FREEZE = "scoreboard-freeze";
-
-    public static final String LANGUAGE_KEY = "languages";
-
-    public static final String DEFAULT_CLARS_KEY = "default-clars";
-
-    public static final String CLAR_CATEGORIES_KEY = "clar-categories";
-
-    public static final String PROBLEMS_KEY = "problemset";
     
-    public static final String JUDGING_TYPE_KEY = "judging-type";
-    
-    public static final String MANUAL_REVIEW_KEY = "manual-review";
-
-    public static final String COMPUTER_JUDGING_KEY = "computer-judged";
-    
-    public static final String SEND_PRELIMINARY_JUDGEMENT_KEY = "send-prelim-judgement";
-    
-    public static final String USE_JUDGE_CMD_KEY = "use-judge-cmd";
-    
-    public static final String INTERPRETED_LANGUAGE_KEY = "interpreted";
-    
-    public static final String ACCOUNTS_KEY = "accounts";
-
-    public static final String SITES_KEY = "sites";
-
-    public static final String REPLAY_KEY = "replay";
-    
-    /**
-     * Base path/location where config (CDP) problem files found.
-     */
-    public static final String JUDGE_CONFIG_PATH_KEY = "judge-config-path";
-    
-    /**
-     * Run execution time limit, in seconds.
-     */
-    public static final String TIMEOUT_KEY = "timeout";
-
-    public static final String LIMITS_KEY = "limits";
-
     private static final String DELIMIT = ":";
-
-    public static final String DEFAULT_CONTEST_YAML_FILENAME = IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
-
-    public static final String DEFAULT_PROBLEM_YAML_FILENAME = IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
-
-    public static final String DEFAULT_PROBLEM_LATEX_FILENAME = IContestLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
-
-    /**
-     * problem title key in problem.yaml
-     */
-    private static final String PROBLEM_NAME_KEY = "title";
-
-    /**
-     * Problem input (data files) key.
-     */
-    private static final String PROBLEM_INPUT_KEY = "input";
-
-    /**
-     * Default time out for run execution.
-     */
-    public static final int DEFAULT_TIME_OUT = 30;
-
-    public static final String AUTO_JUDGE_KEY = "auto-judging";
-
-    public static final String INPUT_KEY = "input";
-
-    /**
-     * Use external data files?   (if no, then no file contents loaded into pc2).  
-     */
-    public static final String PROBLEM_LOAD_DATA_FILES_KEY = "load-data-files";
     
-    /**
-     * Contest wide validator name.
-     * 
-     * This will be overridden by the individual problem validator name.  If
-     * there is no default validator name specified the internal validator
-     * will be used.
-     * 
-     */
-    private static final String DEFAULT_VALIDATOR_KEY = "default-validator";
-
-    /**
-     * The override validator name, this supercedes all other validators.
-     * 
-     * No other validator def will override this value.
-     */
-    private static final String OVERRIDE_VALIDATOR_KEY = "override-validator";
-    
-//  default-validator: /home/pc2/yaml/default_validator
-    /**
-     * mtsv command line args.
-     */
-//  override-validator: /home/pc2/mtsv {:problemletter} {:resfile} {:basename} {:timelimit}
-    private static final String MTSV_OVERRIDE_VALIDATOR_ARGS = "{:problemletter} {:resfile} {:basename} {:timelimit}";
-    
-    /**
-     * mtsv program name.
-     */
-    private static final String MTSV_PROGRAM_NAME = "mtsv";
-    
-    /**
-     * Validator per problem.
-     */
-    public static final String VALIDATOR_KEY = "validator";
-
-    public static final String USING_PC2_VALIDATOR = "use-internal-validator";
-
-    private static final String READ_FROM_STDIN_KEY = "readFromSTDIN";
-
     /**
      * Load Problem Data File Contents
      */
@@ -283,7 +167,7 @@ public class ContestYAMLLoader implements IContestLoader {
         
         // TODO CCS SCOREBOARD_FREEZE
         
-        String startTime = getSequenceValue(yamlLines, CONTEST_START_TIME);
+        String startTime = getSequenceValue(yamlLines, CONTEST_START_TIME_KEY);
         if (startTime != null) {
             try {
                 Date date = parseStartTime(startTime);

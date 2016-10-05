@@ -2,11 +2,10 @@
 # Contest configuration 
 # Based on CCS Spec contest.yaml
 #
-# $HeaderURL$
 ---
 name:              ACM-ICPC CLI CCS Sample One
 short-name:        ICPC WF 2011
-start-time:        2011-02-04 01:23Z
+start-time:        2020-02-04 01:23Z
 duration:          5:00:00
 scoreboard-freeze: 4:00:00
 

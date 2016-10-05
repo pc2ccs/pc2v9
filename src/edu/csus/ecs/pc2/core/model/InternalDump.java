@@ -186,7 +186,7 @@ public class InternalDump {
                 }
                 String state = "STOPPED";
                 if (contestTime.isContestRunning()) {
-                    state = "STARTED";
+                    state = "RUNNING";
                 }
 
                 log.println("  Site " + contestTime.getSiteNumber() + " " + state + " " + contestTime.getElapsedTimeStr() + " " + contestTime.getRemainingTimeStr() + " "

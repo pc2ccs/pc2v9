@@ -202,6 +202,11 @@
                 <attribute name="Main-Class" value="edu.csus.ecs.pc2.Starter"/>
             </manifest>
         </jar>
+        <ant dir="projects/EWTeam" antfile="package.xml" useNativeBasedir="true" inheritAll="false"/>
+        <copy todir="projects">
+            <fileset dir="projects/EWTeam/dist" includes="EWTeam*.tar.gz"/>
+            <fileset dir="projects/EWTeam/dist" includes="EWTeam*.zip"/>
+        </copy>
     </target>
 
     <target name="clean" description="clean up">
@@ -216,6 +221,9 @@
         <delete dir="executesite2judge1" />
         <delete file="profiles.properties" />
         <delete file="teams.output.txt" />
+        <delete>
+           <fileset dir="projects" includes="EWTeam-*"/>
+        </delete>
     </target>
 
     <target name="checkstyle" description="Generates a report of code convention violations." depends="init">
