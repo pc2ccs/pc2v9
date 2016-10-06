@@ -2,8 +2,11 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,6 +14,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -19,19 +23,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.Component;
-
-import javax.swing.Box;
-import javax.swing.border.EtchedBorder;
 
 /**
  * Add/Edit ContestTime Pane.
@@ -389,7 +387,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     }
 
     private void populateGUI(ContestInformation inContestInfo) {
-
+        
         populatingGUI = true;
 
         // put the ScheduledStartTime into the GUI
@@ -412,7 +410,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
                     System.err.println("EditScheduledStartTimePane: getContest() returned null but no Log is available.");
                 }
            } else {
-               System.out.println("EditScheduledStartTimePane: getContest() returned null but no Controller is available (hence, no Log)");
+               System.err.println("EditScheduledStartTimePane: getContest() returned null but no Controller is available (hence, no Log)");
            }
             
         } else {
@@ -426,7 +424,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
                         System.err.println("EditScheduledStartTimePane: getContestTime() returned null but no Log is available.");
                     }
                } else {
-                   System.out.println("EditScheduledStartTimePane: getContestTime() returned null but no Controller is available (hence, no Log)");
+                   System.err.println("EditScheduledStartTimePane: getContestTime() returned null but no Controller is available (hence, no Log)");
                }
             }
         }
@@ -434,6 +432,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         if (localContestTime!=null) {
             
             if (localContestTime.isContestStarted()) {
+                getScheduledStartTimeTextBox().setText(displayStartTime);
                 getScheduledStartTimeTextBox().setToolTipText("Scheduled start time cannot be set when the contest has already started.");
                 getScheduledStartTimeTextBox().setEditable(false);
             } else {
@@ -488,6 +487,8 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
     /**
      * Convert a GregorianCalendar date/time to a displayable string in yyyy-mm-dd hh:mm form.
+     * Note that any additional seconds/milliseconds are truncated in the returned string (although the
+     * input calendar is not changed).
      */
     private String getGregorianTimeAsString(GregorianCalendar cal) {
 
@@ -496,9 +497,15 @@ public class EditScheduledStartTimePane extends JPanePlugin {
             // extract fields from input and build string
             // TODO: need to deal with the difference between displaying LOCAL time and storing UTC
 
+            //make a copy and truncate everything below minutes
+            GregorianCalendar calCopy = new GregorianCalendar();
+            calCopy.setTimeInMillis(cal.getTimeInMillis());
+            calCopy.set(Calendar.SECOND, 0);
+            calCopy.set(Calendar.MILLISECOND, 0);
+            
             SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            fmt.setCalendar(cal);
-            retString = fmt.format(cal.getTime());
+            fmt.setCalendar(calCopy);
+            retString = fmt.format(calCopy.getTime());
         }
 
         return retString;
