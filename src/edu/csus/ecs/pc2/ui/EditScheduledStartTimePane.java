@@ -87,7 +87,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
      */
     public EditScheduledStartTimePane() {
         super();
-        setPreferredSize(new Dimension(620, 350));
+        setPreferredSize(new Dimension(650, 350));
         initialize();
     }
 
@@ -638,7 +638,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
     private JButton getClearStartTimeButton() {
         if (clearStartTimeButton == null) {
-            clearStartTimeButton = new JButton("Clear");
+            clearStartTimeButton = new JButton("Set to Undefined");
             clearStartTimeButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     setStartTimeToUndefined();
