@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -80,6 +81,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     private JLabel dropdownListLabel;
 
     private Component horizontalStrut;
+    private Component verticalStrut;
 
     /**
      * This constructor creates an EditScheduledStartTimePane containing a message pane, a button pane with Update and Cancel buttons, and a center pane allowing editing of the Scheduled Start Time.
@@ -616,6 +618,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
         if (scheduledStartTimePanel == null) {
             scheduledStartTimePanel = new JPanel();
             scheduledStartTimePanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+            scheduledStartTimePanel.add(getVerticalStrut());
             scheduledStartTimePanel.add(getScheduledStartTimeLabel());
             scheduledStartTimePanel.add(getScheduledStartTimeTextBox());
         }
@@ -625,6 +628,7 @@ public class EditScheduledStartTimePane extends JPanePlugin {
     private JPanel getStartTimeButtonPanel() {
         if (startTimeButtonPanel == null) {
             startTimeButtonPanel = new JPanel();
+            startTimeButtonPanel.setBorder(new EmptyBorder(15, 10, 10, 10));
             startTimeButtonPanel.add(getClearStartTimeButton());
             startTimeButtonPanel.add(getSetStartToNowButton());
             startTimeButtonPanel.add(getHorizontalStrut());
@@ -797,5 +801,11 @@ public class EditScheduledStartTimePane extends JPanePlugin {
             horizontalStrut = Box.createHorizontalStrut(20);
         }
         return horizontalStrut;
+    }
+    private Component getVerticalStrut() {
+        if (verticalStrut == null) {
+        	verticalStrut = Box.createVerticalStrut(20);
+        }
+        return verticalStrut;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
