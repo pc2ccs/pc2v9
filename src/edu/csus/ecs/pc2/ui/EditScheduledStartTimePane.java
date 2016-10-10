@@ -762,8 +762,13 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
         GregorianCalendar currentTextboxStartTime = getScheduledStartTimeFromGUI();
 
+        // get above method returns a date with a time of "zero" if the GUI displayed value is "<undefined>" or the empty string;
+        // it returns null if the GUI start time FAILED TO PARSE
+
         if (currentTextboxStartTime == null) {
             showMessage("Invalid time in Scheduled Start Time textbox; cannot increment");
+        } else if (currentTextboxStartTime.getTimeInMillis() == 0) {
+            showMessage("Undefined Scheduled Start Time; cannot increment");
         } else {
             currentTextboxStartTime.add(Calendar.MINUTE, ((Integer) (getIncrementTimeComboBox().getSelectedItem())));
             getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(currentTextboxStartTime));
@@ -779,8 +784,13 @@ public class EditScheduledStartTimePane extends JPanePlugin {
 
         GregorianCalendar currentTextboxStartTime = getScheduledStartTimeFromGUI();
 
+        // get above method returns a date with a time of "zero" if the GUI displayed value is "<undefined>" or the empty string;
+        // it returns null if the GUI start time FAILED TO PARSE
+
         if (currentTextboxStartTime == null) {
             showMessage("Invalid time in Scheduled Start Time textbox; cannot decrement");
+        } else if (currentTextboxStartTime.getTimeInMillis() == 0) {
+            showMessage("Undefined Scheduled Start Time; cannot decrement");
         } else {
             currentTextboxStartTime.add(Calendar.MINUTE, -(((Integer) (getIncrementTimeComboBox().getSelectedItem()))));
             getScheduledStartTimeTextBox().setText(getGregorianTimeAsString(currentTextboxStartTime));
