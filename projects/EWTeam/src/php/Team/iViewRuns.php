@@ -1,4 +1,3 @@
-
 <?php
 
 	if(version_compare(phpversion(),'4.3.0')>=0) { 

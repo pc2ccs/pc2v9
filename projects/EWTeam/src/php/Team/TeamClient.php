@@ -1,12 +1,3 @@
-<head>
-<title>PC^2 Team Client</title>
-<meta charset="utf-8" />
-
-<link href="tab_style/style.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="tab_style/jquery-1.9.1.js"></script>
-<script type="text/javascript" src="tab_style/jquery-ui-1.10.2.js"></script>
-
-
 <?php
 
 	// $Id$
@@ -44,7 +35,14 @@
 
 	}//end if(is_resource(. . .)) {}
 ?>
- <script type="text/javascript">
+<head>
+<title>PC^2 Team Client</title>
+<meta charset="utf-8" />
+
+<link href="tab_style/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="tab_style/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="tab_style/jquery-ui-1.10.2.js"></script>
+<script type="text/javascript">
 
 setInterval('timer()',1000);
 
