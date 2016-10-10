@@ -785,7 +785,7 @@ public class ContestTimesPane extends JPanePlugin {
      */
     private JButton getSetScheduledStartTimeButton() {
         if (setScheduledStartTimeButton == null) {
-            setScheduledStartTimeButton = new JButton("Set Schedule");
+            setScheduledStartTimeButton = new JButton("Edit Start Schedule");
             setScheduledStartTimeButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     editScheduledStartTime();
