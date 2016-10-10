@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <?php
 // $Id$
 // session_start();
