@@ -1,4 +1,3 @@
-<!DOCTYPE html lang="en">
 <head>
 <title>PC^2 Team Client</title>
 <meta charset="utf-8" />

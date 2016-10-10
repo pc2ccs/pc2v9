@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <?php
 	if(version_compare(phpversion(),'4.3.0')>=0) { 
   		  if(!ereg('^SESS[0-9a-zA-Z]+$',$_REQUEST['SESSION_NAME'])) { 
