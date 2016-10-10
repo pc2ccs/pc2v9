@@ -19,7 +19,7 @@ No need for Javadoc - this is not an API.
          Build of EWTeam.jar
     </description>
 	
-	<property name="version" value="2.2" />
+	<property name="ewversion" value="2.3" />
 	
     <!-- Compiler settings. -->
     <property name="compilerArg" value=""/>

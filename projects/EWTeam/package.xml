@@ -7,13 +7,13 @@
 
     <!-- version is set in build.xml and can be overriden
            on ant cmdline w/ -Dversion=9_0 -->
-    <property name="release" value="${name}-${version}"/>
+    <property name="release" value="${name}-${ewversion}"/>
 
      <property name="build.unpack.dir" value="${build.dir}/unpack"/>
 
     <!-- zip/gzip moved to archives so we have repo.version available -->
     <!-- <property name="version.path" value="${build.dir}/VERSION"/> -->
-    <property name="ewutzip.name" value="ewteamj-${version}.zip"/>
+    <property name="ewutzip.name" value="ewteamj-${ewversion}.zip"/>
     <property name="ewutzip.path" value="${build.dir}/${ewutzip.name}"/>
 
     <target name="ewutzip" description="creates zip of the source">
@@ -59,7 +59,7 @@
         <property name="zip.path" value="${dist.dir}/${zip.name}"/>
         <property name="gzip.name" value="${release}-${repo.version}.tar.gz"/>
         <property name="gzip.path" value="${dist.dir}/${gzip.name}"/>
-        <property name="apizip.name" value="api-doc-${version}-${repo.version}.zip"/>
+        <property name="apizip.name" value="api-doc-${ewversion}-${repo.version}.zip"/>
         <property name="apizip.path" value="${dist.dir}/${apizip.name}"/>
 
         <!-- <antcall target="apizip"/> -->
