@@ -42,6 +42,11 @@ public class StarttimeService {
     private IInternalContest model;
     private IInternalController controller;
     
+    /**
+     * List of the possible types of requests which might be received from clients.
+     * 
+     * @author john
+     */
     private enum StartTimeRequestType {ILLEGAL, SET_START_TO_UNDEFINED, SET_START_TO_SPECIFIED_DATE};
    
     public StarttimeService(IInternalContest inModel, IInternalController inController) {
@@ -141,9 +146,9 @@ public class StarttimeService {
                 requestedStartTime = getDate(startTimeValueString);
                 if (requestedStartTime != null) {
                     requestType = StartTimeRequestType.SET_START_TO_SPECIFIED_DATE;
-                } else {
-                    //null requestedStartTime means startTimeValueString failed to parse (wasn't a legal Unix epoch date);
-                    // do nothing -- leaving requestType set to "ILLEGAL"
+//                } else {
+//                    //null requestedStartTime means startTimeValueString failed to parse (wasn't a legal Unix epoch date);
+//                    // do nothing -- leaving requestType set to "ILLEGAL"
                 }
             }
                 
