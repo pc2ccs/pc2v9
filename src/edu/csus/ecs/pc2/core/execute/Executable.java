@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -76,6 +77,10 @@ public class Executable extends Plugin implements IExecutable {
      * Directory where main file is found
      */
     private String mainFileDirectory;
+    /**
+     * File user selects
+     */
+    private String fileFromUser;
 
     private ExecutionData executionData = new ExecutionData();
 
@@ -1008,21 +1013,29 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     public String getFileNameFromUser() {
-        String outFileName = null;
-        JFileChooser chooser = new JFileChooser(mainFileDirectory);
         try {
-            chooser.setDialogTitle("Open Test Input File");
-            int returnVal = chooser.showOpenDialog(null);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                mainFileDirectory = chooser.getCurrentDirectory().getAbsolutePath();
-                outFileName = chooser.getSelectedFile().getCanonicalFile().toString();
-            }
-        } catch (Exception e) {
-            log.log(Log.CONFIG, "Error getting selected file, try again.", e);
+            SwingUtilities.invokeAndWait( new Runnable() {
+                public void run() {
+                    JFileChooser chooser = new JFileChooser(mainFileDirectory);
+                    try {
+                        chooser.setDialogTitle("Open Test Input File");
+                        int returnVal = chooser.showOpenDialog(null);
+                        if (returnVal == JFileChooser.APPROVE_OPTION) {
+                            mainFileDirectory = chooser.getCurrentDirectory().getAbsolutePath();
+                            fileFromUser = chooser.getSelectedFile().getCanonicalFile().toString();
+                        } else {
+                            fileFromUser = null;
+                        }
+                    } catch (Exception e) {
+                        log.log(Log.CONFIG, "Error getting selected file, try again.", e);
+                    }
+                    chooser = null;
+                }
+            });
+        } catch(Exception e) {
+            log.throwing("Executable", "getFileNameFromUser", e);
         }
-        chooser = null;
-
-        return outFileName;
+        return fileFromUser;
     }
 
     /**
