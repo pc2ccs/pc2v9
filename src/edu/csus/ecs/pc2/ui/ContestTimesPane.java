@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 
 import com.ibm.webrunner.j2mclb.util.Comparator;
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
@@ -44,8 +45,6 @@ import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
-
-import javax.swing.border.EmptyBorder;
 
 /**
  * InternalContest Times Pane/Grid.
@@ -122,8 +121,47 @@ public class ContestTimesPane extends JPanePlugin {
         this.addComponentListener(new ComponentAdapter() {
             public void componentShown(ComponentEvent event) {
                 System.out.println ("Debug: ContestTimesPane component shown...");
-                //TODO: the ContestTimesPane has been shown; need to refresh the Scheduled Start label and time.
-                //  How to do this?  Like to fire ContestInformationEvent, but the corresponding method in InternalContest is private...
+                
+                //the ContestTimesPane has been shown; need to refresh the Scheduled Start label and time.
+                IInternalContest contest = getContest();
+                if (contest!=null) {
+                    ContestInformation ci = contest.getContestInformation();
+                    ContestTime ct = contest.getContestTime();
+                    if (ci!=null && ct!=null) {
+                        
+                        //update the Scheduled Start Time label
+                        boolean started = ct.isContestStarted();
+                        String labelText ;
+                        if (!started) {
+                            labelText = "Scheduled Start Time: ";
+                        } else {
+                            labelText = "Started at: ";
+                        }
+                        getScheduledStartTimeLabel().setText(labelText);
+                        
+                        //update the Scheduled Start Time data value
+                        GregorianCalendar startTime = ci.getScheduledStartTime();
+                        String displayTime;
+                        if (startTime==null) {
+                            displayTime = "undefined";
+                        } else {
+                            displayTime = formatTime(startTime.getTimeInMillis());
+                        }
+                        getScheduledStartTimeTextField().setText(displayTime);
+                    } 
+                } else {
+                    IInternalController controller = getController();
+                    Log log = null;
+                    if (controller!=null) {
+                        log = controller.getLog();
+                        if (log!=null) {
+                            log.warning("ContestTimesPane.componentShown(): cannot update Scheduled Start Time -- no contest available");
+                        }
+                    }
+                    if (controller==null || log==null) {
+                        System.err.println ("ContestTimesPane.componentShown(): Warning: cannot update Scheduled Start Time -- no contest available, and no controller/log available");
+                    }
+                }
             }
         });
     }
