@@ -120,7 +120,6 @@ public class ContestTimesPane extends JPanePlugin {
         
         this.addComponentListener(new ComponentAdapter() {
             public void componentShown(ComponentEvent event) {
-                System.out.println ("Debug: ContestTimesPane component shown...");
                 
                 //the ContestTimesPane has been shown; need to refresh the Scheduled Start label and time.
                 IInternalContest contest = getContest();
