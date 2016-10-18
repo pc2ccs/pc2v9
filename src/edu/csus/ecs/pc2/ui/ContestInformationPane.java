@@ -197,7 +197,7 @@ public class ContestInformationPane extends JPanePlugin {
             startTimeTextField.setBounds(270, 424, 243, 31);
             startTimeTextField.setColumns(25);
             startTimeTextField.setEditable(false);
-            startTimeTextField.setToolTipText("Use Contest Times tab \"Set Schedule\" button to edit Start Time");
+            startTimeTextField.setToolTipText("Use Contest Times tab \"Edit Start Schedule\" button to edit Start Time");
         }
         return startTimeTextField ;
     }
