@@ -10,7 +10,7 @@ remaining: 5:00:00
 running: false
 start-time: 
 elapsed: 5:00:00
-scoreboard-freeze: 1:00:00
+scoreboard-freeze: 01:00:00
 # load-data-files: false
 
 default-clars:
