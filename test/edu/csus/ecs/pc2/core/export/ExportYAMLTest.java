@@ -102,10 +102,12 @@ public class ExportYAMLTest extends AbstractTestCase {
         
         String actualContestYamlFile = testDirectory+File.separator+IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
         
-        String expectedContestYamlFile = getTestFilename("expected.contest.yaml");
-        if (File.separator.equals("/")) {
-            expectedContestYamlFile = getTestFilename("expected.unix.contest.yaml");
+//        String expectedContestYamlFile = getTestFilename("expected.contest.yaml");
+        String expectedContestYamlFile = getTestFilename("expected.unix.contest.yaml");
+        if (! "/".equals(File.separator)){
+            convertToLocalFileSeperators (expectedContestYamlFile);
         }
+        
         stripStartTime(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
         
@@ -117,6 +119,31 @@ public class ExportYAMLTest extends AbstractTestCase {
 
     }
     
+    /**
+     * Will convert input file ./ to local path/file separators.
+     * 
+     * Only applies to ./ string.
+     * 
+     * @param filename
+     * @throws Exception
+     */
+    private void convertToLocalFileSeperators(String filename) throws Exception {
+
+        File actualFile = new File(filename);
+        File newFile = new File(filename + ".tmp");
+        PrintWriter printWriter = new PrintWriter(newFile);
+        String[] actualContents = Utilities.loadFile(actualFile.getAbsolutePath());
+        for (int i = 0; i < actualContents.length; i++) {
+            String string = actualContents[i];
+            string = string.replace("./", ".\\");
+            printWriter.println(string);
+        }
+        printWriter.close();
+        actualFile.delete();
+        boolean result = newFile.renameTo(actualFile);
+        assertTrue("rename Failed", result);
+    }
+
 //  private void addShortNames(IInternalContest contest) throws Exception {
 //
 //      int idx = 1;
