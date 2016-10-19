@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.ui;
 
-
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,17 +31,20 @@ import edu.csus.ecs.pc2.core.util.DateDifferizer.DateFormat;
 /**
  * Maintains a number of contest clock displays/labels.
  * <P>
- * This provides methods to dynamically update JLabels with contest 
- * remaining or elapsed times.  This also will update a single JFrame
- * title (when frame is minimized).
+ * For each JLabel added will dynamically update the text
+ * with a countdown timer text string.   The label will
+ * also dynamically update when contest/clock state config
+ * changes.   For example, if the contest length is changed
+ * then the remaining or elapsed time will automatically
+ * reflect that change.
+ * <P>
+ * Add a label and the format of the time {@link #addLabeltoUpdateList(JLabel, DisplayTimes, int)} 
  * <P>
  * 
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     /**
@@ -131,7 +133,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
          */
         REMAINING_TIME,
         /**
-         * Countdown to scheduled start time
+         * Show time to start of contest, per scheduled start time.
          */
         TO_SCHEDULED_START_TIME,
     };
@@ -433,14 +435,24 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
                                 clockText = "< 2 mins";
                             } else {
                                 if (teamDisplayMode) {
+                                    /**
+                                     * This will only be displayed whent there are more than 120
+                                     * seconds left in the contest, so no handling of
+                                     * scheduled time is needed.
+                                     */
+                                    // Since this is a team there will be no 
                                     clockText = contestTime.getRemainingMinStr();
 
                                 } else {
                                     long secsLeft = contestTime.getRemainingSecs();
                                     if (secsLeft < 60 && secsLeft > -1) {
+                                        /**
+                                         * Show time in seconds just before contest ends.
+                                         */
                                         clockText = secsLeft + " seconds ";
                                     } else {
                                         clockText = contestTime.getRemainingTimeStr();
+                                        clockText = adjustForPostContest(clockText);
                                     }
                                 }
                             }
@@ -450,6 +462,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
                                 clockText = "STOPPED";
                             } else {
                                 clockText = contestTime.getRemainingTimeStr();
+                                clockText = adjustForPostContest(clockText);
                             }
                         }
                     }
@@ -494,7 +507,25 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
     }
 
     /**
+     * Adjust contest time display if after end of contest.
      * 
+     * If input time, ex remaining time, is -HHM:MM:SS will
+     * change string to +HH:MMSS, else returns string unchanged.  
+     * 
+     * @param string
+     * @return +HH:MM:SS if input is -HH:MM:SS, else returns string unchanged.
+     */
+    protected String adjustForPostContest(String string) {
+        if (string.startsWith("-")){
+            return string.replace('-', '+');
+        } else {
+            return string;
+        }
+    }
+
+
+    /**
+     * Update Scheduled Time labels.
      */
     protected void updateScheduledStartLabels() {
         
