@@ -1,6 +1,6 @@
 # Contest Configuration, version 1.0 
 # PC^2 Version: Version 9.2 20141203 (Wednesday, December 03rd 2014 08:46 UTC) Java ver 1.7.0_02 build 875 Windows 7 6.1 (x86) 
-# Created: 2014-12-27 17:45:23 PST
+# Created: 2014-12-27 17:45:23 PST 
 --- 
 
 name: 'Programming Contest'
@@ -10,7 +10,7 @@ remaining: 5:00:00
 running: false
 start-time: 
 elapsed: 5:00:00
-scoreboard-freeze: null
+scoreboard-freeze: 01:00:00
 # load-data-files: false
 
 default-clars:
