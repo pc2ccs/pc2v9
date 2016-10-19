@@ -163,6 +163,8 @@ public class InternalDumpReport implements IReport {
         printWriter.println("  Auto Start  Contest Date/time        : " + gregTimeString + " " + contestInformation.getScheduledStartTime());
         printWriter.println("  Auto Start  Contest Date/time (Date) : " + contestInformation.getScheduledStartDate());
         printWriter.println();
+        printWriter.println("  Scoreboard Freeze Time               : " + contestInformation.getFreezeTime());
+        printWriter.println();
         
         printWriter.println("  Include Preliminary Judgements in Scoring Algorithm : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
         printWriter.println("  Send Notifications for Preliminary Judgements       : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
