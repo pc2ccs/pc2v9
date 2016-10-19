@@ -245,7 +245,7 @@ public class ReportsTest extends AbstractTestCase {
                 "Judgement Notifications Report", // 
                 "Profile Clone Settings Report", // 
                 "Sites Report", // 
-                "Event Feed (CCS) XML Report", // 
+                "Unused 2011 Event Feed XML Report", // 
                 "Notifications XML Report", // 
                 "Finalize-Certify Report", // 
                 "Internal Dump Report", // 
@@ -254,12 +254,16 @@ public class ReportsTest extends AbstractTestCase {
                 "accounts.tsv Report (all accounts)", // 
                 "runs.tsv", // 
                 "JSON Standings", // 
-                "Event Feed 2013 XML Report", // 
+                "Unused 2013 Event Feed XML Report", // 
                 "userdata.tsv", // 
                 "groups.tsv", // 
                 "teams.tsv", // 
                 "scoreboard.tsv", // 
                 "submissions.tsv", //
+                "ICPC Tools Event Feed Report", //
+                "Auto Judging Settings Report", //
+                "Judging Analysis Report", //
+                "JSON 2016 Scoreboard", //
         };
 
         IReport [] reportList = Reports.getReports();
@@ -267,11 +271,12 @@ public class ReportsTest extends AbstractTestCase {
         int idx = 0;
         for (IReport iReport : reportList) {
             String name = iReport.getPluginTitle();
-//            String className = getShortClassName(iReport.getClass());
-//            System.out.println("Class name = "+className);
             
             if (idx < reportTitles.length){
                 assertEquals("Expected name for report "+(idx+1)+" "+iReport.getClass().getName(), reportTitles[idx], name);
+            } else {
+//                System.out.println("Missing \""+name+"\", //");
+                fail("Missing report named: "+name);
             }
             idx ++;
         }
