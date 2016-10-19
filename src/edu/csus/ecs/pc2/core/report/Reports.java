@@ -147,7 +147,7 @@ public final class Reports {
         reports.add(new JudgingAnalysisReport());
 
         reports.add(new JSON2016Report());
-
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }

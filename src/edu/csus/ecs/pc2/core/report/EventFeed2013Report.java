@@ -13,13 +13,12 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.EventFeedXML2013;
 
 /**
- * Event Feed Finals 2013 XML Report.
+ * 2013 Event Feed Report.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
-// $HeadURL$
 public class EventFeed2013Report implements IReport {
 
     /**
@@ -102,7 +101,7 @@ public class EventFeed2013Report implements IReport {
     }
 
     public String getReportTitle() {
-        return "Event Feed 2013 XML";
+        return "Unused 2013 Event Feed XML";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -112,7 +111,7 @@ public class EventFeed2013Report implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Event Feed 2013 XML Report";
+        return "Unused 2013 Event Feed XML Report";
     }
 
     public Filter getFilter() {

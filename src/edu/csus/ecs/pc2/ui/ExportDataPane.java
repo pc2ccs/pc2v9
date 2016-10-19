@@ -4,12 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
+import java.util.logging.Level;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -20,8 +24,10 @@ import javax.swing.filechooser.FileFilter;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.report.SubmissionsTSVReport;
 import edu.csus.ecs.pc2.exports.ccs.Groupdata;
+import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
 import edu.csus.ecs.pc2.exports.ccs.Teamdata;
@@ -64,6 +70,7 @@ public class ExportDataPane extends JPanePlugin {
     private String lastDirectory = ".";
 
     private JButton exportRunTSVButton = null;
+    private JButton viewEventFeed;
 
     /**
      * This method initializes
@@ -134,10 +141,6 @@ public class ExportDataPane extends JPanePlugin {
 
     protected void saveResultsTSVFile() {
 
-        // TODO CCS prompt for path to save this file to..
-
-        
-        
         String outfilename = "results.tsv";
         
         try {
@@ -147,7 +150,7 @@ public class ExportDataPane extends JPanePlugin {
             viewFile(outfilename, outfilename);
         } catch (Exception e) {
             FrameUtilities.showMessage(this, "Can not save file", "Unable to save " + outfilename + " " + e.getMessage());
-            e.printStackTrace();
+            getLog().log(Level.WARNING, e.toString(),e);
         }
     }
 
@@ -173,8 +176,6 @@ public class ExportDataPane extends JPanePlugin {
     }
 
     protected void saveScoreboardTSVFile() {
-
-        // TODO CCS prompt for path to save this file to..
 
         String outfilename = "scoreboard.tsv";
         try {
@@ -246,8 +247,6 @@ public class ExportDataPane extends JPanePlugin {
     }
 
     protected void saveUserDataTSVFile() {
-
-        // TODO CCS prompt for path to save this file to..
 
         String outfilename = "userdata.tsv";
         try {
@@ -322,6 +321,7 @@ public class ExportDataPane extends JPanePlugin {
             centerPane.setLayout(flowLayout1);
             centerPane.add(getExportYamlButton(), null);
             centerPane.add(getExportRunTSVButton(), null);
+            centerPane.add(getViewEventFeed());
         }
         return centerPane;
     }
@@ -368,7 +368,6 @@ public class ExportDataPane extends JPanePlugin {
     public File saveAsFileDialog (Component parent, String startDirectory, String defaultFileName) {
 
         File inFile = new File(startDirectory + File.separator + defaultFileName);
-        System.out.println("debug 22 filename is "+inFile.getAbsolutePath());
         JFileChooser chooser = new JFileChooser(startDirectory);
         
         chooser.setSelectedFile(inFile);
@@ -443,5 +442,64 @@ public class ExportDataPane extends JPanePlugin {
             Utilities.viewReport(runsTSVReport, "submissions.tsv file", getContest(), getController(), ! runsTSVReport.suppressHeaderFooter());
         }
     }
+    
+    /**
+     * Parses input time.
+     * 
+     * @param freezeTime
+     * @return number of minutes.
+     */
+    private long parseFreezeTime(String freezeTime) {
+        
+        if (freezeTime == null){
+            return ContestInformation.DEFAULT_FREEZE_MINUTES;
+        } else {
+            
+            long seconds = Utilities.convertStringToSeconds(freezeTime);
+            if (seconds == -1){
+                return ContestInformation.DEFAULT_FREEZE_MINUTES;
+            }
+            return seconds / 60; 
+        }
+    }
+    
+    protected void showSnapshotOfEventViewer() {
+        showSnapshotOfEventViewer(false);
+    }
+    
+    protected void showSnapshotOfEventViewer(boolean showFilteredFeed) {
 
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
+
+        String eventFeed = null;
+        if (! showFilteredFeed) {
+            eventFeed = eventFeedXML.toXML(getContest());
+        } else {
+            ContestInformation info = getContest().getContestInformation();
+            String freezeTime = info.getFreezeTime();
+            long numberMinutesFreezeTime = parseFreezeTime(freezeTime);
+            eventFeed = eventFeedXML.toXMLFreeze(getContest(), numberMinutesFreezeTime);
+
+        }
+        String[] lines = { eventFeed };
+            
+        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+        multipleFileViewer.addTextintoPane("Event Feed", lines);
+        multipleFileViewer.setTitle("PC^2 Event Feed at " + new Date());
+        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+        multipleFileViewer.setVisible(true);
+        
+    }
+
+    private JButton getViewEventFeed() {
+        if (viewEventFeed == null) {
+        	viewEventFeed = new JButton("Show Event Feed");
+        	viewEventFeed.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        showSnapshotOfEventViewer();
+        	    }
+        	});
+        }
+        return viewEventFeed;
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"

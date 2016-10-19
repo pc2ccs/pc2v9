@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
+import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -19,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.GroupEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
+import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IEventFeedRunnable;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -90,6 +92,8 @@ public class EventFeeder implements Runnable {
     private JudgementListener judgementListener = null;
 
     private ContestInformationListener contestInformationListener = null;
+
+    private ContestTimeListener contestTimeListener = null;
     
     EventFeeder() {
         initListeners();
@@ -105,7 +109,7 @@ public class EventFeeder implements Runnable {
         groupListener = new GroupListener();
         judgementListener = new JudgementListener();
         contestInformationListener = new ContestInformationListener();
-
+        contestTimeListener = new ContestTimeListener();
     }
 
     /**
@@ -190,9 +194,9 @@ public class EventFeeder implements Runnable {
         inContest.addGroupListener(groupListener);
         inContest.addJudgementListener(judgementListener);
         inContest.addContestInformationListener(contestInformationListener);
+        inContest.addContestTimeListener(contestTimeListener);
 
         // TODO CCS ensure that commented out listeners are not needed.
-        // inContest.addContestTimeListener(new ContestTimeListener());
         // inContest.addMessageListener(new MessageListener());
         // inContest.addSiteListener(new SiteListener());
         // inContest.addConnectionListener(new ConnectionListener());
@@ -213,7 +217,6 @@ public class EventFeeder implements Runnable {
     // protected class LanguageListener implements ILanguageListener {}
     // protected class ChangePasswordListener implements IChangePasswordListener {}
     // protected class LoginListener implements ILoginListener {}
-    // protected class ContestTimeListener implements IContestTimeListener {}
     // protected class MessageListener implements IMessageListener {}
     // protected class SiteListener implements ISiteListener {}
     // protected class ConnectionListener implements IConnectionListener {}
@@ -574,6 +577,54 @@ public class EventFeeder implements Runnable {
         public void judgementRefreshAll(JudgementEvent judgementEvent) {
             // SOMEDAY refresh all judgements on event feed
         }
+    }
+    
+    /**
+     * Listener.
+     * 
+     * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+     */
+    protected class ContestTimeListener implements IContestTimeListener {
+
+        @Override
+        public void contestTimeAdded(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        @Override
+        public void contestTimeRemoved(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        @Override
+        public void contestTimeChanged(ContestTimeEvent event) {
+            ContestInformation info = contest.getContestInformation();
+            sendXML(eventFeedXML.createInfoElement(contest, info));
+        }
+
+        @Override
+        public void contestStarted(ContestTimeEvent event) {
+            contestTimeChanged(event);
+            
+        }
+
+        @Override
+        public void contestStopped(ContestTimeEvent event) {
+            contestTimeChanged(event);
+            
+        }
+
+        @Override
+        public void contestAutoStarted(ContestTimeEvent event) {
+            contestTimeChanged(event);
+            
+        }
+
+        @Override
+        public void refreshAll(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+        
     }
     
     /**

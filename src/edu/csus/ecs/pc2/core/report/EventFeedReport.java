@@ -103,7 +103,7 @@ public class EventFeedReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Event Feed (CCS) XML";
+        return "Unused 2011 Event Feed XML";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -113,7 +113,7 @@ public class EventFeedReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Event Feed (CCS) XML Report";
+        return "Unused 2011 Event Feed XML Report";
     }
 
     public Filter getFilter() {

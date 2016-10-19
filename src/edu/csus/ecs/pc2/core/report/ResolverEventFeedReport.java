@@ -13,18 +13,14 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
 
 /**
- * Event Feed XML for ICPC Tools Resolver.
+ * The Event Feed - Event Feed XML for ICPC Tools.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id: EventFeedReport.java 2363 2011-09-27 01:37:28Z laned $
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/core/report/EventFeedReport.java $
 public class ResolverEventFeedReport implements IReport {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 635385259159143084L;
 
     private IInternalContest contest;
@@ -102,7 +98,7 @@ public class ResolverEventFeedReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Event Feed XML for ICPC Tools Resolver";
+        return "ICPC Tools Event Feed";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -112,7 +108,7 @@ public class ResolverEventFeedReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Event Feed XML for ICPC Tools Resolver Report";
+        return "ICPC Tools Event Feed Report";
     }
 
     public Filter getFilter() {
