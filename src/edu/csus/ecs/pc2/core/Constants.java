@@ -7,6 +7,8 @@ package edu.csus.ecs.pc2.core;
  */
 public final class Constants {
 
+    public static long HOURS_PER_DAY = 24;
+
     private Constants() {
         super();
     }
@@ -40,7 +42,10 @@ public final class Constants {
     /**
      * number of ms in a second.
      */
+    // SOMEDAY deprecate use MS_PER_SECOND (singlular)
     public static final long MS_PER_SECONDS = 1000;
+
+    public static final long MS_PER_SECOND = 1000;
 
     /**
      * number of seconds in a minute.
@@ -61,6 +66,8 @@ public final class Constants {
      * number of seconds in an hour.
      */
     public static final long SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+    
+    public static final long SECONDS_PER_DAY = 86400;
 
     /**
      * Default contest length.

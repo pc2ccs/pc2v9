@@ -89,12 +89,14 @@ public final class Pluralize {
     public static String pluralize(String s, int count) {
 
         /**
-         * List of special singlular and plural names
+         * List of special singular and plural names
          */
         String[][] nameList = { { "is", "are" }, { "attorney-general", "attorneys-general" }, { "brother-in-law", "brothers-in-law" }, { "child", "children" }, { "father-in-law", "fathers-in law" },
                 { "foot", "feet" }, { "louse", "lice" }, { "mailman", "mailmen" }, { "man", "men" }, { "mother-in-law", "mothers-in-law" }, { "mouse", "mice" }, { "ox", "oxen" },
                 { "secretary-general", "secretaries general" }, { "sister-in-law", "sisters-in-law" }, { "tooth", "teeth" }, { "woman", "women" }, { "calf", "calves" }, { "elf", "elves" },
-                { "half", "halves" }, { "knife", "knives" }, { "life", "lives" }, { "loaf", "loaves" }, { "shelf", "shelves" }, { "thief", "thieves" }, { "wife", "wives" }, };
+                { "half", "halves" }, { "knife", "knives" }, { "life", "lives" }, { "loaf", "loaves" }, { "shelf", "shelves" }, { "thief", "thieves" }, { "wife", "wives" }, //
+                { "day", "days" }, //
+                };
 
         /**
          * Special words that are both singular and plural
