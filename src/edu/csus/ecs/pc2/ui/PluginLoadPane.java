@@ -209,6 +209,7 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new MessageMonitorPane());
         plugins.add(new EventFeedServerPane());
         plugins.add(new AutoJudgesPane());
+        plugins.add(new ContestScheduledStartClockPane());
 
         JPanePlugin[] pluginList = (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
 

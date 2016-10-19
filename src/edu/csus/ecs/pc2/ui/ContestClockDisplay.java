@@ -1,10 +1,15 @@
 package edu.csus.ecs.pc2.ui;
 
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -14,10 +19,15 @@ import javax.swing.Timer;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.util.DateDifferizer;
+import edu.csus.ecs.pc2.core.util.DateDifferizer.DateFormat;
 
 /**
  * Maintains a number of contest clock displays/labels.
@@ -47,12 +57,32 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     private Vector<JLabel> remainingtimeLabelList = new Vector<JLabel>();
 
+    /**
+     * List of elapsed JLabels to update
+     */
     private Hashtable<Integer, Vector<JLabel>> sitesElapsedTimeLabelList = new Hashtable<Integer, Vector<JLabel>>();
 
+    /**
+     * List of remaining time JLabels to update
+     */
     private Hashtable<Integer, Vector<JLabel>> sitesRemainingtimeLabelList = new Hashtable<Integer, Vector<JLabel>>();
+    
+    /**
+     * List of scheduled start time JLabels to update.
+     */
+    private List<JLabel> scheduledStartTimeLabelList = new ArrayList<>();
 
     private Hashtable<Integer, ContestTime> contestTimes = new Hashtable<Integer, ContestTime>();
-
+    
+    /**
+     * The date/time when the contest is scheduled (intended) to start.
+     * This value is null (undefined) if no scheduled start time has been set.
+     * This value ONLY applies BEFORE THE CONTEST STARTS; once 
+     * any "start contest" operation (e.g. pushing the "Start Button") has occurred,
+     * this value no longer has meaning.
+     */
+    private GregorianCalendar scheduledStartTime = null ;
+    
     private Timer timer = new Timer(500, this);
 
     private JFrame clientFrame = null;
@@ -99,7 +129,11 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         /**
          * Show remaining time.
          */
-        REMAINING_TIME
+        REMAINING_TIME,
+        /**
+         * Countdown to scheduled start time
+         */
+        TO_SCHEDULED_START_TIME,
     };
 
 
@@ -136,6 +170,24 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         fireClockStateChange(contestTime);
 
     }
+    
+    
+    /**
+     * Update clock times with scheduled information.
+     * 
+     * @param contestInformation
+     */
+    public void fireClockStateChange(final ContestInformation contestInformation) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                setScheduledStartTime(contestInformation);
+                updateTimeLabels();
+            }
+        });
+        
+    }
+
 
     /**
      * Update clock display using contestTime.
@@ -173,6 +225,9 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             updateTimeLabel(element.intValue());
 
         }
+        
+        updateScheduledStartLabels();
+        
     }
 
     /**
@@ -203,6 +258,8 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             }
         });
     }
+    
+    
 
     /**
      * Add a label to be the update list.
@@ -214,22 +271,42 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
      * @param siteNumber the site number for this contest time.
      */
     public void addLabeltoUpdateList(JLabel labelToUpdate, DisplayTimes whichTime, int siteNumber) {
+        
+        Vector<JLabel> list = null;
+        
+        switch (whichTime) {
+            case ELAPSED_TIME:
+                list = sitesElapsedTimeLabelList.get(new Integer(siteNumber));
+                if (list == null) {
+                    list = new Vector<JLabel>();
+                }
+                list.addElement(labelToUpdate);
+                sitesElapsedTimeLabelList.put(new Integer(siteNumber), list);
+                break;
+                
+            case REMAINING_TIME:
+                
+                list = sitesRemainingtimeLabelList.get(new Integer(siteNumber));
+                
+                if (list == null) {
+                    list = new Vector<JLabel>();
+                }
+                list.addElement(labelToUpdate);
+                sitesRemainingtimeLabelList.put(new Integer(siteNumber), list);
+                break;
+                
+            case TO_SCHEDULED_START_TIME:
+                
+                scheduledStartTimeLabelList.add(labelToUpdate);
+                
+                break;
+
+            default:
+                break;
+        }
         if (whichTime == DisplayTimes.ELAPSED_TIME) {
-            Vector<JLabel> list = sitesElapsedTimeLabelList.get(new Integer(siteNumber));
-            if (list == null) {
-                list = new Vector<JLabel>();
-            }
-            list.addElement(labelToUpdate);
-            sitesElapsedTimeLabelList.put(new Integer(siteNumber), list);
         } else {
 
-            Vector<JLabel> list = sitesRemainingtimeLabelList.get(new Integer(siteNumber));
-
-            if (list == null) {
-                list = new Vector<JLabel>();
-            }
-            list.addElement(labelToUpdate);
-            sitesRemainingtimeLabelList.put(new Integer(siteNumber), list);
         }
 
         updateTimeLabels();
@@ -300,6 +377,10 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
                         list.elementAt(i).setForeground(Color.BLACK);
                     }
                 }
+                
+                for (JLabel jLabel : scheduledStartTimeLabelList) {
+                    jLabel.setForeground(Color.BLACK);
+                }
             }
         });
     }
@@ -309,7 +390,9 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
      * 
      */
     private void stopClockDisplay(int siteNumber) {
-        timer.stop();
+        if (scheduledStartTime == null){
+            timer.stop();
+        }
 
         Vector<JLabel> list = sitesElapsedTimeLabelList.get(new Integer(siteNumber));
         if (list == null) {
@@ -385,6 +468,8 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
                             list.elementAt(i).setText(clockText);
                         }
                     }
+                    
+                    updateScheduledStartLabels();
 
                     if (siteNumber == localSiteNumber.intValue() && clientFrame != null) { // only update Title bar if the local site
                         if ((clientFrame.getState() == JFrame.ICONIFIED) || (isAlwaysUpdateTitle())) {
@@ -407,6 +492,33 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         } );
 
     }
+
+    /**
+     * 
+     */
+    protected void updateScheduledStartLabels() {
+        
+        if (scheduledStartTimeLabelList.size() >  0){
+            
+            String text = "No scheduled start";
+            String hint = "Still no scheduled start";
+            
+            if (scheduledStartTime != null){
+                Date now = GregorianCalendar.getInstance().getTime();
+                DateDifferizer differizer = new DateDifferizer(now, scheduledStartTime.getTime());
+                differizer.setFormat(DateFormat.COUNT_DOWN);
+                text = differizer.toString();
+                hint = differizer.formatTime(DateFormat.LONG_FORMAT);
+            }
+            
+            for (JLabel jLabel : scheduledStartTimeLabelList) {
+                jLabel.setText(text);
+                jLabel.setToolTipText(hint);
+            }
+        }
+        
+    }
+
 
     public void actionPerformed(ActionEvent arg0) {
         ContestTime contestTime = contestTimes.get(localSiteNumber);
@@ -445,12 +557,50 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         log = controller.getLog();
         
         contest.addContestTimeListener(new ContestTimeListenerImplementation());
+        contest.addContestInformationListener(new ContestInformationListenerImplementation());
         
+        setScheduledStartTime(inContest.getContestInformation());
     }
 
     public String getPluginTitle() {
         return "Contest Clock Display";
     }
+    
+    
+    public class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        @Override
+        public void contestInformationAdded(ContestInformationEvent event) {
+            fireClockStateChange(event.getContestInformation());
+            
+        }
+
+        @Override
+        public void contestInformationChanged(ContestInformationEvent event) {
+            fireClockStateChange(event.getContestInformation());
+            
+        }
+
+        @Override
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            fireClockStateChange(event.getContestInformation());
+            
+        }
+
+        @Override
+        public void contestInformationRefreshAll(ContestInformationEvent event) {
+            fireClockStateChange(event.getContestInformation());
+            
+        }
+
+        @Override
+        public void finalizeDataChanged(ContestInformationEvent event) {
+            fireClockStateChange(event.getContestInformation());
+            
+        }
+        
+    }
+    
     
     /**
      * Implementor.
@@ -515,7 +665,26 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         }
     }
 
+    public GregorianCalendar getScheduledStartTime() {
+        return scheduledStartTime;
+    }
+    
+    public void setScheduledStartTime(GregorianCalendar scheduledStartTime) {
+        this.scheduledStartTime = scheduledStartTime;
+        if (scheduledStartTime != null){
+            timer.start();
+        }
+    }
+    
+    public void setScheduledStartTime(ContestInformation info) {
+        if (info != null){
+            setScheduledStartTime(info.getScheduledStartTime());
+        }
+    }
+    
+
     public JFrame getClientFrame() {
         return clientFrame;
     }
 }  //  @jve:decl-index=0:visual-constraint="96,54"
+

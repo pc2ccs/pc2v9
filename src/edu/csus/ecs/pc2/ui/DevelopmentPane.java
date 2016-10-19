@@ -17,6 +17,8 @@ public class DevelopmentPane extends JPanePlugin {
     private static final long serialVersionUID = -6902750741500529883L;
 
     private PluginPane pluginPane = new PluginPane();
+    
+    private ContestScheduledStartClockPane contestScheduledStartClockPane = new ContestScheduledStartClockPane();
 
     private ReportPane reportPane = new ReportPane();
 
@@ -34,6 +36,8 @@ public class DevelopmentPane extends JPanePlugin {
         add(tabbedPane);
 
         tabbedPane.addTab("Plugins", null, pluginPane, null);
+        
+        tabbedPane.addTab("Scheduled Start Countdown", null, contestScheduledStartClockPane, null);
 
         tabbedPane.addTab("Reports", null, reportPane, null);
         
@@ -57,6 +61,7 @@ public class DevelopmentPane extends JPanePlugin {
         optionsPane.setContestAndController(inContest, inController);
         logSettingsPane.setContestAndController(inContest, inController);
         contestPreloadPane.setContestAndController(inContest, inController);
+        contestScheduledStartClockPane.setContestAndController(inContest, inController);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -215,11 +215,9 @@ public class DateDifferizer {
         } else if (months > 0) {
             return pluralString("month", months);
         } else if (days > 0) {
-            return pluralString("day", days);
-        } else if (hours24 > 0) {
+            return pluralString("day", days) + " " + hours24 + ":" + lpad('0', 2, minutes) + ":" + lpad('0', 2, seconds);
+        } else { 
             return hours24 + ":" + lpad('0', 2, minutes) + ":" + lpad('0', 2, seconds);
-        } else {
-            return minutes + ":" + lpad('0', 2, seconds);
         }
     }
 
