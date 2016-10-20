@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.core.util;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -78,7 +77,7 @@ public class DateDifferizer {
     /**
      * Initialize with a date with an offset.
      * @param date
-     * @param field - field name from {@link Calendar#add}
+     * @param field - field name from {@link GregorianCalendar#add(int, int)}
      * @param amount
      */
     public DateDifferizer(Date date, int field, int amount) {

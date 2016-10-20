@@ -306,10 +306,6 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             default:
                 break;
         }
-        if (whichTime == DisplayTimes.ELAPSED_TIME) {
-        } else {
-
-        }
 
         updateTimeLabels();
         
@@ -598,6 +594,11 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
     }
     
     
+    /**
+     * Listener.
+     * 
+     * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+     */
     public class ContestInformationListenerImplementation implements IContestInformationListener {
 
         @Override

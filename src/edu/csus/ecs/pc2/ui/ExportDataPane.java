@@ -493,12 +493,12 @@ public class ExportDataPane extends JPanePlugin {
 
     private JButton getViewEventFeed() {
         if (viewEventFeed == null) {
-        	viewEventFeed = new JButton("Show Event Feed");
-        	viewEventFeed.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        showSnapshotOfEventViewer();
-        	    }
-        	});
+            viewEventFeed = new JButton("Show Event Feed");
+            viewEventFeed.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    showSnapshotOfEventViewer();
+                }
+            });
         }
         return viewEventFeed;
     }

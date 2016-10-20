@@ -51,8 +51,7 @@ public class DateDifferizerTest extends TestCase {
 
     }
 
-    public void testOneDayDiff() throws Exception 
-    {
+    public void testOneDayDiff() throws Exception {
         Date date = new Date();
 
         String expectedTimeString ;

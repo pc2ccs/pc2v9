@@ -7,7 +7,7 @@ package edu.csus.ecs.pc2.core;
  */
 public final class Constants {
 
-    public static long HOURS_PER_DAY = 24;
+    public static final long HOURS_PER_DAY = 24;
 
     private Constants() {
         super();
