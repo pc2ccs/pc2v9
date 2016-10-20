@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
@@ -2944,55 +2943,12 @@ public class PacketHandler {
             
             //if I'm a server and the new contest info includes a scheduled (future) auto-start time, schedule it
             if (isServer()) {
-                
-                //get the scheduled start time (if any) and the time now
-                GregorianCalendar startTime = contestInformation.getScheduledStartTime();
-                GregorianCalendar now = new GregorianCalendar();
-                
-                //if starttime is null it means there should not be any autostart; clear any scheduled start
-                if (startTime == null && autoStarter != null) {
-                    
-                    GregorianCalendar scheduledStart = autoStarter.getScheduledFutureStartTime();
-                    autoStarter.cancelAnyScheduledStartContestTask();
-                    autoStarter = null;
-                    
-                    //log the cancellation of scheduled start
-                    if (controller!= null) {
-                        Log log = controller.getLog();
-                        if (log!=null) {
-                            log.info("Cancelled automatic contest start scheduled for time " + scheduledStart.getTimeInMillis());
-                        } else {
-                            System.err.println ("Cancelled automatic contest scheduled for time " + scheduledStart.getTimeInMillis() + " but couldn't get Log");
-                        }
-                    } else {
-                        System.err.println ("Cancelled automatic contest start scheduled for time " + scheduledStart.getTimeInMillis() + " but couldn't get Controller (so no log)");
-                    }
+
+                if (autoStarter == null) {
+                    autoStarter = new AutoStarter(contest, controller);
                 }
-                
-                //check if we should schedule a start task
-                if (startTime != null  &&  startTime.after(now)  && contestInformation.isAutoStartContest()) {
-                    
-                    //get rid of any previously-scheduled autostart task
-                    if (autoStarter!=null) {
-                        autoStarter.cancelAnyScheduledStartContestTask();
-                    }
-                    
-                    //schedule a new task to auto-start the contest at the specified time (this also removes any previously-scheduled start task(s))
-                    autoStarter = new AutoStarter(contest,controller);
-                    autoStarter.scheduleFutureStartContestTask(startTime);
-                    
-                    //log the scheduled start
-                    if (controller!= null) {
-                        Log log = controller.getLog();
-                        if (log!=null) {
-                            log.info("Scheduled automatic contest start at time " + startTime.getTimeInMillis());
-                        } else {
-                            System.err.println ("Scheduled automatic contest start at time " + startTime.getTimeInMillis() + " but couldn't get Log");
-                        }
-                    } else {
-                        System.err.println ("Scheduled automatic contest start at time " + startTime.getTimeInMillis() + " but couldn't get Controller (so no log)");
-                    }
-                } 
+
+                autoStarter.updateScheduleStartContestTask(contest.getContestInformation());
             }
         }
 
