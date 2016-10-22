@@ -251,6 +251,10 @@ public class ExportYAML {
         problemSetWriter.println("# Created: " + getDateTimeString());
         
         writeProblemSetYaml(problemSetWriter, contest, directoryName, IContestLoader.PROBLEMSET_PROBLEMS_KEY, problems);
+        
+        problemSetWriter.flush();
+        problemSetWriter.close();
+        problemSetWriter = null;
 
         Vector<Account> accountVector = contest.getAccounts(ClientType.Type.JUDGE);
         Account[] judgeAccounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
