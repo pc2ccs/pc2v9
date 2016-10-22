@@ -348,4 +348,16 @@ public class UtilitiesTest extends AbstractTestCase {
         expected = 0;
         assertEquals("Expeting number " + expected + " for problem " + probMissing, expected, actual2);
     }
+    
+    public void testUnixify() throws Exception {
+        
+        String input = ".\\testout\\ExportYAMLTest\\testOne\\sumit\\data\\secret\\sumit.dat";
+        String expected = "./testout/ExportYAMLTest/testOne/sumit/data/secret/sumit.dat";
+        
+        String actual = Utilities.unixifyPath(input);
+        
+        assertEquals(expected, actual);
+        
+        
+    }
 }

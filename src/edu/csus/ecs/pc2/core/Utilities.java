@@ -1353,5 +1353,17 @@ public final class Utilities {
     public static String getDateTimeString() {
         return formatterYYYYMMDDHHMMSS.format(new Date());
     }
+
+    /**
+     * Convert DOS file seperator with unix.
+     * 
+     * replace all \ with /.
+     * 
+     * @param filename
+     * @return
+     */
+    public static String unixifyPath(String filename) {
+        return filename.replaceAll("\\\\", "/");
+    }
     
 }

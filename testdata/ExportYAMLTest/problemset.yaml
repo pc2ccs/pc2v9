@@ -1,6 +1,6 @@
 # Contest Configuration, Problem Set, version 1.0 
 # PC^2 Version: Version 9.2 20161022 (Saturday, October 22nd 2016 17:48 UTC) Java ver 1.8.0_25 build 182 Windows 7 6.1 (amd64) 
-# Created: 2016-10-22 10:52:27 PDT
+# Created: 2016-10-22 11:30:34 PDT
 problems:
   - letter: A
     short-name: sumit
@@ -8,8 +8,8 @@ problems:
     color: Alice Blue
     load-data-files: true
 #     2 data files written
-#     wrote .\testout\ExportYAMLTest\testOne\sumit\data\secret\sumit.dat
-#     wrote .\testout\ExportYAMLTest\testOne\sumit\data\secret\sumit.ans
+#     wrote ./testout/ExportYAMLTest/testOne/sumit/data/secret/sumit.dat
+#     wrote ./testout/ExportYAMLTest/testOne/sumit/data/secret/sumit.ans
 
   - letter: B
     short-name: quadrangles
@@ -17,8 +17,8 @@ problems:
     color: Antique White
     load-data-files: true
 #     2 data files written
-#     wrote .\testout\ExportYAMLTest\testOne\quadrangles\data\secret\quads.in
-#     wrote .\testout\ExportYAMLTest\testOne\quadrangles\data\secret\quads.ans
+#     wrote ./testout/ExportYAMLTest/testOne/quadrangles/data/secret/quads.in
+#     wrote ./testout/ExportYAMLTest/testOne/quadrangles/data/secret/quads.ans
 
   - letter: C
     short-name: routing
@@ -38,8 +38,8 @@ problems:
     color: Azure
     load-data-files: true
 #     2 data files written
-#     wrote .\testout\ExportYAMLTest\testOne\london\data\secret\london.dat
-#     wrote .\testout\ExportYAMLTest\testOne\london\data\secret\london.ans
+#     wrote ./testout/ExportYAMLTest/testOne/london/data/secret/london.dat
+#     wrote ./testout/ExportYAMLTest/testOne/london/data/secret/london.ans
 
   - letter: F
     short-name: finnigans

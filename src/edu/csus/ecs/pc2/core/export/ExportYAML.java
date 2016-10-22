@@ -402,7 +402,7 @@ public class ExportYAML {
             if (filesWritten.length > 0) {
                 writer.println("#     " + filesWritten.length + " data files written");
                 for (String filename : filesWritten) {
-                    writer.println("#     wrote " + filename);
+                    writer.println("#     wrote " + Utilities.unixifyPath(filename));
                 }
             }
             id++;
@@ -617,14 +617,14 @@ public class ExportYAML {
             for (SerializedFile serializedFile : problemDataFiles.getJudgesDataFiles()) {
                 String outputFileName = dataFileDirectoryName + File.separator + serializedFile.getName();
                 createFile(serializedFile, outputFileName);
-                problemWriter.println("#     wrote (D)" + outputFileName);
+                problemWriter.println("#     wrote (D)" + Utilities.unixifyPath(outputFileName));
                 filesWritten.addElement(outputFileName);
             }
 
             for (SerializedFile serializedFile : problemDataFiles.getJudgesAnswerFiles()) {
                 String outputFileName = dataFileDirectoryName + File.separator + serializedFile.getName();
                 createFile(serializedFile, outputFileName);
-                problemWriter.println("#     wrote (A)" + outputFileName);
+                problemWriter.println("#     wrote (A)" + Utilities.unixifyPath(outputFileName));
                 filesWritten.addElement(outputFileName);
             }
 
