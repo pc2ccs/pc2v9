@@ -47,6 +47,7 @@ import edu.csus.ecs.pc2.core.report.AutoJudgingSettingsReport;
 import edu.csus.ecs.pc2.core.report.BalloonDeliveryReport;
 import edu.csus.ecs.pc2.core.report.BalloonSettingsReport;
 import edu.csus.ecs.pc2.core.report.BalloonSummaryReport;
+import edu.csus.ecs.pc2.core.report.CDPReport;
 import edu.csus.ecs.pc2.core.report.CategoryReport;
 import edu.csus.ecs.pc2.core.report.ClarificationsReport;
 import edu.csus.ecs.pc2.core.report.ClientSettingsReport;
@@ -286,6 +287,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new JudgingAnalysisReport());
 
         reports.add(new JSON2016Report());
+        
+        reports.add(new CDPReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());

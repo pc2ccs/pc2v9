@@ -264,6 +264,7 @@ public class ReportsTest extends AbstractTestCase {
                 "Auto Judging Settings Report", //
                 "Judging Analysis Report", //
                 "JSON 2016 Scoreboard", //
+                "Contest Data Package Report/Export", //
         };
 
         IReport [] reportList = Reports.getReports();
@@ -275,7 +276,7 @@ public class ReportsTest extends AbstractTestCase {
             if (idx < reportTitles.length){
                 assertEquals("Expected name for report "+(idx+1)+" "+iReport.getClass().getName(), reportTitles[idx], name);
             } else {
-//                System.out.println("Missing \""+name+"\", //");
+                System.out.println("Missing \""+name+"\", //");
                 fail("Missing report named: "+name);
             }
             idx ++;

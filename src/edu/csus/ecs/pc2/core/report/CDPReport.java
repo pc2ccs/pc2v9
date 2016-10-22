@@ -30,15 +30,16 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.exports.ccs.ResolverEventFeedXML;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
- * Contest Data Package Report
+ * Contest Data Package Report - creates CDP.
  * 
- * @author $Author$
- * @version $Id$
+ * 
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class CDPReport implements IReport {
 
@@ -211,6 +212,7 @@ public class CDPReport implements IReport {
         ExportYAML exportYAML = new ExportYAML();
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.ss.SSS");
+ 
 
         if (directoryName == null) {
             directoryName = "reports" + File.separator + "yaml" + simpleDateFormat.format(new Date());
@@ -246,14 +248,7 @@ public class CDPReport implements IReport {
         String resultsdir = directoryName + File.separator + "results";
         ensureDirectory(resultsdir);
 
-        String resultsTSVFilename = directoryName + File.separator + "results.tsv";
-
-        try {
-            writeResults(resultsTSVFilename);
-        } catch (Exception e) {
-            printWriter.println("Error creating " + resultsTSVFilename);
-            e.printStackTrace(printWriter);
-        }
+     
 
         String scorboardTSVFilename = directoryName + File.separator + "scoreboard.tsv";
         try {
@@ -360,6 +355,15 @@ public class CDPReport implements IReport {
         printWriter.println();
         Utilities.catFile(printWriter, problemSetYamlFilename);
         printWriter.println();
+        
+        String resultsTSVFilename = directoryName + File.separator + "results.tsv";
+
+        try {
+            writeResults(resultsTSVFilename);
+        } catch (Exception e) {
+            printWriter.println("Error creating " + resultsTSVFilename);
+            e.printStackTrace(printWriter);
+        }
     }
 
     public void writeProblemYaml(String filename) throws FileNotFoundException {
@@ -423,35 +427,67 @@ public class CDPReport implements IReport {
 
         HashMap<String, RunFiles> list = new HashMap<>();
 
-        /**
-         * Request set of runs from server. Wait for runs to arrive. Consider caching runs. return runs.
-         */
-
         // TODO Check that if on server whether grabs runs directly.
         // This may be a server only feature, for now.
+        
+        if (allRunsNotPresent(runs)){
+            /**
+             * Request set of runs from server. Wait for runs to arrive. Consider caching runs. return runs.
+             */
 
-        // RunFiles [] files = controller.fetchRuns(runs);
+            // TODO code for Admin to get Source files 
+            // send packet to controller
+            // wait for run source to be received, then continue
+        }
 
         /**
          * Fetch run files for
          */
 
-        String filename = "pc2v9.ini";
-
         for (Run run : runs) {
-            RunFiles files = new RunFiles(run, filename);
-            String key = run.getElementId().toString();
-            list.put(key, files);
+            RunFiles files;
+            try {
+                files = contest.getRunFiles(run);
+                String key = run.getElementId().toString();
+                list.put(key, files);
+            } catch (ClassNotFoundException | IOException | FileSecurityException e) {
+                log.warning("Unable to get run files for " + getRunInfoFormatted(run) + " " + e.getMessage());
+            }
         }
 
         return list;
     }
 
+    private boolean allRunsNotPresent(Run[] runs) {
+        
+        for (Run run : runs) {
+            try {
+                if (contest.getRunFiles(run) == null){
+                    return false;
+                }
+            } catch (Exception e) {
+                log.warning("for Run files for run "+getRunInfoFormatted(run)+" "+e.getMessage());
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    private String getRunInfoFormatted(Run run) {
+        return "Run "+run.getNumber()+" Site "+run.getSiteNumber();
+    }
+
     public void writeSubmissions(PrintWriter writer, String dir) throws IOException {
 
         Run[] runs = contest.getRuns();
+        
+        if (filter != null){
+            runs = filter.getRuns(runs);
+        }
+        
         Arrays.sort(runs, new RunComparator());
-
+        
         Map<String, RunFiles> files = getRunFiles(runs);
 
         for (Run run : runs) {
@@ -601,13 +637,16 @@ public class CDPReport implements IReport {
 
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
+        filter = inFilter;
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+        
+  
 
         try {
 
             try {
                 printHeader(printWriter);
-
+                
                 writeReport(printWriter);
 
                 printFooter(printWriter);
@@ -645,7 +684,7 @@ public class CDPReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Contest Data Package Reportt";
+        return "Contest Data Package Report/Export";
     }
 
     public Filter getFilter() {

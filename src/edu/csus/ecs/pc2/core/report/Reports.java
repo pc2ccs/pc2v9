@@ -148,6 +148,8 @@ public final class Reports {
 
         reports.add(new JSON2016Report());
         
+        reports.add(new CDPReport());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }
