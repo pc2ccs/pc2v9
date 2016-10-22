@@ -67,7 +67,15 @@ public interface IContestLoader {
 
     String CLAR_CATEGORIES_KEY = "clar-categories";
 
+    /**
+     * Name for problem set in contest.yaml
+     */
     String PROBLEMS_KEY = "problemset";
+    
+    /**
+     * name for problem set in problemset.yaml
+     */
+    String PROBLEMSET_PROBLEMS_KEY = "problems";
 
     String MANUAL_REVIEW_KEY = "manual-review";
     

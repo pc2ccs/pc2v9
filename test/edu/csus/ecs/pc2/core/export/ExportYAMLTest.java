@@ -36,7 +36,15 @@ public class ExportYAMLTest extends AbstractTestCase {
     public void testOne() throws Exception {
 
         IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
-
+        
+        String dataDirectory = getDataDirectory();
+        ensureDirectory(dataDirectory);
+        
+        String testDirectory = getOutputDataDirectory("testOne");
+        ensureDirectory(testDirectory);
+//        startExplorer(testDirectory);
+//        startExplorer(dataDirectory);
+        
 //        addShortNames(contest);
 
         Problem[] problems = contest.getProblems();
@@ -47,9 +55,7 @@ public class ExportYAMLTest extends AbstractTestCase {
             }
         }
         
-        String testDirectory = getOutputDataDirectory("testOne");
-        ensureDirectory(testDirectory);
-
+        
         sampleContest.addDataFiles(contest, testDirectory, problems[0], "sumit.dat", "sumit.ans");
         sampleContest.addDataFiles(contest, testDirectory, problems[1], "quads.in", "quads.ans");
         sampleContest.addDataFiles(contest, testDirectory, problems[4], "london.dat", "london.ans");
@@ -58,6 +64,12 @@ public class ExportYAMLTest extends AbstractTestCase {
         ExportYAML exportYAML = new ExportYAML();
 
         exportYAML.exportFiles(testDirectory, contest);
+
+        String actualFileName =testDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
+        String expectedFileName = dataDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
+        
+        // Start compare on line 4 to skip header/version/time information
+        assertFileContentsEquals(new File(actualFileName), new File(expectedFileName), 4);
 
         exportYAML = null;
     }
@@ -83,8 +95,14 @@ public class ExportYAMLTest extends AbstractTestCase {
     
     public void testCreateYaml() throws Exception {
         
+        String dataDirectory = getDataDirectory("testCreateYaml");
+        ensureDirectory(dataDirectory);
+        
         String testDirectory = getOutputDataDirectory("testCreateYaml");
         ensureDirectory(testDirectory);
+        
+        startExplorer(dataDirectory);
+        startExplorer(testDirectory);
         
         IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
         
@@ -114,6 +132,13 @@ public class ExportYAMLTest extends AbstractTestCase {
         assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4);
         
 //        String filename = testDirectory + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+        
+        String actualFileName =testDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
+        String expectedFileName = dataDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
+        
+        // Start compare on line 4 to skip header/version/time information
+        assertFileContentsEquals(new File(actualFileName), new File(expectedFileName), 4);
+
 
         exportYAML = null;
 

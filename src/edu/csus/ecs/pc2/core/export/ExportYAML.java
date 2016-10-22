@@ -232,58 +232,25 @@ public class ExportYAML {
         }
 
         Problem[] problems = contest.getProblems();
+        
+        /**
+         * Write problem section to contest.yaml
+         */
+        writeProblemSetYaml(contestWriter, contest, directoryName, IContestLoader.PROBLEMS_KEY, problems);
+        
+        /**
+         * Write problemset.yaml file. 
+         */
+        String confiDir = new File(contestFileName).getParent();
+        
+        String problemSetFilename = confiDir + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
+        PrintWriter problemSetWriter = new PrintWriter(new FileOutputStream(problemSetFilename, false), true);
 
-        if (problems.length > 0) {
-            contestWriter.println(ContestYAMLLoader.PROBLEMS_KEY + ":");
-        }
-
-        // TODO CCS put the problemset section into its own method
-
-        // problemset:
-        //
-        // - letter: B
-        // short-name: barcodes
-        // color: red
-        // rgb: #ff0000
-
-        int id = 1;
-
-        for (Problem problem : problems) {
-
-            String name = problem.getDisplayName();
-
-            String letter = getProblemLetter(id);
-            if (problem.getLetter() != null) {
-                letter = problem.getLetter();
-            }
-            contestWriter.println(PAD2 + "- letter: " + letter);
-            String shortName = createProblemShortName(name);
-            if (problem.getShortName() != null && problem.getShortName().trim().length() > 0) {
-                shortName = problem.getShortName();
-            }
-            contestWriter.println(PAD4 + "short-name: " + shortName);
-            contestWriter.println(PAD4 + "name: " + quote(name));
-
-            String colorName = getProblemBalloonColor(contest, problem);
-            if (colorName != null) {
-                contestWriter.println(PAD4 + "color: " + colorName);
-            }
-            // else no color, nothing to print.
-
-            contestWriter.println(PAD4 + ContestYAMLLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!problem.isUsingExternalDataFiles()));
-
-            String[] filesWritten = writeProblemYAML(contest, directoryName, problem, shortName);
-
-            if (filesWritten.length > 0) {
-                contestWriter.println("#     " + filesWritten.length + " data files written");
-                for (String filename : filesWritten) {
-                    contestWriter.println("#     wrote " + filename);
-                }
-            }
-            id++;
-
-            contestWriter.println();
-        }
+        problemSetWriter.println("# Contest Configuration, Problem Set, version 1.0 ");
+        problemSetWriter.println("# PC^2 Version: " + new VersionInfo().getSystemVersionInfo());
+        problemSetWriter.println("# Created: " + getDateTimeString());
+        
+        writeProblemSetYaml(problemSetWriter, contest, directoryName, IContestLoader.PROBLEMSET_PROBLEMS_KEY, problems);
 
         Vector<Account> accountVector = contest.getAccounts(ClientType.Type.JUDGE);
         Account[] judgeAccounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
@@ -378,6 +345,71 @@ public class ExportYAML {
         contestWriter.flush();
         contestWriter.close();
         contestWriter = null;
+    }
+
+    /**
+     * Write problem set section.
+     * 
+     * @param writer
+     * @param contest
+     * @param directoryName
+     * @param problemsKey problemset for contest.yaml or problems for problemset.yaml 
+     * @param problems
+     * @throws IOException
+     */
+    private void writeProblemSetYaml(PrintWriter writer, IInternalContest contest, String directoryName, String problemsKey, Problem [] problems) throws IOException {
+
+        if (problems.length > 0) {
+            writer.println(problemsKey + ":");
+        }
+        
+        // 
+        // problemset:
+        //
+        // - letter: B
+        // short-name: barcodes
+        // color: red
+        // rgb: #ff0000
+
+        int id = 1;
+
+        for (Problem problem : problems) {
+
+            String name = problem.getDisplayName();
+
+            String letter = getProblemLetter(id);
+            if (problem.getLetter() != null) {
+                letter = problem.getLetter();
+            }
+            writer.println(PAD2 + "- letter: " + letter);
+            String shortName = createProblemShortName(name);
+            if (problem.getShortName() != null && problem.getShortName().trim().length() > 0) {
+                shortName = problem.getShortName();
+            }
+            writer.println(PAD4 + "short-name: " + shortName);
+            writer.println(PAD4 + "name: " + quote(name));
+
+            String colorName = getProblemBalloonColor(contest, problem);
+            if (colorName != null) {
+                writer.println(PAD4 + "color: " + colorName);
+            }
+            // else no color, nothing to print.
+
+            writer.println(PAD4 + ContestYAMLLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!problem.isUsingExternalDataFiles()));
+
+            String[] filesWritten = writeProblemYAML(contest, directoryName, problem, shortName);
+
+            if (filesWritten.length > 0) {
+                writer.println("#     " + filesWritten.length + " data files written");
+                for (String filename : filesWritten) {
+                    writer.println("#     wrote " + filename);
+                }
+            }
+            id++;
+
+            writer.println();
+        }
+        
     }
 
     /**

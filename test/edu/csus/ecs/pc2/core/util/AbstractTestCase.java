@@ -859,7 +859,16 @@ public class AbstractTestCase extends TestCase {
         return  documentBuilder.parse(new InputSource(new StringReader(xmlString)));
     }
 
+    /**
+     * Compare two text files, fail if contents not identical.
+     * 
+     * @param expectedFile
+     * @param actualFile
+     * @throws IOException
+     */
     public void assertFileContentsEquals(File expectedFile, File actualFile) throws IOException{
+        // Compare two files 
+        // file comparison 
         assertFileContentsEquals(expectedFile, actualFile, 1);
     }
     
