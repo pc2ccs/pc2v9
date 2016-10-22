@@ -348,7 +348,12 @@ public final class PacketFactory {
     public static final String OVERRIDE_RUN_ID = "OVERRIDE_RUN_ID";
 
     public static final String AUTO_REG_REQUEST_INFO = "AUTO_REG_REQUEST_INFO";
-
+    
+    /**
+     * List of files submitted by team.
+     */
+    public static final String TEAM_RUN_SOURCE_FILES_LIST = "TEAM_RUN_SOURCE_FILES_LIST";
+    
     
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -2258,4 +2263,30 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
+    
+    /**
+     * List of team source files.
+     * 
+     * <P>
+     * This is a response/reply to a {@link #createRunSourceFetchRequest(ClientId, ClientId, Run[])}.
+     */
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, RunFiles [] runfiles) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(TEAM_RUN_SOURCE_FILES_LIST, runfiles);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
+    
+    /**
+     * Request a list of team source files.
+     */
+    public static Packet createRunSourceFetchRequest(ClientId source, ClientId destination, Run [] runList) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(RUN_LIST, runList);
+        Packet packet = new Packet(Type.REQUEST_FETCH_TEAMS_SUBMISSION_FILES, source, destination, prop);
+        return packet;
+    }
+    
 }

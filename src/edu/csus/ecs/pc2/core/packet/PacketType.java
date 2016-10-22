@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.core.packet;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
+
 /**
  * Defines packet types and property names used to store data in packets.
  * 
@@ -757,7 +759,13 @@ public final class PacketType implements Serializable {
          * Start Playback 
          */
         RESET_PLAYBACK,
-    
+        /**
+         * A request to send a list of run files to client.
+         * 
+         * An client (admin or feeder) will send a request
+         * to the server for team's run source (RunFile []) files.
+         */
+        REQUEST_FETCH_TEAMS_SUBMISSION_FILES,
     }
 
     /**
