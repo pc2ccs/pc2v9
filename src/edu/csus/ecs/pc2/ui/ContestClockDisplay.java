@@ -41,7 +41,6 @@ import edu.csus.ecs.pc2.core.util.DateDifferizer.DateFormat;
  * Add a label and the format of the time {@link #addLabeltoUpdateList(JLabel, DisplayTimes, int)} 
  * <P>
  * 
- * 
  * @author pc2@ecs.csus.edu
  */
 

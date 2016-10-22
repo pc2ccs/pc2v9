@@ -41,12 +41,12 @@ languages:
     active: true
     compilerCmd: 'g++ -lm -o {:basename}.exe {:mainfile}'
     exemask: '{:basename}.exe'
-    execCmd: './{:basename}.exe'
-    runner: './{:basename}.exe'
+    execCmd: '.\{:basename}.exe'
+    runner: '.\{:basename}.exe'
     runner-args: ''
     interpreted: false
     use-judge-cmd: false
-    judge-exec-cmd: './{:basename}.exe'
+    judge-exec-cmd: '.\{:basename}.exe'
 
   - name: 'Perl'
     active: true
@@ -63,12 +63,12 @@ languages:
     active: true
     compilerCmd: 'cl.exe {:mainfile}'
     exemask: '{:basename}.exe'
-    execCmd: './{:basename}.exe'
-    runner: './{:basename}.exe'
+    execCmd: '.\{:basename}.exe'
+    runner: '.\{:basename}.exe'
     runner-args: ''
     interpreted: false
     use-judge-cmd: false
-    judge-exec-cmd: './{:basename}.exe'
+    judge-exec-cmd: '.\{:basename}.exe'
 
   - name: 'APL'
     active: true
