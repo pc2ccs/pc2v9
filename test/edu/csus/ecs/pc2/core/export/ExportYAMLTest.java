@@ -101,8 +101,8 @@ public class ExportYAMLTest extends AbstractTestCase {
         String testDirectory = getOutputDataDirectory("testCreateYaml");
         ensureDirectory(testDirectory);
         
-        startExplorer(dataDirectory);
-        startExplorer(testDirectory);
+//        startExplorer(dataDirectory);
+//        startExplorer(testDirectory);
         
         IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
         
