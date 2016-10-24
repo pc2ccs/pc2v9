@@ -102,7 +102,7 @@ public class Teamdata {
         return outLines;
     }
 
-    private String teamDataLine(IInternalContest contest, Account account) {
+    public String teamDataLine(IInternalContest contest, Account account) {
 
         ClientId clientId = account.getClientId();
 
@@ -119,13 +119,29 @@ public class Teamdata {
         if (account.getGroupId() != null) {
             groupId = contest.getGroup(account.getGroupId()).getGroupId();
         }
+        
+        String longSchoolName = setString(account.getLongSchoolName(), "undefined");
+        String countryCode = setString(account.getCountryCode(), "XXX");
+        String shortSchoolName = setString(account.getShortSchoolName(),"undefined");
 
+        
         return clientId.getClientNumber() + TAB + //
                 account.getExternalId() + TAB + //
                 groupId + TAB + //
                 account.getDisplayName() + TAB + //
-                account.getLongSchoolName() + TAB + //
-                account.getShortSchoolName() + TAB + //
-                account.getCountryCode();
+                longSchoolName+ TAB + //
+                shortSchoolName + TAB + //
+                countryCode;
+    }
+
+    private String setString(String string, String defaultString) {
+        
+        if (string == null || string.trim().length() == 0){
+            return defaultString;
+        } else {
+            return string;
+        }
+            
+//            return string;
     }
 }

@@ -1,27 +1,26 @@
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.util.Arrays;
+import java.util.Vector;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 
 /**
- * Test team.tsv
+ * Test team.tsv.
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-
-// $HeadURL$
-
 public class TeamdataTest extends TestCase {
-
+    
+    private static final String TAB = "\t";
 
     private SampleContest sample = new SampleContest();
 
@@ -125,5 +124,81 @@ public class TeamdataTest extends TestCase {
             System.out.println(line);
         }
     }
+    
+    
+    public Account[] getTeamAccounts(IInternalContest inContest) {
+        Vector<Account> accountVector = inContest.getAccounts(ClientType.Type.TEAM);
+        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+
+        return accounts;
+    }
+    
+    /**
+     * Test teamDataLine.
+     * 
+     * @throws Exception
+     */
+    public void testteamDataLine() throws Exception {
+        
+        Teamdata teamdata = new Teamdata();
+        IInternalContest contest = new SampleContest().createStandardContest();
+        
+        Account [] accounts = getTeamAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+        
+        Account accountOne = accounts[0];
+        
+        // Field Description Example Type
+        // 1 Team number 22 integer
+        // 2 Reservation ID 24314 integer
+        // 3 Group ID 4 integer
+        // 4 Team name Hoos string
+        // 5 Institution name University of Virginia string
+        // 6 Institution short name U Virginia string
+        // 7 Country USA string ISO 3166-1 alpha-3
+        
+        String institutionName = "";
+        String institutionShortName = "";
+        String country = "";
+        
+        String displayName = "Team 1 Display Name";
+        accountOne.setDisplayName(displayName);
+        updateAccountFields(accountOne, institutionName, institutionShortName, country);
+
+        String actual = teamdata.teamDataLine(contest, accountOne);
+//        String expected = "1" + TAB + "3001" + TAB + "0" + TAB + displayName + TAB + institutionName + TAB + institutionShortName + TAB + country;
+        
+        institutionName = "undefined";;
+        institutionShortName = "undefined";
+        country = "XXX";
+        
+        
+        String expected = "1" + TAB + "3001" + TAB + "0" + TAB + displayName + TAB + institutionName + TAB + institutionShortName + TAB + country;
+        assertEquals(expected, actual);
+        
+        Account accountMid = accounts[accounts.length / 2];
+        
+        institutionName = "University of Virginia";
+        institutionShortName = "UOV";
+        country = "USA";
+        
+        updateAccountFields(accountMid, institutionName, institutionShortName, country);
+
+        actual = teamdata.teamDataLine(contest, accountMid);
+        expected = "61" + TAB + "3061" + TAB + "0" + TAB + "team61" +  TAB + institutionName + TAB + institutionShortName + TAB + country;
+        assertEquals(expected, actual);
+
+    }
+
+
+    private void updateAccountFields(Account account, String institutionName, String institutionShortName, String countryCode) {
+        
+        account.setLongSchoolName(institutionName);
+        account.setShortSchoolName(institutionShortName);
+        account.setCountryCode(countryCode);
+        
+    }
+
 
 }
