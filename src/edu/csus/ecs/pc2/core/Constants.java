@@ -128,4 +128,6 @@ public final class Constants {
 
     public static final String TEAMNAME_COLUMN_NAME = "teamname";
     
+    public static final String COUNTRY_CODE_COLUMN_NAME = "countrycode";
+    
 }
