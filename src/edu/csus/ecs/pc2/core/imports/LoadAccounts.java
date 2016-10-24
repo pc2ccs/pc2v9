@@ -5,24 +5,25 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
 /**
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Troy pc2@ecs.csus.edu
  */
-
-// $HeadURL$
 public class LoadAccounts {
+    
+
+
     private HashMap<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
     private HashMap<String,Group> groups = new HashMap<String,Group>();
 
@@ -221,43 +222,44 @@ public class LoadAccounts {
             permLoginColumn = -1;
             permPasswordColumn = -1;
             for (int i = 0; i < columns.length; i++) {
-                if (columns[i].equalsIgnoreCase("site")) {
+                
+                if (Constants.SITE_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     siteColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("account")) {
+                if (Constants.ACCOUNT_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     accountColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("displayname")) {
+                if (Constants.DISPLAYNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     displayNameColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("password")) {
+                if (Constants.PASSWORD_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     passwordColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("group")) {
+                if (Constants.GROUP_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     groupColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("permdisplay")) {
+                if (Constants.PERMDISPLAY_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     permDisplayColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("permlogin")) {
+                if (Constants.PERMLOGIN_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     permLoginColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("externalid")) {
+                if (Constants.EXTERNALID_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     externalIdColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("alias")) {
+                if (Constants.ALIAS_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     aliasColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("permpassword")) {
+                if (Constants.PERMPASSWORD_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     permPasswordColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("longschoolname")) {
+                if (Constants.LONGSCHOOLNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     longSchoolNameColumnn = i;
                 }
-                if (columns[i].equalsIgnoreCase("shortschoolname")) {
+                if (Constants.SHORTSCHOOLNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     shortSchoolNameColumn = i;
                 }
-                if (columns[i].equalsIgnoreCase("teamname")) {
+                if (Constants.TEAMNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     teamNameColumn = i;
                 }
             }

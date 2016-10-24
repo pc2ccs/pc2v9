@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.File;
@@ -34,7 +31,10 @@ public final class ExportAccounts {
     /**
      * used by writeCSV and writeTXT and build
      */
-    private static String[] titles = { "site", "account", "displayname", "password", "group", "permdisplay", "permlogin", "externalid", "alias", "permpassword" };
+    public static final String[] COLUMN_TITLES = { "site", "account", "displayname", "password", "group", "permdisplay", //
+        "permlogin", "externalid", "alias", "permpassword", // 
+        };
+    
     private static Hashtable<ElementId, String> groupHash;
     private static Exception exception = null;
 
@@ -43,7 +43,7 @@ public final class ExportAccounts {
     }
 
     /**
-     * Formats we can write.
+     * Output file formats.
      * 
      * @author pc2@ecs.csus.edu
      */
@@ -63,6 +63,7 @@ public final class ExportAccounts {
     };
 
     /**
+     * Save accounts for filename based on format.
      * 
      * @param outputFile 
      * @return true on success, otherwise returns false and getException() can be used to get the error
@@ -119,7 +120,7 @@ public final class ExportAccounts {
     private static boolean writeCSV(PrintWriter out, Account[] accounts) {
         boolean result = true;
         try {
-            out.println(CommaSeparatedValueParser.toString(titles));
+            out.println(CommaSeparatedValueParser.toString(COLUMN_TITLES));
             for (int i = 0; i < accounts.length; i++) {
                 Account account = accounts[i];
                 if (account.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
@@ -138,7 +139,7 @@ public final class ExportAccounts {
     private static boolean writeTXT(PrintWriter out, Account[] accounts) {
         boolean result=true;
         try {
-            out.println(TabSeparatedValueParser.toString(titles));
+            out.println(TabSeparatedValueParser.toString(COLUMN_TITLES));
             for (int i = 0; i < accounts.length; i++) {
                 Account account = accounts[i];
                 if (account.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
@@ -154,9 +155,14 @@ public final class ExportAccounts {
         return result;
     }
 
-    private static String[] buildAccountString(Account account) {
+    /**
+     * Create array of fields based on title.
+     * @param account
+     * @return
+     */
+    public static String[] buildAccountString(Account account) {
         // titles = { "site", "account", "displayname", "password", "group", "permdisplay", "permlogin", "externalid", "alias", "permpassword" };
-        String[] a=new String[titles .length];
+        String[] a=new String[COLUMN_TITLES.length];
         a[0] = Integer.toString(account.getSiteNumber());
         a[1] = account.getClientId().getName();
         a[2] = account.getDisplayName();
@@ -201,7 +207,8 @@ public final class ExportAccounts {
         return xmlString;
 
     }
-    private static void addSingleAccountXML(Account account, Hashtable<ElementId,String> groups, XMLMemento mementoRoot) {
+    
+    public static void addSingleAccountXML(Account account, Hashtable<ElementId,String> groups, XMLMemento mementoRoot) {
         // titles = { "site", "account", "displayname", "password", "group", "permdisplay", "permlogin", "externalid", "alias", "permpassword" };
 
         // XXX these 1st ones are from teamStanding of the scoreboard xml

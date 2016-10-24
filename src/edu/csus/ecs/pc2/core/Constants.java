@@ -99,4 +99,33 @@ public final class Constants {
      */
     public static final int DEFAULT_PC2_PORT = 50002;
     
+    
+    // Column names for load/save accounts
+    
+    public static final String SITE_COLUMN_NAME = "site";
+
+    public static final String ACCOUNT_COLUMN_NAME = "account";
+
+    public static final String DISPLAYNAME_COLUMN_NAME = "displayname";
+
+    public static final String PASSWORD_COLUMN_NAME = "password";
+
+    public static final String GROUP_COLUMN_NAME = "group";
+
+    public static final String PERMDISPLAY_COLUMN_NAME = "permdisplay";
+
+    public static final String PERMLOGIN_COLUMN_NAME = "permlogin";
+
+    public static final String EXTERNALID_COLUMN_NAME = "externalid";
+
+    public static final String ALIAS_COLUMN_NAME = "alias";
+
+    public static final String PERMPASSWORD_COLUMN_NAME = "permpassword";
+
+    public static final String LONGSCHOOLNAME_COLUMN_NAME = "longschoolname";
+
+    public static final String SHORTSCHOOLNAME_COLUMN_NAME = "shortschoolname";
+
+    public static final String TEAMNAME_COLUMN_NAME = "teamname";
+    
 }
