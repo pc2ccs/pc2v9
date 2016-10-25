@@ -1,20 +1,26 @@
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.File;
+import java.util.Arrays;
 
+import edu.csus.ecs.pc2.core.imports.ExportAccounts.Formats;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
- * @author PC2
+ * Unit test.
  * 
+ * @author Troy
  */
 public class LoadAccountsTest extends AbstractTestCase {
 
@@ -23,6 +29,8 @@ public class LoadAccountsTest extends AbstractTestCase {
     private Site[] sites = new Site[2];
 
     private AccountList accountList = new AccountList();
+    
+    private SampleContest sample = new SampleContest();
 
     public LoadAccountsTest() {
         super();
@@ -153,6 +161,113 @@ public class LoadAccountsTest extends AbstractTestCase {
             }
             assertTrue(account.getClientId()+" permLogin", account.isAllowed(Permission.Type.LOGIN));
         }
+
+    }
+    
+    protected void generateFile(IInternalContest contest,  Formats format, String outputFile) throws Exception {
+        
+        Group[] groups = contest.getGroups();
+        Account[] accounts = SampleContest.getTeamAccounts(contest);
+        
+        assertEquals("Team accounts ", 120, accounts.length);
+        assertEquals("Groups ", 2, groups.length);
+        
+        ExportAccounts.saveAccounts(format, accounts, groups, new File(outputFile));
+        
+        if (ExportAccounts.getException() != null){
+            throw ExportAccounts.getException();
+        }
+        
+    }
+    
+    /**
+     * Test load for 3 new institution fields.
+     * 
+     * Bug 1067 test.
+     * 
+     * @throws Exception
+     */
+    public void testLoadTXTFile() throws Exception {
+
+        String dataDir = getDataDirectory(this.getName());
+        ensureDirectory(dataDir);
+        // startExplorer(dataDir);
+
+        /**
+         * TXT is tsv file format.
+         */
+        Formats format = Formats.TXT;
+
+        IInternalContest contest = new SampleContest().createStandardContest();
+        sample.assignSampleGroups(contest, "Group Thing One", "Group Thing Two");
+
+        String inputTSVFilename = dataDir + File.separator + this.getName() + "." + format.toString().toLowerCase();
+
+        // editFile(inputTSVFilename);
+        // generateFile(contest, format, inputTSVFilename);
+
+        assertFileExists(inputTSVFilename);
+
+        Account[] existingAccounts = contest.getAccounts();
+        // for (Account account : existingAccounts) {
+        // if (account.getClientId().getTripletKey().equals("3TEAM3")){
+        // dumpTeam(account);
+        // }
+        // }
+        Group[] groups = contest.getGroups();
+
+        LoadAccounts loadAccounts = new LoadAccounts();
+
+        Account[] newAccounts = loadAccounts.fromTSVFile(inputTSVFilename, existingAccounts, groups);
+        contest.updateAccounts(newAccounts);
+
+        existingAccounts = contest.getAccounts();
+
+        // for (Account account : existingAccounts) {
+        // if (account.getClientId().getTripletKey().equals("3TEAM3")){
+        // dumpTeam(account);
+        // }
+        // }
+
+        testAccountFields(contest, 3, "Univerity 3 Long", "University 3 Short", "USA");
+
+    }
+
+    private void testAccountFields( IInternalContest contest, int teamNumber, String longInst, String shortInst, String countryCode) {
+        
+        Account[] accounts = SampleContest.getTeamAccounts(contest, 3);
+        Arrays.sort(accounts, new AccountComparator());
+        
+        Account team = accounts[teamNumber - 1];
+        
+        testAccountFields(team, longInst, shortInst, countryCode);
+
+//        dumpTeam(team);
+//        String teamId = team.getClientId().getTripletKey();
+//        assertEquals("int long name, " +teamId, longInst, team.getLongSchoolName());
+//        assertEquals("int short name, team " + teamId, shortInst, team.getShortSchoolName());
+//        assertEquals("country code, team " + teamId, countryCode, team.getCountryCode());
+        
+    }
+
+    private void testAccountFields(Account team, String longInst, String shortInst, String countryCode) {
+
+        // dumpTeam(team);
+        String teamId = team.getClientId().getTripletKey();
+        assertEquals("int long name, " + teamId, longInst, team.getLongSchoolName());
+        assertEquals("int short name, team " + teamId, shortInst, team.getShortSchoolName());
+        assertEquals("country code, team " + teamId, countryCode, team.getCountryCode());
+
+    }
+
+    public void dumpTeam(Account team) {
+
+        String teamId = team.getClientId().getTripletKey();
+
+        System.out.println("Account = " + team + " " + teamId);
+        System.out.println("Long mame = " + team.getLongSchoolName());
+        System.out.println("short name = " + team.getShortSchoolName());
+        System.out.println("country code = " + team.getCountryCode());
 
     }
 }
