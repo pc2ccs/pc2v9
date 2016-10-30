@@ -164,7 +164,7 @@ public class DateDifferizerTest extends TestCase {
         assertEquals("10 months", s);
 
         s = DateDifferizer.formatTime(DateFormat.COUNT_DOWN, 0, 0, 3, 4, 5, 6);
-        assertEquals("3 days", s);
+        assertEquals("3 days 4:05:06", s);
 
         s = DateDifferizer.formatTime(DateFormat.COUNT_DOWN, 0, 0, 0, 4, 1, 12);
         assertEquals("4:01:12", s);
@@ -237,5 +237,19 @@ public class DateDifferizerTest extends TestCase {
         form = DateDifferizer.lpad('0', 2, 9999);
         i = 4;
         assertEquals("Expecting " + i + " length, got " + form, i, form.length());
+    }
+    
+    public void testnegativeFormatTime() throws Exception {
+        
+        String s = DateDifferizer.formatTime(DateFormat.LONG_FULL_FORMAT, "-", 1, 1, 1, 1, 1, 1);
+        assertEquals("-1 year 1 month 1 day 1 hour 1 minute 1 second", s);
+
+        s = DateDifferizer.formatTime(DateFormat.LONG_FULL_FORMAT,  "-", 8, 7, 6, 5, 4, 3);
+        assertEquals("-8 years 7 months 6 days 5 hours 4 minutes 3 seconds", s);
+
+        s = DateDifferizer.formatTime(DateFormat.COUNT_DOWN,  "-", 8, 7, 6, 5, 4, 3);
+        assertEquals("-8 years", s);
+
+        
     }
 }

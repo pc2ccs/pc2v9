@@ -131,8 +131,16 @@ public class DateDifferizer {
      * @return and english string of the difference between the dates.
      */
     public String formatTime(DateFormat dateFormat) {
-
+        
         long totalSeconds = diffInSec();
+        
+        String negativeMark = "";
+        boolean negative = totalSeconds < 0;
+        
+        if (negative){
+            totalSeconds = -totalSeconds;
+            negativeMark = "-";
+        }
         
 
         long days = 0;
@@ -165,27 +173,30 @@ public class DateDifferizer {
         }
         
 
-        return formatTime(dateFormat, (int) years, (int) months, (int) days, (int) hours24, (int) minutes, (int) seconds);
+        return formatTime(dateFormat, negativeMark, (int) years, (int) months, (int) days, (int) hours24, (int) minutes, (int) seconds);
+    }
+    
+    public static String formatTime(DateFormat dateFormat, int years, int months, int days, int hours24, int minutes, int seconds) {
+        return formatTime(dateFormat, "",  years,  months,  days,  hours24,  minutes,  seconds);
     }
 
-    public static String formatTime(DateFormat dateFormat, int years, int months, int days, int hours24, int minutes, int seconds) {
+    public static String formatTime(DateFormat dateFormat, String negativeMark, int years, int months, int days, int hours24, int minutes, int seconds) {
 
-        String outs = years + "-" + months + "-" + days + " " + hours24 + ":" + minutes + ":" + seconds;
-        
+        String outs = negativeMark +  years + "-" + months + "-" + days + " " + hours24 + ":" + minutes + ":" + seconds;
 
         switch (dateFormat) {
             case LONG_FORMAT:
-                outs = pluralStringNotEmpty("year", years) + " " + //
+               outs = negativeMark +  pluralStringNotEmpty("year", years) + " " + //
                         pluralStringNotEmpty("month", months) + " " + //
                         pluralStringNotEmpty("day", days) + " " + //
                         pluralStringNotEmpty("hour", hours24) + " " + //
                         pluralStringNotEmpty("minute", minutes) + " " + //
                         pluralStringNotEmpty("second", seconds);
-                outs = outs.replaceAll("  ", " ").trim();
+               outs = negativeMark +  outs.replaceAll("  ", " ").trim();
                 break;
             case LONG_FULL_FORMAT:
 
-                outs = pluralString("year", years) + " " + //
+               outs = negativeMark +  pluralString("year", years) + " " + //
                         pluralString("month", months) + " " + //
                         pluralString("day", days) + " " + //
                         pluralString("hour", hours24) + " " + //
@@ -195,12 +206,12 @@ public class DateDifferizer {
                 break;
 
             case COUNT_DOWN:
-                outs = countDownFormat(years, months, days, hours24, minutes, seconds);
+               outs = negativeMark +  countDownFormat(years, months, days, hours24, minutes, seconds);
                 break;
 
             case YYYYMMDD_FORMAT:
             default:
-                outs = lpad('0', 4, years) + "-" + lpad('0', 2, months) + "-" + lpad('0', 2, days) + " " + //
+               outs = negativeMark +  lpad('0', 4, years) + "-" + lpad('0', 2, months) + "-" + lpad('0', 2, days) + " " + //
                         lpad('0', 2, hours24) + ":" + lpad('0', 2, minutes) + ":" + lpad('0', 2, seconds);
 
                 break;
@@ -215,8 +226,12 @@ public class DateDifferizer {
             return pluralString("month", months);
         } else if (days > 0) {
             return pluralString("day", days) + " " + hours24 + ":" + lpad('0', 2, minutes) + ":" + lpad('0', 2, seconds);
-        } else { 
+        } else if ( hours24 > 0) {
             return hours24 + ":" + lpad('0', 2, minutes) + ":" + lpad('0', 2, seconds);
+        } else if ( minutes > 0 ){
+            return minutes + ":" + lpad('0', 2, seconds);
+        } else {
+            return "0:"+ lpad('0', 2, seconds);
         }
     }
 

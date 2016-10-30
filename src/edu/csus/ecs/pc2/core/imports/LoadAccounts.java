@@ -52,6 +52,7 @@ public class LoadAccounts {
      */
     private int longSchoolNameColumnn = -1;
     private int shortSchoolNameColumn = -1;
+    private int countryCodeColumn = -1;
     private int teamNameColumn = -1;
     
     private HashMap<ClientId, Account> existingAccountsMap = new HashMap<ClientId, Account>();
@@ -108,9 +109,13 @@ public class LoadAccounts {
         if (shortSchoolNameColumn != -1 && values.length > shortSchoolNameColumn) {
             account.setShortSchoolName(values[shortSchoolNameColumn]);
         }
+        if (countryCodeColumn != -1 && values.length > countryCodeColumn) {
+            account.setCountryCode(values[countryCodeColumn]);
+        }
         if (teamNameColumn != -1 && values.length > teamNameColumn) {
             account.setExternalName(values[teamNameColumn]);
         }
+        
         if (groups.size() > 0) {
             if (groupColumn != -1 && values.length > groupColumn && values[groupColumn].length() > 0) {
                 if (groups.containsKey(values[groupColumn])) {
@@ -258,6 +263,9 @@ public class LoadAccounts {
                 }
                 if (Constants.SHORTSCHOOLNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     shortSchoolNameColumn = i;
+                }
+                if (Constants.COUNTRY_CODE_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    countryCodeColumn = i;
                 }
                 if (Constants.TEAMNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     teamNameColumn = i;

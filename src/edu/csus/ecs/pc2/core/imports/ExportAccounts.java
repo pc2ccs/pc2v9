@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Hashtable;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -32,7 +33,10 @@ public final class ExportAccounts {
      * used by writeCSV and writeTXT and build
      */
     public static final String[] COLUMN_TITLES = { "site", "account", "displayname", "password", "group", "permdisplay", //
-        "permlogin", "externalid", "alias", "permpassword", // 
+        "permlogin", "externalid", "alias", "permpassword", //
+        
+        Constants.LONGSCHOOLNAME_COLUMN_NAME,  Constants.SHORTSCHOOLNAME_COLUMN_NAME, Constants.COUNTRY_CODE_COLUMN_NAME,
+        
         };
     
     private static Hashtable<ElementId, String> groupHash;
@@ -177,6 +181,12 @@ public final class ExportAccounts {
         a[7] = account.getExternalId();
         a[8] = account.getAliasName();
         a[9] = Boolean.toString(account.isAllowed(Type.CHANGE_PASSWORD));
+
+        //    Constants.LONGSCHOOLNAME_COLUMN_NAME,  Constants.SHORTSCHOOLNAME_COLUMN_NAME, Constants.COUNTRY_CODE_COLUMN_NAME,
+        a[10] = account.getLongSchoolName();
+        a[11] = account.getShortSchoolName();
+        a[12] = account.getCountryCode();
+        
         return a;
     }
 

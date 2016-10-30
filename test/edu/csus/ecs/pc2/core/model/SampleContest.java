@@ -467,7 +467,7 @@ public class SampleContest {
      * @param siteNumber
      * @return
      */
-    public Account[] getTeamAccounts(IInternalContest contest, int siteNumber) {
+    public static Account[] getTeamAccounts(IInternalContest contest, int siteNumber) {
         Vector<Account> accountVector = contest.getAccounts(ClientType.Type.TEAM, siteNumber);
         Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
