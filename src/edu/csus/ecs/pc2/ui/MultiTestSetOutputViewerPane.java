@@ -1347,8 +1347,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             showFile(getCurrentViewer(), targetFile, title, "Test Case "+testCaseNum, true);
         } else {
             if (col == COLUMN.TEAM_OUTPUT_VIEW.ordinal()) {
-                String msg = "Unable to find file for table cell (" 
-                        + row + "," + col + ") try executing the run 1st." ;
+                String msg = "No Team Output file found (has the Team submission been executed?)" ;
                 if (log != null) {
                     log.log(Log.WARNING, "MTSVPane.viewFile(): " + msg);
                 } else {
