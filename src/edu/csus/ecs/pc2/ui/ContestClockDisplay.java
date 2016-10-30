@@ -40,16 +40,13 @@ import edu.csus.ecs.pc2.core.util.DateDifferizer.DateFormat;
  * <P>
  * Add a label and the format of the time {@link #addLabeltoUpdateList(JLabel, DisplayTimes, int)} 
  * <P>
- * 
- * @author pc2@ecs.csus.edu
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-
 public class ContestClockDisplay implements ActionListener, UIPlugin {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 8137635697344335832L;
+
+    private static final String NO_SCHEDULE_START_TIME = "No scheduled start";
 
     /**
      * Labels to be updated with contest time.
@@ -72,6 +69,11 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
      * List of scheduled start time JLabels to update.
      */
     private List<JLabel> scheduledStartTimeLabelList = new ArrayList<>();
+
+    /**
+     * 
+     */
+    private List<JLabel> schedAndRemainingTimeLabelList = new ArrayList<>();
 
     private Hashtable<Integer, ContestTime> contestTimes = new Hashtable<Integer, ContestTime>();
     
@@ -135,6 +137,10 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
          * Show time to start of contest, per scheduled start time.
          */
         TO_SCHEDULED_START_TIME,
+        /**
+         * Show countdown to scheduled then remaining when contest starts.
+         */
+        SCHEDULED_THEN_REMAINING_TIME,
     };
 
 
@@ -299,7 +305,10 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             case TO_SCHEDULED_START_TIME:
                 
                 scheduledStartTimeLabelList.add(labelToUpdate);
+                break;
                 
+            case SCHEDULED_THEN_REMAINING_TIME:
+                schedAndRemainingTimeLabelList.add(labelToUpdate);
                 break;
 
             default:
@@ -420,47 +429,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             public void run() {
 
                 try {
-                    String clockText = "There no time like the present";
-
-                    if (contestTime == null) {
-                        clockText = "***";
-                    } else {
-                        if (contestTime.isContestRunning()) {
-                            if (teamDisplayMode && contestTime.getRemainingSecs() < 120) {
-                                clockText = "< 2 mins";
-                            } else {
-                                if (teamDisplayMode) {
-                                    /**
-                                     * This will only be displayed whent there are more than 120
-                                     * seconds left in the contest, so no handling of
-                                     * scheduled time is needed.
-                                     */
-                                    // Since this is a team there will be no 
-                                    clockText = contestTime.getRemainingMinStr();
-
-                                } else {
-                                    long secsLeft = contestTime.getRemainingSecs();
-                                    if (secsLeft < 60 && secsLeft > -1) {
-                                        /**
-                                         * Show time in seconds just before contest ends.
-                                         */
-                                        clockText = secsLeft + " seconds ";
-                                    } else {
-                                        clockText = contestTime.getRemainingTimeStr();
-                                        clockText = adjustForPostContest(clockText);
-                                    }
-                                }
-                            }
-
-                        } else {
-                            if (teamDisplayMode) {
-                                clockText = "STOPPED";
-                            } else {
-                                clockText = contestTime.getRemainingTimeStr();
-                                clockText = adjustForPostContest(clockText);
-                            }
-                        }
-                    }
+                    String clockText = getRemainingTimeClockText(contestTime);
 
                     Vector<JLabel> list = sitesElapsedTimeLabelList.get(new Integer(siteNumber));
 
@@ -494,7 +463,6 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
                     }
                 } catch (Exception e) {
                     log.throwing("Something in here", "Exception in clock label display method", e);
-                    e.printStackTrace(); // TODO delete this line
                 }
             }
         } );
@@ -523,28 +491,85 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
      * Update Scheduled Time labels.
      */
     protected void updateScheduledStartLabels() {
-        
-        if (scheduledStartTimeLabelList.size() >  0){
-            
-            String text = "No scheduled start";
+
+        if (scheduledStartTimeLabelList.size() > 0) {
+
+            String text = NO_SCHEDULE_START_TIME;
             String hint = "Still no scheduled start";
-            
-            if (scheduledStartTime != null){
-                Date now = GregorianCalendar.getInstance().getTime();
-                DateDifferizer differizer = new DateDifferizer(now, scheduledStartTime.getTime());
-                differizer.setFormat(DateFormat.COUNT_DOWN);
-                text = differizer.toString();
-                hint = differizer.formatTime(DateFormat.LONG_FORMAT);
+
+            if (scheduledStartTime != null) {
+
+                text = getScheduledTimeClockText();
+                hint = getScheduledTimeClockHint();
             }
-            
+
             for (JLabel jLabel : scheduledStartTimeLabelList) {
                 jLabel.setText(text);
                 jLabel.setToolTipText(hint);
             }
         }
-        
+
+        if (schedAndRemainingTimeLabelList.size() > 0) {
+
+            String hint = "Still no scheduled start";
+
+            ContestTime contestTime = contest.getContestTime();
+
+            String text = getScheduleOrRemainingTime(contestTime);
+
+            for (JLabel jLabel : schedAndRemainingTimeLabelList) {
+                jLabel.setText(text);
+                jLabel.setToolTipText(text);
+            }
+        }
     }
 
+    public String getScheduleOrRemainingTime(ContestTime contestTime) {
+        
+        String text = NO_SCHEDULE_START_TIME; 
+        
+        boolean showRemainingTime = true;
+        
+        if (scheduledStartTime  != null && ! contestTime.isContestStarted()){
+            showRemainingTime = false;
+        }
+        
+        if (showRemainingTime){
+            
+            /**
+             * Show Remaining time count down. 
+             */
+            text = contestTime.getRemainingTimeStr();
+            text = adjustForPostContest(text);
+            
+        } else {
+            /**
+             * Show schedule start count down
+             */
+            Date now = GregorianCalendar.getInstance().getTime();
+            DateDifferizer differizer = new DateDifferizer(now, scheduledStartTime.getTime());
+            differizer.setFormat(DateFormat.COUNT_DOWN);
+            text = differizer.toString();
+        }
+        
+        return text;
+    }
+
+
+    public String getScheduledTimeClockHint() {
+        Date now = GregorianCalendar.getInstance().getTime();
+        DateDifferizer differizer = new DateDifferizer(now, scheduledStartTime.getTime());
+        String hint = differizer.formatTime(DateFormat.LONG_FORMAT);
+        return hint;
+    }
+
+    public String getScheduledTimeClockText() {
+        Date now = GregorianCalendar.getInstance().getTime();
+        DateDifferizer differizer = new DateDifferizer(now, scheduledStartTime.getTime());
+        differizer.setFormat(DateFormat.COUNT_DOWN);
+        String text = differizer.toString();
+        return text;
+    }
 
     public void actionPerformed(ActionEvent arg0) {
         ContestTime contestTime = contestTimes.get(localSiteNumber);
@@ -646,7 +671,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         }
 
         public void contestTimeRemoved(ContestTimeEvent event) {
-            // TODO Auto-generated method stub
+            // no action 
             
         }
 
@@ -712,8 +737,56 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             setScheduledStartTime(info.getScheduledStartTime());
         }
     }
-    
 
+    /**
+     * Get remaining time text.
+     * @param contestTime
+     * @return
+     */
+    public String getRemainingTimeClockText(ContestTime contestTime) {
+
+        String clockText = "There no time like the present";
+
+        if (contestTime == null) {
+            clockText = "***";
+        } else {
+            if (contestTime.isContestRunning()) {
+                if (teamDisplayMode && contestTime.getRemainingSecs() < 120) {
+                    clockText = "< 2 mins";
+                } else {
+                    if (teamDisplayMode) {
+                        /**
+                         * This will only be displayed whent there are more than 120 seconds left in the contest, so no handling of scheduled time is needed.
+                         */
+                        // Since this is a team there will be no
+                        clockText = contestTime.getRemainingMinStr();
+
+                    } else {
+                        long secsLeft = contestTime.getRemainingSecs();
+                        if (secsLeft < 60 && secsLeft > -1) {
+                            /**
+                             * Show time in seconds just before contest ends.
+                             */
+                            clockText = secsLeft + " seconds ";
+                        } else {
+                            clockText = contestTime.getRemainingTimeStr();
+                            clockText = adjustForPostContest(clockText);
+                        }
+                    }
+                }
+
+            } else {
+                if (teamDisplayMode) {
+                    clockText = "STOPPED";
+                } else {
+                    clockText = contestTime.getRemainingTimeStr();
+                    clockText = adjustForPostContest(clockText);
+                }
+            }
+        }
+        return clockText;
+
+    }
     public JFrame getClientFrame() {
         return clientFrame;
     }

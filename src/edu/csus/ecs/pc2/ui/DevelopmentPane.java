@@ -28,6 +28,8 @@ public class DevelopmentPane extends JPanePlugin {
     
     private ContestPreloadPane contestPreloadPane = new ContestPreloadPane();
 
+    private ContestClockAllPane contestClockAllPane = new ContestClockAllPane();
+
     public DevelopmentPane() {
         super();
         setLayout(new BorderLayout(0, 0));
@@ -38,7 +40,9 @@ public class DevelopmentPane extends JPanePlugin {
         tabbedPane.addTab("Plugins", null, pluginPane, null);
         
         tabbedPane.addTab("Scheduled Start Countdown", null, contestScheduledStartClockPane, null);
-
+        
+        tabbedPane.addTab("All Countdown Timers", null, contestClockAllPane, null);
+        
         tabbedPane.addTab("Reports", null, reportPane, null);
         
         tabbedPane.addTab("Sample Contests", null, contestPreloadPane, null);
@@ -62,6 +66,7 @@ public class DevelopmentPane extends JPanePlugin {
         logSettingsPane.setContestAndController(inContest, inController);
         contestPreloadPane.setContestAndController(inContest, inController);
         contestScheduledStartClockPane.setContestAndController(inContest, inController);
+        contestClockAllPane.setContestAndController(inContest, inController);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
