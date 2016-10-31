@@ -90,8 +90,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(800,1000));
+        getContentPane().setLayout(new BorderLayout());
+        this.setSize(new Dimension(801, 600));
         this.setPreferredSize(new java.awt.Dimension(800,1000));
         this.setTitle("Review Account Loading");
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -132,6 +132,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private MCLB getAccountListBox() {
         if (accountListBox == null) {
             accountListBox = new MCLB();
+            accountListBox.setMaximumSize(new Dimension(4096, 1024));
 
             Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Team Name"};
             accountListBox.addColumns(cols);
@@ -445,6 +446,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private JPanel getJPanel() {
         if (jPanel == null) {
             jPanel = new JPanel();
+            jPanel.setPreferredSize(new Dimension(800, 600));
             jPanel.setLayout(new BorderLayout());
             jPanel.add(getAccountListBox(), java.awt.BorderLayout.CENTER);
             jPanel.add(getMessagePane(), java.awt.BorderLayout.NORTH);
