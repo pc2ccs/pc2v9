@@ -11,10 +11,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
@@ -215,15 +218,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     /**
      * Parse and convert dateString to Date.
      * 
-     * <br>
-     * SOMEDAY handle format: yyyy-MM-dd HH:mmZ
      * 
      * @param dateString
      *            date string in form: yyyy-MM-dd HH:mm or yyyy-MM-dd HH:mmZ
      * @return date for input string
      * @throws ParseException
      */
-    public static Date parseStartTime(String dateString) throws ParseException {
+    public static Date parseSimpleDate(String dateString) throws ParseException {
         // String pattern = "yyyy-MM-dd HH:mmZ";
         String pattern = "yyyy-MM-dd HH:mm";
 
@@ -235,6 +236,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         SimpleDateFormat parser = new SimpleDateFormat(pattern);
         Date date = parser.parse(dateTime);
+        
+        
+        
         return date;
     }
 
@@ -351,15 +355,48 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setScoreboardFreezeTime(contest, scoreboardFreezeTime);
         }
 
-        String startTime = fetchValue(content, CONTEST_START_TIME_KEY);
-        if (startTime != null) {
-            try {
-                Date date = parseStartTime(startTime);
-                setContestStartDateTime(contest, date);
-            } catch (ParseException e) {
-                throw new YamlLoadException("Invalid start-time value '" + startTime + " expected form yyyy-MM-dd HH:mm, " + e.getMessage(), e, contestFileName);
+        Object startTimeObject = fetchObjectValue(content, CONTEST_START_TIME_KEY);
+
+        Date date = null;
+        if (startTimeObject != null && startTimeObject instanceof Date) {
+            setContestStartDateTime(contest, (Date) startTimeObject);
+        } else {
+
+            String startTime = fetchValue(content, CONTEST_START_TIME_KEY);
+
+            if (startTime != null) {
+
+                /**
+                 * Support previous format yyyy-MM-dd HH:mm or yyyy-MM-dd HH:mmZ
+                 */
+
+                try {
+                    date = parseSimpleDate(startTime);
+                    setContestStartDateTime(contest, date);
+                } catch (ParseException e) {
+                    date = null;
+                    /**
+                     * No longer a failure, will attempt to parse using ISO 8601 format
+                     */
+                }
+
+                /**
+                 * Parse ISO 8601 format date.
+                 */
+
+                if (date == null) {
+
+                    try {
+
+                        date = parseISO8601Date(startTime);
+                        setContestStartDateTime(contest, date);
+
+                    } catch (IllegalArgumentException e) {
+                        throw new YamlLoadException("Invalid start-time value '" + startTime + " expected ISO 8601 format, " + e.getMessage(), e, contestFileName);
+                    }
+                }
             }
-        }
+        }        
 
         Language[] languages = getLanguages(yamlLines);
         for (Language language : languages) {
@@ -443,6 +480,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return contest;
 
+    }
+
+    public Date parseISO8601Date(String startTime) {
+        Calendar cal = DatatypeConverter.parseDateTime(startTime);
+        Date date = cal.getTime();
+        return date;
     }
 
     private void setScoreboardFreezeTime(IInternalContest contest, String scoreboardFreezeTime) {
@@ -589,6 +632,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return (Account[]) accountVector.toArray(new Account[accountVector.size()]);
 
+    }
+    
+    
+    private Object fetchObjectValue(Map<String, Object> content, String key) {
+        if (content == null) {
+            return null;
+        }
+        Object value = content.get(key);
+        return value;
     }
 
     private String fetchValue(Map<String, Object> content, String key) {

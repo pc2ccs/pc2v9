@@ -2033,9 +2033,57 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // very much before now
         date.setTime(date.getTime() - 60000);
         assertFalse ("Expected not to be before date "+date,snake.isBeforeNow(date));
-
-        
         
     }
-}
+    
+    /**
+     * Test data parsers.
+     * 
+     * @throws Exception
+     */
+    public void testDateParsers() throws Exception {
 
+        ContestSnakeYAMLLoader snakeYAMLLoader = new ContestSnakeYAMLLoader();
+
+        String startTime = "2016-10-28T18:00:00-07:00";
+        Date d = snakeYAMLLoader.parseISO8601Date(startTime);
+
+        long expected = 1477702800000L;
+        assertEquals(expected, d.getTime());
+
+        startTime = "2016-10-28 18:00";
+        d = ContestSnakeYAMLLoader.parseSimpleDate(startTime);
+
+        expected = 1477702800000L;
+        assertEquals(expected, d.getTime());
+
+    }
+    
+    /**
+     * Test ISO Start time
+     * Bug 1122 - Import contest yaml does not support start-time in ISO 8601 format
+     * @throws Exception
+     */
+    
+    public void testISO8601StartTime() throws Exception {
+
+        String testDirectoryName = getDataDirectory(this.getName());
+        ensureDirectory(testDirectoryName);
+        // startExplorer(testDirectoryName);
+
+        // String inputYamlFile = testDirectoryName + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+        // editFile(inputYamlFile);
+
+        boolean loadDataFiles = false;
+
+        IInternalContest contest = loader.fromYaml(null, testDirectoryName, loadDataFiles);
+
+        ContestInformation info = contest.getContestInformation();
+        assertNotNull(info);
+
+        Date date = info.getScheduledStartDate();
+
+        long expected = 1477713600000L;
+        assertEquals(expected, date.getTime());
+    }
+}

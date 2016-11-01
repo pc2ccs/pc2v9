@@ -1,0 +1,26 @@
+# Contest configuration
+# Source: http://scrool.se/icpc/wiki/index.php/Contest_Control_System
+# $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/testdata/ContestYAMLLoaderTest/contest.yaml $
+# $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $
+---
+
+name:              2016 CSUS Local Fall Contest
+short-name:        2016 CSUS Fall
+# ISO 8601 format start time
+start-time:        2016-10-28T21:00:00-07:00
+duration:          3:00:00
+# freeze time before end of contest
+scoreboard-freeze: 0:55:00
+# scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze
+scoreboard-freeze-length: 0:55:00
+
+penalty-time:      20
+
+sites:
+ - number: 1
+   name: Uno Site Arcadia
+   IP: localhost
+   port: 50002
+
+# eof $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $
+
