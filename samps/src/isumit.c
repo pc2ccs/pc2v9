@@ -4,9 +4,8 @@
  * Purpose: to sum the integers from stdin
  * Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
  *
- * Thu Oct  2 20:27:08 PDT 2003
+ * Tue Nov  1 16:21:04 PDT 2016
  *
- * $Id$ 
  *
  */
 
@@ -14,7 +13,7 @@
 
 #define INFILENAME "sumit.dat"
 
-main ()
+int main (char **argv)
 {
 	int sum = 0;
 	int i;
@@ -23,8 +22,9 @@ main ()
 	{
 		sum += i > 0 ? i : 0;
 	}
-	printf("The sum of the positive integers is %d \n",sum);
+	printf("The sum of the integers is %d\n",sum);
 
+	return 0;
 }
 
-/* eof isumit.c $Id$ */
+/* eof isumit.c */
