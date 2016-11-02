@@ -1,0 +1,54 @@
+#
+# Sumit Sample multiple test cases
+# Tue Nov 01 18:11:54 2016
+#
+--- 
+
+name: Sumit multi test set
+short-name: Sumit MTC
+elapsed: 0:00:00
+remaining: 5:00:00
+running: false
+scoreboard-freeze: 01:00:00
+
+languages:
+  - name: Java
+    active: true
+
+  - name: GNU C++
+    active: true
+
+  - name: GNU C
+    active: true
+
+  - name: Perl
+    active: true
+
+problemset:
+  - letter: A
+    short-name: sumit
+
+sites:
+ - number: 1
+   name: Site 1
+   IP: localhost
+   port: 50002
+
+accounts:
+  - account: TEAM
+    site: 1
+    count: 22
+
+  - account: JUDGE
+    site: 1
+    count: 12
+
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+
+  - account: FEEDER
+    site: 1
+    count: 1
+
+# EOF Contest Configuration
