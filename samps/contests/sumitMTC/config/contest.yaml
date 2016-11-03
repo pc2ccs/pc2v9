@@ -1,6 +1,6 @@
 #
 # Sumit Sample multiple test cases
-# Tue Nov 01 18:11:54 2016
+# Wed Nov 02 19:18:46 2016
 #
 --- 
 
@@ -10,6 +10,11 @@ elapsed: 0:00:00
 remaining: 5:00:00
 running: false
 scoreboard-freeze: 01:00:00
+
+# default pc2 judging types
+computer-judged: true
+manual-review: true
+send-prelim-judgement: true
 
 languages:
   - name: Java
@@ -50,5 +55,12 @@ accounts:
   - account: FEEDER
     site: 1
     count: 1
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 2,3
+    letters: A
+    enabled: yes
 
 # EOF Contest Configuration
