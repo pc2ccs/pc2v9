@@ -1,19 +1,21 @@
 #
 # Sumit Sample multiple test cases
-# Thu Nov 03 22:25:20 2016
+# Fri Nov 04 12:02:43 2016
 #
 --- 
 
 name: Sumit multi test set
 short-name: Sumit MTC
 
+# Note auto start countdown will not be started unless start-time is in future.
+
 start-time:        2016-10-15T17:00:00-07:00
 
 duration:  5:00:00
-scoreboard-freeze: 01:00:00
+
 # freeze time before end of contest
 scoreboard-freeze: 01:00:00
-# scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze
+# scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze in pc2?
 scoreboard-freeze-length: 01:00:00
 
 # pc2 specific settings
@@ -116,7 +118,7 @@ sites:
 accounts:
   - account: TEAM
     site: 1
-    count: 22
+    count: 80
 
   - account: JUDGE
     site: 1
