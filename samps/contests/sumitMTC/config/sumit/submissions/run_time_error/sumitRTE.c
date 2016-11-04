@@ -20,7 +20,7 @@ int main (char **argv)
 	char *p;
 
 	p = 0;
-	*p = 'abc'; // should do a seg fault
+	*p = 'a'; /* seg fault */
 
 	return 22;
 }

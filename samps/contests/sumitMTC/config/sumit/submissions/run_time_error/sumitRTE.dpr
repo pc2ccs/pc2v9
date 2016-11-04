@@ -4,7 +4,9 @@
 * Purpose: prints the sum of the positive integers, read from stdin
 * Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
 *
-* $Id: isumit.dpr 326 2006-10-25 02:53:57Z laned $
+# Thu Nov  3 16:59:54 PDT 2016
+*
+* TODO create a RTE
 *
 }
 

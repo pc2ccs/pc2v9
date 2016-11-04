@@ -4,9 +4,8 @@
  * Purpose: to sum the integers from stdin
  * Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
  *
- * Tue Nov  1 16:21:04 PDT 2016
- *
- * TODO  write to file 
+ * Thu Nov  3 17:03:27 PDT 2016
+ * 
  */
 
 #include <stdio.h>
@@ -26,6 +25,10 @@ int main (char **argv)
 	sum += 1000;
 
 	printf("The sum of the integers is %d\n",sum);
+
+	FILE *fpo = fopen ("sumitCoutputfile.txt", "w");
+	fprintf(fpo, "The sum of the integers is %d\n",sum);
+	fclose (fpo);
 
 	return 0;
 }

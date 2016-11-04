@@ -4,7 +4,9 @@
 # Purpose: to sum the integers from input from stdin
 # Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
 #
-# Tue Nov  1 17:46:37 PDT 2016
+# Thu Nov  3 17:00:26 PDT 2016
+#
+# * TODO create a RTE
 #
 
 	$sum = 0;

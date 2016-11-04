@@ -5,12 +5,17 @@ import java.io.*;
 // Purpose: to sum the integers from stdin
 // Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
 // 
-// Thu Oct  2 20:25:28 PDT 2003
+// Thu Nov  3 16:44:40 PDT 2016
 // 
-// $Id: isumit.java 1962 2009-11-25 03:42:12Z boudreat $
+// $Id: isumit.java 1962 2016-11-03 03:42:12Z boudreat $
 //
 
-public class ISumit {
+/**
+ * Produce Wrong Answer for sumit.
+ * 
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+ */
+public class SumitWA {
     public static void main(String[] args) 
     {
 	try

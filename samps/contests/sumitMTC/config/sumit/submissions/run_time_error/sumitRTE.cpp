@@ -17,7 +17,7 @@ main ()
 	char *p;
 
 	p = 0;
-	*p = "abcde"; /* should produce a seg fault */
+	*p = 'a'; /* seg fault */
 
 }
 
