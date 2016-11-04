@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+if [ "x$1" == "x" ]; then
+   cat <<EOM
+Usage:  $0 timelimit
+
+Where:
+    timelimit is a positive integer
+EOM
+   exit 1
+fi
+time=$1
+rm -f log timelimit.txt
+/usr/local/pc2v9/bin/run_execute.sh a.out c policy.generic.C log $time
+
+grep -q 'No Security Violation' log || cat log

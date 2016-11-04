@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -e
+if [ "x$2" == "x" ]; then
+   cat <<EOM
+Usage:  $0 timelimit classname
+
+Where:
+    timelimit is a positive integer
+    classname the Class name (filename minus the .class)
+EOM
+   exit 1
+fi
+
+time=$1
+filename=$2
+rm -f log timelimit.txt
+/usr/local/pc2v9/bin/run_execute.sh $filename java policy.generic.J log $time
+
+if [ ! -f log ]; then
+   echo "Failure to run sandbox, contact staff."
+else
+   grep -q 'No Security Violation' log || cat log
+fi

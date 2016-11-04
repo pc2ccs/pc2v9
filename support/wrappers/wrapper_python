@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]
+then
+   cat <<EOM
+Usage:  $0 timelimit scriptname
+
+Where:
+    timelimit is a positive integer
+    scriptname the python file name
+EOM
+   exit 1
+else
+	filename=$2
+	timeout=$1
+	timeout2=`expr $timeout + 1`
+	if [ -f timelimit.txt ]; then
+		rm timelimit.txt
+	fi
+	
+	starttime=`date "+%s"`
+	(
+		ulimit -m 2048 -t $timeout2 -c 100
+		python $filename
+	)
+	# shell exits with 0 regardless
+	endtime=`date "+%s"`
+	ptime=$(($endtime - $starttime))
+	if [ $ptime -gt $timeout ]; then
+	    echo "$ptime" > timelimit.txt
+	fi
+fi
+
