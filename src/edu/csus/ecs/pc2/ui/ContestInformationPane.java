@@ -313,6 +313,7 @@ public class ContestInformationPane extends JPanePlugin {
             
             contestInformation.setFreezeTime(savedContestInformation.getFreezeTime());
             contestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
+            contestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
         }
 
         contestInformation.setScoringProperties(changedScoringProperties);
