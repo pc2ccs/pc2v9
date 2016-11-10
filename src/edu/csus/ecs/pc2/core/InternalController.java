@@ -4031,11 +4031,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     public void updateAutoStartInformation(IInternalContest theContest, IInternalController theController) {
         
-        System.err.println ("JOHN - in updateAutoStartInformation()");
-
         // if I'm a server then if there's no AutoStarter create one, and then tell the AutoStarter to
         // update its Scheduled Start task list based on the ContestInformation in theContest (Model).
-        if (isServer()) {
+//        if (isServer()) {
 
             // make sure we have a log for logging
             Log log = getLog();
@@ -4087,8 +4085,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     System.err.println("InternalController.updateAutoStartInformation() received a null contest Model ... and no log is available!");
                 }
             }
-        } else {
-            System.err.println ("JOHN - in updateAutoStartInformation() -- NOT A SERVER!!");
-        }
+//        } else {
+//            System.err.println ("in updateAutoStartInformation() -- NOT A SERVER!!");
+//        }
     }
 }
