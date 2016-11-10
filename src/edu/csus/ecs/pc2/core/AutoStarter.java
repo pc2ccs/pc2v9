@@ -51,7 +51,7 @@ public class AutoStarter {
     /**
      * Runnable that starts all contest clocks.
      */
-    final Runnable contestStarterRunnable = new Runnable() {
+    private final Runnable contestStarterRunnable = new Runnable() {
         public void run() { 
 
             //TODO: should "auto-start" start THIS site instead of ALL sites?
@@ -255,7 +255,6 @@ public class AutoStarter {
         Date now = new Date();
 
         if (controller != null) {
-            Log log = controller.getLog();
 
             if (log != null) {
                 log.log(level,message);

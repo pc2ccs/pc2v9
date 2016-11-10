@@ -4035,8 +4035,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // update its Scheduled Start task list based on the ContestInformation in theContest (Model).
 //        if (isServer()) {
 
-            // make sure we have a log for logging
-            Log log = getLog();
             if (log == null) {
                 System.err.println("InternalController.updateAutoStartInformation(): no log available!");
             }

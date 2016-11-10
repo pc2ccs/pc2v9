@@ -682,6 +682,6 @@ public interface IInternalController {
      * @param theController
      *            - the Controller to which this request applies
      */
-    public void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) ;
+    void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) ;
 
 }
