@@ -87,9 +87,6 @@ public class PacketHandler {
      */
     private EvaluationLog evaluationLog = null;
 
-    private AutoStarter autoStarter;
-
-
     public PacketHandler(IInternalController controller, IInternalContest contest) {
         this.controller = controller;
         this.contest = contest;
@@ -2939,17 +2936,8 @@ public class PacketHandler {
         ContestInformation contestInformation = (ContestInformation) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_INFORMATION);
         if (contestInformation != null) {
             contest.updateContestInformation(contestInformation);
+            controller.updateAutoStartInformation(contest,controller);
             sendToTeams = true;
-            
-            //if I'm a server and the new contest info includes a scheduled (future) auto-start time, schedule it
-            if (isServer()) {
-
-                if (autoStarter == null) {
-                    autoStarter = new AutoStarter(contest, controller);
-                }
-
-                autoStarter.updateScheduleStartContestTask(contest.getContestInformation());
-            }
         }
 
         ClientSettings clientSettings = (ClientSettings) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS);

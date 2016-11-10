@@ -516,4 +516,18 @@ public class NullController implements IInternalController {
     public void updateGroups(Group[] groups) {
         
     }
+
+    /**
+     * Creates an {@link AutoStarter} if none exists, and then instructs the AutoStarter to update its Scheduled Start Task to correspond to the Scheduled Start Time information in the
+     * {@link ContestInformation} object in the received {@link IInternalContest}.
+     * 
+     * @param theContest
+     *            - the Contest (Model) containing the Scheduled Start Time information
+     * @param theController
+     *            - the Controller to which this request applies
+     */
+    @Override
+    public void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) {
+
+    }
 }

@@ -332,6 +332,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private ILogWindow logWindow = null;
 
     private RunSubmitterInterfaceManager runSubmitterInterfaceManager = new RunSubmitterInterfaceManager();
+    
+    /**
+     * The object used to control contest auto-starting.
+     */
+    private AutoStarter autoStarter;
 
     public InternalController(IInternalContest contest) {
         super();
@@ -975,6 +980,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } catch (Exception e) {
             getLog().log(Log.WARNING, "Exception creating evals.log ", e);
         }
+        
+        updateAutoStartInformation(inContest, this);
 
     }
 
@@ -4013,4 +4020,75 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(updatePacket);
     }
     
+    /**
+     * Creates an {@link AutoStarter} if none exists, and then instructs the AutoStarter to update its Scheduled Start Task to correspond to the Scheduled Start Time information in the
+     * {@link ContestInformation} object in the received {@link IInternalContest}.
+     * 
+     * @param theContest
+     *            - the Contest (Model) containing the Scheduled Start Time information
+     * @param theController
+     *            - the Controller to which this request applies
+     */
+    public void updateAutoStartInformation(IInternalContest theContest, IInternalController theController) {
+        
+        System.err.println ("JOHN - in updateAutoStartInformation()");
+
+        // if I'm a server then if there's no AutoStarter create one, and then tell the AutoStarter to
+        // update its Scheduled Start task list based on the ContestInformation in theContest (Model).
+        if (isServer()) {
+
+            // make sure we have a log for logging
+            Log log = getLog();
+            if (log == null) {
+                System.err.println("InternalController.updateAutoStartInformation(): no log available!");
+            }
+
+            // create an AutoStarter if there isn't already one
+            if (autoStarter == null) {
+                autoStarter = new AutoStarter(theContest, theController);
+                if (log != null) {
+                    log.info("Created AutoStarter...");
+                } else {
+                    System.err.println("Created AutoStarter... (but no log available)");
+                }
+            }
+
+            // if we have a Model, get its ContestInformation and update the AutoStarter
+            if (theContest != null) {
+                ContestInformation contestInfo = theContest.getContestInformation();
+                if (contestInfo != null) {
+
+                    // we have the ContestInformation; update the AutoStarter from the CI
+                    autoStarter.updateScheduleStartContestTask(contestInfo);
+
+                    if (log != null) {
+                        log.info("updated AutoStarter with date " + contestInfo.getScheduledStartDate() + " (note: null means no scheduled start is set)");
+                    } else {
+                        System.err.println("updated AutoStarter with date " + contestInfo.getScheduledStartDate()
+                                + " (note: null means no scheduled start is set)"
+                                + " but no log is available!");
+                    }
+
+                } else {
+                    // we got a Model but it doesn't have any ContestInfo
+                    if (log != null) {
+                        log.warning("InternalController.updateAutoStartInformation(): contest Model has no ContestInformation; cannot update AutoStarter! ");
+                    } else {
+                        System.err.println("InternalController.updateAutoStartInformation(): contest model has no ContestInformation; cannot update AutoStarter"
+                                + "...and no log is available!");
+                    }
+                }
+
+            } else {
+                // we got a null Model
+                if (log != null) {
+                    log.warning("InternalController.updateAutoStartInformation() received a null contest Model!");
+                } else {
+                    System.err.println("InternalController.updateAutoStartInformation() received a null contest Model ... and no log is available!");
+                }
+            }
+        } else {
+            System.err.println ("JOHN - in updateAutoStartInformation() -- NOT A SERVER!!");
+        }
+    }
 }

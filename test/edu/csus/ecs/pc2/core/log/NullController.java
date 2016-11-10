@@ -634,4 +634,10 @@ public class NullController implements IInternalController{
     public void updateGroups(Group[] groups) {
         
     }
+
+    @Override
+    public void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) {
+        // TODO Auto-generated method stub
+        
+    }
 }

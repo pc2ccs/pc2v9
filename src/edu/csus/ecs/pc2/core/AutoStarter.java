@@ -214,7 +214,7 @@ public class AutoStarter {
             GregorianCalendar scheduledStart = getScheduledFutureStartTime();
 
             if (scheduledStart != null) {
-                info("Cancelled automatic contest start scheduled for time " + scheduledStart.getTimeInMillis());
+                info("Cancelling automatic contest start scheduled for time " + scheduledStart.getTimeInMillis());
             }
 
             cancelAnyScheduledStartContestTask();
