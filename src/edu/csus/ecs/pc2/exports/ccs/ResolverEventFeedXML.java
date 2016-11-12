@@ -173,6 +173,13 @@ public class ResolverEventFeedXML {
         Arrays.sort(runs, new RunComparator());
 
         for (Run run : runs) {
+            if (run.isJudged()) {
+                // run is judged with only a preliminary judgement, skip it
+                Problem problem = contest.getProblem(run.getProblemId());
+                if (problem.isManualReview() && run.getJudgementRecord().isComputerJudgement()) {
+                    continue;
+                }
+            }
             // only emit runs that are for submitters that can be displayed on the scoreboard
             if (contest.isAllowed(run.getSubmitter(),Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 if (filter.matches(run)) {
@@ -966,7 +973,13 @@ public class ResolverEventFeedXML {
         Arrays.sort(runs, new RunComparator());
 
         for (Run run : runs) {
-
+            if (run.isJudged()) {
+                // run is judged with only a preliminary judgement, skip it
+                Problem problem = contest.getProblem(run.getProblemId());
+                if (problem.isManualReview() && run.getJudgementRecord().isComputerJudgement()) {
+                    continue;
+                }
+            }
             if (contest.isAllowed(run.getSubmitter(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 if (filter.matches(run)) {
                     sb.append(toXML(createElement(contest, run))); // add RUN

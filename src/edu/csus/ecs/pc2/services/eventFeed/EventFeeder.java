@@ -35,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
@@ -358,13 +359,22 @@ public class EventFeeder implements Runnable {
 
         public void runAdded(RunEvent event) {
             Run run = event.getRun();
-            if (! run.isDeleted()){
-                runChanged(event);
+            Account account = contest.getAccount(run.getSubmitter());
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && ! run.isDeleted()){
+                sendXML(eventFeedXML.createElement(contest, run));
             }
+            // NOTE for a run auto marked as DEL there will be no 
+            // XML until the judging Completed.
         }
 
         public void runChanged(RunEvent event) {
             Run run = event.getRun();
+            RunStates status = run.getStatus();
+            Account account = contest.getAccount(run.getSubmitter());
+            // skip emitting xml for runs that are not completed or for an account that should not be shown
+            if (!account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) || !status.equals(RunStates.JUDGED)) {
+                return;
+            }
             sendXML(eventFeedXML.createElement(contest, run));
         }
 
