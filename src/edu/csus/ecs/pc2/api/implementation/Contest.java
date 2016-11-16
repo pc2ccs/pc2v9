@@ -124,7 +124,7 @@ public class Contest implements IContest, UIPlugin {
         return implementations;
     }
 
-    public IProblem[] getProblems() {
+    public IProblem[] getAllProblems() {
         Problem[] problems = contest.getProblems();
         ProblemImplementation[] implementations = new ProblemImplementation[problems.length];
 
@@ -133,7 +133,21 @@ public class Contest implements IContest, UIPlugin {
         }
         return implementations;
     }
+    
+    @Override
+    public IProblem[] getProblems() {
+        Problem[] problems = contest.getProblems();
+        ArrayList<ProblemImplementation> implementations = new ArrayList<>();
 
+        for (int i = 0; i < problems.length; i++) {
+            if (problems[i].isActive()) {
+                implementations.add(new ProblemImplementation(problems[i], contest));
+            }
+        }
+
+        return (ProblemImplementation[]) implementations.toArray(new ProblemImplementation[implementations.size()]);
+    }
+    
     public IJudgement[] getJudgements() {
         Judgement[] judgements = contest.getJudgements();
         JudgementImplementation[] implementations = new JudgementImplementation[judgements.length];

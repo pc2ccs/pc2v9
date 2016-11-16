@@ -87,7 +87,8 @@ public interface IContest {
 
     /**
      * Get an ordered list of all currently defined contest problems.
-     * Returns an array containing one {@link IProblem} for each currently defined contest problem.
+     * 
+     * Returns an array containing one {@link IProblem} for each currently defined/active contest problem.
      * The problems in the returned array are always ordered in the order in which the Contest Administrator
      * entered them into the contest:  element [0] is the first problem, etc.
      * <P>
@@ -102,9 +103,21 @@ public interface IContest {
      * }
      * </pre>
      * 
-     * @return An array containing one {@link IProblem} for each currently defined contest problem.
+     * 
+     * 
+     * @return An array containing one {@link IProblem} for each currently defined (non-hidden) contest problem.
      */
     IProblem[] getProblems();
+    
+    /**
+     * Get an ordered list of all contest problems (hidden or non-hidden).
+     * 
+     * 
+     * @see #getProblems()
+     * @return An array containing one {@link IProblem} for each currently defined contest problem.
+     */
+    IProblem[] getAllProblems();
+    
     
     /**
      * Get an ordered list of all currently defined clarification categories.

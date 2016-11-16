@@ -130,10 +130,11 @@ public class ContestTest extends AbstractTestCase {
         assertEquals("Expecting run detail for team " + team, expectedNumberOfRuns, teamDet.length);
 
         IProblem[] problemsApi = apiContest.getProblems();
+        IProblem[] problemsApiAll = apiContest.getAllProblems();
 
-        // Test for Bug 993    
-        assertEquals("Same problems for API ", problems.length, problemsApi.length);
-        assertTrue("Expecting problem " + problemtoDelete + " to be deleted ", problemsApi[problemtoDelete].isDeleted());
+        // Test for Bug 
+        assertEquals("Same problems for API ", problems.length - 1, problemsApi.length);
+        assertTrue("Expecting problem " + problemtoDelete + " to be deleted ", problemsApiAll[problemtoDelete].isDeleted());
 
     }
 
