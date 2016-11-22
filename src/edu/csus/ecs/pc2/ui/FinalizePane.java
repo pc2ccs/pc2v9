@@ -45,6 +45,11 @@ public class FinalizePane extends JPanePlugin {
 
     private JPanel buttonPane = null;
 
+    /**
+     * Update button.
+     * 
+     * Not visible per Bug 1155.
+     */
     private JButton updateButton = null;
 
     private JButton finalizeButton = null;
@@ -108,7 +113,7 @@ public class FinalizePane extends JPanePlugin {
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
             buttonPane.setPreferredSize(new Dimension(35, 35));
-            buttonPane.add(getUpdateButton(), null);
+//            buttonPane.add(getUpdateButton(), null);
             buttonPane.add(getFinalizeButton(), null);
             buttonPane.add(getReportButton(), null);
         }
@@ -518,7 +523,7 @@ public class FinalizePane extends JPanePlugin {
     void enableButtons(){
         
         boolean certified = false;
-        getUpdateButton().setEnabled(! certified);
+//        getUpdateButton().setEnabled(! certified);
         getFinalizeButton().setEnabled(! certified);
         
     }
