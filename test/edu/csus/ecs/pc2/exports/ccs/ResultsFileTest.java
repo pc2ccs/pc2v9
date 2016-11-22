@@ -84,26 +84,26 @@ public class ResultsFileTest extends TestCase {
     public void testcreateTSVFileLinesEmpty() throws Exception {
 
         String[] expectedResults = { //
-        "2020;1;gold;0", // results
-                "2021;1;gold;0", // results
-                "2022;1;gold;0", // results
-                "2023;1;gold;0", // results
-                "2024;1;gold;0", // results
-                "2025;1;gold;0", // results
-                "2026;1;gold;0", // results
-                "2027;1;gold;0", // results
-                "2028;1;gold;0", // results
-                "2029;1;gold;0", // results
-                "2030;1;gold;0", // results
-                "2031;1;gold;0", // results
-                "2032;1;gold;0", // results
-                "2033;1;gold;0", // results
-                "2034;1;gold;0", // results
-                "2035;1;gold;0", // results
-                "2036;1;gold;0", // results
-                "2037;1;gold;0", // results
-                "2038;1;gold;0", // results
-                "2039;1;gold;0", // results
+                "2020;1;Gold Medal;0", // results 
+                "2021;1;Gold Medal;0", // results 
+                "2022;1;Gold Medal;0", // results 
+                "2023;1;Gold Medal;0", // results 
+                "2024;1;Gold Medal;0", // results 
+                "2025;1;Gold Medal;0", // results 
+                "2026;1;Gold Medal;0", // results 
+                "2027;1;Gold Medal;0", // results 
+                "2028;1;Gold Medal;0", // results 
+                "2029;1;Gold Medal;0", // results 
+                "2030;1;Gold Medal;0", // results 
+                "2031;1;Gold Medal;0", // results 
+                "2032;1;Gold Medal;0", // results 
+                "2033;1;Gold Medal;0", // results 
+                "2034;1;Gold Medal;0", // results 
+                "2035;1;Gold Medal;0", // results 
+                "2036;1;Gold Medal;0", // results 
+                "2037;1;Gold Medal;0", // results 
+                "2038;1;Gold Medal;0", // results 
+                "2039;1;Gold Medal;0", // results 
         };
 
         ResultsFile resultsFile = new ResultsFile();
@@ -121,7 +121,7 @@ public class ResultsFileTest extends TestCase {
 
          String[] results = resultsFile.createTSVFileLines(contest); // using getStandingsRecords
 //        String[] results = resultsFile.createTSVFileLinesTwo(contest); // using XML
-
+         
         assertEquals("Number results file lines ", numTeams + 1, results.length);
 
         compareResults(results, expectedResults);
@@ -171,26 +171,26 @@ public class ResultsFileTest extends TestCase {
 
         // for medal ranks 4, 8, 12
         String[] expectedResults = { //
-        "2024;1;gold;2", // results
-                "2031;2;gold;2", // results
-                "2026;3;gold;2", // results
-                "2038;4;gold;2", // results
-                "2029;5;silver;1", // results
-                "2020;6;silver;1", // results
-                "2030;7;silver;1", // results
-                "2021;8;silver;1", // results
-                "2032;9;bronze;1", // results
-                "2033;10;bronze;1", // results
-                "2034;11;bronze;1", // results
-                "2022;12;bronze;0", // results
-                "2023;12;bronze;0", // results
-                "2025;12;bronze;0", // results
-                "2027;12;bronze;0", // results
-                "2028;12;bronze;0", // results
-                "2035;12;bronze;0", // results
-                "2036;12;bronze;0", // results
-                "2037;12;bronze;0", // results
-                "2039;12;bronze;0", // results
+                "2024;1;Gold Medal;2", // results 
+                "2031;2;Gold Medal;2", // results 
+                "2026;3;Gold Medal;2", // results 
+                "2038;4;Gold Medal;2", // results 
+                "2029;5;Silver Medal;1", // results 
+                "2020;6;Silver Medal;1", // results 
+                "2030;7;Silver Medal;1", // results 
+                "2021;8;Silver Medal;1", // results 
+                "2032;9;Bronze Medal;1", // results 
+                "2033;10;Bronze Medal;1", // results 
+                "2034;11;Bronze Medal;1", // results 
+                "2022;12;Bronze Medal;0", // results 
+                "2023;12;Bronze Medal;0", // results 
+                "2025;12;Bronze Medal;0", // results 
+                "2027;12;Bronze Medal;0", // results 
+                "2028;12;Bronze Medal;0", // results 
+                "2035;12;Bronze Medal;0", // results 
+                "2036;12;Bronze Medal;0", // results 
+                "2037;12;Bronze Medal;0", // results 
+                "2039;12;Bronze Medal;0", // results 
         };
 
         // for medal ranks 3, 6, 10
@@ -242,7 +242,6 @@ public class ResultsFileTest extends TestCase {
             // printExpectedTestData(results);
         }
 
-        // TODO CCS
         compareResults(results, expectedResults);
     }
 

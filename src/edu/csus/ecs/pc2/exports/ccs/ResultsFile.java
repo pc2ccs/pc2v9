@@ -16,21 +16,20 @@ import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
  * Create results.tsv file.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: ResultsFile.java 193 2011-05-14 05:02:16Z laned $
  */
-
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/exports/ccs/ResultsFile.java $
 public class ResultsFile {
 
-    private static final String BRONZE = "bronze";
+    private static final String BRONZE = "Bronze Medal";
 
-    private static final String GOLD = "gold";
+    private static final String GOLD = "Gold Medal";
 
-    private static final String SILVER = "silver";
+    private static final String SILVER = "Silver Medal";
 
-    private static final String HONORABLE = "honorable";
+    private static final String HONORABLE = "Honorable" ;
 
     private static final String TAB = "\t";
+
+    private static final String DEFAULT_RESULT_FIELD_NAME =  "results";
 
     private FinalizeData finalizeData = null;
 
@@ -46,6 +45,18 @@ public class ResultsFile {
      * @throws IllegalContestState
      */
     public String[] createTSVFileLines(IInternalContest contest) throws IllegalContestState {
+        return createTSVFileLines(contest,DEFAULT_RESULT_FIELD_NAME);
+    }
+    
+    /**
+     * Create CCS restuls.tsv file contents.
+     * 
+     * @param contest
+     * @param resultFileTitleFieldName override title anem {@value #DEFAULT_RESULT_FIELD_NAME}. 
+     * @return
+     * @throws IllegalContestState
+     */
+    public String[] createTSVFileLines(IInternalContest contest, String resultFileTitleFieldName) throws IllegalContestState {
 
         Vector<String> lines = new Vector<String>();
 
@@ -64,7 +75,7 @@ public class ResultsFile {
         // 1 Label results fixed string (always same value)
         // 2 Version number 1 integer
 
-        lines.addElement("results" + TAB + "1");
+        lines.addElement(resultFileTitleFieldName + TAB + "1");
 
         // return ranked teams
         StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
@@ -158,4 +169,5 @@ public class ResultsFile {
         
         return XMLUtilities.transformToArray(xmlString, xsltFileName);
     }
+ 
 }
