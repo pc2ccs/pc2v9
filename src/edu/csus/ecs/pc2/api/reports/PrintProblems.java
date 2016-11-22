@@ -12,11 +12,27 @@ public class PrintProblems extends APIAbstractTest {
 
     @Override
     public void printTest() {
-        println("There are " + getContest().getProblems().length + " team ");
-        for (IProblem problem : getContest().getProblems()) {
+
+        println("There are " + getContest().getAllProblems().length + " problems ");
+        printProblems(getContest().getAllProblems());
+        println();
+        println();
+
+        println("There are " + getContest().getProblems().length + " non-hidden problems ");
+        printProblems(getContest().getProblems());
+        println();
+    }
+
+    private void printProblems(IProblem[] problems) {
+
+        for (IProblem problem : problems) {
             print("Problem name = " + problem.getName());
 
             print(" short name = " + problem.getShortName());
+            
+            if (problem.isDeleted()){
+                print(" [DELETED] ");
+            }
 
             print(" data file = ");
             if (problem.hasDataFile()) {
@@ -38,16 +54,19 @@ public class PrintProblems extends APIAbstractTest {
             } else {
                 print("<none>");
             }
-
+            
+      
             if (problem.readsInputFromFile()) {
                 print(" reads from FILE");
             }
             if (problem.readsInputFromStdIn()) {
                 print(" reads from stdin");
             }
+            
+            
             println();
         }
-        println();
+
     }
 
     @Override
