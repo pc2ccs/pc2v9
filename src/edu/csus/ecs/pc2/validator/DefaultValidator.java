@@ -4,6 +4,8 @@
 package edu.csus.ecs.pc2.validator;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -193,11 +195,23 @@ public class DefaultValidator {
         
         //so far, there's no apparent need for the judge's input data file...
         // InputStream judgeDataIS = getClass().getClassLoader().getResourceAsStream(judgeDataFile);
-        InputStream judgeAnswerIS = getClass().getClassLoader().getResourceAsStream(judgeAnswerFile);        
+//        InputStream judgeAnswerIS = getClass().getClassLoader().getResourceAsStream(judgeAnswerFile);   
         
-        //input streams for reading judge's answer and team output
-        // (note the assumption that the team's output is provided on "stdin")
+        //get input stream for reading judge's answer
+        InputStream judgeAnswerIS=null;
+        try {
+            judgeAnswerIS = new FileInputStream(new File(judgeAnswerFile));
+        } catch (FileNotFoundException e2) {
+            log.severe("Judge's answer file '" + judgeAnswerFile + "': file not found");
+            e2.printStackTrace();
+            return -39;
+        }
+        
+        //we need a pushback stream so we can mimic "peek()" on the judge's answer file stream
         PushbackInputStream judgeAnswerPushbackIS = new PushbackInputStream(judgeAnswerIS);
+        
+        //input stream for reading team output
+        // (note the assumption that the team's output is provided on "stdin")
         PushbackInputStream teamOutputPushbackIS = new PushbackInputStream(System.in);
         
         //loop until judge's answer is exhausted (the loop breaks out when judge's answer is exhausted; 
