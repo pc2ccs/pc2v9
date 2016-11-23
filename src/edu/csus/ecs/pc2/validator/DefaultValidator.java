@@ -78,7 +78,7 @@ public class DefaultValidator {
     
     public DefaultValidator(String inJudgeDataFile, String inJudgeAnswerFile, String inFeedbackDirName, String... options ) {
         if (log==null) {
-            Log log = new Log("DefaultValidator.log");
+            log = new Log("DefaultValidator.log");
             StaticLog.setLog(log);
             log = StaticLog.getLog();            
         }
@@ -187,7 +187,7 @@ public class DefaultValidator {
      * Causes this DefaultValidator to evaluate the team output (received on the validator's standard input stream)
      * using the data values configured via the constructor, and return either 42 (success) or 43 (failure).
      * 
-     * @return an int indicating success (42) or failure (43)
+     * @return an int indicating success (42) or failure (43), or -39 if an error occurred
      */
     public int validate() {
         
@@ -267,6 +267,7 @@ public class DefaultValidator {
                 } catch (IOException e) {
                     log.severe("IOException processing judge/team files: " + e.getMessage());
                     e.printStackTrace();
+                    return -39;
                 }
             } //end if isSpaceSensitive
             
@@ -363,6 +364,7 @@ public class DefaultValidator {
         } catch (IOException e) {
             log.severe("IOException while flushing leading whitespace from input stream: " + e.getMessage());
             e.printStackTrace();
+            return "DefaultValidator.getNextToken(): error reading stream";
         }
         
         //if nextChar = -1 then there were no non-whitespace chars left in the stream
@@ -386,6 +388,7 @@ public class DefaultValidator {
         } catch (IOException e) {
             log.severe("IOException while reading non-whitespace chars from input stream: " + e.getMessage());
             e.printStackTrace();
+            return "DefaultValidator.getNextToken(): error reading stream";
         }
         
         //return the stream characters as the next token
@@ -544,6 +547,9 @@ public class DefaultValidator {
     
     /**
      * The main entry point to the DefaultValidator when running as a stand-alone program.
+     * The main program constructs a DefaultValidator object passing it the arguments received
+     * by main(), then invokes the validator's validate() method.  The integer result returned by
+     * validate() is then used as the main program exit code.
      * 
      * @param args judgeDataFile judgeAnswerFile feedbackDir [options] < teamOutputFile
      */
@@ -569,7 +575,7 @@ public class DefaultValidator {
         
         int result = df.validate();
         
-        log.info("validate returned code " + result);
+        log.info("validate() returned code " + result);
         
         System.exit(result);
         
