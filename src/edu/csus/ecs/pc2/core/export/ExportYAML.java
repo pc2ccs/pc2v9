@@ -576,8 +576,7 @@ public class ExportYAML {
             problemWriter.println(IContestLoader.VALIDATOR_KEY+": ");
             problemWriter.println(PAD4 + "validatorProg: " + quote(problem.getValidatorProgramName()));
             problemWriter.println(PAD4 + "validatorCmd: " + quote(problem.getValidatorCommandLine()));
-            problemWriter.println(PAD4 + "usingInternal: " + problem.isUsingPC2Validator());
-            problemWriter.println(PAD4 + "validatorOption: " + problem.getWhichPC2Validator());
+            problemWriter.println(PAD4 + "usingDefaultValidator: " + problem.isUsingDefaultValidator());
             problemWriter.println();
             problemWriter.println(PAD4 + IContestLoader.USING_PC2_VALIDATOR + ": " + problem.isUsingPC2Validator());
             problemWriter.println();

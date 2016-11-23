@@ -63,7 +63,7 @@ public class ProblemImplementation implements IProblem {
         validatorFileName = problem.getValidatorProgramName();
         
         if (problem.isValidatedProblem()){
-            if (! problem.isUsingPC2Validator()){
+            if (! problem.isUsingDefaultValidator()){
                 externalValidator = true;
             }
         }

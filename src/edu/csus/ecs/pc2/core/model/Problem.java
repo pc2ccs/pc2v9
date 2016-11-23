@@ -97,12 +97,7 @@ public class Problem implements IElementObject {
     /**
      * Using the internal (default) validator ?
      */
-    private boolean usingPC2Validator = false;
-
-    /**
-     * Which PC2 Validator Option?.
-     */
-    private int whichPC2Validator = 0;
+    private boolean usingDefaultValidator = false;
 
     /**
      * Validator command line.
@@ -133,10 +128,7 @@ public class Problem implements IElementObject {
      */
     private boolean ccsMode = false;
      
-    /**
-     * PC2 option to ignore spaces on validation.
-     */
-    private boolean ignoreSpacesOnValidation = false;
+    private DefaultValidatorSettings defaultValidatorSettings = null;
 
     /**
      * Display validation output window to judges.
@@ -214,6 +206,8 @@ public class Problem implements IElementObject {
     }
     
     private State state = State.ENABLED;
+
+    private CustomValidatorSettings customValidatorSettings;
     
     /**
      * Create a problem with the display name.
@@ -243,17 +237,17 @@ public class Problem implements IElementObject {
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
         clone.setTimeOutInSeconds(getTimeOutInSeconds());
         clone.setValidatedProblem(isValidatedProblem());
-        clone.setUsingPC2Validator(isUsingPC2Validator());
-        clone.setWhichPC2Validator(getWhichPC2Validator());
-        clone.setValidatorCommandLine(StringUtilities.cloneString(validatorCommandLine));
-        clone.setValidatorProgramName(StringUtilities.cloneString(validatorProgramName));
+        clone.setUsingDefaultValidator(isUsingDefaultValidator());
+
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
         // TODO Implement Commands to be executed before a problem is run
         // private String executionPrepCommand = "";
         // private SerializedFile executionPrepFile;
         
-        clone.setIgnoreSpacesOnValidation(isIgnoreSpacesOnValidation());
+        clone.setDefaultValidatorSettings(this.getDefaultValidatorSettings().clone());
+        clone.setCustomValidatorSettings(this.getCustomValidatorSettings().clone());
+        
         clone.setShowValidationToJudges(isShowValidationToJudges());
         clone.setHideOutputWindow(isHideOutputWindow());
         clone.setShowCompareWindow(isShowCompareWindow());
@@ -365,13 +359,6 @@ public class Problem implements IElementObject {
 
 
     /**
-     * @return Returns the ignoreSpacesOnValidation.
-     */
-    public boolean isIgnoreSpacesOnValidation() {
-        return ignoreSpacesOnValidation;
-    }
-
-    /**
      * @return Returns the internationalJudgementReadMethod.
      */
     public boolean isInternationalJudgementReadMethod() {
@@ -400,14 +387,16 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @return Returns the usingPC2Validator.
+     * @return the flag indicating whether this Problem is using the default validator 
+     *          (as opposed to a custom validator) -- note that the value of the returned
+     *          flag is only meaningful if {@link #isValidatedProblem} returns true.
      */
-    public boolean isUsingPC2Validator() {
-        return usingPC2Validator;
+    public boolean isUsingDefaultValidator() {
+        return usingDefaultValidator;
     }
 
     /**
-     * @return Returns the validatedProblem.
+     * @return whether this Problem has a validator or not.
      */
     public boolean isValidatedProblem() {
         return validatedProblem;
@@ -452,13 +441,6 @@ public class Problem implements IElementObject {
         this.elementId = elementId;
     }
 
-    /**
-     * @param ignoreSpacesOnValidation
-     *            The ignoreSpacesOnValidation to set.
-     */
-    public void setIgnoreSpacesOnValidation(boolean ignoreSpacesOnValidation) {
-        this.ignoreSpacesOnValidation = ignoreSpacesOnValidation;
-    }
 
     /**
      * @param internationalJudgementReadMethod
@@ -493,11 +475,14 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @param usingPC2Validator
-     *            The usingPC2Validator to set.
+     * Sets the Problem flag which indicates whether the default validator is being used.
+     * Note that the value of this flag is only meaningful if {@link #isValidatedProblem} == true.
+     * 
+     * @param usingDefaultValidator
+     *            The value to which the usingDefaultValidator flag should be set.
      */
-    public void setUsingPC2Validator(boolean usingPC2Validator) {
-        this.usingPC2Validator = usingPC2Validator;
+    public void setUsingDefaultValidator(boolean usingDefaultValidator) {
+        this.usingDefaultValidator = usingDefaultValidator;
     }
 
     /**
@@ -566,20 +551,11 @@ public class Problem implements IElementObject {
         elementId.setSiteNumber(siteNumber);
     }
 
-    public int getWhichPC2Validator() {
-        return whichPC2Validator;
-    }
-
-    public void setWhichPC2Validator(int whichPC2Validator) {
-        this.whichPC2Validator = whichPC2Validator;
-    }
 
     public int hashCode() {
         return getElementId().toString().hashCode();
     }
     
-
-
     public boolean isSameAs(Problem problem) {
 
         try {
@@ -609,10 +585,7 @@ public class Problem implements IElementObject {
             if (validatedProblem != problem.isValidatedProblem()) {
                 return false;
             }
-            if (usingPC2Validator != problem.isUsingPC2Validator()) {
-                return false;
-            }
-            if (whichPC2Validator != problem.getWhichPC2Validator()) {
+            if (usingDefaultValidator != problem.isUsingDefaultValidator()) {
                 return false;
             }
             if (! StringUtilities.stringSame(validatorProgramName, problem.getValidatorProgramName())) {
@@ -621,8 +594,15 @@ public class Problem implements IElementObject {
             if (! StringUtilities.stringSame(validatorCommandLine, problem.getValidatorCommandLine())) {
                 return false;
             }
-            if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {
+            //if one default validator setting is null and the other is not (using the Java XOR operator, "^"), return false 
+            if (getDefaultValidatorSettings()==null ^ problem.getDefaultValidatorSettings()==null) {
                 return false;
+            }
+            //if both have default settings but they're not identical, return false
+            if (getDefaultValidatorSettings()!=null && problem.getDefaultValidatorSettings()!=null) {
+                if (!getDefaultValidatorSettings().isSameAs(problem.getDefaultValidatorSettings())) {
+                    return false;
+                }
             }
             if (showValidationToJudges != problem.isShowValidationToJudges()) {
                 return false;
@@ -956,5 +936,40 @@ public class Problem implements IElementObject {
 
     public void setElementId(Problem problem) {
         problem.elementId = elementId;
+    }
+
+    /**
+     * Returns a {@link DefaultValidatorSettings} object containing the options which this
+     * Problem should apply when using the default validator.
+     * @return the defaultValidatorSettings for this problem
+     */
+    public DefaultValidatorSettings getDefaultValidatorSettings() {
+        return defaultValidatorSettings;
+    }
+
+    /**
+     * Sets the {@link DefaultValidatorSettings} for this problem to the specified value.
+     * @param settings the defaultValidatorSettings to set
+     */
+    public void setDefaultValidatorSettings(DefaultValidatorSettings settings) {
+        this.defaultValidatorSettings = settings;
+    }
+    
+
+    /**
+     * Returns a {@link CustomValidatorSettings} object describing the custom validator
+     * associated with this problem (if any).
+     * @return the customValidatorSettings for this problem
+     */
+    public CustomValidatorSettings getCustomValidatorSettings() {
+        return customValidatorSettings;
+    }
+
+    /**
+     * Sets the {@link CustomValidatorSettings} for this problem to the specified value.
+     * @param customValidatorSettings the customValidatorSettings to set
+     */
+    public void setCustomValidatorSettings(CustomValidatorSettings settings) {
+        this.customValidatorSettings = settings;
     }
 }

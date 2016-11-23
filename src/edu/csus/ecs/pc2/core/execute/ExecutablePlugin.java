@@ -710,8 +710,9 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
         String commandPattern = problem.getValidatorCommandLine();
         boolean pc2JarUseDirectory = false;
 
-        if (problem.isUsingPC2Validator()) {
+        if (problem.isUsingDefaultValidator()) {
 
+        	//TODO: this needs to change to reflect the DefaultValidator rather than the old "pc2 validator"
             /**
              * The internal command is set to: <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files] Where validator is
              * Problem.INTERNAL_VALIDATOR_NAME aka "pc2.jar edu.csus.ecs.pc2.validator.Validator"
@@ -734,7 +735,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
         log.log(Log.DEBUG, "after  substitution: " + cmdLine);
 
         if (File.separator.equals("\\")) {
-            if (problem.isUsingPC2Validator()) {
+            if (problem.isUsingDefaultValidator()) {
                 cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
                 cmdLine = cmdLine.replaceFirst("jar ", "jar\" ");
                 log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);
