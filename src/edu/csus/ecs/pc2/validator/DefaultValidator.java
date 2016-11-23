@@ -542,6 +542,7 @@ public class DefaultValidator {
             return false;
         }
         
+        log.info("Verified all files/folders accessible");
         return true;
     }
     
