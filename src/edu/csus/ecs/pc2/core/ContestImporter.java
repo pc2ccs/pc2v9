@@ -360,7 +360,7 @@ public class ContestImporter {
         newProblem.setShowCompareWindow(problem.isShowCompareWindow());
         newProblem.setShowValidationToJudges(problem.isShowValidationToJudges());
         newProblem.setTimeOutInSeconds(problem.getTimeOutInSeconds());
-        newProblem.setUsingDefaultValidator(problem.isUsingDefaultValidator());
+        newProblem.setUsingCLICSDefaultValidator(problem.isUsingCLICSDefaultValidator());
         newProblem.setValidatedProblem(problem.isValidatedProblem());
         newProblem.setValidatorCommandLine(problem.getValidatorCommandLine());
         newProblem.setValidatorProgramName(problem.getValidatorProgramName());

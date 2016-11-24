@@ -408,7 +408,7 @@ public class ContestXML {
 
         IMemento memento = mementoRoot.createChild(PROBLEM_TAG);
         memento.putString("name", problem.toString());
-        if (problem.isUsingDefaultValidator()) {
+        if (problem.isUsingCLICSDefaultValidator()) {
             memento.putBoolean("useDefaultValidator", true);
             memento.putBoolean("caseSensitive", problem.getDefaultValidatorSettings().isCaseSensitive());
             memento.putBoolean("spaceSensitive", problem.getDefaultValidatorSettings().isSpaceSensitive());

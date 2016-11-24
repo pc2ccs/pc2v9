@@ -124,22 +124,50 @@ public class DefaultValidatorSettings implements Serializable {
     /**
      * Returns true if the default validator settings in this object match those in
      * the "other" object; false otherwise.
+     * Note that if both objects agree that float absolute and/or relative tolerance is NOT
+     * specified, then the objects will otherwise compare as "equal" regardless of the actual values
+     * stored in the absolute and/or relative float tolerance fields (in other words, if both objects
+     * agree that a tolerance is "not specified", then no check against the corresponding values is
+     * performed).
+     * 
      * @param other -- the object against which to compare this object's settings
      * @return true if this object matches the other object
      */
-    public boolean isSameAs(DefaultValidatorSettings other) {
+    @Override
+    public boolean equals (Object obj) {
+        
+        if (obj==null || !(obj instanceof DefaultValidatorSettings)) {
+            return false;
+        }
+        
+        DefaultValidatorSettings other = (DefaultValidatorSettings) obj;
+        
+        
         if (this.isCaseSensitive()!=other.isCaseSensitive()) {
             return false;
         }
+        
         if (this.isSpaceSensitive()!=other.isSpaceSensitive()) {
             return false;
         }
-        if (this.getFloatAbsoluteTolerance()!=other.getFloatAbsoluteTolerance()) {
+        
+        if (this.isFloatAbsoluteToleranceSpecified() != other.isFloatAbsoluteToleranceSpecified()) {
             return false;
         }
-        if (this.getFloatRelativeTolerance()!=other.getFloatRelativeTolerance()) {
+        
+        if (this.isFloatRelativeToleranceSpecified() != other.isFloatRelativeToleranceSpecified()) {
             return false;
         }
+        
+        if (this.isFloatAbsoluteToleranceSpecified() && this.getFloatAbsoluteTolerance()!=other.getFloatAbsoluteTolerance()) {
+            return false;
+        }
+        
+        if (this.isFloatRelativeToleranceSpecified() && this.getFloatRelativeTolerance()!=other.getFloatRelativeTolerance()) {
+            return false;
+        }
+        
+       
         return true;
         
     }

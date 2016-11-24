@@ -618,7 +618,7 @@ public class ExecutableV9 extends Plugin implements IExecutable {
         String commandPattern = problem.getValidatorCommandLine();
         boolean pc2JarUseDirectory = false;
 
-        if (problem.isUsingDefaultValidator()) {
+        if (problem.isUsingCLICSDefaultValidator()) {
 
         	//TODO: this needs to change to reflect the DefaultValidator rather than the old "pc2 validator"
             /**
@@ -640,7 +640,7 @@ public class ExecutableV9 extends Plugin implements IExecutable {
         String cmdLine = executeUtilities.substituteAllStrings(commandPattern);
 
         if (File.separator.equals("\\")) {
-            if (problem.isUsingDefaultValidator()) {
+            if (problem.isUsingCLICSDefaultValidator()) {
                 cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
                 cmdLine = cmdLine.replaceFirst("jar ", "jar\" ");
                 log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);

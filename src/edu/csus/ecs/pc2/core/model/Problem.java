@@ -5,6 +5,7 @@ import java.io.File;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.validator.DefaultValidator;
 
 /**
  * Problem Definition.
@@ -97,12 +98,17 @@ public class Problem implements IElementObject {
     /**
      * A flag indicating whether or not the problem is using the old (deprecated) pc2Validator.
      */
-    private boolean usingPC2Validator;
+    private boolean usingPC2Validator = false;
     
     /**
-     * Using the internal (default) validator ?
+     * Which PC2 Validator Option?.
      */
-    private boolean usingDefaultValidator = false;
+    private int whichPC2Validator = 0;
+    
+    /**
+     * Using the CLICS Default Validator ?
+     */
+    private boolean usingCLICSDefaultValidator = false;
 
     /**
      * Validator command line.
@@ -132,7 +138,15 @@ public class Problem implements IElementObject {
      * Is this problem to be executed and validated per the CCS specification.
      */
     private boolean ccsMode = false;
+    
+    /**
+     * PC2 Validator option to ignore spaces on validation (deprecated).
+     */
+    private boolean ignoreSpacesOnValidation = false;    
      
+    /**
+     * The settings for the CLICS Default Validator
+     */
     private DefaultValidatorSettings defaultValidatorSettings = null;
 
     /**
@@ -242,14 +256,18 @@ public class Problem implements IElementObject {
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
         clone.setTimeOutInSeconds(getTimeOutInSeconds());
         clone.setValidatedProblem(isValidatedProblem());
-        clone.setUsingDefaultValidator(isUsingDefaultValidator());
-
+        clone.setUsingPC2Validator(isUsingPC2Validator());
+        clone.setWhichPC2Validator(getWhichPC2Validator());
+        clone.setValidatorCommandLine(StringUtilities.cloneString(validatorCommandLine));
+        clone.setValidatorProgramName(StringUtilities.cloneString(validatorProgramName));
+        clone.setUsingCLICSDefaultValidator(isUsingCLICSDefaultValidator());
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
         // TODO Implement Commands to be executed before a problem is run
         // private String executionPrepCommand = "";
         // private SerializedFile executionPrepFile;
-        
+
+        clone.setIgnoreSpacesOnValidation(isIgnoreSpacesOnValidation());
         clone.setDefaultValidatorSettings(this.getDefaultValidatorSettings().clone());
         clone.setCustomValidatorSettings(this.getCustomValidatorSettings().clone());
         
@@ -364,6 +382,13 @@ public class Problem implements IElementObject {
 
 
     /**
+     * @return Returns the (deprecated) PC2 Validator ignoreSpacesOnValidation flag.
+     */
+    public boolean isIgnoreSpacesOnValidation() {
+        return ignoreSpacesOnValidation;
+    }
+
+    /**
      * @return Returns the internationalJudgementReadMethod.
      */
     public boolean isInternationalJudgementReadMethod() {
@@ -392,12 +417,20 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @return the flag indicating whether this Problem is using the default validator 
-     *          (as opposed to a custom validator) -- note that the value of the returned
-     *          flag is only meaningful if {@link #isValidatedProblem} returns true.
+     * @return Returns the flag indicating whether the Problem is using the old (deprecated) PC2Validator.
      */
-    public boolean isUsingDefaultValidator() {
-        return usingDefaultValidator;
+    public boolean isUsingPC2Validator() {
+        return usingPC2Validator;
+    }
+
+    /**
+     * @return the flag indicating whether this Problem is using the CLICS Default Validator 
+     *          (as opposed to a custom validator, or the old (deprecated) PC2Validator) 
+     *          -- note that the value of the returned
+     *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     */
+    public boolean isUsingCLICSDefaultValidator() {
+        return usingCLICSDefaultValidator;
     }
 
     /**
@@ -446,6 +479,20 @@ public class Problem implements IElementObject {
         this.elementId = elementId;
     }
 
+    /**
+     * Sets the value of the ignoreSpacesOnValidation flag for the old (deprecated) PC2Validator.
+     * Note that setting this flag has NO EFFECT unless the old (deprecated) PC2Validator is selected
+     * for the Problem (in particular, this flag is unrelated to the "isSpaceSensitive" flag for 
+     * the CLICS {@link DefaultValidator}.
+     * 
+     * @param ignoreSpacesOnValidation
+     *            The value to which the ignoreSpacesOnValidation flag should be set.
+     * @see {@link DefaultValidatorSettings#setSpaceSensitive(boolean)}
+     */
+    @Deprecated
+    public void setIgnoreSpacesOnValidation(boolean ignoreSpacesOnValidation) {
+        this.ignoreSpacesOnValidation = ignoreSpacesOnValidation;
+    }
 
     /**
      * @param internationalJudgementReadMethod
@@ -480,27 +527,36 @@ public class Problem implements IElementObject {
     }
     
     /**
-     * Sets the flag indicating whether or not this problem is using the older (deprecated) pc2Validator.
+     * Sets the flag indicating whether or not this problem is using the old (deprecated) pc2Validator.
+     * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
      * 
-     * @param usingPC2Validator - the boolean value to which the flag should be set
-     *            The usingPC2Validator to set.
+     * @param usingPC2Validator - the boolean value to which the usingPC2Validator flag should be set
+     * @see {@link #setUsingCLICSDefaultValidator(boolean)}
      */
+    @Deprecated
     public void setUsingPC2Validator(boolean usingPC2Validator) {
         this.usingPC2Validator = usingPC2Validator;
     }
 
     /**
-     * Sets the Problem flag which indicates whether the default validator is being used.
-     * Note that the value of this flag is only meaningful if {@link #isValidatedProblem} == true.
+     * Sets the flag which indicates whether the CLICS Default Validator is being used.
+     * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
      * 
      * @param usingDefaultValidator
      *            The value to which the usingDefaultValidator flag should be set.
      */
-    public void setUsingDefaultValidator(boolean usingDefaultValidator) {
-        this.usingDefaultValidator = usingDefaultValidator;
+    public void setUsingCLICSDefaultValidator(boolean usingDefaultValidator) {
+        this.usingCLICSDefaultValidator = usingDefaultValidator;
     }
 
     /**
+     * Sets the flag indicating that this Problem is using a validator.
+     * Note that at least three different validators might be used: the CLICS {@link DefaultValidator},
+     * a custom (user-defined) validator, or the old (deprecated) PC2Validator.
+     * It is the caller's responsibility when calling this method to also insure that a specific
+     * validator has been specified by calling either {@link Problem#setUsingCLICSDefaultValidator(boolean)},
+     * {@link Problem#setUsingCustomValidator(boolean)}, or (deprecated) {@link Problem#setUsingPC2Validator(boolean)}.
+     * 
      * @param validated
      *            Set to true if the problem uses a validator.
      */
@@ -566,6 +622,27 @@ public class Problem implements IElementObject {
         elementId.setSiteNumber(siteNumber);
     }
 
+    /**
+     * Returns an indication of which option has been selected when using the old (deprecated) PC2Validator.
+     * Note that the return value of this method is meaningless unless {@link Problem#isUsingPC2Validator()} returns true.
+     * 
+     * @return an integer indicating which PC2Validator option has been specified
+     */
+    @Deprecated
+    public int getWhichPC2Validator() {
+        return whichPC2Validator;
+    }
+
+    /**
+     * Sets the value indicating which option has been selected when using the old (deprecated) PC2Validator.
+     * Note that the operation of this method is meaningless unless {@link Problem#setUsingPC2Validator(boolean)} has been called.
+     * 
+     * @param whichPC2Validator -- the integer value to which the PC2Validator option should be set
+     */
+    @Deprecated
+    public void setWhichPC2Validator(int whichPC2Validator) {
+        this.whichPC2Validator = whichPC2Validator;
+    }
 
     public int hashCode() {
         return getElementId().toString().hashCode();
@@ -600,24 +677,35 @@ public class Problem implements IElementObject {
             if (validatedProblem != problem.isValidatedProblem()) {
                 return false;
             }
-            if (usingDefaultValidator != problem.isUsingDefaultValidator()) {
+            if (usingPC2Validator != problem.isUsingPC2Validator()) {
                 return false;
             }
+            if (whichPC2Validator != problem.getWhichPC2Validator()) {
+                return false;
+            }
+            
+            if (usingCLICSDefaultValidator != problem.isUsingCLICSDefaultValidator()) {
+                return false;
+            }
+            if (getDefaultValidatorSettings()==null ^ problem.getDefaultValidatorSettings()==null) {
+                //Java XOR (^) says they are different (one is null, the other is not) -- return false
+                return false;
+            }
+            if (getDefaultValidatorSettings()!=null) {
+                //both must be non-null; check for equality
+                if (!getDefaultValidatorSettings().equals(problem.getDefaultValidatorSettings())) {
+                    return false;
+                }
+            }
+            
             if (! StringUtilities.stringSame(validatorProgramName, problem.getValidatorProgramName())) {
                 return false;
             }
             if (! StringUtilities.stringSame(validatorCommandLine, problem.getValidatorCommandLine())) {
                 return false;
             }
-            //if one default validator setting is null and the other is not (using the Java XOR operator, "^"), return false 
-            if (getDefaultValidatorSettings()==null ^ problem.getDefaultValidatorSettings()==null) {
+            if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {
                 return false;
-            }
-            //if both have default settings but they're not identical, return false
-            if (getDefaultValidatorSettings()!=null && problem.getDefaultValidatorSettings()!=null) {
-                if (!getDefaultValidatorSettings().isSameAs(problem.getDefaultValidatorSettings())) {
-                    return false;
-                }
             }
             if (showValidationToJudges != problem.isShowValidationToJudges()) {
                 return false;

@@ -603,7 +603,7 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                     String fileName = changedProblem.getValidatorProgramName();
-                    if (!problem.isUsingDefaultValidator() && fileName != null && fileName.length() > 0) {
+                    if (!problem.isUsingCLICSDefaultValidator() && fileName != null && fileName.length() > 0) {
                         if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
                             enableButton = true;
                             fileChanged++;
@@ -857,7 +857,7 @@ public class EditProblemPane extends JPanePlugin {
 
         checkProblem.setValidatedProblem(!getUseNOValidatatorRadioButton().isSelected());
         if (checkProblem.isValidatedProblem()) {
-            checkProblem.setUsingDefaultValidator(getUseDefaultValidatorRadioButton().isSelected());
+            checkProblem.setUsingCLICSDefaultValidator(getUseDefaultValidatorRadioButton().isSelected());
         }
 
         checkProblem.setDefaultValidatorSettings(getDefaultValidatorSettingsFromFields());
@@ -1720,7 +1720,7 @@ public class EditProblemPane extends JPanePlugin {
 
         if (inProblem.isValidatedProblem()) {
 
-            if (inProblem.isUsingDefaultValidator()) {
+            if (inProblem.isUsingCLICSDefaultValidator()) {
                 getUseDefaultValidatorRadioButton().setSelected(true);
                 getCaseSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isCaseSensitive());
                 getSpaceSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isSpaceSensitive());

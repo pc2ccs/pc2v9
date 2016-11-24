@@ -90,7 +90,7 @@ public class ProblemsReport implements IReport {
 
         printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
 //        printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
-        printWriter.println("    Using pc2 validator : " + problem.isUsingDefaultValidator());
+        printWriter.println("    Using pc2 validator : " + problem.isUsingCLICSDefaultValidator());
 
         printWriter.println("   Using external files : " + problem.isUsingExternalDataFiles() + " path = " + problem.getExternalDataFileLocation());
         printWriter.println("               CCS mode : " + problem.isCcsMode());
