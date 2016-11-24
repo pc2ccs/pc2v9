@@ -23,14 +23,14 @@ import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.ParseArguments;
 
 /**
+ * Archive/backup of pc2 configuration, settings and generated files.
+ * 
  * This class creates an archive containing the files required to store the current state of PC^2.
  * <P>
  *
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ZipPC2 {
 
     private String zipFileName = "";
@@ -163,6 +163,8 @@ public class ZipPC2 {
             } else if (dirEntryName.equalsIgnoreCase("data")) {
                 addDirToList(dirEntryName);
             } else if (dirEntryName.equalsIgnoreCase("profiles")) {
+                addDirToList(dirEntryName);
+            } else if (dirEntryName.equalsIgnoreCase("results")) {
                 addDirToList(dirEntryName);
             }
         }
