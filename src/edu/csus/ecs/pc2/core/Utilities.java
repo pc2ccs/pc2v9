@@ -1365,5 +1365,22 @@ public final class Utilities {
     public static String unixifyPath(String filename) {
         return filename.replaceAll("\\\\", "/");
     }
+
+    /**
+     * Write lines to file.
+     * 
+     * @param filename
+     * @param lines
+     * @throws FileNotFoundException
+     */
+    public static void writeLinesToFile(String filename, String[] lines) throws FileNotFoundException {
+
+        PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+        for (String line : lines) {
+            printWriter.println(line);
+        }
+        printWriter.close();
+
+    }
     
 }

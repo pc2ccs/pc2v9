@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.util.logging.Level;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -29,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.FinalizeReport;
+import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 /**
  * Edit Finalize settings pane.
@@ -75,6 +78,10 @@ public class FinalizePane extends JPanePlugin {
     private JLabel certificationCommentLabel = null;
 
     private JButton reportButton = null;
+    private JPanel southPanel;
+    private JPanel viewResultsPane;
+    private JLabel resultsFileLabel;
+    private JButton viewButton;
 
     /**
      * This method initializes
@@ -92,13 +99,13 @@ public class FinalizePane extends JPanePlugin {
     private void initialize() {
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(457, 239));
-        this.add(getButtonPane(), BorderLayout.SOUTH);
         this.add(getCenterPane(), BorderLayout.CENTER);
+        add(getSouthPanel(), BorderLayout.SOUTH);
     }
 
     @Override
     public String getPluginTitle() {
-        return "Profile Status Pane";
+        return "Finalized Pane";
     }
 
     /**
@@ -520,12 +527,95 @@ public class FinalizePane extends JPanePlugin {
         return reportButton;
     }
     
-    void enableButtons(){
-        
-        boolean certified = false;
-//        getUpdateButton().setEnabled(! certified);
-        getFinalizeButton().setEnabled(! certified);
-        
+    void enableButtons() {
+
+        boolean finalized = false;
+        if (getContest().getFinalizeData() != null) {
+            finalized = getContest().getFinalizeData().isCertified();
+        }
+
+        getFinalizeButton().setEnabled(true);
+
+        getViewButton().setEnabled(finalized);
+
+        if (finalized) {
+            String text = "Results file generated to " + genererateResultsFile();
+            getResultsFileLabel().setText(text);
+            getResultsFileLabel().setToolTipText(text);
+        }
+
+        getResultsFileLabel().setVisible(finalized);
+
+    }
+
+    private String genererateResultsFile() {
+
+        String resultsDir = Utilities.getCurrentDirectory() + File.separator + "results";
+
+        File dir = new File(resultsDir);
+        if (!dir.isDirectory()) {
+            dir.mkdirs();
+        }
+
+        String outfilename = resultsDir + File.separator + ResultsFile.RESULTS_FILENAME;
+
+        ResultsFile resultsFile = new ResultsFile();
+        try {
+            String[] lines = resultsFile.createTSVFileLines(getContest());
+            Utilities.writeLinesToFile(outfilename, lines);
+            return outfilename;
+        } catch (Exception e) {
+            getLog().info("Unable to write results file " + outfilename);
+            getLog().log(Level.WARNING, "Writing " + outfilename, e);
+            e.printStackTrace(); // TODO remove debug 22 
+            return "Unable to write " + outfilename;
+        }
+
+    }
+
+    private JPanel getSouthPanel() {
+        if (southPanel == null) {
+        	southPanel = new JPanel();
+        	southPanel.setLayout(new BorderLayout(0, 0));
+        	southPanel.add(getButtonPane(), BorderLayout.SOUTH);
+        	southPanel.add(getViewResultsPane());
+        }
+        return southPanel;
+    }
+    private JPanel getViewResultsPane() {
+        if (viewResultsPane == null) {
+        	viewResultsPane = new JPanel();
+        	viewResultsPane.setLayout(new BorderLayout(0, 0));
+        	viewResultsPane.add(getResultsFileLabel());
+        	viewResultsPane.add(getViewButton(), BorderLayout.EAST);
+        }
+        return viewResultsPane;
+    }
+    private JLabel getResultsFileLabel() {
+        if (resultsFileLabel == null) {
+        	resultsFileLabel = new JLabel("results/resulst.tsv");
+        	resultsFileLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        }
+        return resultsFileLabel;
+    }
+    private JButton getViewButton() {
+        if (viewButton == null) {
+        	viewButton = new JButton("View");
+        	viewButton.setToolTipText("View results.tsv");
+        	viewButton.addActionListener(new java.awt.event.ActionListener() {
+                   public void actionPerformed(java.awt.event.ActionEvent e) {
+                       showResultsFile();
+                   }
+               });
+        }
+        return viewButton;
+    }
+
+    protected void showResultsFile() {
+
+        String resultsFile = genererateResultsFile();
+
+        FrameUtilities.viewFile(resultsFile, "Results File", getLog());
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

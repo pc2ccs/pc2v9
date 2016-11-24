@@ -31,6 +31,8 @@ public class ResultsFile {
 
     private static final String DEFAULT_RESULT_FIELD_NAME =  "results";
 
+    public static final String RESULTS_FILENAME = "results.tsv";
+
     private FinalizeData finalizeData = null;
 
     public void setFinalizeData(FinalizeData finalizeData) {
