@@ -95,6 +95,11 @@ public class Problem implements IElementObject {
     private boolean validatedProblem = false;
 
     /**
+     * A flag indicating whether or not the problem is using the old (deprecated) pc2Validator.
+     */
+    private boolean usingPC2Validator;
+    
+    /**
      * Using the internal (default) validator ?
      */
     private boolean usingDefaultValidator = false;
@@ -472,6 +477,16 @@ public class Problem implements IElementObject {
      */
     public void setTimeOutInSeconds(int timeOutInSeconds) {
         this.timeOutInSeconds = timeOutInSeconds;
+    }
+    
+    /**
+     * Sets the flag indicating whether or not this problem is using the older (deprecated) pc2Validator.
+     * 
+     * @param usingPC2Validator - the boolean value to which the flag should be set
+     *            The usingPC2Validator to set.
+     */
+    public void setUsingPC2Validator(boolean usingPC2Validator) {
+        this.usingPC2Validator = usingPC2Validator;
     }
 
     /**
