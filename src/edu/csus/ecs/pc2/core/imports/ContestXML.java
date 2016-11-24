@@ -408,18 +408,12 @@ public class ContestXML {
 
         IMemento memento = mementoRoot.createChild(PROBLEM_TAG);
         memento.putString("name", problem.toString());
-        if (problem.isUsingCLICSDefaultValidator()) {
-            memento.putBoolean("useDefaultValidator", true);
-            memento.putBoolean("caseSensitive", problem.getDefaultValidatorSettings().isCaseSensitive());
-            memento.putBoolean("spaceSensitive", problem.getDefaultValidatorSettings().isSpaceSensitive());
-            if (problem.getDefaultValidatorSettings().isFloatAbsoluteToleranceSpecified()) {
-                String absTolStr = Double.valueOf(problem.getDefaultValidatorSettings().getFloatAbsoluteTolerance()).toString();
-                memento.putString("floatAbsoluteTolerance", absTolStr);
-            }
-            if (problem.getDefaultValidatorSettings().isFloatRelativeToleranceSpecified()) {
-                String relTolStr = Double.valueOf(problem.getDefaultValidatorSettings().getFloatRelativeTolerance()).toString();
-                memento.putString("floatAbsoluteTolerance", relTolStr);
-            }
+        if (problem.isUsingPC2Validator()) {
+            memento.putBoolean("useInternalValidator", true);
+            memento.putInteger("internalValidatorOption", problem.getWhichPC2Validator());
+            memento.putString("validatorCommand", problem.getValidatorCommandLine());
+            memento.putString("validatorProgram", problem.getValidatorProgramName());
+            memento.putBoolean("ignoreSpaces", problem.isIgnoreSpacesOnValidation());
         } else if (problem.isValidatedProblem()) {
             memento.putString("validatorCommand", problem.getValidatorCommandLine());
             memento.putString("validatorProgram", problem.getValidatorProgramName());

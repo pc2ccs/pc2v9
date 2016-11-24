@@ -225,7 +225,7 @@ public class ProblemsPane extends JPanePlugin {
         c[i++] = yesNoString(problem.isShowValidationToJudges());
         String validatorName = problem.getValidatorProgramName();
         if (problem.isValidatedProblem()) {
-            if (! problem.isUsingCLICSDefaultValidator()) {
+            if (! problem.isUsingPC2Validator()) {
                 validatorName = problem.getValidatorCommandLine();
             }
         }
