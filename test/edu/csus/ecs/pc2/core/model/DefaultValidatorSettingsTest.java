@@ -1,7 +1,5 @@
 package edu.csus.ecs.pc2.core.model;
 
-import java.util.ArrayList;
-
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -10,7 +8,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * Tests various combinations of these settings (from DefaultValidatorSettings toString())
  * 
  * <pre>
- * case_sensitive case_sensitive - indicates that comparisons should be case-sensitive.
+ * case_sensitive - indicates that comparisons should be case-sensitive.
  * space_change_sensitive - indicates that changes in the amount of whitespace should be rejected (the default is that any sequence of 1 or more whitespace characters are equivalent).
  * float_relative_tolerance e - indicates that floating-point tokens should be accepted if they are within relative error = e (see below for details).
  * float_absolute_tolerance e - indicates that floating-point tokens should be accepted if they are within absolute error = e (see below for details).
@@ -20,15 +18,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class DefaultValidatorSettingsTest extends AbstractTestCase {
-
-    public final String VTO_CASE_SENSITIVE = "case_sensitive";
-
-    public final String VTO_SPACE_CHANGE_SENSITIVE = "space_change_sensitive";
-
-    public final String VTO_FLOAT_RELATIVE_TOLERANCE = " float_relative_tolerance";
-
-    public final String VTO_FLOAT_ABSOLUTE_TOLERANCE = " float_absolute_tolerance";
-
+    
     /**
      * Emulate float_tolerance, both settings.
      * 
@@ -50,28 +40,8 @@ public class DefaultValidatorSettingsTest extends AbstractTestCase {
      */
     protected String toString(DefaultValidatorSettings settings) {
 
-        // TODO replace this entire method code with
-        // return settings.toString();
+        return settings.toString();
 
-        ArrayList<String> list = new ArrayList<>();
-
-        if (settings.isCaseSensitive()) {
-            list.add(VTO_CASE_SENSITIVE);
-        }
-        if (settings.isFloatAbsoluteToleranceSpecified()) {
-            list.add(VTO_FLOAT_ABSOLUTE_TOLERANCE);
-            list.add(Double.toString(settings.getFloatAbsoluteTolerance()));
-        }
-
-        if (settings.isFloatRelativeToleranceSpecified()) {
-            list.add(VTO_FLOAT_RELATIVE_TOLERANCE);
-            list.add(Double.toString(settings.getFloatRelativeTolerance()));
-        }
-        if (settings.isSpaceSensitive()) {
-            list.add(VTO_SPACE_CHANGE_SENSITIVE);
-        }
-
-        return String.join(" ", list);
     }
 
     /**
@@ -104,17 +74,17 @@ public class DefaultValidatorSettingsTest extends AbstractTestCase {
 
         String actual = toString(settings);
 
-        String expected = VTO_CASE_SENSITIVE + " " + VTO_SPACE_CHANGE_SENSITIVE;
+        String expected = DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
 
         assertEquals(expected, actual);
 
         setFloatTolerance(settings, 4.0042354);
         actual = toString(settings);
 
-        expected = VTO_CASE_SENSITIVE + " " + //
-                VTO_FLOAT_ABSOLUTE_TOLERANCE + " 4.0042354 " + //
-                VTO_FLOAT_RELATIVE_TOLERANCE + " 4.0042354 " + //
-                VTO_SPACE_CHANGE_SENSITIVE;
+        expected = DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
+                DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
+                DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 4.0042354 " + 
+                DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 4.0042354";
 
         assertEquals(expected, actual);
 
@@ -134,15 +104,16 @@ public class DefaultValidatorSettingsTest extends AbstractTestCase {
 
         String actual = toString(settings);
 
-        String expected = VTO_CASE_SENSITIVE + " " + VTO_SPACE_CHANGE_SENSITIVE;
+        String expected = DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
+                DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
 
         assertEquals(expected, actual);
 
         settings.setFloatAbsoluteTolerance(5.666334);
 
-        expected = VTO_CASE_SENSITIVE + " " + //
-                VTO_FLOAT_ABSOLUTE_TOLERANCE + " 5.666334" + //
-                " " + VTO_SPACE_CHANGE_SENSITIVE;
+        expected = DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
+                DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
+                DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 5.666334" ;
 
         actual = toString(settings);
 
@@ -162,13 +133,14 @@ public class DefaultValidatorSettingsTest extends AbstractTestCase {
 
         String actual = toString(settings);
 
-        String expected = VTO_SPACE_CHANGE_SENSITIVE;
+        String expected = DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE ;
 
         assertEquals(expected, actual);
 
         settings.setFloatRelativeTolerance(0.0030303);
 
-        expected = VTO_FLOAT_RELATIVE_TOLERANCE + " 0.0030303 " + VTO_SPACE_CHANGE_SENSITIVE;
+        expected = DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
+                    DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 0.0030303" ;
 
         actual = toString(settings);
 
