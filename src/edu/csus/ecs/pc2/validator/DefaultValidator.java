@@ -12,6 +12,7 @@ import java.io.PushbackInputStream;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.DefaultValidatorSettings;
 
 /**
  * This class implements an "ICPC Default Validator".
@@ -114,10 +115,10 @@ public class DefaultValidator {
         for (int i=0; i<options.length; i++) {
             if (options[i].equals("case_sensitive") || options[i].equals("case-sensitive")) {
                 isCaseSensitive = true;
-            } else if (options[i].equals("space_change_sensitive") || options[i].equals("space_sensitive")
+            } else if (options[i].equals(DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE) || options[i].equals("space_sensitive")
                     || options[i].equals("space-change-sensitive") || options[i].equals("space-sensitive")) {
                 isSpaceSensitive = true;
-            } else if (options[i].equals("float_absolute_tolerance") || options[i].equals("float-absolute-tolerance")) {
+            } else if (options[i].equals(DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE) || options[i].equals("float-absolute-tolerance")) {
                 if (i<options.length-1) {
                     i++;
                     try {
@@ -126,18 +127,18 @@ public class DefaultValidator {
                         useFloatTolerance = true;
                     } catch (NumberFormatException | NullPointerException e) {
                         //bad epsilon value
-                        log.severe("Bad value following 'float_absolute_tolerance' option");
+                        log.severe("Bad value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                         e.printStackTrace();
-                        throw new RuntimeException("Bad value following 'float_absolute_tolerance' option");
+                        throw new RuntimeException("Bad value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                     }
                 } else {
                     //missing epsilon
-                    log.severe("Missing tolerance value following 'float_absolute_tolerance' option");
-                    throw new RuntimeException("Missing tolerance value following 'float_absolute_tolerance' option");
+                    log.severe("Missing tolerance value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                    throw new RuntimeException("Missing tolerance value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                     
                 }
                 
-            } else if (options[i].equals("float_relative_tolerance") || options[i].equals("float-relative-tolerance")) {
+            } else if (options[i].equals(DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE) || options[i].equals("float-relative-tolerance")) {
                 if (i<options.length-1) {
                     i++;
                     try {
@@ -146,14 +147,14 @@ public class DefaultValidator {
                         useFloatTolerance = true;
                     } catch (NumberFormatException | NullPointerException e) {
                         //bad epsilon value
-                        log.severe("Bad value following 'float_relative_tolerance' option");
+                        log.severe("Bad value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                         e.printStackTrace();
-                        throw new RuntimeException("Bad value following 'float_relative_tolerance' option");
+                        throw new RuntimeException("Bad value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                     }
                 } else {
                     //missing epsilon
-                    log.severe("Missing tolerance value following 'float_relative_tolerance' option");
-                    throw new RuntimeException("Missing tolerance value following 'float_relative_tolerance' option");
+                    log.severe("Missing tolerance value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                    throw new RuntimeException("Missing tolerance value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                 }
                 
             } else if (options[i].equals("float_tolerance") || options[i].equals("float-tolerance")) {
@@ -601,10 +602,10 @@ public class DefaultValidator {
         System.err.println ("  where judges_data_file and judges_answer_file must exist and be readable files,\n"
                 + "  feedbackdir" + File.separator + " must exist and be a directory that is both readable and writable,\n"
                 + "  and where [options] include:");
-        System.err.println ("    case_sensitive");
-        System.err.println ("    space_change_sensitive");
-        System.err.println ("    float_absolute_tolerance E");
-        System.err.println ("    float_relative_tolerance E");
+        System.err.println ("    " + DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE);
+        System.err.println ("    " + DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE);
+        System.err.println ("    " + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " E");
+        System.err.println ("    " + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " E");
         System.err.println ("    float_tolerance E   (shorthand for setting both absolute and relative tolerance)");        
     }
 
