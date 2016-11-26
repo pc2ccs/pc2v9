@@ -1,0 +1,143 @@
+#
+# Sumit Sample multiple test cases
+# Fri Nov 04 12:02:43 2016
+#
+--- 
+
+name: Pac NW Mini Contest
+short-name: PacNW Mini
+
+# Note auto start countdown will not be started unless start-time is in future.
+
+start-time:        2016-11-04T18:30:00-07:00
+
+duration:  2:00:00
+
+# freeze time before end of contest
+scoreboard-freeze: 01:00:00
+# scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze in pc2?
+scoreboard-freeze-length: 01:00:00
+
+# pc2 specific settings
+# elapsed: 0:00:00
+# remaining: 5:00:00
+# running: false
+
+# default pc2 judging types
+computer-judged: true
+manual-review: true
+send-prelim-judgement: true
+
+# other pc2 settings
+default-validator: /home/judge/cdp/config/validefault {:infile} {:outfile} {:ansfile} {:resfile} {:problemletter}
+# default-validator:  /home/judge/cdp/config/validefault
+
+# Load data files into pc2 as SerializedFiles, not using CDP external files
+load-data-files: false
+
+# judge's data path
+judge-config-path: /home/judge/cdp/config
+
+languages:
+  - name: 'Java'
+    active: true
+    compilerCmd: 'javac -encoding UTF-8 -sourcepath . -d . {:mainfile}'
+    exemask: '{:basename}.class'
+    execCmd: 'java -Xss8m -Xmx1024m {:basename}'
+    runner: 'java'
+    runner-args: '{:basename}'
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_java {:timelimit} {:basename}'
+
+  - name: 'GNU C'
+    active: true
+    compilerCmd: 'gcc -g -O2 -std=gnu99 -static {:mainfile} -lm'
+    exemask: './a.out'
+    execCmd: './a.out'
+    runner: './a.out'
+    runner-args: ''
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
+
+  - name: 'GNU C++'
+    active: true
+    compilerCmd: 'g++ -g -O2 -static -std=gnu++11 {:mainfile}'
+    exemask: 'a.out'
+    execCmd: './a.out'
+    runner: './a.out'
+    runner-args: ''
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
+
+  - name: 'Python2'
+    active: true
+    compilerCmd: 'python -m py_compile {:mainfile}'
+    interpreted: true
+    exemask: ''
+    execCmd: 'python {:mainfile}'
+    runner: 'python'
+    runner-args: '{:mainfile}'
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_python {:timelimit} {:mainfile}'
+
+  - name: 'Python3'
+    active: true
+    compilerCmd: 'python3 -m py_compile {:mainfile}'
+    interpreted: true
+    exemask: ''
+    execCmd: 'python3 {:mainfile}'
+    runner: 'python3'
+    runner-args: '{:mainfile}'
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_python3 {:timelimit} {:mainfile}'
+
+  - name: 'C#'
+    active: true
+    compilerCmd: 'mcs {:mainfile}'
+    interpreted: false
+    exemask: '{:basename}.exe'
+    execCmd: 'mono {:basename}.exe'
+    runner: 'mono'
+    runner-args: '{:basename}.exe'
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_cs {:timelimit} {:basename}.exe'
+
+#
+# problemset.yaml - list of CCS problem definitions
+#
+# created on: Thu Nov  3 22:08:02 PDT 2016
+# created by: $Id: mkprobset,v 1.6 2016/10/28 18:27:55 laned Exp $
+#
+# problems:
+problemset:
+  - letter:     A
+    short-name: sumit
+
+    color:      Black
+    rgb:        '#000000'
+
+accounts:
+  - account: TEAM
+    site: 1
+    count: 700
+
+  - account: JUDGE
+    site: 1
+    count: 14
+
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+
+  - account: FEEDER
+    site: 1
+    count: 1
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 7,8,9,10,11,12,13,14
+    letters: A
+    enabled: yes
+
+# EOF Contest Configuration

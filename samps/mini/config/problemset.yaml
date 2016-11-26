@@ -1,0 +1,14 @@
+#
+# problemset.yaml - list of CCS problem definitions
+#
+# created on: Thu Nov  3 22:08:02 PDT 2016
+# created by: $Id: mkprobset,v 1.6 2016/10/28 18:27:55 laned Exp $
+#
+# problemset:
+problems:
+  - letter:     A
+    short-name: sumit
+
+    color:      Black
+    rgb:        '#000000'
+

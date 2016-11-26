@@ -1,0 +1,26 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.3 20110918 (Sunday, September 18th 2011 23:51 UTC) Java ver 1.6.0_20 build 2345 Windows XP 5.1 (x86) 
+# Created: 2011-09-18 18:05:40 PDT
+# 
+# Thu Nov 03 22:37:20 2016
+# 
+--- 
+
+name: Sumit
+source: PC^2 Team 
+author: PC^2 Team 
+license: 
+rights_owner: 
+
+limits: 
+   timeout: 30
+
+validator: 
+   validatorProg: pc2.jar edu.csus.ecs.pc2.validator.Validator
+   validatorCmd: '{:validator} {:infile} {:outfile} {:ansfile} {:resfile}  -pc2 1 false'
+   usingInternal: true
+   validatorOption: 1
+
+input: 
+   readFromSTDIN: true
+

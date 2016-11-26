@@ -1,0 +1,92 @@
+#!/bin/bash
+
+validir=$HOME/cdp/config
+val=$validir/default_validator
+vargs=
+
+# args for this should be: {:infile} {:outfile} {:ansfile} {:resfile} {:probletter}
+# new args, also add {:probletter}
+
+if [ $# -ne "5" ]; then
+    cat <<EOM
+Usage:
+    $0 infile outfile ansfile resfile problemletter
+
+where 
+    infile is the judges input data file
+    outfile is the teams output file
+    ansfile is the judges answer file
+    resfile is the results xml file
+    problemletter is the letter of the problem
+EOM
+    exit 1
+fi
+
+if [ ! -f $val ]; then
+   echo Could not find validator at $val
+   exit 1
+fi
+
+# Output validator args are: 
+# input judge_answer feedback_dir [additional_arguments] < team_output [ > team_input ]
+# args for pc2 should be: {:infile} {:outfile} {:ansfile} {:resfile}
+
+BASE="Completed"
+
+# populate vargs based on problem.yaml for the problem.
+pfile=`echo $1 | sed 's#data/.*#problem.yaml#'`
+vargs=`grep validator_flags: $pfile | cut -d: -f2-`
+mkdir -p feedback
+$val $1 $3 feedback/ $vargs < $2
+result=$?
+# send the feedback to stderr
+echo "----- begin test case ----" >&2
+cat feedback/*.txt >&2
+if [ -f EXITCODE.TXT ]; then
+  BASE="Runtime Error"
+  cat >>$2<<EOM
+
+EOM
+  echo -n "PC2: Team program exit code = " >> $2
+  cat EXITCODE.TXT >> $2
+fi
+if [ -f core ]; then
+  BASE="Runtime Error"
+  cat >>$2<<EOM
+
+PC2: Team program generated core file
+EOM
+fi
+if [ -f timelimit.txt ]; then
+   BASE="Time Limit Exceeded"
+fi
+echo "----- end test case ----" >&2
+if [ $result -eq "43" ]; then
+# output is incorrect
+  cat >$4<<EOM
+<?xml version="1.0"?>
+<result outcome =  "No - $BASE - Wrong Answer" security = "$4">$val returned 43
+</result>
+EOM
+  exit 0
+fi
+if [ $result -eq "42" ]; then
+# correct output
+  if [ -f EXITCODE.TXT ]; then
+    cat >$4<<EOM
+<?xml version="1.0"?>
+<result outcome =  "No - $BASE - Correct Output" security = "$4">$val returned 42
+</result>
+EOM
+  else
+    cat >$4<<EOM
+<?xml version="1.0"?>
+<result outcome =  "Accepted" security = "$4">$val returned 42
+</result>
+EOM
+  fi
+  exit 0
+fi
+
+# validator failed for some reason
+exit $result
