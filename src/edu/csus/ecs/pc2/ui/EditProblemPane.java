@@ -226,7 +226,7 @@ public class EditProblemPane extends JPanePlugin {
     //the panel holding the "use default validator" radio button and the corresponding options panel
     private JPanel defaultValidatorPanel = null;
     private JRadioButton useDefaultValidatorRadioButton = null;
-    private JPanel defaultValidatorOptionsSubPanel = null;    
+    private JPanel clicsValidatorOptionsSubPanel = null;    
       private JCheckBox floatRelativeToleranceCheckBox;
       private JTextField floatRelativeToleranceTextField;
       private JCheckBox floatAbsoluteToleranceCheckBox;
@@ -2410,7 +2410,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     protected void enableDefaultValidatorComponents(boolean enableComponents) {
-        getDefaultValidatorOptionsSubPanel().setEnabled(enableComponents);
+        getClicsValidatorOptionsSubPanel().setEnabled(enableComponents);
         getCaseSensitiveCheckBox().setEnabled(enableComponents);
         getSpaceSensitiveCheckBox().setEnabled(enableComponents);
         getFloatAbsoluteToleranceCheckBox().setEnabled(enableComponents);
@@ -2464,61 +2464,62 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getDefaultValidatorOptionsSubPanel() {
-        if (defaultValidatorOptionsSubPanel == null) {
+    private JPanel getClicsValidatorOptionsSubPanel() {
+        if (clicsValidatorOptionsSubPanel == null) {
             
-            defaultValidatorOptionsSubPanel = new JPanel();
-            defaultValidatorOptionsSubPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Validator options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+            clicsValidatorOptionsSubPanel = new JPanel();
+            clicsValidatorOptionsSubPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Validator options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
             
-            GridBagLayout gbl_defaultValidatorOptionsPanel = new GridBagLayout();
-            gbl_defaultValidatorOptionsPanel.columnWidths = new int[] {30, 160, 10, 75};
-            gbl_defaultValidatorOptionsPanel.rowHeights = new int[] {25, 25, 25, 25};
-            gbl_defaultValidatorOptionsPanel.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
-            gbl_defaultValidatorOptionsPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
-            defaultValidatorOptionsSubPanel.setLayout(gbl_defaultValidatorOptionsPanel);
+            GridBagLayout gbl_clicsValidatorOptionsSubPanel = new GridBagLayout();
+            gbl_clicsValidatorOptionsSubPanel.columnWidths = new int[] {30, 100, 150};
+            gbl_clicsValidatorOptionsSubPanel.rowHeights = new int[] {25, 25};
+            gbl_clicsValidatorOptionsSubPanel.columnWeights = new double[]{0.0, 0.0, 0.0};
+            gbl_clicsValidatorOptionsSubPanel.rowWeights = new double[]{0.0, 0.0};
+            clicsValidatorOptionsSubPanel.setLayout(gbl_clicsValidatorOptionsSubPanel);
             
             GridBagConstraints gbc_CaseSensitiveCheckBox = new GridBagConstraints();
             gbc_CaseSensitiveCheckBox.fill = GridBagConstraints.BOTH;
             gbc_CaseSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_CaseSensitiveCheckBox.gridx = 1;
+            gbc_CaseSensitiveCheckBox.gridx = 0;
             gbc_CaseSensitiveCheckBox.gridy = 0;
-            defaultValidatorOptionsSubPanel.add(getCaseSensitiveCheckBox(), gbc_CaseSensitiveCheckBox);
-            
-            GridBagConstraints gbc_SpaceSensitiveCheckBox = new GridBagConstraints();
-            gbc_SpaceSensitiveCheckBox.fill = GridBagConstraints.BOTH;
-            gbc_SpaceSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_SpaceSensitiveCheckBox.gridx = 1;
-            gbc_SpaceSensitiveCheckBox.gridy = 1;
-            defaultValidatorOptionsSubPanel.add(getSpaceSensitiveCheckBox(), gbc_SpaceSensitiveCheckBox);
+            clicsValidatorOptionsSubPanel.add(getCaseSensitiveCheckBox(), gbc_CaseSensitiveCheckBox);
             
             GridBagConstraints gbc_FloatRelativeToleranceCheckBox = new GridBagConstraints();
             gbc_FloatRelativeToleranceCheckBox.fill = GridBagConstraints.BOTH;
             gbc_FloatRelativeToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
             gbc_FloatRelativeToleranceCheckBox.gridx = 1;
-            gbc_FloatRelativeToleranceCheckBox.gridy = 2;
-            defaultValidatorOptionsSubPanel.add(getFloatRelativeToleranceCheckBox(), gbc_FloatRelativeToleranceCheckBox);
+            gbc_FloatRelativeToleranceCheckBox.gridy = 0;
+            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceCheckBox(), gbc_FloatRelativeToleranceCheckBox);
             
             GridBagConstraints gbc_FloatRelativeToleranceTextField = new GridBagConstraints();
-            gbc_FloatRelativeToleranceTextField.insets = new Insets(0, 0, 5, 0);
+            gbc_FloatRelativeToleranceTextField.insets = new Insets(0, 0, 5, 5);
             gbc_FloatRelativeToleranceTextField.fill = GridBagConstraints.BOTH;
             gbc_FloatRelativeToleranceTextField.gridx = 2;
-            gbc_FloatRelativeToleranceTextField.gridy = 2;
-            defaultValidatorOptionsSubPanel.add(getFloatRelativeToleranceTextField(), gbc_FloatRelativeToleranceTextField);
+            gbc_FloatRelativeToleranceTextField.gridy = 0;
+            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceTextField(), gbc_FloatRelativeToleranceTextField);
+            
+            GridBagConstraints gbc_SpaceSensitiveCheckBox = new GridBagConstraints();
+            gbc_SpaceSensitiveCheckBox.fill = GridBagConstraints.BOTH;
+            gbc_SpaceSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
+            gbc_SpaceSensitiveCheckBox.gridx = 0;
+            gbc_SpaceSensitiveCheckBox.gridy = 1;
+            clicsValidatorOptionsSubPanel.add(getSpaceSensitiveCheckBox(), gbc_SpaceSensitiveCheckBox);
             
             GridBagConstraints gbc_FloatAbsoluteToleranceCheckBox = new GridBagConstraints();
             gbc_FloatAbsoluteToleranceCheckBox.anchor = GridBagConstraints.WEST;
-            gbc_FloatAbsoluteToleranceCheckBox.insets = new Insets(0, 0, 0, 5);
+            gbc_FloatAbsoluteToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
             gbc_FloatAbsoluteToleranceCheckBox.gridx = 1;
-            gbc_FloatAbsoluteToleranceCheckBox.gridy = 3;
-            defaultValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceCheckBox(), gbc_FloatAbsoluteToleranceCheckBox);
+            gbc_FloatAbsoluteToleranceCheckBox.gridy = 1;
+            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceCheckBox(), gbc_FloatAbsoluteToleranceCheckBox);
             
             GridBagConstraints gbc_FloatAbsoluteToleranceTextField = new GridBagConstraints();
+            gbc_FloatAbsoluteToleranceTextField.insets = new Insets(0, 0, 5, 5);
             gbc_FloatAbsoluteToleranceTextField.fill = GridBagConstraints.BOTH;
             gbc_FloatAbsoluteToleranceTextField.gridx = 2;
-            gbc_FloatAbsoluteToleranceTextField.gridy = 3;
-            defaultValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceTextField(), gbc_FloatAbsoluteToleranceTextField);
+            gbc_FloatAbsoluteToleranceTextField.gridy = 1;
+            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceTextField(), gbc_FloatAbsoluteToleranceTextField);
         }
-        return defaultValidatorOptionsSubPanel;
+        return clicsValidatorOptionsSubPanel;
     }
 
     /**
@@ -2606,7 +2607,7 @@ public class EditProblemPane extends JPanePlugin {
             floatRelativeToleranceTextField = new JTextField();
             floatRelativeToleranceTextField.setToolTipText("Enter the relative tolerance for floating point numbers");
             floatRelativeToleranceTextField.setMaximumSize(new Dimension(100, 20));
-            floatRelativeToleranceTextField.setColumns(10);
+            floatRelativeToleranceTextField.setColumns(20);
             floatRelativeToleranceTextField.setEnabled(false);
         }
         return floatRelativeToleranceTextField;
@@ -3568,7 +3569,7 @@ public class EditProblemPane extends JPanePlugin {
         	defaultValidatorPanel.setLayout(new BorderLayout(0, 0));
         	defaultValidatorPanel.add(getUseDefaultValidatorRadioButton(), BorderLayout.NORTH);
         	defaultValidatorPanel.add(getHorizontalStrut(), BorderLayout.WEST);
-        	defaultValidatorPanel.add(getDefaultValidatorOptionsSubPanel());
+        	defaultValidatorPanel.add(getClicsValidatorOptionsSubPanel());
         }
         return defaultValidatorPanel;
     }
