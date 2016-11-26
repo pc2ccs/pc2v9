@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.validator.DefaultValidator;
 public class Problem implements IElementObject {
 
     /**
-     * PC<sup>2 Validator Command Line.
+     * PC<sup>2</sup> Validator Command Line.
      */
     public static final String INTERNAL_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.validator.Validator";
 
@@ -268,9 +268,16 @@ public class Problem implements IElementObject {
         // private SerializedFile executionPrepFile;
 
         clone.setIgnoreSpacesOnValidation(isIgnoreSpacesOnValidation());
-        clone.setDefaultValidatorSettings(this.getDefaultValidatorSettings().clone());
-        clone.setCustomValidatorSettings(this.getCustomValidatorSettings().clone());
-        
+        if (this.getDefaultValidatorSettings()==null) {
+            clone.setDefaultValidatorSettings(null);
+        } else {
+            clone.setDefaultValidatorSettings(this.getDefaultValidatorSettings().clone());
+        }
+        if (this.getCustomValidatorSettings() == null) {
+            clone.setCustomValidatorSettings(null);
+        } else {
+            clone.setCustomValidatorSettings(this.getCustomValidatorSettings().clone());
+        }       
         clone.setShowValidationToJudges(isShowValidationToJudges());
         clone.setHideOutputWindow(isHideOutputWindow());
         clone.setShowCompareWindow(isShowCompareWindow());
