@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestComparison;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
 /**
@@ -123,7 +124,7 @@ public class ContestPreloadPane extends JPanePlugin {
             Arrays.sort(filenames);
 
             for (String name : filenames) {
-                String contestFilename = dirname + File.separator + name + File.separator + "contest.yaml";
+                String contestFilename = dirname + File.separator + name + File.separator + "config" + File.separator + "contest.yaml";
                 if (new File(contestFilename).isFile()) {
 
                     String[] cols = buildContestRow(contestFilename, name);
@@ -233,7 +234,7 @@ public class ContestPreloadPane extends JPanePlugin {
 
      
         try {
-            ContestYAMLLoader loader = new ContestYAMLLoader();
+            ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
             newContest = loader.fromYaml(null, directoryName);
 
 //            if (Utilities.isDebugMode()) {

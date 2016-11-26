@@ -1814,7 +1814,7 @@ public class ContestYAMLLoader implements IContestLoader {
     
 
     /**
-     * Find sample conetst by name.
+     * Find sample contest by name in samps/contests/NAME/config.
      * @param name
      * @return
      */
@@ -1824,7 +1824,8 @@ public class ContestYAMLLoader implements IContestLoader {
 
         String sampleDir = "samps" + File.separator + "contests";
 
-        String conestYamleFilename = sampleDir + File.separator + name + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+        String conestYamleFilename = sampleDir + File.separator + name + File.separator + //
+                "config" + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
 
         if (new File(conestYamleFilename).isFile()) {
             return conestYamleFilename;
