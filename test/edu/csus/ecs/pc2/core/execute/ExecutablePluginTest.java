@@ -379,8 +379,8 @@ public class ExecutablePluginTest extends AbstractTestCase {
         } else {
             if (contest.getProblem(run.getProblemId()).isValidatedProblem()) {
                 
+//                System.out.println("debug 22 executionData = "+executionData.toString());                
                 assertTrue("Expect no error running validator" , executionData.isValidationSuccess());
-//                System.out.println("debug 22 executionData = "+toString(executionData));
                 
                 if (solved){
                     assertTrue("Expected to run to be a Yes " + run.getProblemId(), ExecuteUtilities.didTeamSolveProblem(executionData));
