@@ -96,20 +96,15 @@ public class Problem implements IElementObject {
     private boolean validatedProblem = false;
 
     /**
-     * A flag indicating whether or not the problem is using the old (deprecated) pc2Validator.
+     * Flags indicating which validator is being used; only relevant if validatedProblem (above) == true
      */
     private boolean usingPC2Validator = false;
-    
-    /**
-     * Which PC2 Validator Option?.
-     */
-    private int whichPC2Validator = 0;
-    
-    /**
-     * Using the CLICS Default Validator ?
-     */
+    private int whichPC2Validator = 0;  //if pc2Validator is used, which option?
+
     private boolean usingCLICSDefaultValidator = false;
 
+    private boolean usingCustomValidator = false;
+    
     /**
      * Validator command line.
      * 
@@ -227,6 +222,7 @@ public class Problem implements IElementObject {
     private State state = State.ENABLED;
 
     private CustomValidatorSettings customValidatorSettings;
+
     
     /**
      * Create a problem with the display name.
@@ -269,9 +265,9 @@ public class Problem implements IElementObject {
 
         clone.setIgnoreSpacesOnValidation(isIgnoreSpacesOnValidation());
         if (this.getDefaultValidatorSettings()==null) {
-            clone.setDefaultValidatorSettings(null);
+            clone.setCLICSDefaultValidatorSettings(null);
         } else {
-            clone.setDefaultValidatorSettings(this.getDefaultValidatorSettings().clone());
+            clone.setCLICSDefaultValidatorSettings(this.getDefaultValidatorSettings().clone());
         }
         if (this.getCustomValidatorSettings() == null) {
             clone.setCustomValidatorSettings(null);
@@ -424,20 +420,40 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @return Returns the flag indicating whether the Problem is using the old (deprecated) PC2Validator.
+     * Returns whether the Problem is using the old (deprecated) PC2Validator 
+     *          (as opposed to a custom validator, or the CLICS Default Validator) 
+     *          -- note that the value of the returned
+     *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     *          
+     * @return true if if the Problem is using the PC2Validator
      */
+    @Deprecated
     public boolean isUsingPC2Validator() {
         return usingPC2Validator;
     }
 
     /**
-     * @return the flag indicating whether this Problem is using the CLICS Default Validator 
+     * Returns whether this Problem is using the CLICS Default Validator 
      *          (as opposed to a custom validator, or the old (deprecated) PC2Validator) 
      *          -- note that the value of the returned
      *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     *          
+     * @return true if the Problem is using the CLICS Default Validator
      */
     public boolean isUsingCLICSDefaultValidator() {
         return usingCLICSDefaultValidator;
+    }
+
+    /**
+     * Returns whether this Problem is using a Custom (user-supplied) Validator 
+     *          (as opposed to the CLICS Default Validator or the old (deprecated) PC2Validator) 
+     *          -- note that the value of the returned
+     *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     *          
+     * @return true if the Problem is using a Custom validator
+     */
+    public boolean isUsingCustomValidator() {
+        return usingCustomValidator;
     }
 
     /**
@@ -557,6 +573,17 @@ public class Problem implements IElementObject {
     }
 
     /**
+     * Sets the flag which indicates whether a Custom (user-supplied) Validator is being used.
+     * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     * 
+     * @param usingCustomValidator
+     *            The value to which the usingCustomValidator flag should be set.
+     */
+    public void setUsingCustomValidator(boolean usingCustomValidator) {
+        this.usingCustomValidator = usingCustomValidator;
+    }
+
+   /**
      * Sets the flag indicating that this Problem is using a validator.
      * Note that at least three different validators might be used: the CLICS {@link DefaultValidator},
      * a custom (user-defined) validator, or the old (deprecated) PC2Validator.
@@ -1061,7 +1088,7 @@ public class Problem implements IElementObject {
      * Sets the {@link DefaultValidatorSettings} for this problem to the specified value.
      * @param settings the defaultValidatorSettings to set
      */
-    public void setDefaultValidatorSettings(DefaultValidatorSettings settings) {
+    public void setCLICSDefaultValidatorSettings(DefaultValidatorSettings settings) {
         this.defaultValidatorSettings = settings;
     }
     
