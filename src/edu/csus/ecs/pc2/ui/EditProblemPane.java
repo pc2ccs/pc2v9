@@ -177,9 +177,9 @@ public class EditProblemPane extends JPanePlugin {
 
     private JCheckBox showValidatorToJudgesCheckBox = null;
 
-    private JCheckBox isCaseSensitiveCheckBox = null;
+    private JCheckBox isCLICSCaseSensitiveCheckBox = null;
     
-    private JCheckBox isSpaceSensitiveCheckBox = null;
+    private JCheckBox isCLICSSpaceSensitiveCheckBox = null;
 
     private JCheckBox showCompareCheckBox = null;
 
@@ -855,33 +855,26 @@ public class EditProblemPane extends JPanePlugin {
 
         checkProblem.setReadInputDataFromSTDIN(stdinRadioButton.isSelected());
 
-        /**
-         * The 3 radio buttons for "which validator" are fit into 2 boolean fields in checkProblem. 
-         * If the checkProblem is to be validated using the default validator then 
-         *   validatedProblem = true and usingDefaultValidator = true; 
-         * if the checkProblem is to be validated using a custom validator then
-         *   validatedProblem = true and usingDefaultValidator = false; 
-         * if the checkProblem is not validated then
-         *   validatedProblem = false and the value of usingDefaultValidator is meaningless.
-         */
-
+        //set the flags indicating which validator (if any) is being used
         checkProblem.setValidatedProblem(!getUseNOValidatatorRadioButton().isSelected());
         if (checkProblem.isValidatedProblem()) {
+            checkProblem.setUsingPC2Validator(getUsePC2ValidatorRadioButton().isSelected());
             checkProblem.setUsingCLICSDefaultValidator(getUseCLICSValidatorRadioButton().isSelected());
+            checkProblem.setUsingCustomValidator(getUseCustomValidatorRadioButton().isSelected());
         }
 
-        checkProblem.setDefaultValidatorSettings(getDefaultValidatorSettingsFromFields());
+        checkProblem.setCLICSDefaultValidatorSettings(getCLICSDefaultValidatorSettingsFromFields());
         checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
 
-//        if (checkProblem.isUsingDefaultValidator()) {
-//
-//            // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
-//            // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
-//
-//            checkProblem.setIgnoreSpacesOnValidation(getCaseSensitiveCheckBox().isSelected());
-//            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
-//            checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
-//        }
+        if (checkProblem.isUsingPC2Validator()) {
+
+            // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
+            // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
+
+            checkProblem.setIgnoreSpacesOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());
+            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
+            checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+        }
 
         checkProblem.setShowValidationToJudges(showValidatorToJudgesCheckBox.isSelected());
 
@@ -998,12 +991,12 @@ public class EditProblemPane extends JPanePlugin {
      * @return a DefaultValidatorSettings object populated from the GUI
      * @throws {@link InvalidFieldValue} if an invalid tolerance value is detected
      */
-    private DefaultValidatorSettings getDefaultValidatorSettingsFromFields() {
+    private DefaultValidatorSettings getCLICSDefaultValidatorSettingsFromFields() {
         
         DefaultValidatorSettings settings = new DefaultValidatorSettings();
         
-        settings.setCaseSensitive(getCaseSensitiveCheckBox().isSelected());
-        settings.setSpaceSensitive(getSpaceSensitiveCheckBox().isSelected());
+        settings.setCaseSensitive(getCLICSValidatorCaseSensitiveCheckBox().isSelected());
+        settings.setSpaceSensitive(getCLICSSpaceSensitiveCheckBox().isSelected());
         
         if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
 
@@ -1732,8 +1725,8 @@ public class EditProblemPane extends JPanePlugin {
 
             if (inProblem.isUsingCLICSDefaultValidator()) {
                 getUseCLICSValidatorRadioButton().setSelected(true);
-                getCaseSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isCaseSensitive());
-                getSpaceSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isSpaceSensitive());
+                getCLICSValidatorCaseSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isCaseSensitive());
+                getCLICSSpaceSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isSpaceSensitive());
                 getFloatAbsoluteToleranceCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isFloatAbsoluteToleranceSpecified());
                 if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
                     getFloatAbsoluteToleranceTextField().setText(inProblem.getDefaultValidatorSettings().getFloatAbsoluteTolerance()+"");
@@ -2416,7 +2409,7 @@ public class EditProblemPane extends JPanePlugin {
         if (useCLICSValidatorRadioButton == null) {
             useCLICSValidatorRadioButton = new JRadioButton();
             useCLICSValidatorRadioButton.setMargin(new Insets(2, 12, 2, 2));
-            useCLICSValidatorRadioButton.setText("Use CLICS Default Validator");
+            useCLICSValidatorRadioButton.setText("Use CLICS Default Validator (recommended)");
             useCLICSValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableValidatorComponents();
@@ -2438,8 +2431,8 @@ public class EditProblemPane extends JPanePlugin {
 
     protected void enableClicsValidatorComponents(boolean enableComponents) {
         getClicsValidatorOptionsSubPanel().setEnabled(enableComponents);
-        getCaseSensitiveCheckBox().setEnabled(enableComponents);
-        getSpaceSensitiveCheckBox().setEnabled(enableComponents);
+        getCLICSValidatorCaseSensitiveCheckBox().setEnabled(enableComponents);
+        getCLICSSpaceSensitiveCheckBox().setEnabled(enableComponents);
         getFloatAbsoluteToleranceCheckBox().setEnabled(enableComponents);
         getFloatRelativeToleranceCheckBox().setEnabled(enableComponents);
         getFloatAbsoluteToleranceTextField().setEnabled(enableComponents);
@@ -2495,7 +2488,7 @@ public class EditProblemPane extends JPanePlugin {
         if (clicsValidatorOptionsSubPanel == null) {
             
             clicsValidatorOptionsSubPanel = new JPanel();
-            clicsValidatorOptionsSubPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Validator options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+            clicsValidatorOptionsSubPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "CLICS Validator options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
             
             GridBagLayout gbl_clicsValidatorOptionsSubPanel = new GridBagLayout();
             gbl_clicsValidatorOptionsSubPanel.columnWidths = new int[] {30, 100, 150};
@@ -2509,7 +2502,7 @@ public class EditProblemPane extends JPanePlugin {
             gbc_CaseSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
             gbc_CaseSensitiveCheckBox.gridx = 0;
             gbc_CaseSensitiveCheckBox.gridy = 0;
-            clicsValidatorOptionsSubPanel.add(getCaseSensitiveCheckBox(), gbc_CaseSensitiveCheckBox);
+            clicsValidatorOptionsSubPanel.add(getCLICSValidatorCaseSensitiveCheckBox(), gbc_CaseSensitiveCheckBox);
             
             GridBagConstraints gbc_FloatRelativeToleranceCheckBox = new GridBagConstraints();
             gbc_FloatRelativeToleranceCheckBox.fill = GridBagConstraints.BOTH;
@@ -2530,7 +2523,7 @@ public class EditProblemPane extends JPanePlugin {
             gbc_SpaceSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
             gbc_SpaceSensitiveCheckBox.gridx = 0;
             gbc_SpaceSensitiveCheckBox.gridy = 1;
-            clicsValidatorOptionsSubPanel.add(getSpaceSensitiveCheckBox(), gbc_SpaceSensitiveCheckBox);
+            clicsValidatorOptionsSubPanel.add(getCLICSSpaceSensitiveCheckBox(), gbc_SpaceSensitiveCheckBox);
             
             GridBagConstraints gbc_FloatAbsoluteToleranceCheckBox = new GridBagConstraints();
             gbc_FloatAbsoluteToleranceCheckBox.anchor = GridBagConstraints.WEST;
@@ -2568,22 +2561,22 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes the isCaseSensitive checkbox.
+     * This method initializes the isCaseSensitive checkbox for the old (deprecated) PC2 Validator.
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getCaseSensitiveCheckBox() {
-        if (isCaseSensitiveCheckBox == null) {
-            isCaseSensitiveCheckBox = new JCheckBox();
-            isCaseSensitiveCheckBox.setText("Case-sensitive");
-            isCaseSensitiveCheckBox.setSelected(false);
-            isCaseSensitiveCheckBox.addActionListener(new java.awt.event.ActionListener() {
+    private JCheckBox getCLICSValidatorCaseSensitiveCheckBox() {
+        if (isCLICSCaseSensitiveCheckBox == null) {
+            isCLICSCaseSensitiveCheckBox = new JCheckBox();
+            isCLICSCaseSensitiveCheckBox.setText("Case-sensitive");
+            isCLICSCaseSensitiveCheckBox.setSelected(false);
+            isCLICSCaseSensitiveCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
             });
         }
-        return isCaseSensitiveCheckBox;
+        return isCLICSCaseSensitiveCheckBox;
     }
 
     /**
@@ -2591,18 +2584,18 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getSpaceSensitiveCheckBox() {
-        if (isSpaceSensitiveCheckBox == null) {
-            isSpaceSensitiveCheckBox = new JCheckBox();
-            isSpaceSensitiveCheckBox.setText("Space-sensitive");
-            isSpaceSensitiveCheckBox.setSelected(false);
-            isSpaceSensitiveCheckBox.addActionListener(new java.awt.event.ActionListener() {
+    private JCheckBox getCLICSSpaceSensitiveCheckBox() {
+        if (isCLICSSpaceSensitiveCheckBox == null) {
+            isCLICSSpaceSensitiveCheckBox = new JCheckBox();
+            isCLICSSpaceSensitiveCheckBox.setText("Space-sensitive");
+            isCLICSSpaceSensitiveCheckBox.setSelected(false);
+            isCLICSSpaceSensitiveCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
             });
         }
-        return isSpaceSensitiveCheckBox;
+        return isCLICSSpaceSensitiveCheckBox;
     }
 
     /**
@@ -2962,9 +2955,9 @@ public class EditProblemPane extends JPanePlugin {
         
         getUseNOValidatatorRadioButton().setSelected(true);
         
-        //clear default validator options
-        getCaseSensitiveCheckBox().setSelected(false);
-        getSpaceSensitiveCheckBox().setSelected(false);
+        //clear CLICS default validator options
+        getCLICSValidatorCaseSensitiveCheckBox().setSelected(false);
+        getCLICSSpaceSensitiveCheckBox().setSelected(false);
         getFloatAbsoluteToleranceCheckBox().setSelected(false);
         getFloatRelativeToleranceCheckBox().setSelected(false);
         getFloatAbsoluteToleranceTextField().setText("");
@@ -3593,8 +3586,8 @@ public class EditProblemPane extends JPanePlugin {
         if (clicsValidatorPanel == null) {
         	clicsValidatorPanel = new JPanel();
         	clicsValidatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            clicsValidatorPanel.setLayout(new BorderLayout(0, 0));
         	clicsValidatorPanel.setMaximumSize(new Dimension(500, 200));
-        	clicsValidatorPanel.setLayout(new BorderLayout(0, 0));
         	clicsValidatorPanel.add(getUseCLICSValidatorRadioButton(), BorderLayout.NORTH);
         	clicsValidatorPanel.add(getHorizontalStrut(), BorderLayout.WEST);
         	clicsValidatorPanel.add(getClicsValidatorOptionsSubPanel());
@@ -3734,15 +3727,19 @@ public class EditProblemPane extends JPanePlugin {
         	pc2ValidatorPanel = new JPanel();
         	pc2ValidatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         	pc2ValidatorPanel.setLayout(new BorderLayout(0, 0));
+        	pc2ValidatorPanel.setMaximumSize(new Dimension(500, 200));
         	pc2ValidatorPanel.add(getUsePC2ValidatorRadioButton(), BorderLayout.NORTH);
         	pc2ValidatorPanel.add(getHorizontalStrut_2(), BorderLayout.WEST);
-        	pc2ValidatorPanel.add(getPc2ValidatorOptionsSubPanel(), BorderLayout.CENTER);
+        	pc2ValidatorPanel.add(getPc2ValidatorOptionsSubPanel());
         }
         return pc2ValidatorPanel;
     }
     private JRadioButton getUsePC2ValidatorRadioButton() {
         if (usePC2ValidatorRadioButton == null) {
-        	usePC2ValidatorRadioButton = new JRadioButton("Use Old PC2 Validator (deprecated)");
+        	usePC2ValidatorRadioButton = new JRadioButton("Use PC^2 Internal Validator (deprecated)");
+        	usePC2ValidatorRadioButton.setPreferredSize(new Dimension(21, 23));
+        	usePC2ValidatorRadioButton.setMinimumSize(new Dimension(21, 23));
+        	usePC2ValidatorRadioButton.setMaximumSize(new Dimension(21, 23));
         	usePC2ValidatorRadioButton.setMargin(new Insets(2, 12, 2, 2));
         	usePC2ValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -3763,31 +3760,33 @@ public class EditProblemPane extends JPanePlugin {
     private JPanel getPc2ValidatorOptionsSubPanel() {
         if (pc2ValidatorOptionsSubPanel == null) {
         	pc2ValidatorOptionsSubPanel = new JPanel();
-        	pc2ValidatorOptionsSubPanel.setBorder(new TitledBorder(null, "Validator options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        	pc2ValidatorOptionsSubPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "PC^2 Validator options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
         	
         	GridBagLayout gbl_pc2ValidatorOptionsSubPanel = new GridBagLayout();
-        	gbl_pc2ValidatorOptionsSubPanel.columnWidths = new int[]{100,200};
+        	gbl_pc2ValidatorOptionsSubPanel.columnWidths = new int[] {100, 100};
         	gbl_pc2ValidatorOptionsSubPanel.rowHeights = new int[]{20,20};
         	gbl_pc2ValidatorOptionsSubPanel.columnWeights = new double[]{0.0, 0.0};
         	gbl_pc2ValidatorOptionsSubPanel.rowWeights = new double[]{0.0,0.0};
         	pc2ValidatorOptionsSubPanel.setLayout(gbl_pc2ValidatorOptionsSubPanel);
         	
         	GridBagConstraints gbc_pc2ValidatorOptionComboBoxLabel = new GridBagConstraints();
-        	gbc_pc2ValidatorOptionComboBoxLabel.insets = new Insets(0, 0, 5, 5);
+        	gbc_pc2ValidatorOptionComboBoxLabel.insets = new Insets(0, 20, 5, 5);
         	gbc_pc2ValidatorOptionComboBoxLabel.gridx = 0;
         	gbc_pc2ValidatorOptionComboBoxLabel.gridy = 0;
         	pc2ValidatorOptionsSubPanel.add(getPc2ValidatorOptionComboBoxLabel(), gbc_pc2ValidatorOptionComboBoxLabel);
         	
         	GridBagConstraints gbc_pc2ValidatorOptionComboBox = new GridBagConstraints();
-        	gbc_pc2ValidatorOptionComboBox.insets = new Insets(0, 0, 5, 5);
-        	gbc_pc2ValidatorOptionComboBox.fill = GridBagConstraints.HORIZONTAL;
+        	gbc_pc2ValidatorOptionComboBox.anchor = GridBagConstraints.WEST;
+        	gbc_pc2ValidatorOptionComboBox.fill = GridBagConstraints.VERTICAL;
+        	gbc_pc2ValidatorOptionComboBox.weightx = 1.0;
+        	gbc_pc2ValidatorOptionComboBox.insets = new Insets(0, 0, 5, 0);
         	gbc_pc2ValidatorOptionComboBox.gridx = 1;
         	gbc_pc2ValidatorOptionComboBox.gridy = 0;
         	pc2ValidatorOptionsSubPanel.add(getPc2ValidatorOptionComboBox(), gbc_pc2ValidatorOptionComboBox);
         	
         	GridBagConstraints gbc_pc2ValidatorIgnoreCaseCheckBox = new GridBagConstraints();
-        	gbc_pc2ValidatorIgnoreCaseCheckBox.anchor = GridBagConstraints.CENTER;
-        	gbc_pc2ValidatorIgnoreCaseCheckBox.insets = new Insets(0, 0, 0, 5);
+        	gbc_pc2ValidatorIgnoreCaseCheckBox.anchor = GridBagConstraints.WEST;
+        	gbc_pc2ValidatorIgnoreCaseCheckBox.insets = new Insets(0, 30, 0, 5);
         	gbc_pc2ValidatorIgnoreCaseCheckBox.gridx = 0;
         	gbc_pc2ValidatorIgnoreCaseCheckBox.gridy = 1;
         	pc2ValidatorOptionsSubPanel.add(getPc2ValidatorIgnoreCaseCheckBox(), gbc_pc2ValidatorIgnoreCaseCheckBox);
@@ -3832,6 +3831,9 @@ public class EditProblemPane extends JPanePlugin {
     private JCheckBox getPc2ValidatorIgnoreCaseCheckBox() {
         if (pc2ValidatorIgnoreCaseCheckBox == null) {
         	pc2ValidatorIgnoreCaseCheckBox = new JCheckBox("Ignore Case In Output");
+        	pc2ValidatorIgnoreCaseCheckBox.setMinimumSize(new Dimension(80, 23));
+        	pc2ValidatorIgnoreCaseCheckBox.setMaximumSize(new Dimension(80, 23));
+        	pc2ValidatorIgnoreCaseCheckBox.setPreferredSize(new Dimension(150, 23));
         	pc2ValidatorIgnoreCaseCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
