@@ -1974,6 +1974,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      * @throws Exception
      */
     public void testFindCDPPaths() throws Exception {
+        
+        ContestSnakeYAMLLoader snake = new ContestSnakeYAMLLoader();
 
         String [] dirs = {
 
@@ -1989,7 +1991,12 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         for (String name : dirs) {
             
-            File actual = loader.findCDPConfigDirectory(new File(name));
+            File actual = snake.findCDPConfigDirectory(new File(name));
+            
+            if (actual == null){
+                System.err.println("For "+name+" expected to find file "+snake.getSampleContesYaml(name));
+                System.err.println("CWD is "+Utilities.getCurrentDirectory());
+            }
             
             assertNotNull(actual);
             assertTrue("Is a config directory? ", actual.isDirectory());
@@ -2014,7 +2021,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
             File actual = loader.findCDPConfigDirectory(new File(name));
 //            System.out.println("For "+name+" found "+actual);
-
+            
             assertNull(actual);
         }
     }
@@ -2087,3 +2094,4 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(expected, date.getTime());
     }
 }
+

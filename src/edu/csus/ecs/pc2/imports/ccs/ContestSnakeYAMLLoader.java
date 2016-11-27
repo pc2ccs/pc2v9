@@ -1803,13 +1803,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      */
     protected String findSampleContestYaml(String name) {
 
-        // System.out.println("findSampleContestYaml ( "+name+")");
 
-        String sampleDir = "samps" + File.separator + "contests";
+        String conestYamleFilename = getSampleContesYaml(name);
 
-        String conestYamleFilename = sampleDir + File.separator + name + File.separator + //
-                "config" + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
- 
         if (new File(conestYamleFilename).isFile()) {
             return conestYamleFilename;
         } else {
@@ -1817,6 +1813,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
     }
 
+
+    /**
+     * Get sample yaml in sample config dir.
+     * 
+     *  
+     * @param name
+     * @return
+     */
+    protected String getSampleContesYaml(String name) {
+
+        String sampleDir = "samps" + File.separator + "contests";
+        return sampleDir + File.separator + name + File.separator + "config" + File.separator +  IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+    }
 
 
     /**
