@@ -351,7 +351,7 @@ public class ContestImporter {
         newProblem.setDataFileName(problem.getDataFileName());
         newProblem.setHideOutputWindow(problem.isHideOutputWindow());
         newProblem.setIgnoreSpacesOnValidation(problem.isIgnoreSpacesOnValidation());
-        newProblem.setDefaultValidatorSettings(problem.getDefaultValidatorSettings().clone());
+        newProblem.setCLICSDefaultValidatorSettings(problem.getDefaultValidatorSettings().clone());
         newProblem.setCustomValidatorSettings(problem.getCustomValidatorSettings().clone());
         newProblem.setInternationalJudgementReadMethod(problem.isInternationalJudgementReadMethod());
         newProblem.setManualReview(problem.isManualReview());
