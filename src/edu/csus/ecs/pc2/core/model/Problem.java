@@ -101,7 +101,7 @@ public class Problem implements IElementObject {
     private boolean usingPC2Validator = false;
     private int whichPC2Validator = 0;  //if pc2Validator is used, which option?
 
-    private boolean usingCLICSDefaultValidator = false;
+    private boolean usingCLICSValidator = false;
 
     private boolean usingCustomValidator = false;
     
@@ -140,7 +140,7 @@ public class Problem implements IElementObject {
     private boolean ignoreSpacesOnValidation = false;    
      
     /**
-     * The settings for the CLICS Default Validator
+     * The settings for the CLICS Validator
      */
     private ClicsValidatorSettings clicsValidatorSettings = null;
 
@@ -256,7 +256,7 @@ public class Problem implements IElementObject {
         clone.setWhichPC2Validator(getWhichPC2Validator());
         clone.setValidatorCommandLine(StringUtilities.cloneString(validatorCommandLine));
         clone.setValidatorProgramName(StringUtilities.cloneString(validatorProgramName));
-        clone.setUsingCLICSDefaultValidator(isUsingCLICSDefaultValidator());
+        clone.setUsingCLICSValidator(isUsingCLICSValidator());
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
         // TODO Implement Commands to be executed before a problem is run
@@ -264,10 +264,10 @@ public class Problem implements IElementObject {
         // private SerializedFile executionPrepFile;
 
         clone.setIgnoreSpacesOnValidation(isIgnoreSpacesOnValidation());
-        if (this.getDefaultValidatorSettings()==null) {
-            clone.setCLICSDefaultValidatorSettings(null);
+        if (this.getClicsValidatorSettings()==null) {
+            clone.setCLICSValidatorSettings(null);
         } else {
-            clone.setCLICSDefaultValidatorSettings(this.getDefaultValidatorSettings().clone());
+            clone.setCLICSValidatorSettings(this.getClicsValidatorSettings().clone());
         }
         if (this.getCustomValidatorSettings() == null) {
             clone.setCustomValidatorSettings(null);
@@ -421,7 +421,7 @@ public class Problem implements IElementObject {
 
     /**
      * Returns whether the Problem is using the old PC2Validator 
-     *          (as opposed to a custom validator, or the CLICS Default Validator) 
+     *          (as opposed to a custom validator, or the CLICS Validator) 
      *          -- note that the value of the returned
      *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
      *          
@@ -432,15 +432,15 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Returns whether this Problem is using the CLICS Default Validator 
-     *          (as opposed to a custom validator, or the old PC2Validator) 
+     * Returns whether this Problem is using the CLICS Validator 
+     *          (as opposed to a custom validator, or the older PC2Validator) 
      *          -- note that the value of the returned
      *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
      *          
-     * @return true if the Problem is using the CLICS Default Validator
+     * @return true if the Problem is using the CLICS Validator
      */
-    public boolean isUsingCLICSDefaultValidator() {
-        return usingCLICSDefaultValidator;
+    public boolean isUsingCLICSValidator() {
+        return usingCLICSValidator;
     }
 
     /**
@@ -552,21 +552,21 @@ public class Problem implements IElementObject {
      * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
      * 
      * @param usingPC2Validator - the boolean value to which the usingPC2Validator flag should be set
-     * @see {@link #setUsingCLICSDefaultValidator(boolean)}
+     * @see {@link #setUsingCLICSValidator(boolean)}
      */
     public void setUsingPC2Validator(boolean usingPC2Validator) {
         this.usingPC2Validator = usingPC2Validator;
     }
 
     /**
-     * Sets the flag which indicates whether the CLICS Default Validator is being used.
+     * Sets the flag which indicates whether the CLICS Validator is being used.
      * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
      * 
-     * @param usingDefaultValidator
-     *            The value to which the usingDefaultValidator flag should be set.
+     * @param usingClicsValidator
+     *            The value to which the usingClicsValidator flag should be set.
      */
-    public void setUsingCLICSDefaultValidator(boolean usingDefaultValidator) {
-        this.usingCLICSDefaultValidator = usingDefaultValidator;
+    public void setUsingCLICSValidator(boolean usingClicsValidator) {
+        this.usingCLICSValidator = usingClicsValidator;
     }
 
     /**
@@ -585,7 +585,7 @@ public class Problem implements IElementObject {
      * Note that at least three different validators might be used: the CLICS {@link ClicsValidator},
      * a custom (user-defined) validator, or the old (deprecated) PC2Validator.
      * It is the caller's responsibility when calling this method to also insure that a specific
-     * validator has been specified by calling either {@link Problem#setUsingCLICSDefaultValidator(boolean)},
+     * validator has been specified by calling either {@link Problem#setUsingCLICSValidator(boolean)},
      * {@link Problem#setUsingCustomValidator(boolean)}, or (deprecated) {@link Problem#setUsingPC2Validator(boolean)}.
      * 
      * @param validated
@@ -713,16 +713,16 @@ public class Problem implements IElementObject {
                 return false;
             }
             
-            if (usingCLICSDefaultValidator != problem.isUsingCLICSDefaultValidator()) {
+            if (usingCLICSValidator != problem.isUsingCLICSValidator()) {
                 return false;
             }
-            if (getDefaultValidatorSettings()==null ^ problem.getDefaultValidatorSettings()==null) {
+            if (getClicsValidatorSettings()==null ^ problem.getClicsValidatorSettings()==null) {
                 //Java XOR (^) says they are different (one is null, the other is not) -- return false
                 return false;
             }
-            if (getDefaultValidatorSettings()!=null) {
+            if (getClicsValidatorSettings()!=null) {
                 //both must be non-null; check for equality
-                if (!getDefaultValidatorSettings().equals(problem.getDefaultValidatorSettings())) {
+                if (!getClicsValidatorSettings().equals(problem.getClicsValidatorSettings())) {
                     return false;
                 }
             }
@@ -1072,18 +1072,18 @@ public class Problem implements IElementObject {
 
     /**
      * Returns a {@link ClicsValidatorSettings} object containing the options which this
-     * Problem should apply when using the default validator.
-     * @return the defaultValidatorSettings for this problem
+     * Problem should apply when using the CLICS validator.
+     * @return the clicsValidatorSettings for this problem
      */
-    public ClicsValidatorSettings getDefaultValidatorSettings() {
+    public ClicsValidatorSettings getClicsValidatorSettings() {
         return clicsValidatorSettings;
     }
 
     /**
      * Sets the {@link ClicsValidatorSettings} for this problem to the specified value.
-     * @param settings the defaultValidatorSettings to set
+     * @param settings the CLICS Validator Settings to set
      */
-    public void setCLICSDefaultValidatorSettings(ClicsValidatorSettings settings) {
+    public void setCLICSValidatorSettings(ClicsValidatorSettings settings) {
         this.clicsValidatorSettings = settings;
     }
     

@@ -869,7 +869,7 @@ public class EditProblemPane extends JPanePlugin {
         if (checkProblem.isValidatedProblem()) {
         	//update validator selection from radio buttons
             checkProblem.setUsingPC2Validator(getUsePC2ValidatorRadioButton().isSelected());
-            checkProblem.setUsingCLICSDefaultValidator(getUseCLICSValidatorRadioButton().isSelected());
+            checkProblem.setUsingCLICSValidator(getUseCLICSValidatorRadioButton().isSelected());
             checkProblem.setUsingCustomValidator(getUseCustomValidatorRadioButton().isSelected());
         }
 
@@ -890,9 +890,9 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         }
         
-        if (checkProblem.isUsingCLICSDefaultValidator()) {
+        if (checkProblem.isUsingCLICSValidator()) {
             //update CLICS Default Validator settings from fields.
-            checkProblem.setCLICSDefaultValidatorSettings(getCLICSDefaultValidatorSettingsFromFields());
+            checkProblem.setCLICSValidatorSettings(getCLICSDefaultValidatorSettingsFromFields());
         }
         
         if (checkProblem.isUsingCustomValidator()) {
@@ -1725,22 +1725,22 @@ public class EditProblemPane extends JPanePlugin {
                 getPc2ValidatorOptionComboBox().setSelectedIndex(inProblem.getWhichPC2Validator());
                 getPc2ValidatorIgnoreCaseCheckBox().setSelected(inProblem.isIgnoreSpacesOnValidation());
                 
-            } else if (inProblem.isUsingCLICSDefaultValidator()) {
+            } else if (inProblem.isUsingCLICSValidator()) {
             	
                 getUsePC2ValidatorRadioButton().setSelected(false);
                 getUseCLICSValidatorRadioButton().setSelected(true);
                 getUseCustomValidatorRadioButton().setSelected(false);
-                getCLICSValidatorCaseSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isCaseSensitive());
-                getCLICSSpaceSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isSpaceSensitive());
-                getFloatAbsoluteToleranceCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isFloatAbsoluteToleranceSpecified());
+                getCLICSValidatorCaseSensitiveCheckBox().setSelected(inProblem.getClicsValidatorSettings().isCaseSensitive());
+                getCLICSSpaceSensitiveCheckBox().setSelected(inProblem.getClicsValidatorSettings().isSpaceSensitive());
+                getFloatAbsoluteToleranceCheckBox().setSelected(inProblem.getClicsValidatorSettings().isFloatAbsoluteToleranceSpecified());
                 if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
-                    getFloatAbsoluteToleranceTextField().setText(inProblem.getDefaultValidatorSettings().getFloatAbsoluteTolerance()+"");
+                    getFloatAbsoluteToleranceTextField().setText(inProblem.getClicsValidatorSettings().getFloatAbsoluteTolerance()+"");
                 } else {
                     getFloatAbsoluteToleranceTextField().setText("");   
                 }
-                getFloatRelativeToleranceCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isFloatRelativeToleranceSpecified());
+                getFloatRelativeToleranceCheckBox().setSelected(inProblem.getClicsValidatorSettings().isFloatRelativeToleranceSpecified());
                 if (getFloatRelativeToleranceCheckBox().isSelected()) {
-                    getFloatRelativeToleranceTextField().setText(inProblem.getDefaultValidatorSettings().getFloatRelativeTolerance()+"");
+                    getFloatRelativeToleranceTextField().setText(inProblem.getClicsValidatorSettings().getFloatRelativeTolerance()+"");
                 } else {
                     getFloatRelativeToleranceTextField().setText("");   
                 }
