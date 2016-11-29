@@ -13,6 +13,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,6 +42,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
@@ -263,6 +266,8 @@ public class EditProblemPane extends JPanePlugin {
       private JLabel pc2ValidatorOptionComboBoxLabel;
       private JComboBox<String> pc2ValidatorOptionComboBox;
       private JCheckBox pc2ValidatorIgnoreCaseCheckBox;
+
+    private JLabel lblWhatsThis;
 
     /**
      * This method initializes
@@ -2443,7 +2448,7 @@ public class EditProblemPane extends JPanePlugin {
         if (useCLICSValidatorRadioButton == null) {
             useCLICSValidatorRadioButton = new JRadioButton();
             useCLICSValidatorRadioButton.setMargin(new Insets(2, 12, 2, 2));
-            useCLICSValidatorRadioButton.setText("Use CLICS Default Validator (recommended)");
+            useCLICSValidatorRadioButton.setText("Use CLICS Validator");
             useCLICSValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableValidatorComponents();
@@ -2454,6 +2459,41 @@ public class EditProblemPane extends JPanePlugin {
         return useCLICSValidatorRadioButton;
     }
 
+    private JLabel getLblWhatsThis() {
+        if (lblWhatsThis == null) {
+            lblWhatsThis = new JLabel("<What's This?>");
+            lblWhatsThis.setForeground(Color.blue);
+            lblWhatsThis.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, whatsThisMessage, "CLICS Validator", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+            lblWhatsThis.setBorder(new EmptyBorder(0, 15, 0, 0));
+        }
+        return lblWhatsThis;
+    }
+    
+    private String whatsThisMessage = "Selecting this option allows you to use the \"CLICS Validator\"."
+            
+            + "\n\nCLICS is the Competitive Learning Initiative Contest System specification, used among other things to define "
+            + "\nrequirements for Contest Control Systems used at the ICPC World Finals. The CLICS specification includes a"
+            + "\ndefinition for a \"standard validator\" used as the default when no other validator is selected."
+            
+            + "\n\nThe CLICS Validator \"tokenizes\" the Judge's Answer file and the Team Output file, ignoring case and whitespace"
+            + "\nby default, and determines \"equivalence\" by comparing the corresponding tokens."
+            
+            + "\n\nOptions allow the user to require case-sensitivity and/or \"space-sensitivity\" (i.e., an exact match in whitespace),"
+            + "\nand to specify tolerance requirements which floating-point tokens must meet to be considered equal."
+            
+            + "\n\nIf both absolute and relative tolerance values are specified, floating-point tokens are considered equivalent if"
+            + "\nif they match within EITHER of the specified tolerances.  If neither absolute nor relative tolerance is specified,"
+            + "\nfloating-point tokens must match character-for-character to be considered equivalent."
+            
+            + "\n\nFor more information, see the CLICS specification at https://clics.ecs.baylor.edu/index.php/Problem_format#Validators.  ";
+
+    private JPanel clicsOptionButtonPanel;
+    
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
         getChooseValidatorProgramButton().setEnabled(enableComponents);
@@ -3630,7 +3670,7 @@ public class EditProblemPane extends JPanePlugin {
         	clicsValidatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             clicsValidatorPanel.setLayout(new BorderLayout(0, 0));
         	clicsValidatorPanel.setMaximumSize(new Dimension(500, 200));
-        	clicsValidatorPanel.add(getUseCLICSValidatorRadioButton(), BorderLayout.NORTH);
+            clicsValidatorPanel.add(getClicsOptionButtonPanel(), BorderLayout.NORTH);
         	clicsValidatorPanel.add(getHorizontalStrut(), BorderLayout.WEST);
         	clicsValidatorPanel.add(getClicsValidatorOptionsSubPanel());
         }
@@ -3643,6 +3683,20 @@ public class EditProblemPane extends JPanePlugin {
         	horizontalStrut.setPreferredSize(new Dimension(35, 0));
         }
         return horizontalStrut;
+    }
+    
+    private JPanel getClicsOptionButtonPanel() {
+        if (clicsOptionButtonPanel == null) {
+            clicsOptionButtonPanel = new JPanel();
+            clicsOptionButtonPanel.setBorder(null);
+            clicsOptionButtonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            FlowLayout fl_clicsOptionButtonPanel = new FlowLayout(FlowLayout.LEFT);
+            fl_clicsOptionButtonPanel.setHgap(0);
+            clicsOptionButtonPanel.setLayout(fl_clicsOptionButtonPanel);
+            clicsOptionButtonPanel.add(getUseCLICSValidatorRadioButton());
+            clicsOptionButtonPanel.add(getLblWhatsThis());
+        }
+        return clicsOptionButtonPanel;
     }
     
     private JPanel getCustomValidatorOptionsSubPanel() {
@@ -3784,7 +3838,7 @@ public class EditProblemPane extends JPanePlugin {
     }
     private JRadioButton getUsePC2ValidatorRadioButton() {
         if (usePC2ValidatorRadioButton == null) {
-        	usePC2ValidatorRadioButton = new JRadioButton("Use PC^2 Internal Validator (deprecated)");
+        	usePC2ValidatorRadioButton = new JRadioButton("Use PC^2 Validator");
         	usePC2ValidatorRadioButton.setPreferredSize(new Dimension(21, 23));
         	usePC2ValidatorRadioButton.setMinimumSize(new Dimension(21, 23));
         	usePC2ValidatorRadioButton.setMaximumSize(new Dimension(21, 23));
