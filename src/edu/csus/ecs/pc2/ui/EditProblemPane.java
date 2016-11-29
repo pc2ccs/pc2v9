@@ -29,6 +29,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -59,8 +60,6 @@ import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
-
-import javax.swing.JComboBox;
 
 /**
  * Add/Edit Problem Pane.
@@ -172,8 +171,16 @@ public class EditProblemPane extends JPanePlugin {
 
     private ButtonGroup judgingTypeGroup = null; // @jve:decl-index=0:visual-constraint="586,61"
 
-    //the top-level tabbed pane holding various validator information
+    //the top-level tabbed pane holding settings for various validator options
     private JPanel validatorPane = null;
+
+    private JRadioButton useNOValidatatorRadioButton = null;
+
+    private JRadioButton usePC2ValidatorRadioButton = null;
+
+    private JRadioButton useCLICSValidatorRadioButton = null;
+
+    private JRadioButton useCustomValidatorRadioButton = null;
 
     private JCheckBox showValidatorToJudgesCheckBox = null;
 
@@ -189,13 +196,13 @@ public class EditProblemPane extends JPanePlugin {
 
     private static final String NL = System.getProperty("line.separator");
 
-    private JRadioButton computerJudging = null;
+    private JRadioButton computerJudgingRadioButton = null;
 
-    private JRadioButton manualJudging = null;
+    private JRadioButton manualJudgingRadioButton = null;
 
-    private JCheckBox manualReview = null;
+    private JCheckBox manualReviewCheckBox = null;
 
-    private JCheckBox prelimaryNotification = null;
+    private JCheckBox prelimaryNotificationCheckBox = null;
 
     private JCheckBox deleteProblemCheckBox = null;
 
@@ -223,11 +230,9 @@ public class EditProblemPane extends JPanePlugin {
     
     //the panel holding the "Do not use validator" radio button
     private JPanel noValidatorPanel;
-    private JRadioButton useNOValidatatorRadioButton = null;
 
-    //the panel holding the "use default validator" radio button and the corresponding options panel
+    //the panel holding the "use CLICS default validator" radio button and the corresponding options panel
     private JPanel clicsValidatorPanel = null;
-    private JRadioButton useCLICSValidatorRadioButton = null;
     private JPanel clicsValidatorOptionsSubPanel = null;    
       private JCheckBox floatRelativeToleranceCheckBox;
       private JTextField floatRelativeToleranceTextField;
@@ -236,7 +241,6 @@ public class EditProblemPane extends JPanePlugin {
 
     //the panel holding the "use custom validator" radio button and the corresponding options panel
     private JPanel customValidatorPanel = null;
-    private JRadioButton useCustomValidatorRadioButton = null;
     private Component horizontalStrut_1;
     private JPanel customValidatorOptionsSubPanel;
       private JLabel customValidatorCommandLabel;
@@ -254,7 +258,6 @@ public class EditProblemPane extends JPanePlugin {
     private Component verticalStrut_4;
     private Component verticalStrut_5;
     private JPanel pc2ValidatorPanel;
-    private JRadioButton usePC2ValidatorRadioButton;
     private Component horizontalStrut_2;
     private JPanel pc2ValidatorOptionsSubPanel;
       private JLabel pc2ValidatorOptionComboBoxLabel;
@@ -613,7 +616,7 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                     String fileName = changedProblem.getValidatorProgramName();
-                    if (!problem.isUsingCLICSDefaultValidator() && fileName != null && fileName.length() > 0) {
+                    if (!problem.isUsingPC2Validator() && fileName != null && fileName.length() > 0) {
                         if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
                             enableButton = true;
                             fileChanged++;
@@ -857,82 +860,110 @@ public class EditProblemPane extends JPanePlugin {
 
         //set the flags indicating which validator (if any) is being used
         checkProblem.setValidatedProblem(!getUseNOValidatatorRadioButton().isSelected());
+
         if (checkProblem.isValidatedProblem()) {
+        	//update validator selection from radio buttons
             checkProblem.setUsingPC2Validator(getUsePC2ValidatorRadioButton().isSelected());
             checkProblem.setUsingCLICSDefaultValidator(getUseCLICSValidatorRadioButton().isSelected());
             checkProblem.setUsingCustomValidator(getUseCustomValidatorRadioButton().isSelected());
         }
 
-        checkProblem.setCLICSDefaultValidatorSettings(getCLICSDefaultValidatorSettingsFromFields());
-        checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
-
+        //initialize PC2 validator settings to defaults
+        checkProblem.setValidatorCommandLine(getCustomValidatorCommandOptionsTextField().getText());
+        checkProblem.setWhichPC2Validator(0);
+        checkProblem.setIgnoreSpacesOnValidation(false);
+        checkProblem.setValidatorProgramName(null);
+        
         if (checkProblem.isUsingPC2Validator()) {
 
             // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
             // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
 
+            checkProblem.setWhichPC2Validator(getPc2ValidatorOptionComboBox().getSelectedIndex());
             checkProblem.setIgnoreSpacesOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());
             checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         }
+        
+        if (checkProblem.isUsingCLICSDefaultValidator()) {
+            //update CLICS Default Validator settings from fields.
+            checkProblem.setCLICSDefaultValidatorSettings(getCLICSDefaultValidatorSettingsFromFields());
+        }
+        
+        if (checkProblem.isUsingCustomValidator()) {
+            //update Custom validator settings from fields.
+            checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
+        }
 
-        checkProblem.setShowValidationToJudges(showValidatorToJudgesCheckBox.isSelected());
+        checkProblem.setShowValidationToJudges(getShowValidatorToJudgesCheckBox().isSelected());
 
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
-        if (getUseCustomValidatorRadioButton().isSelected())
+        // selecting a file is optional
+        String newValidatorFileName = getCustomValidatorExecutableCommandTextField().getText();
+        if (newValidatorFileName != null) {
+            newValidatorFileName = newValidatorFileName.trim();
+        } else {
+            newValidatorFileName = "";
+        }
+
+        if (getUseCustomValidatorRadioButton().isSelected() && newValidatorFileName.length() > 0) {
+       	
+        	// external (custom) validator and they have specified a validator file name
+            String existingValidatorFilename = newValidatorFileName;
+            if (existingValidatorFilename.length() != getCustomValidatorExecutableCommandTextField().getToolTipText().length()) {
+                existingValidatorFilename = getCustomValidatorExecutableCommandTextField().getToolTipText() + "";
+            }
 
             if (isAdding) {
-                SerializedFile serializedFile = new SerializedFile(getCustomValidatorExecutableCommandTextField().getText());
+                SerializedFile serializedFile = new SerializedFile(existingValidatorFilename);
 
                 if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file " + getCustomValidatorExecutableCommandTextField().getText() 
-                            + "; choose validator file again (adding)");
+                    throw new InvalidFieldValue("Unable to read file '" + existingValidatorFilename + "'; choose validator file again (adding)");
                 }
 
                 checkProblem.setValidatorProgramName(serializedFile.getName());
                 // for some reason on validator this is borked
                 // newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, existingValidatorFilename));
                 newProblemDataFiles.setValidatorFile(serializedFile);
-                
-                //TODO: this whole block related to serialized validator files needs to be rethunk...
-//            } else {
-//
-//                // existing validator loaded name.
-//                SerializedFile serializedFile = getController().getProblemDataFiles(problem).getValidatorFile();
-//
-//                if (newValidatorFileName.equals(existingValidatorFilename)) {
-//
-//                    // refresh/check validator file
-//
-//                    if (serializedFile != null) {
-//                        serializedFile = freshenIfNeeded(serializedFile, existingValidatorFilename);
-//                        newProblemDataFiles.setValidatorFile(serializedFile);
-//                        checkProblem.setValidatorProgramName(serializedFile.getName());
-//                    } else {
-//                        newProblemDataFiles.setValidatorFile(null);
-//                        checkProblem.setValidatorProgramName(existingValidatorFilename);
-//                    }
-//
-//                } else {
-//
-//                    // different file name
-//
-//                    serializedFile = new SerializedFile(newValidatorFileName);
-//                    checkFileFormat(serializedFile);
-//                    newProblemDataFiles.setValidatorFile(serializedFile);
-//                    checkProblem.setValidatorProgramName(serializedFile.getName());
-//                }
-//            }
+
+            } else {
+
+                // existing validator loaded name.
+                SerializedFile serializedFile = getController().getProblemDataFiles(problem).getValidatorFile();
+
+                if (newValidatorFileName.equals(existingValidatorFilename)) {
+
+                    // refresh/check validator file
+
+                    if (serializedFile != null) {
+                        serializedFile = freshenIfNeeded(serializedFile, existingValidatorFilename);
+                        newProblemDataFiles.setValidatorFile(serializedFile);
+                        checkProblem.setValidatorProgramName(serializedFile.getName());
+                    } else {
+                        newProblemDataFiles.setValidatorFile(null);
+                        checkProblem.setValidatorProgramName(existingValidatorFilename);
+                    }
+
+                } else {
+
+                    // different file name
+
+                    serializedFile = new SerializedFile(newValidatorFileName);
+                    checkFileFormat(serializedFile);
+                    newProblemDataFiles.setValidatorFile(serializedFile);
+                    checkProblem.setValidatorProgramName(serializedFile.getName());
+                }
+            }
         }
 
-        checkProblem.setComputerJudged(computerJudging.isSelected());
+        checkProblem.setComputerJudged(computerJudgingRadioButton.isSelected());
 
-        if (computerJudging.isSelected()) {
-            checkProblem.setManualReview(manualReview.isSelected());
-            if (manualReview.isSelected()) {
-                checkProblem.setPrelimaryNotification(prelimaryNotification.isSelected());
+        if (computerJudgingRadioButton.isSelected()) {
+            checkProblem.setManualReview(manualReviewCheckBox.isSelected());
+            if (manualReviewCheckBox.isSelected()) {
+                checkProblem.setPrelimaryNotification(prelimaryNotificationCheckBox.isSelected());
             } else {
                 checkProblem.setPrelimaryNotification(false);
             }
@@ -956,7 +987,7 @@ public class EditProblemPane extends JPanePlugin {
                 newProblemDataFiles.setJudgesDataFile(lastDataFile);
             }
 
-            checkProblem.addTestCaseFilenames(getNane(lastAnsFile), getNane(lastDataFile));
+            checkProblem.addTestCaseFilenames(getName(lastAnsFile), getName(lastDataFile));
 
         } else {
             populateProblemTestSetFilenames(checkProblem, dataFiles);
@@ -970,62 +1001,7 @@ public class EditProblemPane extends JPanePlugin {
 
     }
 
-    /**
-     * Returns a CustomValidatorSettings object containing the values currently displayed in the GUI.
-     * 
-     * @return a CustomValidatorSettings object populated from the GUI
-     */
-    private CustomValidatorSettings getCustomValidatorSettingsFromFields() {
-        CustomValidatorSettings settings = new CustomValidatorSettings();
-        settings.setCustomValidatorInvocationCommand(this.getCustomValidatorExecutableCommandTextField().getText());
-        settings.setCustomValidatorCommandOptions(this.getCustomValidatorExecutableCommandTextField().getText());
-        
-        return settings;
-    }
-
-    /**
-     * Returns a DefaultValidatorSettings object containing the values currently displayed in the GUI.
-     * Displays an error message and throws {@link InvalidFieldValue} if either the absolute or relative
-     * tolerance are selected and the string in the corresponding text box is invalid.
-     * 
-     * @return a DefaultValidatorSettings object populated from the GUI
-     * @throws {@link InvalidFieldValue} if an invalid tolerance value is detected
-     */
-    private DefaultValidatorSettings getCLICSDefaultValidatorSettingsFromFields() {
-        
-        DefaultValidatorSettings settings = new DefaultValidatorSettings();
-        
-        settings.setCaseSensitive(getCLICSValidatorCaseSensitiveCheckBox().isSelected());
-        settings.setSpaceSensitive(getCLICSSpaceSensitiveCheckBox().isSelected());
-        
-        if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
-
-            double absTol;
-            try {
-                absTol = Double.parseDouble(getFloatAbsoluteToleranceTextField().getText());
-            } catch (NumberFormatException e) {
-                showMessage("Invalid absolute tolerance value");
-                throw new InvalidFieldValue("Invalid absolute tolerance value");
-            }
-            settings.setFloatAbsoluteTolerance(absTol);
-        }
-        
-        if (getFloatRelativeToleranceCheckBox().isSelected()) {
-
-            double relTol;
-            try {
-                relTol = Double.parseDouble(getFloatRelativeToleranceTextField().getText());
-            } catch (NumberFormatException e) {
-                showMessage("Invalid relative tolerance value");
-                throw new InvalidFieldValue("Invalid relative tolerance value");
-            }
-            settings.setFloatRelativeTolerance(relTol);
-        }
-        
-        return settings;
-    }
-
-    private String getNane(SerializedFile serializedFile) {
+    private String getName(SerializedFile serializedFile) {
         if (serializedFile != null) {
             return serializedFile.getName();
         }
@@ -1252,6 +1228,21 @@ public class EditProblemPane extends JPanePlugin {
             return false;
         }
 
+        if (getUsePC2ValidatorRadioButton().isSelected()) {
+            if (pc2ValidatorOptionComboBox.getSelectedIndex() < 1) {
+                showMessage("Select a Validator option");
+                return false;
+            }
+        }
+        
+        if (getUseCustomValidatorRadioButton().isSelected()) {
+            if (getCustomValidatorExecutableCommandTextField().getText() == null
+                    || getCustomValidatorExecutableCommandTextField().getText().trim().length() == 0) {
+                showMessage("Use Custom Validator selected; must specify Validator executable program (\"Validator\" tab)");
+                return false;
+            }
+        }
+
         //validate the validator tolerance fields
         if (getFloatRelativeToleranceCheckBox().isSelected()) {
             String text = getFloatRelativeToleranceTextField().getText();
@@ -1313,21 +1304,13 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
-        if (getComputerJudging().isSelected()) {
+        if (getUseComputerJudgingRadioButton().isSelected()) {
 
             if (useNOValidatatorRadioButton.isSelected()) {
                 showMessage("Computer Judging is selected (\"Judging Type\" tab), must select a validator");
                 return false;
             }
 
-        }
-        
-        if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (getCustomValidatorExecutableCommandTextField().getText() == null
-                    || getCustomValidatorExecutableCommandTextField().getText().trim().length() == 0) {
-                showMessage("Use Custom Validator selected; must specify Validator executable program (\"Validator\" tab)");
-                return false;
-            }
         }
 
         return true;
@@ -1720,11 +1703,28 @@ public class EditProblemPane extends JPanePlugin {
             stdinRadioButton.setSelected(false);
         }
 
+        getPc2ValidatorOptionComboBox().setSelectedIndex(0);
+        getPc2ValidatorIgnoreCaseCheckBox().setSelected(true);
+        getCustomValidatorExecutableCommandTextField().setText("");
+        getCustomValidatorExecutableCommandTextField().setToolTipText("");
+        getPc2ValidatorIgnoreCaseCheckBox().setSelected(false);
 
         if (inProblem.isValidatedProblem()) {
 
-            if (inProblem.isUsingCLICSDefaultValidator()) {
+            if (inProblem.isUsingPC2Validator()) {
+            	
+                getCustomValidatorCommandOptionsTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+                getUsePC2ValidatorRadioButton().setSelected(true);
+                getUseCLICSValidatorRadioButton().setSelected(false);
+                getUseCustomValidatorRadioButton().setSelected(false);
+                getPc2ValidatorOptionComboBox().setSelectedIndex(inProblem.getWhichPC2Validator());
+                getPc2ValidatorIgnoreCaseCheckBox().setSelected(inProblem.isIgnoreSpacesOnValidation());
+                
+            } else if (inProblem.isUsingCLICSDefaultValidator()) {
+            	
+                getUsePC2ValidatorRadioButton().setSelected(false);
                 getUseCLICSValidatorRadioButton().setSelected(true);
+                getUseCustomValidatorRadioButton().setSelected(false);
                 getCLICSValidatorCaseSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isCaseSensitive());
                 getCLICSSpaceSensitiveCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isSpaceSensitive());
                 getFloatAbsoluteToleranceCheckBox().setSelected(inProblem.getDefaultValidatorSettings().isFloatAbsoluteToleranceSpecified());
@@ -1740,38 +1740,34 @@ public class EditProblemPane extends JPanePlugin {
                     getFloatRelativeToleranceTextField().setText("");   
                 }
                 
-            } else {
-                //the problem is using a custom validator
+            } else if (inProblem.isUsingCustomValidator()) {
+
+                getUsePC2ValidatorRadioButton().setSelected(false);
+                getUseCLICSValidatorRadioButton().setSelected(false);
                 getUseCustomValidatorRadioButton().setSelected(true);
                 
-                JTextField a = getCustomValidatorExecutableCommandTextField();
-                CustomValidatorSettings b = inProblem.getCustomValidatorSettings();
-                String c = b.getCustomValidatorInvocationCommand();
-                a.setText(c);
+                CustomValidatorSettings settings = inProblem.getCustomValidatorSettings();
+                getCustomValidatorExecutableCommandTextField().setText(settings.getCustomValidatorInvocationCommand());
+                getCustomValidatorExecutableCommandTextField().setToolTipText(settings.getCustomValidatorInvocationCommand());
+                getCustomValidatorCommandOptionsTextField().setText(settings.getCustomValidatorCommandOptions());
                 
-//                getCustomValidatorExecutableCommandTextField().setText(inProblem.getCustomValidatorSettings().getCustomValidatorInvocationCommand());
-                
-                JTextField a1 = getCustomValidatorCommandOptionsTextField();
-                CustomValidatorSettings b1 = inProblem.getCustomValidatorSettings();
-                String c1 = b1.getCustomValidatorCommandOptions();
-                a1.setText(c1);
-                
-//                getCustomValidatorCommandOptionsTextField().setText(inProblem.getCustomValidatorSettings().getCustomValidatorCommandOptions());
-                
-                //TODO: this whole thing about serialized validator files needs to be redone...
-//                SerializedFile sFile = problemDataFiles.getValidatorFile();
-//                if (sFile != null) {
-//                    if (sFile.getAbsolutePath() != null) {
-//                        externalValidatorLabel.setToolTipText(sFile.getAbsolutePath());
-//                    } else {
-//                        externalValidatorLabel.setToolTipText("");
-//                    }
-//                }
+                SerializedFile sFile = problemDataFiles.getValidatorFile();
+                if (sFile != null) {
+                    if (sFile.getAbsolutePath() != null) {
+                    	getCustomValidatorExecutableCommandTextField().setToolTipText(sFile.getAbsolutePath());
+                    } else {
+                    	getCustomValidatorExecutableCommandTextField().setToolTipText("");
+                    }
+                }
             }
 
         } else {
-            getCustomValidatorCommandOptionsTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        	//the problem is not using a validator
+            getCustomValidatorCommandOptionsTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND); //why? (copied from old code)
             useNOValidatatorRadioButton.setSelected(true);
+            getUsePC2ValidatorRadioButton().setSelected(false);
+            getUseCLICSValidatorRadioButton().setSelected(false);
+            getUseCustomValidatorRadioButton().setSelected(false);
         }
 
         getShowValidatorToJudgesCheckBox().setSelected(inProblem.isShowValidationToJudges());
@@ -1793,35 +1789,34 @@ public class EditProblemPane extends JPanePlugin {
 
     }
 
-
     /*
      * Sets the Judging Type radio and checkboxes in a sane manner.
      */
     private void populateJudging(Problem inProblem) {
         if (inProblem != null && inProblem.isComputerJudged()) {
-            computerJudging.setSelected(true);
-            manualReview.setSelected(inProblem.isManualReview());
-            manualReview.setEnabled(true);
+            computerJudgingRadioButton.setSelected(true);
+            manualReviewCheckBox.setSelected(inProblem.isManualReview());
+            manualReviewCheckBox.setEnabled(true);
 
-            prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
-            if (manualReview.isSelected()) {
-                prelimaryNotification.setEnabled(true);
+            prelimaryNotificationCheckBox.setSelected(inProblem.isPrelimaryNotification());
+            if (manualReviewCheckBox.isSelected()) {
+                prelimaryNotificationCheckBox.setEnabled(true);
             } else {
-                prelimaryNotification.setEnabled(false);
+                prelimaryNotificationCheckBox.setEnabled(false);
             }
         } else {
-            computerJudging.setSelected(false);
-            manualJudging.setSelected(true);
+            computerJudgingRadioButton.setSelected(false);
+            manualJudgingRadioButton.setSelected(true);
             if (inProblem == null) {
-                manualReview.setSelected(false);
-                prelimaryNotification.setSelected(false);
+                manualReviewCheckBox.setSelected(false);
+                prelimaryNotificationCheckBox.setSelected(false);
             } else {
-                manualReview.setSelected(inProblem.isManualReview());
-                prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
+                manualReviewCheckBox.setSelected(inProblem.isManualReview());
+                prelimaryNotificationCheckBox.setSelected(inProblem.isPrelimaryNotification());
             }
 
-            manualReview.setEnabled(false);
-            prelimaryNotification.setEnabled(false);
+            manualReviewCheckBox.setEnabled(false);
+            prelimaryNotificationCheckBox.setEnabled(false);
         }
     }
 
@@ -1873,7 +1868,7 @@ public class EditProblemPane extends JPanePlugin {
             judgingTypePane.setLayout(new BorderLayout());
             judgingTypePane.add(getJudgeTypeInnerPane(), BorderLayout.NORTH);
             judgingTypePane.add(getCcsSettingsPane(), BorderLayout.CENTER);
-            getJudgingTypeGroup().setSelected(getManualJudging().getModel(), true);
+            getJudgingTypeGroup().setSelected(getManualJudgingRadioButton().getModel(), true);
         }
         return judgingTypePane;
     }
@@ -1894,7 +1889,7 @@ public class EditProblemPane extends JPanePlugin {
             generalPane = new JPanel();
             generalPane.setLayout(null);
             generalPane.add(getProblemNameTextField(), null);
-            generalPane.add(getJTextField(), null);
+            generalPane.add(getTimeOutTextField(), null);
             generalPane.add(getProblemRequiresDataCheckBox(), null);
             generalPane.add(getDataProblemPane(), null);
             generalPane.add(getJudgesHaveAnswerFiles(), null);
@@ -1948,11 +1943,11 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes jTextField
+     * This method initializes the timeOut textfield
      * 
-     * @return javax.swing.JTextField
+     * @return javax.swing.JTextField holding the timeOut
      */
-    private JTextField getJTextField() {
+    private JTextField getTimeOutTextField() {
         if (timeOutSecondTextField == null) {
             timeOutSecondTextField = new JTextField();
             timeOutSecondTextField.setBounds(new Rectangle(183, 44, 74, 20));
@@ -2267,7 +2262,7 @@ public class EditProblemPane extends JPanePlugin {
      * @param label
      * @param dialogTitle
      *            title for file chooser
-     * @return True is a file was select and label updated
+     * @return True if a file was select and label updated
      * @throws Exception
      */
     private boolean selectFile(JLabel label, String dialogTitle) {
@@ -2300,6 +2295,45 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
+     * select file, if file picked updates specified JTextField.
+     * 
+     * @param textField -- a JTextField whose value will be updated if a file is chosen
+     * @param dialogTitle
+     *            title for file chooser
+     * @return True if a file was select and the JTextField updated
+     * @throws Exception
+     */
+    private boolean selectFile(JTextField textField, String dialogTitle) {
+        boolean result = false;
+        // toolTip should always have the full path
+        String oldFile = textField.getToolTipText();
+        String startDir;
+        if (oldFile.equalsIgnoreCase("")) {
+            startDir = lastDirectory;
+        } else {
+            startDir = oldFile;
+        }
+        JFileChooser chooser = new JFileChooser(startDir);
+        if (dialogTitle != null) {
+            chooser.setDialogTitle(dialogTitle);
+        }
+        try {
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                lastDirectory = chooser.getCurrentDirectory().toString();
+                textField.setText(chooser.getSelectedFile().getCanonicalFile().toString());
+                result = true;
+            }
+        } catch (Exception e) {
+            showMessage("Error getting selected file, try again: \n" + e.getMessage());
+            log.log(Log.INFO, "Error getting selected file: ", e);
+            result = false;
+        }
+        chooser = null;
+        return result;
+    }
+
+    /**
      * This method initializes teamReadsFrombuttonGroup
      * 
      * @return javax.swing.ButtonGroup
@@ -2316,8 +2350,8 @@ public class EditProblemPane extends JPanePlugin {
     private ButtonGroup getJudgingTypeGroup() {
         if (judgingTypeGroup == null) {
             judgingTypeGroup = new ButtonGroup();
-            judgingTypeGroup.add(getComputerJudging());
-            judgingTypeGroup.add(getManualJudging());
+            judgingTypeGroup.add(getUseComputerJudgingRadioButton());
+            judgingTypeGroup.add(getManualJudgingRadioButton());
         }
         return judgingTypeGroup;
     }
@@ -2401,7 +2435,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes jRadioButton
+     * This method initializes the CLICS Validator jRadioButton
      * 
      * @return javax.swing.JRadioButton
      */
@@ -2440,7 +2474,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes jRadioButton
+     * This method initializes the Custom Validator jRadioButton
      * 
      * @return javax.swing.JRadioButton
      */
@@ -2700,16 +2734,18 @@ public class EditProblemPane extends JPanePlugin {
             chooseValidatorProgramButton.setText("Choose...");
             chooseValidatorProgramButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showMessage ("Not implemented yet...");
-//                    if (selectFile(externalValidatorLabel, "Open Validator Program")) {
-//                        externalValidatorLabel.setToolTipText(externalValidatorLabel.getText());
-//                        enableUpdateButton();
-//                    }
+//                    showMessage ("Not implemented yet...");
+                    if (selectFile(getCustomValidatorExecutableCommandTextField(), "Open Validator Program")) {
+                        getCustomValidatorExecutableCommandTextField().setToolTipText((getCustomValidatorExecutableCommandTextField().getText()));
+                        enableUpdateButton();
+                    }
                 }
             });
         }
         return chooseValidatorProgramButton;
     }
+    
+    
 
     /**
      * This method initializes validatorCommandLineTextBox
@@ -2731,7 +2767,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes showComareCheckBox
+     * This method initializes showCompareCheckBox
      * 
      * @return javax.swing.JCheckBox
      */
@@ -2955,6 +2991,10 @@ public class EditProblemPane extends JPanePlugin {
         
         getUseNOValidatatorRadioButton().setSelected(true);
         
+        //clear PC2 Validator options
+        getPc2ValidatorOptionComboBox().setSelectedIndex(0);
+        getPc2ValidatorIgnoreCaseCheckBox().setSelected(false);
+        
         //clear CLICS default validator options
         getCLICSValidatorCaseSensitiveCheckBox().setSelected(false);
         getCLICSSpaceSensitiveCheckBox().setSelected(false);
@@ -2964,8 +3004,9 @@ public class EditProblemPane extends JPanePlugin {
         getFloatRelativeToleranceTextField().setText("");
 
         //clear custom validator options
-        getCustomValidatorCommandOptionsTextField().setText("");
+        getCustomValidatorCommandOptionsTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
         getCustomValidatorExecutableCommandTextField().setText("");
+        getCustomValidatorExecutableCommandTextField().setToolTipText("");
         
         getShowValidatorToJudgesCheckBox().setSelected(true);
         getDoShowOutputWindowCheckBox().setSelected(true);
@@ -2978,73 +3019,74 @@ public class EditProblemPane extends JPanePlugin {
 
         populateJudging(null);
     }
+    
 
     /**
-     * This method initializes computerJudging
+     * This method initializes the useComputerJudging Radio Button
      * 
      * @return javax.swing.JRadioButton
      */
-    private JRadioButton getComputerJudging() {
-        if (computerJudging == null) {
-            computerJudging = new JRadioButton();
-            computerJudging.setText("Computer Judging");
-            computerJudging.setBounds(new Rectangle(32, 14, 173, 21));
-            computerJudging.addActionListener(new java.awt.event.ActionListener() {
+    private JRadioButton getUseComputerJudgingRadioButton() {
+        if (computerJudgingRadioButton == null) {
+            computerJudgingRadioButton = new JRadioButton();
+            computerJudgingRadioButton.setText("Computer Judging");
+            computerJudgingRadioButton.setBounds(new Rectangle(32, 14, 173, 21));
+            computerJudgingRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    manualReview.setEnabled(true);
-                    prelimaryNotification.setEnabled(manualReview.isSelected());
-                    prelimaryNotification.setEnabled(manualReview.isSelected());
+                    getManualReviewCheckBox().setEnabled(true);
+                    getPrelimaryNotificationCheckBox().setEnabled(getManualReviewCheckBox().isSelected());
+                    getPrelimaryNotificationCheckBox().setEnabled(getManualReviewCheckBox().isSelected());
                     enableUpdateButton();
                 }
             });
 
         }
-        return computerJudging;
+        return computerJudgingRadioButton;
     }
 
     /**
-     * This method initializes manualJudging
+     * This method initializes the manualJudging Radio Button
      * 
      * @return javax.swing.JRadioButton
      */
-    private JRadioButton getManualJudging() {
-        if (manualJudging == null) {
-            manualJudging = new JRadioButton();
-            manualJudging.setText("Manual Judging");
-            manualJudging.setBounds(new Rectangle(32, 132, 257, 21));
-            manualJudging.addActionListener(new java.awt.event.ActionListener() {
+    private JRadioButton getManualJudgingRadioButton() {
+        if (manualJudgingRadioButton == null) {
+            manualJudgingRadioButton = new JRadioButton();
+            manualJudgingRadioButton.setText("Manual Judging");
+            manualJudgingRadioButton.setBounds(new Rectangle(32, 132, 257, 21));
+            manualJudgingRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    manualReview.setEnabled(false);
-                    prelimaryNotification.setEnabled(false);
+                    getManualReviewCheckBox().setEnabled(false);
+                    getPrelimaryNotificationCheckBox().setEnabled(false);
                     enableUpdateButton();
                 }
             });
         }
 
-        return manualJudging;
+        return manualJudgingRadioButton;
     }
 
     /**
-     * This method initializes manualReview
+     * This method initializes the manualReview CheckBox
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getManualReview() {
-        if (manualReview == null) {
-            manualReview = new JCheckBox();
-            manualReview.setText("Manual Review");
-            manualReview.setBounds(new Rectangle(57, 47, 186, 21));
-            manualReview.setEnabled(false);
-            manualReview.addActionListener(new java.awt.event.ActionListener() {
+    private JCheckBox getManualReviewCheckBox() {
+        if (manualReviewCheckBox == null) {
+            manualReviewCheckBox = new JCheckBox();
+            manualReviewCheckBox.setText("Manual Review");
+            manualReviewCheckBox.setBounds(new Rectangle(57, 47, 186, 21));
+            manualReviewCheckBox.setEnabled(false);
+            manualReviewCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    prelimaryNotification.setEnabled(manualReview.isSelected());
-                    prelimaryNotification.setEnabled(manualReview.isSelected());
+                    getPrelimaryNotificationCheckBox().setEnabled(getManualReviewCheckBox().isSelected());
+                    getPrelimaryNotificationCheckBox().setEnabled(getManualReviewCheckBox().isSelected());
                     enableUpdateButton();
                 }
             });
 
         }
-        return manualReview;
+        return manualReviewCheckBox;
     }
 
     /**
@@ -3052,20 +3094,20 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getPrelimaryNotification() {
-        if (prelimaryNotification == null) {
-            prelimaryNotification = new JCheckBox();
-            prelimaryNotification.setText("Send Preliminary Notification to the team");
-            prelimaryNotification.setBounds(new Rectangle(100, 80, 328, 21));
-            prelimaryNotification.setEnabled(false);
-            prelimaryNotification.addActionListener(new java.awt.event.ActionListener() {
+    private JCheckBox getPrelimaryNotificationCheckBox() {
+        if (prelimaryNotificationCheckBox == null) {
+            prelimaryNotificationCheckBox = new JCheckBox();
+            prelimaryNotificationCheckBox.setText("Send Preliminary Notification to the team");
+            prelimaryNotificationCheckBox.setBounds(new Rectangle(100, 80, 328, 21));
+            prelimaryNotificationCheckBox.setEnabled(false);
+            prelimaryNotificationCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
             });
 
         }
-        return prelimaryNotification;
+        return prelimaryNotificationCheckBox;
     }
 
     /**
@@ -3451,10 +3493,10 @@ public class EditProblemPane extends JPanePlugin {
             judgeTypeInnerPane = new JPanel();
             judgeTypeInnerPane.setLayout(null);
             judgeTypeInnerPane.setPreferredSize(new Dimension(190, 190));
-            judgeTypeInnerPane.add(getComputerJudging(), null);
-            judgeTypeInnerPane.add(getManualReview(), null);
-            judgeTypeInnerPane.add(getPrelimaryNotification(), null);
-            judgeTypeInnerPane.add(getManualJudging(), null);
+            judgeTypeInnerPane.add(getUseComputerJudgingRadioButton(), null);
+            judgeTypeInnerPane.add(getManualReviewCheckBox(), null);
+            judgeTypeInnerPane.add(getPrelimaryNotificationCheckBox(), null);
+            judgeTypeInnerPane.add(getManualJudgingRadioButton(), null);
         }
         return judgeTypeInnerPane;
     }
@@ -3682,6 +3724,12 @@ public class EditProblemPane extends JPanePlugin {
         	customValidatorCommandTextField = new JTextField();
         	customValidatorCommandTextField.setEnabled(false);
         	customValidatorCommandTextField.setColumns(25);
+        	customValidatorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+
         }
         return customValidatorCommandTextField;
     }
@@ -3842,5 +3890,61 @@ public class EditProblemPane extends JPanePlugin {
         }
         return pc2ValidatorIgnoreCaseCheckBox;
     }
+    
+    /**
+     * Returns a CustomValidatorSettings object containing the values currently displayed in the GUI.
+     * 
+     * @return a CustomValidatorSettings object populated from the GUI
+     */
+    private CustomValidatorSettings getCustomValidatorSettingsFromFields() {
+        CustomValidatorSettings settings = new CustomValidatorSettings();
+        settings.setCustomValidatorInvocationCommand(this.getCustomValidatorExecutableCommandTextField().getText());
+        settings.setCustomValidatorCommandOptions(this.getCustomValidatorCommandOptionsTextField().getText());
+        
+        return settings;
+    }
+
+    /**
+     * Returns a DefaultValidatorSettings object containing the values currently displayed in the GUI.
+     * Displays an error message and throws {@link InvalidFieldValue} if either the absolute or relative
+     * tolerance are selected and the string in the corresponding text box is invalid.
+     * 
+     * @return a DefaultValidatorSettings object populated from the GUI
+     * @throws {@link InvalidFieldValue} if an invalid tolerance value is detected
+     */
+    private DefaultValidatorSettings getCLICSDefaultValidatorSettingsFromFields() {
+        
+        DefaultValidatorSettings settings = new DefaultValidatorSettings();
+        
+        settings.setCaseSensitive(getCLICSValidatorCaseSensitiveCheckBox().isSelected());
+        settings.setSpaceSensitive(getCLICSSpaceSensitiveCheckBox().isSelected());
+        
+        if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
+
+            double absTol;
+            try {
+                absTol = Double.parseDouble(getFloatAbsoluteToleranceTextField().getText());
+            } catch (NumberFormatException e) {
+                showMessage("Invalid absolute tolerance value");
+                throw new InvalidFieldValue("Invalid absolute tolerance value");
+            }
+            settings.setFloatAbsoluteTolerance(absTol);
+        }
+        
+        if (getFloatRelativeToleranceCheckBox().isSelected()) {
+
+            double relTol;
+            try {
+                relTol = Double.parseDouble(getFloatRelativeToleranceTextField().getText());
+            } catch (NumberFormatException e) {
+                showMessage("Invalid relative tolerance value");
+                throw new InvalidFieldValue("Invalid relative tolerance value");
+            }
+            settings.setFloatRelativeTolerance(relTol);
+        }
+        
+        return settings;
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
 
