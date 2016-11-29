@@ -12,19 +12,19 @@ import java.io.PushbackInputStream;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.core.model.DefaultValidatorSettings;
+import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
 
 /**
- * This class implements an "ICPC Default Validator".
- * The DefaultValidator expects to receive on its standard input stream the output of the execution of 
- * a team program on a given data set; it returns an indication of whether the team output is "valid".
+ * This class implements the ICPC "CLICS Validator", which
+ * expects to receive on its standard input stream the output of the execution of 
+ * a team program on a given data set, and returns an indication of whether the team output is "valid".
  * <P>
- * The DefaultValidator can be invoked in one of two ways: as a stand-alone main program, or by instantiating
+ * The CLICS Validator can be invoked in one of two ways: as a stand-alone main program, or by instantiating
  * the class and invoking the {@link #validate()} method. If invoked as a stand-alone program the validator
  * exits with Exit Code 42 if the team output matches the judge's answer, or with Exit Code 43 if not
  * (these values are specified by the ICPC CLICS Output Validator specification).
  * <P>
- * If invoked by instantiation and then calling {@link DefaultValidator#validate()}, the {@link #validate()}
+ * If invoked by instantiation and then calling {@link ClicsValidator#validate()}, the {@link #validate()}
  * method returns these same values (42 for success or 43 for failure).
  * <p>
  * The validator requires arguments (either on the command line if invoked via main() 
@@ -64,7 +64,7 @@ import edu.csus.ecs.pc2.core.model.DefaultValidatorSettings;
  * @author John@pc2.ecs.csus.edu
  *
  */
-public class DefaultValidator {
+public class ClicsValidator {
 
     static Log log = null;
     
@@ -79,9 +79,9 @@ public class DefaultValidator {
     private double floatRelTolerance = -1;
     
     
-    public DefaultValidator(String inJudgeDataFile, String inJudgeAnswerFile, String inFeedbackDirName, String... options ) {
+    public ClicsValidator(String inJudgeDataFile, String inJudgeAnswerFile, String inFeedbackDirName, String... options ) {
         if (log==null) {
-            log = new Log("DefaultValidator.log");
+            log = new Log("ClicsValidator.log");
             StaticLog.setLog(log);
             log = StaticLog.getLog();            
         }
@@ -94,7 +94,7 @@ public class DefaultValidator {
                 optionString += options[i] + " ";
             }
         }
-        log.info("Constructing DefaultValidator; judgeDataFile='" + inJudgeDataFile + "', judgeAnswerFile='" + inJudgeAnswerFile 
+        log.info("Constructing ClicsValidator; judgeDataFile='" + inJudgeDataFile + "', judgeAnswerFile='" + inJudgeAnswerFile 
                 + "', feedbackDirName='" + inFeedbackDirName + "'"); 
         if (options.length>0) {
             log.info("   Validator options: " + optionString);
@@ -107,18 +107,18 @@ public class DefaultValidator {
 
         //verify files are valid
         if (!validateFiles()) {
-            log.severe("DefaultValidator received invalid file or directory name(s)");
-            throw new RuntimeException("DefaultValidator received invalid file or directory name(s)");
+            log.severe("ClicsValidator received invalid file or directory name(s)");
+            throw new RuntimeException("ClicsValidator received invalid file or directory name(s)");
         }
         
         //grab optional arguments (if any)
         for (int i=0; i<options.length; i++) {
             if (options[i].equals("case_sensitive") || options[i].equals("case-sensitive")) {
                 isCaseSensitive = true;
-            } else if (options[i].equals(DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE) || options[i].equals("space_sensitive")
+            } else if (options[i].equals(ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE) || options[i].equals("space_sensitive")
                     || options[i].equals("space-change-sensitive") || options[i].equals("space-sensitive")) {
                 isSpaceSensitive = true;
-            } else if (options[i].equals(DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE) || options[i].equals("float-absolute-tolerance")) {
+            } else if (options[i].equals(ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE) || options[i].equals("float-absolute-tolerance")) {
                 if (i<options.length-1) {
                     i++;
                     try {
@@ -127,18 +127,18 @@ public class DefaultValidator {
                         useFloatTolerance = true;
                     } catch (NumberFormatException | NullPointerException e) {
                         //bad epsilon value
-                        log.severe("Bad value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                        log.severe("Bad value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                         e.printStackTrace();
-                        throw new RuntimeException("Bad value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                        throw new RuntimeException("Bad value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                     }
                 } else {
                     //missing epsilon
-                    log.severe("Missing tolerance value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
-                    throw new RuntimeException("Missing tolerance value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                    log.severe("Missing tolerance value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                    throw new RuntimeException("Missing tolerance value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                     
                 }
                 
-            } else if (options[i].equals(DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE) || options[i].equals("float-relative-tolerance")) {
+            } else if (options[i].equals(ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE) || options[i].equals("float-relative-tolerance")) {
                 if (i<options.length-1) {
                     i++;
                     try {
@@ -147,14 +147,14 @@ public class DefaultValidator {
                         useFloatTolerance = true;
                     } catch (NumberFormatException | NullPointerException e) {
                         //bad epsilon value
-                        log.severe("Bad value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                        log.severe("Bad value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                         e.printStackTrace();
-                        throw new RuntimeException("Bad value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                        throw new RuntimeException("Bad value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                     }
                 } else {
                     //missing epsilon
-                    log.severe("Missing tolerance value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
-                    throw new RuntimeException("Missing tolerance value following '" + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                    log.severe("Missing tolerance value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                    throw new RuntimeException("Missing tolerance value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                 }
                 
             } else if (options[i].equals("float_tolerance") || options[i].equals("float-tolerance")) {
@@ -187,7 +187,7 @@ public class DefaultValidator {
     }//end constructor
     
     /**
-     * Causes this DefaultValidator to evaluate the team output (received on the validator's standard input stream)
+     * Causes this ClicsValidator to evaluate the team output (received on the validator's standard input stream)
      * using the data values configured via the constructor, and return either 42 (success) or 43 (failure).
      * 
      * @return an int indicating success (42) or failure (43), or -39 if an error occurred
@@ -379,7 +379,7 @@ public class DefaultValidator {
         } catch (IOException e) {
             log.severe("IOException while flushing leading whitespace from input stream: " + e.getMessage());
             e.printStackTrace();
-            return "DefaultValidator.getNextToken(): error reading stream";
+            return "ClicsValidator.getNextToken(): error reading stream";
         }
         
         //if nextChar = -1 then there were no non-whitespace chars left in the stream
@@ -403,7 +403,7 @@ public class DefaultValidator {
         } catch (IOException e) {
             log.severe("IOException while reading non-whitespace chars from input stream: " + e.getMessage());
             e.printStackTrace();
-            return "DefaultValidator.getNextToken(): error reading stream";
+            return "ClicsValidator.getNextToken(): error reading stream";
         }
         
         //return the stream characters as the next token
@@ -562,8 +562,8 @@ public class DefaultValidator {
     }
     
     /**
-     * The main entry point to the DefaultValidator when running as a stand-alone program.
-     * The main program constructs a DefaultValidator object passing it the arguments received
+     * The main entry point to the ClicsValidator when running as a stand-alone program.
+     * The main program constructs a ClicsValidator object passing it the arguments received
      * by main(), then invokes the validator's validate() method.  The integer result returned by
      * validate() is then used as the main program exit code.
      * 
@@ -575,7 +575,7 @@ public class DefaultValidator {
             System.exit(43);
         }
         
-        log = new Log("DefaultValidator.log");
+        log = new Log("ClicsValidator.log");
         StaticLog.setLog(log);
         log = StaticLog.getLog();            
         
@@ -585,9 +585,9 @@ public class DefaultValidator {
             options[i-3] = args[i];
         }
         
-        DefaultValidator df = new DefaultValidator(args[0], args[1], args[2], options);
+        ClicsValidator df = new ClicsValidator(args[0], args[1], args[2], options);
         
-        log.info("Invoking DefaultValidator.validate()");
+        log.info("Invoking ClicsValidator.validate()");
         
         int result = df.validate();
         
@@ -598,14 +598,14 @@ public class DefaultValidator {
     }
 
     public static void usage() {
-        System.err.println("Usage:  java DefaultValidator judges_data_file judges_answer_file feedbackdir" + File.separator + "  [options]  <  teamOutput");
+        System.err.println("Usage:  java ClicsValidator judges_data_file judges_answer_file feedbackdir" + File.separator + "  [options]  <  teamOutput");
         System.err.println ("  where judges_data_file and judges_answer_file must exist and be readable files,\n"
                 + "  feedbackdir" + File.separator + " must exist and be a directory that is both readable and writable,\n"
                 + "  and where [options] include:");
-        System.err.println ("    " + DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE);
-        System.err.println ("    " + DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE);
-        System.err.println ("    " + DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " E");
-        System.err.println ("    " + DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " E");
+        System.err.println ("    " + ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE);
+        System.err.println ("    " + ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE);
+        System.err.println ("    " + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " E");
+        System.err.println ("    " + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " E");
         System.err.println ("    float_tolerance E   (shorthand for setting both absolute and relative tolerance)");        
     }
 

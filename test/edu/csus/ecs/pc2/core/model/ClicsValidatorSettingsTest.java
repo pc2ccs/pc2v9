@@ -5,7 +5,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 /**
  * Unit test.
  *
- * Tests various combinations of these settings (from DefaultValidatorSettings toString())
+ * Tests various combinations of these settings (from ClicsValidatorSettings toString())
  * 
  * <pre>
  * case_sensitive - indicates that comparisons should be case-sensitive.
@@ -17,7 +17,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-public class DefaultValidatorSettingsTest extends AbstractTestCase {
+public class ClicsValidatorSettingsTest extends AbstractTestCase {
     
     /**
      * Emulate float_tolerance, both settings.
@@ -27,18 +27,18 @@ public class DefaultValidatorSettingsTest extends AbstractTestCase {
      * @param settings
      * @param tolerance
      */
-    protected void setFloatTolerance(DefaultValidatorSettings settings, double tolerance) {
+    protected void setFloatTolerance(ClicsValidatorSettings settings, double tolerance) {
         settings.setFloatAbsoluteTolerance(tolerance);
         settings.setFloatRelativeTolerance(tolerance);
     }
 
     /**
-     * To String for DefaultValidatorSettings.
+     * To String for ClicsValidatorSettings.
      * 
      * @param settings
      * @return
      */
-    protected String toString(DefaultValidatorSettings settings) {
+    protected String toString(ClicsValidatorSettings settings) {
 
         return settings.toString();
 
@@ -51,7 +51,7 @@ public class DefaultValidatorSettingsTest extends AbstractTestCase {
      */
     public void testDefaultSettings() throws Exception {
 
-        DefaultValidatorSettings settings = new DefaultValidatorSettings();
+        ClicsValidatorSettings settings = new ClicsValidatorSettings();
 
         String actual = toString(settings);
         String expected = "";
@@ -67,24 +67,24 @@ public class DefaultValidatorSettingsTest extends AbstractTestCase {
      */
     public void testThreeSettings() throws Exception {
 
-        DefaultValidatorSettings settings = new DefaultValidatorSettings();
+        ClicsValidatorSettings settings = new ClicsValidatorSettings();
 
         settings.setCaseSensitive(true);
         settings.setSpaceSensitive(true);
 
         String actual = toString(settings);
 
-        String expected = DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
+        String expected = ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
 
         assertEquals(expected, actual);
 
         setFloatTolerance(settings, 4.0042354);
         actual = toString(settings);
 
-        expected = DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
-                DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
-                DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 4.0042354 " + 
-                DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 4.0042354";
+        expected = ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
+                ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
+                ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 4.0042354 " + 
+                ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 4.0042354";
 
         assertEquals(expected, actual);
 
@@ -97,23 +97,23 @@ public class DefaultValidatorSettingsTest extends AbstractTestCase {
      */
     public void testThreeSettingsAbs() throws Exception {
 
-        DefaultValidatorSettings settings = new DefaultValidatorSettings();
+        ClicsValidatorSettings settings = new ClicsValidatorSettings();
 
         settings.setCaseSensitive(true);
         settings.setSpaceSensitive(true);
 
         String actual = toString(settings);
 
-        String expected = DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
-                DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
+        String expected = ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
+                ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
 
         assertEquals(expected, actual);
 
         settings.setFloatAbsoluteTolerance(5.666334);
 
-        expected = DefaultValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
-                DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
-                DefaultValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 5.666334" ;
+        expected = ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
+                ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
+                ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 5.666334" ;
 
         actual = toString(settings);
 
@@ -127,20 +127,20 @@ public class DefaultValidatorSettingsTest extends AbstractTestCase {
      */
     public void testThreeSettingsRel() throws Exception {
 
-        DefaultValidatorSettings settings = new DefaultValidatorSettings();
+        ClicsValidatorSettings settings = new ClicsValidatorSettings();
 
         settings.setSpaceSensitive(true);
 
         String actual = toString(settings);
 
-        String expected = DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE ;
+        String expected = ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE ;
 
         assertEquals(expected, actual);
 
         settings.setFloatRelativeTolerance(0.0030303);
 
-        expected = DefaultValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
-                    DefaultValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 0.0030303" ;
+        expected = ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
+                    ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 0.0030303" ;
 
         actual = toString(settings);
 

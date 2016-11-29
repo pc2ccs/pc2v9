@@ -5,7 +5,7 @@ import java.io.File;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.validator.DefaultValidator;
+import edu.csus.ecs.pc2.validator.ClicsValidator;
 
 /**
  * Problem Definition.
@@ -142,7 +142,7 @@ public class Problem implements IElementObject {
     /**
      * The settings for the CLICS Default Validator
      */
-    private DefaultValidatorSettings defaultValidatorSettings = null;
+    private ClicsValidatorSettings clicsValidatorSettings = null;
 
     /**
      * Display validation output window to judges.
@@ -505,11 +505,11 @@ public class Problem implements IElementObject {
      * Sets the value of the ignoreSpacesOnValidation flag for the old PC2Validator.
      * Note that setting this flag has NO EFFECT unless the old PC2Validator is selected
      * for the Problem (in particular, this flag is unrelated to the "isSpaceSensitive" flag for 
-     * the CLICS {@link DefaultValidator}.
+     * the CLICS {@link ClicsValidator}.
      * 
      * @param ignoreSpacesOnValidation
      *            The value to which the ignoreSpacesOnValidation flag should be set.
-     * @see {@link DefaultValidatorSettings#setSpaceSensitive(boolean)}
+     * @see {@link ClicsValidatorSettings#setSpaceSensitive(boolean)}
      */
     public void setIgnoreSpacesOnValidation(boolean ignoreSpacesOnValidation) {
         this.ignoreSpacesOnValidation = ignoreSpacesOnValidation;
@@ -582,7 +582,7 @@ public class Problem implements IElementObject {
 
    /**
      * Sets the flag indicating that this Problem is using a validator.
-     * Note that at least three different validators might be used: the CLICS {@link DefaultValidator},
+     * Note that at least three different validators might be used: the CLICS {@link ClicsValidator},
      * a custom (user-defined) validator, or the old (deprecated) PC2Validator.
      * It is the caller's responsibility when calling this method to also insure that a specific
      * validator has been specified by calling either {@link Problem#setUsingCLICSDefaultValidator(boolean)},
@@ -1071,20 +1071,20 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Returns a {@link DefaultValidatorSettings} object containing the options which this
+     * Returns a {@link ClicsValidatorSettings} object containing the options which this
      * Problem should apply when using the default validator.
      * @return the defaultValidatorSettings for this problem
      */
-    public DefaultValidatorSettings getDefaultValidatorSettings() {
-        return defaultValidatorSettings;
+    public ClicsValidatorSettings getDefaultValidatorSettings() {
+        return clicsValidatorSettings;
     }
 
     /**
-     * Sets the {@link DefaultValidatorSettings} for this problem to the specified value.
+     * Sets the {@link ClicsValidatorSettings} for this problem to the specified value.
      * @param settings the defaultValidatorSettings to set
      */
-    public void setCLICSDefaultValidatorSettings(DefaultValidatorSettings settings) {
-        this.defaultValidatorSettings = settings;
+    public void setCLICSDefaultValidatorSettings(ClicsValidatorSettings settings) {
+        this.clicsValidatorSettings = settings;
     }
     
 

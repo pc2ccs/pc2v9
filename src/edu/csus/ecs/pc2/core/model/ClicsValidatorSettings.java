@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
  * @author pc2@ecs.csus.edu
  *
  */
-public class DefaultValidatorSettings implements Serializable, Cloneable {
+public class ClicsValidatorSettings implements Serializable, Cloneable {
 
     static Log log = null;
 
@@ -49,7 +49,7 @@ public class DefaultValidatorSettings implements Serializable, Cloneable {
      * Constructs a DefaultValidatorSettings object with default values matching the 
      * defined public default constants.
      */
-    public DefaultValidatorSettings() {
+    public ClicsValidatorSettings() {
         if (log==null) {
             log = new Log("DefaultValidatorSettings.log");
             StaticLog.setLog(log);
@@ -70,12 +70,12 @@ public class DefaultValidatorSettings implements Serializable, Cloneable {
      * as defined in the CLICS <A href="https://clics.ecs.baylor.edu/index.php/Problem_format#Default_Validator_Capabilities">
      * <I>default validator options</i></a> specification.
      * Any options not specified are set to the defaults values defined by the public default constants,
-     * as if the object was constructed by calling {@link DefaultValidator#DefaultValidator()}. 
+     * as if the object was constructed by calling {@link ClicsValidator#DefaultValidator()}. 
      * Any values in the received string not matching the CLICS validator options are logged but
      * otherwise silently ignored.  The same is true if valid options are specified (e.g. "float_tolerance")
      * but the required following tolerance value ("epsilon") is missing.
      */
-    public DefaultValidatorSettings(String options) {
+    public ClicsValidatorSettings(String options) {
         
         //start with the default settings
         this();
@@ -250,11 +250,11 @@ public class DefaultValidatorSettings implements Serializable, Cloneable {
     @Override
     public boolean equals (Object obj) {
         
-        if (obj==null || !(obj instanceof DefaultValidatorSettings)) {
+        if (obj==null || !(obj instanceof ClicsValidatorSettings)) {
             return false;
         }
         
-        DefaultValidatorSettings other = (DefaultValidatorSettings) obj;
+        ClicsValidatorSettings other = (ClicsValidatorSettings) obj;
         
         
         if (this.isCaseSensitive()!=other.isCaseSensitive()) {
@@ -289,8 +289,8 @@ public class DefaultValidatorSettings implements Serializable, Cloneable {
     /**
      * Returns a DefaultValidatorSettings object which is a clone of this object.
      */
-    public DefaultValidatorSettings clone() {
-        DefaultValidatorSettings clone = new DefaultValidatorSettings();
+    public ClicsValidatorSettings clone() {
+        ClicsValidatorSettings clone = new ClicsValidatorSettings();
         clone.setCaseSensitive(this.isCaseSensitive());
         clone.setSpaceSensitive(this.isSpaceSensitive());
         clone.setFloatAbsoluteTolerance(this.getFloatAbsoluteTolerance());

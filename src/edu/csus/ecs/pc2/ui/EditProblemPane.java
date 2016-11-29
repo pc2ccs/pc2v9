@@ -53,7 +53,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.CustomValidatorSettings;
-import edu.csus.ecs.pc2.core.model.DefaultValidatorSettings;
+import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -3966,9 +3966,9 @@ public class EditProblemPane extends JPanePlugin {
      * @return a DefaultValidatorSettings object populated from the GUI
      * @throws {@link InvalidFieldValue} if an invalid tolerance value is detected
      */
-    private DefaultValidatorSettings getCLICSDefaultValidatorSettingsFromFields() {
+    private ClicsValidatorSettings getCLICSDefaultValidatorSettingsFromFields() {
         
-        DefaultValidatorSettings settings = new DefaultValidatorSettings();
+        ClicsValidatorSettings settings = new ClicsValidatorSettings();
         
         settings.setCaseSensitive(getCLICSValidatorCaseSensitiveCheckBox().isSelected());
         settings.setSpaceSensitive(getCLICSSpaceSensitiveCheckBox().isSelected());
