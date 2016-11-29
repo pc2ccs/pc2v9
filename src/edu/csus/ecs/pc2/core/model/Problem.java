@@ -420,21 +420,20 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Returns whether the Problem is using the old (deprecated) PC2Validator 
+     * Returns whether the Problem is using the old PC2Validator 
      *          (as opposed to a custom validator, or the CLICS Default Validator) 
      *          -- note that the value of the returned
      *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
      *          
      * @return true if if the Problem is using the PC2Validator
      */
-    @Deprecated
     public boolean isUsingPC2Validator() {
         return usingPC2Validator;
     }
 
     /**
      * Returns whether this Problem is using the CLICS Default Validator 
-     *          (as opposed to a custom validator, or the old (deprecated) PC2Validator) 
+     *          (as opposed to a custom validator, or the old PC2Validator) 
      *          -- note that the value of the returned
      *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
      *          
@@ -503,8 +502,8 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Sets the value of the ignoreSpacesOnValidation flag for the old (deprecated) PC2Validator.
-     * Note that setting this flag has NO EFFECT unless the old (deprecated) PC2Validator is selected
+     * Sets the value of the ignoreSpacesOnValidation flag for the old PC2Validator.
+     * Note that setting this flag has NO EFFECT unless the old PC2Validator is selected
      * for the Problem (in particular, this flag is unrelated to the "isSpaceSensitive" flag for 
      * the CLICS {@link DefaultValidator}.
      * 
@@ -512,7 +511,6 @@ public class Problem implements IElementObject {
      *            The value to which the ignoreSpacesOnValidation flag should be set.
      * @see {@link DefaultValidatorSettings#setSpaceSensitive(boolean)}
      */
-    @Deprecated
     public void setIgnoreSpacesOnValidation(boolean ignoreSpacesOnValidation) {
         this.ignoreSpacesOnValidation = ignoreSpacesOnValidation;
     }
@@ -550,13 +548,12 @@ public class Problem implements IElementObject {
     }
     
     /**
-     * Sets the flag indicating whether or not this problem is using the old (deprecated) pc2Validator.
+     * Sets the flag indicating whether or not this problem is using the older pc2Validator.
      * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
      * 
      * @param usingPC2Validator - the boolean value to which the usingPC2Validator flag should be set
      * @see {@link #setUsingCLICSDefaultValidator(boolean)}
      */
-    @Deprecated
     public void setUsingPC2Validator(boolean usingPC2Validator) {
         this.usingPC2Validator = usingPC2Validator;
     }
@@ -657,23 +654,21 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Returns an indication of which option has been selected when using the old (deprecated) PC2Validator.
+     * Returns an indication of which option has been selected when using the older PC2Validator.
      * Note that the return value of this method is meaningless unless {@link Problem#isUsingPC2Validator()} returns true.
      * 
      * @return an integer indicating which PC2Validator option has been specified
      */
-    @Deprecated
     public int getWhichPC2Validator() {
         return whichPC2Validator;
     }
 
     /**
-     * Sets the value indicating which option has been selected when using the old (deprecated) PC2Validator.
+     * Sets the value indicating which option has been selected when using the older PC2Validator.
      * Note that the operation of this method is meaningless unless {@link Problem#setUsingPC2Validator(boolean)} has been called.
      * 
      * @param whichPC2Validator -- the integer value to which the PC2Validator option should be set
      */
-    @Deprecated
     public void setWhichPC2Validator(int whichPC2Validator) {
         this.whichPC2Validator = whichPC2Validator;
     }
