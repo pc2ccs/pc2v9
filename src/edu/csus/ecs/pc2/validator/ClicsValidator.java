@@ -33,7 +33,7 @@ import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
  * <ul>
  *   <li> judge_data -- the judge's input data for a single test case
  *   <li> judge_answer  -- the judge's answer file corresponding to the specified judge_data
- *   <li> feedback_dir -- the name of a “feedback directory” in which the validator can produce "feedback files" 
+ *   <li> feedback_dir -- the name of a "feedback directory" in which the validator can produce "feedback files" 
  *      in order to report additional information on the validation of the team output. 
  *      The feedback_dir must end with a path separator ('/' or '\' depending on operating system), 
  *      so that simply appending a filename to feedback_dir gives the path to a file in the feedback directory.
