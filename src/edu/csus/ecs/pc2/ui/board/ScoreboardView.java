@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -23,13 +24,18 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
+import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
+import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
+import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
 import edu.csus.ecs.pc2.ui.BalloonColorListPane;
 import edu.csus.ecs.pc2.ui.BalloonPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
@@ -88,7 +94,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private ContestClockDisplay contestClockDisplay = null;
 
     private JPanel clockPanel = null;
-    
+
     /**
      * This method initializes
      * 
@@ -134,7 +140,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 promptAndExit();
             }
         });
-
+        
         overRideLookAndFeel();
         FrameUtilities.centerFrame(this);
     }
@@ -336,6 +342,53 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                     log.log(Log.WARNING, "Trouble transforming "+xslFilename, e);
                 }
             }
+        }
+        FinalizeData finalizeData = contest.getFinalizeData();
+        if (finalizeData != null && finalizeData.isCertified()) {
+            File outputResultsDirFile = new File("results");
+            if (!outputResultsDirFile.exists() && !outputResultsDirFile.mkdirs()) {
+                log.warning("Could not create " + outputResultsDirFile.getAbsolutePath() + ", defaulting to current directory");
+                outputDir = ".";
+                outputResultsDirFile = new File(outputDir);
+            }
+            if (!outputResultsDirFile.isDirectory()) {
+                log.warning(outputDir + " is not a directory.");
+                return;
+            } else {
+                log.fine("Sending results output to " + outputResultsDirFile.getAbsolutePath());
+            }
+            try {
+                ResultsFile resultsFile = new ResultsFile();
+                String[] createTSVFileLines = resultsFile.createTSVFileLines(contest);
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + "results.tsv");
+                for (int i = 0; i < createTSVFileLines.length; i++) {
+                    outputFile.write(createTSVFileLines[i]);
+                }
+                outputFile.close();
+            } catch (IllegalContestState | IOException e) {
+                log.log(Log.WARNING, "Trouble creating results.tsv", e);
+            }
+            try {
+                ScoreboardFile scoreboardFile = new ScoreboardFile();
+                String[] createTSVFileLines = scoreboardFile.createTSVFileLines(contest);
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + "scoreboard.tsv");
+                for (int i = 0; i < createTSVFileLines.length; i++) {
+                    outputFile.write(createTSVFileLines[i]);
+                }
+                outputFile.close();
+            } catch (IllegalContestState | IOException e) {
+                log.log(Log.WARNING, "Trouble creating scoreboard.tsv", e);
+            }
+            StandingsJSON2016 standingsJson = new StandingsJSON2016();
+            try {
+                String createJSON = standingsJson.createJSON(contest, controller);
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + "scoreboard.json");
+                outputFile.write(createJSON);
+                outputFile.close();
+            } catch (IllegalContestState | IOException e) {
+                log.log(Log.WARNING, "Trouble creating scoreboard.json", e);
+            }
+            
         }
     }
 
