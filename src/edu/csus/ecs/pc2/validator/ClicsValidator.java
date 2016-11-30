@@ -66,6 +66,10 @@ import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
  */
 public class ClicsValidator {
 
+    static public final int CLICS_VALIDATOR_SUCCESS_EXIT_CODE = 42;
+    static public final int CLICS_VALIDATOR_FAILURE_EXIT_CODE = 43;
+    static public final int CLICS_VALIDATOR_ERROR_EXIT_CODE = -39;
+    
     static Log log = null;
     
     private String judgeDataFile = null;
@@ -188,9 +192,10 @@ public class ClicsValidator {
     
     /**
      * Causes this ClicsValidator to evaluate the team output (received on the validator's standard input stream)
-     * using the data values configured via the constructor, and return either 42 (success) or 43 (failure).
+     * using the data values configured via the constructor, and return either success or failure as defined by
+     * the static class constants.
      * 
-     * @return an int indicating success (42) or failure (43), or -39 if an error occurred
+     * @return an int indicating success or failure, or an error code if an error occurred
      */
     public int validate() {
         
@@ -205,7 +210,7 @@ public class ClicsValidator {
         } catch (FileNotFoundException e2) {
             log.severe("Judge's answer file '" + judgeAnswerFile + "': file not found");
             e2.printStackTrace();
-            return -39;
+            return CLICS_VALIDATOR_ERROR_EXIT_CODE;
         }
         
         //we need a pushback stream so we can mimic "peek()" on the judge's answer file stream
@@ -216,7 +221,7 @@ public class ClicsValidator {
         PushbackInputStream teamOutputPushbackIS = new PushbackInputStream(System.in);
         
         //loop until judge's answer is exhausted (the loop breaks out when judge's answer is exhausted; 
-        // it exits with a return 43 if team output fails to match
+        // it exits with a failure code if team output fails to match)
         while (true) {
             
             //if space sensitive, skip over equal whitespace in judge answer and team output
@@ -234,7 +239,7 @@ public class ClicsValidator {
                             //exit with mismatched whitespace error
                             outputWrongAnswer("Space change error: judge's answer contains '" + printableString(judgeByte) 
                                     + "' but team's output contains '" + printableString(teamByte) + "'");
-                            return 43;
+                            return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
                         }
                         //team byte matches judge (i.e., is the same whitespace char); get next judge byte
                         judgeByte = (byte) judgeAnswerPushbackIS.read();
@@ -252,11 +257,11 @@ public class ClicsValidator {
                             if (teamExcess.length()==0) {
                                 //team had trailing whitespace
                                 outputWrongAnswer("Team output contains excess trailing whitespace");
-                                return 43;
+                                return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
                             } else {
                                 //team had more than just trailing whitespace
                                 outputWrongAnswer("Team output contains excess characters: '" + teamExcess + "'...");
-                                return 43;
+                                return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
                             }
                         } else {
                             //judge and team are both at EOF; we're done
@@ -273,7 +278,7 @@ public class ClicsValidator {
                         //exit with mismatched whitespace error
                         outputWrongAnswer("Space change error: judge's answer contains '" + printableString(judgeByte) 
                                 + "' but team's output contains '" + printableString(teamByte) + "'");
-                        return 43;
+                        return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
                     } else {
                         //push the (non-whitespace) char back into the team input stream
                         teamOutputPushbackIS.unread(teamByte);
@@ -282,7 +287,7 @@ public class ClicsValidator {
                 } catch (IOException e) {
                     log.severe("IOException processing judge/team files: " + e.getMessage());
                     e.printStackTrace();
-                    return -39;
+                    return CLICS_VALIDATOR_ERROR_EXIT_CODE;
                 }
             } //end if isSpaceSensitive
             
@@ -304,13 +309,13 @@ public class ClicsValidator {
             //exit if there's no team token (because it means the team has incomplete output)
             if (nextTeamToken==null || nextTeamToken.length()==0) {
                 outputWrongAnswer("Insufficient output");
-                return 43;
+                return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
             }
             
             //we have both a judge token and a team token which are not null and not zero length; compare them
             // (note that method areEquivalent() handles calling outputWrongAnswer() for various conditions if necessary)
             if (!areEquivalent(nextJudgeToken, nextTeamToken)) {
-                return 43;
+                return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
             }
             
             //go back and skip the next whitespace (if in case-sensitive mode), then process the next token
@@ -322,7 +327,7 @@ public class ClicsValidator {
         try {
             if (teamOutputPushbackIS.read()!= -1) {
                 outputWrongAnswer("Trailing output");
-                return 43;
+                return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
             }
         } catch (IOException e) {
             log.severe("IOException processing team input stream (stdin): " + e.getMessage());
@@ -330,7 +335,7 @@ public class ClicsValidator {
         }
         
         outputSuccess("Correct output");
-        return 42;  
+        return CLICS_VALIDATOR_SUCCESS_EXIT_CODE;  
     }//end method validate()
     
     /**
@@ -572,7 +577,7 @@ public class ClicsValidator {
     public static void main(String[] args) {
         if (args.length < 3) {
             usage();
-            System.exit(43);
+            System.exit(CLICS_VALIDATOR_FAILURE_EXIT_CODE);
         }
         
         log = new Log("ClicsValidator.log");
