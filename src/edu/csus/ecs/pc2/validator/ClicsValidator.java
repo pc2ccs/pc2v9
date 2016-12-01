@@ -119,10 +119,10 @@ public class ClicsValidator {
         for (int i=0; i<options.length; i++) {
             if (options[i].equals("case_sensitive") || options[i].equals("case-sensitive")) {
                 isCaseSensitive = true;
-            } else if (options[i].equals(ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE) || options[i].equals("space_sensitive")
-                    || options[i].equals("space-change-sensitive") || options[i].equals("space-sensitive")) {
+            } else if (ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE.equals(options[i]) || "space_sensitive".equals(options[i])
+                    || "space-change-sensitive".equals(options[i]) || "space-sensitive".equals(options[i])) {
                 isSpaceSensitive = true;
-            } else if (options[i].equals(ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE) || options[i].equals("float-absolute-tolerance")) {
+            } else if (ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE.equals(options[i]) || "float-absolute-tolerance".equals(options[i])) {
                 if (i<options.length-1) {
                     i++;
                     try {
@@ -142,7 +142,7 @@ public class ClicsValidator {
                     
                 }
                 
-            } else if (options[i].equals(ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE) || options[i].equals("float-relative-tolerance")) {
+            } else if (ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE.equals(options[i]) || "float-relative-tolerance".equals(options[i])) {
                 if (i<options.length-1) {
                     i++;
                     try {
@@ -161,7 +161,7 @@ public class ClicsValidator {
                     throw new RuntimeException("Missing tolerance value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                 }
                 
-            } else if (options[i].equals("float_tolerance") || options[i].equals("float-tolerance")) {
+            } else if ("float_tolerance".equals(options[i]) || "float-tolerance".equals(options[i])) {
                 if (i<options.length-1) {
                     i++;
                     try {
