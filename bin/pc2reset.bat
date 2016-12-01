@@ -48,6 +48,7 @@ if exist logs/nul %RMCMD% logs
 if exist packets/nul %RMCMD% packets
 if exist reports/nul %RMCMD% reports
 if exist profiles/nul %RMCMD% profiles
+if exist results/nul %RMCMD% results
 if exist profiles.properties del profiles.properties
 
 rem the /D option requires "Command Extensions" to be enabled.

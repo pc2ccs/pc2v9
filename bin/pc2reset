@@ -2,7 +2,6 @@
 #
 # Purpose: resets contest status.
 # Author : pc2@ecs.csus.edu
-# $HeadURL$
 #
 
 . `dirname $0`/pc2env
@@ -11,13 +10,12 @@
 if [ -d logs -o -d profiles ] ; then
     `dirname $0`/pc2zip
     if [ -d archive ]; then
-	rm -fr logs packets reports execute* profiles profiles.properties
+	rm -fr logs packets reports execute* profiles profiles.properties results
     else
 	echo Could not find archive directory, was pc2zip successful?
     fi
 else
     echo Not in directory to reset, should be run from dir with logs or profiles
 fi 
-
 
 # eof pc2reset $Id$ 
