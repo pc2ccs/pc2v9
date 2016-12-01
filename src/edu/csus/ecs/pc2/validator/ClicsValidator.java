@@ -386,11 +386,11 @@ public class ClicsValidator {
      */
     private String getNextToken(PushbackInputStream inStream) {
 
-        byte nextChar = 0;
+        char nextChar;
         try {
-            nextChar = (byte) inStream.read();
+            nextChar = (char) (((byte) inStream.read()) & 0xFF);
             while (nextChar!= -1 && Character.isWhitespace(nextChar)) {
-                nextChar = (byte) inStream.read();
+                nextChar = (char) (((byte) inStream.read()) & 0xFF);
             }
         } catch (IOException e) {
             log.severe("IOException while flushing leading whitespace from input stream: " + e.getMessage());
@@ -407,10 +407,10 @@ public class ClicsValidator {
         StringBuffer buf = new StringBuffer();
         buf.append(nextChar);
         try {
-            nextChar = (byte) inStream.read();
+            nextChar = (char) (((byte) inStream.read()) & 0xFF);
             while (nextChar!= -1 && !Character.isWhitespace(nextChar)) {
                 buf.append(nextChar);
-                nextChar = (byte) inStream.read();
+                nextChar = (char) (((byte) inStream.read()) & 0xFF);
             }
             //if we pulled a whitespace char out, put it back
             if (nextChar!= -1 && Character.isWhitespace(nextChar)) {
@@ -425,6 +425,7 @@ public class ClicsValidator {
         //return the stream characters as the next token
         String retString = new String(buf);
                 
+        System.out.println("DEBUG: getNextToken() returning '" + retString + "'");
         return retString;
     }//end method getNextToken()
     
