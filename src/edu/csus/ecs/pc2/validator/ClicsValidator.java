@@ -191,17 +191,13 @@ public class ClicsValidator {
     }//end constructor
     
     /**
-     * Causes this ClicsValidator to evaluate the team output (received on the validator's standard input stream)
+     * Causes this ClicsValidator to evaluate the team output (received on System.in)
      * using the data values configured via the constructor, and return either success or failure as defined by
      * the static class constants.
      * 
      * @return an int indicating success or failure, or an error code if an error occurred
      */
-    public int validate() {
-        
-        //so far, there's no apparent need for the judge's input data file...
-        // InputStream judgeDataIS = getClass().getClassLoader().getResourceAsStream(judgeDataFile);
-//        InputStream judgeAnswerIS = getClass().getClassLoader().getResourceAsStream(judgeAnswerFile);   
+    public int validate() {   
         
         //get input stream for reading judge's answer
         InputStream judgeAnswerIS=null;
@@ -213,12 +209,27 @@ public class ClicsValidator {
             return CLICS_VALIDATOR_ERROR_EXIT_CODE;
         }
         
+        return validate(judgeAnswerIS, System.in);
+    }
+    
+    /**
+     * Causes this ClicsValidator to evaluate the team output (received on the specified input stream)
+     * against the judge's answer (received on the specified input stream), 
+     * and return either success or failure as defined by the static class constants.
+     * 
+     * @param judgeAnswerIS - an InputStream containing the values in the judge's answer file
+     * @param teamOutputIS - an InputStream containing the values in the team's output file 
+     * 
+     * @return an int indicating success or failure, or an error code if an error occurred
+     */
+    public int validate(InputStream judgeAnswerIS, InputStream teamOutputIS) {
+        
         //we need a pushback stream so we can mimic "peek()" on the judge's answer file stream
         PushbackInputStream judgeAnswerPushbackIS = new PushbackInputStream(judgeAnswerIS);
         
         //input stream for reading team output
         // (note the assumption that the team's output is provided on "stdin")
-        PushbackInputStream teamOutputPushbackIS = new PushbackInputStream(System.in);
+        PushbackInputStream teamOutputPushbackIS = new PushbackInputStream(teamOutputIS);
         
         //loop until judge's answer is exhausted (the loop breaks out when judge's answer is exhausted; 
         // it exits with a failure code if team output fails to match)
