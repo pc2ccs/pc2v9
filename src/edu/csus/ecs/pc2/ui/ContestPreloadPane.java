@@ -19,7 +19,6 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestComparison;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
 /**
  * Contest load pre-configured contests pane.
@@ -97,7 +96,7 @@ public class ContestPreloadPane extends JPanePlugin {
 //        String[] cols = { "Description", "Directory" };
         String[] obj = new String[contestsListbox.getColumnCount()];
         
-        ContestYAMLLoader loader = new ContestYAMLLoader();
+        ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
         try {
             String description = loader.getContestTitle(contestFilename);
 

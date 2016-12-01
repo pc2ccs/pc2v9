@@ -29,7 +29,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.Validator;
 
 /**
@@ -867,7 +867,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         Problem problem = new Problem(problemShortName);
         problem.setShortName(problemShortName);
 
-        ContestYAMLLoader loader = new ContestYAMLLoader();
+        ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
 
         // where problem.yaml file is
         String testBaseDirname = getDataDirectory(this.getName());

@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.Validator;
 
 /**
@@ -962,10 +962,6 @@ public class ExecutableTest extends AbstractTestCase {
         String directory = getSecretDir(this.getName(), problemName);
         directory = new File(directory).getCanonicalPath();
 
-        // ContestYAMLLoader loader = new ContestYAMLLoader();
-        // loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem);
-        // ProblemDataFiles problemDataFiles = contest2.getProblemDataFile(problem);
-
         setupUsingPC2Validator(problem);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
@@ -1025,7 +1021,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         testBaseDirname = testBaseDirname + File.separator + problemName;
 
-        ContestYAMLLoader loader = new ContestYAMLLoader();
+        ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
         loader.loadProblemInformationAndDataFiles(contest2, testBaseDirname, problem, false);
 
         // TODO loadProblemInformationAndDataFiles not setting pc2 validator flag

@@ -49,7 +49,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
@@ -216,7 +216,7 @@ public class EditProblemPane extends JPanePlugin {
 
     private JButton loadButton = null;
 
-    private ContestYAMLLoader loader = null;
+    private ContestSnakeYAMLLoader loader = null;
 
     private JButton exportButton = null;
 
@@ -2927,9 +2927,9 @@ public class EditProblemPane extends JPanePlugin {
     // }
     // }
 
-    public ContestYAMLLoader getLoader() {
+    public ContestSnakeYAMLLoader getLoader() {
         if (loader == null) {
-            loader = new ContestYAMLLoader();
+            loader = new ContestSnakeYAMLLoader();
         }
         return loader;
     }

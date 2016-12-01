@@ -19,7 +19,6 @@ public final class AllTests {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.util");
         //$JUnit-BEGIN$
         suite.addTestSuite(ICPCTSVLoaderTest.class);
-        suite.addTestSuite(ContestYAMLLoaderTest.class);
         suite.addTestSuite(ContestSnakeYAMLLoaderTest.class);
         //$JUnit-END$
         return suite;

@@ -771,6 +771,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     private Integer fetchIntValue(Map<String, Object> map, String key) {
+        if (map == null){
+            // SOMEDAY figure out why map would every be null
+            return null;
+        }
         Integer value = (Integer) map.get(key);
         if (value != null) {
             try {

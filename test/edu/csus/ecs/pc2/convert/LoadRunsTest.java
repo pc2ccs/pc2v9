@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.report.ResolverEventFeedReport;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
@@ -98,11 +98,11 @@ public class LoadRunsTest extends AbstractTestCase {
 
         // startExplorer(configDir);
 
-        String contestYamlFile = configDir + File.separator + ContestYAMLLoader.DEFAULT_CONTEST_YAML_FILENAME;
+        String contestYamlFile = configDir + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
 
         assertFileExists(contestYamlFile, "Contest yaml file ");
 
-        ContestYAMLLoader loader = new ContestYAMLLoader();
+        ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
 
         contest = loader.fromYaml(contest, configDir, false);
 

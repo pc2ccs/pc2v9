@@ -28,7 +28,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestComparison;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
-import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
 import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
 
@@ -51,7 +51,7 @@ public class ImportDataPane extends JPanePlugin {
 
     private String lastDirectory = null;
 
-    private ContestYAMLLoader loader = new ContestYAMLLoader();  //  @jve:decl-index=0:
+    private ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();  //  @jve:decl-index=0:
 
     private static final String NL = System.getProperty("line.separator");
 

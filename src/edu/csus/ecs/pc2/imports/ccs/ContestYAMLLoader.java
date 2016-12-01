@@ -39,12 +39,14 @@ import edu.csus.ecs.pc2.core.model.Site;
 
 /**
  * Create contest from YAML.
- * 
+ *
+ * @deprecated
  * @author pc2@ecs.csus.edu
  */
 
 // TODO CCS REALLY IMPORTANT USER INTERFACE WORK - MUST SHOW SYNTAX ERRORS AND INPUT FILE PROBLEMS TO USER!!!
 //   Replace with Snake Yaml to better handle syntax and other errors.
+
 public class ContestYAMLLoader implements IContestLoader {
     
 //    private boolean debugMode = true;
