@@ -117,7 +117,7 @@ public class ClicsValidator {
             throw new RuntimeException("ClicsValidator received invalid file or directory name(s)");
         }
         
-        dumpOptions(options);
+//        dumpOptions(options);
         
         //grab optional arguments (if any)
         for (int i=0; i<options.length; i++) {
