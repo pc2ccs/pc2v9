@@ -70,6 +70,8 @@ public class ClicsValidator {
     static public final int CLICS_VALIDATOR_FAILURE_EXIT_CODE = 43;
     static public final int CLICS_VALIDATOR_ERROR_EXIT_CODE = -39;
     
+    static public final int EOF = -1;
+    
     static Log log = null;
     
     private String judgeDataFile = null;
@@ -115,9 +117,12 @@ public class ClicsValidator {
             throw new RuntimeException("ClicsValidator received invalid file or directory name(s)");
         }
         
+        dumpOptions(options);
+        
         //grab optional arguments (if any)
         for (int i=0; i<options.length; i++) {
-            if (options[i].equals("case_sensitive") || options[i].equals("case-sensitive")) {
+
+            if (ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE.equals(options[i]) || "case-sensitive".equals(options[i])) {
                 isCaseSensitive = true;
             } else if (ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE.equals(options[i]) || "space_sensitive".equals(options[i])
                     || "space-change-sensitive".equals(options[i]) || "space-sensitive".equals(options[i])) {
@@ -231,97 +236,74 @@ public class ClicsValidator {
         // (note the assumption that the team's output is provided on "stdin")
         PushbackInputStream teamOutputPushbackIS = new PushbackInputStream(teamOutputIS);
         
+        //vars to hold bytes from judge and team input streams
+        byte judgeByte;
+        byte teamByte;
+        
         //loop until judge's answer is exhausted (the loop breaks out when judge's answer is exhausted; 
         // it exits with a failure code if team output fails to match)
         while (true) {
-            
+
             //if space sensitive, skip over equal whitespace in judge answer and team output
             if (isSpaceSensitive) {
                 
                 try {
-                    //while judge's answer file has whitespace, see if team output file matches
-                    byte judgeByte = (byte) judgeAnswerPushbackIS.read();
-                    //check for EOF or whitespace
-                    while (!(judgeByte==-1) && Character.isWhitespace(judgeByte)) {
-                        //found judge whitespace byte; get next team byte
-                        byte teamByte = (byte) teamOutputPushbackIS.read();
-                        //if they don't match, team has failed (since we're in "isSpaceSensitive" mode)
+                    //while judge's answer file has whitespace, see if team output file has matching whitespace
+                    while (isWhiteSpace(peek(judgeAnswerPushbackIS))) {
+                        
+                        //judge has whitespace byte; get next bytes from judge and team
+                        judgeByte = (byte) judgeAnswerPushbackIS.read();
+                        teamByte = (byte) teamOutputPushbackIS.read();
+                        
+                        //if the team byte doesn't match the judge's whitespace char, team has failed (since we're in "isSpaceSensitive" mode)
                         if (teamByte!=judgeByte) {
                             //exit with mismatched whitespace error
                             outputWrongAnswer("Space change error: judge's answer contains '" + printableString(judgeByte) 
                                     + "' but team's output contains '" + printableString(teamByte) + "'");
                             return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
                         }
-                        //team byte matches judge (i.e., is the same whitespace char); get next judge byte
-                        judgeByte = (byte) judgeAnswerPushbackIS.read();
                     }
                     
-                    //if we get here, the judge had either a non-whitespace byte or was at EOF
-                    if (judgeByte == -1) {
-                        //judge at EOF, check if team is also at EOF
-                        byte teamByte = (byte) teamOutputPushbackIS.read();
-                        if (!(teamByte==-1)) {
-                            //team is not at EOF, so has excessive output; we're going to quit --
-                            // but first see if it's just whitespace in the team output, or something more
-                            teamOutputPushbackIS.unread(teamByte);   //necessary because streams don't support "peek()" (at least, I couldn't figure out how...)
-                            String teamExcess = getNextToken(teamOutputPushbackIS);
-                            if (teamExcess.length()==0) {
-                                //team had trailing whitespace
-                                outputWrongAnswer("Team output contains excess trailing whitespace");
-                                return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
-                            } else {
-                                //team had more than just trailing whitespace
-                                outputWrongAnswer("Team output contains excess characters: '" + teamExcess + "'...");
-                                return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
-                            }
-                        } else {
-                            //judge and team are both at EOF; we're done
-                            break;
-                        }
-                    }
-                    
-                    //team matched every whitespace char to first non-whitespace in judge's answer; push back the last judge's char
-                    judgeAnswerPushbackIS.unread(judgeByte);
-                    
-                    //make sure the NEXT thing in the team output is NOT whitespace (because we know that's not what's next in the judge's answer)
-                    byte teamByte = (byte) teamOutputPushbackIS.read();
-                    if (Character.isWhitespace(teamByte)) {
+                    //we've skipped over matching whitespace to the first thing AFTER whitespace in the judge; 
+                    // make sure the team doesn't have MORE whitespace
+                    if (isWhiteSpace(peek(teamOutputPushbackIS))) {
                         //exit with mismatched whitespace error
-                        outputWrongAnswer("Space change error: judge's answer contains '" + printableString(judgeByte) 
-                                + "' but team's output contains '" + printableString(teamByte) + "'");
+                        outputWrongAnswer("Space change error: team's output contains extra whitespace char '" 
+                                    + printableString((byte)teamOutputPushbackIS.read()) + "'");
                         return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
-                    } else {
-                        //push the (non-whitespace) char back into the team input stream
-                        teamOutputPushbackIS.unread(teamByte);
-                    }
 
+                    }
                 } catch (IOException e) {
                     log.severe("IOException processing judge/team files: " + e.getMessage());
                     e.printStackTrace();
                     return CLICS_VALIDATOR_ERROR_EXIT_CODE;
                 }
             } //end if isSpaceSensitive
+                    
+            //if we get here, either we're not in case-sensitive mode, or we are but the above code has stripped matching leading whitespace
+            // from both the judge's answer and the team's output streams; in either case we're ready to compare the next things in the streams.
             
-            //we get here either because we're not in "case-sensitive" mode, or because the judge and team output have matched
-            // up to this point including whitespace; the judge and team streams should be positioned after the matching whitespace
-            // (in case-sensitive mode) or at the start of the next whitespace (in non-case-sensitive mode)
-            
-            //get next token from judge's stream 
-            String nextJudgeToken = getNextToken(judgeAnswerPushbackIS);    //getNextToken() skips leading whitespace, if any...
-            
-            //break loop if no judge's token (because it means we've exhausted the judge's answer input)
-            if (nextJudgeToken==null || nextJudgeToken.length()==0) {
-                break;
+            //make sure the judge isn't at EOF (because if so there's nothing left to compare)
+            if (peek(judgeAnswerPushbackIS) == EOF) {
+                //judge is at EOF; exit loop and check if team is also at EOF
+                break ;
             }
-            
-            //we have a judge token; get next token from team's stream
-            String nextTeamToken = getNextToken(teamOutputPushbackIS);
-            
-            //exit if there's no team token (because it means the team has incomplete output)
-            if (nextTeamToken==null || nextTeamToken.length()==0) {
-                outputWrongAnswer("Insufficient output");
+                        
+            //judge not at EOF, check if team IS at EOF
+            if (peek(teamOutputPushbackIS) == EOF) {
+                            
+                //team is at EOF when judge is not, so team is missing output
+                outputWrongAnswer("Insufficient output (next judge token = '" + getNextToken(judgeAnswerPushbackIS) + "')");
                 return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
             }
+                    
+            
+            //if we get here we know that neither the judge nor the team streams are at EOF, and are positioned after any matching 
+            // whitespace (in case-sensitive mode) or at the start of the next whitespace (in non-case-sensitive mode)
+            
+            //get next tokens from the streams (note that getNextToken() skips leading whitespace, if any...)
+            String nextJudgeToken = getNextToken(judgeAnswerPushbackIS);    
+            String nextTeamToken = getNextToken(teamOutputPushbackIS);
             
             //we have both a judge token and a team token which are not null and not zero length; compare them
             // (note that method areEquivalent() handles calling outputWrongAnswer() for various conditions if necessary)
@@ -336,7 +318,7 @@ public class ClicsValidator {
         //we get here when there's no more input in the judge's answer stream
         //check if team is at EOF
         try {
-            if (teamOutputPushbackIS.read()!= -1) {
+            if (teamOutputPushbackIS.read()!= EOF) {
                 outputWrongAnswer("Trailing output");
                 return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
             }
@@ -350,6 +332,50 @@ public class ClicsValidator {
     }//end method validate()
     
     /**
+     * Returns an int containing the next byte in the specified input stream while leaving the input stream unchanged.
+     * Note that the return value contains the byte value (0-255) in the lower bits of the returned
+     * 16-bit int, or contains -1 if there was no byte available in the input stream (i.e. the 
+     * stream was at EOF).  This conforms to the way in which {@link InputStream#read()} returns data.
+     * 
+     * @param inStream - the PushbackInputStream to be peeked at
+     * @return - an int containing the byte at the head of the input stream, or -1
+     */
+    private int peek(PushbackInputStream inStream) {
+        
+        int nextByte = EOF;  //yes, it's an int named nextByte; see the javadoc for InputStream.read() to understand why
+        try {
+            nextByte = inStream.read();
+            if (nextByte != EOF) {
+                inStream.unread(nextByte);
+            }
+        } catch (IOException e) {
+            // TODO log this exception
+            e.printStackTrace();
+        } 
+        
+        return nextByte;
+    }
+    
+    /**
+     * Checks whether the received integer contains a representation of a whitespace character.
+     * Note that the received integer is assumed to contain a byte read from an input stream,
+     * or else the value -1 if the input stream had been at EOF.
+     * If the received integer is equal to -1 then the method returns false (EOF is not whitespace).
+     * Determination of whitespace for values not equal to -1 is done using 
+     * {@link Character#isWhitespace(int)}.
+     * @param byteVal - an int containing a byte value in the lower 8 bits, or else the value -1
+     * @return true if the received integer is not equal to -1 and is a whitespace character
+     */
+    private boolean isWhiteSpace(int byteVal) {
+
+        if (byteVal == EOF) {
+            return false;
+        } else {
+            return Character.isWhitespace(byteVal);
+        }
+    }
+    
+    /**
      * Returns a printable string containing a representation of the specified byte.
      * Recognized control characters are converted to strings such as "<tab> for the byte 0x08 (tab);
      * other control characters are converted to "<?>".
@@ -361,10 +387,40 @@ public class ClicsValidator {
     private String printableString(byte theByte) {
         if (Character.isISOControl(theByte)) {
             switch (theByte) {
-                case 0x08: return new String ("<tab>");
+                case 0x00: return new String ("<NUL>");
+                case 0x01: return new String ("<SOH>");
+                case 0x02: return new String ("<STX>");
+                case 0x03: return new String ("<ETX>");
+                case 0x04: return new String ("<EOT>");
+                case 0x05: return new String ("<ENQ>");
+                case 0x06: return new String ("<ACK>");
+                case 0x07: return new String ("<BEL>");
+                case 0x08: return new String ("<BS>");
+                case 0x09: return new String ("<TAB>");
                 case 0x0A: return new String ("<LF>");
+                case 0x0B: return new String ("<VT>");
+                case 0x0C: return new String ("<FF>");
                 case 0x0D: return new String ("<CR>");
-                default: return new String ("<?>");
+                case 0x0E: return new String ("<SO>");
+                case 0x0F: return new String ("<SI>");
+                case 0x10: return new String ("<DLE>");
+                case 0x11: return new String ("<DC1>");
+                case 0x12: return new String ("<DC2>");
+                case 0x13: return new String ("<DC3>");
+                case 0x14: return new String ("<DC4>");
+                case 0x15: return new String ("<NAK>");
+                case 0x16: return new String ("<SYN>");
+                case 0x17: return new String ("<ETB>");
+                case 0x18: return new String ("<CAN>");
+                case 0x19: return new String ("<EM>");
+                case 0x1A: return new String ("<SUB>");
+                case 0x1B: return new String ("<ESC>");
+                case 0x1C: return new String ("<FS>");
+                case 0x1D: return new String ("<GS>");
+                case 0x1E: return new String ("<RS>");
+                case 0x1F: return new String ("<US>");
+                case 0x7F: return new String ("<DEL>");
+                default:   return new String ("<?>");
             }
         } else {
             char[] theChar = new char[1];
@@ -386,11 +442,11 @@ public class ClicsValidator {
      */
     private String getNextToken(PushbackInputStream inStream) {
 
-        char nextChar;
+        //strip off any leading whitespace
         try {
-            nextChar = (char) (((byte) inStream.read()) & 0xFF);
-            while (nextChar!= -1 && Character.isWhitespace(nextChar)) {
-                nextChar = (char) (((byte) inStream.read()) & 0xFF);
+
+            while (isWhiteSpace(peek(inStream)) && !(peek(inStream) == EOF)) {
+                inStream.read();  //discard whitespace chars
             }
         } catch (IOException e) {
             log.severe("IOException while flushing leading whitespace from input stream: " + e.getMessage());
@@ -398,23 +454,23 @@ public class ClicsValidator {
             return "ClicsValidator.getNextToken(): error reading stream";
         }
         
-        //if nextChar = -1 then there were no non-whitespace chars left in the stream
-        if (nextChar == -1) {
+        //if at EOF then there were no non-whitespace chars left in the stream
+        if (peek(inStream) == EOF) {
             return "";
         }
         
-        //we got at least one non-whitespace char; pull out consecutive non-whitespace chars
+        //there must be at least one non-whitespace char in the stream; pull out consecutive non-whitespace chars
         StringBuffer buf = new StringBuffer();
-        buf.append(nextChar);
         try {
-            nextChar = (char) (((byte) inStream.read()) & 0xFF);
-            while (nextChar!= -1 && !Character.isWhitespace(nextChar)) {
-                buf.append(nextChar);
-                nextChar = (char) (((byte) inStream.read()) & 0xFF);
-            }
-            //if we pulled a whitespace char out, put it back
-            if (nextChar!= -1 && Character.isWhitespace(nextChar)) {
-                inStream.unread(nextChar);
+            
+            // get all non-whitespace chars preceeding whitespace or EOF
+            while (!(peek(inStream) == EOF)) {
+
+                if (!isWhiteSpace(peek(inStream))) {
+                    buf.append((char) inStream.read());
+                } else {
+                    break;
+                }
             }
         } catch (IOException e) {
             log.severe("IOException while reading non-whitespace chars from input stream: " + e.getMessage());
@@ -425,7 +481,6 @@ public class ClicsValidator {
         //return the stream characters as the next token
         String retString = new String(buf);
                 
-        System.out.println("DEBUG: getNextToken() returning '" + retString + "'");
         return retString;
     }//end method getNextToken()
     
@@ -435,6 +490,8 @@ public class ClicsValidator {
      * Float values are equivalent if they are within either the specified relative or absolute tolerance; 
      * strings are equivalent if they are exactly the same (that is, String.equals() returns true) if in
      * "case-sensitive" mode) or are the same ignoring case when not in case-sensitive mode.
+     * <P>
+     * If either input string is null then they are deemed "not equivalent" (even if BOTH are null).
      * 
      * @param judgeToken
      *            -- a token from the judge's answer input stream
@@ -443,6 +500,10 @@ public class ClicsValidator {
      * @return true if the two tokens are equivalent under the current validator settings
      */
     private boolean areEquivalent(String judgeToken, String teamToken) {
+        
+        if (judgeToken==null || teamToken==null) {
+            return false;
+        }
 
         // check if the judge has a floating-point number and we're applying tolerance checking
         if (useFloatTolerance && isFloat(judgeToken)) {
@@ -540,10 +601,14 @@ public class ClicsValidator {
     
     private void outputWrongAnswer (String message) {
         log.info("Validator returning failure: " + message );
+        //TODO: replace this with output to the feedback directory
+        System.out.println ("Validator feedback: " + message);
     }
     
     private void outputSuccess (String message) {
         log.info("Validator returning success: " + message );
+        //TODO: replace this with output to the feedback directory
+        System.out.println ("Validator feedback: " + message);
     }
     
 
@@ -578,6 +643,12 @@ public class ClicsValidator {
         return true;
     }
     
+    private void dumpOptions(String [] options) {
+        for (int i=0; i<options.length; i++) {
+            System.out.println ("Option " + i + ": '" + options[i] + "'");
+        }
+    }
+    
     /**
      * The main entry point to the ClicsValidator when running as a stand-alone program.
      * The main program constructs a ClicsValidator object passing it the arguments received
@@ -602,11 +673,11 @@ public class ClicsValidator {
             options[i-3] = args[i];
         }
         
-        ClicsValidator df = new ClicsValidator(args[0], args[1], args[2], options);
+        ClicsValidator validator = new ClicsValidator(args[0], args[1], args[2], options);
         
         log.info("Invoking ClicsValidator.validate()");
         
-        int result = df.validate();
+        int result = validator.validate();
         
         log.info("validate() returned code " + result);
         
