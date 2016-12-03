@@ -60,6 +60,25 @@ import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
  * <P>
  * Whether the validator is invoked via the main() method or by instantiation, the class expects the team output to be provided on the
  * standard input stream.
+ * <p>
+ * To understand the meanings of the float_absolute_tolerance and float_relative_Tolerance options, the following description 
+ * (based on {@link http://stackoverflow.com/questions/8961844/relative-and-absolute-tolerance-definitions-in-matlab-solver}) may help.
+ * <p>
+ * There are two ways to measure the amount by which two values differ: relative difference (i.e. % change), and absolute difference.  
+ * It makes a lot of sense to check for relative change, since a difference of 5 means something very different when the correct answer is around 1 
+ * than when it is around 100000.  Relative tolerance is defined as the percentage of allowable difference;
+ * checking relative difference between the judge's answer "j" and the team's answer "t" means checking whether 
+ * abs(j-t)/j)<relTol, or equivalently whether abs(j-t)<=relTol*j, where "relTol" is a percentage (fraction).
+ * In other words, this checks by what fraction the team solution differs from the judge's solution. 
+ * <P>  
+ *  The relative tolerance, however, becomes problematic when the solution is around zero, since x/0 is undefined. 
+ *  Thus, it makes sense to also look at the absolute change in value, and accept an answer when abs(j-t)<absTol. 
+ *  If you choose absTol small enough, it will only be relTol (percent difference) that counts for large values, 
+ *  while absTol only becomes relevant if the solution comes to lie around 0.  
+ *  <P>
+ *  Since the validator stops when either of the two criterion is fulfilled, how close the team gets to a correct answer 
+ *  is determined by absTol or relTol. For example, if relTol is 10% (0.1), the team will have to get within 10% of the judge's answer, 
+ *  unless the answer is very small, in which case the absTol criterion (of, say, 0.0001) is satisfied before the relTol criterion.
  * 
  * @author John@pc2.ecs.csus.edu
  *
@@ -643,11 +662,11 @@ public class ClicsValidator {
         return true;
     }
     
-    private void dumpOptions(String [] options) {
-        for (int i=0; i<options.length; i++) {
-            System.out.println ("Option " + i + ": '" + options[i] + "'");
-        }
-    }
+//    private void dumpOptions(String [] options) {
+//        for (int i=0; i<options.length; i++) {
+//            System.out.println ("Option " + i + ": '" + options[i] + "'");
+//        }
+//    }
     
     /**
      * The main entry point to the ClicsValidator when running as a stand-alone program.
