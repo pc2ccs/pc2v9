@@ -29,7 +29,6 @@ import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
  * <p>
  * The validator requires arguments (either on the command line if invoked via main() 
  * or as constructor arguments if invoked via instantiation) as follows:
- * <P>
  * <ul>
  *   <li> judge_data -- the judge's input data for a single test case
  *   <li> judge_answer  -- the judge's answer file corresponding to the specified judge_data
@@ -46,35 +45,37 @@ import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
  *          (by default, case is ignored)
  *   <li> "space_change_sensitive" -- indicates that changes in the amount of whitespace should be rejected 
  *          (the default is that any sequence of 1 or more whitespace characters are equivalent)
- *   <li> "float_absolute_tolerance E" -- indicates that floating-point tokens should be accepted if they are within absolute error <= E
- *   <li> "float_relative_tolerance E" -- indicates that floating-point tokens should be accepted if they are within relative error <= E
+ *   <li> "float_absolute_tolerance E" -- indicates that floating-point tokens should be accepted if they are within absolute error {@literal <=} E
+ *   <li> "float_relative_tolerance E" -- indicates that floating-point tokens should be accepted if they are within relative error {@literal <=} E
  *   <li> "float_tolerance E" -- this string is a short-hand for applying E as both relative and absolute tolerance
+ * </ul>
  * <P>
  * When supplying both a relative and an absolute tolerance, the semantics are that a token is accepted if it is within either of the 
  * two tolerances. When a floating-point tolerance has been set, any valid formatting of floating point numbers is accepted for floating 
  * point tokens. So for instance if a token in the judge_answer file says 0.0314, a token of 3.14000000e-2 in the team output would be accepted. 
  * If no floating point tolerance has been set, floating point tokens are treated just like any other token and must match exactly.
  * <P>
- * Optional arguments may also be constructed using hyphens ("-") instead of underscores ("_"), as long as the same character is 
- * used throughout a given option string.
+ * Optional arguments may also be constructed using hyphens ("-") instead of underscores ("_"), as long as the same character 
+ * is used throughout a given option string (for example, "space-change-sensitive" is equivalent to "space_change_sensitive").
  * <P>
  * Whether the validator is invoked via the main() method or by instantiation, the class expects the team output to be provided on the
  * standard input stream.
  * <p>
- * To understand the meanings of the float_absolute_tolerance and float_relative_Tolerance options, the following description 
- * (based on {@link http://stackoverflow.com/questions/8961844/relative-and-absolute-tolerance-definitions-in-matlab-solver}) may help.
+ * To understand the meanings of the float_absolute_tolerance and float_relative_tolerance options, the following description 
+ * (based on http://stackoverflow.com/questions/8961844/relative-and-absolute-tolerance-definitions-in-matlab-solver) may help.
  * <p>
  * There are two ways to measure the amount by which two values differ: relative difference (i.e. % change), and absolute difference.  
  * It makes a lot of sense to check for relative change, since a difference of 5 means something very different when the correct answer is around 1 
  * than when it is around 100000.  Relative tolerance is defined as the percentage of allowable difference;
  * checking relative difference between the judge's answer "j" and the team's answer "t" means checking whether 
- * abs(j-t)/j)<relTol, or equivalently whether abs(j-t)<=relTol*j, where "relTol" is a percentage (fraction).
+ * {@literal abs(j-t)/j)<=relTol}, or equivalently whether {@literal abs(j-t)<=relTol*j}, where "relTol" is a percentage (fraction).
  * In other words, this checks by what fraction the team solution differs from the judge's solution. 
  * <P>  
- *  The relative tolerance, however, becomes problematic when the solution is around zero, since x/0 is undefined. 
- *  Thus, it makes sense to also look at the absolute change in value, and accept an answer when abs(j-t)<absTol. 
+ *  Relative tolerance, however, becomes problematic when the correct answer is very small, since as the correct answer tends toward zero
+ *  the value {@literal abs(j-t)/j} grows toward infinity (because x/0 is undefined). 
+ *  Thus, it makes sense to also look at the absolute change in value, and accept an answer when {@literal abs(j-t)<absTol}. 
  *  If you choose absTol small enough, it will only be relTol (percent difference) that counts for large values, 
- *  while absTol only becomes relevant if the solution comes to lie around 0.  
+ *  while absTol only becomes relevant if the correct answer tends to lie around 0.  
  *  <P>
  *  Since the validator stops when either of the two criterion is fulfilled, how close the team gets to a correct answer 
  *  is determined by absTol or relTol. For example, if relTol is 10% (0.1), the team will have to get within 10% of the judge's answer, 
@@ -241,8 +242,8 @@ public class ClicsValidator {
      * against the judge's answer (received on the specified input stream), 
      * and return either success or failure as defined by the static class constants.
      * 
-     * @param judgeAnswerIS - an InputStream containing the values in the judge's answer file
-     * @param teamOutputIS - an InputStream containing the values in the team's output file 
+     * @param judgeAnswerIS an InputStream containing the values in the judge's answer file
+     * @param teamOutputIS an InputStream containing the values in the team's output file 
      * 
      * @return an int indicating success or failure, or an error code if an error occurred
      */
@@ -670,11 +671,14 @@ public class ClicsValidator {
     
     /**
      * The main entry point to the ClicsValidator when running as a stand-alone program.
-     * The main program constructs a ClicsValidator object passing it the arguments received
-     * by main(), then invokes the validator's validate() method.  The integer result returned by
-     * validate() is then used as the main program exit code.
+     * The main program constructs a ClicsValidator object passing to its constructor the arguments received
+     * by main(), then invokes the validator's {@link #validate()} method.  The integer result returned by
+     * {@link #validate()} is then used as the main program exit code.
+     * <P>
+     * The validator expects the output of the team program (that is, the data being validated by comparing
+     * against the specified judge's answer file) to be provided on the standard input channel. 
      * 
-     * @param args judgeDataFile judgeAnswerFile feedbackDir [options] < teamOutputFile
+     * @param args: {@literal judgeDataFile judgeAnswerFile feedbackDir [options]}
      */
     public static void main(String[] args) {
         if (args.length < 3) {
