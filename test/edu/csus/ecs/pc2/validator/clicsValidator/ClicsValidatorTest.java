@@ -333,7 +333,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
         
         options = new String [2];
         options[0] = "float_relative_tolerance";
-        options[1] = "0.101"; //10% tolerance (should succeed)
+        options[1] = "0.101"; //10.1% tolerance (should succeed)
         
         System.out.println();
         retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
