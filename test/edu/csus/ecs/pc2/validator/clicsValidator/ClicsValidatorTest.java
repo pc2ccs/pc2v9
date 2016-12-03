@@ -256,8 +256,8 @@ public class ClicsValidatorTest extends AbstractTestCase {
     }
 
     /**
-     * This tests whether the validator, run as a class instance, correctly rejects output which differs in case, but only
-     * when the "case_senstivity" option is selected.
+     * This tests whether the validator, run as a class instance, correctly accepts float values within a specified absolute
+     * tolerance but rejects float values which are not within the specified absolute tolerance.
      * 
      * @throws Exception
      */
@@ -302,8 +302,56 @@ public class ClicsValidatorTest extends AbstractTestCase {
     }
 
     /**
+     * This tests whether the validator, run as a class instance, correctly accepts float values within a specified relative
+     * tolerance but rejects float values which are not within the specified relative tolerance.
+     * 
+     * @throws Exception
+     */
+    public void testInstanceHandleFloatRelativeTolerance() throws Exception {
+
+        String dataDir = getDataDirectory() + File.separator;
+        assertDirectoryExists(dataDir, "Missing data directory");
+        
+        String judgeDataFileName = dataDir + "defaultJudgeData.in";
+        assertFileExists(judgeDataFileName, "judge's data file");
+        
+        String judgeAnswerFileName = dataDir + "judgeAnswerWithFloatForRelativeTest.ans";
+        assertFileExists(judgeAnswerFileName, "judge's answer file");
+        
+        String feedbackDir = getOutputDataDirectory();
+        assertDirectoryExists(feedbackDir, "feedback output directory");
+        
+        String teamOutputFileName = dataDir + "teamOutputWithFloatForRelativeTest.out";
+        assertFileExists(teamOutputFileName, "team output file");
+
+        String []options = {""};
+        
+        System.out.println();
+        int retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleFloatRelativeTolerance: with no options, Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
+        
+        options = new String [2];
+        options[0] = "float_relative_tolerance";
+        options[1] = "0.101"; //10% tolerance (should succeed)
+        
+        System.out.println();
+        retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleFloatRelativeTolerance: with option 'float_relative_tolerance 0.1' (10%), Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE, retCode);
+        
+        options[1] = "0.05";  //5% tolerance (should fail)
+        
+        System.out.println();
+        retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleFloatRelativeTolerance: with option 'float_relative_tolerance 0.05' (5%), Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
+        
+    }
+
+    /**
      * This tests whether the validator, run as a class instance, correctly accepts output with floating-point values
-     * which differ in represenation but not value (specifically, it should accept 0.341 as being equal to 3.14000000e-2).
+     * which differ in representation but not value (specifically, it should accept 0.341 as being equal to 3.14000000e-2).
      * 
      * @throws Exception
      */
@@ -341,6 +389,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
         
     }
 
+    
 
 
     /**
@@ -523,6 +572,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
         suite.addTest(new ClicsValidatorTest("testInstanceHandleSpaceSensitivity"));        
         suite.addTest(new ClicsValidatorTest("testInstanceHandleFloatAbsoluteTolerance"));        
         suite.addTest(new ClicsValidatorTest("testInstanceHandleScientificNotation"));        
+        suite.addTest(new ClicsValidatorTest("testInstanceHandleFloatRelativeTolerance"));        
 
         return suite;
     }
