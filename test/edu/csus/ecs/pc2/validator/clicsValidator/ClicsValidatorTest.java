@@ -301,6 +301,46 @@ public class ClicsValidatorTest extends AbstractTestCase {
         
     }
 
+    /**
+     * This tests whether the validator, run as a class instance, correctly rejects output which differs in case, but only
+     * when the "case_senstivity" option is selected.
+     * 
+     * @throws Exception
+     */
+    public void testInstanceHandleScientificNotation() throws Exception {
+
+        String dataDir = getDataDirectory() + File.separator;
+        assertDirectoryExists(dataDir, "Missing data directory");
+        
+        String judgeDataFileName = dataDir + "defaultJudgeData.in";
+        assertFileExists(judgeDataFileName, "judge's data file");
+        
+        String judgeAnswerFileName = dataDir + "judgeAnswerWithDecimalFloat.ans";
+        assertFileExists(judgeAnswerFileName, "judge's answer file");
+        
+        String feedbackDir = getOutputDataDirectory();
+        assertDirectoryExists(feedbackDir, "feedback output directory");
+        
+        String teamOutputFileName = dataDir + "teamOutputWithScientificFloat.out";
+        assertFileExists(teamOutputFileName, "team output file");
+
+        String []options = {""};
+        
+        int retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleScientificNotation: with no options, Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
+        
+        options = new String [2];
+        options[0] = "float_absolute_tolerance";
+        options[1] = "0.001";
+        
+        
+        retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleScientificNotation: with 'float_absolute_tolerance 0.001' option, Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE, retCode);
+        
+    }
+
 
 
     /**
@@ -482,6 +522,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
         suite.addTest(new ClicsValidatorTest("testInstanceHandleCaseSensitivity"));        
         suite.addTest(new ClicsValidatorTest("testInstanceHandleSpaceSensitivity"));        
         suite.addTest(new ClicsValidatorTest("testInstanceHandleFloatAbsoluteTolerance"));        
+        suite.addTest(new ClicsValidatorTest("testInstanceHandleScientificNotation"));        
 
         return suite;
     }
