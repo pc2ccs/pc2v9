@@ -302,8 +302,8 @@ public class ClicsValidatorTest extends AbstractTestCase {
     }
 
     /**
-     * This tests whether the validator, run as a class instance, correctly rejects output which differs in case, but only
-     * when the "case_senstivity" option is selected.
+     * This tests whether the validator, run as a class instance, correctly accepts output with floating-point values
+     * which differ in represenation but not value (specifically, it should accept 0.341 as being equal to 3.14000000e-2).
      * 
      * @throws Exception
      */
