@@ -161,6 +161,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
 
         String [] options = {""};
         
+        System.out.println();
         int retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceMatchWithNoOptions: Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE, retCode);
@@ -192,12 +193,14 @@ public class ClicsValidatorTest extends AbstractTestCase {
 
         String [] options = {""};
         
+        System.out.println();
         int retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleCaseSensitivity: with no options, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE, retCode);
         
         options[0] = "case_sensitive";
         
+        System.out.println();
         retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleCaseSensitivity: with 'case_sensitive' option, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
@@ -229,12 +232,14 @@ public class ClicsValidatorTest extends AbstractTestCase {
 
         String [] options = {""};
         
+        System.out.println();
         int retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleSpaceSensitivity: with no options, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE, retCode);
         
         options[0] = "space_change_sensitive";
         
+        System.out.println();
         retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleSpaceSensitivity: with 'space_change_sensitive' option, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
@@ -242,6 +247,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
         teamOutputFileName = dataDir + "teamOutputWithIncorrectSpacing2.out";
         assertFileExists(teamOutputFileName, "team output file");
         
+        System.out.println();
         retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleSpaceSensitivity: with 'space_change_sensitive' option, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
@@ -249,6 +255,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
         teamOutputFileName = dataDir + "teamOutputWithIncorrectSpacing3.out";
         assertFileExists(teamOutputFileName, "team output file");
         
+        System.out.println();
         retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleSpaceSensitivity: with 'space_change_sensitive' option, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
@@ -280,6 +287,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
 
         String []options = {""};
         
+        System.out.println();
         int retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleFloatAbsoluteTolerance: with no options, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
@@ -289,12 +297,14 @@ public class ClicsValidatorTest extends AbstractTestCase {
         options[1] = "0.001";
         
         
+        System.out.println();
         retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleFloatAbsoluteTolerance: with 'float_absolute_tolerance 0.001' option, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE, retCode);
         
         options[1] = "0.00001";
         
+        System.out.println();
         retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleFloatAbsoluteTolerance: with 'float_absolute_tolerance 0.00001' option, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
