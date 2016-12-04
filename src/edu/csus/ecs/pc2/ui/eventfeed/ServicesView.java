@@ -113,7 +113,7 @@ public class ServicesView extends JFrame implements UIPlugin {
     }
 
     protected void promptAndExit() {
-        int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to exit PC^2?", "Exit PC^2");
+        int result = FrameUtilities.yesNoCancelDialog(this, "Are you sure you want to exit PC^2?", "Exit PC^2");
 
         if (result == JOptionPane.YES_OPTION) {
             System.exit(0);
