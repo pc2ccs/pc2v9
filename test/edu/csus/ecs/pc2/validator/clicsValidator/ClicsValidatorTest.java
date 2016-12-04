@@ -384,6 +384,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
 
         String []options = {""};
         
+        System.out.println();
         int retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleScientificNotation: with no options, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE, retCode);
@@ -393,6 +394,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
         options[1] = "0.001";
         
         
+        System.out.println();
         retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
         System.out.println ("testInstanceHandleScientificNotation: with 'float_absolute_tolerance 0.001' option, Validator returned: " + retCode);
         assertEquals(ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE, retCode);
@@ -400,6 +402,45 @@ public class ClicsValidatorTest extends AbstractTestCase {
     }
 
     
+    //additional tests needed:
+    //  testInstanceHandleWithinRelativeButNotAbsoluteTolerance()
+    //  testInstanceHandleWithinAbsoluteButNotRelativeTolerance()
+    //  testInstanceHandleSetBothTolerancesWithOneOption()
+    
+    // testProcessHandleXXX()
+   
+    
+    //sample suggested code for examining feedback directory files:
+    
+//    String [] feedbackFilenames = getFileEntries (inFeedbackDirName);
+//    
+//    System.out.println("There were "+feedbackFilenames.length+" feedback files under "+inFeedbackDirName);
+//    for (String filename : feedbackFilenames) {
+//        System.out.println("File: "+filename);
+//        Utilities.catFile(new PrintWriter(System.out), filename);
+//    }
+//    
+
+//
+///**
+// * Get file directory entries with full pathnames.
+// *  
+// * @param directory
+// * @return
+// */
+//private String  []  getFileEntries(String directory) {
+//    ArrayList<String> list = new ArrayList<>();
+//    File[] files = new File(directory).listFiles();
+//
+//    for (File file : files) {
+//        if (file.isFile()){
+//            list.add(directory + file.separator + file.getName());
+//        }
+//    }
+//    return (String[]) list.toArray(new String[list.size()]);
+//
+//}
+
 
 
     /**
