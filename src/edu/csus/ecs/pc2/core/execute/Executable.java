@@ -342,7 +342,13 @@ public class Executable extends Plugin implements IExecutable {
                         fileViewer.addTextPane("Error during compile", errorMessage);
                     } // else they will get a tab hopefully showing something wrong
                 }
-            } else if (compileProgram()) {
+            } 
+            
+            //if we get here, this is a Judged Run (not a Team Test Run)            
+            else if (compileProgram()) {
+                
+                //compile succeeded; proceed to execution
+                
                 SerializedFile[] dataFiles = null;
                 if (problemDataFiles != null) {
                     dataFiles = problemDataFiles.getJudgesDataFiles();
@@ -352,37 +358,43 @@ public class Executable extends Plugin implements IExecutable {
                 boolean passed = true;
 
                 /**
-                 * Did one test case fail flag.
+                 * Did at least one test case fail flag.
                  */
-                boolean oneTestFailed = false;
+                boolean atLeastOneTestFailed = false;
                 String failedResults = "";
 
                 if (dataFiles == null || dataFiles.length <= 1) {
-                    // Only a single (at most) data set,
-
+                    
+                    // the judged run has (at most) a single data set,
                     log.info("Test cases: 1 for run " + run.getNumber());
 
                     passed = executeAndValidateDataSet(dataSetNumber);
                     if (!passed) {
-                        oneTestFailed = true;
+                        atLeastOneTestFailed = true;
                         failedResults = executionData.getValidationResults();
                     }
 
                 } else {
 
+                    //the judged run has multiple test cases
                     log.info("Test cases: " + dataFiles.length + " for run " + run.getNumber());
 
+                    //execute the judged run against each test data set
                     while (dataSetNumber < dataFiles.length) {
+                        
+                        //execute against one specific data set
                         passed = executeAndValidateDataSet(dataSetNumber);
+                        
                         dataSetNumber++;
                         if (!passed) {
                             log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber() + " reason " + getFailureReason());
-                            oneTestFailed = true;
+                            atLeastOneTestFailed = true;
                             if ("".equals(failedResults)) {
                                 failedResults = executionData.getValidationResults();
                             }
                         }
                     }
+                    
                     // re-create 1st test set data if this is an internal file
                     if (!problem.isUsingExternalDataFiles()) {
                         // if internal the 1st file has been re-written by datasets 1..n so we need to re-write 0
@@ -393,16 +405,22 @@ public class Executable extends Plugin implements IExecutable {
                     }
                 }
 
-                if (oneTestFailed) {
+                if (atLeastOneTestFailed) {
                     // replace the final executionData with the 1st failed pass
                     executionData.setValidationResults(failedResults);
                     log.info("Test results: test failed " + run + " reason = " + getFailureReason());
                 } else {
                     log.info("Test results: ALL passed for run " + run);
                 }
+                
             } else {
+                
+                //if we get here it is a judged run but the compile step failed
                 /**
-                 * compileProgram returns false if 1) runProgram failed (errorString set) 2) compiler fails to create expected output file (errorString empty) If there is compiler stderr or stdout we
+                 * compileProgram returns false if 
+                 * 1) runProgram failed (errorString set) 
+                 * 2) compiler fails to create expected output file (errorString empty)
+                 * If there is compiler stderr or stdout we
                  * should not add the textPane saying there was an error.
                  */
                 if (!executionData.isCompileSuccess()) {
@@ -439,6 +457,8 @@ public class Executable extends Plugin implements IExecutable {
                     fileViewer.addTextPane("Error during compile", errorMessage);
                 } // else they will get a tab hopefully showing something wrong
             }
+            
+            //we've finished the compile/execute steps (for better or worse); do the required final steps to display the results
 
             File file;
             String outputFile;
