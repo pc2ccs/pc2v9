@@ -298,6 +298,9 @@ public class Problem implements IElementObject {
      * @see Object#equals(java.lang.Object).
      */
     public boolean equals(Object obj) {
+        if (this==obj) {
+            return true;
+        }
         if (obj == null) {
             return false;
         }
@@ -582,11 +585,11 @@ public class Problem implements IElementObject {
 
    /**
      * Sets the flag indicating that this Problem is using a validator.
-     * Note that at least three different validators might be used: the CLICS {@link ClicsValidator},
-     * a custom (user-defined) validator, or the old (deprecated) PC2Validator.
+     * Note that at least three different validators might be used: the {@link ClicsValidator},
+     * a custom (user-defined) validator, or the original PC2Validator.
      * It is the caller's responsibility when calling this method to also insure that a specific
      * validator has been specified by calling either {@link Problem#setUsingCLICSValidator(boolean)},
-     * {@link Problem#setUsingCustomValidator(boolean)}, or (deprecated) {@link Problem#setUsingPC2Validator(boolean)}.
+     * {@link Problem#setUsingCustomValidator(boolean)}, or {@link Problem#setUsingPC2Validator(boolean)}.
      * 
      * @param validated
      *            Set to true if the problem uses a validator.
@@ -706,37 +709,55 @@ public class Problem implements IElementObject {
             if (validatedProblem != problem.isValidatedProblem()) {
                 return false;
             }
-            if (usingPC2Validator != problem.isUsingPC2Validator()) {
-                return false;
-            }
-            if (whichPC2Validator != problem.getWhichPC2Validator()) {
-                return false;
-            }
             
-            if (usingCLICSValidator != problem.isUsingCLICSValidator()) {
-                return false;
-            }
-            if (getClicsValidatorSettings()==null ^ problem.getClicsValidatorSettings()==null) {
-                //Java XOR (^) says they are different (one is null, the other is not) -- return false
-                return false;
-            }
-            if (getClicsValidatorSettings()!=null) {
-                //both must be non-null; check for equality
-                if (!getClicsValidatorSettings().equals(problem.getClicsValidatorSettings())) {
+            if (validatedProblem) {
+
+                if (usingPC2Validator != problem.isUsingPC2Validator()) {
                     return false;
+                }
+                if (usingPC2Validator) {
+                    if (whichPC2Validator != problem.getWhichPC2Validator()) {
+                        return false;
+                    }
+                    if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {
+                        return false;
+                    }
+                }
+
+                if (usingCLICSValidator != problem.isUsingCLICSValidator()) {
+                    return false;
+                }
+                if (usingCLICSValidator) {
+                    if (getClicsValidatorSettings() == null ^ problem.getClicsValidatorSettings() == null) {
+                        // Java XOR (^) says they are different (one is null, the other is not) -- return false
+                        return false;
+                    }
+                    if (getClicsValidatorSettings() != null) {
+                        // both must be non-null; check for equality
+                        if (!getClicsValidatorSettings().equals(problem.getClicsValidatorSettings())) {
+                            return false;
+                        }
+                    }
+                }
+
+                if (usingCustomValidator != problem.isUsingCustomValidator()) {
+                    return false;
+                }
+                if (usingCustomValidator) {
+                    if (getCustomValidatorSettings() == null ^ problem.getCustomValidatorSettings() == null) {
+                        // Java XOR (^) says they are different (one is null, the other is not) -- return false
+                        return false;
+                    }
+                    if (getCustomValidatorSettings() != null) {
+                        // both must be non-null; check for equality
+                        if (!getCustomValidatorSettings().equals(problem.getCustomValidatorSettings())) {
+                            return false;
+                        }
+                    }
                 }
             }
             
-            if (! StringUtilities.stringSame(validatorProgramName, problem.getValidatorProgramName())) {
-                return false;
-            }
-            if (! StringUtilities.stringSame(validatorCommandLine, problem.getValidatorCommandLine())) {
-                return false;
-            }
-            if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {
-                return false;
-            }
-            if (showValidationToJudges != problem.isShowValidationToJudges()) {
+           if (showValidationToJudges != problem.isShowValidationToJudges()) {
                 return false;
             }
             
