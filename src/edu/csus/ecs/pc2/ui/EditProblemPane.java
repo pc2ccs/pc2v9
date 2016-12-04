@@ -1853,7 +1853,7 @@ public class EditProblemPane extends JPanePlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
-            mainTabbedPane.setPreferredSize(new java.awt.Dimension(400, 400));
+            mainTabbedPane.setPreferredSize(new Dimension(400, 500));
             mainTabbedPane.insertTab("Data Files", null, getMultipleDataSetPane(), null, 0);
             mainTabbedPane.insertTab("Validator", null, getValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
