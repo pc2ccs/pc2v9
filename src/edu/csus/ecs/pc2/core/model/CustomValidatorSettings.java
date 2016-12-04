@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @author pc2@ecs.csus.edu
  *
  */
-public class CustomValidatorSettings implements Serializable {
+public class CustomValidatorSettings implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
 
@@ -71,7 +71,20 @@ public class CustomValidatorSettings implements Serializable {
      * @param other -- the object against which to compare this object's settings
      * @return true if this object matches the other object
      */
-    public boolean isSameAs(CustomValidatorSettings other) {
+    @Override
+    public boolean equals(Object obj) {
+        
+        //are they the exact same object?
+        if (this==obj) {
+            return true;
+        }
+        
+        if (!(obj instanceof CustomValidatorSettings)) {
+            return false;
+        }
+        
+        CustomValidatorSettings other = (CustomValidatorSettings) obj;
+        
         //first, check the invocation command lines
         //check whether one is null while the other is not, using the Java XOR ("^") operator
         if (this.getCustomValidatorInvocationCommand()==null ^ other.getCustomValidatorInvocationCommand()==null) {
