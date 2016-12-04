@@ -596,7 +596,7 @@ public class MultipleDataSetPane extends JPanePlugin {
     private JPanel getButtonPanel() {
         if (buttonPanel == null) {
             buttonPanel = new JPanel();
-            buttonPanel.setPreferredSize(new Dimension(10, 30));
+            buttonPanel.setPreferredSize(new Dimension(10, 50));
             buttonPanel.add(getBtnLoad());
             buttonPanel.add(getHorizontalStrut());
             buttonPanel.add(getBtnDelete());
