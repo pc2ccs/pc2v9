@@ -2775,7 +2775,7 @@ public class EditProblemPane extends JPanePlugin {
             chooseValidatorProgramButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
 //                    showMessage ("Not implemented yet...");
-                    if (selectFile(getCustomValidatorExecutableCommandTextField(), "Open Validator Program")) {
+                    if (selectFile(getCustomValidatorExecutableCommandTextField(), "Select Validator Program")) {
                         getCustomValidatorExecutableCommandTextField().setToolTipText((getCustomValidatorExecutableCommandTextField().getText()));
                         enableUpdateButton();
                     }
@@ -3761,14 +3761,14 @@ public class EditProblemPane extends JPanePlugin {
     
     private JLabel getCustomValidatorExecutableCommandLabel() {
         if (customValidatorCommandLabel == null) {
-        	customValidatorCommandLabel = new JLabel("Validator executable program:");
+        	customValidatorCommandLabel = new JLabel("Validator program:");
         }
         return customValidatorCommandLabel;
     }
     
     private JLabel getCustomValidatorCommandOptionsLabel() {
         if (customValidatorCommandOptionsLabel == null) {
-            customValidatorCommandOptionsLabel = new JLabel("Command Line options:");
+            customValidatorCommandOptionsLabel = new JLabel("Validator Command Line:");
         }
         return customValidatorCommandOptionsLabel;
     }    
