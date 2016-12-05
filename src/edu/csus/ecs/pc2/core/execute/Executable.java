@@ -565,11 +565,10 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Execute and validates
-     * 
-     * @param dataSetNumber
-     *            zero based data set number.
-     * @return true if passes test
+     * Executes the current run against a specified data set, then if the problem is marked as
+     * being validated also invokes the appropriate validator to validate the program (run) output.
+     * @param dataSetNumber zero-based data set number
+     * @return true if the problem was to be validated and the validator indicates the problem was solved
      */
     private boolean executeAndValidateDataSet(int dataSetNumber) {
 
@@ -677,6 +676,12 @@ public class Executable extends Plugin implements IExecutable {
         return dir.isDirectory();
     }
 
+    /**
+     * Runs the problem-specified validator to compare the output of the run (team program)
+     * with the corresponding judge's answer file.
+     * @param dataSetNumber a zero-based value indicating the data set against which the run was executed
+     * @return true if the validator returns "success" (indicating that the problem was correctly solved)
+     */
     protected boolean validateProgram(int dataSetNumber) {
 
         // SOMEDAY Handle the error messages better, log and put them before the user to
@@ -711,11 +716,11 @@ public class Executable extends Plugin implements IExecutable {
         }
 
         /**
-         * Judge input data file name, either short name or fully qualified if external file.{:infile}
+         * Judge input data file name, either short name or fully qualified if external file.  {:infile}
          */
         String judgeDataFilename = problem.getDataFileName();
         /**
-         * Judge answer data file name, either short name or fully qualified if external file.{:infile}
+         * Judge answer file name, either short name or fully qualified if external file.  {:ansfile}
          */
         String judgeAnswerFilename = problem.getAnswerFileName();
 
@@ -753,6 +758,7 @@ public class Executable extends Plugin implements IExecutable {
 
         }
 
+        //get a "random" number to be used as part of the results file name, for security
         String secs = Long.toString((new Date().getTime()) % 100);
 
         // Answer/results XML file name
@@ -1091,18 +1097,12 @@ public class Executable extends Plugin implements IExecutable {
         }
     }
 
+
     /**
-     * execute the submission
+     * Execute the submission against a single data set.
      * 
-     * @return true if program successfully executes.
-     */
-    /**
-     * Execute the submission.
-     * 
-     * @param dataSetNumber
-     *            a zero based data set number
-     * @param writeJudgesDataFiles
-     * @return true if execution worked.
+     * @param dataSetNumber a zero-based data set number
+     * @return true if execution worked successfully.
      */
     protected boolean executeProgram(int dataSetNumber) {
         boolean passed = false;
