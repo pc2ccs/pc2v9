@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
@@ -37,6 +38,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 import edu.csus.ecs.pc2.ui.NullViewer;
+import edu.csus.ecs.pc2.validator.ClicsValidator;
 
 /**
  * Compile, execute and validate a run.
@@ -123,6 +125,8 @@ public class Executable extends Plugin implements IExecutable {
      * Execution stderr filename.
      */
     public static final String VALIDATOR_STDERR_FILENAME = "vstderr.pc2";
+    
+    public static final String CLICS_VALIDATOR_FEEDBACK_DIR_NAME = "feedbackdir";
 
     /**
      * Interface - the file created with the process return.exit code.
@@ -693,8 +697,17 @@ public class Executable extends Plugin implements IExecutable {
         if (isJudge()) {
             controller.sendValidatingMessage(run);
         }
+        
+        String commandPattern = "";
+        if (problem.isUsingCLICSValidator()) {
+            
+          commandPattern = getCLICSValidatorCommandPattern();
 
-        if (problemDataFiles != null && problemDataFiles.getValidatorFile() != null) {
+        }
+
+        else 
+            //not using CLICS Validator; handle as in V9.3
+            if (problemDataFiles != null && problemDataFiles.getValidatorFile() != null) {
             // Create Validation Program
 
             String validatorFileName = problemDataFiles.getValidatorFile().getName();
@@ -714,14 +727,12 @@ public class Executable extends Plugin implements IExecutable {
                 setExecuteBit(prefixExecuteDirname(validatorFileName));
             }
         }
+        
 
-        /**
-         * Judge input data file name, either short name or fully qualified if external file.  {:infile}
-         */
-        String judgeDataFilename = problem.getDataFileName();
-        /**
-         * Judge answer file name, either short name or fully qualified if external file.  {:ansfile}
-         */
+        //Judge input data file name, either short name or fully qualified if external file.  {:infile}
+        String judgeDataFilename =  problem.getDataFileName();
+        
+        //Judge answer file name, either short name or fully qualified if external file.  {:ansfile}
         String judgeAnswerFilename = problem.getAnswerFileName();
 
         if (overwriteJudgesDataFiles) {
@@ -768,6 +779,7 @@ public class Executable extends Plugin implements IExecutable {
 
         /*
          * <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files]
+         * 
          */
 
         /**
@@ -776,10 +788,14 @@ public class Executable extends Plugin implements IExecutable {
          * String commandPattern = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
          */
 
-        String commandPattern = problem.getValidatorCommandLine();
+        if (!problem.isUsingCLICSValidator()) {
+            commandPattern = problem.getValidatorCommandLine();
+        }
+        
         boolean pc2JarUseDirectory = false;
 
         if (problem.isUsingPC2Validator()) {
+            
 
             /**
              * The internal command is set to: <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files] Where validator is
@@ -801,7 +817,29 @@ public class Executable extends Plugin implements IExecutable {
 
         String cmdLine = replaceString(commandPattern, "{:infile}", judgeDataFilename);
         cmdLine = replaceString(cmdLine, "{:ansfile}", judgeAnswerFilename);
+        cmdLine = replaceString(cmdLine, "{:feedbackdir}", CLICS_VALIDATOR_FEEDBACK_DIR_NAME);
+        cmdLine = replaceString(cmdLine, "{:outfile}", "estdout.pc2");
+        
+        if (problem.isUsingCLICSValidator()) {
+            if (!insureDir(CLICS_VALIDATOR_FEEDBACK_DIR_NAME)) {
+                throw new SecurityException("Unable to create ClicsValidator feedback directory; check logs");
+            } else {
+                //clean out feedback dir
+                ExecuteUtilities.clearDirectory(CLICS_VALIDATOR_FEEDBACK_DIR_NAME);
+                
+                //copy empty results file into feedback dir (so ClicsValidator knows the resultsfile name)
+                resultsFileName = ExecuteUtilities.createResultsFileName(run);
+                File resultsFile = new File(resultsFileName);
+                try {
+                    resultsFile.createNewFile();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
+            }
+        }
+        
         cmdLine = substituteAllStrings(run, cmdLine);
         cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
 
@@ -889,6 +927,8 @@ public class Executable extends Plugin implements IExecutable {
                 log.config("validatorCall() executionTimer == null");
             }
 
+            log.info("validator process returned exit code " + process.exitValue());
+
             if (process != null) {
                 process.destroy();
             }
@@ -941,6 +981,67 @@ public class Executable extends Plugin implements IExecutable {
         return executionData.isValidationSuccess();
     }
 
+    /**
+     * Returns a command pattern for invoking the {@link ClicsValidator}.
+     * The returned pattern contains "substitution variables" for the elements required by the CLICS validator
+     * (for example, "{:infile}" where the judge's input data file should be substituted).
+     * 
+     * @return a command pattern for invoking the CLICS Validator
+     */
+    private String getCLICSValidatorCommandPattern() {
+        
+        String pathToPC2Jar = findPC2JarPath();
+        if (!(new File(pathToPC2Jar+"pc2.jar")).exists()) {
+//            pc2JarUseDirectory = true;
+        }
+        
+      String options = getClicsOptionString();
+      
+      String args = "{:infile} {:ansfile} {:feedbackdir}";
+
+      String cmdPattern = "java -cp " + pathToPC2Jar + "pc2.jar" + " edu.csus.ecs.pc2.validator.ClicsValidator " + args + options + " < {:outfile}";
+
+      System.out.println("DEBUG: CLICS Validator command pattern: '" + cmdPattern + "'");
+      
+      return cmdPattern;
+
+    }
+    
+    /**
+     * Returns a string containing the {@link ClicsValidatorSettings} options configured in the current problem.
+     * 
+     * @return a String containing the Clics Validator options, or the empty string if the
+     *          problem is null or the ClicsValidatorSettings is null
+     */
+    private String getClicsOptionString() {
+
+        String optStr = "";
+
+        if (problem!=null && problem.getClicsValidatorSettings()!=null) {
+
+            ClicsValidatorSettings settings = problem.getClicsValidatorSettings();
+
+            if (settings.isCaseSensitive()) {
+                optStr += " " + ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE;
+            }
+            if (settings.isSpaceSensitive()) {
+                optStr += " " + ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
+            }
+            if (settings.isFloatAbsoluteToleranceSpecified()) {
+                optStr += " " + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE;
+                double abstol = settings.getFloatAbsoluteTolerance();
+                optStr += " " + Double.toString(abstol);
+            }
+            if (settings.isFloatRelativeToleranceSpecified()) {
+                optStr += " " + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE;
+                double reltol = settings.getFloatRelativeTolerance();
+                optStr += " " + Double.toString(reltol);
+            }
+
+        }
+        return optStr;
+    }
+    
     private String getTeamOutputFilename(int dataSetNumber) {
         return prefixExecuteDirname("teamoutput." + dataSetNumber + ".txt");
     }
@@ -1334,6 +1435,7 @@ public class Executable extends Plugin implements IExecutable {
 
             if (process != null) {
                 int returnValue = process.waitFor();
+                log.info("execution process returned exit code " + process.exitValue());
                 executionData.setExecuteExitValue(returnValue);
                 process.destroy();
             }
