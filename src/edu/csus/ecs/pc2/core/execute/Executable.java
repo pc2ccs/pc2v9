@@ -821,20 +821,23 @@ public class Executable extends Plugin implements IExecutable {
         cmdLine = replaceString(cmdLine, "{:outfile}", "estdout.pc2");
         
         if (problem.isUsingCLICSValidator()) {
-            if (!insureDir(CLICS_VALIDATOR_FEEDBACK_DIR_NAME)) {
+
+            String feedbackDir = getExecuteDirectoryName() + File.separator + CLICS_VALIDATOR_FEEDBACK_DIR_NAME;
+            
+            if (!insureDir(feedbackDir)) {
                 throw new SecurityException("Unable to create ClicsValidator feedback directory; check logs");
             } else {
                 //clean out feedback dir
-                ExecuteUtilities.clearDirectory(CLICS_VALIDATOR_FEEDBACK_DIR_NAME);
+                ExecuteUtilities.clearDirectory(feedbackDir);
                 
                 //copy empty results file into feedback dir (so ClicsValidator knows the resultsfile name)
                 resultsFileName = ExecuteUtilities.createResultsFileName(run);
-                File resultsFile = new File(resultsFileName);
+                File resultsFile = new File(feedbackDir + File.separator + resultsFileName);
                 try {
                     resultsFile.createNewFile();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.severe("unable to create results results file '" + resultsFileName + "' in feedback directory '" + feedbackDir + "'");
+                    throw new SecurityException("Unable to create results file in ClicsValidator feedback directory; check logs");
                 }
 
             }
