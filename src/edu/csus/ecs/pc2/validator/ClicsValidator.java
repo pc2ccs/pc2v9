@@ -10,8 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 
+import javax.swing.JOptionPane;
+
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
 
 /**
@@ -107,9 +108,7 @@ public class ClicsValidator {
     
     public ClicsValidator(String inJudgeDataFile, String inJudgeAnswerFile, String inFeedbackDirName, String... options ) {
         if (log==null) {
-            log = new Log("ClicsValidator.log");
-            StaticLog.setLog(log);
-            log = StaticLog.getLog();            
+            log = new Log("ClicsValidator.log");        
         }
         
         String optionString = "";
@@ -133,7 +132,7 @@ public class ClicsValidator {
 
         //verify files are valid
         if (!validateFiles()) {
-            log.severe("ClicsValidator received invalid file or directory name(s)");
+            log.severe("XXX: ClicsValidator received invalid file or directory name(s)");
             throw new RuntimeException("ClicsValidator received invalid file or directory name(s)");
         }
         
@@ -208,7 +207,8 @@ public class ClicsValidator {
                 
             } else {
                 //unknown option
-                log.warning("Validator received unknown option: '" + options[i] + "'; ignored");
+                log.warning("Validator received unknown option: '" + options[i] + "'");
+                throw new RuntimeException("Validator received unknown option: '" + options[i] + "'");
             }
             
         }//end grab option arguments (if any)
@@ -641,21 +641,40 @@ public class ClicsValidator {
     private boolean validateFiles() {
         
         if (judgeDataFile==null || judgeAnswerFile==null || feedbackDirName==null) {
+            String errStr = "";
+            if (judgeDataFile==null) {
+                errStr += " judgeDataFile";
+            }
+            if (judgeAnswerFile==null) {
+                errStr += " judgeAnswerFile";
+            }
+            if (feedbackDirName==null) {
+                errStr += " feedbackDirName";
+            }
+            log.severe("validator received null file name(s) for: " + errStr);
+            JOptionPane.showMessageDialog(null, "File is null: judgeDataFile=" + judgeDataFile + ", judgeAnswerFile=" + judgeAnswerFile
+                    + ", feedbackdir=" + feedbackDirName) ;
             return false;
         }
         
         File dataFile = new File(judgeDataFile);
         if (!dataFile.exists() || !dataFile.canRead()) {
+            log.severe("judge data file doesn't exist or isn't readable");
+            JOptionPane.showMessageDialog(null, "judge data file doesn't exist or isn't readable") ; 
             return false;
         }
         
         File answerFile = new File(judgeAnswerFile);
         if (!answerFile.exists() || !answerFile.canRead()) {
+            log.severe("judge answer file doesn't exist or isn't readable");
+            JOptionPane.showMessageDialog(null, "judge answer file doesn't exist or isn't readable") ; 
             return false;
         }
         
         File feedbackDir = new File(feedbackDirName);
         if (!feedbackDir.exists() || !feedbackDir.isDirectory() || !feedbackDir.canRead() || !feedbackDir.canWrite()) {
+            log.severe("feedback dir doesn't exist, isn't a directory or isn't readable or writeable");
+            JOptionPane.showMessageDialog(null, "feedback dir doesn't exist, isn't a directory or isn't readable or writeable") ; 
             return false;
         }
         
@@ -681,28 +700,47 @@ public class ClicsValidator {
      * @param args: {@literal judgeDataFile judgeAnswerFile feedbackDir [options]}
      */
     public static void main(String[] args) {
+        
+        System.out.println ("DEBUG: in ClicsValidator main()");
         if (args.length < 3) {
             usage();
             System.exit(CLICS_VALIDATOR_FAILURE_EXIT_CODE);
         }
         
-        log = new Log("ClicsValidator.log");
-        StaticLog.setLog(log);
-        log = StaticLog.getLog();            
+        log = new Log("ClicsValidator.log");            
+        
+        //build a string of all input argument values for output/logging/debugging
+        String params = "";
+        params += args[0] + " ";
+        params += args[1] + " ";
+        params += args[2] + " ";
         
         //copy any options into an array for passing to the constructor as a vararg
         String [] options = new String[args.length-3];
         for (int i=3; i<args.length; i++) {
             options[i-3] = args[i];
+            params += args[i] + " ";
         }
         
-        ClicsValidator validator = new ClicsValidator(args[0], args[1], args[2], options);
+        log.info("Constructing CLICS Validator from ClicsValidator.main() with arguments '" + params + "'");
+         
+        
+        ClicsValidator validator = null;
+        try {
+            validator = new ClicsValidator(args[0], args[1], args[2], options);
+        } catch (Exception e) {
+            log.severe("Exception constructing ClicsValidator from main(): " + e.getMessage());
+            e.printStackTrace();
+            System.exit (CLICS_VALIDATOR_ERROR_EXIT_CODE);
+        }
         
         log.info("Invoking ClicsValidator.validate()");
         
         int result = validator.validate();
         
         log.info("validate() returned code " + result);
+        
+        System.out.println ("Exiting Clics Validator main() with exit code " + result);
         
         System.exit(result);
         
