@@ -918,6 +918,31 @@ public class Executable extends Plugin implements IExecutable {
 
             // // waiting for the process to finish execution...
             // executionData.setValidationReturnCode(process.waitFor());
+            
+            //if CLICS validator, redirect team output to STDIN
+            if (problem.isUsingCLICSValidator()) {
+
+                String teamOutputFileName = getTeamOutputFilename(dataSetNumber);
+                if (teamOutputFileName != null && new File(teamOutputFileName).exists()) {
+                    log.info("Sending team output file '" + getTeamOutputFilename(dataSetNumber) + "' to CLICS Validator stdin");
+
+                    BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
+                    BufferedInputStream in = new BufferedInputStream(new FileInputStream(teamOutputFileName));
+                    byte[] buf = new byte[32768];
+                    int c;
+                    try {
+                        while ((c = in.read(buf)) != -1) {
+                            out.write(buf, 0, c);
+                        }
+                    } catch (java.io.IOException e) {
+                        log.info("Caught a " + e.getMessage() + " do not be alarmed.");
+                    }
+
+                    in.close();
+                    out.close();
+                }
+            }
+
 
             stdoutCollector.join();
             stderrCollector.join();
