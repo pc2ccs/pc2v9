@@ -3959,11 +3959,11 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Returns a DefaultValidatorSettings object containing the values currently displayed in the GUI.
+     * Returns a {@link ClicsValidatorSettings} object containing the values currently displayed in the GUI.
      * Displays an error message and throws {@link InvalidFieldValue} if either the absolute or relative
      * tolerance are selected and the string in the corresponding text box is invalid.
      * 
-     * @return a DefaultValidatorSettings object populated from the GUI
+     * @return a ClicsValidatorSettings object populated from the GUI
      * @throws {@link InvalidFieldValue} if an invalid tolerance value is detected
      */
     private ClicsValidatorSettings getCLICSValidatorSettingsFromFields() {
