@@ -117,12 +117,12 @@ public class Executable extends Plugin implements IExecutable {
     public static final String EXECUTE_STDERR_FILENAME = "estderr.pc2";
 
     /**
-     * Execution stdout filename.
+     * Validator stdout filename.
      */
     public static final String VALIDATOR_STDOUT_FILENAME = "vstdout.pc2";
 
     /**
-     * Execution stderr filename.
+     * Validator stderr filename.
      */
     public static final String VALIDATOR_STDERR_FILENAME = "vstderr.pc2";
     
@@ -1002,7 +1002,7 @@ public class Executable extends Plugin implements IExecutable {
       
       String args = "{:infile} {:ansfile} {:feedbackdir}";
 
-      String cmdPattern = "java -cp " + pathToPC2Jar + "pc2.jar" + " edu.csus.ecs.pc2.validator.ClicsValidator " + args + options + " < {:outfile}";
+      String cmdPattern = "java -cp " + pathToPC2Jar + "pc2.jar" + " edu.csus.ecs.pc2.validator.ClicsValidator " + args + options ;
 
       System.out.println("DEBUG: CLICS Validator command pattern: '" + cmdPattern + "'");
       
