@@ -46,12 +46,12 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
     private double floatAbsoluteTolerance;
     
     /**
-     * Constructs a DefaultValidatorSettings object with default values matching the 
+     * Constructs a ClicsValidatorSettings object with default values matching the 
      * defined public default constants.
      */
     public ClicsValidatorSettings() {
         if (log==null) {
-            log = new Log("DefaultValidatorSettings.log");
+            log = new Log("ClicsValidatorSettings.log");
             StaticLog.setLog(log);
             log = StaticLog.getLog();            
         }
@@ -65,12 +65,12 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
     }
     
     /**
-     * Constructs a DefaultValidatorSettings object containing the values specified in the received String.
+     * Constructs a ClicsValidatorSettings object containing the values specified in the received String.
      * The received String is expected to contain zero or more space-separated "validator setting" options
      * as defined in the CLICS <A href="https://clics.ecs.baylor.edu/index.php/Problem_format#Default_Validator_Capabilities">
      * <I>default validator options</i></a> specification.
      * Any options not specified are set to the defaults values defined by the public default constants,
-     * as if the object was constructed by calling {@link ClicsValidator#DefaultValidator()}. 
+     * as if the object was constructed by calling {@link ClicsValidator#ClicsValidator()}. 
      * Any values in the received string not matching the CLICS validator options are logged but
      * otherwise silently ignored.  The same is true if valid options are specified (e.g. "float_tolerance")
      * but the required following tolerance value ("epsilon") is missing.
@@ -107,11 +107,11 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
                                 double epsilon = Double.parseDouble(opts[i+1]) ;
                                 this.setFloatRelativeTolerance(epsilon);
                             } catch (NumberFormatException | NullPointerException e) {
-                                log.warning("DefaultValidatorSettings(String) constructor: invalid float tolerance epsilon value; option ignored");
+                                log.warning("ClicsValidatorSettings(String) constructor: invalid float tolerance epsilon value; option ignored");
                             }
                             i++;
                         } else {
-                            log.warning("DefaultValidatorSettings(String) constructor missing float tolerance epsilon value; option ignored"); 
+                            log.warning("ClicsValidatorSettings(String) constructor missing float tolerance epsilon value; option ignored"); 
                         }
                         break;
                         
@@ -122,11 +122,11 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
                                 double epsilon = Double.parseDouble(opts[i+1]) ;
                                 this.setFloatAbsoluteTolerance(epsilon);
                             } catch (NumberFormatException | NullPointerException e) {
-                                log.warning("DefaultValidatorSettings(String) constructor: invalid float tolerance epsilon value; option ignored");
+                                log.warning("ClicsValidatorSettings(String) constructor: invalid float tolerance epsilon value; option ignored");
                             }
                             i++;
                         } else {
-                            log.warning("DefaultValidatorSettings(String) constructor missing float tolerance epsilon value; option ignored"); 
+                            log.warning("ClicsValidatorSettings(String) constructor missing float tolerance epsilon value; option ignored"); 
                         }
                         break;
                         
@@ -138,16 +138,16 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
                                 this.setFloatRelativeTolerance(epsilon);
                                 this.setFloatAbsoluteTolerance(epsilon);
                             } catch (NumberFormatException | NullPointerException e) {
-                                log.warning("DefaultValidatorSettings(String) constructor: invalid float tolerance epsilon value; option ignored");
+                                log.warning("ClicsValidatorSettings(String) constructor: invalid float tolerance epsilon value; option ignored");
                             }
                             i++;
                         } else {
-                            log.warning("DefaultValidatorSettings(String) constructor missing float tolerance epsilon value; option ignored"); 
+                            log.warning("ClicsValidatorSettings(String) constructor missing float tolerance epsilon value; option ignored"); 
                         }
                         break;
                         
                     default:
-                        log.warning("DefaultValidatorSettings(String) constructor received unknown option '" + opts[i] +"'; ignored");
+                        log.warning("ClicsValidatorSettings(String) constructor received unknown option '" + opts[i] +"'; ignored");
                         break;
                 }//end switch
             }//end for each option field
@@ -287,7 +287,7 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
     }
     
     /**
-     * Returns a DefaultValidatorSettings object which is a clone of this object.
+     * Returns a {@link ClicsValidatorSettings} object which is a clone of this object.
      */
     public ClicsValidatorSettings clone() {
         ClicsValidatorSettings clone = new ClicsValidatorSettings();
@@ -299,12 +299,12 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
     }
     
     /**
-     * Returns a String representation of this DefaultValidatorSettings object.
+     * Returns a String representation of this {@link ClicsValidatorSettings} object.
      * The format of the string is as if the validator options were specified on a command line
      * as per the CLICS Default Validator invocation specification; that is, a series of space-delimited
      * options.  Note that this means that if an option is currently not specified, the option will not
      * be present in the returned string.  This in turn means, for example, that the string returned for
-     * a DefaultValidatorSettings object for which no options have been specified will be the empty string.
+     * a ClicsValidatorSettings object for which no options have been specified will be the empty string.
      */
     public String toString() {
         String retStr = "";

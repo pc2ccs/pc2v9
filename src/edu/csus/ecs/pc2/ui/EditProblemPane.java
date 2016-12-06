@@ -892,7 +892,7 @@ public class EditProblemPane extends JPanePlugin {
         
         if (checkProblem.isUsingCLICSValidator()) {
             //update CLICS Default Validator settings from fields.
-            checkProblem.setCLICSValidatorSettings(getCLICSDefaultValidatorSettingsFromFields());
+            checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
         }
         
         if (checkProblem.isUsingCustomValidator()) {
@@ -3966,7 +3966,7 @@ public class EditProblemPane extends JPanePlugin {
      * @return a DefaultValidatorSettings object populated from the GUI
      * @throws {@link InvalidFieldValue} if an invalid tolerance value is detected
      */
-    private ClicsValidatorSettings getCLICSDefaultValidatorSettingsFromFields() {
+    private ClicsValidatorSettings getCLICSValidatorSettingsFromFields() {
         
         ClicsValidatorSettings settings = new ClicsValidatorSettings();
         
