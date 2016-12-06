@@ -132,7 +132,7 @@ public class ClicsValidator {
 
         //verify files are valid
         if (!validateFiles()) {
-            log.severe("XXX: ClicsValidator received invalid file or directory name(s)");
+            log.severe("ClicsValidator received invalid file or directory name(s)");
             throw new RuntimeException("ClicsValidator received invalid file or directory name(s)");
         }
         
