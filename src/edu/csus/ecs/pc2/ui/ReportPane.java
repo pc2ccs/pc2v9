@@ -108,10 +108,8 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
  * Report Pane, allows picking and viewing reports.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ReportPane extends JPanePlugin {
 
     /**
@@ -195,6 +193,9 @@ public class ReportPane extends JPanePlugin {
         this.add(getTopPane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
+    }
+
+    private void populateReports() {
 
         // populate list of reports
         Vector<IReport> reports = new Vector<IReport>();
@@ -288,7 +289,10 @@ public class ReportPane extends JPanePlugin {
 
         reports.add(new JSON2016Report());
         
-        reports.add(new CDPReport());
+        if (isServer()){
+            // SOMEDAY Bug 1166 remove this isServer when added to Admin. 
+            reports.add(new CDPReport());
+        }
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());
@@ -311,6 +315,7 @@ public class ReportPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getEditFilterFrame().setContestAndController(getContest(), getController());
+                populateReports();
                 refreshGUI();
                 updateGUIperPermissions();
             }
