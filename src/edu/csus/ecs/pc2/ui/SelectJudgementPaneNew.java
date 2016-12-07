@@ -372,6 +372,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
                 long totalSeconds = milliDiff / 1000;
                 judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
+            } else {
+                // judgement did not change, fix for bug 1165
+                // grab most recent active judgement
+                judgementRecord = newRun.getJudgementRecord();
             }
     
             JudgeView.setAlreadyJudgingRun(false);
