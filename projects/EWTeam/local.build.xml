@@ -133,7 +133,7 @@ No need for Javadoc - this is not an API.
 		<jar jarfile="${jar.path}" basedir="${build.prod.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="PC2JavaMiniserver" />
-				<attribute name="Class-Path" value="pc2.jar JavaBridge.jar" />
+				<attribute name="Class-Path" value="pc2.jar JavaBridge.jar jackson-core-2.5.4.jar" />
 				<attribute name="Specification-Version" value="${version}" />
 				<attribute name="Implementation-Title" value="EWU Web Team Client" />
 				<attribute name="Implementation-Version" value="${repo.version}" />
