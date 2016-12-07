@@ -48,13 +48,6 @@ public class FinalizePane extends JPanePlugin {
 
     private JPanel buttonPane = null;
 
-    /**
-     * Update button.
-     * 
-     * Not visible per Bug 1155.
-     */
-    private JButton updateButton = null;
-
     private JButton finalizeButton = null;
 
     private JPanel centerPane = null;
@@ -78,9 +71,13 @@ public class FinalizePane extends JPanePlugin {
     private JLabel certificationCommentLabel = null;
 
     private JButton reportButton = null;
+
     private JPanel southPanel;
+
     private JPanel viewResultsPane;
+
     private JLabel resultsFileLabel;
+
     private JButton viewButton;
 
     /**
@@ -120,7 +117,6 @@ public class FinalizePane extends JPanePlugin {
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
             buttonPane.setPreferredSize(new Dimension(35, 35));
-//            buttonPane.add(getUpdateButton(), null);
             buttonPane.add(getFinalizeButton(), null);
             buttonPane.add(getReportButton(), null);
         }
@@ -182,29 +178,9 @@ public class FinalizePane extends JPanePlugin {
             certificationCommentLabel.setToolTipText("");
             populateDefaults();
         }
-        
+
         enableButtons();
 
-    }
-
-    /**
-     * This method initializes updateButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getUpdateButton() {
-        if (updateButton == null) {
-            updateButton = new JButton();
-            updateButton.setText("Update");
-            updateButton.setMnemonic(KeyEvent.VK_U);
-            updateButton.setToolTipText("Update data do not finalize");
-            updateButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    updateFinalizeData();
-                }
-            });
-        }
-        return updateButton;
     }
 
     /**
@@ -246,22 +222,22 @@ public class FinalizePane extends JPanePlugin {
     protected void certifyContest() {
 
         FinalizeData data = getFromFields();
-        
+
         try {
 
             int numberUnjudgedRuns = getNumberUnjudgedRuns();
             if (numberUnjudgedRuns > 0) {
-                throw new InvalidFieldValue("Cannot finalize all runs must be judged, "+numberUnjudgedRuns+" unjudged runs");
+                throw new InvalidFieldValue("Cannot finalize all runs must be judged, " + numberUnjudgedRuns + " unjudged runs");
             }
 
             int numberUnasweredClars = getNumberUnansweredClars();
             if (numberUnasweredClars > 0) {
-                throw new InvalidFieldValue("Cannot finalize all clars must be answered, "+ numberUnasweredClars + " un-answered clarifications");
+                throw new InvalidFieldValue("Cannot finalize all clars must be answered, " + numberUnasweredClars + " un-answered clarifications");
             }
-            
+
             int numberJudgingErrorRuns = getNumberJERuns(getContest());
             if (numberJudgingErrorRuns > 0) {
-                throw new InvalidFieldValue("Cannot finalize there are runs with Judging Errors (JEs), "+ numberJudgingErrorRuns + " un-answered clarifications");
+                throw new InvalidFieldValue("Cannot finalize there are runs with Judging Errors (JEs), " + numberJudgingErrorRuns + " un-answered clarifications");
             }
             ContestTime contestTime = getContest().getContestTime();
 
@@ -272,7 +248,7 @@ public class FinalizePane extends JPanePlugin {
             if (contestTime.getRemainingSecs() > 0) {
                 throw new InvalidFieldValue("Cannot finalize contest - contest not over - remaining time: " + contestTime.getRemainingTimeStr());
             }
-            
+
             if (data.getBronzeRank() == 0) {
                 throw new InvalidFieldValue("Cannot finalize contest - Bronze rank must be greater than zero");
             }
@@ -296,7 +272,8 @@ public class FinalizePane extends JPanePlugin {
 
     /**
      * Get number of JE runs.
-     * @param contest 
+     * 
+     * @param contest
      * @return
      */
     public static int getNumberJERuns(IInternalContest contest) {
@@ -304,35 +281,35 @@ public class FinalizePane extends JPanePlugin {
 
         Filter filter = new Filter();
         filter.addRunState(RunStates.JUDGED);
-        
+
         runs = filter.getRuns(runs);
-        
+
         Judgement judgementJE = null;
         Judgement[] judgeList = contest.getJudgements();
         for (Judgement judgement : judgeList) {
-            if (judgement.getAcronym() != null){
-                if (judgement.getAcronym().equalsIgnoreCase("JE")){
+            if (judgement.getAcronym() != null) {
+                if (judgement.getAcronym().equalsIgnoreCase("JE")) {
                     judgementJE = judgement;
                 }
             }
         }
-        
-        if (judgementJE == null){
+
+        if (judgementJE == null) {
             /**
              * No JE judgement, there is no way to have any runs judged as JE.
              */
-            
+
             return 0; // ------------------------ RETURN -------------
         }
-        
+
         int count = 0;
 
         for (Run run : runs) {
             if (!run.isDeleted()) {
-                
+
                 ElementId id = run.getJudgementRecord().getJudgementId();
                 if (judgementJE.getElementId().equals(id)) {
-                  count ++;  
+                    count++;
                 }
             }
         }
@@ -371,8 +348,6 @@ public class FinalizePane extends JPanePlugin {
     private void showMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
     }
-
-
 
     /**
      * This method initializes centerPane
@@ -526,7 +501,7 @@ public class FinalizePane extends JPanePlugin {
         }
         return reportButton;
     }
-    
+
     void enableButtons() {
 
         boolean finalized = false;
@@ -567,7 +542,7 @@ public class FinalizePane extends JPanePlugin {
         } catch (Exception e) {
             getLog().info("Unable to write results file " + outfilename);
             getLog().log(Level.WARNING, "Writing " + outfilename, e);
-            e.printStackTrace(); // TODO remove debug 22 
+            e.printStackTrace(); // TODO remove debug 22
             return "Unable to write " + outfilename;
         }
 
@@ -575,38 +550,41 @@ public class FinalizePane extends JPanePlugin {
 
     private JPanel getSouthPanel() {
         if (southPanel == null) {
-        	southPanel = new JPanel();
-        	southPanel.setLayout(new BorderLayout(0, 0));
-        	southPanel.add(getButtonPane(), BorderLayout.SOUTH);
-        	southPanel.add(getViewResultsPane());
+            southPanel = new JPanel();
+            southPanel.setLayout(new BorderLayout(0, 0));
+            southPanel.add(getButtonPane(), BorderLayout.SOUTH);
+            southPanel.add(getViewResultsPane());
         }
         return southPanel;
     }
+
     private JPanel getViewResultsPane() {
         if (viewResultsPane == null) {
-        	viewResultsPane = new JPanel();
-        	viewResultsPane.setLayout(new BorderLayout(0, 0));
-        	viewResultsPane.add(getResultsFileLabel());
-        	viewResultsPane.add(getViewButton(), BorderLayout.EAST);
+            viewResultsPane = new JPanel();
+            viewResultsPane.setLayout(new BorderLayout(0, 0));
+            viewResultsPane.add(getResultsFileLabel());
+            viewResultsPane.add(getViewButton(), BorderLayout.EAST);
         }
         return viewResultsPane;
     }
+
     private JLabel getResultsFileLabel() {
         if (resultsFileLabel == null) {
-        	resultsFileLabel = new JLabel("results/resulst.tsv");
-        	resultsFileLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            resultsFileLabel = new JLabel("results/resulst.tsv");
+            resultsFileLabel.setHorizontalAlignment(SwingConstants.CENTER);
         }
         return resultsFileLabel;
     }
+
     private JButton getViewButton() {
         if (viewButton == null) {
-        	viewButton = new JButton("View");
-        	viewButton.setToolTipText("View results.tsv");
-        	viewButton.addActionListener(new java.awt.event.ActionListener() {
-                   public void actionPerformed(java.awt.event.ActionEvent e) {
-                       showResultsFile();
-                   }
-               });
+            viewButton = new JButton("View");
+            viewButton.setToolTipText("View results.tsv");
+            viewButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showResultsFile();
+                }
+            });
         }
         return viewButton;
     }

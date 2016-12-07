@@ -434,7 +434,7 @@ public class CDPReport implements IReport {
             /**
              * Request set of runs from server. Wait for runs to arrive. Consider caching runs. return runs.
              */
-
+            System.err.println("NOT IMPLEMENTED getRunFiles when not all runs are present");
             // TODO code for Admin to get Source files 
             // send packet to controller
             // wait for run source to be received, then continue

@@ -511,8 +511,6 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
         if (schedAndRemainingTimeLabelList.size() > 0) {
 
-            String hint = "Still no scheduled start";
-
             ContestTime contestTime = contest.getContestTime();
 
             String text = getScheduleOrRemainingTime(contestTime);

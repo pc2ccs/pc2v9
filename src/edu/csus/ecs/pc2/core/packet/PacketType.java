@@ -2,8 +2,6 @@ package edu.csus.ecs.pc2.core.packet;
 
 import java.io.Serializable;
 
-import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
-
 /**
  * Defines packet types and property names used to store data in packets.
  * 

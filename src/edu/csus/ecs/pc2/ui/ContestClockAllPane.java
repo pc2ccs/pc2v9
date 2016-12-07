@@ -28,7 +28,7 @@ public class ContestClockAllPane extends JPanePlugin {
 
     private Log log;
 
-    boolean labelsAdded = false;
+    private boolean labelsAdded = false;
 
     private ContestClockDisplay contestClockDisplay = null;
 

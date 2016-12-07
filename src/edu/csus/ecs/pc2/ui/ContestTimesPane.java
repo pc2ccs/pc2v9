@@ -92,12 +92,15 @@ public class ContestTimesPane extends JPanePlugin {
     private SimpleDateFormat formatter = new SimpleDateFormat(" HH:mm:ss MM-dd");
 
     private Logger log;
+
     private JPanel scheduledStartTimePanel;
+
     private JLabel lblScheduledStartTime;
+
     private JTextField scheduledStartTimeTextField;
+
     private JPanel contestTimesPanel;
 
-    
     /**
      * This method initializes
      * 
@@ -117,48 +120,47 @@ public class ContestTimesPane extends JPanePlugin {
         this.add(getMessagePane(), BorderLayout.NORTH);
         this.add(getContestTimesPanel(), BorderLayout.CENTER);
         this.add(getContestTimeButtonPane(), java.awt.BorderLayout.SOUTH);
-        
+
         this.addComponentListener(new ComponentAdapter() {
             public void componentShown(ComponentEvent event) {
-                
-                //the ContestTimesPane has been shown; need to refresh the Scheduled Start label and time.
+
+                // the ContestTimesPane has been shown; need to refresh the Scheduled Start label and time.
                 IInternalContest contest = getContest();
-                if (contest!=null) {
+                if (contest != null) {
                     ContestInformation ci = contest.getContestInformation();
                     ContestTime ct = contest.getContestTime();
-                    if (ci!=null && ct!=null) {
-                        
-                        //update the Scheduled Start Time label
+                    if (ci != null && ct != null) {
+
+                        // update the Scheduled Start Time label
                         boolean started = ct.isContestStarted();
-                        String labelText ;
+                        String labelText;
                         if (!started) {
                             labelText = "Scheduled Start Time: ";
                         } else {
                             labelText = "Started at: ";
                         }
                         getScheduledStartTimeLabel().setText(labelText);
-                        
-                        //update the Scheduled Start Time data value
+
+                        // update the Scheduled Start Time data value
                         GregorianCalendar startTime = ci.getScheduledStartTime();
                         String displayTime;
-                        if (startTime==null) {
+                        if (startTime == null) {
                             displayTime = "undefined";
                         } else {
                             displayTime = formatTime(startTime.getTimeInMillis());
                         }
                         getScheduledStartTimeTextField().setText(displayTime);
-                    } 
+                    }
                 } else {
                     IInternalController controller = getController();
-                    Log log = null;
-                    if (controller!=null) {
+                    if (controller != null) {
                         log = controller.getLog();
-                        if (log!=null) {
+                        if (log != null) {
                             log.warning("ContestTimesPane.componentShown(): cannot update Scheduled Start Time -- no contest available");
                         }
                     }
-                    if (controller==null || log==null) {
-                        System.err.println ("ContestTimesPane.componentShown(): Warning: cannot update Scheduled Start Time -- no contest available, and no controller/log available");
+                    if (controller == null || log == null) {
+                        System.err.println("ContestTimesPane.componentShown(): Warning: cannot update Scheduled Start Time -- no contest available, and no controller/log available");
                     }
                 }
             }
@@ -224,8 +226,7 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeListBox = new MCLB();
 
             contestTimeListBox.setMultipleSelections(true);
-            Object[] cols = { "Site", "Started?", "Current State", "Remaining", "Elapsed", "Length", "Logged In", "Since"  };
-
+            Object[] cols = { "Site", "Started?", "Current State", "Remaining", "Elapsed", "Length", "Logged In", "Since" };
 
             contestTimeListBox.addColumns(cols);
 
@@ -267,19 +268,18 @@ public class ContestTimesPane extends JPanePlugin {
 
     protected String[] buildContestTimeRow(ContestTime contestTime) {
 
-//        Object[] cols = { "Site", "Started?", "Current State", "Remaining", "Elapsed", "Length", "Logged In", "Since"  };
+        // Object[] cols = { "Site", "Started?", "Current State", "Remaining", "Elapsed", "Length", "Logged In", "Since" };
 
         int numberColumns = contestTimeListBox.getColumnCount();
         String[] c = new String[numberColumns];
 
-        //fill in the Site number
+        // fill in the Site number
         c[0] = "??";
         if (contestTime != null) {
-            c[0] = "Site " + contestTime.getSiteNumber();           
+            c[0] = "Site " + contestTime.getSiteNumber();
         }
 
-        
-        //fill in the "Started?" field
+        // fill in the "Started?" field
         c[1] = "NO CONTACT";
         if (contestTime != null) {
             if (contestTime.isContestStarted()) {
@@ -288,8 +288,8 @@ public class ContestTimesPane extends JPanePlugin {
                 c[1] = "No";
             }
         }
-        
-        //fill in the "Current State" field
+
+        // fill in the "Current State" field
         c[2] = "NO CONTACT";
         if (contestTime != null) {
             if (contestTime.isContestRunning()) {
@@ -301,20 +301,20 @@ public class ContestTimesPane extends JPanePlugin {
             c[3] = contestTime.getRemainingTimeStr();
             c[4] = contestTime.getElapsedTimeStr();
             c[5] = contestTime.getContestLengthStr();
-            
+
             c[6] = "No";
             if (isThisSite(contestTime.getSiteNumber())) {
                 c[6] = "N/A";
             }
             c[7] = "";
-            
+
             try {
                 ClientId serverId = new ClientId(contestTime.getSiteNumber(), Type.SERVER, 0);
                 if (getContest().isLocalLoggedIn(serverId)) {
                     c[6] = "YES";
                     c[7] = formatter.format(getContest().getLocalLoggedInDate(serverId));
-                } else if (! isServer(getContest().getClientId())){
-                    if (getContest().isRemoteLoggedIn(serverId)){
+                } else if (!isServer(getContest().getClientId())) {
+                    if (getContest().isRemoteLoggedIn(serverId)) {
                         c[6] = "YES";
                         // TODO some day send when server was logged in
                         c[7] = "";
@@ -322,9 +322,9 @@ public class ContestTimesPane extends JPanePlugin {
                 }
             } catch (Exception e) {
                 c[6] = "??";
-                log.log(Log.WARNING, "Exception updating Contest Time for site "+contestTime.getSiteNumber(), e);
+                log.log(Log.WARNING, "Exception updating Contest Time for site " + contestTime.getSiteNumber(), e);
             }
-            
+
         }
 
         return c;
@@ -367,15 +367,15 @@ public class ContestTimesPane extends JPanePlugin {
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
 
         getContest().addSiteListener(new SiteListenerImplementation());
-        
+
         getContest().addLoginListener(new LoginListenerImplementation());
 
         getContest().addAccountListener(new AccountListenerImplementation());
 
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
-        
+
         editContestTimeFrame.setContestAndController(inContest, inController);
-        
+
         editScheduledStartTimeFrame.setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -395,7 +395,7 @@ public class ContestTimesPane extends JPanePlugin {
     public class SiteListenerImplementation implements ISiteListener {
 
         public void siteProfileStatusChanged(SiteEvent event) {
-            // TODO this UI does not use a change in profile status 
+            // TODO this UI does not use a change in profile status
         }
 
         protected void updateSiteInfo(int siteNumber) {
@@ -441,7 +441,7 @@ public class ContestTimesPane extends JPanePlugin {
         }
 
     }
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -450,7 +450,7 @@ public class ContestTimesPane extends JPanePlugin {
     public class LoginListenerImplementation implements ILoginListener {
 
         public void loginAdded(LoginEvent event) {
-            if (isServer(event.getClientId())){
+            if (isServer(event.getClientId())) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         reloadListBox();
@@ -460,7 +460,7 @@ public class ContestTimesPane extends JPanePlugin {
         }
 
         public void loginRemoved(LoginEvent event) {
-            if (isServer(event.getClientId())){
+            if (isServer(event.getClientId())) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         reloadListBox();
@@ -470,9 +470,9 @@ public class ContestTimesPane extends JPanePlugin {
         }
 
         public void loginDenied(LoginEvent event) {
-          
+
         }
-        
+
         public void loginRefreshAll(LoginEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -519,10 +519,10 @@ public class ContestTimesPane extends JPanePlugin {
                 }
             });
         }
-        
-        /** This method exists to support differentiation between manual and automatic starts,
-         * in the event this is desired in the future.
-         * Currently it just delegates the handling to the contestStarted() method.
+
+        /**
+         * This method exists to support differentiation between manual and automatic starts, in the event this is desired in the future. Currently it just delegates the handling to the
+         * contestStarted() method.
          */
         @Override
         public void contestAutoStarted(ContestTimeEvent event) {
@@ -587,7 +587,7 @@ public class ContestTimesPane extends JPanePlugin {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[selectedSites[i]];
             ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
-//                showMessage("START site " + contestTime.getSiteNumber());
+                // showMessage("START site " + contestTime.getSiteNumber());
                 getController().startContest(contestTime.getSiteNumber());
             }
         }
@@ -626,7 +626,7 @@ public class ContestTimesPane extends JPanePlugin {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[selectedSites[i]];
             ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
-//                showMessage("STOP site " + contestTime.getSiteNumber());
+                // showMessage("STOP site " + contestTime.getSiteNumber());
                 getController().stopContest(contestTime.getSiteNumber());
             }
         }
@@ -742,7 +742,7 @@ public class ContestTimesPane extends JPanePlugin {
     }
 
     protected void startAllClocks() {
-//        showMessage("START ALL sites");
+        // showMessage("START ALL sites");
         getController().startAllContestTimes();
     }
 
@@ -767,14 +767,14 @@ public class ContestTimesPane extends JPanePlugin {
     }
 
     protected void stopAllContestTimes() {
-//        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Are you sure you want to stop all contest clocks?", "Confirm stop all clocks");
+        // int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Are you sure you want to stop all contest clocks?", "Confirm stop all clocks");
 
-//        if (result == JOptionPane.YES_OPTION) {
-//            showMessage("STOP ALL sites");
-        
-            getController().stopAllContestTimes();
-            
-//        }
+        // if (result == JOptionPane.YES_OPTION) {
+        // showMessage("STOP ALL sites");
+
+        getController().stopAllContestTimes();
+
+        // }
     }
 
     /**
@@ -816,7 +816,6 @@ public class ContestTimesPane extends JPanePlugin {
         editContestTimeFrame.setVisible(true);
 
     }
-    
 
     /**
      * This method creates and initializes the Set Scheduled Start Time button
@@ -846,7 +845,7 @@ public class ContestTimesPane extends JPanePlugin {
         editScheduledStartTimeFrame.setContestInfo(contestInfo);
         editScheduledStartTimeFrame.setVisible(true);
     }
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -869,69 +868,70 @@ public class ContestTimesPane extends JPanePlugin {
         public void contestInformationRefreshAll(ContestInformationEvent event) {
             updateScheduledStartTime(event.getContestInformation());
         }
-        
+
         public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
             // Not used
         }
 
     }
 
-    
     private JPanel getScheduledStartTimePanel() {
         if (scheduledStartTimePanel == null) {
-        	scheduledStartTimePanel = new JPanel();
-        	scheduledStartTimePanel.setBorder(new EmptyBorder(20, 0, 20, 0));
-        	scheduledStartTimePanel.add(getScheduledStartTimeLabel());
-        	scheduledStartTimePanel.add(getScheduledStartTimeTextField());
+            scheduledStartTimePanel = new JPanel();
+            scheduledStartTimePanel.setBorder(new EmptyBorder(20, 0, 20, 0));
+            scheduledStartTimePanel.add(getScheduledStartTimeLabel());
+            scheduledStartTimePanel.add(getScheduledStartTimeTextField());
         }
         return scheduledStartTimePanel;
     }
-    
+
     /**
-     * Updates the Scheduled Start Time field on the GUI to show the Start Time specified
-     * in the received {@link ContestInformation}.
+     * Updates the Scheduled Start Time field on the GUI to show the Start Time specified in the received {@link ContestInformation}.
      * 
-     * @param contestInformation a ContestInformation containing a new Scheduled Start Time
+     * @param contestInformation
+     *            a ContestInformation containing a new Scheduled Start Time
      */
     private void updateScheduledStartTime(ContestInformation contestInformation) {
         if (contestInformation != null) {
             GregorianCalendar curStartTime = contestInformation.getScheduledStartTime();
-            String displayTime ;
+            String displayTime;
             String timeLabel = "Scheduled Start Time: ";
 
             if (curStartTime != null) {
-                //set display time to scheduled start time
+                // set display time to scheduled start time
                 displayTime = formatTime(curStartTime.getTimeInMillis());
             } else {
-                //starttime was null; either no scheduled time has been set or else the contest has already started 
-                if (getContest().getContestTime().isContestStarted() ) {
-                    //set display time to time contest actually started
+                // starttime was null; either no scheduled time has been set or else the contest has already started
+                if (getContest().getContestTime().isContestStarted()) {
+                    // set display time to time contest actually started
                     displayTime = formatTime(getContest().getContestTime().getContestStartTime().getTimeInMillis());
                     timeLabel = "Started at: ";
                 } else {
-                    //there is no start time set and the contest has not started yet
+                    // there is no start time set and the contest has not started yet
                     displayTime = "undefined";
                 }
             }
             getScheduledStartTimeTextField().setText(displayTime);
             getScheduledStartTimeLabel().setText(timeLabel);
-            getController().getLog().info("ContestTimePane.updateScheduledStartTime(): updated Scheduled Start Time field to " + displayTime );
-            
+            getController().getLog().info("ContestTimePane.updateScheduledStartTime(): updated Scheduled Start Time field to " + displayTime);
+
         } else {
-            //received null contestInformation 
-            getController().getLog().warning("ContestTimePane.updateScheduledStartTime(): received null ContestInformation" ) ;
-            System.err.println ("ContestTimePane.updateScheduledStartTime(): null ContestInformation");
+            // received null contestInformation
+            getController().getLog().warning("ContestTimePane.updateScheduledStartTime(): received null ContestInformation");
+            System.err.println("ContestTimePane.updateScheduledStartTime(): null ContestInformation");
         }
     }
-    
+
     /**
      * Formats the given time (in milliseconds from the Epoch) into a human-readable form.
-     * @param timeMillis a number of milliseconds past the Unix Epoch 
+     * 
+     * @param timeMillis
+     *            a number of milliseconds past the Unix Epoch
      * @return a human-readable representation of the specified time
      */
     private String formatTime(long timeMillis) {
-        String retString ;
-        
+        String retString;
+
         GregorianCalendar cal = new GregorianCalendar();
         cal.setTimeInMillis(timeMillis);
 
@@ -944,27 +944,27 @@ public class ContestTimesPane extends JPanePlugin {
 
     private JLabel getScheduledStartTimeLabel() {
         if (lblScheduledStartTime == null) {
-        	lblScheduledStartTime = new JLabel("Scheduled Start Time:  ");
-        } 
+            lblScheduledStartTime = new JLabel("Scheduled Start Time:  ");
+        }
         return lblScheduledStartTime;
     }
-    
+
     private JTextField getScheduledStartTimeTextField() {
         if (scheduledStartTimeTextField == null) {
-        	scheduledStartTimeTextField = new JTextField();
-        	scheduledStartTimeTextField.setEditable(false);
-        	scheduledStartTimeTextField.setText("<undefined>");
-        	scheduledStartTimeTextField.setColumns(20);
-        } 
+            scheduledStartTimeTextField = new JTextField();
+            scheduledStartTimeTextField.setEditable(false);
+            scheduledStartTimeTextField.setText("<undefined>");
+            scheduledStartTimeTextField.setColumns(20);
+        }
         return scheduledStartTimeTextField;
     }
-    
+
     private JPanel getContestTimesPanel() {
         if (contestTimesPanel == null) {
-        	contestTimesPanel = new JPanel();
-        	contestTimesPanel.setLayout(new BorderLayout(0, 0));
-        	contestTimesPanel.add(getScheduledStartTimePanel(), BorderLayout.NORTH);
-        	contestTimesPanel.add(getContestTimeListBox());
+            contestTimesPanel = new JPanel();
+            contestTimesPanel.setLayout(new BorderLayout(0, 0));
+            contestTimesPanel.add(getScheduledStartTimePanel(), BorderLayout.NORTH);
+            contestTimesPanel.add(getContestTimeListBox());
         }
         return contestTimesPanel;
     }
