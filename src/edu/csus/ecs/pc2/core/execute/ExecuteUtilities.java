@@ -430,6 +430,32 @@ public class ExecuteUtilities extends Plugin {
         return (result);
     }
     
+    /**
+     * Removes the specified directory (folder) from the file system, including first recursively removing
+     * all files and all sub-directories (and their contents).
+     * 
+     * @param dirName the name of the directory to be removed
+     * 
+     * @return true if the directory was successfully cleared and removed; false if the directory
+     *      could not be cleared, could not be removed, or if the specified name is not a directory
+     */
+    public static boolean removeDirectory(String dirName) {
+        
+        File dir = new File(dirName);
+        if (!dir.isDirectory()) {
+            return false;
+        }
+        
+        boolean success = clearDirectory(dirName);
+        if (!success) {
+            return false;
+        } 
+        
+        success = dir.delete();
+        
+        return success;
+    }
+    
     
     @Override
     public void dispose() {
