@@ -10,8 +10,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -1205,60 +1203,61 @@ public class Executable extends Plugin implements IExecutable {
             String judgementFileName = feedbackDir + File.separator + ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
             File judgementFile = new File(judgementFileName);
             if (judgementFile.exists()) {
-                String judgement = "";
-                // try {
-                // // judgement = new String (Files.readAllBytes(Paths.get(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME)));
-                // judgement = new String (Files.readAllBytes(Paths.get(judgementFile)));
-                // } catch (IOException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
-                // String judgement = null;
-                // try {
-                // judgement = new Scanner(new File(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME)).useDelimiter("\\Z").next();
-                // } catch (FileNotFoundException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
-
-                try {
-
-                    BufferedReader bufferedReader = new BufferedReader(new FileReader(judgementFileName));
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        judgement += line;
-                    }
-
-                    bufferedReader.close();
-                } catch (Exception e) {
-                    log.severe("Exception reading judgement file: " + e.getMessage());
-                }
+                
+                //get the judgement out of the feedback file
+                String judgement = readFileAsString(judgementFileName);
 
                 executionData.setValidationResults(judgement);
-                System.out.println("DEBUG: CLICS Judgement feedback = '" + judgement + "'");
+                log.info ("Saving CLICS Validator judgement '" + judgement + "'");
                 
             } else {
                 log.info("No Clics Validator judgement file found in feedback directory");
             }
             
             // check for judgementdetails.txt file
-            // check for judgements.txt file
-            File detailsFile = new File(ClicsValidator.CLICS_JUDGEMENT_DETAILS_FILE_NAME);
+            String detailsFileName = feedbackDir + File.separator + ClicsValidator.CLICS_JUDGEMENT_DETAILS_FILE_NAME;
+            File detailsFile = new File(detailsFileName);
             if (detailsFile.exists()) {
-                String details=null;
-                try {
-                    details = new String (Files.readAllBytes(Paths.get(ClicsValidator.CLICS_JUDGEMENT_DETAILS_FILE_NAME)));
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                
+                //get details out of the feedback file
+                String details = readFileAsString(detailsFileName);
               
                 executionData.setAdditionalInformation(details);
+                log.info ("Saving CLICS Validator detail string '" + details + "'");
+
                 System.out.println ("DEBUG: CLICS Judgement feedback details = '" + details + "'");
             }
         } else {
             log.info("No CLICS validator feedback directory found"); 
         }
+    }
+    
+    /**
+     * Reads all of the lines in the specified file and returns them concatenated as a single string.
+     * Note that this should only be used for text files, and small ones at that.
+     * If any error occurs while reading the file then the empty string is returned.
+     * 
+     * @param fileName the name of the file to be read
+     * 
+     * @return a String containing the contents of the specified file
+     */
+    private String readFileAsString(String fileName) {
+        String retStr = "";
+        try {
+
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                retStr += line;
+            }
+
+            bufferedReader.close();
+        } catch (Exception e) {
+            log.severe("Exception reading file: " + e.getMessage());
+        }
+        
+        return retStr;
+
     }
 
     /**
