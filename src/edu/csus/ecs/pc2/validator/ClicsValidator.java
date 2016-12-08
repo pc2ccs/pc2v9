@@ -100,6 +100,9 @@ public class ClicsValidator {
     static public final String CLICS_WRONG_ANSWER_MSG = "Wrong Answer";
     static public final String CLICS_CORRECT_ANSWER_MSG = "Correct Answer";
     
+    static public final String CLICS_JUDGEMENT_FEEDBACK_FILE_NAME = "judgement.txt";
+    static public final String CLICS_JUDGEMENT_DETAILS_FILE_NAME = "judgementdetails.txt";
+    
     static public final int EOF = -1;
     
     static Log log = null;
@@ -696,13 +699,13 @@ public class ClicsValidator {
     }
     
     /**
-     * Writes the specified judgment text into the file "judgment.txt" in the feedback directory.
+     * Writes the specified judgement text into the feedback judgement file in the feedback directory.
      * @throws UnsupportedEncodingException 
      * @throws FileNotFoundException 
      */
-    private void outputJudgementFile(String judgment) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter(feedbackDirName + File.separator + "judgment.txt", "UTF-8");
-        writer.println(judgment);
+    private void outputJudgementFile(String judgement) throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter writer = new PrintWriter(feedbackDirName + File.separator + CLICS_JUDGEMENT_FEEDBACK_FILE_NAME, "UTF-8");
+        writer.println(judgement);
         writer.close();
     }
     
@@ -712,7 +715,7 @@ public class ClicsValidator {
      * @throws FileNotFoundException 
      */
     private void outputDetailsFile(String details) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter(feedbackDirName + File.separator + "judgmentdetails.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter(feedbackDirName + File.separator + CLICS_JUDGEMENT_DETAILS_FILE_NAME, "UTF-8");
         writer.println(details);
         writer.close();
     }
