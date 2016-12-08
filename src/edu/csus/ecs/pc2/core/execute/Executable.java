@@ -2,10 +2,12 @@ package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -1034,8 +1036,8 @@ public class Executable extends Plugin implements IExecutable {
         else if (problem.isUsingCLICSValidator()) {
             
             try {
-                
-                storeClicsValidatorResults(exitcode, feedbackDirName, log);
+                String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;
+                storeClicsValidatorResults(exitcode, feedbackDirPath, log);
                 
             } catch (Exception e) {
                 
@@ -1184,7 +1186,7 @@ public class Executable extends Plugin implements IExecutable {
      * @param logger the log to be used for logging
      */
     private void storeClicsValidatorResults(int exitCode, String feedbackDir, Log logger) {
-        
+
         //save exit code in executionData
         executionData.setValidationReturnCode(exitCode);
         
@@ -1196,27 +1198,47 @@ public class Executable extends Plugin implements IExecutable {
             executionData.setValidationSuccess(false);
         }
         
+        //check for feedback from validator
         if (new File(feedbackDir).exists()) {
             
             // check for judgements.txt file
-            File judgementFile = new File(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME);
+            String judgementFileName = feedbackDir + File.separator + ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
+            File judgementFile = new File(judgementFileName);
             if (judgementFile.exists()) {
-                String judgement=null;
+                String judgement = "";
+                // try {
+                // // judgement = new String (Files.readAllBytes(Paths.get(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME)));
+                // judgement = new String (Files.readAllBytes(Paths.get(judgementFile)));
+                // } catch (IOException e) {
+                // // TODO Auto-generated catch block
+                // e.printStackTrace();
+                // }
+                // String judgement = null;
+                // try {
+                // judgement = new Scanner(new File(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME)).useDelimiter("\\Z").next();
+                // } catch (FileNotFoundException e) {
+                // // TODO Auto-generated catch block
+                // e.printStackTrace();
+                // }
+
                 try {
-                    judgement = new String (Files.readAllBytes(Paths.get(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME)));
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+
+                    BufferedReader bufferedReader = new BufferedReader(new FileReader(judgementFileName));
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        judgement += line;
+                    }
+
+                    bufferedReader.close();
+                } catch (Exception e) {
+                    log.severe("Exception reading judgement file: " + e.getMessage());
                 }
-//                String judgement = null;
-//                try {
-//                    judgement = new Scanner(new File(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME)).useDelimiter("\\Z").next();
-//                } catch (FileNotFoundException e) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }               
+
                 executionData.setValidationResults(judgement);
-                System.out.println ("DEBUG: CLICS Judgement feedback = '" + judgement + "'");
+                System.out.println("DEBUG: CLICS Judgement feedback = '" + judgement + "'");
+                
+            } else {
+                log.info("No Clics Validator judgement file found in feedback directory");
             }
             
             // check for judgementdetails.txt file
@@ -1234,6 +1256,8 @@ public class Executable extends Plugin implements IExecutable {
                 executionData.setAdditionalInformation(details);
                 System.out.println ("DEBUG: CLICS Judgement feedback details = '" + details + "'");
             }
+        } else {
+            log.info("No CLICS validator feedback directory found"); 
         }
     }
 
