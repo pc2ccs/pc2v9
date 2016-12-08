@@ -98,7 +98,7 @@ public class ClicsValidator {
     static public final String CLICS_EXCESSIVE_OUTPUT_MSG = "Excessive output";
     static public final String CLICS_INCORRECT_OUTPUT_FORMAT_MSG = "Incorrect output format";
     static public final String CLICS_WRONG_ANSWER_MSG = "Wrong Answer";
-    static public final String CLICS_CORRECT_ANSWER_MSG = "Correct Answer";
+    static public final String CLICS_CORRECT_ANSWER_MSG = "accepted";
     
     static public final String CLICS_JUDGEMENT_FEEDBACK_FILE_NAME = "judgement.txt";
     static public final String CLICS_JUDGEMENT_DETAILS_FILE_NAME = "judgementdetails.txt";
@@ -704,7 +704,9 @@ public class ClicsValidator {
      * @throws FileNotFoundException 
      */
     private void outputJudgementFile(String judgement) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter(feedbackDirName + File.separator + CLICS_JUDGEMENT_FEEDBACK_FILE_NAME, "UTF-8");
+        String feedbackFileName = feedbackDirName + File.separator + CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
+        System.out.println ("Writing judgement '" + judgement + "' to feedback file '" + feedbackFileName + "'");
+        PrintWriter writer = new PrintWriter(feedbackFileName, "UTF-8");
         writer.println(judgement);
         writer.close();
     }
@@ -790,7 +792,6 @@ public class ClicsValidator {
      */
     public static void main(String[] args) {
         
-        System.out.println ("DEBUG: in ClicsValidator main()");
         if (args.length < 3) {
             usage();
             System.exit(CLICS_VALIDATOR_FAILURE_EXIT_CODE);
