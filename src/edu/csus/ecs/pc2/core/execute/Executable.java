@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -126,8 +128,6 @@ public class Executable extends Plugin implements IExecutable {
      */
     public static final String VALIDATOR_STDERR_FILENAME = "vstderr.pc2";
     
-    public static final String CLICS_VALIDATOR_FEEDBACK_DIR_NAME = "feedbackdir";
-
     /**
      * Interface - the file created with the process return.exit code.
      */
@@ -462,7 +462,7 @@ public class Executable extends Plugin implements IExecutable {
                 } // else they will get a tab hopefully showing something wrong
             }
             
-            //we've finished the compile/execute steps (for better or worse); do the required final steps to display the results
+            //we've finished the compile/execute/validate steps (for better or worse); do the required final steps to display the results
 
             File file;
             String outputFile;
@@ -813,32 +813,42 @@ public class Executable extends Plugin implements IExecutable {
 
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
 
-        // orig String cmdLine = substituteAllStrings(run, commandPattern);
+//      orig  String cmdLine = substituteAllStrings(run, commandPattern);
 
         String cmdLine = replaceString(commandPattern, "{:infile}", judgeDataFilename);
         cmdLine = replaceString(cmdLine, "{:ansfile}", judgeAnswerFilename);
-        cmdLine = replaceString(cmdLine, "{:feedbackdir}", CLICS_VALIDATOR_FEEDBACK_DIR_NAME);
         cmdLine = replaceString(cmdLine, "{:outfile}", "estdout.pc2");
+        
+        //the following is specific to the CLICS validator but needs to be done here for scope accessibility in the code below
+        String feedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber ;
+        cmdLine = replaceString(cmdLine, "{:feedbackdir}", feedbackDirName); 
         
         if (problem.isUsingCLICSValidator()) {
 
-            String feedbackDir = getExecuteDirectoryName() + File.separator + CLICS_VALIDATOR_FEEDBACK_DIR_NAME;
+            String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;
             
-            if (!insureDir(feedbackDir)) {
+            //get rid of any pre-existing feedback dir
+            try {
+                ExecuteUtilities.removeDirectory(feedbackDirPath);
+            } catch (Exception e) {
+                log.warning("Exception trying to remove feedback directory '" + feedbackDirPath + "': " + e.getMessage());
+            }
+            
+            if (!insureDir(feedbackDirPath)) {
                 throw new SecurityException("Unable to create ClicsValidator feedback directory; check logs");
             } else {
                 //clean out feedback dir
-                ExecuteUtilities.clearDirectory(feedbackDir);
+                ExecuteUtilities.clearDirectory(feedbackDirPath);
                 
-                //copy empty results file into feedback dir (so ClicsValidator knows the resultsfile name)
-                resultsFileName = ExecuteUtilities.createResultsFileName(run);
-                File resultsFile = new File(feedbackDir + File.separator + resultsFileName);
-                try {
-                    resultsFile.createNewFile();
-                } catch (IOException e) {
-                    log.severe("unable to create results results file '" + resultsFileName + "' in feedback directory '" + feedbackDir + "'");
-                    throw new SecurityException("Unable to create results file in ClicsValidator feedback directory; check logs");
-                }
+//                //copy empty results file into feedback dir (so ClicsValidator knows the resultsfile name)
+//                resultsFileName = ExecuteUtilities.createResultsFileName(run);
+//                File resultsFile = new File(feedbackDirPath + File.separator + resultsFileName);
+//                try {
+//                    resultsFile.createNewFile();
+//                } catch (IOException e) {
+//                    log.severe("unable to create results results file '" + resultsFileName + "' in feedback directory '" + feedbackDirPath + "'");
+//                    throw new SecurityException("Unable to create results file in ClicsValidator feedback directory; check logs");
+//                }
 
             }
         }
@@ -882,6 +892,7 @@ public class Executable extends Plugin implements IExecutable {
             throw new SecurityException(e);
         }
 
+        int exitcode = -1;
         try {
 
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME), false));
@@ -891,8 +902,8 @@ public class Executable extends Plugin implements IExecutable {
             if (problem.isShowValidationToJudges()) {
                 msg = "Validating...";
             }
-
-            long startSecs = System.currentTimeMillis();
+            
+            long startTime = System.currentTimeMillis();
             Process process = runProgram(cmdLine, msg, false);
 
             if (process == null) {
@@ -956,7 +967,8 @@ public class Executable extends Plugin implements IExecutable {
                 log.config("validatorCall() executionTimer == null");
             }
 
-            log.info("validator process returned exit code " + process.exitValue());
+            exitcode = process.exitValue();
+            log.info("validator process returned exit code " + exitcode);
 
             if (process != null) {
                 process.destroy();
@@ -965,7 +977,7 @@ public class Executable extends Plugin implements IExecutable {
             stdoutlog.close();
             stderrlog.close();
 
-            executionData.setvalidateTimeMS(System.currentTimeMillis() - startSecs);
+            executionData.setvalidateTimeMS(System.currentTimeMillis() - startTime);
             executionData.setValidationStdout(new SerializedFile(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME)));
             executionData.setValidationStderr(new SerializedFile(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME)));
 
@@ -976,37 +988,71 @@ public class Executable extends Plugin implements IExecutable {
             }
             log.log(Log.CONFIG, "Exception in validator ", ex);
         }
-        
-        String validatorOutputFilename = prefixExecuteDirname("valout." + dataSetNumber + ".txt");
+                
+        //the validator stdout for the current dataset was written to file "vstdout.pc2" and then copied into a
+        //SerializedFile and stored in the executionData (by the last statements in the try/catch, above); 
+        //copy it from the executionData to a file named for this specific data set so it doesn't get overwritten
+        //during the execution for the following data set
+        String validatorOutputFilename = prefixExecuteDirname("valout." + dataSetNumber + ".txt");    //dataset-specific validator stdout file
         createFile(executionData.getValidationStdout(), validatorOutputFilename);
+        
+        //save new validator stdout file in a list of stdout files for all data sets
         validatorOutputFilenames.add(validatorOutputFilename);
+        
+        //same as above, for validator stderr
         String validatorStderrFilename = prefixExecuteDirname("valerr." + dataSetNumber + ".txt");
         createFile(executionData.getValidationStderr(), validatorStderrFilename);
         validatorStderrFilesnames.add(validatorStderrFilename);
 
-        boolean fileThere = new File(prefixExecuteDirname(resultsFileName)).exists();
 
-        try {
-            if (fileThere) {
+        if (problem.isUsingPC2Validator()) {
+            
+            boolean fileThere = new File(prefixExecuteDirname(resultsFileName)).exists();
 
-                storeValidatorResults(resultsFileName, log);
-
-            } else {
-                // SOMEDAY LOG
-                log.config("validationCall - Did not produce output results file " + resultsFileName);
-                // JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
+            try {
+                if (fileThere) {
+                
+                    storePC2ValidatorResults(resultsFileName, log);
+                
+                } else {
+                    log.config("validationCall - Did not produce output results file " + resultsFileName);
+//                  JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
+                }
+            } catch (Exception ex) {
+                executionData.setExecutionException(ex);
+                log.log(Log.INFO, "Exception while reading results file "+resultsFileName, ex);
+                throw new SecurityException(ex);
+            } finally {
+            
+                if (executionData.isRunTimeLimitExceeded()){
+                    executionData.setValidationResults("No - Time Limit Exceeded");
+                    executionData.setValidationSuccess(true);
+                }
             }
-        } catch (Exception ex) {
-            executionData.setExecutionException(ex);
-            log.log(Log.INFO, "Exception while reading results file " + resultsFileName, ex);
-            throw new SecurityException(ex);
-        } finally {
-
-            if (executionData.isRunTimeLimitExceeded()) {
-                executionData.setValidationResults("No - Time Limit Exceeded");
-                executionData.setValidationSuccess(true);
+        } 
+        
+        else if (problem.isUsingCLICSValidator()) {
+            
+            try {
+                
+                storeClicsValidatorResults(exitcode, feedbackDirName, log);
+                
+            } catch (Exception e) {
+                
+                executionData.setExecutionException(e);
+                log.log(Log.INFO, "Exception while reading results file "+resultsFileName, e);
+                throw new SecurityException(e);
+               
+            } finally {
+                
+                if (executionData.isRunTimeLimitExceeded()){
+                    executionData.setValidationResults("No - Time Limit Exceeded");
+                    executionData.setValidationSuccess(true);
+                }
+                
             }
         }
+
 
         return executionData.isValidationSuccess();
     }
@@ -1077,12 +1123,12 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Set results of validation into executionData.
+     * Set results of validation using the PC2Validator into executionData.
      * 
      * @param resultsFileName
      * @param logger
      */
-    protected void storeValidatorResults(String resultsFileName, Log logger) {
+    protected void storePC2ValidatorResults(String resultsFileName, Log logger) {
 
         IResultsParser parser = new XMLResultsParser();
         parser.setLog(log);
@@ -1129,6 +1175,66 @@ public class Executable extends Plugin implements IExecutable {
             }
         }
 
+    }
+
+    
+    /**
+     * Set results of validation using the ClicsValidator into executionData.
+     * 
+     * @param logger the log to be used for logging
+     */
+    private void storeClicsValidatorResults(int exitCode, String feedbackDir, Log logger) {
+        
+        //save exit code in executionData
+        executionData.setValidationReturnCode(exitCode);
+        
+        //save validation success (note that this refers to whether the validator completed successfully, 
+        // not whether the run was judged "correct".
+        if (exitCode == ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE || exitCode==ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE) {
+            executionData.setValidationSuccess(true);
+        } else {
+            executionData.setValidationSuccess(false);
+        }
+        
+        if (new File(feedbackDir).exists()) {
+            
+            // check for judgements.txt file
+            File judgementFile = new File(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME);
+            if (judgementFile.exists()) {
+                String judgement=null;
+                try {
+                    judgement = new String (Files.readAllBytes(Paths.get(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME)));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+//                String judgement = null;
+//                try {
+//                    judgement = new Scanner(new File(ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME)).useDelimiter("\\Z").next();
+//                } catch (FileNotFoundException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }               
+                executionData.setValidationResults(judgement);
+                System.out.println ("DEBUG: CLICS Judgement feedback = '" + judgement + "'");
+            }
+            
+            // check for judgementdetails.txt file
+            // check for judgements.txt file
+            File detailsFile = new File(ClicsValidator.CLICS_JUDGEMENT_DETAILS_FILE_NAME);
+            if (detailsFile.exists()) {
+                String details=null;
+                try {
+                    details = new String (Files.readAllBytes(Paths.get(ClicsValidator.CLICS_JUDGEMENT_DETAILS_FILE_NAME)));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+              
+                executionData.setAdditionalInformation(details);
+                System.out.println ("DEBUG: CLICS Judgement feedback details = '" + details + "'");
+            }
+        }
     }
 
     /**
