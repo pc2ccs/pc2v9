@@ -436,10 +436,15 @@ public class ExecuteUtilities extends Plugin {
      * 
      * @param dirName the name of the directory to be removed
      * 
-     * @return true if the directory was successfully cleared and removed; false if the directory
+     * @return true if the directory was successfully cleared and removed; false if the 
+     *      specified directory is null or the empty string, does not exist, 
      *      could not be cleared, could not be removed, or if the specified name is not a directory
      */
     public static boolean removeDirectory(String dirName) {
+        
+        if (dirName==null || dirName.equals("")) {
+            return false;
+        }
         
         File dir = new File(dirName);
         if (!dir.isDirectory()) {
