@@ -942,6 +942,7 @@ public class Executable extends Plugin implements IExecutable {
                     out.close();
                 }
             }
+            
 
 
             stdoutCollector.join();
@@ -975,6 +976,7 @@ public class Executable extends Plugin implements IExecutable {
             }
             log.log(Log.CONFIG, "Exception in validator ", ex);
         }
+        
         String validatorOutputFilename = prefixExecuteDirname("valout." + dataSetNumber + ".txt");
         createFile(executionData.getValidationStdout(), validatorOutputFilename);
         validatorOutputFilenames.add(validatorOutputFilename);
@@ -1023,7 +1025,7 @@ public class Executable extends Plugin implements IExecutable {
 //            pc2JarUseDirectory = true;
         }
         
-      String options = getClicsOptionString();
+      String options = getClicsValidatorOptionString();
       
       String args = "{:infile} {:ansfile} {:feedbackdir}";
 
@@ -1041,7 +1043,7 @@ public class Executable extends Plugin implements IExecutable {
      * @return a String containing the Clics Validator options, or the empty string if the
      *          problem is null or the ClicsValidatorSettings is null
      */
-    private String getClicsOptionString() {
+    private String getClicsValidatorOptionString() {
 
         String optStr = "";
 
