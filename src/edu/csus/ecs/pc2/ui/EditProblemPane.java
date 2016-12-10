@@ -6,16 +6,20 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,6 +33,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -2461,8 +2466,13 @@ public class EditProblemPane extends JPanePlugin {
 
     private JLabel getLblWhatsThis() {
         if (lblWhatsThis == null) {
-            lblWhatsThis = new JLabel("<What's This?>");
-            lblWhatsThis.setForeground(Color.blue);
+//            lblWhatsThis = new JLabel("<What's This?>");
+//            lblWhatsThis.setForeground(Color.blue);
+
+            ImageIcon iconImage = (ImageIcon) UIManager.getIcon("OptionPane.informationIcon");
+            Image image = iconImage.getImage();
+            lblWhatsThis = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            lblWhatsThis.setToolTipText("Click for additional information");
             lblWhatsThis.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
@@ -3998,6 +4008,17 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         return settings;
+    }
+    
+    private Image getScaledImage(Image srcImg, int w, int h){
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
