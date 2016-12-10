@@ -2,8 +2,15 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.GregorianCalendar;
@@ -47,11 +54,6 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Component;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 /**
  * Select a Judgement Pane.
@@ -175,6 +177,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel additionalInfoLabel;
 
     private JLabel additionalInfoTextLabel;
+    private JLabel addtionalInfoMoreButtonLabel;
     
     /**
      * This method initializes
@@ -1253,10 +1256,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 additionalInfoTextLabel.setVisible(true);
                 additionalInfoTextLabel.setText(executable.getExecutionData().getAdditionalInformation());
                 additionalInfoTextLabel.setToolTipText(executable.getExecutionData().getAdditionalInformation());
+                getAdditionalInfoMoreButtonLabel().setVisible(true);
             }
         } else {
             additionalInfoLabel.setVisible(false);
             additionalInfoTextLabel.setVisible(false);
+            getAdditionalInfoMoreButtonLabel().setVisible(false);
         }
     }
 
@@ -1524,8 +1529,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             
             additionalInfoTextLabel = new JLabel("<none>");
             additionalInfoTextLabel.setFont(new Font("Dialog", Font.PLAIN, 12));
-            additionalInfoTextLabel.setBounds(269, 71, 429, 14);
+            additionalInfoTextLabel.setBounds(269, 71, 211, 14);
             assignJudgementPanel.add(additionalInfoTextLabel);
+            
+            assignJudgementPanel.add(getAdditionalInfoMoreButtonLabel());
         }
         return assignJudgementPanel;
     }
@@ -1594,5 +1601,23 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         public void judgementRefreshAll(JudgementEvent judgementEvent) {
             reloadComboBoxes();
         }
+    }
+    private JLabel getAdditionalInfoMoreButtonLabel() {
+        if (addtionalInfoMoreButtonLabel == null) {
+        	addtionalInfoMoreButtonLabel = new JLabel("More...");
+        	addtionalInfoMoreButtonLabel.addMouseListener(new MouseAdapter() {
+        	    @Override
+        	    public void mouseClicked(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, "<html><body><p style='width: 400px;'>" 
+                                    +  executable.getExecutionData().getAdditionalInformation()
+                                    + "</p></body></html>", 
+                                    "Validator Additional Information", JOptionPane.PLAIN_MESSAGE, null);
+        	    }
+        	});
+        	addtionalInfoMoreButtonLabel.setForeground(Color.BLUE);
+        	addtionalInfoMoreButtonLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+        	addtionalInfoMoreButtonLabel.setBounds(479, 71, 46, 14);
+        }
+        return addtionalInfoMoreButtonLabel;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
