@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
+import java.awt.Dimension;
 
 /**
  * Judge can chose judgement and execute run.
@@ -43,6 +44,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     private Log log = null;
 
+    
     /**
      * This method initializes
      * 
@@ -59,8 +61,8 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     private void initialize() {
         this.setContentPane(getSelectJudgementPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setPreferredSize(new java.awt.Dimension(800,400));
-        this.setSize(new java.awt.Dimension(800,400));
+        this.setPreferredSize(new Dimension(800, 450));
+        this.setSize(new Dimension(800, 450));
         this.setTitle("Select Run Judgement");
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
