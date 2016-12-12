@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -20,7 +21,7 @@ public class Account implements IElementObject {
     private static final long serialVersionUID = -1098364914694875689L;
 
     private ClientId clientId;
-
+    
     /**
      * Unique id, version and site number.
      * 
@@ -52,6 +53,13 @@ public class Account implements IElementObject {
     private ElementId groupId;
     
     private PermissionList permissionList = new PermissionList();
+    
+    
+//    public static final String DEFAULT_INSTITUTIONNAME = "undefined";
+//
+//    public static final String DEFAULT_INSTITUTIONSHORTNAME = "undefined";
+//
+//    public static final String DEFAULT_COUNTRY = "XXX";
 
     /**
      * Institution short name.
@@ -65,10 +73,10 @@ public class Account implements IElementObject {
 
     private String externalName = "";
 
-    private String countryCode = "";
+    private String countryCode = Constants.DEFAULT_COUNTRY_CODE;
     
-    private String institutionName = "";
-    private String institutionShortName= "";
+    private String institutionName = Constants.DEFAULT_INSTITUTIONNAME;
+    private String institutionShortName= Constants.DEFAULT_INSTITUTIONSHORTNAME;
     private String institutionCode  = "";
     
     private String teamName = "";

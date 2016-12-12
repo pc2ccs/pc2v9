@@ -130,4 +130,10 @@ public final class Constants {
     
     public static final String COUNTRY_CODE_COLUMN_NAME = "countrycode";
     
+    public static final String DEFAULT_INSTITUTIONNAME = "undefined";
+
+    public static final String DEFAULT_INSTITUTIONSHORTNAME = "undefined";
+
+    public static final String DEFAULT_COUNTRY_CODE = "XXX";
+    
 }

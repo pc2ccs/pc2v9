@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -164,6 +165,32 @@ public class AccountTest extends AbstractTestCase {
        assertTrue(account2.isSameAs(account3));
 
    }
+   
+   /**
+    * Test new default values for institution fields.
+    * 
+    * <P>
+    * Bug 1067.
+    * @throws Exception
+    */
+    public void testDefaultInstitutionNames() throws Exception {
+
+        SampleContest sample = new SampleContest();
+
+        IInternalContest contest = sample.createStandardContest();
+        contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 10, true);
+        Account[] teams = SampleContest.getTeamAccounts(contest);
+
+        for (Account account : teams) {
+
+            assertEquals(Constants.DEFAULT_INSTITUTIONNAME, account.getInstitutionName());
+            assertEquals(Constants.DEFAULT_INSTITUTIONSHORTNAME, account.getInstitutionShortName());
+            assertEquals(Constants.DEFAULT_COUNTRY_CODE, account.getCountryCode());
+        }
+
+    }
+   
+   
 //  
 //  if (!StringUtilities.stringSame(institutionCode, account.getInstitutionCode())) {
 //      return false;
