@@ -79,9 +79,9 @@ public class WebServer implements UIPlugin {
 
     public static final String SCOREBOARD_SERVICE_ENABLED_KEY = "enableScoreboard";
 
-    public static final String PROBLEM_SERVICE_ENABLED_KEY = "enableProblem";
+    public static final String PROBLEMS_SERVICE_ENABLED_KEY = "enableProblems";
 
-    public static final String LANGUAGE_SERVICE_ENABLED_KEY = "enableLanguage";
+    public static final String LANGUAGES_SERVICE_ENABLED_KEY = "enableLanguages";
 
     public static final String STARTTIME_SERVICE_ENABLED_KEY = "enableStartTime";
 
@@ -321,12 +321,12 @@ public class WebServer implements UIPlugin {
             showMessage("Starting /scoreboard web service");
         }
 
-        if (getBooleanProperty(PROBLEM_SERVICE_ENABLED_KEY, false)) {
+        if (getBooleanProperty(PROBLEMS_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new ProblemService(getContest(), getController()));
-            showMessage("Starting /problem web service");
+            showMessage("Starting /problems web service");
         }
 
-        if (getBooleanProperty(LANGUAGE_SERVICE_ENABLED_KEY, false)) {
+        if (getBooleanProperty(LANGUAGES_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new LanguageService(getContest(), getController()));
             showMessage("Starting /languages web service");
             }
@@ -390,9 +390,9 @@ public class WebServer implements UIPlugin {
 
         prop.put(SCOREBOARD_SERVICE_ENABLED_KEY, "yes");
 
-        prop.put(PROBLEM_SERVICE_ENABLED_KEY, "yes");
+        prop.put(PROBLEMS_SERVICE_ENABLED_KEY, "yes");
 
-        prop.put(LANGUAGE_SERVICE_ENABLED_KEY, "yes");
+        prop.put(LANGUAGES_SERVICE_ENABLED_KEY, "yes");
 
         prop.put(STARTTIME_SERVICE_ENABLED_KEY, "yes");
 

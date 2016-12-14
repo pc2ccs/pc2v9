@@ -151,9 +151,9 @@ public class WebServerPane extends JPanePlugin {
 
         properties.put(WebServer.PORT_NUMBER_KEY, portTextField.getText());
         properties.put(WebServer.SCOREBOARD_SERVICE_ENABLED_KEY, Boolean.toString(chckbxScoreboard.isSelected()));
-        properties.put(WebServer.PROBLEM_SERVICE_ENABLED_KEY, Boolean.toString(chckbxProblems.isSelected()));
+        properties.put(WebServer.PROBLEMS_SERVICE_ENABLED_KEY, Boolean.toString(chckbxProblems.isSelected()));
 
-        properties.put(WebServer.LANGUAGE_SERVICE_ENABLED_KEY, Boolean.toString(chckbxLanguages.isSelected()));
+        properties.put(WebServer.LANGUAGES_SERVICE_ENABLED_KEY, Boolean.toString(chckbxLanguages.isSelected()));
         properties.put(WebServer.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(chckbxStarttime.isSelected()));
 
         properties.put(WebServer.TEAMS_SERVICE_ENABLED_KEY, Boolean.toString(chckbxTeams.isSelected()));
