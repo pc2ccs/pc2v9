@@ -2488,6 +2488,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             } else {
                 
                 info("** Not loading (--load) CDP from " + entryLocation+" contest config ALREADY exists. **");
+                System.err.println ("Warning: contest configuration already exists; ignoring --load option"); 
                 
             }
         }
