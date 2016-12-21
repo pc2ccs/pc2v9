@@ -2936,7 +2936,9 @@ public class PacketHandler {
         ContestInformation contestInformation = (ContestInformation) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_INFORMATION);
         if (contestInformation != null) {
             contest.updateContestInformation(contestInformation);
-            controller.updateAutoStartInformation(contest,controller);
+            if (isServer()) {
+                controller.updateAutoStartInformation(contest,controller);
+            }
             sendToTeams = true;
         }
 
