@@ -82,7 +82,6 @@
 
     <!-- version is used in the jar manifest & in package.xml -->
     <property name="version" value="9.4.0"/>
-
     <path id="project.classpath">
         <pathelement location="${build.prod.dir}"/>
         <pathelement location="${build.test.dir}"/>
