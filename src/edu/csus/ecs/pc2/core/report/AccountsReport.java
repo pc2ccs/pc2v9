@@ -166,8 +166,8 @@ public class AccountsReport implements IReport {
         
         printWriter.println(pad7 + "Country code '" + account.getCountryCode() + "'");
         printWriter.print(pad7 + "Institution '" + account.getInstitutionName() + "'");
-        printWriter.print(" code '" + account.getInstitutionCode() + "'");
-        printWriter.println(" short '" + account.getInstitutionShortName() + "'");
+        printWriter.print(" Institution code '" + account.getInstitutionCode() + "'");
+        printWriter.println(" Institution short name '" + account.getInstitutionShortName() + "'");
 
         printWriter.print(pad7 + "Member Names: ");
         
