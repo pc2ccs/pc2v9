@@ -135,5 +135,7 @@ public final class Constants {
     public static final String DEFAULT_INSTITUTIONSHORTNAME = "undefined";
 
     public static final String DEFAULT_COUNTRY_CODE = "XXX";
+
+    public static final String DEFAULT_INSTITUTIONCODE = "undefined";
     
 }

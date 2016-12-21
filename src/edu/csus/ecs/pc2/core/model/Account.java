@@ -77,7 +77,7 @@ public class Account implements IElementObject {
     
     private String institutionName = Constants.DEFAULT_INSTITUTIONNAME;
     private String institutionShortName= Constants.DEFAULT_INSTITUTIONSHORTNAME;
-    private String institutionCode  = "";
+    private String institutionCode  = Constants.DEFAULT_INSTITUTIONCODE;
     
     private String teamName = "";
     
