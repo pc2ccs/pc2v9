@@ -1051,8 +1051,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Vector<Problem> problemList = new Vector<Problem>();
 
         Map<String, Object> yamlContent = loadYaml(null, yamlLines);
+        // use problemset yaml key
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, PROBLEMS_KEY);
-
+        
+        if (list == null){
+            // use problems yaml key
+            list = fetchList(yamlContent, PROBLEMSET_PROBLEMS_KEY);
+        }
+        
         if (list != null) {
             for (Object object : list) {
 

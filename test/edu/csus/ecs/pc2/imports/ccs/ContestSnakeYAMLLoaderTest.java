@@ -2093,5 +2093,62 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         long expected = 1477713600000L;
         assertEquals(expected, date.getTime());
     }
+    
+    /**
+     * Using problem key for problems unit test.
+     * 
+     * Bug 1177 - When loading yaml allow problems or problemset (key).
+     * 
+     * @throws Exception
+     */
+    public void testProblemsYamlKey() throws Exception {
+
+        String[] yamlLines = { //
+                IContestLoader.PROBLEMSET_PROBLEMS_KEY + ":", // test using problems: key
+                "  - letter:     A", //
+                "    short-name: apl", //
+                "    color:      yellow", //
+                "    rgb:        #ffff00", //
+                "", //
+                "  - letter:     B", //
+                "    short-name: barcodes", //
+                "    color:      red", //
+                "    rgb:        #ff0000", //
+                "    timeout:    1", //
+        };
+
+        Problem[] problems = loader.getProblems(yamlLines, 12, false, "{:validator}");
+
+        assertEquals("Expecting same number of problems", 2, problems.length);
+
+//        for (Problem problem : problems) {
+//            System.out.println("problems = " + problem.getShortName());
+//        }
+
+        assertEquals("Problem short name apl", "apl", problems[0].getShortName());
+        assertEquals("Problem short name barcode", "barcodes", problems[1].getShortName());
+    }
+    
+    public void testProblemsYamlKeyFromFile() throws Exception {
+
+        String dirname = getDataDirectory(this.getName());
+//        ensureDirectory(dirname);
+//        startExplorer(dirname);;
+        
+        String yamlFilename= dirname + File.separator + "contest.ps.yaml";
+//        editFile(yamlFilename);
+
+        String[] contents = Utilities.loadFile(yamlFilename);
+        assertFileExists(yamlFilename);
+        IInternalContest contest = loader.fromYaml(null, contents, dirname, false);
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+
+        assertEquals("Expecting same number of problems", 2, problems.length);
+
+        assertEquals("Problem short name apl", "apl", problems[0].getShortName());
+        assertEquals("Problem short name barcode", "barcodes", problems[1].getShortName());
+    }
 }
 
