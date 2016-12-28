@@ -1,0 +1,17 @@
+#
+# Test for problems
+#
+#
+
+problems:
+  - letter:     A
+    short-name: apl
+    color:      yellow
+    rgb:        #ffff00
+
+  - letter:     B
+    short-name: barcodes
+    color:      red
+    rgb:        #ff0000
+    timeout:    1
+
