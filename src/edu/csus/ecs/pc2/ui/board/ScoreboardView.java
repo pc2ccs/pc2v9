@@ -360,7 +360,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             try {
                 ResultsFile resultsFile = new ResultsFile();
                 String[] createTSVFileLines = resultsFile.createTSVFileLines(contest);
-                FileWriter outputFile = new FileWriter(outputResultsDirFile + "results.tsv");
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + "results.tsv");
                 for (int i = 0; i < createTSVFileLines.length; i++) {
                     outputFile.write(createTSVFileLines[i]);
                 }
@@ -371,7 +371,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             try {
                 ScoreboardFile scoreboardFile = new ScoreboardFile();
                 String[] createTSVFileLines = scoreboardFile.createTSVFileLines(contest);
-                FileWriter outputFile = new FileWriter(outputResultsDirFile + "scoreboard.tsv");
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + "scoreboard.tsv");
                 for (int i = 0; i < createTSVFileLines.length; i++) {
                     outputFile.write(createTSVFileLines[i]);
                 }
@@ -382,7 +382,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             StandingsJSON2016 standingsJson = new StandingsJSON2016();
             try {
                 String createJSON = standingsJson.createJSON(contest, controller);
-                FileWriter outputFile = new FileWriter(outputResultsDirFile + "scoreboard.json");
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + "scoreboard.json");
                 outputFile.write(createJSON);
                 outputFile.close();
             } catch (IllegalContestState | IOException e) {
