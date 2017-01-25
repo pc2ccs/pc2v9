@@ -448,17 +448,21 @@ public class AutoJudgingMonitor implements UIPlugin {
                 String results = executable.getValidationResults();
                 if (results == null) {
                     results = "Undetermined";
+                } else {
+                    results = results.trim();
                 }
-                if (results.trim().length() == 0) {
+                if (results.length() == 0) {
                     results = "Undetermined";
                 }
 
                 boolean solved = false;
 
                 // Try to find result text in judgement list
-                ElementId elementId = contest.getJudgements()[1].getElementId();
+                //  (start with a default of a non-variable-scoring "no" judgment)
+                ElementId elementId = contest.getJudgements()[2].getElementId();
+                
                 for (Judgement judgement : contest.getJudgements()) {
-                    if (judgement.getDisplayName().equals(results)) {
+                    if (judgement.getDisplayName().trim().equalsIgnoreCase(results)) {
                         elementId = judgement.getElementId();
                     }
                 }
@@ -466,7 +470,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                 // Or perhaps it is a yes? yes?
                 Judgement yesJudgement = contest.getJudgements()[0];
                 // bug 280 ICPC Validator Interface Standard calls for "accepted" in any case.
-                if (results.trim().equalsIgnoreCase("accepted")) {
+                if (results.equalsIgnoreCase("accepted")) {
                     results = yesJudgement.getDisplayName();
                 }
                 if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
@@ -483,7 +487,8 @@ public class AutoJudgingMonitor implements UIPlugin {
 
                 info("Run compiled but failed to validate " + fetchedRun);
 
-                ElementId elementId = contest.getJudgements()[1].getElementId();
+                //  default to a non-variable-scoring "no" judgment
+                ElementId elementId = contest.getJudgements()[2].getElementId();
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true, true);
                 judgementRecord.setValidatorResultString("Undetermined");
 
