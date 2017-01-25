@@ -37,6 +37,8 @@ public final class LanguageAutoFill {
     public static final String RUBYTITLE = "Ruby";
     
     public static final String PYTHON3TITLE = "Python 3";
+    
+    public static final String CSHARPTITLE = "C#";
 
     /**
      * Constant string for an interpreted language.
@@ -46,7 +48,7 @@ public final class LanguageAutoFill {
     private static final String NULL_LANGUAGE_NAME = "";
 
     private static String[] languageList = { DEFAULTTITLE, JAVATITLE, //
-            GNUCPPTITLE, GNUCTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, PYTHON3TITLE, RUBYTITLE, //
+            GNUCPPTITLE, GNUCTITLE, CSHARPTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, PYTHON3TITLE, RUBYTITLE, //
             MSCTITLE, KYLIXTITLE, KYLIXCPPTITLE, FPCTITLE };
 
     /**
@@ -90,6 +92,10 @@ public final class LanguageAutoFill {
         } else if (key.equals(KYLIXCPPTITLE)) {
             String[] dVals = { KYLIXCPPTITLE, "bc++ -A  {:mainfile}", //
                     "{:basename}", "." + fs + "{:basename}", KYLIXCPPTITLE, "" };
+            return dVals;
+        } else if (key.equals(CSHARPTITLE)) {
+            String[] dVals = { CSHARPTITLE, "msc  {:mainfile}", //
+                    "{:basename}.exe", "mono {:basename}.exe", CSHARPTITLE, "" };
             return dVals;
         } else if (key.equals(MSCTITLE)) {
             String[] dVals = { MSCTITLE, "cl.exe {:mainfile}", //

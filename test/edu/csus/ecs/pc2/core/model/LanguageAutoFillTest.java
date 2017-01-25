@@ -3,13 +3,13 @@ package edu.csus.ecs.pc2.core.model;
 import junit.framework.TestCase;
 
 /**
- * Prints language definitions.
+ * Unit test.
+ * 
+ * main prints Language definitions.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class LanguageAutoFillTest extends TestCase {
 
     protected void setUp() throws Exception {
@@ -69,11 +69,37 @@ public class LanguageAutoFillTest extends TestCase {
         assertEquals("lang execute ", values[3], language.getProgramExecuteCommandLine());
 
     }
+    
+    /**
+     * Test C#.
+     * 
+     * Bug 1134 unit test.
+     * 
+     * @throws Exception
+     */
+    public void testCSharpDef() throws Exception {
+        Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.CSHARPTITLE);
+
+        String[] values = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.CSHARPTITLE);
+
+        assertEquals("interpreted ", false, language.isInterpreted());
+
+        assertEquals("lang name ", values[0], language.getDisplayName());
+
+        assertEquals("lang execute ", values[3], language.getProgramExecuteCommandLine());
+        
+        assertEquals("lang execute ", "mono {:basename}.exe", language.getProgramExecuteCommandLine());
+        
+    }
 
     public static void printDefs() {
 
-        String[] keys = { LanguageAutoFill.JAVATITLE, LanguageAutoFill.DEFAULTTITLE, LanguageAutoFill.GNUCPPTITLE, LanguageAutoFill.GNUCTITLE, LanguageAutoFill.PERLTITLE, LanguageAutoFill.MSCTITLE,
-                LanguageAutoFill.KYLIXTITLE, LanguageAutoFill.KYLIXCPPTITLE, LanguageAutoFill.FPCTITLE };
+        String[] keys = { LanguageAutoFill.JAVATITLE, LanguageAutoFill.DEFAULTTITLE, //
+                LanguageAutoFill.GNUCPPTITLE, LanguageAutoFill.GNUCTITLE, LanguageAutoFill.PERLTITLE, //
+                LanguageAutoFill.MSCTITLE, LanguageAutoFill.CSHARPTITLE,
+                LanguageAutoFill.KYLIXTITLE, LanguageAutoFill.KYLIXCPPTITLE, // 
+                LanguageAutoFill.FPCTITLE // 
+        };
 
         for (String key : keys) {
 
