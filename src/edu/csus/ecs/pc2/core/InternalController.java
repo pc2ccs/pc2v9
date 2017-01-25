@@ -1023,7 +1023,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 "Yes", // 
                 "No - Compilation Error", // 
                 "No - Run-time Error", // 
-                "No - Time-limit Exceeded", // 
+                "No - Time Limit Exceeded", // 
                 "No - Wrong Answer", // 
                 "No - Excessive Output", // 
                 "No - Output Format Error", // 

@@ -41,12 +41,18 @@ public final class JudgementUtilites {
             
             // Some sort of JE or execution error.
             
-            ElementId elementId = contest.getJudgements()[1].getElementId();
+            // Default to a "wrong answer" judgment that cannot have its scoring properties changed 
+            // (i.e., always applies penalty)
+            
+            ElementId elementId = contest.getJudgements()[2].getElementId();
             judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true, true);
             
+            //see if we can find a "Judging Error" judgment, if so use that
+            //TODO: NOTE: this code block seems useless, since variable "judgment" is never used
             Judgement judgement = findJudgementByAcronym(contest, "JE");
             if (judgement == null){
-                judgement = contest.getJudgements()[1]; // has to be a "no" judgement
+                //we didn't find a JE; choose a non-variable-penalty "no" judgment
+                judgement = contest.getJudgements()[2];
             }
             
             judgementRecord.setValidatorResultString("Execption during execution "+executionData.getExecutionException().getMessage());
@@ -66,17 +72,22 @@ public final class JudgementUtilites {
 
             if (results == null) {
                 results = "Undetermined";
+            } else {
+                results = results.trim();
             }
-            if (results.trim().length() == 0) {
+            
+            if (results.length() == 0) {
                 results = "Undetermined";
             }
 
             boolean solved = false;
 
             // Try to find result text in judgement list
-            ElementId elementId = contest.getJudgements()[1].getElementId();
+            //  (default to a non-variable-penalty "no" judgment to start)
+            ElementId elementId = contest.getJudgements()[2].getElementId();
             for (Judgement judgement : contest.getJudgements()) {
-                if (judgement.getDisplayName().equals(results)) {
+                if (judgement.getDisplayName().trim().equalsIgnoreCase(results)) {
+                    //found a matching judgment; use that instead of the default
                     elementId = judgement.getElementId();
                 }
             }
@@ -84,7 +95,7 @@ public final class JudgementUtilites {
             // Or perhaps it is a yes? yes?
             Judgement yesJudgement = contest.getJudgements()[0];
             // bug 280 ICPC Validator Interface Standard calls for "accepted" in any case.
-            if (results.trim().equalsIgnoreCase("accepted")) {
+            if (results.equalsIgnoreCase("accepted")) {
                 results = yesJudgement.getDisplayName();
             }
             if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
@@ -99,7 +110,8 @@ public final class JudgementUtilites {
             // Something went wrong either during validation or execution
             // Unable to validate result: Undetermined
 
-            ElementId elementId = contest.getJudgements()[1].getElementId();
+            //default to a non-variable-scoring "no" judgment
+            ElementId elementId = contest.getJudgements()[2].getElementId();
             judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true, true);
             judgementRecord.setValidatorResultString("Undetermined");
 
