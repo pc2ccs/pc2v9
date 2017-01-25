@@ -1242,7 +1242,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private ElementId getValidatorResultElementID(String results) {
         // Try to find result text in judgement list
-        ElementId elementId = getContest().getJudgements()[1].getElementId();
+        //  (start with a default of a non-variable-scoring "no" judgment)
+        ElementId elementId = getContest().getJudgements()[2].getElementId();
+        
         for (Judgement judgement : getContest().getJudgements()) {
             if (judgement.getDisplayName().equals(results)) {
                 elementId = judgement.getElementId();
