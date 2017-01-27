@@ -284,11 +284,13 @@ public class ResolverEventFeedXML {
 
         String contestLengthString = "0:0:0";
         boolean running = false;
+        boolean started = false;
         String formattedSeconds = "undefined";
 
         if (time != null) {
             contestLengthString = time.getContestLengthStr();
             running = time.isContestRunning();
+            started = time.isContestStarted();
             if (time.getContestStartTime() != null) {
                 formattedSeconds = XMLUtilities.formatSeconds(time.getContestStartTime().getTimeInMillis());
             }
@@ -300,7 +302,8 @@ public class ResolverEventFeedXML {
 
         XMLUtilities.addChild(memento, "length", contestLengthString); 
         XMLUtilities.addChild(memento, "penalty", DefaultScoringAlgorithm.getDefaultProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO));
-        XMLUtilities.addChild(memento, "started", titleCaseBoolean(running));
+        XMLUtilities.addChild(memento, "started", titleCaseBoolean(started));
+        XMLUtilities.addChild(memento, "running", titleCaseBoolean(running));
         XMLUtilities.addChild(memento, "starttime", formattedSeconds);
         XMLUtilities.addChild(memento, "title", info.getContestTitle());
         String shortTitle;

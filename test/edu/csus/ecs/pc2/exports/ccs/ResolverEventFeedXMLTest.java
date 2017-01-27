@@ -227,8 +227,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         testForValidXML(xml);
         
-        System.out.println (xml);
-        
+//        System.out.println (xml);
 //        assertXMLNodeValueEquals(xml, ", expectedValue);
     }
 
@@ -983,6 +982,61 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+    
+
+    /**
+     * Test for started and running values.
+     * 
+     * Bug 1118.
+     * 
+     * @throws Exception
+     */
+    public void testInfoStartedRunning() throws Exception {
+        
+        ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
+
+        IInternalContest standardContest = new SampleContest().createStandardContest();
+
+        String xml = eventFeedXML.toXML(standardContest);
+
+        testForValidXML(xml);
+        
+        assertXMLCounts(xml, ResolverEventFeedXML.CONTEST_TAG, 1);
+        assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
+
+        assertXMLCounts(xml, "started", 1);
+        assertXMLCounts(xml, "running", 1);
+        
+        assertXMLNodeValueEquals(xml, "length", "5:00:00");
+        assertXMLNodeValueEquals(xml, "started", "False");
+        assertXMLNodeValueEquals(xml, "running", "False");
+        assertXMLNodeValueEquals(xml, "starttime", "undefined");
+        
+        assertFalse(standardContest.getContestTime().isContestRunning());
+        
+        standardContest.startContest(standardContest.getSiteNumber());
+        
+        xml = eventFeedXML.toXML(standardContest);
+        testForValidXML(xml);
+        
+        assertTrue(standardContest.getContestTime().isContestRunning());
+        
+        assertXMLNodeValueEquals(xml, "length", "5:00:00");
+        assertXMLNodeValueEquals(xml, "started", "True");
+        assertXMLNodeValueEquals(xml, "running", "True");
+        
+        standardContest.stopContest(standardContest.getSiteNumber());
+        
+        xml = eventFeedXML.toXML(standardContest);
+        testForValidXML(xml);
+        
+        assertFalse(standardContest.getContestTime().isContestRunning());
+        
+        assertXMLNodeValueEquals(xml, "length", "5:00:00");
+        assertXMLNodeValueEquals(xml, "started", "True");
+        assertXMLNodeValueEquals(xml, "running", "False");
 
     }
 
