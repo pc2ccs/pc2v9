@@ -355,21 +355,31 @@ public class ProfilesPane extends JPanePlugin {
         int selectedIndex = getProfilesListBox().getSelectedIndex();
         if (selectedIndex == -1) {
             showMessage("No profile selected");
-            return;
+
+            return;  // ------------------------------------ RETURN
         }
 
         if (getContest().getContestTime().isContestRunning()){
             showMessage("Contest Clock/Time must be stopped");
-            return;
+            
+            return;  // ------------------------------------ RETURN
         }
 
         String profilePath = (String) getProfilesListBox().getKeys()[selectedIndex];
         Profile selectedProfile = getProfile(profilePath);
 
         if (selectedProfile.equals(getContest().getProfile())) {
-            int result = FrameUtilities.yesNoCancelDialog(this, "Currently using profile '" + selectedProfile.getName() + "' change to this profile?", "Change profile");
+
+            showMessage("Profile '" + selectedProfile.getName() + "' is already the current profile");
+
+            return; // ------------------------------------ RETURN
+
+        } else {
+            // if (selectedProfile.equals(getContest().getProfile())) {
+            int result = FrameUtilities.yesNoCancelDialog(this, "Change to profile '" + selectedProfile.getName() + "'?", "Change profile");
+
             if (result != JOptionPane.YES_OPTION) {
-                return;
+                return; // ------------------------------------ RETURN
             }
         }
         
