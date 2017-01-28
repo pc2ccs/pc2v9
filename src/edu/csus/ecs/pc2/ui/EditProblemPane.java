@@ -272,7 +272,7 @@ public class EditProblemPane extends JPanePlugin {
       private JComboBox<String> pc2ValidatorOptionComboBox;
       private JCheckBox pc2ValidatorIgnoreCaseCheckBox;
 
-    private JLabel lblWhatsThis;
+    private JLabel lblWhatsThisCLICSValidator;
 
     /**
      * This method initializes
@@ -289,7 +289,7 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(539, 511));
+        this.setSize(new Dimension(539, 630));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -1858,7 +1858,7 @@ public class EditProblemPane extends JPanePlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
-            mainTabbedPane.setPreferredSize(new Dimension(400, 500));
+            mainTabbedPane.setPreferredSize(new Dimension(500, 600));
             mainTabbedPane.insertTab("Data Files", null, getMultipleDataSetPane(), null, 0);
             mainTabbedPane.insertTab("Validator", null, getValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
@@ -2376,7 +2376,7 @@ public class EditProblemPane extends JPanePlugin {
             validatorPane = new JPanel();
             validatorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
             validatorPane.setAlignmentY(Component.TOP_ALIGNMENT);
-            validatorPane.setMaximumSize(new Dimension(500, 300));
+            validatorPane.setMaximumSize(new Dimension(500, 400));
             validatorPane.setLayout(new BoxLayout(validatorPane, BoxLayout.Y_AXIS));
             validatorPane.add(getVerticalStrut_4());
             validatorPane.add(getNoValidatorPanel());
@@ -2464,27 +2464,27 @@ public class EditProblemPane extends JPanePlugin {
         return useCLICSValidatorRadioButton;
     }
 
-    private JLabel getLblWhatsThis() {
-        if (lblWhatsThis == null) {
+    private JLabel getLblWhatsThisCLICSValidator() {
+        if (lblWhatsThisCLICSValidator == null) {
 //            lblWhatsThis = new JLabel("<What's This?>");
 //            lblWhatsThis.setForeground(Color.blue);
 
-            ImageIcon iconImage = (ImageIcon) UIManager.getIcon("OptionPane.informationIcon");
+            ImageIcon iconImage = (ImageIcon) UIManager.getIcon("OptionPane.questionIcon");
             Image image = iconImage.getImage();
-            lblWhatsThis = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
-            lblWhatsThis.setToolTipText("Click for additional information");
-            lblWhatsThis.addMouseListener(new MouseAdapter() {
+            lblWhatsThisCLICSValidator = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            lblWhatsThisCLICSValidator.setToolTipText("What's This? (click for additional information");
+            lblWhatsThisCLICSValidator.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    JOptionPane.showMessageDialog(null, whatsThisMessage, "CLICS Validator", JOptionPane.INFORMATION_MESSAGE, null);
+                    JOptionPane.showMessageDialog(null, whatsThisCLICSValidatorMessage, "CLICS Validator", JOptionPane.INFORMATION_MESSAGE, null);
                 }
             });
-            lblWhatsThis.setBorder(new EmptyBorder(0, 15, 0, 0));
+            lblWhatsThisCLICSValidator.setBorder(new EmptyBorder(0, 15, 0, 0));
         }
-        return lblWhatsThis;
+        return lblWhatsThisCLICSValidator;
     }
     
-    private String whatsThisMessage = "Selecting this option allows you to use the \"CLICS Validator\"."
+    private String whatsThisCLICSValidatorMessage = "Selecting this option allows you to use the \"CLICS Validator\"."
             
             + "\n\nCLICS is the Competitive Learning Initiative Contest System specification, used among other things to define "
             + "\nrequirements for Contest Control Systems used at the ICPC World Finals. The CLICS specification includes a"
@@ -2502,7 +2502,26 @@ public class EditProblemPane extends JPanePlugin {
             
             + "\n\nFor more information, see the CLICS specification at https://clics.ecs.baylor.edu/index.php/Problem_format#Validators.  ";
 
+    private String whatsThisPC2ValStdMessage = "Selecting this option indicates your Validator is going to interface with PC^2 using the \"PC^2 Validator Standard\"."
+            
+            + "\n\n<Description of the PC^2 Validator Standard here... > " ;
+
+    private String whatsThisCLICSValStdMessage = "Selecting this option indicates your Validator is going to interface with PC^2 using the \"CLICS Validator Standard\"."
+            
+            + "\n\nCLICS is the Competitive Learning Initiative Contest System specification, used among other things to define "
+            + "\nrequirements for Contest Control Systems used at the ICPC World Finals. "
+            
+            + "\n\n<Description of the CLICS Validator Standard here... > "
+            
+            + "\n\nFor more information, see the CLICS specification at https://clics.ecs.baylor.edu/index.php/Problem_format#Validators.  ";
+
     private JPanel clicsOptionButtonPanel;
+    private JLabel lblValidatorInterface;
+    private JRadioButton rdbtnUsePcStandard;
+    private JRadioButton rdbtnUseClicsStandard;
+    private final ButtonGroup validatorStandardButtonGroup = new ButtonGroup();
+    private JLabel lblWhatsThisPC2ValStd;
+    private JLabel lblWhatsThisCLICSValStd;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -2511,6 +2530,9 @@ public class EditProblemPane extends JPanePlugin {
         getCustomValidatorExecutableCommandTextField().setEnabled(enableComponents);
         getCustomValidatorCommandOptionsLabel().setEnabled(enableComponents);
         getCustomValidatorCommandOptionsTextField().setEnabled(enableComponents);
+        getLblValidatorInterface().setEnabled(enableComponents);
+        getRdbtnUsePC2ValStd().setEnabled(enableComponents);
+        getRdbtnUseClicsValStd().setEnabled(enableComponents);
     }
 
     protected void enableClicsValidatorComponents(boolean enableComponents) {
@@ -3704,7 +3726,7 @@ public class EditProblemPane extends JPanePlugin {
             fl_clicsOptionButtonPanel.setHgap(0);
             clicsOptionButtonPanel.setLayout(fl_clicsOptionButtonPanel);
             clicsOptionButtonPanel.add(getUseCLICSValidatorRadioButton());
-            clicsOptionButtonPanel.add(getLblWhatsThis());
+            clicsOptionButtonPanel.add(getLblWhatsThisCLICSValidator());
         }
         return clicsOptionButtonPanel;
     }
@@ -3713,14 +3735,14 @@ public class EditProblemPane extends JPanePlugin {
         if (customValidatorOptionsSubPanel == null) {
         	customValidatorOptionsSubPanel = new JPanel();
         	customValidatorOptionsSubPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        	customValidatorOptionsSubPanel.setPreferredSize(new Dimension(500, 150));
+        	customValidatorOptionsSubPanel.setPreferredSize(new Dimension(500, 300));
         	customValidatorOptionsSubPanel.setBorder(new TitledBorder(null, "Validator options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         	
         	GridBagLayout gbl_customValidatorOptionsPanel = new GridBagLayout();
         	gbl_customValidatorOptionsPanel.columnWidths = new int[] {140, 150, 50};
-        	gbl_customValidatorOptionsPanel.rowHeights = new int[] {30, 30};
+        	gbl_customValidatorOptionsPanel.rowHeights = new int[] {30, 30, 0, 0};
         	gbl_customValidatorOptionsPanel.columnWeights = new double[]{0.0, 0.0, 0.0};
-        	gbl_customValidatorOptionsPanel.rowWeights = new double[]{0.0, 0.0};
+        	gbl_customValidatorOptionsPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
         	customValidatorOptionsSubPanel.setLayout(gbl_customValidatorOptionsPanel);
         	
         	GridBagConstraints gbc_lblValidatorCommand = new GridBagConstraints();
@@ -3746,17 +3768,49 @@ public class EditProblemPane extends JPanePlugin {
         	
         	GridBagConstraints gbc_CustomValidatorCommandOptionsLabel = new GridBagConstraints();
         	gbc_CustomValidatorCommandOptionsLabel.anchor = GridBagConstraints.EAST;
-        	gbc_CustomValidatorCommandOptionsLabel.insets = new Insets(0, 0, 0, 5);
+        	gbc_CustomValidatorCommandOptionsLabel.insets = new Insets(0, 0, 5, 5);
         	gbc_CustomValidatorCommandOptionsLabel.gridx = 0;
         	gbc_CustomValidatorCommandOptionsLabel.gridy = 1;
         	customValidatorOptionsSubPanel.add(getCustomValidatorCommandOptionsLabel(), gbc_CustomValidatorCommandOptionsLabel);
         	
         	GridBagConstraints gbc_validatorCommandLineTextBox = new GridBagConstraints();
-        	gbc_validatorCommandLineTextBox.insets = new Insets(0, 0, 0, 5);
+        	gbc_validatorCommandLineTextBox.insets = new Insets(0, 0, 5, 5);
         	gbc_validatorCommandLineTextBox.fill = GridBagConstraints.HORIZONTAL;
         	gbc_validatorCommandLineTextBox.gridx = 1;
         	gbc_validatorCommandLineTextBox.gridy = 1;
         	customValidatorOptionsSubPanel.add(getCustomValidatorCommandOptionsTextField(), gbc_validatorCommandLineTextBox);
+        	
+        	GridBagConstraints gbc_lblValidatorInterface = new GridBagConstraints();
+        	gbc_lblValidatorInterface.anchor = GridBagConstraints.EAST;
+        	gbc_lblValidatorInterface.insets = new Insets(0, 0, 5, 5);
+        	gbc_lblValidatorInterface.gridx = 0;
+        	gbc_lblValidatorInterface.gridy = 2;
+        	customValidatorOptionsSubPanel.add(getLblValidatorInterface(), gbc_lblValidatorInterface);
+        	
+        	GridBagConstraints gbc_rdbtnUsePc2Standard = new GridBagConstraints();
+        	gbc_rdbtnUsePc2Standard.anchor = GridBagConstraints.WEST;
+        	gbc_rdbtnUsePc2Standard.insets = new Insets(0, 0, 5, 5);
+        	gbc_rdbtnUsePc2Standard.gridx = 1;
+        	gbc_rdbtnUsePc2Standard.gridy = 2;
+        	customValidatorOptionsSubPanel.add(getRdbtnUsePC2ValStd(), gbc_rdbtnUsePc2Standard);
+        	
+        	GridBagConstraints gbc_label_WhatsThisPC2ValStd = new GridBagConstraints();
+        	gbc_label_WhatsThisPC2ValStd.insets = new Insets(0, 0, 5, 0);
+        	gbc_label_WhatsThisPC2ValStd.gridx = 2;
+        	gbc_label_WhatsThisPC2ValStd.gridy = 2;
+        	customValidatorOptionsSubPanel.add(getLabelWhatsThisPC2ValStd(), gbc_label_WhatsThisPC2ValStd);
+        	
+        	GridBagConstraints gbc_rdbtnUseClicsStandard = new GridBagConstraints();
+        	gbc_rdbtnUseClicsStandard.anchor = GridBagConstraints.WEST;
+        	gbc_rdbtnUseClicsStandard.insets = new Insets(0, 0, 0, 5);
+        	gbc_rdbtnUseClicsStandard.gridx = 1;
+        	gbc_rdbtnUseClicsStandard.gridy = 3;
+        	customValidatorOptionsSubPanel.add(getRdbtnUseClicsValStd(), gbc_rdbtnUseClicsStandard);
+        	
+        	GridBagConstraints gbc_label_WhatsThisCLICSValStd = new GridBagConstraints();
+        	gbc_label_WhatsThisCLICSValStd.gridx = 2;
+        	gbc_label_WhatsThisCLICSValStd.gridy = 3;
+        	customValidatorOptionsSubPanel.add(getLabelWhatsThisCLICSValStd(), gbc_label_WhatsThisCLICSValStd);
         }
         return customValidatorOptionsSubPanel;
     }
@@ -4021,5 +4075,68 @@ public class EditProblemPane extends JPanePlugin {
         return resizedImg;
     }
 
+    private JLabel getLblValidatorInterface() {
+        if (lblValidatorInterface == null) {
+        	lblValidatorInterface = new JLabel("Validator Interface:");
+        }
+        return lblValidatorInterface;
+    }
+    private JRadioButton getRdbtnUsePC2ValStd() {
+        if (rdbtnUsePcStandard == null) {
+        	rdbtnUsePcStandard = new JRadioButton("Use PC^2 Standard Interface");
+        	validatorStandardButtonGroup.add(rdbtnUsePcStandard);
+        }
+        return rdbtnUsePcStandard;
+    }
+    private JRadioButton getRdbtnUseClicsValStd() {
+        if (rdbtnUseClicsStandard == null) {
+        	rdbtnUseClicsStandard = new JRadioButton("Use CLICS Standard Interface");
+        	rdbtnUseClicsStandard.setSelected(true);
+            validatorStandardButtonGroup.add(rdbtnUseClicsStandard);
+        }
+        return rdbtnUseClicsStandard;
+    }
+    private JLabel getLabelWhatsThisPC2ValStd() {
+        if (lblWhatsThisPC2ValStd == null) {
+            
+//        	lblWhatsThisPC2ValStd = new JLabel("<What's This?>");
+//        	lblWhatsThisPC2ValStd.setForeground(Color.blue);
+        	
+            ImageIcon iconImage = (ImageIcon) UIManager.getIcon("OptionPane.questionIcon");
+            Image image = iconImage.getImage();
+            lblWhatsThisPC2ValStd = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            lblWhatsThisPC2ValStd.setToolTipText("What's This? (click for additional information)");
+
+        	lblWhatsThisPC2ValStd.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, whatsThisPC2ValStdMessage, "PC^2 Validator Interface Standard", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+        	lblWhatsThisPC2ValStd.setBorder(new EmptyBorder(0, 15, 0, 0));
+        }
+        return lblWhatsThisPC2ValStd;
+    }
+    private JLabel getLabelWhatsThisCLICSValStd() {
+        if (lblWhatsThisCLICSValStd == null) {
+            
+//        	lblWhatsThisCLICSValStd = new JLabel("<What's This?>");
+//        	lblWhatsThisCLICSValStd.setForeground(Color.blue);
+        	
+            ImageIcon iconImage = (ImageIcon) UIManager.getIcon("OptionPane.questionIcon");
+            Image image = iconImage.getImage();
+            lblWhatsThisCLICSValStd = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            lblWhatsThisCLICSValStd.setToolTipText("What's This?  (click for additional information");
+
+            lblWhatsThisCLICSValStd.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, whatsThisCLICSValStdMessage, "CLICS Validator Interface Standard", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+        	lblWhatsThisCLICSValStd.setBorder(new EmptyBorder(0, 15, 0, 0));
+        }
+        return lblWhatsThisCLICSValStd;
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
