@@ -3788,26 +3788,26 @@ public class EditProblemPane extends JPanePlugin {
         	customValidatorOptionsSubPanel.add(getLblValidatorInterface(), gbc_lblValidatorInterface);
         	
         	GridBagConstraints gbc_rdbtnUsePc2Standard = new GridBagConstraints();
-        	gbc_rdbtnUsePc2Standard.anchor = GridBagConstraints.WEST;
         	gbc_rdbtnUsePc2Standard.insets = new Insets(0, 0, 5, 5);
         	gbc_rdbtnUsePc2Standard.gridx = 1;
         	gbc_rdbtnUsePc2Standard.gridy = 2;
         	customValidatorOptionsSubPanel.add(getRdbtnUsePC2ValStd(), gbc_rdbtnUsePc2Standard);
         	
         	GridBagConstraints gbc_label_WhatsThisPC2ValStd = new GridBagConstraints();
-        	gbc_label_WhatsThisPC2ValStd.insets = new Insets(0, 0, 5, 0);
+        	gbc_label_WhatsThisPC2ValStd.anchor = GridBagConstraints.WEST;
+            gbc_label_WhatsThisPC2ValStd.insets = new Insets(0, 0, 5, 0);
         	gbc_label_WhatsThisPC2ValStd.gridx = 2;
         	gbc_label_WhatsThisPC2ValStd.gridy = 2;
         	customValidatorOptionsSubPanel.add(getLabelWhatsThisPC2ValStd(), gbc_label_WhatsThisPC2ValStd);
         	
         	GridBagConstraints gbc_rdbtnUseClicsStandard = new GridBagConstraints();
-        	gbc_rdbtnUseClicsStandard.anchor = GridBagConstraints.WEST;
         	gbc_rdbtnUseClicsStandard.insets = new Insets(0, 0, 0, 5);
         	gbc_rdbtnUseClicsStandard.gridx = 1;
         	gbc_rdbtnUseClicsStandard.gridy = 3;
         	customValidatorOptionsSubPanel.add(getRdbtnUseClicsValStd(), gbc_rdbtnUseClicsStandard);
         	
         	GridBagConstraints gbc_label_WhatsThisCLICSValStd = new GridBagConstraints();
+        	gbc_label_WhatsThisCLICSValStd.anchor = GridBagConstraints.WEST;
         	gbc_label_WhatsThisCLICSValStd.gridx = 2;
         	gbc_label_WhatsThisCLICSValStd.gridy = 3;
         	customValidatorOptionsSubPanel.add(getLabelWhatsThisCLICSValStd(), gbc_label_WhatsThisCLICSValStd);
@@ -4113,7 +4113,7 @@ public class EditProblemPane extends JPanePlugin {
                     JOptionPane.showMessageDialog(null, whatsThisPC2ValStdMessage, "PC^2 Validator Interface Standard", JOptionPane.INFORMATION_MESSAGE, null);
                 }
             });
-        	lblWhatsThisPC2ValStd.setBorder(new EmptyBorder(0, 15, 0, 0));
+        	lblWhatsThisPC2ValStd.setBorder(new EmptyBorder(0, 0, 0, 0));
         }
         return lblWhatsThisPC2ValStd;
     }
@@ -4134,7 +4134,7 @@ public class EditProblemPane extends JPanePlugin {
                     JOptionPane.showMessageDialog(null, whatsThisCLICSValStdMessage, "CLICS Validator Interface Standard", JOptionPane.INFORMATION_MESSAGE, null);
                 }
             });
-        	lblWhatsThisCLICSValStd.setBorder(new EmptyBorder(0, 15, 0, 0));
+        	lblWhatsThisCLICSValStd.setBorder(new EmptyBorder(0, 0, 0, 0));
         }
         return lblWhatsThisCLICSValStd;
     }
