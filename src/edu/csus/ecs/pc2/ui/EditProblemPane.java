@@ -2502,9 +2502,26 @@ public class EditProblemPane extends JPanePlugin {
             
             + "\n\nFor more information, see the CLICS specification at https://clics.ecs.baylor.edu/index.php/Problem_format#Validators.  ";
 
-    private String whatsThisPC2ValStdMessage = "Selecting this option indicates your Validator is going to interface with PC^2 using the \"PC^2 Validator Standard\"."
+    private String whatsThisPC2ValStdMessage = "Selecting this option indicates that your Validator is going to interface with PC^2 using the \"PC^2 Validator Standard\"."
             
-            + "\n\n<Description of the PC^2 Validator Standard here... > " ;
+            + "\n\n In this mode, PC^2 passes to the Validator program a set of four string parameters:" 
+            + "\n  (1) the name of the input data file which was used to test the program whose output is being validated; " 
+            + "\n  (2) the name of the output file which was produced by the program being validated when it was run using the specified input data file; " 
+            + "\n  (3) the name of an \"answer file\" which is input to the Validator (typically, the \"correct answer\" for the problem)"
+            + "\n  (4) the name of a \"result file\" which the Validator must produce."
+  
+            + "\n\n Your Validator is responsible for accepting the above parameters and producing the specified \"result file\"."
+            + "\n The \"result file\" must be a valid XML document with a header of the form \"<?xml version=\"1.0\"?>\""
+            + "\n and a root element of the form \"<result outcome = \"string1\">   string2  </result>\" "
+            + "\n where \"string1\" is \"accepted\" for correct runs or some other string for rejected runs."
+            
+            + "\n\n  If \"string1\" is \"accepted\" then PC^2 assigns \"YES\" to the run; otherwise, PC^2 compares \"string1\" with the set of currently-defined" 
+            + "\n \"judgement messages\"; if a match is found then PC^2 assigns that judgement as the result for the run;"
+            + "\n  otherwise it assigns \"Undetermined\" as the result for the run.  The value of \"string2\" is ignored. "
+            
+            + "\n\n For additional information, see the PC^2 Contest Administrator's Guide; in particular, the Appendix on Validators."
+
+            ;
 
     private String whatsThisCLICSValStdMessage = "Selecting this option indicates your Validator is going to interface with PC^2 using the \"CLICS Validator Standard\"."
             
@@ -4126,7 +4143,7 @@ public class EditProblemPane extends JPanePlugin {
             ImageIcon iconImage = (ImageIcon) UIManager.getIcon("OptionPane.questionIcon");
             Image image = iconImage.getImage();
             lblWhatsThisCLICSValStd = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
-            lblWhatsThisCLICSValStd.setToolTipText("What's This?  (click for additional information");
+            lblWhatsThisCLICSValStd.setToolTipText("What's This?  (click for additional information)");
 
             lblWhatsThisCLICSValStd.addMouseListener(new MouseAdapter() {
                 @Override
