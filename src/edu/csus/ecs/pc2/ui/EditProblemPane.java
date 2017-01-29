@@ -4126,6 +4126,7 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton getRdbtnUsePC2ValStd() {
         if (rdbtnUsePcStandard == null) {
         	rdbtnUsePcStandard = new JRadioButton("Use PC^2 Standard Interface");
+        	rdbtnUsePcStandard.setSelected(true);
         	validatorStandardButtonGroup.add(rdbtnUsePcStandard);
         }
         return rdbtnUsePcStandard;
@@ -4133,7 +4134,6 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton getRdbtnUseClicsValStd() {
         if (rdbtnUseClicsStandard == null) {
         	rdbtnUseClicsStandard = new JRadioButton("Use CLICS Standard Interface");
-        	rdbtnUseClicsStandard.setSelected(true);
             validatorStandardButtonGroup.add(rdbtnUseClicsStandard);
         }
         return rdbtnUseClicsStandard;
