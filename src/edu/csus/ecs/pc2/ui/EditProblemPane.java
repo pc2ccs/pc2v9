@@ -879,7 +879,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         //initialize PC2 validator settings to defaults
-        checkProblem.setValidatorCommandLine(getCustomValidatorCommandOptionsTextField().getText());
+        checkProblem.setValidatorCommandLine(getCustomValidatorCommandTextField().getText());
         checkProblem.setWhichPC2Validator(0);
         checkProblem.setIgnoreSpacesOnValidation(false);
         checkProblem.setValidatorProgramName(null);
@@ -911,7 +911,7 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
         // selecting a file is optional
-        String newValidatorFileName = getCustomValidatorExecutableCommandTextField().getText();
+        String newValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
         if (newValidatorFileName != null) {
             newValidatorFileName = newValidatorFileName.trim();
         } else {
@@ -922,8 +922,8 @@ public class EditProblemPane extends JPanePlugin {
        	
         	// external (custom) validator and they have specified a validator file name
             String existingValidatorFilename = newValidatorFileName;
-            if (existingValidatorFilename.length() != getCustomValidatorExecutableCommandTextField().getToolTipText().length()) {
-                existingValidatorFilename = getCustomValidatorExecutableCommandTextField().getToolTipText() + "";
+            if (existingValidatorFilename.length() != getCustomValidatorExecutableProgramTextField().getToolTipText().length()) {
+                existingValidatorFilename = getCustomValidatorExecutableProgramTextField().getToolTipText() + "";
             }
 
             if (isAdding) {
@@ -1246,8 +1246,8 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (getCustomValidatorExecutableCommandTextField().getText() == null
-                    || getCustomValidatorExecutableCommandTextField().getText().trim().length() == 0) {
+            if (getCustomValidatorExecutableProgramTextField().getText() == null
+                    || getCustomValidatorExecutableProgramTextField().getText().trim().length() == 0) {
                 showMessage("Use Custom Validator selected; must specify Validator executable program (\"Validator\" tab)");
                 return false;
             }
@@ -1715,15 +1715,15 @@ public class EditProblemPane extends JPanePlugin {
 
         getPc2ValidatorOptionComboBox().setSelectedIndex(0);
         getPc2ValidatorIgnoreCaseCheckBox().setSelected(true);
-        getCustomValidatorExecutableCommandTextField().setText("");
-        getCustomValidatorExecutableCommandTextField().setToolTipText("");
+        getCustomValidatorExecutableProgramTextField().setText("");
+        getCustomValidatorExecutableProgramTextField().setToolTipText("");
         getPc2ValidatorIgnoreCaseCheckBox().setSelected(false);
 
         if (inProblem.isValidatedProblem()) {
 
             if (inProblem.isUsingPC2Validator()) {
             	
-                getCustomValidatorCommandOptionsTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+                getCustomValidatorCommandTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
                 getUsePC2ValidatorRadioButton().setSelected(true);
                 getUseCLICSValidatorRadioButton().setSelected(false);
                 getUseCustomValidatorRadioButton().setSelected(false);
@@ -1757,23 +1757,23 @@ public class EditProblemPane extends JPanePlugin {
                 getUseCustomValidatorRadioButton().setSelected(true);
                 
                 CustomValidatorSettings settings = inProblem.getCustomValidatorSettings();
-                getCustomValidatorExecutableCommandTextField().setText(settings.getCustomValidatorInvocationCommand());
-                getCustomValidatorExecutableCommandTextField().setToolTipText(settings.getCustomValidatorInvocationCommand());
-                getCustomValidatorCommandOptionsTextField().setText(settings.getCustomValidatorCommandOptions());
+                getCustomValidatorExecutableProgramTextField().setText(settings.getCustomValidatorInvocationCommand());
+                getCustomValidatorExecutableProgramTextField().setToolTipText(settings.getCustomValidatorInvocationCommand());
+                getCustomValidatorCommandTextField().setText(settings.getCustomValidatorCommandOptions());
                 
                 SerializedFile sFile = problemDataFiles.getValidatorFile();
                 if (sFile != null) {
                     if (sFile.getAbsolutePath() != null) {
-                    	getCustomValidatorExecutableCommandTextField().setToolTipText(sFile.getAbsolutePath());
+                    	getCustomValidatorExecutableProgramTextField().setToolTipText(sFile.getAbsolutePath());
                     } else {
-                    	getCustomValidatorExecutableCommandTextField().setToolTipText("");
+                    	getCustomValidatorExecutableProgramTextField().setToolTipText("");
                     }
                 }
             }
 
         } else {
         	//the problem is not using a validator
-            getCustomValidatorCommandOptionsTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND); //why? (copied from old code)
+            getCustomValidatorCommandTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND); //why? (copied from old code)
             useNOValidatatorRadioButton.setSelected(true);
             getUsePC2ValidatorRadioButton().setSelected(false);
             getUseCLICSValidatorRadioButton().setSelected(false);
@@ -2555,11 +2555,11 @@ public class EditProblemPane extends JPanePlugin {
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
         getChooseValidatorProgramButton().setEnabled(enableComponents);
-        getCustomValidatorExecutableCommandLabel().setEnabled(enableComponents);
-        getCustomValidatorExecutableCommandTextField().setEnabled(enableComponents);
-        getCustomValidatorCommandOptionsLabel().setEnabled(enableComponents);
-        getCustomValidatorCommandOptionsTextField().setEnabled(enableComponents);
-        getLblValidatorInterface().setEnabled(enableComponents);
+        getCustomValidatorExecutableProgramLabel().setEnabled(enableComponents);
+        getCustomValidatorExecutableProgramTextField().setEnabled(enableComponents);
+        getCustomValidatorCommandLabel().setEnabled(enableComponents);
+        getCustomValidatorCommandTextField().setEnabled(enableComponents);
+        getCustomValidatorInterfaceLabel().setEnabled(enableComponents);
         getRdbtnUsePC2ValStd().setEnabled(enableComponents);
         getRdbtnUseClicsValStd().setEnabled(enableComponents);
     }
@@ -2836,8 +2836,8 @@ public class EditProblemPane extends JPanePlugin {
             chooseValidatorProgramButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
 //                    showMessage ("Not implemented yet...");
-                    if (selectFile(getCustomValidatorExecutableCommandTextField(), "Select Validator Program")) {
-                        getCustomValidatorExecutableCommandTextField().setToolTipText((getCustomValidatorExecutableCommandTextField().getText()));
+                    if (selectFile(getCustomValidatorExecutableProgramTextField(), "Select Validator Program")) {
+                        getCustomValidatorExecutableProgramTextField().setToolTipText((getCustomValidatorExecutableProgramTextField().getText()));
                         enableUpdateButton();
                     }
                 }
@@ -2853,7 +2853,7 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getCustomValidatorCommandOptionsTextField() {
+    private JTextField getCustomValidatorCommandTextField() {
         if (customValidatorCommandOptionsTextField == null) {
             customValidatorCommandOptionsTextField = new JTextField();
             customValidatorCommandOptionsTextField.setEnabled(false);
@@ -3105,9 +3105,9 @@ public class EditProblemPane extends JPanePlugin {
         getFloatRelativeToleranceTextField().setText("");
 
         //clear custom validator options
-        getCustomValidatorCommandOptionsTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
-        getCustomValidatorExecutableCommandTextField().setText("");
-        getCustomValidatorExecutableCommandTextField().setToolTipText("");
+        getCustomValidatorCommandTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        getCustomValidatorExecutableProgramTextField().setText("");
+        getCustomValidatorExecutableProgramTextField().setToolTipText("");
         
         getShowValidatorToJudgesCheckBox().setSelected(true);
         getDoShowOutputWindowCheckBox().setSelected(true);
@@ -3762,11 +3762,14 @@ public class EditProblemPane extends JPanePlugin {
     
     private JPanel getCustomValidatorOptionsSubPanel() {
         if (customValidatorOptionsSubPanel == null) {
+            
+            //define the Custom Validator subpanel
         	customValidatorOptionsSubPanel = new JPanel();
         	customValidatorOptionsSubPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         	customValidatorOptionsSubPanel.setPreferredSize(new Dimension(500, 300));
         	customValidatorOptionsSubPanel.setBorder(new TitledBorder(null, "Validator options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         	
+        	//define the (GridBag) layout for the Custom Validator subpanel
         	GridBagLayout gbl_customValidatorOptionsPanel = new GridBagLayout();
         	gbl_customValidatorOptionsPanel.columnWidths = new int[] {140, 150, 50};
         	gbl_customValidatorOptionsPanel.rowHeights = new int[] {30, 30, 0, 0};
@@ -3774,54 +3777,62 @@ public class EditProblemPane extends JPanePlugin {
         	gbl_customValidatorOptionsPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
         	customValidatorOptionsSubPanel.setLayout(gbl_customValidatorOptionsPanel);
         	
-        	GridBagConstraints gbc_lblValidatorCommand = new GridBagConstraints();
-        	gbc_lblValidatorCommand.anchor = GridBagConstraints.EAST;
-        	gbc_lblValidatorCommand.insets = new Insets(0, 0, 5, 5);
-        	gbc_lblValidatorCommand.gridx = 0;
-        	gbc_lblValidatorCommand.gridy = 0;
-        	customValidatorOptionsSubPanel.add(getCustomValidatorExecutableCommandLabel(), gbc_lblValidatorCommand);
+        	//add the Custom Validator Executable Program Label to the subpanel
+        	GridBagConstraints gbc_ValidatorProgramLabel = new GridBagConstraints();
+        	gbc_ValidatorProgramLabel.anchor = GridBagConstraints.EAST;
+        	gbc_ValidatorProgramLabel.insets = new Insets(0, 0, 5, 5);
+        	gbc_ValidatorProgramLabel.gridx = 0;
+        	gbc_ValidatorProgramLabel.gridy = 0;
+        	customValidatorOptionsSubPanel.add(getCustomValidatorExecutableProgramLabel(), gbc_ValidatorProgramLabel);
         	
+        	//add the Custom Validator Executable Program TextField to the subpanel
         	GridBagConstraints gbc_textField = new GridBagConstraints();
         	gbc_textField.insets = new Insets(0, 0, 5, 5);
         	gbc_textField.fill = GridBagConstraints.HORIZONTAL;
         	gbc_textField.gridx = 1;
         	gbc_textField.gridy = 0;
-        	customValidatorOptionsSubPanel.add(getCustomValidatorExecutableCommandTextField(), gbc_textField);
+        	customValidatorOptionsSubPanel.add(getCustomValidatorExecutableProgramTextField(), gbc_textField);
         	
-        	GridBagConstraints gbc_validatorProgramJButton = new GridBagConstraints();
-        	gbc_validatorProgramJButton.anchor = GridBagConstraints.NORTHWEST;
-        	gbc_validatorProgramJButton.insets = new Insets(0, 0, 5, 0);
-        	gbc_validatorProgramJButton.gridx = 2;
-        	gbc_validatorProgramJButton.gridy = 0;
-        	customValidatorOptionsSubPanel.add(getChooseValidatorProgramButton(), gbc_validatorProgramJButton);
+        	//add the Choose Validator Program button to the subpanel
+        	GridBagConstraints gbc_validatorProgramButton = new GridBagConstraints();
+        	gbc_validatorProgramButton.anchor = GridBagConstraints.NORTHWEST;
+        	gbc_validatorProgramButton.insets = new Insets(0, 0, 5, 0);
+        	gbc_validatorProgramButton.gridx = 2;
+        	gbc_validatorProgramButton.gridy = 0;
+        	customValidatorOptionsSubPanel.add(getChooseValidatorProgramButton(), gbc_validatorProgramButton);
         	
-        	GridBagConstraints gbc_CustomValidatorCommandOptionsLabel = new GridBagConstraints();
-        	gbc_CustomValidatorCommandOptionsLabel.anchor = GridBagConstraints.EAST;
-        	gbc_CustomValidatorCommandOptionsLabel.insets = new Insets(0, 0, 5, 5);
-        	gbc_CustomValidatorCommandOptionsLabel.gridx = 0;
-        	gbc_CustomValidatorCommandOptionsLabel.gridy = 1;
-        	customValidatorOptionsSubPanel.add(getCustomValidatorCommandOptionsLabel(), gbc_CustomValidatorCommandOptionsLabel);
+        	//add the Validator Command Line label to the subpanel
+        	GridBagConstraints gbc_CustomValidatorCommandLabel = new GridBagConstraints();
+        	gbc_CustomValidatorCommandLabel.anchor = GridBagConstraints.EAST;
+        	gbc_CustomValidatorCommandLabel.insets = new Insets(0, 0, 5, 5);
+        	gbc_CustomValidatorCommandLabel.gridx = 0;
+        	gbc_CustomValidatorCommandLabel.gridy = 1;
+        	customValidatorOptionsSubPanel.add(getCustomValidatorCommandLabel(), gbc_CustomValidatorCommandLabel);
         	
-        	GridBagConstraints gbc_validatorCommandLineTextBox = new GridBagConstraints();
-        	gbc_validatorCommandLineTextBox.insets = new Insets(0, 0, 5, 5);
-        	gbc_validatorCommandLineTextBox.fill = GridBagConstraints.HORIZONTAL;
-        	gbc_validatorCommandLineTextBox.gridx = 1;
-        	gbc_validatorCommandLineTextBox.gridy = 1;
-        	customValidatorOptionsSubPanel.add(getCustomValidatorCommandOptionsTextField(), gbc_validatorCommandLineTextBox);
+        	//add the Custom Validator Command Textfield to the subpanel
+        	GridBagConstraints gbc_CustomValidatorCommandTextField = new GridBagConstraints();
+        	gbc_CustomValidatorCommandTextField.insets = new Insets(0, 0, 5, 5);
+        	gbc_CustomValidatorCommandTextField.fill = GridBagConstraints.HORIZONTAL;
+        	gbc_CustomValidatorCommandTextField.gridx = 1;
+        	gbc_CustomValidatorCommandTextField.gridy = 1;
+        	customValidatorOptionsSubPanel.add(getCustomValidatorCommandTextField(), gbc_CustomValidatorCommandTextField);
         	
-        	GridBagConstraints gbc_lblValidatorInterface = new GridBagConstraints();
-        	gbc_lblValidatorInterface.anchor = GridBagConstraints.EAST;
-        	gbc_lblValidatorInterface.insets = new Insets(0, 0, 5, 5);
-        	gbc_lblValidatorInterface.gridx = 0;
-        	gbc_lblValidatorInterface.gridy = 2;
-        	customValidatorOptionsSubPanel.add(getLblValidatorInterface(), gbc_lblValidatorInterface);
+        	//add the Custom Validator Interface label to the subpanel
+        	GridBagConstraints gbc_CustomValidatorInterfaceLabel = new GridBagConstraints();
+        	gbc_CustomValidatorInterfaceLabel.anchor = GridBagConstraints.EAST;
+        	gbc_CustomValidatorInterfaceLabel.insets = new Insets(0, 0, 5, 5);
+        	gbc_CustomValidatorInterfaceLabel.gridx = 0;
+        	gbc_CustomValidatorInterfaceLabel.gridy = 2;
+        	customValidatorOptionsSubPanel.add(getCustomValidatorInterfaceLabel(), gbc_CustomValidatorInterfaceLabel);
         	
+        	//add the "Use PC2 Validator Interface" radio button to the subpanel
         	GridBagConstraints gbc_rdbtnUsePc2Standard = new GridBagConstraints();
         	gbc_rdbtnUsePc2Standard.insets = new Insets(0, 0, 5, 5);
         	gbc_rdbtnUsePc2Standard.gridx = 1;
         	gbc_rdbtnUsePc2Standard.gridy = 2;
         	customValidatorOptionsSubPanel.add(getRdbtnUsePC2ValStd(), gbc_rdbtnUsePc2Standard);
         	
+        	//add the "What's This" icon for the PC2 Validator Standard Interface radio button to the subpanel
         	GridBagConstraints gbc_label_WhatsThisPC2ValStd = new GridBagConstraints();
         	gbc_label_WhatsThisPC2ValStd.anchor = GridBagConstraints.WEST;
             gbc_label_WhatsThisPC2ValStd.insets = new Insets(0, 0, 5, 0);
@@ -3829,12 +3840,14 @@ public class EditProblemPane extends JPanePlugin {
         	gbc_label_WhatsThisPC2ValStd.gridy = 2;
         	customValidatorOptionsSubPanel.add(getLabelWhatsThisPC2ValStd(), gbc_label_WhatsThisPC2ValStd);
         	
+        	//add the "Use CLICS Validator Interface" radio button to the subpanel
         	GridBagConstraints gbc_rdbtnUseClicsStandard = new GridBagConstraints();
         	gbc_rdbtnUseClicsStandard.insets = new Insets(0, 0, 0, 5);
         	gbc_rdbtnUseClicsStandard.gridx = 1;
         	gbc_rdbtnUseClicsStandard.gridy = 3;
         	customValidatorOptionsSubPanel.add(getRdbtnUseClicsValStd(), gbc_rdbtnUseClicsStandard);
         	
+            //add the "What's This" icon for the CLICS Validator Standard Interface radio button to the subpanel
         	GridBagConstraints gbc_label_WhatsThisCLICSValStd = new GridBagConstraints();
         	gbc_label_WhatsThisCLICSValStd.anchor = GridBagConstraints.WEST;
         	gbc_label_WhatsThisCLICSValStd.gridx = 2;
@@ -3852,21 +3865,21 @@ public class EditProblemPane extends JPanePlugin {
         return horizontalStrut_1;
     }
     
-    private JLabel getCustomValidatorExecutableCommandLabel() {
+    private JLabel getCustomValidatorExecutableProgramLabel() {
         if (customValidatorCommandLabel == null) {
         	customValidatorCommandLabel = new JLabel("Validator program:");
         }
         return customValidatorCommandLabel;
     }
     
-    private JLabel getCustomValidatorCommandOptionsLabel() {
+    private JLabel getCustomValidatorCommandLabel() {
         if (customValidatorCommandOptionsLabel == null) {
             customValidatorCommandOptionsLabel = new JLabel("Validator Command Line:");
         }
         return customValidatorCommandOptionsLabel;
     }    
     
-    private JTextField getCustomValidatorExecutableCommandTextField() {
+    private JTextField getCustomValidatorExecutableProgramTextField() {
         if (customValidatorCommandTextField == null) {
         	customValidatorCommandTextField = new JTextField();
         	customValidatorCommandTextField.setEnabled(false);
@@ -4045,8 +4058,8 @@ public class EditProblemPane extends JPanePlugin {
      */
     private CustomValidatorSettings getCustomValidatorSettingsFromFields() {
         CustomValidatorSettings settings = new CustomValidatorSettings();
-        settings.setCustomValidatorInvocationCommand(this.getCustomValidatorExecutableCommandTextField().getText());
-        settings.setCustomValidatorCommandOptions(this.getCustomValidatorCommandOptionsTextField().getText());
+        settings.setCustomValidatorInvocationCommand(this.getCustomValidatorExecutableProgramTextField().getText());
+        settings.setCustomValidatorCommandOptions(this.getCustomValidatorCommandTextField().getText());
         
         return settings;
     }
@@ -4104,7 +4117,7 @@ public class EditProblemPane extends JPanePlugin {
         return resizedImg;
     }
 
-    private JLabel getLblValidatorInterface() {
+    private JLabel getCustomValidatorInterfaceLabel() {
         if (lblValidatorInterface == null) {
         	lblValidatorInterface = new JLabel("Validator Interface:");
         }
