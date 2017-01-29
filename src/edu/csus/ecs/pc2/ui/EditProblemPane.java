@@ -2484,7 +2484,7 @@ public class EditProblemPane extends JPanePlugin {
         return lblWhatsThisCLICSValidator;
     }
     
-    private String whatsThisCLICSValidatorMessage = "Selecting this option allows you to use the \"CLICS Validator\"."
+    private String whatsThisCLICSValidatorMessage = "Selecting this option allows you to use the PC^2 implementation of the \"CLICS Validator\"."
             
             + "\n\nCLICS is the Competitive Learning Initiative Contest System specification, used among other things to define "
             + "\nrequirements for Contest Control Systems used at the ICPC World Finals. The CLICS specification includes a"
