@@ -424,7 +424,7 @@ public class EditProblemPane extends JPanePlugin {
 
         if (!validateProblemFields()) {
             // new problem is invalid, just return, message issued by validateProblemFields
-            System.err.println ("DEBUG: validateProblemFields() returned false");
+//            System.err.println ("DEBUG: validateProblemFields() returned false");
             return;
         }
 
