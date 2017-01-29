@@ -1233,33 +1233,45 @@ public class EditProblemPane extends JPanePlugin {
      */
     private boolean validateProblemFields() {
 
+        //verify there is a problem name
         if (problemNameTextField.getText().trim().length() < 1) {
             showMessage("Enter a problem name (\"General\" tab)");
             return false;
         }
 
+        //verify that if the PC2 Validator is selected, an option has been chosen
         if (getUsePC2ValidatorRadioButton().isSelected()) {
             if (pc2ValidatorOptionComboBox.getSelectedIndex() < 1) {
-                showMessage("Select a Validator option");
+                showMessage("PC^2 Validator is selected; you must select a Validator Mode option (\"Validator\" tab)");
                 return false;
             }
         }
         
+        //verify that if a Custom Validator has been selected, there is a Validator Program specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
             if (getCustomValidatorExecutableProgramTextField().getText() == null
                     || getCustomValidatorExecutableProgramTextField().getText().trim().length() == 0) {
-                showMessage("Use Custom Validator selected; must specify Validator executable program (\"Validator\" tab)");
+                showMessage("\"Use Custom Validator\" is selected; you must specify Validator executable program (\"Validator\" tab)");
                 return false;
             }
         }
 
-        //validate the validator tolerance fields
+        //verify that if a Custom Validator has been selected, there is a Validator Command specified
+        if (getUseCustomValidatorRadioButton().isSelected()) {
+            if (getCustomValidatorCommandTextField().getText() == null
+                    || getCustomValidatorCommandTextField().getText().trim().length() == 0) {
+                showMessage("\"Use Custom Validator\" is selected; you must specify Validator Command Line (\"Validator\" tab)");
+                return false;
+            }
+        }
+
+        //validate the CLICS validator tolerance fields
         if (getFloatRelativeToleranceCheckBox().isSelected()) {
             String text = getFloatRelativeToleranceTextField().getText();
             try {
                 Float.parseFloat(text);
             } catch (NumberFormatException | NullPointerException e) {
-                showMessage("Float Relative Tolerance selected; must specify a valid tolerance (\"Validator\" tab)");
+                showMessage("CLICS Validator 'Float Relative Tolerance' is selected; you must specify a valid tolerance (\"Validator\" tab)");
                 return false;
             }
         }
@@ -1268,18 +1280,19 @@ public class EditProblemPane extends JPanePlugin {
             try {
                 Float.parseFloat(text);
             } catch (NumberFormatException | NullPointerException e) {
-                showMessage("Float Absolute Tolerance selected; must specify a valid tolerance (\"Validator\" tab)");
+                showMessage("CLICS Validator 'Float Absolute Tolerance' is selected; you must specify a valid tolerance (\"Validator\" tab)");
                 return false;
             }
         }
 
 
+        //verify that if the problem requires data, a data file is specified
         if (getProblemRequiresDataCheckBox().isSelected()) {
 
             String fileName = inputDataFileLabel.getText();
             // this check is outside so we can provide a specific message
             if (fileName == null || fileName.trim().length() == 0) {
-                showMessage("Problem Requires Input Data checked, must specify a file (\"General\" tab)");
+                showMessage("'Problem Requires Input Data' is checked; you must specify a data file (\"General\" tab)");
                 return false;
             }
 
@@ -1293,6 +1306,7 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
+        //verify that if "judges have answer files" is selected, a file has been specified
         if (getJudgesHaveAnswerFiles().isSelected()) {
 
             //note: the Judge's Answer File name is displayed in a JLabel (not a textfield)
@@ -1300,7 +1314,7 @@ public class EditProblemPane extends JPanePlugin {
 
             // this check is outside so we can provide a specific message
             if (answerFileName == null || answerFileName.trim().length() == 0) {
-                showMessage("Problem Requires Judges' Answer File checked, select a file (\"General\" tab)");
+                showMessage("\"Judges Have Provided Answer File\" is checked; you must select a Judge's Answer File (\"General\" tab)");
                 return false;
             }
 
@@ -1314,10 +1328,11 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
+        //verify that if computer judging is selected then a Validator has been specified
         if (getUseComputerJudgingRadioButton().isSelected()) {
 
             if (useNOValidatatorRadioButton.isSelected()) {
-                showMessage("Computer Judging is selected (\"Judging Type\" tab), must select a validator");
+                showMessage("'Computer Judging' is selected (\"Judging Type\" tab); you must select a Validator on the \"Validator\" tab");
                 return false;
             }
 
