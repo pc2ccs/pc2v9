@@ -878,11 +878,9 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setUsingCustomValidator(getUseCustomValidatorRadioButton().isSelected());
         }
 
-        //initialize PC2 validator settings to defaults
-        checkProblem.setValidatorCommandLine(getCustomValidatorCommandTextField().getText());
-        checkProblem.setWhichPC2Validator(0);
-        checkProblem.setIgnoreSpacesOnValidation(false);
+        //initialize validator settings to defaults
         checkProblem.setValidatorProgramName(null);
+        checkProblem.setValidatorCommandLine(null);
         
         if (checkProblem.isUsingPC2Validator()) {
 
