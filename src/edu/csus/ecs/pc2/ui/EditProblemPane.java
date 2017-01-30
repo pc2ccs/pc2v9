@@ -888,7 +888,7 @@ public class EditProblemPane extends JPanePlugin {
             // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
 
             checkProblem.setWhichPC2Validator(getPc2ValidatorOptionComboBox().getSelectedIndex());
-            checkProblem.setIgnoreSpacesOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());
+            checkProblem.setIgnoreCaseOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());
             checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         }

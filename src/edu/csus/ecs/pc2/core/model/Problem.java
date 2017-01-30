@@ -137,7 +137,7 @@ public class Problem implements IElementObject {
     /**
      * PC2 Validator option to ignore spaces on validation.
      */
-    private boolean ignoreSpacesOnValidation = false;    
+    private boolean ignoreCaseOnValidation = false;    
      
     /**
      * The settings for the CLICS Validator
@@ -263,7 +263,7 @@ public class Problem implements IElementObject {
         // private String executionPrepCommand = "";
         // private SerializedFile executionPrepFile;
 
-        clone.setIgnoreSpacesOnValidation(isIgnoreSpacesOnValidation());
+        clone.setIgnoreCaseOnValidation(isIgnoreSpacesOnValidation());
         if (this.getClicsValidatorSettings()==null) {
             clone.setCLICSValidatorSettings(null);
         } else {
@@ -391,7 +391,7 @@ public class Problem implements IElementObject {
      * @return Returns the PC2 Validator ignoreSpacesOnValidation flag.
      */
     public boolean isIgnoreSpacesOnValidation() {
-        return ignoreSpacesOnValidation;
+        return ignoreCaseOnValidation;
     }
 
     /**
@@ -505,17 +505,17 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Sets the value of the ignoreSpacesOnValidation flag for the old PC2Validator.
+     * Sets the value of the ignoreCaseOnValidation flag for the old PC2Validator.
      * Note that setting this flag has NO EFFECT unless the old PC2Validator is selected
-     * for the Problem (in particular, this flag is unrelated to the "isSpaceSensitive" flag for 
+     * for the Problem (in particular, this flag is unrelated to the "isCaseSensitive" flag for 
      * the CLICS {@link ClicsValidator}).
      * 
-     * @param ignoreSpacesOnValidation
+     * @param ignoreCaseOnValidation
      *            The value to which the ignoreSpacesOnValidation flag should be set.
-     * @see {@link ClicsValidatorSettings#setSpaceSensitive(boolean)}
+     * @see {@link ClicsValidatorSettings#setCaseSensitive(boolean)}
      */
-    public void setIgnoreSpacesOnValidation(boolean ignoreSpacesOnValidation) {
-        this.ignoreSpacesOnValidation = ignoreSpacesOnValidation;
+    public void setIgnoreCaseOnValidation(boolean ignoreCaseOnValidation) {
+        this.ignoreCaseOnValidation = ignoreCaseOnValidation;
     }
 
     /**
@@ -719,7 +719,7 @@ public class Problem implements IElementObject {
                     if (whichPC2Validator != problem.getWhichPC2Validator()) {
                         return false;
                     }
-                    if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {
+                    if (ignoreCaseOnValidation != problem.isIgnoreSpacesOnValidation()) {
                         return false;
                     }
                 }

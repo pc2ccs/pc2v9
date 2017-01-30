@@ -785,7 +785,7 @@ public class EditProblemPaneNew extends JPanePlugin {
 
         checkProblem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
         checkProblem.setWhichPC2Validator(0);
-        checkProblem.setIgnoreSpacesOnValidation(false);
+        checkProblem.setIgnoreCaseOnValidation(false);
 
         checkProblem.setValidatorProgramName(null);
         if (checkProblem.isUsingPC2Validator()) {
@@ -794,7 +794,7 @@ public class EditProblemPaneNew extends JPanePlugin {
             // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
 
             checkProblem.setWhichPC2Validator(getPc2ValidatorComboBox().getSelectedIndex());
-            checkProblem.setIgnoreSpacesOnValidation(getIgnoreCaseCheckBox().isSelected());
+            checkProblem.setIgnoreCaseOnValidation(getIgnoreCaseCheckBox().isSelected());
             checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         }
