@@ -712,7 +712,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Create a Problem from the fields.
+     * Create a Problem from the fields in this GUI.
      * 
      * This also populates newProblemDataFiles for the data files.
      * 
@@ -885,9 +885,9 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setValidatorProgramName(null);
         checkProblem.setValidatorCommandLine(null);
         
+        //handle PC2 Validator case
         if (checkProblem.isUsingPC2Validator()) {
 
-            //update PC2 Validator settings from fields
             // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
             // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
 
@@ -897,13 +897,13 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         }
         
+        //handle CLICS Validator case
         if (checkProblem.isUsingCLICSValidator()) {
-            //update CLICS Validator settings from fields.
             checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
         }
         
+        //handle Custom Validator case
         if (checkProblem.isUsingCustomValidator()) {
-            //update Custom validator settings from fields.
             checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
         }
 
