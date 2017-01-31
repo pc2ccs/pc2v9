@@ -103,13 +103,14 @@ public class ProblemTest extends TestCase {
         p2.setAnswerFileName("foo");
         checkString("setAnswerFileName foo", p1.getAnswerFileName(), p2.getAnswerFileName(), p1, p2);
 
-        p2 = getProblemAnew();
-        p2.setValidatorProgramName(null);
-        checkString("setValidatorProgramName null", p1.getValidatorProgramName(), p2.getValidatorProgramName(), p1, p2);
+        //these tests are no longer valid since the default validator settings were changed to 'null'
+//        p2 = getProblemAnew();
+//        p2.setValidatorProgramName(null);
+//        checkString("setValidatorProgramName null", p1.getValidatorProgramName(), p2.getValidatorProgramName(), p1, p2);
 
-        p2 = getProblemAnew();
-        p2.setValidatorProgramName("foo");
-        checkString("setValidatorProgramName foo", p1.getValidatorProgramName(), p2.getValidatorProgramName(), p1, p2);
+//        p2 = getProblemAnew();
+//        p2.setValidatorProgramName("foo");
+//        checkString("setValidatorProgramName foo", p1.getValidatorProgramName(), p2.getValidatorProgramName(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setReadInputDataFromSTDIN(true);
@@ -123,9 +124,10 @@ public class ProblemTest extends TestCase {
         p2.setUsingPC2Validator(false);
         checkBoolean("setUsingPC2Validator", p1.isUsingPC2Validator(), p2.isUsingPC2Validator(), p1, p2);
 
-        p2 = getProblemAnew();
-        p2.setValidatorCommandLine(null);
-        checkString("setValidatorCommandLine", p1.getValidatorCommandLine(), p2.getValidatorCommandLine(), p1, p2);
+        //this test is no longer valid since the default validator settings were changed to 'null'
+//        p2 = getProblemAnew();
+//        p2.setValidatorCommandLine(null);
+//        checkString("setValidatorCommandLine", p1.getValidatorCommandLine(), p2.getValidatorCommandLine(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setShowValidationToJudges(true);
