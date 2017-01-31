@@ -122,7 +122,7 @@ public class ExecutableV9Test extends AbstractTestCase {
 
         problem.setUsingPC2Validator(true);
         problem.setWhichPC2Validator(1);
-        problem.setIgnoreSpacesOnValidation(true);
+        problem.setIgnoreCaseOnValidation(true);
         problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
                 + problem.isIgnoreSpacesOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);

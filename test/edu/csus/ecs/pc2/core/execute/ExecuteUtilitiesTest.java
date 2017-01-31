@@ -63,7 +63,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
 
         problem.setUsingPC2Validator(true);
         problem.setWhichPC2Validator(1);
-        problem.setIgnoreSpacesOnValidation(true);
+        problem.setIgnoreCaseOnValidation(true);
         problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
     }

@@ -36,7 +36,7 @@ public class ProblemTest extends TestCase {
         p2.setValidatedProblem(true);
         p2.setUsingPC2Validator(true);
         p2.setWhichPC2Validator(3);
-        p2.setIgnoreSpacesOnValidation(true);
+        p2.setIgnoreCaseOnValidation(true);
 
         p2.setValidatorCommandLine(EditProblemPane.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() + " " + p2.isIgnoreSpacesOnValidation());
         p2.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
@@ -140,7 +140,7 @@ public class ProblemTest extends TestCase {
         checkBoolean("setShowCompareWindow", p1.isShowCompareWindow(), p2.isShowCompareWindow(), p1, p2);
 
         p2 = getProblemAnew();
-        p2.setIgnoreSpacesOnValidation(false);
+        p2.setIgnoreCaseOnValidation(false);
         checkBoolean("setIgnoreSpacesOnValidation", p1.isIgnoreSpacesOnValidation(), p2.isIgnoreSpacesOnValidation(), p1, p2);
 
         p2 = getProblemAnew();
