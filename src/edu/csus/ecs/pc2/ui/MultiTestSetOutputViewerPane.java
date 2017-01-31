@@ -1214,8 +1214,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 int row = target.getSelectedRow();
                 int column = target.getSelectedColumn();
                 
-                System.out.println ("MTSVPane.mouseClicked(): row=" + row + ", col=" + column);
-
                 if (column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || column == COLUMN.JUDGE_OUTPUT.ordinal() || column == COLUMN.JUDGE_DATA.ordinal() || column == COLUMN.VALIDATOR_OUTPUT.ordinal()
                         || column == COLUMN.VALIDATOR_ERR.ordinal()) {
                     viewFile(row, column);
@@ -1440,11 +1438,19 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private String getExecuteDir() {
         Executable tempExecutable;
         if (currentRunFiles == null) {
-            System.err.println("runFiles for run are null from setData()");
+            if (log!=null) {
+                log.warning("MTSVPane.compareFiles(): invalid team output file names array");
+            } else {
+                System.err.println("runFiles for run are null from setData()");
+            }
             return null;
         }
         if (currentRunFiles == null) {
-            System.err.println("runFiles.getMainFile is null");
+            if (log!=null) {
+                log.warning("MTSVPane.compareFiles(): invalid team output file names array");
+            } else {
+                System.err.println("runFiles.getMainFile is null");
+            }
             return null;
         }
         tempExecutable = new Executable(getContest(), getController(), currentRun, currentRunFiles);
