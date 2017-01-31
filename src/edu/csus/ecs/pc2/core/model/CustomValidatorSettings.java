@@ -15,54 +15,70 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
 
-    private String customValidatorInvocationCommand;
+    // the name of the validator program
+    private String customValidatorProgramName;
     
-    private String customValidatorCommandOptions;
+    //the command which is used to invoke the validator (typically includes the validator program name)
+    private String customValidatorCommandLine;
+    
+    // flags indicating which validator interface to use
+    private boolean usePC2ValidatorInterface ;
+    private boolean useCLICSValidatorInterface ;
     
     /**
      * Constructs a CustomValidatorSettings object with default values of empty strings
-     * for both the invocation command and the command line options.
+     * for both the Validator executable program name and the Validator invocation command line,
+     * and with a default setting of "usePC2ValidatorInterface".
      */
     public CustomValidatorSettings() {
-        this.customValidatorInvocationCommand = "";
-        this.customValidatorCommandOptions = "";
+        this.customValidatorProgramName = "";
+        this.customValidatorCommandLine = "";
+        this.usePC2ValidatorInterface = true ;
+        this.useCLICSValidatorInterface = false;
     }
 
 
 
     /**
-     * Returns the current custom validator invocation command.
-     * @return the invocation command for the custom validator
+     * Returns the name of the custom validator program.
+     * @return a String containing the name of the custom validator program
      */
-    public String getCustomValidatorInvocationCommand() {
-        return customValidatorInvocationCommand;
+    public String getCustomValidatorProgramName() {
+        return customValidatorProgramName;
     }
 
     /**
-     * Sets the invocation command for the custom validator to the specified value.
-     * Note that the invocation command does not include command line options; those
-     * are specified via the separate "customValidatorCommandOptions" field.
-     * @param command -- the command used to invoke the custom validator
+     * Sets the name for the custom validator to the specified value.
+     * Note that the validator name does not include command line options; those
+     * are specified via the separate "customValidatorCommand" field.
+     * 
+     * @param progName -- the custom validator program name
      */
-    public void setCustomValidatorInvocationCommand(String command) {
-        this.customValidatorInvocationCommand = command;
+    public void setCustomValidatorProgramName(String progName) {
+        this.customValidatorProgramName = progName;
     }
 
 
     /**
-     * Returns the current custom validator command options.
-     * @return the command options to be passed to the custom validator
+     * Returns the current Custom Validator command line; that is, the command used to invoke the Custom Balidator.
+     * This typically includes the name of the validator program as the first element, followed by any arguments
+     * to be passed to the custom validator.
+     * 
+     * @return the command line used to invoke the custom validator
      */
-    public String getCustomValidatorCommandOptions() {
-        return customValidatorCommandOptions;
+    public String getCustomValidatorCommandLine() {
+        return customValidatorCommandLine;
     }
 
     /**
-     * Sets the command options for the custom validator to the specified value.
-     * @param optionString -- a String defining the options to be passed to the custom validator
+     * Sets the command line to be used to invoke the Custom Validator.
+     * The command typically includes the name of the custom validator program as the first element, followed by
+     * any arguments to be passed to the custom validator.
+     * 
+     * @param commandString -- a String defining the command line used to invoke the Custom Validator
      */
-    public void setCustomValidatorCommandOptions(String optionString) {
-        this.customValidatorInvocationCommand = optionString;
+    public void setCustomValidatorCommandLine(String commandString) {
+        this.customValidatorCommandLine = commandString;
     }
 
     /**
@@ -85,28 +101,36 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
         
         CustomValidatorSettings other = (CustomValidatorSettings) obj;
         
-        //first, check the invocation command lines
+        //first, check the validator program name
         //check whether one is null while the other is not, using the Java XOR ("^") operator
-        if (this.getCustomValidatorInvocationCommand()==null ^ other.getCustomValidatorInvocationCommand()==null) {
+        if (this.getCustomValidatorProgramName()==null ^ other.getCustomValidatorProgramName()==null) {
             return false;
         }
         //check whether, if both are non-null, both are the same
-        if (this.getCustomValidatorInvocationCommand()!=null && other.getCustomValidatorInvocationCommand()!=null) {
-            if (!(this.getCustomValidatorInvocationCommand().equals(other.getCustomValidatorInvocationCommand()))) {
+        if (this.getCustomValidatorProgramName()!=null && other.getCustomValidatorProgramName()!=null) {
+            if (!(this.getCustomValidatorProgramName().equals(other.getCustomValidatorProgramName()))) {
                 return false;
             }
         }
         
-        //next, check the options string
+        //next, check the validator invocation command string
         //check whether one is null while the other is not, using the Java XOR ("^") operator
-        if (this.getCustomValidatorCommandOptions()==null ^ other.getCustomValidatorCommandOptions()==null) {
+        if (this.getCustomValidatorCommandLine()==null ^ other.getCustomValidatorCommandLine()==null) {
             return false;
         }
         //check whether, if both are non-null, both are the same
-        if (this.getCustomValidatorCommandOptions()!=null && other.getCustomValidatorCommandOptions()!=null) {
-            if (!(this.getCustomValidatorCommandOptions().equals(other.getCustomValidatorCommandOptions()))) {
+        if (this.getCustomValidatorCommandLine()!=null && other.getCustomValidatorCommandLine()!=null) {
+            if (!(this.getCustomValidatorCommandLine().equals(other.getCustomValidatorCommandLine()))) {
                 return false;
             }
+        }
+        
+        //check whether the flags specifying which validator interface to use are identical
+        if (this.isUsePC2ValidatorInterface() != other.isUsePC2ValidatorInterface()) {
+            return false;
+        }
+        if (this.isUseCLICSValidatorInterface() != other.isUseCLICSValidatorInterface()) {
+            return false;
         }
 
         return true;
@@ -119,9 +143,53 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
     public CustomValidatorSettings clone() {
         CustomValidatorSettings clone = new CustomValidatorSettings();
         //the following should work because Strings are immutable...
-        clone.setCustomValidatorInvocationCommand(this.getCustomValidatorInvocationCommand());
-        clone.setCustomValidatorCommandOptions(this.getCustomValidatorCommandOptions());
+        clone.setCustomValidatorProgramName(this.getCustomValidatorProgramName());
+        clone.setCustomValidatorCommandLine(this.getCustomValidatorCommandLine());
         return clone;
+    }
+
+
+
+    /**
+     * @return the usePC2ValidatorInterface flag setting
+     */
+    public boolean isUsePC2ValidatorInterface() {
+        return usePC2ValidatorInterface;
+    }
+
+
+
+    /**
+     * Sets the flag indicating that this validator expects to use the PC2 Validator Interface.
+     * Note that it is the caller's responsibility to also call method {@link #setUseCLICSValidatorInterface(boolean)}
+     * to set the useCLICSValidatorInterface to the complement of the value passed to this method. 
+     * 
+     * @param yesNo the value to which the usePC2ValidatorInterface flag should be set
+     */
+    public void setUsePC2ValidatorInterface(boolean yesNo) {
+        this.usePC2ValidatorInterface = yesNo;
+    }
+
+
+
+    /**
+     * @return the useCLICSValidatorInterface
+     */
+    public boolean isUseCLICSValidatorInterface() {
+        return useCLICSValidatorInterface;
+    }
+
+
+
+    /**
+     * Sets the flag indicating that this validator expects to use the CLICS Validator Interface.
+     * Note that it is the caller's responsibility to also call method {@link #setUsePC2ValidatorInterface(boolean)}
+     * to set the usePC2ValidatorInterface to the complement of the value passed to this method. 
+     * 
+     * @param yesNo the value to which the useCLICSValidatorInterface flag should be set
+     */
+    public void setUseCLICSValidatorInterface(boolean yesNo) {
+        this.useCLICSValidatorInterface = yesNo;
     }
 
 }

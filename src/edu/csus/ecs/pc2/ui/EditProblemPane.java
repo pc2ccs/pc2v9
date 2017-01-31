@@ -251,11 +251,11 @@ public class EditProblemPane extends JPanePlugin {
     private JPanel customValidatorPanel = null;
     private Component horizontalStrut_1;
     private JPanel customValidatorOptionsSubPanel;
-      private JLabel customValidatorCommandLabel;
-      private JTextField customValidatorCommandTextField;
+      private JLabel customValidatorProgramNameLabel;
+      private JTextField customValidatorProgramNameTextField;
       private JButton chooseValidatorProgramButton = null;
-      private JLabel customValidatorCommandOptionsLabel = null;
-      private JTextField customValidatorCommandOptionsTextField = null;
+      private JLabel customValidatorCommandLineLabel = null;
+      private JTextField customValidatorCommandLineTextField = null;
 
     
     private Component horizontalStrut;    
@@ -719,8 +719,9 @@ public class EditProblemPane extends JPanePlugin {
      * @param checkProblem
      *            will update this Problem if supplied, if null creates a new Problem
      * @param dataFiles
-     * @return Problem based on fields
-     * @throws InvalidFieldValue
+     * 
+     * @return a Problem based on fields in this EditProblemPane GUI
+     * @throws InvalidFieldValue if any of the fields in the GUI are incomplete or illegally set
      */
     public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
         
@@ -775,6 +776,7 @@ public class EditProblemPane extends JPanePlugin {
             throw new InvalidFieldValue("Invalid problem short name");
         }
 
+        //handle problems which require data files
         if (problemRequiresDataCheckBox.isSelected()) {
 
             String fileName = inputDataFileLabel.getText();
@@ -819,6 +821,7 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setDataFileName(null);
         }
 
+        //handle problems for which the judges have provided an Answer File
         if (judgesHaveAnswerFiles.isSelected()) {
 
             String fileName = answerFileNameLabel.getText();
@@ -884,6 +887,7 @@ public class EditProblemPane extends JPanePlugin {
         
         if (checkProblem.isUsingPC2Validator()) {
 
+            //update PC2 Validator settings from fields
             // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
             // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
 
@@ -894,7 +898,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         if (checkProblem.isUsingCLICSValidator()) {
-            //update CLICS Default Validator settings from fields.
+            //update CLICS Validator settings from fields.
             checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
         }
         
@@ -908,6 +912,8 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
+        
+        //*** this is not true; for Custom Validator you MUST specify a file
         // selecting a file is optional
         String newValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
         if (newValidatorFileName != null) {
@@ -1256,12 +1262,21 @@ public class EditProblemPane extends JPanePlugin {
 
         //verify that if a Custom Validator has been selected, there is a Validator Command specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (getCustomValidatorCommandTextField().getText() == null
-                    || getCustomValidatorCommandTextField().getText().trim().length() == 0) {
+            if (getCustomValidatorCommandLineTextField().getText() == null
+                    || getCustomValidatorCommandLineTextField().getText().trim().length() == 0) {
                 showMessage("\"Use Custom Validator\" is selected; you must specify Validator Command Line (\"Validator\" tab)");
                 return false;
             }
         }
+        
+        //verify that if a Custom Validator has been selected, exactly one Validator Interface has been specified
+        if (getUseCustomValidatorRadioButton().isSelected()) {
+            if (!(getRdbtnUseClicsValStd().isSelected() ^ getRdbtnUsePC2ValStd().isSelected())) {
+                showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Validator\" tab)");
+                return false;
+            }
+        }
+
 
         //validate the CLICS validator tolerance fields
         if (getFloatRelativeToleranceCheckBox().isSelected()) {
@@ -1736,7 +1751,7 @@ public class EditProblemPane extends JPanePlugin {
 
             if (inProblem.isUsingPC2Validator()) {
             	
-                getCustomValidatorCommandTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+                getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
                 getUsePC2ValidatorRadioButton().setSelected(true);
                 getUseCLICSValidatorRadioButton().setSelected(false);
                 getUseCustomValidatorRadioButton().setSelected(false);
@@ -1770,9 +1785,10 @@ public class EditProblemPane extends JPanePlugin {
                 getUseCustomValidatorRadioButton().setSelected(true);
                 
                 CustomValidatorSettings settings = inProblem.getCustomValidatorSettings();
-                getCustomValidatorExecutableProgramTextField().setText(settings.getCustomValidatorInvocationCommand());
-                getCustomValidatorExecutableProgramTextField().setToolTipText(settings.getCustomValidatorInvocationCommand());
-                getCustomValidatorCommandTextField().setText(settings.getCustomValidatorCommandOptions());
+                getCustomValidatorExecutableProgramTextField().setText(settings.getCustomValidatorProgramName());
+                getCustomValidatorExecutableProgramTextField().setToolTipText(settings.getCustomValidatorProgramName());
+                getCustomValidatorCommandLineTextField().setText(settings.getCustomValidatorCommandLine());
+                getCustomValidatorCommandLineTextField().setToolTipText(settings.getCustomValidatorCommandLine());
                 
                 SerializedFile sFile = problemDataFiles.getValidatorFile();
                 if (sFile != null) {
@@ -1786,7 +1802,7 @@ public class EditProblemPane extends JPanePlugin {
 
         } else {
         	//the problem is not using a validator
-            getCustomValidatorCommandTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND); //why? (copied from old code)
+            getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND); //why? (copied from old code)
             useNOValidatatorRadioButton.setSelected(true);
             getUsePC2ValidatorRadioButton().setSelected(false);
             getUseCLICSValidatorRadioButton().setSelected(false);
@@ -2571,7 +2587,7 @@ public class EditProblemPane extends JPanePlugin {
         getCustomValidatorExecutableProgramLabel().setEnabled(enableComponents);
         getCustomValidatorExecutableProgramTextField().setEnabled(enableComponents);
         getCustomValidatorCommandLabel().setEnabled(enableComponents);
-        getCustomValidatorCommandTextField().setEnabled(enableComponents);
+        getCustomValidatorCommandLineTextField().setEnabled(enableComponents);
         getCustomValidatorInterfaceLabel().setEnabled(enableComponents);
         getRdbtnUsePC2ValStd().setEnabled(enableComponents);
         getRdbtnUseClicsValStd().setEnabled(enableComponents);
@@ -2866,18 +2882,18 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getCustomValidatorCommandTextField() {
-        if (customValidatorCommandOptionsTextField == null) {
-            customValidatorCommandOptionsTextField = new JTextField();
-            customValidatorCommandOptionsTextField.setEnabled(false);
-            customValidatorCommandOptionsTextField.setMaximumSize(new Dimension(100, 20));
-            customValidatorCommandOptionsTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+    private JTextField getCustomValidatorCommandLineTextField() {
+        if (customValidatorCommandLineTextField == null) {
+            customValidatorCommandLineTextField = new JTextField();
+            customValidatorCommandLineTextField.setEnabled(false);
+            customValidatorCommandLineTextField.setMaximumSize(new Dimension(100, 20));
+            customValidatorCommandLineTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
         }
-        return customValidatorCommandOptionsTextField;
+        return customValidatorCommandLineTextField;
     }
 
     /**
@@ -3118,7 +3134,7 @@ public class EditProblemPane extends JPanePlugin {
         getFloatRelativeToleranceTextField().setText("");
 
         //clear custom validator options
-        getCustomValidatorCommandTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
         getCustomValidatorExecutableProgramTextField().setText("");
         getCustomValidatorExecutableProgramTextField().setToolTipText("");
         
@@ -3791,20 +3807,20 @@ public class EditProblemPane extends JPanePlugin {
         	customValidatorOptionsSubPanel.setLayout(gbl_customValidatorOptionsPanel);
         	
         	//add the Custom Validator Executable Program Label to the subpanel
-        	GridBagConstraints gbc_ValidatorProgramLabel = new GridBagConstraints();
-        	gbc_ValidatorProgramLabel.anchor = GridBagConstraints.EAST;
-        	gbc_ValidatorProgramLabel.insets = new Insets(0, 0, 5, 5);
-        	gbc_ValidatorProgramLabel.gridx = 0;
-        	gbc_ValidatorProgramLabel.gridy = 0;
-        	customValidatorOptionsSubPanel.add(getCustomValidatorExecutableProgramLabel(), gbc_ValidatorProgramLabel);
+        	GridBagConstraints gbc_customValidatorProgramNameLabel = new GridBagConstraints();
+        	gbc_customValidatorProgramNameLabel.anchor = GridBagConstraints.EAST;
+        	gbc_customValidatorProgramNameLabel.insets = new Insets(0, 0, 5, 5);
+        	gbc_customValidatorProgramNameLabel.gridx = 0;
+        	gbc_customValidatorProgramNameLabel.gridy = 0;
+        	customValidatorOptionsSubPanel.add(getCustomValidatorExecutableProgramLabel(), gbc_customValidatorProgramNameLabel);
         	
         	//add the Custom Validator Executable Program TextField to the subpanel
-        	GridBagConstraints gbc_textField = new GridBagConstraints();
-        	gbc_textField.insets = new Insets(0, 0, 5, 5);
-        	gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-        	gbc_textField.gridx = 1;
-        	gbc_textField.gridy = 0;
-        	customValidatorOptionsSubPanel.add(getCustomValidatorExecutableProgramTextField(), gbc_textField);
+        	GridBagConstraints gbc_customValidatorProgramNameTextField = new GridBagConstraints();
+        	gbc_customValidatorProgramNameTextField.insets = new Insets(0, 0, 5, 5);
+        	gbc_customValidatorProgramNameTextField.fill = GridBagConstraints.HORIZONTAL;
+        	gbc_customValidatorProgramNameTextField.gridx = 1;
+        	gbc_customValidatorProgramNameTextField.gridy = 0;
+        	customValidatorOptionsSubPanel.add(getCustomValidatorExecutableProgramTextField(), gbc_customValidatorProgramNameTextField);
         	
         	//add the Choose Validator Program button to the subpanel
         	GridBagConstraints gbc_validatorProgramButton = new GridBagConstraints();
@@ -3815,20 +3831,20 @@ public class EditProblemPane extends JPanePlugin {
         	customValidatorOptionsSubPanel.add(getChooseValidatorProgramButton(), gbc_validatorProgramButton);
         	
         	//add the Validator Command Line label to the subpanel
-        	GridBagConstraints gbc_CustomValidatorCommandLabel = new GridBagConstraints();
-        	gbc_CustomValidatorCommandLabel.anchor = GridBagConstraints.EAST;
-        	gbc_CustomValidatorCommandLabel.insets = new Insets(0, 0, 5, 5);
-        	gbc_CustomValidatorCommandLabel.gridx = 0;
-        	gbc_CustomValidatorCommandLabel.gridy = 1;
-        	customValidatorOptionsSubPanel.add(getCustomValidatorCommandLabel(), gbc_CustomValidatorCommandLabel);
+        	GridBagConstraints gbc_customValidatorCommandLineLabel = new GridBagConstraints();
+        	gbc_customValidatorCommandLineLabel.anchor = GridBagConstraints.EAST;
+        	gbc_customValidatorCommandLineLabel.insets = new Insets(0, 0, 5, 5);
+        	gbc_customValidatorCommandLineLabel.gridx = 0;
+        	gbc_customValidatorCommandLineLabel.gridy = 1;
+        	customValidatorOptionsSubPanel.add(getCustomValidatorCommandLabel(), gbc_customValidatorCommandLineLabel);
         	
         	//add the Custom Validator Command Textfield to the subpanel
-        	GridBagConstraints gbc_CustomValidatorCommandTextField = new GridBagConstraints();
-        	gbc_CustomValidatorCommandTextField.insets = new Insets(0, 0, 5, 5);
-        	gbc_CustomValidatorCommandTextField.fill = GridBagConstraints.HORIZONTAL;
-        	gbc_CustomValidatorCommandTextField.gridx = 1;
-        	gbc_CustomValidatorCommandTextField.gridy = 1;
-        	customValidatorOptionsSubPanel.add(getCustomValidatorCommandTextField(), gbc_CustomValidatorCommandTextField);
+        	GridBagConstraints gbc_customValidatorCommandLineTextField = new GridBagConstraints();
+        	gbc_customValidatorCommandLineTextField.insets = new Insets(0, 0, 5, 5);
+        	gbc_customValidatorCommandLineTextField.fill = GridBagConstraints.HORIZONTAL;
+        	gbc_customValidatorCommandLineTextField.gridx = 1;
+        	gbc_customValidatorCommandLineTextField.gridy = 1;
+        	customValidatorOptionsSubPanel.add(getCustomValidatorCommandLineTextField(), gbc_customValidatorCommandLineTextField);
         	
         	//add the Custom Validator Interface label to the subpanel
         	GridBagConstraints gbc_CustomValidatorInterfaceLabel = new GridBagConstraints();
@@ -3879,32 +3895,32 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     private JLabel getCustomValidatorExecutableProgramLabel() {
-        if (customValidatorCommandLabel == null) {
-        	customValidatorCommandLabel = new JLabel("Validator program:");
+        if (customValidatorProgramNameLabel == null) {
+        	customValidatorProgramNameLabel = new JLabel("Validator program:");
         }
-        return customValidatorCommandLabel;
+        return customValidatorProgramNameLabel;
     }
     
     private JLabel getCustomValidatorCommandLabel() {
-        if (customValidatorCommandOptionsLabel == null) {
-            customValidatorCommandOptionsLabel = new JLabel("Validator Command Line:");
+        if (customValidatorCommandLineLabel == null) {
+            customValidatorCommandLineLabel = new JLabel("Validator Command Line:");
         }
-        return customValidatorCommandOptionsLabel;
+        return customValidatorCommandLineLabel;
     }    
     
     private JTextField getCustomValidatorExecutableProgramTextField() {
-        if (customValidatorCommandTextField == null) {
-        	customValidatorCommandTextField = new JTextField();
-        	customValidatorCommandTextField.setEnabled(false);
-        	customValidatorCommandTextField.setColumns(25);
-        	customValidatorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+        if (customValidatorProgramNameTextField == null) {
+        	customValidatorProgramNameTextField = new JTextField();
+        	customValidatorProgramNameTextField.setEnabled(false);
+        	customValidatorProgramNameTextField.setColumns(25);
+        	customValidatorProgramNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
 
         }
-        return customValidatorCommandTextField;
+        return customValidatorProgramNameTextField;
     }
     private Component getVerticalStrut() {
         if (verticalStrut == null) {
@@ -4065,14 +4081,16 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     /**
-     * Returns a CustomValidatorSettings object containing the values currently displayed in the GUI.
+     * Returns a CustomValidatorSettings object containing the Custom Validator settings currently displayed in the GUI.
      * 
      * @return a CustomValidatorSettings object populated from the GUI
      */
     private CustomValidatorSettings getCustomValidatorSettingsFromFields() {
         CustomValidatorSettings settings = new CustomValidatorSettings();
-        settings.setCustomValidatorInvocationCommand(this.getCustomValidatorExecutableProgramTextField().getText());
-        settings.setCustomValidatorCommandOptions(this.getCustomValidatorCommandTextField().getText());
+        settings.setCustomValidatorProgramName(this.getCustomValidatorExecutableProgramTextField().getText());
+        settings.setCustomValidatorCommandLine(this.getCustomValidatorCommandLineTextField().getText());
+        settings.setUsePC2ValidatorInterface(this.getRdbtnUsePC2ValStd().isSelected());
+        settings.setUseCLICSValidatorInterface(this.getRdbtnUseClicsValStd().isSelected());
         
         return settings;
     }
