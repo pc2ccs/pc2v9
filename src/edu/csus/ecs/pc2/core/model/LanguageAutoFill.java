@@ -102,12 +102,12 @@ public final class LanguageAutoFill {
                     "{:basename}.exe", "." + fs + "{:basename}.exe", MSCTITLE , ""};
             return dVals;
         } else if (key.equals(GNUCPPTITLE)) {
-            String[] dVals = { GNUCPPTITLE, "g++ -lm -o {:basename}.exe {:mainfile}", "{:basename}.exe", //
+            String[] dVals = { GNUCPPTITLE, "g++ -o {:basename}.exe {:mainfile}", "{:basename}.exe", //
                     "." + fs + "{:basename}.exe", "GNU C++", "" };
             return dVals;
         } else if (key.equals(GNUCTITLE)) {
 
-            String[] dVals = { GNUCTITLE, "gcc -lm -o {:basename}.exe {:mainfile}", //
+            String[] dVals = { GNUCTITLE, "gcc -o {:basename}.exe {:mainfile} -lm", //
                     "{:basename}.exe", "." + fs + "{:basename}.exe", "GNU C", "" };
             return dVals;
         } else if (key.equals(KYLIXTITLE)) {
