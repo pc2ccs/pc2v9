@@ -148,9 +148,8 @@ public class ExportYAML {
         }
         contestWriter.println("start-time: " + formatDate(info.getScheduledStartDate()));
 
-        // TODO CCS duration: 5:00:00
         // duration: 5:00:00
-        contestWriter.println("elapsed: " + contestTime.getContestLengthStr());
+        contestWriter.println("duration: " + contestTime.getContestLengthStr());
 
         // TODO CCS scoreboard-freeze: 4:00:00
         // scoreboard-freeze: 4:00:00
