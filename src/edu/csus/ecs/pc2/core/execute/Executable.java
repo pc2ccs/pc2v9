@@ -313,7 +313,7 @@ public class Executable extends Plugin implements IExecutable {
                      */ 
                     if (! executionData.isCompileSuccess()) {
 
-                        String errorMessage = "Unable to find/execute compiler using command: "+language.getCompileCommandLine();
+                        String errorMessage = "Compile failed to generate expected program \""+substituteAllStrings(run, language.getExecutableIdentifierMask())+"\" using the compile command \""+substituteAllStrings(run, language.getCompileCommandLine())+"\";  either PC2 was unable to find the specified compiler, or the submitted source code had compilation errors.";
                         if (executionData.getExecutionException() != null) {
                             errorMessage += NL + executionData.getExecutionException().getMessage();
                         }
