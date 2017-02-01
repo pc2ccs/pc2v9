@@ -1271,7 +1271,7 @@ public class EditProblemPane extends JPanePlugin {
         
         //verify that if a Custom Validator has been selected, exactly one Validator Interface has been specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (!(getRdbtnUseClicsValStd().isSelected() ^ getRdbtnUsePC2ValStd().isSelected())) {
+            if (!(getUseClicsValStdRadioButton().isSelected() ^ getUsePC2ValStdRadioButton().isSelected())) {
                 showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Validator\" tab)");
                 return false;
             }
@@ -2589,8 +2589,8 @@ public class EditProblemPane extends JPanePlugin {
         getCustomValidatorCommandLabel().setEnabled(enableComponents);
         getCustomValidatorCommandLineTextField().setEnabled(enableComponents);
         getCustomValidatorInterfaceLabel().setEnabled(enableComponents);
-        getRdbtnUsePC2ValStd().setEnabled(enableComponents);
-        getRdbtnUseClicsValStd().setEnabled(enableComponents);
+        getUsePC2ValStdRadioButton().setEnabled(enableComponents);
+        getUseClicsValStdRadioButton().setEnabled(enableComponents);
     }
 
     protected void enableClicsValidatorComponents(boolean enableComponents) {
@@ -3859,7 +3859,7 @@ public class EditProblemPane extends JPanePlugin {
         	gbc_rdbtnUsePc2Standard.insets = new Insets(0, 0, 5, 5);
         	gbc_rdbtnUsePc2Standard.gridx = 1;
         	gbc_rdbtnUsePc2Standard.gridy = 2;
-        	customValidatorOptionsSubPanel.add(getRdbtnUsePC2ValStd(), gbc_rdbtnUsePc2Standard);
+        	customValidatorOptionsSubPanel.add(getUsePC2ValStdRadioButton(), gbc_rdbtnUsePc2Standard);
         	
         	//add the "What's This" icon for the PC2 Validator Standard Interface radio button to the subpanel
         	GridBagConstraints gbc_label_WhatsThisPC2ValStd = new GridBagConstraints();
@@ -3874,7 +3874,7 @@ public class EditProblemPane extends JPanePlugin {
         	gbc_rdbtnUseClicsStandard.insets = new Insets(0, 0, 0, 5);
         	gbc_rdbtnUseClicsStandard.gridx = 1;
         	gbc_rdbtnUseClicsStandard.gridy = 3;
-        	customValidatorOptionsSubPanel.add(getRdbtnUseClicsValStd(), gbc_rdbtnUseClicsStandard);
+        	customValidatorOptionsSubPanel.add(getUseClicsValStdRadioButton(), gbc_rdbtnUseClicsStandard);
         	
             //add the "What's This" icon for the CLICS Validator Standard Interface radio button to the subpanel
         	GridBagConstraints gbc_label_WhatsThisCLICSValStd = new GridBagConstraints();
@@ -4089,8 +4089,8 @@ public class EditProblemPane extends JPanePlugin {
         CustomValidatorSettings settings = new CustomValidatorSettings();
         settings.setCustomValidatorProgramName(this.getCustomValidatorExecutableProgramTextField().getText());
         settings.setCustomValidatorCommandLine(this.getCustomValidatorCommandLineTextField().getText());
-        settings.setUsePC2ValidatorInterface(this.getRdbtnUsePC2ValStd().isSelected());
-        settings.setUseCLICSValidatorInterface(this.getRdbtnUseClicsValStd().isSelected());
+        settings.setUsePC2ValidatorInterface(this.getUsePC2ValStdRadioButton().isSelected());
+        settings.setUseCLICSValidatorInterface(this.getUseClicsValStdRadioButton().isSelected());
         
         return settings;
     }
@@ -4154,7 +4154,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         return lblValidatorInterface;
     }
-    private JRadioButton getRdbtnUsePC2ValStd() {
+    private JRadioButton getUsePC2ValStdRadioButton() {
         if (rdbtnUsePcStandard == null) {
         	rdbtnUsePcStandard = new JRadioButton("Use PC^2 Standard Interface");
         	rdbtnUsePcStandard.setSelected(true);
@@ -4162,7 +4162,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         return rdbtnUsePcStandard;
     }
-    private JRadioButton getRdbtnUseClicsValStd() {
+    private JRadioButton getUseClicsValStdRadioButton() {
         if (rdbtnUseClicsStandard == null) {
         	rdbtnUseClicsStandard = new JRadioButton("Use CLICS Standard Interface");
             validatorStandardButtonGroup.add(rdbtnUseClicsStandard);
