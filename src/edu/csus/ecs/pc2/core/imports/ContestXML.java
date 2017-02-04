@@ -413,7 +413,7 @@ public class ContestXML {
             memento.putInteger("internalValidatorOption", problem.getWhichPC2Validator());
             memento.putString("validatorCommand", problem.getValidatorCommandLine());
             memento.putString("validatorProgram", problem.getValidatorProgramName());
-            memento.putBoolean("ignoreSpaces", problem.isIgnoreSpacesOnValidation());
+            memento.putBoolean("ignoreCase", problem.isIgnoreCaseOnValidation());
         } else if (problem.isValidatedProblem()) {
             memento.putString("validatorCommand", problem.getValidatorCommandLine());
             memento.putString("validatorProgram", problem.getValidatorProgramName());

@@ -350,7 +350,7 @@ public class ContestImporter {
         newProblem.setComputerJudged(problem.isComputerJudged());
         newProblem.setDataFileName(problem.getDataFileName());
         newProblem.setHideOutputWindow(problem.isHideOutputWindow());
-        newProblem.setIgnoreCaseOnValidation(problem.isIgnoreSpacesOnValidation());
+        newProblem.setIgnoreCaseOnValidation(problem.isIgnoreCaseOnValidation());
         newProblem.setCLICSValidatorSettings(problem.getClicsValidatorSettings().clone());
         newProblem.setCustomValidatorSettings(problem.getCustomValidatorSettings().clone());
         newProblem.setInternationalJudgementReadMethod(problem.isInternationalJudgementReadMethod());

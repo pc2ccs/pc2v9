@@ -1078,7 +1078,7 @@ public class ContestYAMLLoader implements IContestLoader {
         problem.setWhichPC2Validator(optionNumber);
         problem.setIgnoreCaseOnValidation(true);
 
-        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
+        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
 
         return problem;

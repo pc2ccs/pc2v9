@@ -795,7 +795,7 @@ public class EditProblemPaneNew extends JPanePlugin {
 
             checkProblem.setWhichPC2Validator(getPc2ValidatorComboBox().getSelectedIndex());
             checkProblem.setIgnoreCaseOnValidation(getIgnoreCaseCheckBox().isSelected());
-            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
+            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreCaseOnValidation());
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         }
 
@@ -1485,7 +1485,7 @@ public class EditProblemPaneNew extends JPanePlugin {
                 getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
                 usePC2ValidatorRadioButton.setSelected(true);
                 pc2ValidatorOptionComboBox.setSelectedIndex(inProblem.getWhichPC2Validator());
-                ignoreCaseCheckBox.setSelected(inProblem.isIgnoreSpacesOnValidation());
+                ignoreCaseCheckBox.setSelected(inProblem.isIgnoreCaseOnValidation());
             } else {
                 getValidatorCommandLineTextBox().setText(inProblem.getValidatorCommandLine());
                 useExternalValidatorRadioButton.setSelected(true);

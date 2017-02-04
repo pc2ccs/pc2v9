@@ -263,7 +263,7 @@ public class Problem implements IElementObject {
         // private String executionPrepCommand = "";
         // private SerializedFile executionPrepFile;
 
-        clone.setIgnoreCaseOnValidation(isIgnoreSpacesOnValidation());
+        clone.setIgnoreCaseOnValidation(isIgnoreCaseOnValidation());
         if (this.getClicsValidatorSettings()==null) {
             clone.setCLICSValidatorSettings(null);
         } else {
@@ -388,9 +388,9 @@ public class Problem implements IElementObject {
 
 
     /**
-     * @return Returns the PC2 Validator ignoreSpacesOnValidation flag.
+     * @return Returns the PC2 Validator ignoreCaseOnValidation flag.
      */
-    public boolean isIgnoreSpacesOnValidation() {
+    public boolean isIgnoreCaseOnValidation() {
         return ignoreCaseOnValidation;
     }
 
@@ -719,7 +719,7 @@ public class Problem implements IElementObject {
                     if (whichPC2Validator != problem.getWhichPC2Validator()) {
                         return false;
                     }
-                    if (ignoreCaseOnValidation != problem.isIgnoreSpacesOnValidation()) {
+                    if (ignoreCaseOnValidation != problem.isIgnoreCaseOnValidation()) {
                         return false;
                     }
                 }
