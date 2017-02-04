@@ -625,6 +625,8 @@ public class EditProblemPane extends JPanePlugin {
                             }
                         }
                     }
+                    
+                    //TODO: XXX This needs to be updated to reflect the new validator possibilities
                     String fileName = changedProblem.getValidatorProgramName();
                     if (!problem.isUsingPC2Validator() && fileName != null && fileName.length() > 0) {
                         if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
@@ -893,7 +895,7 @@ public class EditProblemPane extends JPanePlugin {
 
             checkProblem.setWhichPC2Validator(getPc2ValidatorOptionComboBox().getSelectedIndex());
             checkProblem.setIgnoreCaseOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());
-            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
+            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreCaseOnValidation());
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         }
         
@@ -913,7 +915,7 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
         
-        //*** this is not true; for Custom Validator you MUST specify a file
+        //TODO:  *** this is not true; for Custom Validator you MUST specify a file
         // selecting a file is optional
         String newValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
         if (newValidatorFileName != null) {
@@ -972,6 +974,7 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
+        //TODO: should be using accessors instead of hard references for these buttons and checkboxes...
         checkProblem.setComputerJudged(computerJudgingRadioButton.isSelected());
 
         if (computerJudgingRadioButton.isSelected()) {
@@ -1741,28 +1744,27 @@ public class EditProblemPane extends JPanePlugin {
             stdinRadioButton.setSelected(false);
         }
 
-        getPc2ValidatorOptionComboBox().setSelectedIndex(0);
-        getPc2ValidatorIgnoreCaseCheckBox().setSelected(true);
-        getCustomValidatorExecutableProgramTextField().setText("");
-        getCustomValidatorExecutableProgramTextField().setToolTipText("");
-        getPc2ValidatorIgnoreCaseCheckBox().setSelected(false);
-
+        setDefaultValidatorFormSettings();
+        
         if (inProblem.isValidatedProblem()) {
 
             if (inProblem.isUsingPC2Validator()) {
             	
-                getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
                 getUsePC2ValidatorRadioButton().setSelected(true);
                 getUseCLICSValidatorRadioButton().setSelected(false);
                 getUseCustomValidatorRadioButton().setSelected(false);
+                getUseNOValidatatorRadioButton().setSelected(false);
+                
                 getPc2ValidatorOptionComboBox().setSelectedIndex(inProblem.getWhichPC2Validator());
-                getPc2ValidatorIgnoreCaseCheckBox().setSelected(inProblem.isIgnoreSpacesOnValidation());
+                getPc2ValidatorIgnoreCaseCheckBox().setSelected(inProblem.isIgnoreCaseOnValidation());
                 
             } else if (inProblem.isUsingCLICSValidator()) {
             	
                 getUsePC2ValidatorRadioButton().setSelected(false);
                 getUseCLICSValidatorRadioButton().setSelected(true);
                 getUseCustomValidatorRadioButton().setSelected(false);
+                getUseNOValidatatorRadioButton().setSelected(false);
+                
                 getCLICSValidatorCaseSensitiveCheckBox().setSelected(inProblem.getClicsValidatorSettings().isCaseSensitive());
                 getCLICSSpaceSensitiveCheckBox().setSelected(inProblem.getClicsValidatorSettings().isSpaceSensitive());
                 getFloatAbsoluteToleranceCheckBox().setSelected(inProblem.getClicsValidatorSettings().isFloatAbsoluteToleranceSpecified());
@@ -1783,12 +1785,15 @@ public class EditProblemPane extends JPanePlugin {
                 getUsePC2ValidatorRadioButton().setSelected(false);
                 getUseCLICSValidatorRadioButton().setSelected(false);
                 getUseCustomValidatorRadioButton().setSelected(true);
+                getUseNOValidatatorRadioButton().setSelected(false);
                 
                 CustomValidatorSettings settings = inProblem.getCustomValidatorSettings();
                 getCustomValidatorExecutableProgramTextField().setText(settings.getCustomValidatorProgramName());
                 getCustomValidatorExecutableProgramTextField().setToolTipText(settings.getCustomValidatorProgramName());
                 getCustomValidatorCommandLineTextField().setText(settings.getCustomValidatorCommandLine());
                 getCustomValidatorCommandLineTextField().setToolTipText(settings.getCustomValidatorCommandLine());
+                getUseClicsValStdRadioButton().setSelected(settings.isUseCLICSValidatorInterface());
+                getUsePC2ValStdRadioButton().setSelected(settings.isUsePC2ValidatorInterface());
                 
                 SerializedFile sFile = problemDataFiles.getValidatorFile();
                 if (sFile != null) {
@@ -1802,11 +1807,10 @@ public class EditProblemPane extends JPanePlugin {
 
         } else {
         	//the problem is not using a validator
-            getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND); //why? (copied from old code)
-            useNOValidatatorRadioButton.setSelected(true);
             getUsePC2ValidatorRadioButton().setSelected(false);
             getUseCLICSValidatorRadioButton().setSelected(false);
             getUseCustomValidatorRadioButton().setSelected(false);
+            useNOValidatatorRadioButton.setSelected(true);
         }
 
         getShowValidatorToJudgesCheckBox().setSelected(inProblem.isShowValidationToJudges());
@@ -1827,11 +1831,41 @@ public class EditProblemPane extends JPanePlugin {
         shortNameTextfield.setText(inProblem.getShortName());
 
     }
+    
+    /**
+     * Defines the initial values for Validator settings when the Validator tab (form) is first being
+     * populated.  These values will be over-ridden by validator-specific settings if a validator has been selected.
+     */
+    private void setDefaultValidatorFormSettings() {
+  
+    	//default PC2 Validator form settings
+        getPc2ValidatorOptionComboBox().setSelectedIndex(0);
+        getPc2ValidatorIgnoreCaseCheckBox().setSelected(false);
+        
+        //default CLICS Validator form settings
+        getCLICSValidatorCaseSensitiveCheckBox().setSelected(false);
+        getCLICSSpaceSensitiveCheckBox().setSelected(false);
+        getFloatRelativeToleranceCheckBox().setSelected(false);
+        getFloatAbsoluteToleranceTextField().setText("");
+        getFloatRelativeToleranceCheckBox().setSelected(false);
+        getFloatRelativeToleranceTextField().setText("");
+        
+        //default Custom Validator form settings
+        getCustomValidatorExecutableProgramTextField().setText("");
+        getCustomValidatorExecutableProgramTextField().setToolTipText("");
+        getUsePC2ValStdRadioButton().setSelected(true);
+        getUseClicsValStdRadioButton().setSelected(false);
+        getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        getCustomValidatorCommandLineTextField().setToolTipText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+
+    }
 
     /*
      * Sets the Judging Type radio and checkboxes in a sane manner.
      */
     private void populateJudging(Problem inProblem) {
+    	
+    	//TODO: all the following buttons and checkboxes should be accessed via accessors, not direct references...
         if (inProblem != null && inProblem.isComputerJudged()) {
             computerJudgingRadioButton.setSelected(true);
             manualReviewCheckBox.setSelected(inProblem.isManualReview());
