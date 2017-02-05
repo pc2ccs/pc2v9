@@ -562,7 +562,6 @@ public class EventFeedXML2013 {
      * @param contest
      * @param testCase
      * @param run
-     * @param problem
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, RunTestCase testCase, Run run) {
 
