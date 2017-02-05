@@ -1007,7 +1007,6 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void updateProblemCustomValidatorInfoFromGUIFields(Problem checkProblem) {
         
-        checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
         
         String newValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
         if (newValidatorFileName == null || newValidatorFileName.trim().length() <= 0) {
@@ -1026,6 +1025,7 @@ public class EditProblemPane extends JPanePlugin {
         checkFileFormat(serializedFile);
         
         //put the Validator information in the new Problem
+        checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
         checkProblem.setValidatorProgramName(serializedFile.getName());
         // for some reason on validator this is borked
         // newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, newValidatorFileName));
