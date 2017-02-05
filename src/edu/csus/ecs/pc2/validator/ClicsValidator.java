@@ -773,11 +773,12 @@ public class ClicsValidator {
         return true;
     }
     
-//    private void dumpOptions(String [] options) {
-//        for (int i=0; i<options.length; i++) {
-//            System.out.println ("Option " + i + ": '" + options[i] + "'");
-//        }
-//    }
+    @SuppressWarnings("unused")
+    private void dumpOptions(String [] options) {
+        for (int i=0; i<options.length; i++) {
+            System.out.println ("Option " + i + ": '" + options[i] + "'");
+        }
+    }
     
     /**
      * The main entry point to the ClicsValidator when running as a stand-alone program.
