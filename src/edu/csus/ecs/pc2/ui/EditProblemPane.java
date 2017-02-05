@@ -412,7 +412,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Add Problem to the fields.
+     * Add to the contest a new Problem as defined by the current GUI fields.
      * 
      */
     protected void addProblem() {
@@ -727,7 +727,7 @@ public class EditProblemPane extends JPanePlugin {
      */
     public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
         
-        boolean isAdding;
+        boolean isAddingNewProblem; //false means we are editing an existing problem, received as "checkProblem"
         
         /**
          * Data file from General tab.
@@ -745,7 +745,7 @@ public class EditProblemPane extends JPanePlugin {
 
         if (checkProblem == null) {
             checkProblem = new Problem(problemNameTextField.getText());
-            isAdding = true;
+            isAddingNewProblem = true;
             if (newProblemDataFiles == null) {
                 // only overwrite if they do not exist already
                 newProblemDataFiles = new ProblemDataFiles(checkProblem);
@@ -755,7 +755,7 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setElementId(problem); // duplicate ElementId so that Problem key/lookup is identical
             newProblemDataFiles = dataFiles;
             // newProblemDataFiles = new ProblemDataFiles(problem);
-            isAdding = false;
+            isAddingNewProblem = false;
 
         }
 
@@ -790,7 +790,7 @@ public class EditProblemPane extends JPanePlugin {
                 fileName = inputDataFileLabel.getToolTipText() + "";
             }
 
-            if (isAdding) {
+            if (isAddingNewProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
 
                 if (serializedFile.getBuffer() == null) {
@@ -835,7 +835,7 @@ public class EditProblemPane extends JPanePlugin {
                 fileName = answerFileNameLabel.getToolTipText() + "";
             }
 
-            if (isAdding) {
+            if (isAddingNewProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
 
                 if (serializedFile.getBuffer() == null) {
@@ -873,7 +873,7 @@ public class EditProblemPane extends JPanePlugin {
 
         checkProblem.setReadInputDataFromSTDIN(stdinRadioButton.isSelected());
 
-        //set the flags indicating which validator (if any) is being used
+        //set the flags indicating which validator (if any) is being used in the Problem
         checkProblem.setValidatedProblem(!getUseNOValidatatorRadioButton().isSelected());
 
         if (checkProblem.isValidatedProblem()) {
@@ -887,7 +887,7 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setValidatorProgramName(null);
         checkProblem.setValidatorCommandLine(null);
         
-        //handle PC2 Validator case
+        //update PC2 Validator settings in the Problem
         if (checkProblem.isUsingPC2Validator()) {
 
             // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
@@ -899,81 +899,62 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         }
         
-        //handle CLICS Validator case
+        //update CLICS Validator settings in the Problem
         if (checkProblem.isUsingCLICSValidator()) {
             checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
         }
         
-        //handle Custom Validator case
+        //update Custom Validator settings in the Problem
         if (checkProblem.isUsingCustomValidator()) {
-            checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
-        }
 
-        checkProblem.setShowValidationToJudges(getShowValidatorToJudgesCheckBox().isSelected());
+            if (isAddingNewProblem) {
 
-        checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
-        checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
-
-        
-        //TODO:  *** this is not true; for Custom Validator you MUST specify a file
-        // selecting a file is optional
-        String newValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
-        if (newValidatorFileName != null) {
-            newValidatorFileName = newValidatorFileName.trim();
-        } else {
-            newValidatorFileName = "";
-        }
-
-        if (getUseCustomValidatorRadioButton().isSelected() && newValidatorFileName.length() > 0) {
-       	
-        	// external (custom) validator and they have specified a validator file name
-            String existingValidatorFilename = newValidatorFileName;
-            if (existingValidatorFilename.length() != getCustomValidatorExecutableProgramTextField().getToolTipText().length()) {
-                existingValidatorFilename = getCustomValidatorExecutableProgramTextField().getToolTipText() + "";
-            }
-
-            if (isAdding) {
-                SerializedFile serializedFile = new SerializedFile(existingValidatorFilename);
-
-                if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file '" + existingValidatorFilename + "'; choose validator file again (adding)");
-                }
-
-                checkProblem.setValidatorProgramName(serializedFile.getName());
-                // for some reason on validator this is borked
-                // newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, existingValidatorFilename));
-                newProblemDataFiles.setValidatorFile(serializedFile);
+                // we're adding a new Problem; update Problem Custom Validator values from GUI
+                updateProblemCustomValidatorInfoFromGUIFields(checkProblem);
 
             } else {
 
-                // existing validator loaded name.
+                // we're editing an existing Problem, which may or may not already have a Validator defined;
+                // find out if the Problem has a Validator defined
                 SerializedFile serializedFile = getController().getProblemDataFiles(problem).getValidatorFile();
 
-                if (newValidatorFileName.equals(existingValidatorFilename)) {
+                if (serializedFile == null) {
+                    //the existing Problem has no SerializedFile defined for the Validator; handle
+                    // this just like the case of a new Problem
+                    updateProblemCustomValidatorInfoFromGUIFields(checkProblem);
+                    
+                } else {
+                    //the existing Problem already has a SerializedFile defined for the Validator;
+                    // check to see if the defined file is the same as the one currently specified in the GUI
+                    
+                    String guiValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
+                    String existingValidatorFileName = serializedFile.getAbsolutePath();
 
-                    // refresh/check validator file
+                    if (guiValidatorFileName.equals(existingValidatorFileName)) {
 
-                    if (serializedFile != null) {
-                        serializedFile = freshenIfNeeded(serializedFile, existingValidatorFilename);
+                        // same file names in GUI and Problem; refresh/check validator file
+
+                        serializedFile = freshenIfNeeded(serializedFile, existingValidatorFileName);
                         newProblemDataFiles.setValidatorFile(serializedFile);
                         checkProblem.setValidatorProgramName(serializedFile.getName());
+
                     } else {
-                        newProblemDataFiles.setValidatorFile(null);
-                        checkProblem.setValidatorProgramName(existingValidatorFilename);
+
+                        // different file name in GUI from what's currently in the Problem; replace the one in 
+                        // the Problem with the one specified by the GUI fields,
+                        // which means doing the same thing as if a new problem was being defined
+                        updateProblemCustomValidatorInfoFromGUIFields(checkProblem);
                     }
-
-                } else {
-
-                    // different file name
-
-                    serializedFile = new SerializedFile(newValidatorFileName);
-                    checkFileFormat(serializedFile);
-                    newProblemDataFiles.setValidatorFile(serializedFile);
-                    checkProblem.setValidatorProgramName(serializedFile.getName());
                 }
             }
         }
+        
+        //update misc settings from GUI
+        checkProblem.setShowValidationToJudges(getShowValidatorToJudgesCheckBox().isSelected());
+        checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
+        checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
+        //update Judging Type settings from GUI
         //TODO: should be using accessors instead of hard references for these buttons and checkboxes...
         checkProblem.setComputerJudged(computerJudgingRadioButton.isSelected());
 
@@ -1016,6 +997,39 @@ public class EditProblemPane extends JPanePlugin {
 
         return checkProblem;
 
+    }
+    
+    /**
+     * Updates all data related to Custom Validators in a given problem from the current GUI fields.
+     * 
+     * @param checkProblem The {@link Problem} to be updated
+     * @throws InvalidFieldValue if any fields related to Custom Validator are illegal
+     */
+    private void updateProblemCustomValidatorInfoFromGUIFields(Problem checkProblem) {
+        
+        checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
+        
+        String newValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
+        if (newValidatorFileName == null || newValidatorFileName.trim().length() <= 0) {
+            // missing required custom validator name
+            throw new InvalidFieldValue("Missing required Custom Validator program name");
+        } else {
+            newValidatorFileName = newValidatorFileName.trim();
+        }
+
+        SerializedFile serializedFile = new SerializedFile(newValidatorFileName);
+
+        if (serializedFile.getBuffer() == null) {
+            throw new InvalidFieldValue("Unable to read file '" + newValidatorFileName + "' while adding new Problem; choose validator file again");
+        }
+        
+        checkFileFormat(serializedFile);
+        
+        //put the Validator information in the new Problem
+        checkProblem.setValidatorProgramName(serializedFile.getName());
+        // for some reason on validator this is borked
+        // newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, newValidatorFileName));
+        newProblemDataFiles.setValidatorFile(serializedFile);
     }
 
     private String getName(SerializedFile serializedFile) {
@@ -1274,7 +1288,7 @@ public class EditProblemPane extends JPanePlugin {
         
         //verify that if a Custom Validator has been selected, exactly one Validator Interface has been specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (!(getUseClicsValStdRadioButton().isSelected() ^ getUsePC2ValStdRadioButton().isSelected())) {
+            if (!(getUseClicsValStdRadioButton().isSelected() ^ getUsePC2ValStdRadioButton().isSelected())) {  // ^ == XOR
                 showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Validator\" tab)");
                 return false;
             }
@@ -2989,10 +3003,12 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Checks whether needs to freshen, prompt user before freshening.
      * 
-     * @param serializedFile
-     * @param fileName
-     * @return
-     * @throws InvalidFieldValue
+     * @param serializedFile the file to be checked to see if it is need of freshening
+     * @param fileName the file name corresponding to the specified SerializedFile
+     * 
+     * @return a SerializedFile which is the updated version of the specified SerializedFile if the specified file
+     *          was out of date AND the user confirmed the refresh operation
+     * @throws InvalidFieldValue if the specified file cannot be read or if the user cancels the operation
      */
     private SerializedFile freshenIfNeeded(SerializedFile serializedFile, String fileName) {
 
@@ -3001,7 +3017,7 @@ public class EditProblemPane extends JPanePlugin {
 
         }
         if (serializedFile.getBuffer() == null) {
-            throw new InvalidFieldValue("Unable to read file " + fileName + " choose file again (updating)");
+            throw new InvalidFieldValue("Unable to read file '" + fileName + "' while updating problem; choose file again");
         }
 
         // only check freshening if it is still the same fileName
@@ -3067,13 +3083,18 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * @param newFile
-     * @return true if the file was converted
+     * Checks a given {@link SerializedFile} to see if the file type matches the platform on which we are running.
+     * If the file type does not match, the user is prompted to confirm whether file should be converted to the current platform
+     * format as it is read into PC2.
+     * 
+     * @param newFile the SerializedFile to be checked
+     * @return true if the file was converted, false if the file was null or was not converted
+     * @throws InvalidFieldValue if the user was prompted as to whether to do a file conversion and hits "Cancel"
      */
     public boolean checkFileFormat(SerializedFile newFile) {
 
         if (newFile == null) {
-            showMessage("Warning new file is null");
+            showMessage("EditProblemPane.checkFileFormat(): Warning: specified file is null");
             return false;
         }
 
@@ -3119,6 +3140,8 @@ public class EditProblemPane extends JPanePlugin {
             if (!newFile.isExternalFile()) {
                 int answer = JOptionPane.showConfirmDialog(this, question, "File Format Mismatch", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (answer == JOptionPane.YES_OPTION) {
+                    
+                    //TODO: shouldn't the return value here be the value returned by "convertFile()", rather than "always true"?
                     newFile.convertFile(currentOS);
                     return true;
                 } else if (answer == JOptionPane.CANCEL_OPTION) {
