@@ -68,6 +68,8 @@ import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * Add/Edit Problem Pane.
@@ -4214,6 +4216,19 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton getUsePC2ValStdRadioButton() {
         if (rdbtnUsePcStandard == null) {
         	rdbtnUsePcStandard = new JRadioButton("Use PC^2 Standard Interface");
+        	rdbtnUsePcStandard.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        if (problem==null || problem.getValidatorCommandLine()==null || 
+        	                problem.getValidatorCommandLine().length() <= 0 ) {
+        	            //there's currently no definition for the Validator Command Line; fill it with the PC2 default
+        	            getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        	        } else {
+        	            if (problem != null && problem.getValidatorCommandLine()!=null) {
+        	                getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
+        	            }
+        	        }
+        	    }
+        	});
         	rdbtnUsePcStandard.setSelected(true);
         	validatorStandardButtonGroup.add(rdbtnUsePcStandard);
         }
@@ -4222,6 +4237,19 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton getUseClicsValStdRadioButton() {
         if (rdbtnUseClicsStandard == null) {
         	rdbtnUseClicsStandard = new JRadioButton("Use CLICS Standard Interface");
+        	rdbtnUseClicsStandard.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+                    if (problem==null || problem.getValidatorCommandLine()==null || 
+                            problem.getValidatorCommandLine().length() <= 0 ) {
+                        //there's currently no definition for the Validator Command Line; fill it with the CLICS default
+                        getCustomValidatorCommandLineTextField().setText("CLICS std here...");
+                    } else {
+                        if (problem != null && problem.getValidatorCommandLine()!=null) {
+                            getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
+                        }
+                    }
+                }
+        	});
             validatorStandardButtonGroup.add(rdbtnUseClicsStandard);
         }
         return rdbtnUseClicsStandard;
