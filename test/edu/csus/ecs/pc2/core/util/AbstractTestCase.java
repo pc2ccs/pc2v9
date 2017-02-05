@@ -498,10 +498,10 @@ public class AbstractTestCase extends TestCase {
      * @param directoryName
      *            directory that must exist.
      * @param message
-     *            message to show if file does not exist
+     *            message to show if directory does not exist
      */
     public void assertDirectoryExists(String directoryName, String message) {
-        assertTrue("Missing file " + message + ": " + directoryName, new File(directoryName).isDirectory());
+        assertTrue("Missing directory " + message + ": " + directoryName, new File(directoryName).isDirectory());
     }
 
     /**
