@@ -470,7 +470,7 @@ public class EditProblemPane extends JPanePlugin {
             clone.setSiteNumber(newProblemDataFiles.getSiteNumber());
             clone.setValidatorFile(newProblemDataFiles.getValidatorFile());
             clone.setValidatorRunCommand(newProblemDataFiles.getValidatorRunCommand());
-            clone.setValidatorFile(newProblemDataFiles.getValidatorRunFile());
+            clone.setValidatorRunFile(newProblemDataFiles.getValidatorRunFile());
             clone.setJudgesAnswerFiles(newProblemDataFiles.getJudgesAnswerFiles());
             clone.setJudgesDataFiles(newProblemDataFiles.getJudgesDataFiles());
             clone.setValidatorFiles(newProblemDataFiles.getValidatorFiles());
