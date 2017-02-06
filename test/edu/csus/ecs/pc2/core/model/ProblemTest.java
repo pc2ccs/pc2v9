@@ -38,7 +38,7 @@ public class ProblemTest extends TestCase {
         p2.setWhichPC2Validator(3);
         p2.setIgnoreCaseOnValidation(true);
 
-        p2.setValidatorCommandLine(EditProblemPane.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() + " " + p2.isIgnoreSpacesOnValidation());
+        p2.setValidatorCommandLine(EditProblemPane.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() + " " + p2.isIgnoreCaseOnValidation());
         p2.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
 
         p2.setReadInputDataFromSTDIN(false);
@@ -143,7 +143,7 @@ public class ProblemTest extends TestCase {
 
         p2 = getProblemAnew();
         p2.setIgnoreCaseOnValidation(false);
-        checkBoolean("setIgnoreSpacesOnValidation", p1.isIgnoreSpacesOnValidation(), p2.isIgnoreSpacesOnValidation(), p1, p2);
+        checkBoolean("setIgnoreSpacesOnValidation", p1.isIgnoreCaseOnValidation(), p2.isIgnoreCaseOnValidation(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setWhichPC2Validator(2);

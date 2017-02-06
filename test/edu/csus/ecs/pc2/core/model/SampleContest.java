@@ -1287,7 +1287,7 @@ public class SampleContest {
         problem.setWhichPC2Validator(optionNumber);
         problem.setIgnoreCaseOnValidation(true);
 
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
+        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         
         contest.updateProblem(problem);
