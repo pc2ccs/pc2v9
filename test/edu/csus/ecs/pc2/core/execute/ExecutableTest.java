@@ -175,7 +175,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         problem.setWhichPC2Validator(1);
         problem.setIgnoreCaseOnValidation(true);
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
+        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
     }
     
@@ -185,7 +185,7 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setUsingPC2Validator(false);
         assertFalse("Not Expecting using pc2 validator", problem.isUsingPC2Validator());
         String mockValidatorCommandLine = "java {:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
-        problem.setValidatorCommandLine(mockValidatorCommandLine + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
+        problem.setValidatorCommandLine(mockValidatorCommandLine + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
         problem.setValidatorProgramName(MOCK_VALIDATOR_NAME);
     }
 

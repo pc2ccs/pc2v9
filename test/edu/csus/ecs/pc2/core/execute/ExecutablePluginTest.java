@@ -138,7 +138,7 @@ public class ExecutablePluginTest extends AbstractTestCase {
         problem.setWhichPC2Validator(1);
         problem.setIgnoreCaseOnValidation(true);
         problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
-                + problem.isIgnoreSpacesOnValidation());
+                + problem.isIgnoreCaseOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
     }
 
