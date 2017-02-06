@@ -12,8 +12,6 @@ import java.io.PrintWriter;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 
-import javax.swing.JOptionPane;
-
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
 
@@ -740,35 +738,36 @@ public class ClicsValidator {
                 errStr += " judgeDataFile";
             }
             if (judgeAnswerFile==null) {
+                if (errStr.length()>0) {
+                    errStr += ",";
+                }
                 errStr += " judgeAnswerFile";
             }
             if (feedbackDirName==null) {
+                if (errStr.length()>0) {
+                    errStr += ",";
+                }
                 errStr += " feedbackDirName";
             }
             log.severe("validator received null file name(s) for: " + errStr);
-            JOptionPane.showMessageDialog(null, "File is null: judgeDataFile=" + judgeDataFile + ", judgeAnswerFile=" + judgeAnswerFile
-                    + ", feedbackdir=" + feedbackDirName) ;
             return false;
         }
         
         File dataFile = new File(judgeDataFile);
         if (!dataFile.exists() || !dataFile.canRead()) {
-            log.severe("judge data file doesn't exist or isn't readable");
-            JOptionPane.showMessageDialog(null, "judge data file doesn't exist or isn't readable") ; 
+            log.severe("judge data file '" + judgeDataFile + "' doesn't exist or isn't readable");
             return false;
         }
         
         File answerFile = new File(judgeAnswerFile);
         if (!answerFile.exists() || !answerFile.canRead()) {
-            log.severe("judge answer file doesn't exist or isn't readable");
-            JOptionPane.showMessageDialog(null, "judge answer file doesn't exist or isn't readable") ; 
+            log.severe("judge answer file '" + judgeAnswerFile + "' doesn't exist or isn't readable");
             return false;
         }
         
         File feedbackDir = new File(feedbackDirName);
         if (!feedbackDir.exists() || !feedbackDir.isDirectory() || !feedbackDir.canRead() || !feedbackDir.canWrite()) {
-            log.severe("feedback dir doesn't exist, isn't a directory or isn't readable or writeable");
-            JOptionPane.showMessageDialog(null, "feedback dir doesn't exist, isn't a directory or isn't readable or writeable") ; 
+            log.severe("feedback dir '" + feedbackDirName + "' doesn't exist, isn't a directory, or isn't readable and writeable");
             return false;
         }
         
