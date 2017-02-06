@@ -144,7 +144,8 @@ public class ClicsValidator {
 
         //verify files are valid
         if (!validateFiles()) {
-            log.severe("ClicsValidator received invalid file or directory name(s)");
+            log.severe("ClicsValidator received invalid file or directory name(s):");
+            log.severe("  Judge's data file = '" + judgeDataFile + "'; Judge's answer file = '" + judgeAnswerFile + "'; Feedback Dir Name = '" + feedbackDirName + "'");
             throw new RuntimeException("ClicsValidator received invalid file or directory name(s)");
         }
         
@@ -218,9 +219,11 @@ public class ClicsValidator {
                 }
                 
             } else {
-                //unknown option
-                log.warning("Validator received unknown option: '" + options[i] + "'");
-                throw new RuntimeException("Validator received unknown option: '" + options[i] + "'");
+                //check for empty option argument (to allow accepting null or "" as a valid -- if ignored -- argument)
+                if (options[i]!=null && options[i].length()>0) {
+                    //non-null, non-zero-length option -> unknown option
+                    log.warning("Validator received unknown option: '" + options[i] + "'");
+                }
             }
             
         }//end grab option arguments (if any)
