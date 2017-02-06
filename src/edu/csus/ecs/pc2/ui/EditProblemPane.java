@@ -84,6 +84,8 @@ public class EditProblemPane extends JPanePlugin {
     // TODO 917 automatic check on load when external/internal data sets changed
 
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    
+    public static final String DEFAULT_CLICS_VALIDATOR_COMMAND = "{:validator} {:infile} {:ansfile} feedbackdir" + File.separator;
 
     private static boolean debug22EditProblem = false;
 
@@ -4222,6 +4224,7 @@ public class EditProblemPane extends JPanePlugin {
         	                problem.getValidatorCommandLine().length() <= 0 ) {
         	            //there's currently no definition for the Validator Command Line; fill it with the PC2 default
         	            getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        	            getCustomValidatorExecutableProgramTextField().setText("");
         	        } else {
         	            if (problem != null && problem.getValidatorCommandLine()!=null) {
         	                getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
@@ -4242,7 +4245,8 @@ public class EditProblemPane extends JPanePlugin {
                     if (problem==null || problem.getValidatorCommandLine()==null || 
                             problem.getValidatorCommandLine().length() <= 0 ) {
                         //there's currently no definition for the Validator Command Line; fill it with the CLICS default
-                        getCustomValidatorCommandLineTextField().setText("CLICS std here...");
+                        getCustomValidatorCommandLineTextField().setText(DEFAULT_CLICS_VALIDATOR_COMMAND);
+                        getCustomValidatorExecutableProgramTextField().setText("");
                     } else {
                         if (problem != null && problem.getValidatorCommandLine()!=null) {
                             getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
