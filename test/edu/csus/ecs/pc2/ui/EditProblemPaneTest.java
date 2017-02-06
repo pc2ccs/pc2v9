@@ -110,7 +110,7 @@ public class EditProblemPaneTest extends AbstractTestCase {
             if (!StringUtilities.stringSame(newProblem.getValidatorCommandLine(), problem.getValidatorCommandLine())) {
                 list.add(new InvalidFieldValue("if (!StringUtilities.stringSame(validatorCommandLine, problem.getValidatorCommandLine())) {"));
             }
-            if (newProblem.isIgnoreSpacesOnValidation() != problem.isIgnoreSpacesOnValidation()) {
+            if (newProblem.isIgnoreCaseOnValidation() != problem.isIgnoreCaseOnValidation()) {
                 list.add(new InvalidFieldValue("if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {"));
             }
             if (newProblem.isShowValidationToJudges() != problem.isShowValidationToJudges()) {
