@@ -4224,7 +4224,6 @@ public class EditProblemPane extends JPanePlugin {
         	                problem.getValidatorCommandLine().length() <= 0 ) {
         	            //there's currently no definition for the Validator Command Line; fill it with the PC2 default
         	            getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
-        	            getCustomValidatorExecutableProgramTextField().setText("");
         	        } else {
         	            if (problem != null && problem.getValidatorCommandLine()!=null) {
         	                getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
@@ -4246,7 +4245,6 @@ public class EditProblemPane extends JPanePlugin {
                             problem.getValidatorCommandLine().length() <= 0 ) {
                         //there's currently no definition for the Validator Command Line; fill it with the CLICS default
                         getCustomValidatorCommandLineTextField().setText(DEFAULT_CLICS_VALIDATOR_COMMAND);
-                        getCustomValidatorExecutableProgramTextField().setText("");
                     } else {
                         if (problem != null && problem.getValidatorCommandLine()!=null) {
                             getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
