@@ -40,14 +40,8 @@ public class ClicsValidatorTest extends AbstractTestCase {
         String feedbackDir = getOutputDataDirectory();
         assertDirectoryExists(feedbackDir, "feedback output directory");
         
-        //the required files and directories exist; see if constructing the validator throws an exception on them
-        ClicsValidator validator = null ;
-        try {
-            validator = new ClicsValidator(judgeDataFileName, judgeAnswerFileName, feedbackDir);
-        } catch (Exception e) {
-//            System.out.println ("Validator threw erroneous exception on construction");
-            assertNotNull("Validator construction erroneously throws exception", validator);
-        }
+        //the required files and directories exist; verify validator can construct an instance of itself
+        ClicsValidator validator = new ClicsValidator(judgeDataFileName, judgeAnswerFileName, feedbackDir);
         assertNotNull(validator);
         
         //try constructing a validator with a non-existent judge's data file
@@ -55,11 +49,15 @@ public class ClicsValidatorTest extends AbstractTestCase {
         judgeDataFileName = "foo";
         try {
             validator = new ClicsValidator(judgeDataFileName, judgeAnswerFileName, feedbackDir);
-        } catch (Exception e) {
-            //do nothing -- throwing an exception is the correct behavior
+            fail("Validator failed to throw exception on construction when judge's data file is missing");
+        } catch (RuntimeException e) {
+            //throwing an exception is the correct behavior
 //            System.out.println ("Validator correctly threw exception on construction");
+            String expectedMessage = "ClicsValidator received invalid file or directory name(s)";
+            assertEquals("Expected exception message", expectedMessage, e.getMessage());
         }
-        assertNull("Validator failed to throw exception on construction", validator);
+        assertNull("Validator failed to throw exception on construction when judge's data file '"
+                + judgeDataFileName + "' is missing", validator);
         
     }
     
@@ -77,11 +75,11 @@ public class ClicsValidatorTest extends AbstractTestCase {
         String feedbackDir = getOutputDataDirectory();
         assertDirectoryExists(feedbackDir, "feedback output directory");
         
-        //the required files and directories exist; see if constructing the validator throws an exception on them
+        //the required files and directories exist; verify validator can construct an instance of itself
         ClicsValidator validator = null ;
         try {
             validator = new ClicsValidator(judgeDataFileName, judgeAnswerFileName, feedbackDir);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
 //            System.out.println ("Validator threw erroneous exception on construction");
             assertNotNull("Validator construction erroneously throws exception", validator);
         }
