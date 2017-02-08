@@ -90,11 +90,15 @@ public class ClicsValidatorTest extends AbstractTestCase {
         judgeAnswerFileName = "foo";
         try {
             validator = new ClicsValidator(judgeDataFileName, judgeAnswerFileName, feedbackDir);
-        } catch (Exception e) {
-            //do nothing -- throwing an exception is the correct behavior
+            fail("Validator failed to throw exception on construction when judge's answer file is missing");
+        } catch (RuntimeException e) {
+            //throwing an exception is the correct behavior
 //            System.out.println ("Validator correctly threw exception on construction");
+            String expectedMessage = "ClicsValidator received invalid file or directory name(s)";
+            assertEquals("Expected exception message", expectedMessage, e.getMessage());
         }
-        assertNull("Validator failed to throw exception on construction", validator);
+        assertNull("Validator failed to throw exception on construction when judge's answer file '"
+                + judgeAnswerFileName + "' is missing", validator);
     }
     
     public void testMissingFeedbackDir() throws Exception {
@@ -126,11 +130,15 @@ public class ClicsValidatorTest extends AbstractTestCase {
         feedbackDir = "foo";
         try {
             validator = new ClicsValidator(judgeDataFileName, judgeAnswerFileName, feedbackDir);
-        } catch (Exception e) {
-            //do nothing -- throwing an exception is the correct behavior
+            fail("Validator failed to throw exception on construction when feedback directory is missing");
+        } catch (RuntimeException e) {
+            //throwing an exception is the correct behavior
 //            System.out.println ("Validator correctly threw exception on construction");
+            String expectedMessage = "ClicsValidator received invalid file or directory name(s)";
+            assertEquals("Expected exception message", expectedMessage, e.getMessage());
         }
-        assertNull("Validator failed to throw exception on construction", validator);        
+        assertNull("Validator failed to throw exception on construction when feedback directory '"
+                + feedbackDir + "' is missing", validator);
     }
     
     /**
@@ -404,7 +412,9 @@ public class ClicsValidatorTest extends AbstractTestCase {
     //  testInstanceHandleWithinRelativeButNotAbsoluteTolerance()
     //  testInstanceHandleWithinAbsoluteButNotRelativeTolerance()
     //  testInstanceHandleSetBothTolerancesWithOneOption()
-    
+    //  testInstanceHandleCaseSensitiveAndSpaceSensitiveOptionsTogetherInThatOrder()
+    //  testInstanceHandleSpaceSensitiveAndCaseSensitiveOptionsTogetherInThatOrder()
+
     // testProcessHandleXXX()
    
     
