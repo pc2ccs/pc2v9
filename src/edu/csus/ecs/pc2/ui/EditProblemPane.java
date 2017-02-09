@@ -4229,6 +4229,7 @@ public class EditProblemPane extends JPanePlugin {
         	                getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
         	            }
         	        }
+        	        enableUpdateButton();
         	    }
         	});
         	rdbtnUsePcStandard.setSelected(true);
@@ -4250,6 +4251,7 @@ public class EditProblemPane extends JPanePlugin {
                             getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
                         }
                     }
+                    enableUpdateButton();
                 }
         	});
             validatorStandardButtonGroup.add(rdbtnUseClicsStandard);
