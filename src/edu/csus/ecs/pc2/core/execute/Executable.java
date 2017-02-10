@@ -55,7 +55,7 @@ import edu.csus.ecs.pc2.ui.NullViewer;
 
 // $HeadURL$
 public class Executable extends Plugin implements IExecutable {
-    
+
     /**
      * 
      */
@@ -68,7 +68,7 @@ public class Executable extends Plugin implements IExecutable {
     private Language language = null;
 
     private Problem problem = null;
-    
+
     private ProblemDataFiles problemDataFiles = null;
 
     private ClientId executorId = null;
@@ -77,6 +77,7 @@ public class Executable extends Plugin implements IExecutable {
      * Directory where main file is found
      */
     private String mainFileDirectory;
+
     /**
      * File user selects
      */
@@ -145,9 +146,9 @@ public class Executable extends Plugin implements IExecutable {
      * The directory where files are unpacked and the program is executed.
      */
     private String executeDirectoryName = null;
-    
+
     private String executeDirectoryNameSuffix = "";
-    
+
     /**
      * Overwrite judge's data and answer files.
      */
@@ -156,7 +157,7 @@ public class Executable extends Plugin implements IExecutable {
     private boolean testRunOnly = false;
 
     private boolean showMessageToUser = true;
-    
+
     private boolean usingGUI = true;
 
     /**
@@ -177,7 +178,7 @@ public class Executable extends Plugin implements IExecutable {
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
         super.setContestAndController(inContest, inController);
-        
+
         this.contest = inContest;
         this.controller = inController;
         this.runFiles = runFiles;
@@ -231,18 +232,16 @@ public class Executable extends Plugin implements IExecutable {
         return (result);
     }
 
-
     @Override
     public IFileViewer execute() {
         return execute(true);
     }
 
-
     @Override
     public IFileViewer execute(boolean clearDirFirst) {
-        
+
         teamsOutputFilenames = new ArrayList<String>();
-        
+
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
         } else {
@@ -251,16 +250,15 @@ public class Executable extends Plugin implements IExecutable {
 
         try {
             executionData = new ExecutionData();
-            
+
             executeDirectoryName = getExecuteDirectoryName();
 
             boolean dirThere = insureDir(executeDirectoryName);
-            
 
             if (!dirThere) {
                 log.config("Directory could not be created: " + executeDirectoryName);
                 showDialogToUser("Unable to create directory " + executeDirectoryName);
-                setException ("Unable to create directory " + executeDirectoryName);
+                setException("Unable to create directory " + executeDirectoryName);
                 return fileViewer;
             }
 
@@ -277,7 +275,7 @@ public class Executable extends Plugin implements IExecutable {
                     log.config("Directory could not be cleared, other process running? ");
 
                     showDialogToUser("Unable to remove all files from directory " + executeDirectoryName);
-                    setException ("Unable to remove all files from directory " + executeDirectoryName);
+                    setException("Unable to remove all files from directory " + executeDirectoryName);
                     return fileViewer;
                 }
 
@@ -305,39 +303,42 @@ public class Executable extends Plugin implements IExecutable {
                     executeProgram(0); // execute with first data set.
                 } else {
                     /**
-                     * compileProgram returns false if
-                     * 1) runProgram failed (errorString set)
-                     * 2) compiler fails to create expecte output file (errorString empty)
-                     * If there is compiler stderr or stdout we should not add the
-                     * textPane saying there was an error.
-                     */ 
-                    if (! executionData.isCompileSuccess()) {
+                     * compileProgram returns false if 1) runProgram failed (errorString set) 2) compiler fails to create expecte output file (errorString empty) If there is compiler stderr or stdout
+                     * we should not add the textPane saying there was an error.
+                     */
+                    if (!executionData.isCompileSuccess()) {
 
-                        String errorMessage = "Compile failed to generate expected program output ";
-                        if (language.getExecutableIdentifierMask() != null && !language.getExecutableIdentifierMask().trim().equals("") && !language.isInterpreted()) {
-                            errorMessage += "\""+substituteAllStrings(run, language.getExecutableIdentifierMask())+"\" ";
+                        // exitCode will be 1 if the runprocess failed
+                        // ExectionException is set if the runprocess failed
+                        // exitCode will be 2 if the output was not created (and not interpreted)
+                        String title = "System Configuration Error";
+                        String errorMessage = "";
+                        if (executionData.getCompileResultCode() == 1 || executionData.getExecutionException() != null) {
+                            // compiler missing
+                            errorMessage = "Unable to find/execute copmiler using the command \""+substituteAllStrings(run, language.getCompileCommandLine());
+                            errorMessage += "\", contact staff";
+                        } else {
+                            // expected output missing
+                            title = "Compilation Error";
+                            errorMessage = "Compilation error when compiling program \""+substituteAllStrings(run, "{:mainfile}");
+                            errorMessage += "\" using the command \"" + substituteAllStrings(run, language.getCompileCommandLine())+"\"";
                         }
-                        errorMessage += "using the compile command \""+substituteAllStrings(run, language.getCompileCommandLine())+"\";";
-                        errorMessage += "  either PC2 was unable to find the specified compiler, or the submitted source code had compilation errors.";
-                        if (executionData.getExecutionException() != null) {
-                            errorMessage += NL + executionData.getExecutionException().getMessage();
-                        }
-                        
+
                         showDialogToUser(errorMessage);
-                        fileViewer.addTextPane("Error executing compiler", errorMessage);
-                        
+                        fileViewer.addTextPane(title, errorMessage);
+
                     } else if (executionData.getCompileStderr() == null && executionData.getCompileStdout() == null) {
-                        
+
                         int errnoIndex = errorString.indexOf('=') + 1;
                         String errorMessage;
                         if (errorString.substring(errnoIndex).equals("2")) {
                             errorMessage = "Compiler not found, contact staff.";
-    
+
                         } else {
                             errorMessage = "Problem executing compiler, contact staff.";
                         }
                         showDialogToUser(errorMessage);
-                        setException (errorMessage);
+                        setException(errorMessage);
                         fileViewer.addTextPane("Error during compile", errorMessage);
                     } // else they will get a tab hopefully showing something wrong
                 }
@@ -346,10 +347,10 @@ public class Executable extends Plugin implements IExecutable {
                 if (problemDataFiles != null) {
                     dataFiles = problemDataFiles.getJudgesDataFiles();
                 } // else problem has no data files
-                
+
                 int dataSetNumber = 0;
                 boolean passed = true;
-                
+
                 /**
                  * Did one test case fail flag.
                  */
@@ -366,7 +367,7 @@ public class Executable extends Plugin implements IExecutable {
                         oneTestFailed = true;
                         failedResults = executionData.getValidationResults();
                     }
-                    
+
                 } else {
 
                     log.info("Test cases: " + dataFiles.length + " for run " + run.getNumber());
@@ -375,7 +376,7 @@ public class Executable extends Plugin implements IExecutable {
                         passed = executeAndValidateDataSet(dataSetNumber);
                         dataSetNumber++;
                         if (!passed) {
-                            log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber()+" reason "+getFailureReason());
+                            log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber() + " reason " + getFailureReason());
                             oneTestFailed = true;
                             if ("".equals(failedResults)) {
                                 failedResults = executionData.getValidationResults();
@@ -386,7 +387,7 @@ public class Executable extends Plugin implements IExecutable {
                     if (!problem.isUsingExternalDataFiles()) {
                         // if internal the 1st file has been re-written by datasets 1..n so we need to re-write 0
                         createFile(problemDataFiles.getJudgesDataFiles(), 0, prefixExecuteDirname(problem.getDataFileName()));
-    
+
                         // Create the correct output file, aka answer file
                         createFile(problemDataFiles.getJudgesAnswerFiles(), 0, prefixExecuteDirname(problem.getAnswerFileName()));
                     }
@@ -395,39 +396,46 @@ public class Executable extends Plugin implements IExecutable {
                 if (oneTestFailed) {
                     // replace the final executionData with the 1st failed pass
                     executionData.setValidationResults(failedResults);
-                    log.info("Test results: test failed " + run + " reason = "+getFailureReason() );
+                    log.info("Test results: test failed " + run + " reason = " + getFailureReason());
                 } else {
                     log.info("Test results: ALL passed for run " + run);
                 }
             } else {
                 /**
-                 * compileProgram returns false if
-                 * 1) runProgram failed (errorString set)
-                 * 2) compiler fails to create expected output file (errorString empty)
-                 * If there is compiler stderr or stdout we should not add the
-                 * textPane saying there was an error.
-                 */ 
-                if (! executionData.isCompileSuccess()) {
+                 * compileProgram returns false if 1) runProgram failed (errorString set) 2) compiler fails to create expected output file (errorString empty) If there is compiler stderr or stdout we
+                 * should not add the textPane saying there was an error.
+                 */
+                if (!executionData.isCompileSuccess()) {
 
-                    String errorMessage = "Unable to find/execute compiler using command: "+language.getCompileCommandLine();
+                    String title = "System Configuration Error";
+                    String errorMessage = "";
+                    if (executionData.getCompileResultCode() == 1 || executionData.getExecutionException() != null) {
+                        // compiler missing
+                        errorMessage = "Unable to find/execute copmiler using the command \""+substituteAllStrings(run, language.getCompileCommandLine());
+                        errorMessage += "\", contact staff";
+                    } else {
+                        // expected output missing
+                        title = "Compilation Error";
+                        errorMessage = "Compilation error when compiling program \""+substituteAllStrings(run, "{:mainfile}");
+                        errorMessage += "\" using the command \"" + substituteAllStrings(run, language.getCompileCommandLine())+"\"";
+                    }
+
                     if (executionData.getExecutionException() != null) {
                         errorMessage += NL + executionData.getExecutionException().getMessage();
                     }
-                    
                     showDialogToUser(errorMessage);
-                    fileViewer.addTextPane("Error executing compiler", errorMessage);
-                    
+                    fileViewer.addTextPane(title, errorMessage);
                 } else if (executionData.getCompileStderr() == null && executionData.getCompileStdout() == null) {
                     int errnoIndex = errorString.indexOf('=') + 1;
                     String errorMessage;
                     if (errorString.substring(errnoIndex).equals("2")) {
                         errorMessage = "Compiler not found, contact staff.";
-    
+
                     } else {
                         errorMessage = "Problem executing compiler, contact staff.";
                     }
                     showDialogToUser(errorMessage);
-                    setException (errorMessage);
+                    setException(errorMessage);
                     fileViewer.addTextPane("Error during compile", errorMessage);
                 } // else they will get a tab hopefully showing something wrong
             }
@@ -448,7 +456,7 @@ public class Executable extends Plugin implements IExecutable {
             if (file.isFile() && file.length() > 0) {
                 fileViewer.addFilePane("Validator stderr", outputFile);
             }
-            
+
             outputFile = prefixExecuteDirname(EXECUTE_STDOUT_FILENAME);
             file = new File(outputFile);
             boolean programGeneratedOutput = false;
@@ -493,21 +501,21 @@ public class Executable extends Plugin implements IExecutable {
             if (executionData.getExecuteExitValue() != 0) {
                 long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
-                fileViewer.setInformationLabelText("<html><font size='+1' color='red'>Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase()+"</font>");
+                fileViewer.setInformationLabelText("<html><font size='+1' color='red'>Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase() + "</font>");
 
             } else {
                 fileViewer.setInformationLabelText("");
             }
-            
+
             if (!isTestRunOnly()) {
                 if (problem.isShowCompareWindow()) {
                     String teamsOutputFileName = prefixExecuteDirname(EXECUTE_STDOUT_FILENAME);
 
                     if (problem.getAnswerFileName() != null && problem.getAnswerFileName().length() > 0) {
                         String answerFileName = prefixExecuteDirname(problem.getAnswerFileName());
-                        if (! new File(answerFileName).isFile()){
+                        if (!new File(answerFileName).isFile()) {
                             int dataSetNumber = 0;
-                            
+
                             // Create the correct output file, aka answer file
                             createFile(problemDataFiles.getJudgesAnswerFiles(), dataSetNumber, answerFileName);
                         }
@@ -517,7 +525,6 @@ public class Executable extends Plugin implements IExecutable {
                 }
             }
 
-
         } catch (Exception e) {
             log.log(Log.INFO, "Exception during execute() ", e);
             fileViewer.addTextPane("Error during execute", "Exception during execute, check log " + e.getMessage());
@@ -525,7 +532,7 @@ public class Executable extends Plugin implements IExecutable {
 
         return fileViewer;
     }
-    
+
     public String getFailureReason() {
 
         if (executionData.getExecutionException() != null) {
@@ -539,7 +546,9 @@ public class Executable extends Plugin implements IExecutable {
 
     /**
      * Execute and validates
-     * @param dataSetNumber zero based data set number.
+     * 
+     * @param dataSetNumber
+     *            zero based data set number.
      * @return true if passes test
      */
     private boolean executeAndValidateDataSet(int dataSetNumber) {
@@ -560,7 +569,7 @@ public class Executable extends Plugin implements IExecutable {
         } else {
             passed = false;
         }
-        
+
         String reason = getFailureReason();
         if (reason == null) {
             reason = "";
@@ -571,10 +580,10 @@ public class Executable extends Plugin implements IExecutable {
         log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " " + reason);
 
         JudgementRecord record = JudgementUtilites.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
-        
-//        Judgement judgement = getContest().getJudgement(record.getJudgementId());
-//        log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement =  " + judgement);
-    
+
+        // Judgement judgement = getContest().getJudgement(record.getJudgementId());
+        // log.info(" Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement = " + judgement);
+
         RunTestCase runTestCase = new RunTestCase(run, record, testNumber, passed);
         runTestCase.setElapsedMS(executionData.getExecuteTimeMS());
         run.addTestCase(runTestCase);
@@ -584,14 +593,14 @@ public class Executable extends Plugin implements IExecutable {
     /**
      * Extracts file setNumber from list of files (fileList).
      * 
-     * @param fileList -
-     *            list of SerializedFile's
-     * @param setNumber -
-     *            index in list of file to write, zero based.
-     * @param outputFileName -
-     *            output file name.
+     * @param fileList
+     *            - list of SerializedFile's
+     * @param setNumber
+     *            - index in list of file to write, zero based.
+     * @param outputFileName
+     *            - output file name.
      * @return true if file written to disk.
-     * @throws IOException 
+     * @throws IOException
      */
     public boolean createFile(SerializedFile[] fileList, int setNumber, String outputFileName) {
 
@@ -609,20 +618,21 @@ public class Executable extends Plugin implements IExecutable {
             // will return false if file could not be created
             return Utilities.createFile(file, filename);
         } catch (IOException e) {
-            log.log(Log.INFO, "Could not create "+filename, e);
+            log.log(Log.INFO, "Could not create " + filename, e);
             return false;
         }
     }
 
     /**
      * Show pop up mesage to user.
+     * 
      * @param string
      */
     protected void showDialogToUser(String string) {
-        
-        if (showMessageToUser){
+
+        if (showMessageToUser) {
             if (usingGUI) {
-                fileViewer.showMessage(string);     
+                fileViewer.showMessage(string);
             }
             log.info(string);
         }
@@ -641,7 +651,7 @@ public class Executable extends Plugin implements IExecutable {
         dir = new File(dirName);
         if (!dir.exists() && !dir.mkdir()) {
             log.log(Log.CONFIG, "Executable.execute(RunData): Directory " + dir.getName() + " could not be created.");
-            setException ("Executable.execute(RunData): Directory " + dir.getName() + " could not be created.");
+            setException("Executable.execute(RunData): Directory " + dir.getName() + " could not be created.");
         }
 
         return dir.isDirectory();
@@ -654,8 +664,8 @@ public class Executable extends Plugin implements IExecutable {
 
         executionData.setValidationReturnCode(-1);
         executionData.setValidationSuccess(false);
-        
-        if (isJudge()){
+
+        if (isJudge()) {
             controller.sendValidatingMessage(run);
         }
 
@@ -666,7 +676,7 @@ public class Executable extends Plugin implements IExecutable {
             String validatorUnpackName = prefixExecuteDirname(validatorFileName);
             if (!createFile(problemDataFiles.getValidatorFile(), validatorUnpackName)) {
                 log.info("Unable to create validator program " + validatorUnpackName);
-                setException ("Unable to create validator program " + validatorUnpackName);
+                setException("Unable to create validator program " + validatorUnpackName);
 
                 throw new SecurityException("Unable to create validator, check logs");
             }
@@ -679,24 +689,24 @@ public class Executable extends Plugin implements IExecutable {
                 setExecuteBit(prefixExecuteDirname(validatorFileName));
             }
         }
-        
+
         /**
          * Judge input data file name, either short name or fully qualified if external file.{:infile}
          */
-        String judgeDataFilename =  problem.getDataFileName();
+        String judgeDataFilename = problem.getDataFileName();
         /**
-         * Judge answer  data file name, either short name or fully qualified if external file.{:infile}
+         * Judge answer data file name, either short name or fully qualified if external file.{:infile}
          */
         String judgeAnswerFilename = problem.getAnswerFileName();
-        
+
         if (overwriteJudgesDataFiles) {
 
             if (problem.isUsingExternalDataFiles()) {
-                
+
                 /**
                  * Set filenames if external files.
                  */
-                
+
                 SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
                 judgeDataFilename = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
 
@@ -704,22 +714,21 @@ public class Executable extends Plugin implements IExecutable {
                 judgeAnswerFilename = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
 
             } else {
-                
-                if (problemDataFiles == null){
-                    throw new NullPointerException("Internal error - no data files present for problem "+problem);
+
+                if (problemDataFiles == null) {
+                    throw new NullPointerException("Internal error - no data files present for problem " + problem);
                 }
 
                 /**
                  * If not external files, must unpack files.
                  */
-                
+
                 // Create the correct output file, aka answer file
                 createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, prefixExecuteDirname(problem.getDataFileName()));
 
                 // Create the correct output file, aka answer file
                 createFile(problemDataFiles.getJudgesAnswerFiles(), dataSetNumber, prefixExecuteDirname(problem.getAnswerFileName()));
-                
-             
+
             } // else no need to create external data files.
 
         }
@@ -753,8 +762,8 @@ public class Executable extends Plugin implements IExecutable {
              * So we need to prefix the command with java -jar <path to jar>
              */
 
-            String pathToPC2Jar = findPC2JarPath ();
-            if (!(new File(pathToPC2Jar+"pc2.jar")).exists()) {
+            String pathToPC2Jar = findPC2JarPath();
+            if (!(new File(pathToPC2Jar + "pc2.jar")).exists()) {
                 pc2JarUseDirectory = true;
             }
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
@@ -762,11 +771,11 @@ public class Executable extends Plugin implements IExecutable {
 
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
 
-//      orig  String cmdLine = substituteAllStrings(run, commandPattern);
-        
+        // orig String cmdLine = substituteAllStrings(run, commandPattern);
+
         String cmdLine = replaceString(commandPattern, "{:infile}", judgeDataFilename);
         cmdLine = replaceString(cmdLine, "{:ansfile}", judgeAnswerFilename);
-        
+
         cmdLine = substituteAllStrings(run, cmdLine);
         cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
 
@@ -783,7 +792,6 @@ public class Executable extends Plugin implements IExecutable {
         }
         log.log(Log.DEBUG, "after  substitution: " + cmdLine);
 
-        
         try {
             String actFilename = new String(cmdLine);
 
@@ -816,7 +824,7 @@ public class Executable extends Plugin implements IExecutable {
             if (problem.isShowValidationToJudges()) {
                 msg = "Validating...";
             }
-            
+
             long startSecs = System.currentTimeMillis();
             Process process = runProgram(cmdLine, msg, false);
 
@@ -873,10 +881,10 @@ public class Executable extends Plugin implements IExecutable {
             }
             log.log(Log.CONFIG, "Exception in validator ", ex);
         }
-        String validatorOutputFilename = prefixExecuteDirname("valout."+dataSetNumber + ".txt");
+        String validatorOutputFilename = prefixExecuteDirname("valout." + dataSetNumber + ".txt");
         createFile(executionData.getValidationStdout(), validatorOutputFilename);
         validatorOutputFilenames.add(validatorOutputFilename);
-        String validatorStderrFilename = prefixExecuteDirname("valerr."+dataSetNumber + ".txt");
+        String validatorStderrFilename = prefixExecuteDirname("valerr." + dataSetNumber + ".txt");
         createFile(executionData.getValidationStderr(), validatorStderrFilename);
         validatorStderrFilesnames.add(validatorStderrFilename);
 
@@ -884,21 +892,21 @@ public class Executable extends Plugin implements IExecutable {
 
         try {
             if (fileThere) {
-                
+
                 storeValidatorResults(resultsFileName, log);
-                
+
             } else {
                 // SOMEDAY LOG
                 log.config("validationCall - Did not produce output results file " + resultsFileName);
-//                JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
+                // JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
             }
         } catch (Exception ex) {
             executionData.setExecutionException(ex);
-            log.log(Log.INFO, "Exception while reading results file "+resultsFileName, ex);
+            log.log(Log.INFO, "Exception while reading results file " + resultsFileName, ex);
             throw new SecurityException(ex);
         } finally {
-            
-            if ( executionData.isRunTimeLimitExceeded()){
+
+            if (executionData.isRunTimeLimitExceeded()) {
                 executionData.setValidationResults("No - Time Limit Exceeded");
                 executionData.setValidationSuccess(true);
             }
@@ -921,26 +929,26 @@ public class Executable extends Plugin implements IExecutable {
 
         IResultsParser parser = new XMLResultsParser();
         parser.setLog(log);
-        
+
         /**
          * returns true if valid XML and found outcome tag.
          */
         boolean done = parser.parseValidatorResultsFile(prefixExecuteDirname(resultsFileName));
         Hashtable<String, String> results = parser.getResults();
-        
-        if (parser.getException() != null){
-            logger.log(Log.WARNING,"Exception parsing XML in file "+resultsFileName, parser.getException());
-            
+
+        if (parser.getException() != null) {
+            logger.log(Log.WARNING, "Exception parsing XML in file " + resultsFileName, parser.getException());
+
         } else if (done && results != null && results.containsKey("outcome")) {
             // non-IJRM does not require security, but if it is IJRM it better have security.
-            
+
             if (!problem.isInternationalJudgementReadMethod() || (results.containsKey("security") && resultsFileName.equals(results.get("security")))) {
                 // Found the string
                 executionData.setValidationResults(results.get("outcome"));
                 executionData.setValidationSuccess(true);
             } else {
                 // SOMEDAY LOG info
-                setException( "validationCall - results file did not contain security");
+                setException("validationCall - results file did not contain security");
 
                 logger.config("validationCall - results file did not contain security");
                 logger.config(resultsFileName + " != " + results.get("security"));
@@ -949,13 +957,13 @@ public class Executable extends Plugin implements IExecutable {
             if (!done) {
                 // SOMEDAY LOG
                 // SOMEDAY show user message
-                setException( "Error parsing/reading results file, check log");
+                setException("Error parsing/reading results file, check log");
 
                 logger.config("Error parsing/reading results file, check log");
             } else if (results != null && (!results.containsKey("outcome"))) {
                 // SOMEDAY LOG
                 // SOMEDAY show user message
-                setException( "Error parsing/reading results file, check log");
+                setException("Error parsing/reading results file, check log");
                 logger.config("Error could not find 'outcome' in results file, check log");
             } else {
                 // SOMEDAY LOG
@@ -967,7 +975,7 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Create an Execution Exception. 
+     * Create an Execution Exception.
      * 
      * @param inExecutionData
      * @param string
@@ -979,9 +987,9 @@ public class Executable extends Plugin implements IExecutable {
     protected String findPC2JarPath() {
         String jarDir = ".";
         try {
-            String defaultPath = new File("./build/prod").getCanonicalPath(); 
+            String defaultPath = new File("./build/prod").getCanonicalPath();
             // for CruiseControl, will not be needed with jenkins
-            if (! new File(defaultPath).exists()) {
+            if (!new File(defaultPath).exists()) {
                 defaultPath = "/software/pc2/cc/projects/pc2v9/build/prod";
             }
             jarDir = defaultPath;
@@ -990,17 +998,16 @@ public class Executable extends Plugin implements IExecutable {
             while (st.hasMoreTokens()) {
                 String token = st.nextToken();
                 File dir = new File(token);
-                if (dir.exists() && dir.isFile()
-                        && dir.toString().endsWith("pc2.jar")) {
-                    jarDir = new File(dir.getParent()).getCanonicalPath()+File.separator;
+                if (dir.exists() && dir.isFile() && dir.toString().endsWith("pc2.jar")) {
+                    jarDir = new File(dir.getParent()).getCanonicalPath() + File.separator;
                     break;
                 }
             }
-            if (defaultPath.equals(jarDir)){
-               File dir = new File("dist/pc2.jar");
-               if (dir.isFile()) {
-                   jarDir = new File(dir.getParent()).getCanonicalPath()+File.separator;
-               }
+            if (defaultPath.equals(jarDir)) {
+                File dir = new File("dist/pc2.jar");
+                if (dir.isFile()) {
+                    jarDir = new File(dir.getParent()).getCanonicalPath() + File.separator;
+                }
             }
         } catch (IOException e) {
             log.log(Log.WARNING, "Trouble locating pc2home: " + e.getMessage(), e);
@@ -1019,7 +1026,7 @@ public class Executable extends Plugin implements IExecutable {
 
     public String getFileNameFromUser() {
         try {
-            SwingUtilities.invokeAndWait( new Runnable() {
+            SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
                     JFileChooser chooser = new JFileChooser(mainFileDirectory);
                     try {
@@ -1037,7 +1044,7 @@ public class Executable extends Plugin implements IExecutable {
                     chooser = null;
                 }
             });
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.throwing("Executable", "getFileNameFromUser", e);
         }
         return fileFromUser;
@@ -1072,26 +1079,27 @@ public class Executable extends Plugin implements IExecutable {
     /**
      * Execute the submission.
      * 
-     * @param dataSetNumber a zero based data set number
+     * @param dataSetNumber
+     *            a zero based data set number
      * @param writeJudgesDataFiles
      * @return true if execution worked.
      */
     protected boolean executeProgram(int dataSetNumber) {
         boolean passed = false;
         String inputDataFileName = null;
-        
+
         // a one-based test data set number
         int testSetNumber = dataSetNumber + 1;
 
         try {
-            if (isJudge()){
+            if (isJudge()) {
                 controller.sendExecutingMessage(run);
             }
-            
+
             if (!isTestRunOnly()) {
                 log.log(Log.INFO, "Executing run " + run.getNumber() + " from " + run.getSubmitter().getTripletKey() + " test set " + testSetNumber);
             }
-            
+
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
             executionTimer.startTimer();
 
@@ -1139,10 +1147,10 @@ public class Executable extends Plugin implements IExecutable {
                 /**
                  * Judge execute run
                  */
-                
+
                 // Extract the judge data file for this problem and dataSetNumber.
-                
-                if ( ! problem.isUsingExternalDataFiles() ){
+
+                if (!problem.isUsingExternalDataFiles()) {
                     /**
                      * Only extract internal data files.
                      */
@@ -1164,71 +1172,67 @@ public class Executable extends Plugin implements IExecutable {
                             }
 
                             log.info("(Internal) Input data file: " + actualDataFile);
-                            
+
                         }
 
                     }
                     // Else, leave whatever data file is present.
                 } else {
-                    
+
                     /*
-                     * External data files (not inside of pc2).  On local disk.
+                     * External data files (not inside of pc2). On local disk.
                      */
-                    
+
                     SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
                     String dataFileName = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
-                    
-                    if (dataFileName != null){
-                        // Found file 
-                        
+
+                    if (dataFileName != null) {
+                        // Found file
+
                         File dataFile = new File(dataFileName);
                         inputDataFileName = dataFile.getCanonicalPath();
-                        log.info("(External) Input data file: "+inputDataFileName);
-                        
+                        log.info("(External) Input data file: " + inputDataFileName);
+
                     } else {
-                        
+
                         // Did not find file
-                        
+
                         String expectedFileName = serializedFile.getName();
-                        log.log(Log.DEBUG,"For problem "+problem+" test case "+testSetNumber+" expecting file "+expectedFileName+" in dir "+problem.getCCSfileDirectory());
-                        FileNotFoundException notFound = new FileNotFoundException(expectedFileName + " for test case "+testSetNumber);
+                        log.log(Log.DEBUG, "For problem " + problem + " test case " + testSetNumber + " expecting file " + expectedFileName + " in dir " + problem.getCCSfileDirectory());
+                        FileNotFoundException notFound = new FileNotFoundException(expectedFileName + " for test case " + testSetNumber);
                         executionData.setExecutionException(notFound);
                         log.info("(External) Input data file: NOT FOUND ");
                     }
                 }
             }
-            
 
             // SOMEDAY execute the language.getProgramExecuteCommandLine();
 
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME), false));
             BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDERR_FILENAME), false));
 
-
             String cmdline = language.getProgramExecuteCommandLine();
-            
+
             if (!isTestRunOnly()) {
-                if (language.isUsingJudgeProgramExecuteCommandLine()){
-                    
+                if (language.isUsingJudgeProgramExecuteCommandLine()) {
+
                     /**
                      * Use Judge execution command line (override).
                      */
                     cmdline = language.getJudgeProgramExecuteCommandLine();
-                    log.info("Using judge command line "+cmdline);
+                    log.info("Using judge command line " + cmdline);
                 }
-                
+
             }
-            
+
             log.log(Log.DEBUG, "before substitution: " + cmdline);
             cmdline = substituteAllStrings(run, cmdline);
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
             /**
-             * Insure that the first command in the command
-             * line can be executed by prepending the execute
-             * directory name. 
+             * Insure that the first command in the command line can be executed by prepending the execute directory name.
              */
-            
+
             int i; // location of first space in command line.
             String actFilename = new String(cmdline);
 
@@ -1242,20 +1246,19 @@ public class Executable extends Plugin implements IExecutable {
             File f = new File(actFilename);
             if (f.exists()) {
                 /**
-                 * If the first word is a existing file, use
-                 * the full path
+                 * If the first word is a existing file, use the full path
                  */
                 cmdline = f.getCanonicalPath();
             }
-            
+
             boolean autoStop = false;
-            if (! isTestRunOnly()){
+            if (!isTestRunOnly()) {
                 /**
                  * Auto stop on time limit exceeded - Judge (aka non-Team) only.
                  */
                 autoStop = true;
             }
-            
+
             long startSecs = System.currentTimeMillis();
             Process process = runProgram(cmdline, "Executing...", autoStop);
             if (process == null) {
@@ -1280,19 +1283,19 @@ public class Executable extends Plugin implements IExecutable {
             stdoutCollector.start();
             stderrCollector.start();
 
-            if ( inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
-                log.info("Using STDIN from file " +inputDataFileName);
-                    
+            if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
+                log.info("Using STDIN from file " + inputDataFileName);
+
                 BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
                 BufferedInputStream in = new BufferedInputStream(new FileInputStream(inputDataFileName));
                 byte[] buf = new byte[32768];
                 int c;
                 try {
-                    while ((c = in.read(buf))!= -1) {
+                    while ((c = in.read(buf)) != -1) {
                         out.write(buf, 0, c);
                     }
                 } catch (java.io.IOException e) {
-                    log.info("Caught a "+e.getMessage()+" do not be alarmed.");
+                    log.info("Caught a " + e.getMessage() + " do not be alarmed.");
                 }
 
                 in.close();
@@ -1306,7 +1309,7 @@ public class Executable extends Plugin implements IExecutable {
                 executionTimer.stopTimer();
                 executionData.setRunTimeLimitExceeded(executionTimer.isRunTimeLimitExceeded());
                 // SOMEDAY - this happens much too much find out why time limit is 10 when should be 30 by default.
-                log.info("Run exceeded time limit "+problem.getTimeOutInSeconds()+" secs, Run = "+run);
+                log.info("Run exceeded time limit " + problem.getTimeOutInSeconds() + " secs, Run = " + run);
             }
 
             if (process != null) {
@@ -1317,18 +1320,18 @@ public class Executable extends Plugin implements IExecutable {
 
             stdoutlog.close();
             stderrlog.close();
-            
+
             executionData.setExecuteSucess(true);
             executionData.setExecuteTimeMS(System.currentTimeMillis() - startSecs);
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
-            
+
             // teams output file - single file name
             SerializedFile userOutputFile = executionData.getExecuteProgramOutput();
             createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
-            
+
             String teamsOutputFilename = getTeamOutputFilename(dataSetNumber);
-            
+
             createFile(userOutputFile, teamsOutputFilename); // Create a per test case Team's output file
             teamsOutputFilenames.add(teamsOutputFilename); // add to list
             if (executionData.getExecuteExitValue() != 0) {
@@ -1337,9 +1340,9 @@ public class Executable extends Plugin implements IExecutable {
                 PrintWriter exitCodeFile = null;
                 try {
                     exitCodeFile = new PrintWriter(new FileOutputStream(prefixExecuteDirname(EXIT_CODE_FILENAME), false), true);
-                    exitCodeFile.write("0x"+Long.toHexString(returnValue).toUpperCase());
+                    exitCodeFile.write("0x" + Long.toHexString(returnValue).toUpperCase());
                 } catch (FileNotFoundException e) {
-                    log.log(Log.WARNING, "Unable to open/write file "+EXIT_CODE_FILENAME, e);
+                    log.log(Log.WARNING, "Unable to open/write file " + EXIT_CODE_FILENAME, e);
                     exitCodeFile = null;
                 } finally {
                     if (exitCodeFile != null) {
@@ -1353,12 +1356,12 @@ public class Executable extends Plugin implements IExecutable {
                 try {
                     if (errBuff != null && errBuff.length > 0) {
                         outputStream = new FileOutputStream(teamsOutputFilename, true);
-                        outputStream.write(("*** Team STDERR Follows:"+NL).getBytes());
+                        outputStream.write(("*** Team STDERR Follows:" + NL).getBytes());
                         outputStream.write(errBuff, 0, errBuff.length);
                         outputStream.close();
                     }
                 } catch (IOException e) {
-                    log.log(Log.WARNING, "Unable to append to file "+teamsOutputFilename, e);
+                    log.log(Log.WARNING, "Unable to append to file " + teamsOutputFilename, e);
                 }
             }
             passed = true;
@@ -1366,7 +1369,7 @@ public class Executable extends Plugin implements IExecutable {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
             }
-            // SOMEDAY  handle exception
+            // SOMEDAY handle exception
             log.log(Log.INFO, "Exception in executeProgram()", e);
             executionData.setExecutionException(e);
             throw new SecurityException(e);
@@ -1375,13 +1378,12 @@ public class Executable extends Plugin implements IExecutable {
         return passed;
     }
 
-
     protected boolean isValidDataFile(Problem inProblem) {
         boolean result = false;
         if (inProblem.getDataFileName() != null && inProblem.getDataFileName().trim().length() > 0) {
             result = true;
         }
-        if (inProblem.isUsingExternalDataFiles()){
+        if (inProblem.isUsingExternalDataFiles()) {
             return true;
         }
         return result;
@@ -1390,7 +1392,6 @@ public class Executable extends Plugin implements IExecutable {
     private boolean isJudge() {
         return contest.getClientId().getClientType().equals(ClientType.Type.JUDGE);
     }
-    
 
     /**
      * Extract source file and run compile command line script.
@@ -1400,8 +1401,8 @@ public class Executable extends Plugin implements IExecutable {
     protected boolean compileProgram() {
 
         try {
-            
-            if (isJudge()){
+
+            if (isJudge()) {
                 controller.sendCompilingMessage(run);
             }
 
@@ -1428,13 +1429,13 @@ public class Executable extends Plugin implements IExecutable {
             executionTimer.startTimer();
 
             long startSecs = System.currentTimeMillis();
-            
+
             Process process = runProgram(cmdline, "Compiling...", false);
             if (process == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
-                // errorString will be set by 
+                // errorString will be set by
                 executionData.setCompileExeFileName("");
                 executionData.setCompileSuccess(false);
                 executionData.setCompileResultCode(1);
@@ -1512,6 +1513,7 @@ public class Executable extends Plugin implements IExecutable {
 
     /**
      * Get max output file size.
+     * 
      * @return
      */
     private long getMaxFileSize() {
@@ -1593,8 +1595,8 @@ public class Executable extends Plugin implements IExecutable {
      * 
      * @param inRun
      *            submitted by team
-     * @param origString -
-     *            original string to be substituted.
+     * @param origString
+     *            - original string to be substituted.
      * @return string with values
      */
     public String substituteAllStrings(Run inRun, String origString) {
@@ -1625,7 +1627,7 @@ public class Executable extends Plugin implements IExecutable {
                     validatorCommand = validatorFile.getName(); // validator
                 }
             }
-            
+
             if (validatorCommand != null) {
                 newString = replaceString(newString, "{:validator}", validatorCommand);
             }
@@ -1634,13 +1636,13 @@ public class Executable extends Plugin implements IExecutable {
             // what should we do?
 
             if (inRun.getLanguageId() != null) {
-                Language[] langs=contest.getLanguages();
+                Language[] langs = contest.getLanguages();
                 int index = 0;
-                String displayName="";
+                String displayName = "";
                 for (int i = 0; i < langs.length; i++) {
                     if (langs[i] != null && langs[i].getElementId().equals(inRun.getLanguageId())) {
                         displayName = langs[i].getDisplayName().toLowerCase().replaceAll(" ", "_");
-                        index=i+1;
+                        index = i + 1;
                         break;
                     }
                 }
@@ -1651,11 +1653,11 @@ public class Executable extends Plugin implements IExecutable {
                 }
             }
             if (inRun.getProblemId() != null) {
-                Problem[] problems=contest.getProblems();
+                Problem[] problems = contest.getProblems();
                 int index = 0;
                 for (int i = 0; i < problems.length; i++) {
                     if (problems[i] != null && problems[i].getElementId().equals(inRun.getProblemId())) {
-                        index=i+1;
+                        index = i + 1;
                         break;
                     }
                 }
@@ -1708,7 +1710,6 @@ public class Executable extends Plugin implements IExecutable {
         return newString;
     }
 
-
     /**
      * Return string minus last extension. <br>
      * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
@@ -1754,20 +1755,20 @@ public class Executable extends Plugin implements IExecutable {
      * 
      * @param cmdline
      * @param msg
-     * @param autoStopExecution 
+     * @param autoStopExecution
      * @return the process started.
      */
     public Process runProgram(String cmdline, String msg, boolean autoStopExecution) {
         Process process = null;
         errorString = "";
-        
+
         executeDirectoryName = getExecuteDirectoryName();
-        
+
         try {
             File runDir = new File(executeDirectoryName);
             if (runDir.isDirectory()) {
                 log.config("executing: '" + cmdline + "'");
-                
+
                 String[] env = null;
 
                 if (executionTimer != null) {
@@ -1828,8 +1829,6 @@ public class Executable extends Plugin implements IExecutable {
             log.log(Log.CONFIG, "Exception in setExecuteBit()  ", ex);
         }
     }
-
-
 
     public String getValidationResults() {
         return executionData.getValidationResults();
@@ -1926,6 +1925,7 @@ public class Executable extends Plugin implements IExecutable {
 
     /**
      * Show gui message to user when errors occur?
+     * 
      * @param showMessageToUser
      */
     public void setShowMessageToUser(boolean showMessageToUser) {
@@ -1935,35 +1935,32 @@ public class Executable extends Plugin implements IExecutable {
     public String getExecuteDirectoryNameSuffix() {
         return executeDirectoryNameSuffix;
     }
-    
+
     public void setExecuteDirectoryName(String executeDirectoryName) {
         this.executeDirectoryName = executeDirectoryName;
     }
-    
+
     /**
      * Prepend basedirectoryname in front of executedirectory name.
      * 
      * @param baseDirectoryName
      */
-    public void setExecuteBaseDirectoryName (String baseDirectoryName) throws Exception {
+    public void setExecuteBaseDirectoryName(String baseDirectoryName) throws Exception {
         insureDir(baseDirectoryName);
-        if (! isDirectory(baseDirectoryName)) {
-            throw new IOException ("Could not create directory "+baseDirectoryName);
+        if (!isDirectory(baseDirectoryName)) {
+            throw new IOException("Could not create directory " + baseDirectoryName);
         }
         String dirname = baseDirectoryName + File.separator + executeDirectoryName;
         insureDir(baseDirectoryName);
-        if (! isDirectory(dirname)) {
-            throw new IOException ("Could not create directory "+dirname);
+        if (!isDirectory(dirname)) {
+            throw new IOException("Could not create directory " + dirname);
         }
-        this.executeDirectoryName = dirname; 
+        this.executeDirectoryName = dirname;
     }
-
 
     private boolean isDirectory(String dirname) {
         return new File(dirname).isDirectory();
     }
-    
-    
 
     /**
      * This suffix is added to the execute directory nanme.
@@ -1977,11 +1974,11 @@ public class Executable extends Plugin implements IExecutable {
     public void setExecuteDirectoryNameSuffix(String executeDirectoryNameSuffix) {
         this.executeDirectoryNameSuffix = executeDirectoryNameSuffix;
     }
-    
+
     public void setUsingGUI(boolean usingGUI) {
         this.usingGUI = usingGUI;
     }
-    
+
     public boolean isUsingGUI() {
         return usingGUI;
     }
@@ -1995,11 +1992,11 @@ public class Executable extends Plugin implements IExecutable {
         this.run = aRun;
         language = inContest.getLanguage(aRun.getLanguageId());
         problem = inContest.getProblem(aRun.getProblemId());
-        
+
         initialize();
-        
+
         return execute(clearDirFirst);
-        
+
     }
 
     @Override
@@ -2009,18 +2006,19 @@ public class Executable extends Plugin implements IExecutable {
 
     @Override
     public void dispose() {
-       
+
         executionData = null;
         executionTimer = null;
         fileViewer = null;
     }
-    
+
     public ContestInformation getContestInformation() {
         return contest.getContestInformation();
     }
-    
+
     /**
      * Get filename for each team's output for each test case.
+     * 
      * @return the list of team output file names.
      */
     public List<String> getTeamsOutputFilenames() {
@@ -2029,6 +2027,7 @@ public class Executable extends Plugin implements IExecutable {
 
     /**
      * Get filename for each team's output for each test case.
+     * 
      * @return the list of team output file names.
      */
     public List<String> getValidatorOutputFilenames() {
@@ -2037,10 +2036,10 @@ public class Executable extends Plugin implements IExecutable {
 
     /**
      * Get filename for each team's output for each test case.
+     * 
      * @return the list of team output file names.
      */
     public List<String> getValidatorErrFilenames() {
         return validatorStderrFilesnames;
     }
 }
-
