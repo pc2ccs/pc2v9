@@ -1078,6 +1078,7 @@ public class EditProblemPane extends JPanePlugin {
         
         
         String newValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
+        System.err.println ("Custom Validator text field entry = '" + newValidatorFileName + "'");
         if (newValidatorFileName == null || newValidatorFileName.trim().length() <= 0) {
             // missing required custom validator name
             throw new InvalidFieldValue("Missing required Custom Validator program name");
@@ -1317,7 +1318,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Validate that all problem fields are ok.
+     * Validate that all problem fields selected in the GUI are ok.
      * 
      * @return
      */
@@ -1364,23 +1365,27 @@ public class EditProblemPane extends JPanePlugin {
         }
 
 
-        //validate the CLICS validator tolerance fields
-        if (getFloatRelativeToleranceCheckBox().isSelected()) {
-            String text = getFloatRelativeToleranceTextField().getText();
-            try {
-                Float.parseFloat(text);
-            } catch (NumberFormatException | NullPointerException e) {
-                showMessage("CLICS Validator 'Float Relative Tolerance' is selected; you must specify a valid tolerance (\"Validator\" tab)");
-                return false;
+        //verify that if the CLICS validator has been selected, the tolerance fields are valid
+        if (getUseCLICSValidatorRadioButton().isSelected()) {
+
+            if (getFloatRelativeToleranceCheckBox().isSelected()) {
+                String text = getFloatRelativeToleranceTextField().getText();
+                try {
+                    Float.parseFloat(text);
+                } catch (NumberFormatException | NullPointerException e) {
+                    showMessage("CLICS Validator 'Float Relative Tolerance' is selected; you must specify a valid tolerance (\"Validator\" tab)");
+                    return false;
+                }
             }
-        }
-        if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
-            String text = getFloatAbsoluteToleranceTextField().getText();
-            try {
-                Float.parseFloat(text);
-            } catch (NumberFormatException | NullPointerException e) {
-                showMessage("CLICS Validator 'Float Absolute Tolerance' is selected; you must specify a valid tolerance (\"Validator\" tab)");
-                return false;
+            
+            if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
+                String text = getFloatAbsoluteToleranceTextField().getText();
+                try {
+                    Float.parseFloat(text);
+                } catch (NumberFormatException | NullPointerException e) {
+                    showMessage("CLICS Validator 'Float Absolute Tolerance' is selected; you must specify a valid tolerance (\"Validator\" tab)");
+                    return false;
+                }
             }
         }
 
