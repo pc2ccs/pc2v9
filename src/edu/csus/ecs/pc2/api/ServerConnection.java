@@ -492,12 +492,12 @@ public class ServerConnection {
     protected void setPC2Validator(Problem problem) {
 
         problem.setValidatedProblem(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
 
         problem.setUsingPC2Validator(true);
         problem.setWhichPC2Validator(1);
         problem.setIgnoreCaseOnValidation(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
                 + problem.isIgnoreCaseOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
     }

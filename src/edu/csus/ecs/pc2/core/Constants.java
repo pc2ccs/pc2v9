@@ -78,7 +78,7 @@ public final class Constants {
     /**
      * The Default PC2 Validator Command Line
      */
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    public static final String DEFAULT_PC2_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
     
     /**
      * The Default CLICS Validator Command Line
