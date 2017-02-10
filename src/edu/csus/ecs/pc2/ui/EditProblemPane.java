@@ -2682,7 +2682,7 @@ public class EditProblemPane extends JPanePlugin {
             + "\n  (1) the name of the input data file which was used to test the program whose output is being validated; " 
             + "\n  (2) the name of an \"answer file\" which is input to the Validator (typically, the \"correct answer\" for the problem); and"
             + "\n  (3) the name of a \"feedback directory\" into which the Validator can place \"feedback files\" in order to report additional information"
-            + "\n      on the validation of the output of the program being validated.  The \"feedback directory\" name must end with a \"path separator\" character ('/' or '\\')."
+            + "\n      on the validation of the output of the program being validated.  The \"feedback directory\" name will end with a \"path separator\" character ('/' or '\\')."
             
             + "\n\n When using a CLICS Validator, PC^2 arranges that the content of the output file which was produced by the program being validated "
             + "\n is sent to the \"standard input\" of the Validator program."
@@ -2690,6 +2690,9 @@ public class EditProblemPane extends JPanePlugin {
             + "\n\n The CLICS Validator Standard specifies that the Validator is responsible for accepting the above parameters (along with the data on its standard input)"
             + "\n and exiting with an exit code of 42 if the submission which produced the given output is to be accepted (i.e., judged \"Yes\"),"
             + "\n or exiting with an exit code of 43 if the submission is to be rejected (i.e., judged \"No - Wrong Answer\")."
+            
+            + "\n\n The Validator may also write additional feedback information into files in the \"feedback directory\"; these files can under certain conditions"
+            + "\n be used by PC^2 to display additional information to the Judges and/or Teams."
             
             + "\n\nFor more information, see the PC^2 Contest Administrator's Guide; in particular, the Appendix on Validators."
             +"\nSee also the CLICS specification at https://clics.ecs.baylor.edu/index.php/Problem_format#Validators.";
