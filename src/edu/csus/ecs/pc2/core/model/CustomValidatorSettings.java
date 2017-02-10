@@ -62,7 +62,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
 
 
     /**
-     * Returns the current Custom Validator command line; that is, the command used to invoke the Custom Balidator.
+     * Returns the current Custom Validator command line; that is, the command used to invoke the Custom Validator.
      * This typically includes the name of the validator program as the first element, followed by any arguments
      * to be passed to the custom validator.
      * 
