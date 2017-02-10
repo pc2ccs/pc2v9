@@ -258,7 +258,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
         
         retStr += "; PC2InterfaceValidatorCommandLine=" + customPC2InterfaceValidatorCommandLine;
         
-        retStr += "; CLICSInterfaceValidatorCommandLine" + customCLICSInterfaceValidatorCommandLine;
+        retStr += "; CLICSInterfaceValidatorCommandLine=" + customCLICSInterfaceValidatorCommandLine;
         
         retStr += "; usePC2ValidatorInterface=" + usePC2ValidatorInterface;
         retStr += "; useCLICSValidatorInterface=" + useCLICSValidatorInterface;
