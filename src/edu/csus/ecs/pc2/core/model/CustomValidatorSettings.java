@@ -1,7 +1,9 @@
 /**
  * This class encapsulates settings for configuring a "custom validator".
- * Settings include the validator program execution command line (that is, the command used to invoke
- * the custom validator) and the command line options to be passed to the custom validator. 
+ * Settings include the validator program name (that is, the program which acts as
+ * the custom validator) and the validator command line (that is, the command line
+ * used to invoke the validator, including whatever options need to be passed to the 
+ * validator program). 
  */
 package edu.csus.ecs.pc2.core.model;
 
