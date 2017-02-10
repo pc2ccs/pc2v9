@@ -25,6 +25,8 @@ public class Problem implements IElementObject {
      * PC<sup>2</sup> Validator Command Line.
      */
     public static final String INTERNAL_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.validator.Validator";
+    
+    public static final String CLICS_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.ClicsValidator";
 
     /**
      * 
