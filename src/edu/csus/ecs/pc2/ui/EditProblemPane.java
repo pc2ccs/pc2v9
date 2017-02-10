@@ -83,10 +83,6 @@ public class EditProblemPane extends JPanePlugin {
 
     // TODO 917 automatic check on load when external/internal data sets changed
 
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
-    
-    public static final String DEFAULT_CLICS_VALIDATOR_COMMAND = "{:validator} {:infile} {:ansfile} feedbackdir" + File.separator;
-
     private static boolean debug22EditProblem = false;
 
     /**
@@ -963,8 +959,8 @@ public class EditProblemPane extends JPanePlugin {
 
             checkProblem.setWhichPC2Validator(getPc2ValidatorOptionComboBox().getSelectedIndex());
             checkProblem.setIgnoreCaseOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());
-            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreCaseOnValidation());
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+            checkProblem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreCaseOnValidation());
         }
         
         //update CLICS Validator settings in the Problem
@@ -1946,8 +1942,8 @@ public class EditProblemPane extends JPanePlugin {
         getCustomValidatorExecutableProgramTextField().setToolTipText("");
         getUsePC2ValStdRadioButton().setSelected(true);
         getUseClicsValStdRadioButton().setSelected(false);
-        getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
-        getCustomValidatorCommandLineTextField().setToolTipText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        getCustomValidatorCommandLineTextField().setToolTipText(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
 
     }
 
@@ -3268,7 +3264,7 @@ public class EditProblemPane extends JPanePlugin {
         getFloatRelativeToleranceTextField().setText("");
 
         //clear custom validator options
-        getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
         getCustomValidatorExecutableProgramTextField().setText("");
         getCustomValidatorExecutableProgramTextField().setToolTipText("");
         
@@ -4303,7 +4299,7 @@ public class EditProblemPane extends JPanePlugin {
         	        if (problem==null || problem.getValidatorCommandLine()==null || 
         	                problem.getValidatorCommandLine().length() <= 0 ) {
         	            //there's currently no definition for the Validator Command Line; fill it with the PC2 default
-        	            getCustomValidatorCommandLineTextField().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        	            getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
         	        } else {
         	            if (problem != null && problem.getValidatorCommandLine()!=null) {
         	                getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
@@ -4325,7 +4321,7 @@ public class EditProblemPane extends JPanePlugin {
                     if (problem==null || problem.getValidatorCommandLine()==null || 
                             problem.getValidatorCommandLine().length() <= 0 ) {
                         //there's currently no definition for the Validator Command Line; fill it with the CLICS default
-                        getCustomValidatorCommandLineTextField().setText(DEFAULT_CLICS_VALIDATOR_COMMAND);
+                        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
                     } else {
                         if (problem != null && problem.getValidatorCommandLine()!=null) {
                             getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
