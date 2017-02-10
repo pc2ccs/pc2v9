@@ -19,7 +19,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     
-    //the name of the custome validator (the program which is to be executed)
+    //the name of the custom validator (the program which is to be executed)
     private String customValidatorProgramName;
     
     //the command which is used to invoke the validator (typically includes the validator program name)
@@ -248,6 +248,24 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
     public void setUseCLICSValidatorInterface() {
         this.useCLICSValidatorInterface = true;
         this.usePC2ValidatorInterface = false;
+    }
+    
+    @Override
+    public String toString() {
+        String retStr = "CustomValidatorSettings[";
+        
+        retStr += "ValidatorProgramName=" + customValidatorProgramName;
+        
+        retStr += "; PC2InterfaceValidatorCommandLine=" + customPC2InterfaceValidatorCommandLine;
+        
+        retStr += "; CLICSInterfaceValidatorCommandLine" + customCLICSInterfaceValidatorCommandLine;
+        
+        retStr += "; usePC2ValidatorInterface=" + usePC2ValidatorInterface;
+        retStr += "; useCLICSValidatorInterface=" + useCLICSValidatorInterface;
+
+        retStr += "]";
+        return retStr ;
+        
     }
 
 }
