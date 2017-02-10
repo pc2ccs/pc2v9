@@ -971,7 +971,7 @@ public class EditProblemPane extends JPanePlugin {
         if (checkProblem.isUsingCLICSValidator()) {
             checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
             checkProblem.setValidatorProgramName(Problem.CLICS_VALIDATOR_NAME);
-            checkProblem.setValidatorCommandLine("{:validator} {:infile} {:ansfile} feedbackDir" + File.separator);
+            checkProblem.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         }
         
         //update Custom Validator settings in the Problem
@@ -4218,13 +4218,20 @@ public class EditProblemPane extends JPanePlugin {
      * Returns a CustomValidatorSettings object containing the Custom Validator settings currently displayed in the GUI.
      * 
      * @return a CustomValidatorSettings object populated from the GUI
+     * 
+     * @throws {@link InvalidFieldValue} if the GUI does not properly identify the Validator Interface mode
      */
     private CustomValidatorSettings getCustomValidatorSettingsFromFields() {
         CustomValidatorSettings settings = new CustomValidatorSettings();
         settings.setCustomValidatorProgramName(this.getCustomValidatorExecutableProgramTextField().getText());
+        if (this.getUsePC2ValStdRadioButton().isSelected()) {
+            settings.setUsePC2ValidatorInterface();
+        } else if (this.getUseClicsValStdRadioButton().isSelected()){
+            settings.setUseCLICSValidatorInterface();
+        } else {
+            throw new InvalidFieldValue("No Validator Standard radio button set");
+        }
         settings.setCustomValidatorCommandLine(this.getCustomValidatorCommandLineTextField().getText());
-        settings.setUsePC2ValidatorInterface(this.getUsePC2ValStdRadioButton().isSelected());
-        settings.setUseCLICSValidatorInterface(this.getUseClicsValStdRadioButton().isSelected());
         
         return settings;
     }

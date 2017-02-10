@@ -9,6 +9,8 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.Constants;
+
 /**
  * @author pc2@ecs.csus.edu
  *
@@ -16,25 +18,33 @@ import java.io.Serializable;
 public class CustomValidatorSettings implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
-
-    // the name of the validator program
+    
+    //the name of the custome validator (the program which is to be executed)
     private String customValidatorProgramName;
     
     //the command which is used to invoke the validator (typically includes the validator program name)
-    private String customValidatorCommandLine;
+    // Note that there are two variables, to hold two versions of the Command Line: one for Validators 
+    // using the PC2 Interface standard and one for Validators using the CLICS Interface standard
+    private String customPC2InterfaceValidatorCommandLine;
+    private String customCLICSInterfaceValidatorCommandLine;
     
-    // flags indicating which validator interface to use
+    // flags indicating which validator interface this validator is using
     private boolean usePC2ValidatorInterface ;
     private boolean useCLICSValidatorInterface ;
+
+
     
     /**
-     * Constructs a CustomValidatorSettings object with default values of empty strings
-     * for both the Validator executable program name and the Validator invocation command line,
-     * and with a default setting of "usePC2ValidatorInterface".
+     * Constructs a CustomValidatorSettings object with default values of the empty string
+     * for the Validator executable program name, the default PC2 Validator and CLICS Validator
+     * invocation command lines, and with a default setting of "usePC2ValidatorInterface".
+     * 
+     * @see {@link Constants}
      */
     public CustomValidatorSettings() {
         this.customValidatorProgramName = "";
-        this.customValidatorCommandLine = "";
+        this.customPC2InterfaceValidatorCommandLine = Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND;
+        this.customCLICSInterfaceValidatorCommandLine = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
         this.usePC2ValidatorInterface = true ;
         this.useCLICSValidatorInterface = false;
     }
@@ -43,6 +53,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
 
     /**
      * Returns the name of the custom validator program.
+     * 
      * @return a String containing the name of the custom validator program
      */
     public String getCustomValidatorProgramName() {
@@ -51,8 +62,10 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
 
     /**
      * Sets the name for the custom validator to the specified value.
-     * Note that the validator name does not include command line options; those
-     * are specified via the separate "customValidatorCommand" field.
+     * Note that the validator program name does not include command line options; those
+     * are specified via the separate "customValidatorCommand".
+     * 
+     * @see {@link #setCustomValidatorCommandLine(String)}
      * 
      * @param progName -- the custom validator program name
      */
@@ -66,10 +79,27 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
      * This typically includes the name of the validator program as the first element, followed by any arguments
      * to be passed to the custom validator.
      * 
-     * @return the command line used to invoke the custom validator
+     * Note that the returned Custom Validator Command Line depends on the current Validator Interface Standard mode.
+     * That is, if the Validator Settings indicate "usePC2ValidatorInterface", this method returns the current
+     * PC2 Validator Command Line; if the Validator Settings indicate "useCLICSValidatorInterface",
+     * this method returns the current CLICS Validator Command Line.
+     * 
+     * @see {@link #setCustomValidatorCommandLine(String)}
+     * @see {@link #setUseCLICSValidatorInterface()}
+     * @see {@link #setUsePC2ValidatorInterface()}
+     * 
+     * @return the command line used to invoke the custom validator when using the currently-set Validator Interface
+     * 
+     * @throws {@link RuntimeException} if the settings do not contain a valid Validator Interface mode setting
      */
     public String getCustomValidatorCommandLine() {
-        return customValidatorCommandLine;
+        if (this.isUseCLICSValidatorInterface()) {
+            return this.customCLICSInterfaceValidatorCommandLine;
+        } else if (this.isUsePC2ValidatorInterface()) {
+            return this.customPC2InterfaceValidatorCommandLine;
+        } else {
+            throw new RuntimeException("CustomValidatorSettings.getCustomValidatorCommandLine(): undefined Validator Interface mode");
+        }
     }
 
     /**
@@ -77,10 +107,31 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
      * The command typically includes the name of the custom validator program as the first element, followed by
      * any arguments to be passed to the custom validator.
      * 
-     * @param commandString -- a String defining the command line used to invoke the Custom Validator
+     * Note that this class internally maintains two representations of the Validator Command Line, depending on
+     * the Validator Interface mode (that is, whether the Validator uses the PC2 Interface Standard or the
+     * CLICS Interface Standard).  Calling this method sets the Validator Command Line for the currently-set
+     * Validator Interface mode.
+     * 
+     * This in turn means that it is the caller's responsibility to insure that this CustomValidatorSettings object
+     * is in the desired Validator Interface Standard mode (that is, set to use either the PC2 Interface Standard or 
+     * the CLICS Interface Standard as desired) prior to calling this method. 
+     * 
+     * @see {@link #setUseCLICSValidatorInterface()}
+     * @see {@link #setUsePC2ValidatorInterface()} 
+     * 
+     * @param commandString -- a String defining the command line used to invoke the Custom Validator when
+     * the Validator is set to use the currently-defined Validator Interface mode.
+     * 
+     * @throws {@link RuntimeException} if the settings do not contain a valid Validator Interface mode setting
      */
     public void setCustomValidatorCommandLine(String commandString) {
-        this.customValidatorCommandLine = commandString;
+        if (this.usePC2ValidatorInterface) {
+            this.customPC2InterfaceValidatorCommandLine = commandString;
+        } else if (this.useCLICSValidatorInterface) {
+            this.customCLICSInterfaceValidatorCommandLine = commandString;
+        } else {
+            throw new RuntimeException("CustomValidatorSettings.setCustomValidatorCommandLine(): undefined Validator Interface mode");
+        }
     }
 
     /**
@@ -144,12 +195,18 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
      */
     public CustomValidatorSettings clone() {
         CustomValidatorSettings clone = new CustomValidatorSettings();
-        //the following should work because Strings are immutable...
-        clone.setCustomValidatorProgramName(this.getCustomValidatorProgramName());
+        clone.setCustomValidatorProgramName(this.getCustomValidatorProgramName());  //should work because Strings are immutable...
+        if (this.isUseCLICSValidatorInterface()) {
+            clone.setUseCLICSValidatorInterface();
+        } else if (this.isUsePC2ValidatorInterface()){
+            clone.setUsePC2ValidatorInterface();
+        } else {
+            throw new RuntimeException ("CustomValidatorSettings.clone(): unknown Validator Interface state");
+        }
         clone.setCustomValidatorCommandLine(this.getCustomValidatorCommandLine());
+
         return clone;
     }
-
 
 
     /**
@@ -160,22 +217,21 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
     }
 
 
-
     /**
      * Sets the flag indicating that this validator expects to use the PC2 Validator Interface.
-     * Note that it is the caller's responsibility to also call method {@link #setUseCLICSValidatorInterface(boolean)}
-     * to set the useCLICSValidatorInterface to the complement of the value passed to this method. 
+     * This method should be called prior to attempting to use {@link #setCustomValidatorCommandLine(String)}
+     * to set a PC2 Validator Command Line.
      * 
-     * @param yesNo the value to which the usePC2ValidatorInterface flag should be set
      */
-    public void setUsePC2ValidatorInterface(boolean yesNo) {
-        this.usePC2ValidatorInterface = yesNo;
+    public void setUsePC2ValidatorInterface() {
+        this.usePC2ValidatorInterface = true;
+        this.useCLICSValidatorInterface = false;
     }
 
 
 
     /**
-     * @return the useCLICSValidatorInterface
+     * @return the useCLICSValidatorInterface flag setting
      */
     public boolean isUseCLICSValidatorInterface() {
         return useCLICSValidatorInterface;
@@ -185,13 +241,13 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
 
     /**
      * Sets the flag indicating that this validator expects to use the CLICS Validator Interface.
-     * Note that it is the caller's responsibility to also call method {@link #setUsePC2ValidatorInterface(boolean)}
-     * to set the usePC2ValidatorInterface to the complement of the value passed to this method. 
+     * This method should be called prior to attempting to use {@link #setCustomValidatorCommandLine(String)}
+     * to set a CLICS Validator Command Line.
      * 
-     * @param yesNo the value to which the useCLICSValidatorInterface flag should be set
      */
-    public void setUseCLICSValidatorInterface(boolean yesNo) {
-        this.useCLICSValidatorInterface = yesNo;
+    public void setUseCLICSValidatorInterface() {
+        this.useCLICSValidatorInterface = true;
+        this.usePC2ValidatorInterface = false;
     }
 
 }
