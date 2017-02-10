@@ -417,6 +417,9 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Add to the contest a new Problem as defined by the current GUI fields.
+     * This method is invoked by pushing either the "Add" button on the Problems grid
+     * or the "Cancel" button on the Add/Edit Problem Pane (after having selected either
+     * "Add" or "Edit" and then pushing "Cancel").
      * 
      */
     protected void addProblem() {
@@ -468,8 +471,8 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (!newProblem.getElementId().equals(newProblemDataFiles.getProblemId())) {
-            // this is like ProblemDataFiles.copy but without overwriting the ProblemId, which is the problem
-            // we are trying to fix here
+            // this is like ProblemDataFiles.copy but without overwriting the elementID & ProblemId, 
+            // which is the problem we are trying to fix here
             ProblemDataFiles clone = new ProblemDataFiles(newProblem);
             clone.setSiteNumber(newProblemDataFiles.getSiteNumber());
             clone.setValidatorFile(newProblemDataFiles.getValidatorFile());
@@ -694,8 +697,8 @@ public class EditProblemPane extends JPanePlugin {
                     }
                    
                     
-                    /// from here down is the original code, being replaced by the above...
-                    // the concept here of checking the ValidatorFile in the ProblemDataFiles needs to be added to the above
+                    //TODO: XXX from here down is the original code; it needs to be considered for modification/deletion/replacement/retention
+                    // (the concept here of checking the ValidatorFile in the ProblemDataFiles needs to be added to the above?)
                     String fileName = changedProblem.getValidatorProgramName();
                     if (!problem.isUsingPC2Validator() && fileName != null && fileName.length() > 0) {
                         if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
@@ -942,17 +945,13 @@ public class EditProblemPane extends JPanePlugin {
 
         checkProblem.setReadInputDataFromSTDIN(stdinRadioButton.isSelected());
 
-        //set the flags indicating which validator (if any) is being used in the Problem
+        // set the flags indicating which validator (if any) is being used in the Problem
         checkProblem.setValidatedProblem(!getUseNOValidatatorRadioButton().isSelected());
+        checkProblem.setUsingPC2Validator(getUsePC2ValidatorRadioButton().isSelected());
+        checkProblem.setUsingCLICSValidator(getUseCLICSValidatorRadioButton().isSelected());
+        checkProblem.setUsingCustomValidator(getUseCustomValidatorRadioButton().isSelected());
 
-        if (checkProblem.isValidatedProblem()) {
-        	//update validator selection from radio buttons
-            checkProblem.setUsingPC2Validator(getUsePC2ValidatorRadioButton().isSelected());
-            checkProblem.setUsingCLICSValidator(getUseCLICSValidatorRadioButton().isSelected());
-            checkProblem.setUsingCustomValidator(getUseCustomValidatorRadioButton().isSelected());
-        }
-
-        //initialize validator settings to defaults
+        // initialize validator settings to defaults
         checkProblem.setValidatorProgramName(null);
         checkProblem.setValidatorCommandLine(null);
         
@@ -971,6 +970,8 @@ public class EditProblemPane extends JPanePlugin {
         //update CLICS Validator settings in the Problem
         if (checkProblem.isUsingCLICSValidator()) {
             checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
+            checkProblem.setValidatorProgramName(Problem.CLICS_VALIDATOR_NAME);
+            checkProblem.setValidatorCommandLine("{:validator} {:infile} {:ansfile} feedbackDir" + File.separator);
         }
         
         //update Custom Validator settings in the Problem
@@ -1078,7 +1079,7 @@ public class EditProblemPane extends JPanePlugin {
         
         
         String newValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
-        System.err.println ("Custom Validator text field entry = '" + newValidatorFileName + "'");
+
         if (newValidatorFileName == null || newValidatorFileName.trim().length() <= 0) {
             // missing required custom validator name
             throw new InvalidFieldValue("Missing required Custom Validator program name");
@@ -1094,9 +1095,11 @@ public class EditProblemPane extends JPanePlugin {
         
         checkFileFormat(serializedFile);
         
-        //put the Validator information in the new Problem
-        checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
+        //put the Custom Validator information in the new Problem
+        CustomValidatorSettings settings = getCustomValidatorSettingsFromFields();
+        checkProblem.setCustomValidatorSettings(settings);
         checkProblem.setValidatorProgramName(serializedFile.getName());
+        checkProblem.setValidatorCommandLine(settings.getCustomValidatorCommandLine());
         // for some reason on validator this is borked
         // newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, newValidatorFileName));
         newProblemDataFiles.setValidatorFile(serializedFile);
