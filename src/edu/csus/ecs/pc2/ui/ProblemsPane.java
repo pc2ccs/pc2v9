@@ -132,7 +132,7 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
+            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Program", "Validator Command Line" };
             problemListBox.addColumns(cols);
 
             /**
@@ -184,6 +184,7 @@ public class ProblemsPane extends JPanePlugin {
 
     protected Object[] buildProblemRow(Problem problem) {
         // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
+        //Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Prog", "Validator Command Line" };
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -223,14 +224,26 @@ public class ProblemsPane extends JPanePlugin {
         c[i++] = problem.getShortName();
         c[i++] = Integer.toString(problem.getTimeOutInSeconds());
         c[i++] = yesNoString(problem.isShowValidationToJudges());
-        String validatorName = problem.getValidatorProgramName();
-        if (problem.isValidatedProblem()) {
-            if (! problem.isUsingPC2Validator()) {
-                validatorName = problem.getValidatorCommandLine();
-            }
-        }
         
-        c[i++] = validatorName;
+        //set validator column value
+//        String validatorName = problem.getValidatorProgramName();
+//        if (problem.isValidatedProblem()) {
+//            if (! problem.isUsingPC2Validator()) {
+//                validatorName = problem.getValidatorCommandLine();
+//            }
+//        }
+        
+        String validatorProgramName = "<none>";
+        if (problem.isValidatedProblem()) {
+            validatorProgramName = problem.getValidatorProgramName();
+        }
+        c[i++] = validatorProgramName;
+        
+        String validatorCommandLine = "";
+        if (problem.isValidatedProblem()) {
+            validatorCommandLine = problem.getValidatorCommandLine();
+        }
+        c[i++] = validatorCommandLine ;
 
         return c;
     }
