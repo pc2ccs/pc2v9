@@ -9,10 +9,13 @@ import edu.csus.ecs.pc2.core.Constants;
  * @author John@pc2.ecs.csus.edu
  *
  */
-public class PC2ValidatorSettings {
+public class PC2ValidatorSettings implements Cloneable {
 
     private String validatorProgramName ;
     private String validatorCommandLine ;
+    private int whichPC2Validator = 0;  //which pc2validator option?
+    private boolean ignoreCaseOnValidation = false;    
+
     
     public PC2ValidatorSettings() {
         
@@ -50,6 +53,69 @@ public class PC2ValidatorSettings {
      */
     public void setValidatorCommandLine(String validatorCommandLine) {
         this.validatorCommandLine = validatorCommandLine;
+    }
+
+    /**
+     * @return an integer indicating which PC2 Validator Option to use
+     */
+    public int getWhichPC2Validator() {
+        return whichPC2Validator;
+    }
+
+    /**
+     * Set the integer indicating which PC2Validator option to use.
+     * 
+     * @param whichPC2Validator the whichPC2Validator to set
+     */
+    public void setWhichPC2Validator(int whichPC2Validator) {
+        this.whichPC2Validator = whichPC2Validator;
+    }
+
+    /**
+     * @return the ignoreCaseOnValidation flag
+     */
+    public boolean isIgnoreCaseOnValidation() {
+        return ignoreCaseOnValidation;
+    }
+
+    /**
+     * Sets whether or not the PC2Validator should ignore case differences in answers.
+     * 
+     * @param ignoreCaseOnValidation the ignoreCaseOnValidation to set
+     */
+    public void setIgnoreCaseOnValidation(boolean ignoreCaseOnValidation) {
+        this.ignoreCaseOnValidation = ignoreCaseOnValidation;
+    }
+
+    /** 
+     * Returns a clone (copy) of this PC2ValidatorSettings object.
+     */
+    @Override
+    protected PC2ValidatorSettings clone()  {
+        PC2ValidatorSettings settings = new PC2ValidatorSettings();
+        
+        settings.validatorProgramName = this.validatorProgramName;
+        settings.validatorCommandLine = this.validatorCommandLine;
+        settings.whichPC2Validator = this.whichPC2Validator;
+        settings.ignoreCaseOnValidation = this.ignoreCaseOnValidation;
+        
+        return settings;
+    }
+
+    /**
+     * Returns a String representation of this PC2ValidatorSettings object.
+     */
+    @Override
+    public String toString() {
+        String retStr = "PC2ValidatorSettings[" ;
+        
+        retStr += "validatorProgramName=" + validatorProgramName;
+        retStr += "; validatorCommandLine=\"" + validatorCommandLine + "\""; 
+        retStr += "; whichPC2Validator=" + whichPC2Validator; 
+        retStr += "; ignoreCaseOnValidation=" + ignoreCaseOnValidation;    
+
+        retStr += "]";
+        return retStr;
     }
     
 }
