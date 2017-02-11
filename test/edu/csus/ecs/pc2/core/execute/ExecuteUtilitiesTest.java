@@ -59,12 +59,12 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         // TODO Promote to AbstractTestCase
 
         problem.setValidatedProblem(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
 
         problem.setUsingPC2Validator(true);
         problem.setWhichPC2Validator(1);
         problem.setIgnoreCaseOnValidation(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
         problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
     }
 
@@ -155,7 +155,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         String[] testData = { //
         // input;expected
                 "A foggy bottom day runs far;A foggy bottom day runs far", //
-                Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + ";pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
+                Constants.DEFAULT_PC2_VALIDATOR_COMMAND + ";pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
                 "{:ansfile};sumit.ans", // 
                 "{:basename};Sumit", // 
                 "{:executetime};45321", // 
@@ -235,7 +235,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         String[] testData = { //
         // input;expected
                 "A foggy bottom day runs far;A foggy bottom day runs far", // 
-                Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + ";pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
+                Constants.DEFAULT_PC2_VALIDATOR_COMMAND + ";pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
                 "{:ansfile};sumit.ans", // 
                 "{:basename};Sumit", // 
                 "{:executetime};45321", // 
