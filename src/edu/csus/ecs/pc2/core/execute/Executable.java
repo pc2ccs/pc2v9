@@ -1098,18 +1098,18 @@ public class Executable extends Plugin implements IExecutable {
             ClicsValidatorSettings settings = problem.getClicsValidatorSettings();
 
             if (settings.isCaseSensitive()) {
-                optStr += " " + ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE;
+                optStr += " " + ClicsValidatorSettings.CLICS_VTOKEN_CASE_SENSITIVE;
             }
             if (settings.isSpaceSensitive()) {
-                optStr += " " + ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
+                optStr += " " + ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE;
             }
             if (settings.isFloatAbsoluteToleranceSpecified()) {
-                optStr += " " + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE;
+                optStr += " " + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE;
                 double abstol = settings.getFloatAbsoluteTolerance();
                 optStr += " " + Double.toString(abstol);
             }
             if (settings.isFloatRelativeToleranceSpecified()) {
-                optStr += " " + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE;
+                optStr += " " + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE;
                 double reltol = settings.getFloatRelativeTolerance();
                 optStr += " " + Double.toString(reltol);
             }
