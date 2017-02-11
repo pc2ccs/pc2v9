@@ -8,6 +8,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.validator.ClicsValidator;
 
@@ -33,6 +34,9 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
     public static final double CLICS_DEFAULT_FLOAT_RELATIVE_TOLERANCE = -1.0;
     public static final double CLICS_DEFAULT_FLOAT_ABSOLUTE_TOLERANCE = -1.0;
     
+    private String validatorProgramName ;
+    private String validatorCommandLine ;
+
     private boolean isCaseSensitive;
     
     private boolean isSpaceSensitive;
@@ -46,14 +50,18 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
     private double floatAbsoluteTolerance;
     
     /**
-     * Constructs a ClicsValidatorSettings object with default values matching the 
+     * Constructs a ClicsValidatorSettings object with default setting values matching the 
      * defined public default constants.
+     * The default values for Validator Program Name and Validator Command Line are as
+     * defined by constants in class {@link Constants}.
      */
     public ClicsValidatorSettings() {
         if (log==null) {
             log = new Log("ClicsValidatorSettings.log");         
         }
 
+        this.validatorProgramName = Constants.CLICS_VALIDATOR_NAME;
+        this.validatorCommandLine = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
         this.isCaseSensitive = CLICS_DEFAULT_CASE_SENSITIVITY;
         this.isSpaceSensitive = CLICS_DEFAULT_SPACE_SENSITIVITY;
         this.isFloatRelativeToleranceSpecified = CLICS_DEFAULT_IS_FLOAT_RELATIVE_TOLERANCE_SPECIFIED;
@@ -158,6 +166,38 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
                 }//end switch
             }//end for each option field
         }
+    }
+
+    /**
+     * @return the validatorProgramName
+     */
+    public String getValidatorProgramName() {
+        return validatorProgramName;
+    }
+
+    /**
+     * Sets the name of the program to be executed in association with this Settings object.
+     * 
+     * @param validatorProgramName the validatorProgramName to set
+     */
+    public void setValidatorProgramName(String validatorProgramName) {
+        this.validatorProgramName = validatorProgramName;
+    }
+
+    /**
+     * @return the validatorCommandLine
+     */
+    public String getValidatorCommandLine() {
+        return validatorCommandLine;
+    }
+
+    /**
+     * Sets the Validator Command Line to be used to invoke the Validator associated with this Settings object.
+     * 
+     * @param validatorCommandLine the validatorCommandLine to set
+     */
+    public void setValidatorCommandLine(String validatorCommandLine) {
+        this.validatorCommandLine = validatorCommandLine;
     }
 
     /**
