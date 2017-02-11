@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestSuite;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -41,8 +42,6 @@ import edu.csus.ecs.pc2.validator.Validator;
 public class ExecutableTest extends AbstractTestCase {
 
     // SOMDAY change to using Hello.java by fixing class name in Hello.java
-
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     public static final String MOCK_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.validator.MockValidator";
 
@@ -167,7 +166,7 @@ public class ExecutableTest extends AbstractTestCase {
     protected void setupUsingPC2Validator(Problem problem) {
 
         problem.setValidatedProblem(true);
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
 
         problem.setUsingPC2Validator(true);
 
@@ -175,8 +174,8 @@ public class ExecutableTest extends AbstractTestCase {
 
         problem.setWhichPC2Validator(1);
         problem.setIgnoreCaseOnValidation(true);
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
+        problem.setValidatorProgramName(Constants.INTERNAL_VALIDATOR_NAME);
     }
     
     protected void setupMockPC2Validator(Problem problem) {

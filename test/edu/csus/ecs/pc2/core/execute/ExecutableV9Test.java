@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -33,8 +34,6 @@ public class ExecutableV9Test extends AbstractTestCase {
 
     // SOMDAY change to using Hello.java by fixing class name in Hello.java
     
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
-
     // private static int testNumber = 1;
 
     private IInternalContest contest;
@@ -118,14 +117,14 @@ public class ExecutableV9Test extends AbstractTestCase {
     protected void setPC2Validator(Problem problem) {
 
         problem.setValidatedProblem(true);
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
 
         problem.setUsingPC2Validator(true);
         problem.setWhichPC2Validator(1);
         problem.setIgnoreCaseOnValidation(true);
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
                 + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+        problem.setValidatorProgramName(Constants.INTERNAL_VALIDATOR_NAME);
     }
 
     /**

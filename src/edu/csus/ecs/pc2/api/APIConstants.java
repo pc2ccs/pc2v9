@@ -1,6 +1,6 @@
 package edu.csus.ecs.pc2.api;
 
-import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.Constants;
 
 /**
  * Constants used in the API.
@@ -62,6 +62,6 @@ public final class APIConstants {
     /**
      * PC^2 Validator program value.
      */
-    public static final String PC2_VALIDATOR_PROGRAM = Problem.INTERNAL_VALIDATOR_NAME;
+    public static final String PC2_VALIDATOR_PROGRAM = Constants.INTERNAL_VALIDATOR_NAME;
 
 }

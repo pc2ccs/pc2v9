@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.ccs.CCSConstants;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.InternalControllerSpecial;
@@ -1288,7 +1289,7 @@ public class SampleContest {
         problem.setIgnoreCaseOnValidation(true);
 
         problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+        problem.setValidatorProgramName(Constants.INTERNAL_VALIDATOR_NAME);
         
         contest.updateProblem(problem);
     }

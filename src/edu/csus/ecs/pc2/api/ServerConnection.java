@@ -499,7 +499,7 @@ public class ServerConnection {
         problem.setIgnoreCaseOnValidation(true);
         problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
                 + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+        problem.setValidatorProgramName(Constants.INTERNAL_VALIDATOR_NAME);
     }
     
     /**

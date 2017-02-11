@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.logging.ConsoleHandler;
 
 import junit.framework.TestSuite;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -41,8 +42,6 @@ import edu.csus.ecs.pc2.validator.Validator;
 
 // $HeadURL$
 public class ExecutablePluginTest extends AbstractTestCase {
-
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     // private static int testNumber = 1;
 
@@ -132,14 +131,14 @@ public class ExecutablePluginTest extends AbstractTestCase {
     protected void setPC2Validator(Problem problem) {
 
         problem.setValidatedProblem(true);
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
 
         problem.setUsingPC2Validator(true);
         problem.setWhichPC2Validator(1);
         problem.setIgnoreCaseOnValidation(true);
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
+        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
                 + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+        problem.setValidatorProgramName(Constants.INTERNAL_VALIDATOR_NAME);
     }
 
     /**

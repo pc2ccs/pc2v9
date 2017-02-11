@@ -74,6 +74,15 @@ public final class Constants {
      */
     public static final long DEFAULT_CONTEST_LENGTH_SECONDS = 18000; // 5 * 60 * 60
 
+    /**
+     * PC<sup>2</sup> Validator Program Name.
+     */
+    public static final String INTERNAL_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.validator.Validator";
+    
+    /**
+     * CLICS Validator Program Name.
+     */
+    public static final String CLICS_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.ClicsValidator";
 
     /**
      * The Default PC2 Validator Command Line
