@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.validator;
 import edu.csus.ecs.pc2.core.Constants;
 
 /**
- * This class holds the setttings for an instance of the PC2 Validator
+ * This class holds the settings for an instance of the PC2 Validator
  * (formerly known also as the "Internal Validator").
  * 
  * @author John@pc2.ecs.csus.edu
