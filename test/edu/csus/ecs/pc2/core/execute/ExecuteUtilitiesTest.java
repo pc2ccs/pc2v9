@@ -65,7 +65,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         problem.setWhichPC2Validator(1);
         problem.setIgnoreCaseOnValidation(true);
         problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Constants.INTERNAL_VALIDATOR_NAME);
+        problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
     }
 
     /**

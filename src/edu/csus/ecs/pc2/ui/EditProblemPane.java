@@ -966,7 +966,7 @@ public class EditProblemPane extends JPanePlugin {
             // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
             // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
 
-            checkProblem.setValidatorProgramName(Constants.INTERNAL_VALIDATOR_NAME);
+            checkProblem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
             checkProblem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreCaseOnValidation());
         }
         

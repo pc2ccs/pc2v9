@@ -796,7 +796,7 @@ public class EditProblemPaneNew extends JPanePlugin {
             checkProblem.setWhichPC2Validator(getPc2ValidatorComboBox().getSelectedIndex());
             checkProblem.setIgnoreCaseOnValidation(getIgnoreCaseCheckBox().isSelected());
             checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreCaseOnValidation());
-            checkProblem.setValidatorProgramName(Constants.INTERNAL_VALIDATOR_NAME);
+            checkProblem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
         }
 
         checkProblem.setShowValidationToJudges(showValidatorToJudges.isSelected());

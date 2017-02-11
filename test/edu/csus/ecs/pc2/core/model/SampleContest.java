@@ -1289,7 +1289,7 @@ public class SampleContest {
         problem.setIgnoreCaseOnValidation(true);
 
         problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Constants.INTERNAL_VALIDATOR_NAME);
+        problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
         
         contest.updateProblem(problem);
     }
