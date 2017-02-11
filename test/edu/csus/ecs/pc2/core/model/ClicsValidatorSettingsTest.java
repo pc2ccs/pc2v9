@@ -74,17 +74,17 @@ public class ClicsValidatorSettingsTest extends AbstractTestCase {
 
         String actual = toString(settings);
 
-        String expected = ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
+        String expected = ClicsValidatorSettings.CLICS_VTOKEN_CASE_SENSITIVE + " " + ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE;
 
         assertEquals(expected, actual);
 
         setFloatTolerance(settings, 4.0042354);
         actual = toString(settings);
 
-        expected = ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
-                ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
-                ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 4.0042354 " + 
-                ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 4.0042354";
+        expected = ClicsValidatorSettings.CLICS_VTOKEN_CASE_SENSITIVE + " " + 
+                ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
+                ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 4.0042354 " + 
+                ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 4.0042354";
 
         assertEquals(expected, actual);
 
@@ -104,16 +104,16 @@ public class ClicsValidatorSettingsTest extends AbstractTestCase {
 
         String actual = toString(settings);
 
-        String expected = ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
-                ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE;
+        String expected = ClicsValidatorSettings.CLICS_VTOKEN_CASE_SENSITIVE + " " + 
+                ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE;
 
         assertEquals(expected, actual);
 
         settings.setFloatAbsoluteTolerance(5.666334);
 
-        expected = ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE + " " + 
-                ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
-                ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 5.666334" ;
+        expected = ClicsValidatorSettings.CLICS_VTOKEN_CASE_SENSITIVE + " " + 
+                ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
+                ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " 5.666334" ;
 
         actual = toString(settings);
 
@@ -133,14 +133,14 @@ public class ClicsValidatorSettingsTest extends AbstractTestCase {
 
         String actual = toString(settings);
 
-        String expected = ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE ;
+        String expected = ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE ;
 
         assertEquals(expected, actual);
 
         settings.setFloatRelativeTolerance(0.0030303);
 
-        expected = ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
-                    ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 0.0030303" ;
+        expected = ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE + " " +
+                    ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + " 0.0030303" ;
 
         actual = toString(settings);
 

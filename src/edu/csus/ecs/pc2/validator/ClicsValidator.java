@@ -152,12 +152,12 @@ public class ClicsValidator {
         //grab optional arguments (if any)
         for (int i=0; i<options.length; i++) {
 
-            if (ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE.equals(options[i]) || "case-sensitive".equals(options[i])) {
+            if (ClicsValidatorSettings.CLICS_VTOKEN_CASE_SENSITIVE.equals(options[i]) || "case-sensitive".equals(options[i])) {
                 isCaseSensitive = true;
-            } else if (ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE.equals(options[i]) || "space_sensitive".equals(options[i])
+            } else if (ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE.equals(options[i]) || "space_sensitive".equals(options[i])
                     || "space-change-sensitive".equals(options[i]) || "space-sensitive".equals(options[i])) {
                 isSpaceSensitive = true;
-            } else if (ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE.equals(options[i]) || "float-absolute-tolerance".equals(options[i])) {
+            } else if (ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE.equals(options[i]) || "float-absolute-tolerance".equals(options[i])) {
                 if (i<options.length-1) {
                     i++;
                     try {
@@ -166,18 +166,18 @@ public class ClicsValidator {
                         useFloatTolerance = true;
                     } catch (NumberFormatException | NullPointerException e) {
                         //bad epsilon value
-                        log.severe("Bad value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                        log.severe("Bad value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                         e.printStackTrace();
-                        throw new RuntimeException("Bad value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                        throw new RuntimeException("Bad value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                     }
                 } else {
                     //missing epsilon
-                    log.severe("Missing tolerance value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
-                    throw new RuntimeException("Missing tolerance value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                    log.severe("Missing tolerance value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                    throw new RuntimeException("Missing tolerance value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                     
                 }
                 
-            } else if (ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE.equals(options[i]) || "float-relative-tolerance".equals(options[i])) {
+            } else if (ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE.equals(options[i]) || "float-relative-tolerance".equals(options[i])) {
                 if (i<options.length-1) {
                     i++;
                     try {
@@ -186,14 +186,14 @@ public class ClicsValidator {
                         useFloatTolerance = true;
                     } catch (NumberFormatException | NullPointerException e) {
                         //bad epsilon value
-                        log.severe("Bad value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                        log.severe("Bad value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                         e.printStackTrace();
-                        throw new RuntimeException("Bad value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                        throw new RuntimeException("Bad value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                     }
                 } else {
                     //missing epsilon
-                    log.severe("Missing tolerance value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
-                    throw new RuntimeException("Missing tolerance value following '" + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                    log.severe("Missing tolerance value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                    throw new RuntimeException("Missing tolerance value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                 }
                 
             } else if ("float_tolerance".equals(options[i]) || "float-tolerance".equals(options[i])) {
@@ -843,10 +843,10 @@ public class ClicsValidator {
         System.err.println ("  where judges_data_file and judges_answer_file must exist and be readable files,\n"
                 + "  feedbackdir" + File.separator + " must exist and be a directory that is both readable and writable,\n"
                 + "  and where [options] include:");
-        System.err.println ("    " + ClicsValidatorSettings.VTOKEN_CASE_SENSITIVE);
-        System.err.println ("    " + ClicsValidatorSettings.VTOKEN_SPACE_CHANGE_SENSITIVE);
-        System.err.println ("    " + ClicsValidatorSettings.VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " E");
-        System.err.println ("    " + ClicsValidatorSettings.VTOKEN_FLOAT_RELATIVE_TOLERANCE + " E");
+        System.err.println ("    " + ClicsValidatorSettings.CLICS_VTOKEN_CASE_SENSITIVE);
+        System.err.println ("    " + ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE);
+        System.err.println ("    " + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " E");
+        System.err.println ("    " + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + " E");
         System.err.println ("    float_tolerance E   (shorthand for setting both absolute and relative tolerance)");        
     }
 
