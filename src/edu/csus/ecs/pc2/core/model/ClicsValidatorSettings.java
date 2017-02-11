@@ -21,17 +21,17 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     
-    public static final String VTOKEN_CASE_SENSITIVE = "case_sensitive";
-    public static final String VTOKEN_SPACE_CHANGE_SENSITIVE = "space_change_sensitive";
-    public static final String VTOKEN_FLOAT_RELATIVE_TOLERANCE = "float_relative_tolerance";
-    public static final String VTOKEN_FLOAT_ABSOLUTE_TOLERANCE = "float_absolute_tolerance";
+    public static final String CLICS_VTOKEN_CASE_SENSITIVE = "case_sensitive";
+    public static final String CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE = "space_change_sensitive";
+    public static final String CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE = "float_relative_tolerance";
+    public static final String CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE = "float_absolute_tolerance";
     
-    public static final boolean DEFAULT_CASE_SENSITIVITY = false;
-    public static final boolean DEFAULT_SPACE_SENSITIVITY = false;
-    public static final boolean DEFAULT_IS_FLOAT_RELATIVE_TOLERANCE_SPECIFIED = false;
-    public static final boolean DEFAULT_IS_FLOAT_ABSOLUTE_TOLERANCE_SPECIFIED = false;
-    public static final double DEFAULT_FLOAT_RELATIVE_TOLERANCE = -1.0;
-    public static final double DEFAULT_FLOAT_ABSOLUTE_TOLERANCE = -1.0;
+    public static final boolean CLICS_DEFAULT_CASE_SENSITIVITY = false;
+    public static final boolean CLICS_DEFAULT_SPACE_SENSITIVITY = false;
+    public static final boolean CLICS_DEFAULT_IS_FLOAT_RELATIVE_TOLERANCE_SPECIFIED = false;
+    public static final boolean CLICS_DEFAULT_IS_FLOAT_ABSOLUTE_TOLERANCE_SPECIFIED = false;
+    public static final double CLICS_DEFAULT_FLOAT_RELATIVE_TOLERANCE = -1.0;
+    public static final double CLICS_DEFAULT_FLOAT_ABSOLUTE_TOLERANCE = -1.0;
     
     private boolean isCaseSensitive;
     
@@ -54,12 +54,12 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
             log = new Log("ClicsValidatorSettings.log");         
         }
 
-        this.isCaseSensitive = DEFAULT_CASE_SENSITIVITY;
-        this.isSpaceSensitive = DEFAULT_SPACE_SENSITIVITY;
-        this.isFloatRelativeToleranceSpecified = DEFAULT_IS_FLOAT_RELATIVE_TOLERANCE_SPECIFIED;
-        this.isFloatAbsoluteToleranceSpecified = DEFAULT_IS_FLOAT_RELATIVE_TOLERANCE_SPECIFIED;
-        this.floatRelativeTolerance = DEFAULT_FLOAT_RELATIVE_TOLERANCE;
-        this.floatAbsoluteTolerance = DEFAULT_FLOAT_ABSOLUTE_TOLERANCE;
+        this.isCaseSensitive = CLICS_DEFAULT_CASE_SENSITIVITY;
+        this.isSpaceSensitive = CLICS_DEFAULT_SPACE_SENSITIVITY;
+        this.isFloatRelativeToleranceSpecified = CLICS_DEFAULT_IS_FLOAT_RELATIVE_TOLERANCE_SPECIFIED;
+        this.isFloatAbsoluteToleranceSpecified = CLICS_DEFAULT_IS_FLOAT_RELATIVE_TOLERANCE_SPECIFIED;
+        this.floatRelativeTolerance = CLICS_DEFAULT_FLOAT_RELATIVE_TOLERANCE;
+        this.floatAbsoluteTolerance = CLICS_DEFAULT_FLOAT_ABSOLUTE_TOLERANCE;
     }
     
     /**
@@ -89,17 +89,17 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
                 System.out.println ("DEBUG: Processing option '" + opts[i] + "'");
                 
                 switch (opts[i]) {
-                    case VTOKEN_CASE_SENSITIVE:
+                    case CLICS_VTOKEN_CASE_SENSITIVE:
                     case "case-sensitive":
                         this.setCaseSensitive(true);
                         break;
                         
-                    case VTOKEN_SPACE_CHANGE_SENSITIVE:
+                    case CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE:
                     case "space-change-sensitive":
                         this.setSpaceSensitive(true);
                         break;
                         
-                    case VTOKEN_FLOAT_RELATIVE_TOLERANCE:
+                    case CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE:
                     case "float-relative-tolerance":
                         if (i<opts.length-1) {
                             try {
@@ -116,7 +116,7 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
                         }
                         break;
                         
-                    case VTOKEN_FLOAT_ABSOLUTE_TOLERANCE:
+                    case CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE:
                     case "float-absolute-tolerance":
                         if (i<opts.length-1) {
                             try {
