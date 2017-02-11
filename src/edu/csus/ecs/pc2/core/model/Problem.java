@@ -321,6 +321,53 @@ public class Problem implements IElementObject {
     public String toString() {
         return displayName;
     }
+    
+    /**
+     * Output details of the problem.
+     */
+    public String toStringDetails() {
+        String retStr = "Problem[";
+        
+        retStr += "displayName=" + displayName;
+        retStr += "; elementId=" + elementId;
+        retStr += "; number=" + number;
+        retStr += "; dataFileName=" + dataFileName;
+        retStr += "; answerFileName=" + answerFileName;
+        retStr += "; testCaseDataFilenames=" + testCaseDataFilenames;
+        retStr += "; testCaseAnswerFilenames=" + testCaseAnswerFilenames;
+        retStr += "; active=" + active;
+        retStr += "; readInputDataFromSTDIN=" + readInputDataFromSTDIN;
+        retStr += "; timeOutInSeconds=" + timeOutInSeconds;
+        retStr += "; validatedProblem=" + validatedProblem;
+        retStr += "; usingPC2Validator=" + usingPC2Validator;
+        retStr += "; whichPC2Validator=" + whichPC2Validator;
+        retStr += "; usingCLICSValidator=" + usingCLICSValidator;
+        retStr += ";usingCustomValidator =" + usingCustomValidator;
+        retStr += "; validatorCommandLine=\"" + validatorCommandLine + "\"";
+        retStr += "; validatorProgramName=" + validatorProgramName;
+        retStr += "; internationalJudgementReadMethod=" + internationalJudgementReadMethod;
+        retStr += "; executionPrepCommand=" + executionPrepCommand;
+        retStr += "; ccsMode=" + ccsMode;
+        retStr += "; ignoreCaseOnValidation=" + ignoreCaseOnValidation;
+        retStr += "; clicsValidatorSettings=" + clicsValidatorSettings;
+        retStr += "; showValidationToJudges=" + showValidationToJudges;
+        retStr += "; hideOutputWindow=" + hideOutputWindow;
+        retStr += "; showCompareWindow=" + showCompareWindow;
+        retStr += "; computerJudged=" + computerJudged;
+        retStr += "; manualReview=" + manualReview;
+        retStr += "; prelimaryNotification=" + prelimaryNotification;
+        retStr += "; shortName=" + shortName;
+        retStr += "; letter=" + letter;
+        retStr += "; colorName=" + colorName;
+        retStr += "; colorRGB=" + colorRGB;
+        retStr += "; usingExternalDataFiles=" + usingExternalDataFiles;
+        retStr += "; externalDataFileLocation=" + externalDataFileLocation;
+        retStr += "; state=" + state;
+        retStr += "; customValidatorSettings=" + customValidatorSettings;
+      
+        retStr += "]";
+        return retStr;
+    }
 
     /**
      * @return Returns the elementId.
