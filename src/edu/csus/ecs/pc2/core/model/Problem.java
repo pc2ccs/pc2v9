@@ -342,7 +342,7 @@ public class Problem implements IElementObject {
         retStr += "; usingPC2Validator=" + usingPC2Validator;
         retStr += "; whichPC2Validator=" + whichPC2Validator;
         retStr += "; usingCLICSValidator=" + usingCLICSValidator;
-        retStr += ";usingCustomValidator =" + usingCustomValidator;
+        retStr += "; usingCustomValidator =" + usingCustomValidator;
         retStr += "; validatorCommandLine=\"" + validatorCommandLine + "\"";
         retStr += "; validatorProgramName=" + validatorProgramName;
         retStr += "; internationalJudgementReadMethod=" + internationalJudgementReadMethod;
