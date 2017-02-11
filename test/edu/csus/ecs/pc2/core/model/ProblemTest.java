@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.File;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.ui.EditProblemPane;
+import edu.csus.ecs.pc2.core.Constants;
 
 /**
  * Test for Problem class.
@@ -38,7 +38,7 @@ public class ProblemTest extends TestCase {
         p2.setWhichPC2Validator(3);
         p2.setIgnoreCaseOnValidation(true);
 
-        p2.setValidatorCommandLine(EditProblemPane.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() + " " + p2.isIgnoreCaseOnValidation());
+        p2.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() + " " + p2.isIgnoreCaseOnValidation());
         p2.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
 
         p2.setReadInputDataFromSTDIN(false);
