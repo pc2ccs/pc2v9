@@ -196,6 +196,9 @@ public class Problem implements IElementObject {
         this.displayName = displayName;
         elementId = new ElementId(displayName);
         setSiteNumber(0);
+        this.pc2ValidatorSettings = new PC2ValidatorSettings();
+        this.clicsValidatorSettings = new ClicsValidatorSettings();
+        this.customValidatorSettings = new CustomValidatorSettings();
     }
 
     public Problem copy(String newDisplayName) {
