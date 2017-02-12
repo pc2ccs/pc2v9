@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 import edu.csus.ecs.pc2.validator.Validator;
 
 /**
@@ -167,24 +168,29 @@ public class ExecutableTest extends AbstractTestCase {
 
         problem.setValidatedProblem(true);
         problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
-        problem.setUsingPC2Validator(true);
+        problem.setUsingPC2Validator();
 
         assertTrue("Expecting using pc2 validator", problem.isUsingPC2Validator());
 
-        problem.setWhichPC2Validator(1);
-        problem.setIgnoreCaseOnValidation(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
+        PC2ValidatorSettings settings = new PC2ValidatorSettings();
+        settings.setWhichPC2Validator(1);
+        settings.setIgnoreCaseOnValidation(true);
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator() + " "
+                + settings.isIgnoreCaseOnValidation());
+
+        problem.setPC2ValidatorSettings(settings);
     }
     
     protected void setupMockPC2Validator(Problem problem) {
 
         problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator(false);
+        problem.setUsingClicsValidator();
         assertFalse("Not Expecting using pc2 validator", problem.isUsingPC2Validator());
         String mockValidatorCommandLine = "java {:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
-        problem.setValidatorCommandLine(mockValidatorCommandLine + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
+        problem.setValidatorCommandLine(mockValidatorCommandLine + " -pc2 " + problem.getPC2ValidatorSettings().getWhichPC2Validator() 
+                + " " + problem.getPC2ValidatorSettings().isIgnoreCaseOnValidation());
         problem.setValidatorProgramName(MOCK_VALIDATOR_NAME);
     }
 

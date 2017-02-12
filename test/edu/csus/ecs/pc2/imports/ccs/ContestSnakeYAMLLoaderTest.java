@@ -1558,7 +1558,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         IInternalContest originalContest = sampleContest.createContest(3, 3, 12, 5, true);
         Problem[] problems = originalContest.getProblems();
         Problem problem = problems[0];
-        sampleContest.setCCSValidation(originalContest, null, problem);
+        sampleContest.setClicsValidation(originalContest, null, problem);
         ElementId problemId = problem.getElementId();
 
         // ExportYAML2 exportYAML = new ExportYAML2();

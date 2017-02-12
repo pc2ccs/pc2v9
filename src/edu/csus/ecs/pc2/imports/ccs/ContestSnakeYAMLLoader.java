@@ -23,7 +23,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
 
-import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -49,6 +48,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
  * Load contest from Yaml using SnakeYaml methods.
@@ -880,7 +880,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
 
-            addCCSValidator(problem, problemDataFiles, baseDirectoryName);
+            addClicsValidator(problem, problemDataFiles, baseDirectoryName);
 
         } else {
             addDefaultPC2Validator(problem, 1);
@@ -915,16 +915,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public Problem addDefaultPC2Validator(Problem problem, int optionNumber) {
 
-        problem.setCcsMode(false);
-
         problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator(true);
-        problem.setWhichPC2Validator(optionNumber);
-        problem.setIgnoreCaseOnValidation(true);
+        problem.setUsingPC2Validator();
+        
+        PC2ValidatorSettings settings = new PC2ValidatorSettings();
+        settings.setWhichPC2Validator(optionNumber);
+        settings.setIgnoreCaseOnValidation(true);
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator() + " " + settings.isIgnoreCaseOnValidation());
+        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
-        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
-
+        problem.setPC2ValidatorSettings(settings);
         return problem;
     }
 
@@ -1433,22 +1433,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         throw exception;
     }
 
-    private Problem addCCSValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
-
-        problem.setCcsMode(true);
+    private Problem addClicsValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
 
         problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator(false);
+        problem.setUsingClicsValidator();
+        
         problem.setReadInputDataFromSTDIN(true);
 
         if (problem.getValidatorProgramName() == null) {
-            problem.setValidatorProgramName(CCSConstants.DEFAULT_CCS_VALIATOR_NAME);
+            problem.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
         }
 
         // if we use the internal Java CCS validator use this.
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
         if (problem.getValidatorCommandLine() == null) {
-            problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+            problem.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         }
 
         String validatorName = baseDirectoryName + File.separator + problem.getValidatorProgramName();

@@ -93,7 +93,6 @@ public class ProblemsReport implements IReport {
         printWriter.println("    Using pc2 validator : " + problem.isUsingPC2Validator());
 
         printWriter.println("   Using external files : " + problem.isUsingExternalDataFiles() + " path = " + problem.getExternalDataFileLocation());
-        printWriter.println("               CCS mode : " + problem.isCcsMode());
 
         if (problem.getAnswerFileName() != null) {
             if (problemDataFiles != null) {

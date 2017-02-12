@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
  * This class represents a connection to a PC<sup>2</sup> server. Instantiating the class creates a local {@link ServerConnection} object which can then be used to connect to the PC<sup>2</sup> server
@@ -485,21 +486,26 @@ public class ServerConnection {
     }
     
     /**
-     * Define a pc2 validated problem.
+     * Marks the specified Problem as being validated using the PC2 Validator with a default set of Settings values.
      * 
-     * @param problem
+     * @param problem the problem to be marked as being validated by the PC2 Validator
      */
     protected void setPC2Validator(Problem problem) {
 
         problem.setValidatedProblem(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        problem.setUsingPC2Validator();
+        
+        PC2ValidatorSettings settings = new PC2ValidatorSettings();
+        
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
-        problem.setUsingPC2Validator(true);
-        problem.setWhichPC2Validator(1);
-        problem.setIgnoreCaseOnValidation(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
-                + problem.isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
+        settings.setWhichPC2Validator(1);
+        settings.setIgnoreCaseOnValidation(true);
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator() + " "
+                + settings.isIgnoreCaseOnValidation());
+        
+        problem.setPC2ValidatorSettings(settings);
     }
     
     /**

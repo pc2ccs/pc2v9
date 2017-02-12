@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
  * Unit test.
@@ -60,12 +61,19 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
 
         problem.setValidatedProblem(true);
         problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
-
-        problem.setUsingPC2Validator(true);
-        problem.setWhichPC2Validator(1);
-        problem.setIgnoreCaseOnValidation(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreCaseOnValidation());
         problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
+        
+        problem.setUsingPC2Validator();
+        
+        PC2ValidatorSettings settings = new PC2ValidatorSettings();
+        settings.setWhichPC2Validator(1);
+        settings.setIgnoreCaseOnValidation(true);
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator() 
+                + " " + settings.isIgnoreCaseOnValidation());
+        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
+
+        problem.setPC2ValidatorSettings(settings);
+
     }
 
     /**
