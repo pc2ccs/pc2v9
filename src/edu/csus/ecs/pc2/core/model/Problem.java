@@ -521,6 +521,45 @@ public class Problem implements IElementObject {
     }
 
     /**
+     * Sets the Validator Command Line associated with type of Validator configured for this Problem.
+     * 
+     * @param commandLine the new command line for the currently-specified Validator
+     * 
+     * @throws {@link RuntimeException} if the Problem is not marked as using a Validator, or is marked as using a Validator
+     *           but no corresponding Validator Settings could be found.
+     */
+    public void setValidatorCommandLine(String commandLine) {
+        
+        if (!isValidatedProblem()) {
+            throw new RuntimeException("setValidatorCommandLine(): no Validator configured for Problem");                
+        }
+        
+        //search for ValidatorSettings for the currently-specified Validator; if found, set the ValidatorCommandLine
+        // into those Settings
+        boolean found = false;
+        if (isUsingPC2Validator()) {
+            if (getPC2ValidatorSettings()!=null) {
+                getPC2ValidatorSettings().setValidatorCommandLine(commandLine);
+                found = true;
+            }
+        } else if (isUsingCLICSValidator()) {
+            if (getClicsValidatorSettings()!=null) {
+                getClicsValidatorSettings().setValidatorCommandLine(commandLine);
+                found = true;
+            }
+        } else if (isUsingCustomValidator()) {
+            if (getCustomValidatorSettings()!=null) {
+                getCustomValidatorSettings().setCustomValidatorCommandLine(commandLine);
+                found = true;
+            }
+        }
+        
+        if (!found) {
+            throw new RuntimeException("setValidatorCommandLine(): unable to locate Settings for currently-specified Validator");                
+        } 
+    }
+
+    /**
      * @param active
      *            The active to set.
      */
