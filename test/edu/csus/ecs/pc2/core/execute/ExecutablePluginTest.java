@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -131,10 +132,9 @@ public class ExecutablePluginTest extends AbstractTestCase {
 
     protected void setPC2Validator(Problem problem) {
 
-        problem.setValidatedProblem(true);
+        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
         problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
         problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
-        problem.setUsingPC2Validator();
         
         PC2ValidatorSettings settings = new PC2ValidatorSettings();
         settings.setWhichPC2Validator(1);

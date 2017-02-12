@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -1071,8 +1072,7 @@ public class ContestYAMLLoader implements IContestLoader {
 
     public Problem addDefaultPC2Validator(Problem problem, int optionNumber) {
         
-        problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator();
+        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
         
         PC2ValidatorSettings settings = new PC2ValidatorSettings();
         settings.setWhichPC2Validator(optionNumber);
@@ -1087,8 +1087,7 @@ public class ContestYAMLLoader implements IContestLoader {
 
     private Problem addClicsValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
     
-        problem.setValidatedProblem(true);
-        problem.setUsingClicsValidator();
+        problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         
         problem.setReadInputDataFromSTDIN(true);
 
@@ -1389,6 +1388,7 @@ public class ContestYAMLLoader implements IContestLoader {
             if (overrideValidatorCommandLine != null) {
                 validatorCommandLine = overrideValidatorCommandLine;
             }
+            problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
             problem.setValidatorCommandLine(validatorCommandLine);
             
             problemList.addElement(problem);

@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -166,11 +167,9 @@ public class ExecutableTest extends AbstractTestCase {
 
     protected void setupUsingPC2Validator(Problem problem) {
 
-        problem.setValidatedProblem(true);
+        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
         problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
         problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
-
-        problem.setUsingPC2Validator();
 
         assertTrue("Expecting using pc2 validator", problem.isUsingPC2Validator());
 
@@ -185,8 +184,7 @@ public class ExecutableTest extends AbstractTestCase {
     
     protected void setupMockPC2Validator(Problem problem) {
 
-        problem.setValidatedProblem(true);
-        problem.setUsingClicsValidator();
+        problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
         assertFalse("Not Expecting using pc2 validator", problem.isUsingPC2Validator());
         String mockValidatorCommandLine = "java {:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
         problem.setValidatorCommandLine(mockValidatorCommandLine + " -pc2 " + problem.getPC2ValidatorSettings().getWhichPC2Validator() 

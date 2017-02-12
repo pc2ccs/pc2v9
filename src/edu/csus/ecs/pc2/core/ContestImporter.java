@@ -351,19 +351,10 @@ public class ContestImporter {
         newProblem.setDataFileName(problem.getDataFileName());
         newProblem.setHideOutputWindow(problem.isHideOutputWindow());
         
-        newProblem.setValidatedProblem(problem.isValidatedProblem());
+        newProblem.setValidatorType(problem.getValidatorType());
         newProblem.setPC2ValidatorSettings(problem.getPC2ValidatorSettings().clone());
         newProblem.setCLICSValidatorSettings(problem.getClicsValidatorSettings().clone());
         newProblem.setCustomValidatorSettings(problem.getCustomValidatorSettings().clone());
-        if (problem.isUsingPC2Validator()) {
-            newProblem.setUsingPC2Validator(); 
-        }
-        if (problem.isUsingCLICSValidator()) {
-            newProblem.setUsingClicsValidator();
-        }
-        if (problem.isUsingCustomValidator()) {
-            newProblem.setUsingCustomValidator();
-        }
         
         newProblem.setInternationalJudgementReadMethod(problem.isInternationalJudgementReadMethod());
         newProblem.setManualReview(problem.isManualReview());

@@ -5,7 +5,6 @@ import java.io.File;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.validator.ClicsValidator;
 import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
@@ -25,6 +24,7 @@ public class Problem implements IElementObject {
     private static final long serialVersionUID = 1708763261096488240L;
 
     public static final int DEFAULT_TIMEOUT_SECONDS = 30;
+    
 
     /**
      * Problem title.
@@ -82,16 +82,29 @@ public class Problem implements IElementObject {
     private int timeOutInSeconds = DEFAULT_TIMEOUT_SECONDS;
 
     /**
-     * Is this problem using a validator?
+     * This enum defines the types of Validators which a Problem can have.
      */
-    private boolean validatedProblem = false;
-
-    /**
-     * Flags indicating which validator is being used; only relevant if validatedProblem (above) == true
-     */
-    private boolean usingPC2Validator = false;
-    private boolean usingCLICSValidator = false;
-    private boolean usingCustomValidator = false;
+    public enum VALIDATOR_TYPE {
+        /**
+         * The Problem has no associated Validator; it is not a Validated Problem.
+         */
+        NONE, 
+        /**
+         * The Problem uses the PC2 Validator, also known as the "Internal" Validator.
+         */
+        PC2VALIDATOR, 
+        /**
+         * The Problem uses the PC2 implementation of the CLICS Validator.
+         */
+        CLICSVALIDATOR, 
+        /**
+         * The Problem uses a Custom (user-provided) Validator.
+         */
+        CUSTOMVALIDATOR
+        }
+    
+    //The type of validator associated with this Problem.
+    private VALIDATOR_TYPE validatorType = VALIDATOR_TYPE.NONE ;
     
     //the settings for each possible type of validator used by the problem
     private PC2ValidatorSettings pc2ValidatorSettings ;
@@ -218,16 +231,7 @@ public class Problem implements IElementObject {
         clone.setTimeOutInSeconds(getTimeOutInSeconds());
         
         //validator settings
-        clone.setValidatedProblem(isValidatedProblem());
-        if (this.isUsingPC2Validator()) {
-            clone.setUsingPC2Validator();
-        }
-        if (this.isUsingCLICSValidator()) {
-            clone.setUsingClicsValidator();
-        }
-        if (this.isUsingCustomValidator()) {
-            clone.setUsingCustomValidator();
-        }
+        clone.setValidatorType(this.getValidatorType());
         
         if (pc2ValidatorSettings!=null) {
             clone.setPC2ValidatorSettings(this.getPC2ValidatorSettings().clone());
@@ -315,14 +319,11 @@ public class Problem implements IElementObject {
         retStr += "; readInputDataFromSTDIN=" + readInputDataFromSTDIN;
         retStr += "; timeOutInSeconds=" + timeOutInSeconds;
         
+        boolean validatedProblem = getValidatorType()==VALIDATOR_TYPE.NONE;
         retStr += "; validatedProblem=" + validatedProblem;
-        retStr += "; usingPC2Validator=" + usingPC2Validator;
+        retStr += "; validatorType=" + getValidatorType();
         retStr += "; pc2ValidatorSettings=" + getPC2ValidatorSettings();
-        
-        retStr += "; usingCLICSValidator=" + usingCLICSValidator;
         retStr += "; clicsValidatorSettings=" + getClicsValidatorSettings();
-        
-        retStr += "; usingCustomValidator=" + usingCustomValidator;
         retStr += "; customValidatorSettings=" + getCustomValidatorSettings();
         
         retStr += "; internationalJudgementReadMethod=" + internationalJudgementReadMethod;
@@ -442,43 +443,64 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Returns whether the Problem is using the PC2Validator (as opposed to a custom validator, 
-     * or the CLICS Validator).  Note that the value of the returned
-     * flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     * Returns the state variable indicating what type of Validator this Problem is using.
+     * The returned value will be an element of the enumerated type {@link edu.csus.ecs.pc2.core.Problem.VALIDATOR_TYPE};
+     * note that this enumeration includes "NONE" to indicate that a Problem has no Validator attached.
+     * 
+     * @see {@link edu.csus.ecs.pc2.core.Problem.VALIDATOR_TYPE}
+     * @see {@link #isValidatedProblem()}
+     */
+    public VALIDATOR_TYPE getValidatorType() {
+        return this.validatorType;
+    }
+    
+   /**
+     * Sets the state variable indicating what type of Validator this problem is using.
+     * Note that one possible value of this variable is "NONE", indicating the Problem is not validated.
+     * 
+     * @see #isValidatedProblem()
+     * 
+     * @param valType a {@link edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE} indicating the 
+     *              type of validator used by this Problem
+     */
+    public void setValidatorType(VALIDATOR_TYPE valType) {
+        this.validatorType = valType;
+    }
+    /**
+     * Returns whether the Problem is using the PC2Validator (as opposed to a Custom Validator, 
+     * the CLICS Validator, or no Validator).  
      *          
      * @return true if the Problem is using the PC2Validator
      */
     public boolean isUsingPC2Validator() {
-        return usingPC2Validator;
+        return getValidatorType()==VALIDATOR_TYPE.PC2VALIDATOR;
     }
 
     /**
-     * Returns whether this Problem is using the CLICS Validator (as opposed to a custom validator, 
-     * or the  PC2Validator).  Note that the value of the returned
-     * flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     * Returns whether this Problem is using the CLICS Validator (as opposed to a Custom Validator, 
+     * the  PC2Validator, or no Validator).  
      *          
      * @return true if the Problem is using the CLICS Validator
      */
     public boolean isUsingCLICSValidator() {
-        return usingCLICSValidator;
+        return getValidatorType()==VALIDATOR_TYPE.CLICSVALIDATOR;
     }
 
     /**
      * Returns whether this Problem is using a Custom (user-supplied) Validator 
-     * (as opposed to the CLICS Validator or the PC2Validator).
-     * Note that the value of the returned flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     * (as opposed to the CLICS Validator, the PC2Validator, or no Validator).
      *          
      * @return true if the Problem is using a Custom validator
      */
     public boolean isUsingCustomValidator() {
-        return usingCustomValidator;
+        return getValidatorType()==VALIDATOR_TYPE.CUSTOMVALIDATOR;
     }
 
     /**
      * @return whether this Problem has a validator or not.
      */
     public boolean isValidatedProblem() {
-        return validatedProblem;
+        return ! (getValidatorType()==VALIDATOR_TYPE.NONE);
     }
 
     /**
@@ -517,7 +539,8 @@ public class Problem implements IElementObject {
         }
         
         if (!found) {
-            throw new RuntimeException("getValidatorCommandLine(): unable to locate Settings for currently-specified Validator");                
+            throw new RuntimeException("getValidatorCommandLine(): unable to locate Settings for currently-specified Validator '"
+                    + getValidatorType() + "'");                
         } else {
             return validatorCommandLine;
         }
@@ -625,69 +648,6 @@ public class Problem implements IElementObject {
     public void setTimeOutInSeconds(int timeOutInSeconds) {
         this.timeOutInSeconds = timeOutInSeconds;
     }
-    
-    /**
-     * Sets the flag indicating that this problem is using the "PC2Validator" to true.
-     * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
-     * 
-     * A side-effect of calling this method is to simultaneously set the flag indicating that the Problem
-     * is using the Clics Validator and the flag indicating that the Problem is using a Custom Validator both to false.
-     * 
-     * @see {@link #setUsingCLICSValidator()}
-     * @see {@link #setUsingCustomValidator()}
-     */
-    public void setUsingPC2Validator() {
-        this.usingPC2Validator = true;
-        this.usingCLICSValidator = false;
-        this.usingCustomValidator = false;
-    }
-
-    /**
-     * Sets the flag indicating that this problem is using the "CLICS Validator" to true.
-     * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
-     * 
-     * A side-effect of calling this method is to simultaneously set the flag indicating that the Problem
-     * is using the PC2 Validator and the flag indicating that the Problem is using a Custom Validator both to false.
-     * 
-     * @see {@link #setUsingPC2Validator()}
-     * @see {@link #setUsingCustomValidator()}
-     */
-    public void setUsingClicsValidator() {
-        this.usingPC2Validator = false;
-        this.usingCLICSValidator = true;
-        this.usingCustomValidator = false;
-    }
-
-    /**
-     * Sets the flag indicating that this problem is using a "Custom Validator" to true.
-     * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
-     * 
-     * A side-effect of calling this method is to simultaneously set the flag indicating that the Problem
-     * is using the PC2 Validator and the flag indicating that the Problem is using a CLICS Validator both to false.
-     * 
-     * @see {@link #setUsingPC2Validator()}
-     * @see {@link #setUsingClicsValidator()}
-     */
-    public void setUsingCustomValidator() {
-        this.usingPC2Validator = false;
-        this.usingCLICSValidator = false;
-        this.usingCustomValidator = true;
-    }
-
-   /**
-     * Sets the flag indicating that this Problem is using a validator.
-     * Note that at least three different validators might be used: the {@link ClicsValidator},
-     * a custom (user-defined) validator, or the original PC2Validator.
-     * It is the caller's responsibility when calling this method to also insure that a specific
-     * validator has been specified by calling either {@link Problem#setUsingCLICSValidator()},
-     * {@link Problem#setUsingCustomValidator()}, or {@link Problem#setUsingPC2Validator()}.
-     * 
-     * @param validated true if the Problem is going to use a validator; false if not
-     */
-    public void setValidatedProblem(boolean validated) {
-        this.validatedProblem = validated;
-    }
-
 
     /**
      * @return Returns the hideOutputWindow.
@@ -876,58 +836,46 @@ public class Problem implements IElementObject {
                 return false;
             }
             
-            if (validatedProblem != problem.isValidatedProblem()) {
+            if (this.isValidatedProblem() != problem.isValidatedProblem()) {
                 return false;
             }
 
-            if (usingPC2Validator != problem.isUsingPC2Validator()) {
+            if (this.getValidatorType() != problem.getValidatorType()) {
                 return false;
             }
 
             // check for one PC2ValidatorSettings being null while the other is not (i.e., XOR says they are different)
-            if (this.getPC2ValidatorSettings() == null ^ problem.getPC2ValidatorSettings() == null) {
+            if (this.getPC2ValidatorSettings()==null ^ problem.getPC2ValidatorSettings()==null) {
                 return false;
             }
-            // check that if both Settings are non-null, they are the same
-            if (this.getPC2ValidatorSettings() != null && problem.getPC2ValidatorSettings() != null) {
+            // check that if both Settings are non-null, they are the same (if one is non-null, the other must also be, due to the XOR above)
+            if (this.getPC2ValidatorSettings() != null) {
                 if (!this.getPC2ValidatorSettings().equals(problem.getPC2ValidatorSettings())) {
                     return false;
                 }
             }
 
-            if (usingCLICSValidator != problem.isUsingCLICSValidator()) {
+            // check for one ClicsValidatorSettings being null while the other is not (i.e., XOR says they are different)
+            if (this.getClicsValidatorSettings()==null ^ problem.getClicsValidatorSettings()==null) {
                 return false;
             }
-
-            if (usingCLICSValidator) {
-                if (getClicsValidatorSettings() == null ^ problem.getClicsValidatorSettings() == null) {
-                    // Java XOR (^) says they are different (one is null, the other is not) -- return false
+            // check that if both Settings are non-null, they are the same (if one is non-null, the other must also be, due to the XOR above)
+            if (this.getClicsValidatorSettings() != null) {
+                if (!this.getClicsValidatorSettings().equals(problem.getClicsValidatorSettings())) {
                     return false;
-                }
-                if (getClicsValidatorSettings() != null) {
-                    // both must be non-null; check for equality
-                    if (!getClicsValidatorSettings().equals(problem.getClicsValidatorSettings())) {
-                        return false;
-                    }
                 }
             }
 
-            if (usingCustomValidator != problem.isUsingCustomValidator()) {
+            // check for one CustomValidatorSettings being null while the other is not (i.e., XOR says they are different)
+            if (this.getCustomValidatorSettings()==null ^ problem.getCustomValidatorSettings()==null) {
                 return false;
             }
-            if (usingCustomValidator) {
-                if (getCustomValidatorSettings() == null ^ problem.getCustomValidatorSettings() == null) {
-                    // Java XOR (^) says they are different (one is null, the other is not) -- return false
+            // check that if both Settings are non-null, they are the same (if one is non-null, the other must also be, due to the XOR above)
+            if (this.getCustomValidatorSettings() != null) {
+                if (!this.getCustomValidatorSettings().equals(problem.getCustomValidatorSettings())) {
                     return false;
                 }
-                if (getCustomValidatorSettings() != null) {
-                    // both must be non-null; check for equality
-                    if (!getCustomValidatorSettings().equals(problem.getCustomValidatorSettings())) {
-                        return false;
-                    }
-                }
             }
-
             
            if (showValidationToJudges != problem.isShowValidationToJudges()) {
                 return false;

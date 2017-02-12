@@ -4,6 +4,7 @@ import java.io.File;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 
 /**
  * Test for Problem class.
@@ -33,8 +34,7 @@ public class ProblemTest extends TestCase {
         p2.setDataFileName("sumit.dat");
         p2.setHideOutputWindow(true);
 
-        p2.setValidatedProblem(true);
-        p2.setUsingPC2Validator();
+        p2.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
         p2.getPC2ValidatorSettings().setWhichPC2Validator(3);
         p2.getPC2ValidatorSettings().setIgnoreCaseOnValidation(true);
 
@@ -79,7 +79,7 @@ public class ProblemTest extends TestCase {
         assertFalse("Is not same As, null parameter", p1.isSameAs(null));
 
         p2 = getProblemAnew();
-        p2.setValidatedProblem(false);
+        p2.setValidatorType(VALIDATOR_TYPE.NONE);
         assertFalse("Is not same as, setValidatedProblem ", p1.isSameAs(p2));
         assertFalse("Is not same as, setValidatedProblem ", p2.isSameAs(p1));
 
@@ -118,15 +118,15 @@ public class ProblemTest extends TestCase {
         checkBoolean("setReadInputDataFromSTDIN foo", p1.isReadInputDataFromSTDIN(), p2.isReadInputDataFromSTDIN(), p1, p2);
 
         p2 = getProblemAnew();
-        p2.setValidatedProblem(false);
+        p2.setValidatorType(VALIDATOR_TYPE.NONE);
         checkBoolean("setValidatedProblem foo", p1.isValidatedProblem(), p2.isValidatedProblem(), p1, p2);
 
         p2 = getProblemAnew();
-        p2.setUsingClicsValidator();
+        p2.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         checkBoolean("setUsingPC2Validator", p1.isUsingPC2Validator(), p2.isUsingPC2Validator(), p1, p2);
 
         p2 = getProblemAnew();
-        p2.setUsingCustomValidator();
+        p2.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
         checkBoolean("setUsingPC2Validator", p1.isUsingPC2Validator(), p2.isUsingPC2Validator(), p1, p2);
 
         //this test is no longer valid since the default validator settings were changed to 'null'

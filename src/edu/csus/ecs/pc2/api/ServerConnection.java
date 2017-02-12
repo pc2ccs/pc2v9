@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -492,8 +493,7 @@ public class ServerConnection {
      */
     protected void setPC2Validator(Problem problem) {
 
-        problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator();
+        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
         
         PC2ValidatorSettings settings = new PC2ValidatorSettings();
         
@@ -552,7 +552,7 @@ public class ServerConnection {
              * Cannot be manual judged and validated.
              */
             if (APIConstants.MANUAL_JUDGING_ONLY.equals(judgingType) && validated){
-                throw new IllegalArgumentException("Problem cannot be validated and not judging type computer judged");
+                throw new IllegalArgumentException("Problem cannot be specified as 'validated' when judging type is not 'computer judged'");
             }
         } else {
             judgingType = APIConstants.MANUAL_JUDGING_ONLY;
@@ -584,16 +584,16 @@ public class ServerConnection {
         usingPc2Validator = APIConstants.PC2_VALIDATOR_PROGRAM.equals(validatorProgram);
         
         if (validated){
-            
-            problem.setValidatedProblem(validated);
-            
-            String validatorCommandLine = getProperty(problemProperties, APIConstants.VALIDATOR_COMMAND_LINE, APIConstants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
-            problem.setValidatorCommandLine(validatorCommandLine);
-            
             if (usingPc2Validator) {
-                setPC2Validator(problem);
-            } // else add external validator later
-            
+                problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+                String validatorCommandLine = getProperty(problemProperties, APIConstants.VALIDATOR_COMMAND_LINE, APIConstants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+                problem.setValidatorCommandLine(validatorCommandLine);
+                setPC2Validator(problem);                
+            } else {
+                // else add external validator later
+            }
+        } else {
+            problem.setValidatorType(VALIDATOR_TYPE.NONE);
         }
 
         problem.setShowValidationToJudges(false);

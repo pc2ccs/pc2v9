@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 
 /**
@@ -37,7 +38,7 @@ public class EditAutoJudgeSettingFrameTest extends TestCase {
         for (Problem problem : problems) {
 
             problem.setComputerJudged(true);
-            problem.setValidatedProblem(true);
+            problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
             contest.updateProblem(problem);
         }
 
