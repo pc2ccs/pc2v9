@@ -91,7 +91,7 @@ public class PC2ValidatorSettings implements Cloneable {
      * Returns a clone (copy) of this PC2ValidatorSettings object.
      */
     @Override
-    protected PC2ValidatorSettings clone()  {
+    public PC2ValidatorSettings clone()  {
         PC2ValidatorSettings settings = new PC2ValidatorSettings();
         
         settings.validatorProgramName = this.validatorProgramName;
@@ -117,5 +117,41 @@ public class PC2ValidatorSettings implements Cloneable {
         retStr += "]";
         return retStr;
     }
-    
+
+    /**
+     * Returns true if the specified Object is the same as this PC2ValidatorSettings object.
+     */
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof PC2ValidatorSettings)) {
+            return false;
+        }
+
+        PC2ValidatorSettings other = (PC2ValidatorSettings) obj;
+
+        if (!(this.validatorProgramName.equals(other.validatorProgramName))) {
+            return false;
+        }
+
+        if (!(this.validatorCommandLine.equals(other.validatorCommandLine))) {
+            return false;
+        }
+
+        if (!(this.whichPC2Validator == other.whichPC2Validator)) {
+            return false;
+        }
+
+        if (!(this.ignoreCaseOnValidation == other.ignoreCaseOnValidation)) {
+            return false;
+        }
+
+        return true;
+
+    }
+
 }
