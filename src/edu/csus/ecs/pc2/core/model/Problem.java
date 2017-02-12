@@ -1248,7 +1248,7 @@ public class Problem implements IElementObject {
      * 
      * @return the current PC2ValidatorSettings object
      */
-    private PC2ValidatorSettings getPC2ValidatorSettings() {
+    public PC2ValidatorSettings getPC2ValidatorSettings() {
         return this.pc2ValidatorSettings;
     }
 
@@ -1257,7 +1257,7 @@ public class Problem implements IElementObject {
      * 
      * @param settings the PC2ValidatorSettings object to attach to this Problem
      */
-    private void setPC2ValidatorSettings(PC2ValidatorSettings settings) {
+    public void setPC2ValidatorSettings(PC2ValidatorSettings settings) {
         this.pc2ValidatorSettings = settings ;
     }
 
