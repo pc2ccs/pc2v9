@@ -6,6 +6,7 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.validator.ClicsValidator;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
  * Problem Definition.
@@ -66,7 +67,7 @@ public class Problem implements IElementObject {
     private String [] testCaseAnswerFilenames = new String[0];;
     
     /**
-     * 
+     * Whether or not the problem should be shown to teams.
      */
     private boolean active = true;
 
@@ -80,8 +81,6 @@ public class Problem implements IElementObject {
      */
     private int timeOutInSeconds = DEFAULT_TIMEOUT_SECONDS;
 
-    // Validator fields
-
     /**
      * Is this problem using a validator?
      */
@@ -91,25 +90,13 @@ public class Problem implements IElementObject {
      * Flags indicating which validator is being used; only relevant if validatedProblem (above) == true
      */
     private boolean usingPC2Validator = false;
-    private int whichPC2Validator = 0;  //if pc2Validator is used, which option?
-
     private boolean usingCLICSValidator = false;
-
     private boolean usingCustomValidator = false;
     
-    /**
-     * Validator command line.
-     * 
-     * This contains a command and field names.
-     */
-    private String validatorCommandLine;
-
-    /**
-     * The validator command.
-     * <P>
-     * Ex. java -cp Validator.jar Validator.
-     */
-    private String validatorProgramName;
+    //the settings for each possible type of validator used by the problem
+    private PC2ValidatorSettings pc2ValidatorSettings ;
+    private ClicsValidatorSettings clicsValidatorSettings ;
+    private CustomValidatorSettings customValidatorSettings ;
 
     /**
      * Use international judgement method.
@@ -120,22 +107,7 @@ public class Problem implements IElementObject {
      * This is the command executed before the run is executed.
      */
     private String executionPrepCommand = null;
-    
-    /**
-     * Is this problem to be executed and validated per the CCS specification.
-     */
-    private boolean ccsMode = false;
-    
-    /**
-     * PC2 Validator option to ignore spaces on validation.
-     */
-    private boolean ignoreCaseOnValidation = false;    
      
-    /**
-     * The settings for the CLICS Validator
-     */
-    private ClicsValidatorSettings clicsValidatorSettings = null;
-
     /**
      * Display validation output window to judges.
      */
@@ -213,8 +185,6 @@ public class Problem implements IElementObject {
     
     private State state = State.ENABLED;
 
-    private CustomValidatorSettings customValidatorSettings;
-
     
     /**
      * Create a problem with the display name.
@@ -243,29 +213,41 @@ public class Problem implements IElementObject {
         clone.setActive(isActive());
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
         clone.setTimeOutInSeconds(getTimeOutInSeconds());
+        
+        //validator settings
         clone.setValidatedProblem(isValidatedProblem());
-        clone.setUsingPC2Validator(isUsingPC2Validator());
-        clone.setWhichPC2Validator(getWhichPC2Validator());
-        clone.setValidatorCommandLine(StringUtilities.cloneString(validatorCommandLine));
-        clone.setValidatorProgramName(StringUtilities.cloneString(validatorProgramName));
-        clone.setUsingCLICSValidator(isUsingCLICSValidator());
+        if (this.isUsingPC2Validator()) {
+            clone.setUsingPC2Validator();
+        }
+        if (this.isUsingCLICSValidator()) {
+            clone.setUsingClicsValidator();
+        }
+        if (this.isUsingCustomValidator()) {
+            clone.setUsingCustomValidator();
+        }
+        
+        if (pc2ValidatorSettings!=null) {
+            clone.setPC2ValidatorSettings(this.getPC2ValidatorSettings().clone());
+        } else {
+            clone.setPC2ValidatorSettings(null);
+        }
+        if (this.getClicsValidatorSettings()!=null) {
+            clone.setCLICSValidatorSettings(this.getClicsValidatorSettings().clone());
+        } else {
+            clone.setCLICSValidatorSettings(null);
+        }
+        if (this.getCustomValidatorSettings()!=null) {
+            clone.setCustomValidatorSettings(this.getCustomValidatorSettings().clone());
+        } else {
+            clone.setCustomValidatorSettings(null);
+        }
+
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
         // TODO Implement Commands to be executed before a problem is run
         // private String executionPrepCommand = "";
         // private SerializedFile executionPrepFile;
 
-        clone.setIgnoreCaseOnValidation(isIgnoreCaseOnValidation());
-        if (this.getClicsValidatorSettings()==null) {
-            clone.setCLICSValidatorSettings(null);
-        } else {
-            clone.setCLICSValidatorSettings(this.getClicsValidatorSettings().clone());
-        }
-        if (this.getCustomValidatorSettings() == null) {
-            clone.setCustomValidatorSettings(null);
-        } else {
-            clone.setCustomValidatorSettings(this.getCustomValidatorSettings().clone());
-        }       
         clone.setShowValidationToJudges(isShowValidationToJudges());
         clone.setHideOutputWindow(isHideOutputWindow());
         clone.setShowCompareWindow(isShowCompareWindow());
@@ -285,6 +267,7 @@ public class Problem implements IElementObject {
         
         return clone;
     }
+
 
     /**
      * @see Object#equals(java.lang.Object).
@@ -328,18 +311,20 @@ public class Problem implements IElementObject {
         retStr += "; active=" + active;
         retStr += "; readInputDataFromSTDIN=" + readInputDataFromSTDIN;
         retStr += "; timeOutInSeconds=" + timeOutInSeconds;
+        
         retStr += "; validatedProblem=" + validatedProblem;
         retStr += "; usingPC2Validator=" + usingPC2Validator;
-        retStr += "; whichPC2Validator=" + whichPC2Validator;
+        retStr += "; pc2ValidatorSettings=" + getPC2ValidatorSettings();
+        
         retStr += "; usingCLICSValidator=" + usingCLICSValidator;
+        retStr += "; clicsValidatorSettings=" + getClicsValidatorSettings();
+        
         retStr += "; usingCustomValidator=" + usingCustomValidator;
-        retStr += "; validatorCommandLine=\"" + validatorCommandLine + "\"";
-        retStr += "; validatorProgramName=" + validatorProgramName;
+        retStr += "; customValidatorSettings=" + getCustomValidatorSettings();
+        
         retStr += "; internationalJudgementReadMethod=" + internationalJudgementReadMethod;
         retStr += "; executionPrepCommand=" + executionPrepCommand;
-        retStr += "; ccsMode=" + ccsMode;
-        retStr += "; ignoreCaseOnValidation=" + ignoreCaseOnValidation;
-        retStr += "; clicsValidatorSettings=" + clicsValidatorSettings;
+
         retStr += "; showValidationToJudges=" + showValidationToJudges;
         retStr += "; hideOutputWindow=" + hideOutputWindow;
         retStr += "; showCompareWindow=" + showCompareWindow;
@@ -353,7 +338,6 @@ public class Problem implements IElementObject {
         retStr += "; usingExternalDataFiles=" + usingExternalDataFiles;
         retStr += "; externalDataFileLocation=" + externalDataFileLocation;
         retStr += "; state=" + state;
-        retStr += "; customValidatorSettings=" + customValidatorSettings;
       
         retStr += "]";
         return retStr;
@@ -427,57 +411,48 @@ public class Problem implements IElementObject {
 
 
     /**
-     * @return Returns the PC2 Validator ignoreCaseOnValidation flag.
-     */
-    public boolean isIgnoreCaseOnValidation() {
-        return ignoreCaseOnValidation;
-    }
-
-    /**
-     * @return Returns the internationalJudgementReadMethod.
+     * @return Returns the internationalJudgementReadMethod flag
      */
     public boolean isInternationalJudgementReadMethod() {
         return internationalJudgementReadMethod;
     }
 
     /**
-     * @return Returns the readInputDataFromSTDIN.
+     * @return Returns the readInputDataFromSTDIN flag
      */
     public boolean isReadInputDataFromSTDIN() {
         return readInputDataFromSTDIN;
     }
 
     /**
-     * @return Returns the showValidationToJudges.
+     * @return Returns the showValidationToJudges flag
      */
     public boolean isShowValidationToJudges() {
         return showValidationToJudges;
     }
 
     /**
-     * @return Returns the timeOutInSeconds.
+     * @return Returns the timeOutInSeconds
      */
     public int getTimeOutInSeconds() {
         return timeOutInSeconds;
     }
 
     /**
-     * Returns whether the Problem is using the old PC2Validator 
-     *          (as opposed to a custom validator, or the CLICS Validator) 
-     *          -- note that the value of the returned
-     *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     * Returns whether the Problem is using the PC2Validator (as opposed to a custom validator, 
+     * or the CLICS Validator).  Note that the value of the returned
+     * flag is only meaningful if {@link #isValidatedProblem()} returns true.
      *          
-     * @return true if if the Problem is using the PC2Validator
+     * @return true if the Problem is using the PC2Validator
      */
     public boolean isUsingPC2Validator() {
         return usingPC2Validator;
     }
 
     /**
-     * Returns whether this Problem is using the CLICS Validator 
-     *          (as opposed to a custom validator, or the older PC2Validator) 
-     *          -- note that the value of the returned
-     *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     * Returns whether this Problem is using the CLICS Validator (as opposed to a custom validator, 
+     * or the  PC2Validator).  Note that the value of the returned
+     * flag is only meaningful if {@link #isValidatedProblem()} returns true.
      *          
      * @return true if the Problem is using the CLICS Validator
      */
@@ -487,9 +462,8 @@ public class Problem implements IElementObject {
 
     /**
      * Returns whether this Problem is using a Custom (user-supplied) Validator 
-     *          (as opposed to the CLICS Default Validator or the old (deprecated) PC2Validator) 
-     *          -- note that the value of the returned
-     *          flag is only meaningful if {@link #isValidatedProblem()} returns true.
+     * (as opposed to the CLICS Validator or the PC2Validator).
+     * Note that the value of the returned flag is only meaningful if {@link #isValidatedProblem()} returns true.
      *          
      * @return true if the Problem is using a Custom validator
      */
@@ -505,10 +479,45 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @return Returns the validatorCommandLine.
+     * Returns the Validator Command Line associated with this Problem, if the Problem is using a Validator;
+     * returns null otherwise.
+     * 
+     * @return the validatorCommandLine for the Problem's validator, or null if the Problem is not using a Validator.
+     * 
+     * @throws {@link RuntimeException} if the Problem is marked as using a Validator but no corresponding Validator
+     *              Settings could be found.
      */
     public String getValidatorCommandLine() {
-        return validatorCommandLine;
+        if (!isValidatedProblem()) {
+            return null;
+        }
+        
+        //search for ValidatorSettings for the currently-specified Validator; if found, return the ValidatorCommandLine
+        // from those Settings
+        String validatorCommandLine = null;
+        boolean found = false;
+        if (isUsingPC2Validator()) {
+            if (getPC2ValidatorSettings()!=null) {
+                validatorCommandLine = getPC2ValidatorSettings().getValidatorCommandLine();
+                found = true;
+            }
+        } else if (isUsingCLICSValidator()) {
+            if (getClicsValidatorSettings()!=null) {
+                validatorCommandLine = getClicsValidatorSettings().getValidatorCommandLine();
+                found = true;
+            }
+        } else if (isUsingCustomValidator()) {
+            if (getCustomValidatorSettings()!=null) {
+                validatorCommandLine = getCustomValidatorSettings().getCustomValidatorCommandLine();
+                found = true;
+            }
+        }
+        
+        if (!found) {
+            throw new RuntimeException("getValidatorCommandLine(): unable to locate Settings for currently-specified Validator");                
+        } else {
+            return validatorCommandLine;
+        }
     }
 
     /**
@@ -544,20 +553,6 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Sets the value of the ignoreCaseOnValidation flag for the old PC2Validator.
-     * Note that setting this flag has NO EFFECT unless the old PC2Validator is selected
-     * for the Problem (in particular, this flag is unrelated to the "isCaseSensitive" flag for 
-     * the CLICS {@link ClicsValidator}).
-     * 
-     * @param ignoreCaseOnValidation
-     *            The value to which the ignoreSpacesOnValidation flag should be set.
-     * @see {@link ClicsValidatorSettings#setCaseSensitive(boolean)}
-     */
-    public void setIgnoreCaseOnValidation(boolean ignoreCaseOnValidation) {
-        this.ignoreCaseOnValidation = ignoreCaseOnValidation;
-    }
-
-    /**
      * @param internationalJudgementReadMethod
      *            The internationalJudgementReadMethod to set.
      */
@@ -590,36 +585,51 @@ public class Problem implements IElementObject {
     }
     
     /**
-     * Sets the flag indicating whether or not this problem is using the older pc2Validator.
+     * Sets the flag indicating that this problem is using the "PC2Validator" to true.
      * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
      * 
-     * @param usingPC2Validator - the boolean value to which the usingPC2Validator flag should be set
-     * @see {@link #setUsingCLICSValidator(boolean)}
+     * A side-effect of calling this method is to simultaneously set the flag indicating that the Problem
+     * is using the Clics Validator and the flag indicating that the Problem is using a Custom Validator both to false.
+     * 
+     * @see {@link #setUsingCLICSValidator()}
+     * @see {@link #setUsingCustomValidator()}
      */
-    public void setUsingPC2Validator(boolean usingPC2Validator) {
-        this.usingPC2Validator = usingPC2Validator;
+    public void setUsingPC2Validator() {
+        this.usingPC2Validator = true;
+        this.usingCLICSValidator = false;
+        this.usingCustomValidator = false;
     }
 
     /**
-     * Sets the flag which indicates whether the CLICS Validator is being used.
+     * Sets the flag indicating that this problem is using the "CLICS Validator" to true.
      * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
      * 
-     * @param usingClicsValidator
-     *            The value to which the usingClicsValidator flag should be set.
+     * A side-effect of calling this method is to simultaneously set the flag indicating that the Problem
+     * is using the PC2 Validator and the flag indicating that the Problem is using a Custom Validator both to false.
+     * 
+     * @see {@link #setUsingPC2Validator()}
+     * @see {@link #setUsingCustomValidator()}
      */
-    public void setUsingCLICSValidator(boolean usingClicsValidator) {
-        this.usingCLICSValidator = usingClicsValidator;
+    public void setUsingClicsValidator() {
+        this.usingPC2Validator = false;
+        this.usingCLICSValidator = true;
+        this.usingCustomValidator = false;
     }
 
     /**
-     * Sets the flag which indicates whether a Custom (user-supplied) Validator is being used.
+     * Sets the flag indicating that this problem is using a "Custom Validator" to true.
      * Note that the value of this flag is only meaningful if {@link #isValidatedProblem()} returns true.
      * 
-     * @param usingCustomValidator
-     *            The value to which the usingCustomValidator flag should be set.
+     * A side-effect of calling this method is to simultaneously set the flag indicating that the Problem
+     * is using the PC2 Validator and the flag indicating that the Problem is using a CLICS Validator both to false.
+     * 
+     * @see {@link #setUsingPC2Validator()}
+     * @see {@link #setUsingClicsValidator()}
      */
-    public void setUsingCustomValidator(boolean usingCustomValidator) {
-        this.usingCustomValidator = usingCustomValidator;
+    public void setUsingCustomValidator() {
+        this.usingPC2Validator = false;
+        this.usingCLICSValidator = false;
+        this.usingCustomValidator = true;
     }
 
    /**
@@ -627,23 +637,15 @@ public class Problem implements IElementObject {
      * Note that at least three different validators might be used: the {@link ClicsValidator},
      * a custom (user-defined) validator, or the original PC2Validator.
      * It is the caller's responsibility when calling this method to also insure that a specific
-     * validator has been specified by calling either {@link Problem#setUsingCLICSValidator(boolean)},
-     * {@link Problem#setUsingCustomValidator(boolean)}, or {@link Problem#setUsingPC2Validator(boolean)}.
+     * validator has been specified by calling either {@link Problem#setUsingCLICSValidator()},
+     * {@link Problem#setUsingCustomValidator()}, or {@link Problem#setUsingPC2Validator()}.
      * 
-     * @param validated
-     *            Set to true if the problem uses a validator.
+     * @param validated true if the Problem is going to use a validator; false if not
      */
     public void setValidatedProblem(boolean validated) {
         this.validatedProblem = validated;
     }
 
-    /**
-     * @param validatorCommandLine
-     *            The validatorCommandLine to set.
-     */
-    public void setValidatorCommandLine(String validatorCommandLine) {
-        this.validatorCommandLine = validatorCommandLine;
-    }
 
     /**
      * @return Returns the hideOutputWindow.
@@ -654,31 +656,107 @@ public class Problem implements IElementObject {
 
     /**
      * @param hideOutputWindow
-     *            The hideOutputWindow to set.
+     *            The value to which the hideOutputWindow should be set.
      */
     public void setHideOutputWindow(boolean hideOutputWindow) {
         this.hideOutputWindow = hideOutputWindow;
     }
 
     /**
-     * @return Returns the validatorProgramName.
+     * Returns the Validator Program Name if the Problem has a Validator attached; otherwise returns null.
+     * 
+     * @return the validatorProgramName if there is a validator for the Problem, or null if not
+     * 
+     * @throws {@link RuntimeException} if the Problem is marked as having a Validator but no Validator Settings could be found
      */
     public String getValidatorProgramName() {
-        return validatorProgramName;
+
+        if (!isValidatedProblem()) {
+            return null;
+        }
+
+        // search for ValidatorSettings for the currently-specified Validator; if found, return the ValidatorProgramName
+        // from those Settings
+        String validatorProgName = null;
+        boolean found = false;
+        if (isUsingPC2Validator()) {
+            if (getPC2ValidatorSettings() != null) {
+                validatorProgName = getPC2ValidatorSettings().getValidatorProgramName();
+                found = true;
+            }
+        } else if (isUsingCLICSValidator()) {
+            if (getClicsValidatorSettings() != null) {
+                validatorProgName = getClicsValidatorSettings().getValidatorProgramName();
+                found = true;
+            }
+        } else if (isUsingCustomValidator()) {
+            if (getCustomValidatorSettings() != null) {
+                validatorProgName = getCustomValidatorSettings().getCustomValidatorProgramName();
+                found = true;
+            }
+        }
+
+        if (!found) {
+            throw new RuntimeException("getValidatorProgramName(): unable to locate Settings for currently-specified Validator");
+        } else {
+            return validatorProgName;
+        }
     }
 
     /**
+     * Sets the Validator Program Name for the Validator attached to the Problem.
+     * If the Problem is currently marked as having a Validator (of any type) but there is no corresponding Validator Settings
+     * object in the Problem, a new Validator Settings object is created.
+     * 
      * @param validatorProgramName
      *            The validatorProgramName to set.
+     *            
+     * @throws {@link RuntimeException} if the Problem is not marked as having a Validator when an attempt is made to set
+     *          set the Validator Program name, or if the Problem is marked as having a Validator but no Validator Settings could be found
      */
     public void setValidatorProgramName(String validatorProgramName) {
-        this.validatorProgramName = validatorProgramName;
+        
+        if (!this.isValidatedProblem()) {
+            throw new RuntimeException("Cannot set a Validator Program Name on a Problem marked as not using a Validator");
+        }
+        
+        // search for ValidatorSettings for the currently-specified Validator; if found, set the ValidatorProgramName
+        // into those Settings
+        boolean found = false;
+        if (isUsingPC2Validator()) {
+            if (getPC2ValidatorSettings() != null) {
+                getPC2ValidatorSettings().setValidatorProgramName(validatorProgramName);
+                found = true;
+            }
+        } else if (isUsingCLICSValidator()) {
+            if (getClicsValidatorSettings() != null) {
+                getClicsValidatorSettings().setValidatorProgramName(validatorProgramName);
+                found = true;
+            }
+        } else if (isUsingCustomValidator()) {
+            if (getCustomValidatorSettings() != null) {
+                getCustomValidatorSettings().setCustomValidatorProgramName(validatorProgramName);
+                found = true;
+            }
+        }
+
+        if (!found) {
+            throw new RuntimeException("setValidatorProgramName(): unable to locate Settings for currently-specified Validator");
+        } 
     }
 
+    /**
+     * Returns the Problem Number.
+     * @return the Problem Number
+     */
     protected int getNumber() {
         return number;
     }
 
+    /**
+     * Sets the Problem Number.
+     * @param number the number for the Problem
+     */
     protected void setNumber(int number) {
         this.number = number;
     }
@@ -696,23 +774,34 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Returns an indication of which option has been selected when using the older PC2Validator.
-     * Note that the return value of this method is meaningless unless {@link Problem#isUsingPC2Validator()} returns true.
+     * Returns an indication of which option has been selected when using the PC2Validator.
      * 
-     * @return an integer indicating which PC2Validator option has been specified
+     * @return an integer indicating which PC2Validator option has been specified, 
+     *              or -1 if no PC2Validator Settings for the Problem could be found
      */
     public int getWhichPC2Validator() {
-        return whichPC2Validator;
+
+        if (getPC2ValidatorSettings() != null) {
+            return getPC2ValidatorSettings().getWhichPC2Validator();
+        } else {
+            return -1;
+        }
     }
 
     /**
-     * Sets the value indicating which option has been selected when using the older PC2Validator.
-     * Note that the operation of this method is meaningless unless {@link Problem#setUsingPC2Validator(boolean)} has been called.
+     * Sets the value indicating which option has been selected when using the PC2Validator.
      * 
      * @param whichPC2Validator -- the integer value to which the PC2Validator option should be set
+     * 
+     * @throws {@link RuntimeException} if there is no PC2 Validator Settings object attached to the Problem
      */
     public void setWhichPC2Validator(int whichPC2Validator) {
-        this.whichPC2Validator = whichPC2Validator;
+        
+        if (getPC2ValidatorSettings()!=null) {
+            getPC2ValidatorSettings().setWhichPC2Validator(whichPC2Validator);
+        } else {
+            throw new RuntimeException("setWhichPC2Validator(): no PC2 Validator Settings found in the Problem");
+        }
     }
 
     public int hashCode() {
@@ -748,53 +837,55 @@ public class Problem implements IElementObject {
             if (validatedProblem != problem.isValidatedProblem()) {
                 return false;
             }
-            
-            if (validatedProblem) {
 
-                if (usingPC2Validator != problem.isUsingPC2Validator()) {
+            if (usingPC2Validator != problem.isUsingPC2Validator()) {
+                return false;
+            }
+
+            // check for one PC2ValidatorSettings being null while the other is not (i.e., XOR says they are different)
+            if (this.getPC2ValidatorSettings() == null ^ problem.getPC2ValidatorSettings() == null) {
+                return false;
+            }
+            // check that if both Settings are non-null, they are the same
+            if (this.getPC2ValidatorSettings() != null && problem.getPC2ValidatorSettings() != null) {
+                if (!this.getPC2ValidatorSettings().equals(problem.getPC2ValidatorSettings())) {
                     return false;
                 }
-                if (usingPC2Validator) {
-                    if (whichPC2Validator != problem.getWhichPC2Validator()) {
-                        return false;
-                    }
-                    if (ignoreCaseOnValidation != problem.isIgnoreCaseOnValidation()) {
-                        return false;
-                    }
-                }
+            }
 
-                if (usingCLICSValidator != problem.isUsingCLICSValidator()) {
+            if (usingCLICSValidator != problem.isUsingCLICSValidator()) {
+                return false;
+            }
+
+            if (usingCLICSValidator) {
+                if (getClicsValidatorSettings() == null ^ problem.getClicsValidatorSettings() == null) {
+                    // Java XOR (^) says they are different (one is null, the other is not) -- return false
                     return false;
                 }
-                if (usingCLICSValidator) {
-                    if (getClicsValidatorSettings() == null ^ problem.getClicsValidatorSettings() == null) {
-                        // Java XOR (^) says they are different (one is null, the other is not) -- return false
+                if (getClicsValidatorSettings() != null) {
+                    // both must be non-null; check for equality
+                    if (!getClicsValidatorSettings().equals(problem.getClicsValidatorSettings())) {
                         return false;
-                    }
-                    if (getClicsValidatorSettings() != null) {
-                        // both must be non-null; check for equality
-                        if (!getClicsValidatorSettings().equals(problem.getClicsValidatorSettings())) {
-                            return false;
-                        }
-                    }
-                }
-
-                if (usingCustomValidator != problem.isUsingCustomValidator()) {
-                    return false;
-                }
-                if (usingCustomValidator) {
-                    if (getCustomValidatorSettings() == null ^ problem.getCustomValidatorSettings() == null) {
-                        // Java XOR (^) says they are different (one is null, the other is not) -- return false
-                        return false;
-                    }
-                    if (getCustomValidatorSettings() != null) {
-                        // both must be non-null; check for equality
-                        if (!getCustomValidatorSettings().equals(problem.getCustomValidatorSettings())) {
-                            return false;
-                        }
                     }
                 }
             }
+
+            if (usingCustomValidator != problem.isUsingCustomValidator()) {
+                return false;
+            }
+            if (usingCustomValidator) {
+                if (getCustomValidatorSettings() == null ^ problem.getCustomValidatorSettings() == null) {
+                    // Java XOR (^) says they are different (one is null, the other is not) -- return false
+                    return false;
+                }
+                if (getCustomValidatorSettings() != null) {
+                    // both must be non-null; check for equality
+                    if (!getCustomValidatorSettings().equals(problem.getCustomValidatorSettings())) {
+                        return false;
+                    }
+                }
+            }
+
             
            if (showValidationToJudges != problem.isShowValidationToJudges()) {
                 return false;
@@ -976,23 +1067,6 @@ public class Problem implements IElementObject {
         this.executionPrepCommand = executionPrepCommand;
     }
 
-    /**
-     * Is this a CCS standard problem?.
-     * 
-     * A CCS standard problem will:
-     * <li> Execute the team submission and send the test data via stdin.
-     * <li> Validate the program output by sending the team output via stdin to the validator.
-     * 
-     * @return
-     */
-    public boolean isCcsMode() {
-        return ccsMode;
-    }
-
-    public void setCcsMode(boolean ccsMode) {
-        this.ccsMode = ccsMode;
-    }
-
     public void setColorName(String colorName) {
         this.colorName = colorName;
     }
@@ -1131,8 +1205,27 @@ public class Problem implements IElementObject {
     }
 
     /**
+     * Returns the current {@link PC2ValidatorSettings} object attached to this Problem.
+     * 
+     * @return the current PC2ValidatorSettings object
+     */
+    private PC2ValidatorSettings getPC2ValidatorSettings() {
+        return this.pc2ValidatorSettings;
+    }
+
+    /**
+     * Sets the {@link PC2ValidatorSettings} for this Problem to the specified settings object.
+     * 
+     * @param settings the PC2ValidatorSettings object to attach to this Problem
+     */
+    private void setPC2ValidatorSettings(PC2ValidatorSettings settings) {
+        this.pc2ValidatorSettings = settings ;
+    }
+
+    /**
      * Returns a {@link ClicsValidatorSettings} object containing the options which this
      * Problem should apply when using the CLICS validator.
+     * 
      * @return the clicsValidatorSettings for this problem
      */
     public ClicsValidatorSettings getClicsValidatorSettings() {
@@ -1141,16 +1234,16 @@ public class Problem implements IElementObject {
 
     /**
      * Sets the {@link ClicsValidatorSettings} for this problem to the specified value.
+     * 
      * @param settings the CLICS Validator Settings to set
      */
     public void setCLICSValidatorSettings(ClicsValidatorSettings settings) {
         this.clicsValidatorSettings = settings;
     }
-    
 
     /**
      * Returns a {@link CustomValidatorSettings} object describing the custom validator
-     * associated with this problem (if any).
+     * settings associated with this problem (if any).
      * @return the customValidatorSettings for this problem
      */
     public CustomValidatorSettings getCustomValidatorSettings() {
