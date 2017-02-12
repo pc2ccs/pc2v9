@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.validator;
 
+import java.io.Serializable;
+
 import edu.csus.ecs.pc2.core.Constants;
 
 /**
@@ -9,8 +11,10 @@ import edu.csus.ecs.pc2.core.Constants;
  * @author John@pc2.ecs.csus.edu
  *
  */
-public class PC2ValidatorSettings implements Cloneable {
+public class PC2ValidatorSettings implements Cloneable, Serializable {
 
+    private static final long serialVersionUID = 1L;
+    
     private String validatorProgramName ;
     private String validatorCommandLine ;
     private int whichPC2Validator = 0;  //which pc2validator option?
