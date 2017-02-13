@@ -37,7 +37,7 @@ public class ContestSummaryReportsTest extends AbstractTestCase {
                 "groups.tsv", //
                 "scoreboard.tsv", //
                 "submissions.tsv", //
-                "Event Feed XML for ICPC Tools Resolver", //
+                "ICPC Tools Event Feed", //
         };
 
         ContestSummaryReports summaryReports = new ContestSummaryReports();
