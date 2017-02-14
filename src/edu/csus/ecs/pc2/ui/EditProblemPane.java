@@ -1095,7 +1095,12 @@ public class EditProblemPane extends JPanePlugin {
         SerializedFile serializedFile = new SerializedFile(newValidatorFileName);
 
         if (serializedFile.getBuffer() == null  ||  (serializedFile.getErrorMessage() != null && serializedFile.getErrorMessage() != "")) {
-            throw new InvalidFieldValue("Unable to read file '" + newValidatorFileName + "' while adding new Problem; choose validator file again");
+
+            String msg = "Unable to read file '" + newValidatorFileName + "' while adding new Problem; choose validator file again";
+            if (serializedFile.getErrorMessage()!=null) {
+                msg += "\n (Error Message = \"" + serializedFile.getErrorMessage() + "\")";
+            }
+            throw new InvalidFieldValue( msg  );
         }
         
         checkFileFormat(serializedFile);
