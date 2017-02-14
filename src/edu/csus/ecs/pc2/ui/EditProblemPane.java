@@ -63,11 +63,13 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -277,7 +279,7 @@ public class EditProblemPane extends JPanePlugin {
 
     //a temporary variables to track changes in the command line
     private String localPC2InterfaceCustomValidatorCommandLine;
-    private String localCLICSInterfaceCustomValidatorCommandLine;
+    private String localClicsInterfaceCustomValidatorCommandLine;
 
     /**
      * This method initializes
@@ -417,10 +419,13 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Add to the contest a new Problem as defined by the current GUI fields.
-     * This method is invoked by pushing either the "Add" button on the Problems grid
-     * or the "Cancel" button on the Add/Edit Problem Pane (after having selected either
-     * "Add" or "Edit" and then pushing "Cancel").
+     * Adds to the contest a new Problem as defined by the current GUI fields.
+     * This method is invoked by pushing the "Add" button on the EditProblemPane GUI 
+     * after having defined the values for a new problem being added.
+     * 
+     * The method also gets invoked by making GUI changes to a new problem definition,
+     * then pressing "Cancel" (which displays a message "Problem Modified - Save Changes?")
+     * and responding "Yes" to the message.
      * 
      */
     protected void addProblem() {
@@ -440,6 +445,7 @@ public class EditProblemPane extends JPanePlugin {
         try {
             newProblemDataFiles = getProblemDataFilesFromFields();
 
+            //get a new Problem object from the GUI fields (throws InvalidFieldValue if any GUI fields are illegal)
             newProblem = getProblemFromFields(null, newProblemDataFiles);
 
             SerializedFile sFile;
@@ -787,15 +793,19 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Create a Problem from the fields in this GUI.
+     * Create a Problem from the fields in this GUI. This method assumes the data in the GUI fields
+     * has already been validated (i.e., the GUI values define a legitimate, complete Problem);
+     * while the method does do some sanity checking it should not be assumed to have completely
+     * verified the validity of the GUI data.
      * 
-     * This also populates newProblemDataFiles for the data files.
+     * This method also populates newProblemDataFiles for the data files.
      * 
      * @param checkProblem
-     *            will update this Problem if supplied, if null creates a new Problem
+     *            will update this Problem if supplied, if null creates and returns a new Problem
      * @param dataFiles
      * 
      * @return a Problem based on fields in this EditProblemPane GUI
+     * 
      * @throws InvalidFieldValue if any of the fields in the GUI are incomplete or illegally set
      */
     public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
@@ -816,20 +826,22 @@ public class EditProblemPane extends JPanePlugin {
          */
         SerializedFile lastAnsFile = null;
 
+        //check whether we've been given an existing Problem to fill
         if (checkProblem == null) {
-            checkProblem = new Problem(problemNameTextField.getText());
+            //we weren't give a Problem; construct a new one
+            checkProblem = new Problem(getProblemNameTextField().getText());
             isAddingNewProblem = true;
             if (newProblemDataFiles == null) {
                 // only overwrite if they do not exist already
                 newProblemDataFiles = new ProblemDataFiles(checkProblem);
             }
         } else {
+            //we were given an existing Problem (called "checkProblem"); update the critical values in the Problem
             checkProblem.setDisplayName(problemNameTextField.getText());
             checkProblem.setElementId(problem); // duplicate ElementId so that Problem key/lookup is identical
             newProblemDataFiles = dataFiles;
             // newProblemDataFiles = new ProblemDataFiles(problem);
             isAddingNewProblem = false;
-
         }
 
         if (debug22EditProblem) {
@@ -838,21 +850,19 @@ public class EditProblemPane extends JPanePlugin {
 
         checkProblem.setUsingExternalDataFiles(getMultipleDataSetPane().isUsingExternalDataFiles());
 
-        checkProblem.setTimeOutInSeconds(getIntegerValue(timeOutSecondTextField.getText()));
+        checkProblem.setTimeOutInSeconds(getIntegerValue(getTimeOutTextField().getText()));
 
-        checkProblem.setLetter(problemLetterTextField.getText());
+        checkProblem.setLetter(getProblemLetterTextField().getText());
 
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
 
-        checkProblem.setCcsMode(getCcsValidationEnabledCheckBox().isSelected());
-
-        checkProblem.setShortName(shortNameTextfield.getText());
+        checkProblem.setShortName(getShortNameTextfield().getText());
         if (!checkProblem.isValidShortName()) {
             throw new InvalidFieldValue("Invalid problem short name");
         }
 
-        //handle problems which require data files
-        if (problemRequiresDataCheckBox.isSelected()) {
+        //update problems which require data files
+        if (getProblemRequiresDataCheckBox().isSelected()) {
 
             String fileName = inputDataFileLabel.getText();
             if (fileName == null || fileName.trim().length() == 0) {
@@ -896,7 +906,7 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setDataFileName(null);
         }
 
-        //handle problems for which the judges have provided an Answer File
+        //update problems for which the judges have provided an Answer File
         if (judgesHaveAnswerFiles.isSelected()) {
 
             String fileName = answerFileNameLabel.getText();
@@ -944,85 +954,74 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setAnswerFileName(null);
         }
 
-        checkProblem.setReadInputDataFromSTDIN(stdinRadioButton.isSelected());
+        checkProblem.setReadInputDataFromSTDIN(getStdinRadioButton().isSelected());
 
-        // set the flags indicating which validator (if any) is being used in the Problem
-        checkProblem.setValidatedProblem(!getUseNOValidatatorRadioButton().isSelected());
-        checkProblem.setUsingPC2Validator(getUsePC2ValidatorRadioButton().isSelected());
-        checkProblem.setUsingCLICSValidator(getUseCLICSValidatorRadioButton().isSelected());
-        checkProblem.setUsingCustomValidator(getUseCustomValidatorRadioButton().isSelected());
-
-        // initialize validator settings to defaults
-        checkProblem.setValidatorProgramName(null);
-        checkProblem.setValidatorCommandLine(null);
-        
-        //update PC2Validator-specific settings in the Problem
-        checkProblem.setWhichPC2Validator(getPc2ValidatorOptionComboBox().getSelectedIndex());
-        checkProblem.setIgnoreCaseOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());
-        
-        //only update Validator Program Name and Command from PC2 panel if it is selected
-        if (checkProblem.isUsingPC2Validator()) {
-
-            // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
-            // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
-
-            checkProblem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
-            checkProblem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreCaseOnValidation());
+        // set the flag indicating which validator (if any) is being used in the Problem
+        VALIDATOR_TYPE validatorType ;
+        if (getUseNOValidatatorRadioButton().isSelected()) {
+            validatorType = VALIDATOR_TYPE.NONE;
+        } else if (getUsePC2ValidatorRadioButton().isSelected()) {
+            validatorType = VALIDATOR_TYPE.PC2VALIDATOR;
+        } else if (getUseCLICSValidatorRadioButton().isSelected()) {
+            validatorType = VALIDATOR_TYPE.CLICSVALIDATOR;
+        } else if (getUseCustomValidatorRadioButton().isSelected()) {
+            validatorType = VALIDATOR_TYPE.CUSTOMVALIDATOR;
+        } else {
+            throw new InvalidFieldValue("Illegal settings in validator selection buttons");
         }
-        
-        //update CLICSValidator-specific settings in the Problem
+        checkProblem.setValidatorType(validatorType);
+
+        //update settings in the Problem for each type of validator:
+        checkProblem.setPC2ValidatorSettings(getPC2ValidatorSettingsFromFields());
         checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
-        
-        //only update Validator Program Name and Command for CLICS Validator if it is selected
-        if (checkProblem.isUsingCLICSValidator()) {
-            checkProblem.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
-            checkProblem.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
-        }
-        
-        //update CustomValidator-specific settings in the Problem
-        if (checkProblem.isUsingCustomValidator()) {
+        checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
 
+        //if Custom Validator is selected, make sure we have a SerializedFile for the Validator
+        // (the PC2 and CLICS Validators use internal PC2 classes and don't need a separate SerializedFile)
+        if (getUseCustomValidatorRadioButton().isSelected()) {
+            
             if (isAddingNewProblem) {
 
-                // we're adding a new Problem; update Problem Custom Validator values from GUI
-                updateProblemCustomValidatorInfoFromGUIFields(checkProblem);
+                // we're adding a new Problem; update Problem Custom Validator SerializedFile
+                updateCustomValidatorSerializedFile(checkProblem);
 
             } else {
 
-                // we're editing an existing Problem, which may or may not already have a Validator defined;
-                // find out if the Problem has a Validator defined
+                // we're editing an existing Problem, which may or may not already have a Validator SerializedFile defined;
+                // find out if the Problem has a Validator SerializedFile defined
                 SerializedFile serializedFile = getController().getProblemDataFiles(problem).getValidatorFile();
 
                 if (serializedFile == null) {
                     //the existing Problem has no SerializedFile defined for the Validator; handle
                     // this just like the case of a new Problem
-                    updateProblemCustomValidatorInfoFromGUIFields(checkProblem);
+                    updateCustomValidatorSerializedFile(checkProblem);
                     
                 } else {
                     //the existing Problem already has a SerializedFile defined for the Validator;
                     // check to see if the defined file is the same as the one currently specified in the GUI
                     
                     String guiValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
-                    String existingValidatorFileName = serializedFile.getAbsolutePath();
+                    String existingValidatorFileName = serializedFile.getName();
 
                     if (guiValidatorFileName.equals(existingValidatorFileName)) {
 
                         // same file names in GUI and Problem; refresh/check validator file
 
                         serializedFile = freshenIfNeeded(serializedFile, existingValidatorFileName);
-                        newProblemDataFiles.setValidatorFile(serializedFile);
                         checkProblem.setValidatorProgramName(serializedFile.getName());
+                        newProblemDataFiles.setValidatorFile(serializedFile);
 
                     } else {
 
                         // different file name in GUI from what's currently in the Problem; replace the one in 
                         // the Problem with the one specified by the GUI fields,
                         // which means doing the same thing as if a new problem was being defined
-                        updateProblemCustomValidatorInfoFromGUIFields(checkProblem);
+                        updateCustomValidatorSerializedFile(checkProblem);
                     }
                 }
             }
         }
+        
         
         //update misc settings from GUI
         checkProblem.setShowValidationToJudges(getShowValidatorToJudgesCheckBox().isSelected());
@@ -1075,14 +1074,15 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     /**
-     * Updates all data related to Custom Validators in a given problem from the current GUI fields.
+     * Updates the SerializedFile information for the Custom Validator in the specified problem from the current GUI fields.
      * 
-     * @param checkProblem The {@link Problem} to be updated
-     * @throws InvalidFieldValue if any fields related to Custom Validator are illegal
+     * @param checkProblem The {@link Problem} whose Custom Validator {@link SerializedFile} is to be updated
+     * 
+     * @throws InvalidFieldValue if no Validator Executable Program file name is given in the GUI or if the named 
+     *          Executable Program file cannot be converted to a SerializedFile
      */
-    private void updateProblemCustomValidatorInfoFromGUIFields(Problem checkProblem) {
-        
-        
+    private void updateCustomValidatorSerializedFile(Problem checkProblem) {
+
         String newValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
 
         if (newValidatorFileName == null || newValidatorFileName.trim().length() <= 0) {
@@ -1094,20 +1094,18 @@ public class EditProblemPane extends JPanePlugin {
 
         SerializedFile serializedFile = new SerializedFile(newValidatorFileName);
 
-        if (serializedFile.getBuffer() == null) {
+        if (serializedFile.getBuffer() == null  ||  (serializedFile.getErrorMessage() != null && serializedFile.getErrorMessage() != "")) {
             throw new InvalidFieldValue("Unable to read file '" + newValidatorFileName + "' while adding new Problem; choose validator file again");
         }
         
         checkFileFormat(serializedFile);
         
-        //put the Custom Validator information in the new Problem
-        CustomValidatorSettings settings = getCustomValidatorSettingsFromFields();
-        checkProblem.setCustomValidatorSettings(settings);
+        //put the Custom Validator SerializedFile into the Problem
         checkProblem.setValidatorProgramName(serializedFile.getName());
-        checkProblem.setValidatorCommandLine(settings.getCustomValidatorCommandLine());
-        // for some reason on validator this is borked
-        // newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, newValidatorFileName));
-        newProblemDataFiles.setValidatorFile(serializedFile);
+        // for some reason on validator this is borked  <-- old, out of date comment?
+        newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, newValidatorFileName));
+        //the following was the replacement for the above, but the above should work...
+        //newProblemDataFiles.setValidatorFile(serializedFile);
     }
     
     /**
@@ -1118,7 +1116,7 @@ public class EditProblemPane extends JPanePlugin {
         if (this.getUsePC2ValStdRadioButton().isSelected()) {
             localPC2InterfaceCustomValidatorCommandLine = this.getCustomValidatorCommandLineTextField().getText();
         } else if (this.getUseClicsValStdRadioButton().isSelected()) {
-            localCLICSInterfaceCustomValidatorCommandLine = this.getCustomValidatorCommandLineTextField().getText();
+            localClicsInterfaceCustomValidatorCommandLine = this.getCustomValidatorCommandLineTextField().getText();
         }
     }
 
@@ -1217,18 +1215,35 @@ public class EditProblemPane extends JPanePlugin {
         return updateButton;
     }
 
+    /**
+     * Updates an existing contest Problem with the values specified by the current GUI fields.
+     * This method is invoked by pushing the "Update" button on the EditProblemPane GUI 
+     * after having entered into the GUI the new (updated) values for the problem being edited.
+     * 
+     * The method also gets invoked by making GUI changes to an existing problem definition,
+     * then pressing "Cancel" (which displays a message "Problem Modified - Save Changes?")
+     * and responding "Yes" to the message.
+     * 
+     */
+
     protected void updateProblem() {
 
         if (!validateProblemFields()) {
-            // new problem is invalid, just return, message issued by validateProblemFields
+            // problem defined by the GUI fields is invalid, just return ( error message was issued by validateProblemFields() )
             return;
         }
 
+        //all the GUI fields are valid; create a new Problem from them
         Problem newProblem = null;
 
         try {
+            //create datafiles from the fields
             ProblemDataFiles dataFiles = getProblemDataFilesFromFields();
+            
+            //create a new Problem from the fields
             newProblem = getProblemFromFields(problem, dataFiles);
+            
+            //verify the correctness of the datafiles just obtained from the fields
             if (dataFiles != null) {
                 // ensure what we got from the fields is what is actually on disk
                 // enableUpdateButton() would enable if the sha1 sums changed.
@@ -1295,6 +1310,7 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
 
+        //add a Problem Letter to the problem if it doesn't have one (note: problem letter is not displayed in the GUI)
         if (newProblem.getLetter() == null || newProblem.getLetter().length() == 0) {
 
             // Update/Add next letter to problem.
@@ -1303,8 +1319,10 @@ public class EditProblemPane extends JPanePlugin {
             newProblem.setLetter(letter);
         }
 
+        //hand the new problem to the Controller for transmission to the Server
         getController().updateProblem(newProblem, newProblemDataFiles);
 
+        //clean up the GUI state
         cancelButton.setText("Close");
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
@@ -1338,53 +1356,26 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Validate that all problem fields selected in the GUI are ok.
+     * Validate that all problem fields in the GUI are ok.
      * 
-     * @return
+     * @return true if all GUI values are valid; false otherwise
      */
     private boolean validateProblemFields() {
 
         //verify there is a problem name
-        if (problemNameTextField.getText().trim().length() < 1) {
+        if (getProblemNameTextField().getText().trim().length() < 1) {
             showMessage("Enter a problem name (\"General\" tab)");
             return false;
         }
 
         //verify that if the PC2 Validator is selected, an option has been chosen
         if (getUsePC2ValidatorRadioButton().isSelected()) {
-            if (pc2ValidatorOptionComboBox.getSelectedIndex() < 1) {
+            if (getPc2ValidatorOptionComboBox().getSelectedIndex() < 1) {
                 showMessage("PC^2 Validator is selected; you must select a Validator Mode option (\"Validator\" tab)");
                 return false;
             }
         }
         
-        //verify that if a Custom Validator has been selected, there is a Validator Program specified
-        if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (getCustomValidatorExecutableProgramTextField().getText() == null
-                    || getCustomValidatorExecutableProgramTextField().getText().trim().length() == 0) {
-                showMessage("\"Use Custom Validator\" is selected; you must specify Validator executable program (\"Validator\" tab)");
-                return false;
-            }
-        }
-
-        //verify that if a Custom Validator has been selected, there is a Validator Command specified
-        if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (getCustomValidatorCommandLineTextField().getText() == null
-                    || getCustomValidatorCommandLineTextField().getText().trim().length() == 0) {
-                showMessage("\"Use Custom Validator\" is selected; you must specify Validator Command Line (\"Validator\" tab)");
-                return false;
-            }
-        }
-        
-        //verify that if a Custom Validator has been selected, exactly one Validator Interface has been specified
-        if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (!(getUseClicsValStdRadioButton().isSelected() ^ getUsePC2ValStdRadioButton().isSelected())) {  // ^ == XOR
-                showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Validator\" tab)");
-                return false;
-            }
-        }
-
-
         //verify that if the CLICS validator has been selected, the tolerance fields are valid
         if (getUseCLICSValidatorRadioButton().isSelected()) {
 
@@ -1409,13 +1400,38 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
+        //verify that if a Custom Validator has been selected, there is a Validator Program specified
+        if (getUseCustomValidatorRadioButton().isSelected()) {
+            if (getCustomValidatorExecutableProgramTextField().getText() == null
+                    || getCustomValidatorExecutableProgramTextField().getText().trim().length() < 1) {
+                showMessage("\"Use Custom Validator\" is selected; you must specify Validator executable program (\"Validator\" tab)");
+                return false;
+            }
+        }
+
+        //verify that if a Custom Validator has been selected, there is a Validator Command specified
+        if (getUseCustomValidatorRadioButton().isSelected()) {
+            if (getCustomValidatorCommandLineTextField().getText() == null
+                    || getCustomValidatorCommandLineTextField().getText().trim().length() < 1) {
+                showMessage("\"Use Custom Validator\" is selected; you must specify Validator Command Line (\"Validator\" tab)");
+                return false;
+            }
+        }
+        
+        //verify that if a Custom Validator has been selected, exactly one Validator Interface has been specified
+        if (getUseCustomValidatorRadioButton().isSelected()) {
+            if (!(getUseClicsValStdRadioButton().isSelected() ^ getUsePC2ValStdRadioButton().isSelected())) {  // ^ == XOR
+                showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Validator\" tab)");
+                return false;
+            }
+        }
 
         //verify that if the problem requires data, a data file is specified
         if (getProblemRequiresDataCheckBox().isSelected()) {
 
             String fileName = inputDataFileLabel.getText();
             // this check is outside so we can provide a specific message
-            if (fileName == null || fileName.trim().length() == 0) {
+            if (fileName == null || fileName.trim().length() < 1) {
                 showMessage("'Problem Requires Input Data' is checked; you must specify a data file (\"General\" tab)");
                 return false;
             }
@@ -1431,7 +1447,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         //verify that if "judges have answer files" is selected, a file has been specified
-        if (getJudgesHaveAnswerFiles().isSelected()) {
+        if (getJudgesHaveAnswerFilesCheckbox().isSelected()) {
 
             //note: the Judge's Answer File name is displayed in a JLabel (not a textfield)
             String answerFileName = answerFileNameLabel.getText();
@@ -1733,8 +1749,6 @@ public class EditProblemPane extends JPanePlugin {
 
             setForm(inProblem, originalProblemDataFiles);
 
-            getCcsValidationEnabledCheckBox().setSelected(inProblem.isCcsMode());
-
             try {
                 @SuppressWarnings("unused")
                 Problem changedProblem = getProblemFromFields(inProblem, originalProblemDataFiles);
@@ -1747,11 +1761,13 @@ public class EditProblemPane extends JPanePlugin {
             clearForm();
         }
 
-        enableValidatorComponents();
+        enableValidatorTabComponents();
 
+        //enableGeneralTabComponents:
         enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
-
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
+        
+        //enableJudgingTabComponents:  ??
 
         if (debug22EditProblem) {
             Utilities.dump(originalProblemDataFiles, "debug 22 ORIGINAL  populateGUI B");
@@ -1805,12 +1821,12 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Set Form data.
+     * Set Form data -- that is, populates the GUI from the specified Problem and ProblemDataFiles.
      * 
      * Populates the form, no error checking is performed.
      * 
-     * @param inProblem
-     * @param problemDataFiles
+     * @param inProblem - the Problem which will be used to populate the GUI form
+     * @param problemDataFiles - the ProblemDataFiles which will be used to populate the GUI form
      */
     private void setForm(Problem inProblem, ProblemDataFiles problemDataFiles) {
 
@@ -1819,33 +1835,37 @@ public class EditProblemPane extends JPanePlugin {
         
         originalProblemDataFiles = problemDataFiles;
 
-        problemNameTextField.setText(inProblem.getDisplayName());
-        timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
-        problemLetterTextField.setText(inProblem.getLetter());
+        //General tab fields:
+        initializeGeneralTabFields(inProblem, problemDataFiles);
 
-        inputDataFileLabel.setText(inProblem.getDataFileName());
-        answerFileNameLabel.setText(inProblem.getAnswerFileName());
+        //Validator tab:
+        initializeValidatorTabFields(inProblem, problemDataFiles);
         
-        /**
-         * Set tool tip with complete paths.
-         */
-        inputDataFileLabel.setToolTipText("");
-        answerFileNameLabel.setToolTipText("");
+        //Judging Type tab:
+        initializeJudgingTabFields(inProblem);
 
-        if (problemDataFiles != null) {
-            SerializedFile[] files = problemDataFiles.getJudgesDataFiles();
-            if (files.length > 0) {
-                inputDataFileLabel.setToolTipText(files[0].getAbsolutePath());
-            }
-            files = problemDataFiles.getJudgesAnswerFiles();
-            if (files.length > 0) {
-                answerFileNameLabel.setToolTipText(files[0].getAbsolutePath());
-            }
-        }
+        //Data Files tab:
+        getMultipleDataSetPane().setLoadDirectory(inProblem.getExternalDataFileLocation());
 
-        judgesHaveAnswerFiles.setSelected(inProblem.getAnswerFileName() != null);
+    }
+    
+    /**
+     * This method initializes the "General" tab GUI fields from the data in the specified Problem and ProblemDataFiles.
+     * 
+     * @param inProblem - the Problem to be used to initialize the GUI fields
+     * @param inProblemDataFiles - the ProblemDataFiles to be used to initialize the GUI fields
+     * 
+     */
+    private void initializeGeneralTabFields(Problem inProblem, ProblemDataFiles inProblemDataFiles) {
+        
+        //initialize problem description fields:
+        getProblemNameTextField().setText(inProblem.getDisplayName());
+        getTimeOutTextField().setText(inProblem.getTimeOutInSeconds() + "");
+        getShortNameTextfield().setText(inProblem.getShortName());
+        getProblemLetterTextField().setText(inProblem.getLetter()); //note: Problem Letter is currently not displayed in the GUI!
+
+        //input data fields:
         problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName() != null);
-
         if (inProblem.isReadInputDataFromSTDIN()) {
             fileRadioButton.setSelected(false);
             stdinRadioButton.setSelected(true);
@@ -1853,128 +1873,40 @@ public class EditProblemPane extends JPanePlugin {
             fileRadioButton.setSelected(true);
             stdinRadioButton.setSelected(false);
         }
-
-        setDefaultValidatorFormSettings();
+        inputDataFileLabel.setText(inProblem.getDataFileName());
         
-        if (inProblem.isValidatedProblem()) {
+        //judges answer fields:
+        judgesHaveAnswerFiles.setSelected(inProblem.getAnswerFileName() != null);
+        answerFileNameLabel.setText(inProblem.getAnswerFileName());
+        
+        //set ToolTips for input data and judge's answer labels to defaults
+        inputDataFileLabel.setToolTipText("");
+        answerFileNameLabel.setToolTipText("");
 
-            if (inProblem.isUsingPC2Validator()) {
-            	
-                getUseNOValidatatorRadioButton().setSelected(false);
-                getUsePC2ValidatorRadioButton().setSelected(true);
-                getUseCLICSValidatorRadioButton().setSelected(false);
-                getUseCustomValidatorRadioButton().setSelected(false);
-                
-                getPc2ValidatorOptionComboBox().setSelectedIndex(inProblem.getWhichPC2Validator());
-                getPc2ValidatorIgnoreCaseCheckBox().setSelected(inProblem.isIgnoreCaseOnValidation());
-                
-            } else if (inProblem.isUsingCLICSValidator()) {
-            	
-                getUseNOValidatatorRadioButton().setSelected(false);
-                getUsePC2ValidatorRadioButton().setSelected(false);
-                getUseCLICSValidatorRadioButton().setSelected(true);
-                getUseCustomValidatorRadioButton().setSelected(false);
-                
-                getCLICSValidatorCaseSensitiveCheckBox().setSelected(inProblem.getClicsValidatorSettings().isCaseSensitive());
-                getCLICSSpaceSensitiveCheckBox().setSelected(inProblem.getClicsValidatorSettings().isSpaceSensitive());
-                getFloatAbsoluteToleranceCheckBox().setSelected(inProblem.getClicsValidatorSettings().isFloatAbsoluteToleranceSpecified());
-                if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
-                    getFloatAbsoluteToleranceTextField().setText(inProblem.getClicsValidatorSettings().getFloatAbsoluteTolerance()+"");
-                } else {
-                    getFloatAbsoluteToleranceTextField().setText("");   
-                }
-                getFloatRelativeToleranceCheckBox().setSelected(inProblem.getClicsValidatorSettings().isFloatRelativeToleranceSpecified());
-                if (getFloatRelativeToleranceCheckBox().isSelected()) {
-                    getFloatRelativeToleranceTextField().setText(inProblem.getClicsValidatorSettings().getFloatRelativeTolerance()+"");
-                } else {
-                    getFloatRelativeToleranceTextField().setText("");   
-                }
-                
-            } else if (inProblem.isUsingCustomValidator()) {
-
-                getUseNOValidatatorRadioButton().setSelected(false);
-                getUsePC2ValidatorRadioButton().setSelected(false);
-                getUseCLICSValidatorRadioButton().setSelected(false);
-                getUseCustomValidatorRadioButton().setSelected(true);
-                
-                CustomValidatorSettings settings = inProblem.getCustomValidatorSettings();
-                System.out.println (settings);
-                getCustomValidatorExecutableProgramTextField().setText(settings.getCustomValidatorProgramName());
-                getCustomValidatorExecutableProgramTextField().setToolTipText(settings.getCustomValidatorProgramName());
-                getCustomValidatorCommandLineTextField().setText(settings.getCustomValidatorCommandLine());
-                getCustomValidatorCommandLineTextField().setToolTipText(settings.getCustomValidatorCommandLine());
-                getUseClicsValStdRadioButton().setSelected(settings.isUseCLICSValidatorInterface());
-                getUsePC2ValStdRadioButton().setSelected(settings.isUsePC2ValidatorInterface());
-                
-                SerializedFile sFile = problemDataFiles.getValidatorFile();
-                if (sFile != null) {
-                    if (sFile.getAbsolutePath() != null) {
-                    	getCustomValidatorExecutableProgramTextField().setToolTipText(sFile.getAbsolutePath());
-                    } else {
-                    	getCustomValidatorExecutableProgramTextField().setToolTipText("");
-                    }
-                }
+        //update ToolTips from ProblemDataFiles if available
+        if (inProblemDataFiles != null) {
+            SerializedFile[] files = inProblemDataFiles.getJudgesDataFiles();
+            if (files.length > 0) {
+                inputDataFileLabel.setToolTipText(files[0].getAbsolutePath());
             }
-
-        } else {
-        	//the problem is not using a validator
-            getUseNOValidatatorRadioButton().setSelected(true);
-            getUsePC2ValidatorRadioButton().setSelected(false);
-            getUseCLICSValidatorRadioButton().setSelected(false);
-            getUseCustomValidatorRadioButton().setSelected(false);
+            files = inProblemDataFiles.getJudgesAnswerFiles();
+            if (files.length > 0) {
+                answerFileNameLabel.setToolTipText(files[0].getAbsolutePath());
+            }
         }
 
-        getShowValidatorToJudgesCheckBox().setSelected(inProblem.isShowValidationToJudges());
+        //miscellaneous fields:
         getDoShowOutputWindowCheckBox().setSelected(!inProblem.isHideOutputWindow());
         getShowCompareCheckBox().setSelected(inProblem.isShowCompareWindow());
         getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
 
         getDeleteProblemCheckBox().setSelected(!inProblem.isActive());
-
-        populateJudging(inProblem);
-
-        getMultipleDataSetPane().setLoadDirectory(inProblem.getExternalDataFileLocation());
-
-        /**
-         * Short problem name
-         */
-
-        shortNameTextfield.setText(inProblem.getShortName());
-
     }
-    
+
     /**
-     * Defines the initial values for Validator settings when the Validator tab (form) is first being
-     * populated.  These values will be over-ridden by validator-specific settings if a validator has been selected.
-     */
-    private void setDefaultValidatorFormSettings() {
-  
-    	//default PC2 Validator form settings
-        getPc2ValidatorOptionComboBox().setSelectedIndex(0);
-        getPc2ValidatorIgnoreCaseCheckBox().setSelected(false);
-        
-        //default CLICS Validator form settings
-        getCLICSValidatorCaseSensitiveCheckBox().setSelected(false);
-        getCLICSSpaceSensitiveCheckBox().setSelected(false);
-        getFloatRelativeToleranceCheckBox().setSelected(false);
-        getFloatAbsoluteToleranceTextField().setText("");
-        getFloatRelativeToleranceCheckBox().setSelected(false);
-        getFloatRelativeToleranceTextField().setText("");
-        
-        //default Custom Validator form settings
-        getCustomValidatorExecutableProgramTextField().setText("");
-        getCustomValidatorExecutableProgramTextField().setToolTipText("");
-        getUsePC2ValStdRadioButton().setSelected(true);
-        getUseClicsValStdRadioButton().setSelected(false);
-        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
-        getCustomValidatorCommandLineTextField().setToolTipText(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
-
-    }
-
-    /*
      * Sets the Judging Type radio and checkboxes in a sane manner.
      */
-    private void populateJudging(Problem inProblem) {
+    private void initializeJudgingTabFields(Problem inProblem) {
     	
     	//TODO: all the following buttons and checkboxes should be accessed via accessors, not direct references...
         if (inProblem != null && inProblem.isComputerJudged()) {
@@ -2002,6 +1934,125 @@ public class EditProblemPane extends JPanePlugin {
             manualReviewCheckBox.setEnabled(false);
             prelimaryNotificationCheckBox.setEnabled(false);
         }
+    }
+    
+    /**
+     * Initializes the Validator tab (GUI pane) from the specified Problem and ProblemDataFiles.
+     * 
+     * @param inProblem the {@link Problem} to be used to initialize the GUI
+     * @param inProblemDataFiles the {@link ProblemDataFiles} to be used to initialize the GUI
+     * 
+     * @throws {@link RuntimeException} if either the received Problem or ProblemDataFiles are null
+     * @throws {@link InvalidFieldValue} if the received Problem contains unspecified (but required) values
+     */
+    private void initializeValidatorTabFields(Problem inProblem, ProblemDataFiles inProblemDataFiles) {
+        
+        if (inProblem==null || inProblemDataFiles==null) {
+            throw new RuntimeException("EditProblemPane.initializeValidatorTabFields(): received null Problem or ProblemDataFiles");
+        }
+        
+        //get what type of validator (if any) is specified in the problem
+        VALIDATOR_TYPE validatorType = inProblem.getValidatorType();
+        
+        //enable the corresponding validator selection radio button (the ButtonGroup will disable all the others)
+        switch (validatorType) {
+            case NONE:
+                getUseNOValidatatorRadioButton().setSelected(true);
+                break;
+            case PC2VALIDATOR:
+                getUsePC2ValidatorRadioButton().setSelected(true);
+                break;
+            case CLICSVALIDATOR:
+                getUseCLICSValidatorRadioButton().setSelected(true);
+                break;
+            case CUSTOMVALIDATOR:
+                getUseCustomValidatorRadioButton().setSelected(true);
+                break;
+            default:
+                throw new InvalidFieldValue("Unknown Validator type: '" + validatorType + "'");
+        }
+        
+        //update the PC2 Validator settings in the GUI from the Problem
+        PC2ValidatorSettings pc2ValSettings = inProblem.getPC2ValidatorSettings();
+        if (pc2ValSettings!=null) {
+            getPc2ValidatorOptionComboBox().setSelectedIndex(pc2ValSettings.getWhichPC2Validator());
+            getPc2ValidatorIgnoreCaseCheckBox().setSelected(pc2ValSettings.isIgnoreCaseOnValidation());
+        } else {
+            throw new InvalidFieldValue("EditProblemPane.initializeValidatorTabFields(): null PC2 Validator Settings in received Problem");
+        }
+
+        //update the Clics Validator settings in the GUI from the Problem
+        ClicsValidatorSettings clicsValSettings = inProblem.getClicsValidatorSettings();
+        if (clicsValSettings!=null) {
+            getCLICSValidatorCaseSensitiveCheckBox().setSelected(clicsValSettings.isCaseSensitive());
+            getCLICSSpaceSensitiveCheckBox().setSelected(clicsValSettings.isSpaceSensitive());
+            getFloatAbsoluteToleranceCheckBox().setSelected(clicsValSettings.isFloatAbsoluteToleranceSpecified());
+            if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
+                getFloatAbsoluteToleranceTextField().setText(clicsValSettings.getFloatAbsoluteTolerance()+"");
+            } else {
+                getFloatAbsoluteToleranceTextField().setText("");   
+            }
+            getFloatRelativeToleranceCheckBox().setSelected(clicsValSettings.isFloatRelativeToleranceSpecified());
+            if (getFloatRelativeToleranceCheckBox().isSelected()) {
+                getFloatRelativeToleranceTextField().setText(clicsValSettings.getFloatRelativeTolerance()+"");
+            } else {
+                getFloatRelativeToleranceTextField().setText("");   
+            }
+        } else {
+            throw new InvalidFieldValue("EditProblemPane.initializeValidatorTabFields(): null CLICS Validator Settings in received Problem");
+        }
+  
+        //update the Clics Validator settings in the GUI from the Problem
+        CustomValidatorSettings customSettings = inProblem.getCustomValidatorSettings().clone();
+        System.out.println (customSettings);
+        if (customSettings!=null) {
+            
+            //set the Validator Program name
+            getCustomValidatorExecutableProgramTextField().setText(customSettings.getCustomValidatorProgramName());
+            getCustomValidatorExecutableProgramTextField().setToolTipText(customSettings.getCustomValidatorProgramName());
+            
+            //set the radio buttons indicating which Validator Standard the Problem uses
+            getUsePC2ValStdRadioButton().setSelected(customSettings.isUsePC2ValidatorInterface());
+            getUseClicsValStdRadioButton().setSelected(customSettings.isUseCLICSValidatorInterface());
+            
+            //set the custom validator command line based on which standard is being used (the CustomValidatorSettings object
+            // stores command lines for both cases; the active one needs to be put into the GUI as well as into the local (temp) storage
+            // while the other one needs to be put in the local temp storage only)
+            if (getUsePC2ValStdRadioButton().isSelected()) {
+                //Problem is currently using the PC2 interface; put that command line in the GUI and the local storage
+                getCustomValidatorCommandLineTextField().setText(customSettings.getCustomValidatorCommandLine());
+                localPC2InterfaceCustomValidatorCommandLine = customSettings.getCustomValidatorCommandLine();
+                //get the CLICS Interface command line out of the cloned settings and save it locally
+                customSettings.setUseCLICSValidatorInterface(); //note customSettings is a clone; this doesn't affect the original problem settings
+                localClicsInterfaceCustomValidatorCommandLine = customSettings.getCustomValidatorCommandLine();
+            } else {
+                //Problem is currently using the CLICS interface; put that in the GUI and the local storage
+                getCustomValidatorCommandLineTextField().setText(customSettings.getCustomValidatorCommandLine());
+                localClicsInterfaceCustomValidatorCommandLine = customSettings.getCustomValidatorCommandLine();
+                //get the PC2 Interface command line out of the cloned settings and save it locally
+                customSettings.setUsePC2ValidatorInterface();
+                localPC2InterfaceCustomValidatorCommandLine = customSettings.getCustomValidatorCommandLine();
+            }
+            
+            //set the Command Line ToolTip to "same as Command Line"
+            getCustomValidatorCommandLineTextField().setToolTipText(inProblem.getCustomValidatorSettings().getCustomValidatorCommandLine());
+            
+            //update the Custom Validator Executable Program Name ToolTip from the received ProblemDataFiles if appropriate
+            SerializedFile sFile = inProblemDataFiles.getValidatorFile();
+            if (sFile != null) {
+                if (sFile.getAbsolutePath() != null) {
+                    getCustomValidatorExecutableProgramTextField().setToolTipText(sFile.getAbsolutePath());
+                } else {
+                    getCustomValidatorExecutableProgramTextField().setToolTipText("");
+                }
+            }
+        } else {
+            throw new InvalidFieldValue("EditProblemPane.initializeValidatorTabFields(): null Custom Validator Settings in received Problem");
+        }
+
+        //update the SVTJ checkbox from the received Problem
+        getShowValidatorToJudgesCheckBox().setSelected(inProblem.isShowValidationToJudges());
+
     }
 
     /**
@@ -2076,7 +2127,7 @@ public class EditProblemPane extends JPanePlugin {
             generalPane.add(getTimeOutTextField(), null);
             generalPane.add(getProblemRequiresDataCheckBox(), null);
             generalPane.add(getDataProblemPane(), null);
-            generalPane.add(getJudgesHaveAnswerFiles(), null);
+            generalPane.add(getJudgesHaveAnswerFilesCheckbox(), null);
             generalPane.add(getAnswerFilePane(), null);
             generalPane.add(problemNameLabel, null);
             generalPane.add(timeoutLabel, null);
@@ -2155,7 +2206,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes problemRequiresDataTextField
+     * This method initializes the problemRequiresData checkbox
      * 
      * @return javax.swing.JCheckBox
      */
@@ -2178,7 +2229,7 @@ public class EditProblemPane extends JPanePlugin {
         getInputDataFilePane().setEnabled(enableButtons);
         getFileRadioButton().setEnabled(enableButtons);
         getStdinRadioButton().setEnabled(enableButtons);
-        getReadsFromPane().setEnabled(enableButtons);
+        getTeamReadsFromPane().setEnabled(enableButtons);
         getSelectFileButton().setEnabled(enableButtons);
         getInputDataFilePane().setEnabled(enableButtons);
         getFileNamePane().setEnabled(enableButtons);
@@ -2200,18 +2251,18 @@ public class EditProblemPane extends JPanePlugin {
             dataProblemPane = new JPanel();
             dataProblemPane.setLayout(gridLayout);
             dataProblemPane.setBounds(new java.awt.Rectangle(53, 114, 423, 113));
-            dataProblemPane.add(getReadsFromPane(), null);
+            dataProblemPane.add(getTeamReadsFromPane(), null);
             dataProblemPane.add(getInputDataFilePane(), null);
         }
         return dataProblemPane;
     }
 
     /**
-     * This method initializes readsFromPane
+     * This method initializes the TeamReadsFrom Pane
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getReadsFromPane() {
+    private JPanel getTeamReadsFromPane() {
         if (readsFromPane == null) {
             FlowLayout flowLayout1 = new FlowLayout();
             flowLayout1.setHgap(35);
@@ -2224,7 +2275,6 @@ public class EditProblemPane extends JPanePlugin {
             readsFromPane.add(getFileRadioButton(), null);
             readsFromPane.add(getStdinRadioButton(), null);
             getTeamReadsFrombuttonGroup().setSelected(getFileRadioButton().getModel(), true);
-            getValidatorChoiceButtonGroup().setSelected(getUseNOValidatatorRadioButton().getModel(), true);
         }
         return readsFromPane;
     }
@@ -2336,11 +2386,11 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes jCheckBox
+     * This method initializes the JudgesHaveAnswerFiles CheckBox
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getJudgesHaveAnswerFiles() {
+    private JCheckBox getJudgesHaveAnswerFilesCheckbox() {
         if (judgesHaveAnswerFiles == null) {
             judgesHaveAnswerFiles = new JCheckBox();
             judgesHaveAnswerFiles.setBounds(new java.awt.Rectangle(23, 239, 302, 24));
@@ -2563,12 +2613,13 @@ public class EditProblemPane extends JPanePlugin {
             validatorPane.add(getVerticalStrut_2());
             validatorPane.add(getShowValidatorToJudgesCheckBox());
             validatorPane.add(getVerticalStrut_3());
+            getValidatorChoiceButtonGroup().setSelected(getUseNOValidatatorRadioButton().getModel(), true);
         }
         return validatorPane;
     }
 
     /**
-     * This method initializes useValidatorRadioButton
+     * This method initializes the useNoValidator RadioButton.
      * 
      * @return javax.swing.JRadioButton
      */
@@ -2578,7 +2629,7 @@ public class EditProblemPane extends JPanePlugin {
             useNOValidatatorRadioButton.setText("Do not use Validator");
             useNOValidatatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableValidatorComponents();
+                    enableValidatorTabComponents();
                     enableUpdateButton();
                 }
             });
@@ -2586,7 +2637,7 @@ public class EditProblemPane extends JPanePlugin {
         return useNOValidatatorRadioButton;
     }
 
-    protected void enableValidatorComponents() {
+    protected void enableValidatorTabComponents() {
         if (getUsePC2ValidatorRadioButton().isSelected()) {
             enablePC2ValidatorComponents(true);
             enableClicsValidatorComponents(false);
@@ -2603,7 +2654,7 @@ public class EditProblemPane extends JPanePlugin {
             enableCustomValidatorComponents(true);
             getShowValidatorToJudgesCheckBox().setEnabled(true);
         } else {
-            // None used
+            // No validator used
             enablePC2ValidatorComponents(false);
             enableClicsValidatorComponents(false);
             enableCustomValidatorComponents(false);
@@ -2630,7 +2681,7 @@ public class EditProblemPane extends JPanePlugin {
             useCLICSValidatorRadioButton.setText("Use CLICS Validator");
             useCLICSValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableValidatorComponents();
+                    enableValidatorTabComponents();
                     enableUpdateButton();
                 }
             });
@@ -2763,7 +2814,7 @@ public class EditProblemPane extends JPanePlugin {
             useCustomValidatorRadioButton.setText("Use Custom (User-supplied) Validator");
             useCustomValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableValidatorComponents();
+                    enableValidatorTabComponents();
                     enableUpdateButton();
                 }
             });
@@ -3102,7 +3153,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Checks whether needs to freshen, prompt user before freshening.
+     * Checks whether a given {@link SerializedFile} needs to be freshened, and if so prompts the user before freshening.
      * 
      * @param serializedFile the file to be checked to see if it is need of freshening
      * @param fileName the file name corresponding to the specified SerializedFile
@@ -3258,32 +3309,61 @@ public class EditProblemPane extends JPanePlugin {
      * This resets the form, eg for a new problem.
      */
     private void clearForm() {
+        
+        //we're defining (adding) a new problem; show Add and hide Update buttons
         getAddButton().setVisible(true);
+        getAddButton().setEnabled(true);
         getUpdateButton().setVisible(false);
-        addButton.setEnabled(true);
-        updateButton.setEnabled(false);
+        getUpdateButton().setEnabled(false);
 
+        //initialize the General Tab fields:
+        
+        //Problem description components:
         problemNameTextField.setText("");
         timeOutSecondTextField.setText(Integer.toString(Problem.DEFAULT_TIMEOUT_SECONDS));
-        judgesHaveAnswerFiles.setSelected(false);
-        problemRequiresDataCheckBox.setSelected(false);
-
+        shortNameTextfield.setText("");
+        
+        //input data options:
+        getProblemRequiresDataCheckBox().setSelected(false);
         stdinRadioButton.setSelected(true);
+        fileRadioButton.setSelected(false);
         inputDataFileLabel.setText("");
         inputDataFileLabel.setToolTipText("");
+
+        //answer files options:
+        getJudgesHaveAnswerFilesCheckbox().setSelected(false);
         answerFileNameLabel.setText("");
         answerFileNameLabel.setToolTipText("");
 
-        fileRadioButton.setSelected(false);
-        stdinRadioButton.setSelected(false);
+        //misc options:
+        getDoShowOutputWindowCheckBox().setSelected(true);
+        getShowCompareCheckBox().setSelected(true);
+        getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
+
+        getDeleteProblemCheckBox().setSelected(false);
+
+        //Judging Type tab:
+        initializeJudgingTabFields(null);
         
+        //Validator tab:
+        initializeValidatorTabFields();
+        
+        //Data Files tab:
+        // ???
+
+    }
+    
+    private void initializeValidatorTabFields() {
+        //default to "no validator"
         getUseNOValidatatorRadioButton().setSelected(true);
         
         //clear PC2 Validator options
+        getUsePC2ValidatorRadioButton().setSelected(false);
         getPc2ValidatorOptionComboBox().setSelectedIndex(0);
         getPc2ValidatorIgnoreCaseCheckBox().setSelected(false);
         
         //clear CLICS default validator options
+        getUseCLICSValidatorRadioButton().setSelected(false);
         getCLICSValidatorCaseSensitiveCheckBox().setSelected(false);
         getCLICSSpaceSensitiveCheckBox().setSelected(false);
         getFloatAbsoluteToleranceCheckBox().setSelected(false);
@@ -3292,6 +3372,7 @@ public class EditProblemPane extends JPanePlugin {
         getFloatRelativeToleranceTextField().setText("");
 
         //clear custom validator options
+        getUseCustomValidatorRadioButton().setSelected(false);
         getCustomValidatorExecutableProgramTextField().setText("");
         getCustomValidatorExecutableProgramTextField().setToolTipText("");
         
@@ -3299,18 +3380,10 @@ public class EditProblemPane extends JPanePlugin {
         localPC2InterfaceCustomValidatorCommandLine = getCustomValidatorCommandLineTextField().getText();
         
         getUsePC2ValStdRadioButton().setSelected(true); //button group also causes Use CLICS Val Std button to become unselected 
-        localCLICSInterfaceCustomValidatorCommandLine = null;
+        localClicsInterfaceCustomValidatorCommandLine = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
         
         getShowValidatorToJudgesCheckBox().setSelected(true);
-        getDoShowOutputWindowCheckBox().setSelected(true);
-        getShowCompareCheckBox().setSelected(true);
-        getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
-
-        getDeleteProblemCheckBox().setSelected(false);
-
-        shortNameTextfield.setText("");
-
-        populateJudging(null);
+        
     }
     
 
@@ -4143,7 +4216,7 @@ public class EditProblemPane extends JPanePlugin {
         	usePC2ValidatorRadioButton.setMargin(new Insets(2, 12, 2, 2));
         	usePC2ValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableValidatorComponents();
+                    enableValidatorTabComponents();
                     enableUpdateButton();
                 }
             });
@@ -4244,29 +4317,70 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     /**
-     * Returns a CustomValidatorSettings object containing the Custom Validator settings currently displayed in the GUI.
+     * Returns a {@link CustomValidatorSettings} object containing the Custom Validator settings currently displayed in the GUI.
+     * Displays an error message and throws {@link InvalidFieldValue} if the Validator Interface buttons displayed in the GUI
+     * are inconsistent.
      * 
      * @return a CustomValidatorSettings object populated from the GUI
      * 
-     * @throws {@link InvalidFieldValue} if neither of the GUI radio buttons identifying the Validator Interface mode is selected
+     * @throws {@link InvalidFieldValue} if it's not the case that exactly one of the GUI radio buttons identifying 
+     *                              the Validator Interface mode is selected
      */
     private CustomValidatorSettings getCustomValidatorSettingsFromFields() {
-        CustomValidatorSettings settings = new CustomValidatorSettings();
-        settings.setCustomValidatorProgramName(this.getCustomValidatorExecutableProgramTextField().getText());
         
+        //make sure exactly one of the Interface mode buttons is selected
+        if (!(this.getUsePC2ValStdRadioButton().isSelected() ^ this.getUseClicsValStdRadioButton().isSelected())) {
+            showMessage("Invalid settings for Validator Interface radio buttons");
+            throw new InvalidFieldValue("Invalid settings for Validator Interface radio buttons.");
+        }
+        
+        CustomValidatorSettings settings = new CustomValidatorSettings();
+        
+        //put the Validator Program Name into the new settings
+        settings.setValidatorProgramName(this.getCustomValidatorExecutableProgramTextField().getText());
+        
+        //put the settings object into "PC2 Interface" mode and copy the current PC2 Validator Command line to it
+        //Note that this gets the "local copy" (which is updated on every keystroke) rather than what is currently
+        // in the GUI textbox, because the user could have switched to the CLICS Validator Interface mode after
+        // entering data for the PC2 Command Line while in PC2 Validator Interface mode
+        settings.setUsePC2ValidatorInterface();
+        settings.setValidatorCommandLine(this.localPC2InterfaceCustomValidatorCommandLine);
+        
+        //put the settings object into "CLICS Interface" mode and copy the current CLICS Validator Command line to it
+        settings.setUseCLICSValidatorInterface();
+        settings.setValidatorCommandLine(this.localClicsInterfaceCustomValidatorCommandLine);
+        
+        //put the settings object into the Validator Interface mode indicated in the GUI
         if (this.getUsePC2ValStdRadioButton().isSelected()) {
             settings.setUsePC2ValidatorInterface();
-            settings.setCustomValidatorPC2InterfaceCommandLine(this.getCustomValidatorCommandLineTextField().getText());
-            settings.setCustomValidatorCLICSInterfaceCommandLine(localCLICSInterfaceCustomValidatorCommandLine);
-            
-        } else if (this.getUseClicsValStdRadioButton().isSelected()){
-            settings.setUseCLICSValidatorInterface();
-            settings.setCustomValidatorCLICSInterfaceCommandLine(this.getCustomValidatorCommandLineTextField().getText());
-            settings.setCustomValidatorPC2InterfaceCommandLine(localPC2InterfaceCustomValidatorCommandLine);
-            
         } else {
-            throw new InvalidFieldValue("No Validator Standard radio button set");
+            settings.setUseCLICSValidatorInterface();
         }
+        
+        return settings;
+    }
+
+    /**
+     * Returns a {@link PC2ValidatorSettings} object containing the values currently displayed in the GUI.
+     * Displays an error message and throws {@link InvalidFieldValue} if the values displayed in the GUI
+     * are illegal (for example, if the PC2 Validator has been selected but no PC2 Validator Mode has been chosen.
+     * 
+     * @return a PC2ValidatorSettings object populated from the GUI
+     * @throws {@link InvalidFieldValue} if an invalid tolerance value is detected
+     */
+    private PC2ValidatorSettings getPC2ValidatorSettingsFromFields() {
+        
+        //check if the PC2 Validator has been selected but no Mode chosen
+        if (getUsePC2ValidatorRadioButton().isSelected() && getPc2ValidatorOptionComboBox().getSelectedIndex()<=0) {
+            throw new InvalidFieldValue("PC2 Validator selected but no valid Mode chosen");
+        }
+        
+        PC2ValidatorSettings settings = new PC2ValidatorSettings();
+        
+        settings.setIgnoreCaseOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());;
+        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        settings.setWhichPC2Validator(getPc2ValidatorOptionComboBox().getSelectedIndex());
         
         return settings;
     }
@@ -4335,15 +4449,23 @@ public class EditProblemPane extends JPanePlugin {
         	rdbtnUsePcStandard = new JRadioButton("Use PC^2 Standard Interface");
         	rdbtnUsePcStandard.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
-        	        if (problem==null || problem.getValidatorCommandLine()==null || 
-        	                problem.getValidatorCommandLine().length() <= 0 ) {
-        	            //there's currently no definition for the Validator Command Line; fill it with the PC2 default
-        	            getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
-        	        } else {
-        	            if (problem != null && problem.getValidatorCommandLine()!=null) {
-        	                getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
-        	            }
-        	        }
+                    //switching to Use PC2 Standard Interface for this Custom Validator; see if the user has previously entered a Validator Command Line
+                    if (localPC2InterfaceCustomValidatorCommandLine != null) {
+                        // yes; restore that
+                        getCustomValidatorCommandLineTextField().setText(localPC2InterfaceCustomValidatorCommandLine);
+                    } else {
+                        //no, the user has never entered anything in this GUI for the PC2 Interface Custom Validator Command line;
+                        //check to see if we are editing a problem which might already have a PC2 Interface Validator Command Line
+                        if (problem != null && problem.getCustomValidatorSettings()!=null && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface()
+                                && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().trim().length() > 0) {
+                            // we are editing a problem which has a Custom Validator which is using the CLICS Interface Standard and has a 
+                            // Custom Validator Command Line which is not empty; put that command line in the GUI
+                            getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine().trim());
+                        } else {
+                            // there's currently no definition for the Validator Command Line; fill it with the PC2 default
+                            getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+                        }
+                    }
         	        enableUpdateButton();
         	    }
         	});
@@ -4358,17 +4480,17 @@ public class EditProblemPane extends JPanePlugin {
         	rdbtnUseClicsStandard.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        //switching to Use CLICS Standard Interface for this Custom Validator; see if the user has previously entered a Validator Command Line
-                    if (localCLICSInterfaceCustomValidatorCommandLine != null) {
+                    if (localClicsInterfaceCustomValidatorCommandLine != null) {
                         // yes; restore that
-                        getCustomValidatorCommandLineTextField().setText(localCLICSInterfaceCustomValidatorCommandLine);
+                        getCustomValidatorCommandLineTextField().setText(localClicsInterfaceCustomValidatorCommandLine);
                     } else {
                         //no, the user has never entered anything in this GUI for the CLICS Interface Custom Validator Command line;
                         //check to see if we are editing a problem which might already have a CLICS Interface Validator Command Line
-                        if (problem != null && problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface()
-                                && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().length() <= 0) {
+                        if (problem != null && problem.getCustomValidatorSettings()!=null && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface()
+                                && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().trim().length() > 0) {
                             // we are editing a problem which has a Custom Validator which is using the CLICS Interface Standard and has a 
                             // Custom Validator Command Line which is not empty; put that command line in the GUI
-                            getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine());
+                            getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine().trim());
                         } else {
                             // there's currently no definition for the Validator Command Line; fill it with the CLICS default
                             getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
