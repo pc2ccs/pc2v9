@@ -57,7 +57,7 @@ public final class APIConstants {
     /**
      * Default validator command line value.
      */
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    public static final String DEFAULT_PC2_VALIDATOR_COMMAND = Constants.DEFAULT_PC2_VALIDATOR_COMMAND; //"{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     /**
      * PC^2 Validator program value.
