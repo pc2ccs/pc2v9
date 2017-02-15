@@ -233,7 +233,7 @@ public class Problem implements IElementObject {
         //validator settings
         clone.setValidatorType(this.getValidatorType());
         
-        if (pc2ValidatorSettings!=null) {
+        if (this.getPC2ValidatorSettings()!=null) {
             clone.setPC2ValidatorSettings(this.getPC2ValidatorSettings().clone());
         } else {
             clone.setPC2ValidatorSettings(null);
@@ -263,6 +263,9 @@ public class Problem implements IElementObject {
         clone.setPrelimaryNotification(isPrelimaryNotification());
         clone.letter = StringUtilities.cloneString(letter);
         clone.shortName = StringUtilities.cloneString(shortName);
+        
+        clone.externalDataFileLocation = StringUtilities.cloneString(getExternalDataFileLocation());
+        clone.usingExternalDataFiles = usingExternalDataFiles;
         
         if (getNumberTestCases() > 1){
             for (int i = 0 ; i < getNumberTestCases(); i++){
@@ -575,7 +578,7 @@ public class Problem implements IElementObject {
             }
         } else if (isUsingCustomValidator()) {
             if (getCustomValidatorSettings()!=null) {
-                getCustomValidatorSettings().setCustomValidatorCommandLine(commandLine);
+                getCustomValidatorSettings().setValidatorCommandLine(commandLine);
                 found = true;
             }
         }
@@ -737,7 +740,7 @@ public class Problem implements IElementObject {
             }
         } else if (isUsingCustomValidator()) {
             if (getCustomValidatorSettings() != null) {
-                getCustomValidatorSettings().setCustomValidatorProgramName(validatorProgramName);
+                getCustomValidatorSettings().setValidatorProgramName(validatorProgramName);
                 found = true;
             }
         }
