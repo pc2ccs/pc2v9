@@ -341,6 +341,8 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
         clone.setSpaceSensitive(this.isSpaceSensitive());
         clone.setFloatAbsoluteTolerance(this.getFloatAbsoluteTolerance());
         clone.setFloatRelativeTolerance(this.getFloatRelativeTolerance());
+        clone.isFloatAbsoluteToleranceSpecified = this.isFloatAbsoluteToleranceSpecified;
+        clone.isFloatRelativeToleranceSpecified = this.isFloatRelativeToleranceSpecified;
         return clone;
     }
     
