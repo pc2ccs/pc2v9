@@ -19,9 +19,11 @@ import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.CustomValidatorSettings;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -491,7 +493,7 @@ public class ServerConnection {
      * 
      * @param problem the problem to be marked as being validated by the PC2 Validator
      */
-    protected void setPC2Validator(Problem problem) {
+    protected void setPC2ValidatorDefaults(Problem problem) {
 
         problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
         
@@ -506,6 +508,40 @@ public class ServerConnection {
                 + settings.isIgnoreCaseOnValidation());
         
         problem.setPC2ValidatorSettings(settings);
+    }
+    
+    /**
+     * Marks the specified Problem as being validated using the CLICS Validator with a default set of Settings values.
+     * 
+     * @param problem the problem to be marked as being validated by the CLICS Validator
+     */
+    protected void setClicsValidatorDefaults(Problem problem) {
+
+        problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        
+        ClicsValidatorSettings settings = new ClicsValidatorSettings();
+        
+        settings.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
+        settings.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
+        
+        problem.setCLICSValidatorSettings(settings);
+    }
+    
+    /**
+     * Marks the specified Problem as being validated using a Custom Validator with a default set of Settings values.
+     * 
+     * @param problem the problem to be marked as being validated by a Custom Validator
+     */
+    protected void setCustomValidatorDefaults(Problem problem) {
+
+        problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
+        
+        CustomValidatorSettings settings = new CustomValidatorSettings();
+        
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
+        
+        problem.setCustomValidatorSettings(settings);
     }
     
     /**
@@ -524,11 +560,12 @@ public class ServerConnection {
      * @param problemProperties
      *            - optional properties, for a list of keys see {@link #getProblemPropertyNames()}, null is allowed.
      */
-    public void addProblem(String title, String shortName, File judgesDataFile, File judgesAnswerFile, boolean validated, Properties problemProperties) {
+    public void addProblem(String title, String shortName, File judgesDataFile, File judgesAnswerFile, VALIDATOR_TYPE validator, Properties problemProperties) {
 
         checkNotEmpty("Problem title", title);
         checkNotEmpty("Problem short name", shortName);
         checkFile("Judges data file", judgesDataFile);
+        checkNotEmpty("Validator", validator.toString());
         
         checkIsAllowed(Type.ADD_PROBLEM);
         
@@ -536,7 +573,7 @@ public class ServerConnection {
         problem.setShortName(shortName);
         problem.setDataFileName(judgesDataFile.getName());
         problem.setAnswerFileName(judgesAnswerFile.getName());
-        
+
         /**
          * Check for valid property names.
          */
@@ -545,31 +582,41 @@ public class ServerConnection {
             throw new IllegalArgumentException("Unknown/Invalid property names: "+ Arrays.toString(invalids));
         }
         
+        //get a judging type from the properties, or else default to null
         String judgingType = getProperty(problemProperties, APIConstants.JUDGING_TYPE, null);
         
-        if (judgingType != null){
-            /**
-             * Cannot be manual judged and validated.
-             */
-            if (APIConstants.MANUAL_JUDGING_ONLY.equals(judgingType) && validated){
-                throw new IllegalArgumentException("Problem cannot be specified as 'validated' when judging type is not 'computer judged'");
+        if (judgingType==null) {
+            //null means we will default to manual judging, but we can't do that if a validator was specified
+            if (!(validator==VALIDATOR_TYPE.NONE)) {
+                throw new IllegalArgumentException("Problem cannot have a validator if no judging type is specified in the properties (because the default is 'manual judging')");
+            } else {
+                //no judging type specified; default to manual judging
+                judgingType = APIConstants.MANUAL_JUDGING_ONLY;
             }
-        } else {
-            judgingType = APIConstants.MANUAL_JUDGING_ONLY;
         }
+        
+        //when we get here, judgingType and validator are both known != null
+        
+        //we cannot have manual judging and also have a validator
+        if (judgingType.equals(APIConstants.MANUAL_JUDGING_ONLY) && validator!=VALIDATOR_TYPE.NONE) {
+            throw new IllegalArgumentException("Problem cannot have a validator when manual judging is specified (or defaulted to)");            
+        }
+        
+        //if we DON'T have manual judging, we MUST have a validator
+        if ( (!judgingType.equals(APIConstants.MANUAL_JUDGING_ONLY)) && (validator==VALIDATOR_TYPE.NONE) )  {
+            throw new IllegalArgumentException("Problem cannot be specified as computer judged (i.e., 'not manual judged') unless a validator is specified");            
+        }
+        
         
         switch (judgingType) {
             case APIConstants.MANUAL_JUDGING_ONLY:
-                validated = false;
                 problem.setManualReview(true);
                 break;
             case APIConstants.COMPUTER_JUDGING_ONLY:
-                validated = true;
                 problem.setComputerJudged(true);
                 problem.setManualReview(false);
                 break;
             case APIConstants.COMPUTER_AND_MANUAL_JUDGING:
-                validated = true;
                 problem.setComputerJudged(true);
                 problem.setManualReview(true);
                 break;
@@ -578,42 +625,53 @@ public class ServerConnection {
                 throw new IllegalArgumentException("Unknown "+APIConstants.JUDGING_TYPE+" '"+judgingType+"'");
         }
         
-        boolean usingPc2Validator = false;
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
         
         String validatorProgram = getProperty(problemProperties, APIConstants.VALIDATOR_PROGRAM, APIConstants.PC2_VALIDATOR_PROGRAM);
-        usingPc2Validator = APIConstants.PC2_VALIDATOR_PROGRAM.equals(validatorProgram);
-        
-        if (validated){
-            if (usingPc2Validator) {
-                problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
-                String validatorCommandLine = getProperty(problemProperties, APIConstants.VALIDATOR_COMMAND_LINE, APIConstants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        String validatorCommandLine = getProperty(problemProperties, APIConstants.VALIDATOR_COMMAND_LINE, APIConstants.DEFAULT_PC2_VALIDATOR_COMMAND);
+
+        switch (validator) {
+            case PC2VALIDATOR:
+                // set default settings
+                setPC2ValidatorDefaults(problem);
+                // update desired settings
+                problem.setValidatorProgramName(validatorProgram);
                 problem.setValidatorCommandLine(validatorCommandLine);
-                setPC2Validator(problem);                
-            } else {
-                // else add external validator later
-            }
-        } else {
-            problem.setValidatorType(VALIDATOR_TYPE.NONE);
+                break;
+            case CLICSVALIDATOR:
+                setClicsValidatorDefaults(problem);
+                problem.setValidatorProgramName(validatorProgram);
+                problem.setValidatorCommandLine(validatorCommandLine);
+                if (new File(validatorProgram).isFile()){
+                    SerializedFile validatorFile = new SerializedFile(validatorProgram);
+                    problemDataFiles.setValidatorFile(validatorFile);
+                }
+               break;
+            case CUSTOMVALIDATOR:
+                setCustomValidatorDefaults(problem);
+                problem.setValidatorProgramName(validatorProgram);
+                problem.setValidatorCommandLine(validatorCommandLine);
+                if (new File(validatorProgram).isFile()){
+                    SerializedFile validatorFile = new SerializedFile(validatorProgram);
+                    problemDataFiles.setValidatorFile(validatorFile);
+                }
+                break;
+            case NONE:
+                problem.setValidatorType(VALIDATOR_TYPE.NONE);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown Validator Type: '" + validator + "'");
         }
 
         problem.setShowValidationToJudges(false);
         problem.setHideOutputWindow(true); 
         
         /**
-         * Add problem data files.
+         * Add judge's info to problem data files.
          */
-        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
         problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile.getAbsolutePath()));
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(judgesAnswerFile.getAbsolutePath()));
-        
-        if (validated && ! usingPc2Validator){
-            // add external validator
-            if (new File(validatorProgram).isFile()){
-                SerializedFile validatorFile = new SerializedFile(validatorProgram);
-                problemDataFiles.setValidatorFile(validatorFile);
-            }
-        }
-        
+                
         controller.addNewProblem(problem, problemDataFiles);
     }
 
