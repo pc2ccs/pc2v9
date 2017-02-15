@@ -1125,6 +1125,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (overrideValidatorCommandLine != null) {
                     validatorCommandLine = overrideValidatorCommandLine;
                 }
+                problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
                 problem.setValidatorCommandLine(validatorCommandLine);
 
                 problemList.addElement(problem);
