@@ -72,11 +72,11 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
      * Note that the validator program name does not include command line options; those
      * are specified via the separate "customValidatorCommand".
      * 
-     * @see {@link #setCustomValidatorCommandLine(String)}
+     * @see {@link #setValidatorCommandLine(String)}
      * 
      * @param progName -- the custom validator program name
      */
-    public void setCustomValidatorProgramName(String progName) {
+    public void setValidatorProgramName(String progName) {
         this.customValidatorProgramName = progName;
     }
 
@@ -91,7 +91,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
      * this method returns the current PC2 Validator Command Line; if the settings indicate "useCLICSValidatorInterface",
      * this method returns the current CLICS Validator Command Line.
      * 
-     * @see {@link #setCustomValidatorCommandLine(String)}
+     * @see {@link #setValidatorCommandLine(String)}
      * @see {@link #setUseCLICSValidatorInterface()}
      * @see {@link #setUsePC2ValidatorInterface()}
      * 
@@ -116,7 +116,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
      * 
      * Note that this class internally maintains two representations of the Validator Command Line, depending on
      * the Validator Interface mode (that is, whether the Validator uses the PC2 Interface Standard or the
-     * CLICS Interface Standard).  Calling this method sets the Validator Command Line associated with the currenty-set
+     * CLICS Interface Standard).  Calling this method sets the Validator Command Line associated with the currently-set
      * Validator Interface mode.
      * 
      * It is the caller's responsibility to insure that this CustomValidatorSettings object
@@ -134,7 +134,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
      *              nor the CLICSValidator Interface mode set
      * 
      */
-    public void setCustomValidatorCommandLine(String commandString) {
+    public void setValidatorCommandLine(String commandString) {
         if (this.isUseCLICSValidatorInterface()) {
             this.customCLICSInterfaceValidatorCommandLine = commandString;
         } else if (this.isUsePC2ValidatorInterface()) {
@@ -223,7 +223,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
         CustomValidatorSettings clone = new CustomValidatorSettings();
         
         //update the validator program name
-        clone.setCustomValidatorProgramName(this.getCustomValidatorProgramName());
+        clone.setValidatorProgramName(this.getCustomValidatorProgramName());
         
         //update the interface mode settings
         clone.useCLICSValidatorInterface = this.isUseCLICSValidatorInterface();
@@ -249,10 +249,10 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
 
     /**
      * Sets the flag indicating that this validator expects to use the PC2 Validator Interface.
-     * This method should be called prior to attempting to use {@link #setCustomValidatorCommandLine(String)}
+     * This method should be called prior to attempting to use {@link #setValidatorCommandLine(String)}
      * to set a PC2 Validator Command Line.
      * 
-     * @see {@link #setCustomValidatorCommandLine(String)}
+     * @see {@link #setValidatorCommandLine(String)}
      * 
      */
     public void setUsePC2ValidatorInterface() {
@@ -273,10 +273,10 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
 
     /**
      * Sets the flag indicating that this validator expects to use the CLICS Validator Interface.
-     * This method should be called prior to attempting to use {@link #setCustomValidatorCommandLine(String)}
+     * This method should be called prior to attempting to use {@link #setValidatorCommandLine(String)}
      * to set a CLICS Validator Command Line.
      * 
-     * @see {@link #setCustomValidatorCommandLine(String)}
+     * @see {@link #setValidatorCommandLine(String)}
      * 
      */
     public void setUseCLICSValidatorInterface() {
