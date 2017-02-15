@@ -14,7 +14,7 @@ import junit.framework.TestSuite;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import edu.csus.ecs.pc2.ccs.CCSConstants;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
@@ -1344,8 +1344,8 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
         problem = originalContest.getProblem(problemId);
         
         
-        assertEquals("Expected validator name ", CCSConstants.INTERNAL_CCS_VALIDATOR_NAME, problem.getValidatorProgramName());
-        assertEquals("Expected validator command ", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problem.getValidatorCommandLine());
+        assertEquals("Expected validator name ", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
+        assertEquals("Expected validator command ", Constants.DEFAULT_CLICS_VALIDATOR_COMMAND, problem.getValidatorCommandLine());
         
     }
     
