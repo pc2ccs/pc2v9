@@ -138,12 +138,28 @@ public class PC2ValidatorSettings implements Cloneable, Serializable {
 
         PC2ValidatorSettings other = (PC2ValidatorSettings) obj;
 
-        if (!(this.validatorProgramName.equals(other.validatorProgramName))) {
+        //check whether one validator program name is null while the other is not
+        if (this.validatorProgramName==null ^ other.validatorProgramName==null) {
             return false;
         }
+        
+        //check whether, if both names are non-null, they are the same
+        if (this.validatorProgramName != null) {
+            if (!(this.validatorProgramName.equals(other.validatorProgramName))) {
+                return false;
+            }
+        }
 
-        if (!(this.validatorCommandLine.equals(other.validatorCommandLine))) {
+        //check whether one validator validator Command Line is null while the other is not
+        if (this.validatorCommandLine==null ^ other.validatorCommandLine==null) {
             return false;
+        }
+        
+        //check whether, if both command lines are non-null, they are the same
+        if (this.validatorCommandLine != null) {
+            if (!(this.validatorCommandLine.equals(other.validatorCommandLine))) {
+                return false;
+            }
         }
 
         if (!(this.whichPC2Validator == other.whichPC2Validator)) {
