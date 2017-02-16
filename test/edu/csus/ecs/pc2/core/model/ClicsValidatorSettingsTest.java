@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
 
 /**
  * Unit test.

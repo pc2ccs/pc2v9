@@ -24,7 +24,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
@@ -41,6 +40,7 @@ import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 import edu.csus.ecs.pc2.ui.NullViewer;
 import edu.csus.ecs.pc2.validator.ClicsValidator;
+import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
 
 /**
  * Compile, execute and validate a run.

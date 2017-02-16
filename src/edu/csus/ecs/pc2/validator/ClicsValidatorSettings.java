@@ -4,13 +4,12 @@
  * what tolerances should be used for any floating-point values in the team output processed
  * by the validator. 
  */
-package edu.csus.ecs.pc2.core.model;
+package edu.csus.ecs.pc2.validator;
 
 import java.io.Serializable;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.validator.ClicsValidator;
 
 /**
  * @author pc2@ecs.csus.edu

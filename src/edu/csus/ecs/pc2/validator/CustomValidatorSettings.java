@@ -13,7 +13,7 @@
  * The getters and setters associated with the Validator Command Line get/set the command line
  * associated with the current "interface mode" setting in this CustomValidatorSettings object.
  */
-package edu.csus.ecs.pc2.core.model;
+package edu.csus.ecs.pc2.validator;
 
 import java.io.Serializable;
 

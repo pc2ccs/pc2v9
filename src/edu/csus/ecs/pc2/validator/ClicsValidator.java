@@ -13,7 +13,6 @@ import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
 
 /**
  * This class implements the ICPC "CLICS Validator", which
