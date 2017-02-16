@@ -59,9 +59,14 @@ public class ScoreboardPluginTest extends AbstractTestCase {
                 "full.html", //
                 "fullnums.html", //
                 "iScoreBoard.php", //
-                "results.tsv", //
-                "scoreboard.json", //
-                "scoreboard.tsv", //
+                
+                /**
+                 * No longer creates these files.
+                 * TODO deprecate ScoreboardPlugin and remove this unit test
+                 */
+//                "results.tsv", //
+//                "scoreboard.json", //
+//                "scoreboard.tsv", //
                 "sumatt.html", //
                 "summary.html", //
                 "sumtime.html", //
