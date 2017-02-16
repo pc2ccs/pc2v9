@@ -457,7 +457,7 @@ public interface IContest {
      * Get Full PC^2 version string.
      * <P>
      * Ex.
-     * <pre>Version 9.3 20150205 (Thursday, February 5th 2015 15:55 UTC) build 2920<pre>
+     * <pre>Version 9.3 20150205 (Thursday, February 5th 2015 15:55 UTC) build 2920</pre>
      */
     String getFullVersionString();
 

@@ -555,8 +555,8 @@ public class ServerConnection {
      *            - judges input data file
      * @param judgesAnswerFile
      *            - judges answer file
-     * @param validated
-     *            - is the problem validated using the pc2 internal validator?
+     * @param validator
+     *            - which validator to use (choices are: PC2VALIDATOR, CLICSVALIDATOR, CUSTOMVALIDATOR, NONE)
      * @param problemProperties
      *            - optional properties, for a list of keys see {@link #getProblemPropertyNames()}, null is allowed.
      */
