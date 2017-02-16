@@ -1,11 +1,24 @@
 package edu.csus.ecs.pc2.exports.ccs;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Vector;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -19,12 +32,14 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.scoring.IScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.ProblemSummaryInfo;
 import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
 import edu.csus.ecs.pc2.core.scoring.SummaryRow;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.core.util.XSLTransformer;
 
 /**
  * Unit tests.
@@ -114,10 +129,10 @@ public class StandingsJSON2016Test extends AbstractTestCase {
             addTheRun(contest, runInfoLine);
         }
 
-        Run[] runs = contest.getRuns();
-        for (Run run : runs) {
-            System.out.println("Run is " + run);
-        }
+//        Run[] runs = contest.getRuns();
+//        for (Run run : runs) {
+//            System.out.println("Run is " + run);
+//        }
 
         NewScoringAlgorithm algo = new NewScoringAlgorithm();
         StandingsRecord[] records = algo.getStandingsRecords(contest, DefaultScoringAlgorithm.getDefaultProperties());
@@ -158,7 +173,7 @@ public class StandingsJSON2016Test extends AbstractTestCase {
 
         assertFileExists(expectedJSONFilename);
 
-        String[] lines = edu.csus.ecs.pc2.core.Utilities.loadFile(expectedJSONFilename);
+        String[] lines = Utilities.loadFile(expectedJSONFilename);
         String expectedJSON = StringUtilities.join("", lines);
         assertJSONEquals(json, expectedJSON);
 
@@ -270,35 +285,214 @@ public class StandingsJSON2016Test extends AbstractTestCase {
         }
 
         StandingsJSON2016 standingsJSON2016 = new StandingsJSON2016();
-        String json = standingsJSON2016.createJSON(contest,controller);
+        String actualJSON = standingsJSON2016.createJSON(contest,controller);
+        
+//        writeStandings(contest);
+//        writeStandingsHtml(contest);
 
-        // System.out.println("JSON="+json);
-
-        // XXX TODO FIXME the test90Runs.json.txt looks nothing like the json that is created
-        assertEquals("Expecting JSON length ", 8766, json.length());
+//         System.out.println("JSON="+json);
 
         /**
          * File containing one line of the expected JSON output
          */
         String expectedJSONFilename = getTestFilename("test90Runs.json.txt");
+        
+//        editFile(expectedJSONFilename);
 
-        // This write file will overwrite the expected output,
-        // if the createJSON method changes the output, uncomment the writeFormattedJson
-        // to write the newer, better expected json.
-        if (writeSampleData) {
-            System.out.println("JSON String length = " + json.length());
-            writeFormattedJson(expectedJSONFilename, json);
-        }
+ 
 
         // System.out.println("Expected file at  "+expectedJSONFilename);
 
         assertFileExists(expectedJSONFilename);
 
-        String[] lines = edu.csus.ecs.pc2.core.Utilities.loadFile(expectedJSONFilename);
+        String[] lines = Utilities.loadFile(expectedJSONFilename);
         String expectedJSON = StringUtilities.join("", lines);
-        assertJSONEquals(json, expectedJSON);
+        
+        String expectedPrettyPrintJSON = prettyPrintJSON(expectedJSON);
+        String actualPrettyPrintJSON = prettyPrintJSON(actualJSON);
+        
+        String outDir = getOutputDataDirectory(this.getName());
+        ensureDirectory(outDir);
+//        startExplorer(outDir);
+
+        String actualOutFile = outDir + File.separator + "actual.pp.json";
+        String expectedOutFile = outDir + File.separator + "expected.pp.json";
+        
+        /**
+         * Write some HTML files based on both scoring algorithms, for reference when
+         * JSON changes.
+         */
+        writeStandingsToFile(contest,new DefaultScoringAlgorithm(), "full.xsl", outDir + File.separator + "dfa.html");
+        writeStandingsToFile(contest,new NewScoringAlgorithm(), "full.xsl", outDir + File.separator + "newAlgo.html");
+
+        /**
+         * Update expected data.
+         */
+        if (writeSampleData) {
+            writeToFile(expectedOutFile, actualPrettyPrintJSON);
+        }
+        
+        /**
+         * Write pretty printed JSON to files.
+         */
+        writeToFile(actualOutFile, actualPrettyPrintJSON);
+        writeToFile(expectedOutFile, expectedPrettyPrintJSON);
+
+        /**
+         * Compare files lin by line.
+         */
+        assertFileContentsEquals(new File(expectedOutFile), new File(actualOutFile));
 
     }
+    
+    
+    /**
+     * create output for transformation.
+     * 
+     * @param xmlString input SA XML string
+     * @param xsltFileName, like "full.xsl"
+     * @return
+     */
+    private String transformAndDisplay(String xmlString, String xsltFileName) {
+
+        String xslDir = "data/xsl";
+        String fullPathFileName = xslDir + File.separator + xsltFileName;
+
+        try {
+            XSLTransformer xslTransformer = new XSLTransformer();
+
+            File xslFile = new File(fullPathFileName);
+            String htmlString = xslTransformer.transformToString(xslFile, xmlString);
+            return htmlString;
+    
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw new RuntimeException("Trouble transforming with "+fullPathFileName, e.getCause());
+        }
+    }
+
+
+    /**
+     * Write standings, 3 columns, rank, team, penalty.
+     * 
+     * @param contest
+     * @throws IllegalContestState
+     */
+    protected void writeStandings(IInternalContest contest) throws IllegalContestState {
+        
+        NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
+
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties());
+        for (StandingsRecord standingsRecord : standingsRecords) {
+
+            System.out.format("%2d %6s %3d", standingsRecord.getRankNumber(), // 
+                    standingsRecord.getClientId().getName(), //
+                    standingsRecord.getPenaltyPoints());
+            System.out.println();
+        }
+
+    }
+    
+    
+    /**
+     * Output HTML for full.xsl transform on SA XML
+     * @param contest
+     * @throws IllegalContestState
+     */
+    protected void writeStandingsHtml(IInternalContest contest) throws IllegalContestState {
+        String htmlOUt = createStandingsHtml(contest);
+        System.out.println(htmlOUt);
+    }
+    
+    void writeStandingsToFile(IInternalContest contest, String outputFilename) throws FileNotFoundException, IllegalContestState{
+        String htmlOUt = createStandingsHtml(contest);
+        writeToFile(outputFilename, htmlOUt);
+    }
+
+    private String createStandingsHtml(IInternalContest contest) throws IllegalContestState {
+        String xsltFileName = "full.xsl";
+        DefaultScoringAlgorithm algorithm = new DefaultScoringAlgorithm();
+        return createStandingsHtml(contest, algorithm, xsltFileName);
+    }
+    
+    
+    /**
+     * Write HTML for input contest.
+     * @param contest
+     * @param algorithm
+     * @param xsltFileName
+     * @param outputFilename
+     * @throws FileNotFoundException
+     * @throws IllegalContestState
+     */
+    void writeStandingsToFile(IInternalContest contest, IScoringAlgorithm algorithm, String xsltFileName, String outputFilename) throws FileNotFoundException, IllegalContestState{
+        String htmlOUt = createStandingsHtml(contest,algorithm, xsltFileName);
+        writeToFile(outputFilename, htmlOUt);
+    }
+
+
+    private String createStandingsHtml(IInternalContest contest, IScoringAlgorithm algorithm, String xsltFileName) throws IllegalContestState {
+        Properties properties = contest.getContestInformation().getScoringProperties();
+        String saXML = algorithm.getStandings(contest, properties, null);
+
+        String htmlOUt = transformAndDisplay(saXML, xsltFileName);
+        return htmlOUt;
+
+    }
+
+    public static Map<String, Object> convertJSONToMap(String jsonString) throws JsonParseException, JsonMappingException, IOException {
+
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        ObjectMapper mapper = new ObjectMapper();
+        map = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+        });
+        return map;
+    }
+    
+    /**
+     * Pretty Print input JSON String.
+     */
+    public String prettyPrintJSON(String jsonString) throws JsonParseException, JsonMappingException, IOException{
+        
+        ObjectMapper mapper = new ObjectMapper();
+        Object json = mapper.readValue(jsonString, Object.class);
+        String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+        return indented;
+    }
+
+    /**
+     * Write lines to file.
+     * 
+     * @param filename
+     * @param lines
+     * @throws FileNotFoundException
+     */
+    public static void writeToFile(String filename, String longLine) throws FileNotFoundException {
+
+        PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+        printWriter.println(longLine);
+        printWriter.close();
+        printWriter = null;
+
+    }
+    
+//    /**
+//     * return pretty printed JSON.
+//     * @param jsonObject
+//     * @return pretty print/formatte JSON.
+//     */
+//    public static String prettyPrintJSON(Object jsonObject) {
+//
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+//            String s = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+//            return s;
+//        } catch (JsonProcessingException e) {
+//            return e.getMessage();
+//        }
+//    }
 
     private void assertJSONEquals(String expectedJSON, String actualJson) {
 
