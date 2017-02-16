@@ -517,7 +517,7 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Enable or disable Update button based on comparison of run to fields.
+     * Enable or disable Update button based on comparison of current problem to GUI fields.
      * 
      */
     public void enableUpdateButton() {
@@ -646,13 +646,8 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                     
-                    //TODO: XXX This needs to be updated to reflect the new validator possibilities
-                    
                     //see if the choice of which validator (if any) to use has changed; update the tooltip if so
-                    if ( (problem.isValidatedProblem()&&!changedProblem.isValidatedProblem()) ||
-                         (problem.isUsingPC2Validator()&&!changedProblem.isUsingPC2Validator()) ||
-                         (problem.isUsingCLICSValidator()&&!changedProblem.isUsingCLICSValidator()) ||
-                         (problem.isUsingCustomValidator()&&!changedProblem.isUsingCustomValidator()) ) {
+                    if ( problem.getValidatorType() != changedProblem.getValidatorType() ) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
                             updateToolTip = "Validator";
@@ -661,63 +656,101 @@ public class EditProblemPane extends JPanePlugin {
                         }                        
                     }
                     
-                    //see if the PC2 Validator options (if being used) have changed
-                    if (problem.isUsingPC2Validator() && changedProblem.isUsingPC2Validator()) {
-                        if (problem.getWhichPC2Validator() != changedProblem.getWhichPC2Validator()) {
+                    //see if the PC2 Validator options have changed
+                    if (problem.getPC2ValidatorSettings()!=null && changedProblem.getPC2ValidatorSettings()!=null) {
+                        PC2ValidatorSettings problemSettings = problem.getPC2ValidatorSettings();
+                        PC2ValidatorSettings changedProblemSettings = changedProblem.getPC2ValidatorSettings();
+                        if ( (problemSettings.getWhichPC2Validator() != changedProblemSettings.getWhichPC2Validator()) ||
+                             (problemSettings.isIgnoreCaseOnValidation() != changedProblemSettings.isIgnoreCaseOnValidation()) ) {
                             enableButton = true;
                             if (!updateToolTip.contains("Validator")) {
                                 if (updateToolTip.equals("")) {
                                     updateToolTip = "Validator";
                                 } else {
                                     updateToolTip += ", Validator";
-                                }                            
+                                }
+                            }
+                        }
+                    }
+
+                    //see if the Clics Validator options have changed
+                    if (problem.getClicsValidatorSettings()!=null && changedProblem.getClicsValidatorSettings()!=null) {
+                        ClicsValidatorSettings problemSettings = problem.getClicsValidatorSettings();
+                        ClicsValidatorSettings changedProblemSettings = changedProblem.getClicsValidatorSettings();
+                        if ( (problemSettings.getFloatAbsoluteTolerance() != changedProblemSettings.getFloatAbsoluteTolerance()) ||
+                             (problemSettings.getFloatRelativeTolerance() != changedProblemSettings.getFloatRelativeTolerance()) ||
+                             (problemSettings.isFloatAbsoluteToleranceSpecified() != changedProblemSettings.isFloatAbsoluteToleranceSpecified()) ||
+                             (problemSettings.isFloatRelativeToleranceSpecified() != changedProblemSettings.isFloatRelativeToleranceSpecified()) ||
+                             (problemSettings.isCaseSensitive() != changedProblemSettings.isCaseSensitive()) ||
+                             (problemSettings.isSpaceSensitive() != changedProblemSettings.isSpaceSensitive()) ) {
+                            enableButton = true;
+                            if (!updateToolTip.contains("Validator")) {
+                                if (updateToolTip.equals("")) {
+                                    updateToolTip = "Validator";
+                                } else {
+                                    updateToolTip += ", Validator";
+                                }
+                            }
+                        }
+                    }
+
+                   
+                    //see if the Custom Validator options have changed
+                    if (problem.getCustomValidatorSettings()!=null && changedProblem.getCustomValidatorSettings()!=null) {
+                        CustomValidatorSettings problemSettings = problem.getCustomValidatorSettings();
+                        CustomValidatorSettings changedProblemSettings = changedProblem.getCustomValidatorSettings();
+                        boolean changed = false ;
+                        //check for changes in the command line
+                        if ( (problemSettings.getCustomValidatorCommandLine()==null ^ changedProblemSettings.getCustomValidatorCommandLine()==null) ) {
+                            //XOR=1 -> they are different(one is null, the other is not) -> something changed
+                            changed = true;
+                        } else if ( !(problemSettings.getCustomValidatorCommandLine()==null && changedProblemSettings.getCustomValidatorCommandLine()==null) ) {
+                            //they're not BOTH null (and therefore BOTH are NON-null); something MIGHT have changed
+                            if (!(problemSettings.getCustomValidatorCommandLine().equals(changedProblemSettings.getCustomValidatorCommandLine()))) {
+                                changed = true;
+                            }
+                        }
+                        //check for changes in the executable program name
+                        if ( (problemSettings.getCustomValidatorProgramName()==null ^ changedProblemSettings.getCustomValidatorProgramName()==null) ) {
+                            //XOR=1 -> they are different(one is null, the other is not) -> something changed
+                            changed = true;
+                        } else if ( !(problemSettings.getCustomValidatorProgramName()==null && changedProblemSettings.getCustomValidatorProgramName()==null) ) {
+                            //they're not BOTH null (and therefore BOTH are NON-null); something MIGHT have changed
+                            if (!(problemSettings.getCustomValidatorProgramName().equals(changedProblemSettings.getCustomValidatorProgramName()))) {
+                                changed = true;
+                            }
+                        }
+                        
+                        //check for changes in the actual validator program file
+                        String fileName = changedProblem.getValidatorProgramName();
+                        if (fileName != null && fileName.length() > 0) {
+                            //TODO: there could be a problem here because getValidatorProgramName() returns the name for the validator which is
+                            //  currently selected in the Problem; that might not be the Custom Validator 
+                            if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
+                                changed = true;
+                                fileChanged++;
+                            }
+                        }
+
+                        //check for changes in the specified interface being used
+                        if( problemSettings.isUseCLICSValidatorInterface() != changedProblemSettings.isUseCLICSValidatorInterface() ||
+                            problemSettings.isUsePC2ValidatorInterface() != changedProblemSettings.isUsePC2ValidatorInterface() ) {
+                            changed = true;
+                        }
+                        
+                        if (changed) {
+                            
+                            enableButton = true;
+                            if (!updateToolTip.contains("Validator")) {
+                                if (updateToolTip.equals("")) {
+                                    updateToolTip = "Validator";
+                                } else {
+                                    updateToolTip += ", Validator";
+                                }
                             }
                         }
                     }
                     
-                    //see if the CLICS Validator options (if being used) have changed
-                    if (problem.isUsingCLICSValidator() && changedProblem.isUsingCLICSValidator()) {
-                        if (! (problem.getClicsValidatorSettings().equals(changedProblem.getClicsValidatorSettings()))) {
-                            enableButton = true;
-                            if (!updateToolTip.contains("Validator")) {
-                                if (updateToolTip.equals("")) {
-                                    updateToolTip = "Validator";
-                                } else {
-                                    updateToolTip += ", Validator";
-                                }                            
-                            }
-                        }
-                    }
-                   
-                    //see if the Custom Validator options (if being used) have changed
-                    if (problem.isUsingCustomValidator() && changedProblem.isUsingCustomValidator()) {
-                        if (! (problem.getCustomValidatorSettings().equals(changedProblem.getCustomValidatorSettings()))) {
-                            enableButton = true;
-                            if (!updateToolTip.contains("Validator")) {
-                                if (updateToolTip.equals("")) {
-                                    updateToolTip = "Validator";
-                                } else {
-                                    updateToolTip += ", Validator";
-                                }                            
-                            }
-                        }
-                    }
-                   
-                    
-                    //TODO: XXX from here down is the original code; it needs to be considered for modification/deletion/replacement/retention
-                    // (the concept here of checking the ValidatorFile in the ProblemDataFiles needs to be added to the above?)
-                    String fileName = changedProblem.getValidatorProgramName();
-                    if (!problem.isUsingPC2Validator() && fileName != null && fileName.length() > 0) {
-                        if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
-                            enableButton = true;
-                            fileChanged++;
-                            if (updateToolTip.equals("")) {
-                                updateToolTip = "Validator";
-                            } else {
-                                updateToolTip += ", Validator";
-                            }
-                        }
-                    }
                     if (fileChanged > 0) {
                         if (fileChanged == 1) {
                             updateToolTip += " file changed";
@@ -726,6 +759,7 @@ public class EditProblemPane extends JPanePlugin {
 
                         }
                     }
+                    
                 } else {
                     logDebugException("No ProblemDataFiles for " + problem);
                 }
