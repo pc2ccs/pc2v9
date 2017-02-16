@@ -112,26 +112,26 @@ public class XSLTransformerTest extends AbstractTestCase {
         
         // for medal ranks 4, 8, 12
         String[] expectedResults = { //
-        "2024;1;gold;2", // results
-                "2031;2;gold;2", // results
-                "2026;3;gold;2", // results
-                "2038;4;gold;2", // results
-                "2029;5;silver;1", // results
-                "2020;6;silver;1", // results
-                "2030;7;silver;1", // results
-                "2021;8;silver;1", // results
-                "2032;9;bronze;1", // results
-                "2033;10;bronze;1", // results
-                "2034;11;bronze;1", // results
-                "2022;12;bronze;0", // results
-                "2023;12;bronze;0", // results
-                "2025;12;bronze;0", // results
-                "2027;12;bronze;0", // results
-                "2028;12;bronze;0", // results
-                "2035;12;bronze;0", // results
-                "2036;12;bronze;0", // results
-                "2037;12;bronze;0", // results
-                "2039;12;bronze;0", // results
+                "2024;1;Gold Medal;2;88;53", // 
+                "2031;2;Gold Medal;2;90;55", // 
+                "2026;3;Gold Medal;2;110;55", // 
+                "2038;4;Gold Medal;2;160;85", // 
+                "2029;5;Silver Medal;1;15;15", // 
+                "2020;6;Silver Medal;1;23;3", // 
+                "2030;7;Silver Medal;1;25;25", // 
+                "2021;8;Silver Medal;1;30;30", // 
+                "2032;9;Bronze Medal;1;45;45", // 
+                "2033;10;Bronze Medal;1;55;55", // 
+                "2034;11;Bronze Medal;1;65;65", // 
+                "2022;12;Bronze Medal;0;0;0", // 
+                "2023;12;Bronze Medal;0;0;0", // 
+                "2025;12;Bronze Medal;0;0;0", // 
+                "2027;12;Bronze Medal;0;0;0", // 
+                "2028;12;Bronze Medal;0;0;0", // 
+                "2035;12;Bronze Medal;0;0;0", // 
+                "2036;12;Bronze Medal;0;0;0", // 
+                "2037;12;Bronze Medal;0;0;0", // 
+                "2039;12;Bronze Medal;0;0;0", // 
         };
 
         
@@ -152,12 +152,16 @@ public class XSLTransformerTest extends AbstractTestCase {
 
         contest.setFinalizeData(finalizeData);
 
-        String[] results = resultsFile.createTSVFileLines(contest); // using getStandingsRecords
+        String[] actualResults = resultsFile.createTSVFileLines(contest); // using getStandingsRecords
 //       String[] results = resultsFile.createTSVFileLinesTwo(contest); // using XML
 
-       assertEquals("Number results file lines ", numTeams + 1, results.length);
+        // write actual data.
+//        for (String string : actualResults) {
+//            System.out.println("\""+string.replaceAll("\t",";")+"\", // ");
+//        }
 
-       compareResults(results, expectedResults);
-        
+       assertEquals("Number results file lines ", numTeams + 1, actualResults.length);
+       
+       compareResults(actualResults, expectedResults);
     }
 }
