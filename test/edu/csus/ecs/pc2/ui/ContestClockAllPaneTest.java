@@ -6,13 +6,18 @@ import java.util.GregorianCalendar;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
-public class ContestClockAllPaneTest extends TestCase {
+/**
+ * Contest Clock tester.
+ * 
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+ */
+public class ContestClockAllPaneTest extends AbstractTestCase {
     
     
    public static JFrame createFrame(String title, JPanel pane){
