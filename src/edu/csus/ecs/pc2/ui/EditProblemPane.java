@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -15,6 +14,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -29,7 +30,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -57,22 +57,19 @@ import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.CustomValidatorSettings;
 import edu.csus.ecs.pc2.core.model.ClicsValidatorSettings;
+import edu.csus.ecs.pc2.core.model.CustomValidatorSettings;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 /**
  * Add/Edit Problem Pane.
@@ -230,10 +227,6 @@ public class EditProblemPane extends JPanePlugin {
     private MultipleDataSetPane multipleDataSetPane = null;
 
     private JPanel judgeTypeInnerPane = null;
-
-    private JPanel ccsSettingsPane = null;
-
-    private JCheckBox ccsValidationEnabledCheckBox = null;
 
     private JTextField shortNameTextfield;
 
@@ -2141,7 +2134,6 @@ public class EditProblemPane extends JPanePlugin {
             judgingTypePane = new JPanel();
             judgingTypePane.setLayout(new BorderLayout());
             judgingTypePane.add(getJudgeTypeInnerPane(), BorderLayout.NORTH);
-            judgingTypePane.add(getCcsSettingsPane(), BorderLayout.CENTER);
             getJudgingTypeGroup().setSelected(getManualJudgingRadioButton().getModel(), true);
         }
         return judgingTypePane;
@@ -3904,43 +3896,6 @@ public class EditProblemPane extends JPanePlugin {
             judgeTypeInnerPane.add(getManualJudgingRadioButton(), null);
         }
         return judgeTypeInnerPane;
-    }
-
-    /**
-     * This method initializes ccsSettingsPane
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getCcsSettingsPane() {
-        if (ccsSettingsPane == null) {
-            ccsSettingsPane = new JPanel();
-            ccsSettingsPane.setLayout(null);
-            ccsSettingsPane.setBorder(BorderFactory.createTitledBorder(null, "CCS Standard Problem Settings", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog",
-                    Font.BOLD, 12), new Color(51, 51, 51)));
-            ccsSettingsPane.add(getCcsValidationEnabledCheckBox(), null);
-        }
-        return ccsSettingsPane;
-    }
-
-    /**
-     * This method initializes ccsValidationEnabledCheckBox
-     * 
-     * @return javax.swing.JCheckBox
-     */
-    private JCheckBox getCcsValidationEnabledCheckBox() {
-        if (ccsValidationEnabledCheckBox == null) {
-            ccsValidationEnabledCheckBox = new JCheckBox();
-            ccsValidationEnabledCheckBox.setToolTipText("Use validator that uses exit code to return judgement");
-            ccsValidationEnabledCheckBox.setBounds(new Rectangle(27, 33, 375, 28));
-            ccsValidationEnabledCheckBox.setText("Use CCS validator interface");
-
-            ccsValidationEnabledCheckBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableUpdateButton();
-                }
-            });
-        }
-        return ccsValidationEnabledCheckBox;
     }
 
     /**
