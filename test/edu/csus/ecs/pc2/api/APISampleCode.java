@@ -42,7 +42,7 @@ public class APISampleCode {
     /**
      * getTeams() sample.
      * 
-     * @param contest
+     * @param contest The contest from which team samples are to be drawn
      */
     public void getTeamsSample(IContest contest) {
 
@@ -58,7 +58,7 @@ public class APISampleCode {
     /**
      * getLanguages() sample.
      * 
-     * @param contest
+     * @param contest The contest from which language samples are to be drawn
      */
     public void getLanguagesSample(IContest contest) {
 
@@ -71,7 +71,7 @@ public class APISampleCode {
     /**
      * getProblems() sample.
      * 
-     * @param contest
+     * @param contest The contest from which problem samples are to be drawn
      */
     public void getProblemSample(IContest contest) {
 
@@ -84,7 +84,7 @@ public class APISampleCode {
     /**
      * getJudgements() sample.
      * 
-     * @param contest
+     * @param contest The contest from which judgement samples are to be drawn
      */
     public void getJudgmentsSample(IContest contest) {
 
@@ -97,7 +97,7 @@ public class APISampleCode {
     /**
      * getRuns() sample.
      * 
-     * @param contest
+     * @param contest The contest from which run samples are to be drawn
      */
     public void getRunsSample(IContest contest) {
 
@@ -119,7 +119,7 @@ public class APISampleCode {
     /**
      * getStandings() samples.
      * 
-     * @param contest
+     * @param contest The contest from which Standings samples are to be drawn
      */
     public void getStandingsSample(IContest contest) {
 

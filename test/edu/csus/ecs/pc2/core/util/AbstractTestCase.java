@@ -147,7 +147,8 @@ public class AbstractTestCase extends TestCase {
      * Get the full filename for a file in the root testdata directory.
      * 
      * @see #getRootInputTestDataDirectory()
-     * @param filename
+     * @param filename the name of the file for which the full file path and name is to be returned
+     * @return a String containing the full path name of the specified file
      */
     public String getRootInputTestFile(String filename){
         return getRootInputTestDataDirectory() + File.separator + filename;
@@ -157,9 +158,9 @@ public class AbstractTestCase extends TestCase {
     /**
      * Get the full path to the input test directory under the project.
      * 
-     * @see {@link #getTestFilename(String)}
-     * @see {@link #getOutputTestFilename(String)}
-     * @see {@link #getSamplesSourceFilename(String)}
+     * @see #getTestFilename(String)
+     * @see #getOutputTestFilename(String)
+     * @see #getSamplesSourceFilename(String)
      * @return full path to the project test directory.
      */
     // SOMEDAY deprecated this method and use test method directory names for test data input
@@ -181,9 +182,9 @@ public class AbstractTestCase extends TestCase {
      /**
       * Project root directory.
       * 
-      * @see {@link #getTestFilename(String)}
-      * @see {@link #getOutputTestFilename(String)}
-      * @see {@link #getSamplesSourceFilename(String)}
+      * @see #getTestFilename(String)
+      * @see #getOutputTestFilename(String)
+      * @see #getSamplesSourceFilename(String)
       * 
       * @return directory
       */
@@ -239,7 +240,8 @@ public class AbstractTestCase extends TestCase {
      * 
      * If directory cannot be created then returns false.
      * 
-     * @param directoryName
+     * @param directoryName a String giving the name of the directory which should be verified as existing, 
+     *                  or created if it doesn't already exist
      * @return true if directory exists or was created, false otherwise.
      */
     public boolean ensureDirectory(String directoryName) {
@@ -265,8 +267,8 @@ public class AbstractTestCase extends TestCase {
      * Ensure output sub directory exists under output directory.
      * 
      * @see #ensureOutputDirectory()
-     * @param subDirectoryName
-     * @return
+     * @param subDirectoryName - the name of the subdirectory which should be ensured to exist under the output directory
+     * @return true if the specified subdirectory exists (or was created) in the output directory; false otherwise
      */
     public boolean ensureOutputDirectory(String subDirectoryName) {
         return ensureDirectory(getOutputDataDirectory(subDirectoryName));
@@ -291,9 +293,9 @@ public class AbstractTestCase extends TestCase {
      * 
      * If directory does not exist will create it.
      * 
-     * @see {@link #getTestFilename(String)}
-     * @see {@link #getOutputTestFilename(String)}
-     * @see {@link #getSamplesSourceFilename(String)}
+     * @see #getTestFilename(String)
+     * @see #getOutputTestFilename(String)
+     * @see #getSamplesSourceFilename(String)
      * 
      * @return a project-relative directory name, appends the JUnit name at the end of the string. 
      */
@@ -306,9 +308,9 @@ public class AbstractTestCase extends TestCase {
     /**
      * Return the project (with JUnit name) relative directory where test input data is located.
      * 
-     * @see {@link #getTestFilename(String)}
-     * @see {@link #getOutputTestFilename(String)}
-     * @see {@link #getSamplesSourceFilename(String)}
+     * @see #getTestFilename(String)
+     * @see #getOutputTestFilename(String)
+     * @see #getSamplesSourceFilename(String)
      * 
      * @param directoryName name of directory to append to end of string
      * @return a project-relative directory name  
@@ -323,7 +325,7 @@ public class AbstractTestCase extends TestCase {
     * 
     * Use this method to get JUnit test specific input filenames.
     * 
-    * @param baseFilename
+    * @param baseFilename a String giving the name of the file whose full path name in the data directory should be returned
     * @return project and JUnit method relative filename.
     */
     public String getTestFilename(String baseFilename) {
@@ -335,8 +337,8 @@ public class AbstractTestCase extends TestCase {
      * 
      * @see #getOutputDataDirectory()
      * 
-     * @param logFileBaseName
-     * @return
+     * @param logFileBaseName a String giving the base name of the .log file which should be created in the output data directory
+     * @return a {@link edu.csus.ecs.pc2.core.log.Log} object with the specified log file name
      */
     public Log createLog(String logFileBaseName) {
         String logfilename = logFileBaseName + ".log";
@@ -344,13 +346,13 @@ public class AbstractTestCase extends TestCase {
     }
     
     /**
-     * Get output file name relative to the output directory/
+     * Get output file name relative to the output directory.
      * 
      * Use this method to get JUnit test specific output filename.
      * 
-     * @see #getOutputDataDirectory().
-     * @param baseFilename
-     * @return
+     * @see #getOutputDataDirectory()
+     * @param baseFilename a String giving the base name of a file in the output data directory
+     * @return the full path name of the specified file
      */
     public String getOutputTestFilename(String baseFilename) {
         return getOutputDataDirectory() + File.separator + baseFilename;
@@ -428,12 +430,12 @@ public class AbstractTestCase extends TestCase {
     
     /**
      * Create N files with sample data.
-     * @param strings 
      *  
-     * @param n
-     * @param string
-     * @return
-     * @throws FileNotFoundException 
+     * @param n the number of files which should be created
+     * @param lines a String array containing the lines to be written into each created file
+     * @param ext a String giving the file name extension to be applied to each created file
+     * @return an array of Strings containing the names of the created files
+     * @throws FileNotFoundException if a file of the specified name could not be created
      */
     public String[] createDataFiles(int n, String[] lines, String ext) throws FileNotFoundException {
         String[] names = new String[n];
@@ -461,8 +463,8 @@ public class AbstractTestCase extends TestCase {
     /**
      * Write array to PrintWriter.
      * 
-     * @param writer
-     * @param datalines
+     * @param writer a PrintWriter to which the specified array of Strings should be written
+     * @param datalines a String array containing the lines of data to be written to the specified PrintWriter
      */
     public void writeLines(PrintWriter writer, String[] datalines) {
         for (String s : datalines) {
@@ -515,9 +517,9 @@ public class AbstractTestCase extends TestCase {
     }
 
     /**
-     * Force a failure of the test
+     * Force a failure of the test.
      * 
-     * @param string
+     * @param string A String which will be written out as part of the failure message
      */
     public void failTest(String string) {
         failTest(string, null);
@@ -526,8 +528,8 @@ public class AbstractTestCase extends TestCase {
     /**
      * Force failure, print stack trace.
      * 
-     * @param string
-     * @param e
+     * @param string a String which will be written out as part of the failure message
+     * @param e an Exception whose StackTrace will be written to System.err
      */
     public void failTest(String string, Exception e) {
 
@@ -540,7 +542,7 @@ public class AbstractTestCase extends TestCase {
     /**
      * Recursively remove directory and all sub directories/files.
      * 
-     * @param dirName
+     * @param dirName the name of the directory to be removed
      * @return true if all directories removed.
      */
     public boolean removeDirectory(String dirName) {
@@ -565,8 +567,8 @@ public class AbstractTestCase extends TestCase {
     }
 
     /**
-     * remove a file.
-     * @param filename
+     * Remove a file.
+     * @param filename the name of the file to be removed
      * @throws RuntimeException if cannot remove the directory entry/file
      */
     public void removeFile(String filename) {
@@ -597,8 +599,8 @@ public class AbstractTestCase extends TestCase {
      * 
      * </pre>
      *  
-     * @param filename
-     * @return
+     * @param filename the name of a file
+     * @return the full path name to the specified file
      */
     public String getSamplesSourceFilename(String filename) {
 
@@ -629,9 +631,10 @@ public class AbstractTestCase extends TestCase {
     
     /**
      * Remove every ch from string.
-     * @param string
-     * @param ch
-     * @return
+     * @param string the String from which characters are to be removed
+     * @param ch the character which is to be removed from the specified String
+     * @return a new String with the specified character removed, or the original String if the
+     *      character did not exist in the String
      */
     public String stripChar(String string, char ch) {
         int idx = string.indexOf(ch);
@@ -651,14 +654,14 @@ public class AbstractTestCase extends TestCase {
     /**
      * Get nodelist based on XPath expression.
      * 
-     * @param contest
-     * @param xPathExpression
-     * @param filter
-     * @return
-     * @throws SAXException
-     * @throws IOException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
+     * @param report a {@link edu.csus.ecs.pc2.core.report.IReport} from which a NodeList is to be extracted
+     * @param xPathExpression a {@link javax.xml.xpath.XPathExpression} to be evaluated
+     * @param filter a {@link edu.csus.ecs.pc2.core.model.Filter} to be applied to the specified IReport
+     * @return an {@link org.w3c.dom.NodeList} extracted from the specified {@link edu.csus.ecs.pc2.core.report.IReport}
+     * @throws SAXException if a {@link org.w3c.dom.Document} cannot be created from the specified IReport
+     * @throws IOException if a {@link org.w3c.dom.Document} cannot be created from the specified IReport
+     * @throws ParserConfigurationException if a {@link org.w3c.dom.Document} cannot be created from the specified IReport
+     * @throws XPathExpressionException if the specified xPathExpression cannot be compiled
      */
     public NodeList getXMLNodeList(IReport report, String xPathExpression, Filter filter) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
         Document doc = createDocument(report, filter);
@@ -672,13 +675,12 @@ public class AbstractTestCase extends TestCase {
     /**
      * Create document for report.
      * 
-     * @param contest
-     * @param report
-     * @param filter
-     * @return
-     * @throws ParserConfigurationException
-     * @throws IOException
-     * @throws SAXException
+     * @param report an {@link edu.csus.ecs.pc2.core.report.IReportFile} 
+     * @param filter a {@link edu.csus.ecs.pc2.core.model.Filter}
+     * @return an {@link org.w3c.dom.Document} created from the specified IReport with the specified Filter applied
+     * @throws ParserConfigurationException if the Document could not be created
+     * @throws IOException if the Document could not be created
+     * @throws SAXException if the Document could not be created
      */
     public Document createDocument(IReport report, Filter filter) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -691,9 +693,9 @@ public class AbstractTestCase extends TestCase {
 
     /**
      * Checks whether report creates valid XML, throws Exception if not.
-     * @param report
-     * @param filter
-     * @return
+     * @param report the {@link edu.csus.ecs.pc2.core.report.IReport} to be checked
+     * @param filter the {@link edu.csus.ecs.pc2.core.model.Filter} to be applied to the IReport
+     * @return an Exception object if the report fails to create valid XML, or null if the report does create valid XML
      */
     public Exception isValidXML(IReport report, Filter filter) {
         try {
@@ -717,11 +719,12 @@ public class AbstractTestCase extends TestCase {
     }
     
     /**
-     * Write temporary files.
+     * Write data to a temporary file.
+     * The file name will be the name of this JUnit test, with an extension of ".txt".
      * 
-     * @param lines
-     * @return
-     * @throws IOException
+     * @param lines an array of Strings containing the data to be written to the file
+     * @return the created File object
+     * @throws IOException if the temporary file cannot be created
      */
     public File writeTempFile (String [] lines) throws IOException{
         File tempFile  = File.createTempFile(getName(), "txt");
@@ -732,8 +735,8 @@ public class AbstractTestCase extends TestCase {
     /**
      * Write lines and start editor on temp file.
      * 
-     * @param lines
-     * @throws IOException
+     * @param line a String to be written to the temporary file
+     * @throws IOException if the temporary file cannot be created
      */
     public void editTempFile(String  line) throws IOException {
         String [] lines = { line };
@@ -744,8 +747,8 @@ public class AbstractTestCase extends TestCase {
     /**
      * Write lines and start editor on temp file.
      * 
-     * @param lines
-     * @throws IOException
+     * @param lines an array of Strings to be written to a temporary file
+     * @throws IOException if the temporary file cannot be written
      */
     public void editTempFile(String [] lines) throws IOException {
         File file = writeTempFile(lines);
@@ -789,7 +792,9 @@ public class AbstractTestCase extends TestCase {
     /**
      * Test for well formed XML.
      * 
-     * @param xml
+     * @param xml a String containing XML
+     * 
+     * @throws Exception if the specified XML string is not valid XML
      */
     public void testForValidXML(String xml) throws Exception {
         
@@ -802,7 +807,10 @@ public class AbstractTestCase extends TestCase {
     /**
      * Test for well formed XML that passes schema validation.
      * 
-     * @param xml
+     * @param xml a String containing XML
+     * @param schemaString a String containing the {@link javax.xml.validation.Schema} for the specified XML string
+     * 
+     * @throws Exception if the xml fails to parse according to the specified schema
      */
     public void testForValidXML(String xml, String schemaString) throws Exception {
 
@@ -834,7 +842,11 @@ public class AbstractTestCase extends TestCase {
     /**
      * Test for well formed XML that passes schema validation.
      * 
-     * @param xml
+     * @param xml a String containing XML
+     * @param schemaFile a File containing the Schema for the XML
+     * 
+     * @throws IOException if the schema file could not be loaded
+     * @throws Exception if the XML string fails to match the schema
      */
     public void testForValidXML(String xml, File schemaFile) throws Exception {
         String [] lines = Utilities.loadFile(schemaFile.getCanonicalPath());
@@ -845,11 +857,11 @@ public class AbstractTestCase extends TestCase {
     /**
      * Parse input string and return a Document.
      * 
-     * @param xmlString
-     * @return
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
+     * @param xmlString a String containing XML
+     * @return a Document constructed from the xmlString
+     * @throws ParserConfigurationException if a DocumentBuilder could not be constructed
+     * @throws SAXException if the specified xmlString did not parse correctly
+     * @throws IOException if any I/O error occurs
      */
     public Document getDocument(String xmlString) throws ParserConfigurationException, SAXException, IOException {
         
@@ -862,9 +874,9 @@ public class AbstractTestCase extends TestCase {
     /**
      * Compare two text files, fail if contents not identical.
      * 
-     * @param expectedFile
-     * @param actualFile
-     * @throws IOException
+     * @param expectedFile the first file to be compared
+     * @param actualFile the second file to be compared
+     * @throws IOException if any error occurs in comparing the files
      */
     public void assertFileContentsEquals(File expectedFile, File actualFile) throws IOException{
         // Compare two files 
@@ -875,9 +887,12 @@ public class AbstractTestCase extends TestCase {
     /**
      * Text file contents equal.
      * 
-     * @param expectedFile
-     * @param actualFile
+     * @param expectedFile the first file to be compared
+     * @param actualFile the second file to be compared
      * @param startLine (base 1) first line to compare in files.
+     * 
+     * @throws FileNotFoundException if either of the specified files cannot be found
+     * @throws IOException if an error occurs in reading the files
      */
     public void assertFileContentsEquals(File expectedFile, File actualFile, int startLine) throws IOException{
         
@@ -912,10 +927,10 @@ public class AbstractTestCase extends TestCase {
     
     /**
      * Asserts that there are expectedCount occurrences of c in sourceString.
-     * @param message
-     * @param expectedCount
-     * @param c
-     * @param sourceString
+     * @param message a String to be displayed if the assertion fails
+     * @param expectedCount the number of expected occurences of c in the sourceString
+     * @param c the character to be checked for
+     * @param sourceString the String in which to check for occurrences of c
      */
     public void assertCount(String message, int expectedCount, char c, String sourceString) {
         int actualCount = countCharacters(sourceString, c);
@@ -925,10 +940,10 @@ public class AbstractTestCase extends TestCase {
 
     /**
      * Asserts that there are expectedCount occurrences of stringToFind in sourceString.
-     * @param message descriptive message for assert failure.
-     * @param expectedCount
-     * @param stringToFind
-     * @param sourceString
+     * @param message a String to be displayed if the assertion fails
+     * @param expectedCount the number of expected occurences of stringToFind in the sourceString
+     * @param stringToFind the String to be searched for
+     * @param sourceString the String to search 
      */
     public void assertCount(String message, int expectedCount, String stringToFind, String sourceString) {
         int actualCount = countString(sourceString, stringToFind);
@@ -941,6 +956,11 @@ public class AbstractTestCase extends TestCase {
 
     /**
      * Returns number of occurrences of string in source.
+     * 
+     * @param source the String to search
+     * @param string the String to search for in the source string
+     * 
+     * @return the number of occurrences of the specified string in the source string
      */
     public int countString(String source, String string) {
         int idx = source.indexOf(string);
@@ -958,6 +978,11 @@ public class AbstractTestCase extends TestCase {
 
     /**
      * return number of chartocount in source.
+     * 
+     * @param source the String to search
+     * @param chartocount the char to search for in the source string
+     * 
+     * @return the count of occurrences of the specified character in the specified source string
      */
     public int countCharacters(String source, char chartocount) {
         return source.split("\\" + chartocount, -1).length - 1;
@@ -998,7 +1023,7 @@ public class AbstractTestCase extends TestCase {
      * Start Windows Explorer.
      * 
      * @param dir directory to display
-     * @throws IOException
+     * @throws IOException if the Runtime package is unable to launch Windows Explorer
      */
     public void startExplorer(File dir) throws IOException {
 //       String[] command = {"explorer.exe /e,"+directoryName.getAbsolutePath()};
@@ -1009,6 +1034,10 @@ public class AbstractTestCase extends TestCase {
     
     /**
      * Start Windows Explorer on  directory.
+     * 
+     * @param directoryName the directory in which Windows Explorer should be started
+     * 
+     * @throws IOException if Windows Explorer could not be started in the specified directory
      */
     public void startExplorer(String directoryName) throws IOException {
         File dir = new File(directoryName);
@@ -1017,7 +1046,7 @@ public class AbstractTestCase extends TestCase {
     
     /**
      * Start Windows Explorer on data directory.
-     * @throws IOException
+     * @throws IOException if Windows Explorer cannot be started
      */
     public void startExplorer() throws IOException {
         startExplorer(getDataDirectory());
@@ -1025,6 +1054,10 @@ public class AbstractTestCase extends TestCase {
 
     /**
      * Compares strings, if strings are equal fails. 
+     * 
+     * @param message a String to be displayed if the equality test fails
+     * @param expected the first String to be compared
+     * @param actual the second string to be compared
      */
     public void assertNotEquals(String message, String expected, String actual) {
         if (actual.equals(expected)){
@@ -1042,9 +1075,9 @@ public class AbstractTestCase extends TestCase {
     
     /**
      * Compares count of directory entries in dir with expectedNumberOfFiles.
-     * @param string
-     * @param dir
-     * @param expectedNumberOfFiles
+     * @param string a message to be displayed if the number of files in the directory doesn't match
+     * @param dir the directory to be checked
+     * @param expectedNumberOfFiles the number of files expected to be found in the directory
      */
     public void assertExpectedFileCount(String string, File dir, int expectedNumberOfFiles){
         
@@ -1064,7 +1097,7 @@ public class AbstractTestCase extends TestCase {
     /**
      * Test if any files in input directory have zero bytes.
      * 
-     * @param dir
+     * @param dir a directory to be checked for having no zero-size files
      */
     public void assertNoZeroSizeFiles(File dir) {
        
@@ -1090,6 +1123,8 @@ public class AbstractTestCase extends TestCase {
 
     /**
      * Print log output to console/stdout.
+     * 
+     * @param log the Log object to be displayed on the console
      */
     public void addConsoleHandler(Log log) {
         ConsoleHandler consoleHandler = new ConsoleHandler();
@@ -1098,6 +1133,8 @@ public class AbstractTestCase extends TestCase {
 
     /**
      * Set log level to DEBUG.
+     * 
+     * @param the Log whose level is being set
      */
     public void setDebugLevel(Log log) {
         log.setLevel(Log.DEBUG);
@@ -1105,7 +1142,7 @@ public class AbstractTestCase extends TestCase {
 
     /**
      * Print string if debugMode.
-     * @param string
+     * @param string the String to be printed if in debugMode
      */
     public void debugPrint(String string) {
         if (debugMode){
@@ -1115,7 +1152,7 @@ public class AbstractTestCase extends TestCase {
     
     /**
      * Print string if debugMode.
-     * @param string
+     * @param string the String to be printed if in debugMode
      */
     public void debugPrintln(String string) {
         if (debugMode){
@@ -1140,7 +1177,7 @@ public class AbstractTestCase extends TestCase {
      * Get a SERVER client id.
      * 
      * This is a generic send to all server and clients ClientId.
-     * @param contest 
+     * @param contest  the Contest for which a Site Number is returned
      * 
      * @return a generic all sites server client id
      */

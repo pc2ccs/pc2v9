@@ -65,8 +65,9 @@ public class QuickTest {
     }
     
     /**
+     * Output to System.err an "information string" consisting of the current Date and current Thread Name
      * 
-     * @param s
+     * @param s a String to be appended to the output string 
      */
     public void info(String s) {
         System.err.println(new Date() + " " +Thread.currentThread().getName() + " " + s);
@@ -75,7 +76,8 @@ public class QuickTest {
 
     /**
      * Login as judge2 and print runs.
-     * @param args
+     * 
+     * @param args the arguments passed to the main method
      */
     public static void main(String[] args) {
         new QuickTest().showRuns("judge2", null);

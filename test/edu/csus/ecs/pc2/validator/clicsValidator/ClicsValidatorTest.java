@@ -479,19 +479,19 @@ public class ClicsValidatorTest extends AbstractTestCase {
 
     }
     
-    /**
-     * Run the CLICS Validator as an external program, passing it the specified arguments
-     * on its command line and sending the specified teamOutputFileName to the standard
-     * input of the validator, and returning the exit code specified by the validator.
-     * 
-     * @param args - the command line arguments to be passed to the validator, including at least
-     *              the judge's data file name, judge's answer file name, and feedback directory name,
-     *              and also including any validator options (such as "case_sensitive"), all 
-     *              separated by spaces
-     * @param teamOutputFileName - the name of the file to be routed to the stdin of the validator
-     * 
-     * @return an int containing the validator process's exit code
-     */
+//    /**
+//     * Run the CLICS Validator as an external program, passing it the specified arguments
+//     * on its command line and sending the specified teamOutputFileName to the standard
+//     * input of the validator, and returning the exit code specified by the validator.
+//     * 
+//     * @param args - the command line arguments to be passed to the validator, including at least
+//     *              the judge's data file name, judge's answer file name, and feedback directory name,
+//     *              and also including any validator options (such as "case_sensitive"), all 
+//     *              separated by spaces
+//     * @param teamOutputFileName - the name of the file to be routed to the stdin of the validator
+//     * 
+//     * @return an int containing the validator process's exit code
+//     */
 //    private int runValidatorProcess (String judgeDataFile, String judgeAnswerFile, String feedbackDir, String teamOutputFileName) {
 //        
 //      String pathToPC2Jar = findPC2JarPath();

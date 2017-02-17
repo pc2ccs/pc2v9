@@ -86,7 +86,8 @@ public class ServerConnectionTest extends AbstractTestCase {
 
     /**
      * Test Bug 767 - submitRun may submit for the wrong IProblem
-     * @throws Exception
+     * @throws Exception if submitting the run to the server failed
+     * @throws InterruptedException if the Problem could not be fetched from the Controller within a specified time limit
      */
     public void testSubmittedRun() throws Exception {
 
@@ -260,7 +261,6 @@ public class ServerConnectionTest extends AbstractTestCase {
 
     /**
      * 
-     * @param args
      */
     public static void main(String[] args) {
 
@@ -519,10 +519,12 @@ public class ServerConnectionTest extends AbstractTestCase {
      * 
      * <P>
      * To test Bug 884:
+     * <ul>
      * <li> Create admin 2 account
      * <li> Run: <code>ServerConnectionTest adda</code>
+     * </ul>
      * 
-     * @throws Exception
+     * @throws Exception if accounts cannot be added
      */
     public void addAccountTest() throws Exception {
 
@@ -736,7 +738,7 @@ public class ServerConnectionTest extends AbstractTestCase {
     /**
      * Test add problem, manual review only.
      * 
-     * @throws Exception
+     * @throws Exception for a variety of reasons
      */
     public void testAddProblemDefault() throws Exception {
         SampleContest sample = new SampleContest();
@@ -934,7 +936,7 @@ public class ServerConnectionTest extends AbstractTestCase {
 
     /**
      * Test add interpreted language.
-     * @throws Exception
+     * @throws Exception for a variety of reasons
      */
     public void testAddLanguageLong() throws Exception {
         
