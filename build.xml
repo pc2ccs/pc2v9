@@ -144,6 +144,9 @@
             <compilerarg line="-log '${compilelogs.dir}/${name}.test${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         </javac>
     </target>
+    
+    <!-- test only AllTests.class classes -->
+    
     <target name="test" depends="compile-tests" description="run junit tests">
         <delete dir="${testresults.dir}"/>
         <mkdir dir="${testresults.xml.dir}"/>
@@ -254,4 +257,41 @@
 	    <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistloc="${packagelistloc.dir}"/> 
         </javadoc>
     </target>
+    
+   
+   <!-- TODO Bug 1205 - replace test target with testAll target --> 	
+   <!-- test all JUnit classes -->
+    	
+	<target name="testAll" depends="compile-tests" description="run junit tests">
+		<delete dir="${testresults.dir}"/>
+		<mkdir dir="${testresults.xml.dir}"/>
+		<junit errorProperty="test.failed" failureProperty="test.failed">
+			<classpath refid="project.classpath"/>
+			<formatter type="brief" usefile="false"/>
+			<formatter type="xml"/>
+				<batchtest todir="${testresults.xml.dir}">
+					<fileset dir="${build.test.dir}">
+						<include name="**/*Test.class" />
+						<exclude name="**/Version10AbstractTest.class" />
+					</fileset>
+				</batchtest>
+		</junit>
+		<!-- remove TEST- from filenames  -->
+		<move todir="${testresults.xml.dir}">
+			<fileset dir="${testresults.xml.dir}" includes="**/*"/>
+			<mapper type="glob" from="TEST-*" to="*"/>
+		</move>
+		<fail message="Tests failed! Check test reports.">
+			<condition>
+				<and>
+					<isset property="test.failed"/>
+					<not>
+						<isset property="cruisecontrol"/>
+					</not>
+				</and>
+			</condition>
+		</fail>
+	</target>
+    
+    
 </project>
