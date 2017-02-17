@@ -255,12 +255,11 @@ public class ResolverEventFeedXML {
     }
 
     /**
-     * create info XML element
+     * create info XML element.
      * 
      * @param contest
      * @param filter
      * @return
-     * @throws IOException
      */
     public XMLMemento createInfoElement(IInternalContest contest, Filter filter) {
         XMLMemento memento = XMLMemento.createWriteRoot(INFO_TAG);
@@ -348,9 +347,9 @@ public class ResolverEventFeedXML {
      * Add Language fields.
      * 
      * <pre>
-     * <language>
-     * <name>C++</name>
-     * </language>
+     * &lt;language&gt;
+     * &lt;name&gt;C++&lt;/name&gt;
+     * &lt;/language&gt;
      * </pre>
      * @param memento
      * @param contest
@@ -383,11 +382,11 @@ public class ResolverEventFeedXML {
      * Add problem fields.
      * 
      * <pre>
-     * <problem id="1" state="enabled">
-     * <label>A</label>
-     * <name>APL Lives!</name>
-     * <balloon-color rgb="#ffff00">yellow</balloon-color>
-     * </problem>
+     * &lt;problem id="1" state="enabled"&gt;
+     * &lt;label&gt;A&lt;/label&gt;
+     * &lt;name&gt;APL Lives!&lt;/name&gt;
+     * &lt;balloon-color rgb="#ffff00"&gt;yellow&lt;/balloon-color&gt;
+     * &lt;/problem&gt;
      * </pre>
      * 
      * @param memento
@@ -542,12 +541,12 @@ public class ResolverEventFeedXML {
      * Create account memento.
      * 
      * <pre>
-     * <team id="1" external-id="23412">
-     * <name>American University of Beirut</name>
-     * <nationality>LBN</nationality>
-     * <university>American University of Beirut</university>
-     * <region>Europe</region>
-     * </team>
+     * &lt;team id="1" external-id="23412"&gt;
+     * &lt;name&gt;American University of Beirut&lt;/name&gt;
+     * &lt;nationality&gt;LBN&lt;/nationality&gt;
+     * &lt;university&gt;American University of Beirut&lt;/university&gt;
+     * &lt;region&gt;Europe&lt;/region&gt;
+     * &lt;/team&gt;
      * </pre>
      * @param memento
      * @param contest
@@ -760,7 +759,6 @@ public class ResolverEventFeedXML {
      * 
      * @param contest
      * @param run
-     * @param suppressJudgement if true, do not output judgement information.
      * @return
      */
     public XMLMemento createElement(IInternalContest contest, Run run) {
@@ -1035,7 +1033,9 @@ public class ResolverEventFeedXML {
     }
 
     /**
-     * @param contest
+     * Get the set of Team accounts for the specified Contest.
+     * 
+     * @param inContest the Contest from which Teams are to be fetched
      * @return team accounts sorted by site, team number
      */
     public Account[] getTeamAccounts(IInternalContest inContest) {

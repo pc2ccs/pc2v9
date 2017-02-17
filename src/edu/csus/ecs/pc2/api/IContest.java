@@ -204,7 +204,7 @@ public interface IContest {
     /**
      * Get single run by runNumber from the current site.
      * 
-     * @param runNumber
+     * @param runNumber the number of the run to be fetched
      * @return the IRun or null if no such run exists.
      */
     IRun getRun(int runNumber);
@@ -244,7 +244,7 @@ public interface IContest {
      * A connection event listener (object of type {@link IConnectionEventListener}) will be 
      * invoked every time a connection to the server has been dropped, this client is no longer logged in.
      * 
-     * @param connectionEventListener
+     * @param connectionEventListener the IConnectionEventListener to be added
      */
     void addConnectionListener(IConnectionEventListener connectionEventListener);
 
@@ -259,7 +259,7 @@ public interface IContest {
     /**
      * Remove the specified clarification event listener from the contest.
      * 
-     * @param clarificationEventListener
+     * @param clarificationEventListener the IClarificationEventListener to be added
      */
     void removeClarificationListener(IClarificationEventListener clarificationEventListener);
 
@@ -331,6 +331,8 @@ public interface IContest {
      * This method can be used by a custom client making use of the PC<sup>2</sup> API to
      * obtain at runtime a PC<sup>2</sup> {@link IClient} description of its own client
      * login data.
+     * 
+     * @return the ICLient object for the currently logged-in client
      */
     IClient getMyClient();
 
@@ -428,7 +430,7 @@ public interface IContest {
     /**
      * Get run state for a run (judge or admin only).
      * 
-     * @param run
+     * @param run the IRun whose state is to be fetched
      * @return run state
      */
     RunStates getRunState(IRun run);
@@ -437,6 +439,8 @@ public interface IContest {
      * Get PC^2 Major version.
      * 
      * For "9.3Beta" would be "9"
+     * 
+     * @return the "Major version number" of this version of PC^2
      */
     String getMajorVersion();
 
@@ -444,6 +448,7 @@ public interface IContest {
      * Get PC^2 Minor version number.
      * 
      * For "9.3Beta" would be "3"
+     * @return the "minor version number" of this version of PC^2
      */
     String getMinorVersion();
     
@@ -456,27 +461,29 @@ public interface IContest {
     /**
      * Get Full PC^2 version string.
      * <P>
-     * Ex.
+     * Example:
      * <pre>Version 9.3 20150205 (Thursday, February 5th 2015 15:55 UTC) build 2920</pre>
+     * 
+     * @return a String containing the full PC^2 version string for this version of PC^2
      */
     String getFullVersionString();
 
     /**
      * Get extra version info.
      * 
-     * Get anyting after the minor version number.
+     * Get anything after the minor version number.
      * <br><br>
      *  For ""9.3Beta"" would be "Beta"
-     * @return extra veresion info
+     * @return extra version info
      */
     String getOtherVersionInfo();
 
     /**
      * Get a run from a site.
      * 
-     * @param siteNumber 
-     * @param runNumber
-     * @return run
+     * @param siteNumber the site from which the run should be fetched
+     * @param runNumber the ID number of the Run to be fetched
+     * @return an IRun object describing the requested run
      */
     IRun getRun(int siteNumber, int runNumber);
 

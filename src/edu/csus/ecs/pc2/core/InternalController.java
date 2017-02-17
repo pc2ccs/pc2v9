@@ -638,8 +638,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      *            the login name.
      * @param password
      *            the password for the id.
-     * @throws Exception
-     *             if there is a problem contacting server or logging in.
+     * @throws SecurityException 
+     *              if a login is attempted when the contest is not running or if the login is from a server
+     *              and this is a Client (servers can only log in to other servers)
      */
     public void login(String id, String password) {
 
@@ -1910,8 +1911,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Connection to client lost.
      * 
-     * @throws FileSecurityException
-     * @throws ClassNotFoundException
      * @throws IOException
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {

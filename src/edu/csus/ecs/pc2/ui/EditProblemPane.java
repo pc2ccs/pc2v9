@@ -3899,10 +3899,10 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * 
-     * @param string
-     * @param nextDirectory
-     * @return
+     * Compare the entries in two directories.
+     * @param directory the first directory to compare
+     * @param nextDirectory the second directory to compare with
+     * @return a String containing a message indicating whether the directory contents match
      */
     public String compareDirectories(String directory, String nextDirectory) {
 
@@ -3918,7 +3918,7 @@ public class EditProblemPane extends JPanePlugin {
                 if (name1.equals(name2)) {
                     matching++;
                 } else {
-                    System.err.println("Miss match " + name1 + " vs " + name2);
+                    System.err.println("Mismatch " + name1 + " vs " + name2);
                 }
             }
         }

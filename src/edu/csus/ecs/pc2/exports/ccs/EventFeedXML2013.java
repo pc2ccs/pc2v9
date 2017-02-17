@@ -247,7 +247,6 @@ public class EventFeedXML2013 {
      * @param contest
      * @param filter
      * @return
-     * @throws IOException
      */
     public XMLMemento createInfoElement(IInternalContest contest, Filter filter) {
         XMLMemento memento = XMLMemento.createWriteRoot(INFO_TAG);
@@ -303,9 +302,9 @@ public class EventFeedXML2013 {
      * Add Language fields.
      * 
      * <pre>
-     * <language>
-     * <name>C++</name>
-     * </language>
+     * &lt;language&gt;
+     * &lt;name&gt;C++&lt;/name&gt;
+     * &lt;/language&gt;
      * </pre>
      * @param memento
      * @param contest
@@ -335,11 +334,11 @@ public class EventFeedXML2013 {
      * Add problem fields.
      * 
      * <pre>
-     * <problem id="1" state="enabled">
-     * <label>A</label>
-     * <name>APL Lives!</name>
-     * <balloon-color rgb="#ffff00">yellow</balloon-color>
-     * </problem>
+     * &lt;problem id="1" state="enabled"&gt;
+     * &lt;label&gt;A&lt;/label&gt;
+     * &lt;name&gt;APL Lives!&lt;/name&gt;
+     * &lt;balloon-color rgb="#ffff00"&gt;yellow&lt;/balloon-color&gt;
+     * &lt;/problem&gt;
      * </pre>
      * 
      * @param memento
@@ -475,12 +474,12 @@ public class EventFeedXML2013 {
      * Create account memento.
      * 
      * <pre>
-     * <team id="1" external-id="23412">
-     * <name>American University of Beirut</name>
-     * <nationality>LBN</nationality>
-     * <university>American University of Beirut</university>
-     * <region>Europe</region>
-     * </team>
+     * &lt;team id="1" external-id="23412"&gt;
+     * &lt;name&gt;American University of Beirut&lt;/name&gt;
+     * &lt;nationality&gt;LBN&lt;/nationality&gt;
+     * &lt;university&gt;American University of Beirut&lt;/university&gt;
+     * &lt;region&gt;Europe&lt;/region&gt;
+     * &lt;/team&gt;
      * </pre>
      * @param memento
      * @param contest
@@ -670,10 +669,9 @@ public class EventFeedXML2013 {
     /**
      * Create RUN XML element.
      * 
-     * @param contest
-     * @param run
-     * @param suppressJudgement if true, do not output judgement information.
-     * @return
+     * @param contest the contest which the run belongs
+     * @param run the Run to be contained in the XML
+     * @return the created XMLMemento
      */
     public XMLMemento createElement(IInternalContest contest, Run run) {
         XMLMemento memento = XMLMemento.createWriteRoot(RUN_TAG);

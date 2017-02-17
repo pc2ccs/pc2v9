@@ -67,8 +67,8 @@ public class LoadICPCTSVData implements UIPlugin {
     /**
      * Load both teams.tsv and groups.tsv into contest and optionally sends results to server.
      * @param filename
-     * @param sendToServer if true sends to server via controller, if false just loads into contest.
-     * @param usingGUI prompt using GUI to add accounts and groups.s
+     * @param sendToServer if true sends to server via controller, if false just loads into contest
+     * @param useConfirmGUI prompt using GUI to add accounts and groups
      * @return
      * @throws Exception
      */

@@ -1749,7 +1749,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * 
      * @param s
      *            string to be converted to seconds
-     * @return -1 if invalid time string, 0 or >0 if valid
+     * @return -1 if invalid time string, 0 or greater if valid
      */
     public long stringToLongSecs(String s) {
 

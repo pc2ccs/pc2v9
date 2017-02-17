@@ -199,7 +199,6 @@ public interface IContestLoader {
      *            the directory where the .in and .ans files are found.
      * @param problem
      * @param problemDataFiles
-     * @param sectionLines
      * 
      */
     Problem loadCCSProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles);

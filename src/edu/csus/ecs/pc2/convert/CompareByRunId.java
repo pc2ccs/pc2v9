@@ -5,7 +5,7 @@ import java.util.Comparator;
 /**
  * Compare by run id numerically.
  * 
- * @author $Author$ Douglas A. Lane <laned@ecs.csus.edu>
+ * @author $Author$ Douglas A. Lane &lt;laned@ecs.csus.edu&gt;
  * @version $Id$
  */
 public class CompareByRunId implements Comparator<EventFeedRun> {

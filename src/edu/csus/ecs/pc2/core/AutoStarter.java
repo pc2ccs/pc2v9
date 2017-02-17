@@ -127,8 +127,8 @@ public class AutoStarter {
      * Format input starttime.
      * 
      * ex. 2016-Oct-14 Oct 14:19:30
-     * @param startTime
-     * @return
+     * @param gregorianCalendar a GregorianCalendar object specifying a date/time
+     * @return the specified date/time formatted as "YYY-MMM-dd MMM HH:mm:ss"
      */
     public static String formatTime(GregorianCalendar gregorianCalendar) {
         String pattern = "YYY-MMM-dd MMM HH:mm:ss";

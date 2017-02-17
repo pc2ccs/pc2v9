@@ -849,8 +849,8 @@ public class InternalDumpReport implements IReport {
     
     /**
      * Count the accounts that match this filter.
-     * @param accounts
-     * @return number of accounts matching this filter.
+     * @param clientSettings an array of ClientSettings
+     * @return number of accounts matching the filter in this object
      */
     public int countClientSettings (ClientSettings [] clientSettings){
         int count = 0;

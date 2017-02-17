@@ -169,8 +169,8 @@ public class ContestSettingsReport implements IReport {
     /**
      * Count the accounts that match this filter.
      * 
-     * @param accounts
-     * @return number of accounts matching this filter.
+     * @param clientSettings an array of Client Settings
+     * @return number of accounts matching the filter in this ContestSettings object
      */
     public int countClientSettings(ClientSettings[] clientSettings) {
         int count = 0;

@@ -529,7 +529,7 @@ public class ContestYAMLLoader implements IContestLoader {
      * @param contest
      * @param baseDirectoryName location for contest.yaml and problem short names
      * @param problem
-     * @param dataFiles
+     * @param overrideUsePc2Validator
      */
     public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator) {
         loadProblemInformationAndDataFiles(contest, baseDirectoryName, problem, overrideUsePc2Validator, false);
@@ -1774,7 +1774,6 @@ public class ContestYAMLLoader implements IContestLoader {
      * 
      * @param contents
      * @param defaultTimeOut
-     * @param overrideValidatorCommandLine 
      * @param defaultValidatorCommandLine 
      * @param loadDataFileContents 
      * @return

@@ -623,7 +623,6 @@ public class Executable extends Plugin implements IExecutable {
      * @param outputFileName
      *            - output file name.
      * @return true if file written to disk.
-     * @throws IOException
      */
     public boolean createFile(SerializedFile[] fileList, int setNumber, String outputFileName) {
 
@@ -2244,13 +2243,13 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * This suffix is added to the execute directory nanme.
+     * Set the suffix which is to be added to the execute directory name.
      * 
-     * This must be used before using {@link #(String, String)}.
+     * This method must be called before calling {@link #getExecuteDirectoryName()} or {@link #getExecuteDirectoryName(String)}.
      * 
      * @see #getExecuteDirectoryName()
      * 
-     * @param executeDirectoryNameSuffix
+     * @param executeDirectoryNameSuffix the suffix to be added to the name of the execute directory
      */
     public void setExecuteDirectoryNameSuffix(String executeDirectoryNameSuffix) {
         this.executeDirectoryNameSuffix = executeDirectoryNameSuffix;

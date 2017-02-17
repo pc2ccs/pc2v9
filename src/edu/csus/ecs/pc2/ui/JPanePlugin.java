@@ -47,6 +47,8 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     
     /**
      * Is this logged in as a server module? 
+     * 
+     * @return true if this module is a server, false otherwise
      */
     public boolean isServer() {
         return getContest().getClientId() != null && isServer(getContest().getClientId());
@@ -169,11 +171,10 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     /**
      * Create and view via GUI the report file.
      * 
-     * @param report
-     * @param filename
-     * @param inFilter
-     * @param log
-     * @throws IOException
+     * @param report the IReport to be viewed
+     * @param filter a Filter to be applied to the Report
+     * @param log the Log to be used for logging 
+     * @throws IOException if the Report Directory path cannot be found
      */
     public void createAndViewReportFile(IReport report, Filter filter, Log log) throws IOException {
 
@@ -214,7 +215,7 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     /**
      * Output notelist to log.
      * 
-     * @param noteList
+     * @param noteList the Notelist to be output to the log
      */
     public void logNoteList(NoteList noteList) {
 
@@ -249,7 +250,6 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     /**
      * Load permission list.
      * 
-     * @see #getPermissionList()
      * @see #isAllowed(edu.csus.ecs.pc2.core.security.Permission.Type)
      */
     public void initializePermissions() {
@@ -269,9 +269,9 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     /**
      * Show message to user.
      * 
-     * @param component
-     * @param title
-     * @param message
+     * @param component the parent component for the JOptionPane used to display the message
+     * @param title the title for the JOptionPane dialog
+     * @param message the message to be displayed in the JOptionPane message dialog
      */
     public void showMessage(Component component, String title, String message) {
         JOptionPane.showMessageDialog(component, message, title, JOptionPane.INFORMATION_MESSAGE);

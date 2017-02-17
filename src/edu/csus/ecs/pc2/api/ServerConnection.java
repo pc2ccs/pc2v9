@@ -107,6 +107,9 @@ public class ServerConnection {
      *            client login name (for example: &quot;team5&quot; or &quot;judge3&quot;)
      * @param password
      *            password for the login name
+     * @return
+     *            an IContest object representing the Contest which has been logged in to
+     *            
      * @throws LoginFailureException
      *             if login fails, the message contained in the exception will provide and indication of the reason for the failure.
      */
@@ -214,7 +217,8 @@ public class ServerConnection {
       * @param accountTypeName name of account, ex TEAM
       * @param displayName title for account/team, if null will be login name
       * @param password password for account, must not be null or emptystring (string length==0)
-      * @throws Exception
+      * 
+      * @throws IllegalArgumentException if the account type is invalid or the password is null or empty
       */
     public void addAccount(String accountTypeName, String displayName, String password) throws Exception {
 
@@ -249,9 +253,10 @@ public class ServerConnection {
     /**
      * Submit a clarification.
      * 
-     * @param problem 
+     * @param problem  the Problem for which the clarification request is being submitted
      * @param question text of question
-     * @throws Exception
+     * @throws NotLoggedInException if the client is not currently logged in to the server
+     * @throws Exception if the specified Problem is null or the clarification request could not be submitted to the server
      */
     public void submitClarification(IProblem problem, String question) throws Exception {
 
@@ -286,12 +291,15 @@ public class ServerConnection {
     /**
      * Submit a run.
      * 
-     * @param problem 
-     * @param language
-     * @param mainFileName
-     * @param additionalFileNames
+     * @param problem the Problem for which the run is being submitted
+     * @param language the language used for the Problem submission (Java, C++, etc.)
+     * @param mainFileName the name of the main source code file
+     * @param additionalFileNames an array of Strings giving the names of any additional files submitted
      * @param overrideSubmissionTimeMS an override elapsed time in ms, only works if contest information CCS test mode is set true.
-     * @throws Exception
+     * 
+     * @throws NotLoggedInException if the client is not currently logged in to the server
+     * @throws Exception if any of the specified files cannot be found, if the Problem or Language is null, 
+     *          the contest is not running, or a failure occurred while submitting the run to the server
      */
     public void submitRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
 

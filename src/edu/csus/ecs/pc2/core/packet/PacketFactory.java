@@ -170,7 +170,7 @@ public final class PacketFactory {
      * Used as a start count (id) for generating accounts.
      * 
      * If start count is 0, will add accounts after max account number. <br>
-     * If start count is 100, will add accounts after max account number >= 100.
+     * If start count is 100, will add accounts after max account number is greater than 100.
      */
     public static final String START_COUNT = "START_COUNT";
 

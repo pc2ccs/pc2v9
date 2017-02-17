@@ -35,7 +35,7 @@ public final class CCSConstants {
     /**
      * The default CCS validator command line.
      * 
-     * <pre>Command line: validator input judgeanswer feedbackdir < teamoutput </pre>
+     * <pre>Command line: validator input judgeanswer feedbackdir &lt; teamoutput </pre>
      * 
      * Assumes that input is from stdin and output is to stdout.
      */

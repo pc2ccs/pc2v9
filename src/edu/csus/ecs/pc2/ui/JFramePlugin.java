@@ -84,11 +84,10 @@ public abstract class JFramePlugin extends JFrame implements UIPlugin {
     /**
      * Create and view via GUI the report file.
      * 
-     * @param report
-     * @param filename
-     * @param inFilter
-     * @param log
-     * @throws IOException
+     * @param report the IReport to be viewed
+     * @param filter the Filter to be applied to the Report
+     * @param log the Log to be used for logging
+     * @throws IOException if the path to the Reports directory cannot be found
      */
     public void createAndViewReportFile(IReport report, Filter filter, Log log) throws IOException {
 
@@ -161,7 +160,6 @@ public abstract class JFramePlugin extends JFrame implements UIPlugin {
     /**
      * Load permission list.
      * 
-     * @see #getPermissionList()
      * @see #isAllowed(edu.csus.ecs.pc2.core.security.Permission.Type)
      */
     public void initializePermissions() {

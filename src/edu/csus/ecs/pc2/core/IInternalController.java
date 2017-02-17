@@ -86,7 +86,7 @@ public interface IInternalController {
     /**
      * Send to client (or server), if necessary forward to another server.
      * 
-     * @param confirmPacket
+     * @param packet
      */
     void sendToClient(Packet packet);
 
@@ -536,8 +536,8 @@ public interface IInternalController {
     /**
      * Update/replace contest and controller for all registered UI Plugins.
      * 
-     * @param contest
-     * @param packetHandler
+     * @param inContest
+     * @param inController
      */
     void updateContestController(IInternalContest inContest, IInternalController inController);
 
@@ -598,7 +598,7 @@ public interface IInternalController {
     /**
      * Shutdown this server.
      * 
-     * @param clientRequestingShutdown
+     * @param requestor
      */
     void shutdownServer(ClientId requestor);
 
@@ -661,7 +661,7 @@ public interface IInternalController {
      * Typically sendToServers is set if this is the originating site, if not done then a nasty circular path will occur.
      * 
      * @param packet
-     * @param sendToServer if true then send to other server.
+     * @param sendToServers if true then send to other server.
      */
     void sendToJudgesAndOthers(Packet packet, boolean sendToServers);
 
@@ -677,9 +677,9 @@ public interface IInternalController {
      * Creates an {@link AutoStarter} if none exists, and then instructs the AutoStarter to update its Scheduled Start Task to correspond to the Scheduled Start Time information in the
      * {@link ContestInformation} object in the received {@link IInternalContest}.
      * 
-     * @param theContest
+     * @param aContest
      *            - the Contest (Model) containing the Scheduled Start Time information
-     * @param theController
+     * @param aController
      *            - the Controller to which this request applies
      */
     void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) ;

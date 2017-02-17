@@ -164,7 +164,7 @@ public class RunsPane extends JPanePlugin {
     }
 
     /**
-     * @param useAutoJudge
+     * @param useAutoJudgeMonitor
      *            if true use
      */
     public RunsPane(boolean useAutoJudgeMonitor) {

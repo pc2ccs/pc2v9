@@ -179,11 +179,9 @@ public class ExecuteUtilities extends Plugin {
      *              {:pc2home}
      * </pre>
      * 
-     * @param run
-     *            submitted by team
      * @param origString -
      *            original string to be substituted.
-     * @return string with values
+     * @return a new String with all occurrences of substitution variables replaced by the corresponding values
      */
     public String substituteAllStrings(String origString) {
         
@@ -555,7 +553,7 @@ public class ExecuteUtilities extends Plugin {
     /**
      * Did the team's run solve the problem ?.
      * 
-     * @param inExecutionData    
+     * @param executionData  the ExecutionData object which was produced by running the team's program
      * @return true if validation returned accepted
      */
     public static boolean didTeamSolveProblem(ExecutionData executionData) {

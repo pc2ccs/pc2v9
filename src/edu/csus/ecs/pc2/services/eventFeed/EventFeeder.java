@@ -132,7 +132,7 @@ public class EventFeeder implements Runnable {
     /**
      * Invoke send method with Event Feed XML.
      * 
-     * @see IEventFeedRunnable#send(String).
+     * @see edu.csus.ecs.pc2.core.model.IEventFeedRunnable#send(String)
      * 
      * @param contest
      * @param runnable
@@ -271,7 +271,7 @@ public class EventFeeder implements Runnable {
     /**
      * Send XML to socket/client.
      * 
-     * @param memento
+     * @param xmlString the String to send
      */
     public void sendToSocket(String xmlString) {
         

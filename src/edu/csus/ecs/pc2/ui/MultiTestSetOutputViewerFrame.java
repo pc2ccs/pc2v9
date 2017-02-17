@@ -29,7 +29,7 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
     /**
      * Constructor which initializes this Frame to contain a {@link #multiSetOutputViewerPane}.
      * Invokers are expected to call {@link #setContestAndController(IInternalContest, IInternalController)}
-     * and then {@link #setData(Run, Problem, ProblemDataFiles)} prior to calling
+     * and then {@link #setData(Run, RunFiles, Problem, ProblemDataFiles)} prior to calling
      * {@link #setVisible(boolean)} on the frame.
      * 
      */

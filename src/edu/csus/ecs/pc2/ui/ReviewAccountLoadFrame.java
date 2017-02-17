@@ -32,8 +32,8 @@ import java.awt.Dimension;
  * Review Account Load Frame
  * 
  * 1st line of load file are the column headers.
- * Required columns are:  account, site, & password
- * Optional columns are: displayname, group, permdisplay, & permlogin
+ * Required columns are:  account, site, and password
+ * Optional columns are: displayname, group, permdisplay, and permlogin
  * perm* are booleans, but ignored if empty
  * @author pc2@ecs.csus.edu
  * @version $Id$

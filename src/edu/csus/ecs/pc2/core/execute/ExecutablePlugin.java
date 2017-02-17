@@ -578,7 +578,6 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
      * @param outputFileName -
      *            output file name.
      * @return true if file written to disk.
-     * @throws IOException 
      */
     public boolean createFile(SerializedFile[] fileList, int setNumber, String outputFileName) {
 
@@ -1805,7 +1804,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
     /**
      * This suffix is added to the execute directory nanme.
      * 
-     * This must be used before using {@link #(String, String)}.
+     * This method must be called before calling {@link #getExecuteDirectoryName()}.
      * 
      * @see #getExecuteDirectoryName()
      * 

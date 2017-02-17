@@ -31,7 +31,7 @@ public interface IProblemListener {
 
     /**
      * Refresh all Problems.
-     * @param problemEvent
+     * @param event the {@link edu.csus.ecs.pc2.core.model.ProblemEvent} triggering the refresh
      */
     void problemRefreshAll(ProblemEvent event);
 }

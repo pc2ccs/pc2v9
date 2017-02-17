@@ -386,7 +386,8 @@ public class ServerView extends JFrame implements UIPlugin {
     /**
      * Puts this frame to right of input frame.
      * 
-     * @param sourceFrame
+     * @param sourceFrame the JFrame to which this frame is attached (that is,
+     *   the frame in which this frame will be moved to the right)
      */
     public void windowToRight(JFrame sourceFrame) {
         int rightX = sourceFrame.getX() + sourceFrame.getWidth();
