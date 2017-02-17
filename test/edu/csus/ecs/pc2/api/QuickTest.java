@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * API Test - print rows.
@@ -13,7 +14,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
  */
 
 // $HeadURL$
-public class QuickTest {
+public class QuickTest extends AbstractTestCase {
 
     /**
      * Show runs

@@ -254,9 +254,9 @@ public class LoadRunsTest extends AbstractTestCase {
         String outFile = getOutputTestFilename("eventfile.out.txt");
 
         createEventFeedMetaFile(inputEventFeed, inFile);
-        System.out.println("Wrote file: " + inFile);
+//        System.out.println("Wrote file: " + inFile);
         createEventFeedMetaFile(outputEventFeedFilename, outFile);
-        System.out.println("Wrote file: " + outFile);
+//        System.out.println("Wrote file: " + outFile);
 
         // startExplorer(getOutputDataDirectory());
     }
@@ -389,7 +389,11 @@ public class LoadRunsTest extends AbstractTestCase {
         int missingProblems = pCount - numProblems;
         for (int i = 0; i < missingProblems; i++) {
             Problem problem = new Problem("Problem " + (i + 1));
+            char let = 'A';
+            let += i;
             contest.addProblem(problem);
+            problem.setLetter("" + let);
+            assertNotNull("Expecting letter", problem.getLetter());
         }
 
         numProblems = contest.getProblems().length;

@@ -254,7 +254,7 @@ public class RunListTest extends AbstractTestCase {
         
         RunList runList = new RunList(storage);
         String runListFile = runList.getFileName();
-        System.out.println("file is "+runListFile);
+//        System.out.println("file is "+runListFile);
         
         createSampleAnswerFile(runListFile);
         try {

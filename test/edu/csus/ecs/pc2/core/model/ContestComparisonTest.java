@@ -7,10 +7,8 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * Unit test.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ContestComparisonTest extends AbstractTestCase {
 
     private static final String NEW_LINE = ContestComparison.NEW_LINE;
@@ -172,7 +170,7 @@ public class ContestComparisonTest extends AbstractTestCase {
 
         String actual = new ContestComparison().comparisonList(contest, contest2);
 
-        printExpectedDeclaration(actual);
+//        printExpectedDeclaration(actual);
 
         String expected = "Add 3 Sites;Add 6 Problems;Add 6 Languages;Add 134 Accounts;Add 1 administrator;Add 120 teams;Add 12 judges;Add 1 scoreboard;Add 9 Judgements;Add 4 AJ Settingss;";
 

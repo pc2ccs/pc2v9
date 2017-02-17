@@ -6,10 +6,7 @@ import junit.framework.TestCase;
  * Unit test.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class StringUtilitiesTest extends TestCase {
 
     public void testAppendString() throws Exception {
@@ -22,7 +19,7 @@ public class StringUtilitiesTest extends TestCase {
 
         for (String line : data) {
 
-            System.out.println("line " + line);
+//            System.out.println("line " + line);
             String[] f = line.split(",");
 
             String[] results = new String[0];
