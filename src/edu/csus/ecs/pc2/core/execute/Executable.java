@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
@@ -1078,9 +1079,17 @@ public class Executable extends Plugin implements IExecutable {
       
       String args = "{:infile} {:outfile} {:ansfile} {:resfile}";
 
-      String cmdPattern = "java -cp " + pathToPC2Jar + "pc2.jar" + " edu.csus.ecs.pc2.validator.Validator " + args + " " + options ;
+      //depending on how it is run (e.g. from a Test directory), pathToPC2Jar may or may not add a file separator at the end;
+      // one is added here to insure it is present
+      String cmdPattern = "java -cp " + pathToPC2Jar + File.separator + "pc2.jar" + " edu.csus.ecs.pc2.validator.Validator " + args + " " + options ;
 
-      System.out.println("DEBUG: PC2 Validator command pattern: '" + cmdPattern + "'");
+//      System.out.println("DEBUG1: PC2 Validator command pattern (before replacement): '" + cmdPattern + "'");
+      
+      //get rid of any double-fileSeparators
+      String doubleFS = File.separator + File.separator;
+      cmdPattern = cmdPattern.replaceAll(Matcher.quoteReplacement(doubleFS),  Matcher.quoteReplacement(File.separator));
+      
+      System.out.println("DEBUG2: PC2 Validator command pattern (after replacement):  '" + cmdPattern + "'");
       
       return cmdPattern;
 
