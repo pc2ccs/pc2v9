@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.ccs;
 
+import edu.csus.ecs.pc2.core.Constants;
+
 /**
  * Contest Control System (Standard) constants.
  * 
@@ -39,13 +41,13 @@ public final class CCSConstants {
      * 
      * Assumes that input is from stdin and output is to stdout.
      */
-    public static final String DEFAULT_CCS_VALIDATOR_COMMAND = "{:validator} {:infile} {:ansfile} {:resultsdir} ";
+    public static final String DEFAULT_CCS_VALIDATOR_COMMAND = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
     
     
     /**
      * The default CCS validator program name. 
      */
-    public static final String INTERNAL_CCS_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.validator.ccs.Validator";
+    public static final String INTERNAL_CCS_VALIDATOR_NAME = Constants.CLICS_VALIDATOR_NAME;
 
     /**
      * Wrong answer judgment string.
@@ -57,11 +59,5 @@ public final class CCSConstants {
      */
     public static final String JUDGEMENT_YES = "Yes";
 
-
-
-    /**
-     * Default program name for CCS valdator.
-     */
-    public static final String DEFAULT_CCS_VALIATOR_NAME = "default_validator";
 
 }
