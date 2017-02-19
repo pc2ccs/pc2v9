@@ -41,6 +41,7 @@ import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 import edu.csus.ecs.pc2.ui.NullViewer;
 import edu.csus.ecs.pc2.validator.ClicsValidator;
 import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
  * Compile, execute and validate a run.
@@ -697,37 +698,56 @@ public class Executable extends Plugin implements IExecutable {
             controller.sendValidatingMessage(run);
         }
         
+        //get the appropriate command pattern for invoking the validator attached to the problem
         String commandPattern = "";
-        if (problem.isUsingCLICSValidator()) {
+        
+        if (problem.isUsingPC2Validator()) {
+            
+            commandPattern = getPC2ValidatorCommandPattern();
+            
+        } else if (problem.isUsingCLICSValidator()) {
             
           commandPattern = getCLICSValidatorCommandPattern();
 
-        }
+        } else if (problem.isUsingCustomValidator()) {
 
-        else 
-            //not using CLICS Validator; handle as in V9.3
+            commandPattern = getCustomValidatorCommandPattern();
+
+            // for a custom validator we also need to obtain the SerializedFile for the validator
             if (problemDataFiles != null && problemDataFiles.getValidatorFile() != null) {
-            // Create Validation Program
+                
+                // get Validation Program
+                String validatorFileName = problemDataFiles.getValidatorFile().getName();
+                String validatorUnpackName = prefixExecuteDirname(validatorFileName);
+                
+                //create the validator program file
+                if (!createFile(problemDataFiles.getValidatorFile(), validatorUnpackName)) {
+                    log.info("Unable to create custom validator program " + validatorUnpackName);
+                    setException("Unable to create custom validator program " + validatorUnpackName);
 
-            String validatorFileName = problemDataFiles.getValidatorFile().getName();
-            String validatorUnpackName = prefixExecuteDirname(validatorFileName);
-            if (!createFile(problemDataFiles.getValidatorFile(), validatorUnpackName)) {
-                log.info("Unable to create validator program " + validatorUnpackName);
-                setException("Unable to create validator program " + validatorUnpackName);
+                    throw new SecurityException("Unable to create custom validator, check logs");
+                }
 
-                throw new SecurityException("Unable to create validator, check logs");
+                if (!validatorFileName.endsWith(".jar")) {
+                    // Unix validator programs must set the execute bit to be able to execute the program.
+                    setExecuteBit(prefixExecuteDirname(validatorFileName));
+                }
+            } else {
+                
+                log.warning("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
+                setException("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
+                throw new IllegalStateException("IllegalStateException: Problem is marked as having a Custom Validator but no "
+                        + "SerializedFile for the validator could be obtained from the ProblemDataFiles");
             }
-
-            if (!validatorFileName.endsWith(".jar")) {
-                /**
-                 * Unix validator programs must set the execute bit to be able to execute the program.
-                 */
-
-                setExecuteBit(prefixExecuteDirname(validatorFileName));
-            }
+   
+        } else {
+            
+            log.warning("Problem is marked as validated but has no defined Validator");
+            setException("Problem is marked as validated but has no defined Validator");
+            throw new IllegalStateException("IllegalStateException: Problem is marked as validated but has no defined Validator");
         }
         
-
+        
         //Judge input data file name, either short name or fully qualified if external file.  {:infile}
         String judgeDataFilename =  problem.getDataFileName();
         
@@ -775,39 +795,23 @@ public class Executable extends Plugin implements IExecutable {
 
         int testSetNumber = dataSetNumber + 1;
         String resultsFileName = run.getNumber() + secs + "XRSAM." + testSetNumber + ".txt";
-
-        /*
-         * <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files]
-         * 
-         */
-
-        /**
-         * Standard command line pattern
-         * 
-         * String commandPattern = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
-         */
-
-        if (!problem.isUsingCLICSValidator()) {
-            commandPattern = problem.getValidatorCommandLine();
-        }
         
         boolean pc2JarUseDirectory = false;
 
         if (problem.isUsingPC2Validator()) {
             
-
             /**
              * The internal command is set to: <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files] Where validator is
              * Problem.INTERNAL_VALIDATOR_NAME aka "pc2.jar edu.csus.ecs.pc2.validator.Validator"
              * 
-             * So we need to prefix the command with java -jar <path to jar>
+             * So we need to prefix the command with java -jar <path to jar> ?? this may no longer be needed...
              */
 
             String pathToPC2Jar = findPC2JarPath();
             if (!(new File(pathToPC2Jar + "pc2.jar")).exists()) {
                 pc2JarUseDirectory = true;
             }
-            commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
+
         }
 
         log.log(Log.DEBUG, "before substitution: " + commandPattern);
@@ -1057,6 +1061,32 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
+     * Returns a command pattern for invoking the PC2 "internal validator".
+     * The returned pattern contains "substitution variables" for the elements required by the PC2 validator
+     * (for example, "{:infile}" where the judge's input data file should be substituted).
+     * 
+     * @return a command pattern for invoking the PC2 Validator
+     */
+    private String getPC2ValidatorCommandPattern() {
+        
+        String pathToPC2Jar = findPC2JarPath();
+        if (!(new File(pathToPC2Jar+"pc2.jar")).exists()) {
+//            pc2JarUseDirectory = true;
+        }
+        
+      String options = getPC2ValidatorOptionString();
+      
+      String args = "{:infile} {:outfile} {:ansfile} {:resfile}";
+
+      String cmdPattern = "java -cp " + pathToPC2Jar + "pc2.jar" + " edu.csus.ecs.pc2.validator.Validator " + args + " " + options ;
+
+      System.out.println("DEBUG: PC2 Validator command pattern: '" + cmdPattern + "'");
+      
+      return cmdPattern;
+
+    }
+
+    /**
      * Returns a command pattern for invoking the {@link ClicsValidator}.
      * The returned pattern contains "substitution variables" for the elements required by the CLICS validator
      * (for example, "{:infile}" where the judge's input data file should be substituted).
@@ -1081,7 +1111,54 @@ public class Executable extends Plugin implements IExecutable {
       return cmdPattern;
 
     }
-    
+ 
+    /**
+     * Returns a command pattern for invoking a Custom Validator.
+     * The returned pattern is determined by the Custom Validator settings in the current Problem.
+     * 
+     * @return a command pattern for invoking the Custom Validator
+     */
+    private String getCustomValidatorCommandPattern() {
+        
+        String cmdPattern = "";
+
+        if (problem!=null && problem.getCustomValidatorSettings()!=null) {
+
+            cmdPattern += problem.getCustomValidatorSettings().getCustomValidatorCommandLine();
+        }
+
+      System.out.println("DEBUG: Custom Validator command pattern: '" + cmdPattern + "'");
+      
+      return cmdPattern;
+
+    }
+ 
+   /**
+     * Returns a string containing the PC2 Validator options configured in the current problem.
+     * 
+     * @return a String containing the PC2 Validator options, or the empty string if the
+     *          problem is null or the PC2ValidatorSettings is null
+     */
+    private String getPC2ValidatorOptionString() {
+
+        String optStr = "";
+
+        if (problem!=null && problem.getPC2ValidatorSettings()!=null) {
+
+            PC2ValidatorSettings settings = problem.getPC2ValidatorSettings();
+
+            optStr += "-pc2 " + settings.getWhichPC2Validator() ;
+            
+            if (settings.isIgnoreCaseOnValidation()) {
+                optStr += " " + true;
+            } else {
+                optStr += " " + false;
+            }
+
+        }
+        return optStr;
+    }
+ 
     /**
      * Returns a string containing the {@link ClicsValidatorSettings} options configured in the current problem.
      * 
