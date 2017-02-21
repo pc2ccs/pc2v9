@@ -1393,7 +1393,8 @@ public class Executable extends Plugin implements IExecutable {
      * Finally, if no pc2.jar was found in the classpath it checks for the existence of file "dist/pc2.jar"; if that exists
      * then the parent directory of that file (i.e., "dist") is returned as the path.
      * 
-     * @return a String giving the path to a pc2.jar file, or "." if no pc2.jar file could be found.
+     * @return a String giving the path to a pc2.jar file, or "." if no pc2.jar file could be found. In any case the returned String
+     *              is guaranteed to end with a File.separator character
      * 
      * @throws IOException if any problem occurs accessing any of the specified paths
      */
@@ -1438,7 +1439,12 @@ public class Executable extends Plugin implements IExecutable {
         } catch (IOException e) {
             log.log(Log.WARNING, "Trouble locating pc2home: " + e.getMessage(), e);
         }
-        //when we get here, jarDir contains either a path to a pc2.jar, or "."
+        
+        //when we get here, jarDir contains either a path to a pc2.jar, or ".".
+        //In either case, make sure it ends with a file separator
+        if (!jarDir.endsWith(Matcher.quoteReplacement(File.separator))) {
+            jarDir += Matcher.quoteReplacement(File.separator);
+        }
         return jarDir;
     }
 
