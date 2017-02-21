@@ -18,7 +18,7 @@ public final class AllTests {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.util");
+        TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.validator");
         // $JUnit-BEGIN$
         suite.addTestSuite(ValidatorTest.class);
         // $JUnit-END$
