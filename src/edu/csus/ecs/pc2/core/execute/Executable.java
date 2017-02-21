@@ -1400,31 +1400,45 @@ public class Executable extends Plugin implements IExecutable {
     protected String findPC2JarPath() {
         String jarDir = ".";
         try {
+            //start by assuming a default path
             String defaultPath = new File("./build/prod").getCanonicalPath();
             // for CruiseControl, will not be needed with jenkins
             if (!new File(defaultPath).exists()) {
                 defaultPath = "/software/pc2/cc/projects/pc2v9/build/prod";
             }
+            //assume the directory containing the pc2.jar will be the assumed default path
             jarDir = defaultPath;
+            
+            //see if "pc2.jar" can be found in the CLASSPATH
             String cp = System.getProperty("java.class.path");
             StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
             while (st.hasMoreTokens()) {
+                //get one component of the classpath
                 String token = st.nextToken();
+                //try constructing a File from that component
                 File dir = new File(token);
+                //see if the component is a file that ends in "pc2.jar"
                 if (dir.exists() && dir.isFile() && dir.toString().endsWith("pc2.jar")) {
+                    //yes, we found a pc2.jar file in the classpath; get the path to its parent directory
                     jarDir = new File(dir.getParent()).getCanonicalPath() + File.separator;
                     break;
                 }
             }
+            
+            //if we didn't find a pc2.jar in the classpath, the jarDir will still be the same as the default path
             if (defaultPath.equals(jarDir)) {
+                //we didn't find a pc2.jar in the classpath; see if we can find one in directory "dist"
                 File dir = new File("dist/pc2.jar");
                 if (dir.isFile()) {
+                    //we found a pc2.jar in "dist"; get the path to its parent directory
                     jarDir = new File(dir.getParent()).getCanonicalPath() + File.separator;
                 }
             }
+            
         } catch (IOException e) {
             log.log(Log.WARNING, "Trouble locating pc2home: " + e.getMessage(), e);
         }
+        //when we get here, jarDir contains either a path to a pc2.jar, or "."
         return jarDir;
     }
 
