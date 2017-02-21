@@ -822,6 +822,7 @@ public class Executable extends Plugin implements IExecutable {
         String cmdLine = replaceString(commandPattern, "{:infile}", judgeDataFilename);
         cmdLine = replaceString(cmdLine, "{:ansfile}", judgeAnswerFilename);
         cmdLine = replaceString(cmdLine, "{:outfile}", "estdout.pc2");
+        cmdLine = replaceString(cmdLine, "{resfile}", resultsFileName);
         
         //the following is specific to the CLICS validator but needs to be done here for scope accessibility in the code below
         String feedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber + File.separator ;
