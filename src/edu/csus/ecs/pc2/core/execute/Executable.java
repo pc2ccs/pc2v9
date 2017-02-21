@@ -1378,6 +1378,25 @@ public class Executable extends Plugin implements IExecutable {
         executionData.setExecutionException(new Exception(string));
     }
 
+    /**
+     * This method attempts to find a path to a "pc2.jar" file.
+     * 
+     * It starts by assuming a default return value of "." (the current directory).
+     * It then makes various attempts to update (improve) this default, as follows:
+     * 
+     * It starts by choosing "./build/prod" as the default path, or if that directory doesn't exist then 
+     * it chooses "/software/pc2/cc/projects/pc2v9/build/prod".
+     * 
+     * It then searches the current CLASSPATH (Java System property "java.class.path") for a classpath element ending
+     * in "pc2.jar".  If one is found, the default path is updated to be the parent directory of the indicated pc2.jar file.
+     * 
+     * Finally, if no pc2.jar was found in the classpath it checks for the existence of file "dist/pc2.jar"; if that exists
+     * then the parent directory of that file (i.e., "dist") is returned as the path.
+     * 
+     * @return a String giving the path to a pc2.jar file, or "." if no pc2.jar file could be found.
+     * 
+     * @throws IOException if any problem occurs accessing any of the specified paths
+     */
     protected String findPC2JarPath() {
         String jarDir = ".";
         try {
