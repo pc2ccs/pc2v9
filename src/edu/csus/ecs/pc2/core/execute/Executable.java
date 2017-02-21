@@ -797,26 +797,8 @@ public class Executable extends Plugin implements IExecutable {
 
         int testSetNumber = dataSetNumber + 1;
         String resultsFileName = run.getNumber() + secs + "XRSAM." + testSetNumber + ".txt";
-        
-        boolean pc2JarUseDirectory = false;
 
-        if (problem.isUsingPC2Validator()) {
-            
-            /**
-             * The internal command is set to: <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files] Where validator is
-             * Problem.INTERNAL_VALIDATOR_NAME aka "pc2.jar edu.csus.ecs.pc2.validator.Validator"
-             * 
-             * So we need to prefix the command with java -jar <path to jar> ?? this may no longer be needed...
-             */
-
-            String pathToPC2Jar = findPC2JarPath();
-            if (!(new File(pathToPC2Jar + "pc2.jar")).exists()) {
-                pc2JarUseDirectory = true;
-            }
-
-        }
-
-        log.log(Log.DEBUG, "before substitution: " + commandPattern);
+        log.log(Log.DEBUG, "validateProgram(): command pattern before substitution: " + commandPattern);
 
 //      orig  String cmdLine = substituteAllStrings(run, commandPattern);
 
@@ -860,20 +842,16 @@ public class Executable extends Plugin implements IExecutable {
         }
         
         cmdLine = substituteAllStrings(run, cmdLine);
-        cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
 
         if (File.separator.equals("\\")) {
             if (problem.isUsingPC2Validator()) {
                 cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
-                cmdLine = cmdLine.replaceFirst("jar ", "jar\" ");
+                cmdLine = cmdLine.replaceFirst("jar ", "jar\" ");   //how do we know there's a "jar" in the string? It might be using a directory!
                 log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);
             }
         }
-        if (pc2JarUseDirectory) {
-            // this is a directory, remove "pc2.jar" from string
-            cmdLine = ExecuteUtilities.replaceString(cmdLine, "pc2.jar", "");
-        }
-        log.log(Log.DEBUG, "after  substitution: " + cmdLine);
+
+        log.log(Log.DEBUG, "validateProgram(): command pattern after substitution: " + cmdLine);
 
         try {
             String actFilename = new String(cmdLine);
@@ -1072,9 +1050,12 @@ public class Executable extends Plugin implements IExecutable {
      */
     private String getPC2ValidatorCommandPattern() {
         
+        //try to find a path to a pc2.jar file
         String pathToPC2Jar = findPC2JarPath();
-        if (!(new File(pathToPC2Jar+"pc2.jar")).exists()) {
-//            pc2JarUseDirectory = true;
+        
+        //if a path was found, add "pc2.jar" to the path
+        if ((new File(pathToPC2Jar+"pc2.jar")).exists()) {
+            pathToPC2Jar += "pc2.jar";
         }
         
       String options = getPC2ValidatorOptionString();
@@ -1090,7 +1071,7 @@ public class Executable extends Plugin implements IExecutable {
 
       //depending on how it is run (e.g. from a Test directory), pathToPC2Jar may or may not add a file separator at the end;
       // one is added here to insure it is present
-      String cmdPattern = "java -cp " + pathToPC2Jar + File.separator + "pc2.jar" + " " + validatorName + " " + args + " " + options ;
+      String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options ;
 
 //      System.out.println("DEBUG1: PC2 Validator command pattern (before replacement): '" + cmdPattern + "'");
       
@@ -1113,9 +1094,12 @@ public class Executable extends Plugin implements IExecutable {
      */
     private String getCLICSValidatorCommandPattern() {
         
+        //try to find a path to a pc2.jar file
         String pathToPC2Jar = findPC2JarPath();
-        if (!(new File(pathToPC2Jar+"pc2.jar")).exists()) {
-//            pc2JarUseDirectory = true;
+        
+        //if a path was found, add "pc2.jar" to the path
+        if ((new File(pathToPC2Jar+"pc2.jar")).exists()) {
+            pathToPC2Jar += "pc2.jar";
         }
         
       String options = getClicsValidatorOptionString();
@@ -1128,10 +1112,8 @@ public class Executable extends Plugin implements IExecutable {
       } else {
           validatorName = Constants.CLICS_VALIDATOR_NAME;
       }
-
-      //depending on how it is run (e.g. from a Test directory), pathToPC2Jar may or may not add a file separator at the end;
-      // one is added here to insure it is present
-      String cmdPattern = "java -cp " + pathToPC2Jar + File.separator + "pc2.jar" + " " + validatorName + " " + args + " " + options ;
+      
+      String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options ;
 
 //      System.out.println("DEBUG1: CLICS Validator command pattern (before replacement): '" + cmdPattern + "'");
       
