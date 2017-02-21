@@ -798,14 +798,14 @@ public class Executable extends Plugin implements IExecutable {
         int testSetNumber = dataSetNumber + 1;
         String resultsFileName = run.getNumber() + secs + "XRSAM." + testSetNumber + ".txt";
 
-        log.log(Log.DEBUG, "validateProgram(): command pattern before substitution: " + commandPattern);
+        log.log(Log.DEBUG, "command pattern before substitution: " + commandPattern);
 
 //      orig  String cmdLine = substituteAllStrings(run, commandPattern);
 
         String cmdLine = replaceString(commandPattern, "{:infile}", judgeDataFilename);
         cmdLine = replaceString(cmdLine, "{:ansfile}", judgeAnswerFilename);
         cmdLine = replaceString(cmdLine, "{:outfile}", "estdout.pc2");
-        cmdLine = replaceString(cmdLine, "{resfile}", resultsFileName);
+        cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
         
         //the following is specific to the CLICS validator but needs to be done here for scope accessibility in the code below
         String feedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber + File.separator ;
@@ -843,15 +843,15 @@ public class Executable extends Plugin implements IExecutable {
         
         cmdLine = substituteAllStrings(run, cmdLine);
 
-        if (File.separator.equals("\\")) {
-            if (problem.isUsingPC2Validator()) {
-                cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
-                cmdLine = cmdLine.replaceFirst("jar ", "jar\" ");   //how do we know there's a "jar" in the string? It might be using a directory!
-                log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);
-            }
-        }
+//        if (File.separator.equals("\\")) {
+//            if (problem.isUsingPC2Validator()) {
+//                cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
+//                cmdLine = cmdLine.replaceFirst("jar ", "jar\" ");   //how do we know there's a "jar" in the string? It might be using a directory!
+//                log.log(Log.DEBUG, "command line after replaceFirst: " + cmdLine);
+//            }
+//        }
 
-        log.log(Log.DEBUG, "validateProgram(): command pattern after substitution: " + cmdLine);
+        log.log(Log.DEBUG, "command pattern after substitution: " + cmdLine);
 
         try {
             String actFilename = new String(cmdLine);
