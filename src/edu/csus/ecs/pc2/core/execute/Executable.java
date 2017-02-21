@@ -1072,14 +1072,13 @@ public class Executable extends Plugin implements IExecutable {
       //depending on how it is run (e.g. from a Test directory), pathToPC2Jar may or may not add a file separator at the end;
       // one is added here to insure it is present
       String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options ;
-
-//      System.out.println("DEBUG1: PC2 Validator command pattern (before replacement): '" + cmdPattern + "'");
       
       //get rid of any double-fileSeparators
       String doubleFS = File.separator + File.separator;
       cmdPattern = cmdPattern.replaceAll(Matcher.quoteReplacement(doubleFS),  Matcher.quoteReplacement(File.separator));
       
-      System.out.println("DEBUG2: PC2 Validator command pattern (after replacement):  '" + cmdPattern + "'");
+//      System.out.println("DEBUG2: PC2 Validator command pattern:  '" + cmdPattern + "'");
+      log.log(Log.DEBUG, "PC2 Validator command pattern:  '" + cmdPattern + "'");
       
       return cmdPattern;
 
@@ -1114,15 +1113,14 @@ public class Executable extends Plugin implements IExecutable {
       }
       
       String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options ;
-
-//      System.out.println("DEBUG1: CLICS Validator command pattern (before replacement): '" + cmdPattern + "'");
       
       //get rid of any double-fileSeparators
       String doubleFS = File.separator + File.separator;
       cmdPattern = cmdPattern.replaceAll(Matcher.quoteReplacement(doubleFS),  Matcher.quoteReplacement(File.separator));
       
-      System.out.println("DEBUG2: CLICS Validator command pattern (after replacement):  '" + cmdPattern + "'");
-      
+//      System.out.println("DEBUG2: CLICS Validator command pattern:  '" + cmdPattern + "'");
+      log.log(Log.DEBUG, "CLICS Validator command pattern:  '" + cmdPattern + "'");
+
       return cmdPattern;
     }
  
@@ -1141,7 +1139,8 @@ public class Executable extends Plugin implements IExecutable {
             cmdPattern += problem.getCustomValidatorSettings().getCustomValidatorCommandLine();
         }
 
-      System.out.println("DEBUG: Custom Validator command pattern: '" + cmdPattern + "'");
+//      System.out.println("DEBUG: Custom Validator command pattern: '" + cmdPattern + "'");
+      log.log(Log.DEBUG, "Custom Validator command pattern:  '" + cmdPattern + "'");
       
       return cmdPattern;
 
