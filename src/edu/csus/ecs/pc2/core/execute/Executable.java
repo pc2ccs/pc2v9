@@ -21,6 +21,7 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -1080,9 +1081,16 @@ public class Executable extends Plugin implements IExecutable {
       
       String args = "{:infile} {:outfile} {:ansfile} {:resfile}";
 
+      String validatorName;
+      if (problem!=null && problem.getPC2ValidatorSettings()!=null) {
+          validatorName = problem.getPC2ValidatorSettings().getValidatorProgramName() ;
+      } else {
+          validatorName = Constants.PC2_VALIDATOR_NAME;
+      }
+
       //depending on how it is run (e.g. from a Test directory), pathToPC2Jar may or may not add a file separator at the end;
       // one is added here to insure it is present
-      String cmdPattern = "java -cp " + pathToPC2Jar + File.separator + "pc2.jar" + " edu.csus.ecs.pc2.validator.Validator " + args + " " + options ;
+      String cmdPattern = "java -cp " + pathToPC2Jar + File.separator + "pc2.jar" + " " + validatorName + " " + args + " " + options ;
 
 //      System.out.println("DEBUG1: PC2 Validator command pattern (before replacement): '" + cmdPattern + "'");
       
@@ -1113,13 +1121,27 @@ public class Executable extends Plugin implements IExecutable {
       String options = getClicsValidatorOptionString();
       
       String args = "{:infile} {:ansfile} {:feedbackdir}";
+      
+      String validatorName;
+      if (problem!=null && problem.getClicsValidatorSettings()!=null) {
+          validatorName = problem.getClicsValidatorSettings().getValidatorProgramName() ;
+      } else {
+          validatorName = Constants.CLICS_VALIDATOR_NAME;
+      }
 
-      String cmdPattern = "java -cp " + pathToPC2Jar + "pc2.jar" + " edu.csus.ecs.pc2.validator.ClicsValidator " + args + options ;
+      //depending on how it is run (e.g. from a Test directory), pathToPC2Jar may or may not add a file separator at the end;
+      // one is added here to insure it is present
+      String cmdPattern = "java -cp " + pathToPC2Jar + File.separator + "pc2.jar" + " " + validatorName + " " + args + " " + options ;
 
-      System.out.println("DEBUG: CLICS Validator command pattern: '" + cmdPattern + "'");
+//      System.out.println("DEBUG1: CLICS Validator command pattern (before replacement): '" + cmdPattern + "'");
+      
+      //get rid of any double-fileSeparators
+      String doubleFS = File.separator + File.separator;
+      cmdPattern = cmdPattern.replaceAll(Matcher.quoteReplacement(doubleFS),  Matcher.quoteReplacement(File.separator));
+      
+      System.out.println("DEBUG2: CLICS Validator command pattern (after replacement):  '" + cmdPattern + "'");
       
       return cmdPattern;
-
     }
  
     /**
