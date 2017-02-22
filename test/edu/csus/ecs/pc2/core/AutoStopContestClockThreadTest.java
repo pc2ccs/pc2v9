@@ -16,6 +16,10 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 public class AutoStopContestClockThreadTest extends AbstractTestCase {
 
     public void testAutoStop() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
 
         String outputDir = getOutputDataDirectory();
 

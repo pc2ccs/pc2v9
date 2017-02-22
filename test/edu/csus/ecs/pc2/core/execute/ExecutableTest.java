@@ -769,6 +769,10 @@ public class ExecutableTest extends AbstractTestCase {
 
     public void testMultipleTestCaseFromSTDIN() throws Exception {
 
+        if (isFastJUnitTesting()){
+            return;
+        }
+
         String sumitFilename = getSamplesSourceFilename("ISumit.java");
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
@@ -822,6 +826,11 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     public void testMultipleTestCaseExternalFile() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
+
 
         // String testBaseDirname = getDataDirectory(this.getName());
         // ensureDirectory(testBaseDirname);
@@ -853,6 +862,11 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     public void testMultipleTestCaseInternalFile() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
+
 
         // String testBaseDirname = getDataDirectory(this.getName());
         // ensureDirectory(testBaseDirname);

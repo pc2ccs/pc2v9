@@ -169,6 +169,10 @@ public class ContestClockDisplayTest extends AbstractTestCase {
     
     public void testgetScheduleOrRemainingTime() throws Exception {
         
+        if (isFastJUnitTesting()){
+            return;
+        }
+        
         IInternalContest contest = sample.createStandardContest();
         
         Account account = getAdminAccount(contest);

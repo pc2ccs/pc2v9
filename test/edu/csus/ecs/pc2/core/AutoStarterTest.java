@@ -117,6 +117,10 @@ public class AutoStarterTest extends AbstractTestCase {
 
     public void testgetRemainingTimeMs() throws Exception {
         
+        if (isFastJUnitTesting()){
+            return;
+        }
+        
         String dir = getOutputDataDirectory();
         ensureDirectory(dir);
         String logname = getName() + ".log";
@@ -181,6 +185,10 @@ public class AutoStarterTest extends AbstractTestCase {
     }
     
     public void testStartThenStopClear() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
         
         String logname = getName() + ".log";
         AutoStarter autoStarter = createAutoStarter(logname);

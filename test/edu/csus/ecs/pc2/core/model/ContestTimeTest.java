@@ -115,6 +115,10 @@ public class ContestTimeTest extends AbstractTestCase {
      * @throws Exception
      */
     public void testTimeElements() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
 
         String testName = this.getName();
 
