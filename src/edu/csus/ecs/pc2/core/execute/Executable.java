@@ -1716,8 +1716,9 @@ public class Executable extends Plugin implements IExecutable {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
                 executionData.setRunTimeLimitExceeded(executionTimer.isRunTimeLimitExceeded());
-                // SOMEDAY - this happens much too much find out why time limit is 10 when should be 30 by default.
-                log.info("Run exceeded time limit " + problem.getTimeOutInSeconds() + " secs, Run = " + run);
+                if (executionTimer.isRunTimeLimitExceeded()) {
+                    log.info("Run exceeded problem time limit of " + problem.getTimeOutInSeconds() + " secs: actual run time = " + executionData.getExecuteTimeMS() + " msec;  Run = " + run);                    
+                }
             }
 
             if (process != null) {
