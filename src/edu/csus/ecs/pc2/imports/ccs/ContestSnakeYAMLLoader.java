@@ -49,6 +49,7 @@ import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
@@ -861,6 +862,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             loadPc2ProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, dataFileName, answerFileName);
         } else {
             loadCCSProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles);
+
+            // validator_flags: options are: [case_sensitive] [space_change_sensitive] [float_absolute_tolerance FLOAT] [float_tolerance FLOAT]
+            // ex. validator_flags: float_tolerance 1e-6
+            
+            String validatorFlags = fetchValue(content, IContestLoader.VALIDATOR_FLAGS_KEY);
+            
+            if (validatorFlags != null && validatorFlags.trim().length() > 0) {
+                try {
+                    ClicsValidatorSettings settings = new ClicsValidatorSettings(validatorFlags);
+                    problem.setCLICSValidatorSettings(settings);
+                } catch (RuntimeException e) {
+                    throw new YamlLoadException("For problem " + problem.getShortName() + ", invalid validator flags '" + validatorFlags + "' " + e.getMessage(), e.getCause());
+                }
+            }
         }
 
         Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
@@ -1464,7 +1479,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
-
+        
         return problem;
     }
 

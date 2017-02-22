@@ -108,6 +108,8 @@ public interface IContestLoader {
     String OVERRIDE_VALIDATOR_KEY = "override-validator";
 
     String VALIDATOR_KEY = "validator";
+    
+    String VALIDATOR_FLAGS_KEY = "validator_flags";
 
     String USING_PC2_VALIDATOR = "use-internal-validator";
 

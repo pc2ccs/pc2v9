@@ -567,6 +567,13 @@ public class ExportYAML {
         }
 
         problemWriter.println();
+        if (problem.getClicsValidatorSettings() != null && problem.getClicsValidatorSettings().toString().trim().length() > 0){
+            problemWriter.println(IContestLoader.VALIDATOR_FLAGS_KEY + ": " + problem.getClicsValidatorSettings());
+        } else {
+            problemWriter.println("# "+ IContestLoader.VALIDATOR_FLAGS_KEY + ": ");
+        }
+        
+        problemWriter.println();
         
         problemWriter.println(IContestLoader.LIMITS_KEY + ":");
         problemWriter.println(PAD4 + "timeout: " + problem.getTimeOutInSeconds());

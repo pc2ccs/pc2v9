@@ -43,6 +43,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
 
 /**
  * Unit tests.
@@ -299,7 +300,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String dir = getDataDirectory(this.getName());
 
         String problemShortName = "td";
-//        ensureDirectory(dir);
+        ensureDirectory(dir);
 
 //        String filename = dir + File.separator + problemShortName + File.separator +IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
 //        System.out.println("filename " + filename);
@@ -330,7 +331,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         assertJudgementTypes(problem2, false, true, true);
     }
-
+    
 
 
     /**
@@ -2149,6 +2150,82 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         assertEquals("Problem short name apl", "apl", problems[0].getShortName());
         assertEquals("Problem short name barcode", "barcodes", problems[1].getShortName());
+    }
+    
+    /**
+     * Test loading of 
+     * @throws Exception
+     */
+    public void testCLICSJudgementOptionsLoad() throws Exception {
+        
+        String dir = getDataDirectory(this.getName());
+
+        String problemShortName = "prob1";
+//        ensureDirectory(dir);
+
+//        String filename = dir + File.separator + problemShortName + File.separator +IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
+//        System.out.println("filename " + filename);
+//        editFile(filename);
+
+//        startExplorer(dir);
+        String problemTitlte = "CLICS Options"; // note also set in problem.yaml
+        Problem problem = new Problem(problemTitlte);
+        problem.setShortName("BeforeLoad2");
+
+        assertJudgementTypes(problem, false, false, false);
+
+        IInternalContest contest = new InternalContest();
+
+        problem.setShortName(problemShortName);
+
+        boolean overrideUsePc2Validator = false;
+
+        loader.loadProblemInformationAndDataFiles(contest, dir, problem, overrideUsePc2Validator);
+        
+        Problem problemDos = new Problem("Le Deux");
+        problemDos.setShortName("prob2");
+        
+        loader.loadProblemInformationAndDataFiles(contest, dir, problemDos, overrideUsePc2Validator);
+
+        Problem[] problems = contest.getProblems();
+
+        assertEquals("Expecting number of problems ", 2, problems.length);
+
+        Problem problem1 = problems[0];
+
+        assertEquals("Problem One Title", problem1.getDisplayName());
+
+        // validator_flags: float_tolerance 1e-6
+        String expecting = "float_absolute_tolerance 1.0E-6 float_relative_tolerance 1.0E-6";
+        
+        assertEquals(expecting, problem1.getClicsValidatorSettings().toString());
+
+        ClicsValidatorSettings settings = problem1.getClicsValidatorSettings();
+        assertFalse("case_sensitive", settings.isCaseSensitive());
+        assertTrue("float_absolute_tolerance specified", settings.isFloatAbsoluteToleranceSpecified());
+        assertTrue("float_relative_tolerance", settings.isFloatRelativeToleranceSpecified());
+        assertFalse("space_change_sensitive ", settings.isSpaceSensitive());
+        
+        assertEquals(1.0E-6, settings.getFloatAbsoluteTolerance());
+        assertEquals(1.0E-6, settings.getFloatRelativeTolerance());
+        
+
+        Problem prob2 = problems[1];
+
+        assertEquals("Two too to tutu", prob2.getDisplayName());
+
+        // validator_flags: case_sensitive space_change_sensitive float_absolute_tolerance 4.0011122 float_relative_tolerance 4.0042354
+        expecting = "case_sensitive space_change_sensitive float_absolute_tolerance 4.0011122 float_relative_tolerance 4.0042354";
+        assertEquals(expecting, prob2.getClicsValidatorSettings().toString());
+
+        settings = prob2.getClicsValidatorSettings();
+        assertTrue("case_sensitive", settings.isCaseSensitive());
+        assertTrue("float_absolute_tolerance specified", settings.isFloatAbsoluteToleranceSpecified());
+        assertTrue("float_relative_tolerance", settings.isFloatRelativeToleranceSpecified());
+        assertTrue("space_change_sensitive ", settings.isSpaceSensitive());
+        
+        assertEquals(4.0011122, settings.getFloatAbsoluteTolerance());
+        assertEquals(4.0042354, settings.getFloatRelativeTolerance());
     }
 }
 

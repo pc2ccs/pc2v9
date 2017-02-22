@@ -1,0 +1,28 @@
+#
+# Problem td for testJudgementTypesinProblemYaml
+#
+
+source: me.
+author: Douglas A. Lane
+license: 
+rights_owner: Douglas A. Lane
+
+validator_flags: case_sensitive space_change_sensitive float_absolute_tolerance 4.0011122 float_relative_tolerance 4.0042354
+
+# load-data-files: false
+
+# datafile: td.dat
+# ansfile: td.ans
+
+computer-judged: false
+manual-review: true
+send-prelim-judgement: true
+
+limits: 
+   timeout: 120
+
+input: 
+   readFromSTDIN: false
+
+
+

@@ -101,13 +101,12 @@ public class ContestYAMLLoaderTest extends AbstractTestCase {
      * @throws Exception
      */
     public void testLoaderMethods() throws Exception {
-
-        IInternalContest contest = loader.fromYaml(null, new String[0], "NAD");
-        assertNotNull(contest);
         
 //        editFile(getContestYamlTestFilename());
 
         String[] contents = Utilities.loadFile(getContestYamlTestFilename());
+        IInternalContest contest = loader.fromYaml(null, contents, getDataDirectory());
+        assertNotNull(contest);
 
         assertFalse("File missing " + getContestYamlTestFilename(), contents.length == 0);
 
