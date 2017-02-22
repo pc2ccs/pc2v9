@@ -1188,7 +1188,7 @@ public class ExecutableTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
-    public void testValidationFalurue() throws Exception {
+    public void testValidationFailure() throws Exception {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
