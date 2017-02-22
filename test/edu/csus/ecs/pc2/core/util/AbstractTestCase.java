@@ -11,6 +11,7 @@ import java.io.StringReader;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.logging.ConsoleHandler;
@@ -120,6 +121,15 @@ public class AbstractTestCase extends TestCase {
     public static final String HELLO_SOURCE_FILENAME = "hello.java";
     
     public static final String SUMIT_SOURCE_FILENAME = "Sumit.java";
+
+    /**
+     * Environment variable to use fast test.
+     * 
+     * If {@value #ENV_KEY_FASTTEST} is defined then long tests will be skipped.
+     * 
+     * @see #isFastJUnitTesting()
+     */
+    private static final String ENV_KEY_FASTTEST = "pc2fasttest";
     
     private PermissionGroup permissionGroup = new PermissionGroup();
 
@@ -1211,9 +1221,19 @@ public class AbstractTestCase extends TestCase {
      * @return true to skip, else false.
      */
     public boolean isFastJUnitTesting() {
+
+        if (isInEnvironment(ENV_KEY_FASTTEST)) {
+            return true;
+        }
+
         return fastJUnitTesting;
     }
     
+
+    private boolean isInEnvironment(String string) {
+        Map<String, String> map = System.getenv();
+        return map.containsKey(string);
+    }
 
     /**
      * Test xml tag for value, compare against expected value.
