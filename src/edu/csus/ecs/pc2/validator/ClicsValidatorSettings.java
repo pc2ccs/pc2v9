@@ -93,7 +93,7 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
             
             //process each separate string option
             for (int i=0; i<opts.length; i++) {
-                System.out.println ("DEBUG: Processing option '" + opts[i] + "'");
+//                System.out.println ("DEBUG: Processing option '" + opts[i] + "'");
                 
                 switch (opts[i]) {
                     case CLICS_VTOKEN_CASE_SENSITIVE:
