@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.validator;
+package edu.csus.ecs.pc2.validator.pc2Validator;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -7,6 +7,7 @@ import java.util.UUID;
 import edu.csus.ecs.pc2.core.execute.IResultsParser;
 import edu.csus.ecs.pc2.core.execute.XMLResultsParser;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.validator.PC2Validator;
 
 /**
  * JUnit test cases for Validator.
@@ -16,7 +17,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  */
 
 // $HeadURL$
-public class ValidatorTest extends AbstractTestCase {
+public class PC2ValidatorTest extends AbstractTestCase {
 
     private boolean unitDebug = true;
 
