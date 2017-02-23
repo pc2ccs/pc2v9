@@ -9,12 +9,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -36,11 +39,6 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-
-import javax.swing.JLabel;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  * Multiple Test Data set UI.
@@ -300,7 +298,9 @@ public class MultipleDataSetPane extends JPanePlugin {
     }
 
     public ProblemDataFiles getProblemDataFiles() {
-        dump(tableModel.getFiles(), "populateUI debug 22 C");
+        if (Utilities.isDebugMode()) {
+            dump(tableModel.getFiles(), "populateUI debug 22 C");
+        }
         return tableModel.getFiles();
     }
 
@@ -335,8 +335,10 @@ public class MultipleDataSetPane extends JPanePlugin {
             return true;
         }
 
-        System.out.println("debug 22 Are problemId's identical ?" + //
+        if (Utilities.isDebugMode()) {
+            System.out.println("debug 22 Are problemId's identical ?" + //
                 problemDataFiles.getProblemId().equals(originalFiles.getProblemId()));
+        }
 
         return false;
     }
