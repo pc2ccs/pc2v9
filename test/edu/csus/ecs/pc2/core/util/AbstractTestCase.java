@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -43,6 +44,7 @@ import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.LogFormatter;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -121,7 +123,7 @@ public class AbstractTestCase extends TestCase {
     public static final String HELLO_SOURCE_FILENAME = "hello.java";
     
     public static final String SUMIT_SOURCE_FILENAME = "Sumit.java";
-
+    
     /**
      * Environment variable to use fast test.
      * 
@@ -1103,6 +1105,24 @@ public class AbstractTestCase extends TestCase {
      */
     public void addConsoleHandler(Log log) {
         ConsoleHandler consoleHandler = new ConsoleHandler();
+        log.addHandler(consoleHandler);
+    }
+    
+    /**
+     * Add output to console.
+     * 
+     * Example of verbose log entry:
+     * 170222 074047.361|INFO|main|testCorruptSettingsFile|Logging started for testCorruptSettingsFile
+     * 
+     * @param log
+     * @param verbose prefix each line with date,time|Level|method name|
+     */
+    public void addConsoleHandler(Log log, boolean verbose) {
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        if (verbose) {
+            consoleHandler.setLevel(Level.ALL);
+            consoleHandler.setFormatter(new LogFormatter(true));
+        }
         log.addHandler(consoleHandler);
     }
 

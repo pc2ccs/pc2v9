@@ -6,15 +6,17 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * Unit test.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ContestSummaryReportsTest extends AbstractTestCase {
 
-    public void testNewReports() throws Exception {
+    /**
+     * Test report names
+     * @throws Exception
+     */
+    public void testReportNames() throws Exception {
 
-        String[] names = {
+        String[] expectedNames = {
                 //
                 "Fastest Solutions Summary", //
                 "Fastest Solutions Per Problem", //
@@ -37,7 +39,7 @@ public class ContestSummaryReportsTest extends AbstractTestCase {
                 "groups.tsv", //
                 "scoreboard.tsv", //
                 "submissions.tsv", //
-                "Event Feed XML for ICPC Tools Resolver", //
+                "ICPC Tools Event Feed", //
         };
 
         ContestSummaryReports summaryReports = new ContestSummaryReports();
@@ -50,9 +52,18 @@ public class ContestSummaryReportsTest extends AbstractTestCase {
         for (IReport iReport : list) {
 
             String actual = iReport.getReportTitle();
-            assertEquals("Expecting report name ", names[i], actual);
+            assertEquals("Expecting report name ", expectedNames[i], actual);
+//            System.out.println(quote(actual)+", //");  // output new expected data
             i++;
         }
+    }
+    
+    /**
+     * Surround by a double quote
+     */
+    public String quote(String string) {
+        return "\"" + string + "\"";
+//        return "'" + string + "'";
     }
 
 }
