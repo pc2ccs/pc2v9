@@ -30,8 +30,8 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
     public static final boolean CLICS_DEFAULT_SPACE_SENSITIVITY = false;
     public static final boolean CLICS_DEFAULT_IS_FLOAT_RELATIVE_TOLERANCE_SPECIFIED = false;
     public static final boolean CLICS_DEFAULT_IS_FLOAT_ABSOLUTE_TOLERANCE_SPECIFIED = false;
-    public static final double CLICS_DEFAULT_FLOAT_RELATIVE_TOLERANCE = -1.0;
-    public static final double CLICS_DEFAULT_FLOAT_ABSOLUTE_TOLERANCE = -1.0;
+    public static final double CLICS_DEFAULT_FLOAT_RELATIVE_TOLERANCE = 0.0;
+    public static final double CLICS_DEFAULT_FLOAT_ABSOLUTE_TOLERANCE = 0.0;
     
     private String validatorProgramName ;
     private String validatorCommandLine ;
@@ -230,32 +230,59 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
     }
 
     /**
-     * Returns the current float relative tolerance value.
-     * @return the floatRelativeTolerance
+     * Returns the current float relative tolerance value if one has been specified; 
+     * if no float relative tolerance has been specified, returns the default relative tolerance value
+     * defined by {@link ClicsValidatorSettings#CLICS_DEFAULT_FLOAT_RELATIVE_TOLERANCE}
+     * (normally zero).
+     * @return the defined floatRelativeTolerance, or the default float relative tolerance if
+     *          no float relative tolerance has been set
      */
     public double getFloatRelativeTolerance() {
-        return floatRelativeTolerance;
+        if (this.isFloatRelativeToleranceSpecified()) {
+            return floatRelativeTolerance;
+        } else {
+            return CLICS_DEFAULT_FLOAT_RELATIVE_TOLERANCE;
+        }
     }
 
     /**
-     * Sets the float relative tolerance to the specified value.
+     * Sets the float relative tolerance to the specified value, and marks this
+     * ClicsValidatorSettings object has having a specified float relative tolerance.
+     * 
      * @param floatRelativeTolerance the float relative tolerance value to set
      */
     public void setFloatRelativeTolerance(double floatRelativeTolerance) {
         this.floatRelativeTolerance = floatRelativeTolerance;
         this.isFloatRelativeToleranceSpecified = true;
     }
-
+    
     /**
-     * Returns the current float absolute tolerance value.
-     * @return the floatAbsoluteTolerance
+     * Marks this ClicsValidatorSettings object as not having any specified float relative tolerance.
+     */
+    public void disableFloatRelativeTolerance() {
+        this.isFloatRelativeToleranceSpecified = false ;
+    }
+    
+    /**
+     * Returns the current float absolute tolerance value if one has been specified; 
+     * if no float absolute tolerance has been specified, returns the default absolute tolerance value
+     * defined by {@link ClicsValidatorSettings#CLICS_DEFAULT_FLOAT_ABSOLUTE_TOLERANCE}
+     * (normally zero).
+     * @return the defined float absolute tolerance, or the default float absolute tolerance if
+     *          no float absolute tolerance has been set
      */
     public double getFloatAbsoluteTolerance() {
-        return floatAbsoluteTolerance;
+        if (this.isFloatAbsoluteToleranceSpecified()) {
+            return floatAbsoluteTolerance;
+        } else {
+            return CLICS_DEFAULT_FLOAT_ABSOLUTE_TOLERANCE ;
+        }
     }
 
     /**
-     * Sets the float absolute tolerance to the specified value.
+     * Sets the float absolute tolerance to the specified value, and marks this
+     * ClicsValidatorSettings object has having a float absolute tolerance value.
+     * 
      * @param floatAbsoluteTolerance the float absolute tolerance value to set
      */
     public void setFloatAbsoluteTolerance(double floatAbsoluteTolerance) {
@@ -263,6 +290,13 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
         this.isFloatAbsoluteToleranceSpecified = true;
     }
 
+    /**
+     * Marks this ClicsValidatorSettings object as not having any specified float absolute tolerance.
+     */
+    public void disableFloatAbsoluteTolerance() {
+        this.isFloatAbsoluteToleranceSpecified = false ;
+    }
+    
     /**
      * Returns the flag indicating whether float relative tolerance has been specified for this collection of settings.
      * @return the isFloatRelativeToleranceSpecified flag
