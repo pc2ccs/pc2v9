@@ -429,8 +429,10 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (!validateProblemFields()) {
-            // new problem is invalid, just return, message issued by validateProblemFields
-//            System.err.println ("DEBUG: validateProblemFields() returned false");
+            // new problem is invalid, just return; message issued by validateProblemFields
+            if (debug22EditProblem) {
+                System.err.println ("DEBUG: validateProblemFields() returned false");
+            }
             return;
         }
 
@@ -1863,7 +1865,7 @@ public class EditProblemPane extends JPanePlugin {
     private void setForm(Problem inProblem, ProblemDataFiles problemDataFiles) {
 
         problem = inProblem;
-        System.out.println (inProblem.toStringDetails());
+//        System.out.println (inProblem.toStringDetails());
         
         originalProblemDataFiles = problemDataFiles;
 
@@ -2036,7 +2038,7 @@ public class EditProblemPane extends JPanePlugin {
   
         //update the Clics Validator settings in the GUI from the Problem
         CustomValidatorSettings customSettings = inProblem.getCustomValidatorSettings().clone();
-        System.out.println (customSettings);
+//        System.out.println (customSettings);
         if (customSettings!=null) {
             
             //set the Validator Program name
@@ -3073,7 +3075,7 @@ public class EditProblemPane extends JPanePlugin {
     protected void showFilesDiff(String fileOne, String fileTwo) {
 
         String command = "gvim.exe -d " + fileOne + " " + fileTwo;
-        System.out.println("cmd = " + command);
+//        System.out.println("cmd = " + command);
         try {
             Runtime.getRuntime().exec(command);
         } catch (Exception e) {
@@ -3674,7 +3676,9 @@ public class EditProblemPane extends JPanePlugin {
             }
 
             String fileNameTwo = createProblemReport(newProblem, newProblemDataFiles, "stuf2");
-            System.out.println("Created problem report " + fileNameOne);
+            if (debug22EditProblem) {
+                System.out.println("Created problem report " + fileNameOne);
+            }
 
             showFilesDiff(fileNameOne, fileNameTwo);
         } catch (Exception e) {
@@ -3727,12 +3731,16 @@ public class EditProblemPane extends JPanePlugin {
             String[] filelist = exportYAML.writeProblemYAML(getContest(), newProblem, problemYamlFile, newProblemDataFiles);
 
             String results = compareDirectories(lastSaveDirectory + File.separator + currentLetter, nextDirectory);
-            System.out.println("Comparison : " + results);
+            
+            if (debug22EditProblem) {
 
-            System.out.println("Last dir: " + lastSaveDirectory);
-            System.out.println("Wrote " + problemYamlFile);
-            for (String string : filelist) {
-                System.out.println("Wrote " + string);
+                System.out.println("Comparison : " + results);
+
+                System.out.println("Last dir: " + lastSaveDirectory);
+                System.out.println("Wrote " + problemYamlFile);
+                for (String string : filelist) {
+                    System.out.println("Wrote " + string);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace(); // debug 22
@@ -3752,7 +3760,10 @@ public class EditProblemPane extends JPanePlugin {
         File file = new File(nextDirectory);
 
         while (file.isDirectory()) {
-            System.out.println("Found directory: " + nextDirectory);
+            
+            if (debug22EditProblem) {
+                System.out.println("Found directory: " + nextDirectory);
+            }
 
             letter++;
             nextDirectory = directory + File.separator + letter;
@@ -3773,7 +3784,9 @@ public class EditProblemPane extends JPanePlugin {
         File file = new File(nextDirectory);
 
         while (file.isDirectory()) {
-            System.out.println("Found directory: " + nextDirectory);
+            if (debug22EditProblem) {
+                System.out.println("Found directory: " + nextDirectory);
+            }
 
             letter++;
             nextDirectory = directory + File.separator + letter;
@@ -3782,7 +3795,10 @@ public class EditProblemPane extends JPanePlugin {
 
         if (!file.isDirectory()) {
             file.mkdirs();
-            System.out.println("Created dir " + nextDirectory);
+            
+            if (debug22EditProblem) {
+                System.out.println("Created dir " + nextDirectory);
+            }
         }
 
         return nextDirectory;
