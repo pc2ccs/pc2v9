@@ -703,8 +703,8 @@ public class ExecutableTest extends AbstractTestCase {
      * - a program that produces a floating-point output value that matches exactly the judge's answer when relative tolerance is disabled (should succeed)
      * - a program that produces a floating point value that doesn't match exactly the judge's answer when relative tolerance is disabled (should fail)
      * - a program that produces a floating-point value that matches exactly the judge's answer with relative tolerance enabled (should succeed regardless of tolerance value)
-     * - a program that produces a floating-point value within the specified tolerance of the judge's answer (should succeed)
-     * - a program that produces a floating-point value outside the specified tolerance of the judge's answer (should fail)
+     * - a program that produces a floating-point value within the specified relative tolerance of the judge's answer (should succeed)
+     * - a program that produces a floating-point value outside the specified relative tolerance of the judge's answer (should fail)
      * 
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
@@ -712,9 +712,10 @@ public class ExecutableTest extends AbstractTestCase {
         
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
-        //set the problem state to ignore relative tolerance
+        //set the problem state to ignore tolerances
         iSumitFloatOutputProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatRelativeTolerance();
+        iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatAbsoluteTolerance();
         
         // submit a program that produces a floating-point output value that matches exactly the judge's answer 
         // when relative tolerance is disabled (should succeed)
@@ -759,7 +760,7 @@ public class ExecutableTest extends AbstractTestCase {
         
         // submit a program that produces a floating-point value within the specified tolerance of the judge's answer (should succeed)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatRelativeTolerance(0.15);
-        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 75, 175);
+        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 76, 176);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutputTenPercentOff.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorRelativeToleranceOption(): ISumitFloatOutputTenPercentOff with relative tolerance of 15% (should succeed)");
@@ -767,10 +768,89 @@ public class ExecutableTest extends AbstractTestCase {
         
         // submit a program that produces a floating-point value outside the specified tolerance of the judge's answer (should fail)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatRelativeTolerance(0.05);
-        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 75, 175);
+        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 77, 177);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutputTenPercentOff.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorRelativeToleranceOption(): ISumitFloatOutputTenPercentOff with relative tolerance of 5% (should fail)");
+        runExecutableTest(run, runFiles, false, clicsNoJudgement);
+        
+    }
+    
+    /**
+     * Verifies that the Clics Validator returns the correct results for all combinations
+     * of the "Absolute Tolerance" option. The combinations are:  
+     * - a program that produces a floating-point output value that matches exactly the judge's answer when absolute tolerance is disabled (should succeed)
+     * - a program that produces a floating point value that doesn't match exactly the judge's answer when absolute tolerance is disabled (should fail)
+     * - a program that produces a floating-point value that matches exactly the judge's answer with absolute tolerance enabled (should succeed regardless of tolerance value)
+     * - a program that produces a floating-point value within the specified absolute tolerance of the judge's answer (should succeed)
+     * - a program that produces a floating-point value outside the specified absolute tolerance of the judge's answer (should fail)
+     * 
+     * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
+     */
+    public void testClicsValidatorAbsoluteToleranceOption() throws Exception {
+        
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        //set the problem state to ignore tolerances
+        iSumitFloatOutputProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatAbsoluteTolerance();
+        iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatRelativeTolerance();
+        
+        // submit a program that produces a floating-point output value that matches exactly the judge's answer 
+        // when absolute tolerance is disabled (should succeed)
+        Run run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 81, 181);
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutput.java"));
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+//        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutput with absolute tolerance disabled (should succeed)");
+        runExecutableTest(run, runFiles, true, clicsYesJudgement);
+        
+        // submit a program that produces a floating point value that doesn't match exactly the judge's answer 
+        // when absolute tolerance is disabled (should fail)
+        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 82, 182);
+        runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutputTenUnitsOff.java"));
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+//        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutputTenUnitsOff with absolute tolerance disabled (should fail)");
+        runExecutableTest(run, runFiles, false, clicsNoJudgement);
+        
+        // submit a program that produces a floating-point value that matches exactly the judge's answer 
+        // with absolute tolerance enabled (should succeed regardless of tolerance value)
+        iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(0.0);
+        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 83, 183);
+        runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutput.java"));
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+//        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutput with absolute tolerance of zero (should succeed)");
+        runExecutableTest(run, runFiles, true, clicsYesJudgement);
+        
+        // try the same thing with a wildly different absolute tolerance value (should succeed)
+        iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(10000.0);
+        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 84, 184);
+        runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutput.java"));
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+//        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutput with absolute tolerance of 10000 (should succeed)");
+        runExecutableTest(run, runFiles, true, clicsYesJudgement);
+        
+        // try the same thing with another wildly different absolute tolerance value (should succeed)
+        iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(-10000.0);
+        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 85, 185);
+        runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutput.java"));
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+//        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutput with absolute tolerance of -10000 (should succeed)");
+        runExecutableTest(run, runFiles, true, clicsYesJudgement);
+        
+        // submit a program that produces a floating-point value within the specified absolute tolerance of the judge's answer (should succeed)
+        iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(15.0);
+        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 86, 186);
+        runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutputTenUnitsOff.java"));
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+//        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutputTenUnitsOff with absolute tolerance of 15 (should succeed)");
+        runExecutableTest(run, runFiles, true, clicsYesJudgement);
+        
+        // submit a program that produces a floating-point value outside the specified tolerance of the judge's answer (should fail)
+        iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(5.0);
+        run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 87, 187);
+        runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutputTenUnitsOff.java"));
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+//        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutputTenUnitsOff with absolute tolerance of 5 (should fail)");
         runExecutableTest(run, runFiles, false, clicsNoJudgement);
         
     }
