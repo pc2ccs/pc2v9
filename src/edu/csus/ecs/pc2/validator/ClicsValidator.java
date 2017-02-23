@@ -111,8 +111,8 @@ public class ClicsValidator {
     private boolean isCaseSensitive = false;
     private boolean isSpaceSensitive = false;
     private boolean useFloatTolerance = false;
-    private double floatAbsTolerance = -1;
-    private double floatRelTolerance = -1;
+    private double floatAbsTolerance = ClicsValidatorSettings.CLICS_DEFAULT_FLOAT_ABSOLUTE_TOLERANCE;
+    private double floatRelTolerance = ClicsValidatorSettings.CLICS_DEFAULT_FLOAT_RELATIVE_TOLERANCE;
     
     
     public ClicsValidator(String inJudgeDataFile, String inJudgeAnswerFile, String inFeedbackDirName, String... options ) {
