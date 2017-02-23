@@ -32,7 +32,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.ClicsValidator;
 import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
-import edu.csus.ecs.pc2.validator.Validator;
+import edu.csus.ecs.pc2.validator.PC2Validator;
 
 /**
  * Test Executable class.
@@ -68,9 +68,9 @@ public class ExecutableTest extends AbstractTestCase {
 
     private Language javaLanguage = null;
 
-    private String pc2YesJudgement = Validator.JUDGEMENT_YES;
+    private String pc2YesJudgement = PC2Validator.JUDGEMENT_YES;
     
-    private String pc2NoJudgement = Validator.JUDGEMENT_NO_WRONG_ANSWER;
+    private String pc2NoJudgement = PC2Validator.JUDGEMENT_NO_WRONG_ANSWER;
     
     private String clicsYesJudgement = ClicsValidator.CLICS_CORRECT_ANSWER_MSG;
     
