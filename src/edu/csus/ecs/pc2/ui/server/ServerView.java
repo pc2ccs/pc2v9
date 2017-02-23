@@ -585,16 +585,19 @@ public class ServerView extends JFrame implements UIPlugin {
      * @param tabbedPane
      * @param name
      */
-    protected void setSelectedTab(JTabbedPane tabbedPane, String name) {
-        
-        for (int i = 0; i < tabbedPane.getComponentCount(); i ++){
-            String tabTitle = tabbedPane.getTitleAt(i);
-//            System.err.println("For "+tabbedPane.getName()+" found "+tabTitle);
-            if (tabTitle != null && name.equals(tabTitle)){
-//                System.err.println("For "+tabbedPane.getName()+"   selected "+name);
-                tabbedPane.setSelectedIndex(i);
+    protected void setSelectedTab(final JTabbedPane tabbedPane, final String name) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < tabbedPane.getComponentCount(); i++) {
+                    String tabTitle = tabbedPane.getTitleAt(i);
+                    if (tabTitle != null && name.equals(tabTitle)) {
+                        tabbedPane.setSelectedIndex(i);
+                    }
+                }
             }
-        }
+        });
     }
 
     private void logException(Exception e) {
