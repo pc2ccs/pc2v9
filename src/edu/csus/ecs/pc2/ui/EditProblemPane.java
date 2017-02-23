@@ -4404,6 +4404,9 @@ public class EditProblemPane extends JPanePlugin {
                 throw new InvalidFieldValue("Invalid absolute tolerance value");
             }
             settings.setFloatAbsoluteTolerance(absTol);
+            
+        } else {
+            settings.disableFloatAbsoluteTolerance();
         }
         
         if (getFloatRelativeToleranceCheckBox().isSelected()) {
@@ -4416,6 +4419,9 @@ public class EditProblemPane extends JPanePlugin {
                 throw new InvalidFieldValue("Invalid relative tolerance value");
             }
             settings.setFloatRelativeTolerance(relTol);
+        
+        } else {
+            settings.disableFloatRelativeTolerance();
         }
         
         return settings;
