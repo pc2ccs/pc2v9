@@ -713,7 +713,7 @@ public class ExecutablePlugin extends Plugin implements IExecutable {
 
             /**
              * The internal command is set to: <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files] Where validator is
-             * Problem.INTERNAL_VALIDATOR_NAME aka "pc2.jar edu.csus.ecs.pc2.validator.Validator"
+             * Problem.INTERNAL_VALIDATOR_NAME aka "pc2.jar edu.csus.ecs.pc2.validator.PC2Validator"
              * 
              * So we need to prefix the command with java -jar <path to jar>
              */

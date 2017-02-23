@@ -623,7 +623,7 @@ public class PC2Validator {
      */
     public String getInternalValidatorCommandLine(int whichCommand, boolean ignoreCase) {
 
-        String javaCmd = "java edu.csus.ecs.pc2.validator.Validator";
+        String javaCmd = "java edu.csus.ecs.pc2.validator.PC2Validator";
         String commandLine = null;
         
         commandLine = javaCmd  + " {:infile} {:outfile} {:ansfile} {:resfile} -pc2 " + whichCommand;

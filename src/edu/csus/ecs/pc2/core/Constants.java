@@ -77,7 +77,7 @@ public final class Constants {
     /**
      * PC<sup>2</sup> Validator Program Name.
      */
-    public static final String PC2_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.Validator";
+    public static final String PC2_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.PC2Validator";
     
     /**
      * CLICS Validator Program Name.
