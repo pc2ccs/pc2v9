@@ -19,7 +19,7 @@ public final class CCSConstants {
     /**
      * Validator success exit code.
      */
-    public static final int VALIDATOR_JUDGED_SUCCESS_EXIT_CODE = 42;
+//    public static final int VALIDATOR_JUDGED_SUCCESS_EXIT_CODE = 42;
 
     /**
      * Validator failure exit code.
