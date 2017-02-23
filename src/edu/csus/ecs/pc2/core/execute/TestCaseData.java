@@ -72,7 +72,7 @@ public class TestCaseData extends AbstractElementObject {
         internalErrorMessage = null;
         failure = true;
 
-        if (validatorExitCode == ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE) {
+        if (validatorExitCode == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE) {
             failure = false;
         }
     }

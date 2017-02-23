@@ -1279,7 +1279,7 @@ public class Executable extends Plugin implements IExecutable {
         
         //save validation success (note that this refers to whether the validator completed successfully, 
         // not whether the run was judged "correct".
-        if (exitCode == ClicsValidator.CLICS_VALIDATOR_SUCCESS_EXIT_CODE || exitCode==ClicsValidator.CLICS_VALIDATOR_FAILURE_EXIT_CODE) {
+        if (exitCode == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE || exitCode==ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE) {
             executionData.setValidationSuccess(true);
         } else {
             executionData.setValidationSuccess(false);

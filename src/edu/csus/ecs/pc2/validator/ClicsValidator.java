@@ -86,8 +86,8 @@ import edu.csus.ecs.pc2.core.log.Log;
  */
 public class ClicsValidator {
 
-    static public final int CLICS_VALIDATOR_SUCCESS_EXIT_CODE = 42;
-    static public final int CLICS_VALIDATOR_FAILURE_EXIT_CODE = 43;
+    static public final int CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE = 42;
+    static public final int CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE = 43;
     static public final int CLICS_VALIDATOR_ERROR_EXIT_CODE = -39;
     
     //the judgement messages which can be returned in the "judgement.txt" feedback file in the feedback directory
@@ -297,7 +297,7 @@ public class ClicsValidator {
                                 log.severe("Error outputting validator feedback answer file");
                                 return CLICS_VALIDATOR_ERROR_EXIT_CODE;                                                                            
                             }
-                            return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
+                            return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
                         }
                     }
                     
@@ -312,7 +312,7 @@ public class ClicsValidator {
                             log.severe("Error outputting validator feedback answer file");
                             return CLICS_VALIDATOR_ERROR_EXIT_CODE;                                            
                         }
-                        return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
+                        return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
 
                     }
                 } catch (IOException e) {
@@ -340,7 +340,7 @@ public class ClicsValidator {
                 } catch (Exception e) {
                     return CLICS_VALIDATOR_ERROR_EXIT_CODE;
                 }
-                return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
+                return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
             }
                     
             
@@ -355,7 +355,7 @@ public class ClicsValidator {
             // (note that method areEquivalent() handles calling outputWrongAnswer() for various conditions if necessary)
             try {
                 if (!areEquivalent(nextJudgeToken, nextTeamToken)) {
-                    return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
+                    return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
                 }
             } catch (IOException e) {
                 log.severe("Error checking areEquivalent(" + nextJudgeToken + "," + nextTeamToken + ")");
@@ -376,7 +376,7 @@ public class ClicsValidator {
                     log.severe("Error outputting validator feedback answer file");
                     return CLICS_VALIDATOR_ERROR_EXIT_CODE;                                            
                 }
-                return CLICS_VALIDATOR_FAILURE_EXIT_CODE;
+                return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
             }
         } catch (IOException e) {
             log.severe("IOException processing team input stream (stdin): " + e.getMessage());
@@ -388,7 +388,7 @@ public class ClicsValidator {
         } catch (Exception e) {
             return CLICS_VALIDATOR_ERROR_EXIT_CODE;
         }
-        return CLICS_VALIDATOR_SUCCESS_EXIT_CODE;  
+        return CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE;  
     }//end method validate()
     
     /**
@@ -796,7 +796,7 @@ public class ClicsValidator {
         
         if (args.length < 3) {
             usage();
-            System.exit(CLICS_VALIDATOR_FAILURE_EXIT_CODE);
+            System.exit(CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE);
         }
         
         log = new Log("ClicsValidator.log");            
