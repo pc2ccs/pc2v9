@@ -1355,23 +1355,29 @@ public class Executable extends Plugin implements IExecutable {
     
     /**
      * Stores the results of the execution of a Custom Validator which uses the PC2 Validator Interface.
+     * Currently this method just delegates to {@link #storePC2ValidatorResults(String, Log)}; it is provided
+     * in the event of a future need to distinguish between the real (internal) PC2Validator and a Custom Validator
+     * which uses the PC2 Validator Interface.
      * 
      * @param resultsFileName the name of the file containing the results
      * @param log the Log to be used for logging
      */
     private void storeCustomPC2InterfaceValidatorResults(String resultsFileName, Log log) {
-        System.err.println ("WARNING: storeCustomPC2InterfaceValidatorResults() not implemented!");
+        storePC2ValidatorResults(resultsFileName, log);
     }
     
     /**
      * Stores the results of the execution of a Custom Validator which uses the Clics Validator Interface.
+     * Currently this method just delegates to {@link #storeClicsValidatorResults(int, String, Log)}; it is provided
+     * in the event of a future need to distinguish between the real (internal) ClicsValidator and a Custom Validator
+     * which uses the Clics Validator Interface.
      * 
      * @param exitcode the exitcode returned by the Custom Validator
      * @param feedbackDirPath the path to the feedback directory
      * @param log the Log to be used for logging
      */
     private void storeCustomClicsInterfaceValidatorResults(int exitcode, String feedbackDirPath, Log log) {
-        System.err.println ("WARNING: storeCustomClicsInterfaceValidatorResults() not implemented!");
+        storeClicsValidatorResults(exitcode, feedbackDirPath, log);
     }
     
     /**
