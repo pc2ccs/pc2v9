@@ -749,11 +749,13 @@ public class Executable extends Plugin implements IExecutable {
             throw new IllegalStateException("IllegalStateException: Problem is marked as validated but has no defined Validator");
         }
         
+        //when we get here, we have a command pattern for the specified validator and, if it is a custom validator,
+        //  we know there is an executable validator file
         
-        //Judge input data file name, either short name or fully qualified if external file.  {:infile}
+        //get Judge input data file name, either short name or fully qualified if external file.  {:infile}
         String judgeDataFilename =  problem.getDataFileName();
         
-        //Judge answer file name, either short name or fully qualified if external file.  {:ansfile}
+        //get Judge answer file name, either short name or fully qualified if external file.  {:ansfile}
         String judgeAnswerFilename = problem.getAnswerFileName();
 
         if (overwriteJudgesDataFiles) {
@@ -807,11 +809,12 @@ public class Executable extends Plugin implements IExecutable {
         cmdLine = replaceString(cmdLine, "{:outfile}", "estdout.pc2");
         cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
         
-        //the following is specific to the CLICS validator but needs to be done here for scope accessibility in the code below
+        //the following is specific to the CLICS validator but needs to be done here for scope accessibility in the code below (near line 1023)
         String feedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber + File.separator ;
         cmdLine = replaceString(cmdLine, "{:feedbackdir}", feedbackDirName); 
         
-        if (problem.isUsingCLICSValidator()) {
+        if (problem.isUsingCLICSValidator() ||
+                (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
 
             String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;
             
@@ -853,6 +856,8 @@ public class Executable extends Plugin implements IExecutable {
 
         log.log(Log.DEBUG, "command pattern after substitution: " + cmdLine);
 
+        //check if the command to be executed is a program residing in the current execute directory;
+        // if so, prepend the directory name onto the command name in the command line
         try {
             String actFilename = new String(cmdLine);
 
@@ -914,12 +919,13 @@ public class Executable extends Plugin implements IExecutable {
             // // waiting for the process to finish execution...
             // executionData.setValidationReturnCode(process.waitFor());
             
-            //if CLICS validator, redirect team output to STDIN
-            if (problem.isUsingCLICSValidator()) {
+            //if CLICS validator interface, redirect team output to STDIN
+            if (problem.isUsingCLICSValidator() || 
+                    (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
 
                 String teamOutputFileName = getTeamOutputFilename(dataSetNumber);
                 if (teamOutputFileName != null && new File(teamOutputFileName).exists()) {
-                    log.info("Sending team output file '" + getTeamOutputFilename(dataSetNumber) + "' to CLICS Validator stdin");
+                    log.info("Sending team output file '" + getTeamOutputFilename(dataSetNumber) + "' to Validator stdin");
 
                     BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
                     BufferedInputStream in = new BufferedInputStream(new FileInputStream(teamOutputFileName));
@@ -951,12 +957,24 @@ public class Executable extends Plugin implements IExecutable {
                 log.config("validatorCall() executionTimer == null");
             }
 
-            exitcode = process.exitValue();
-            log.info("validator process returned exit code " + exitcode);
-
             if (process != null) {
+                process.waitFor();
+                exitcode = process.exitValue();
+                log.info("validator process returned exit code " + exitcode);
+                executionData.setExecuteExitValue(exitcode);
                 process.destroy();
+            } else {
+                log.warning("Validator process is null");
+                return false;
             }
+            
+            //previously this code did the following instead of the above if/then/else:
+//            exitcode = process.exitValue();
+//            log.info("validator process returned exit code " + exitcode);
+//
+//            if (process != null) {
+//                process.destroy();
+//            }
 
             stdoutlog.close();
             stderrlog.close();
@@ -989,14 +1007,21 @@ public class Executable extends Plugin implements IExecutable {
         validatorStderrFilesnames.add(validatorStderrFilename);
 
 
-        if (problem.isUsingPC2Validator()) {
+        if (problem.isUsingPC2Validator() ||
+                (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface())) {
             
             boolean fileThere = new File(prefixExecuteDirname(resultsFileName)).exists();
 
             try {
                 if (fileThere) {
                 
-                    storePC2ValidatorResults(resultsFileName, log);
+                    if (problem.isUsingPC2Validator()) {
+                        storePC2ValidatorResults(resultsFileName, log);
+                    } else {
+                        if (problem.isUsingCustomValidator()) {
+                            storeCustomPC2InterfaceValidatorResults(resultsFileName, log);
+                        }
+                    }
                 
                 } else {
                     log.config("validationCall - Did not produce output results file " + resultsFileName);
@@ -1015,11 +1040,17 @@ public class Executable extends Plugin implements IExecutable {
             }
         } 
         
-        else if (problem.isUsingCLICSValidator()) {
+        else if (problem.isUsingCLICSValidator() ||
+                (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
             
             try {
                 String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;
-                storeClicsValidatorResults(exitcode, feedbackDirPath, log);
+                
+                if (problem.isUsingCLICSValidator()) {
+                    storeClicsValidatorResults(exitcode, feedbackDirPath, log);
+                } else if (problem.isUsingCustomValidator()) {
+                    storeCustomClicsInterfaceValidatorResults(exitcode, feedbackDirPath, log);
+                }
                 
             } catch (Exception e) {
                 
@@ -1319,6 +1350,28 @@ public class Executable extends Plugin implements IExecutable {
         } else {
             log.info("No CLICS validator feedback directory found"); 
         }
+    }
+    
+    
+    /**
+     * Stores the results of the execution of a Custom Validator which uses the PC2 Validator Interface.
+     * 
+     * @param resultsFileName the name of the file containing the results
+     * @param log the Log to be used for logging
+     */
+    private void storeCustomPC2InterfaceValidatorResults(String resultsFileName, Log log) {
+        System.err.println ("WARNING: storeCustomPC2InterfaceValidatorResults() not implemented!");
+    }
+    
+    /**
+     * Stores the results of the execution of a Custom Validator which uses the Clics Validator Interface.
+     * 
+     * @param exitcode the exitcode returned by the Custom Validator
+     * @param feedbackDirPath the path to the feedback directory
+     * @param log the Log to be used for logging
+     */
+    private void storeCustomClicsInterfaceValidatorResults(int exitcode, String feedbackDirPath, Log log) {
+        System.err.println ("WARNING: storeCustomClicsInterfaceValidatorResults() not implemented!");
     }
     
     /**
