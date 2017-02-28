@@ -2042,7 +2042,9 @@ public class EditProblemPane extends JPanePlugin {
         if (customSettings!=null) {
             
             //set the Validator Program name
-            getCustomValidatorExecutableProgramTextField().setText(customSettings.getCustomValidatorProgramName());
+            String validatorName = inProblemDataFiles.getValidatorFile().getAbsolutePath();
+            getCustomValidatorExecutableProgramTextField().setText(validatorName);
+//            getCustomValidatorExecutableProgramTextField().setText(customSettings.getCustomValidatorProgramName());
             getCustomValidatorExecutableProgramTextField().setToolTipText(customSettings.getCustomValidatorProgramName());
             
             //set the radio buttons indicating which Validator Standard the Problem uses
