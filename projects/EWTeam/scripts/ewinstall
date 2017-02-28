@@ -1,0 +1,178 @@
+#!/bin/sh
+#
+# File   : ewinstall
+# Purpose: Install EWTeam project to a web server location
+# Author : pc2@ecs.csus.edu
+#
+# ------------------------------------------------------------
+
+# directory to create and install under
+EWTEAM_TARG=pc2team
+
+# ------------------------------------------------------------
+usage()
+{
+  cat <<SAGE
+$0 [-h] [DIR] 
+
+Purpose: to install a EWTeam distribution
+
+where:
+
+DIR     directory to install to, will create DIR/$EWTEAM_TARG and install
+        into DIR/$EWTEAM_TARG
+
+-h      this listing
+
+SAGE
+
+  # print version info 
+
+  # uncomment
+  . `dirname $0`/pc2env 2>/dev/null
+  if [ -f $libdir/PC2JavaServer.jar ] ; then
+    java -cp $libdir/PC2JavaServer.jar  edu.csus.pc2.ewuteam.VersionInfo
+  fi
+}
+
+# ------------------------------------------------------------
+
+run_install()
+{
+  DIR=$1
+
+  # location ./pc2-9.5build/projects/EWTeam-2.3-3875.tar.gz
+
+  WD=`pwd`
+  DIST_NAME=`ls -t1r $WD/*/projects/EWT*tar.gz | tail -1`
+
+  if [ ! -f $DIST_NAME ] ; then
+
+    echo Cannot find EWTeam distribution under `pwd`
+
+    exit 6
+
+  fi 
+
+  TARG_DIR=$DIR/$EWTEAM_TARG
+
+  # writeable and does not exist
+  if [ -w $DIR -a ! -d $TARG_DIR ] ; then
+    mkdir -p $TARG_DIR
+  fi
+
+  if [ ! -d $TARG_DIR ] ; then
+    echo
+    echo Could not create directory: $TARG_DIR
+    echo
+    exit 5
+  fi
+
+  # Extract EWTeam dist
+  tar zxf $DIST_NAME
+
+  echo
+  echo Extracted $DIST_NAME
+  echo 
+
+  EW_DIST_DIR=`ls -t1dr $WD/EW*/dist 2>/dev/null | tail -1`
+  
+  if [ -n "$EWDEBUG" ] ; then
+    echo "debug DIST_NAME         : $DIST_NAME"
+    echo "debug EW_DIST_DIR       : $EW_DIST_DIR"
+    echo "debug DIR               : $DIR"
+    echo "debug TARG_DIR          : $TARG_DIR"
+  fi 
+
+#  *3) In the PC2 distribution, go to the projects folder, u=
+#  nzip the
+#  EWTeam-xxx.zip file, then go*
+#  *into the resulting EWTeam-xxx folder and then into the  dist
+#  (distribution) folder.*
+
+#  *4) Copy the contents of the EWTeam dist folder (the inde=
+#  x.html file plus the bin/,*
+
+  #
+  # Dir contents to copy 
+  #
+  DIRLIST="bin doc lib Login Team uploads"
+
+#  *doc/, lib/, Login/, Team/, and uploads/ folders and their contents) into
+
+
+  echo Copying files to $TARG_DIR
+  for D in $DIRLIST
+  do
+    echo    Copying $D files 
+    cp -r -p $EW_DIST_DIR/$D $TARG_DIR
+  done
+  echo Copying done.
+  echo 
+
+#  *5) Insure that the uploads/ folder on the web server is readable and
+#  writeable by the web*
+#  *server process and group.*
+
+  echo
+  echo Ensuring uploads is writeable 
+  echo
+  chmod 777 $TARG_DIR/uploads/
+  ls -ld $TARG_DIR/uploads/
+  echo
+
+#  *6) For security, insure that the permissions on the bin/ folder restrict
+#  access such that files in*
+#  *there are executable only by the owner. (There isn=E2=80=99t really anythi=
+#  ng in
+#  there you need to*
+#  *worry about, but some people worry anyway=E2=80=A6)*
+
+  # Add rwx for owner, remove all other permissions
+  chmod u+rwx,g-rwx,o-rwx $TARG_DIR/bin/*
+
+  # 
+  # Post install instructions
+  # 
+  cat <<POST_INSTALL
+
+Next Steps are:
+
+1.  Edit the pc2v9.ini ( vi $TARG_DIR/lib/pc2v9.ini ) change the localhost
+    "server=localhost:50002" to the pc2 server host name.
+
+2.  Run the ewrun to start EWTeam 
+
+    cd $TARG_DIR
+    ./bin/ewrun 
+  
+See the Appendix on "Team Clients"  in the PC2 Contest Administrator's
+Guide for additional information.  
+
+POST_INSTALL
+
+}
+
+# ------------------------------------------------------------
+# ------------------------------------------------------------
+
+if [ -z "$1" -o "$1" = "-h" ] ; then
+
+  usage
+
+else
+
+  DIR=$1
+  if [ ! -d "$DIR" ] ; then
+    echo
+    echo "Cannot install to directory \"$DIR\", No such directory"
+    echo
+    echo To create directory use: mkdir -p $DIR
+    exit 4
+  fi 
+
+  run_install $DIR
+
+fi 
+
+# eof ewinstall 
