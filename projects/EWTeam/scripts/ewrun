@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Purpose: Start the EW Java Bridge/Server
+# Author : pc2@ecs.csus.edu
+#
+
+. `dirname $0`/ewenv
+
+# MacOS or not
+if [ -f /mach_kernel ]; then
+  # set our dock name (otherwise defaults to Starter)
+  EWOPTS="-Xdock:name=`basename $0`"
+else
+  EWOPTS=""
+fi
+
+java $EWOPTS -Xms64M -Xmx1600M -cp $libdir/pc2.jar -jar $libdir/PC2JavaServer.jar
+
+# eof ewrun  
