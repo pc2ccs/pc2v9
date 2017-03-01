@@ -53,8 +53,8 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
         this.customValidatorProgramName = "";
         this.customPC2InterfaceValidatorCommandLine = Constants.DEFAULT_PC2_VALIDATOR_COMMAND;
         this.customCLICSInterfaceValidatorCommandLine = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
-        this.usePC2ValidatorInterface = true ;
-        this.useCLICSValidatorInterface = false;
+        this.usePC2ValidatorInterface = false ;
+        this.useCLICSValidatorInterface = true;
     }
 
 
