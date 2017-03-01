@@ -105,7 +105,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
     }
 
     /**
-     * @wbp.parser.constructor
+     * 
      */
     public MultipleFileViewer(Log log, String windowTitle, String paneTitle, String messageData, boolean isFile) {
 

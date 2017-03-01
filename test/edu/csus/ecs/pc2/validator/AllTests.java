@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.validator;
 
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorTest;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -18,9 +20,10 @@ public final class AllTests {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.util");
+        TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.validator");
         // $JUnit-BEGIN$
-        suite.addTestSuite(ValidatorTest.class);
+        suite.addTestSuite(PC2ValidatorTest.class);
+        suite.addTestSuite(ClicsValidatorTest.class);
         // $JUnit-END$
         return suite;
     }

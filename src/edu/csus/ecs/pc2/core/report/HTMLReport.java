@@ -193,8 +193,8 @@ public class HTMLReport implements IReport {
      * Creates a report name.
      * 
      * <pre>
-     * Form: report.<report title>[.extraPart].yyMMdd HHmmss.SSS.<extension>
-     * </p>
+     * Form: report.&lt;report title&gt;[.extraPart].yyMMdd HHmmss.SSS.&lt;extension&gt;
+     * </pre>
      * 
      * Will replace all spaces with underscores.
      * 

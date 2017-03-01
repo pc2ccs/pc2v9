@@ -34,8 +34,6 @@ public abstract class APIAbstractTest {
     /**
      * Print Test Output
      * 
-     * @param contest
-     * @param scrollyFrame
      */
     public abstract void printTest();
 

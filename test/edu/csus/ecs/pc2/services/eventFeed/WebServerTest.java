@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 /**
  * Unit tests.
  * 
- * @author Douglas A. Lane, PC^2 Team, <pc2@ecs.csus.edu>
+ * @author Douglas A. Lane, PC^2 Team, &lt;pc2@ecs.csus.edu&gt;
  */
 public class WebServerTest extends AbstractTestCase {
     

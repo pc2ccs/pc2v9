@@ -33,7 +33,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 /**
  * Methods to load event feed runs into the contest.
  * 
- * @author Douglas A. Lane <laned@ecs.csus.edu>
+ * @author Douglas A. Lane &lt;laned@ecs.csus.edu&gt;
  */
 public class LoadRuns {
 
@@ -113,11 +113,12 @@ public class LoadRuns {
     /**
      * Add EF runs to contest.
      * 
-     * @see #loadRunsFromEventFeed(String).
+     * @see #loadRunsFromEventFeed(String)
      * 
      * @param contest
      * @param runs
-     * @param properties
+     * @param cdpBasePath
+     * @param addJudgements
      * @return
      * @throws IllegalContestState
      * @throws ClassNotFoundException

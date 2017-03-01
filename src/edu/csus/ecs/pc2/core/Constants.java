@@ -74,8 +74,26 @@ public final class Constants {
      */
     public static final long DEFAULT_CONTEST_LENGTH_SECONDS = 18000; // 5 * 60 * 60
 
+    /**
+     * PC<sup>2</sup> Validator Program Name.
+     */
+    public static final String PC2_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.PC2Validator";
+    
+    /**
+     * CLICS Validator Program Name.
+     */
+    public static final String CLICS_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.ClicsValidator";
 
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    /**
+     * The Default PC2 Validator Command Line
+     */
+    public static final String DEFAULT_PC2_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    
+    /**
+     * The Default CLICS Validator Command Line
+     */
+    public static final String DEFAULT_CLICS_VALIDATOR_COMMAND = "{:validator} {:infile} {:ansfile} {:feedbackdir} ";
+    
     
     /**
      * Default file name for judgement ini file.

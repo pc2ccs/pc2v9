@@ -269,10 +269,8 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
     /**
      * Show or hide list on edit filter frame.
      * 
-     * @param listNames
-     *            list to show or hid
-     * @param showList
-     *            true show list, false do not show list.
+     * @param listName
+     *            list to show or hide
      */
     public void addList(ListNames listName) {
         editFilterPane.addList(listName);

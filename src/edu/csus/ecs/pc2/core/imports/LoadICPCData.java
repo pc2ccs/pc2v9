@@ -37,7 +37,7 @@ public final class LoadICPCData {
      * 
      * @param directory
      * @param sites
-     * @return ICPCImportData populated with contestTitle & groups
+     * @return ICPCImportData populated with contestTitle and groups
      * @throws Exception
      */
     public static ICPCImportData loadSites(String directory, Site[] sites) throws Exception {

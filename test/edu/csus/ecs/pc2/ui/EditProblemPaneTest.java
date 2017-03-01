@@ -101,6 +101,12 @@ public class EditProblemPaneTest extends AbstractTestCase {
             if (newProblem.isUsingPC2Validator() != problem.isUsingPC2Validator()) {
                 list.add(new InvalidFieldValue("if (usingPC2Validator != problem.isUsingPC2Validator()) {"));
             }
+            if (newProblem.isUsingCLICSValidator() != problem.isUsingCLICSValidator()) {
+                list.add(new InvalidFieldValue("if (usingClicsValidator != problem.isUsingClicsValidator()) {"));
+            }
+            if (newProblem.isUsingCustomValidator() != problem.isUsingCustomValidator()) {
+                list.add(new InvalidFieldValue("if (usingCustomValidator != problem.isUsingCustomValidator()) {"));
+            }
             if (newProblem.getWhichPC2Validator() != problem.getWhichPC2Validator()) {
                 list.add(new InvalidFieldValue("if (whichPC2Validator != problem.getWhichPC2Validator()) {"));
             }
@@ -110,10 +116,10 @@ public class EditProblemPaneTest extends AbstractTestCase {
             if (!StringUtilities.stringSame(newProblem.getValidatorCommandLine(), problem.getValidatorCommandLine())) {
                 list.add(new InvalidFieldValue("if (!StringUtilities.stringSame(validatorCommandLine, problem.getValidatorCommandLine())) {"));
             }
-            if (newProblem.isIgnoreSpacesOnValidation() != problem.isIgnoreSpacesOnValidation()) {
-                list.add(new InvalidFieldValue("if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {"));
+            if (!newProblem.getPC2ValidatorSettings().equals(problem.getPC2ValidatorSettings())) {
+                list.add(new InvalidFieldValue("if (getPC2ValidatorSettings() != problem.getPC2ValidatorSettings()) {"));
             }
-            if (newProblem.isShowValidationToJudges() != problem.isShowValidationToJudges()) {
+             if (newProblem.isShowValidationToJudges() != problem.isShowValidationToJudges()) {
                 list.add(new InvalidFieldValue("if (showValidationToJudges != problem.isShowValidationToJudges()) {"));
             }
 

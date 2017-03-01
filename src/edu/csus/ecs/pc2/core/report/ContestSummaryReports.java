@@ -108,7 +108,6 @@ public class ContestSummaryReports extends Plugin {
      * 
      * Will create the report directory if it does not exist.
      * 
-     * @throws IOException
      */
     public void generateReports() {
 
@@ -145,8 +144,8 @@ public class ContestSummaryReports extends Plugin {
      * Get the report directory.
      * 
      * If the reportDirectory exists and is a directory use that. <br>
-     * If the reportDirectory is not null but does not exist will use <profile path>/<reportDirector> <br>
-     * If the reportDirectory is null use a default directory <profile path>/reports <br>
+     * If the reportDirectory is not null but does not exist will use &lt;profile path&gt;/&lt;reportDirector&gt; <br>
+     * If the reportDirectory is null use a default directory &lt;profile path&gt;/reports <br>
      * 
      * @return directory name where reports will be written.
      */

@@ -33,7 +33,6 @@ import edu.csus.ecs.pc2.ui.NullViewer;
 /**
  * Compile, execute and validate a run.
  * 
- * Before execute, one can use {@link #setLanguage(Language)}, {@link #setProblem(Problem)} to use a different language or problem. <br>
  * To not overwrite the judge's data files, use {@link #setOverwriteJudgesDataFiles(boolean)} to false.
  * 
  * @see #execute()
@@ -487,7 +486,6 @@ public class ExecutableV9 extends Plugin implements IExecutable {
      * @param outputFileName
      *            - output file name.
      * @return true if file written to disk.
-     * @throws IOException
      */
     public boolean createFile(SerializedFile[] fileList, int setNumber, String outputFileName) {
 
@@ -622,7 +620,7 @@ public class ExecutableV9 extends Plugin implements IExecutable {
 
             /**
              * The internal command is set to: <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files] Where validator is
-             * Problem.INTERNAL_VALIDATOR_NAME aka "pc2.jar edu.csus.ecs.pc2.validator.Validator"
+             * Problem.INTERNAL_VALIDATOR_NAME aka "pc2.jar edu.csus.ecs.pc2.validator.PC2Validator"
              * 
              * So we need to prefix the command with java -jar <path to jar>
              */
@@ -1473,7 +1471,7 @@ public class ExecutableV9 extends Plugin implements IExecutable {
     /**
      * This suffix is added to the execute directory nanme.
      * 
-     * This must be used before using {@link #(String, String)}.
+     * This must be used before using {@link #getExecuteDirectoryName()}.
      * 
      * @see #getExecuteDirectoryName()
      * 

@@ -63,7 +63,7 @@ public interface IRunJudgement {
      * <P>
      * In the case where a problem is defined a judging type of Computer Judging only
      * (no Manual Review), this method would always return <code>false</code>.  In this
-     * example there would not be a case where this method would return <code>true</code. 
+     * example there would not be a case where this method would return <code>true</code>. 
      * 
      * @return true if a preliminary judgement, false if this is the final judgement.
      */

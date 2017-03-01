@@ -25,7 +25,6 @@ import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
 /**
  * Options Pane, Show Log checkbox.
  * 
- * You must invoke {@link #setLogWindow(LogWindow)} for Show Log checkbox to enable.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$

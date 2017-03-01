@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.VersionInfo;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/validator/Validator.java$
-public class Validator {
+public class PC2Validator {
 
     // System.out.println("Usage: java Validator <inputfile name> <outputfile
     // name> <answerfile name> <resultfile name> <-pc2> [options] icflag");
@@ -153,8 +153,8 @@ public class Validator {
      */
     public static void main(String[] args) {
 
-        Validator validator = new Validator();
-        validator.runValidator(args);
+        PC2Validator pC2Validator = new PC2Validator();
+        pC2Validator.runValidator(args);
     }
 
     /**
@@ -623,7 +623,7 @@ public class Validator {
      */
     public String getInternalValidatorCommandLine(int whichCommand, boolean ignoreCase) {
 
-        String javaCmd = "java edu.csus.ecs.pc2.validator.Validator";
+        String javaCmd = "java edu.csus.ecs.pc2.validator.PC2Validator";
         String commandLine = null;
         
         commandLine = javaCmd  + " {:infile} {:outfile} {:ansfile} {:resfile} -pc2 " + whichCommand;

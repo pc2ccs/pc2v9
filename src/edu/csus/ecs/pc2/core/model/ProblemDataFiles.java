@@ -88,7 +88,7 @@ public class ProblemDataFiles implements IElementObject {
         clone.setValidatorFile(cloneSerializedFile(getValidatorFile()));
 
         clone.setValidatorRunCommand(getValidatorRunCommand());
-        clone.setValidatorFile(cloneSerializedFile(getValidatorRunFile()));
+        clone.setValidatorRunFile(cloneSerializedFile(getValidatorRunFile()));
 
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));

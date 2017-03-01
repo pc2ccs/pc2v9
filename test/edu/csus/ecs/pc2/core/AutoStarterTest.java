@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 /**
  * Unit test.
  *
- * @author Douglas A. Lane, PC^2 Team, <pc2@ecs.csus.edu>
+ * @author Douglas A. Lane, PC^2 Team, &lt;pc2@ecs.csus.edu&gt;
  */
 public class AutoStarterTest extends AbstractTestCase {
     
@@ -27,7 +27,7 @@ public class AutoStarterTest extends AbstractTestCase {
     /**
      * print a message runnable.
      *
-     * @author Douglas A. Lane, PC^2 Team, <pc2@ecs.csus.edu>
+     * @author Douglas A. Lane, PC^2 Team, &lt;pc2@ecs.csus.edu&gt;
      */
     public class PrintMessgeRunnable implements Runnable {
 
@@ -77,7 +77,7 @@ public class AutoStarterTest extends AbstractTestCase {
     /**
      * A class that prints a message when startAllContestTimes invoked.
      *
-     * @author Douglas A. Lane, PC^2 Team, <pc2@ecs.csus.edu>
+     * @author Douglas A. Lane, PC^2 Team, &lt;pc2@ecs.csus.edu&gt;
      */
     public class OverRideStarterController extends InternalController{
         

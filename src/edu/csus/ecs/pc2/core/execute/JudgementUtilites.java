@@ -31,7 +31,6 @@ public final class JudgementUtilites {
      * @param executionData
      * @param validationResults
      * @return
-     * @throws Exception 
      */
     public static JudgementRecord createJudgementRecord(IInternalContest contest, Run run, ExecutionData executionData, String validationResults) {
 

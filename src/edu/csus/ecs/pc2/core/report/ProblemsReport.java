@@ -21,10 +21,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  * Print all problems info.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class ProblemsReport implements IReport {
 
     /**
@@ -47,7 +44,6 @@ public class ProblemsReport implements IReport {
             printWriter.println("Contest date/time: never started");
         } else {
             printWriter.println("Contest date/time: " + resumeTime.getTime());
-
         }
     }
 
@@ -86,14 +82,32 @@ public class ProblemsReport implements IReport {
         printWriter.println();
 
         printWriter.println("        Using validator : " + problem.isValidatedProblem());
+        printWriter.println("        Using validator : " + problem.getValidatorType().toString());
+        
         printWriter.println("         Validator name : " + problem.getValidatorProgramName());
 
         printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
         printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
         printWriter.println("    Using pc2 validator : " + problem.isUsingPC2Validator());
+        
+
+        printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
+        printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
+        printWriter.println("    Using pc2 validator : " + problem.isUsingPC2Validator());
+
+        printWriter.println();
+        printWriter.print("    pc2ValidatorSettings: ");
+        splitPad(printWriter, ";", "    pc2ValidatorSettings> ", nullSafeString(problem.getPC2ValidatorSettings()),";");
+
+        printWriter.print("  ClicsValidatorSettings: ");
+        splitPad(printWriter, ";", "  ClicsValidatorSettings> ", nullSafeString(problem.getClicsValidatorSettings()),";");
+
+        printWriter.print(" customValidatorSettings: ");
+        splitPad(printWriter, ";", " customValidatorSettings> ", nullSafeString(problem.getCustomValidatorSettings()),";");
+        
+        printWriter.println();
 
         printWriter.println("   Using external files : " + problem.isUsingExternalDataFiles() + " path = " + problem.getExternalDataFileLocation());
-        printWriter.println("               CCS mode : " + problem.isCcsMode());
 
         if (problem.getAnswerFileName() != null) {
             if (problemDataFiles != null) {
@@ -127,6 +141,41 @@ public class ProblemsReport implements IReport {
         }
 
         writeProblemDataFiles(printWriter, problemDataFiles);
+    }
+
+    /**
+     * 
+     * @return a string no mater if settings is null or not.
+     */
+    private String nullSafeString(Object settings) {
+        if (settings == null){
+            return "";
+        } else {
+            return settings.toString();
+        }
+    }
+
+    /**
+     * splits on delimit prints each field.
+     * 
+     * @param printWriter
+     * @param delimiter delimiters for fields in string
+     * @param prefix second field to field n, prefix string
+     * @param value string with list of fields.
+     */
+    private void splitPad(PrintWriter printWriter, String delimiter, String prefix, String value, String suffix) {
+
+        String[] fields = value.split(delimiter);
+
+        if (fields.length > 1) {
+            printWriter.println(fields[0] + suffix);
+        } else {
+            printWriter.println(fields[0]);
+        }
+        for (int i = 1; i < fields.length; i++) {
+            printWriter.println(prefix + fields[i] + suffix);
+        }
+
     }
 
     public void writeProblemDataFiles(PrintWriter printWriter, ProblemDataFiles problemDataFiles) {
@@ -205,6 +254,7 @@ public class ProblemsReport implements IReport {
             return "Internal";
         }
     }
+    
 
     public void writeReport(PrintWriter printWriter) {
 

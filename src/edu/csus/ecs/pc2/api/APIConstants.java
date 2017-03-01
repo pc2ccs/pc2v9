@@ -1,6 +1,6 @@
 package edu.csus.ecs.pc2.api;
 
-import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.Constants;
 
 /**
  * Constants used in the API.
@@ -57,11 +57,11 @@ public final class APIConstants {
     /**
      * Default validator command line value.
      */
-    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    public static final String DEFAULT_PC2_VALIDATOR_COMMAND = Constants.DEFAULT_PC2_VALIDATOR_COMMAND; //"{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     /**
      * PC^2 Validator program value.
      */
-    public static final String PC2_VALIDATOR_PROGRAM = Problem.INTERNAL_VALIDATOR_NAME;
+    public static final String PC2_VALIDATOR_PROGRAM = Constants.PC2_VALIDATOR_NAME;
 
 }

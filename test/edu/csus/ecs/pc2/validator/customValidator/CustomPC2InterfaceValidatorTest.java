@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.validator;
+package edu.csus.ecs.pc2.validator.customValidator;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -7,16 +7,17 @@ import java.util.UUID;
 import edu.csus.ecs.pc2.core.execute.IResultsParser;
 import edu.csus.ecs.pc2.core.execute.XMLResultsParser;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.validator.PC2Validator;
 
 /**
- * JUnit test cases for Validator.
+ * JUnit test cases for a Custom Validator which uses the PC2 Validator Interface.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class ValidatorTest extends AbstractTestCase {
+public class CustomPC2InterfaceValidatorTest extends AbstractTestCase {
 
     private boolean unitDebug = true;
 
@@ -103,13 +104,13 @@ public class ValidatorTest extends AbstractTestCase {
         for (int i = 0; i < pc2TestNumbers.length; i++) {
             int pc2TestNumber = pc2TestNumbers[i];
 
-            String outcome = Validator.JUDGEMENT_YES;
+            String outcome = PC2Validator.JUDGEMENT_YES;
 
             validateOneLineIdentical(pc2TestNumber, outcome);
             validateTwoEmptyFiles(pc2TestNumber, outcome);
             validateFileSame(pc2TestNumber, outcome);
 
-            outcome = Validator.JUDGEMENT_NO_WRONG_ANSWER;
+            outcome = PC2Validator.JUDGEMENT_NO_WRONG_ANSWER;
 
             validateOneLineDifferent(pc2TestNumber, outcome);
             validateOneLineEmpty(pc2TestNumber, outcome);
@@ -135,7 +136,7 @@ public class ValidatorTest extends AbstractTestCase {
             String answerFilename = getFullPathName("testfile.txt");
             runNegativeValidatorTest(outputFilename, answerFilename, expectedOutcome, pc2TestNumber);
 
-            expectedOutcome = Validator.JUDGEMENT_YES;
+            expectedOutcome = PC2Validator.JUDGEMENT_YES;
 
             outputFilename = getFullPathName("testfile.txt");
             answerFilename = getFullPathName("testdatain.txt");
@@ -340,7 +341,7 @@ public class ValidatorTest extends AbstractTestCase {
         try {
 
             String[] args = { inputFileName, outputFileName, answerFileName, resultsFileName, "-pc2", "" + pc2TestNumber, "" + ignoreCase };
-            Validator.main(args);
+            PC2Validator.main(args);
 
             IResultsParser parser = new XMLResultsParser();
             // parser.setLog(log);

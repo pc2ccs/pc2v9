@@ -351,4 +351,33 @@ public class ExecutionData implements Serializable {
     public String getAdditionalInformation() {
         return additionalInformation;
     }
+    
+    @Override
+    public String toString() {
+        String retStr = "[";
+        retStr += "compileStdout=" + compileStdout + ",";
+        retStr += "compileStderr=" + compileStderr + ",";
+        retStr += "compileExeFileName=" + compileExeFileName + ",";
+        retStr += "compileSuccess=" + compileSuccess + ",";
+        retStr += "compileResultCode=" + compileResultCode + ",";
+        retStr += "executeStderr=" + executeStderr + ",";
+        retStr += "executeProgramOutput=" + executeProgramOutput + ",";
+        retStr += "executeExitValue=" + executeExitValue + ",";
+        retStr += "executeSucess=" + executeSucess + ",";
+        retStr += "validationStdout=" + validationStdout + ",";
+        retStr += "validationStderr=" + validationStderr + ",";
+        retStr += "validationReturnCode" + validationReturnCode + ",";
+        retStr += "validationSuccess=" + validationSuccess + ",";
+        retStr += "validationResults=" + validationResults + ",";
+        retStr += "compileTimeMS=" + compileTimeMS + ",";
+        retStr += "executeTimeMS=" + executeTimeMS + ",";
+        retStr += "validateTimeMS=" + validateTimeMS + ",";
+        retStr += "executionException=" + executionException + ",";
+        retStr += "runTimeLimitExceeded=" + runTimeLimitExceeded + ",";
+        retStr += "failedToCompile=" + failedToCompile + ",";
+        retStr += "additionalInformation=" + additionalInformation;
+        retStr += "]";
+        
+        return retStr;
+    }
 }

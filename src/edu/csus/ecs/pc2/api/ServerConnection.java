@@ -27,10 +27,14 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
+import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
+import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
  * This class represents a connection to a PC<sup>2</sup> server. Instantiating the class creates a local {@link ServerConnection} object which can then be used to connect to the PC<sup>2</sup> server
@@ -103,6 +107,9 @@ public class ServerConnection {
      *            client login name (for example: &quot;team5&quot; or &quot;judge3&quot;)
      * @param password
      *            password for the login name
+     * @return
+     *            an IContest object representing the Contest which has been logged in to
+     *            
      * @throws LoginFailureException
      *             if login fails, the message contained in the exception will provide and indication of the reason for the failure.
      */
@@ -210,7 +217,8 @@ public class ServerConnection {
       * @param accountTypeName name of account, ex TEAM
       * @param displayName title for account/team, if null will be login name
       * @param password password for account, must not be null or emptystring (string length==0)
-      * @throws Exception
+      * 
+      * @throws IllegalArgumentException if the account type is invalid or the password is null or empty
       */
     public void addAccount(String accountTypeName, String displayName, String password) throws Exception {
 
@@ -245,9 +253,10 @@ public class ServerConnection {
     /**
      * Submit a clarification.
      * 
-     * @param problem 
+     * @param problem  the Problem for which the clarification request is being submitted
      * @param question text of question
-     * @throws Exception
+     * @throws NotLoggedInException if the client is not currently logged in to the server
+     * @throws Exception if the specified Problem is null or the clarification request could not be submitted to the server
      */
     public void submitClarification(IProblem problem, String question) throws Exception {
 
@@ -282,12 +291,15 @@ public class ServerConnection {
     /**
      * Submit a run.
      * 
-     * @param problem 
-     * @param language
-     * @param mainFileName
-     * @param additionalFileNames
+     * @param problem the Problem for which the run is being submitted
+     * @param language the language used for the Problem submission (Java, C++, etc.)
+     * @param mainFileName the name of the main source code file
+     * @param additionalFileNames an array of Strings giving the names of any additional files submitted
      * @param overrideSubmissionTimeMS an override elapsed time in ms, only works if contest information CCS test mode is set true.
-     * @throws Exception
+     * 
+     * @throws NotLoggedInException if the client is not currently logged in to the server
+     * @throws Exception if any of the specified files cannot be found, if the Problem or Language is null, 
+     *          the contest is not running, or a failure occurred while submitting the run to the server
      */
     public void submitRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
 
@@ -485,21 +497,59 @@ public class ServerConnection {
     }
     
     /**
-     * Define a pc2 validated problem.
+     * Marks the specified Problem as being validated using the PC2 Validator with a default set of Settings values.
      * 
-     * @param problem
+     * @param problem the problem to be marked as being validated by the PC2 Validator
      */
-    protected void setPC2Validator(Problem problem) {
+    protected void setPC2ValidatorDefaults(Problem problem) {
 
-        problem.setValidatedProblem(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+        
+        PC2ValidatorSettings settings = new PC2ValidatorSettings();
+        
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
-        problem.setUsingPC2Validator(true);
-        problem.setWhichPC2Validator(1);
-        problem.setIgnoreSpacesOnValidation(true);
-        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " "
-                + problem.isIgnoreSpacesOnValidation());
-        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+        settings.setWhichPC2Validator(1);
+        settings.setIgnoreCaseOnValidation(true);
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator() + " "
+                + settings.isIgnoreCaseOnValidation());
+        
+        problem.setPC2ValidatorSettings(settings);
+    }
+    
+    /**
+     * Marks the specified Problem as being validated using the CLICS Validator with a default set of Settings values.
+     * 
+     * @param problem the problem to be marked as being validated by the CLICS Validator
+     */
+    protected void setClicsValidatorDefaults(Problem problem) {
+
+        problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        
+        ClicsValidatorSettings settings = new ClicsValidatorSettings();
+        
+        settings.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
+        settings.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
+        
+        problem.setCLICSValidatorSettings(settings);
+    }
+    
+    /**
+     * Marks the specified Problem as being validated using a Custom Validator with a default set of Settings values.
+     * 
+     * @param problem the problem to be marked as being validated by a Custom Validator
+     */
+    protected void setCustomValidatorDefaults(Problem problem) {
+
+        problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
+        
+        CustomValidatorSettings settings = new CustomValidatorSettings();
+        
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
+        
+        problem.setCustomValidatorSettings(settings);
     }
     
     /**
@@ -513,16 +563,17 @@ public class ServerConnection {
      *            - judges input data file
      * @param judgesAnswerFile
      *            - judges answer file
-     * @param validated
-     *            - is the problem validated using the pc2 internal validator?
+     * @param validator
+     *            - which validator to use (choices are: PC2VALIDATOR, CLICSVALIDATOR, CUSTOMVALIDATOR, NONE)
      * @param problemProperties
      *            - optional properties, for a list of keys see {@link #getProblemPropertyNames()}, null is allowed.
      */
-    public void addProblem(String title, String shortName, File judgesDataFile, File judgesAnswerFile, boolean validated, Properties problemProperties) {
+    public void addProblem(String title, String shortName, File judgesDataFile, File judgesAnswerFile, VALIDATOR_TYPE validator, Properties problemProperties) {
 
         checkNotEmpty("Problem title", title);
         checkNotEmpty("Problem short name", shortName);
         checkFile("Judges data file", judgesDataFile);
+        checkNotEmpty("Validator", validator.toString());
         
         checkIsAllowed(Type.ADD_PROBLEM);
         
@@ -530,7 +581,7 @@ public class ServerConnection {
         problem.setShortName(shortName);
         problem.setDataFileName(judgesDataFile.getName());
         problem.setAnswerFileName(judgesAnswerFile.getName());
-        
+
         /**
          * Check for valid property names.
          */
@@ -539,31 +590,41 @@ public class ServerConnection {
             throw new IllegalArgumentException("Unknown/Invalid property names: "+ Arrays.toString(invalids));
         }
         
+        //get a judging type from the properties, or else default to null
         String judgingType = getProperty(problemProperties, APIConstants.JUDGING_TYPE, null);
         
-        if (judgingType != null){
-            /**
-             * Cannot be manual judged and validated.
-             */
-            if (APIConstants.MANUAL_JUDGING_ONLY.equals(judgingType) && validated){
-                throw new IllegalArgumentException("Problem cannot be validated and not judging type computer judged");
+        if (judgingType==null) {
+            //null means we will default to manual judging, but we can't do that if a validator was specified
+            if (!(validator==VALIDATOR_TYPE.NONE)) {
+                throw new IllegalArgumentException("Problem cannot have a validator if no judging type is specified in the properties (because the default is 'manual judging')");
+            } else {
+                //no judging type specified; default to manual judging
+                judgingType = APIConstants.MANUAL_JUDGING_ONLY;
             }
-        } else {
-            judgingType = APIConstants.MANUAL_JUDGING_ONLY;
         }
+        
+        //when we get here, judgingType and validator are both known != null
+        
+        //we cannot have manual judging and also have a validator
+        if (judgingType.equals(APIConstants.MANUAL_JUDGING_ONLY) && validator!=VALIDATOR_TYPE.NONE) {
+            throw new IllegalArgumentException("Problem cannot have a validator when manual judging is specified (or defaulted to)");            
+        }
+        
+        //if we DON'T have manual judging, we MUST have a validator
+        if ( (!judgingType.equals(APIConstants.MANUAL_JUDGING_ONLY)) && (validator==VALIDATOR_TYPE.NONE) )  {
+            throw new IllegalArgumentException("Problem cannot be specified as computer judged (i.e., 'not manual judged') unless a validator is specified");            
+        }
+        
         
         switch (judgingType) {
             case APIConstants.MANUAL_JUDGING_ONLY:
-                validated = false;
                 problem.setManualReview(true);
                 break;
             case APIConstants.COMPUTER_JUDGING_ONLY:
-                validated = true;
                 problem.setComputerJudged(true);
                 problem.setManualReview(false);
                 break;
             case APIConstants.COMPUTER_AND_MANUAL_JUDGING:
-                validated = true;
                 problem.setComputerJudged(true);
                 problem.setManualReview(true);
                 break;
@@ -572,42 +633,53 @@ public class ServerConnection {
                 throw new IllegalArgumentException("Unknown "+APIConstants.JUDGING_TYPE+" '"+judgingType+"'");
         }
         
-        boolean usingPc2Validator = false;
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
         
         String validatorProgram = getProperty(problemProperties, APIConstants.VALIDATOR_PROGRAM, APIConstants.PC2_VALIDATOR_PROGRAM);
-        usingPc2Validator = APIConstants.PC2_VALIDATOR_PROGRAM.equals(validatorProgram);
-        
-        if (validated){
-            
-            problem.setValidatedProblem(validated);
-            
-            String validatorCommandLine = getProperty(problemProperties, APIConstants.VALIDATOR_COMMAND_LINE, APIConstants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
-            problem.setValidatorCommandLine(validatorCommandLine);
-            
-            if (usingPc2Validator) {
-                setPC2Validator(problem);
-            } // else add external validator later
-            
+        String validatorCommandLine = getProperty(problemProperties, APIConstants.VALIDATOR_COMMAND_LINE, APIConstants.DEFAULT_PC2_VALIDATOR_COMMAND);
+
+        switch (validator) {
+            case PC2VALIDATOR:
+                // set default settings
+                setPC2ValidatorDefaults(problem);
+                // update desired settings
+                problem.setValidatorProgramName(validatorProgram);
+                problem.setValidatorCommandLine(validatorCommandLine);
+                break;
+            case CLICSVALIDATOR:
+                setClicsValidatorDefaults(problem);
+                problem.setValidatorProgramName(validatorProgram);
+                problem.setValidatorCommandLine(validatorCommandLine);
+                if (new File(validatorProgram).isFile()){
+                    SerializedFile validatorFile = new SerializedFile(validatorProgram);
+                    problemDataFiles.setValidatorFile(validatorFile);
+                }
+               break;
+            case CUSTOMVALIDATOR:
+                setCustomValidatorDefaults(problem);
+                problem.setValidatorProgramName(validatorProgram);
+                problem.setValidatorCommandLine(validatorCommandLine);
+                if (new File(validatorProgram).isFile()){
+                    SerializedFile validatorFile = new SerializedFile(validatorProgram);
+                    problemDataFiles.setValidatorFile(validatorFile);
+                }
+                break;
+            case NONE:
+                problem.setValidatorType(VALIDATOR_TYPE.NONE);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown Validator Type: '" + validator + "'");
         }
 
         problem.setShowValidationToJudges(false);
         problem.setHideOutputWindow(true); 
         
         /**
-         * Add problem data files.
+         * Add judge's info to problem data files.
          */
-        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
         problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile.getAbsolutePath()));
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(judgesAnswerFile.getAbsolutePath()));
-        
-        if (validated && ! usingPc2Validator){
-            // add external validator
-            if (new File(validatorProgram).isFile()){
-                SerializedFile validatorFile = new SerializedFile(validatorProgram);
-                problemDataFiles.setValidatorFile(validatorFile);
-            }
-        }
-        
+                
         controller.addNewProblem(problem, problemDataFiles);
     }
 

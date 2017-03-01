@@ -63,7 +63,7 @@ public class ProblemScoreRecord {
      * Constructor deprecated.
      * 
      * This class is now used to store values, before it was used to both calculate and store values. <br>
-     * See {@link IScoringAlgorithm#createProblemScoreRecord(Run[], Problem, Properties)} as an example of how to compute values.
+     * See {@link edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm#createProblemScoreRecord(Run[], Problem, Properties)} as an example of how to compute values.
      */
     @Deprecated
     public ProblemScoreRecord(Run[] teamProblemRuns, Problem problem2, Properties properties) {

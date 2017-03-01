@@ -262,7 +262,6 @@ public class ServerConnectionTestFrame extends JFrame {
     }
 
     /**
-     * @param args
      */
     public static void main(String[] args) {
         new ServerConnectionTestFrame().setVisible(true);

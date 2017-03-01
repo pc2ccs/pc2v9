@@ -31,7 +31,6 @@ public interface ICategoryListener {
 
     /**
      * Refresh all Categories.
-     * @param categoryEvent
      */
     void categoryRefreshAll(CategoryEvent event);
 }

@@ -9,7 +9,7 @@ import java.util.logging.LogRecord;
  * A simpler log formatter.
  *
  * Returns a log line in the following format: <br>
- * <code>YYMMDD HHMMSS <level> <method_name> message </code>
+ * <code>YYMMDD HHMMSS &lt;level&gt; &lt;method_name&gt; message </code>
  *
  * @author pc2@ecs.csus.edu
  * @version $Id$

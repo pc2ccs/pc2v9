@@ -211,7 +211,7 @@ public class EventFeedXML2013Test extends AbstractTestCase {
     }
 
     /**
-     * Test <info> tag.
+     * Test &lt;info&gt; tag.
      * 
      * @throws Exception
      */

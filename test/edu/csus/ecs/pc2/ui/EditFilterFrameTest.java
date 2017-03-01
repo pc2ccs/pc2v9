@@ -11,7 +11,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 /**
  * Test for Edit Filter Frame
  * 
- * @author Douglas A. Lane, PC^2 Team, <pc2@ecs.csus.edu>
+ * @author Douglas A. Lane, PC^2 Team, &gt;pc2@ecs.csus.edu&lt;
  */
 
 public class EditFilterFrameTest extends TestCase {

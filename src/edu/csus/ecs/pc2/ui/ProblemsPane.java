@@ -61,8 +61,6 @@ public class ProblemsPane extends JPanePlugin {
     private Log log = null;
 
     private EditProblemFrame editProblemFrame = null;
-    
-    private EditProblemFrameNew editProblemFrameNew = null;
 
     private JButton reportButton = null;
     private JPanel centerPanel;
@@ -92,9 +90,6 @@ public class ProblemsPane extends JPanePlugin {
         this.add(getProblemButtonPane(), java.awt.BorderLayout.SOUTH);
 
         editProblemFrame = new EditProblemFrame();
-        
-        editProblemFrameNew = new EditProblemFrameNew();
-
     }
 
     @Override
@@ -132,7 +127,7 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
+            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Program", "Validator Command Line" };
             problemListBox.addColumns(cols);
 
             /**
@@ -184,6 +179,7 @@ public class ProblemsPane extends JPanePlugin {
 
     protected Object[] buildProblemRow(Problem problem) {
         // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
+        //Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Prog", "Validator Command Line" };
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -223,14 +219,26 @@ public class ProblemsPane extends JPanePlugin {
         c[i++] = problem.getShortName();
         c[i++] = Integer.toString(problem.getTimeOutInSeconds());
         c[i++] = yesNoString(problem.isShowValidationToJudges());
-        String validatorName = problem.getValidatorProgramName();
-        if (problem.isValidatedProblem()) {
-            if (! problem.isUsingPC2Validator()) {
-                validatorName = problem.getValidatorCommandLine();
-            }
-        }
         
-        c[i++] = validatorName;
+        //set validator column value
+//        String validatorName = problem.getValidatorProgramName();
+//        if (problem.isValidatedProblem()) {
+//            if (! problem.isUsingPC2Validator()) {
+//                validatorName = problem.getValidatorCommandLine();
+//            }
+//        }
+        
+        String validatorProgramName = "<none>";
+        if (problem.isValidatedProblem()) {
+            validatorProgramName = problem.getValidatorProgramName();
+        }
+        c[i++] = validatorProgramName;
+        
+        String validatorCommandLine = "";
+        if (problem.isValidatedProblem()) {
+            validatorCommandLine = problem.getValidatorCommandLine();
+        }
+        c[i++] = validatorCommandLine ;
 
         return c;
     }
@@ -303,8 +311,7 @@ public class ProblemsPane extends JPanePlugin {
         log = getController().getLog();
 
         editProblemFrame.setContestAndController(inContest, inController);
-        editProblemFrameNew.setContestAndController(inContest, inController);
-
+        
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
@@ -355,21 +362,10 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected void addProblem() {
-        if (Utilities.isDebugMode()) {
-            int result = FrameUtilities.yesNoCancelDialog(this, "Do you want to use  EditProblemFrameNew ? ", "TEMPORARY DEBUGGING THING. debug 22");
+        // bring up the ui, let the user add/cancel the copied problem
+        editProblemFrame.setProblem(null);
+        editProblemFrame.setVisible(true);
 
-            if (result == JOptionPane.YES_OPTION) {
-                editProblemFrameNew.setProblem(null);
-                editProblemFrameNew.setVisible(true);
-            } else {
-                editProblemFrame.setProblem(null);
-                editProblemFrame.setVisible(true);
-            }
-        } else {
-            // just bring up the ui, let the user add/cancel the copied problem
-            editProblemFrame.setProblem(null);
-            editProblemFrame.setVisible(true);
-        }
     }
 
     /**
@@ -426,42 +422,19 @@ public class ProblemsPane extends JPanePlugin {
             Problem problemToEdit = getContest().getProblem(elementId);
 
             ProblemDataFiles newProblemDataFiles = getController().getProblemDataFiles(problemToEdit);
-            
-            if (Utilities.isDebugMode()) {
 
-                int result = FrameUtilities.yesNoCancelDialog(this, "Do you want to use  EditProblemFrameNew ? ", "TEMPORARY DEBUGGING THING. debug 22");
-
-                if (result == JOptionPane.YES_OPTION) {
-                    editProblemFrameNew.setProblemCopy(problemToEdit, newProblemDataFiles);
-                    if (problemToEdit.isUsingExternalDataFiles()) {
-                        editProblemFrameNew.setTitle("Edit Problem " + problemToEdit.getDisplayName()+" ("+problemToEdit.getExternalDataFileLocation()+")");
-                    } else {
-                        editProblemFrameNew.setTitle("Edit Problem " + problemToEdit.getDisplayName());
-                    }
-                    editProblemFrameNew.setVisible(true);
-                } else {
-                    editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
-                    if (problemToEdit.isUsingExternalDataFiles()) {
-                        editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName()+" ("+problemToEdit.getExternalDataFileLocation()+")");
-                    } else {
-                        editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName());
-                    }
-                    editProblemFrame.setVisible(true);
-                }
+            // bring up the ui, let the user add/cancel the copied problem
+            editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
+            if (problemToEdit.isUsingExternalDataFiles()) {
+                editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName() + " (" + problemToEdit.getExternalDataFileLocation() + ")");
             } else {
-                // just bring up the ui, let the user add/cancel the copied problem
-                editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
-                if (problemToEdit.isUsingExternalDataFiles()) {
-                    editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName()+" ("+problemToEdit.getExternalDataFileLocation()+")");
-                } else {
-                    editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName());
-                }
-                editProblemFrame.setVisible(true);
+                editProblemFrame.setTitle("Edit Problem " + problemToEdit.getDisplayName());
             }
-            
+            editProblemFrame.setVisible(true);
+
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to edit problem, check log ("+e.getMessage()+")");
+            showMessage("Unable to edit problem, check log (" + e.getMessage() + ")");
         }
     }
 

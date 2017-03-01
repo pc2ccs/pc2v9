@@ -14,7 +14,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.ccs.CCSConstants;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.InternalControllerSpecial;
@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -31,6 +32,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 import edu.csus.ecs.pc2.core.util.NotificationUtilities;
 import edu.csus.ecs.pc2.ui.InvalidFieldValue;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
  * Create Sample contest and controller.
@@ -1282,13 +1284,16 @@ public class SampleContest {
 
    public void addInternalValidator(IInternalContest contest, Problem problem, int optionNumber) {
         
-        problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator(true);
-        problem.setWhichPC2Validator(optionNumber);
-        problem.setIgnoreSpacesOnValidation(true);
+       problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+       
+       PC2ValidatorSettings settings = new PC2ValidatorSettings();
+       settings.setWhichPC2Validator(optionNumber);
+       settings.setIgnoreCaseOnValidation(true);
+       settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator() 
+               + " " + settings.isIgnoreCaseOnValidation());
+       settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
-        problem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
-        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+       problem.setPC2ValidatorSettings(settings);
         
         contest.updateProblem(problem);
     }
@@ -1372,18 +1377,17 @@ public class SampleContest {
      * @param validatorParameters
      * @param problem
      */
-    public void setCCSValidation(IInternalContest contest, String validatorParameters, Problem problem) {
+    public void setClicsValidation(IInternalContest contest, String validatorParameters, Problem problem) {
 
-        problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator(false);
+        problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        problem.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
+        
         problem.setReadInputDataFromSTDIN(true);
 
-        problem.setValidatorProgramName(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME);
-
         if (validatorParameters == null) {
-            problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+            problem.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         } else {
-            problem.setValidatorCommandLine(CCSConstants.INTERNAL_CCS_VALIDATOR_NAME+" " +validatorParameters);
+            problem.setValidatorCommandLine(Constants.CLICS_VALIDATOR_NAME +" " +validatorParameters);
         }
     }
 

@@ -3,7 +3,8 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.File;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.ui.EditProblemPane;
+import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 
 /**
  * Test for Problem class.
@@ -33,13 +34,13 @@ public class ProblemTest extends TestCase {
         p2.setDataFileName("sumit.dat");
         p2.setHideOutputWindow(true);
 
-        p2.setValidatedProblem(true);
-        p2.setUsingPC2Validator(true);
-        p2.setWhichPC2Validator(3);
-        p2.setIgnoreSpacesOnValidation(true);
+        p2.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+        p2.getPC2ValidatorSettings().setWhichPC2Validator(3);
+        p2.getPC2ValidatorSettings().setIgnoreCaseOnValidation(true);
 
-        p2.setValidatorCommandLine(EditProblemPane.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() + " " + p2.isIgnoreSpacesOnValidation());
-        p2.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+        p2.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() 
+                + " " + p2.getPC2ValidatorSettings().isIgnoreCaseOnValidation());
+        p2.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
         p2.setReadInputDataFromSTDIN(false);
         p2.setShowCompareWindow(true);
@@ -78,7 +79,7 @@ public class ProblemTest extends TestCase {
         assertFalse("Is not same As, null parameter", p1.isSameAs(null));
 
         p2 = getProblemAnew();
-        p2.setValidatedProblem(false);
+        p2.setValidatorType(VALIDATOR_TYPE.NONE);
         assertFalse("Is not same as, setValidatedProblem ", p1.isSameAs(p2));
         assertFalse("Is not same as, setValidatedProblem ", p2.isSameAs(p1));
 
@@ -103,29 +104,35 @@ public class ProblemTest extends TestCase {
         p2.setAnswerFileName("foo");
         checkString("setAnswerFileName foo", p1.getAnswerFileName(), p2.getAnswerFileName(), p1, p2);
 
-        p2 = getProblemAnew();
-        p2.setValidatorProgramName(null);
-        checkString("setValidatorProgramName null", p1.getValidatorProgramName(), p2.getValidatorProgramName(), p1, p2);
+        //these tests are no longer valid since the default validator settings were changed to 'null'
+//        p2 = getProblemAnew();
+//        p2.setValidatorProgramName(null);
+//        checkString("setValidatorProgramName null", p1.getValidatorProgramName(), p2.getValidatorProgramName(), p1, p2);
 
-        p2 = getProblemAnew();
-        p2.setValidatorProgramName("foo");
-        checkString("setValidatorProgramName foo", p1.getValidatorProgramName(), p2.getValidatorProgramName(), p1, p2);
+//        p2 = getProblemAnew();
+//        p2.setValidatorProgramName("foo");
+//        checkString("setValidatorProgramName foo", p1.getValidatorProgramName(), p2.getValidatorProgramName(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setReadInputDataFromSTDIN(true);
         checkBoolean("setReadInputDataFromSTDIN foo", p1.isReadInputDataFromSTDIN(), p2.isReadInputDataFromSTDIN(), p1, p2);
 
         p2 = getProblemAnew();
-        p2.setValidatedProblem(false);
+        p2.setValidatorType(VALIDATOR_TYPE.NONE);
         checkBoolean("setValidatedProblem foo", p1.isValidatedProblem(), p2.isValidatedProblem(), p1, p2);
 
         p2 = getProblemAnew();
-        p2.setUsingPC2Validator(false);
+        p2.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         checkBoolean("setUsingPC2Validator", p1.isUsingPC2Validator(), p2.isUsingPC2Validator(), p1, p2);
 
         p2 = getProblemAnew();
-        p2.setValidatorCommandLine(null);
-        checkString("setValidatorCommandLine", p1.getValidatorCommandLine(), p2.getValidatorCommandLine(), p1, p2);
+        p2.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
+        checkBoolean("setUsingPC2Validator", p1.isUsingPC2Validator(), p2.isUsingPC2Validator(), p1, p2);
+
+        //this test is no longer valid since the default validator settings were changed to 'null'
+//        p2 = getProblemAnew();
+//        p2.setValidatorCommandLine(null);
+//        checkString("setValidatorCommandLine", p1.getValidatorCommandLine(), p2.getValidatorCommandLine(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setShowValidationToJudges(true);
@@ -140,8 +147,9 @@ public class ProblemTest extends TestCase {
         checkBoolean("setShowCompareWindow", p1.isShowCompareWindow(), p2.isShowCompareWindow(), p1, p2);
 
         p2 = getProblemAnew();
-        p2.setIgnoreSpacesOnValidation(false);
-        checkBoolean("setIgnoreSpacesOnValidation", p1.isIgnoreSpacesOnValidation(), p2.isIgnoreSpacesOnValidation(), p1, p2);
+        p2.getPC2ValidatorSettings().setIgnoreCaseOnValidation(false);
+        checkBoolean("setIgnoreSpacesOnValidation", p1.getPC2ValidatorSettings().isIgnoreCaseOnValidation(), 
+                                                    p2.getPC2ValidatorSettings().isIgnoreCaseOnValidation(), p1, p2);
 
         p2 = getProblemAnew();
         p2.setWhichPC2Validator(2);

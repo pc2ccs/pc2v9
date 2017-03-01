@@ -22,7 +22,6 @@ public final class AllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(ExecuteUtilitiesTest.class);
         suite.addTestSuite(ExecutableTest.class);
-        suite.addTestSuite(ExecutableV9Test.class);
 
         //$JUnit-END$
         return suite;

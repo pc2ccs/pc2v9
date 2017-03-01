@@ -36,7 +36,11 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 /**
  * Contest import/export XML.
  * 
- * Class used <li>to create output XML based on contest data <li>to create a IInternalContest based on input XML.
+ * Class used 
+ * <ul>
+ * <li>to create output XML based on contest data 
+ * <li>to create a IInternalContest based on input XML.
+ * </ul>
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -413,7 +417,7 @@ public class ContestXML {
             memento.putInteger("internalValidatorOption", problem.getWhichPC2Validator());
             memento.putString("validatorCommand", problem.getValidatorCommandLine());
             memento.putString("validatorProgram", problem.getValidatorProgramName());
-            memento.putBoolean("ignoreSpaces", problem.isIgnoreSpacesOnValidation());
+            memento.putBoolean("ignoreCase", problem.getPC2ValidatorSettings().isIgnoreCaseOnValidation());
         } else if (problem.isValidatedProblem()) {
             memento.putString("validatorCommand", problem.getValidatorCommandLine());
             memento.putString("validatorProgram", problem.getValidatorProgramName());

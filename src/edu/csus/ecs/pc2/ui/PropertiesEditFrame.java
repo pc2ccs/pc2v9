@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 /**
  * Properties Edit Frame (Window).
  * 
- * The method {@link #setProperties(Properties, IPropertyUpdater)) must
+ * The method {@link #setProperties(Properties, IPropertyUpdater)} must
  * be used to initialize both the Properties and the Property Updater call back.
  * 
  * @author pc2@ecs.csus.edu

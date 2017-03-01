@@ -45,7 +45,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(800, 535));
+        this.setSize(new Dimension(800, 700));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getProblemPane());
         this.setTitle("New Problem");
@@ -69,7 +69,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
         } else {
             setTitle("Edit Problem " + problem.getDisplayName());
             if (problem.isUsingExternalDataFiles()) {
-                setTitle("Edit Problem " + problem.getDisplayName()+" [External/CCS]" );
+                setTitle("Edit Problem " + problem.getDisplayName()+" [External Data]" );
             }
             
         }

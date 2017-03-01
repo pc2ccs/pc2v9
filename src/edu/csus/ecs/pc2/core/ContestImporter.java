@@ -350,7 +350,12 @@ public class ContestImporter {
         newProblem.setComputerJudged(problem.isComputerJudged());
         newProblem.setDataFileName(problem.getDataFileName());
         newProblem.setHideOutputWindow(problem.isHideOutputWindow());
-        newProblem.setIgnoreSpacesOnValidation(problem.isIgnoreSpacesOnValidation());
+        
+        newProblem.setValidatorType(problem.getValidatorType());
+        newProblem.setPC2ValidatorSettings(problem.getPC2ValidatorSettings().clone());
+        newProblem.setCLICSValidatorSettings(problem.getClicsValidatorSettings().clone());
+        newProblem.setCustomValidatorSettings(problem.getCustomValidatorSettings().clone());
+        
         newProblem.setInternationalJudgementReadMethod(problem.isInternationalJudgementReadMethod());
         newProblem.setManualReview(problem.isManualReview());
         newProblem.setPrelimaryNotification(problem.isPrelimaryNotification());
@@ -359,11 +364,8 @@ public class ContestImporter {
         newProblem.setShowCompareWindow(problem.isShowCompareWindow());
         newProblem.setShowValidationToJudges(problem.isShowValidationToJudges());
         newProblem.setTimeOutInSeconds(problem.getTimeOutInSeconds());
-        newProblem.setUsingPC2Validator(problem.isUsingPC2Validator());
-        newProblem.setValidatedProblem(problem.isValidatedProblem());
         newProblem.setValidatorCommandLine(problem.getValidatorCommandLine());
         newProblem.setValidatorProgramName(problem.getValidatorProgramName());
-        newProblem.setWhichPC2Validator(problem.getWhichPC2Validator());
     }
 
     /**

@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
@@ -33,9 +32,11 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
  * Create contest from YAML.
@@ -528,7 +529,7 @@ public class ContestYAMLLoader implements IContestLoader {
      * @param contest
      * @param baseDirectoryName location for contest.yaml and problem short names
      * @param problem
-     * @param dataFiles
+     * @param overrideUsePc2Validator
      */
     public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator) {
         loadProblemInformationAndDataFiles(contest, baseDirectoryName, problem, overrideUsePc2Validator, false);
@@ -624,7 +625,7 @@ public class ContestYAMLLoader implements IContestLoader {
 
             // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
 
-            addCCSValidator(problem, problemDataFiles, baseDirectoryName);
+            addClicsValidator(problem, problemDataFiles, baseDirectoryName);
 
         } else {
             problem.setComputerJudged(true);
@@ -1070,46 +1071,43 @@ public class ContestYAMLLoader implements IContestLoader {
     }
 
     public Problem addDefaultPC2Validator(Problem problem, int optionNumber) {
-
-        problem.setCcsMode(false);
         
-        problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator(true);
-        problem.setWhichPC2Validator(optionNumber);
-        problem.setIgnoreSpacesOnValidation(true);
+        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+        
+        PC2ValidatorSettings settings = new PC2ValidatorSettings();
+        settings.setWhichPC2Validator(optionNumber);
+        settings.setIgnoreCaseOnValidation(true);
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator() + " " + settings.isIgnoreCaseOnValidation());
+        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
-        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
-        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
-
+        problem.setPC2ValidatorSettings(settings);
         return problem;
+
     }
 
-    private Problem addCCSValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
-
-        problem.setCcsMode(true);
-
-        problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator(false);
+    private Problem addClicsValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
+    
+        problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        
         problem.setReadInputDataFromSTDIN(true);
 
-
-        if (problem.getValidatorProgramName() == null){
-            problem.setValidatorProgramName(CCSConstants.DEFAULT_CCS_VALIATOR_NAME);
+        if (problem.getValidatorProgramName() == null) {
+            problem.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
         }
 
         // if we use the internal Java CCS validator use this.
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
-        if (problem.getValidatorCommandLine() == null){
-            problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+        if (problem.getValidatorCommandLine() == null) {
+            problem.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         }
 
         String validatorName = baseDirectoryName + File.separator + problem.getValidatorProgramName();
 
         try {
             /**
-             * If file is there load it 
+             * If file is there load it
              */
-            if (new File(validatorName).isFile()){
+            if (new File(validatorName).isFile()) {
                 problemDataFiles.setValidatorFile(new SerializedFile(validatorName));
             }
         } catch (Exception e) {
@@ -1119,7 +1117,7 @@ public class ContestYAMLLoader implements IContestLoader {
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
 
         return problem;
-    }
+}
 
     /**
      * Load list of strings.
@@ -1390,6 +1388,7 @@ public class ContestYAMLLoader implements IContestLoader {
             if (overrideValidatorCommandLine != null) {
                 validatorCommandLine = overrideValidatorCommandLine;
             }
+            problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
             problem.setValidatorCommandLine(validatorCommandLine);
             
             problemList.addElement(problem);
@@ -1775,7 +1774,6 @@ public class ContestYAMLLoader implements IContestLoader {
      * 
      * @param contents
      * @param defaultTimeOut
-     * @param overrideValidatorCommandLine 
      * @param defaultValidatorCommandLine 
      * @param loadDataFileContents 
      * @return

@@ -23,7 +23,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
 
-import edu.csus.ecs.pc2.ccs.CCSConstants;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -46,9 +45,12 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
+import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
 
 /**
  * Load contest from Yaml using SnakeYaml methods.
@@ -860,6 +862,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             loadPc2ProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, dataFileName, answerFileName);
         } else {
             loadCCSProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles);
+
+            // validator_flags: options are: [case_sensitive] [space_change_sensitive] [float_absolute_tolerance FLOAT] [float_tolerance FLOAT]
+            // ex. validator_flags: float_tolerance 1e-6
+            
+            String validatorFlags = fetchValue(content, IContestLoader.VALIDATOR_FLAGS_KEY);
+            
+            if (validatorFlags != null && validatorFlags.trim().length() > 0) {
+                try {
+                    ClicsValidatorSettings settings = new ClicsValidatorSettings(validatorFlags);
+                    problem.setCLICSValidatorSettings(settings);
+                } catch (RuntimeException e) {
+                    throw new YamlLoadException("For problem " + problem.getShortName() + ", invalid validator flags '" + validatorFlags + "' " + e.getMessage(), e.getCause());
+                }
+            }
         }
 
         Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
@@ -880,7 +896,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
 
-            addCCSValidator(problem, problemDataFiles, baseDirectoryName);
+            addClicsValidator(problem, problemDataFiles, baseDirectoryName);
 
         } else {
             addDefaultPC2Validator(problem, 1);
@@ -915,16 +931,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public Problem addDefaultPC2Validator(Problem problem, int optionNumber) {
 
-        problem.setCcsMode(false);
+        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+        
+        PC2ValidatorSettings settings = new PC2ValidatorSettings();
+        settings.setWhichPC2Validator(optionNumber);
+        settings.setIgnoreCaseOnValidation(true);
+        settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator() + " " + settings.isIgnoreCaseOnValidation());
+        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
-        problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator(true);
-        problem.setWhichPC2Validator(optionNumber);
-        problem.setIgnoreSpacesOnValidation(true);
-
-        problem.setValidatorCommandLine(Constants.DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + problem.getWhichPC2Validator() + " " + problem.isIgnoreSpacesOnValidation());
-        problem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
-
+        problem.setPC2ValidatorSettings(settings);
         return problem;
     }
 
@@ -1125,6 +1140,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (overrideValidatorCommandLine != null) {
                     validatorCommandLine = overrideValidatorCommandLine;
                 }
+                problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
                 problem.setValidatorCommandLine(validatorCommandLine);
 
                 problemList.addElement(problem);
@@ -1433,22 +1449,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         throw exception;
     }
 
-    private Problem addCCSValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
+    private Problem addClicsValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
 
-        problem.setCcsMode(true);
-
-        problem.setValidatedProblem(true);
-        problem.setUsingPC2Validator(false);
+        problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        
         problem.setReadInputDataFromSTDIN(true);
 
         if (problem.getValidatorProgramName() == null) {
-            problem.setValidatorProgramName(CCSConstants.DEFAULT_CCS_VALIATOR_NAME);
+            problem.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
         }
 
         // if we use the internal Java CCS validator use this.
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
         if (problem.getValidatorCommandLine() == null) {
-            problem.setValidatorCommandLine(CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+            problem.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         }
 
         String validatorName = baseDirectoryName + File.separator + problem.getValidatorProgramName();
@@ -1465,7 +1479,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
-
+        
         return problem;
     }
 
@@ -1750,7 +1764,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * 
      * @param s
      *            string to be converted to seconds
-     * @return -1 if invalid time string, 0 or >0 if valid
+     * @return -1 if invalid time string, 0 or greater if valid
      */
     public long stringToLongSecs(String s) {
 

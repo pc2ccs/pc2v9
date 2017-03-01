@@ -50,7 +50,10 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 /**
  * Event Feed (CCS) XML.
  * 
- * Class used <li>to CCS Standard Event Feed output XML based on contest data.
+ * Class used 
+ * <ul>
+ * <li>to CCS Standard Event Feed output XML based on contest data.
+ * </ul>
  * 
  * Mementos are the internal tags for a element, Elements are the XML Elements with
  * surrounding tag.
@@ -334,7 +337,6 @@ public class EventFeedXML {
      * @param contest
      * @param filter
      * @return
-     * @throws IOException
      */
     public XMLMemento createInfoElement(IInternalContest contest, Filter filter) {
         XMLMemento memento = XMLMemento.createWriteRoot(INFO_TAG);
@@ -395,9 +397,9 @@ public class EventFeedXML {
      * Add Language fields.
      * 
      * <pre>
-     * <language>
-     * <name>C++</name>
-     * </language>
+     * &lt;language&gt;
+     * &lt;name&gt;C++&lt;/name&gt;
+     * &lt;/language&gt;
      * </pre>
      * @param memento
      * @param contest
@@ -427,11 +429,11 @@ public class EventFeedXML {
      * Add problem fields.
      * 
      * <pre>
-     * <problem id="1" state="enabled">
-     * <label>A</label>
-     * <name>APL Lives!</name>
-     * <balloon-color rgb="#ffff00">yellow</balloon-color>
-     * </problem>
+     * &lt;problem id="1" state="enabled"&gt;
+     * &lt;label&gt;A&lt;/label&gt;
+     * &lt;name&gt;APL Lives!&lt;/name&gt;
+     * &lt;balloon-color rgb="#ffff00"&gt;yellow&lt;/balloon-color&gt;
+     * &lt;/problem&gt;
      * </pre>
      * 
      * @param memento
@@ -840,12 +842,12 @@ public class EventFeedXML {
      * Create account memento.
      * 
      * <pre>
-     * <team id="1" external-id="23412">
-     * <name>American University of Beirut</name>
-     * <nationality>LBN</nationality>
-     * <university>American University of Beirut</university>
-     * <region>Europe</region>
-     * </team>
+     * &lt;team id="1" external-id="23412"&gt;
+     * &lt;name&gt;American University of Beirut&lt;/name&gt;
+     * &lt;nationality&gt;LBN&lt;/nationality&gt;
+     * &lt;university&gt;American University of Beirut&lt;/university&gt;
+     * &lt;region&gt;Europe&lt;/region&gt;
+     * &lt;/team&gt;
      * </pre>
      * @param memento
      * @param contest
@@ -890,7 +892,6 @@ public class EventFeedXML {
      * @param contest
      * @param testCase
      * @param run
-     * @param problem
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, RunTestCase testCase, Run run) {
 
@@ -1184,7 +1185,7 @@ public class EventFeedXML {
      * Starts contest XML and adds all configuration data/values.
      * 
      * @param contest
-     * @param judgement
+     * @param filter
      * @return
      */
     public String createStartupXML(IInternalContest contest, Filter filter) {
@@ -1297,7 +1298,7 @@ public class EventFeedXML {
     }
 
     /**
-     * @param contest
+     * @param inContest
      * @return team accounts sorted by site, team number
      */
     public Account[] getTeamAccounts(IInternalContest inContest) {

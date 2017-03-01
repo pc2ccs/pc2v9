@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.packet.Packet;
@@ -85,7 +86,8 @@ public class ServerConnectionTest extends AbstractTestCase {
 
     /**
      * Test Bug 767 - submitRun may submit for the wrong IProblem
-     * @throws Exception
+     * @throws Exception if submitting the run to the server failed
+     * @throws InterruptedException if the Problem could not be fetched from the Controller within a specified time limit
      */
     public void testSubmittedRun() throws Exception {
 
@@ -259,7 +261,6 @@ public class ServerConnectionTest extends AbstractTestCase {
 
     /**
      * 
-     * @param args
      */
     public static void main(String[] args) {
 
@@ -518,10 +519,12 @@ public class ServerConnectionTest extends AbstractTestCase {
      * 
      * <P>
      * To test Bug 884:
+     * <ul>
      * <li> Create admin 2 account
      * <li> Run: <code>ServerConnectionTest adda</code>
+     * </ul>
      * 
-     * @throws Exception
+     * @throws Exception if accounts cannot be added
      */
     public void addAccountTest() throws Exception {
 
@@ -573,7 +576,7 @@ public class ServerConnectionTest extends AbstractTestCase {
             File dataFile = new File(data);
             File answerFile = new File(answer);
             
-            connection.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, false, null);
+            connection.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATOR_TYPE.NONE, null);
             
             Thread.sleep(1000); // sleep so packet can be sent/processed
             
@@ -599,7 +602,7 @@ public class ServerConnectionTest extends AbstractTestCase {
         
         File dataFile = new File(data);
         File answerFile = new File(answer);
-        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, false, null);
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATOR_TYPE.NONE, null);
         
         Packet[] list = special.getPacketList();
         assertEquals("Expecting packets sent", 1, list.length);
@@ -707,7 +710,7 @@ public class ServerConnectionTest extends AbstractTestCase {
         properties.put(APIConstants.JUDGING_TYPE, APIConstants.COMPUTER_JUDGING_ONLY);
         properties.put(APIConstants.VALIDATOR_PROGRAM, "/home/pc2/validdiff");
         
-        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, true, properties);
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATOR_TYPE.CUSTOMVALIDATOR, properties);
         
         Packet[] list = special.getPacketList();
         assertEquals("Expecting packets sent", 1, list.length);
@@ -727,15 +730,15 @@ public class ServerConnectionTest extends AbstractTestCase {
         assertEquals("Data file name", "sumit.dat", problem.getDataFileName());
         assertEquals("Answer file name", "sumit.ans", problem.getAnswerFileName());
 
+        assertEquals("Validator prog name ", "/home/pc2/validdiff", problem.getValidatorProgramName());
+        
         assertEquals("Validator cmd line ", "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ", problem.getValidatorCommandLine());
-
-// SOMEDAY  assertEquals("Validator prog name ", "/home/pc2/validdiff", problem.getValidatorProgramName());
     }
     
     /**
      * Test add problem, manual review only.
      * 
-     * @throws Exception
+     * @throws Exception for a variety of reasons
      */
     public void testAddProblemDefault() throws Exception {
         SampleContest sample = new SampleContest();
@@ -764,7 +767,7 @@ public class ServerConnectionTest extends AbstractTestCase {
 
         Properties properties = new Properties();
         
-        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, true, properties);
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATOR_TYPE.NONE, properties);
         
         Packet[] list = special.getPacketList();
         assertEquals("Expecting packets sent", 1, list.length);
@@ -933,7 +936,7 @@ public class ServerConnectionTest extends AbstractTestCase {
 
     /**
      * Test add interpreted language.
-     * @throws Exception
+     * @throws Exception for a variety of reasons
      */
     public void testAddLanguageLong() throws Exception {
         
