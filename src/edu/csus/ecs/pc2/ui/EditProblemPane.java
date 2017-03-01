@@ -3411,10 +3411,10 @@ public class EditProblemPane extends JPanePlugin {
         getCustomValidatorExecutableProgramTextField().setText("");
         getCustomValidatorExecutableProgramTextField().setToolTipText("");
         
-        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         localPC2InterfaceCustomValidatorCommandLine = getCustomValidatorCommandLineTextField().getText();
         
-        getUsePC2ValStdRadioButton().setSelected(true); //button group also causes Use CLICS Val Std button to become unselected 
+        getUseClicsValStdRadioButton().setSelected(true); //button group also causes Use PC2 Val Std button to become unselected 
         localClicsInterfaceCustomValidatorCommandLine = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
         
         getShowValidatorToJudgesCheckBox().setSelected(true);
@@ -4465,6 +4465,7 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton getUsePC2ValStdRadioButton() {
         if (rdbtnUsePcStandard == null) {
         	rdbtnUsePcStandard = new JRadioButton("Use PC^2 Standard Interface");
+        	rdbtnUsePcStandard.setSelected(false);
         	rdbtnUsePcStandard.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
                     //switching to Use PC2 Standard Interface for this Custom Validator; see if the user has previously entered a Validator Command Line
@@ -4487,7 +4488,6 @@ public class EditProblemPane extends JPanePlugin {
         	        enableUpdateButton();
         	    }
         	});
-        	rdbtnUsePcStandard.setSelected(true);
         	validatorStandardButtonGroup.add(rdbtnUsePcStandard);
         }
         return rdbtnUsePcStandard;
@@ -4495,6 +4495,7 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton getUseClicsValStdRadioButton() {
         if (rdbtnUseClicsStandard == null) {
         	rdbtnUseClicsStandard = new JRadioButton("Use CLICS Standard Interface");
+        	rdbtnUseClicsStandard.setSelected(true);
         	rdbtnUseClicsStandard.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        //switching to Use CLICS Standard Interface for this Custom Validator; see if the user has previously entered a Validator Command Line
