@@ -1,7 +1,11 @@
 package edu.csus.ecs.pc2.core.execute;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -47,6 +51,8 @@ public class ExecutableTest extends AbstractTestCase {
     // SOMDAY change to using Hello.java by fixing class name in Hello.java
 
     public static final String MOCK_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.validator.MockValidator";
+
+    private static final String NL = System.getProperty("line.separator");
 
     // private static int testNumber = 1;
 
@@ -311,11 +317,43 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setAnswerFileName("sumit.ans");
         String answerFileName = getSamplesSourceFilename(problem.getAnswerFileName());
         checkFileExistance(answerFileName);
+        answerFileName = convertEOLtoHostFormat(answerFileName);
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
 
         contest2.addProblem(problem, problemDataFiles);
 
         return problem;
+    }
+
+    /**
+     * Produces a new file in the Test Data directory which has the same name as the specified
+     * file but where the End-of-Line characters in the new file have been converted to the form
+     * of the host OS.
+     * 
+     * @param originalFileName the original data file
+     * @return the name of a new file with EOL converted
+     */
+    private String convertEOLtoHostFormat(String originalFileName) {
+        File orig = new File(originalFileName);
+        String newFilename=null;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(orig));
+            newFilename = getTestFilename(orig.getName()) ;
+            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(newFilename)));
+            String line ;
+            while ((line=br.readLine()) != null) {
+                bw.write(line+NL);
+            }
+            br.close();
+            bw.close();
+            
+        } catch (IOException e) {
+            System.err.println ("IOException while converting input file '"+ originalFileName + "'");
+            e.printStackTrace();
+        }
+        
+        
+        return newFilename;
     }
 
     /**
