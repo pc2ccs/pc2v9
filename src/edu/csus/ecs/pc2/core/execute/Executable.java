@@ -958,8 +958,8 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             if (process != null) {
-                process.waitFor();
-                exitcode = process.exitValue();
+                exitcode = process.waitFor();
+//                exitcode = process.exitValue();
                 log.info("validator process returned exit code " + exitcode);
                 executionData.setExecuteExitValue(exitcode);
                 process.destroy();
