@@ -130,7 +130,7 @@ public class Executable extends Plugin implements IExecutable {
      * Validator stderr filename.
      */
     public static final String VALIDATOR_STDERR_FILENAME = "vstderr.pc2";
-    
+
     /**
      * Interface - the file created with the process return.exit code.
      */
@@ -322,13 +322,13 @@ public class Executable extends Plugin implements IExecutable {
                         String errorMessage = "";
                         if (executionData.getCompileResultCode() == 1 || executionData.getExecutionException() != null) {
                             // compiler missing
-                            errorMessage = "Unable to find/execute copmiler using the command \""+substituteAllStrings(run, language.getCompileCommandLine());
+                            errorMessage = "Unable to find/execute copmiler using the command \"" + substituteAllStrings(run, language.getCompileCommandLine());
                             errorMessage += "\", contact staff";
                         } else {
                             // expected output missing
                             title = "Compilation Error";
-                            errorMessage = "Compilation error when compiling program \""+substituteAllStrings(run, "{:mainfile}");
-                            errorMessage += "\" using the command \"" + substituteAllStrings(run, language.getCompileCommandLine())+"\"";
+                            errorMessage = "Compilation error when compiling program \"" + substituteAllStrings(run, "{:mainfile}");
+                            errorMessage += "\" using the command \"" + substituteAllStrings(run, language.getCompileCommandLine()) + "\"";
                         }
 
                         showDialogToUser(errorMessage);
@@ -349,13 +349,13 @@ public class Executable extends Plugin implements IExecutable {
                         fileViewer.addTextPane("Error during compile", errorMessage);
                     } // else they will get a tab hopefully showing something wrong
                 }
-            } 
-            
-            //if we get here, this is a Judged Run (not a Team Test Run)            
+            }
+
+            // if we get here, this is a Judged Run (not a Team Test Run)
             else if (compileProgram()) {
-                
-                //compile succeeded; proceed to execution
-                
+
+                // compile succeeded; proceed to execution
+
                 SerializedFile[] dataFiles = null;
                 if (problemDataFiles != null) {
                     dataFiles = problemDataFiles.getJudgesDataFiles();
@@ -371,7 +371,7 @@ public class Executable extends Plugin implements IExecutable {
                 String failedResults = "";
 
                 if (dataFiles == null || dataFiles.length <= 1) {
-                    
+
                     // the judged run has (at most) a single data set,
                     log.info("Test cases: 1 for run " + run.getNumber());
 
@@ -383,15 +383,15 @@ public class Executable extends Plugin implements IExecutable {
 
                 } else {
 
-                    //the judged run has multiple test cases
+                    // the judged run has multiple test cases
                     log.info("Test cases: " + dataFiles.length + " for run " + run.getNumber());
 
-                    //execute the judged run against each test data set
+                    // execute the judged run against each test data set
                     while (dataSetNumber < dataFiles.length) {
-                        
-                        //execute against one specific data set
+
+                        // execute against one specific data set
                         passed = executeAndValidateDataSet(dataSetNumber);
-                        
+
                         dataSetNumber++;
                         if (!passed) {
                             log.info("FAILED test case " + dataSetNumber + " for run " + run.getNumber() + " reason " + getFailureReason());
@@ -401,7 +401,7 @@ public class Executable extends Plugin implements IExecutable {
                             }
                         }
                     }
-                    
+
                     // re-create 1st test set data if this is an internal file
                     if (!problem.isUsingExternalDataFiles()) {
                         // if internal the 1st file has been re-written by datasets 1..n so we need to re-write 0
@@ -419,15 +419,12 @@ public class Executable extends Plugin implements IExecutable {
                 } else {
                     log.info("Test results: ALL passed for run " + run);
                 }
-                
+
             } else {
-                
-                //if we get here it is a judged run but the compile step failed
+
+                // if we get here it is a judged run but the compile step failed
                 /**
-                 * compileProgram returns false if 
-                 * 1) runProgram failed (errorString set) 
-                 * 2) compiler fails to create expected output file (errorString empty)
-                 * If there is compiler stderr or stdout we
+                 * compileProgram returns false if 1) runProgram failed (errorString set) 2) compiler fails to create expected output file (errorString empty) If there is compiler stderr or stdout we
                  * should not add the textPane saying there was an error.
                  */
                 if (!executionData.isCompileSuccess()) {
@@ -436,13 +433,13 @@ public class Executable extends Plugin implements IExecutable {
                     String errorMessage = "";
                     if (executionData.getCompileResultCode() == 1 || executionData.getExecutionException() != null) {
                         // compiler missing
-                        errorMessage = "Unable to find/execute copmiler using the command \""+substituteAllStrings(run, language.getCompileCommandLine());
+                        errorMessage = "Unable to find/execute copmiler using the command \"" + substituteAllStrings(run, language.getCompileCommandLine());
                         errorMessage += "\", contact staff";
                     } else {
                         // expected output missing
                         title = "Compilation Error";
-                        errorMessage = "Compilation error when compiling program \""+substituteAllStrings(run, "{:mainfile}");
-                        errorMessage += "\" using the command \"" + substituteAllStrings(run, language.getCompileCommandLine())+"\"";
+                        errorMessage = "Compilation error when compiling program \"" + substituteAllStrings(run, "{:mainfile}");
+                        errorMessage += "\" using the command \"" + substituteAllStrings(run, language.getCompileCommandLine()) + "\"";
                     }
 
                     if (executionData.getExecutionException() != null) {
@@ -464,8 +461,8 @@ public class Executable extends Plugin implements IExecutable {
                     fileViewer.addTextPane("Error during compile", errorMessage);
                 } // else they will get a tab hopefully showing something wrong
             }
-            
-            //we've finished the compile/execute/validate steps (for better or worse); do the required final steps to display the results
+
+            // we've finished the compile/execute/validate steps (for better or worse); do the required final steps to display the results
 
             File file;
             String outputFile;
@@ -572,9 +569,10 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Executes the current run against a specified data set, then if the problem is marked as
-     * being validated also invokes the appropriate validator to validate the program (run) output.
-     * @param dataSetNumber zero-based data set number
+     * Executes the current run against a specified data set, then if the problem is marked as being validated also invokes the appropriate validator to validate the program (run) output.
+     * 
+     * @param dataSetNumber
+     *            zero-based data set number
      * @return true if the problem was to be validated and the validator indicates the problem was solved
      */
     private boolean executeAndValidateDataSet(int dataSetNumber) {
@@ -683,9 +681,10 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Runs the problem-specified validator to compare the output of the run (team program)
-     * with the corresponding judge's answer file.
-     * @param dataSetNumber a zero-based value indicating the data set against which the run was executed
+     * Runs the problem-specified validator to compare the output of the run (team program) with the corresponding judge's answer file.
+     * 
+     * @param dataSetNumber
+     *            a zero-based value indicating the data set against which the run was executed
      * @return true if the validator returns "success" (indicating that the problem was correctly solved)
      */
     protected boolean validateProgram(int dataSetNumber) {
@@ -699,17 +698,17 @@ public class Executable extends Plugin implements IExecutable {
         if (isJudge()) {
             controller.sendValidatingMessage(run);
         }
-        
-        //get the appropriate command pattern for invoking the validator attached to the problem
+
+        // get the appropriate command pattern for invoking the validator attached to the problem
         String commandPattern = "";
-        
+
         if (problem.isUsingPC2Validator()) {
-            
+
             commandPattern = getPC2ValidatorCommandPattern();
-            
+
         } else if (problem.isUsingCLICSValidator()) {
-            
-          commandPattern = getCLICSValidatorCommandPattern();
+
+            commandPattern = getCLICSValidatorCommandPattern();
 
         } else if (problem.isUsingCustomValidator()) {
 
@@ -717,12 +716,12 @@ public class Executable extends Plugin implements IExecutable {
 
             // for a custom validator we also need to obtain the SerializedFile for the validator
             if (problemDataFiles != null && problemDataFiles.getValidatorFile() != null) {
-                
+
                 // get Validation Program
                 String validatorFileName = problemDataFiles.getValidatorFile().getName();
                 String validatorUnpackName = prefixExecuteDirname(validatorFileName);
-                
-                //create the validator program file
+
+                // create the validator program file
                 if (!createFile(problemDataFiles.getValidatorFile(), validatorUnpackName)) {
                     log.info("Unable to create custom validator program " + validatorUnpackName);
                     setException("Unable to create custom validator program " + validatorUnpackName);
@@ -735,27 +734,27 @@ public class Executable extends Plugin implements IExecutable {
                     setExecuteBit(prefixExecuteDirname(validatorFileName));
                 }
             } else {
-                
+
                 log.warning("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
                 setException("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
                 throw new IllegalStateException("IllegalStateException: Problem is marked as having a Custom Validator but no "
                         + "SerializedFile for the validator could be obtained from the ProblemDataFiles");
             }
-   
+
         } else {
-            
+
             log.warning("Problem is marked as validated but has no defined Validator");
             setException("Problem is marked as validated but has no defined Validator");
             throw new IllegalStateException("IllegalStateException: Problem is marked as validated but has no defined Validator");
         }
-        
-        //when we get here, we have a command pattern for the specified validator and, if it is a custom validator,
-        //  we know there is an executable validator file
-        
-        //get Judge input data file name, either short name or fully qualified if external file.  {:infile}
-        String judgeDataFilename =  problem.getDataFileName();
-        
-        //get Judge answer file name, either short name or fully qualified if external file.  {:ansfile}
+
+        // when we get here, we have a command pattern for the specified validator and, if it is a custom validator,
+        // we know there is an executable validator file
+
+        // get Judge input data file name, either short name or fully qualified if external file. {:infile}
+        String judgeDataFilename = problem.getDataFileName();
+
+        // get Judge answer file name, either short name or fully qualified if external file. {:ansfile}
         String judgeAnswerFilename = problem.getAnswerFileName();
 
         if (overwriteJudgesDataFiles) {
@@ -792,7 +791,7 @@ public class Executable extends Plugin implements IExecutable {
 
         }
 
-        //get a "random" number to be used as part of the results file name, for security
+        // get a "random" number to be used as part of the results file name, for security
         String secs = Long.toString((new Date().getTime()) % 100);
 
         // Answer/results XML file name
@@ -802,61 +801,60 @@ public class Executable extends Plugin implements IExecutable {
 
         log.log(Log.DEBUG, "command pattern before substitution: " + commandPattern);
 
-//      orig  String cmdLine = substituteAllStrings(run, commandPattern);
+        // orig String cmdLine = substituteAllStrings(run, commandPattern);
 
         String cmdLine = replaceString(commandPattern, "{:infile}", judgeDataFilename);
         cmdLine = replaceString(cmdLine, "{:ansfile}", judgeAnswerFilename);
         cmdLine = replaceString(cmdLine, "{:outfile}", "estdout.pc2");
         cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
-        
-        //the following is specific to the CLICS validator but needs to be done here for scope accessibility in the code below (near line 1023)
-        String feedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber + File.separator ;
-        cmdLine = replaceString(cmdLine, "{:feedbackdir}", feedbackDirName); 
-        
-        if (problem.isUsingCLICSValidator() ||
-                (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
+
+        // the following is specific to the CLICS validator but needs to be done here for scope accessibility in the code below (near line 1023)
+        String feedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber + File.separator;
+        cmdLine = replaceString(cmdLine, "{:feedbackdir}", feedbackDirName);
+
+        if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
 
             String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;
-            
-            //get rid of any pre-existing feedback dir
+
+            // get rid of any pre-existing feedback dir
             try {
                 ExecuteUtilities.removeDirectory(feedbackDirPath);
             } catch (Exception e) {
                 log.warning("Exception trying to remove feedback directory '" + feedbackDirPath + "': " + e.getMessage());
             }
-            
+
             if (!insureDir(feedbackDirPath)) {
                 throw new SecurityException("Unable to create ClicsValidator feedback directory; check logs");
             } else {
-                //clean out feedback dir
+                // clean out feedback dir
                 ExecuteUtilities.clearDirectory(feedbackDirPath);
-                
-//                //copy empty results file into feedback dir (so ClicsValidator knows the resultsfile name)
-//                resultsFileName = ExecuteUtilities.createResultsFileName(run);
-//                File resultsFile = new File(feedbackDirPath + File.separator + resultsFileName);
-//                try {
-//                    resultsFile.createNewFile();
-//                } catch (IOException e) {
-//                    log.severe("unable to create results results file '" + resultsFileName + "' in feedback directory '" + feedbackDirPath + "'");
-//                    throw new SecurityException("Unable to create results file in ClicsValidator feedback directory; check logs");
-//                }
+
+                // //copy empty results file into feedback dir (so ClicsValidator knows the resultsfile name)
+                // resultsFileName = ExecuteUtilities.createResultsFileName(run);
+                // File resultsFile = new File(feedbackDirPath + File.separator + resultsFileName);
+                // try {
+                // resultsFile.createNewFile();
+                // } catch (IOException e) {
+                // log.severe("unable to create results results file '" + resultsFileName + "' in feedback directory '" + feedbackDirPath + "'");
+                // throw new SecurityException("Unable to create results file in ClicsValidator feedback directory; check logs");
+                // }
 
             }
         }
-        
+
         cmdLine = substituteAllStrings(run, cmdLine);
 
-//        if (File.separator.equals("\\")) {
-//            if (problem.isUsingPC2Validator()) {
-//                cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
-//                cmdLine = cmdLine.replaceFirst("jar ", "jar\" ");   //how do we know there's a "jar" in the string? It might be using a directory!
-//                log.log(Log.DEBUG, "command line after replaceFirst: " + cmdLine);
-//            }
-//        }
+        // if (File.separator.equals("\\")) {
+        // if (problem.isUsingPC2Validator()) {
+        // cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
+        // cmdLine = cmdLine.replaceFirst("jar ", "jar\" "); //how do we know there's a "jar" in the string? It might be using a directory!
+        // log.log(Log.DEBUG, "command line after replaceFirst: " + cmdLine);
+        // }
+        // }
 
         log.log(Log.DEBUG, "command pattern after substitution: " + cmdLine);
 
-        //check if the command to be executed is a program residing in the current execute directory;
+        // check if the command to be executed is a program residing in the current execute directory;
         // if so, prepend the directory name onto the command name in the command line
         try {
             String actFilename = new String(cmdLine);
@@ -891,7 +889,7 @@ public class Executable extends Plugin implements IExecutable {
             if (problem.isShowValidationToJudges()) {
                 msg = "Validating...";
             }
-            
+
             long startTime = System.currentTimeMillis();
             Process process = runProgram(cmdLine, msg, false);
 
@@ -918,10 +916,9 @@ public class Executable extends Plugin implements IExecutable {
 
             // // waiting for the process to finish execution...
             // executionData.setValidationReturnCode(process.waitFor());
-            
-            //if CLICS validator interface, redirect team output to STDIN
-            if (problem.isUsingCLICSValidator() || 
-                    (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
+
+            // if CLICS validator interface, redirect team output to STDIN
+            if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
 
                 String teamOutputFileName = getTeamOutputFilename(dataSetNumber);
                 if (teamOutputFileName != null && new File(teamOutputFileName).exists()) {
@@ -943,8 +940,6 @@ public class Executable extends Plugin implements IExecutable {
                     out.close();
                 }
             }
-            
-
 
             stdoutCollector.join();
             stderrCollector.join();
@@ -959,7 +954,7 @@ public class Executable extends Plugin implements IExecutable {
 
             if (process != null) {
                 exitcode = process.waitFor();
-//                exitcode = process.exitValue();
+                // exitcode = process.exitValue();
                 log.info("validator process returned exit code " + exitcode);
                 executionData.setExecuteExitValue(exitcode);
                 process.destroy();
@@ -967,14 +962,14 @@ public class Executable extends Plugin implements IExecutable {
                 log.warning("Validator process is null");
                 return false;
             }
-            
-            //previously this code did the following instead of the above if/then/else:
-//            exitcode = process.exitValue();
-//            log.info("validator process returned exit code " + exitcode);
-//
-//            if (process != null) {
-//                process.destroy();
-//            }
+
+            // previously this code did the following instead of the above if/then/else:
+            // exitcode = process.exitValue();
+            // log.info("validator process returned exit code " + exitcode);
+            //
+            // if (process != null) {
+            // process.destroy();
+            // }
 
             stdoutlog.close();
             stderrlog.close();
@@ -990,31 +985,29 @@ public class Executable extends Plugin implements IExecutable {
             }
             log.log(Log.CONFIG, "Exception in validator ", ex);
         }
-                
-        //the validator stdout for the current dataset was written to file "vstdout.pc2" and then copied into a
-        //SerializedFile and stored in the executionData (by the last statements in the try/catch, above); 
-        //copy it from the executionData to a file named for this specific data set so it doesn't get overwritten
-        //during the execution for the following data set
-        String validatorOutputFilename = prefixExecuteDirname("valout." + dataSetNumber + ".txt");    //dataset-specific validator stdout file
+
+        // the validator stdout for the current dataset was written to file "vstdout.pc2" and then copied into a
+        // SerializedFile and stored in the executionData (by the last statements in the try/catch, above);
+        // copy it from the executionData to a file named for this specific data set so it doesn't get overwritten
+        // during the execution for the following data set
+        String validatorOutputFilename = prefixExecuteDirname("valout." + dataSetNumber + ".txt"); // dataset-specific validator stdout file
         createFile(executionData.getValidationStdout(), validatorOutputFilename);
-        
-        //save new validator stdout file in a list of stdout files for all data sets
+
+        // save new validator stdout file in a list of stdout files for all data sets
         validatorOutputFilenames.add(validatorOutputFilename);
-        
-        //same as above, for validator stderr
+
+        // same as above, for validator stderr
         String validatorStderrFilename = prefixExecuteDirname("valerr." + dataSetNumber + ".txt");
         createFile(executionData.getValidationStderr(), validatorStderrFilename);
         validatorStderrFilesnames.add(validatorStderrFilename);
 
+        if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface())) {
 
-        if (problem.isUsingPC2Validator() ||
-                (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface())) {
-            
             boolean fileThere = new File(prefixExecuteDirname(resultsFileName)).exists();
 
             try {
                 if (fileThere) {
-                
+
                     if (problem.isUsingPC2Validator()) {
                         storePC2ValidatorResults(resultsFileName, log);
                     } else {
@@ -1022,177 +1015,171 @@ public class Executable extends Plugin implements IExecutable {
                             storeCustomPC2InterfaceValidatorResults(resultsFileName, log);
                         }
                     }
-                
+
                 } else {
                     log.config("validationCall - Did not produce output results file " + resultsFileName);
-//                  JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
+                    // JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
                 }
             } catch (Exception ex) {
                 executionData.setExecutionException(ex);
-                log.log(Log.INFO, "Exception while reading results file "+resultsFileName, ex);
+                log.log(Log.INFO, "Exception while reading results file " + resultsFileName, ex);
                 throw new SecurityException(ex);
             } finally {
-            
-                if (executionData.isRunTimeLimitExceeded()){
+
+                if (executionData.isRunTimeLimitExceeded()) {
                     executionData.setValidationResults("No - Time Limit Exceeded");
                     executionData.setValidationSuccess(true);
                 }
             }
-        } 
-        
-        else if (problem.isUsingCLICSValidator() ||
-                (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
-            
+        }
+
+        else if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
+
             try {
                 String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;
-                
+
                 if (problem.isUsingCLICSValidator()) {
                     storeClicsValidatorResults(exitcode, feedbackDirPath, log);
                 } else if (problem.isUsingCustomValidator()) {
                     storeCustomClicsInterfaceValidatorResults(exitcode, feedbackDirPath, log);
                 }
-                
+
             } catch (Exception e) {
-                
+
                 executionData.setExecutionException(e);
-                log.log(Log.INFO, "Exception while reading results file "+resultsFileName, e);
+                log.log(Log.INFO, "Exception while reading results file " + resultsFileName, e);
                 throw new SecurityException(e);
-               
+
             } finally {
-                
-                if (executionData.isRunTimeLimitExceeded()){
+
+                if (executionData.isRunTimeLimitExceeded()) {
                     executionData.setValidationResults("No - Time Limit Exceeded");
                     executionData.setValidationSuccess(true);
                 }
-                
+
             }
         }
-
 
         return executionData.isValidationSuccess();
     }
 
     /**
-     * Returns a command pattern for invoking the PC2 "internal validator".
-     * The returned pattern contains "substitution variables" for the elements required by the PC2 validator
-     * (for example, "{:infile}" where the judge's input data file should be substituted).
+     * Returns a command pattern for invoking the PC2 "internal validator". The returned pattern contains "substitution variables" for the elements required by the PC2 validator (for example,
+     * "{:infile}" where the judge's input data file should be substituted).
      * 
      * @return a command pattern for invoking the PC2 Validator
      */
     private String getPC2ValidatorCommandPattern() {
-        
-        //try to find a path to a pc2.jar file
+
+        // try to find a path to a pc2.jar file
         String pathToPC2Jar = findPC2JarPath();
-        
-        //if a path was found, add "pc2.jar" to the path
-        if ((new File(pathToPC2Jar+"pc2.jar")).exists()) {
+
+        // if a path was found, add "pc2.jar" to the path
+        if ((new File(pathToPC2Jar + "pc2.jar")).exists()) {
             pathToPC2Jar += "pc2.jar";
         }
-        
-      String options = getPC2ValidatorOptionString();
-      
-      String args = "{:infile} {:outfile} {:ansfile} {:resfile}";
 
-      String validatorName;
-      if (problem!=null && problem.getPC2ValidatorSettings()!=null) {
-          validatorName = problem.getPC2ValidatorSettings().getValidatorProgramName() ;
-      } else {
-          validatorName = Constants.PC2_VALIDATOR_NAME;
-      }
+        String options = getPC2ValidatorOptionString();
 
-      //depending on how it is run (e.g. from a Test directory), pathToPC2Jar may or may not add a file separator at the end;
-      // one is added here to insure it is present
-      String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options ;
-      
-      //get rid of any double-fileSeparators
-      String doubleFS = File.separator + File.separator;
-      cmdPattern = cmdPattern.replaceAll(Matcher.quoteReplacement(doubleFS),  Matcher.quoteReplacement(File.separator));
-      
-//      System.out.println("DEBUG2: PC2 Validator command pattern:  '" + cmdPattern + "'");
-      log.log(Log.DEBUG, "PC2 Validator command pattern:  '" + cmdPattern + "'");
-      
-      return cmdPattern;
+        String args = "{:infile} {:outfile} {:ansfile} {:resfile}";
+
+        String validatorName;
+        if (problem != null && problem.getPC2ValidatorSettings() != null) {
+            validatorName = problem.getPC2ValidatorSettings().getValidatorProgramName();
+        } else {
+            validatorName = Constants.PC2_VALIDATOR_NAME;
+        }
+
+        // depending on how it is run (e.g. from a Test directory), pathToPC2Jar may or may not add a file separator at the end;
+        // one is added here to insure it is present
+        String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options;
+
+        // get rid of any double-fileSeparators
+        String doubleFS = File.separator + File.separator;
+        cmdPattern = cmdPattern.replaceAll(Matcher.quoteReplacement(doubleFS), Matcher.quoteReplacement(File.separator));
+
+        // System.out.println("DEBUG2: PC2 Validator command pattern:  '" + cmdPattern + "'");
+        log.log(Log.DEBUG, "PC2 Validator command pattern:  '" + cmdPattern + "'");
+
+        return cmdPattern;
 
     }
 
     /**
-     * Returns a command pattern for invoking the {@link ClicsValidator}.
-     * The returned pattern contains "substitution variables" for the elements required by the CLICS validator
-     * (for example, "{:infile}" where the judge's input data file should be substituted).
+     * Returns a command pattern for invoking the {@link ClicsValidator}. The returned pattern contains "substitution variables" for the elements required by the CLICS validator (for example,
+     * "{:infile}" where the judge's input data file should be substituted).
      * 
      * @return a command pattern for invoking the CLICS Validator
      */
     private String getCLICSValidatorCommandPattern() {
-        
-        //try to find a path to a pc2.jar file
+
+        // try to find a path to a pc2.jar file
         String pathToPC2Jar = findPC2JarPath();
-        
-        //if a path was found, add "pc2.jar" to the path
-        if ((new File(pathToPC2Jar+"pc2.jar")).exists()) {
+
+        // if a path was found, add "pc2.jar" to the path
+        if ((new File(pathToPC2Jar + "pc2.jar")).exists()) {
             pathToPC2Jar += "pc2.jar";
         }
-        
-      String options = getClicsValidatorOptionString();
-      
-      String args = "{:infile} {:ansfile} {:feedbackdir}";
-      
-      String validatorName;
-      if (problem!=null && problem.getClicsValidatorSettings()!=null) {
-          validatorName = problem.getClicsValidatorSettings().getValidatorProgramName() ;
-      } else {
-          validatorName = Constants.CLICS_VALIDATOR_NAME;
-      }
-      
-      String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options ;
-      
-      //get rid of any double-fileSeparators
-      String doubleFS = File.separator + File.separator;
-      cmdPattern = cmdPattern.replaceAll(Matcher.quoteReplacement(doubleFS),  Matcher.quoteReplacement(File.separator));
-      
-//      System.out.println("DEBUG2: CLICS Validator command pattern:  '" + cmdPattern + "'");
-      log.log(Log.DEBUG, "CLICS Validator command pattern:  '" + cmdPattern + "'");
 
-      return cmdPattern;
+        String options = getClicsValidatorOptionString();
+
+        String args = "{:infile} {:ansfile} {:feedbackdir}";
+
+        String validatorName;
+        if (problem != null && problem.getClicsValidatorSettings() != null) {
+            validatorName = problem.getClicsValidatorSettings().getValidatorProgramName();
+        } else {
+            validatorName = Constants.CLICS_VALIDATOR_NAME;
+        }
+
+        String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options;
+
+        // get rid of any double-fileSeparators
+        String doubleFS = File.separator + File.separator;
+        cmdPattern = cmdPattern.replaceAll(Matcher.quoteReplacement(doubleFS), Matcher.quoteReplacement(File.separator));
+
+        // System.out.println("DEBUG2: CLICS Validator command pattern:  '" + cmdPattern + "'");
+        log.log(Log.DEBUG, "CLICS Validator command pattern:  '" + cmdPattern + "'");
+
+        return cmdPattern;
     }
- 
+
     /**
-     * Returns a command pattern for invoking a Custom Validator.
-     * The returned pattern is determined by the Custom Validator settings in the current Problem.
+     * Returns a command pattern for invoking a Custom Validator. The returned pattern is determined by the Custom Validator settings in the current Problem.
      * 
      * @return a command pattern for invoking the Custom Validator
      */
     private String getCustomValidatorCommandPattern() {
-        
+
         String cmdPattern = "";
 
-        if (problem!=null && problem.getCustomValidatorSettings()!=null) {
+        if (problem != null && problem.getCustomValidatorSettings() != null) {
 
             cmdPattern += problem.getCustomValidatorSettings().getCustomValidatorCommandLine();
         }
 
-//      System.out.println("DEBUG: Custom Validator command pattern: '" + cmdPattern + "'");
-      log.log(Log.DEBUG, "Custom Validator command pattern:  '" + cmdPattern + "'");
-      
-      return cmdPattern;
+        // System.out.println("DEBUG: Custom Validator command pattern: '" + cmdPattern + "'");
+        log.log(Log.DEBUG, "Custom Validator command pattern:  '" + cmdPattern + "'");
+
+        return cmdPattern;
 
     }
- 
-   /**
+
+    /**
      * Returns a string containing the PC2 Validator options configured in the current problem.
      * 
-     * @return a String containing the PC2 Validator options, or the empty string if the
-     *          problem is null or the PC2ValidatorSettings is null
+     * @return a String containing the PC2 Validator options, or the empty string if the problem is null or the PC2ValidatorSettings is null
      */
     private String getPC2ValidatorOptionString() {
 
         String optStr = "";
 
-        if (problem!=null && problem.getPC2ValidatorSettings()!=null) {
+        if (problem != null && problem.getPC2ValidatorSettings() != null) {
 
             PC2ValidatorSettings settings = problem.getPC2ValidatorSettings();
 
-            optStr += "-pc2 " + settings.getWhichPC2Validator() ;
-            
+            optStr += "-pc2 " + settings.getWhichPC2Validator();
+
             if (settings.isIgnoreCaseOnValidation()) {
                 optStr += " " + true;
             } else {
@@ -1202,18 +1189,17 @@ public class Executable extends Plugin implements IExecutable {
         }
         return optStr;
     }
- 
+
     /**
      * Returns a string containing the {@link ClicsValidatorSettings} options configured in the current problem.
      * 
-     * @return a String containing the Clics Validator options, or the empty string if the
-     *          problem is null or the ClicsValidatorSettings is null
+     * @return a String containing the Clics Validator options, or the empty string if the problem is null or the ClicsValidatorSettings is null
      */
     private String getClicsValidatorOptionString() {
 
         String optStr = "";
 
-        if (problem!=null && problem.getClicsValidatorSettings()!=null) {
+        if (problem != null && problem.getClicsValidatorSettings() != null) {
 
             ClicsValidatorSettings settings = problem.getClicsValidatorSettings();
 
@@ -1237,7 +1223,7 @@ public class Executable extends Plugin implements IExecutable {
         }
         return optStr;
     }
-    
+
     private String getTeamOutputFilename(int dataSetNumber) {
         return prefixExecuteDirname("teamoutput." + dataSetNumber + ".txt");
     }
@@ -1297,95 +1283,105 @@ public class Executable extends Plugin implements IExecutable {
 
     }
 
-    
     /**
      * Set results of validation using the ClicsValidator into executionData.
      * 
-     * @param logger the log to be used for logging
+     * @param logger
+     *            the log to be used for logging
      */
     private void storeClicsValidatorResults(int exitCode, String feedbackDir, Log logger) {
 
-        //save exit code in executionData
+        // save exit code in executionData
         executionData.setValidationReturnCode(exitCode);
-        
-        //save validation success (note that this refers to whether the validator completed successfully, 
+
+        // save validation success (note that this refers to whether the validator completed successfully,
         // not whether the run was judged "correct".
-        if (exitCode == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE || exitCode==ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE) {
+        if (exitCode == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE || exitCode == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE) {
             executionData.setValidationSuccess(true);
         } else {
             executionData.setValidationSuccess(false);
         }
-        
-        //check for feedback from validator
-        if (new File(feedbackDir).exists()) {
-            
-            // check for judgements.txt file
-            String judgementFileName = feedbackDir + File.separator + ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
-            File judgementFile = new File(judgementFileName);
-            if (judgementFile.exists()) {
-                
-                //get the judgement out of the feedback file
-                String judgement = readFileAsString(judgementFileName);
 
-                executionData.setValidationResults(judgement);
-                log.info ("Saving CLICS Validator judgement '" + judgement + "'");
-                
+        if (exitCode == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE) {
+
+            executionData.setValidationResults(ClicsValidator.CLICS_CORRECT_ANSWER_MSG);
+
+        } else if (exitCode == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE) {
+
+            executionData.setValidationResults(ClicsValidator.CLICS_WRONG_ANSWER_MSG);
+
+            // check for feedback from validator
+            if (new File(feedbackDir).exists()) {
+
+                // check for judgements.txt file
+                String judgementFileName = feedbackDir + File.separator + ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
+                File judgementFile = new File(judgementFileName);
+                if (judgementFile.exists()) {
+
+                    // get the judgement out of the feedback file
+                    String judgement = readFileAsString(judgementFileName);
+
+                    executionData.setValidationResults(judgement);
+                    log.info("Saving CLICS Validator judgement '" + judgement + "'");
+
+                } else {
+                    log.info("No Clics Validator judgement file found in feedback directory");
+                }
+
+                // check for judgementdetails.txt file
+                String detailsFileName = feedbackDir + File.separator + ClicsValidator.CLICS_JUDGEMENT_DETAILS_FILE_NAME;
+                File detailsFile = new File(detailsFileName);
+                if (detailsFile.exists()) {
+
+                    // get details out of the feedback file
+                    String details = readFileAsString(detailsFileName);
+
+                    executionData.setAdditionalInformation(details);
+                    log.info("Saving CLICS Validator detail string '" + details + "'");
+
+                    System.out.println("DEBUG: CLICS Judgement feedback details = '" + details + "'");
+                }
+
             } else {
-                log.info("No Clics Validator judgement file found in feedback directory");
+                log.info("No CLICS validator feedback directory found");
             }
-            
-            // check for judgementdetails.txt file
-            String detailsFileName = feedbackDir + File.separator + ClicsValidator.CLICS_JUDGEMENT_DETAILS_FILE_NAME;
-            File detailsFile = new File(detailsFileName);
-            if (detailsFile.exists()) {
-                
-                //get details out of the feedback file
-                String details = readFileAsString(detailsFileName);
-              
-                executionData.setAdditionalInformation(details);
-                log.info ("Saving CLICS Validator detail string '" + details + "'");
-
-                System.out.println ("DEBUG: CLICS Judgement feedback details = '" + details + "'");
-            }
-        } else {
-            log.info("No CLICS validator feedback directory found"); 
         }
     }
-    
-    
+
     /**
-     * Stores the results of the execution of a Custom Validator which uses the PC2 Validator Interface.
-     * Currently this method just delegates to {@link #storePC2ValidatorResults(String, Log)}; it is provided
-     * in the event of a future need to distinguish between the real (internal) PC2Validator and a Custom Validator
-     * which uses the PC2 Validator Interface.
+     * Stores the results of the execution of a Custom Validator which uses the PC2 Validator Interface. Currently this method just delegates to {@link #storePC2ValidatorResults(String, Log)}; it is
+     * provided in the event of a future need to distinguish between the real (internal) PC2Validator and a Custom Validator which uses the PC2 Validator Interface.
      * 
-     * @param resultsFileName the name of the file containing the results
-     * @param log the Log to be used for logging
+     * @param resultsFileName
+     *            the name of the file containing the results
+     * @param log
+     *            the Log to be used for logging
      */
     private void storeCustomPC2InterfaceValidatorResults(String resultsFileName, Log log) {
         storePC2ValidatorResults(resultsFileName, log);
     }
-    
+
     /**
-     * Stores the results of the execution of a Custom Validator which uses the Clics Validator Interface.
-     * Currently this method just delegates to {@link #storeClicsValidatorResults(int, String, Log)}; it is provided
-     * in the event of a future need to distinguish between the real (internal) ClicsValidator and a Custom Validator
-     * which uses the Clics Validator Interface.
+     * Stores the results of the execution of a Custom Validator which uses the Clics Validator Interface. Currently this method just delegates to {@link #storeClicsValidatorResults(int, String, Log)}
+     * ; it is provided in the event of a future need to distinguish between the real (internal) ClicsValidator and a Custom Validator which uses the Clics Validator Interface.
      * 
-     * @param exitcode the exitcode returned by the Custom Validator
-     * @param feedbackDirPath the path to the feedback directory
-     * @param log the Log to be used for logging
+     * @param exitcode
+     *            the exitcode returned by the Custom Validator
+     * @param feedbackDirPath
+     *            the path to the feedback directory
+     * @param log
+     *            the Log to be used for logging
      */
     private void storeCustomClicsInterfaceValidatorResults(int exitcode, String feedbackDirPath, Log log) {
         storeClicsValidatorResults(exitcode, feedbackDirPath, log);
     }
-    
+
     /**
-     * Reads all of the lines in the specified file and returns them concatenated as a single string.
-     * Note that this should only be used for text files, and small ones at that.
-     * If any error occurs while reading the file then the empty string is returned.
+     * Reads all of the lines in the specified file and returns them concatenated as a single string. Note that this should only be used for text files, and small ones at that. If any error occurs
+     * while reading the file then the empty string is returned.
      * 
-     * @param fileName the name of the file to be read
+     * @param fileName
+     *            the name of the file to be read
      * 
      * @return a String containing the contents of the specified file
      */
@@ -1403,7 +1399,7 @@ public class Executable extends Plugin implements IExecutable {
         } catch (Exception e) {
             log.severe("Exception reading file: " + e.getMessage());
         }
-        
+
         return retStr;
 
     }
@@ -1421,67 +1417,65 @@ public class Executable extends Plugin implements IExecutable {
     /**
      * This method attempts to find a path to a "pc2.jar" file.
      * 
-     * It starts by assuming a default return value of "." (the current directory).
-     * It then makes various attempts to update (improve) this default, as follows:
+     * It starts by assuming a default return value of "." (the current directory). It then makes various attempts to update (improve) this default, as follows:
      * 
-     * It starts by choosing "./build/prod" as the default path, or if that directory doesn't exist then 
-     * it chooses "/software/pc2/cc/projects/pc2v9/build/prod".
+     * It starts by choosing "./build/prod" as the default path, or if that directory doesn't exist then it chooses "/software/pc2/cc/projects/pc2v9/build/prod".
      * 
-     * It then searches the current CLASSPATH (Java System property "java.class.path") for a classpath element ending
-     * in "pc2.jar".  If one is found, the default path is updated to be the parent directory of the indicated pc2.jar file.
+     * It then searches the current CLASSPATH (Java System property "java.class.path") for a classpath element ending in "pc2.jar". If one is found, the default path is updated to be the parent
+     * directory of the indicated pc2.jar file.
      * 
-     * Finally, if no pc2.jar was found in the classpath it checks for the existence of file "dist/pc2.jar"; if that exists
-     * then the parent directory of that file (i.e., "dist") is returned as the path.
+     * Finally, if no pc2.jar was found in the classpath it checks for the existence of file "dist/pc2.jar"; if that exists then the parent directory of that file (i.e., "dist") is returned as the
+     * path.
      * 
-     * @return a String giving the path to a pc2.jar file, or "." if no pc2.jar file could be found. In any case the returned String
-     *              is guaranteed to end with a File.separator character
+     * @return a String giving the path to a pc2.jar file, or "." if no pc2.jar file could be found. In any case the returned String is guaranteed to end with a File.separator character
      * 
-     * @throws IOException if any problem occurs accessing any of the specified paths
+     * @throws IOException
+     *             if any problem occurs accessing any of the specified paths
      */
     protected String findPC2JarPath() {
         String jarDir = ".";
         try {
-            //start by assuming a default path
+            // start by assuming a default path
             String defaultPath = new File("./build/prod").getCanonicalPath();
             // for CruiseControl, will not be needed with jenkins
             if (!new File(defaultPath).exists()) {
                 defaultPath = "/software/pc2/cc/projects/pc2v9/build/prod";
             }
-            //assume the directory containing the pc2.jar will be the assumed default path
+            // assume the directory containing the pc2.jar will be the assumed default path
             jarDir = defaultPath;
-            
-            //see if "pc2.jar" can be found in the CLASSPATH
+
+            // see if "pc2.jar" can be found in the CLASSPATH
             String cp = System.getProperty("java.class.path");
             StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
             while (st.hasMoreTokens()) {
-                //get one component of the classpath
+                // get one component of the classpath
                 String token = st.nextToken();
-                //try constructing a File from that component
+                // try constructing a File from that component
                 File dir = new File(token);
-                //see if the component is a file that ends in "pc2.jar"
+                // see if the component is a file that ends in "pc2.jar"
                 if (dir.exists() && dir.isFile() && dir.toString().endsWith("pc2.jar")) {
-                    //yes, we found a pc2.jar file in the classpath; get the path to its parent directory
+                    // yes, we found a pc2.jar file in the classpath; get the path to its parent directory
                     jarDir = new File(dir.getParent()).getCanonicalPath() + File.separator;
                     break;
                 }
             }
-            
-            //if we didn't find a pc2.jar in the classpath, the jarDir will still be the same as the default path
+
+            // if we didn't find a pc2.jar in the classpath, the jarDir will still be the same as the default path
             if (defaultPath.equals(jarDir)) {
-                //we didn't find a pc2.jar in the classpath; see if we can find one in directory "dist"
+                // we didn't find a pc2.jar in the classpath; see if we can find one in directory "dist"
                 File dir = new File("dist/pc2.jar");
                 if (dir.isFile()) {
-                    //we found a pc2.jar in "dist"; get the path to its parent directory
+                    // we found a pc2.jar in "dist"; get the path to its parent directory
                     jarDir = new File(dir.getParent()).getCanonicalPath() + File.separator;
                 }
             }
-            
+
         } catch (IOException e) {
             log.log(Log.WARNING, "Trouble locating pc2home: " + e.getMessage(), e);
         }
-        
-        //when we get here, jarDir contains either a path to a pc2.jar, or ".".
-        //In either case, make sure it ends with a file separator
+
+        // when we get here, jarDir contains either a path to a pc2.jar, or ".".
+        // In either case, make sure it ends with a file separator
         if (!jarDir.endsWith(Matcher.quoteReplacement(File.separator))) {
             jarDir += Matcher.quoteReplacement(File.separator);
         }
@@ -1544,11 +1538,11 @@ public class Executable extends Plugin implements IExecutable {
         }
     }
 
-
     /**
      * Execute the submission against a single data set.
      * 
-     * @param dataSetNumber a zero-based data set number
+     * @param dataSetNumber
+     *            a zero-based data set number
      * @return true if execution worked successfully.
      */
     protected boolean executeProgram(int dataSetNumber) {
@@ -1776,7 +1770,7 @@ public class Executable extends Plugin implements IExecutable {
                 executionTimer.stopTimer();
                 executionData.setRunTimeLimitExceeded(executionTimer.isRunTimeLimitExceeded());
                 if (executionTimer.isRunTimeLimitExceeded()) {
-                    log.info("Run exceeded problem time limit of " + problem.getTimeOutInSeconds() + " secs: actual run time = " + executionData.getExecuteTimeMS() + " msec;  Run = " + run);                    
+                    log.info("Run exceeded problem time limit of " + problem.getTimeOutInSeconds() + " secs: actual run time = " + executionData.getExecuteTimeMS() + " msec;  Run = " + run);
                 }
             }
 
@@ -2438,7 +2432,8 @@ public class Executable extends Plugin implements IExecutable {
      * 
      * @see #getExecuteDirectoryName()
      * 
-     * @param executeDirectoryNameSuffix the suffix to be added to the name of the execute directory
+     * @param executeDirectoryNameSuffix
+     *            the suffix to be added to the name of the execute directory
      */
     public void setExecuteDirectoryNameSuffix(String executeDirectoryNameSuffix) {
         this.executeDirectoryNameSuffix = executeDirectoryNameSuffix;
