@@ -20,7 +20,7 @@ import java.util.Vector;
  */
 
 
-public class CustomPC2InterfaceValidator {
+public class CustomJavaPC2InterfaceValidator {
 
     // System.out.println("Usage: java Validator <inputfile name> <outputfile
     // name> <answerfile name> <resultfile name> <-pc2> [options] icflag");
@@ -105,8 +105,8 @@ public class CustomPC2InterfaceValidator {
 
     public static void main(String[] args) {
 
-        CustomPC2InterfaceValidator customPC2InterfaceValidator = new CustomPC2InterfaceValidator();
-        customPC2InterfaceValidator.runValidator(args);
+        CustomJavaPC2InterfaceValidator customJavaPC2InterfaceValidator = new CustomJavaPC2InterfaceValidator();
+        customJavaPC2InterfaceValidator.runValidator(args);
     }
 
     /**

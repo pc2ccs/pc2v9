@@ -17,7 +17,7 @@ import edu.csus.ecs.pc2.validator.PC2Validator;
  */
 
 // $HeadURL$
-public class CustomPC2InterfaceValidatorTest extends AbstractTestCase {
+public class CustomJavaPC2InterfaceValidatorTest extends AbstractTestCase {
 
     private boolean unitDebug = true;
 
