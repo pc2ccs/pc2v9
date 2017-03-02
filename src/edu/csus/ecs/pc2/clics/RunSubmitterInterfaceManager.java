@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.ccs;
+package edu.csus.ecs.pc2.clics;
 
 import java.io.File;
 import java.io.IOException;

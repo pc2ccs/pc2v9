@@ -16,7 +16,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.ccs.RunSubmitterInterfaceManager;
+import edu.csus.ecs.pc2.clics.RunSubmitterInterfaceManager;
 import edu.csus.ecs.pc2.convert.EventFeedRun;
 import edu.csus.ecs.pc2.convert.LoadRuns;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;

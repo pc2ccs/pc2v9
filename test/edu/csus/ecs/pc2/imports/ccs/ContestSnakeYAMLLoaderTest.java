@@ -18,7 +18,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
 
-import edu.csus.ecs.pc2.ccs.CCSConstants;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
@@ -1604,8 +1604,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         problem = originalContest.getProblem(problemId);
 
-        assertEquals("Expected validator name ", CCSConstants.INTERNAL_CCS_VALIDATOR_NAME, problem.getValidatorProgramName());
-        assertEquals("Expected validator command ", CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND, problem.getValidatorCommandLine());
+        assertEquals("Expected validator name ", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
+        assertEquals("Expected validator command ", Constants.DEFAULT_CLICS_VALIDATOR_COMMAND, problem.getValidatorCommandLine());
 
     }
     
