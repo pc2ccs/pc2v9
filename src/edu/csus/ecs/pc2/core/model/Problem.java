@@ -48,7 +48,7 @@ public class Problem implements IElementObject {
      * 
      * This is the name of the file that the submitted run will read from.
      */
-    private String dataFileName = null;
+    private String judgesInputDataFileName = null;
 
     /**
      * Judge's answer file name.
@@ -226,7 +226,7 @@ public class Problem implements IElementObject {
         // TODO is number really used?
         clone.setNumber(getNumber());
         // TODO FATAL files need the corresponding ProblemDataFile populated...
-        clone.setDataFileName(StringUtilities.cloneString(dataFileName));
+        clone.setDataFileName(StringUtilities.cloneString(judgesInputDataFileName));
         clone.setAnswerFileName(StringUtilities.cloneString(answerFileName));
         clone.setActive(isActive());
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
@@ -316,7 +316,7 @@ public class Problem implements IElementObject {
         retStr += "displayName=" + displayName;
         retStr += "; elementId=" + elementId;
         retStr += "; number=" + number;
-        retStr += "; dataFileName=" + dataFileName;
+        retStr += "; dataFileName=" + judgesInputDataFileName;
         retStr += "; answerFileName=" + answerFileName;
         retStr += "; testCaseDataFilenames=" + testCaseDataFilenames;
         retStr += "; testCaseAnswerFilenames=" + testCaseAnswerFilenames;
@@ -401,7 +401,7 @@ public class Problem implements IElementObject {
      * @return Returns the dataFileName.
      */
     public String getDataFileName() {
-        return dataFileName;
+        return judgesInputDataFileName;
     }
 
     /**
@@ -413,7 +413,7 @@ public class Problem implements IElementObject {
      */
     public String getDataFileName(int testCaseNumber) {
         if (testCaseNumber == 1 && testCaseDataFilenames.length == 0){
-            return dataFileName;
+            return judgesInputDataFileName;
         }
         return testCaseDataFilenames[testCaseNumber - 1];
     }
@@ -618,7 +618,7 @@ public class Problem implements IElementObject {
      *            The dataFileName to set.
      */
     public void setDataFileName(String dataFileName) {
-        this.dataFileName = dataFileName;
+        this.judgesInputDataFileName = dataFileName;
     }
 
     /**
@@ -843,7 +843,7 @@ public class Problem implements IElementObject {
                 return false;
             }
 
-            if (! StringUtilities.stringSame(dataFileName, problem.getDataFileName())) {
+            if (! StringUtilities.stringSame(judgesInputDataFileName, problem.getDataFileName())) {
                 return false;
             }
             if (! StringUtilities.stringSame(answerFileName, problem.getAnswerFileName())) {
