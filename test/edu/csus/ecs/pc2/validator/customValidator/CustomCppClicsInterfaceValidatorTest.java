@@ -34,7 +34,10 @@ import edu.csus.ecs.pc2.validator.ClicsValidator;
 import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
 
 /**
- * JUnit test cases for a Custom Validator which uses the Clics Validator Interface.
+ * JUnit test cases for a C++ Custom Validator which uses the Clics Validator Interface.
+ * Note that the purpose of this test suite is not to test the Validator itself (there are 
+ * separate tests for that; the objective here is to verify that a Custom Validator written
+ * in C++ can be properly invoked on both a Windows and a Linux platform.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -235,7 +238,7 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
         assertTrue("Expecting problem to be marked as isValidated, but failed", problem.isValidatedProblem());
         assertTrue("Expecting using Custom Validator, but failed", problem.isUsingCustomValidator());
         assertTrue("Expecting problem validator command line to be Clics Default Command Line, but failed", 
-                                problem.getValidatorCommandLine().equals(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND)); 
+                                problem.getValidatorCommandLine().equals("." + File.separator + Constants.DEFAULT_CLICS_VALIDATOR_COMMAND)); 
         assertTrue("Expecting problem validator program name to be '" + getValidatorProgramName() + "' but it is '" + problem.getValidatorProgramName() + "' ", 
                                 problem.getValidatorProgramName().equals(getValidatorProgramName()));
         assertTrue("Expecting problem to have a serialized validator file but it has 'null' ", problemDataFiles.getValidatorFile()!=null);
@@ -323,6 +326,10 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
         return newFilename;
     }
 
+    /** Test to verify that the validator returns "success" for a correct run.
+     * 
+     * @throws Exception if any exception occurs during the execution of the test
+     */
     public void testYesJudgement() throws Exception {
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
@@ -334,15 +341,34 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
 
     }
 
-    /**
-     * Invoke an Executable object to test the configured validator.
+    /** Test to verify that the validator returns "failure" for an incorrect run.
      * 
-     * @param run
-     * @param runFiles
-     * @param solved
-     *            expecting Yes judgement, else failed somewhere in compile/execute/validate.
-     * @param expectedJudgement
-     * @throws Exception
+     * @throws Exception if any exception occurs during the execution of the test
+     */
+    public void testNoJudgement() throws Exception {
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+        Run run = createRun(submitter, javaLanguage, iSumitProblem, 82, 182);
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutputTenPercentOff.java"));
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        runExecutableTest(run, runFiles, false, ClicsValidator.CLICS_WRONG_ANSWER_MSG);
+
+    }
+
+    /**
+     * This method invokes an Executable object to execute the specified Run.
+     * The primary purpose is to test the configured validator.
+     * The method causes the specified Run to be compiled, executed, and validated, then performs a variety
+     * of assertions to verify that the results from the execution/validation were as expected.
+     * 
+     * @param run the Run to be executed
+     * @param runFiles the files associated with the Run
+     * @param solved If true, the Run is expected to solve the problem (that is, the validator should return "Yes";
+     *                  if false, the Run is expected to FAIL to solve the problem and the validator should return "no")
+     * @param expectedJudgement a String giving the judgement value expected to be returned by the validator
+     * 
+     * @throws Exception if the Executable object set an exception during either the compile, execute, or validate step
      */
     protected void runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement) throws Exception {
 
@@ -356,10 +382,9 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
         // run the executable to compile, execute, and validate the program contained in the Run
         executable.execute();
 
+        //get the results of the execution
         ExecutionData executionData = executable.getExecutionData();
 
-        // TODO: change the following println into an assert()
-        // System.err.println("Execute time for " + run.getProblemId() + " (ms): " + executionData.getExecuteTimeMS());
         // XXX TODO FIXME 40000 is too low for windows, but fine for linux
         assertTrue("Excessive runtime", executionData.getExecuteTimeMS() < 40000);
 
@@ -396,10 +421,10 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
         }
 
         if (solved) {
-            assertTrue("Judgement should be solved ", solved);
+            assertTrue("Judgement should be 'solved' ", solved);
             assertEquals(expectedJudgement, executionData.getValidationResults());
         } else {
-            assertFalse("Judgement should not be solved ", solved);
+            assertFalse("Judgement should be 'not solved' ", solved);
             if (expectedJudgement != null) {
                 assertEquals("not solved:", expectedJudgement, executionData.getValidationResults());
             }
