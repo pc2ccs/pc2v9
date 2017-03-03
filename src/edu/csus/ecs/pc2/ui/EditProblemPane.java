@@ -3411,11 +3411,11 @@ public class EditProblemPane extends JPanePlugin {
         getCustomValidatorExecutableProgramTextField().setText("");
         getCustomValidatorExecutableProgramTextField().setToolTipText("");
         
-        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
-        localPC2InterfaceCustomValidatorCommandLine = getCustomValidatorCommandLineTextField().getText();
-        
-        getUseClicsValStdRadioButton().setSelected(true); //button group also causes Use PC2 Val Std button to become unselected 
+        localPC2InterfaceCustomValidatorCommandLine = Constants.DEFAULT_PC2_VALIDATOR_COMMAND;
         localClicsInterfaceCustomValidatorCommandLine = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
+        
+        getCustomValidatorCommandLineTextField().setText(localClicsInterfaceCustomValidatorCommandLine);
+        getUseClicsValStdRadioButton().setSelected(true); //button group also causes Use PC2 Val Std button to become unselected 
         
         getShowValidatorToJudgesCheckBox().setSelected(true);
         
@@ -4466,29 +4466,29 @@ public class EditProblemPane extends JPanePlugin {
         if (rdbtnUsePcStandard == null) {
         	rdbtnUsePcStandard = new JRadioButton("Use PC^2 Standard Interface");
         	rdbtnUsePcStandard.setSelected(false);
-        	rdbtnUsePcStandard.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-                    //switching to Use PC2 Standard Interface for this Custom Validator; see if the user has previously entered a Validator Command Line
-                    if (localPC2InterfaceCustomValidatorCommandLine != null) {
-                        // yes; restore that
+            rdbtnUsePcStandard.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    // switching to Use PC2 Standard Interface for this Custom Validator;
+                    // check to see if we are editing a problem which might already have a PC2 Interface Validator Command Line
+                    if (problem != null && problem.getCustomValidatorSettings() != null && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface()
+                            && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().trim().length() > 0) {
+                        // we are editing a problem which has a Custom Validator which is using the PC2 Interface Standard and has a
+                        // Custom Validator Command Line which is not empty; put that command line in the GUI
+                        getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine().trim());
+                        
+                    } else if (localPC2InterfaceCustomValidatorCommandLine != null) {
+                        //we have a local version of the pc2 command line; fill that into the command line on the GUI
                         getCustomValidatorCommandLineTextField().setText(localPC2InterfaceCustomValidatorCommandLine);
+                        
                     } else {
-                        //no, the user has never entered anything in this GUI for the PC2 Interface Custom Validator Command line;
-                        //check to see if we are editing a problem which might already have a PC2 Interface Validator Command Line
-                        if (problem != null && problem.getCustomValidatorSettings()!=null && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface()
-                                && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().trim().length() > 0) {
-                            // we are editing a problem which has a Custom Validator which is using the CLICS Interface Standard and has a 
-                            // Custom Validator Command Line which is not empty; put that command line in the GUI
-                            getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine().trim());
-                        } else {
-                            // there's currently no definition for the Validator Command Line; fill it with the PC2 default
-                            getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
-                        }
+                        // there's currently no definition for the Validator Command Line in any current problem or locally;
+                        // put the default in the command line GUI
+                        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
                     }
-        	        enableUpdateButton();
-        	    }
-        	});
-        	validatorStandardButtonGroup.add(rdbtnUsePcStandard);
+                    enableUpdateButton();
+                }
+            });
+            validatorStandardButtonGroup.add(rdbtnUsePcStandard);
         }
         return rdbtnUsePcStandard;
     }
@@ -4498,22 +4498,22 @@ public class EditProblemPane extends JPanePlugin {
         	rdbtnUseClicsStandard.setSelected(true);
         	rdbtnUseClicsStandard.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
-        	        //switching to Use CLICS Standard Interface for this Custom Validator; see if the user has previously entered a Validator Command Line
-                    if (localClicsInterfaceCustomValidatorCommandLine != null) {
-                        // yes; restore that
+                    // switching to Use Clics Standard Interface for this Custom Validator;
+                    // check to see if we are editing a problem which might already have a Clics Interface Validator Command Line
+                    if (problem != null && problem.getCustomValidatorSettings() != null && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface()
+                            && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().trim().length() > 0) {
+                        // we are editing a problem which has a Custom Validator which is using the Clics Interface Standard and has a
+                        // Custom Validator Command Line which is not empty; put that command line in the GUI
+                        getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine().trim());
+                        
+                    } else if (localClicsInterfaceCustomValidatorCommandLine != null) {
+                        //we have a local version of the Clics command line; fill that into the command line on the GUI
                         getCustomValidatorCommandLineTextField().setText(localClicsInterfaceCustomValidatorCommandLine);
+                        
                     } else {
-                        //no, the user has never entered anything in this GUI for the CLICS Interface Custom Validator Command line;
-                        //check to see if we are editing a problem which might already have a CLICS Interface Validator Command Line
-                        if (problem != null && problem.getCustomValidatorSettings()!=null && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface()
-                                && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().trim().length() > 0) {
-                            // we are editing a problem which has a Custom Validator which is using the CLICS Interface Standard and has a 
-                            // Custom Validator Command Line which is not empty; put that command line in the GUI
-                            getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine().trim());
-                        } else {
-                            // there's currently no definition for the Validator Command Line; fill it with the CLICS default
-                            getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
-                        }
+                        // there's currently no definition for the Validator Command Line in any current problem or locally;
+                        // put the default in the command line GUI
+                        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
                     }
                     enableUpdateButton();
                 }
