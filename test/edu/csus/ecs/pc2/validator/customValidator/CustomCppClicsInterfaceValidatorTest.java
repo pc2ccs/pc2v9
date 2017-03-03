@@ -177,42 +177,42 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
 
         Problem problem = new Problem("ISumit");
 
+        //set general options
         problem.setShowValidationToJudges(false);
         problem.setHideOutputWindow(true);
         problem.setShowCompareWindow(false);
         problem.setTimeOutInSeconds(10);
 
-        setupUsingCustomCppClicsInterfaceValidator(problem);
-
         problem.setReadInputDataFromSTDIN(true);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
+        //set judge's input data file
         problem.setDataFileName("sumit.in");
-        String judgesDataFile = getSamplesSourceFilename(problem.getDataFileName());
-        checkFileExistence(judgesDataFile);
-        problemDataFiles.setJudgesDataFile(new SerializedFile(judgesDataFile));
+        String judgesInputDataFile = getSamplesSourceFilename(problem.getDataFileName());
+        checkFileExistence(judgesInputDataFile);
+        problemDataFiles.setJudgesDataFile(new SerializedFile(judgesInputDataFile));
 
+        //set judge's answer file
         problem.setAnswerFileName("sumit.ans");
         String answerFileName = getSamplesSourceFilename(problem.getAnswerFileName());
         checkFileExistence(answerFileName);
         answerFileName = convertEOLtoHostFormat(answerFileName);
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
-        
-        problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
-        CustomValidatorSettings settings = new CustomValidatorSettings();
-        settings.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
-        settings.setValidatorProgramName(validatorProgramName);
-        problem.setCustomValidatorSettings(settings);
-        
-//        *** the problem needs to have a serialized file containing the validator!
 
+        setupValidator(problem, problemDataFiles);
+        
         contest2.addProblem(problem, problemDataFiles);
 
         return problem;
     }
 
-    protected void setupUsingCustomCppClicsInterfaceValidator(Problem problem) {
+    /**
+     * Configures the specified Problem to use a Custom C++ Validator utilizing a Clics interface.
+     * @param problem
+     * @throws FileNotFoundException 
+     */
+    protected void setupValidator(Problem problem, ProblemDataFiles problemDataFiles) throws FileNotFoundException {
 
         //mark the problem as using a Custom Validator
         problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
@@ -226,6 +226,11 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
         //put the Custom Validator Settings in the Problem
         problem.setCustomValidatorSettings(settings);
         
+        //put the SerializedFile version of the executable validator file into the problem (specifically, it goes in the "problem data files")
+        String validatorFileName =  testDataDirectoryName + File.separator + validatorProgramName;
+        checkFileExistence(validatorFileName);
+        problemDataFiles.setValidatorFile(new SerializedFile(validatorFileName));
+
         //verify that the Problem Validator is properly configured
         assertTrue("Expecting problem to be marked as isValidated, but failed", problem.isValidatedProblem());
         assertTrue("Expecting using Custom Validator, but failed", problem.isUsingCustomValidator());
@@ -233,8 +238,8 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
                                 problem.getValidatorCommandLine().equals(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND)); 
         assertTrue("Expecting problem validator program name to be '" + getValidatorProgramName() + "' but it is '" + problem.getValidatorProgramName() + "' ", 
                                 problem.getValidatorProgramName().equals(getValidatorProgramName()));
-        
-        
+        assertTrue("Expecting problem to have a serialized validator file but it has 'null' ", problemDataFiles.getValidatorFile()!=null);
+
     }
 
     protected void checkFileExistence(String filename) throws FileNotFoundException {
