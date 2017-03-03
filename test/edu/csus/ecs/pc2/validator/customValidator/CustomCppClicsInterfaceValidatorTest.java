@@ -214,16 +214,27 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
 
     protected void setupUsingCustomCppClicsInterfaceValidator(Problem problem) {
 
+        //mark the problem as using a Custom Validator
         problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
-        problem.setValidatorProgramName(getValidatorProgramName());
 
-        assertTrue("Expecting using Custom Validator", problem.isUsingCustomValidator());
-
+        //construct the appropriate Custom Validator settings
         CustomValidatorSettings settings = new CustomValidatorSettings();
         settings.setUseCLICSValidatorInterface();
         settings.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
-
+        settings.setValidatorProgramName(getValidatorProgramName());
+        
+        //put the Custom Validator Settings in the Problem
         problem.setCustomValidatorSettings(settings);
+        
+        //verify that the Problem Validator is properly configured
+        assertTrue("Expecting problem to be marked as isValidated, but failed", problem.isValidatedProblem());
+        assertTrue("Expecting using Custom Validator, but failed", problem.isUsingCustomValidator());
+        assertTrue("Expecting problem validator command line to be Clics Default Command Line, but failed", 
+                                problem.getValidatorCommandLine().equals(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND)); 
+        assertTrue("Expecting problem validator program name to be '" + getValidatorProgramName() + "' but it is '" + problem.getValidatorProgramName() + "' ", 
+                                problem.getValidatorProgramName().equals(getValidatorProgramName()));
+        
+        
     }
 
     protected void checkFileExistence(String filename) throws FileNotFoundException {
