@@ -553,11 +553,18 @@ public class Problem implements IElementObject {
 
     /**
      * Sets the Validator Command Line associated with type of Validator configured for this Problem.
+     * Note that this Problem class does not maintain a separate "Validator Command Line" field;
+     * rather, the current Validator Command Line is always stored within a "Settings" object 
+     * corresponding to the currently-assigned Validator type.
      * 
-     * @param commandLine the new command line for the currently-specified Validator
+     * @param commandLine the new command line for the currently-specified Validator type associated with the Problem
+     * 
+     * @see PC2ValidatorSettings
+     * @see ClicsValidatorSettings
+     * @see CustomValidatorSettings
      * 
      * @throws {@link RuntimeException} if the Problem is not marked as using a Validator, or is marked as using a Validator
-     *           but no corresponding Validator Settings could be found.
+     *           but no corresponding Validator Settings object could be found.
      */
     public void setValidatorCommandLine(String commandLine) {
         
