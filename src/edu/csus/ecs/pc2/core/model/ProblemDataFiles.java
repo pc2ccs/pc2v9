@@ -45,8 +45,6 @@ public class ProblemDataFiles implements IElementObject {
     
     private SerializedFile validatorFile;
     
-    private SerializedFile validatorRunFile;
-    
     private SerializedFile [] validatorFiles;
 
     public ProblemDataFiles(Problem problem) {
@@ -88,7 +86,6 @@ public class ProblemDataFiles implements IElementObject {
         clone.setValidatorFile(cloneSerializedFile(getValidatorFile()));
 
         clone.setValidatorRunCommand(getValidatorRunCommand());
-        clone.setValidatorRunFile(cloneSerializedFile(getValidatorRunFile()));
 
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
@@ -383,30 +380,6 @@ public class ProblemDataFiles implements IElementObject {
         return buf.toString();
     }
     
-    /**
-     * Get the 'run' command for the validator.
-     * 
-     * For a CCS standard validator a run script is used to invoke
-     * the validator.
-     * 
-     * This is not the validator program, use {@link #getValidatorFile()}
-     * to get the validator program.
-     * 
-     * @return the run script/program for running the CCS validator.
-     */
-    public SerializedFile getValidatorRunFile() {
-        return validatorRunFile;
-    }
-
-    /**
-     * Add/set the validator run file/command.
-     *  
-     * @see #getValidatorFile()
-     * @param validatorRunFile
-     */
-    public void setValidatorRunFile(SerializedFile validatorRunFile) {
-        this.validatorRunFile = validatorRunFile;
-    }
     
     /**
      * save a set of files, one which should be the validator program. 

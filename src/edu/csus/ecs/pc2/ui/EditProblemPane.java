@@ -479,7 +479,6 @@ public class EditProblemPane extends JPanePlugin {
             clone.setSiteNumber(newProblemDataFiles.getSiteNumber());
             clone.setValidatorFile(newProblemDataFiles.getValidatorFile());
             clone.setValidatorRunCommand(newProblemDataFiles.getValidatorRunCommand());
-            clone.setValidatorRunFile(newProblemDataFiles.getValidatorRunFile());   //ValidatorRunFile is associated with the "CCS validator"; probably not needed
             clone.setJudgesAnswerFiles(newProblemDataFiles.getJudgesAnswerFiles());
             clone.setJudgesDataFiles(newProblemDataFiles.getJudgesDataFiles());
             clone.setValidatorFiles(newProblemDataFiles.getValidatorFiles());
