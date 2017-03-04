@@ -2035,16 +2035,21 @@ public class EditProblemPane extends JPanePlugin {
             throw new InvalidFieldValue("EditProblemPane.initializeValidatorTabFields(): null CLICS Validator Settings in received Problem");
         }
   
-        //update the Clics Validator settings in the GUI from the Problem
+        //update the Custom Validator settings in the GUI from the Problem
         CustomValidatorSettings customSettings = inProblem.getCustomValidatorSettings().clone();
 //        System.out.println (customSettings);
         if (customSettings!=null) {
             
-            //set the Validator Program name
-            String validatorName = inProblemDataFiles.getValidatorFile().getAbsolutePath();
-            getCustomValidatorExecutableProgramTextField().setText(validatorName);
-//            getCustomValidatorExecutableProgramTextField().setText(customSettings.getCustomValidatorProgramName());
-            getCustomValidatorExecutableProgramTextField().setToolTipText(customSettings.getCustomValidatorProgramName());
+            //get the Validator Program name
+            String validatorFileName = customSettings.getCustomValidatorProgramName();  
+            //the above will be just the file name; if there's a Serialized validator file we should use the full path name
+            SerializedFile validatorFile = inProblemDataFiles.getValidatorFile();
+            if (validatorFile!=null) {
+                validatorFileName = inProblemDataFiles.getValidatorFile().getAbsolutePath();
+            }
+            //put the Validator Program name into the GUI
+            getCustomValidatorExecutableProgramTextField().setText(validatorFileName);
+            getCustomValidatorExecutableProgramTextField().setToolTipText(validatorFileName);
             
             //set the radio buttons indicating which Validator Standard the Problem uses
             getUsePC2ValStdRadioButton().setSelected(customSettings.isUsePC2ValidatorInterface());
@@ -2072,15 +2077,6 @@ public class EditProblemPane extends JPanePlugin {
             //set the Command Line ToolTip to "same as Command Line"
             getCustomValidatorCommandLineTextField().setToolTipText(inProblem.getCustomValidatorSettings().getCustomValidatorCommandLine());
             
-            //update the Custom Validator Executable Program Name ToolTip from the received ProblemDataFiles if appropriate
-            SerializedFile sFile = inProblemDataFiles.getValidatorFile();
-            if (sFile != null) {
-                if (sFile.getAbsolutePath() != null) {
-                    getCustomValidatorExecutableProgramTextField().setToolTipText(sFile.getAbsolutePath());
-                } else {
-                    getCustomValidatorExecutableProgramTextField().setToolTipText("");
-                }
-            }
         } else {
             throw new InvalidFieldValue("EditProblemPane.initializeValidatorTabFields(): null Custom Validator Settings in received Problem");
         }
