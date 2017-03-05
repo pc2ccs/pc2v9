@@ -36,7 +36,7 @@ import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
 /**
  * JUnit test cases for a C++ Custom Validator which uses the Clics Validator Interface.
  * Note that the purpose of this test suite is not to test the Validator itself (there are 
- * separate tests for that; the objective here is to verify that a Custom Validator written
+ * separate tests for that); the objective here is to verify that a Custom Validator written
  * in C++ can be properly invoked on both a Windows and a Linux platform.
  * 
  * @author pc2@ecs.csus.edu
