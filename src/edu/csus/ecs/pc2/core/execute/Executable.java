@@ -1145,13 +1145,16 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Returns a command pattern for invoking a Custom Validator. The returned pattern is determined by the Custom Validator settings in the current Problem.
+     * Returns a command pattern for invoking a Custom Validator. 
+     * The returned pattern is determined by the Custom Validator settings in the current Problem,
+     * but always has a "./" (or ".\") added to the front since all Custom Validators will be invoked
+     * as commands residing the the current directory (the "execute directory").
      * 
      * @return a command pattern for invoking the Custom Validator
      */
     private String getCustomValidatorCommandPattern() {
 
-        String cmdPattern = "";
+        String cmdPattern = "." + File.separator;
 
         if (problem != null && problem.getCustomValidatorSettings() != null) {
 
