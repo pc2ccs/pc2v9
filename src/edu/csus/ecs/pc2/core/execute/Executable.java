@@ -1146,19 +1146,27 @@ public class Executable extends Plugin implements IExecutable {
 
     /**
      * Returns a command pattern for invoking a Custom Validator. 
-     * The returned pattern is determined by the Custom Validator settings in the current Problem,
-     * but always has a "./" (or ".\") added to the front since all Custom Validators will be invoked
-     * as commands residing the the current directory (the "execute directory").
-     * 
-     * @return a command pattern for invoking the Custom Validator
+     * If the current Problem is null or has no Custom Validator Settings, null is returned.
+     * Otherwise, the returned command pattern is the command pattern defined in the
+     * Custom Validator Settings with "./" (or ".\") prepended, 
+     * unless the current Validator Program name ends with ".jar" in which case the 
+     * returned command pattern is the command pattern defined in the Custom Validator Settings
+     * with "java -jar " prepended.
+     *
+     * @return a command pattern for invoking the Custom Validator, or null if no command pattern could be determined
      */
     private String getCustomValidatorCommandPattern() {
 
-        String cmdPattern = "." + File.separator;
+        String cmdPattern = null ;
 
         if (problem != null && problem.getCustomValidatorSettings() != null) {
 
-            cmdPattern += problem.getCustomValidatorSettings().getCustomValidatorCommandLine();
+            String validatorProgramName = problem.getCustomValidatorSettings().getCustomValidatorProgramName();
+            if (validatorProgramName.trim().toLowerCase().endsWith(".jar")) {
+                cmdPattern = "java -jar " + problem.getCustomValidatorSettings().getCustomValidatorCommandLine();
+            } else {
+                cmdPattern = "." + File.separator + problem.getCustomValidatorSettings().getCustomValidatorCommandLine();   
+            }
         }
 
         // System.out.println("DEBUG: Custom Validator command pattern: '" + cmdPattern + "'");
