@@ -424,7 +424,8 @@ public class CustomJavaClicsInterfaceValidatorTest extends AbstractTestCase {
         checkFileExistence(answerFileName);
         answerFileName = convertEOLtoHostFormat(answerFileName);
         problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
-
+        removeFile(answerFileName);  //removes the COPY created by convertEOLtoHostFormat()
+        
         setupValidator(problem, problemDataFiles);
         
         contest2.addProblem(problem, problemDataFiles);
