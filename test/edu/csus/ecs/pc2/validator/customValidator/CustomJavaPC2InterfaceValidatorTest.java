@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.PC2Validator;
 
 /**
- * JUnit test cases for a Custom Validator which uses the PC2 Validator Interface.
+ * JUnit test cases for a Custom Validator written in Java and which uses the PC2 Validator Interface.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
