@@ -52,7 +52,7 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
 
     private String testOutputDirectoryName = null;
 
-    private static final String DATA_DIR_PATH = "CustomValidatorTest";
+    private static final String DATA_DIR_PATH = "CustomCppClicsInterfaceValidatorTest";
 
     private IInternalContest contest;
 
@@ -212,8 +212,10 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
 
     /**
      * Configures the specified Problem to use a Custom C++ Validator utilizing a Clics interface.
-     * @param problem
-     * @throws FileNotFoundException 
+     * @param problem the Problem whose Validator is to be configured
+     * @param problemDataFiles the ProblemDataFiles associated with the specified Problem
+     * 
+     * @throws FileNotFoundException if the Validator file for the problem cannot be found
      */
     protected void setupValidator(Problem problem, ProblemDataFiles problemDataFiles) throws FileNotFoundException {
 
