@@ -137,6 +137,10 @@ public class SerializedFile implements Serializable {
         if (obj == null){
             return false;
         }
+        
+        if (!(obj instanceof SerializedFile)) {
+            return false;
+        }
 
         SerializedFile otherFile = (SerializedFile) obj;
         
