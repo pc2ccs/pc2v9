@@ -2041,7 +2041,8 @@ public class EditProblemPane extends JPanePlugin {
             
             //get the Validator Program name
             String validatorFileName = customSettings.getCustomValidatorProgramName();  
-            //the above will be just the file name; if there's a Serialized validator file we should use the full path name
+            
+            //if there's a Serialized validator file we should use the full path name from there
             SerializedFile validatorFile = inProblemDataFiles.getValidatorFile();
             if (validatorFile!=null) {
                 validatorFileName = inProblemDataFiles.getValidatorFile().getAbsolutePath();
