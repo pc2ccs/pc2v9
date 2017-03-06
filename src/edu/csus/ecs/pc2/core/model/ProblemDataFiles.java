@@ -41,8 +41,6 @@ public class ProblemDataFiles implements IElementObject {
 
     private ElementId problemId = null;
     
-    private SerializedFile validatorRunCommand;
-    
     private SerializedFile validatorFile;
     
     private SerializedFile [] validatorFiles;
@@ -84,8 +82,6 @@ public class ProblemDataFiles implements IElementObject {
         clone.problemId = getProblemId();
 
         clone.setValidatorFile(cloneSerializedFile(getValidatorFile()));
-
-        clone.setValidatorRunCommand(getValidatorRunCommand());
 
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
@@ -231,21 +227,6 @@ public class ProblemDataFiles implements IElementObject {
         this.problemId = problemId;
     }
     
-    /**
-     * A program that wraps the validator.
-     * 
-     * Under CCS typically named 'run'.
-     * 
-     * @return null if not defined, else the program to run the validator.
-     */
-    public SerializedFile getValidatorRunCommand() {
-        return validatorRunCommand;
-    }
-    
-    public void setValidatorRunCommand(SerializedFile validatorRunCommand) {
-        this.validatorRunCommand = validatorRunCommand;
-    }
-
     /**
      * The validator program.
      * 

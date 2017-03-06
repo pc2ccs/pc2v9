@@ -1084,8 +1084,6 @@ public final class PacketFormatter {
 
             child = createTree("Validator", data.getValidatorFile());
             addNonNull(node, child);
-            child = createTree("Validator run cmd", data.getValidatorRunCommand());
-            addNonNull(node, child);
 
             child = createTree("Judge Data Files", data.getJudgesDataFiles());
             addNonNull(node, child);
