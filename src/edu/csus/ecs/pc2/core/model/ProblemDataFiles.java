@@ -20,8 +20,6 @@ import edu.csus.ecs.pc2.core.Utilities;
  * @see #getJudgesAnswerFiles()
  * @see #getJudgesDataFiles()
  * 
- * @see #getValidatorRunCommand()
- * 
  * @see edu.csus.ecs.pc2.core.model.Problem
  * @see edu.csus.ecs.pc2.core.model.ProblemDataFilesList
  *
@@ -373,9 +371,6 @@ public class ProblemDataFiles implements IElementObject {
     
     /**
      * A directory/set of files needed to run the validator.
-     * 
-     * The {@link #getValidatorRunCommand()} is used to invoke the validator,
-     * these are files needed to run the validator (including the validator).
      * 
      * @return
      */
