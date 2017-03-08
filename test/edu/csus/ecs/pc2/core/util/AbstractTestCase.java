@@ -896,18 +896,22 @@ public class AbstractTestCase extends TestCase {
         assertFileContentsEquals(expectedFile, actualFile, 1);
     }
     
+    
     /**
-     * Text file contents equal.
+     * Override for string compare
      * 
-     * @param expectedFile the first file to be compared
-     * @param actualFile the second file to be compared
-     * @param startLine (base 1) first line to compare in files.
-     * 
-     * @throws FileNotFoundException if either of the specified files cannot be found
-     * @throws IOException if an error occurs in reading the files
+     * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
-    public void assertFileContentsEquals(File expectedFile, File actualFile, int startLine) throws IOException{
-        
+    public interface OverrideStringCompare {
+        /**
+         * 
+         * @return true if strings consider equaled
+         */
+        public boolean stringEquals(String one, String two);
+    }
+    
+    public void assertFileContentsEquals(File expectedFile, File actualFile, int startLine, OverrideStringCompare comp) throws IOException{
+
         if (! expectedFile.isFile()){
             throw new FileNotFoundException(expectedFile.getAbsolutePath());
         }
@@ -922,11 +926,17 @@ public class AbstractTestCase extends TestCase {
         if (expectedContents.length  != actualContents.length){
             throw new ComparisonFailure("File contents different number of lines", ""+expectedContents.length, ""+actualContents.length);
         }
-        
-        for (int i = startLine-1; i < expectedContents.length; i++) {
+
+        for (int i = startLine - 1; i < expectedContents.length; i++) {
             String expected = expectedContents[i];
             String actual = actualContents[i];
-            if (! expected.equals(actual)){
+            boolean stringsDiffer = true;
+            if (comp != null) {
+                stringsDiffer = comp.stringEquals(expected, actual);
+            } else {
+                stringsDiffer = !expected.equals(actual);
+            }
+            if (stringsDiffer){
                 System.err.println("assertFileContentsEquals: expected file: "+expectedFile.getAbsolutePath());
                 System.err.println("assertFileContentsEquals: actual   file: "+actualFile.getAbsolutePath());
                 System.err.println("assertFileContentsEquals: Diff lines at: "+(i+1));
@@ -935,7 +945,22 @@ public class AbstractTestCase extends TestCase {
                 assertEquals("Expecting same line ine "+(i+1), expected, actual);
             }
         }
+
     }
+    /**
+     * Text file contents equal.
+     * 
+     * @param expectedFile the first file to be compared
+     * @param actualFile the second file to be compared
+     * @param startLine (base 1) first line to compare in files.
+     * 
+     * @throws FileNotFoundException if either of the specified files cannot be found
+     * @throws IOException if an error occurs in reading the files
+     */
+    public void assertFileContentsEquals(File expectedFile, File actualFile, int startLine) throws IOException{
+        
+        assertFileContentsEquals (expectedFile, actualFile, startLine, null);
+            }
     
     /**
      * Asserts that there are expectedCount occurrences of c in sourceString.
@@ -1214,14 +1239,17 @@ public class AbstractTestCase extends TestCase {
     public ClientId getServerClientId(IInternalContest contest) {
         return new ClientId(contest.getSiteNumber(), ClientType.Type.SERVER, 0);
     }
-
-    public void copyFileOverwrite(String fileOne, String fileTwo, Log log) throws IOException {
-        File file = new File(fileTwo);
+    
+    public void copyFileOverwrite(String source, String target) throws IOException {
+        File file = new File(target);
         if (file.isFile()) {
             file.delete();
         }
-        Files.copy(new File(fileOne).toPath(), new File(fileTwo).toPath());
+        Files.copy(new File(source).toPath(), new File(target).toPath());
+    }
 
+    public void copyFileOverwrite(String source, String target, Log log) throws IOException {
+        copyFileOverwrite(source, target);
     }
 
     /**
@@ -1321,6 +1349,32 @@ public class AbstractTestCase extends TestCase {
         String value = xml.substring(startIndex + startTag.length(), endIndex);
         assertEquals("Expecting tag value for " + startTag, expectedValue, value);
 
+    }
+    
+    
+    /**
+     * Reads input file and convert input file ./ to native OS path/file separators.
+     * 
+     * Only applies to ./ string.
+     * 
+     * @param filename
+     * @throws Exception
+     */
+    public void convertToNativeFileSeperators(String filename) throws Exception {
+
+        File actualFile = new File(filename);
+        File newFile = new File(filename + ".tmp");
+        PrintWriter printWriter = new PrintWriter(newFile);
+        String[] actualContents = Utilities.loadFile(actualFile.getAbsolutePath());
+        for (int i = 0; i < actualContents.length; i++) {
+            String string = actualContents[i];
+            string = string.replace("./", ".\\");
+            printWriter.println(string);
+        }
+        printWriter.close();
+        actualFile.delete();
+        boolean result = newFile.renameTo(actualFile);
+        assertTrue("rename Failed", result);
     }
     
 }

@@ -153,8 +153,12 @@ public class ExportYAML {
 
         // TODO CCS scoreboard-freeze: 4:00:00
         // scoreboard-freeze: 4:00:00
+        
+        // Bug 1192
+        // scoreboard-freeze-length     Time length before end of contest when scoreboard will be frozen, in h:mm:ss 
 
-        contestWriter.println("scoreboard-freeze: " + info.getFreezeTime());
+//        contestWriter.println("scoreboard-freeze: " + info.getFreezeTime());
+        contestWriter.println("scoreboard-freeze-length: " + info.getFreezeTime());
 
         contestWriter.println("# " + IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": false");
 

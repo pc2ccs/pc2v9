@@ -1,6 +1,6 @@
 # Contest Configuration, version 1.0 
-# PC^2 Version: Version 9.2 20141203 (Wednesday, December 03rd 2014 08:46 UTC) Java ver 1.7.0_02 build 875 Windows 7 6.1 (x86) 
-# Created: 2014-12-27 17:45:23 PST 
+# PC^2 Version: Version 9 () Java ver 1.8.0_25 build  Windows 7 6.1 (amd64) 
+# Created: 2017-03-07 17:11:57 PST
 --- 
 
 name: 'Programming Contest'
@@ -10,7 +10,7 @@ remaining: 5:00:00
 running: false
 start-time: 
 duration: 5:00:00
-scoreboard-freeze-length: 01:00:00
+scoreboard-freeze-length: 02:00:00
 # load-data-files: false
 
 default-clars:
@@ -85,36 +85,54 @@ problemset:
     name: 'Sumit'
     color: Alice Blue
     load-data-files: true
+#     2 data files written
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/sumit/data/secret/sumit.in
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/sumit/data/secret/sumit.ans
 
   - letter: B
     short-name: quadrangles
     name: 'Quadrangles'
     color: Antique White
     load-data-files: true
+#     2 data files written
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/quadrangles/data/secret/quads.in
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/quadrangles/data/secret/quads.ans
 
   - letter: C
     short-name: routing
     name: 'Routing'
     color: Aqua
     load-data-files: true
+#     2 data files written
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/routing/data/secret/quads.in
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/routing/data/secret/quads.ans
 
   - letter: D
     short-name: faulty
     name: 'Faulty Towers'
     color: Aquamarine
     load-data-files: true
+#     2 data files written
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/faulty/data/secret/quads.in
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/faulty/data/secret/quads.ans
 
   - letter: E
     short-name: london
     name: 'London Bridge'
     color: Azure
     load-data-files: true
+#     2 data files written
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/london/data/secret/london.in
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/london/data/secret/london.ans
 
   - letter: F
     short-name: finnigans
     name: 'Finnigans Bluff'
     color: Beige
     load-data-files: true
+#     2 data files written
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/finnigans/data/secret/finn.in
+#     wrote .\testout/ExportYAMLTest/testFreezeTime/finnigans/data/secret/finn.ans
 
 sites:
   - number: 1

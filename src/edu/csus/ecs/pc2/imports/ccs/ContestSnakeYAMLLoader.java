@@ -352,11 +352,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setContestLength(contest, contestLength);
         }
 
+        // Old yaml name
         String scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
         if (scoreboardFreezeTime != null) {
             setScoreboardFreezeTime(contest, scoreboardFreezeTime);
         }
-
+        
+        // New yaml name
+        scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_LENGTH_KEY);
+        if (scoreboardFreezeTime != null) {
+            setScoreboardFreezeTime(contest, scoreboardFreezeTime);
+        }
+        
         Object startTimeObject = fetchObjectValue(content, CONTEST_START_TIME_KEY);
 
         Date date = null;

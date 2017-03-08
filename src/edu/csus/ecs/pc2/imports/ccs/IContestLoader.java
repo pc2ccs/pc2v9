@@ -60,6 +60,8 @@ public interface IContestLoader {
     String CONTEST_DURATION_KEY = "duration";
 
     String SCOREBOARD_FREEZE_KEY = "scoreboard-freeze";
+    
+    String SCOREBOARD_FREEZE_LENGTH_KEY = "scoreboard-freeze-length";
 
     String LANGUAGE_KEY = "languages";
 

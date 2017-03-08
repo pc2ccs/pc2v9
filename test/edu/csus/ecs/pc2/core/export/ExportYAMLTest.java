@@ -7,10 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
@@ -93,15 +95,7 @@ public class ExportYAMLTest extends AbstractTestCase {
 
     }
     
-    // TODO TODAY - before release, remove DISABLED and fix JUnit
-    // TODO Fix JUnit
-    /*
-     * This is failing under Unix because of file seperators, this passes under DOS, so
-     * the JUnit passes, just not under Unix.
-     * Someday it might get fixed for use under Unix, if someone wants to do that. 
-     */
-    
-    public void DISABLEDtestCreateYaml() throws Exception {
+    public void testCreateYaml() throws Exception {
         
         String dataDirectory = getDataDirectory("testCreateYaml");
         ensureDirectory(dataDirectory);
@@ -131,9 +125,10 @@ public class ExportYAMLTest extends AbstractTestCase {
 //        String expectedContestYamlFile = getTestFilename("expected.contest.yaml");
         String expectedContestYamlFile = getTestFilename("expected.unix.contest.yaml");
         if (! "/".equals(File.separator)){
-            convertToLocalFileSeperators (expectedContestYamlFile);
+            convertToNativeFileSeperators (expectedContestYamlFile);
         }
         
+        // Have to strip out start time because it changes, it is always different
         stripStartTime(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
         
@@ -153,29 +148,87 @@ public class ExportYAMLTest extends AbstractTestCase {
     }
     
     /**
-     * Will convert input file ./ to local path/file separators.
+     * Test export and load of huh
      * 
-     * Only applies to ./ string.
      * 
-     * @param filename
      * @throws Exception
      */
-    private void convertToLocalFileSeperators(String filename) throws Exception {
+    public void testFreezeTime() throws Exception {
 
-        File actualFile = new File(filename);
-        File newFile = new File(filename + ".tmp");
-        PrintWriter printWriter = new PrintWriter(newFile);
-        String[] actualContents = Utilities.loadFile(actualFile.getAbsolutePath());
-        for (int i = 0; i < actualContents.length; i++) {
-            String string = actualContents[i];
-            string = string.replace("./", ".\\");
-            printWriter.println(string);
+        String dataDirectory = getDataDirectory("testFreezeTime");
+        ensureDirectory(dataDirectory);
+
+        String outDir = getOutputDataDirectory("testFreezeTime");
+        ensureDirectory(outDir);
+
+        //        startExplorer(dataDirectory);
+        //        startExplorer(testDirectory);
+
+        IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
+
+        ContestInformation contestInformation = contest.getContestInformation();
+        
+        String expectedFreezeTime = "02:00:00";
+        contestInformation.setFreezeTime(expectedFreezeTime);
+        contest.updateContestInformation(contestInformation);
+        
+        Problem[] problems = contest.getProblems();
+        
+        sampleContest.addDataFiles(contest, outDir, problems[0], "sumit.in", "sumit.ans");
+        sampleContest.addDataFiles(contest, outDir, problems[1], "quads.in", "quads.ans");
+        sampleContest.addDataFiles(contest, outDir, problems[2], "quads.in", "quads.ans");
+        sampleContest.addDataFiles(contest, outDir, problems[3], "quads.in", "quads.ans");
+        sampleContest.addDataFiles(contest, outDir, problems[4], "london.in", "london.ans");
+        sampleContest.addDataFiles(contest, outDir, problems[5], "finn.in", "finn.ans");
+
+        // Add Manual Evaluation on problem 2
+        addManualReview(contest, 2, true);
+
+        ExportYAML exportYAML = new ExportYAML();
+        exportYAML.exportFiles(outDir, contest);
+
+        String actualContestYamlFile = outDir + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+        
+        // Have to strip out start time because it changes, it is always different
+        stripStartTime(actualContestYamlFile);
+
+        String expectedContestYamlFile = dataDirectory  + File.separator + "expected.frz.unix.contest.yaml";
+        if (!"/".equals(File.separator)) {
+            convertToNativeFileSeperators(expectedContestYamlFile);
         }
-        printWriter.close();
-        actualFile.delete();
-        boolean result = newFile.renameTo(actualFile);
-        assertTrue("rename Failed", result);
+
+        // overwrite exptected
+//        copyFileOverwrite(actualContestYamlFile, expectedContestYamlFile);
+        
+//        editFile(actualContestYamlFile);
+//        editFile(expectedContestYamlFile);
+        
+        new Thread(new Runnable() {
+            public void run() {
+                
+            }
+        });
+
+        assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4, 
+                new OverrideStringCompare(){
+
+            @Override
+            public boolean stringEquals(String one, String two) {
+                return ! one.replace('\\', '/').equals(two.replace('\\', '/'));
+            }
+        });
+
+        exportYAML = null;
+
+        // Test Load
+        
+        ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
+        IInternalContest contest2 = loader.fromYaml(null, outDir);
+        ContestInformation info = contest2.getContestInformation();
+        assertEquals(expectedFreezeTime, info.getFreezeTime());
+
     }
+
 
 //  private void addShortNames(IInternalContest contest) throws Exception {
 //
