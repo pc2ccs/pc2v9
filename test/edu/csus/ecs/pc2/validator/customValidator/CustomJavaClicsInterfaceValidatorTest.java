@@ -266,7 +266,8 @@ public class CustomJavaClicsInterfaceValidatorTest extends AbstractTestCase {
     }
     
     /**
-     * Produces a new file in the Test Data directory which has the same name as the specified file but where the End-of-Line characters in the new file have been converted to the form of the host OS.
+     * Produces a new file in the Test Output directory which has the same name as the specified file 
+     * but where the End-of-Line characters in the new file have been converted to the form of the host OS.
      * 
      * @param originalFileName
      *            the original data file
@@ -277,7 +278,7 @@ public class CustomJavaClicsInterfaceValidatorTest extends AbstractTestCase {
         String newFilename = null;
         try {
             BufferedReader br = new BufferedReader(new FileReader(orig));
-            newFilename = getTestFilename(orig.getName());
+            newFilename = getOutputTestFilename(orig.getName());
             BufferedWriter bw = new BufferedWriter(new FileWriter(new File(newFilename)));
             String line;
             while ((line = br.readLine()) != null) {
@@ -422,9 +423,8 @@ public class CustomJavaClicsInterfaceValidatorTest extends AbstractTestCase {
         problem.setAnswerFileName("sumit.ans");
         String answerFileName = getSamplesSourceFilename(problem.getAnswerFileName());
         checkFileExistence(answerFileName);
-        answerFileName = convertEOLtoHostFormat(answerFileName);
-        problemDataFiles.setJudgesAnswerFile(new SerializedFile(answerFileName));
-        removeFile(answerFileName);  //removes the COPY created by convertEOLtoHostFormat()
+        String convertedAnswerFileName = convertEOLtoHostFormat(answerFileName);
+        problemDataFiles.setJudgesAnswerFile(new SerializedFile(convertedAnswerFileName));
         
         setupValidator(problem, problemDataFiles);
         
