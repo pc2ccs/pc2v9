@@ -71,7 +71,8 @@ public class ExportYAMLTest extends AbstractTestCase {
         String expectedFileName = dataDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
         
         // Start compare on line 4 to skip header/version/time information
-        assertFileContentsEquals(new File(actualFileName), new File(expectedFileName), 4);
+        assertFileContentsEquals(new File(expectedFileName), new File(actualFileName), 4, getOverrideStringCompare());
+
 
         exportYAML = null;
     }
@@ -131,6 +132,7 @@ public class ExportYAMLTest extends AbstractTestCase {
         // Have to strip out start time because it changes, it is always different
         stripStartTime(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
+        editFile(actualContestYamlFile);
         
         assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4);
         
@@ -140,11 +142,20 @@ public class ExportYAMLTest extends AbstractTestCase {
         String expectedFileName = dataDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
         
         // Start compare on line 4 to skip header/version/time information
-        assertFileContentsEquals(new File(actualFileName), new File(expectedFileName), 4);
-
+        assertFileContentsEquals(new File(actualFileName), new File(expectedFileName), 4, getOverrideStringCompare());
 
         exportYAML = null;
 
+    }
+    
+    private OverrideStringCompare getOverrideStringCompare(){
+        OverrideStringCompare op = new OverrideStringCompare(){
+            @Override
+            public boolean stringEquals(String one, String two) {
+                return ! one.replace('\\', '/').equals(two.replace('\\', '/'));
+            }
+        };
+        return op;
     }
     
     /**
@@ -209,14 +220,7 @@ public class ExportYAMLTest extends AbstractTestCase {
             }
         });
 
-        assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4, 
-                new OverrideStringCompare(){
-
-            @Override
-            public boolean stringEquals(String one, String two) {
-                return ! one.replace('\\', '/').equals(two.replace('\\', '/'));
-            }
-        });
+        assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4, getOverrideStringCompare());
 
         exportYAML = null;
 
