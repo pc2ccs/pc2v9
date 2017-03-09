@@ -326,7 +326,7 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     /**
-     * Produces a new file in the Test Data directory which has the same name as the specified
+     * Produces a new file in the Test Output directory which has the same name as the specified
      * file but where the End-of-Line characters in the new file have been converted to the form
      * of the host OS.
      * 
@@ -338,7 +338,7 @@ public class ExecutableTest extends AbstractTestCase {
         String newFilename=null;
         try {
             BufferedReader br = new BufferedReader(new FileReader(orig));
-            newFilename = getTestFilename(orig.getName()) ;
+            newFilename = getOutputTestFilename(orig.getName()) ;
             BufferedWriter bw = new BufferedWriter(new FileWriter(new File(newFilename)));
             String line ;
             while ((line=br.readLine()) != null) {
