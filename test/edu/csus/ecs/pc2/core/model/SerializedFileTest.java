@@ -16,6 +16,9 @@ public class SerializedFileTest extends AbstractTestCase {
 
     private SampleContest sample = new SampleContest();
     
+    private String DATA_DIR_PATH = "SerializedFileTest" ;
+    private String testDataDirectoryName;
+    
     @Override
     protected void setUp() throws Exception {
 //        setCreateMissingDirectories(true);
@@ -54,6 +57,25 @@ public class SerializedFileTest extends AbstractTestCase {
         
         clone = (SerializedFile) firstFile.clone();
         compareSerializedFile (firstFile, clone);
+        
+    }
+    
+    public void testValidSHA1Computation() {
+        
+        //get the test .exe file to be used to generate an SHA1 code
+        testDataDirectoryName = getRootInputTestDataDirectory() + File.separator + DATA_DIR_PATH;
+        String testFileName = "javaClicsInterfaceValidator.jar";
+
+        //create a SerializedFile from the test file
+        String absolutePath = testDataDirectoryName + File.separator + testFileName ;
+        SerializedFile sf = new SerializedFile(absolutePath);
+        
+        //get the SHA1 code out of the SerializedFile
+        String actual = sf.getSHA1sum();
+        
+        //verify the code matches the expected value
+        String expected = "4eca592e02c44befaa8a90f0ec999186567b7e4e";
+        assertEquals("Wrong SHA1 code (message=" + sf.getErrorMessage() + "): ", expected, actual );
         
     }
     
