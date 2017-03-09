@@ -932,7 +932,10 @@ public class AbstractTestCase extends TestCase {
             String actual = actualContents[i];
             boolean stringsDiffer = true;
             if (comp != null) {
-                stringsDiffer = comp.stringEquals(expected, actual);
+                stringsDiffer = ! comp.stringEquals(expected, actual);
+                if (stringsDiffer){
+                    System.err.println("assertFileContentsEquals: using OverrideStringCompare to compare lines ");
+                }
             } else {
                 stringsDiffer = !expected.equals(actual);
             }
@@ -940,8 +943,8 @@ public class AbstractTestCase extends TestCase {
                 System.err.println("assertFileContentsEquals: expected file: "+expectedFile.getAbsolutePath());
                 System.err.println("assertFileContentsEquals: actual   file: "+actualFile.getAbsolutePath());
                 System.err.println("assertFileContentsEquals: Diff lines at: "+(i+1));
-                System.err.println("assertFileContentsEquals: expected     : "+expected);
-                System.err.println("assertFileContentsEquals: actual       : "+actual);
+                System.err.println("assertFileContentsEquals: expected     : '"+expected+"'");
+                System.err.println("assertFileContentsEquals: actual       : '"+actual+"'");
                 assertEquals("Expecting same line ine "+(i+1), expected, actual);
             }
         }
