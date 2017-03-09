@@ -132,7 +132,7 @@ public class ExportYAMLTest extends AbstractTestCase {
         // Have to strip out start time because it changes, it is always different
         stripStartTime(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
-        editFile(actualContestYamlFile);
+//        editFile(actualContestYamlFile);
         
         assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4);
         
@@ -152,10 +152,34 @@ public class ExportYAMLTest extends AbstractTestCase {
         OverrideStringCompare op = new OverrideStringCompare(){
             @Override
             public boolean stringEquals(String one, String two) {
-                return ! one.replace('\\', '/').equals(two.replace('\\', '/'));
+            	return one.replace('\\', '/').equals(two.replace('\\', '/'));
             }
         };
         return op;
+    }
+    
+    public void testStringEqulas() throws Exception {
+        
+        String [] data  = {//
+                "\\tmp\\file;/tmp/file", // 
+                "work\\longfilename;work\\longfilename", //
+                "\\\\\\\\;////", //
+                "this is the way;this is the way", // 
+                "c:\\tmp\\file2;c:/tmp/file2", //
+        };
+        
+        OverrideStringCompare comp = getOverrideStringCompare();
+
+        for (String string : data) {
+            String[] fields = string.split(";");
+
+            String input = fields[0];
+            String expected = fields[1];
+
+            boolean passed = comp.stringEquals(input, expected);
+            assertTrue("Compare '"+input+"' to '"+expected+"'", passed);
+        }
+
     }
     
     /**
