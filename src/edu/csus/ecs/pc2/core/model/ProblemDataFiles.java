@@ -226,9 +226,9 @@ public class ProblemDataFiles implements IElementObject {
     }
     
     /**
-     * The validator program.
+     * Returns the validator program file.
      * 
-     * @return
+     * @return a SerializedFile containing the validator code, or null if no validator has been specified
      */
     public SerializedFile getValidatorFile() {
         return validatorFile;
@@ -354,6 +354,10 @@ public class ProblemDataFiles implements IElementObject {
         buf.append(" Validator: ");
         if (validatorFile != null) {
             buf.append(validatorFile.getName());
+            buf.append(" SHA1: ");
+            buf.append (validatorFile.getSHA1sum());
+        } else {
+            buf.append("null");
         }
 
         return buf.toString();
