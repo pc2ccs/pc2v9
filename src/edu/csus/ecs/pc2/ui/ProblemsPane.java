@@ -410,6 +410,9 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected void editSelectedProblem() {
+        
+        showStackTrace();
+        System.out.println ("Begin ProblemsPane.editSelectedProblem()...");
 
         int selectedIndex = problemListBox.getSelectedIndex();
         if (selectedIndex == -1) {
@@ -422,6 +425,8 @@ public class ProblemsPane extends JPanePlugin {
             Problem problemToEdit = getContest().getProblem(elementId);
 
             ProblemDataFiles newProblemDataFiles = getController().getProblemDataFiles(problemToEdit);
+
+            System.out.println ("ProblemDataFiles = " + newProblemDataFiles);
 
             // bring up the ui, let the user add/cancel the copied problem
             editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
@@ -436,6 +441,9 @@ public class ProblemsPane extends JPanePlugin {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to edit problem, check log (" + e.getMessage() + ")");
         }
+
+        System.out.println ("End ProblemsPane.editSelectedProblem()...");
+
     }
 
     /**
@@ -723,5 +731,25 @@ public class ProblemsPane extends JPanePlugin {
         }
         return editCDPPathFrame ;
     }
+
+    /**
+     * Displays the class, method, and line number of the method that called this method, 
+     * along with the same information for the method that called THAT method.
+     */
+    private void showStackTrace() {
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        
+        String callingClassName = stackTraceElements[2].getClassName();
+        String callingMethodName = stackTraceElements[2].getMethodName();
+        int callingMethodLineNumber = stackTraceElements[2].getLineNumber();
+        System.out.println ("\nIn " + callingClassName + "." + callingMethodName + "(line " + callingMethodLineNumber + ")");
+
+        callingClassName = stackTraceElements[3].getClassName();
+        callingMethodName = stackTraceElements[3].getMethodName();
+        callingMethodLineNumber = stackTraceElements[3].getLineNumber();
+        System.out.println ("called from " + callingClassName + "." + callingMethodName + "(line " + callingMethodLineNumber + ")");
+        
+    }
     
+
 } // @jve:decl-index=0:visual-constraint="10,10"
