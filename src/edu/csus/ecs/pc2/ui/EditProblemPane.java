@@ -24,7 +24,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,7 +54,6 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -66,7 +64,6 @@ import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
-import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
@@ -89,8 +86,6 @@ public class EditProblemPane extends JPanePlugin {
      *  
      */
     private static final long serialVersionUID = -1060536964672397704L;
-
-    private String lastSaveDirectory = null;
 
     private JPanel messagePane = null;
 
@@ -423,6 +418,10 @@ public class EditProblemPane extends JPanePlugin {
      */
     protected void addProblem() {
 
+        showStackTrace();
+        System.out.println ("Begin EditProblemPane.addProblem()...");
+        System.out.println ("ProblemDataFiles = " + newProblemDataFiles);
+        
         if (problemNameTextField.getText().trim().length() < 1) {
             showMessage("Enter a problem name (\"General\" tab)");
             return;
@@ -496,6 +495,9 @@ public class EditProblemPane extends JPanePlugin {
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
 
+        System.out.println ("End EditProblemPane.addProblem()...");
+        System.out.println ("ProblemDataFiles = " + newProblemDataFiles);
+        
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
@@ -514,7 +516,9 @@ public class EditProblemPane extends JPanePlugin {
      * 
      */
     public void enableUpdateButton() {
-
+        
+        showStackTrace();
+        
         if (populatingGUI) {
             return;
         }
@@ -526,14 +530,14 @@ public class EditProblemPane extends JPanePlugin {
 
             try {
                 //get the new version of the problem from the GUI
-                Problem changedProblem = getProblemFromFields(null, newProblemDataFiles);
+                Problem changedProblem = getProblemFromFields(null, newProblemDataFiles); // XXX this method treats "null" as meaning "adding new Problem"... which causes problems with validator updates!
                 
                 if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(originalProblemDataFiles)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
                 }
                 
-                //see if the problem data files have changed; update the tooltip if so
+                //see if the problem data files have changed; enable the Update button and update the tooltip if so
                 ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
                 ProblemDataFiles proposedPDF = getMultipleDataSetPane().getProblemDataFiles();
                 if (pdf != null) {
@@ -551,7 +555,7 @@ public class EditProblemPane extends JPanePlugin {
                             updateToolTip += ", Judges data";
                         }
                         enableButton = true;
-                    } else if (judgesDataFiles.length != judgesDataFilesNew.length) {
+                    } else if (judgesDataFiles.length != judgesDataFilesNew.length) {  //TODO: this could throw NPE if both are null (the above only eliminates the XOR possibility)
                         fileChanged += Math.abs(judgesDataFiles.length - judgesDataFilesNew.length);
                         if (updateToolTip.equals("")) {
                             updateToolTip = "Judges data";
@@ -564,14 +568,18 @@ public class EditProblemPane extends JPanePlugin {
                         boolean changed = false;
                         if (judgesDataFiles != null) {
                             for (int i = 0; i < judgesDataFiles.length; i++) {
-                                SerializedFile serializedFile = judgesDataFiles[i];
-                                // external true, we just the sha we do not need to load the data
-                                SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), true);
-                                if (!serializedFile.getName().equals(judgesDataFilesNew[i].getName())) {
-                                    // name changed
+                                //get the existing serialized data file
+                                SerializedFile existingSerializedDataFile = judgesDataFiles[i];
+                                //get a new serialized file from disk, using the existing file's name.
+                                // The "isExternal" flag is specified as true (causing the file data to not actually be loaded) because
+                                // we just the SHA code -- we do not need to load the data
+                                SerializedFile serializedFile2 = new SerializedFile(existingSerializedDataFile.getAbsolutePath(), true);
+                                //check whether the file from disk matches the existing (stored) file
+                                if (!existingSerializedDataFile.getName().equals(judgesDataFilesNew[i].getName())) {
+                                    //file name has somehow changed on disk (not sure how this could happen?)
                                     fileChanged++;
                                     changed = true;
-                                } else if (!serializedFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
+                                } else if (!existingSerializedDataFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
                                     // contents have changed on disk
                                     fileChanged++;
                                     changed = true;
@@ -588,13 +596,13 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                     
-                    //see if the judge's answer files have changed; update the tooltip if so
+                    //see if the judge's answer files have changed; enable the Update button and update the tooltip if so
                     SerializedFile[] judgesAnswerFiles = pdf.getJudgesAnswerFiles();
                     SerializedFile[] judgesAnswerFilesNew = null;
                     if (proposedPDF != null) {
                         judgesAnswerFilesNew = proposedPDF.getJudgesAnswerFiles();
                     }
-                    if ((judgesAnswerFiles == null && judgesAnswerFilesNew != null) || (judgesAnswerFiles != null & judgesAnswerFilesNew == null)) {
+                    if ((judgesAnswerFiles == null && judgesAnswerFilesNew != null) || (judgesAnswerFiles != null && judgesAnswerFilesNew == null)) {
                         // one was null the other was not
                         if (updateToolTip.equals("")) {
                             updateToolTip = "Judges answer";
@@ -603,7 +611,7 @@ public class EditProblemPane extends JPanePlugin {
                         }
                         enableButton = true;
                         fileChanged++;
-                    } else if (judgesAnswerFiles.length != judgesAnswerFilesNew.length) {
+                    } else if (judgesAnswerFiles.length != judgesAnswerFilesNew.length) {  //TODO: this could throw NPE if both are null (the above only eliminates the XOR possibility)
                         fileChanged += Math.abs(judgesAnswerFiles.length - judgesAnswerFilesNew.length);
                         if (updateToolTip.equals("")) {
                             updateToolTip = "Judges answer";
@@ -616,13 +624,18 @@ public class EditProblemPane extends JPanePlugin {
                         boolean changed = false;
                         if (judgesAnswerFiles != null) {
                             for (int i = 0; i < judgesAnswerFiles.length; i++) {
-                                SerializedFile serializedFile = judgesAnswerFiles[i];
-                                // external true, we just the sha we do not need to load the data
-                                SerializedFile serializedFile2 = new SerializedFile(serializedFile.getAbsolutePath(), true);
-                                if (!serializedFile.getName().equals(judgesAnswerFilesNew[i].getName())) {
+                                //get the existing serialized answer file
+                                SerializedFile existingSerializedAnswerFile = judgesAnswerFiles[i];
+                                //get a new serialized file from disk, using the existing file's name.
+                                // The "isExternal" flag is specified as true (causing the file data to not actually be loaded) because
+                                // we just the SHA code -- we do not need to load the data
+                                SerializedFile serializedFile2 = new SerializedFile(existingSerializedAnswerFile.getAbsolutePath(), true);
+                                //check whether the file from disk matches the existing (stored) file
+                                if (!existingSerializedAnswerFile.getName().equals(judgesAnswerFilesNew[i].getName())) {
+                                    //file name has somehow changed on disk (not sure how this could happen?)
                                     fileChanged++;
                                     changed = true;
-                                } else if (!serializedFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
+                                } else if (!existingSerializedAnswerFile.getSHA1sum().equals(serializedFile2.getSHA1sum())) {
                                     // contents have changed on disk
                                     fileChanged++;
                                     changed = true;
@@ -639,7 +652,7 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                     
-                    //see if the choice of which validator (if any) to use has changed; update the tooltip if so
+                    //see if the choice of which validator (if any) to use has changed; enable the Update button and update the tooltip if so
                     if ( problem.getValidatorType() != changedProblem.getValidatorType() ) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
@@ -649,24 +662,22 @@ public class EditProblemPane extends JPanePlugin {
                         }                        
                     }
                     
-                    //see if the PC2 Validator options have changed
+                    //see if the PC2 Validator options have changed; enable the Update button and update the tooltip if so
                     if (problem.getPC2ValidatorSettings()!=null && changedProblem.getPC2ValidatorSettings()!=null) {
                         PC2ValidatorSettings problemSettings = problem.getPC2ValidatorSettings();
                         PC2ValidatorSettings changedProblemSettings = changedProblem.getPC2ValidatorSettings();
                         if ( (problemSettings.getWhichPC2Validator() != changedProblemSettings.getWhichPC2Validator()) ||
                              (problemSettings.isIgnoreCaseOnValidation() != changedProblemSettings.isIgnoreCaseOnValidation()) ) {
                             enableButton = true;
-                            if (!updateToolTip.contains("Validator")) {
-                                if (updateToolTip.equals("")) {
-                                    updateToolTip = "Validator";
-                                } else {
-                                    updateToolTip += ", Validator";
-                                }
+                            if (updateToolTip.equals("")) {
+                                updateToolTip = "PC2 Validator options";
+                            } else {
+                                updateToolTip += ", PC2 Validator options";
                             }
                         }
                     }
 
-                    //see if the Clics Validator options have changed
+                    //see if the Clics Validator options have changed; enable the Update button and update the tooltip if so
                     if (problem.getClicsValidatorSettings()!=null && changedProblem.getClicsValidatorSettings()!=null) {
                         ClicsValidatorSettings problemSettings = problem.getClicsValidatorSettings();
                         ClicsValidatorSettings changedProblemSettings = changedProblem.getClicsValidatorSettings();
@@ -677,18 +688,16 @@ public class EditProblemPane extends JPanePlugin {
                              (problemSettings.isCaseSensitive() != changedProblemSettings.isCaseSensitive()) ||
                              (problemSettings.isSpaceSensitive() != changedProblemSettings.isSpaceSensitive()) ) {
                             enableButton = true;
-                            if (!updateToolTip.contains("Validator")) {
-                                if (updateToolTip.equals("")) {
-                                    updateToolTip = "Validator";
-                                } else {
-                                    updateToolTip += ", Validator";
-                                }
+                            if (updateToolTip.equals("")) {
+                                updateToolTip = "CLICS Validator options";
+                            } else {
+                                updateToolTip += ", CLICS Validator options";
                             }
                         }
                     }
 
                    
-                    //see if the Custom Validator options have changed
+                    //see if the Custom Validator options have changed; enable the Update button and update the tooltip if so
                     if (problem.getCustomValidatorSettings()!=null && changedProblem.getCustomValidatorSettings()!=null) {
                         CustomValidatorSettings problemSettings = problem.getCustomValidatorSettings();
                         CustomValidatorSettings changedProblemSettings = changedProblem.getCustomValidatorSettings();
@@ -734,12 +743,10 @@ public class EditProblemPane extends JPanePlugin {
                         if (changed) {
                             
                             enableButton = true;
-                            if (!updateToolTip.contains("Validator")) {
-                                if (updateToolTip.equals("")) {
-                                    updateToolTip = "Validator";
-                                } else {
-                                    updateToolTip += ", Validator";
-                                }
+                            if (updateToolTip.equals("")) {
+                                updateToolTip = "Custom Validator options";
+                            } else {
+                                updateToolTip += ", Custom Validator options";
                             }
                         }
                     }
@@ -802,21 +809,45 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * 
-     * @param file
-     * @param fileName
-     * @return false if fileName exists and has changed checksums
+     * Displays the class, method, and line number of the method that called this method, 
+     * along with the same information for the method that called THAT method.
      */
-    private boolean fileSameAs(SerializedFile file, String fileName) {
-        if (fileName != null && !fileName.trim().equals("")) {
-            // files changed, treat that as the same
-            if (file != null && !fileName.equals(file.getName())) {
-                return true;
-            }
-            return !needsFreshening(file, fileName);
+    private void showStackTrace() {
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        
+        String callingClassName = stackTraceElements[2].getClassName();
+        String callingMethodName = stackTraceElements[2].getMethodName();
+        int callingMethodLineNumber = stackTraceElements[2].getLineNumber();
+        System.out.println ("\nIn " + callingClassName + "." + callingMethodName + "(line " + callingMethodLineNumber + ")");
+
+        callingClassName = stackTraceElements[3].getClassName();
+        callingMethodName = stackTraceElements[3].getMethodName();
+        callingMethodLineNumber = stackTraceElements[3].getLineNumber();
+        System.out.println ("called from " + callingClassName + "." + callingMethodName + "(line " + callingMethodLineNumber + ")");
+        
+    }
+    
+    /**
+     * Compares the specified SerializedFile with the file on disk of the specified filename and
+     * returns an indication of whether or not the two are identical.
+     * 
+     * If the specified SerializedFile is null, or the specified filename is null or the
+     * empty string, returns false (since no comparison can be made and hence they cannot be "the same").  
+     * If the full path file name in the SerializedFile does not match the specified filename, returns false.
+     * Otherwise, compares the checksums using method {@link #needsFreshening(SerializedFile, String)}
+     * and returns an indication of whether the checksums match ({@link #needsFreshening(SerializedFile, String)}
+     * returns false if the files match).
+     * 
+     * @param storedFile the SerializedFile to compare
+     * @param diskFileName the name of a file on disk to compare
+     * @return true if the checksum of the SerializedFile matches that of the corresponding file on disk
+     */
+    private boolean fileSameAs(SerializedFile storedFile, String diskFileName) {
+        if (diskFileName==null || diskFileName.trim().equals("") || storedFile==null || storedFile.getAbsolutePath()!=diskFileName) {
+            return false;
+        } else {
+            return !needsFreshening(storedFile, diskFileName);
         }
-        // default to true
-        return true;
     }
 
     /**
@@ -837,7 +868,12 @@ public class EditProblemPane extends JPanePlugin {
      */
     public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
         
-        boolean isAddingNewProblem; //false means we are editing an existing problem, received as "checkProblem"
+        boolean isEditingExistingProblem; 
+        if (checkProblem!=null) {
+            isEditingExistingProblem = true;
+        } else {
+            isEditingExistingProblem = false;
+        }
         
         /**
          * Data file from General tab.
@@ -854,21 +890,20 @@ public class EditProblemPane extends JPanePlugin {
         SerializedFile lastAnsFile = null;
 
         //check whether we've been given an existing Problem to fill
-        if (checkProblem == null) {
+        if (!isEditingExistingProblem) {
             //we weren't give a Problem; construct a new one
             checkProblem = new Problem(getProblemNameTextField().getText());
-            isAddingNewProblem = true;
+            //check whether we already have ProblemDataFiles
             if (newProblemDataFiles == null) {
-                // only overwrite if they do not exist already
+                // create a ProblemDataFiles object for the problem
                 newProblemDataFiles = new ProblemDataFiles(checkProblem);
             }
         } else {
             //we were given an existing Problem (called "checkProblem"); update the critical values in the Problem
             checkProblem.setDisplayName(problemNameTextField.getText());
             checkProblem.setElementId(problem); // duplicate ElementId so that Problem key/lookup is identical
+            //use the problem data files passed in
             newProblemDataFiles = dataFiles;
-            // newProblemDataFiles = new ProblemDataFiles(problem);
-            isAddingNewProblem = false;
         }
 
         if (debug22EditProblem) {
@@ -900,7 +935,7 @@ public class EditProblemPane extends JPanePlugin {
                 fileName = inputDataFileLabel.getToolTipText() + "";
             }
 
-            if (isAddingNewProblem) {
+            if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
 
                 if (serializedFile.getBuffer() == null) {
@@ -911,6 +946,7 @@ public class EditProblemPane extends JPanePlugin {
                 lastDataFile = serializedFile;
 
             } else {
+                //we're editing an existing problem
                 if (originalProblemDataFiles.getJudgesDataFiles().length < 2) {
                     // TODO this is not MTS safe
                     SerializedFile serializedFile = originalProblemDataFiles.getJudgesDataFile();
@@ -945,7 +981,7 @@ public class EditProblemPane extends JPanePlugin {
                 fileName = answerFileNameLabel.getToolTipText() + "";
             }
 
-            if (isAddingNewProblem) {
+            if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
 
                 if (serializedFile.getBuffer() == null) {
@@ -959,6 +995,7 @@ public class EditProblemPane extends JPanePlugin {
                 }
                 lastAnsFile = serializedFile;
             } else {
+                // we're editing an existing problem
                 if (originalProblemDataFiles.getJudgesAnswerFiles().length < 2) {
                     // TODO this is not MTS safe
                     SerializedFile serializedFile = originalProblemDataFiles.getJudgesAnswerFile();
@@ -1007,12 +1044,18 @@ public class EditProblemPane extends JPanePlugin {
         // (the PC2 and CLICS Validators use internal PC2 classes and don't need a separate SerializedFile)
         if (getUseCustomValidatorRadioButton().isSelected()) {
             
-            if (isAddingNewProblem) {
+            
+           // XXX the logic below here needs to be re-thunk...
+            
+            
+            
+            if (!isEditingExistingProblem) {
 
-                // we're adding a new Problem; update Problem Custom Validator SerializedFile
-                updateCustomValidatorSerializedFile(checkProblem);
+                // we weren't given an existing problem; update Problem Custom Validator SerializedFile in the new problem
+                updateCustomValidatorSerializedFile(checkProblem); //XXX problem: this method seems to magically refresh the validator file
 
             } else {
+                
 
                 // we're editing an existing Problem, which may or may not already have a Validator SerializedFile defined;
                 // find out if the Problem has a Validator SerializedFile defined
@@ -1028,14 +1071,14 @@ public class EditProblemPane extends JPanePlugin {
                     // check to see if the defined file is the same as the one currently specified in the GUI
                     
                     String guiValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
-                    String existingValidatorFileName = serializedFile.getName();
+                    String existingValidatorFileName = serializedFile.getAbsolutePath() ;
 
                     if (guiValidatorFileName.equals(existingValidatorFileName)) {
 
                         // same file names in GUI and Problem; refresh/check validator file
 
                         serializedFile = freshenIfNeeded(serializedFile, existingValidatorFileName);
-                        checkProblem.setValidatorProgramName(serializedFile.getName());
+                        checkProblem.setValidatorProgramName(serializedFile.getAbsolutePath());
                         newProblemDataFiles.setValidatorFile(serializedFile);
 
                     } else {
@@ -1119,7 +1162,7 @@ public class EditProblemPane extends JPanePlugin {
             newValidatorFileName = newValidatorFileName.trim();
         }
 
-        SerializedFile serializedFile = new SerializedFile(newValidatorFileName);
+        SerializedFile serializedFile = new SerializedFile(newValidatorFileName); //XXX see below!!
 
         if (serializedFile.getBuffer() == null  ||  (serializedFile.getErrorMessage() != null && serializedFile.getErrorMessage() != "")) {
 
@@ -1133,9 +1176,9 @@ public class EditProblemPane extends JPanePlugin {
         checkFileFormat(serializedFile);
         
         //put the Custom Validator SerializedFile into the Problem
-        checkProblem.setValidatorProgramName(serializedFile.getName());
+        checkProblem.setValidatorProgramName(serializedFile.getAbsolutePath()) ;
         // for some reason on validator this is borked  <-- old, out of date comment?
-        newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, newValidatorFileName));
+        newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, newValidatorFileName)); //XXX this is wrong -- it is using the new file (which never needs freshening, and saving that!)
         //the following was the replacement for the above, but the above should work...
         //newProblemDataFiles.setValidatorFile(serializedFile);
     }
@@ -1259,6 +1302,8 @@ public class EditProblemPane extends JPanePlugin {
      */
 
     protected void updateProblem() {
+        
+        showStackTrace();
 
         if (!validateProblemFields()) {
             // problem defined by the GUI fields is invalid, just return ( error message was issued by validateProblemFields() )
@@ -1272,8 +1317,12 @@ public class EditProblemPane extends JPanePlugin {
             //create datafiles from the fields
             ProblemDataFiles dataFiles = getProblemDataFilesFromFields();
             
+            System.out.println ("Problem Data Files from fields: " + dataFiles);
+            
             //create a new Problem from the fields
             newProblem = getProblemFromFields(problem, dataFiles);
+            
+            System.out.println ("Problem from fields: " + newProblem);
             
             //verify the correctness of the datafiles just obtained from the fields
             if (dataFiles != null) {
@@ -3708,42 +3757,6 @@ public class EditProblemPane extends JPanePlugin {
         return filename;
     }
 
-    protected void saveProblemYaml() {
-
-        try {
-
-            if (lastSaveDirectory == null) {
-                lastSaveDirectory = new File(".").getCanonicalPath() + File.separator + "export";
-            }
-
-            char currentLetter = currentDirectoryLetter(lastSaveDirectory);
-
-            String nextDirectory = findNextDirectory(lastSaveDirectory);
-            ExportYAML exportYAML = new ExportYAML();
-
-            newProblemDataFiles = getProblemDataFilesFromFields();
-            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
-
-            String problemYamlFile = nextDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME;
-            String[] filelist = exportYAML.writeProblemYAML(getContest(), newProblem, problemYamlFile, newProblemDataFiles);
-
-            String results = compareDirectories(lastSaveDirectory + File.separator + currentLetter, nextDirectory);
-            
-            if (debug22EditProblem) {
-
-                System.out.println("Comparison : " + results);
-
-                System.out.println("Last dir: " + lastSaveDirectory);
-                System.out.println("Wrote " + problemYamlFile);
-                for (String string : filelist) {
-                    System.out.println("Wrote " + string);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace(); // debug 22
-        }
-    }
-
     /**
      * get Letter.
      * 
@@ -3772,91 +3785,6 @@ public class EditProblemPane extends JPanePlugin {
 
         return letter;
 
-    }
-
-    private String findNextDirectory(String directory) {
-
-        char letter = currentDirectoryLetter(directory);
-        String nextDirectory = directory + File.separator + letter;
-        File file = new File(nextDirectory);
-
-        while (file.isDirectory()) {
-            if (debug22EditProblem) {
-                System.out.println("Found directory: " + nextDirectory);
-            }
-
-            letter++;
-            nextDirectory = directory + File.separator + letter;
-            file = new File(nextDirectory);
-        }
-
-        if (!file.isDirectory()) {
-            file.mkdirs();
-            
-            if (debug22EditProblem) {
-                System.out.println("Created dir " + nextDirectory);
-            }
-        }
-
-        return nextDirectory;
-    }
-
-    protected void goodsaveProblemYaml() {
-
-        Problem newProblem = null;
-
-        try {
-            newProblemDataFiles = getProblemDataFilesFromFields();
-            newProblem = getProblemFromFields(problem, newProblemDataFiles);
-
-        } catch (InvalidFieldValue e) {
-            showMessage(e.getMessage());
-            return;
-        }
-
-        try {
-            JFileChooser chooser = new JFileChooser(lastSaveDirectory);
-            FileFilter filterYAML = new FileNameExtensionFilter("YAML File", "yaml");
-            chooser.setDialogTitle("Save problem to problem.YAML ");
-            File file = new File("problem.yaml");
-            chooser.setSelectedFile(file);
-            chooser.setFileFilter(filterYAML);
-            int result = chooser.showSaveDialog(this);
-
-            if (result == JOptionPane.YES_OPTION) {
-                File selectedFile = chooser.getSelectedFile().getCanonicalFile();
-                // chooser.setCurrentDirectory(new File(lastSaveDirectory));
-
-                if (selectedFile.exists()) {
-                    result = FrameUtilities.yesNoCancelDialog(this, "Overwrite " + selectedFile.getName(), "Overwrite existing file?");
-
-                    if (result != JOptionPane.YES_OPTION) {
-                        return;
-                    }
-                }
-
-                ExportYAML exportYAML = new ExportYAML();
-
-                String[] filelist = exportYAML.writeProblemYAML(getContest(), newProblem, selectedFile.getAbsolutePath(), newProblemDataFiles);
-
-                String fileComment = "";
-                if (filelist.length > 0) {
-                    fileComment = "(" + filelist.length + " data files written)";
-                }
-
-                showMessage("Wrote problem YAML to " + selectedFile.getName() + " " + fileComment);
-
-                if (Utilities.isDebugMode()) {
-                    FrameUtilities.viewFile(selectedFile.getAbsolutePath(), selectedFile.getName(), getLog());
-                }
-
-            } else {
-                showMessage("No file selected/saved");
-            }
-
-        } catch (IOException e) {
-            showMessage("Problem saving yaml file " + e.getMessage());
-        }
     }
 
     /**
