@@ -411,7 +411,7 @@ public class ProblemsPane extends JPanePlugin {
 
     protected void editSelectedProblem() {
         
-        showStackTrace();
+//        showStackTrace();
         System.out.println ("Begin ProblemsPane.editSelectedProblem()...");
 
         int selectedIndex = problemListBox.getSelectedIndex();
@@ -736,6 +736,7 @@ public class ProblemsPane extends JPanePlugin {
      * Displays the class, method, and line number of the method that called this method, 
      * along with the same information for the method that called THAT method.
      */
+    @SuppressWarnings("unused")
     private void showStackTrace() {
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
         
