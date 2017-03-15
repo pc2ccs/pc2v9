@@ -523,7 +523,7 @@ public class EditProblemPane extends JPanePlugin {
 
             try {
                 //get the new version of the problem from the GUI
-                Problem changedProblem = getProblemFromFields(null, newProblemDataFiles); // XXX this method treats "null" as meaning "adding new Problem"... which causes problems with validator updates!
+                Problem changedProblem = getProblemFromFields(null, newProblemDataFiles);
                 
                 if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(originalProblemDataFiles)) {
                     enableButton = true;
@@ -548,7 +548,7 @@ public class EditProblemPane extends JPanePlugin {
                             updateToolTip += ", Judges data";
                         }
                         enableButton = true;
-                    } else if (judgesDataFiles.length != judgesDataFilesNew.length) {  //TODO: this could throw NPE if both are null (the above only eliminates the XOR possibility)
+                    } else if (judgesDataFiles.length != judgesDataFilesNew.length) {  //TODO: this will throw NPE if both are null (the above only eliminates the XOR possibility)
                         fileChanged += Math.abs(judgesDataFiles.length - judgesDataFilesNew.length);
                         if (updateToolTip.equals("")) {
                             updateToolTip = "Judges data";
@@ -604,7 +604,7 @@ public class EditProblemPane extends JPanePlugin {
                         }
                         enableButton = true;
                         fileChanged++;
-                    } else if (judgesAnswerFiles.length != judgesAnswerFilesNew.length) {  //TODO: this could throw NPE if both are null (the above only eliminates the XOR possibility)
+                    } else if (judgesAnswerFiles.length != judgesAnswerFilesNew.length) {  //TODO: this will throw NPE if both are null (the above only eliminates the XOR possibility)
                         fileChanged += Math.abs(judgesAnswerFiles.length - judgesAnswerFilesNew.length);
                         if (updateToolTip.equals("")) {
                             updateToolTip = "Judges answer";
