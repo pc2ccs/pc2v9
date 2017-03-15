@@ -412,7 +412,7 @@ public class ProblemsPane extends JPanePlugin {
     protected void editSelectedProblem() {
         
 //        showStackTrace();
-        System.out.println ("Begin ProblemsPane.editSelectedProblem()...");
+//        System.out.println ("Begin ProblemsPane.editSelectedProblem()...");
 
         int selectedIndex = problemListBox.getSelectedIndex();
         if (selectedIndex == -1) {
@@ -426,7 +426,7 @@ public class ProblemsPane extends JPanePlugin {
 
             ProblemDataFiles newProblemDataFiles = getController().getProblemDataFiles(problemToEdit);
 
-            System.out.println ("ProblemDataFiles = " + newProblemDataFiles);
+//            System.out.println ("ProblemDataFiles = " + newProblemDataFiles);
 
             // bring up the ui, let the user add/cancel the copied problem
             editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
@@ -442,7 +442,7 @@ public class ProblemsPane extends JPanePlugin {
             showMessage("Unable to edit problem, check log (" + e.getMessage() + ")");
         }
 
-        System.out.println ("End ProblemsPane.editSelectedProblem()...");
+//        System.out.println ("End ProblemsPane.editSelectedProblem()...");
 
     }
 
