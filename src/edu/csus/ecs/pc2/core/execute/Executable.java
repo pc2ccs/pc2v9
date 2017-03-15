@@ -844,14 +844,6 @@ public class Executable extends Plugin implements IExecutable {
 
         cmdLine = substituteAllStrings(run, cmdLine);
 
-        // if (File.separator.equals("\\")) {
-        // if (problem.isUsingPC2Validator()) {
-        // cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
-        // cmdLine = cmdLine.replaceFirst("jar ", "jar\" "); //how do we know there's a "jar" in the string? It might be using a directory!
-        // log.log(Log.DEBUG, "command line after replaceFirst: " + cmdLine);
-        // }
-        // }
-
         log.log(Log.DEBUG, "command pattern after substitution: " + cmdLine);
 
         // check if the command to be executed is a program residing in the current execute directory;
