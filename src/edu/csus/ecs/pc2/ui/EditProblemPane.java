@@ -1082,9 +1082,7 @@ public class EditProblemPane extends JPanePlugin {
               checkProblem.setValidatorProgramName(validatorSF.getAbsolutePath()) ;
               newProblemDataFiles.setValidatorFile(validatorSF);
             }
-        } else {
-            checkProblem.setValidatorProgramName(null);
-        }
+        } 
                         
         //update misc settings from GUI
         checkProblem.setShowValidationToJudges(getShowValidatorToJudgesCheckBox().isSelected());
