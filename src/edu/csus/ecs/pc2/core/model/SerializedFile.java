@@ -416,6 +416,8 @@ public class SerializedFile implements Serializable {
         out = "";
         for (int i = 0; i < digested.length; i++) {
             out = out + new Integer(digested[i]).toString();  //bad code: byte values above 127 are treated as negative values
+//            The above line is incorrect; it fails to treat type "byte" as signed.  The correction is to change it to the following:
+//            (see Bug 1216:  https://pc2.ecs.csus.edu/bugzilla/show_bug.cgi?id=1216 for further discussion of this issue)
 //            out = out + String.format("%02x", digested[i]&0xff) ;   //mask avoids sign-extension of negative values in byte
         }
 
