@@ -34,9 +34,9 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
-import edu.csus.ecs.pc2.validator.ClicsValidator;
-import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
-import edu.csus.ecs.pc2.validator.PC2Validator;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Test Executable class.

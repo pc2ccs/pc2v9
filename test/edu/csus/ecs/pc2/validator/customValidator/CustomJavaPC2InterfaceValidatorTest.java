@@ -30,7 +30,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.validator.PC2Validator;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator;
 
 /**
  * JUnit test cases for a Custom Validator written in Java and which uses the PC2 Validator Interface.
