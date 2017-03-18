@@ -498,7 +498,7 @@ public class CustomJavaPC2InterfaceValidator {
         // 1 2 3 4 5
 
         if (numberOfArgs != 5 && numberOfArgs != 7) {
-            fatalError("PC2 Validator: too few parameters, see usage", 6);
+            fatalError("Custom Java PC2 Interface Validator: too few parameters, see usage", 6);
         }
 
         inputFileName = args[argNum++];
