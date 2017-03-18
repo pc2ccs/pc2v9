@@ -65,8 +65,8 @@ import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
-import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
+import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 
 /**
  * Add/Edit Problem Pane.
@@ -717,10 +717,9 @@ public class EditProblemPane extends JPanePlugin {
                         }
                         
                         //check for changes in the actual validator program file
-                        String fileName = changedProblem.getValidatorProgramName();
+                        String fileName = changedProblemSettings.getCustomValidatorProgramName();
                         if (fileName != null && fileName.length() > 0) {
-                            //TODO: there could be a problem here because getValidatorProgramName() returns the name for the validator which is
-                            //  currently selected in the Problem; that might not be the Custom Validator 
+                            //TODO: there could be a problem here; pdf.getValidatorFile() seems to sometimes return null even though the problem has a validator...
                             if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
                                 changed = true;
                                 fileChanged++;
