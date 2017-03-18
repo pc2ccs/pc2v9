@@ -16,7 +16,9 @@ public class SerializedFileTest extends AbstractTestCase {
 
     private SampleContest sample = new SampleContest();
     
+    @SuppressWarnings("unused")
     private String DATA_DIR_PATH = "SerializedFileTest" ;
+    @SuppressWarnings("unused")
     private String testDataDirectoryName;
     
     @Override
