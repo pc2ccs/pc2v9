@@ -31,7 +31,6 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.validator.ClicsValidator;
-import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
 
 /**
  * JUnit test cases for a Custom Validator written in Java and which uses the CLICS Validator Interface.
@@ -233,7 +232,7 @@ public class CustomJavaClicsInterfaceValidatorTest extends AbstractTestCase {
     
     private String getValidatorProgramName() {
         
-        return "javaClicsInterfaceValidator.jar";
+        return "CustomJavaClicsInterfaceValidator.jar";
     }
 
     /**

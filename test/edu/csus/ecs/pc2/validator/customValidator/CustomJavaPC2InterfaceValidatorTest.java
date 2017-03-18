@@ -30,7 +30,6 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.PC2Validator;
 
 /**
@@ -235,7 +234,7 @@ public class CustomJavaPC2InterfaceValidatorTest extends AbstractTestCase {
     }
     private String getValidatorProgramName() {
         
-        return "javaPC2InterfaceValidator.jar";
+        return "CustomJavaPC2InterfaceValidator.jar";
     }
 
     /**

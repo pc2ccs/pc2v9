@@ -31,7 +31,6 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.validator.ClicsValidator;
-import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
 
 /**
  * JUnit test cases for a C++ Custom Validator which uses the Clics Validator Interface.
