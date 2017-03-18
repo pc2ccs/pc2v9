@@ -812,7 +812,7 @@ public class Executable extends Plugin implements IExecutable {
         String feedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber + File.separator;
         cmdLine = replaceString(cmdLine, "{:feedbackdir}", feedbackDirName);
 
-        if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
+        if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
 
             String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;
 
@@ -910,7 +910,7 @@ public class Executable extends Plugin implements IExecutable {
             // executionData.setValidationReturnCode(process.waitFor());
 
             // if CLICS validator interface, redirect team output to STDIN
-            if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
+            if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
 
                 String teamOutputFileName = getTeamOutputFilename(dataSetNumber);
                 if (teamOutputFileName != null && new File(teamOutputFileName).exists()) {
@@ -1025,7 +1025,7 @@ public class Executable extends Plugin implements IExecutable {
             }
         }
 
-        else if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface())) {
+        else if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
 
             try {
                 String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;

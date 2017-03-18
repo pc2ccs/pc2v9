@@ -311,7 +311,7 @@ public class CustomJavaClicsInterfaceValidatorTest extends AbstractTestCase {
 
         //construct the appropriate Custom Validator settings
         CustomValidatorSettings settings = new CustomValidatorSettings();
-        settings.setUseCLICSValidatorInterface();
+        settings.setUseClicsValidatorInterface();
         settings.setValidatorCommandLine(validatorCommand);
         settings.setValidatorProgramName(getValidatorProgramName());
         

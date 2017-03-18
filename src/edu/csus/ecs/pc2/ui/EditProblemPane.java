@@ -727,7 +727,7 @@ public class EditProblemPane extends JPanePlugin {
                         }
 
                         //check for changes in the specified interface being used
-                        if( problemSettings.isUseCLICSValidatorInterface() != changedProblemSettings.isUseCLICSValidatorInterface() ||
+                        if( problemSettings.isUseClicsValidatorInterface() != changedProblemSettings.isUseClicsValidatorInterface() ||
                             problemSettings.isUsePC2ValidatorInterface() != changedProblemSettings.isUsePC2ValidatorInterface() ) {
                             changed = true;
                         }
@@ -2054,7 +2054,7 @@ public class EditProblemPane extends JPanePlugin {
             
             //set the radio buttons indicating which Validator Standard the Problem uses
             getUsePC2ValStdRadioButton().setSelected(customSettings.isUsePC2ValidatorInterface());
-            getUseClicsValStdRadioButton().setSelected(customSettings.isUseCLICSValidatorInterface());
+            getUseClicsValStdRadioButton().setSelected(customSettings.isUseClicsValidatorInterface());
             
             //set the custom validator command line based on which standard is being used (the CustomValidatorSettings object
             // stores command lines for both cases; the active one needs to be put into the GUI as well as into the local (temp) storage
@@ -2064,7 +2064,7 @@ public class EditProblemPane extends JPanePlugin {
                 getCustomValidatorCommandLineTextField().setText(customSettings.getCustomValidatorCommandLine());
                 localPC2InterfaceCustomValidatorCommandLine = customSettings.getCustomValidatorCommandLine();
                 //get the CLICS Interface command line out of the cloned settings and save it locally
-                customSettings.setUseCLICSValidatorInterface(); //note customSettings is a clone; this doesn't affect the original problem settings
+                customSettings.setUseClicsValidatorInterface(); //note customSettings is a clone; this doesn't affect the original problem settings
                 localClicsInterfaceCustomValidatorCommandLine = customSettings.getCustomValidatorCommandLine();
             } else {
                 //Problem is currently using the CLICS interface; put that in the GUI and the local storage
@@ -4234,14 +4234,14 @@ public class EditProblemPane extends JPanePlugin {
         settings.setValidatorCommandLine(this.localPC2InterfaceCustomValidatorCommandLine);
         
         //put the settings object into "CLICS Interface" mode and copy the current CLICS Validator Command line to it
-        settings.setUseCLICSValidatorInterface();
+        settings.setUseClicsValidatorInterface();
         settings.setValidatorCommandLine(this.localClicsInterfaceCustomValidatorCommandLine);
         
         //put the settings object into the Validator Interface mode indicated in the GUI
         if (this.getUsePC2ValStdRadioButton().isSelected()) {
             settings.setUsePC2ValidatorInterface();
         } else {
-            settings.setUseCLICSValidatorInterface();
+            settings.setUseClicsValidatorInterface();
         }
         
         return settings;
@@ -4375,7 +4375,7 @@ public class EditProblemPane extends JPanePlugin {
         	    public void actionPerformed(ActionEvent e) {
                     // switching to Use Clics Standard Interface for this Custom Validator;
                     // check to see if we are editing a problem which might already have a Clics Interface Validator Command Line
-                    if (problem != null && problem.getCustomValidatorSettings() != null && problem.getCustomValidatorSettings().isUseCLICSValidatorInterface()
+                    if (problem != null && problem.getCustomValidatorSettings() != null && problem.getCustomValidatorSettings().isUseClicsValidatorInterface()
                             && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().trim().length() > 0) {
                         // we are editing a problem which has a Custom Validator which is using the Clics Interface Standard and has a
                         // Custom Validator Command Line which is not empty; put that command line in the GUI

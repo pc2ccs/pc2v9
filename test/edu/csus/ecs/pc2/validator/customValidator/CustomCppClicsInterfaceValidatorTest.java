@@ -226,7 +226,7 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
 
         //construct the appropriate Custom Validator settings
         CustomValidatorSettings settings = new CustomValidatorSettings();
-        settings.setUseCLICSValidatorInterface();
+        settings.setUseClicsValidatorInterface();
         settings.setValidatorCommandLine("." + File.separator + Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         settings.setValidatorProgramName(getValidatorProgramName());
         
