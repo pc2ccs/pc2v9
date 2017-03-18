@@ -269,13 +269,13 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
 
         // find OS type
         String osName = System.getProperty("os.name");
-        System.out.println("DEBUG: os name = '" + osName + "'");
+//        System.out.println("DEBUG: os name = '" + osName + "'");
 
         if (osName != null) {
 
             if (osName.toLowerCase().contains("windows")) {
 
-                System.out.println("DEBUG: found Windows OS");
+//                System.out.println("DEBUG: found Windows OS");
                 valName = "CustomCppClicsInterfaceValidator.exe";
 
             } else {
@@ -284,7 +284,7 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
 
                     // test for architecture type
                     String archType = System.getProperty("os.arch");
-                    System.out.println("DEBUG: found architecture '" + archType + "'");
+//                    System.out.println("DEBUG: found architecture '" + archType + "'");
 
                     if (archType != null) {
 
