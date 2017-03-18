@@ -5,9 +5,9 @@ import java.io.File;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
-import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Problem Definition.

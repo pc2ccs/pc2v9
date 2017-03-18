@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.validator;
+package edu.csus.ecs.pc2.validator.pc2Validator;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -32,9 +32,9 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
-import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
-import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * This class represents a connection to a PC<sup>2</sup> server. Instantiating the class creates a local {@link ServerConnection} object which can then be used to connect to the PC<sup>2</sup> server

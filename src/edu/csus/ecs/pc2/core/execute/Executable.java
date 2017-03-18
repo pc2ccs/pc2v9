@@ -41,9 +41,9 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 import edu.csus.ecs.pc2.ui.NullViewer;
-import edu.csus.ecs.pc2.validator.ClicsValidator;
-import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
-import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Compile, execute and validate a run.

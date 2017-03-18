@@ -49,8 +49,8 @@ import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
-import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Load contest from Yaml using SnakeYaml methods.

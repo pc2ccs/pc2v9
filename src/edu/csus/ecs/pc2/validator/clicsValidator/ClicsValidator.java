@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.csus.ecs.pc2.validator;
+package edu.csus.ecs.pc2.validator.clicsValidator;
 
 import java.io.File;
 import java.io.FileInputStream;

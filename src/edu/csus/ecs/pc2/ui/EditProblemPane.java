@@ -64,9 +64,9 @@ import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
-import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
-import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Add/Edit Problem Pane.

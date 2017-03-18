@@ -4,7 +4,7 @@
  * what tolerances should be used for any floating-point values in the team output processed
  * by the validator. 
  */
-package edu.csus.ecs.pc2.validator;
+package edu.csus.ecs.pc2.validator.clicsValidator;
 
 import java.io.Serializable;
 
