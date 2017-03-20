@@ -291,7 +291,7 @@ public class ClicsValidator {
                         if (teamByte!=judgeByte) {
                             //exit with mismatched whitespace error
                             try {
-                                outputWrongAnswer(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: judge's answer contains '" + printableString(judgeByte) 
+                                outputFailure(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: judge's answer contains '" + printableString(judgeByte) 
                                     + "' but team's output contains '" + printableString(teamByte) + "'");
                             } catch (Exception e) {
                                 log.severe("Error outputting validator feedback answer file");
@@ -306,7 +306,7 @@ public class ClicsValidator {
                     if (isWhiteSpace(peek(teamOutputPushbackIS))) {
                         //exit with mismatched whitespace error
                         try {
-                            outputWrongAnswer(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: team's output contains extra whitespace char '" 
+                            outputFailure(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: team's output contains extra whitespace char '" 
                                     + printableString((byte)teamOutputPushbackIS.read()) + "'");
                         } catch (Exception e) {
                             log.severe("Error outputting validator feedback answer file");
@@ -336,7 +336,7 @@ public class ClicsValidator {
                             
                 //team is at EOF when judge is not, so team is missing output
                 try {
-                    outputWrongAnswer(CLICS_INCOMPLETE_OUTPUT_MSG, "Incomplete output (next judge token = '" + getNextToken(judgeAnswerPushbackIS) + "')");
+                    outputFailure(CLICS_INCOMPLETE_OUTPUT_MSG, "Incomplete output (next judge token = '" + getNextToken(judgeAnswerPushbackIS) + "')");
                 } catch (Exception e) {
                     return CLICS_VALIDATOR_ERROR_EXIT_CODE;
                 }
@@ -371,7 +371,7 @@ public class ClicsValidator {
         try {
             if (teamOutputPushbackIS.read()!= EOF) {
                 try {
-                    outputWrongAnswer(CLICS_EXCESSIVE_OUTPUT_MSG, "Team has trailing output beyond what judge answer file contains");
+                    outputFailure(CLICS_EXCESSIVE_OUTPUT_MSG, "Team has trailing output beyond what judge answer file contains");
                 } catch (Exception e) {
                     log.severe("Error outputting validator feedback answer file");
                     return CLICS_VALIDATOR_ERROR_EXIT_CODE;                                            
@@ -571,7 +571,7 @@ public class ClicsValidator {
             double judgeVal = getDoubleValue(judgeToken);
             if (!isFloat(teamToken)) {
                 try {
-                    outputWrongAnswer(CLICS_WRONG_ANSWER_MSG, "Expected float in team output, got '" + teamToken + "'");
+                    outputFailure(CLICS_WRONG_ANSWER_MSG, "Expected float in team output, got '" + teamToken + "'");
                 } catch (Exception e) {
                     log.severe("Error outputting validator feedback answer file");
                     throw e;                                            
@@ -585,7 +585,7 @@ public class ClicsValidator {
                 } else {
                     double diff = judgeVal - teamVal;
                     try {
-                        outputWrongAnswer(CLICS_WRONG_ANSWER_MSG, "Float out of tolerance range: judge value = " + judgeVal + "; team value = " + teamVal
+                        outputFailure(CLICS_WRONG_ANSWER_MSG, "Float out of tolerance range: judge value = " + judgeVal + "; team value = " + teamVal
                                         + "; difference = " + diff + " (abs tol = " + floatAbsTolerance + "; rel tol = " + floatRelTolerance + ")");
                     } catch (Exception e) {
                         log.severe("Error outputting validator feedback answer file");
@@ -603,7 +603,7 @@ public class ClicsValidator {
                 return true;
             } else {
                 try {
-                    outputWrongAnswer(CLICS_WRONG_ANSWER_MSG, "String token mismatch (case-sensitive): judge token = '" 
+                    outputFailure(CLICS_WRONG_ANSWER_MSG, "String token mismatch (case-sensitive): judge token = '" 
                                                                     + judgeToken + "'; team token = '" + teamToken + "'");
                 } catch (Exception e) {
                     log.severe("Error outputting validator feedback answer file");
@@ -619,7 +619,7 @@ public class ClicsValidator {
             return true;
         } else {
             try {
-                outputWrongAnswer(CLICS_WRONG_ANSWER_MSG, "String tokens mismatch (ignoring case): judge token = '" 
+                outputFailure(CLICS_WRONG_ANSWER_MSG, "String tokens mismatch (ignoring case): judge token = '" 
                                                                 + judgeToken + "'; team token = '" + teamToken + "'");
             } catch (Exception e) {
                 log.severe("Error outputting validator feedback answer file");
@@ -681,7 +681,7 @@ public class ClicsValidator {
         }
     }
     
-    private void outputWrongAnswer (String judgement, String details) throws FileNotFoundException, UnsupportedEncodingException {
+    private void outputFailure (String judgement, String details) throws FileNotFoundException, UnsupportedEncodingException {
         log.info("Validator returning failure: " + judgement + ", " + details );
         
         System.out.println ("Validator feedback: " + judgement + ", " + details);
