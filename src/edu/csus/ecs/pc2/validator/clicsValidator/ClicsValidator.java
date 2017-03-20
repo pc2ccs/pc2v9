@@ -98,7 +98,7 @@ public class ClicsValidator {
     static public final String CLICS_CORRECT_ANSWER_MSG = "accepted";
     
     static public final String CLICS_JUDGEMENT_FEEDBACK_FILE_NAME = "judgement.txt";
-    static public final String CLICS_JUDGEMENT_DETAILS_FILE_NAME = "judgementdetails.txt";
+    static public final String CLICS_JUDGEMENT_DETAILS_FILE_NAME = "judgement.details.txt";
     
     static public final int EOF = -1;
     
@@ -141,6 +141,7 @@ public class ClicsValidator {
 
         //verify files are valid
         if (!validateFiles()) {
+            usage();
             log.severe("ClicsValidator received invalid file or directory name(s):");
             log.severe("  Judge's data file = '" + judgeDataFile + "'; Judge's answer file = '" + judgeAnswerFile + "'; Feedback Dir Name = '" + feedbackDirName + "'");
             throw new RuntimeException("ClicsValidator received invalid file or directory name(s)");
@@ -848,7 +849,12 @@ public class ClicsValidator {
         System.err.println ("    " + ClicsValidatorSettings.CLICS_VTOKEN_SPACE_CHANGE_SENSITIVE);
         System.err.println ("    " + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " E");
         System.err.println ("    " + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + " E");
-        System.err.println ("    float_tolerance E   (shorthand for setting both absolute and relative tolerance)");        
+        System.err.println ("    float_tolerance E   (shorthand for setting both absolute and relative tolerance)");  
+        System.err.println ("    <judgementResultsBaseFileName> -- the base name of the files in the specified feedbackdir to which judgement results are written ");
+        System.err.println ("\n    where E is a float number in either decimal or scientific notation.");
+        System.err.println ("\n If the optional <judgementResultsBaseFileName> is specified, then judgement feedback is written to a file of that name with '.txt' appended; ");
+        System.err.println ("    any additional feedback details are written to a file of that name  with '.details.txt' appended." );
+        System.err.println ("    (If no <judgementResultsBaseFileName is specified, the default is 'judgement'.)\n");
     }
 
 }
