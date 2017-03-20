@@ -949,7 +949,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     getNumTestCasesLabel().setText("Test Cases:  0");
                 } else {
                     getNumTestCasesLabel().setText("Test Cases:  " + testCases.length);
-                    System.out.println("MTSVPane.populateGUI(): loading " + testCases.length + " test cases into GUI pane...");
+//                    System.out.println("MTSVPane.populateGUI(): loading " + testCases.length + " test cases into GUI pane...");
 //                  for (int i = 0; i < testCases.length; i++) {
 //                    System.out.println("  Test Case " + testCases[i].getTestNumber() + ": " + testCases[i]);
 //                  }
@@ -1007,7 +1007,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 //            setTitle(oldTitle);
             return true;
         } catch (Exception e) {
-            System.out.println("MultipleFileViewer class: exception " + e);
+            System.err.println("MultiTestSetOutputViewerPane.loadFile(): exception " + e);
         }
         return false;
     }
@@ -1310,7 +1310,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal() && col != COLUMN.VALIDATOR_OUTPUT.ordinal()
                 && col != COLUMN.VALIDATOR_ERR.ordinal()) {
             if (log != null) {
-                log.log(Log.WARNING, "MTSVPane.viewFile(): invalid column number for file viewing request: " + col);
+                log.log(Log.WARNING, "MTSOVPane.viewFile(): invalid column number for file viewing request: " + col);
             } else {
                 System.err.println ("Invalid column number for file viewing request: " + col);
             }
@@ -1347,9 +1347,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             if (col == COLUMN.TEAM_OUTPUT_VIEW.ordinal()) {
                 String msg = "No Team Output file found (has the Team submission been executed?)" ;
                 if (log != null) {
-                    log.log(Log.WARNING, "MTSVPane.viewFile(): " + msg);
+                    log.log(Log.WARNING, "MTSOVPane.viewFile(): " + msg);
                 } else {
-                    System.err.println ("MTSVPane.viewFile(): " + msg);
+                    System.err.println ("MTSOVPane.viewFile(): " + msg);
                 }
                 JOptionPane.showMessageDialog(getParentFrame(), msg, 
                         "File Not Found", JOptionPane.WARNING_MESSAGE);
@@ -1369,11 +1369,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private void compareFiles(int [] rows) {
         
-        System.out.print ("MTSVPane.compareFiles(): displaying comparison of files for test case(s) ");
-        for (int i=0; i<rows.length; i++) {
-            System.out.print ((int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1)))) + " ");
-        }
-        System.out.println ();
+//        System.out.print ("MTSVPane.compareFiles(): displaying comparison of files for test case(s) ");
+//        for (int i=0; i<rows.length; i++) {
+//            System.out.print ((int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1)))) + " ");
+//        }
+//        System.out.println ();
  
         //create arrays to hold data to be loaded into the comparator
         int [] testCases = new int [rows.length];
@@ -1402,9 +1402,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             // making a separate call to setTeamOutputFileNames; make sure the client complied)
             if (currentTeamOutputFileNames == null || currentTeamOutputFileNames.length<teamOutputFileNames.length) {
                 if (log!=null) {
-                    log.warning("MTSVPane.compareFiles(): invalid team output file names array");
+                    log.warning("MTSOVPane.compareFiles(): invalid team output file names array");
                 } else {
-                    System.err.println ("MTSVPane.compareFiles(): invalid team output file names array");
+                    System.err.println ("MTSOVPane.compareFiles(): invalid team output file names array");
                 }
             } else {
                 //get the team output file name, which should be provided by the client as a full path
@@ -1439,17 +1439,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         Executable tempExecutable;
         if (currentRunFiles == null) {
             if (log!=null) {
-                log.warning("MTSVPane.compareFiles(): invalid team output file names array");
+                log.warning("MTSOVPane.getExecuteDir(): currentRunFiles is null");
             } else {
-                System.err.println("runFiles for run are null from setData()");
-            }
-            return null;
-        }
-        if (currentRunFiles == null) {
-            if (log!=null) {
-                log.warning("MTSVPane.compareFiles(): invalid team output file names array");
-            } else {
-                System.err.println("runFiles.getMainFile is null");
+                System.err.println("MTSOVPane.getExecuteDir(): currentRunFiles is null");
             }
             return null;
         }
@@ -1548,15 +1540,17 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      * @param visible - whether or not to invoke setVisible(true) on the viewer
      */
     private void showFile(MultipleFileViewer fileViewer, String file, String title, String tabLabel, boolean visible) {
-        System.out.println ("MTSVPane.showFile():");
-        String viewerString = "<null>";
-        if (fileViewer != null) {
-            viewerString = fileViewer.getClass().toString();
-        }
-        System.out.println ("  Viewer='" + viewerString + "'" 
-                            + "  File='" + file + "'"
-                            + "  Title='" + title + "'"
-                            + "  setVisible='" + visible + "'");
+        
+//        System.out.println ("MTSVPane.showFile():");
+//        String viewerString = "<null>";
+//        if (fileViewer != null) {
+//            viewerString = fileViewer.getClass().toString();
+//        }
+//        System.out.println ("  Viewer='" + viewerString + "'" 
+//                            + "  File='" + file + "'"
+//                            + "  Title='" + title + "'"
+//                            + "  setVisible='" + visible + "'");
+        
         if (fileViewer == null || file == null) {
             log = getController().getLog();
             log.log(Log.WARNING, "MTSVPane.showFile(): fileViewer or file is null");
@@ -1671,9 +1665,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     "Error: could not find file: " + e.getMessage(), 
                     "File Missing", JOptionPane.ERROR_MESSAGE);
             if (log!=null) {
-                log.warning("MTSVPane.compareFiles(): could not find file "+e.getMessage());
+                log.warning("MTSOVPane.compareFiles(): could not find file "+e.getMessage());
             } else {
-                System.err.println ("MTSVPane.compareFiles(): could not find file "+e.getMessage());
+                System.err.println ("MTSOVPane.compareFiles(): could not find file "+e.getMessage());
             }
         }
     }
