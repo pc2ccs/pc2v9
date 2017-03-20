@@ -386,6 +386,8 @@ public class ClicsValidator {
         try {
             outputSuccess(CLICS_CORRECT_ANSWER_MSG);
         } catch (Exception e) {
+            log.severe("Exception '" + e.getMessage() + "' while attempting to output 'success' message to feedback file '"
+                    + CLICS_JUDGEMENT_FEEDBACK_FILE_NAME + "' in feedback directory '" + feedbackDirName + "'");
             return CLICS_VALIDATOR_ERROR_EXIT_CODE;
         }
         return CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE;  
@@ -699,9 +701,9 @@ public class ClicsValidator {
     }
     
     /**
-     * Writes the specified judgement text into the feedback judgement file in the feedback directory.
-     * @throws UnsupportedEncodingException 
-     * @throws FileNotFoundException 
+     * Writes the specified judgement text into the feedback judgement file in the feedback directory, using "UTF-8" encoding.
+     * @throws UnsupportedEncodingException if UTF-8 encoding for files is not supported
+     * @throws FileNotFoundException if the method is unable to create a judgement feedback file in the judgement feedback directory
      */
     private void outputJudgementFile(String judgement) throws FileNotFoundException, UnsupportedEncodingException {
         String feedbackFileName = feedbackDirName + File.separator + CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
