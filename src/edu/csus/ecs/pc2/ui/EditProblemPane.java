@@ -717,10 +717,10 @@ public class EditProblemPane extends JPanePlugin {
                         }
                         
                         //check for changes in the actual validator program file
-                        String fileName = changedProblemSettings.getCustomValidatorProgramName();
-                        if (fileName != null && fileName.length() > 0) {
+                        String changedProblemValidatorFileName = changedProblemSettings.getCustomValidatorProgramName();
+                        if (changedProblemValidatorFileName != null && changedProblemValidatorFileName.length() > 0) {
                             //TODO: there could be a problem here; pdf.getValidatorFile() seems to sometimes return null even though the problem has a validator...
-                            if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
+                            if (!fileSameAs(pdf.getValidatorFile(), changedProblemValidatorFileName)) {
                                 changed = true;
                                 fileChanged++;
                             }
