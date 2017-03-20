@@ -97,8 +97,7 @@ public class ClicsValidator {
     static public final String CLICS_WRONG_ANSWER_MSG = "Wrong Answer";
     static public final String CLICS_CORRECT_ANSWER_MSG = "accepted";
     
-    static public final String CLICS_JUDGEMENT_FEEDBACK_FILE_NAME = "judgement.txt";
-    static public final String CLICS_JUDGEMENT_DETAILS_FILE_NAME = "judgement.details.txt";
+    static public final String CLICS_DEFAULT_JUDGEMENT_FEEDBACK_FILE_BASE_NAME = "judgement";
     
     static public final int EOF = -1;
     
@@ -107,6 +106,7 @@ public class ClicsValidator {
     private String judgeDataFile = null;
     private String judgeAnswerFile = null;
     private String feedbackDirName = null;
+    private String judgementFileBaseName = null;
     
     private boolean isCaseSensitive = false;
     private boolean isSpaceSensitive = false;
@@ -167,12 +167,13 @@ public class ClicsValidator {
                     } catch (NumberFormatException | NullPointerException e) {
                         //bad epsilon value
                         log.severe("Bad value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
-                        e.printStackTrace();
+                        usage();
                         throw new RuntimeException("Bad value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                     }
                 } else {
                     //missing epsilon
                     log.severe("Missing tolerance value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
+                    usage();
                     throw new RuntimeException("Missing tolerance value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + "' option");
                     
                 }
@@ -187,12 +188,13 @@ public class ClicsValidator {
                     } catch (NumberFormatException | NullPointerException e) {
                         //bad epsilon value
                         log.severe("Bad value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
-                        e.printStackTrace();
+                        usage();
                         throw new RuntimeException("Bad value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                     }
                 } else {
                     //missing epsilon
                     log.severe("Missing tolerance value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
+                    usage();
                     throw new RuntimeException("Missing tolerance value following '" + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + "' option");
                 }
                 
@@ -207,24 +209,30 @@ public class ClicsValidator {
                     } catch (NumberFormatException | NullPointerException e) {
                         //bad epsilon value
                         log.severe("Bad value following 'float_tolerance' option");
-                        e.printStackTrace();
+                        usage();
                         throw new RuntimeException("Bad value following 'float_tolerance' option");
                     }
                 } else {
                     //missing epsilon
                     log.severe("Missing tolerance value following 'float_tolerance' option");
+                    usage();
                     throw new RuntimeException("Missing tolerance value following 'float_tolerance' option");
                 }
                 
             } else {
-                //check for empty option argument (to allow accepting null or "" as a valid -- if ignored -- argument)
+                //check for any additional option string
                 if (options[i]!=null && options[i].length()>0) {
-                    //non-null, non-zero-length option -> unknown option
-                    log.warning("Validator received unknown option: '" + options[i] + "'");
+                    //treat as judgement feedback file base name
+                    judgementFileBaseName = options[i];
                 }
             }
             
         }//end grab option arguments (if any)
+        
+        //if we didn't find an option defining the judgement file base name, use the default
+        if (judgementFileBaseName==null) {
+            judgementFileBaseName = CLICS_DEFAULT_JUDGEMENT_FEEDBACK_FILE_BASE_NAME;
+        }
         
     }//end constructor
     
@@ -247,6 +255,14 @@ public class ClicsValidator {
             return CLICS_VALIDATOR_ERROR_EXIT_CODE;
         }
         
+        //the following code can be uncommented to run the validator stand-alone against a specified team output file
+//        try {
+//            System.setIn(new FileInputStream(new File("teamoutput.0.txt")));
+//        } catch (FileNotFoundException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+
         return validate(judgeAnswerIS, System.in);
     }
     
@@ -388,7 +404,7 @@ public class ClicsValidator {
             outputSuccess(CLICS_CORRECT_ANSWER_MSG);
         } catch (Exception e) {
             log.severe("Exception '" + e.getMessage() + "' while attempting to output 'success' message to feedback file '"
-                    + CLICS_JUDGEMENT_FEEDBACK_FILE_NAME + "' in feedback directory '" + feedbackDirName + "'");
+                    + judgementFileBaseName + "judgement.txt" + "' in feedback directory '" + feedbackDirName + "'");
             return CLICS_VALIDATOR_ERROR_EXIT_CODE;
         }
         return CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE;  
@@ -555,17 +571,29 @@ public class ClicsValidator {
      * "case-sensitive" mode) or are the same ignoring case when not in case-sensitive mode.
      * <P>
      * If either input string is null then they are deemed "not equivalent" (even if BOTH are null).
+     * <P>
+     * Returns true if the specified tokens are equivalent according to the current settings.
+     * If false is returned it is guaranteed to be preceded by outputting a failure message to the
+     * feedback directory, using {@link #outputFailure(String, String)}.
      * 
      * @param judgeToken
      *            -- a token from the judge's answer input stream
      * @param teamToken
      *            -- a token from the team output stream
      * @return true if the two tokens are equivalent under the current validator settings
-     * @throws IOException 
+     * 
+     * @throws IOException if any error occurs while attempting to write output feedback files
      */
     private boolean areEquivalent(String judgeToken, String teamToken) throws IOException {
         
         if (judgeToken==null || teamToken==null) {
+            try {
+                outputFailure(CLICS_WRONG_ANSWER_MSG, "Attempted to compare incompatible tokens: team token = '" + teamToken 
+                        + "'; judge token = '" + judgeToken + "'");
+            } catch (Exception e) {
+                log.severe("Error outputting validator failed run feedback files");
+                throw e;                                            
+            }            
             return false;
         }
 
@@ -576,7 +604,7 @@ public class ClicsValidator {
                 try {
                     outputFailure(CLICS_WRONG_ANSWER_MSG, "Expected float in team output, got '" + teamToken + "'");
                 } catch (Exception e) {
-                    log.severe("Error outputting validator feedback answer file");
+                    log.severe("Error outputting validator failed run feedback files");
                     throw e;                                            
                 }
                 return false;
@@ -591,7 +619,7 @@ public class ClicsValidator {
                         outputFailure(CLICS_WRONG_ANSWER_MSG, "Float out of tolerance range: judge value = " + judgeVal + "; team value = " + teamVal
                                         + "; difference = " + diff + " (abs tol = " + floatAbsTolerance + "; rel tol = " + floatRelTolerance + ")");
                     } catch (Exception e) {
-                        log.severe("Error outputting validator feedback answer file");
+                        log.severe("Error outputting validator failed run feedback files");
                         throw e;                                            
                     }
                     return false;
@@ -609,7 +637,7 @@ public class ClicsValidator {
                     outputFailure(CLICS_WRONG_ANSWER_MSG, "String token mismatch (case-sensitive): judge token = '" 
                                                                     + judgeToken + "'; team token = '" + teamToken + "'");
                 } catch (Exception e) {
-                    log.severe("Error outputting validator feedback answer file");
+                    log.severe("Error outputting validator failed run feedback files");
                     throw e;                    
                 }
                 return false;
@@ -625,7 +653,7 @@ public class ClicsValidator {
                 outputFailure(CLICS_WRONG_ANSWER_MSG, "String tokens mismatch (ignoring case): judge token = '" 
                                                                 + judgeToken + "'; team token = '" + teamToken + "'");
             } catch (Exception e) {
-                log.severe("Error outputting validator feedback answer file");
+                log.severe("Error outputting validator failed run feedback files");
                 throw e;
             }
             return false;
@@ -696,37 +724,42 @@ public class ClicsValidator {
     private void outputSuccess (String message) throws FileNotFoundException, UnsupportedEncodingException {
         log.info("Validator returning success: " + message );
         
-        System.out.println ("Validator feedback: " + message);
+        System.out.println ("Validator returning success; feedback judgement file message ='" + message + "'");
         
         outputJudgementFile(message);
     }
     
     /**
      * Writes the specified judgement text into the feedback judgement file in the feedback directory, using "UTF-8" encoding.
+     * The name of the file into which the text is written is the current judgementFileBaseName with ".judgement.txt" appended.
+     * 
      * @throws UnsupportedEncodingException if UTF-8 encoding for files is not supported
      * @throws FileNotFoundException if the method is unable to create a judgement feedback file in the judgement feedback directory
      */
     private void outputJudgementFile(String judgement) throws FileNotFoundException, UnsupportedEncodingException {
-        String feedbackFileName = feedbackDirName + File.separator + CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
-        System.out.println ("Writing judgement '" + judgement + "' to feedback file '" + feedbackFileName + "'");
+        String feedbackFileName = feedbackDirName + File.separator + judgementFileBaseName + ".judgement.txt";
+        log.info("Writing judgement '" + judgement + "' to feedback file '" + feedbackFileName + "'");
         PrintWriter writer = new PrintWriter(feedbackFileName, "UTF-8");
         writer.println(judgement);
         writer.close();
     }
     
     /**
-     * Writes the specified message text into the file "judgmentdetails.txt" in the feedback directory.
-     * @throws UnsupportedEncodingException 
-     * @throws FileNotFoundException 
+     * Writes the specified details text into the judgement details file in the feedback directory, using "UTF-8" encoding.
+     * The name of the file into which the text is written is the current judgementFileBaseName with ".details.txt" appended.
+     * 
+     * @throws UnsupportedEncodingException if UTF-8 encoding for files is not supported
+     * @throws FileNotFoundException if the method is unable to create a judgement details feedback file in the judgement feedback directory
      */
     private void outputDetailsFile(String details) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter(feedbackDirName + File.separator + CLICS_JUDGEMENT_DETAILS_FILE_NAME, "UTF-8");
+        String detailsFileName = feedbackDirName + File.separator + judgementFileBaseName + ".details.txt";
+        log.info("Writing judgement details '" + details + "' to feedback file '" + detailsFileName + "'");
+        PrintWriter writer = new PrintWriter(detailsFileName, "UTF-8");
         writer.println(details);
         writer.close();
     }
     
 
-    
     /**
      * Checks the judgesDataFile, judgesAnswerFile, and feedbackDirName to make sure they exist and are 
      * accessible as required.
@@ -799,7 +832,7 @@ public class ClicsValidator {
         
         if (args.length < 3) {
             usage();
-            System.exit(CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE);
+            System.exit(CLICS_VALIDATOR_ERROR_EXIT_CODE);
         }
         
         log = new Log("ClicsValidator.log");            
@@ -850,11 +883,11 @@ public class ClicsValidator {
         System.err.println ("    " + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_ABSOLUTE_TOLERANCE + " E");
         System.err.println ("    " + ClicsValidatorSettings.CLICS_VTOKEN_FLOAT_RELATIVE_TOLERANCE + " E");
         System.err.println ("    float_tolerance E   (shorthand for setting both absolute and relative tolerance)");  
-        System.err.println ("    <judgementResultsBaseFileName> -- the base name of the files in the specified feedbackdir to which judgement results are written ");
+        System.err.println ("    <judgementResultsFileBaseName> -- the base name of the files in the specified feedbackdir to which judgement results are written ");
         System.err.println ("\n    where E is a float number in either decimal or scientific notation.");
-        System.err.println ("\n If the optional <judgementResultsBaseFileName> is specified, then judgement feedback is written to a file of that name with '.txt' appended; ");
-        System.err.println ("    any additional feedback details are written to a file of that name  with '.details.txt' appended." );
-        System.err.println ("    (If no <judgementResultsBaseFileName is specified, the default is 'judgement'.)\n");
+        System.err.println ("\n If the optional <judgementResultsBaseFileName> is specified, then judgement feedback is written to a file of that name with "
+                + "'.judgement.txt' appended; any additional feedback details are written to a file of that name  with '.details.txt' appended." );
+        System.err.println ("    (If no <judgementResultsBaseFileName is specified, the default base name is 'judgement'.)\n");
     }
 
 }
