@@ -4,32 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.Box;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.border.LineBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
-
-import java.awt.Rectangle;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -41,8 +18,28 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
 
-import javax.swing.border.EmptyBorder;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * This class is a {@link JFrame} designed to display comparisons between
@@ -183,17 +180,17 @@ public class MultiFileComparator extends JFrame  {
                 if (e.getSource() instanceof JList<?>) {
                     JList<?> source = (JList<?>)(e.getSource());
                     if (!source.getValueIsAdjusting()) {
-                        ListModel<?> model = source.getModel();
+//                        ListModel<?> model = source.getModel();
                         int index = source.getSelectedIndex();
-                        System.out.println ("MFC.lstTestCases.valueChanged(): Selected Index = " + index);
+//                        System.out.println ("MFC.lstTestCases.valueChanged(): Selected Index = " + index);
                         //if the list model was just loaded then there is no selected index; 
                         // force it to display the item at index 0
                         if (index == -1) {
                             index = 0;
                             source.setSelectedIndex(index);
                         } else {
-                            int testCaseNum = new Integer((String)(model.getElementAt(index)));
-                            System.out.println ("MFC.lstTestCases.valueChanged(): Test Case Number = " + testCaseNum);
+//                            int testCaseNum = new Integer((String)(model.getElementAt(index)));
+//                            System.out.println ("MFC.lstTestCases.valueChanged(): Test Case Number = " + testCaseNum);
                         }
                         updateViewsToSelectedTestCase(index);
                     }
@@ -271,10 +268,10 @@ public class MultiFileComparator extends JFrame  {
         //make sure the test case number (index) points into the array of team/judge/data test cases
         if (testCaseIndex >= 0 && testCaseIndex < currentTeamOutputFileNames.length) {
             
-            System.out.println("MFC.updateViewsToSelectedTestCase(): "
-                    + "received testCaseIndex = " + testCaseIndex 
-                    + "; list test case number = " + currentTestCaseNums[testCaseIndex]
-                    + "; currentJudgesDataFileNames.length = " + currentJudgesDataFileNames.length);
+//            System.out.println("MFC.updateViewsToSelectedTestCase(): "
+//                    + "received testCaseIndex = " + testCaseIndex 
+//                    + "; list test case number = " + currentTestCaseNums[testCaseIndex]
+//                    + "; currentJudgesDataFileNames.length = " + currentJudgesDataFileNames.length);
 
             // update the data file name on the display
             if (currentJudgesDataFileNames != null) {
@@ -518,19 +515,19 @@ public class MultiFileComparator extends JFrame  {
         }
         currentTeamOutputFileNames = teamOutputFileNames;
         
-        //debug
-        System.out.println ("MFC.setOutputFilenames(): team output file names:");
-        for (int i=0; i<currentTeamOutputFileNames.length; i++) {
-            System.out.println ("  '" + currentTeamOutputFileNames[i] + "'");
-        }
+//        //debug
+//        System.out.println ("MFC.setOutputFilenames(): team output file names:");
+//        for (int i=0; i<currentTeamOutputFileNames.length; i++) {
+//            System.out.println ("  '" + currentTeamOutputFileNames[i] + "'");
+//        }
         
         currentJudgesOutputFileNames = judgesOutputFileNames;
         
-        //debug
-        System.out.println ("MFC.setOutputFilenames(): judges output file names:");
-        for (int i=0; i<currentJudgesOutputFileNames.length; i++) {
-            System.out.println ("  '" + currentJudgesOutputFileNames[i] + "'");
-        }
+//        //debug
+//        System.out.println ("MFC.setOutputFilenames(): judges output file names:");
+//        for (int i=0; i<currentJudgesOutputFileNames.length; i++) {
+//            System.out.println ("  '" + currentJudgesOutputFileNames[i] + "'");
+//        }
         
         //TODO: create a cache of the new team/judge files; load "<none selected>" into list models 
     }
