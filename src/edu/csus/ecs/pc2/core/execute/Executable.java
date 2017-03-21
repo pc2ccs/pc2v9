@@ -1330,8 +1330,6 @@ public class Executable extends Plugin implements IExecutable {
 
                 executionData.setAdditionalInformation(details);
                 log.info("Saving Clics Validator 'Additional Details' string '" + details + "'");
-
-                System.out.println("DEBUG: Clics Validator Judgement feedback Additional Details = '" + details + "'");
                 
             } else {
                 log.info("Clics Validator provided no 'Additional Details'");
