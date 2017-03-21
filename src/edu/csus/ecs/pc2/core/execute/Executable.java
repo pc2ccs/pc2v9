@@ -1333,6 +1333,7 @@ public class Executable extends Plugin implements IExecutable {
                 
             } else {
                 log.info("Clics Validator provided no 'Additional Details'");
+                executionData.setAdditionalInformation(null);
             }
 
         } else {
