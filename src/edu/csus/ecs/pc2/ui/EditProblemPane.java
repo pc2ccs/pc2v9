@@ -1352,7 +1352,6 @@ public class EditProblemPane extends JPanePlugin {
             newProblem.setLetter(letter);
         }
 
-        Utilities.dump(newProblemDataFiles," message");
         //hand the new problem to the Controller for transmission to the Server
         getController().updateProblem(newProblem, newProblemDataFiles);
 
