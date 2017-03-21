@@ -162,7 +162,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         String[] testData = { //
         // input;expected
                 "A foggy bottom day runs far;A foggy bottom day runs far", //
-                Constants.DEFAULT_PC2_VALIDATOR_COMMAND + ";edu.csus.ecs.pc2.validator.PC2Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
+                Constants.DEFAULT_PC2_VALIDATOR_COMMAND + ";edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
                 "{:ansfile};sumit.ans", // 
                 "{:basename};Sumit", // 
                 "{:executetime};45321", // 
@@ -181,7 +181,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:siteid};2", // 
                 "{:teamid};1", // 
                 "{:timelimit};30", // 
-                "{:validator};edu.csus.ecs.pc2.validator.PC2Validator", // 
+                "{:validator};edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
                 "{:pc2home};"+ExecuteUtilities.getPC2Home(), // 
         };
 
@@ -242,7 +242,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         String[] testData = { //
         // input;expected
                 "A foggy bottom day runs far;A foggy bottom day runs far", // 
-                Constants.DEFAULT_PC2_VALIDATOR_COMMAND + ";edu.csus.ecs.pc2.validator.PC2Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
+                Constants.DEFAULT_PC2_VALIDATOR_COMMAND + ";edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator sumit.dat teams.output.txt sumit.ans "+resultsFileName+" ", // 
                 "{:ansfile};sumit.ans", // 
                 "{:basename};Sumit", // 
                 "{:executetime};45321", // 
@@ -261,7 +261,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:siteid};2", // 
                 "{:teamid};12", // 
                 "{:timelimit};30", // 
-                "{:validator};edu.csus.ecs.pc2.validator.PC2Validator", // 
+                "{:validator};edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
                 "{:pc2home};"+ExecuteUtilities.getPC2Home(), //
         };
 
