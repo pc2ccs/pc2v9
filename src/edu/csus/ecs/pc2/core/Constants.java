@@ -77,12 +77,12 @@ public final class Constants {
     /**
      * PC<sup>2</sup> Validator Program Name.
      */
-    public static final String PC2_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.PC2Validator";
+    public static final String PC2_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator";
     
     /**
      * CLICS Validator Program Name.
      */
-    public static final String CLICS_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.ClicsValidator";
+    public static final String CLICS_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator";
 
     /**
      * The Default PC2 Validator Command Line
