@@ -1458,7 +1458,7 @@ public class InternalContest implements IInternalContest {
             runFilesList.add(run, runFiles);
         }
         
-        if (! runResultFilesList.isWriteToDisk() && runResultFiles.length > 0){
+        if (! runResultFilesList.isWriteToDisk() && runResultFiles != null && runResultFiles.length > 0){
             runResultFilesList.add(run, run.getJudgementRecord(), runResultFiles[runResultFiles.length-1]);
         }
         
