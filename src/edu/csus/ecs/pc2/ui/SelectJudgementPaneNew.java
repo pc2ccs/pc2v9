@@ -178,7 +178,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private JLabel additionalInfoTextLabel;
     private JLabel addtionalInfoMoreButtonLabel;
-    
+
     /**
      * This method initializes
      * 
@@ -479,6 +479,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         this.run = run;
+        executable = null;
         startTimeCalendar = null; // time does not start until we get the run checkout
         showMessage("Waiting for run...");
         FrameUtilities.waitCursor(this);
@@ -1248,14 +1249,15 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         validatorAnswer.setVisible(showControls);
         getAcceptValidatorJudgementButton().setVisible(showControls);
         
+        ExecutionData executionData = getExecutionData();
+       
         //only set "additional info" fields visible if there is additional info to show
         if (showControls) {
-            if (executable!=null && executable.getExecutionData()!=null && executable.getExecutionData().getAdditionalInformation()!=null 
-                            && !executable.getExecutionData().getAdditionalInformation().equals("")) {
+            if (executionData != null && executionData.getAdditionalInformation() != null && executionData.getAdditionalInformation().trim().length() > 0){
                 additionalInfoLabel.setVisible(true);
                 additionalInfoTextLabel.setVisible(true);
-                additionalInfoTextLabel.setText(executable.getExecutionData().getAdditionalInformation());
-                additionalInfoTextLabel.setToolTipText(executable.getExecutionData().getAdditionalInformation());
+                additionalInfoTextLabel.setText(executionData.getAdditionalInformation());
+                additionalInfoTextLabel.setToolTipText(executionData.getAdditionalInformation());
                 getAdditionalInfoMoreButtonLabel().setVisible(true);
             }
         } else {
@@ -1609,7 +1611,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         	    @Override
         	    public void mouseClicked(MouseEvent e) {
                     JOptionPane.showMessageDialog(null, "<html><body><p style='width: 400px;'>" 
-                                    +  executable.getExecutionData().getAdditionalInformation()
+                                    +  getExecutionData().getAdditionalInformation()
                                     + "</p></body></html>", 
                                     "Validator Additional Information", JOptionPane.PLAIN_MESSAGE, null);
         	    }
@@ -1619,5 +1621,29 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         	addtionalInfoMoreButtonLabel.setBounds(479, 71, 46, 14);
         }
         return addtionalInfoMoreButtonLabel;
+    }
+
+    protected ExecutionData getExecutionData() {
+        
+        ExecutionData executionData = null;
+        
+        if (executable != null){
+            executionData = executable.getExecutionData();
+        } else {
+
+            try {
+                RunResultFiles[] files = getContest().getRunResultFiles(run);
+                if (files != null && files.length > 0){
+                    RunResultFiles runResultFiles = files[files.length-1];
+                    if (runResultFiles != null){
+                        executionData = runResultFiles.getExecutionData();
+                    }
+                }
+            } catch (Exception e) {
+                log.log(Log.WARNING, "Cannot get RunResultFiles for run "+run, e);
+            }
+        }
+        return executionData;
+        
     }
 } // @jve:decl-index=0:visual-constraint="10,10"

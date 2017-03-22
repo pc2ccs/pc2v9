@@ -260,4 +260,8 @@ public class RunResultFiles implements Serializable {
             return executionData.getValidationResults();
         }
     }
+
+    public ExecutionData getExecutionData() {
+        return executionData;
+    }
 }

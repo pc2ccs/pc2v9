@@ -20,17 +20,15 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
  * 
  * @see edu.csus.ecs.pc2.core.model.RunResultFiles
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class RunResultsFileList implements Serializable {
 
     /**
      * 
      */
     private static final long serialVersionUID = -8277112546999332502L;
-
+    
     /**
      * Write runs result files files to disk.
      * <P>
@@ -41,6 +39,7 @@ public class RunResultsFileList implements Serializable {
      * 
      */
     private boolean writeToDisk = false;
+    
 
     /**
      * Run Results files end in .files.
@@ -133,7 +132,7 @@ public class RunResultsFileList implements Serializable {
         if (writeToDisk) {
             return getRunResultFiles(run.getSiteNumber(), run.getNumber(), judgementRecord);
         } else {
-            if (singleRunResultFiles.getJudgementId().equals(judgementRecord.getJudgementId())) {
+            if (singleRunResultFiles != null && judgementRecord.getJudgementId().equals(singleRunResultFiles.getJudgementId())) {
                 return singleRunResultFiles;
             } else {
                 return null;
@@ -152,14 +151,25 @@ public class RunResultsFileList implements Serializable {
      */
     public RunResultFiles[] getRunResultFiles(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
 
-        JudgementRecord[] judgementRecord = run.getAllJudgementRecords();
-        RunResultFiles[] runResultFiles = new RunResultFiles[judgementRecord.length];
+        if (writeToDisk) {
 
-        for (int i = 0; i < judgementRecord.length; i++) {
-            runResultFiles[i] = getRunResultFiles(run.getSiteNumber(), run.getNumber(), judgementRecord[i]);
+            JudgementRecord[] judgementRecord = run.getAllJudgementRecords();
+            RunResultFiles[] runResultFiles = new RunResultFiles[judgementRecord.length];
+
+            for (int i = 0; i < judgementRecord.length; i++) {
+                runResultFiles[i] = getRunResultFiles(run.getSiteNumber(), run.getNumber(), judgementRecord[i]);
+            }
+
+            return runResultFiles;
+            
+        } else {
+            if (singleRunResultFiles != null && run.getElementId().equals(singleRunResultFiles.getRunId())){
+                RunResultFiles[] runResultFiles = { singleRunResultFiles };
+                return runResultFiles;
+            } else {
+                return null;
+            }
         }
-
-        return runResultFiles;
     }
 
     /**
@@ -239,5 +249,12 @@ public class RunResultsFileList implements Serializable {
             e.printStackTrace(System.err);
         }
     }
-    
+
+    public boolean isCached(){
+        return !writeToDisk;
+    }
+
+    public boolean isWriteToDisk() {
+        return writeToDisk;
+    }
 }
