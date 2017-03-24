@@ -9,15 +9,12 @@ package edu.csus.ecs.pc2.validator.clicsValidator;
 import java.io.Serializable;
 
 import edu.csus.ecs.pc2.core.Constants;
-import edu.csus.ecs.pc2.core.log.Log;
 
 /**
  * @author pc2@ecs.csus.edu
  *
  */
 public class ClicsValidatorSettings implements Serializable, Cloneable {
-
-    static Log log = null;
 
     private static final long serialVersionUID = 1L;
     
@@ -55,9 +52,6 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
      * defined by constants in class {@link Constants}.
      */
     public ClicsValidatorSettings() {
-        if (log==null) {
-            log = new Log("ClicsValidatorSettings.log");         
-        }
 
         this.validatorProgramName = Constants.CLICS_VALIDATOR_NAME;
         this.validatorCommandLine = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
@@ -113,12 +107,12 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
                                 double epsilon = Double.parseDouble(opts[i+1]) ;
                                 this.setFloatRelativeTolerance(epsilon);
                             } catch (NumberFormatException | NullPointerException e) {
-                                log.warning("ClicsValidatorSettings: invalid float relative tolerance epsilon value");
-                                throw new RuntimeException("ClicsValidatorSettings: invalid float relative tolerance epsilon value");
+                                System.err.println ("ClicsValidatorSettings: invalid float relative tolerance epsilon value " + e.getMessage());
+                                throw new RuntimeException("ClicsValidatorSettings: invalid float relative tolerance epsilon value " + e.getMessage());
                             }
                             i++;
                         } else {
-                            log.warning("ClicsValidatorSettings: missing float relative tolerance epsilon value"); 
+                            System.err.println ("ClicsValidatorSettings: missing float relative tolerance epsilon value");
                             throw new RuntimeException("ClicsValidatorSettings: missing float relative tolerance epsilon value");
                         }
                         break;
@@ -130,12 +124,12 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
                                 double epsilon = Double.parseDouble(opts[i+1]) ;
                                 this.setFloatAbsoluteTolerance(epsilon);
                             } catch (NumberFormatException | NullPointerException e) {
-                                log.warning("ClicsValidatorSettings: invalid float absolute tolerance epsilon value");
-                                throw new RuntimeException("ClicsValidatorSettings: invalid float absolute tolerance epsilon value");
+                                System.err.println("ClicsValidatorSettings: invalid float absolute tolerance epsilon value: " + e.getMessage());
+                                throw new RuntimeException("ClicsValidatorSettings: invalid float absolute tolerance epsilon value: " + e.getMessage());
                             }
                             i++;
                         } else {
-                            log.warning("ClicsValidatorSettings: missing float absolute tolerance epsilon value"); 
+                            System.err.println ("ClicsValidatorSettings: missing float absolute tolerance epsilon value");
                             throw new RuntimeException("ClicsValidatorSettings: missing float absolute tolerance epsilon value");
                         }
                         break;
@@ -148,18 +142,18 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
                                 this.setFloatRelativeTolerance(epsilon);
                                 this.setFloatAbsoluteTolerance(epsilon);
                             } catch (NumberFormatException | NullPointerException e) {
-                                log.warning("ClicsValidatorSettings: invalid float tolerance epsilon value");
-                                throw new RuntimeException("ClicsValidatorSettings: invalid float tolerance epsilon value");
+                                System.err.println ("ClicsValidatorSettings: invalid float tolerance epsilon value: " + e.getMessage());
+                                throw new RuntimeException("ClicsValidatorSettings: invalid float tolerance epsilon value: " + e.getMessage());
                             }
                             i++;
                         } else {
-                            log.warning("ClicsValidatorSettings: missing float tolerance epsilon value"); 
+                            System.err.println ("ClicsValidatorSettings: missing float tolerance epsilon value");
                             throw new RuntimeException("ClicsValidatorSettings: missing float tolerance epsilon value");
                         }
                         break;
                         
                     default:
-                        log.warning("ClicsValidatorSettings: unknown option '" + opts[i] +"'");
+                        System.err.println ("ClicsValidatorSettings: warning: unknown option '" + opts[i] +"'");
                         throw new RuntimeException("ClicsValidatorSettings: unknown option '" + opts[i] +"'");
 
                 }//end switch
