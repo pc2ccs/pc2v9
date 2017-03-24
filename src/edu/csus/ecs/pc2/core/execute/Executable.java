@@ -791,14 +791,15 @@ public class Executable extends Plugin implements IExecutable {
 
         }
 
-        // get a "random" number to be used as part of the results file name, for security
+        // get a "random" number to be used as part of the results file name and feedback directory name, for security
         String secs = Long.toString((new Date().getTime()) % 100);
 
-        //construct a "results file name".  Note that for a PC2 Interface validator, this is the actual name
-        // of the results file; for a Clics Interface validator, this is the base name used to create a judgement feedback file
-        // and, in the case of a "No" run, a details feedback file in the "feedback" directory
+        //construct a "results file name", used by PC2 Interface validators
         int testSetNumber = dataSetNumber + 1;
-        String resultsFileName = run.getNumber() + secs + "XRSAM." + testSetNumber + ".txt";
+        String pc2InterfaceResultsFileName = run.getNumber() + secs + "XRSAM." + testSetNumber + ".txt";
+        
+        //construct a "feedback directory" name, used by CLICS Interface validators
+        String clicsInterfaceFeedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber + File.separator;
 
         log.log(Log.DEBUG, "command pattern before substitution: " + commandPattern);
 
@@ -807,16 +808,13 @@ public class Executable extends Plugin implements IExecutable {
         String cmdLine = replaceString(commandPattern, "{:infile}", judgeDataFilename);
         cmdLine = replaceString(cmdLine, "{:ansfile}", judgeAnswerFilename);
         cmdLine = replaceString(cmdLine, "{:outfile}", "estdout.pc2");
-        cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
-
-        // the following is specific to the CLICS validator but needs to be done here for scope accessibility in the code below
-        String feedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber + File.separator;
-        cmdLine = replaceString(cmdLine, "{:feedbackdir}", feedbackDirName);
+        cmdLine = replaceString(cmdLine, "{:resfile}", pc2InterfaceResultsFileName);
+        cmdLine = replaceString(cmdLine, "{:feedbackdir}", clicsInterfaceFeedbackDirName);
 
         //create the feedback directory for validators using the Clics Interface
         if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
 
-            String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;
+            String feedbackDirPath = getExecuteDirectoryName() + File.separator + clicsInterfaceFeedbackDirName;
 
             // get rid of any pre-existing feedback dir
             try {
@@ -982,26 +980,26 @@ public class Executable extends Plugin implements IExecutable {
         if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface())) {
 
             //it was using the PC2 Validator Interface, check the results file
-            boolean fileThere = new File(prefixExecuteDirname(resultsFileName)).exists();
+            boolean fileThere = new File(prefixExecuteDirname(pc2InterfaceResultsFileName)).exists();
 
             try {
                 if (fileThere) {
 
                     if (problem.isUsingPC2Validator()) {
-                        updatePC2ValidatorResults(resultsFileName, log);
+                        updatePC2ValidatorResults(pc2InterfaceResultsFileName, log);
                     } else {
                         if (problem.isUsingCustomValidator()) {
-                            updateCustomPC2InterfaceValidatorResults(resultsFileName, log);
+                            updateCustomPC2InterfaceValidatorResults(pc2InterfaceResultsFileName, log);
                         }
                     }
 
                 } else {
-                    log.warning("Validator call did not produce output results file '" + resultsFileName + "'");
+                    log.warning("Validator call did not produce output results file '" + pc2InterfaceResultsFileName + "'");
                     // JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
                 }
             } catch (Exception ex) {
                 executionData.setExecutionException(ex);
-                log.log(Log.WARNING, "Exception while reading results file '" + resultsFileName + "'", ex);
+                log.log(Log.WARNING, "Exception while reading results file '" + pc2InterfaceResultsFileName + "'", ex);
                 throw new SecurityException(ex);
             } finally {
 
@@ -1017,20 +1015,20 @@ public class Executable extends Plugin implements IExecutable {
 
             //it was using the CLICS Validator Interface, check the results file(s)
             try {
-                String feedbackDirPath = getExecuteDirectoryName() + File.separator + feedbackDirName;
+                String feedbackDirPath = getExecuteDirectoryName() + File.separator + clicsInterfaceFeedbackDirName;
 
                 if (problem.isUsingCLICSValidator()) {
-                    //save the results (note that for Clics Interface validators, 'resultsFileName' is the BASE NAME for files in the feedback dir)
-                    updateClicsValidatorResults(exitcode, feedbackDirPath, resultsFileName, log);
+                    //save the ClicsValidator results
+                    updateClicsValidatorResults(exitcode, feedbackDirPath, log);
                 } else if (problem.isUsingCustomValidator()) {
-                    //ditto the above comment
-                    updateCustomClicsInterfaceValidatorResults(exitcode, feedbackDirPath, resultsFileName, log);
+                    //save the Custom Validator results
+                    updateCustomClicsInterfaceValidatorResults(exitcode, feedbackDirPath, log);
                 }
 
             } catch (Exception e) {
 
                 executionData.setExecutionException(e);
-                log.log(Log.WARNING, "Exception while reading validator results file '" + resultsFileName + "'", e);
+                log.log(Log.WARNING, "Exception while reading validator results file '" + clicsInterfaceFeedbackDirName + "'", e);
                 throw new SecurityException(e);
 
             } finally {
@@ -1116,7 +1114,7 @@ public class Executable extends Plugin implements IExecutable {
             validatorName = Constants.CLICS_VALIDATOR_NAME;
         }
 
-        String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options + " " + "{:resfile} ";
+        String cmdPattern = "java -cp " + pathToPC2Jar + " " + validatorName + " " + args + " " + options ;
 
         // get rid of any double-fileSeparators
         String doubleFS = File.separator + File.separator;
@@ -1276,17 +1274,17 @@ public class Executable extends Plugin implements IExecutable {
      * Saves the results of validation using the ClicsValidator into executionData.
      * 
      * Validation results are found in one or both of two files in the feedbackDir directory.
-     * Both files will have a BaseName correspoding to the specified resultsFileBaseName.
-     * The first file is the actual judgement assigned by the validator, found in file <basename>.judgement.txt.
-     * The second file is a details feedback file, present when the validator assigned a "No" to the run; it is
-     * found in the file <basename>.details.txt.
+     * The first file, named as defined by the constant {@link ClicsValidator#CLICS_JUDGEMENT_FEEDBACK_FILE_NAME},
+     * contains the judgement string assigned by the {@link ClicsValidator}.
+     * The second file, named as defined by the constant {@link ClicsValidator#CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME},
+     * contains judgement details for submissions which were judged "no".
      * 
      * @param exitCode the exit code returned by the ClicsValidator
-     * @param feedbackDir the directory into which the ClicsValidator (should have) written feedback information
+     * @param feedbackDirPath the directory into which the ClicsValidator (should have) written feedback information
      * @param resultsFileBaseName the base name of feedback files stored by the Clics Validator
      * @param logger the log to be used for logging
      */
-    private void updateClicsValidatorResults(int exitCode, String feedbackDir, String resultsFileBaseName, Log logger) {
+    private void updateClicsValidatorResults(int exitCode, String feedbackDirPath, Log logger) {
 
         // save exit code in executionData
         executionData.setValidationReturnCode(exitCode);
@@ -1300,10 +1298,13 @@ public class Executable extends Plugin implements IExecutable {
         }
 
         // check for feedback from validator
-        if (new File(feedbackDir).exists()) {
+        if (new File(feedbackDirPath).exists()) {
 
-            // check for judgement feedback file (the Clics Validator returns feedback in "<basename>.judgement.txt")
-            String judgementFileName = feedbackDir + File.separator + resultsFileBaseName + ".judgement.txt";
+            // check for judgement feedback file
+            if (!feedbackDirPath.endsWith(File.separator)) {
+                feedbackDirPath += File.separator;
+            }
+            String judgementFileName = feedbackDirPath + ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
             File judgementFile = new File(judgementFileName);
             if (judgementFile.exists()) {
 
@@ -1316,12 +1317,12 @@ public class Executable extends Plugin implements IExecutable {
 
             } else {
                 //we found no judgement file in the feedback dir -- that's a problem (the Validator implementation should ALWAYS create one)!
-                log.warning ("No Clics Validator judgement file '" + judgementFileName + "' found in feedback directory '" + feedbackDir + "'");
+                log.warning ("No Clics Validator judgement file '" + judgementFileName + "' found in feedback directory '" + feedbackDirPath + "'");
                 saveDefaultClicsValidatorResult(exitCode);
             }
 
-            // check for a judgement details file (the Clics Validator returns details in "<basename>.detail.txt")
-            String detailsFileName = feedbackDir + File.separator + resultsFileBaseName + ".details.txt";
+            // check for a judgement details file 
+            String detailsFileName = feedbackDirPath + ClicsValidator.CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME ;
             File detailsFile = new File(detailsFileName);
             if (detailsFile.exists()) {
 
@@ -1339,7 +1340,7 @@ public class Executable extends Plugin implements IExecutable {
         } else {
             
             //we SHOULD have had a feedback directory -- but we didn't!
-            log.warning("No CLICS validator feedback directory named '" + feedbackDir + "' found");
+            log.warning("No CLICS validator feedback directory named '" + feedbackDirPath + "' found");
             saveDefaultClicsValidatorResult(exitCode);
         }
     }
@@ -1394,7 +1395,7 @@ public class Executable extends Plugin implements IExecutable {
     /**
      * Stores the results of the execution of a Custom Validator which uses the Clics Validator Interface. 
      * 
-     * Currently this method just delegates to {@link #updateClicsValidatorResults(int, String, String, Log)}; 
+     * Currently this method just delegates to {@link #updateClicsValidatorResults(int, String, Log)}; 
      * it is provided in the event of a future need to distinguish between the real (internal) ClicsValidator 
      * and a Custom Validator which uses the Clics Validator Interface.
      * 
@@ -1407,8 +1408,8 @@ public class Executable extends Plugin implements IExecutable {
      * @param log
      *            the Log to be used for logging
      */
-    private void updateCustomClicsInterfaceValidatorResults(int exitcode, String feedbackDirPath, String feedbackFileBaseName, Log log) {
-        updateClicsValidatorResults(exitcode, feedbackDirPath, feedbackFileBaseName, log);
+    private void updateCustomClicsInterfaceValidatorResults(int exitcode, String feedbackDirPath, Log log) {
+        updateClicsValidatorResults(exitcode, feedbackDirPath, log);
     }
 
     /**
