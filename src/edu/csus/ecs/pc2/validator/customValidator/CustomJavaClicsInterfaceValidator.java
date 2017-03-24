@@ -13,6 +13,7 @@ import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 
 /**
@@ -81,6 +82,12 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  *  is determined by absTol or relTol. For example, if relTol is 10% (0.1), the team will have to get within 10% of the judge's answer, 
  *  unless the answer is very small, in which case the absTol criterion (of, say, 0.0001) is satisfied before the relTol criterion.
  * 
+ *  The validator writes a judgement message to a file in the specified feedback_Dir; the name of the file is defined by the 
+ *  constant {@link ClicsValidator#CLICS_JUDGEMENT_FEEDBACK_FILE_NAME}.  
+ *  If the result of the validation is failure (that is, the submission is being judged "no"), the validator also writes a
+ *  "judgement details" message to a file in the feedback_Dir; the name of the details file is defined by the
+ *  constant {@link ClicsValidator#CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME}.
+ * 
  * @author John@pc2.ecs.csus.edu
  *
  */
@@ -96,10 +103,7 @@ public class CustomJavaClicsInterfaceValidator {
     static public final String CLICS_INCORRECT_OUTPUT_FORMAT_MSG = "Incorrect output format";
     static public final String CLICS_WRONG_ANSWER_MSG = "Wrong Answer";
     static public final String CLICS_CORRECT_ANSWER_MSG = "accepted";
-    
-    static public final String CLICS_JUDGEMENT_FEEDBACK_FILE_NAME = "judgement.txt";
-    static public final String CLICS_JUDGEMENT_DETAILS_FILE_NAME = "judgementdetails.txt";
-    
+        
     static public final int EOF = -1;
     
     static Log log = null;
@@ -138,6 +142,11 @@ public class CustomJavaClicsInterfaceValidator {
         judgeDataFile = inJudgeDataFile;
         judgeAnswerFile = inJudgeAnswerFile;
         feedbackDirName = inFeedbackDirName;
+        
+        //make sure the caller appended a file separator on the feedback dir name (the CLICS standard requires this, but still...)
+        if (!feedbackDirName.endsWith(File.separator)) {
+            feedbackDirName += File.separator;
+        }
 
         //verify files are valid
         if (!validateFiles()) {
@@ -291,7 +300,7 @@ public class CustomJavaClicsInterfaceValidator {
                         if (teamByte!=judgeByte) {
                             //exit with mismatched whitespace error
                             try {
-                                outputWrongAnswer(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: judge's answer contains '" + printableString(judgeByte) 
+                                outputFailure(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: judge's answer contains '" + printableString(judgeByte) 
                                     + "' but team's output contains '" + printableString(teamByte) + "'");
                             } catch (Exception e) {
                                 log.severe("Error outputting validator feedback answer file");
@@ -306,7 +315,7 @@ public class CustomJavaClicsInterfaceValidator {
                     if (isWhiteSpace(peek(teamOutputPushbackIS))) {
                         //exit with mismatched whitespace error
                         try {
-                            outputWrongAnswer(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: team's output contains extra whitespace char '" 
+                            outputFailure(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: team's output contains extra whitespace char '" 
                                     + printableString((byte)teamOutputPushbackIS.read()) + "'");
                         } catch (Exception e) {
                             log.severe("Error outputting validator feedback answer file");
@@ -336,7 +345,7 @@ public class CustomJavaClicsInterfaceValidator {
                             
                 //team is at EOF when judge is not, so team is missing output
                 try {
-                    outputWrongAnswer(CLICS_INCOMPLETE_OUTPUT_MSG, "Incomplete output (next judge token = '" + getNextToken(judgeAnswerPushbackIS) + "')");
+                    outputFailure(CLICS_INCOMPLETE_OUTPUT_MSG, "Incomplete output (next judge token = '" + getNextToken(judgeAnswerPushbackIS) + "')");
                 } catch (Exception e) {
                     return CLICS_VALIDATOR_ERROR_EXIT_CODE;
                 }
@@ -371,7 +380,7 @@ public class CustomJavaClicsInterfaceValidator {
         try {
             if (teamOutputPushbackIS.read()!= EOF) {
                 try {
-                    outputWrongAnswer(CLICS_EXCESSIVE_OUTPUT_MSG, "Team has trailing output beyond what judge answer file contains");
+                    outputFailure(CLICS_EXCESSIVE_OUTPUT_MSG, "Team has trailing output beyond what judge answer file contains");
                 } catch (Exception e) {
                     log.severe("Error outputting validator feedback answer file");
                     return CLICS_VALIDATOR_ERROR_EXIT_CODE;                                            
@@ -571,7 +580,7 @@ public class CustomJavaClicsInterfaceValidator {
             double judgeVal = getDoubleValue(judgeToken);
             if (!isFloat(teamToken)) {
                 try {
-                    outputWrongAnswer(CLICS_WRONG_ANSWER_MSG, "Expected float in team output, got '" + teamToken + "'");
+                    outputFailure(CLICS_WRONG_ANSWER_MSG, "Expected float in team output, got '" + teamToken + "'");
                 } catch (Exception e) {
                     log.severe("Error outputting validator feedback answer file");
                     throw e;                                            
@@ -585,7 +594,7 @@ public class CustomJavaClicsInterfaceValidator {
                 } else {
                     double diff = judgeVal - teamVal;
                     try {
-                        outputWrongAnswer(CLICS_WRONG_ANSWER_MSG, "Float out of tolerance range: judge value = " + judgeVal + "; team value = " + teamVal
+                        outputFailure(CLICS_WRONG_ANSWER_MSG, "Float out of tolerance range: judge value = " + judgeVal + "; team value = " + teamVal
                                         + "; difference = " + diff + " (abs tol = " + floatAbsTolerance + "; rel tol = " + floatRelTolerance + ")");
                     } catch (Exception e) {
                         log.severe("Error outputting validator feedback answer file");
@@ -603,7 +612,7 @@ public class CustomJavaClicsInterfaceValidator {
                 return true;
             } else {
                 try {
-                    outputWrongAnswer(CLICS_WRONG_ANSWER_MSG, "String token mismatch (case-sensitive): judge token = '" 
+                    outputFailure(CLICS_WRONG_ANSWER_MSG, "String token mismatch (case-sensitive): judge token = '" 
                                                                     + judgeToken + "'; team token = '" + teamToken + "'");
                 } catch (Exception e) {
                     log.severe("Error outputting validator feedback answer file");
@@ -619,7 +628,7 @@ public class CustomJavaClicsInterfaceValidator {
             return true;
         } else {
             try {
-                outputWrongAnswer(CLICS_WRONG_ANSWER_MSG, "String tokens mismatch (ignoring case): judge token = '" 
+                outputFailure(CLICS_WRONG_ANSWER_MSG, "String tokens mismatch (ignoring case): judge token = '" 
                                                                 + judgeToken + "'; team token = '" + teamToken + "'");
             } catch (Exception e) {
                 log.severe("Error outputting validator feedback answer file");
@@ -681,46 +690,61 @@ public class CustomJavaClicsInterfaceValidator {
         }
     }
     
-    private void outputWrongAnswer (String judgement, String details) throws FileNotFoundException, UnsupportedEncodingException {
-        log.info("Validator returning failure: " + judgement + ", " + details );
-        
-        System.out.println ("Validator feedback: " + judgement + ", " + details);
+    private void outputFailure (String judgement, String details) throws FileNotFoundException, UnsupportedEncodingException {
+        log.info("CLICS Validator returning failure: " + judgement + ", " + details );
         
         outputJudgementFile(judgement);
         outputDetailsFile(details);
     }
     
     private void outputSuccess (String message) throws FileNotFoundException, UnsupportedEncodingException {
-        log.info("Validator returning success: " + message );
-        
-        System.out.println ("Validator feedback: " + message);
-        
+        log.info("CLICS Validator returning success: " + message );
+                
         outputJudgementFile(message);
     }
     
     /**
-     * Writes the specified judgement text into the feedback judgement file in the feedback directory.
-     * @throws UnsupportedEncodingException 
-     * @throws FileNotFoundException 
+     * Writes the specified judgement text into the feedback judgement file in the feedback directory, using "UTF-8" encoding.
+     * The name of the file into which the text is written is defined by the static constant {@link #CLICS_JUDGEMENT_FEEDBACK_FILE_NAME}.
+     * 
+     * Note that this method assumes that the global "feedback directory" name already has a File.separator appended to it (this is
+     * handled in the constructor which receives the feedback directory name).
+     * 
+     * @throws UnsupportedEncodingException if UTF-8 encoding for files is not supported
+     * @throws FileNotFoundException if the method is unable to create a judgement feedback file in the feedback directory
      */
     private void outputJudgementFile(String judgement) throws FileNotFoundException, UnsupportedEncodingException {
-        String feedbackFileName = feedbackDirName + File.separator + CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
-        System.out.println ("Writing judgement '" + judgement + "' to feedback file '" + feedbackFileName + "'");
+        String feedbackFileName = feedbackDirName + ClicsValidator.CLICS_JUDGEMENT_FEEDBACK_FILE_NAME;
+        
+        System.out.println ("CustomJavaClicsInterfaceValidator outputing judgement '" + judgement + "' to feedback file '" + feedbackFileName + "'");
+        log.info("Writing judgement '" + judgement + "' to feedback file '" + feedbackFileName + "'");
+        
         PrintWriter writer = new PrintWriter(feedbackFileName, "UTF-8");
         writer.println(judgement);
         writer.close();
     }
     
     /**
-     * Writes the specified message text into the file "judgmentdetails.txt" in the feedback directory.
-     * @throws UnsupportedEncodingException 
-     * @throws FileNotFoundException 
+     * Writes the specified details text into the judgement details file in the feedback directory, using "UTF-8" encoding.
+     * The name of the file into which the text is written is defined by the static constant {@link #CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME}.
+     * 
+     * Note that this method assumes that the global "feedback directory" name already has a File.separator appended to it (this is
+     * handled in the constructor which receives the feedback directory name).
+     * 
+     * @throws UnsupportedEncodingException if UTF-8 encoding for files is not supported
+     * @throws FileNotFoundException if the method is unable to create a judgement details feedback file in the feedback directory
      */
     private void outputDetailsFile(String details) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter(feedbackDirName + File.separator + CLICS_JUDGEMENT_DETAILS_FILE_NAME, "UTF-8");
+        String detailsFileName = feedbackDirName + ClicsValidator.CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME;
+        
+        System.out.println ("CustomJavaClicsInterfaceValidator outputing judgement details '" + details + "' to feedback details file '" + detailsFileName + "'");
+        log.info("Writing judgement details '" + details + "' to feedback details file '" + detailsFileName + "'");
+        
+        PrintWriter writer = new PrintWriter(detailsFileName, "UTF-8");
         writer.println(details);
         writer.close();
     }
+    
     
 
     
