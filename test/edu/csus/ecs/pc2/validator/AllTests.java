@@ -24,6 +24,9 @@ public final class AllTests {
         // $JUnit-BEGIN$
         suite.addTestSuite(PC2ValidatorTest.class);
         suite.addTestSuite(ClicsValidatorTest.class);
+        suite.addTestSuite(edu.csus.ecs.pc2.validator.customValidator.CustomCppClicsInterfaceValidatorTest.class);
+        suite.addTestSuite(edu.csus.ecs.pc2.validator.customValidator.CustomJavaClicsInterfaceValidatorTest.class);
+        suite.addTestSuite(edu.csus.ecs.pc2.validator.customValidator.CustomJavaPC2InterfaceValidatorTest.class);
         // $JUnit-END$
         return suite;
     }

@@ -458,14 +458,18 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         problem.setUsingExternalDataFiles(externalFiles);
 
-        dump(problemDataFiles, "debug 22 before load");
+        if (Utilities.isDebugMode()) {
+            dump(problemDataFiles, "debug 22 before load");
+        }
         try {
             problemDataFiles = loadDataFiles(problem, problemDataFiles, baseDirectoryName, ".in", ".ans", externalFiles);
         } catch (Exception e) {
             getController().getLog().log(Log.INFO, e.getMessage(), e);
             showMessage(this, "Import Failed", e.getMessage());
         }
-        dump(problemDataFiles, "debug 22 after load");
+        if (Utilities.isDebugMode()) {
+            dump(problemDataFiles, "debug 22 after load");
+        }
 
         populateUI();
 

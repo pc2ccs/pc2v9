@@ -20,8 +20,6 @@ import edu.csus.ecs.pc2.core.Utilities;
  * @see #getJudgesAnswerFiles()
  * @see #getJudgesDataFiles()
  * 
- * @see #getValidatorRunCommand()
- * 
  * @see edu.csus.ecs.pc2.core.model.Problem
  * @see edu.csus.ecs.pc2.core.model.ProblemDataFilesList
  *
@@ -41,11 +39,7 @@ public class ProblemDataFiles implements IElementObject {
 
     private ElementId problemId = null;
     
-    private SerializedFile validatorRunCommand;
-    
     private SerializedFile validatorFile;
-    
-    private SerializedFile validatorRunFile;
     
     private SerializedFile [] validatorFiles;
 
@@ -86,9 +80,6 @@ public class ProblemDataFiles implements IElementObject {
         clone.problemId = getProblemId();
 
         clone.setValidatorFile(cloneSerializedFile(getValidatorFile()));
-
-        clone.setValidatorRunCommand(getValidatorRunCommand());
-        clone.setValidatorRunFile(cloneSerializedFile(getValidatorRunFile()));
 
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
@@ -235,24 +226,9 @@ public class ProblemDataFiles implements IElementObject {
     }
     
     /**
-     * A program that wraps the validator.
+     * Returns the validator program file.
      * 
-     * Under CCS typically named 'run'.
-     * 
-     * @return null if not defined, else the program to run the validator.
-     */
-    public SerializedFile getValidatorRunCommand() {
-        return validatorRunCommand;
-    }
-    
-    public void setValidatorRunCommand(SerializedFile validatorRunCommand) {
-        this.validatorRunCommand = validatorRunCommand;
-    }
-
-    /**
-     * The validator program.
-     * 
-     * @return
+     * @return a SerializedFile containing the validator code, or null if no validator has been specified
      */
     public SerializedFile getValidatorFile() {
         return validatorFile;
@@ -378,35 +354,15 @@ public class ProblemDataFiles implements IElementObject {
         buf.append(" Validator: ");
         if (validatorFile != null) {
             buf.append(validatorFile.getName());
+            buf.append(" SHA1: ");
+            buf.append (validatorFile.getSHA1sum());
+        } else {
+            buf.append("null");
         }
 
         return buf.toString();
     }
     
-    /**
-     * Get the 'run' command for the validator.
-     * 
-     * For a CCS standard validator a run script is used to invoke
-     * the validator.
-     * 
-     * This is not the validator program, use {@link #getValidatorFile()}
-     * to get the validator program.
-     * 
-     * @return the run script/program for running the CCS validator.
-     */
-    public SerializedFile getValidatorRunFile() {
-        return validatorRunFile;
-    }
-
-    /**
-     * Add/set the validator run file/command.
-     *  
-     * @see #getValidatorFile()
-     * @param validatorRunFile
-     */
-    public void setValidatorRunFile(SerializedFile validatorRunFile) {
-        this.validatorRunFile = validatorRunFile;
-    }
     
     /**
      * save a set of files, one which should be the validator program. 
@@ -419,9 +375,6 @@ public class ProblemDataFiles implements IElementObject {
     
     /**
      * A directory/set of files needed to run the validator.
-     * 
-     * The {@link #getValidatorRunCommand()} is used to invoke the validator,
-     * these are files needed to run the validator (including the validator).
      * 
      * @return
      */

@@ -7,7 +7,6 @@ import java.util.UUID;
 import edu.csus.ecs.pc2.core.execute.IResultsParser;
 import edu.csus.ecs.pc2.core.execute.XMLResultsParser;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.validator.PC2Validator;
 
 /**
  * JUnit test cases for Validator.

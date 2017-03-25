@@ -8,7 +8,6 @@ import java.util.StringTokenizer;
 
 import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.validator.ClicsValidator;
 
 /**
  * Unit tests for CLICS Validator

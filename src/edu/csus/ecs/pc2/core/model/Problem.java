@@ -5,9 +5,9 @@ import java.io.File;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.validator.ClicsValidatorSettings;
-import edu.csus.ecs.pc2.validator.CustomValidatorSettings;
-import edu.csus.ecs.pc2.validator.PC2ValidatorSettings;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
+import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
+import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Problem Definition.
@@ -48,7 +48,7 @@ public class Problem implements IElementObject {
      * 
      * This is the name of the file that the submitted run will read from.
      */
-    private String dataFileName = null;
+    private String judgesInputDataFileName = null;
 
     /**
      * Judge's answer file name.
@@ -226,7 +226,7 @@ public class Problem implements IElementObject {
         // TODO is number really used?
         clone.setNumber(getNumber());
         // TODO FATAL files need the corresponding ProblemDataFile populated...
-        clone.setDataFileName(StringUtilities.cloneString(dataFileName));
+        clone.setDataFileName(StringUtilities.cloneString(judgesInputDataFileName));
         clone.setAnswerFileName(StringUtilities.cloneString(answerFileName));
         clone.setActive(isActive());
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
@@ -316,7 +316,7 @@ public class Problem implements IElementObject {
         retStr += "displayName=" + displayName;
         retStr += "; elementId=" + elementId;
         retStr += "; number=" + number;
-        retStr += "; dataFileName=" + dataFileName;
+        retStr += "; dataFileName=" + judgesInputDataFileName;
         retStr += "; answerFileName=" + answerFileName;
         retStr += "; testCaseDataFilenames=" + testCaseDataFilenames;
         retStr += "; testCaseAnswerFilenames=" + testCaseAnswerFilenames;
@@ -401,7 +401,7 @@ public class Problem implements IElementObject {
      * @return Returns the dataFileName.
      */
     public String getDataFileName() {
-        return dataFileName;
+        return judgesInputDataFileName;
     }
 
     /**
@@ -413,7 +413,7 @@ public class Problem implements IElementObject {
      */
     public String getDataFileName(int testCaseNumber) {
         if (testCaseNumber == 1 && testCaseDataFilenames.length == 0){
-            return dataFileName;
+            return judgesInputDataFileName;
         }
         return testCaseDataFilenames[testCaseNumber - 1];
     }
@@ -553,11 +553,18 @@ public class Problem implements IElementObject {
 
     /**
      * Sets the Validator Command Line associated with type of Validator configured for this Problem.
+     * Note that this Problem class does not maintain a separate "Validator Command Line" field;
+     * rather, the current Validator Command Line is always stored within a "Settings" object 
+     * corresponding to the currently-assigned Validator type.
      * 
-     * @param commandLine the new command line for the currently-specified Validator
+     * @param commandLine the new command line for the currently-specified Validator type associated with the Problem
+     * 
+     * @see PC2ValidatorSettings
+     * @see ClicsValidatorSettings
+     * @see CustomValidatorSettings
      * 
      * @throws {@link RuntimeException} if the Problem is not marked as using a Validator, or is marked as using a Validator
-     *           but no corresponding Validator Settings could be found.
+     *           but no corresponding Validator Settings object could be found.
      */
     public void setValidatorCommandLine(String commandLine) {
         
@@ -611,7 +618,7 @@ public class Problem implements IElementObject {
      *            The dataFileName to set.
      */
     public void setDataFileName(String dataFileName) {
-        this.dataFileName = dataFileName;
+        this.judgesInputDataFileName = dataFileName;
     }
 
     /**
@@ -712,14 +719,19 @@ public class Problem implements IElementObject {
 
     /**
      * Sets the Validator Program Name for the Validator attached to the Problem.
-     * If the Problem is currently marked as having a Validator (of any type) but there is no corresponding Validator Settings
-     * object in the Problem, a new Validator Settings object is created.
-     * 
-     * @param validatorProgramName
-     *            The validatorProgramName to set.
+     * Note that this Problem class does not maintain a separate "Validator Program Name" field;
+     * rather, the Validator Program Name is stored within the "Settings" object associated with the
+     * type of Validator attached to the Problem.
+     *  
+     * @param validatorProgramName a String specifying the new Validator Program Name
      *            
+     * @see PC2ValidatorSettings
+     * @see ClicsValidatorSettings
+     * @see CustomValidatorSettings
+     * 
      * @throws {@link RuntimeException} if the Problem is not marked as having a Validator when an attempt is made to set
-     *          set the Validator Program name, or if the Problem is marked as having a Validator but no Validator Settings could be found
+     *          set the Validator Program name, or if the Problem is marked as having a Validator but no Validator Settings 
+     *          object could be found
      */
     public void setValidatorProgramName(String validatorProgramName) {
         
@@ -831,7 +843,7 @@ public class Problem implements IElementObject {
                 return false;
             }
 
-            if (! StringUtilities.stringSame(dataFileName, problem.getDataFileName())) {
+            if (! StringUtilities.stringSame(judgesInputDataFileName, problem.getDataFileName())) {
                 return false;
             }
             if (! StringUtilities.stringSame(answerFileName, problem.getAnswerFileName())) {
