@@ -175,7 +175,7 @@ public class EditProblemPane extends JPanePlugin {
     private ButtonGroup judgingTypeGroup = null; // @jve:decl-index=0:visual-constraint="586,61"
 
     //the top-level tabbed pane holding settings for various validator options
-    private JPanel validatorPane = null;
+    private JPanel outputValidatorPane = null;
 
     private JRadioButton useNOValidatatorRadioButton = null;
 
@@ -2115,7 +2115,8 @@ public class EditProblemPane extends JPanePlugin {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new Dimension(500, 600));
-            mainTabbedPane.insertTab("Data Files", null, getMultipleDataSetPane(), null, 0);
+            mainTabbedPane.insertTab("Input Validator", null, getInputValidatorPane(), null, 0);
+            mainTabbedPane.insertTab("Input Data Files", null, getMultipleDataSetPane(), null, 0);
             mainTabbedPane.insertTab("Output Validator", null, getOutputValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
             mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);
@@ -2626,26 +2627,26 @@ public class EditProblemPane extends JPanePlugin {
      * @return javax.swing.JPanel
      */
     private JPanel getOutputValidatorPane() {
-        if (validatorPane == null) {
-            validatorPane = new JPanel();
-            validatorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-            validatorPane.setAlignmentY(Component.TOP_ALIGNMENT);
-            validatorPane.setMaximumSize(new Dimension(500, 400));
-            validatorPane.setLayout(new BoxLayout(validatorPane, BoxLayout.Y_AXIS));
-            validatorPane.add(getVerticalStrut_4());
-            validatorPane.add(getNoValidatorPanel());
-            validatorPane.add(getVerticalStrut_1());
-            validatorPane.add(getPc2ValidatorPanel());
-            validatorPane.add(getVerticalStrut_5());
-            validatorPane.add(getClicsValidatorPanel());
-            validatorPane.add(getVerticalStrut());
-            validatorPane.add(getCustomValidatorPanel());
-            validatorPane.add(getVerticalStrut_2());
-            validatorPane.add(getShowValidatorToJudgesCheckBox());
-            validatorPane.add(getVerticalStrut_3());
+        if (outputValidatorPane == null) {
+            outputValidatorPane = new JPanel();
+            outputValidatorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+            outputValidatorPane.setAlignmentY(Component.TOP_ALIGNMENT);
+            outputValidatorPane.setMaximumSize(new Dimension(500, 400));
+            outputValidatorPane.setLayout(new BoxLayout(outputValidatorPane, BoxLayout.Y_AXIS));
+            outputValidatorPane.add(getVerticalStrut_4());
+            outputValidatorPane.add(getNoValidatorPanel());
+            outputValidatorPane.add(getVerticalStrut_1());
+            outputValidatorPane.add(getPc2ValidatorPanel());
+            outputValidatorPane.add(getVerticalStrut_5());
+            outputValidatorPane.add(getClicsValidatorPanel());
+            outputValidatorPane.add(getVerticalStrut());
+            outputValidatorPane.add(getCustomValidatorPanel());
+            outputValidatorPane.add(getVerticalStrut_2());
+            outputValidatorPane.add(getShowValidatorToJudgesCheckBox());
+            outputValidatorPane.add(getVerticalStrut_3());
             getValidatorChoiceButtonGroup().setSelected(getUseNOValidatatorRadioButton().getModel(), true);
         }
-        return validatorPane;
+        return outputValidatorPane;
     }
 
     /**
@@ -2809,6 +2810,8 @@ public class EditProblemPane extends JPanePlugin {
     private final ButtonGroup validatorStandardButtonGroup = new ButtonGroup();
     private JLabel lblWhatsThisPC2ValStd;
     private JLabel lblWhatsThisCLICSValStd;
+    private JPanel inputValidatorPane;
+    private JLabel temp_InputValidatorPaneLabel;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -4437,6 +4440,20 @@ public class EditProblemPane extends JPanePlugin {
         	lblWhatsThisCLICSValStd.setBorder(new EmptyBorder(0, 0, 0, 0));
         }
         return lblWhatsThisCLICSValStd;
+    }
+    
+    private JPanel getInputValidatorPane() {
+        if (inputValidatorPane == null) {
+        	inputValidatorPane = new JPanel();
+        	inputValidatorPane.add(getTemp_InputValidatorPaneLabel());
+        }
+        return inputValidatorPane;
+    }
+    private JLabel getTemp_InputValidatorPaneLabel() {
+        if (temp_InputValidatorPaneLabel == null) {
+        	temp_InputValidatorPaneLabel = new JLabel("<Under Construction>");
+        }
+        return temp_InputValidatorPaneLabel;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
