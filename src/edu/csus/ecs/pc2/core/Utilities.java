@@ -1383,4 +1383,45 @@ public final class Utilities {
 
     }
     
+    /**
+     * Return OS type.
+     * 
+     * Attempts to identify {@link OSType}.
+     * 
+     * @return {@link OSType#UNCLASSIFIED} if cannot be determined else returns {@link OSType}  
+     */
+    public static OSType getOSType() {
+
+        OSType type = OSType.UNCLASSIFIED;
+
+        // find OS name
+        String osName = System.getProperty("os.name");
+
+        if (osName != null) {
+
+            if (osName.toLowerCase().contains("windows")) {
+
+                type = OSType.WINDOWS;
+
+            } else {
+
+                if (osName.toLowerCase().contains("linux") || osName.toLowerCase().contains("unix")) {
+
+                    // test for architecture type
+                    String archType = System.getProperty("os.arch");
+
+                    if (archType != null) {
+                        if (archType.toLowerCase().equals("i386")) {
+                            type = OSType.I386;
+                        } else if (archType.toLowerCase().equals("amd64")) {
+                            type = OSType.AMD64;
+                        }
+                    }
+                }
+            }
+        }
+
+        return type;
+    }
+    
 }

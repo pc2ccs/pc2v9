@@ -3315,6 +3315,8 @@ public class EditProblemPane extends JPanePlugin {
             }
 
             question = question + "'." + NL + NL;
+            
+            // SOMEDAY 
             question = question + "The Current OS is '" + System.getProperty("os.name", "?");
             question = question + "'." + NL + NL;
             question = question + "Do you want the file converted to the current OS file format as it is loaded into PC^2?";

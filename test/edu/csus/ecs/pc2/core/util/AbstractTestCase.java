@@ -722,6 +722,11 @@ public class AbstractTestCase extends TestCase {
         return permissionGroup.getPermissionList(type).getList();
     }
 
+    /**
+     * Set debug model.
+     * 
+     * @param debugMode if true then {@link #debugPrint(String)} methods will output text.
+     */
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
     }
@@ -1200,6 +1205,8 @@ public class AbstractTestCase extends TestCase {
 
     /**
      * Print string if debugMode.
+     * 
+     * @see #setDebugMode(boolean)
      * @param string the String to be printed if in debugMode
      */
     public void debugPrint(String string) {
