@@ -67,6 +67,7 @@ import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
+import java.awt.Font;
 
 /**
  * Add/Edit Problem Pane.
@@ -2811,7 +2812,13 @@ public class EditProblemPane extends JPanePlugin {
     private JLabel lblWhatsThisPC2ValStd;
     private JLabel lblWhatsThisCLICSValStd;
     private JPanel inputValidatorPane;
-    private JLabel temp_InputValidatorPaneLabel;
+    private JLabel inputValidatorProgramNameLabel;
+    private JTextField inputValidatorProgramNameTextField;
+    private JLabel lblInputValidatorInvocation;
+    private JTextField inputValidatorCommandTextField;
+    private JCheckBox useCDPFromDiskCheckbox;
+    private JButton validateInputDataButton;
+    private Component verticalStrut_6;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -4445,15 +4452,113 @@ public class EditProblemPane extends JPanePlugin {
     private JPanel getInputValidatorPane() {
         if (inputValidatorPane == null) {
         	inputValidatorPane = new JPanel();
-        	inputValidatorPane.add(getTemp_InputValidatorPaneLabel());
+        	GridBagLayout gbl_inputValidatorPane = new GridBagLayout();
+        	gbl_inputValidatorPane.columnWidths = new int[]{212, 50, 0};
+        	gbl_inputValidatorPane.rowHeights = new int[]{20, 20, 40, 40, 60, 40, 0};
+        	gbl_inputValidatorPane.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+        	gbl_inputValidatorPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+        	inputValidatorPane.setLayout(gbl_inputValidatorPane);
+        	GridBagConstraints gbc_verticalStrut_6 = new GridBagConstraints();
+        	gbc_verticalStrut_6.insets = new Insets(0, 0, 5, 5);
+        	gbc_verticalStrut_6.gridx = 0;
+        	gbc_verticalStrut_6.gridy = 0;
+        	inputValidatorPane.add(getVerticalStrut_6(), gbc_verticalStrut_6);
+        	GridBagConstraints gbc_inputValidatorProgramNameLabel = new GridBagConstraints();
+        	gbc_inputValidatorProgramNameLabel.insets = new Insets(0, 0, 5, 5);
+        	gbc_inputValidatorProgramNameLabel.anchor = GridBagConstraints.EAST;
+        	gbc_inputValidatorProgramNameLabel.gridx = 0;
+        	gbc_inputValidatorProgramNameLabel.gridy = 2;
+        	inputValidatorPane.add(getInputValidatorProgramNameLabel(), gbc_inputValidatorProgramNameLabel);
+        	GridBagConstraints gbc_inputValidatorProgramNameTextField = new GridBagConstraints();
+        	gbc_inputValidatorProgramNameTextField.insets = new Insets(0, 0, 5, 0);
+        	gbc_inputValidatorProgramNameTextField.fill = GridBagConstraints.HORIZONTAL;
+        	gbc_inputValidatorProgramNameTextField.gridx = 1;
+        	gbc_inputValidatorProgramNameTextField.gridy = 2;
+        	inputValidatorPane.add(getInputValidatorProgramNameTextField(), gbc_inputValidatorProgramNameTextField);
+        	GridBagConstraints gbc_lblInputValidatorInvocation = new GridBagConstraints();
+        	gbc_lblInputValidatorInvocation.anchor = GridBagConstraints.EAST;
+        	gbc_lblInputValidatorInvocation.insets = new Insets(0, 0, 5, 5);
+        	gbc_lblInputValidatorInvocation.gridx = 0;
+        	gbc_lblInputValidatorInvocation.gridy = 3;
+        	inputValidatorPane.add(getLblInputValidatorInvocation(), gbc_lblInputValidatorInvocation);
+        	GridBagConstraints gbc_inputValidatorCommandTextField = new GridBagConstraints();
+        	gbc_inputValidatorCommandTextField.insets = new Insets(0, 0, 5, 0);
+        	gbc_inputValidatorCommandTextField.fill = GridBagConstraints.HORIZONTAL;
+        	gbc_inputValidatorCommandTextField.gridx = 1;
+        	gbc_inputValidatorCommandTextField.gridy = 3;
+        	inputValidatorPane.add(getInputValidatorCommandTextField(), gbc_inputValidatorCommandTextField);
+        	GridBagConstraints gbc_testInputDataButton = new GridBagConstraints();
+        	gbc_testInputDataButton.anchor = GridBagConstraints.EAST;
+        	gbc_testInputDataButton.insets = new Insets(0, 0, 0, 5);
+        	gbc_testInputDataButton.gridx = 0;
+        	gbc_testInputDataButton.gridy = 5;
+        	inputValidatorPane.add(getTestInputDataButton(), gbc_testInputDataButton);
+        	GridBagConstraints gbc_useCDPFromDiskCheckbox = new GridBagConstraints();
+        	gbc_useCDPFromDiskCheckbox.anchor = GridBagConstraints.WEST;
+        	gbc_useCDPFromDiskCheckbox.gridx = 1;
+        	gbc_useCDPFromDiskCheckbox.gridy = 5;
+        	inputValidatorPane.add(getUseCDPFromDiskCheckbox(), gbc_useCDPFromDiskCheckbox);
         }
         return inputValidatorPane;
     }
-    private JLabel getTemp_InputValidatorPaneLabel() {
-        if (temp_InputValidatorPaneLabel == null) {
-        	temp_InputValidatorPaneLabel = new JLabel("<Under Construction>");
+    private JLabel getInputValidatorProgramNameLabel() {
+        if (inputValidatorProgramNameLabel == null) {
+        	inputValidatorProgramNameLabel = new JLabel("Input Validator Program: ");
+        	inputValidatorProgramNameLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+        	inputValidatorProgramNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        	inputValidatorProgramNameLabel.setToolTipText("The name, including the full path to it, of the program to be used to validate input data");
         }
-        return temp_InputValidatorPaneLabel;
+        return inputValidatorProgramNameLabel;
+    }
+    private JTextField getInputValidatorProgramNameTextField() {
+        if (inputValidatorProgramNameTextField == null) {
+        	inputValidatorProgramNameTextField = new JTextField();
+        	inputValidatorProgramNameTextField.setColumns(10);
+        }
+        return inputValidatorProgramNameTextField;
+    }
+    private JLabel getLblInputValidatorInvocation() {
+        if (lblInputValidatorInvocation == null) {
+        	lblInputValidatorInvocation = new JLabel("Input Validator command:");
+        	lblInputValidatorInvocation.setToolTipText("The command to be used to invoke the Input Validator");
+        	lblInputValidatorInvocation.setFont(new Font("Tahoma", Font.BOLD, 11));
+        }
+        return lblInputValidatorInvocation;
+    }
+    private JTextField getInputValidatorCommandTextField() {
+        if (inputValidatorCommandTextField == null) {
+        	inputValidatorCommandTextField = new JTextField();
+        	inputValidatorCommandTextField.setColumns(10);
+        }
+        return inputValidatorCommandTextField;
+    }
+    private JCheckBox getUseCDPFromDiskCheckbox() {
+        if (useCDPFromDiskCheckbox == null) {
+        	useCDPFromDiskCheckbox = new JCheckBox("Use CDP on disk instead of input data files already loaded");
+        }
+        return useCDPFromDiskCheckbox;
+    }
+    private JButton getTestInputDataButton() {
+        if (validateInputDataButton == null) {
+        	validateInputDataButton = new JButton("Validate Input Data");
+        	validateInputDataButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        runInputDataValidationTest() ;
+        	    }
+        	});
+        }
+        return validateInputDataButton;
+    }
+    
+    private void runInputDataValidationTest() {
+        // TODO Auto-generated method stub
+        System.out.println ("'Validate Input Data button pushed...");
+    }
+    private Component getVerticalStrut_6() {
+        if (verticalStrut_6 == null) {
+        	verticalStrut_6 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_6;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
