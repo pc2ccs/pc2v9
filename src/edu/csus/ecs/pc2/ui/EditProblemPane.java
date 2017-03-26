@@ -2116,7 +2116,7 @@ public class EditProblemPane extends JPanePlugin {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new Dimension(500, 600));
             mainTabbedPane.insertTab("Data Files", null, getMultipleDataSetPane(), null, 0);
-            mainTabbedPane.insertTab("Validator", null, getValidatorPane(), null, 0);
+            mainTabbedPane.insertTab("Output Validator", null, getOutputValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
             mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);
         }
@@ -2621,11 +2621,11 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes validatorPane
+     * This method initializes the Output Validator Pane
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getValidatorPane() {
+    private JPanel getOutputValidatorPane() {
         if (validatorPane == null) {
             validatorPane = new JPanel();
             validatorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
