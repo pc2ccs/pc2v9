@@ -2819,6 +2819,8 @@ public class EditProblemPane extends JPanePlugin {
     private JCheckBox useCDPFromDiskCheckbox;
     private JButton validateInputDataButton;
     private Component verticalStrut_6;
+    private JPanel defineInputValidatorPanel;
+    private JPanel executeInputValidatorPanel;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -4452,52 +4454,10 @@ public class EditProblemPane extends JPanePlugin {
     private JPanel getInputValidatorPane() {
         if (inputValidatorPane == null) {
         	inputValidatorPane = new JPanel();
-        	GridBagLayout gbl_inputValidatorPane = new GridBagLayout();
-        	gbl_inputValidatorPane.columnWidths = new int[]{212, 50, 0};
-        	gbl_inputValidatorPane.rowHeights = new int[]{20, 20, 40, 40, 60, 40, 0};
-        	gbl_inputValidatorPane.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-        	gbl_inputValidatorPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-        	inputValidatorPane.setLayout(gbl_inputValidatorPane);
-        	GridBagConstraints gbc_verticalStrut_6 = new GridBagConstraints();
-        	gbc_verticalStrut_6.insets = new Insets(0, 0, 5, 5);
-        	gbc_verticalStrut_6.gridx = 0;
-        	gbc_verticalStrut_6.gridy = 0;
-        	inputValidatorPane.add(getVerticalStrut_6(), gbc_verticalStrut_6);
-        	GridBagConstraints gbc_inputValidatorProgramNameLabel = new GridBagConstraints();
-        	gbc_inputValidatorProgramNameLabel.insets = new Insets(0, 0, 5, 5);
-        	gbc_inputValidatorProgramNameLabel.anchor = GridBagConstraints.EAST;
-        	gbc_inputValidatorProgramNameLabel.gridx = 0;
-        	gbc_inputValidatorProgramNameLabel.gridy = 2;
-        	inputValidatorPane.add(getInputValidatorProgramNameLabel(), gbc_inputValidatorProgramNameLabel);
-        	GridBagConstraints gbc_inputValidatorProgramNameTextField = new GridBagConstraints();
-        	gbc_inputValidatorProgramNameTextField.insets = new Insets(0, 0, 5, 0);
-        	gbc_inputValidatorProgramNameTextField.fill = GridBagConstraints.HORIZONTAL;
-        	gbc_inputValidatorProgramNameTextField.gridx = 1;
-        	gbc_inputValidatorProgramNameTextField.gridy = 2;
-        	inputValidatorPane.add(getInputValidatorProgramNameTextField(), gbc_inputValidatorProgramNameTextField);
-        	GridBagConstraints gbc_lblInputValidatorInvocation = new GridBagConstraints();
-        	gbc_lblInputValidatorInvocation.anchor = GridBagConstraints.EAST;
-        	gbc_lblInputValidatorInvocation.insets = new Insets(0, 0, 5, 5);
-        	gbc_lblInputValidatorInvocation.gridx = 0;
-        	gbc_lblInputValidatorInvocation.gridy = 3;
-        	inputValidatorPane.add(getLblInputValidatorInvocation(), gbc_lblInputValidatorInvocation);
-        	GridBagConstraints gbc_inputValidatorCommandTextField = new GridBagConstraints();
-        	gbc_inputValidatorCommandTextField.insets = new Insets(0, 0, 5, 0);
-        	gbc_inputValidatorCommandTextField.fill = GridBagConstraints.HORIZONTAL;
-        	gbc_inputValidatorCommandTextField.gridx = 1;
-        	gbc_inputValidatorCommandTextField.gridy = 3;
-        	inputValidatorPane.add(getInputValidatorCommandTextField(), gbc_inputValidatorCommandTextField);
-        	GridBagConstraints gbc_testInputDataButton = new GridBagConstraints();
-        	gbc_testInputDataButton.anchor = GridBagConstraints.EAST;
-        	gbc_testInputDataButton.insets = new Insets(0, 0, 0, 5);
-        	gbc_testInputDataButton.gridx = 0;
-        	gbc_testInputDataButton.gridy = 5;
-        	inputValidatorPane.add(getTestInputDataButton(), gbc_testInputDataButton);
-        	GridBagConstraints gbc_useCDPFromDiskCheckbox = new GridBagConstraints();
-        	gbc_useCDPFromDiskCheckbox.anchor = GridBagConstraints.WEST;
-        	gbc_useCDPFromDiskCheckbox.gridx = 1;
-        	gbc_useCDPFromDiskCheckbox.gridy = 5;
-        	inputValidatorPane.add(getUseCDPFromDiskCheckbox(), gbc_useCDPFromDiskCheckbox);
+        	inputValidatorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+        	
+        	inputValidatorPane.add(getDefineInputValidatorPanel());
+        	inputValidatorPane.add(getExecuteInputValidatorPanel());
         }
         return inputValidatorPane;
     }
@@ -4559,6 +4519,57 @@ public class EditProblemPane extends JPanePlugin {
         	verticalStrut_6 = Box.createVerticalStrut(20);
         }
         return verticalStrut_6;
+    }
+    private JPanel getDefineInputValidatorPanel() {
+        if (defineInputValidatorPanel == null) {
+            
+        	defineInputValidatorPanel = new JPanel();
+        	defineInputValidatorPanel.setBorder(new TitledBorder(null, "Define Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        	
+        	GridBagLayout gbl_defineInputValidatorPanel = new GridBagLayout();
+        	gbl_defineInputValidatorPanel.columnWidths = new int[]{40, 40};
+        	gbl_defineInputValidatorPanel.rowHeights = new int[]{20, 20};
+        	gbl_defineInputValidatorPanel.columnWeights = new double[]{0.0, 1.0};
+        	gbl_defineInputValidatorPanel.rowWeights = new double[]{0.0, 1.0};
+        	defineInputValidatorPanel.setLayout(gbl_defineInputValidatorPanel);
+        	
+        	GridBagConstraints gbc_inputValidatorProgramNameLabel = new GridBagConstraints();
+        	gbc_inputValidatorProgramNameLabel.anchor = GridBagConstraints.WEST;
+        	gbc_inputValidatorProgramNameLabel.insets = new Insets(0, 0, 0, 5);
+        	gbc_inputValidatorProgramNameLabel.gridx = 0;
+        	gbc_inputValidatorProgramNameLabel.gridy = 0;
+        	defineInputValidatorPanel.add(getInputValidatorProgramNameLabel(), gbc_inputValidatorProgramNameLabel);
+        	
+        	GridBagConstraints gbc_inputValidatorProgramNameTextField = new GridBagConstraints();
+        	gbc_inputValidatorProgramNameTextField.anchor = GridBagConstraints.WEST;
+        	gbc_inputValidatorProgramNameTextField.insets = new Insets(0, 0, 0, 5);
+        	gbc_inputValidatorProgramNameTextField.gridx = 1;
+        	gbc_inputValidatorProgramNameTextField.gridy = 0;
+        	defineInputValidatorPanel.add(getInputValidatorProgramNameTextField(), gbc_inputValidatorProgramNameTextField);
+        	
+        	GridBagConstraints gbc_lblInputValidatorInvocation = new GridBagConstraints();
+        	gbc_lblInputValidatorInvocation.anchor = GridBagConstraints.WEST;
+        	gbc_lblInputValidatorInvocation.insets = new Insets(0, 0, 0, 5);
+        	gbc_lblInputValidatorInvocation.gridx = 0;
+        	gbc_lblInputValidatorInvocation.gridy = 1;
+        	defineInputValidatorPanel.add(getLblInputValidatorInvocation(), gbc_lblInputValidatorInvocation);
+        	
+        	GridBagConstraints gbc_inputValidatorCommandTextField = new GridBagConstraints();
+        	gbc_inputValidatorCommandTextField.anchor = GridBagConstraints.WEST;
+        	gbc_inputValidatorCommandTextField.gridx = 1;
+        	gbc_inputValidatorCommandTextField.gridy = 1;
+        	defineInputValidatorPanel.add(getInputValidatorCommandTextField(), gbc_inputValidatorCommandTextField);
+        }
+        return defineInputValidatorPanel;
+    }
+    private JPanel getExecuteInputValidatorPanel() {
+        if (executeInputValidatorPanel == null) {
+        	executeInputValidatorPanel = new JPanel();
+        	executeInputValidatorPanel.setBorder(new TitledBorder(null, "Execute Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        	executeInputValidatorPanel.add(getTestInputDataButton());
+        	executeInputValidatorPanel.add(getUseCDPFromDiskCheckbox());
+        }
+        return executeInputValidatorPanel;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
