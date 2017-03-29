@@ -8,10 +8,8 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * Unit tests.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ProblemFilesUtilitiesTest extends AbstractTestCase {
 
     private SampleContest sampleContest = new SampleContest();
@@ -33,6 +31,8 @@ public class ProblemFilesUtilitiesTest extends AbstractTestCase {
         IInternalContest contest = sampleContest.createContest(1, 3, 12, 12, true);
 
         Problem problem = contest.getProblems()[0];
+        
+        ensureDirectory(getOutputDataDirectory(this.getName()));
 
         boolean actual = ProblemFilesUtilities.verifyProblemFiles(contest, problem);
         assertFalse("Problem should not have data files", actual);
@@ -44,12 +44,12 @@ public class ProblemFilesUtilitiesTest extends AbstractTestCase {
 
         ensureDirectory(getDataDirectory());
 
-        String filename = getTestFilename("pfut.data.txt");
+        String filename = getOutputTestFilename("pfut.data.txt");
         filename = sampleContest.createSampleDataFile(filename);
         assertFileExists(filename);
         problem.setDataFileName(filename);
 
-        filename = getTestFilename("pfut.answer.txt");
+        filename = getOutputTestFilename("pfut.answer.txt");
         String answerFileName = sampleContest.createSampleDataFile(filename);
         assertFileExists(answerFileName);
         problem.setAnswerFileName(answerFileName);
