@@ -138,6 +138,8 @@ public class AbstractTestCase extends TestCase {
     private boolean debugMode = false;
 
     private Random random  = new Random(System.currentTimeMillis());
+
+    private boolean usingGUI = false;
     
     public AbstractTestCase() {
         super();
@@ -1385,6 +1387,18 @@ public class AbstractTestCase extends TestCase {
         actualFile.delete();
         boolean result = newFile.renameTo(actualFile);
         assertTrue("rename Failed", result);
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public boolean isGui() {
+        return usingGUI;
+    }
+    
+    public void setGUI(boolean useGUI) {
+        this.usingGUI = useGUI;
     }
     
 }

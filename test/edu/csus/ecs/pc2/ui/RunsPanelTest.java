@@ -1,17 +1,17 @@
 package edu.csus.ecs.pc2.ui;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.SampleContest;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test Runs Pane.
@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
  */
 
 // $HeadURL$
-public class RunsPanelTest extends TestCase {
+public class RunsPanelTest extends AbstractTestCase {
 
     /**
      * Add a run judgement and change RunStatus.
@@ -55,6 +55,10 @@ public class RunsPanelTest extends TestCase {
      * Test method for 'edu.csus.ecs.pc2.ui.RunsPanel.getJudgementResultString(Run)'
      */
     public void testGetJudgementResultStringJudge() {
+        
+        if (! isGui()){
+            return;
+        }
 
         SampleContest sampleContest = new SampleContest();
 
@@ -139,7 +143,11 @@ public class RunsPanelTest extends TestCase {
      * Test method for 'edu.csus.ecs.pc2.ui.RunsPanel.getJudgementResultString(Run)'
      */
     public void testGetJudgementResultStringTeam() {
-
+        
+        if (! isGui()){
+            return;
+        }
+        
         SampleContest sampleContest = new SampleContest();
 
         IInternalContest contest = sampleContest.createContest(2, 2, 3, 3, false);
