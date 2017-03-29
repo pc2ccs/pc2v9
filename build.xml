@@ -1,6 +1,4 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
-<!-- $HeadURL$ -->
 <project name="pc2v9" default="jar" basedir=".">
     <description>
         v9 build file
@@ -147,7 +145,7 @@
     
     <!-- test only AllTests.class classes -->
     
-    <target name="test" depends="compile-tests" description="run junit tests">
+    <target name="old_test" depends="compile-tests" description="run junit tests">
         <delete dir="${testresults.dir}"/>
         <mkdir dir="${testresults.xml.dir}"/>
         <junit errorProperty="test.failed" failureProperty="test.failed">
@@ -258,11 +256,7 @@
         </javadoc>
     </target>
     
-   
-   <!-- TODO Bug 1205 - replace test target with testAll target --> 	
-   <!-- test all JUnit classes -->
-    	
-	<target name="testAll" depends="compile-tests" description="run junit tests">
+	<target name="test" depends="compile-tests" description="run junit tests">
 		<delete dir="${testresults.dir}"/>
 		<mkdir dir="${testresults.xml.dir}"/>
 		<junit errorProperty="test.failed" failureProperty="test.failed">
