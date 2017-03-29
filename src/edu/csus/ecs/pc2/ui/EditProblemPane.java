@@ -2826,6 +2826,7 @@ public class EditProblemPane extends JPanePlugin {
     private JPanel inputValidatorFilesOnDiskPanel;
     private JTextField inputValidatorFilesOnDiskTextField;
     private JButton btnChoose;
+    private JButton btnChoose_1;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -4521,25 +4522,30 @@ public class EditProblemPane extends JPanePlugin {
         	defineInputValidatorPanel.setBorder(new TitledBorder(null, "Define Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         	
         	GridBagLayout gbl_defineInputValidatorPanel = new GridBagLayout();
-        	gbl_defineInputValidatorPanel.columnWidths = new int[]{40, 40};
+        	gbl_defineInputValidatorPanel.columnWidths = new int[]{40, 40, 0};
         	gbl_defineInputValidatorPanel.rowHeights = new int[]{20, 20};
-        	gbl_defineInputValidatorPanel.columnWeights = new double[]{0.0, 1.0};
+        	gbl_defineInputValidatorPanel.columnWeights = new double[]{0.0, 1.0, 0.0};
         	gbl_defineInputValidatorPanel.rowWeights = new double[]{0.0, 1.0};
         	defineInputValidatorPanel.setLayout(gbl_defineInputValidatorPanel);
         	
         	GridBagConstraints gbc_inputValidatorProgramNameLabel = new GridBagConstraints();
         	gbc_inputValidatorProgramNameLabel.anchor = GridBagConstraints.WEST;
-        	gbc_inputValidatorProgramNameLabel.insets = new Insets(0, 0, 0, 5);
+        	gbc_inputValidatorProgramNameLabel.insets = new Insets(0, 0, 5, 5);
         	gbc_inputValidatorProgramNameLabel.gridx = 0;
         	gbc_inputValidatorProgramNameLabel.gridy = 0;
         	defineInputValidatorPanel.add(getInputValidatorProgramNameLabel(), gbc_inputValidatorProgramNameLabel);
         	
         	GridBagConstraints gbc_inputValidatorProgramNameTextField = new GridBagConstraints();
         	gbc_inputValidatorProgramNameTextField.anchor = GridBagConstraints.WEST;
-        	gbc_inputValidatorProgramNameTextField.insets = new Insets(0, 0, 0, 5);
+        	gbc_inputValidatorProgramNameTextField.insets = new Insets(0, 0, 5, 5);
         	gbc_inputValidatorProgramNameTextField.gridx = 1;
         	gbc_inputValidatorProgramNameTextField.gridy = 0;
         	defineInputValidatorPanel.add(getInputValidatorProgramNameTextField(), gbc_inputValidatorProgramNameTextField);
+        	GridBagConstraints gbc_btnChoose_1 = new GridBagConstraints();
+        	gbc_btnChoose_1.insets = new Insets(0, 0, 5, 0);
+        	gbc_btnChoose_1.gridx = 2;
+        	gbc_btnChoose_1.gridy = 0;
+        	defineInputValidatorPanel.add(getBtnChoose_1(), gbc_btnChoose_1);
         	
         	GridBagConstraints gbc_lblInputValidatorInvocation = new GridBagConstraints();
         	gbc_lblInputValidatorInvocation.anchor = GridBagConstraints.WEST;
@@ -4549,6 +4555,7 @@ public class EditProblemPane extends JPanePlugin {
         	defineInputValidatorPanel.add(getLblInputValidatorInvocation(), gbc_lblInputValidatorInvocation);
         	
         	GridBagConstraints gbc_inputValidatorCommandTextField = new GridBagConstraints();
+        	gbc_inputValidatorCommandTextField.insets = new Insets(0, 0, 0, 5);
         	gbc_inputValidatorCommandTextField.anchor = GridBagConstraints.WEST;
         	gbc_inputValidatorCommandTextField.gridx = 1;
         	gbc_inputValidatorCommandTextField.gridy = 1;
@@ -4586,7 +4593,7 @@ public class EditProblemPane extends JPanePlugin {
     }
     private JRadioButton getRdbtnNewFilesJust() {
         if (rdbtnNewFilesJust == null) {
-        	rdbtnNewFilesJust = new JRadioButton("New files just loaded via \"Input Data Files\" pane");
+        	rdbtnNewFilesJust = new JRadioButton("Files just loaded via \"Input Data Files\" pane");
         }
         return rdbtnNewFilesJust;
     }
@@ -4617,6 +4624,12 @@ public class EditProblemPane extends JPanePlugin {
         	btnChoose = new JButton("Choose...");
         }
         return btnChoose;
+    }
+    private JButton getBtnChoose_1() {
+        if (btnChoose_1 == null) {
+        	btnChoose_1 = new JButton("Choose...");
+        }
+        return btnChoose_1;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
