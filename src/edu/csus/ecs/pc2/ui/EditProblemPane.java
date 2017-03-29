@@ -2816,11 +2816,16 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField inputValidatorProgramNameTextField;
     private JLabel lblInputValidatorInvocation;
     private JTextField inputValidatorCommandTextField;
-    private JCheckBox useCDPFromDiskCheckbox;
     private JButton validateInputDataButton;
-    private Component verticalStrut_6;
     private JPanel defineInputValidatorPanel;
     private JPanel executeInputValidatorPanel;
+    private JPanel inputValidatorDataFilesPanel;
+    private JRadioButton rdbtnFilesPreviouslyLoaded;
+    private JRadioButton rdbtnNewFilesJust;
+    private JRadioButton rdbtnFilesOnDisk;
+    private JPanel inputValidatorFilesOnDiskPanel;
+    private JTextField inputValidatorFilesOnDiskTextField;
+    private JButton btnChoose;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -4492,15 +4497,9 @@ public class EditProblemPane extends JPanePlugin {
         }
         return inputValidatorCommandTextField;
     }
-    private JCheckBox getUseCDPFromDiskCheckbox() {
-        if (useCDPFromDiskCheckbox == null) {
-        	useCDPFromDiskCheckbox = new JCheckBox("Use CDP on disk instead of input data files already loaded");
-        }
-        return useCDPFromDiskCheckbox;
-    }
     private JButton getTestInputDataButton() {
         if (validateInputDataButton == null) {
-        	validateInputDataButton = new JButton("Validate Input Data");
+        	validateInputDataButton = new JButton("Run Input Validator");
         	validateInputDataButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        runInputDataValidationTest() ;
@@ -4514,12 +4513,7 @@ public class EditProblemPane extends JPanePlugin {
         // TODO Auto-generated method stub
         System.out.println ("'Validate Input Data button pushed...");
     }
-    private Component getVerticalStrut_6() {
-        if (verticalStrut_6 == null) {
-        	verticalStrut_6 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_6;
-    }
+
     private JPanel getDefineInputValidatorPanel() {
         if (defineInputValidatorPanel == null) {
             
@@ -4567,9 +4561,62 @@ public class EditProblemPane extends JPanePlugin {
         	executeInputValidatorPanel = new JPanel();
         	executeInputValidatorPanel.setBorder(new TitledBorder(null, "Execute Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         	executeInputValidatorPanel.add(getTestInputDataButton());
-        	executeInputValidatorPanel.add(getUseCDPFromDiskCheckbox());
+        	executeInputValidatorPanel.add(getInputValidatorDataFilesPanel());
         }
         return executeInputValidatorPanel;
+    }
+    private JPanel getInputValidatorDataFilesPanel() {
+        if (inputValidatorDataFilesPanel == null) {
+        	inputValidatorDataFilesPanel = new JPanel();
+        	inputValidatorDataFilesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        	inputValidatorDataFilesPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Input Data Files to Validate:", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+        	inputValidatorDataFilesPanel.setLayout(new BoxLayout(inputValidatorDataFilesPanel, BoxLayout.Y_AXIS));
+        	inputValidatorDataFilesPanel.add(getRdbtnFilesPreviouslyLoaded());
+        	inputValidatorDataFilesPanel.add(getRdbtnNewFilesJust());
+        	inputValidatorDataFilesPanel.add(getInputValidatorFilesOnDiskPanel());
+        }
+        return inputValidatorDataFilesPanel;
+    }
+    private JRadioButton getRdbtnFilesPreviouslyLoaded() {
+        if (rdbtnFilesPreviouslyLoaded == null) {
+        	rdbtnFilesPreviouslyLoaded = new JRadioButton("Files previously loaded into PC2");
+        	rdbtnFilesPreviouslyLoaded.setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        return rdbtnFilesPreviouslyLoaded;
+    }
+    private JRadioButton getRdbtnNewFilesJust() {
+        if (rdbtnNewFilesJust == null) {
+        	rdbtnNewFilesJust = new JRadioButton("New files just loaded via \"Input Data Files\" pane");
+        }
+        return rdbtnNewFilesJust;
+    }
+    private JRadioButton getRdbtnFilesOnDisk() {
+        if (rdbtnFilesOnDisk == null) {
+        	rdbtnFilesOnDisk = new JRadioButton("Files on disk in folder: ");
+        }
+        return rdbtnFilesOnDisk;
+    }
+    private JPanel getInputValidatorFilesOnDiskPanel() {
+        if (inputValidatorFilesOnDiskPanel == null) {
+        	inputValidatorFilesOnDiskPanel = new JPanel();
+        	inputValidatorFilesOnDiskPanel.add(getRdbtnFilesOnDisk());
+        	inputValidatorFilesOnDiskPanel.add(getInputValidatorFilesOnDiskTextField());
+        	inputValidatorFilesOnDiskPanel.add(getBtnChoose());
+        }
+        return inputValidatorFilesOnDiskPanel;
+    }
+    private JTextField getInputValidatorFilesOnDiskTextField() {
+        if (inputValidatorFilesOnDiskTextField == null) {
+        	inputValidatorFilesOnDiskTextField = new JTextField();
+        	inputValidatorFilesOnDiskTextField.setColumns(10);
+        }
+        return inputValidatorFilesOnDiskTextField;
+    }
+    private JButton getBtnChoose() {
+        if (btnChoose == null) {
+        	btnChoose = new JButton("Choose...");
+        }
+        return btnChoose;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
