@@ -68,6 +68,8 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 import java.awt.Font;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 /**
  * Add/Edit Problem Pane.
@@ -2827,6 +2829,21 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField inputValidatorFilesOnDiskTextField;
     private JButton btnChoose;
     private JButton btnChoose_1;
+    private JPanel inputValidationResultDetailsPanel;
+    private JPanel resultsHeaderPanel;
+    private JScrollPane resultsScrollPane;
+    private JTable resultsTable;
+    private JLabel fileNameColHeaderLabel;
+    private Component horizontalGlue;
+    private JLabel resultColHeaderLabel;
+    private Component horizontalGlue_1;
+    private JLabel stdOutColHeaderLabel;
+    private Component horizontalGlue_2;
+    private JLabel stdErrColHeaderLabel;
+    private JPanel inputValidationResultSummaryPanel;
+    private JLabel inputValidationResultsSummaryLabel;
+    private JLabel inputValidationResultSummaryTextLabel;
+    private JPanel inputValidationResultPanel;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -4464,6 +4481,7 @@ public class EditProblemPane extends JPanePlugin {
         	
         	inputValidatorPane.add(getDefineInputValidatorPanel());
         	inputValidatorPane.add(getExecuteInputValidatorPanel());
+        	inputValidatorPane.add(getInputValidationResultPanel());
         }
         return inputValidatorPane;
     }
@@ -4630,6 +4648,115 @@ public class EditProblemPane extends JPanePlugin {
         	btnChoose_1 = new JButton("Choose...");
         }
         return btnChoose_1;
+    }
+    private JPanel getInputValidationResultDetailsPanel() {
+        if (inputValidationResultDetailsPanel == null) {
+        	inputValidationResultDetailsPanel = new JPanel();
+        	inputValidationResultDetailsPanel.setLayout(new BorderLayout(0, 0));
+        	inputValidationResultDetailsPanel.add(getResultsHeaderPanel(), BorderLayout.NORTH);
+        	inputValidationResultDetailsPanel.add(getResultsScrollPane(), BorderLayout.CENTER);        	
+        }
+        return inputValidationResultDetailsPanel;
+    }
+    private JPanel getResultsHeaderPanel() {
+        if (resultsHeaderPanel == null) {
+        	resultsHeaderPanel = new JPanel();
+        	resultsHeaderPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        	resultsHeaderPanel.add(getFileNameColHeaderLabel());
+        	resultsHeaderPanel.add(getHorizontalGlue());
+        	resultsHeaderPanel.add(getResultColHeaderLabel());
+        	resultsHeaderPanel.add(getHorizontalGlue_1());
+        	resultsHeaderPanel.add(getStdOutColHeaderLabel());
+        	resultsHeaderPanel.add(getHorizontalGlue_2());
+        	resultsHeaderPanel.add(getStdErrColHeaderLabel());
+        }
+        return resultsHeaderPanel;
+    }
+    private JScrollPane getResultsScrollPane() {
+        if (resultsScrollPane == null) {
+        	resultsScrollPane = new JScrollPane();
+        	resultsScrollPane.setViewportView(getResultsTable());
+        }
+        return resultsScrollPane;
+    }
+    private JTable getResultsTable() {
+        if (resultsTable == null) {
+        	resultsTable = new JTable(12,4);
+        	resultsTable.setValueAt(true, 0, 0);
+        }
+        return resultsTable;
+    }
+    private JLabel getFileNameColHeaderLabel() {
+        if (fileNameColHeaderLabel == null) {
+        	fileNameColHeaderLabel = new JLabel("File");
+        }
+        return fileNameColHeaderLabel;
+    }
+    private Component getHorizontalGlue() {
+        if (horizontalGlue == null) {
+        	horizontalGlue = Box.createHorizontalGlue();
+        }
+        return horizontalGlue;
+    }
+    private JLabel getResultColHeaderLabel() {
+        if (resultColHeaderLabel == null) {
+        	resultColHeaderLabel = new JLabel("Result");
+        }
+        return resultColHeaderLabel;
+    }
+    private Component getHorizontalGlue_1() {
+        if (horizontalGlue_1 == null) {
+        	horizontalGlue_1 = Box.createHorizontalGlue();
+        }
+        return horizontalGlue_1;
+    }
+    private JLabel getStdOutColHeaderLabel() {
+        if (stdOutColHeaderLabel == null) {
+        	stdOutColHeaderLabel = new JLabel("Validator StdOut");
+        }
+        return stdOutColHeaderLabel;
+    }
+    private Component getHorizontalGlue_2() {
+        if (horizontalGlue_2 == null) {
+        	horizontalGlue_2 = Box.createHorizontalGlue();
+        }
+        return horizontalGlue_2;
+    }
+    private JLabel getStdErrColHeaderLabel() {
+        if (stdErrColHeaderLabel == null) {
+        	stdErrColHeaderLabel = new JLabel("Validator StdErr");
+        }
+        return stdErrColHeaderLabel;
+    }
+    private JPanel getInputValidationResultSummaryPanel() {
+        if (inputValidationResultSummaryPanel == null) {
+        	inputValidationResultSummaryPanel = new JPanel();
+        	inputValidationResultSummaryPanel.add(getInputValidationResultsSummaryLabel());
+        	inputValidationResultSummaryPanel.add(getInputValidationResultSummaryTextLabel());
+        }
+        return inputValidationResultSummaryPanel;
+    }
+    private JLabel getInputValidationResultsSummaryLabel() {
+        if (inputValidationResultsSummaryLabel == null) {
+        	inputValidationResultsSummaryLabel = new JLabel("Input Validation Overall Result: ");
+        }
+        return inputValidationResultsSummaryLabel;
+    }
+    private JLabel getInputValidationResultSummaryTextLabel() {
+        if (inputValidationResultSummaryTextLabel == null) {
+        	inputValidationResultSummaryTextLabel = new JLabel("<Undefined>");
+        }
+        return inputValidationResultSummaryTextLabel;
+    }
+    private JPanel getInputValidationResultPanel() {
+        if (inputValidationResultPanel == null) {
+        	inputValidationResultPanel = new JPanel();
+        	inputValidationResultPanel.setBorder(new TitledBorder(null, "Input Validation Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        	inputValidationResultPanel.setLayout(new BoxLayout(inputValidationResultPanel, BoxLayout.Y_AXIS));
+        	inputValidationResultPanel.add(getInputValidationResultSummaryPanel());
+        	inputValidationResultPanel.add(getInputValidationResultDetailsPanel());
+        }
+        return inputValidationResultPanel;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
