@@ -2826,9 +2826,7 @@ public class EditProblemPane extends JPanePlugin {
     private JPanel executeInputValidatorPanel;
     private JPanel inputValidatorDataFilesPanel;
     private JRadioButton rdbtnFilesPreviouslyLoaded;
-    private JRadioButton rdbtnNewFilesJust;
-    private JRadioButton rdbtnFilesOnDisk;
-    private JPanel inputValidatorFilesOnDiskPanel;
+    private JRadioButton rdbtnFilesJustLoaded;
     private JTextField inputValidatorFilesOnDiskTextField;
     private JButton btnChoose;
     private JButton btnChoose_1;
@@ -2844,6 +2842,10 @@ public class EditProblemPane extends JPanePlugin {
     private Component verticalStrut_8;
     private Component verticalStrut_9;
     private Component verticalStrut_10;
+    private Component verticalStrut_11;
+    private JRadioButton rdbtnFilesOnDiskInFolder;
+    private Component horizontalStrut_3;
+    private Component horizontalStrut_4;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -4503,6 +4505,7 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField getInputValidatorProgramNameTextField() {
         if (inputValidatorProgramNameTextField == null) {
         	inputValidatorProgramNameTextField = new JTextField();
+        	inputValidatorProgramNameTextField.setPreferredSize(new Dimension(300, 25));
         	inputValidatorProgramNameTextField.setMinimumSize(new Dimension(300, 25));
         	inputValidatorProgramNameTextField.setColumns(50);
         }
@@ -4520,6 +4523,7 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField getInputValidatorCommandTextField() {
         if (inputValidatorCommandTextField == null) {
         	inputValidatorCommandTextField = new JTextField();
+        	inputValidatorCommandTextField.setPreferredSize(new Dimension(300, 25));
         	inputValidatorCommandTextField.setMinimumSize(new Dimension(300, 25));
         	inputValidatorCommandTextField.setColumns(50);
         }
@@ -4539,7 +4543,7 @@ public class EditProblemPane extends JPanePlugin {
     
     private void runInputDataValidationTest() {
         // TODO Auto-generated method stub
-        System.out.println ("'Validate Input Data button pushed...");
+        System.out.println ("'Run Input Validator' button pushed...");
     }
 
     private JPanel getDefineInputValidatorPanel() {
@@ -4549,15 +4553,15 @@ public class EditProblemPane extends JPanePlugin {
         	defineInputValidatorPanel.setBorder(new TitledBorder(null, "Define Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         	
         	GridBagLayout gbl_defineInputValidatorPanel = new GridBagLayout();
-        	gbl_defineInputValidatorPanel.columnWidths = new int[] {20, 40, 40};
+        	gbl_defineInputValidatorPanel.columnWidths = new int[] {20, 60, 60};
         	gbl_defineInputValidatorPanel.rowHeights = new int[]{20, 20};
-        	gbl_defineInputValidatorPanel.columnWeights = new double[]{0.0, 1.0, 0.0};
+        	gbl_defineInputValidatorPanel.columnWeights = new double[]{0.0, 0.0, 0.0};
         	gbl_defineInputValidatorPanel.rowWeights = new double[]{0.0, 1.0};
         	defineInputValidatorPanel.setLayout(gbl_defineInputValidatorPanel);
         	
         	GridBagConstraints gbc_inputValidatorProgramNameLabel = new GridBagConstraints();
-        	gbc_inputValidatorProgramNameLabel.anchor = GridBagConstraints.WEST;
-        	gbc_inputValidatorProgramNameLabel.insets = new Insets(0, 0, 5, 5);
+        	gbc_inputValidatorProgramNameLabel.anchor = GridBagConstraints.EAST;
+        	gbc_inputValidatorProgramNameLabel.insets = new Insets(0, 20, 5, 0);
         	gbc_inputValidatorProgramNameLabel.gridx = 0;
         	gbc_inputValidatorProgramNameLabel.gridy = 0;
         	defineInputValidatorPanel.add(getInputValidatorProgramNameLabel(), gbc_inputValidatorProgramNameLabel);
@@ -4570,20 +4574,21 @@ public class EditProblemPane extends JPanePlugin {
         	defineInputValidatorPanel.add(getInputValidatorProgramNameTextField(), gbc_inputValidatorProgramNameTextField);
         	
         	GridBagConstraints gbc_btnChoose_1 = new GridBagConstraints();
-        	gbc_btnChoose_1.insets = new Insets(0, 0, 5, 5);
+        	gbc_btnChoose_1.anchor = GridBagConstraints.WEST;
+        	gbc_btnChoose_1.insets = new Insets(0, 0, 0, 5);
         	gbc_btnChoose_1.gridx = 2;
         	gbc_btnChoose_1.gridy = 0;
         	defineInputValidatorPanel.add(getBtnChoose_1(), gbc_btnChoose_1);
         	
         	GridBagConstraints gbc_lblInputValidatorInvocation = new GridBagConstraints();
-        	gbc_lblInputValidatorInvocation.anchor = GridBagConstraints.WEST;
-        	gbc_lblInputValidatorInvocation.insets = new Insets(0, 0, 0, 5);
+        	gbc_lblInputValidatorInvocation.anchor = GridBagConstraints.EAST;
+        	gbc_lblInputValidatorInvocation.insets = new Insets(0, 20, 5, 0);
         	gbc_lblInputValidatorInvocation.gridx = 0;
         	gbc_lblInputValidatorInvocation.gridy = 1;
         	defineInputValidatorPanel.add(getLblInputValidatorInvocation(), gbc_lblInputValidatorInvocation);
         	
         	GridBagConstraints gbc_inputValidatorCommandTextField = new GridBagConstraints();
-        	gbc_inputValidatorCommandTextField.insets = new Insets(0, 0, 0, 5);
+        	gbc_inputValidatorCommandTextField.insets = new Insets(0, 0, 5, 5);
         	gbc_inputValidatorCommandTextField.anchor = GridBagConstraints.WEST;
         	gbc_inputValidatorCommandTextField.gridx = 1;
         	gbc_inputValidatorCommandTextField.gridy = 1;
@@ -4595,7 +4600,10 @@ public class EditProblemPane extends JPanePlugin {
         if (executeInputValidatorPanel == null) {
         	executeInputValidatorPanel = new JPanel();
         	executeInputValidatorPanel.setBorder(new TitledBorder(null, "Execute Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        	executeInputValidatorPanel.setLayout(new BoxLayout(executeInputValidatorPanel, BoxLayout.X_AXIS));
+        	executeInputValidatorPanel.add(getHorizontalStrut_3());
         	executeInputValidatorPanel.add(getTestInputDataButton());
+        	executeInputValidatorPanel.add(getHorizontalStrut_4());
         	executeInputValidatorPanel.add(getInputValidatorDataFilesPanel());
         }
         return executeInputValidatorPanel;
@@ -4605,10 +4613,43 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorDataFilesPanel = new JPanel();
         	inputValidatorDataFilesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         	inputValidatorDataFilesPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Input Data Files to Validate:", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        	inputValidatorDataFilesPanel.setLayout(new BoxLayout(inputValidatorDataFilesPanel, BoxLayout.Y_AXIS));
-        	inputValidatorDataFilesPanel.add(getRdbtnFilesPreviouslyLoaded());
-        	inputValidatorDataFilesPanel.add(getRdbtnNewFilesJust());
-        	inputValidatorDataFilesPanel.add(getInputValidatorFilesOnDiskPanel());
+        	GridBagLayout gbl_inputValidatorDataFilesPanel = new GridBagLayout();
+        	gbl_inputValidatorDataFilesPanel.columnWidths = new int[] {50, 200, 50};
+        	gbl_inputValidatorDataFilesPanel.rowHeights = new int[] {25, 25, 25};
+        	gbl_inputValidatorDataFilesPanel.columnWeights = new double[]{0.0, 0.0, 0.0};
+        	gbl_inputValidatorDataFilesPanel.rowWeights = new double[]{0.0, 0.0, 0.0};
+        	inputValidatorDataFilesPanel.setLayout(gbl_inputValidatorDataFilesPanel);
+        	GridBagConstraints gbc_rdbtnFilesPreviouslyLoaded = new GridBagConstraints();
+        	gbc_rdbtnFilesPreviouslyLoaded.gridwidth = 2;
+        	gbc_rdbtnFilesPreviouslyLoaded.anchor = GridBagConstraints.WEST;
+        	gbc_rdbtnFilesPreviouslyLoaded.insets = new Insets(0, 0, 5, 5);
+        	gbc_rdbtnFilesPreviouslyLoaded.gridx = 0;
+        	gbc_rdbtnFilesPreviouslyLoaded.gridy = 0;
+        	inputValidatorDataFilesPanel.add(getRdbtnFilesPreviouslyLoaded(), gbc_rdbtnFilesPreviouslyLoaded);
+        	GridBagConstraints gbc_rdbtnFilesJustLoaded = new GridBagConstraints();
+        	gbc_rdbtnFilesJustLoaded.gridwidth = 2;
+        	gbc_rdbtnFilesJustLoaded.anchor = GridBagConstraints.WEST;
+        	gbc_rdbtnFilesJustLoaded.insets = new Insets(0, 0, 5, 5);
+        	gbc_rdbtnFilesJustLoaded.gridx = 0;
+        	gbc_rdbtnFilesJustLoaded.gridy = 1;
+        	inputValidatorDataFilesPanel.add(getRdbtnFilesJustLoaded(), gbc_rdbtnFilesJustLoaded);
+        	GridBagConstraints gbc_rdbtnFilesOnDiskInFolder = new GridBagConstraints();
+        	gbc_rdbtnFilesOnDiskInFolder.anchor = GridBagConstraints.WEST;
+        	gbc_rdbtnFilesOnDiskInFolder.insets = new Insets(0, 0, 0, 5);
+        	gbc_rdbtnFilesOnDiskInFolder.gridx = 0;
+        	gbc_rdbtnFilesOnDiskInFolder.gridy = 2;
+        	inputValidatorDataFilesPanel.add(getRdbtnFilesOnDiskInFolder(), gbc_rdbtnFilesOnDiskInFolder);
+        	GridBagConstraints gbc_inputValidatorFilesOnDiskTextField = new GridBagConstraints();
+        	gbc_inputValidatorFilesOnDiskTextField.anchor = GridBagConstraints.WEST;
+        	gbc_inputValidatorFilesOnDiskTextField.insets = new Insets(0, 0, 5, 5);
+        	gbc_inputValidatorFilesOnDiskTextField.gridx = 1;
+        	gbc_inputValidatorFilesOnDiskTextField.gridy = 2;
+        	inputValidatorDataFilesPanel.add(getInputValidatorFilesOnDiskTextField(), gbc_inputValidatorFilesOnDiskTextField);
+        	GridBagConstraints gbc_btnChoose = new GridBagConstraints();
+        	gbc_btnChoose.insets = new Insets(0, 0, 0, 5);
+        	gbc_btnChoose.gridx = 2;
+        	gbc_btnChoose.gridy = 2;
+        	inputValidatorDataFilesPanel.add(getBtnChoose(), gbc_btnChoose);
         }
         return inputValidatorDataFilesPanel;
     }
@@ -4619,31 +4660,18 @@ public class EditProblemPane extends JPanePlugin {
         }
         return rdbtnFilesPreviouslyLoaded;
     }
-    private JRadioButton getRdbtnNewFilesJust() {
-        if (rdbtnNewFilesJust == null) {
-        	rdbtnNewFilesJust = new JRadioButton("Files just loaded via \"Input Data Files\" pane");
+    private JRadioButton getRdbtnFilesJustLoaded() {
+        if (rdbtnFilesJustLoaded == null) {
+        	rdbtnFilesJustLoaded = new JRadioButton("Files just loaded via \"Input Data Files\" pane");
         }
-        return rdbtnNewFilesJust;
-    }
-    private JRadioButton getRdbtnFilesOnDisk() {
-        if (rdbtnFilesOnDisk == null) {
-        	rdbtnFilesOnDisk = new JRadioButton("Files on disk in folder: ");
-        }
-        return rdbtnFilesOnDisk;
-    }
-    private JPanel getInputValidatorFilesOnDiskPanel() {
-        if (inputValidatorFilesOnDiskPanel == null) {
-        	inputValidatorFilesOnDiskPanel = new JPanel();
-        	inputValidatorFilesOnDiskPanel.add(getRdbtnFilesOnDisk());
-        	inputValidatorFilesOnDiskPanel.add(getInputValidatorFilesOnDiskTextField());
-        	inputValidatorFilesOnDiskPanel.add(getBtnChoose());
-        }
-        return inputValidatorFilesOnDiskPanel;
+        return rdbtnFilesJustLoaded;
     }
     private JTextField getInputValidatorFilesOnDiskTextField() {
         if (inputValidatorFilesOnDiskTextField == null) {
         	inputValidatorFilesOnDiskTextField = new JTextField();
-        	inputValidatorFilesOnDiskTextField.setColumns(10);
+        	inputValidatorFilesOnDiskTextField.setMinimumSize(new Dimension(300, 25));
+        	inputValidatorFilesOnDiskTextField.setPreferredSize(new Dimension(300, 25));
+        	inputValidatorFilesOnDiskTextField.setColumns(50);
         }
         return inputValidatorFilesOnDiskTextField;
     }
@@ -4656,6 +4684,8 @@ public class EditProblemPane extends JPanePlugin {
     private JButton getBtnChoose_1() {
         if (btnChoose_1 == null) {
         	btnChoose_1 = new JButton("Choose...");
+        	btnChoose_1.setPreferredSize(new Dimension(81, 25));
+        	btnChoose_1.setMinimumSize(new Dimension(81, 25));
         }
         return btnChoose_1;
     }
@@ -4726,6 +4756,7 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidationResultPanel.setLayout(new BoxLayout(inputValidationResultPanel, BoxLayout.Y_AXIS));
         	inputValidationResultPanel.add(getVerticalStrut_7());
         	inputValidationResultPanel.add(getInputValidationResultSummaryPanel());
+        	inputValidationResultPanel.add(getVerticalStrut_11());
         	inputValidationResultPanel.add(getInputValidationResultDetailsPanel());
         }
         return inputValidationResultPanel;
@@ -4759,6 +4790,30 @@ public class EditProblemPane extends JPanePlugin {
         	verticalStrut_10 = Box.createVerticalStrut(20);
         }
         return verticalStrut_10;
+    }
+    private Component getVerticalStrut_11() {
+        if (verticalStrut_11 == null) {
+        	verticalStrut_11 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_11;
+    }
+    private JRadioButton getRdbtnFilesOnDiskInFolder() {
+        if (rdbtnFilesOnDiskInFolder == null) {
+        	rdbtnFilesOnDiskInFolder = new JRadioButton("Files on disk in folder:");
+        }
+        return rdbtnFilesOnDiskInFolder;
+    }
+    private Component getHorizontalStrut_3() {
+        if (horizontalStrut_3 == null) {
+        	horizontalStrut_3 = Box.createHorizontalStrut(20);
+        }
+        return horizontalStrut_3;
+    }
+    private Component getHorizontalStrut_4() {
+        if (horizontalStrut_4 == null) {
+        	horizontalStrut_4 = Box.createHorizontalStrut(20);
+        }
+        return horizontalStrut_4;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
