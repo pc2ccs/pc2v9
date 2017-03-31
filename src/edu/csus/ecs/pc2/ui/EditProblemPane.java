@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -41,7 +42,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -49,6 +52,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.JTableHeader;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -67,9 +71,6 @@ import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
-import java.awt.Font;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 
 /**
  * Add/Edit Problem Pane.
@@ -271,6 +272,8 @@ public class EditProblemPane extends JPanePlugin {
     //a temporary variables to track changes in the command line
     private String localPC2InterfaceCustomValidatorCommandLine;
     private String localClicsInterfaceCustomValidatorCommandLine;
+    
+    private InputValidationResultsTableModel inputValidationResultsTableModel = new InputValidationResultsTableModel();
 
     /**
      * This method initializes
@@ -287,7 +290,7 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(539, 630));
+        this.setSize(new Dimension(544, 681));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -2830,20 +2833,17 @@ public class EditProblemPane extends JPanePlugin {
     private JButton btnChoose;
     private JButton btnChoose_1;
     private JPanel inputValidationResultDetailsPanel;
-    private JPanel resultsHeaderPanel;
     private JScrollPane resultsScrollPane;
     private JTable resultsTable;
-    private JLabel fileNameColHeaderLabel;
-    private Component horizontalGlue;
-    private JLabel resultColHeaderLabel;
-    private Component horizontalGlue_1;
-    private JLabel stdOutColHeaderLabel;
-    private Component horizontalGlue_2;
-    private JLabel stdErrColHeaderLabel;
     private JPanel inputValidationResultSummaryPanel;
     private JLabel inputValidationResultsSummaryLabel;
     private JLabel inputValidationResultSummaryTextLabel;
     private JPanel inputValidationResultPanel;
+    private Component verticalStrut_6;
+    private Component verticalStrut_7;
+    private Component verticalStrut_8;
+    private Component verticalStrut_9;
+    private Component verticalStrut_10;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -4478,17 +4478,23 @@ public class EditProblemPane extends JPanePlugin {
         if (inputValidatorPane == null) {
         	inputValidatorPane = new JPanel();
         	inputValidatorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+        	inputValidatorPane.setLayout(new BoxLayout(inputValidatorPane, BoxLayout.Y_AXIS));
+        	inputValidatorPane.add(getVerticalStrut_8());
         	
         	inputValidatorPane.add(getDefineInputValidatorPanel());
+        	inputValidatorPane.add(getVerticalStrut_9());
         	inputValidatorPane.add(getExecuteInputValidatorPanel());
+        	inputValidatorPane.add(getVerticalStrut_10());
         	inputValidatorPane.add(getInputValidationResultPanel());
+        	inputValidatorPane.add(getVerticalStrut_6());
         }
         return inputValidatorPane;
     }
     private JLabel getInputValidatorProgramNameLabel() {
         if (inputValidatorProgramNameLabel == null) {
         	inputValidatorProgramNameLabel = new JLabel("Input Validator Program: ");
-        	inputValidatorProgramNameLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+        	inputValidatorProgramNameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        	inputValidatorProgramNameLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
         	inputValidatorProgramNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         	inputValidatorProgramNameLabel.setToolTipText("The name, including the full path to it, of the program to be used to validate input data");
         }
@@ -4497,22 +4503,25 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField getInputValidatorProgramNameTextField() {
         if (inputValidatorProgramNameTextField == null) {
         	inputValidatorProgramNameTextField = new JTextField();
-        	inputValidatorProgramNameTextField.setColumns(10);
+        	inputValidatorProgramNameTextField.setMinimumSize(new Dimension(300, 25));
+        	inputValidatorProgramNameTextField.setColumns(50);
         }
         return inputValidatorProgramNameTextField;
     }
     private JLabel getLblInputValidatorInvocation() {
         if (lblInputValidatorInvocation == null) {
         	lblInputValidatorInvocation = new JLabel("Input Validator command:");
+        	lblInputValidatorInvocation.setAlignmentX(Component.RIGHT_ALIGNMENT);
         	lblInputValidatorInvocation.setToolTipText("The command to be used to invoke the Input Validator");
-        	lblInputValidatorInvocation.setFont(new Font("Tahoma", Font.BOLD, 11));
+        	lblInputValidatorInvocation.setFont(new Font("Tahoma", Font.PLAIN, 11));
         }
         return lblInputValidatorInvocation;
     }
     private JTextField getInputValidatorCommandTextField() {
         if (inputValidatorCommandTextField == null) {
         	inputValidatorCommandTextField = new JTextField();
-        	inputValidatorCommandTextField.setColumns(10);
+        	inputValidatorCommandTextField.setMinimumSize(new Dimension(300, 25));
+        	inputValidatorCommandTextField.setColumns(50);
         }
         return inputValidatorCommandTextField;
     }
@@ -4540,7 +4549,7 @@ public class EditProblemPane extends JPanePlugin {
         	defineInputValidatorPanel.setBorder(new TitledBorder(null, "Define Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         	
         	GridBagLayout gbl_defineInputValidatorPanel = new GridBagLayout();
-        	gbl_defineInputValidatorPanel.columnWidths = new int[]{40, 40, 0};
+        	gbl_defineInputValidatorPanel.columnWidths = new int[] {20, 40, 40};
         	gbl_defineInputValidatorPanel.rowHeights = new int[]{20, 20};
         	gbl_defineInputValidatorPanel.columnWeights = new double[]{0.0, 1.0, 0.0};
         	gbl_defineInputValidatorPanel.rowWeights = new double[]{0.0, 1.0};
@@ -4559,8 +4568,9 @@ public class EditProblemPane extends JPanePlugin {
         	gbc_inputValidatorProgramNameTextField.gridx = 1;
         	gbc_inputValidatorProgramNameTextField.gridy = 0;
         	defineInputValidatorPanel.add(getInputValidatorProgramNameTextField(), gbc_inputValidatorProgramNameTextField);
+        	
         	GridBagConstraints gbc_btnChoose_1 = new GridBagConstraints();
-        	gbc_btnChoose_1.insets = new Insets(0, 0, 5, 0);
+        	gbc_btnChoose_1.insets = new Insets(0, 0, 5, 5);
         	gbc_btnChoose_1.gridx = 2;
         	gbc_btnChoose_1.gridy = 0;
         	defineInputValidatorPanel.add(getBtnChoose_1(), gbc_btnChoose_1);
@@ -4653,24 +4663,9 @@ public class EditProblemPane extends JPanePlugin {
         if (inputValidationResultDetailsPanel == null) {
         	inputValidationResultDetailsPanel = new JPanel();
         	inputValidationResultDetailsPanel.setLayout(new BorderLayout(0, 0));
-        	inputValidationResultDetailsPanel.add(getResultsHeaderPanel(), BorderLayout.NORTH);
         	inputValidationResultDetailsPanel.add(getResultsScrollPane(), BorderLayout.CENTER);        	
         }
         return inputValidationResultDetailsPanel;
-    }
-    private JPanel getResultsHeaderPanel() {
-        if (resultsHeaderPanel == null) {
-        	resultsHeaderPanel = new JPanel();
-        	resultsHeaderPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        	resultsHeaderPanel.add(getFileNameColHeaderLabel());
-        	resultsHeaderPanel.add(getHorizontalGlue());
-        	resultsHeaderPanel.add(getResultColHeaderLabel());
-        	resultsHeaderPanel.add(getHorizontalGlue_1());
-        	resultsHeaderPanel.add(getStdOutColHeaderLabel());
-        	resultsHeaderPanel.add(getHorizontalGlue_2());
-        	resultsHeaderPanel.add(getStdErrColHeaderLabel());
-        }
-        return resultsHeaderPanel;
     }
     private JScrollPane getResultsScrollPane() {
         if (resultsScrollPane == null) {
@@ -4681,52 +4676,28 @@ public class EditProblemPane extends JPanePlugin {
     }
     private JTable getResultsTable() {
         if (resultsTable == null) {
-        	resultsTable = new JTable(12,4);
-        	resultsTable.setValueAt(true, 0, 0);
+        	resultsTable = new JTable(inputValidationResultsTableModel);
+//        	resultsTable.setValueAt(true, 0, 0);
+        	
+        	//code from MultipleDataSetPane:
+//            // insert a renderer that will center cell contents
+//            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+//            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+//
+//            for (int i = 0; i < testDataSetsListBox.getColumnCount(); i++) {
+//                testDataSetsListBox.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+//            }
+//            // testDataSetsListBox.setDefaultRenderer(String.class, centerRenderer);
+//
+//            // also center column headers (which use a different CellRenderer)
+//            ((DefaultTableCellRenderer) testDataSetsListBox.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+
+            // change the header font
+            JTableHeader header = resultsTable.getTableHeader();
+            header.setFont(new Font("Dialog", Font.BOLD, 12));
+
         }
         return resultsTable;
-    }
-    private JLabel getFileNameColHeaderLabel() {
-        if (fileNameColHeaderLabel == null) {
-        	fileNameColHeaderLabel = new JLabel("File");
-        }
-        return fileNameColHeaderLabel;
-    }
-    private Component getHorizontalGlue() {
-        if (horizontalGlue == null) {
-        	horizontalGlue = Box.createHorizontalGlue();
-        }
-        return horizontalGlue;
-    }
-    private JLabel getResultColHeaderLabel() {
-        if (resultColHeaderLabel == null) {
-        	resultColHeaderLabel = new JLabel("Result");
-        }
-        return resultColHeaderLabel;
-    }
-    private Component getHorizontalGlue_1() {
-        if (horizontalGlue_1 == null) {
-        	horizontalGlue_1 = Box.createHorizontalGlue();
-        }
-        return horizontalGlue_1;
-    }
-    private JLabel getStdOutColHeaderLabel() {
-        if (stdOutColHeaderLabel == null) {
-        	stdOutColHeaderLabel = new JLabel("Validator StdOut");
-        }
-        return stdOutColHeaderLabel;
-    }
-    private Component getHorizontalGlue_2() {
-        if (horizontalGlue_2 == null) {
-        	horizontalGlue_2 = Box.createHorizontalGlue();
-        }
-        return horizontalGlue_2;
-    }
-    private JLabel getStdErrColHeaderLabel() {
-        if (stdErrColHeaderLabel == null) {
-        	stdErrColHeaderLabel = new JLabel("Validator StdErr");
-        }
-        return stdErrColHeaderLabel;
     }
     private JPanel getInputValidationResultSummaryPanel() {
         if (inputValidationResultSummaryPanel == null) {
@@ -4738,13 +4709,13 @@ public class EditProblemPane extends JPanePlugin {
     }
     private JLabel getInputValidationResultsSummaryLabel() {
         if (inputValidationResultsSummaryLabel == null) {
-        	inputValidationResultsSummaryLabel = new JLabel("Input Validation Overall Result: ");
+        	inputValidationResultsSummaryLabel = new JLabel("Status: ");
         }
         return inputValidationResultsSummaryLabel;
     }
     private JLabel getInputValidationResultSummaryTextLabel() {
         if (inputValidationResultSummaryTextLabel == null) {
-        	inputValidationResultSummaryTextLabel = new JLabel("<Undefined>");
+        	inputValidationResultSummaryTextLabel = new JLabel("<Unknown>");
         }
         return inputValidationResultSummaryTextLabel;
     }
@@ -4753,10 +4724,41 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidationResultPanel = new JPanel();
         	inputValidationResultPanel.setBorder(new TitledBorder(null, "Input Validation Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         	inputValidationResultPanel.setLayout(new BoxLayout(inputValidationResultPanel, BoxLayout.Y_AXIS));
+        	inputValidationResultPanel.add(getVerticalStrut_7());
         	inputValidationResultPanel.add(getInputValidationResultSummaryPanel());
         	inputValidationResultPanel.add(getInputValidationResultDetailsPanel());
         }
         return inputValidationResultPanel;
+    }
+    private Component getVerticalStrut_6() {
+        if (verticalStrut_6 == null) {
+        	verticalStrut_6 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_6;
+    }
+    private Component getVerticalStrut_7() {
+        if (verticalStrut_7 == null) {
+        	verticalStrut_7 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_7;
+    }
+    private Component getVerticalStrut_8() {
+        if (verticalStrut_8 == null) {
+        	verticalStrut_8 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_8;
+    }
+    private Component getVerticalStrut_9() {
+        if (verticalStrut_9 == null) {
+        	verticalStrut_9 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_9;
+    }
+    private Component getVerticalStrut_10() {
+        if (verticalStrut_10 == null) {
+        	verticalStrut_10 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_10;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
