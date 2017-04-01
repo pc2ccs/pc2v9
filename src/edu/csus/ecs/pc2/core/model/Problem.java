@@ -910,6 +910,20 @@ public class Problem implements IElementObject {
                 }
             }
             
+            //check for differences in Input Validator settings
+            if (this.isProblemHasInputValidator() != problem.isProblemHasInputValidator()) {
+                return false;
+            }
+            if (this.inputValidatorHasBeenSuccessfullyRun != problem.inputValidatorHasBeenSuccessfullyRun) {
+                return false;
+            }
+            if (!this.getInputValidatorProgramName().equals(problem.getInputValidatorProgramName())) {
+                return false;
+            }
+            if (!this.getInputValidatorCommandLine().equals(problem.getInputValidatorCommandLine())) {
+                return false;
+            }
+            
            if (showValidationToJudges != problem.isShowValidationToJudges()) {
                 return false;
             }
