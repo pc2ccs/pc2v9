@@ -112,6 +112,11 @@ public class Problem implements IElementObject {
     private PC2ValidatorSettings pc2ValidatorSettings ;
     private ClicsValidatorSettings clicsValidatorSettings ;
     private CustomValidatorSettings customValidatorSettings ;
+    
+    private boolean problemHasInputValidator ;
+    private boolean inputValidatorHasBeenSuccessfullyRun ;
+    private String inputValidatorProgramName = "";
+    private String inputValidatorCommandLine = "";
 
     /**
      * Use international judgement method.
@@ -1263,5 +1268,93 @@ public class Problem implements IElementObject {
      */
     public void setCustomValidatorSettings(CustomValidatorSettings settings) {
         this.customValidatorSettings = settings;
+    }
+
+    /**
+     * Returns an indication of whether or not this Problem has an Input Validator attached.
+     * 
+     * @return true if the problem has an input validator
+     */
+    public boolean isProblemHasInputValidator() {
+        return problemHasInputValidator;
+    }
+
+    /**
+     * Sets the flag indicating whether or not the Problem has an Input Validator.
+     * 
+     * @param problemHasInputValidator the value to which the flag should be set
+     */
+    public void setProblemHasInputValidator(boolean problemHasInputValidator) {
+        this.problemHasInputValidator = problemHasInputValidator;
+    }
+
+    /**
+     * Returns the flag indicating whether the Input Validator for the Problem has been successfully run
+     * (meaning, the Input Validator ran and return "success" for all input data files).
+     * 
+     * Note that this method returns true only if the problem has an Input Validator AND the Input Validator
+     * has been successfully run on all of the Problem's data files; it returns false if Input Validation failed
+     * OR if there is no Input Validator defined for the Problem. 
+     * 
+     * @return true if the problem has an Input Validator and it has been run and returned "success" for all data files; 
+     *              false otherwise.
+     */
+    public boolean isInputValidatorHasBeenSuccessfullyRun() {
+        return problemHasInputValidator && inputValidatorHasBeenSuccessfullyRun;
+    }
+
+    /**
+     * Sets the flag indicating that the problem's Input Validator has been successfully run against all of the
+     * Problem's input data files.
+     * 
+     * @param inputValidatorHasBeenSuccessfullyRun the value to which the flag should be set
+     */
+    public void setInputValidatorHasBeenSuccessfullyRun(boolean inputValidatorHasBeenSuccessfullyRun) {
+        this.inputValidatorHasBeenSuccessfullyRun = inputValidatorHasBeenSuccessfullyRun;
+    }
+
+    /**
+     * Returns the name of the Input Validator for the Problem, or the empty string if the Problem has no
+     * defined Input Validator (that is, if the Input Validator name is null or the empty string).
+     * 
+     * @return the Input Validator Program Name for the Problem, or an empty string
+     */
+    public String getInputValidatorProgramName() {
+        if (inputValidatorProgramName == null) {
+            return "";
+        } else {
+            return inputValidatorProgramName;
+        }
+    }
+
+    /**
+     * Sets the name of the Input Validator program for this Problem.
+     * 
+     * @param inputValidatorProgramName the name of the Input Validator program
+     */
+    public void setInputValidatorProgramName(String inputValidatorProgramName) {
+        this.inputValidatorProgramName = inputValidatorProgramName;
+    }
+
+    /**
+     * Returns the name of the Input Validator command for the Problem (that is, the command used to
+     * invoke the Input Validator), or the empty string if the Problem has no
+     * defined Input Validator (that is, if the Input Validator command is null or the empty string).
+     * 
+     * @return the Input Validator Command Line
+     */
+    public String getInputValidatorCommandLine() {
+        if (inputValidatorCommandLine == null) {
+            return "";
+        } else {
+            return inputValidatorCommandLine;
+        }
+    }
+
+    /**
+     * @param inputValidatorCommandLine the inputValidatorCommandLine to set
+     */
+    public void setInputValidatorCommandLine(String inputValidatorCommandLine) {
+        this.inputValidatorCommandLine = inputValidatorCommandLine;
     }
 }
