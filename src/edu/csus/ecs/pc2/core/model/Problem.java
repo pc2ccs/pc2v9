@@ -336,6 +336,12 @@ public class Problem implements IElementObject {
         retStr += "; clicsValidatorSettings=" + getClicsValidatorSettings();
         retStr += "; customValidatorSettings=" + getCustomValidatorSettings();
         
+        retStr += "; problemHasInputValidator=" + problemHasInputValidator;
+        retStr += "; inputValidatorSuccessfullyRun=" + inputValidatorHasBeenSuccessfullyRun;
+        retStr += "; inputValidatorProgramName=" + inputValidatorProgramName;
+        retStr += "; inputValidatorCommandLine=" + inputValidatorCommandLine;
+        
+        
         retStr += "; internationalJudgementReadMethod=" + internationalJudgementReadMethod;
         retStr += "; executionPrepCommand=" + executionPrepCommand;
 
