@@ -4519,6 +4519,8 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorProgramNameTextField.setPreferredSize(new Dimension(300, 25));
         	inputValidatorProgramNameTextField.setMinimumSize(new Dimension(300, 25));
         	inputValidatorProgramNameTextField.setColumns(50);
+        	inputValidatorProgramNameTextField.setText("");
+        	inputValidatorProgramNameTextField.setToolTipText("");
         }
         return inputValidatorProgramNameTextField;
     }
@@ -4537,6 +4539,8 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorCommandTextField.setPreferredSize(new Dimension(300, 25));
         	inputValidatorCommandTextField.setMinimumSize(new Dimension(300, 25));
         	inputValidatorCommandTextField.setColumns(50);
+        	inputValidatorCommandTextField.setText("");
+        	inputValidatorCommandTextField.setToolTipText("");
         }
         return inputValidatorCommandTextField;
     }
