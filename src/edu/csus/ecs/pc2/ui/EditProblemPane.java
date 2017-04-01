@@ -655,9 +655,9 @@ public class EditProblemPane extends JPanePlugin {
                     if ( problem.getValidatorType() != changedProblem.getValidatorType() ) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
-                            updateToolTip = "Validator";
+                            updateToolTip = "Output Validator";
                         } else {
-                            updateToolTip += ", Validator";
+                            updateToolTip += ", Output Validator";
                         }                        
                     }
                     
@@ -669,9 +669,9 @@ public class EditProblemPane extends JPanePlugin {
                              (problemSettings.isIgnoreCaseOnValidation() != changedProblemSettings.isIgnoreCaseOnValidation()) ) {
                             enableButton = true;
                             if (updateToolTip.equals("")) {
-                                updateToolTip = "PC2 Validator options";
+                                updateToolTip = "PC2 Output Validator options";
                             } else {
-                                updateToolTip += ", PC2 Validator options";
+                                updateToolTip += ", PC2 Output Validator options";
                             }
                         }
                     }
@@ -688,9 +688,9 @@ public class EditProblemPane extends JPanePlugin {
                              (problemSettings.isSpaceSensitive() != changedProblemSettings.isSpaceSensitive()) ) {
                             enableButton = true;
                             if (updateToolTip.equals("")) {
-                                updateToolTip = "CLICS Validator options";
+                                updateToolTip = "CLICS Output Validator options";
                             } else {
-                                updateToolTip += ", CLICS Validator options";
+                                updateToolTip += ", CLICS Output Validator options";
                             }
                         }
                     }
@@ -742,9 +742,9 @@ public class EditProblemPane extends JPanePlugin {
                             
                             enableButton = true;
                             if (updateToolTip.equals("")) {
-                                updateToolTip = "Custom Validator options";
+                                updateToolTip = "Custom Output Validator options";
                             } else {
-                                updateToolTip += ", Custom Validator options";
+                                updateToolTip += ", Custom Output Validator options";
                             }
                         }
                     }
@@ -1093,7 +1093,19 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setShowValidationToJudges(getShowValidatorToJudgesCheckBox().isSelected());
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
-
+        
+        //update Input Validator settings from GUI
+        String inputValProgName = getInputValidatorProgramNameTextField().getText();
+        checkProblem.setInputValidatorProgramName(inputValProgName);
+        if (inputValProgName != null && !inputValProgName.equals("")) {
+            checkProblem.setProblemHasInputValidator(true);
+        } else {
+            checkProblem.setProblemHasInputValidator(false);
+        }
+        String inputValCommand = getInputValidatorCommandTextField().getText();
+        checkProblem.setInputValidatorCommandLine(inputValCommand);
+        
+        
         //update Judging Type settings from GUI
         //TODO: should be using accessors instead of hard references for these buttons and checkboxes...
         checkProblem.setComputerJudged(computerJudgingRadioButton.isSelected());
@@ -3130,7 +3142,6 @@ public class EditProblemPane extends JPanePlugin {
             chooseValidatorProgramButton.setText("Choose...");
             chooseValidatorProgramButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-//                    showMessage ("Not implemented yet...");
                     if (selectFile(getCustomValidatorExecutableProgramTextField(), "Select Validator Program")) {
                         getCustomValidatorExecutableProgramTextField().setToolTipText((getCustomValidatorExecutableProgramTextField().getText()));
                         enableUpdateButton();
@@ -4684,6 +4695,14 @@ public class EditProblemPane extends JPanePlugin {
     private JButton getBtnChoose_1() {
         if (btnChoose_1 == null) {
         	btnChoose_1 = new JButton("Choose...");
+        	btnChoose_1.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+                    if (selectFile(getInputValidatorProgramNameTextField(), "Select Input Validator Program")) {
+                        getInputValidatorProgramNameTextField().setToolTipText((getInputValidatorProgramNameTextField().getText()));
+                        enableUpdateButton();
+                    }
+        	    }
+        	});
         	btnChoose_1.setPreferredSize(new Dimension(81, 25));
         	btnChoose_1.setMinimumSize(new Dimension(81, 25));
         }
