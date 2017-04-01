@@ -255,6 +255,11 @@ public class Problem implements IElementObject {
         } else {
             clone.setCustomValidatorSettings(null);
         }
+        
+        clone.setProblemHasInputValidator(this.problemHasInputValidator);
+        clone.setInputValidatorHasBeenSuccessfullyRun(this.inputValidatorHasBeenSuccessfullyRun);
+        clone.setInputValidatorCommandLine(StringUtilities.cloneString(this.inputValidatorCommandLine));
+        clone.setInputValidatorProgramName(StringUtilities.cloneString(this.inputValidatorProgramName));
 
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
