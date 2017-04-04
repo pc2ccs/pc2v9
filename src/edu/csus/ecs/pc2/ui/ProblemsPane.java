@@ -127,7 +127,7 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Program", "Validator Command Line" };
+            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Short", "Time Limit", "SVTJ", "Output Validator", "O.V. Command", "Input Validator", "I.V. Command" };
             problemListBox.addColumns(cols);
 
             /**
