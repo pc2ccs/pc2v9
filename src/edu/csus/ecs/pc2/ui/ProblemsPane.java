@@ -179,7 +179,8 @@ public class ProblemsPane extends JPanePlugin {
 
     protected Object[] buildProblemRow(Problem problem) {
         // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
-        //Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Prog", "Validator Command Line" };
+        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Prog", "Validator Command Line" };
+        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Short", "Time Limit", "SVTJ", "Output Validator", "O.V. Command", "Input Validator", "I.V. Command" };
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -239,7 +240,16 @@ public class ProblemsPane extends JPanePlugin {
             validatorCommandLine = problem.getValidatorCommandLine();
         }
         c[i++] = validatorCommandLine ;
-
+        
+        String inputValidatorProgramName = "<none>";
+        String inputValidatorCommandLine = "";
+        if (problem.isProblemHasInputValidator()) {
+            inputValidatorProgramName = problem.getInputValidatorProgramName();
+            inputValidatorCommandLine = problem.getInputValidatorCommandLine();
+        }
+        c[i++] = inputValidatorProgramName;
+        c[i++] = inputValidatorCommandLine;
+        
         return c;
     }
 
