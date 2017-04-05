@@ -156,4 +156,10 @@ public final class Constants {
 
     public static final String DEFAULT_INSTITUTIONCODE = "undefined";
     
+    public static final int INPUT_VALIDATOR_SUCCESS_EXIT_CODE = 42;
+    
+    public static final int INPUT_VALIDATOR_FAILED_EXIT_CODE = 43;
+    
+    public static final int INPUT_VALIDATOR_INTERNAL_ERROR_EXIT_CODE = -39;
+    
 }
