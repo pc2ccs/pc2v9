@@ -4768,7 +4768,7 @@ public class EditProblemPane extends JPanePlugin {
     }
     private JLabel getInputValidationResultSummaryTextLabel() {
         if (inputValidationResultSummaryTextLabel == null) {
-        	inputValidationResultSummaryTextLabel = new JLabel("<Unknown>");
+        	inputValidationResultSummaryTextLabel = new JLabel("<No Input Validation test run yet>");
         }
         return inputValidationResultSummaryTextLabel;
     }
