@@ -25,6 +25,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,6 +59,8 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.execute.ExecutionData;
+import edu.csus.ecs.pc2.core.execute.ProgramRunner;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -151,8 +154,6 @@ public class EditProblemPane extends JPanePlugin {
     private JLabel problemNameLabel = null;
 
     private JLabel timeoutLabel = null;
-
-    private Log log = null;
 
     /**
      * Is the form/GUI being currently populated? Used to avoid reEntry/race conditions populating GUI.
@@ -2570,7 +2571,7 @@ public class EditProblemPane extends JPanePlugin {
                 result = true;
             }
         } catch (Exception e) {
-            log.log(Log.INFO, "Error getting selected file, try again.", e);
+            getLog().log(Log.INFO, "Error getting selected file, try again.", e);
             result = false;
         }
         chooser = null;
@@ -2609,7 +2610,7 @@ public class EditProblemPane extends JPanePlugin {
             }
         } catch (Exception e) {
             showMessage("Error getting selected file, try again: \n" + e.getMessage());
-            log.log(Log.INFO, "Error getting selected file: ", e);
+            getLog().log(Log.INFO, "Error getting selected file: ", e);
             result = false;
         }
         chooser = null;
@@ -4559,6 +4560,134 @@ public class EditProblemPane extends JPanePlugin {
     private void runInputDataValidationTest() {
         // TODO Auto-generated method stub
         System.out.println ("'Run Input Validator' button pushed...");
+        
+        ProgramRunner runner = new ProgramRunner(getContest(), getController());
+        
+        String cmdline = getInputValidatorCommandLine();
+        
+        String executeDir = getExecuteDirectoryName();
+        Utilities.insureDir(executeDir);
+        clearDirectory(executeDir);
+
+        String [] inputFiles = getInputFileNames();
+        
+        InputValidationResult [] results = new InputValidationResult [inputFiles.length];
+ 
+        
+        //TODO: need to save the Serialized File in the model (but don't do that in this method)
+        SerializedFile validatorProg = new SerializedFile(getInputValidatorProgramNameTextField().getText());
+        try {
+            validatorProg.writeFile(executeDir + File.separator + validatorProg.getName());
+            getLog().info("Copied validator file '" + validatorProg.getName() + "' to '" + executeDir + "'");
+        } catch (IOException e) {
+            getLog().severe("Exception creating input validator program in execution folder: " + e.getMessage());
+        }
+
+        int exitCode ;
+        for (int i=0; i<inputFiles.length; i++) {
+            
+            String stdinFilename = inputFiles[i];
+            
+            ExecutionData executionData = new ExecutionData();
+            
+            int msTimeout = 30000;
+            
+            String stdoutFilename = "runnerStdout" + i + ".pc2" ;
+            String stderrFilename = "runnerStderr" + i + ".pc2" ;
+            
+            String stdoutFilePath = executeDir + File.separator + stdoutFilename;
+            String stderrFilePath = executeDir + File.separator + stderrFilename;
+            
+            exitCode = runner.runProgram(executionData, executeDir, cmdline, msTimeout, null, stdinFilename, stdoutFilePath, stderrFilePath);
+            
+            boolean passed = exitCode==Constants.INPUT_VALIDATOR_SUCCESS_EXIT_CODE ? true : false;
+            
+            results[i] = new InputValidationResult(stdinFilename, passed, stdoutFilename, stderrFilename);
+            
+        }
+        
+        ((InputValidationResultsTableModel)getResultsTable().getModel()).setResults(results);
+    }
+
+    private String[] getInputFileNames() {
+
+        String [] retVal = null;
+        
+        if (getRdbtnFilesOnDiskInFolder().isSelected()) {
+            String folderName = getInputValidatorFilesOnDiskTextField().getText();
+            if (folderName != null && !folderName.trim().equals("")) {
+                File folderPath = new File(folderName);
+                if (folderPath.exists() && folderPath.isDirectory() && folderPath.canRead()) {
+                    retVal = folderPath.list();
+                    for (int i = 0; i < retVal.length; i++) {
+                        retVal[i] = folderName + File.separator + retVal[i];                        
+                    }
+                }
+            }
+        }
+        return retVal ;
+    }
+
+    public String getExecuteDirectoryName() {
+        return "inputValidate" + getContest().getClientId().getSiteNumber() + getContest().getClientId().getName() ;
+    }
+
+    /**
+     * Remove all files from specified directory, including subdirectories.
+     * 
+     * @param dirName
+     *            directory to be cleared.
+     * @return true if directory was cleared.
+     */
+    public boolean clearDirectory(String dirName) {
+        File dir = null;
+        boolean result = true;
+
+        dir = new File(dirName);
+        //TODO: need to handle if the new FILE() returns null (e.g. for an empty filename string)
+        String[] filesToRemove = dir.list();
+        for (int i = 0; i < filesToRemove.length; i++) {
+            File fn1 = new File(dirName + File.separator + filesToRemove[i]);
+            if (fn1.isDirectory()) {
+                // recurse through any directories
+                result &= clearDirectory(dirName + File.separator + filesToRemove[i]);
+            }
+            result &= fn1.delete();
+        }
+        return (result);
+    }
+    /**
+     * Return string minus last extension. <br>
+     * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
+     * Unlike the Unix basename program, no extension is supplied.
+     * 
+     * @param original
+     *            the input string
+     * @return a string with all text after last . removed
+     */
+    public String removeExtension(String original) {
+        String outString = new String(original);
+
+        // Strip off all text after and including final dot
+
+        int dotIndex = outString.lastIndexOf('.', outString.length() - 1);
+        if (dotIndex != -1) {
+            outString = outString.substring(0, dotIndex);
+        }
+
+        return outString;
+
+    }
+
+    private String getInputValidatorCommandLine() {
+       
+        String progName = getInputValidatorProgramNameTextField().getText();
+        String cmd = getInputValidatorCommandTextField().getText();
+        
+        cmd.replaceAll("[{]:inputvalidator[}]", progName);
+        cmd.replaceAll("[{]:basename[}]", removeExtension(progName));
+        
+        return cmd;
     }
 
     private JPanel getDefineInputValidatorPanel() {

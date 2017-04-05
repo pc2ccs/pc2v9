@@ -48,28 +48,26 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
         Object obj = "Unknown";
 
         //code from TestCaseTableModel, from which this file was cloned:
-//        switch (column) {
-//            case 0:
-//                obj = "" + (row + 1);
-//                break;
-//            case 1:
-//                if (files == null || files.getJudgesDataFiles() == null || files.getJudgesDataFiles().length <= row ){
-//                    obj = null;
-//                } else {
-//                    obj = files.getJudgesDataFiles()[row].getName();
-//                }
-//                break;
-//            case 2:
-//                if (files == null || files.getJudgesAnswerFiles() == null || files.getJudgesAnswerFiles().length <= row ){
-//                    obj = null;
-//                } else {
-//                obj = files.getJudgesAnswerFiles()[row].getName();
-//                }
-//                break;
-//            default:
-//                break;
-//
-//        }
+        switch (column) {
+            case 0:
+                obj = results[row].getFullPathFilename();
+                break;
+            case 1:
+                //TODO: need to add a CellRenderer to set true=green and false=red
+                obj = results[row].isPassed();
+                break;
+            case 2:
+                //TODO: need to return a string which can be used as a LINK to the file
+                obj = results[row].getValidatorStdOut();
+                break;
+            case 3:
+                //TODO: need to return a string which can be used as a LINK to the file
+                obj = results[row].getValidatorStdErr();
+                break;
+            default:
+                break;
+
+        }
         return obj;
     }
 
