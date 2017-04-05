@@ -1,7 +1,6 @@
-package edu.csus.ecs.pc2.validator.inputValidator;
-
 import java.util.InputMismatchException;
 import java.util.Scanner;
+
 
 /**
  * This class is an Input Validator for a (hypothetical) contest problem which requires that the judge's input 
@@ -21,9 +20,11 @@ import java.util.Scanner;
  *
  */
 public class OddEvenInputValidator {
-    
+
     public static final int INPUT_VALIDATOR_SUCCESS_EXIT_CODE = 42;
+    
     public static final int INPUT_VALIDATOR_FAILED_EXIT_CODE = 43;
+    
     public static final int INPUT_VALIDATOR_INTERNAL_ERROR_EXIT_CODE = -39;
 
     /**
@@ -37,7 +38,7 @@ public class OddEvenInputValidator {
         boolean first = true;
         boolean lookingForOdd = true;   //default initialization; required but not used
         int nextInt ;
-        int exitCode = 0;
+        int exitCode = INPUT_VALIDATOR_INTERNAL_ERROR_EXIT_CODE;
         
         //continue as long as the stdin scanner has data
         while (!done) {
@@ -45,6 +46,7 @@ public class OddEvenInputValidator {
             //if there's no more input we're done (and we haven't had an error-exit)
             if (!scanner.hasNext()) {
                 done = true;
+                exitCode = INPUT_VALIDATOR_SUCCESS_EXIT_CODE ;
             } else {
             
                 try {
@@ -95,6 +97,8 @@ public class OddEvenInputValidator {
         }
         
         scanner.close();
+        System.out.println ("OddEvenInputValidator returning Exit Code " + exitCode);
+        System.err.println ("OddEvenInputValidator returning Exit Code " + exitCode);
         System.exit(exitCode) ;
 
     }
