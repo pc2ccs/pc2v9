@@ -205,6 +205,8 @@ public class Problem implements IElementObject {
     
     private State state = State.ENABLED;
 
+    private String inputValidatorFilesOnDiskFolderName;
+
     
     /**
      * Create a problem with the display name.
@@ -1381,5 +1383,25 @@ public class Problem implements IElementObject {
      */
     public void setInputValidatorCommandLine(String inputValidatorCommandLine) {
         this.inputValidatorCommandLine = inputValidatorCommandLine;
+    }
+
+    /**
+     * Returns the name of the folder containing the input files for this Problem.
+     * Note that is value is only meaningful if the user has run the Input Validator
+     * and selected "Files on disk in folder" as the input file source.
+     * 
+     */
+    public String getInputValidatorFilesOnDiskFolder() {
+        return this.inputValidatorFilesOnDiskFolderName;
+    }
+    
+    /**
+     * Sets the value of the InputFilesOnDiskFolder variable for this problem.
+     * 
+     * @param inputValFilesOnDiskFolder
+     */
+    public void setInputValidatorFilesOnDiskFolder(String inputValFilesOnDiskFolder) {
+        this.inputValidatorFilesOnDiskFolderName = inputValFilesOnDiskFolder;
+        
     }
 }

@@ -1105,6 +1105,8 @@ public class EditProblemPane extends JPanePlugin {
         }
         String inputValCommand = getInputValidatorCommandTextField().getText();
         checkProblem.setInputValidatorCommandLine(inputValCommand);
+        String inputValFilesOnDiskFolder = getInputValidatorFilesOnDiskTextField().getText();
+        checkProblem.setInputValidatorFilesOnDiskFolder(inputValFilesOnDiskFolder);
         
         
         //update Judging Type settings from GUI
@@ -2618,6 +2620,37 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
+     * Displays a JFileChooser allowing the user to select a directory.
+     * 
+     * Returns the selected directory name, or null if no directory was selected.
+     * 
+     * @param dialogTitle a String giving the title to display on the dialog
+     * 
+     * @return a String giving the name of the chosen directory
+     */
+    private String selectDirectory(String dialogTitle) {
+
+        String directory = null;
+
+        JFileChooser chooser = new JFileChooser();
+
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        if (dialogTitle != null) {
+            chooser.setDialogTitle(dialogTitle);
+        }
+        try {
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                directory = chooser.getSelectedFile().toString();
+            }
+        } catch (Exception e) {
+            getController().getLog().log(Log.INFO, "Error in JFileChooser getting selected directory", e);
+        }
+        chooser = null;
+        return directory;
+    }
+
+    /**
      * This method initializes teamReadsFrombuttonGroup
      * 
      * @return javax.swing.ButtonGroup
@@ -2838,11 +2871,11 @@ public class EditProblemPane extends JPanePlugin {
     private JPanel defineInputValidatorPanel;
     private JPanel executeInputValidatorPanel;
     private JPanel inputValidatorDataFilesPanel;
-    private JRadioButton rdbtnFilesPreviouslyLoaded;
-    private JRadioButton rdbtnFilesJustLoaded;
+    private JRadioButton filesPreviouslyLoadedRadioButton;
+    private JRadioButton filesJustLoadedRadioButton;
     private JTextField inputValidatorFilesOnDiskTextField;
-    private JButton btnChoose;
-    private JButton btnChoose_1;
+    private JButton chooseInputFilesButton;
+    private JButton chooseInputValidatorProgramButton;
     private JPanel inputValidationResultDetailsPanel;
     private JScrollPane resultsScrollPane;
     private JTable resultsTable;
@@ -2856,9 +2889,10 @@ public class EditProblemPane extends JPanePlugin {
     private Component verticalStrut_9;
     private Component verticalStrut_10;
     private Component verticalStrut_11;
-    private JRadioButton rdbtnFilesOnDiskInFolder;
+    private JRadioButton filesOnDiskInFolderRadioButton;
     private Component horizontalStrut_3;
     private Component horizontalStrut_4;
+    private final ButtonGroup inputFileLocationButtonGroup = new ButtonGroup();
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -3424,15 +3458,30 @@ public class EditProblemPane extends JPanePlugin {
         //Judging Type tab:
         initializeJudgingTabFields(null);
         
-        //Validator tab:
-        initializeValidatorTabFields();
+        //Output Validator tab:
+        initializeOutputValidatorTabFields();
+        
+        //Input Validator tab:
+        initializeInputValidatorTabFields();
         
         //Data Files tab:
         // ???
 
     }
     
-    private void initializeValidatorTabFields() {
+    private void initializeInputValidatorTabFields() {
+        getInputValidatorProgramNameTextField().setText("");
+        getInputValidatorProgramNameTextField().setToolTipText("");
+        getInputValidatorCommandTextField().setText("");
+        getInputValidatorCommandTextField().setToolTipText("");
+        getInputValidatorFilesOnDiskTextField().setText("");
+        getInputValidatorFilesOnDiskTextField().setToolTipText("");
+        getFilesOnDiskInFolderRadioButton().setSelected(true);  //button group will init others "not selected"
+        getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
+        getInputValidatorResultsTable().setModel(new InputValidationResultsTableModel());
+    }
+
+    private void initializeOutputValidatorTabFields() {
         //default to "no validator"
         getUseNOValidatatorRadioButton().setSelected(true);
         
@@ -4606,14 +4655,14 @@ public class EditProblemPane extends JPanePlugin {
             
         }
         
-        ((InputValidationResultsTableModel)getResultsTable().getModel()).setResults(results);
+        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(results);
     }
 
     private String[] getInputFileNames() {
 
         String [] retVal = null;
         
-        if (getRdbtnFilesOnDiskInFolder().isSelected()) {
+        if (getFilesOnDiskInFolderRadioButton().isSelected()) {
             String folderName = getInputValidatorFilesOnDiskTextField().getText();
             if (folderName != null && !folderName.trim().equals("")) {
                 File folderPath = new File(folderName);
@@ -4717,12 +4766,12 @@ public class EditProblemPane extends JPanePlugin {
         	gbc_inputValidatorProgramNameTextField.gridy = 0;
         	defineInputValidatorPanel.add(getInputValidatorProgramNameTextField(), gbc_inputValidatorProgramNameTextField);
         	
-        	GridBagConstraints gbc_btnChoose_1 = new GridBagConstraints();
-        	gbc_btnChoose_1.anchor = GridBagConstraints.WEST;
-        	gbc_btnChoose_1.insets = new Insets(0, 0, 0, 5);
-        	gbc_btnChoose_1.gridx = 2;
-        	gbc_btnChoose_1.gridy = 0;
-        	defineInputValidatorPanel.add(getBtnChoose_1(), gbc_btnChoose_1);
+        	GridBagConstraints gbc_chooseInputValidatorProgramButton = new GridBagConstraints();
+        	gbc_chooseInputValidatorProgramButton.anchor = GridBagConstraints.WEST;
+        	gbc_chooseInputValidatorProgramButton.insets = new Insets(0, 0, 0, 5);
+        	gbc_chooseInputValidatorProgramButton.gridx = 2;
+        	gbc_chooseInputValidatorProgramButton.gridy = 0;
+        	defineInputValidatorPanel.add(getChooseInputValidatorProgramButton(), gbc_chooseInputValidatorProgramButton);
         	
         	GridBagConstraints gbc_lblInputValidatorInvocation = new GridBagConstraints();
         	gbc_lblInputValidatorInvocation.anchor = GridBagConstraints.EAST;
@@ -4763,52 +4812,54 @@ public class EditProblemPane extends JPanePlugin {
         	gbl_inputValidatorDataFilesPanel.columnWeights = new double[]{0.0, 0.0, 0.0};
         	gbl_inputValidatorDataFilesPanel.rowWeights = new double[]{0.0, 0.0, 0.0};
         	inputValidatorDataFilesPanel.setLayout(gbl_inputValidatorDataFilesPanel);
-        	GridBagConstraints gbc_rdbtnFilesPreviouslyLoaded = new GridBagConstraints();
-        	gbc_rdbtnFilesPreviouslyLoaded.gridwidth = 2;
-        	gbc_rdbtnFilesPreviouslyLoaded.anchor = GridBagConstraints.WEST;
-        	gbc_rdbtnFilesPreviouslyLoaded.insets = new Insets(0, 0, 5, 5);
-        	gbc_rdbtnFilesPreviouslyLoaded.gridx = 0;
-        	gbc_rdbtnFilesPreviouslyLoaded.gridy = 0;
-        	inputValidatorDataFilesPanel.add(getRdbtnFilesPreviouslyLoaded(), gbc_rdbtnFilesPreviouslyLoaded);
-        	GridBagConstraints gbc_rdbtnFilesJustLoaded = new GridBagConstraints();
-        	gbc_rdbtnFilesJustLoaded.gridwidth = 2;
-        	gbc_rdbtnFilesJustLoaded.anchor = GridBagConstraints.WEST;
-        	gbc_rdbtnFilesJustLoaded.insets = new Insets(0, 0, 5, 5);
-        	gbc_rdbtnFilesJustLoaded.gridx = 0;
-        	gbc_rdbtnFilesJustLoaded.gridy = 1;
-        	inputValidatorDataFilesPanel.add(getRdbtnFilesJustLoaded(), gbc_rdbtnFilesJustLoaded);
-        	GridBagConstraints gbc_rdbtnFilesOnDiskInFolder = new GridBagConstraints();
-        	gbc_rdbtnFilesOnDiskInFolder.anchor = GridBagConstraints.WEST;
-        	gbc_rdbtnFilesOnDiskInFolder.insets = new Insets(0, 0, 0, 5);
-        	gbc_rdbtnFilesOnDiskInFolder.gridx = 0;
-        	gbc_rdbtnFilesOnDiskInFolder.gridy = 2;
-        	inputValidatorDataFilesPanel.add(getRdbtnFilesOnDiskInFolder(), gbc_rdbtnFilesOnDiskInFolder);
+        	GridBagConstraints gbc_filesPreviouslyLoadedRadioButton = new GridBagConstraints();
+        	gbc_filesPreviouslyLoadedRadioButton.gridwidth = 2;
+        	gbc_filesPreviouslyLoadedRadioButton.anchor = GridBagConstraints.WEST;
+        	gbc_filesPreviouslyLoadedRadioButton.insets = new Insets(0, 0, 5, 5);
+        	gbc_filesPreviouslyLoadedRadioButton.gridx = 0;
+        	gbc_filesPreviouslyLoadedRadioButton.gridy = 0;
+        	inputValidatorDataFilesPanel.add(getFilesPreviouslyLoadedRadioButton(), gbc_filesPreviouslyLoadedRadioButton);
+        	GridBagConstraints gbc_filesJustLoadedRadioButton = new GridBagConstraints();
+        	gbc_filesJustLoadedRadioButton.gridwidth = 2;
+        	gbc_filesJustLoadedRadioButton.anchor = GridBagConstraints.WEST;
+        	gbc_filesJustLoadedRadioButton.insets = new Insets(0, 0, 5, 5);
+        	gbc_filesJustLoadedRadioButton.gridx = 0;
+        	gbc_filesJustLoadedRadioButton.gridy = 1;
+        	inputValidatorDataFilesPanel.add(getFilesJustLoadedRadioButton(), gbc_filesJustLoadedRadioButton);
+        	GridBagConstraints gbc_filesOnDiskInFolderRadioButton = new GridBagConstraints();
+        	gbc_filesOnDiskInFolderRadioButton.anchor = GridBagConstraints.WEST;
+        	gbc_filesOnDiskInFolderRadioButton.insets = new Insets(0, 0, 0, 5);
+        	gbc_filesOnDiskInFolderRadioButton.gridx = 0;
+        	gbc_filesOnDiskInFolderRadioButton.gridy = 2;
+        	inputValidatorDataFilesPanel.add(getFilesOnDiskInFolderRadioButton(), gbc_filesOnDiskInFolderRadioButton);
         	GridBagConstraints gbc_inputValidatorFilesOnDiskTextField = new GridBagConstraints();
         	gbc_inputValidatorFilesOnDiskTextField.anchor = GridBagConstraints.WEST;
         	gbc_inputValidatorFilesOnDiskTextField.insets = new Insets(0, 0, 5, 5);
         	gbc_inputValidatorFilesOnDiskTextField.gridx = 1;
         	gbc_inputValidatorFilesOnDiskTextField.gridy = 2;
         	inputValidatorDataFilesPanel.add(getInputValidatorFilesOnDiskTextField(), gbc_inputValidatorFilesOnDiskTextField);
-        	GridBagConstraints gbc_btnChoose = new GridBagConstraints();
-        	gbc_btnChoose.insets = new Insets(0, 0, 0, 5);
-        	gbc_btnChoose.gridx = 2;
-        	gbc_btnChoose.gridy = 2;
-        	inputValidatorDataFilesPanel.add(getBtnChoose(), gbc_btnChoose);
+        	GridBagConstraints gbc_chooseInputFilesButton = new GridBagConstraints();
+        	gbc_chooseInputFilesButton.insets = new Insets(0, 0, 0, 5);
+        	gbc_chooseInputFilesButton.gridx = 2;
+        	gbc_chooseInputFilesButton.gridy = 2;
+        	inputValidatorDataFilesPanel.add(getChooseInputFilesButton(), gbc_chooseInputFilesButton);
         }
         return inputValidatorDataFilesPanel;
     }
-    private JRadioButton getRdbtnFilesPreviouslyLoaded() {
-        if (rdbtnFilesPreviouslyLoaded == null) {
-        	rdbtnFilesPreviouslyLoaded = new JRadioButton("Files previously loaded into PC2");
-        	rdbtnFilesPreviouslyLoaded.setAlignmentX(Component.LEFT_ALIGNMENT);
+    private JRadioButton getFilesPreviouslyLoadedRadioButton() {
+        if (filesPreviouslyLoadedRadioButton == null) {
+        	filesPreviouslyLoadedRadioButton = new JRadioButton("Files previously loaded into PC2");
+        	inputFileLocationButtonGroup.add(filesPreviouslyLoadedRadioButton);
+        	filesPreviouslyLoadedRadioButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         }
-        return rdbtnFilesPreviouslyLoaded;
+        return filesPreviouslyLoadedRadioButton;
     }
-    private JRadioButton getRdbtnFilesJustLoaded() {
-        if (rdbtnFilesJustLoaded == null) {
-        	rdbtnFilesJustLoaded = new JRadioButton("Files just loaded via \"Input Data Files\" pane");
+    private JRadioButton getFilesJustLoadedRadioButton() {
+        if (filesJustLoadedRadioButton == null) {
+        	filesJustLoadedRadioButton = new JRadioButton("Files just loaded via \"Input Data Files\" pane");
+        	inputFileLocationButtonGroup.add(filesJustLoadedRadioButton);
         }
-        return rdbtnFilesJustLoaded;
+        return filesJustLoadedRadioButton;
     }
     private JTextField getInputValidatorFilesOnDiskTextField() {
         if (inputValidatorFilesOnDiskTextField == null) {
@@ -4819,42 +4870,61 @@ public class EditProblemPane extends JPanePlugin {
         }
         return inputValidatorFilesOnDiskTextField;
     }
-    private JButton getBtnChoose() {
-        if (btnChoose == null) {
-        	btnChoose = new JButton("Choose...");
-        }
-        return btnChoose;
-    }
-    private JButton getBtnChoose_1() {
-        if (btnChoose_1 == null) {
-        	btnChoose_1 = new JButton("Choose...");
-        	btnChoose_1.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-                    if (selectFile(getInputValidatorProgramNameTextField(), "Select Input Validator Program")) {
+    
+    private JButton getChooseInputValidatorProgramButton() {
+        if (chooseInputValidatorProgramButton == null) {
+            chooseInputValidatorProgramButton = new JButton("Choose...");
+            chooseInputValidatorProgramButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (selectFile(getInputValidatorProgramNameTextField(), "Select Input Validator")) {
                         getInputValidatorProgramNameTextField().setToolTipText((getInputValidatorProgramNameTextField().getText()));
+                        enableUpdateButton();
+                    }
+                }
+            });
+        }
+        return chooseInputValidatorProgramButton;
+    }
+    
+    /**
+     * A button allowing the user to choose the directory from which Input Data Files to be validated
+     * are to be loaded.
+     * 
+     * @return A JButton which displays a chooser dialog
+     */
+    private JButton getChooseInputFilesButton() {
+        if (chooseInputFilesButton == null) {
+        	chooseInputFilesButton = new JButton("Choose...");
+        	chooseInputFilesButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        String directory = selectDirectory("Select Input File Folder");
+                    if (directory != null && !directory.equals("")) {
+                        getInputValidatorFilesOnDiskTextField().setText(directory);
+                        getInputValidatorFilesOnDiskTextField().setToolTipText(directory);
                         enableUpdateButton();
                     }
         	    }
         	});
         }
-        return btnChoose_1;
+        return chooseInputFilesButton;
     }
+    
     private JPanel getInputValidationResultDetailsPanel() {
         if (inputValidationResultDetailsPanel == null) {
         	inputValidationResultDetailsPanel = new JPanel();
         	inputValidationResultDetailsPanel.setLayout(new BorderLayout(0, 0));
-        	inputValidationResultDetailsPanel.add(getResultsScrollPane(), BorderLayout.CENTER);        	
+        	inputValidationResultDetailsPanel.add(getInputValidatorResultsScrollPane(), BorderLayout.CENTER);        	
         }
         return inputValidationResultDetailsPanel;
     }
-    private JScrollPane getResultsScrollPane() {
+    private JScrollPane getInputValidatorResultsScrollPane() {
         if (resultsScrollPane == null) {
         	resultsScrollPane = new JScrollPane();
-        	resultsScrollPane.setViewportView(getResultsTable());
+        	resultsScrollPane.setViewportView(getInputValidatorResultsTable());
         }
         return resultsScrollPane;
     }
-    private JTable getResultsTable() {
+    private JTable getInputValidatorResultsTable() {
         if (resultsTable == null) {
         	resultsTable = new JTable(inputValidationResultsTableModel);
 //        	resultsTable.setValueAt(true, 0, 0);
@@ -4947,11 +5017,12 @@ public class EditProblemPane extends JPanePlugin {
         }
         return verticalStrut_11;
     }
-    private JRadioButton getRdbtnFilesOnDiskInFolder() {
-        if (rdbtnFilesOnDiskInFolder == null) {
-        	rdbtnFilesOnDiskInFolder = new JRadioButton("Files on disk in folder:");
+    private JRadioButton getFilesOnDiskInFolderRadioButton() {
+        if (filesOnDiskInFolderRadioButton == null) {
+        	filesOnDiskInFolderRadioButton = new JRadioButton("Files on disk in folder:");
+        	inputFileLocationButtonGroup.add(filesOnDiskInFolderRadioButton);
         }
-        return rdbtnFilesOnDiskInFolder;
+        return filesOnDiskInFolderRadioButton;
     }
     private Component getHorizontalStrut_3() {
         if (horizontalStrut_3 == null) {
