@@ -4836,8 +4836,6 @@ public class EditProblemPane extends JPanePlugin {
                     }
         	    }
         	});
-        	btnChoose_1.setPreferredSize(new Dimension(81, 25));
-        	btnChoose_1.setMinimumSize(new Dimension(81, 25));
         }
         return btnChoose_1;
     }
