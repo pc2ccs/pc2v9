@@ -80,7 +80,7 @@ public class ProgramRunner {
                 BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(stdoutFilename, false));
                 BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(stderrFilename, false));
 
-                log.info("Running '" + cmdline + "' in '" + runDir + "'");  
+                log.info("Running '" + cmdline + "' in directory '" + runDir + "'");  
 
                 String[] env = null;
                 long startSecs = System.currentTimeMillis();
