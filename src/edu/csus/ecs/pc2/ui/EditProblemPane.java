@@ -4660,6 +4660,11 @@ public class EditProblemPane extends JPanePlugin {
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(results);
         ((AbstractTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
+        //adjust the column widths in the updated table
+        getInputValidatorResultsTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        TableColumnAdjuster tca = new TableColumnAdjuster(getInputValidatorResultsTable());
+        tca.adjustColumns();
+        
         //update the result summary label
         boolean allPassed = true;
         for (int i=0; i<results.length; i++) {
