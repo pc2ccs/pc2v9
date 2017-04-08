@@ -47,6 +47,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -54,6 +55,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
 import edu.csus.ecs.pc2.core.Constants;
@@ -4979,24 +4981,34 @@ public class EditProblemPane extends JPanePlugin {
     private JTable getInputValidatorResultsTable() {
         if (resultsTable == null) {
         	resultsTable = new JTable(inputValidationResultsTableModel);
-//        	resultsTable.setValueAt(true, 0, 0);
         	
+            //set the desired options on the table
+        	resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        	resultsTable.setFillsViewportHeight(true);
+        	resultsTable.setRowSelectionAllowed(false);
+        	resultsTable.getTableHeader().setReorderingAllowed(false);
+
         	//code from MultipleDataSetPane:
-//            // insert a renderer that will center cell contents
-//            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-//            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-//
-//            for (int i = 0; i < testDataSetsListBox.getColumnCount(); i++) {
-//                testDataSetsListBox.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-//            }
-//            // testDataSetsListBox.setDefaultRenderer(String.class, centerRenderer);
+            // insert a renderer that will center cell contents
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+            for (int i = 0; i < resultsTable.getColumnCount(); i++) {
+                resultsTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+            }
+            resultsTable.setDefaultRenderer(String.class, centerRenderer);
 //
 //            // also center column headers (which use a different CellRenderer)
+            //(this code came from MultipleDataSetPane, but the JTable here already has centered headers...
 //            ((DefaultTableCellRenderer) testDataSetsListBox.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 
             // change the header font
             JTableHeader header = resultsTable.getTableHeader();
             header.setFont(new Font("Dialog", Font.BOLD, 12));
+            
+            // render Result column as Pass/Fail on Green/Red background
+            resultsTable.getColumn("Result").setCellRenderer(new PassFailCellRenderer());
+
 
         }
         return resultsTable;
@@ -5088,5 +5100,35 @@ public class EditProblemPane extends JPanePlugin {
         }
         return horizontalStrut_4;
     }
-} // @jve:decl-index=0:visual-constraint="10,10"
+    
+    public class PassFailCellRenderer extends DefaultTableCellRenderer {
+
+        private static final long serialVersionUID = 1L;
+
+        public void setValue(Object value) {
+            if (value instanceof Boolean) {
+                boolean passed = (Boolean) value;
+                if (passed) {
+                    setBackground(Color.green);
+                    setForeground(Color.black);
+                    setText("Pass");
+                } else {
+                    setBackground(Color.red);
+                    setForeground(Color.white);
+                    setText("Fail");
+                }
+            } else {
+                // illegal value
+                setBackground(Color.yellow);
+                setText("??");
+                getController().getLog().log(Log.SEVERE, "EditProblem.PassFailCellRenderer: unknown pass/fail result: ", value);
+            }
+            setHorizontalAlignment(SwingConstants.LEFT);
+            setBorder(new EmptyBorder(0, 30, 0, 0));
+
+        }
+
+    }
+
+} 
 
