@@ -4656,6 +4656,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(results);
+
     }
 
     private String[] getInputFileNames() {
@@ -4733,11 +4734,47 @@ public class EditProblemPane extends JPanePlugin {
         String progName = getInputValidatorProgramNameTextField().getText();
         String cmd = getInputValidatorCommandTextField().getText();
         
-        cmd.replaceAll("[{]:inputvalidator[}]", progName);
-        cmd.replaceAll("[{]:basename[}]", removeExtension(progName));
+        cmd = replaceString(cmd, "{:inputvalidator}", progName);
+        cmd = replaceString(cmd, "{:basename}", Utilities.basename(removeExtension(progName)));
         
         return cmd;
     }
+
+    /**
+     * Replace all instances of beforeString with afterString.
+     * 
+     * If before string is not found, then returns original string.
+     * 
+     * @param origString
+     *            string to be modified
+     * @param beforeString
+     *            string to search for
+     * @param afterString
+     *            string to replace beforeString
+     * @return original string with all beforeString instances replaced with afterString
+     */
+    public String replaceString(String origString, String beforeString, String afterString) {
+
+        if (origString == null || afterString == null) {
+            return origString;
+        }
+
+        int startIdx = origString.lastIndexOf(beforeString);
+
+        if (startIdx == -1) {
+            return origString;
+        }
+
+        StringBuffer buf = new StringBuffer(origString);
+
+        while (startIdx != -1) {
+            buf.replace(startIdx, startIdx + beforeString.length(), afterString);
+            startIdx = origString.lastIndexOf(beforeString, startIdx - 1);
+        }
+
+        return buf.toString();
+    }
+
 
     private JPanel getDefineInputValidatorPanel() {
         if (defineInputValidatorPanel == null) {
