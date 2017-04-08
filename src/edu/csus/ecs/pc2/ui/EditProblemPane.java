@@ -53,6 +53,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 
 import edu.csus.ecs.pc2.core.Constants;
@@ -4656,6 +4657,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(results);
+        ((AbstractTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
 
     }
 
