@@ -4608,8 +4608,6 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     private void runInputDataValidationTest() {
-        // TODO Auto-generated method stub
-        System.out.println ("'Run Input Validator' button pushed...");
         
         ProgramRunner runner = new ProgramRunner(getContest(), getController());
         
@@ -4656,9 +4654,24 @@ public class EditProblemPane extends JPanePlugin {
             
         }
         
+        //update the results table
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(results);
         ((AbstractTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
-
+        
+        //update the result summary label
+        boolean allPassed = true;
+        for (int i=0; i<results.length; i++) {
+            if (!results[i].isPassed()) {
+                allPassed = false;
+                break;
+            }
+        }
+        String resultSummaryString = allPassed ? "All Input Data Files passed validation" 
+                                                : "One or more Input Data Files FAILED validation";
+        Color color = allPassed ? Color.green : Color.red ;
+        getInputValidationResultSummaryTextLabel().setText(resultSummaryString);
+        getInputValidationResultSummaryTextLabel().setForeground(color);
+        
     }
 
     private String[] getInputFileNames() {
