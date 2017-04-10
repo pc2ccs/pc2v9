@@ -2149,10 +2149,12 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidatorFilesOnDiskTextField().setToolTipText(getInputValidatorFilesOnDiskTextField().getText());
         getFilesOnDiskInFolderRadioButton().setSelected(true);
         
-        //clear the results table
+        //clear the results table and status
         //TODO: probably should be saving the results of a previous Input Validation run (if any) in the problem, and loading THOSE here
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(null);
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        getInputValidationResultSummaryTextLabel().setText("No Input Validation test run yet");
+        getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
 
     }
     
