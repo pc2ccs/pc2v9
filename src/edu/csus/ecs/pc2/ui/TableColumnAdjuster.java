@@ -9,7 +9,7 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 
 /**
- *  Class to manage the widths of colunmns in a table.
+ *  Class to manage the widths of columns in a table.
  *
  *  Various properties control how the width of the column is calculated.
  *  Another property controls whether column width calculation should be dynamic.

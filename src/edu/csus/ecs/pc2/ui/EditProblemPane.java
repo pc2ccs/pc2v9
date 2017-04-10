@@ -4711,9 +4711,9 @@ public class EditProblemPane extends JPanePlugin {
         ((AbstractTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
         //adjust the column widths in the updated table
-        getInputValidatorResultsTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        TableColumnAdjuster tca = new TableColumnAdjuster(getInputValidatorResultsTable());
-        tca.adjustColumns();
+//        getInputValidatorResultsTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//        TableColumnAdjuster tca = new TableColumnAdjuster(getInputValidatorResultsTable());
+//        tca.adjustColumns();  //this is shrinking columns to use less than the component width; looks ugly
         
         //update the result summary label
         boolean allPassed = true;
