@@ -1894,8 +1894,11 @@ public class EditProblemPane extends JPanePlugin {
         //General tab fields:
         initializeGeneralTabFields(inProblem, problemDataFiles);
 
-        //Validator tab:
-        initializeValidatorTabFields(inProblem, problemDataFiles);
+        //Output Validator tab:
+        initializeOutputValidatorTabFields(inProblem, problemDataFiles);
+        
+        //Input Validator tab:
+        initializeInputValidatorTabFields(inProblem, problemDataFiles);
         
         //Judging Type tab:
         initializeJudgingTabFields(inProblem);
@@ -2001,7 +2004,7 @@ public class EditProblemPane extends JPanePlugin {
      * @throws {@link RuntimeException} if either the received Problem or ProblemDataFiles are null
      * @throws {@link InvalidFieldValue} if the received Problem contains unspecified (but required) values
      */
-    private void initializeValidatorTabFields(Problem inProblem, ProblemDataFiles inProblemDataFiles) {
+    private void initializeOutputValidatorTabFields(Problem inProblem, ProblemDataFiles inProblemDataFiles) {
         
         if (inProblem==null || inProblemDataFiles==null) {
             throw new RuntimeException("EditProblemPane.initializeValidatorTabFields(): received null Problem or ProblemDataFiles");
@@ -2109,6 +2112,50 @@ public class EditProblemPane extends JPanePlugin {
         getShowValidatorToJudgesCheckBox().setSelected(inProblem.isShowValidationToJudges());
 
     }
+    
+    /**
+     * Sets the Input Validator pane fields from the specified Problem information.
+     * 
+     * @param prob - the problem used to set the pane data
+     * @param probDataFiles - ProblemDataFiles associated with the specified Problem
+     */
+    private void initializeInputValidatorTabFields (Problem prob, ProblemDataFiles probDataFiles) {
+        
+        //fill in the input validator program name and corresponding tooltip
+        String inputValidatorProg = prob.getInputValidatorProgramName();
+        if (inputValidatorProg != null) {
+            getInputValidatorProgramNameTextField().setText(inputValidatorProg);
+        } else {
+            getInputValidatorProgramNameTextField().setText("");
+        }
+        getInputValidatorProgramNameTextField().setToolTipText(getInputValidatorProgramNameTextField().getText());
+        
+        //fill in the input validator command
+        String inputValidatorCmd = prob.getInputValidatorCommandLine();
+        if (inputValidatorCmd != null) {
+            getInputValidatorCommandTextField().setText(inputValidatorCmd);
+        } else {
+            getInputValidatorCommandTextField().setText("");
+        }
+        getInputValidatorCommandTextField().setToolTipText(getInputValidatorCommandTextField().getText());
+        
+        //fill in the "Input data files to validate" field, and set the default button
+        String filesOnDiskFolder = prob.getInputValidatorFilesOnDiskFolder() ;
+        if (filesOnDiskFolder != null) {
+            getInputValidatorFilesOnDiskTextField().setText(filesOnDiskFolder);
+        } else {
+            getInputValidatorFilesOnDiskTextField().setText("");
+        }
+        getInputValidatorFilesOnDiskTextField().setToolTipText(getInputValidatorFilesOnDiskTextField().getText());
+        getFilesOnDiskInFolderRadioButton().setSelected(true);
+        
+        //clear the results table
+        //TODO: should be saving the results of a previous Input Validation run (if any) in the problem, and loading those
+        getInputValidatorResultsTable().setModel(new InputValidationResultsTableModel());
+
+    }
+    
+    
 
     /**
      * update/enable Update button.
@@ -4652,7 +4699,7 @@ public class EditProblemPane extends JPanePlugin {
             
             boolean passed = exitCode==Constants.INPUT_VALIDATOR_SUCCESS_EXIT_CODE ? true : false;
             
-            results[i] = new InputValidationResult(stdinFilename, passed, stdoutFilename, stderrFilename);
+            results[i] = new InputValidationResult(Utilities.basename(stdinFilename), passed, stdoutFilename, stderrFilename);
             
         }
         
@@ -4661,9 +4708,9 @@ public class EditProblemPane extends JPanePlugin {
         ((AbstractTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
         //adjust the column widths in the updated table
-        getInputValidatorResultsTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        TableColumnAdjuster tca = new TableColumnAdjuster(getInputValidatorResultsTable());
-        tca.adjustColumns();
+//        getInputValidatorResultsTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//        TableColumnAdjuster tca = new TableColumnAdjuster(getInputValidatorResultsTable());
+//        tca.adjustColumns();
         
         //update the result summary label
         boolean allPassed = true;
