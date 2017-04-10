@@ -5178,8 +5178,8 @@ public class EditProblemPane extends JPanePlugin {
                 setText("??");
                 getController().getLog().log(Log.SEVERE, "EditProblem.PassFailCellRenderer: unknown pass/fail result: ", value);
             }
-            setHorizontalAlignment(SwingConstants.LEFT);
-            setBorder(new EmptyBorder(0, 30, 0, 0));
+            setHorizontalAlignment(SwingConstants.CENTER);
+            setBorder(new EmptyBorder(0, 0, 0, 0));
 
         }
 
