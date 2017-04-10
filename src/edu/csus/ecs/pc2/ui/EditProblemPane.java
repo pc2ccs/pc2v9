@@ -2150,8 +2150,9 @@ public class EditProblemPane extends JPanePlugin {
         getFilesOnDiskInFolderRadioButton().setSelected(true);
         
         //clear the results table
-        //TODO: should be saving the results of a previous Input Validation run (if any) in the problem, and loading those
-        getInputValidatorResultsTable().setModel(new InputValidationResultsTableModel());
+        //TODO: probably should be saving the results of a previous Input Validation run (if any) in the problem, and loading THOSE here
+        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(null);
+        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
 
     }
     
@@ -4708,9 +4709,9 @@ public class EditProblemPane extends JPanePlugin {
         ((AbstractTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
         //adjust the column widths in the updated table
-//        getInputValidatorResultsTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-//        TableColumnAdjuster tca = new TableColumnAdjuster(getInputValidatorResultsTable());
-//        tca.adjustColumns();
+        getInputValidatorResultsTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        TableColumnAdjuster tca = new TableColumnAdjuster(getInputValidatorResultsTable());
+        tca.adjustColumns();
         
         //update the result summary label
         boolean allPassed = true;
