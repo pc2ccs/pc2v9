@@ -53,7 +53,6 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
                 obj = results[row].getFullPathFilename();
                 break;
             case 1:
-                //TODO: need to add a CellRenderer to set true=green and false=red
                 obj = results[row].isPassed();
                 break;
             case 2:
