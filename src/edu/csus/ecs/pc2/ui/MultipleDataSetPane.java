@@ -272,7 +272,7 @@ public class MultipleDataSetPane extends JPanePlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.MCLB
      */
-    private JTable getTestDataSetsListBox() {
+    public JTable getTestDataSetsListBox() {
         if (testDataSetsListBox == null) {
 
             // construct a new JTable
