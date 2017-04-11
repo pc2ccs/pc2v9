@@ -2146,14 +2146,20 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void initializeInputValidatorTabFields (Problem prob, ProblemDataFiles probDataFiles) {
         
-        //fill in the input validator program name and corresponding tooltip
+        //fill in the input validator program name 
         String inputValidatorProg = prob.getInputValidatorProgramName();
         if (inputValidatorProg != null) {
             getInputValidatorProgramNameTextField().setText(inputValidatorProg);
         } else {
             getInputValidatorProgramNameTextField().setText("");
         }
-        getInputValidatorProgramNameTextField().setToolTipText(getInputValidatorProgramNameTextField().getText());
+        //update the tooltip to reflect the name in the text field
+        if (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals("")) {
+            //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
+            getInputValidatorProgramNameTextField().setToolTipText(null);
+        } else {
+            getInputValidatorProgramNameTextField().setToolTipText(getInputValidatorProgramNameTextField().getText());
+        }
         
         //fill in the input validator command
         String inputValidatorCmd = prob.getInputValidatorCommandLine();
@@ -2162,7 +2168,13 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             getInputValidatorCommandTextField().setText("");
         }
-        getInputValidatorCommandTextField().setToolTipText(getInputValidatorCommandTextField().getText());
+        //update the tooltip to reflect the name in the text field
+        if (getInputValidatorCommandTextField().getText() == null || getInputValidatorCommandTextField().getText().equals("")) {
+            //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
+            getInputValidatorCommandTextField().setToolTipText(null);
+        } else {
+            getInputValidatorCommandTextField().setToolTipText(getInputValidatorCommandTextField().getText());
+        }
         
         //fill in the "Input data files to validate" field, and set the default button
         String filesOnDiskFolder = prob.getInputValidatorFilesOnDiskFolder() ;
@@ -2171,7 +2183,15 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             getInputValidatorFilesOnDiskTextField().setText("");
         }
-        getInputValidatorFilesOnDiskTextField().setToolTipText(getInputValidatorFilesOnDiskTextField().getText());
+        //update the tooltip to reflect the name in the text field
+        if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
+            //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
+            getInputValidatorFilesOnDiskTextField().setToolTipText(null);
+        } else {
+            getInputValidatorFilesOnDiskTextField().setToolTipText(getInputValidatorFilesOnDiskTextField().getText());
+        }
+
+        //default to "files on disk" as file source (the ButtonGroup will automatically de-select the other buttons)
         getFilesOnDiskInFolderRadioButton().setSelected(true);
         
         //clear the results table and status
@@ -2985,7 +3005,7 @@ public class EditProblemPane extends JPanePlugin {
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
-        getChooseValidatorProgramButton().setEnabled(enableComponents);
+        getChooseCustomOutputValidatorProgramButton().setEnabled(enableComponents);
         getCustomValidatorExecutableProgramLabel().setEnabled(enableComponents);
         getCustomValidatorExecutableProgramTextField().setEnabled(enableComponents);
         getCustomValidatorCommandLabel().setEnabled(enableComponents);
@@ -3260,7 +3280,7 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getChooseValidatorProgramButton() {
+    private JButton getChooseCustomOutputValidatorProgramButton() {
         if (chooseValidatorProgramButton == null) {
             chooseValidatorProgramButton = new JButton();
             chooseValidatorProgramButton.setText("Choose...");
@@ -3560,11 +3580,11 @@ public class EditProblemPane extends JPanePlugin {
     
     private void initializeInputValidatorTabFields() {
         getInputValidatorProgramNameTextField().setText("");
-        getInputValidatorProgramNameTextField().setToolTipText("");
+        getInputValidatorProgramNameTextField().setToolTipText(null);
         getInputValidatorCommandTextField().setText("");
-        getInputValidatorCommandTextField().setToolTipText("");
+        getInputValidatorCommandTextField().setToolTipText(null);
         getInputValidatorFilesOnDiskTextField().setText("");
-        getInputValidatorFilesOnDiskTextField().setToolTipText("");
+        getInputValidatorFilesOnDiskTextField().setToolTipText(null);
         getFilesOnDiskInFolderRadioButton().setSelected(true);  //button group will init others "not selected"
         getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
         getInputValidatorResultsTable().setModel(new InputValidationResultsTableModel());
@@ -4137,7 +4157,7 @@ public class EditProblemPane extends JPanePlugin {
         	gbc_validatorProgramButton.insets = new Insets(0, 0, 5, 0);
         	gbc_validatorProgramButton.gridx = 2;
         	gbc_validatorProgramButton.gridy = 0;
-        	customValidatorOptionsSubPanel.add(getChooseValidatorProgramButton(), gbc_validatorProgramButton);
+        	customValidatorOptionsSubPanel.add(getChooseCustomOutputValidatorProgramButton(), gbc_validatorProgramButton);
         	
         	//add the Validator Command Line label to the subpanel
         	GridBagConstraints gbc_customValidatorCommandLineLabel = new GridBagConstraints();
@@ -4659,7 +4679,7 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorProgramNameTextField.setMinimumSize(new Dimension(300, 25));
         	inputValidatorProgramNameTextField.setColumns(50);
         	inputValidatorProgramNameTextField.setText("");
-        	inputValidatorProgramNameTextField.setToolTipText("");
+        	inputValidatorProgramNameTextField.setToolTipText(null);
         }
         return inputValidatorProgramNameTextField;
     }
@@ -4679,7 +4699,7 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorCommandTextField.setMinimumSize(new Dimension(300, 25));
         	inputValidatorCommandTextField.setColumns(50);
         	inputValidatorCommandTextField.setText("");
-        	inputValidatorCommandTextField.setToolTipText("");
+        	inputValidatorCommandTextField.setToolTipText(null);
         	
         	inputValidatorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
