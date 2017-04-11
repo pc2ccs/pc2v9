@@ -3580,11 +3580,11 @@ public class EditProblemPane extends JPanePlugin {
     
     private void initializeInputValidatorTabFields() {
         getInputValidatorProgramNameTextField().setText("");
-        getInputValidatorProgramNameTextField().setToolTipText(null);
+        getInputValidatorProgramNameTextField().setToolTipText("");
         getInputValidatorCommandTextField().setText("");
-        getInputValidatorCommandTextField().setToolTipText(null);
+        getInputValidatorCommandTextField().setToolTipText("");
         getInputValidatorFilesOnDiskTextField().setText("");
-        getInputValidatorFilesOnDiskTextField().setToolTipText(null);
+        getInputValidatorFilesOnDiskTextField().setToolTipText("");
         getFilesOnDiskInFolderRadioButton().setSelected(true);  //button group will init others "not selected"
         getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
         getInputValidatorResultsTable().setModel(new InputValidationResultsTableModel());
@@ -4679,7 +4679,7 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorProgramNameTextField.setMinimumSize(new Dimension(300, 25));
         	inputValidatorProgramNameTextField.setColumns(50);
         	inputValidatorProgramNameTextField.setText("");
-        	inputValidatorProgramNameTextField.setToolTipText(null);
+        	inputValidatorProgramNameTextField.setToolTipText("");
         }
         return inputValidatorProgramNameTextField;
     }
@@ -4699,7 +4699,7 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorCommandTextField.setMinimumSize(new Dimension(300, 25));
         	inputValidatorCommandTextField.setColumns(50);
         	inputValidatorCommandTextField.setText("");
-        	inputValidatorCommandTextField.setToolTipText(null);
+        	inputValidatorCommandTextField.setToolTipText("");
         	
         	inputValidatorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
@@ -4882,27 +4882,55 @@ public class EditProblemPane extends JPanePlugin {
      * Uses the currently active "Input Data Files to Validate" button to determine the set of data file
      * names to be returned.  If no data files could be found at the specified source, null is returned.
      *  
-     * @return an Array of Strings containing Input Data file names, or null if not files were found
+     * @return an Array of Strings containing Input Data file names, or null if no files were found
      */
     private String[] getInputFileNames() {
 
         String [] retVal = null;
         
         if (getFilesOnDiskInFolderRadioButton().isSelected()) {
+            //read the specified folder and return the names of files in that folder
             String folderName = getInputValidatorFilesOnDiskTextField().getText();
             if (folderName != null && !folderName.trim().equals("")) {
+                
                 File folderPath = new File(folderName);
                 if (folderPath.exists() && folderPath.isDirectory() && folderPath.canRead()) {
+                    
+                    //at this point we know the folder exists and we can read it; copy the names of its files
                     retVal = folderPath.list();
                     for (int i = 0; i < retVal.length; i++) {
                         retVal[i] = folderName + File.separator + retVal[i];                        
                     }
                 }
             }
+            
         } else if (getFilesJustLoadedRadioButton().isSelected()) {
             
-            //TODO: implement this case
-            return null;
+            //read the MTSOVPane data table and return the files in that table (if any)
+            JTable inputDataFilesTable = getMultipleDataSetPane().getTestDataSetsListBox();
+            if (inputDataFilesTable != null) {
+                
+                TestCaseTableModel tableModel = (TestCaseTableModel) inputDataFilesTable.getModel();
+            
+                if (tableModel != null) {
+                    
+                    ProblemDataFiles pdf = tableModel.getFiles();
+                    
+                    if (pdf != null) {
+                        
+                        SerializedFile [] dataFiles = pdf.getJudgesDataFiles();
+                        
+                        if (dataFiles.length > 0 ) {
+                            
+                            //at this point we know there are judge's data files in the MTSOVPane table; copy their names
+                            retVal = new String [dataFiles.length];
+                            for (int file = 0; file < dataFiles.length; file++) {
+                                retVal[file] = dataFiles[file].getAbsolutePath();
+                            }
+                        }
+                    }
+                }
+            }
             
         } else if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
             
