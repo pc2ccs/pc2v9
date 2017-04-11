@@ -4684,16 +4684,62 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
-                    if (inputValidatorCommandTextField.getText() != null && !inputValidatorCommandTextField.getText().equals("")) {
-                        getRunInputValidatorButton().setEnabled(true);
-                    } else {
-                        getRunInputValidatorButton().setEnabled(false);
-                    }
+                    enableRunValidatorButton();
                 }
             });
 
         }
         return inputValidatorCommandTextField;
+    }
+    
+    /**
+     * Sets the "Run Input Validator" button enabled or disabled according to whether all attributes necessary to run the
+     * Input Validator have been specified.
+     */
+    private void enableRunValidatorButton() {
+        boolean enable = true ;
+        //don't enable the button if there's no validator command defined
+        if (getInputValidatorCommandTextField().getText() == null || getInputValidatorCommandTextField().getText().equals("")) {
+            enable = false;
+        }
+        //don't enable the button if "Files on disk in folder" is selected but there's no folder specified
+        if (getFilesOnDiskInFolderRadioButton().isSelected()) {
+            if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
+                enable = false;
+            }
+        }
+        //set the button-enabled condition based on the above determinations
+        getRunInputValidatorButton().setEnabled(enable);
+        
+        //update the tooltip to match the current state
+        if (enable) {
+            getRunInputValidatorButton().setToolTipText("Run the Input Validator on the specified Input Data Files");
+        } else {
+            //there must be something blocking permission to run the input validator; set the tooltip to indicate the condition(s)
+            String toolTip = "";
+            if (getInputValidatorCommandTextField() == null || getInputValidatorCommandTextField().getText().equals("")) {
+                toolTip += "No Input Validator Command defined";
+            }
+            if (getFilesOnDiskInFolderRadioButton().isSelected()) {
+                if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
+                    if (toolTip.equals("")) {
+                        toolTip = "No Input File folder defined";
+                    } else {
+                        toolTip += "; no Input File folder defined"; 
+                    }
+                }
+            }
+            if (!toolTip.equals("")) {
+                toolTip += "; cannot run Input Validator";
+            } else {
+                //we shouldn't be able to get here; the tooltip shouldn't be empty if 'enable' was false (there must be some condition
+                // suppressing the enable, so why didn't we pick it up in the above set of 'if' statements??)
+                getLog().log(Log.WARNING, "Empty tooltip when this shouldn't be possible");
+            }
+            
+            getRunInputValidatorButton().setToolTipText(toolTip);
+        }
+
     }
     private JButton getRunInputValidatorButton() {
         if (validateInputDataButton == null) {
@@ -4718,6 +4764,12 @@ public class EditProblemPane extends JPanePlugin {
         clearDirectory(executeDir);
 
         String [] inputFiles = getInputFileNames();
+        
+        if (inputFiles == null || inputFiles.length == 0) {
+            showMessage(getParentFrame(), "No Data Files found", "Error - no input data files found");
+            getLog().log(Log.INFO, "Request to run Input Validator, but no input data files found");
+            return;
+        }
         
         InputValidationResult [] results = new InputValidationResult [inputFiles.length];
  
@@ -4779,6 +4831,15 @@ public class EditProblemPane extends JPanePlugin {
         
     }
 
+    /**
+     * Returns an array of Strings giving the names of Problem Input Data Files which are to be checked 
+     * by running the currently-specified Input Validator using each file as input.
+     * 
+     * Uses the currently active "Input Data Files to Validate" button to determine the set of data file
+     * names to be returned.  If no data files could be found at the specified source, null is returned.
+     *  
+     * @return an Array of Strings containing Input Data file names, or null if not files were found
+     */
     private String[] getInputFileNames() {
 
         String [] retVal = null;
@@ -4794,6 +4855,18 @@ public class EditProblemPane extends JPanePlugin {
                     }
                 }
             }
+        } else if (getFilesJustLoadedRadioButton().isSelected()) {
+            
+            //TODO: implement this case
+            return null;
+            
+        } else if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
+            
+            //TODO: implement this case
+            return null;
+            
+        } else {
+            getLog().log(Log.SEVERE, "Error - no 'Input Data Files to Validate' button is selected (shouldn't be possible)");
         }
         return retVal ;
     }
@@ -5024,6 +5097,14 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorFilesOnDiskTextField.setMinimumSize(new Dimension(300, 25));
         	inputValidatorFilesOnDiskTextField.setPreferredSize(new Dimension(300, 25));
         	inputValidatorFilesOnDiskTextField.setColumns(50);
+            
+        	inputValidatorFilesOnDiskTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                    enableRunValidatorButton();
+                }
+            });
+
         }
         return inputValidatorFilesOnDiskTextField;
     }
@@ -5187,6 +5268,12 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton getFilesOnDiskInFolderRadioButton() {
         if (filesOnDiskInFolderRadioButton == null) {
         	filesOnDiskInFolderRadioButton = new JRadioButton("Files on disk in folder:");
+        	filesOnDiskInFolderRadioButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        enableUpdateButton();
+        	        enableRunValidatorButton();
+        	    }
+        	});
         	inputFileLocationButtonGroup.add(filesOnDiskInFolderRadioButton);
         }
         return filesOnDiskInFolderRadioButton;
