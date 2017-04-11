@@ -2198,7 +2198,7 @@ public class EditProblemPane extends JPanePlugin {
         //TODO: probably should be saving the results of a previous Input Validation run (if any) in the problem, and loading THOSE here
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(null);
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
-        getInputValidationResultSummaryTextLabel().setText("No Input Validation test run yet");
+        getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
         getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
 
     }
@@ -3587,6 +3587,7 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidatorFilesOnDiskTextField().setToolTipText("");
         getFilesOnDiskInFolderRadioButton().setSelected(true);  //button group will init others "not selected"
         getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
+        getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
         getInputValidatorResultsTable().setModel(new InputValidationResultsTableModel());
     }
 
@@ -5287,6 +5288,7 @@ public class EditProblemPane extends JPanePlugin {
     private JLabel getInputValidationResultSummaryTextLabel() {
         if (inputValidationResultSummaryTextLabel == null) {
         	inputValidationResultSummaryTextLabel = new JLabel("<No Input Validation test run yet>");
+        	inputValidationResultSummaryTextLabel.setForeground(Color.black);
         }
         return inputValidationResultSummaryTextLabel;
     }
