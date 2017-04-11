@@ -4719,16 +4719,34 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void enableRunValidatorButton() {
         boolean enable = true ;
+        
         //don't enable the button if there's no validator command defined
         if (getInputValidatorCommandTextField().getText() == null || getInputValidatorCommandTextField().getText().equals("")) {
             enable = false;
         }
+        
         //don't enable the button if "Files on disk in folder" is selected but there's no folder specified
         if (getFilesOnDiskInFolderRadioButton().isSelected()) {
             if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
                 enable = false;
             }
         }
+        
+        //don't enable the button if "Files just loaded via 'input data files' pane" is selected but there's files on the MTSOV pane
+        if (getFilesJustLoadedRadioButton().isSelected()) {
+            //TODO: implement a check for files in the MTSOV pane; if not present, set enable = false
+            
+            enable = false ;
+        }
+        
+        //don't enable the button if "Files previously loaded into PC2" is selected but there's no data files loaded
+        if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
+            //TODO: implement a check for files in the contest model; if not present, set enable = false
+            
+            enable = false ;
+        }
+        
+        
         //set the button-enabled condition based on the above determinations
         getRunInputValidatorButton().setEnabled(enable);
         
@@ -5152,6 +5170,12 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton getFilesPreviouslyLoadedRadioButton() {
         if (filesPreviouslyLoadedRadioButton == null) {
         	filesPreviouslyLoadedRadioButton = new JRadioButton("Files previously loaded into PC2");
+        	filesPreviouslyLoadedRadioButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+                    enableUpdateButton();
+                    enableRunValidatorButton();
+        	    }
+        	});
         	inputFileLocationButtonGroup.add(filesPreviouslyLoadedRadioButton);
         	filesPreviouslyLoadedRadioButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         }
@@ -5160,6 +5184,12 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton getFilesJustLoadedRadioButton() {
         if (filesJustLoadedRadioButton == null) {
         	filesJustLoadedRadioButton = new JRadioButton("Files just loaded via \"Input Data Files\" pane");
+        	filesJustLoadedRadioButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+                    enableUpdateButton();
+                    enableRunValidatorButton();
+        	    }
+        	});
         	inputFileLocationButtonGroup.add(filesJustLoadedRadioButton);
         }
         return filesJustLoadedRadioButton;
