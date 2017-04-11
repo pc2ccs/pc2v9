@@ -655,7 +655,8 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                     
-                    //see if the choice of which validator (if any) to use has changed; enable the Update button and update the tooltip if so
+                    //see if the choice of which output validator (if any) to use has changed; 
+                    // enable the Update button and update the tooltip if so
                     if ( problem.getValidatorType() != changedProblem.getValidatorType() ) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
@@ -750,6 +751,25 @@ public class EditProblemPane extends JPanePlugin {
                             } else {
                                 updateToolTip += ", Custom Output Validator options";
                             }
+                        }
+                    }
+                    
+                    //check for changes in Input Validator settings
+                    if (!problem.getInputValidatorProgramName().equals(changedProblem.getInputValidatorProgramName())) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Input Validator";
+                        } else {
+                            updateToolTip += ", Input Validator";
+                        }
+                    }
+                    
+                    if (!problem.getInputValidatorCommandLine().equals(changedProblem.getInputValidatorCommandLine())) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Input Validator Command";
+                        } else {
+                            updateToolTip += ", Input Validator Command";
                         }
                     }
                     
@@ -1040,7 +1060,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         checkProblem.setValidatorType(validatorType);
 
-        //update settings in the Problem for each type of validator:
+        //update settings in the Problem for each type of output validator:
         checkProblem.setPC2ValidatorSettings(getPC2ValidatorSettingsFromFields());
         checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
         checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
@@ -1098,7 +1118,8 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
         
-        //update Input Validator settings from GUI
+        //update Input Validator settings from GUI:
+        //Input Validator Name...
         String inputValProgName = getInputValidatorProgramNameTextField().getText();
         checkProblem.setInputValidatorProgramName(inputValProgName);
         if (inputValProgName != null && !inputValProgName.equals("")) {
@@ -1106,8 +1127,10 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             checkProblem.setProblemHasInputValidator(false);
         }
+        //Input Validator Command...
         String inputValCommand = getInputValidatorCommandTextField().getText();
         checkProblem.setInputValidatorCommandLine(inputValCommand);
+        //Input Validator files from disk...
         String inputValFilesOnDiskFolder = getInputValidatorFilesOnDiskTextField().getText();
         checkProblem.setInputValidatorFilesOnDiskFolder(inputValFilesOnDiskFolder);
         
@@ -1817,7 +1840,9 @@ public class EditProblemPane extends JPanePlugin {
             clearForm();
         }
 
-        enableValidatorTabComponents();
+        enableOutputValidatorTabComponents();
+        
+        enableInputValidatorTabComponents();
 
         //enableGeneralTabComponents:
         enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
@@ -2765,7 +2790,7 @@ public class EditProblemPane extends JPanePlugin {
             useNOValidatatorRadioButton.setText("Do not use Validator");
             useNOValidatatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableValidatorTabComponents();
+                    enableOutputValidatorTabComponents();
                     enableUpdateButton();
                 }
             });
@@ -2773,7 +2798,18 @@ public class EditProblemPane extends JPanePlugin {
         return useNOValidatatorRadioButton;
     }
 
-    protected void enableValidatorTabComponents() {
+    
+    private void enableInputValidatorTabComponents() {
+        if (getInputValidatorCommandTextField().getText() != null && !getInputValidatorCommandTextField().getText().equals("")) {
+            getRunInputValidatorButton().setEnabled(true);
+            getRunInputValidatorButton().setToolTipText("Run the defined Input Validator command using the specified set of Input Data files");
+        } else {
+            getRunInputValidatorButton().setEnabled(false);
+            getRunInputValidatorButton().setToolTipText("No Input Validator command defined; cannot run");
+        }
+    }
+    
+    protected void enableOutputValidatorTabComponents() {
         if (getUsePC2ValidatorRadioButton().isSelected()) {
             enablePC2ValidatorComponents(true);
             enableClicsValidatorComponents(false);
@@ -2817,7 +2853,7 @@ public class EditProblemPane extends JPanePlugin {
             useCLICSValidatorRadioButton.setText("Use CLICS Validator");
             useCLICSValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableValidatorTabComponents();
+                    enableOutputValidatorTabComponents();
                     enableUpdateButton();
                 }
             });
@@ -2981,7 +3017,7 @@ public class EditProblemPane extends JPanePlugin {
             useCustomValidatorRadioButton.setText("Use Custom (User-supplied) Validator");
             useCustomValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableValidatorTabComponents();
+                    enableOutputValidatorTabComponents();
                     enableUpdateButton();
                 }
             });
@@ -4253,7 +4289,7 @@ public class EditProblemPane extends JPanePlugin {
         	usePC2ValidatorRadioButton.setMargin(new Insets(2, 12, 2, 2));
         	usePC2ValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableValidatorTabComponents();
+                    enableOutputValidatorTabComponents();
                     enableUpdateButton();
                 }
             });
@@ -4644,10 +4680,22 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorCommandTextField.setColumns(50);
         	inputValidatorCommandTextField.setText("");
         	inputValidatorCommandTextField.setToolTipText("");
+        	
+        	inputValidatorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                    if (inputValidatorCommandTextField.getText() != null && !inputValidatorCommandTextField.getText().equals("")) {
+                        getRunInputValidatorButton().setEnabled(true);
+                    } else {
+                        getRunInputValidatorButton().setEnabled(false);
+                    }
+                }
+            });
+
         }
         return inputValidatorCommandTextField;
     }
-    private JButton getTestInputDataButton() {
+    private JButton getRunInputValidatorButton() {
         if (validateInputDataButton == null) {
         	validateInputDataButton = new JButton("Run Input Validator");
         	validateInputDataButton.addActionListener(new ActionListener() {
@@ -4904,7 +4952,7 @@ public class EditProblemPane extends JPanePlugin {
         	executeInputValidatorPanel.setBorder(new TitledBorder(null, "Execute Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         	executeInputValidatorPanel.setLayout(new BoxLayout(executeInputValidatorPanel, BoxLayout.X_AXIS));
         	executeInputValidatorPanel.add(getHorizontalStrut_3());
-        	executeInputValidatorPanel.add(getTestInputDataButton());
+        	executeInputValidatorPanel.add(getRunInputValidatorButton());
         	executeInputValidatorPanel.add(getHorizontalStrut_4());
         	executeInputValidatorPanel.add(getInputValidatorDataFilesPanel());
         }
