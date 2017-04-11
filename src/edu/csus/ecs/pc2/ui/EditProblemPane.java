@@ -4796,6 +4796,30 @@ public class EditProblemPane extends JPanePlugin {
         
         //TODO: need to save the Serialized File in the model (but don't do that in this method)
         SerializedFile validatorProg = new SerializedFile(getInputValidatorProgramNameTextField().getText());
+        
+        //check whether creating the SerializedFile caused an error (the SerializedFile class does NOT throw its own exceptions!)
+        if (validatorProg == null 
+                || (validatorProg.getErrorMessage() != null && !validatorProg.getErrorMessage().equals("") ) 
+                || validatorProg.getException() != null ) {
+            
+            String errMsg = "";
+            String exceptionMsg = "";
+            if (validatorProg == null) {
+                errMsg = "Null validator program";
+            } else {
+                if (validatorProg.getErrorMessage() != null && !validatorProg.getErrorMessage().equals("")) {
+                    errMsg = validatorProg.getErrorMessage();
+                }
+                if (validatorProg.getException() != null) {
+                    exceptionMsg += validatorProg.getException();
+                }
+            }
+            showMessage(getParentFrame(), "Validator Program Error", errMsg + "\n\n" + exceptionMsg);
+            getLog().log(Log.WARNING, errMsg + ": " + exceptionMsg);
+            return;
+        }
+        
+        //copy the validator program to the execution directory
         try {
             validatorProg.writeFile(executeDir + File.separator + validatorProg.getName());
             getLog().info("Copied validator file '" + validatorProg.getName() + "' to '" + executeDir + "'");
