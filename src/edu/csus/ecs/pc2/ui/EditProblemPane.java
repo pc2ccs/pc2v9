@@ -5184,6 +5184,7 @@ public class EditProblemPane extends JPanePlugin {
                         getInputValidatorFilesOnDiskTextField().setText(directory);
                         getInputValidatorFilesOnDiskTextField().setToolTipText(directory);
                         enableUpdateButton();
+                        enableRunValidatorButton();
                     }
         	    }
         	});
