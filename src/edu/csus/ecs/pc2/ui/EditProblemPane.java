@@ -3588,7 +3588,10 @@ public class EditProblemPane extends JPanePlugin {
         getFilesOnDiskInFolderRadioButton().setSelected(true);  //button group will init others "not selected"
         getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
         getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
-        getInputValidatorResultsTable().setModel(new InputValidationResultsTableModel());
+//        getInputValidatorResultsTable().setModel(new InputValidationResultsTableModel()); //for some reason this removes the custom pass/fail cell renderer...
+        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(null);
+        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+
     }
 
     private void initializeOutputValidatorTabFields() {
