@@ -4953,12 +4953,31 @@ public class EditProblemPane extends JPanePlugin {
             
         } else if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
             
-            //TODO: implement this case
-            return null;
+            //reach into the Problem (if defined) and get the judge's data files (if any)
+            if (problem != null) {
+                
+                ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
+                
+                if (pdf != null) {
+                    
+                    SerializedFile [] dataFiles = pdf.getJudgesDataFiles();
+                    
+                    if (dataFiles.length > 0 ) {
+                        
+                        //at this point we know there are judge's data files in the problem; copy their names
+                        retVal = new String [dataFiles.length];
+                        for (int file = 0; file < dataFiles.length; file++) {
+                            retVal[file] = dataFiles[file].getAbsolutePath();
+                        }
+                    }
+                }
+            }
             
         } else {
+            //none of the three radio buttons is selected
             getLog().log(Log.SEVERE, "Error - no 'Input Data Files to Validate' button is selected (shouldn't be possible)");
         }
+        
         return retVal ;
     }
 
