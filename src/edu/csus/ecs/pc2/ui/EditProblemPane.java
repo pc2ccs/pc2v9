@@ -4735,11 +4735,12 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
         
-        //don't enable the button if "Files just loaded via 'input data files' pane" is selected but there's files on the MTSOV pane
+        //don't enable the button if "Files just loaded via 'input data files' pane" is selected but there's no files on the MTSOV pane
         if (getFilesJustLoadedRadioButton().isSelected()) {
-            //TODO: implement a check for files in the MTSOV pane; if not present, set enable = false
-            
-            enable = false ;
+            if (getMultipleDataSetPane().getTestDataSetsListBox().getModel().getRowCount() <= 0) {
+                //there are no data rows in the MTSOVPane table
+                enable = false ;               
+            }
         }
         
         //don't enable the button if "Files previously loaded into PC2" is selected but there's no data files loaded
