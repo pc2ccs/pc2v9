@@ -77,6 +77,8 @@ import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 /**
  * Add/Edit Problem Pane.
@@ -2233,6 +2235,15 @@ public class EditProblemPane extends JPanePlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
+            mainTabbedPane.addChangeListener(new ChangeListener() {
+                public void stateChanged(ChangeEvent e) {
+                    JTabbedPane sourceTabbedPane = (JTabbedPane) e.getSource();
+                    int index = sourceTabbedPane.getSelectedIndex();
+                    if (sourceTabbedPane.getTitleAt(index).equals("Input Validator")) {
+                        updateRunValidatorButtonState();
+                    }
+                }
+            });
             mainTabbedPane.setPreferredSize(new Dimension(500, 600));
             mainTabbedPane.insertTab("Input Validator", null, getInputValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Input Data Files", null, getMultipleDataSetPane(), null, 0);
@@ -4708,7 +4719,7 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
-                    enableRunValidatorButton();
+                    updateRunValidatorButtonState();
                 }
             });
 
@@ -4720,7 +4731,7 @@ public class EditProblemPane extends JPanePlugin {
      * Sets the "Run Input Validator" button enabled or disabled according to whether all attributes necessary to run the
      * Input Validator have been specified.
      */
-    private void enableRunValidatorButton() {
+    private void updateRunValidatorButtonState() {
         boolean enable = true ;
         
         //don't enable the button if there's no validator command defined
@@ -5196,7 +5207,7 @@ public class EditProblemPane extends JPanePlugin {
         	filesPreviouslyLoadedRadioButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
                     enableUpdateButton();
-                    enableRunValidatorButton();
+                    updateRunValidatorButtonState();
         	    }
         	});
         	inputFileLocationButtonGroup.add(filesPreviouslyLoadedRadioButton);
@@ -5210,7 +5221,7 @@ public class EditProblemPane extends JPanePlugin {
         	filesJustLoadedRadioButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
                     enableUpdateButton();
-                    enableRunValidatorButton();
+                    updateRunValidatorButtonState();
         	    }
         	});
         	inputFileLocationButtonGroup.add(filesJustLoadedRadioButton);
@@ -5227,7 +5238,7 @@ public class EditProblemPane extends JPanePlugin {
         	inputValidatorFilesOnDiskTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
-                    enableRunValidatorButton();
+                    updateRunValidatorButtonState();
                 }
             });
 
@@ -5266,7 +5277,7 @@ public class EditProblemPane extends JPanePlugin {
                         getInputValidatorFilesOnDiskTextField().setText(directory);
                         getInputValidatorFilesOnDiskTextField().setToolTipText(directory);
                         enableUpdateButton();
-                        enableRunValidatorButton();
+                        updateRunValidatorButtonState();
                     }
         	    }
         	});
@@ -5399,7 +5410,7 @@ public class EditProblemPane extends JPanePlugin {
         	filesOnDiskInFolderRadioButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        enableUpdateButton();
-        	        enableRunValidatorButton();
+        	        updateRunValidatorButtonState();
         	    }
         	});
         	inputFileLocationButtonGroup.add(filesOnDiskInFolderRadioButton);
