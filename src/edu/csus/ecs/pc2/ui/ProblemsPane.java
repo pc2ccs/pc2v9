@@ -68,6 +68,9 @@ public class ProblemsPane extends JPanePlugin {
     private JButton setJudgesDataPathButton;
 
     private EditJudgesDataFilePathFrame editCDPPathFrame;
+    private JButton runInputValidatorButton;
+
+    private RunInputValidatorsFrame runInputValidatorsFrame;
     
     /**
      * This method initializes
@@ -114,6 +117,7 @@ public class ProblemsPane extends JPanePlugin {
             problemButtonPane.add(getEditButton(), null);
             problemButtonPane.add(getReportButton(), null);
             problemButtonPane.add(getSetJudgesDataPathButton());
+            problemButtonPane.add(getRunInputValidatorButton());
         }
         return problemButtonPane;
     }
@@ -741,6 +745,18 @@ public class ProblemsPane extends JPanePlugin {
         }
         return editCDPPathFrame ;
     }
+    
+    /**
+     * Returns a singleton instance of the Frame used to display the results of running the input validators.
+     * 
+     * @return a RunInputValidatorFrame
+     */
+    private RunInputValidatorsFrame getRunInputValidatorsFrame() {
+        if (runInputValidatorsFrame == null) {
+            runInputValidatorsFrame = new RunInputValidatorsFrame();
+        }
+        return runInputValidatorsFrame ;
+    }
 
     /**
      * Displays the class, method, and line number of the method that called this method, 
@@ -763,4 +779,22 @@ public class ProblemsPane extends JPanePlugin {
     }
     
 
-} // @jve:decl-index=0:visual-constraint="10,10"
+    private JButton getRunInputValidatorButton() {
+        if (runInputValidatorButton == null) {
+        	runInputValidatorButton = new JButton("Run Input Validators");
+        	runInputValidatorButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        runInputValidators();
+        	    }
+        	});
+        	runInputValidatorButton.setToolTipText("Execute the Input Validator for each problem against the data files defined for that problem");
+        }
+        return runInputValidatorButton;
+    }
+    
+    private void runInputValidators() {
+        getRunInputValidatorsFrame().setContestAndController(getContest(), getController());
+        getRunInputValidatorsFrame().setVisible(true);
+    }
+    
+} 
