@@ -163,11 +163,11 @@ public class ProgramRunner {
                 log.severe(message);
             }
         } catch (IOException e) {
-            message = "Exec failure " + cmdline + " " + e.getMessage();
+            message = "Exec failure: IOException executing '" + cmdline + "': " + e.getMessage();
             executionData.setExecutionException(new ExecuteException(message, e.getCause()));
             log.severe(message);
         } catch (Exception e) {
-            message = "Exec failure " + cmdline + " " + e.getMessage();
+            message = "Exec failure: Exception executing '" + cmdline + "': " + e.getMessage();
             executionData.setExecutionException(new ExecuteException(message, e.getCause()));
             log.severe(message);
         }
