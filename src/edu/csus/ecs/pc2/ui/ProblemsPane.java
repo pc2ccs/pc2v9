@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
+import java.awt.Dimension;
 
 /**
  * View Problems.
@@ -87,7 +88,7 @@ public class ProblemsPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(564, 229));
+        this.setSize(new Dimension(665, 229));
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
         add(getCenterPanel(), BorderLayout.CENTER);
         this.add(getProblemButtonPane(), java.awt.BorderLayout.SOUTH);
