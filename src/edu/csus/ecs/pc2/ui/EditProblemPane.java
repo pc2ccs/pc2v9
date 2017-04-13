@@ -25,7 +25,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,6 +52,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -62,8 +63,6 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.execute.ExecutionData;
-import edu.csus.ecs.pc2.core.execute.ProgramRunner;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -76,9 +75,8 @@ import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
+import edu.csus.ecs.pc2.validator.inputValidator.InputValidatorRunner;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 /**
  * Add/Edit Problem Pane.
@@ -4809,80 +4807,27 @@ public class EditProblemPane extends JPanePlugin {
     
     private void runInputDataValidationTest() {
         
-        ProgramRunner runner = new ProgramRunner(getContest(), getController());
-        
+        //get the command line from the GUI
         String cmdline = getInputValidatorCommandLine();
         
-        String executeDir = getExecuteDirectoryName();
-        Utilities.insureDir(executeDir);
-        clearDirectory(executeDir);
-
-        String [] inputFiles = getInputFileNames();
-        
-        if (inputFiles == null || inputFiles.length == 0) {
-            showMessage(getParentFrame(), "No Data Files found", "Error - no input data files found");
-            getLog().log(Log.INFO, "Request to run Input Validator, but no input data files found");
-            return;
-        }
-        
-        InputValidationResult [] results = new InputValidationResult [inputFiles.length];
- 
-        
-        //TODO: need to save the Serialized File in the model (but don't do that in this method)
+        //get an execute directory name
+        String executeDir = getExecuteDirectoryName();        
+  
+        //TODO: need to save the Serialized File in the model (but don't do that in this method - do it in the Add/Update button handler)
         SerializedFile validatorProg = new SerializedFile(getInputValidatorProgramNameTextField().getText());
-        
-        //check whether creating the SerializedFile caused an error (the SerializedFile class does NOT throw its own exceptions!)
-        if (validatorProg == null 
-                || (validatorProg.getErrorMessage() != null && !validatorProg.getErrorMessage().equals("") ) 
-                || validatorProg.getException() != null ) {
-            
-            String errMsg = "";
-            String exceptionMsg = "";
-            if (validatorProg == null) {
-                errMsg = "Null validator program";
-            } else {
-                if (validatorProg.getErrorMessage() != null && !validatorProg.getErrorMessage().equals("")) {
-                    errMsg = validatorProg.getErrorMessage();
-                }
-                if (validatorProg.getException() != null) {
-                    exceptionMsg += validatorProg.getException();
-                }
-            }
-            showMessage(getParentFrame(), "Validator Program Error", errMsg + "\n\n" + exceptionMsg);
-            getLog().log(Log.WARNING, errMsg + ": " + exceptionMsg);
+        try {
+            Utilities.checkSerializedFileError(validatorProg);
+        } catch (Exception e) {
+            showMessage(getParentFrame(), "Error Creating Validator", "An error occurred while creating the validator program" + e.getMessage());
             return;
         }
         
-        //copy the validator program to the execution directory
-        try {
-            validatorProg.writeFile(executeDir + File.separator + validatorProg.getName());
-            getLog().info("Copied validator file '" + validatorProg.getName() + "' to '" + executeDir + "'");
-        } catch (IOException e) {
-            getLog().severe("Exception creating input validator program in execution folder: " + e.getMessage());
-        }
-
-        int exitCode ;
-        for (int i=0; i<inputFiles.length; i++) {
+        SerializedFile [] dataFiles = getDataFiles();
+        
+        InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
+        
+        InputValidationResult [] results = runner.runInputValidator(validatorProg, cmdline, executeDir, dataFiles);
             
-            String stdinFilename = inputFiles[i];
-            
-            ExecutionData executionData = new ExecutionData();
-            
-            int msTimeout = 30000;
-            
-            String stdoutFilename = "runnerStdout" + i + ".pc2" ;
-            String stderrFilename = "runnerStderr" + i + ".pc2" ;
-            
-            String stdoutFilePath = executeDir + File.separator + stdoutFilename;
-            String stderrFilePath = executeDir + File.separator + stderrFilename;
-            
-            exitCode = runner.runProgram(executionData, executeDir, cmdline, msTimeout, null, stdinFilename, stdoutFilePath, stderrFilePath);
-            
-            boolean passed = exitCode==Constants.INPUT_VALIDATOR_SUCCESS_EXIT_CODE ? true : false;
-            
-            results[i] = new InputValidationResult(Utilities.basename(stdinFilename), passed, stdoutFilename, stderrFilename);
-            
-        }
         
         //update the results table
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(results);
@@ -4908,6 +4853,65 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidationResultSummaryTextLabel().setForeground(color);
         
     }
+
+    /**
+     * Returns an array of SerializedFiles containing data files to be validated.
+     * 
+     * @return
+     */
+    private SerializedFile [] getDataFiles() {
+        
+        SerializedFile [] retArray = null;
+        
+        //check if the files are coming from either the MSTOVPane or from a folder
+        if (getFilesOnDiskInFolderRadioButton().isSelected() || getFilesPreviouslyLoadedRadioButton().isSelected()) {
+
+            //get the names of the data files to be validated
+            String [] inputFileNames = getInputFileNames();
+            
+            if (inputFileNames == null || inputFileNames.length == 0) {
+                showMessage(getParentFrame(), "No Data Files found", "Error - no input data files found");
+                getLog().log(Log.INFO, "Request to run Input Validator, but no input data files found");
+                throw new RuntimeException("Request to run Input Validator, but no input data files found");
+            } else {
+                
+                //construct SerializedFiles from the specified file names
+                
+                retArray = new SerializedFile [inputFileNames.length];
+                
+                for (int i=0; i< inputFileNames.length; i++) {
+                    
+                    retArray[i] = new SerializedFile(inputFileNames[i]);
+                    try {
+                        Utilities.checkSerializedFileError(retArray[i]);
+                    } catch (Exception e) {
+                        showMessage(getParentFrame(), "Error Creating Validator", "An error occurred while creating the validator program" + e.getMessage());
+                        getLog().log(Log.WARNING, "An error occurred while creating the validator program" + e.getMessage());
+                        return null;
+                    }
+
+                    
+                    //TODO: check the new SerializedFile for errorMessages or exceptions
+                }
+            }
+            
+        } else if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
+            //get the Serialized Judge's Data files out of the contest model and return that
+            
+            retArray = originalProblemDataFiles.getJudgesDataFiles();
+            
+        } else {
+            //we should never be able to get here -- the button group should insure that exactly one button is pushed
+            System.err.println ("Undefined condition in EditProblemPane.InputValidator: no Input Data File radio button is selected!");
+            getLog().log(Log.WARNING, "Undefined condition in EditProblemPane.InputValidator: no Input Data File radio button is selected!");
+        }
+        
+        return retArray;
+        
+    }
+    
+    
+    
 
     /**
      * Returns an array of Strings giving the names of Problem Input Data Files which are to be checked 
