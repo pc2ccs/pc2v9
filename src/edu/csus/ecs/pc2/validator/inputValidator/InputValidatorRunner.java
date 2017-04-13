@@ -11,6 +11,8 @@ import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.execute.ProgramRunner;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.InputValidationResult;
 
@@ -150,6 +152,43 @@ public class InputValidatorRunner {
         
         return results;
     }
+    
+    /**
+     * Runs the Input Validator contained in the specified {@link ProblemDataFiles} against the Judge's data files contained in the 
+     * specified {@link Problem},
+     * returning an array of {@link InputValidationResults} (one element for each data file).
+     * 
+     * @param problem the problem whose Input Validator is to be run
+     * @param problemDataFiles the ProblemDataFiles associated with the problem
+     * 
+     * @return an array of InputValidationResults (length zero if the problem has no data files), 
+     *              or null if the problem has no input validator or no input validator command line
+     */
+    public InputValidationResult [] runInputValidator (Problem problem, ProblemDataFiles problemDataFiles) {
+        
+        SerializedFile validator = problemDataFiles.getValidatorFile();
+        
+        if (validator == null) {
+            return null ;
+        }
+        
+        String validatorCommand = problem.getInputValidatorCommandLine();
+        if (validatorCommand == null || validatorCommand.equals("")) {
+            return null ;
+        }
+        
+        SerializedFile [] dataFiles = problemDataFiles.getJudgesDataFiles();
+        if (dataFiles == null || dataFiles.length <=0) {
+            return new InputValidationResult [0];
+        }
+        
+        String executeDir = getExecuteDirectoryName();
+        
+        InputValidationResult [] results = runInputValidator(validator, validatorCommand, executeDir, dataFiles);
+        
+        return results ;
+        
+    }
 
     /**
      * Replace all instances of beforeString with afterString.
@@ -213,6 +252,10 @@ public class InputValidatorRunner {
             result &= fn1.delete();
         }
         return (result);
+    }
+
+    public String getExecuteDirectoryName() {
+        return "inputValidate" + contest.getClientId().getSiteNumber() + contest.getClientId().getName() ;
     }
 
 
