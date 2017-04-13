@@ -83,22 +83,30 @@ public class InputValidatorRunner {
             validatorProg.writeFile(executeDir + File.separator + validatorProg.getName());
             controller.getLog().info("Copied validator file '" + validatorProg.getName() + "' to '" + executeDir + "'");
         } catch (IOException e) {
-            controller.getLog().severe("Exception creating input validator program in execution folder: " + e.getMessage());
+            controller.getLog().severe("Exception creating input validator program '" + validatorProg.getName() + "' in execution folder: " + e.getMessage());
         }
 
-        String stdinFilename = dataFile.getName();
+        // copy the input data file to the execution directory
+        try {
+            dataFile.writeFile(executeDir + File.separator + dataFile.getName());
+            controller.getLog().info("Copied data file '" + dataFile.getName() + "' to '" + executeDir + "'");
+        } catch (IOException e) {
+            controller.getLog().severe("Exception creating input data file '" + dataFile.getName() + "' in execution folder: " + e.getMessage());
+        }
 
         ExecutionData executionData = new ExecutionData();
 
         int msTimeout = 30000;
 
+        String stdinFilename = dataFile.getName();
         String stdoutFilename = "runnerStdout.pc2";
         String stderrFilename = "runnerStderr.pc2";
 
+        String stdinFilePath = executeDir + File.separator + stdinFilename;
         String stdoutFilePath = executeDir + File.separator + stdoutFilename;
         String stderrFilePath = executeDir + File.separator + stderrFilename;
 
-        int exitCode = runner.runProgram(executionData, executeDir, cmdline, msTimeout, null, stdinFilename, stdoutFilePath, stderrFilePath);
+        int exitCode = runner.runProgram(executionData, executeDir, cmdline, msTimeout, null, stdinFilePath, stdoutFilePath, stderrFilePath);
 
         boolean passed = exitCode == Constants.INPUT_VALIDATOR_SUCCESS_EXIT_CODE ? true : false;
         
