@@ -2701,7 +2701,7 @@ public class EditProblemPane extends JPanePlugin {
         // toolTip should always have the full path
         String oldFile = textField.getToolTipText();
         String startDir;
-        if (oldFile.equalsIgnoreCase("")) {
+        if (oldFile.equalsIgnoreCase("")) { //<<--- consider adding a check for null to this
             startDir = lastDirectory;
         } else {
             startDir = oldFile;
@@ -4730,17 +4730,17 @@ public class EditProblemPane extends JPanePlugin {
      * Input Validator have been specified.
      */
     private void updateRunValidatorButtonState() {
-        boolean enable = true ;
+        boolean enableButton = true ;
         
         //don't enable the button if there's no validator command defined
         if (getInputValidatorCommandTextField().getText() == null || getInputValidatorCommandTextField().getText().equals("")) {
-            enable = false;
+            enableButton = false;
         }
         
         //don't enable the button if "Files on disk in folder" is selected but there's no folder specified
         if (getFilesOnDiskInFolderRadioButton().isSelected()) {
             if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
-                enable = false;
+                enableButton = false;
             }
         }
         
@@ -4748,23 +4748,25 @@ public class EditProblemPane extends JPanePlugin {
         if (getFilesJustLoadedRadioButton().isSelected()) {
             if (getMultipleDataSetPane().getTestDataSetsListBox().getModel().getRowCount() <= 0) {
                 //there are no data rows in the MTSOVPane table
-                enable = false ;               
+                enableButton = false ;               
             }
         }
         
         //don't enable the button if "Files previously loaded into PC2" is selected but there's no data files loaded
         if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
-            //TODO: implement a check for files in the contest model; if not present, set enable = false
-            
-            enable = false ;
+            //Check for files in the contest model
+            SerializedFile [] dataFiles = getContest().getProblemDataFile(getProblem()).getJudgesAnswerFiles();
+            if (dataFiles == null || dataFiles.length <= 0) {
+                enableButton = false ;                
+            }
         }
         
         
         //set the button-enabled condition based on the above determinations
-        getRunInputValidatorButton().setEnabled(enable);
+        getRunInputValidatorButton().setEnabled(enableButton);
         
         //update the tooltip to match the current state
-        if (enable) {
+        if (enableButton) {
             getRunInputValidatorButton().setToolTipText("Run the Input Validator on the specified Input Data Files");
         } else {
             //there must be something blocking permission to run the input validator; set the tooltip to indicate the condition(s)
