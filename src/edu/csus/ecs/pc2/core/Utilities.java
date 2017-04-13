@@ -1383,4 +1383,38 @@ public final class Utilities {
 
     }
     
+    /**
+     * Checks the specified SerializedFile for error messages and/or exceptions. 
+     * This method is provided because the SerializedFile class does not throw exceptions when errors occur (such as its
+     * constructor encountering a "File Not Found" condition). Rather, the SerializedFile class simply sets an "error message" 
+     * and records the "exception" within the SerializedFile object. This method throws any exception found in the specified 
+     * SerializedFile, or returns false if there is an error message (but no exception).
+     * 
+     * @param serFile
+     *            the SerializedFile to be checked
+     * 
+     * @return true if the SerializedFile contains no error message or exceptions; false if it contains an error message or is null
+     * 
+     * @throws Exception
+     *             if any exception is found in the SerializedFile object
+     */
+    public static boolean checkSerializedFileError(SerializedFile serFile) throws Exception {
+
+        if (serFile == null) {
+            return false;
+        }
+
+        if (serFile.getException() != null) {
+            Exception e = serFile.getException();
+            throw e;
+        }
+
+        if (serFile.getErrorMessage() != null && !serFile.getErrorMessage().equals("")) {
+            return false;
+        }
+
+        return true;
+    }
+
+    
 }
