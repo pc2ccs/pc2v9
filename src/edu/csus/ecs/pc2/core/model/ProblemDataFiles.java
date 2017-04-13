@@ -40,8 +40,6 @@ public class ProblemDataFiles implements IElementObject {
     private ElementId problemId = null;
     
     private SerializedFile validatorFile;
-    
-    private SerializedFile [] validatorFiles;
 
     public ProblemDataFiles(Problem problem) {
         problemId = problem.getElementId();
@@ -83,7 +81,6 @@ public class ProblemDataFiles implements IElementObject {
 
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
-        clone.setValidatorFiles(getValidatorFiles());
         
         return clone;
     }
@@ -363,24 +360,6 @@ public class ProblemDataFiles implements IElementObject {
         return buf.toString();
     }
     
-    
-    /**
-     * save a set of files, one which should be the validator program. 
-     * 
-     * @param validatorFiles
-     */
-    public void setValidatorFiles(SerializedFile[] validatorFiles) {
-        this.validatorFiles = validatorFiles;
-    }
-    
-    /**
-     * A directory/set of files needed to run the validator.
-     * 
-     * @return
-     */
-    public SerializedFile[] getValidatorFiles() {
-        return validatorFiles;
-    }
     
     /**
      * Returns the full path for judge data filenames.

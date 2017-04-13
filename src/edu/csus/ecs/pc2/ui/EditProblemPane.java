@@ -485,7 +485,7 @@ public class EditProblemPane extends JPanePlugin {
             clone.setValidatorFile(newProblemDataFiles.getValidatorFile());
             clone.setJudgesAnswerFiles(newProblemDataFiles.getJudgesAnswerFiles());
             clone.setJudgesDataFiles(newProblemDataFiles.getJudgesDataFiles());
-            clone.setValidatorFiles(newProblemDataFiles.getValidatorFiles());
+
             // without this the problemId is wrong in newProblemDataFiles. so the controller.getProblemDataFiles(problem) does not find it
             newProblemDataFiles = clone;
         }
