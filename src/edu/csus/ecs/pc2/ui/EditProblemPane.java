@@ -4864,7 +4864,7 @@ public class EditProblemPane extends JPanePlugin {
         SerializedFile [] retArray = null;
         
         //check if the files are coming from either the MSTOVPane or from a folder
-        if (getFilesOnDiskInFolderRadioButton().isSelected() || getFilesPreviouslyLoadedRadioButton().isSelected()) {
+        if (getFilesOnDiskInFolderRadioButton().isSelected() || getFilesJustLoadedRadioButton().isSelected()) {
 
             //get the names of the data files to be validated
             String [] inputFileNames = getInputFileNames();
@@ -4885,13 +4885,10 @@ public class EditProblemPane extends JPanePlugin {
                     try {
                         Utilities.checkSerializedFileError(retArray[i]);
                     } catch (Exception e) {
-                        showMessage(getParentFrame(), "Error Creating Validator", "An error occurred while creating the validator program" + e.getMessage());
-                        getLog().log(Log.WARNING, "An error occurred while creating the validator program" + e.getMessage());
+                        showMessage(getParentFrame(), "Error creating data files", "An error occurred while serializing the data files: " + e.getMessage());
+                        getLog().log(Log.WARNING, "An error occurred while serializing the data files: " + e.getMessage());
                         return null;
                     }
-
-                    
-                    //TODO: check the new SerializedFile for errorMessages or exceptions
                 }
             }
             
@@ -4902,8 +4899,8 @@ public class EditProblemPane extends JPanePlugin {
             
         } else {
             //we should never be able to get here -- the button group should insure that exactly one button is pushed
-            System.err.println ("Undefined condition in EditProblemPane.InputValidator: no Input Data File radio button is selected!");
-            getLog().log(Log.WARNING, "Undefined condition in EditProblemPane.InputValidator: no Input Data File radio button is selected!");
+            System.err.println ("Undefined condition in EditProblemPane.getDataFiles(): no Input Data File radio button is selected!");
+            getLog().log(Log.WARNING, "Undefined condition in EditProblemPane.getDataFiles(): no Input Data File radio button is selected!");
         }
         
         return retArray;
