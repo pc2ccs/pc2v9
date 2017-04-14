@@ -160,6 +160,6 @@ public final class Constants {
     
     public static final int INPUT_VALIDATOR_FAILED_EXIT_CODE = 43;
     
-    public static final int INPUT_VALIDATOR_INTERNAL_ERROR_EXIT_CODE = -39;
+    public static final int INPUT_VALIDATOR_EXECUTION_ERROR_CODE = -39;
     
 }
