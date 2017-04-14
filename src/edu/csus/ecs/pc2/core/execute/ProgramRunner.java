@@ -59,9 +59,11 @@ public class ProgramRunner {
      * @param stderrFilename the file to which the command's standard error channel will be written
      * 
      * @return the process started.
+     * 
+     * @throws {@link ExecuteException} if any Exception occurs while running the command
      */
     public int runProgram(ExecutionData executionData, String executeDirectoryName, String cmdline,
-            int msTimeout, ExecuteTimer executionTimer, String stdinFilename, String stdoutFilename, String stderrFilename) {
+            int msTimeout, ExecuteTimer executionTimer, String stdinFilename, String stdoutFilename, String stderrFilename) throws ExecuteException {
 
         String message;
         int returnValue = -1 ;
@@ -166,10 +168,12 @@ public class ProgramRunner {
             message = "Exec failure: IOException executing '" + cmdline + "': " + e.getMessage();
             executionData.setExecutionException(new ExecuteException(message, e.getCause()));
             log.severe(message);
+            throw new ExecuteException("Exception attempting to run program", e);
         } catch (Exception e) {
             message = "Exec failure: Exception executing '" + cmdline + "': " + e.getMessage();
             executionData.setExecutionException(new ExecuteException(message, e.getCause()));
             log.severe(message);
+            throw new ExecuteException("Exception attempting to run program", e);
         }
 
         return returnValue;
