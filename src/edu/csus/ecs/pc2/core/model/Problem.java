@@ -132,7 +132,11 @@ public class Problem implements IElementObject {
         /**
          * No Input Validator has been run on the data files in this problem.
          */
-        NOT_TESTED 
+        NOT_TESTED,
+        /**
+         * An attempt was made to run an Input Validator but an internal error occurred.
+         */
+        ERROR
     }
     
     private InputValidationStatus inputValidationStatus;
