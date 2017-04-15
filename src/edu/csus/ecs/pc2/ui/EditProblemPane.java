@@ -467,10 +467,20 @@ public class EditProblemPane extends JPanePlugin {
                     }
                 }
             }
+            
+            //check the output validator
             sFile = newProblemDataFiles.getOutputValidatorFile();
             if (sFile != null) {
                 if (checkFileFormat(sFile)) {
                     newProblemDataFiles.setOutputValidatorFile(sFile);
+                }
+            }
+            
+            //check the input validator
+            sFile = newProblemDataFiles.getInputValidatorFile();
+            if (sFile != null) {
+                if (checkFileFormat(sFile)) {
+                    newProblemDataFiles.setInputValidatorFile(sFile);
                 }
             }
         } catch (InvalidFieldValue e) {
@@ -484,6 +494,7 @@ public class EditProblemPane extends JPanePlugin {
             ProblemDataFiles clone = new ProblemDataFiles(newProblem);
             clone.setSiteNumber(newProblemDataFiles.getSiteNumber());
             clone.setOutputValidatorFile(newProblemDataFiles.getOutputValidatorFile());
+            clone.setInputValidatorFile(newProblemDataFiles.getInputValidatorFile());
             clone.setJudgesAnswerFiles(newProblemDataFiles.getJudgesAnswerFiles());
             clone.setJudgesDataFiles(newProblemDataFiles.getJudgesDataFiles());
 
