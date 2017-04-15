@@ -643,12 +643,12 @@ public class ServerConnection {
                 // set default settings
                 setPC2ValidatorDefaults(problem);
                 // update desired settings
-                problem.setValidatorProgramName(validatorProgram);
+                problem.setOutputValidatorProgramName(validatorProgram);
                 problem.setValidatorCommandLine(validatorCommandLine);
                 break;
             case CLICSVALIDATOR:
                 setClicsValidatorDefaults(problem);
-                problem.setValidatorProgramName(validatorProgram);
+                problem.setOutputValidatorProgramName(validatorProgram);
                 problem.setValidatorCommandLine(validatorCommandLine);
                 if (new File(validatorProgram).isFile()){
                     SerializedFile validatorFile = new SerializedFile(validatorProgram);
@@ -657,7 +657,7 @@ public class ServerConnection {
                break;
             case CUSTOMVALIDATOR:
                 setCustomValidatorDefaults(problem);
-                problem.setValidatorProgramName(validatorProgram);
+                problem.setOutputValidatorProgramName(validatorProgram);
                 problem.setValidatorCommandLine(validatorCommandLine);
                 if (new File(validatorProgram).isFile()){
                     SerializedFile validatorFile = new SerializedFile(validatorProgram);

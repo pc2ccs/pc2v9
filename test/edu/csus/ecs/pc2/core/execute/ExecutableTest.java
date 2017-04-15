@@ -193,7 +193,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
         problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
-        problem.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
+        problem.setOutputValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
         assertTrue("Expecting using pc2 validator", problem.isUsingPC2Validator());
 
@@ -213,7 +213,7 @@ public class ExecutableTest extends AbstractTestCase {
         String mockValidatorCommandLine = "java {:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
         problem.setValidatorCommandLine(mockValidatorCommandLine + " -pc2 " + problem.getPC2ValidatorSettings().getWhichPC2Validator() 
                 + " " + problem.getPC2ValidatorSettings().isIgnoreCaseOnValidation());
-        problem.setValidatorProgramName(MOCK_VALIDATOR_NAME);
+        problem.setOutputValidatorProgramName(MOCK_VALIDATOR_NAME);
     }
 
 

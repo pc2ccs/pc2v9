@@ -1380,7 +1380,7 @@ public class SampleContest {
     public void setClicsValidation(IInternalContest contest, String validatorParameters, Problem problem) {
 
         problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
-        problem.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
+        problem.setOutputValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
         
         problem.setReadInputDataFromSTDIN(true);
 

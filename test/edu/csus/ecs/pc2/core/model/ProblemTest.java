@@ -40,7 +40,7 @@ public class ProblemTest extends TestCase {
 
         p2.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() 
                 + " " + p2.getPC2ValidatorSettings().isIgnoreCaseOnValidation());
-        p2.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
+        p2.setOutputValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
         p2.setReadInputDataFromSTDIN(false);
         p2.setShowCompareWindow(true);

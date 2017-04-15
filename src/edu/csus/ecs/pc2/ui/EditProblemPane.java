@@ -1104,7 +1104,7 @@ public class EditProblemPane extends JPanePlugin {
                     
                 } else {
                     
-                    checkProblem.setValidatorProgramName(outputValidatorSF.getAbsolutePath());
+                    checkProblem.setOutputValidatorProgramName(outputValidatorSF.getAbsolutePath());
                 }
 
             } else {
@@ -1120,7 +1120,7 @@ public class EditProblemPane extends JPanePlugin {
               }
             
               //put the Custom Validator SerializedFile into the Problem
-              checkProblem.setValidatorProgramName(outputValidatorSF.getAbsolutePath()) ;
+              checkProblem.setOutputValidatorProgramName(outputValidatorSF.getAbsolutePath()) ;
               newProblemDataFiles.setOutputValidatorFile(outputValidatorSF);
             }
         } 

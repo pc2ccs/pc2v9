@@ -365,7 +365,7 @@ public class ContestImporter {
         newProblem.setShowValidationToJudges(problem.isShowValidationToJudges());
         newProblem.setTimeOutInSeconds(problem.getTimeOutInSeconds());
         newProblem.setValidatorCommandLine(problem.getValidatorCommandLine());
-        newProblem.setValidatorProgramName(problem.getValidatorProgramName());
+        newProblem.setOutputValidatorProgramName(problem.getValidatorProgramName());
     }
 
     /**

@@ -1463,7 +1463,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         problem.setReadInputDataFromSTDIN(true);
 
         if (problem.getValidatorProgramName() == null) {
-            problem.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
+            problem.setOutputValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
         }
 
         // if we use the internal Java CCS validator use this.

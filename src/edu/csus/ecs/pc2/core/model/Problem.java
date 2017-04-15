@@ -736,22 +736,22 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Sets the Validator Program Name for the Validator attached to the Problem.
+     * Sets the Validator Program Name for the Output Validator attached to the Problem.
      * Note that this Problem class does not maintain a separate "Validator Program Name" field;
-     * rather, the Validator Program Name is stored within the "Settings" object associated with the
-     * type of Validator attached to the Problem.
+     * rather, the Output Validator Program Name is stored within the "Settings" object associated with the
+     * type of Output Validator attached to the Problem.
      *  
-     * @param validatorProgramName a String specifying the new Validator Program Name
+     * @param validatorProgramName a String specifying the new Output Validator Program Name
      *            
      * @see PC2ValidatorSettings
      * @see ClicsValidatorSettings
      * @see CustomValidatorSettings
      * 
-     * @throws {@link RuntimeException} if the Problem is not marked as having a Validator when an attempt is made to set
-     *          set the Validator Program name, or if the Problem is marked as having a Validator but no Validator Settings 
+     * @throws {@link RuntimeException} if the Problem is not marked as having an Output Validator when an attempt is made to set
+     *          set the Output Validator Program name, or if the Problem is marked as having an Output Validator but no Validator Settings 
      *          object could be found
      */
-    public void setValidatorProgramName(String validatorProgramName) {
+    public void setOutputValidatorProgramName(String validatorProgramName) {
         
         if (!this.isValidatedProblem()) {
             throw new RuntimeException("Cannot set a Validator Program Name on a Problem marked as not using a Validator");
