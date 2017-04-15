@@ -39,7 +39,7 @@ public class ProblemDataFiles implements IElementObject {
 
     private ElementId problemId = null;
     
-    private SerializedFile validatorFile;
+    private SerializedFile outputValidatorFile;
 
     public ProblemDataFiles(Problem problem) {
         problemId = problem.getElementId();
@@ -77,7 +77,7 @@ public class ProblemDataFiles implements IElementObject {
         clone.elementId = elementId;
         clone.problemId = getProblemId();
 
-        clone.setValidatorFile(cloneSerializedFile(getValidatorFile()));
+        clone.setOutputValidatorFile(cloneSerializedFile(getOutputValidatorFile()));
 
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
@@ -227,12 +227,12 @@ public class ProblemDataFiles implements IElementObject {
      * 
      * @return a SerializedFile containing the validator code, or null if no validator has been specified
      */
-    public SerializedFile getValidatorFile() {
-        return validatorFile;
+    public SerializedFile getOutputValidatorFile() {
+        return outputValidatorFile;
     }
 
-    public void setValidatorFile(SerializedFile validatorFile) {
-        this.validatorFile = validatorFile;
+    public void setOutputValidatorFile(SerializedFile validatorFile) {
+        this.outputValidatorFile = validatorFile;
     }
 
     private boolean compareSerializedFiles(SerializedFile oldFile, SerializedFile newFile) {
@@ -303,7 +303,7 @@ public class ProblemDataFiles implements IElementObject {
             if (!compareSerializedFileArrays(judgesDataFiles, newProblemDataFiles.getJudgesDataFiles())) {
                 return false;
             }
-            if (!compareSerializedFiles(validatorFile, newProblemDataFiles.getValidatorFile())) {
+            if (!compareSerializedFiles(outputValidatorFile, newProblemDataFiles.getOutputValidatorFile())) {
                 return false;
             }
             
@@ -348,11 +348,11 @@ public class ProblemDataFiles implements IElementObject {
             buf.append(" ");
         }
 
-        buf.append(" Validator: ");
-        if (validatorFile != null) {
-            buf.append(validatorFile.getName());
+        buf.append(" Output Validator: ");
+        if (outputValidatorFile != null) {
+            buf.append(outputValidatorFile.getName());
             buf.append(" SHA1: ");
-            buf.append (validatorFile.getSHA1sum());
+            buf.append (outputValidatorFile.getSHA1sum());
         } else {
             buf.append("null");
         }

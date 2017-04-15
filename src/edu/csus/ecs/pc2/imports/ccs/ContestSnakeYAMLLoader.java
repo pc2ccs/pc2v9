@@ -1479,7 +1479,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
              * If file is there load it
              */
             if (new File(validatorName).isFile()) {
-                problemDataFiles.setValidatorFile(new SerializedFile(validatorName));
+                problemDataFiles.setOutputValidatorFile(new SerializedFile(validatorName));
             }
         } catch (Exception e) {
             throw new YamlLoadException("Unable to load validator for problem " + problem.getShortName() + ": " + validatorName, e);

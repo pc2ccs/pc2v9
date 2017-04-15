@@ -207,7 +207,7 @@ public class ExecuteUtilities extends Plugin {
             }
             
             if (problemDataFiles != null) {
-                SerializedFile validatorFile = problemDataFiles.getValidatorFile();
+                SerializedFile validatorFile = problemDataFiles.getOutputValidatorFile();
                 if (validatorFile != null) {
                     validatorCommand = validatorFile.getName(); // validator
                 }

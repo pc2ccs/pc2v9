@@ -553,12 +553,12 @@ public class ExecutableV9 extends Plugin implements IExecutable {
             controller.sendValidatingMessage(run);
         }
 
-        if (problemDataFiles.getValidatorFile() != null) {
+        if (problemDataFiles.getOutputValidatorFile() != null) {
             // Create Validation Program
 
-            String validatorFileName = problemDataFiles.getValidatorFile().getName();
+            String validatorFileName = problemDataFiles.getOutputValidatorFile().getName();
             String validatorUnpackName = prefixExecuteDirname(validatorFileName);
-            if (!createFile(problemDataFiles.getValidatorFile(), validatorUnpackName)) {
+            if (!createFile(problemDataFiles.getOutputValidatorFile(), validatorUnpackName)) {
                 log.info("Unable to create validator program " + validatorUnpackName);
                 setException(executionData, "Unable to create validator program " + validatorUnpackName);
 

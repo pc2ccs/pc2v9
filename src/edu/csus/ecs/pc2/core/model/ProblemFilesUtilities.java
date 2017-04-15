@@ -86,7 +86,7 @@ public final class ProblemFilesUtilities {
 
         ProblemDataFiles files = contest.getProblemDataFile(problem);
 
-        if (files.getValidatorFile() == null) {
+        if (files.getOutputValidatorFile() == null) {
             return true;
         } else if (problem.getValidatorProgramName() == null) {
             // no validator name defined

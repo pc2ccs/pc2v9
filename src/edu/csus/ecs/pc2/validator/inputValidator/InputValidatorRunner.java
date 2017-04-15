@@ -202,7 +202,7 @@ public class InputValidatorRunner {
      */
     public InputValidationResult [] runInputValidator (Problem problem, ProblemDataFiles problemDataFiles) throws ExecuteException {
         
-        SerializedFile validator = problemDataFiles.getValidatorFile();
+        SerializedFile validator = problemDataFiles.getOutputValidatorFile();
         
         if (validator == null) {
             return null ;

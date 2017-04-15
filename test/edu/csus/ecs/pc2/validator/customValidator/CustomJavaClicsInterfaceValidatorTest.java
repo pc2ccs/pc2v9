@@ -321,7 +321,7 @@ public class CustomJavaClicsInterfaceValidatorTest extends AbstractTestCase {
         //put the SerializedFile version of the executable validator file into the problem (specifically, it goes in the "problem data files")
         String validatorFileName =  testDataDirectoryName + File.separator + validatorProgramName;
         checkFileExistence(validatorFileName);
-        problemDataFiles.setValidatorFile(new SerializedFile(validatorFileName));
+        problemDataFiles.setOutputValidatorFile(new SerializedFile(validatorFileName));
 
         //verify that the Problem Validator is properly configured
         assertTrue("Expecting problem to be marked as isValidated, but failed", problem.isValidatedProblem());
@@ -330,7 +330,7 @@ public class CustomJavaClicsInterfaceValidatorTest extends AbstractTestCase {
                                 problem.getValidatorCommandLine().equals(validatorCommand)); 
         assertTrue("Expecting problem validator program name to be '" + getValidatorProgramName() + "' but it is '" + problem.getValidatorProgramName() + "' ", 
                                 problem.getValidatorProgramName().equals(getValidatorProgramName()));
-        assertTrue("Expecting problem to have a serialized validator file but it has 'null' ", problemDataFiles.getValidatorFile()!=null);
+        assertTrue("Expecting problem to have a serialized validator file but it has 'null' ", problemDataFiles.getOutputValidatorFile()!=null);
 
     }
     protected void checkFileExistence(String filename) throws FileNotFoundException {

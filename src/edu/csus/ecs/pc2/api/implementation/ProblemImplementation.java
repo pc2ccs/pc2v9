@@ -84,7 +84,7 @@ public class ProblemImplementation implements IProblem {
                 judgesAnswerFileContents = serializedFile.getBuffer();
             }
 
-            serializedFile = problemDataFiles.getValidatorFile();
+            serializedFile = problemDataFiles.getOutputValidatorFile();
             if (serializedFile != null){
                 validatorFileContents = serializedFile.getBuffer();
             }

@@ -715,14 +715,14 @@ public class Executable extends Plugin implements IExecutable {
             commandPattern = getCustomValidatorCommandPattern();
 
             // for a custom validator we also need to obtain the SerializedFile for the validator
-            if (problemDataFiles != null && problemDataFiles.getValidatorFile() != null) {
+            if (problemDataFiles != null && problemDataFiles.getOutputValidatorFile() != null) {
 
                 // get Validation Program
-                String validatorFileName = problemDataFiles.getValidatorFile().getName();
+                String validatorFileName = problemDataFiles.getOutputValidatorFile().getName();
                 String validatorUnpackName = prefixExecuteDirname(validatorFileName);
 
                 // create the validator program file
-                if (!createFile(problemDataFiles.getValidatorFile(), validatorUnpackName)) {
+                if (!createFile(problemDataFiles.getOutputValidatorFile(), validatorUnpackName)) {
                     log.info("Unable to create custom validator program " + validatorUnpackName);
                     setException("Unable to create custom validator program " + validatorUnpackName);
 
@@ -2120,7 +2120,7 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             if (problemDataFiles != null) {
-                SerializedFile validatorFile = problemDataFiles.getValidatorFile();
+                SerializedFile validatorFile = problemDataFiles.getOutputValidatorFile();
                 if (validatorFile != null) {
                     validatorCommand = validatorFile.getName(); // validator
                 }

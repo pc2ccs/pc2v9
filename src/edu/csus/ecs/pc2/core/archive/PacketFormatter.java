@@ -1082,7 +1082,7 @@ public final class PacketFormatter {
             child = new DefaultMutableTreeNode("problem: " + data.getProblemId());
             node.add(child);
 
-            child = createTree("Validator", data.getValidatorFile());
+            child = createTree("Validator", data.getOutputValidatorFile());
             addNonNull(node, child);
 
             child = createTree("Judge Data Files", data.getJudgesDataFiles());

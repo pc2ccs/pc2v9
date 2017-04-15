@@ -467,10 +467,10 @@ public class EditProblemPane extends JPanePlugin {
                     }
                 }
             }
-            sFile = newProblemDataFiles.getValidatorFile();
+            sFile = newProblemDataFiles.getOutputValidatorFile();
             if (sFile != null) {
                 if (checkFileFormat(sFile)) {
-                    newProblemDataFiles.setValidatorFile(sFile);
+                    newProblemDataFiles.setOutputValidatorFile(sFile);
                 }
             }
         } catch (InvalidFieldValue e) {
@@ -483,7 +483,7 @@ public class EditProblemPane extends JPanePlugin {
             // which is the problem we are trying to fix here
             ProblemDataFiles clone = new ProblemDataFiles(newProblem);
             clone.setSiteNumber(newProblemDataFiles.getSiteNumber());
-            clone.setValidatorFile(newProblemDataFiles.getValidatorFile());
+            clone.setOutputValidatorFile(newProblemDataFiles.getOutputValidatorFile());
             clone.setJudgesAnswerFiles(newProblemDataFiles.getJudgesAnswerFiles());
             clone.setJudgesDataFiles(newProblemDataFiles.getJudgesDataFiles());
 
@@ -732,7 +732,7 @@ public class EditProblemPane extends JPanePlugin {
                         String changedProblemValidatorFileName = changedProblemSettings.getCustomValidatorProgramName();
                         if (changedProblemValidatorFileName != null && changedProblemValidatorFileName.length() > 0) {
                             //TODO: there could be a problem here; pdf.getValidatorFile() seems to sometimes return null even though the problem has a validator...
-                            if (!fileSameAs(pdf.getValidatorFile(), changedProblemValidatorFileName)) {
+                            if (!fileSameAs(pdf.getOutputValidatorFile(), changedProblemValidatorFileName)) {
                                 changed = true;
                                 fileChanged++;
                             }
@@ -1099,7 +1099,7 @@ public class EditProblemPane extends JPanePlugin {
             } else {
 
               // we're editing an existing problem
-              outputValidatorSF = originalProblemDataFiles.getValidatorFile();
+              outputValidatorSF = originalProblemDataFiles.getOutputValidatorFile();
               if (outputValidatorSF == null || !outputValidatorSF.getAbsolutePath().equals(guiValidatorFileName)) {
                   // they've added a new file
                   outputValidatorSF = new SerializedFile(guiValidatorFileName);
@@ -1110,7 +1110,7 @@ public class EditProblemPane extends JPanePlugin {
             
               //put the Custom Validator SerializedFile into the Problem
               checkProblem.setValidatorProgramName(outputValidatorSF.getAbsolutePath()) ;
-              newProblemDataFiles.setValidatorFile(outputValidatorSF);
+              newProblemDataFiles.setOutputValidatorFile(outputValidatorSF);
             }
         } 
                         
@@ -1179,7 +1179,7 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.addTestCaseFilenames(getName(lastAnsFile), getName(lastDataFile));
 
             if (outputValidatorSF != null) {
-                newProblemDataFiles.setValidatorFile(outputValidatorSF);
+                newProblemDataFiles.setOutputValidatorFile(outputValidatorSF);
             }
         } else {
             populateProblemTestSetFilenames(checkProblem, dataFiles);
@@ -2106,9 +2106,9 @@ public class EditProblemPane extends JPanePlugin {
             String validatorFileName = customSettings.getCustomValidatorProgramName();  
             
             //if there's a Serialized validator file we should use the full path name from there
-            SerializedFile validatorFile = inProblemDataFiles.getValidatorFile();
+            SerializedFile validatorFile = inProblemDataFiles.getOutputValidatorFile();
             if (validatorFile!=null) {
-                validatorFileName = inProblemDataFiles.getValidatorFile().getAbsolutePath();
+                validatorFileName = inProblemDataFiles.getOutputValidatorFile().getAbsolutePath();
             }
             //put the Validator Program name into the GUI
             getCustomValidatorExecutableProgramTextField().setText(validatorFileName);

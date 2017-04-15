@@ -652,7 +652,7 @@ public class ServerConnection {
                 problem.setValidatorCommandLine(validatorCommandLine);
                 if (new File(validatorProgram).isFile()){
                     SerializedFile validatorFile = new SerializedFile(validatorProgram);
-                    problemDataFiles.setValidatorFile(validatorFile);
+                    problemDataFiles.setOutputValidatorFile(validatorFile);
                 }
                break;
             case CUSTOMVALIDATOR:
@@ -661,7 +661,7 @@ public class ServerConnection {
                 problem.setValidatorCommandLine(validatorCommandLine);
                 if (new File(validatorProgram).isFile()){
                     SerializedFile validatorFile = new SerializedFile(validatorProgram);
-                    problemDataFiles.setValidatorFile(validatorFile);
+                    problemDataFiles.setOutputValidatorFile(validatorFile);
                 }
                 break;
             case NONE:
