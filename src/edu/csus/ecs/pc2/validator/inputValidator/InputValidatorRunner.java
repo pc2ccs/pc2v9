@@ -114,7 +114,7 @@ public class InputValidatorRunner {
         try {
             exitCode = runner.runProgram(executionData, executeDir, cmdline, msTimeout, null, stdinFilePath, stdoutFilePath, stderrFilePath);
         } catch (ExecuteException e) {
-           throw new ExecuteException("Error executing Input Validator command '" + cmdline + "': ", e);
+           throw new ExecuteException("Error executing Input Validator command '" + cmdline + "': \n" + e.getMessage());
         }
 
         boolean passed = exitCode == Constants.INPUT_VALIDATOR_SUCCESS_EXIT_CODE ? true : false;

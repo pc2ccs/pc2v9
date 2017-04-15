@@ -168,12 +168,12 @@ public class ProgramRunner {
             message = "Exec failure: IOException executing '" + cmdline + "': " + e.getMessage();
             executionData.setExecutionException(new ExecuteException(message, e.getCause()));
             log.severe(message);
-            throw new ExecuteException("Exception attempting to run program", e);
+            throw new ExecuteException("Exception attempting to run program: " + e.getMessage());
         } catch (Exception e) {
             message = "Exec failure: Exception executing '" + cmdline + "': " + e.getMessage();
             executionData.setExecutionException(new ExecuteException(message, e.getCause()));
             log.severe(message);
-            throw new ExecuteException("Exception attempting to run program", e);
+            throw new ExecuteException("Exception attempting to run program: " + e.getMessage());
         }
 
         return returnValue;
