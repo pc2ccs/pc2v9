@@ -10,7 +10,7 @@ import java.util.Scanner;
  * @author pc2@ecs.csus.edu
  *
  */
-public class EvenOddTeamSolution {
+public class EvenOddJudgesSolution {
 
     public static void main(String[] args) {
 
