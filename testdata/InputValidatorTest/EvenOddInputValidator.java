@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 /**
  * This class is an Input Validator for a (hypothetical) contest problem which requires that the judge's input data consist of 
- * alternating even and odd integers separated by whitespace. Note that the (hypothetical) problem requirement does NOT include 
+ * alternating positive even and odd integers separated by whitespace. Note that the (hypothetical) problem requirement does NOT include 
  * knowing in advance whether the first number is even or odd; only that, once the first one is read then all the rest must alternate 
  * (even/odd or odd/even, depending on the first value).
  * 
@@ -15,7 +15,7 @@ import java.util.Scanner;
  * Note that this code does NOT check whether the input data follows the "alternating even-odd" requirement; only that the input consists
  * solely of positive integers.  Checking for alternating even/odd numbers is a function of a problem solution, not an input validator
  * (that is, a valid input file could fail to have alternating integers -- it would be a data file for which the problem solution should
- * return "No, the input doesn't meet the requirement"; but it's still valid input data file.
+ * return "No, the input doesn't meet the requirement"; but it's still valid input data file).
  * 
  * This implementation returns Exit Code -39 if there is an internal error in the Input Validator.
  * 
