@@ -4787,9 +4787,13 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             //there must be something blocking permission to run the input validator; set the tooltip to indicate the condition(s)
             String toolTip = "";
+            
+            //check for the required validator command line
             if (getInputValidatorCommandTextField() == null || getInputValidatorCommandTextField().getText().equals("")) {
                 toolTip += "No Input Validator Command defined";
             }
+            
+            //check whether, if files are coming from a disk folder, there is a folder defined
             if (getFilesOnDiskInFolderRadioButton().isSelected()) {
                 if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
                     if (toolTip.equals("")) {
@@ -4799,12 +4803,39 @@ public class EditProblemPane extends JPanePlugin {
                     }
                 }
             }
+            
+            //check whether, if files are coming from the Load Data Files pane, there are files in that pane
+            if (getFilesJustLoadedRadioButton().isSelected()) {
+                if (getMultipleDataSetPane().getTestDataSetsListBox().getRowCount() <= 0) {
+                    if (toolTip.equals("")) {
+                        toolTip = "No Input Files defined on Input Data Files pane";
+                    } else {
+                        toolTip += "; no Input Files defined on Input Data Files pane"; 
+                    }
+                }
+            }
+            
+            //check whether, if files are coming from those previously loaded, there actually ARE files loaded
+            if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
+                
+                //make sure we have a problem from which we can possibly load data files
+                if (problem == null || getContest().getProblemDataFile(getProblem()) == null 
+                        || getContest().getProblemDataFile(getProblem()).getJudgesDataFiles() == null
+                        || getContest().getProblemDataFile(getProblem()).getJudgesDataFiles().length <= 0) {
+                    if (toolTip.equals("")) {
+                        toolTip = "No Input Files saved in current problem";
+                    } else {
+                        toolTip += "; no Input Files saved in current problem"; 
+                    }
+                }
+            }
+            
             if (!toolTip.equals("")) {
                 toolTip += "; cannot run Input Validator";
             } else {
                 //we shouldn't be able to get here; the tooltip shouldn't be empty if 'enable' was false (there must be some condition
                 // suppressing the enable, so why didn't we pick it up in the above set of 'if' statements??)
-                getLog().log(Log.WARNING, "Empty tooltip when this shouldn't be possible");
+                getLog().log(Log.WARNING, "Empty Run Validator button tooltip when this shouldn't be possible");
             }
             
             getRunInputValidatorButton().setToolTipText(toolTip);
