@@ -40,6 +40,8 @@ public class ProblemDataFiles implements IElementObject {
     private ElementId problemId = null;
     
     private SerializedFile outputValidatorFile;
+    
+    private SerializedFile inputValidatorFile;
 
     public ProblemDataFiles(Problem problem) {
         problemId = problem.getElementId();
@@ -223,9 +225,9 @@ public class ProblemDataFiles implements IElementObject {
     }
     
     /**
-     * Returns the validator program file.
+     * Returns the output validator program file.
      * 
-     * @return a SerializedFile containing the validator code, or null if no validator has been specified
+     * @return a SerializedFile containing the output validator code, or null if no output validator has been specified
      */
     public SerializedFile getOutputValidatorFile() {
         return outputValidatorFile;
@@ -234,6 +236,21 @@ public class ProblemDataFiles implements IElementObject {
     public void setOutputValidatorFile(SerializedFile validatorFile) {
         this.outputValidatorFile = validatorFile;
     }
+    
+    /**
+     * Returns the input validator program file.
+     * 
+     * @return a SerializedFile containing the input validator code, or null if no input validator has been specified
+     */
+    public SerializedFile getInputValidatorFile() {
+        return inputValidatorFile;
+    }
+
+    public void setInputValidatorFile(SerializedFile validatorFile) {
+        this.inputValidatorFile = validatorFile;
+    }
+    
+   
 
     private boolean compareSerializedFiles(SerializedFile oldFile, SerializedFile newFile) {
         if (oldFile == null) {
