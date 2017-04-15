@@ -71,8 +71,21 @@ public class EvenOddInputValidator {
         } //end while
 
         scanner.close();
-        System.out.println("EvenOddInputValidator returning Exit Code " + exitCode);
-        System.err.println("EvenOddInputValidator returning Exit Code " + exitCode);
+        
+        String msg = "EvenOddInputValidator returning exit code " + exitCode;
+        switch (exitCode) {
+            case INPUT_VALIDATOR_SUCCESS_EXIT_CODE:
+                msg += " (success; input passes validation)"; 
+                break;
+            case INPUT_VALIDATOR_FAILED_EXIT_CODE:
+                msg += " (input fails validation)";
+                break;
+            default:
+                msg += " (error during input validator execution)";
+        }
+        
+        System.out.println(msg);
+        System.err.println(msg);
         System.exit(exitCode);
 
     }
