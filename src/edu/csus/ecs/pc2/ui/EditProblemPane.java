@@ -1046,7 +1046,7 @@ public class EditProblemPane extends JPanePlugin {
 
         checkProblem.setReadInputDataFromSTDIN(getStdinRadioButton().isSelected());
 
-        // set the flag indicating which validator (if any) is being used in the Problem
+        // set the flag indicating which output validator (if any) is being used in the Problem
         VALIDATOR_TYPE validatorType ;
         if (getUseNOValidatatorRadioButton().isSelected()) {
             validatorType = VALIDATOR_TYPE.NONE;
@@ -1124,7 +1124,16 @@ public class EditProblemPane extends JPanePlugin {
         String inputValProgName = getInputValidatorProgramNameTextField().getText();
         checkProblem.setInputValidatorProgramName(inputValProgName);
         if (inputValProgName != null && !inputValProgName.equals("")) {
-            checkProblem.setProblemHasInputValidator(true);
+            
+            //create a SerializedFile from the GUI name
+            
+            //save the SF in the ProblemDataFiles
+            // But: we're in getPROBLEMfromFields(); we probably shouldn't be accessing the ProblemDataFiles here...
+                
+                
+           checkProblem.setProblemHasInputValidator(true);
+                
+            
         } else {
             checkProblem.setProblemHasInputValidator(false);
         }
@@ -1844,6 +1853,7 @@ public class EditProblemPane extends JPanePlugin {
         enableOutputValidatorTabComponents();
         
         enableInputValidatorTabComponents();
+        
 
         //enableGeneralTabComponents:
         enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
