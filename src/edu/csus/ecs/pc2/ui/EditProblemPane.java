@@ -4882,7 +4882,6 @@ public class EditProblemPane extends JPanePlugin {
         try {
             results = runner.runInputValidator(validatorProg, cmdline, executeDir, dataFiles);
         } catch (ExecuteException e) {
-            System.err.println ("Exception running Input Validator: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "Error running Input Validator: \n" + e.getMessage() + "\nCheck logs for further details", "Input Validator Error", JOptionPane.WARNING_MESSAGE);
             getInputValidationResultSummaryTextLabel().setText("Errror Running Input Validator");
             getInputValidationResultSummaryTextLabel().setForeground(Color.RED);

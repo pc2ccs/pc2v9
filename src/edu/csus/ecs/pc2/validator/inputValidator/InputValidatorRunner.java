@@ -127,10 +127,10 @@ public class InputValidatorRunner {
         try {
             Utilities.checkSerializedFileError(stdoutResults);
         } catch (ExecuteException e) {
-            System.err.println ("Exception constructing SerializedFile containing validator stdout: " + e.getMessage());
+//            System.err.println ("Exception constructing SerializedFile containing validator stdout: " + e.getMessage());
             throw e;
         } catch (Exception e) {
-            System.err.println ("Exception constructing SerializedFile containing validator stdout: " + e.getMessage());
+//            System.err.println ("Exception constructing SerializedFile containing validator stdout: " + e.getMessage());
             throw e;
             
         }
@@ -176,10 +176,10 @@ public class InputValidatorRunner {
             try {
                 results[i] = runInputValidator(validator, validatorCommand, executeDir, dataFiles[i]);
             } catch (ExecuteException e) {
-                System.err.println("ExecuteException running input validator: " + e.getMessage());
+//                System.err.println("ExecuteException running input validator: " + e.getMessage());
                 throw e;
             } catch (Exception e) {
-                System.err.println ("Exception running input validator: " + e.getMessage());
+//                System.err.println ("Exception running input validator: " + e.getMessage());
                 e.printStackTrace();
             }
         }
