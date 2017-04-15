@@ -63,6 +63,7 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.execute.ExecuteException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -891,7 +892,7 @@ public class EditProblemPane extends JPanePlugin {
      */
     public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
         
-        SerializedFile validatorSF = null ;
+        SerializedFile outputValidatorSF = null ;
         
         boolean isEditingExistingProblem; 
         if (checkProblem!=null) {
@@ -1080,36 +1081,36 @@ public class EditProblemPane extends JPanePlugin {
 
             if (!isEditingExistingProblem) {
                 
-                validatorSF = new SerializedFile(guiValidatorFileName); 
+                outputValidatorSF = new SerializedFile(guiValidatorFileName); 
 
-                if (validatorSF.getBuffer() == null  ||  (validatorSF.getErrorMessage() != null && validatorSF.getErrorMessage() != "")) {
+                if (outputValidatorSF.getBuffer() == null  ||  (outputValidatorSF.getErrorMessage() != null && outputValidatorSF.getErrorMessage() != "")) {
 
                     String msg = "Unable to read file '" + guiValidatorFileName + "' while adding new Problem; choose validator file again";
-                    if (validatorSF.getErrorMessage()!=null) {
-                        msg += "\n (Error Message = \"" + validatorSF.getErrorMessage() + "\")";
+                    if (outputValidatorSF.getErrorMessage()!=null) {
+                        msg += "\n (Error Message = \"" + outputValidatorSF.getErrorMessage() + "\")";
                     }
                     throw new InvalidFieldValue( msg  );
                     
                 } else {
                     
-                    checkProblem.setValidatorProgramName(validatorSF.getAbsolutePath());
+                    checkProblem.setValidatorProgramName(outputValidatorSF.getAbsolutePath());
                 }
 
             } else {
 
               // we're editing an existing problem
-              validatorSF = originalProblemDataFiles.getValidatorFile();
-              if (validatorSF == null || !validatorSF.getAbsolutePath().equals(guiValidatorFileName)) {
+              outputValidatorSF = originalProblemDataFiles.getValidatorFile();
+              if (outputValidatorSF == null || !outputValidatorSF.getAbsolutePath().equals(guiValidatorFileName)) {
                   // they've added a new file
-                  validatorSF = new SerializedFile(guiValidatorFileName);
-                  checkFileFormat(validatorSF);
+                  outputValidatorSF = new SerializedFile(guiValidatorFileName);
+                  checkFileFormat(outputValidatorSF);
               } else {
-                  validatorSF = freshenIfNeeded(validatorSF, guiValidatorFileName);
+                  outputValidatorSF = freshenIfNeeded(outputValidatorSF, guiValidatorFileName);
               }
             
               //put the Custom Validator SerializedFile into the Problem
-              checkProblem.setValidatorProgramName(validatorSF.getAbsolutePath()) ;
-              newProblemDataFiles.setValidatorFile(validatorSF);
+              checkProblem.setValidatorProgramName(outputValidatorSF.getAbsolutePath()) ;
+              newProblemDataFiles.setValidatorFile(outputValidatorSF);
             }
         } 
                         
@@ -1168,8 +1169,8 @@ public class EditProblemPane extends JPanePlugin {
 
             checkProblem.addTestCaseFilenames(getName(lastAnsFile), getName(lastDataFile));
 
-            if (validatorSF != null) {
-                newProblemDataFiles.setValidatorFile(validatorSF);
+            if (outputValidatorSF != null) {
+                newProblemDataFiles.setValidatorFile(outputValidatorSF);
             }
         } else {
             populateProblemTestSetFilenames(checkProblem, dataFiles);
@@ -4752,15 +4753,30 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
         
-        //don't enable the button if "Files previously loaded into PC2" is selected but there's no data files loaded
+        // don't enable the button if "Files previously loaded into PC2" is selected but there's no data files loaded
         if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
-            //Check for files in the contest model
-            SerializedFile [] dataFiles = getContest().getProblemDataFile(getProblem()).getJudgesAnswerFiles();
-            if (dataFiles == null || dataFiles.length <= 0) {
-                enableButton = false ;                
+            
+            //make sure we have a problem from which we can possibly load data files
+            if (problem != null) {
+                
+                // make sure the problem in the contest model has data files
+                ProblemDataFiles pdf = getContest().getProblemDataFile(getProblem());
+                if (pdf != null) {
+                    //make sure the data files contain judge's answer files
+                    SerializedFile[] answerFiles = pdf.getJudgesAnswerFiles();
+                    if (answerFiles == null || answerFiles.length <= 0) {
+                        //problem has no judge's answer files; don't enable Run button
+                        enableButton = false;
+                    }
+                } else {
+                    //problem has no data files; don't enable Run button
+                    enableButton = false;
+                }
+            } else {
+                //problem is null; don't enable Run button
+                enableButton = false ;
             }
         }
-        
         
         //set the button-enabled condition based on the above determinations
         getRunInputValidatorButton().setEnabled(enableButton);
@@ -4807,6 +4823,9 @@ public class EditProblemPane extends JPanePlugin {
         return validateInputDataButton;
     }
     
+    /**
+     * Runs the Input Validator specified in the GUI, using the GUI-specified Input Validator Command, against 
+     */
     private void runInputDataValidationTest() {
         
         //get the command line from the GUI
@@ -4828,7 +4847,15 @@ public class EditProblemPane extends JPanePlugin {
         
         InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
         
-        InputValidationResult [] results = runner.runInputValidator(validatorProg, cmdline, executeDir, dataFiles);
+        InputValidationResult[] results = null;
+        try {
+            results = runner.runInputValidator(validatorProg, cmdline, executeDir, dataFiles);
+        } catch (ExecuteException e) {
+            System.err.println ("Exception running Input Validator: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error running Input Validator: \n" + e.getMessage(), "Input Validator Error", JOptionPane.WARNING_MESSAGE);
+            getInputValidationResultSummaryTextLabel().setText("Errror Running Input Validator");
+            getInputValidationResultSummaryTextLabel().setForeground(Color.RED);
+        }
             
         
         //update the results table
@@ -4840,20 +4867,22 @@ public class EditProblemPane extends JPanePlugin {
 //        TableColumnAdjuster tca = new TableColumnAdjuster(getInputValidatorResultsTable());
 //        tca.adjustColumns();  //this is shrinking columns to use less than the component width; looks ugly
         
-        //update the result summary label
-        boolean allPassed = true;
-        for (int i=0; i<results.length; i++) {
-            if (!results[i].isPassed()) {
-                allPassed = false;
-                break;
+        if (results != null) {
+            // update the result summary label
+
+            boolean allPassed = true;
+            for (int i = 0; i < results.length; i++) {
+                if (!results[i].isPassed()) {
+                    allPassed = false;
+                    break;
+                }
             }
+            String resultSummaryString = allPassed ? "All Input Data Files passed validation"
+                    : "One or more Input Data Files FAILED validation";
+            Color color = allPassed ? Color.green : Color.red;
+            getInputValidationResultSummaryTextLabel().setText(resultSummaryString);
+            getInputValidationResultSummaryTextLabel().setForeground(color);
         }
-        String resultSummaryString = allPassed ? "All Input Data Files passed validation" 
-                                                : "One or more Input Data Files FAILED validation";
-        Color color = allPassed ? Color.green : Color.red ;
-        getInputValidationResultSummaryTextLabel().setText(resultSummaryString);
-        getInputValidationResultSummaryTextLabel().setForeground(color);
-        
     }
 
     /**
