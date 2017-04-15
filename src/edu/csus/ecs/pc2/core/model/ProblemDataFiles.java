@@ -80,6 +80,7 @@ public class ProblemDataFiles implements IElementObject {
         clone.problemId = getProblemId();
 
         clone.setOutputValidatorFile(cloneSerializedFile(getOutputValidatorFile()));
+        clone.setInputValidatorFile(cloneSerializedFile(getInputValidatorFile()));
 
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
@@ -314,13 +315,16 @@ public class ProblemDataFiles implements IElementObject {
             if (newProblemDataFiles == null) {
                 return false;
             }
-            if (!compareSerializedFileArrays(judgesAnswerFiles, newProblemDataFiles.getJudgesAnswerFiles())) {
+            if (!compareSerializedFileArrays(this.getJudgesAnswerFiles(), newProblemDataFiles.getJudgesAnswerFiles())) {
                 return false;
             }
-            if (!compareSerializedFileArrays(judgesDataFiles, newProblemDataFiles.getJudgesDataFiles())) {
+            if (!compareSerializedFileArrays(this.getJudgesDataFiles(), newProblemDataFiles.getJudgesDataFiles())) {
                 return false;
             }
-            if (!compareSerializedFiles(outputValidatorFile, newProblemDataFiles.getOutputValidatorFile())) {
+            if (!compareSerializedFiles(this.getOutputValidatorFile(), newProblemDataFiles.getOutputValidatorFile())) {
+                return false;
+            }
+            if (!compareSerializedFiles(this.getInputValidatorFile(), newProblemDataFiles.getInputValidatorFile())) {
                 return false;
             }
             
@@ -370,6 +374,15 @@ public class ProblemDataFiles implements IElementObject {
             buf.append(outputValidatorFile.getName());
             buf.append(" SHA1: ");
             buf.append (outputValidatorFile.getSHA1sum());
+        } else {
+            buf.append("null");
+        }
+
+        buf.append(" Input Validator: ");
+        if (inputValidatorFile != null) {
+            buf.append(inputValidatorFile.getName());
+            buf.append(" SHA1: ");
+            buf.append (inputValidatorFile.getSHA1sum());
         } else {
             buf.append("null");
         }
