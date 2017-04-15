@@ -105,18 +105,38 @@ public class Problem implements IElementObject {
         CUSTOMVALIDATOR
         }
     
-    //The type of validator associated with this Problem.
+    //The type of output validator associated with this Problem.
     private VALIDATOR_TYPE validatorType = VALIDATOR_TYPE.NONE ;
     
-    //the settings for each possible type of validator used by the problem
+    //the settings for each possible type of output validator used by the problem
     private PC2ValidatorSettings pc2ValidatorSettings ;
     private ClicsValidatorSettings clicsValidatorSettings ;
     private CustomValidatorSettings customValidatorSettings ;
     
-    private boolean problemHasInputValidator ;
-    private boolean inputValidatorHasBeenSuccessfullyRun ;
+    
+    //input validator settings
+    private boolean problemHasInputValidator = false;
     private String inputValidatorProgramName = "";
     private String inputValidatorCommandLine = "";
+    private String inputValidatorFilesOnDiskFolderName = "";   
+
+    public enum InputValidationStatus {
+        /**
+         * An Input Validator has been run on the data files in this problem and they all passed.
+         */
+        PASSED, 
+        /**
+         * An Input Validator has been run on the data files in this problem and one or more data files failed.
+         */
+        FAILED, 
+        /**
+         * No Input Validator has been run on the data files in this problem.
+         */
+        NOT_TESTED 
+    }
+    
+    private InputValidationStatus inputValidationStatus;
+    
 
     /**
      * Use international judgement method.
@@ -205,8 +225,6 @@ public class Problem implements IElementObject {
     
     private State state = State.ENABLED;
 
-    private String inputValidatorFilesOnDiskFolderName;
-
     
     /**
      * Create a problem with the display name.
@@ -221,6 +239,7 @@ public class Problem implements IElementObject {
         this.pc2ValidatorSettings = new PC2ValidatorSettings();
         this.clicsValidatorSettings = new ClicsValidatorSettings();
         this.customValidatorSettings = new CustomValidatorSettings();
+        this.inputValidationStatus = InputValidationStatus.NOT_TESTED;
     }
 
     public Problem copy(String newDisplayName) {
@@ -258,10 +277,10 @@ public class Problem implements IElementObject {
             clone.setCustomValidatorSettings(null);
         }
         
-        clone.setProblemHasInputValidator(this.problemHasInputValidator);
-        clone.setInputValidatorHasBeenSuccessfullyRun(this.inputValidatorHasBeenSuccessfullyRun);
-        clone.setInputValidatorCommandLine(StringUtilities.cloneString(this.inputValidatorCommandLine));
-        clone.setInputValidatorProgramName(StringUtilities.cloneString(this.inputValidatorProgramName));
+        clone.setProblemHasInputValidator(this.isProblemHasInputValidator());
+        clone.setInputValidationStatus(this.getInputValidationStatus());
+        clone.setInputValidatorCommandLine(StringUtilities.cloneString(this.getInputValidatorCommandLine()));
+        clone.setInputValidatorProgramName(StringUtilities.cloneString(this.getInputValidatorProgramName()));
 
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
@@ -343,8 +362,9 @@ public class Problem implements IElementObject {
         retStr += "; clicsValidatorSettings=" + getClicsValidatorSettings();
         retStr += "; customValidatorSettings=" + getCustomValidatorSettings();
         
-        retStr += "; problemHasInputValidator=" + problemHasInputValidator;
-        retStr += "; inputValidatorSuccessfullyRun=" + inputValidatorHasBeenSuccessfullyRun;
+        retStr += "; problemHasInputValidator=" + isProblemHasInputValidator();
+        retStr += "; inputValidatorRunStatus=" + getInputValidationStatus();
+        
         retStr += "; inputValidatorProgramName=" + inputValidatorProgramName;
         retStr += "; inputValidatorCommandLine=" + inputValidatorCommandLine;
         
@@ -916,7 +936,7 @@ public class Problem implements IElementObject {
             if (this.isProblemHasInputValidator() != problem.isProblemHasInputValidator()) {
                 return false;
             }
-            if (this.inputValidatorHasBeenSuccessfullyRun != problem.inputValidatorHasBeenSuccessfullyRun) {
+            if (this.getInputValidationStatus() != problem.getInputValidationStatus()) {
                 return false;
             }
             if (!this.getInputValidatorProgramName().equals(problem.getInputValidatorProgramName())) {
@@ -1316,28 +1336,25 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Returns the flag indicating whether the Input Validator for the Problem has been successfully run
-     * (meaning, the Input Validator ran and return "success" for all input data files).
+     * Returns an indication of the status of the problem with respect to running an Input Validator.
      * 
-     * Note that this method returns true only if the problem has an Input Validator AND the Input Validator
-     * has been successfully run on all of the Problem's data files; it returns false if Input Validation failed
-     * OR if there is no Input Validator defined for the Problem. 
+     * Possible return status values are {@link InputValidationStatus#PASSED}, {@link InputValidationStatus#FAILED},
+     * or {@link InputValidationStatus#NOT_TESTED}.
      * 
-     * @return true if the problem has an Input Validator and it has been run and returned "success" for all data files; 
-     *              false otherwise.
+     * @return an element of {@link InputValidationStatus} indicating the Input Validation status of the problem
+     *
      */
-    public boolean isInputValidatorHasBeenSuccessfullyRun() {
-        return problemHasInputValidator && inputValidatorHasBeenSuccessfullyRun;
+    public InputValidationStatus getInputValidationStatus() {
+        return inputValidationStatus;
     }
 
     /**
-     * Sets the flag indicating that the problem's Input Validator has been successfully run against all of the
-     * Problem's input data files.
+     * Sets the flag indicating the result of having run the problem's data files against the problem's input validator.
      * 
-     * @param inputValidatorHasBeenSuccessfullyRun the value to which the flag should be set
+     * @param InputValidationStatus the value to which the flag should be set
      */
-    public void setInputValidatorHasBeenSuccessfullyRun(boolean inputValidatorHasBeenSuccessfullyRun) {
-        this.inputValidatorHasBeenSuccessfullyRun = inputValidatorHasBeenSuccessfullyRun;
+    public void setInputValidationStatus(InputValidationStatus status) {
+        this.inputValidationStatus = status;
     }
 
     /**
