@@ -445,6 +445,19 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
 
+        if (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals("")) {
+            //no input validator defined; issue a warning
+            String warning = "You are attempting to specify a Problem which has no Input Data Validator." 
+                    + "\n\nThis is usually not good practice because it provides no way to insure that the"
+                    + "\nJudge's data files meet the Problem Specification."
+                    + "\n\nAre you sure you want to do this?";
+            int response = JOptionPane.showConfirmDialog(getParentFrame(), warning, "No Input Validator specified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (!(response == JOptionPane.YES_OPTION)) {
+                return;
+            }
+        }
+
+
         Problem newProblem = null;
         try {
             newProblemDataFiles = getProblemDataFilesFromFields();
@@ -1398,6 +1411,18 @@ public class EditProblemPane extends JPanePlugin {
         if (!validateProblemFields()) {
             // problem defined by the GUI fields is invalid, just return ( error message was issued by validateProblemFields() )
             return;
+        }
+        
+        if (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals("")) {
+            //no input validator defined; issue a warning
+            String warning = "You are attempting to specify a Problem which has no Input Data Validator." 
+                    + "\n\nThis is usually not good practice because it provides no way to insure that the"
+                    + "\nJudge's data files meet the Problem Specification."
+                    + "\n\nAre you sure you want to do this?";
+            int response = JOptionPane.showConfirmDialog(getParentFrame(), warning, "No Input Validator specified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (!(response == JOptionPane.YES_OPTION)) {
+                return;
+            }
         }
 
         //all the GUI fields are valid; create a new Problem from them
