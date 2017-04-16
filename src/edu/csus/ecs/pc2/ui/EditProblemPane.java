@@ -2959,13 +2959,7 @@ public class EditProblemPane extends JPanePlugin {
 
     
     private void enableInputValidatorTabComponents() {
-        if (getInputValidatorCommandTextField().getText() != null && !getInputValidatorCommandTextField().getText().equals("")) {
-            getRunInputValidatorButton().setEnabled(true);
-            getRunInputValidatorButton().setToolTipText("Run the defined Input Validator command using the specified set of Input Data files");
-        } else {
-            getRunInputValidatorButton().setEnabled(false);
-            getRunInputValidatorButton().setToolTipText("No Input Validator command defined; cannot run");
-        }
+        updateRunValidatorButtonState();
     }
     
     protected void enableOutputValidatorTabComponents() {
@@ -4912,7 +4906,7 @@ public class EditProblemPane extends JPanePlugin {
         
         //update the tooltip to match the current state
         if (enableButton) {
-            getRunInputValidatorButton().setToolTipText("Run the Input Validator on the specified Input Data Files");
+            getRunInputValidatorButton().setToolTipText("Run the defined Input Validator command using the specified set of Input Data files");
         } else {
             //there must be something blocking permission to run the input validator; set the tooltip to indicate the condition(s)
             String toolTip = "";
