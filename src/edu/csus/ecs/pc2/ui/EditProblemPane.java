@@ -792,6 +792,16 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                     
+                    if (!(problem.getInputValidationStatus() == this.getInputValidationStatus())) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Input Validator Results";
+                        } else {
+                            updateToolTip += ", Input Validator Results";
+                        }
+                        
+                    }
+                    
                     if (fileChanged > 0) {
                         if (fileChanged == 1) {
                             updateToolTip += " file changed";
@@ -1641,7 +1651,7 @@ public class EditProblemPane extends JPanePlugin {
         //verify that if an Input Validator program has been specified, there is a command specified to invoke it.
         // (Note that the reverse is NOT required; it would be legal to specify an Input Validator command with no explicit program name)
         if (getInputValidatorProgramNameTextField().getText() != null && !getInputValidatorProgramNameTextField().getText().equals("")) {
-            if (getInputValidatorCommandTextField() == null || getInputValidatorCommandTextField().equals("")) {
+            if (getInputValidatorCommandTextField().getText() == null || getInputValidatorCommandTextField().getText().equals("")) {
                 showMessage("An Input Validator Program has been specified; you must also specify an Input Validator command line"); 
                 return false;
             }
@@ -2268,14 +2278,14 @@ public class EditProblemPane extends JPanePlugin {
             getInputValidatorCommandTextField().setToolTipText(getInputValidatorCommandTextField().getText());
         }
         
-        //fill in the "Input data files to validate" field, and set the default button
+        //fill in the "Validate files on disk" field
         String filesOnDiskFolder = prob.getInputValidatorFilesOnDiskFolder() ;
         if (filesOnDiskFolder != null) {
             getInputValidatorFilesOnDiskTextField().setText(filesOnDiskFolder);
         } else {
             getInputValidatorFilesOnDiskTextField().setText("");
         }
-        //update the tooltip to reflect the name in the text field
+        //update the files on disk tooltip to reflect the name in the files on disk text field
         if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
             //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
             getInputValidatorFilesOnDiskTextField().setToolTipText(null);
@@ -2286,14 +2296,40 @@ public class EditProblemPane extends JPanePlugin {
         //default to "files on disk" as file source (the ButtonGroup will automatically de-select the other buttons)
         getFilesOnDiskInFolderRadioButton().setSelected(true);
         
-        //clear the results table and status
+        //clear the results table
         //TODO: probably should be saving the results of a previous Input Validation run (if any) in the problem, and loading THOSE here
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(null);
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
-        getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
-        getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
         
-        setInputValidationStatus(prob.getInputValidationStatus());  //note: validation status is not displayed on the GUI!
+        //set the Status message based on the status in the specified problem
+        InputValidationStatus problemValidationStatus = prob.getInputValidationStatus();
+        Color color ;
+        String msg ;
+        switch (problemValidationStatus) {
+            case NOT_TESTED:
+                msg = "<No Input Validation test run yet>";
+                color = Color.BLACK;
+                break;
+            case PASSED:
+                msg = "All input data files PASSED validation";
+                color = Color.GREEN;
+                break;
+            case FAILED:
+                msg = "One or more input data files FAILED validation";
+                color = Color.red;
+                break;
+            case ERROR:
+                msg = "Error occurred during input validation; check logs";
+                color = Color.YELLOW;
+                break;
+            default:
+                msg = "This should never be displayed";
+                color = Color.ORANGE;
+        }
+                
+        getInputValidationResultSummaryTextLabel().setText(msg);
+        getInputValidationResultSummaryTextLabel().setForeground(color);
+        setInputValidationStatus(prob.getInputValidationStatus());  //note: validation status variable is not displayed on the GUI
 
     }
     
@@ -4941,6 +4977,7 @@ public class EditProblemPane extends JPanePlugin {
         	validateInputDataButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        runInputDataValidationTest() ;
+        	        enableUpdateButton();
         	    }
         	});
         }
@@ -5515,7 +5552,7 @@ public class EditProblemPane extends JPanePlugin {
     }
     private JLabel getInputValidationResultsSummaryLabel() {
         if (inputValidationResultsSummaryLabel == null) {
-        	inputValidationResultsSummaryLabel = new JLabel("Status: ");
+        	inputValidationResultsSummaryLabel = new JLabel("Most Recent Status: ");
         }
         return inputValidationResultsSummaryLabel;
     }
