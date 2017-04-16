@@ -2884,17 +2884,26 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Displays a JFileChooser allowing the user to select a directory.
      * 
-     * Returns the selected directory name, or null if no directory was selected.
+     * Returns the selected directory name, or null if no directory was selected. 
+     * Also updates the specified JTextField to contain the selected directory name.
      * 
      * @param dialogTitle a String giving the title to display on the dialog
      * 
      * @return a String giving the name of the chosen directory
      */
-    private String selectDirectory(String dialogTitle) {
+    private String selectDirectory(JTextField textField, String dialogTitle) {
 
-        String directory = null;
+        String chosenDir = null;
+        
+        String startDir = null;
+        if (textField != null) {
+            String toolTip = textField.getToolTipText();
+            if (toolTip != null && !toolTip.equals("")) {
+                startDir = toolTip;
+            }
+        }
 
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = new JFileChooser(startDir);
 
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (dialogTitle != null) {
@@ -2903,13 +2912,17 @@ public class EditProblemPane extends JPanePlugin {
         try {
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                directory = chooser.getSelectedFile().toString();
+                chosenDir = chooser.getSelectedFile().toString();
+                textField.setText(chosenDir);
             }
         } catch (Exception e) {
+            showMessage("Error selecting input folder, try again: \n" + e.getMessage());
             getController().getLog().log(Log.INFO, "Error in JFileChooser getting selected directory", e);
         }
         chooser = null;
-        return directory;
+        return chosenDir;
+        
+         
     }
 
     /**
@@ -5498,7 +5511,7 @@ public class EditProblemPane extends JPanePlugin {
         	chooseInputFilesButton = new JButton("Choose...");
         	chooseInputFilesButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
-        	        String directory = selectDirectory("Select Input File Folder");
+        	        String directory = selectDirectory(getInputValidatorFilesOnDiskTextField(),"Select Input File Folder");
                     if (directory != null && !directory.equals("")) {
                         getInputValidatorFilesOnDiskTextField().setText(directory);
                         getInputValidatorFilesOnDiskTextField().setToolTipText(directory);
