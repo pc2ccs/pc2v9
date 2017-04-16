@@ -89,6 +89,15 @@ public class RunInputValidatorsFrame extends JFrame implements UIPlugin  {
       JPanel buttonPanel = new JPanel();
       mainPanel.add(buttonPanel, BorderLayout.SOUTH);
       
+      JButton runSelectedButton = new JButton("Run Selected");
+      runSelectedButton.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+              System.out.println ("Not implemented yet...");
+//            JOptionPane.showMessageDialog(this, "This function isn't implemented yet...", "Not Implemented", JOptionPane.INFORMATION_MESSAGE);
+          }
+      });
+      buttonPanel.add(runSelectedButton);
+      
       buttonPanel.add(getRunAllButton());
   
       buttonPanel.add(getCloseButton()); 
