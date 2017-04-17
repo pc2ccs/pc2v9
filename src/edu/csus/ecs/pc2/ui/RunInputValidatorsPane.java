@@ -56,7 +56,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
 
     private JTable resultsTable;
 
-    private TableModel allProblemsInputValidationResultsTableModel;
+    private TableModel allProblemsInputValidationResultsTableModel = new InputValidationResultsTableModel();
 
     private JPanel buttonPanel;
 
@@ -199,7 +199,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
     }
     
     private void handleCloseButton() {
-        this.setVisible(false);
+        this.getParentFrame().setVisible(false);
     }
     
 
