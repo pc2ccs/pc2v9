@@ -1436,7 +1436,7 @@ public class Problem implements IElementObject {
      * 
      * @return an {@link Iterable} containing InputValidationResults
      */
-    Iterable<InputValidationResult> getInputValidationResults() {
+    public Iterable<InputValidationResult> getInputValidationResults() {
         return this.inputValidationResults;
     }
     
