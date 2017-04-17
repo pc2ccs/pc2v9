@@ -56,7 +56,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
 
     private JTable resultsTable;
 
-    private TableModel allProblemsInputValidationResultsTableModel = new InputValidationResultsTableModel();
+    private TableModel allProblemsInputValidationResultsTableModel = new AllProblemsInputValidationResultsTableModel();
 
     private JPanel buttonPanel;
 
