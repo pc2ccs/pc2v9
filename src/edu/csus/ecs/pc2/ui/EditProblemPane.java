@@ -450,7 +450,8 @@ public class EditProblemPane extends JPanePlugin {
             String warning = "You are attempting to specify a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
                     + "\nJudge's data files meet the Problem Specification."
-                    + "\n\nAre you sure you want to do this?";
+                    + "\n\nAre you sure you want to do this?"
+                    + "\n";
             int response = JOptionPane.showConfirmDialog(getParentFrame(), warning, "No Input Validator specified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
             if (!(response == JOptionPane.YES_OPTION)) {
                 return;
