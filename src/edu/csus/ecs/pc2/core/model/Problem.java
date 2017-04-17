@@ -1,10 +1,12 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
+import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.ui.InputValidationResult;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
@@ -141,6 +143,8 @@ public class Problem implements IElementObject {
     
     private InputValidationStatus inputValidationStatus;
     
+    private Vector<InputValidationResult> inputValidationResults ;
+    
 
     /**
      * Use international judgement method.
@@ -244,6 +248,7 @@ public class Problem implements IElementObject {
         this.clicsValidatorSettings = new ClicsValidatorSettings();
         this.customValidatorSettings = new CustomValidatorSettings();
         this.inputValidationStatus = InputValidationStatus.NOT_TESTED;
+        this.inputValidationResults = new Vector<InputValidationResult>();
     }
 
     public Problem copy(String newDisplayName) {
@@ -1424,5 +1429,36 @@ public class Problem implements IElementObject {
     public void setInputValidatorFilesOnDiskFolder(String inputValFilesOnDiskFolder) {
         this.inputValidatorFilesOnDiskFolderName = inputValFilesOnDiskFolder;
         
+    }
+    
+    /**
+     * Returns the current {@link InputValidationResults} for this problem.
+     * 
+     * @return an {@link Iterable} containing InputValidationResults
+     */
+    Iterable<InputValidationResult> getInputValidationResults() {
+        return this.inputValidationResults;
+    }
+    
+    /**
+     * Adds the specified {@link InputValidationResult} to the current set of Input Validation Results
+     * for the Problem.
+     * 
+     * @param result the InputValidationResult to be added
+     * 
+     */
+    public void addInputValidationResult(InputValidationResult result) {
+        if (getInputValidationResults() == null) {
+            this.inputValidationResults = new Vector<InputValidationResult>();
+        }
+        inputValidationResults.add(result);
+    }
+    
+    /**
+     * Clears (removes) all {@link InputValidationResults} currently stored in this Problem.
+     * 
+     */
+    public void clearInputValidationResults() {
+        this.inputValidationResults = null;
     }
 }
