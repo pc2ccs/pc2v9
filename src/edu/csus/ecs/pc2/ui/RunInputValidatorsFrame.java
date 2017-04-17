@@ -19,9 +19,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 public class RunInputValidatorsFrame extends JFrame implements UIPlugin {
 
-    /**
-     *  
-     */
     private static final long serialVersionUID = 1;
 
     private IInternalContest contest;
@@ -31,7 +28,7 @@ public class RunInputValidatorsFrame extends JFrame implements UIPlugin {
     private RunInputValidatorsPane runInputValidatorsPane = null;
 
     /**
-     * Constructs a JFrame containing a {@link RunInputValidators} pane.
+     * Constructs a JFrame containing a {@link RunInputValidatorsPane}.
      * 
      */
     public RunInputValidatorsFrame() {
