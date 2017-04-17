@@ -228,7 +228,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
 
     @Override
     public String getPluginTitle() {
-        return "Run Input Validators Frame";
+        return "Run Input Validators Pane";
     }
 
     private void addWindowListeners() {
