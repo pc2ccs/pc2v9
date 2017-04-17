@@ -69,7 +69,7 @@ public class ProblemsPane extends JPanePlugin {
     private JButton setJudgesDataPathButton;
 
     private EditJudgesDataFilePathFrame editCDPPathFrame;
-    private JButton runInputValidatorButton;
+    private JButton runInputValidatorsButton;
 
     private RunInputValidatorsFrame runInputValidatorsFrame;
     
@@ -94,6 +94,7 @@ public class ProblemsPane extends JPanePlugin {
         this.add(getProblemButtonPane(), java.awt.BorderLayout.SOUTH);
 
         editProblemFrame = new EditProblemFrame();
+        runInputValidatorsFrame = new RunInputValidatorsFrame();
     }
 
     @Override
@@ -118,7 +119,7 @@ public class ProblemsPane extends JPanePlugin {
             problemButtonPane.add(getEditButton(), null);
             problemButtonPane.add(getReportButton(), null);
             problemButtonPane.add(getSetJudgesDataPathButton());
-            problemButtonPane.add(getRunInputValidatorButton());
+            problemButtonPane.add(getRunInputValidatorsButton());
         }
         return problemButtonPane;
     }
@@ -312,6 +313,12 @@ public class ProblemsPane extends JPanePlugin {
         for (Problem problem : problems) {
             addProblemRow(problem);
         }
+        
+        if (problems.length > 0 ) {
+            getRunInputValidatorsButton().setEnabled(true);
+        } else {
+            getRunInputValidatorsButton().setEnabled(false);
+        }
     }
 
     private void addProblemRow(Problem problem) {
@@ -326,7 +333,8 @@ public class ProblemsPane extends JPanePlugin {
         log = getController().getLog();
 
         editProblemFrame.setContestAndController(inContest, inController);
-        
+        runInputValidatorsFrame.setContestAndController(inContest, inController);
+       
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
@@ -539,6 +547,7 @@ public class ProblemsPane extends JPanePlugin {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     updateProblemRow(event.getProblem());
+                    getRunInputValidatorsButton().setEnabled(true);
                 }
             });
         }
@@ -780,17 +789,18 @@ public class ProblemsPane extends JPanePlugin {
     }
     
 
-    private JButton getRunInputValidatorButton() {
-        if (runInputValidatorButton == null) {
-        	runInputValidatorButton = new JButton("Run Input Validators");
-        	runInputValidatorButton.addActionListener(new ActionListener() {
+    private JButton getRunInputValidatorsButton() {
+        if (runInputValidatorsButton == null) {
+        	runInputValidatorsButton = new JButton("Run Input Validators");
+        	runInputValidatorsButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        runInputValidators();
         	    }
         	});
-        	runInputValidatorButton.setToolTipText("Execute the Input Validator for each problem against the data files defined for that problem");
+        	runInputValidatorsButton.setEnabled(false);
+        	runInputValidatorsButton.setToolTipText("Execute the Input Validator for each problem against the data files defined for that problem");
         }
-        return runInputValidatorButton;
+        return runInputValidatorsButton;
     }
     
     private void runInputValidators() {
