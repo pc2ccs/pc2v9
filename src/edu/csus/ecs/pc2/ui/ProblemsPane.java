@@ -24,10 +24,12 @@ import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
+
 import java.awt.Dimension;
 
 /**
@@ -174,6 +176,25 @@ public class ProblemsPane extends JPanePlugin {
             }
         });
     }
+    
+    public void updateRunInputValidatorsProblemRow(final Problem problem) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                
+                //build a row of InputValidatorResults for the specified problem
+                Object[] rowData = buildRunInputValidatorsResultsProblemRow(problem);
+                
+                //add the row to the InputValidatorResults table model in the RunInputValidators pane
+                ((AllProblemsInputValidationResultsTableModel)(getRunInputValidatorsFrame().getRunInputValidatorsPane()
+                        .getInputValidatorResultsTable().getModel())).addRow(rowData);
+                
+                //tell the table to update
+                ((AllProblemsInputValidationResultsTableModel)(getRunInputValidatorsFrame().getRunInputValidatorsPane()
+                        .getInputValidatorResultsTable().getModel())).fireTableDataChanged();
+            }
+        });
+        
+    }
 
     private String yesNoString(boolean b) {
         if (b) {
@@ -258,6 +279,57 @@ public class ProblemsPane extends JPanePlugin {
         
         return c;
     }
+    
+    private Object [] buildRunInputValidatorsResultsProblemRow(Problem problem) {
+        //from AllProblemsInputValidationResultsTableModel:
+        // String[] colNames = { "Select", "Problem", "Overall Result", "Pass/Fail Count", "Failed Files...", "Input Validator", "I.V. Command" };
+        
+        int numberColumns = ((AllProblemsInputValidationResultsTableModel)(getRunInputValidatorsFrame().getRunInputValidatorsPane().getInputValidatorResultsTable().getModel())).getColumnCount();
+
+        Object[] c = new Object[numberColumns];
+        int i = 0;
+        
+        c[i++] = new Boolean(true);
+        
+        c[i++] = problem.getShortName();
+
+        c[i++] = problem.getInputValidationStatus();
+        
+        c[i++] = getPassFailCount(problem);
+        
+        c[i++] = "<unknown>";
+        
+        c[i++] = problem.isProblemHasInputValidator() ? problem.getInputValidatorProgramName() : "<none>";
+        
+        c[i++] = problem.getInputValidatorCommandLine() ;
+        
+        return c;
+    }
+    
+    private String getPassFailCount(Problem problem) {
+        String retStr = "";
+        if (problem.getInputValidationStatus() == InputValidationStatus.NOT_TESTED || problem.getInputValidationStatus() == InputValidationStatus.ERROR) {
+            retStr = "N/A";
+        } else {
+    //TODO: this should return a string of the form  "x/y", where x = count of passed tests and y = count of failed tests.
+    //   However, the results are not currently being stored in the problem...
+//            int passed = 0;
+//            int failed = 0;
+//            InputValidationResult[] results = problem.getInputValidationResults();
+//            for (int i = 0; i < results.length; i++) {
+//                if (results[i].isPassed()) {
+//                    passed++;
+//                } else {
+//                    failed++;
+//                }
+//            }
+//            retStr = "" + passed + "/" + failed;
+            
+            retStr = "?/?";
+        }
+        
+        return retStr;
+    }
 
     protected void copySelectedProblem() {
         int selectedIndex = problemListBox.getSelectedIndex();
@@ -316,6 +388,7 @@ public class ProblemsPane extends JPanePlugin {
         
         if (problems.length > 0 ) {
             getRunInputValidatorsButton().setEnabled(true);
+            System.out.println ("RunInputValidators button enabled in ProblemsPane.reloadListBox()");
         } else {
             getRunInputValidatorsButton().setEnabled(false);
         }
@@ -547,7 +620,9 @@ public class ProblemsPane extends JPanePlugin {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     updateProblemRow(event.getProblem());
+                    updateRunInputValidatorsProblemRow(event.getProblem());
                     getRunInputValidatorsButton().setEnabled(true);
+                    System.out.println ("RunInputValidators button enabled in ProblemsPane.ProblemListenerImplementation.problemAdded()");
                 }
             });
         }
