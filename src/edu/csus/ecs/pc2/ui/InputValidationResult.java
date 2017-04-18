@@ -153,5 +153,20 @@ public class InputValidationResult implements Serializable {
     public void setValidatorStdErr(SerializedFile validatorStdErr) {
         this.validatorStdErr = validatorStdErr;
     }
+    
+    @Override
+    public String toString() {
+        String retStr = "InputValidatorResult[";
+        
+        retStr += "problem=" + this.problem;
+        retStr += " dataFile=" + this.fullPathFilename;
+        retStr += " passed=" + this.passed;
+        retStr += " validatorStdOutFile=" + this.validatorStdOut.getName();
+        retStr += " validatorStdErrFile=" + this.validatorStdErr.getName();
+
+        retStr += "]";
+        
+        return retStr;
+    }
 
 }
