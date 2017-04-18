@@ -1,5 +1,8 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.io.Serializable;
+
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -12,8 +15,11 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  * @author John
  *
  */
-public class InputValidationResult {
+public class InputValidationResult implements Serializable {
     
+    private static final long serialVersionUID = 1L;
+    
+    private Problem problem ;
     private String fullPathFilename ;
     private boolean passed ;
     private SerializedFile validatorStdOut ;
@@ -23,12 +29,14 @@ public class InputValidationResult {
      * Constructs an InputValidationResult containing the specified data.
      * The validatorStdOut and validatorStdErr strings are converted to {@link SerializedFile}s before being saved.
      * 
+     * @param problem the {@link Problem} for which this result applies
      * @param dataFilePathName the full path name of the data file on which the Input Validator was run
      * @param passed a boolean indicating whether the Input Validator returned success or failure when checking the input data file
      * @param validatorStdOutFilename a String containing the standard output of the Input Validator (this is stored as a SerializedFile)
      * @param validatorStdErrFilename a String containing the standard error output of the Input Validator (this is stored as a SerializedFile)
      */
-    public InputValidationResult(String dataFilePathName, boolean passed, String validatorStdOutFilename, String validatorStdErrFilename)  {
+    public InputValidationResult(Problem problem, String dataFilePathName, boolean passed, String validatorStdOutFilename, String validatorStdErrFilename)  {
+        this.problem = problem;
         this.fullPathFilename = dataFilePathName;
         this.passed = passed;
         this.validatorStdOut = new SerializedFile(validatorStdOutFilename);
@@ -44,16 +52,32 @@ public class InputValidationResult {
     /**
      * Constructs an InputValidationResult containing the specified data.
      * 
+     * @param problem the {@link Problem} for which this result applies
      * @param dataFilePathName the full path name of the data file on which the Input Validator was run
      * @param passed a boolean indicating whether the Input Validator returned success or failure when checking the input data file
      * @param validatorStdOutFile a {@link SerializedFile} containing the standard output of the Input Validator
      * @param validatorStdErrFile a {@link SerializedFile} containing the standard error output of the Input Validator
      */
-    public InputValidationResult(String dataFilePathName, boolean passed, SerializedFile validatorStdOutFile, SerializedFile validatorStdErrFile) {
+    public InputValidationResult(Problem problem, String dataFilePathName, boolean passed, SerializedFile validatorStdOutFile, SerializedFile validatorStdErrFile) {
+        this.problem = problem;
         this.passed = passed;
         this.fullPathFilename = dataFilePathName;
         this.validatorStdOut = validatorStdOutFile;
         this.validatorStdErr = validatorStdErrFile;
+    }
+    
+    /**
+     * Returns the {@link Problem} associated with this result.
+     */
+    public Problem getProblem() {
+        return problem;
+    }
+    
+    /**
+     * Allows setting the {@link Problem} associated with this result.
+     */
+    public void setProblem(Problem problem) {
+        this.problem = problem;
     }
 
     /**
