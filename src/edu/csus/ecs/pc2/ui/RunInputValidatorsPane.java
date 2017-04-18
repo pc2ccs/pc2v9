@@ -8,6 +8,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -27,6 +28,7 @@ import javax.swing.table.TableModel;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
  * A pane for running the input validators for currently defined problems and displaying the results.
@@ -37,10 +39,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 public class RunInputValidatorsPane extends JPanePlugin  {
 
     private static final long serialVersionUID = 1;
-
-    private IInternalContest contest;
-
-    private IInternalController controller;
 
     private JButton closeButton;
 
@@ -72,18 +70,15 @@ public class RunInputValidatorsPane extends JPanePlugin  {
     private void initialize() {
 
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(549, 312));
+        this.setSize(new Dimension(775, 536));
 
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
         this.add(getResultsPanel(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
 
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                populateUI();
-            }
-        });
     }
+    
+    
     
     private JPanel getMessagePanel() {
         if (msgPanel == null) {
@@ -100,6 +95,8 @@ public class RunInputValidatorsPane extends JPanePlugin  {
     private JPanel getResultsPanel() {
         if (resultsPanel == null) {
             resultsPanel = new JPanel();
+            resultsPanel.setPreferredSize(new Dimension(700, 700));
+            resultsPanel.setMinimumSize(new Dimension(700, 700));
             resultsPanel.setBorder(new TitledBorder(null, "Run Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
             resultsPanel.add(getInputValidatorResultsScrollPane());
         }
@@ -120,21 +117,29 @@ public class RunInputValidatorsPane extends JPanePlugin  {
     private JScrollPane getInputValidatorResultsScrollPane() {
         if (resultsScrollPane == null) {
             resultsScrollPane = new JScrollPane();
+            resultsScrollPane.setMinimumSize(new Dimension(450, 450));
+            resultsScrollPane.setPreferredSize(new Dimension(700, 450));
             resultsScrollPane.setViewportView(getInputValidatorResultsTable());
         }
         return resultsScrollPane;
     }
 
     //copied from EditProblemPane; needs to be updated for this class
-    private JTable getInputValidatorResultsTable() {
+    public JTable getInputValidatorResultsTable() {
         if (resultsTable == null) {
             resultsTable = new JTable(allProblemsInputValidationResultsTableModel);
+            resultsTable.setMinimumSize(new Dimension(450, 0));
             
             //set the desired options on the table
             resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             resultsTable.setFillsViewportHeight(true);
             resultsTable.setRowSelectionAllowed(false);
             resultsTable.getTableHeader().setReorderingAllowed(false);
+            
+            //the following statement is necessary (it's one way to force the Table to use the Table Model's rowcount, which it doesn't in all cases)
+            //Another way might be to add a custom row sorter, but make sure the row sorter's model is updated every time the Table Model is updated...
+            //@see http://stackoverflow.com/questions/23626951/jtable-row-count-vs-model-row-count
+            resultsTable.setAutoCreateRowSorter(true);
 
             //code from MultipleDataSetPane:
             // insert a renderer that will center cell contents
@@ -155,7 +160,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
             header.setFont(new Font("Dialog", Font.BOLD, 12));
             
             // render Result column as Pass/Fail on Green/Red background
-            resultsTable.getColumn("Result").setCellRenderer(new PassFailCellRenderer());
+            resultsTable.getColumn("Overall Result").setCellRenderer(new PassFailCellRenderer());
 
 
         }
@@ -204,25 +209,74 @@ public class RunInputValidatorsPane extends JPanePlugin  {
     
 
     /**
-     * Populate UI fields.
+     * Populates the GUI fields with Problem InputValidationResults data from the underlying table model.
      */
-    protected void populateUI() {
+    protected void populateGUI() {
         
+        //get the currently-defined problems
+        Problem [] probs = getContest().getProblems();
+        
+        if (probs == null) {
+            System.err.println ("Probs is null");
+        } else {
+            System.err.println("Number of Probs = " + probs.length + ":");
+            for (int i=0; i<probs.length; i++) {
+                System.err.println ("  " + probs[i].toStringDetails());
+            }
+        }
+        //get the Input Validation Results for each problem (note that this could be empty for any given problem, or all problems)
+        Vector<Vector<InputValidationResult>> tableData = getInputValidationResultsTableData(probs);
+        
+        System.err.println ("\nIn RunInputValidatorsPane.populateGUI(): Table Data returned from getInputValidationResultsTableData():");
+        for (int i=0; i<tableData.size(); i++) {
+            for (int j=0; j<tableData.get(i).size(); j++) {
+                System.err.println ("[" + i + "][" + j + "]: " + tableData.get(i).get(j));
+            }
+        }
+       
+        //put the table data into the table model
+        ((AllProblemsInputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(tableData);
+        
+        //fire table data changed to update the display
+        ((AllProblemsInputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
     }
 
+    
+    private Vector< Vector<InputValidationResult>> getInputValidationResultsTableData(Problem [] probs) {
+        
+        Vector<Vector<InputValidationResult>> tableData = new Vector<Vector<InputValidationResult>> ();
+        
+        System.err.println ("\nIn RunInputValidatorsPane.getInputValidationResultsTableData(): ");
+        
+        for (int row=0; row<probs.length; row++) {
+            
+            System.err.println ("  Problem " + probs[row] + ": Input Validation Results:  ");
+            
+            //add a new (empty) "row" to the temp table
+            tableData.add(new Vector<InputValidationResult>());
+            
+            //add each result for the current problem to the current row
+            for (InputValidationResult result : probs[row].getInputValidationResults()) {
+                
+                System.err.print (result + ";  ");
+                tableData.get(row).add(result);  //do we need to clone the InputValidationResult? 
+            }         
+        }
+        
+        return tableData;
+    }
+    
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         addWindowListeners();
-    }
-    
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                populateGUI();
+            }
+        });
 
-    public IInternalContest getContest() {
-        return contest;
-    }
-    
-    public IInternalController getController() {
-        return controller;
     }
   
 
