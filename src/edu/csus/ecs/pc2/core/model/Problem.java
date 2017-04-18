@@ -1432,11 +1432,15 @@ public class Problem implements IElementObject {
     }
     
     /**
-     * Returns the current {@link InputValidationResults} for this problem.
+     * Returns an {@link Iterable} for the current {@link InputValidationResults} for this problem. 
+     * The returned object may be empty (that it, the Iterable may have no elements) but will never be null.
      * 
      * @return an {@link Iterable} containing InputValidationResults
      */
     public Iterable<InputValidationResult> getInputValidationResults() {
+        if (this.inputValidationResults == null) {
+            this.inputValidationResults = new Vector<InputValidationResult>() ;
+        }
         return this.inputValidationResults;
     }
     
