@@ -269,6 +269,11 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
 
         // find OS type
         String osName = System.getProperty("os.name");
+        
+        // SOMEDAY refactor use Utilities.getOSType rather than System.getProperty("os.name");
+        // Use a switch statement on the enum from getOSType
+//        OSType type = Utilities.getOSType();
+        
 //        System.out.println("DEBUG: os name = '" + osName + "'");
 
         if (osName != null) {

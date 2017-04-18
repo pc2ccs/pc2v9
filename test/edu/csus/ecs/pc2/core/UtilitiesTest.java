@@ -360,4 +360,40 @@ public class UtilitiesTest extends AbstractTestCase {
         
         
     }
+    
+    /**
+     * Test OS Type.
+     */
+    public void testGetGetOSType() {
+        
+        OSType type = Utilities.getOSType();
+        
+        switch (type) {
+            case UNCLASSIFIED:
+                /**
+                 * OS type must not be classified
+                 */
+                fail ("Expecting OS Type to not be "+OSType.UNCLASSIFIED);
+                break;
+                
+            case UNDEFINED:
+                /**
+                 * OS type must not be undefined.
+                 */
+                fail ("Expecting OS Type to not be "+OSType.UNDEFINED);
+                break;
+                
+            default:
+                break;
+        }
+        
+        /**
+         * Tests for when running unit test on Windows
+         */
+        debugPrint("OS Type is: "+type);
+        
+//        assertEquals("Windows", type.toString());
+//        assertEquals(OSType.WINDOWS, type);
+        
+    }
 }
