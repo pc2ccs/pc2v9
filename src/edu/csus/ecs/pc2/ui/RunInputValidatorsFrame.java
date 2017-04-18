@@ -68,9 +68,11 @@ public class RunInputValidatorsFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.RunInputValidatorsPane
      */
-    private RunInputValidatorsPane getRunInputValidatorsPane() {
+    public RunInputValidatorsPane getRunInputValidatorsPane() {
         if (runInputValidatorsPane == null) {
             runInputValidatorsPane = new RunInputValidatorsPane();
+            runInputValidatorsPane.setPreferredSize(new Dimension(700, 540));
+            runInputValidatorsPane.setMinimumSize(new Dimension(700, 540));
         }
         return runInputValidatorsPane;
     }
