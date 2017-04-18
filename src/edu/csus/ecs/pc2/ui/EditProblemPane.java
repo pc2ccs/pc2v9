@@ -527,6 +527,21 @@ public class EditProblemPane extends JPanePlugin {
         //add the current input validation status to the problem (this field is not displayed in the GUI, except indirectly via
         // the "Status message" text...)
         newProblem.setInputValidationStatus(this.getInputValidationStatus());
+        
+        //if an Input Validator was run, add the results to the problem
+        if (inputValidatorHasBeenRun) {
+            if (results != null) {
+                newProblem.clearInputValidationResults();
+                for (int i=0; i<results.length; i++) {
+                    //update the Problem in the current result (it would not have been filled in when adding a problem; it was null)
+                    results[i].setProblem(newProblem);
+                    //put the updated result into the problem
+                    newProblem.addInputValidationResult(results[i]);                    
+                }
+            } else {
+                getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
+            }
+        }
 
         getController().addNewProblem(newProblem, newProblemDataFiles);
 
@@ -815,6 +830,15 @@ public class EditProblemPane extends JPanePlugin {
                         }
                         
                     }
+                    
+                    if (inputValidatorHasBeenRun) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Input Validator Run";
+                        } else {
+                            updateToolTip += ", Input Validator Run";
+                        }
+                   }
                     
                     if (fileChanged > 0) {
                         if (fileChanged == 1) {
@@ -1514,6 +1538,18 @@ public class EditProblemPane extends JPanePlugin {
         
         //add the status of Input Validation (note: validation status is not displayed in the GUI)
         newProblem.setInputValidationStatus(this.getInputValidationStatus());
+        
+        //if an Input Validator was run, add the results to the problem
+        if (inputValidatorHasBeenRun) {
+            if (results != null) {
+                newProblem.clearInputValidationResults();
+                for (int i=0; i<results.length; i++) {
+                    newProblem.addInputValidationResult(results[i]);                    
+                }
+            } else {
+                getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
+            }
+        }
 
         //hand the new problem to the Controller for transmission to the Server
         getController().updateProblem(newProblem, newProblemDataFiles);
@@ -2999,6 +3035,7 @@ public class EditProblemPane extends JPanePlugin {
     
     private void enableInputValidatorTabComponents() {
         updateRunValidatorButtonState();
+        inputValidatorHasBeenRun = false ;
     }
     
     protected void enableOutputValidatorTabComponents() {
@@ -3174,6 +3211,10 @@ public class EditProblemPane extends JPanePlugin {
     private Component horizontalStrut_3;
     private Component horizontalStrut_4;
     private final ButtonGroup inputFileLocationButtonGroup = new ButtonGroup();
+
+    private boolean inputValidatorHasBeenRun;
+
+    private InputValidationResult[] results;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -5042,9 +5083,10 @@ public class EditProblemPane extends JPanePlugin {
         
         InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
         
-        InputValidationResult[] results = null;
+        results = null;
         try {
-            results = runner.runInputValidator(validatorProg, cmdline, executeDir, dataFiles);
+            results = runner.runInputValidator(getProblem(), validatorProg, cmdline, executeDir, dataFiles);
+            inputValidatorHasBeenRun = true;
         } catch (ExecuteException e) {
             JOptionPane.showMessageDialog(this, "Error running Input Validator: \n" + e.getMessage() + "\nCheck logs for further details", "Input Validator Error", JOptionPane.WARNING_MESSAGE);
             getInputValidationResultSummaryTextLabel().setText("Errror Running Input Validator");
@@ -5052,7 +5094,6 @@ public class EditProblemPane extends JPanePlugin {
             setInputValidationStatus(InputValidationStatus.ERROR);
         }
             
-        
         //update the results table
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(results);
         ((AbstractTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
@@ -5073,7 +5114,7 @@ public class EditProblemPane extends JPanePlugin {
                 }
             }
             String resultSummaryString = allPassed ? "All Input Data Files passed validation"
-                    : "One or more Input Data Files FAILED validation";
+                                                    : "One or more Input Data Files FAILED validation";
             Color color = allPassed ? Color.green : Color.red;
             getInputValidationResultSummaryTextLabel().setText(resultSummaryString);
             getInputValidationResultSummaryTextLabel().setForeground(color);
