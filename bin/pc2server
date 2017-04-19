@@ -26,7 +26,7 @@ JAVA32=0
 # if we are not running a 64bit java reduce to 1.6G
 java -d64 -version 2>&1 | grep -q "Error" && JAVA32=1
 # found a 32bit java
-if [ $JAVA32 == "1" ]; then
+if [ $JAVA32 = "1" ]; then
 # reduce the heap size
 HEAPPARAM=$JAVA32BIT_HEAPSIZE
 # now check the OS, checking for 64 bit
