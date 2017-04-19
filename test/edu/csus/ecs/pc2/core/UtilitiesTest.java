@@ -18,10 +18,6 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Unit test.
- * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
- *
  */
 public class UtilitiesTest extends AbstractTestCase {
 
@@ -42,7 +38,6 @@ public class UtilitiesTest extends AbstractTestCase {
     }
 
     public void testBasename() {
-        // public static void main(String[] args) {
 
         String[][] entries = { { "foo.c", "foo.c" }, { ";usr;bin;basename", "basename" }, { ";usr;basename", "basename" }, { ";bin;ls", "ls" }, };
 
@@ -395,5 +390,54 @@ public class UtilitiesTest extends AbstractTestCase {
 //        assertEquals("Windows", type.toString());
 //        assertEquals(OSType.WINDOWS, type);
         
+        
+    }
+    
+    /**
+     * Test for files that are considered executable.
+     * 
+     * @throws Exception
+     */
+    public void testisExecutableExtension() throws Exception {
+
+        /**
+         * Files expected to be considered executable
+         */
+        String[] filenames = {
+                "a.exe", //
+                "a.sh", //
+                "awk", //
+                "validate.py", //
+                "validiff.bat", //
+                "validator22", //
+        };
+
+        for (String filename : filenames) {
+            assertTrue("Expected to be isExecutableExtension " + filename, Utilities.isExecutableExtension(filename));
+        }
+
+    }
+
+    /**
+     * Test for files that are not considered executable.
+     * 
+     * @throws Exception
+     */
+    public void testTwo() throws Exception {
+
+        /**
+         * Files expected to NOT be considered executable
+         */
+        String[] filenames = {
+                "a.pl", //
+                "a.cc", //
+                "validate.pl", //
+                "validiff.c", //
+                "validator.cpp", //
+        };
+
+        for (String filename : filenames) {
+            assertFalse("Expected to be isExecutableExtension " + filename, Utilities.isExecutableExtension(filename));
+        }
     }
 }

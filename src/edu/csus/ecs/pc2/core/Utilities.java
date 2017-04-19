@@ -76,7 +76,19 @@ public final class Utilities {
 
     private static SimpleDateFormat formatterYYYYMMDDHHMMSS = new SimpleDateFormat(FORMAT_YYYY_MM_DD_HH_MM_SS);
 
+    /**
+     * List of extensions for files considered to be executable.
+     */
+    public static final String [] VALID_PROGRAM_EXTENSIONS = { //
+        //
+        ".bat", // Windows batch file
+        ".exe", // Windows executable
+        ".py", // Python
+        ".sh", // Shell
+        ".class", // Java
+    };
 
+    
     /**
      * File Types.
      * 
@@ -1456,6 +1468,30 @@ public final class Utilities {
         }
 
         return type;
+    }
+
+    /**
+     * Return true if considered an executable.
+     * 
+     * If not extension found or extension in #VALID_PROGRAM_EXTENSIONS
+     * 
+     * @param baseFileName
+     * @return
+     */
+    public static boolean isExecutableExtension(String baseFileName) {
+
+        if (baseFileName.indexOf('.') == -1) {
+            // no extension found, assumed to be a Unix program
+            return true;
+        }
+
+        for (String ext : VALID_PROGRAM_EXTENSIONS) {
+
+            if (baseFileName.endsWith(ext)) {
+                return true;
+            }
+        }
+        return false;
     }
     
 }

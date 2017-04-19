@@ -132,6 +132,8 @@ public interface IContestLoader {
     String INTERPRETED_LANGUAGE_KEY = "interpreted";
 
     String READ_FROM_STDIN_KEY = "readFromSTDIN";
+    
+    String INPUT_VALIDATOR_COMMAND_LINE_KEY = "inputValidatorCommandLine";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 

@@ -58,7 +58,8 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class ContestSnakeYAMLLoader implements IContestLoader {
-
+    
+    
     /**
      * Full content of yaml file.
      */
@@ -1140,7 +1141,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setUsingExternalDataFiles(!loadFilesFlag);
 
                 String validatorCommandLine = fetchValue(map, VALIDATOR_KEY);
-
+                
                 if (validatorCommandLine == null) {
                     validatorCommandLine = defaultValidatorCommand;
                 }
@@ -1149,12 +1150,29 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
                 problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
                 problem.setValidatorCommandLine(validatorCommandLine);
+                
+                String inputValidatorCommandLine = fetchValue(map, INPUT_VALIDATOR_COMMAND_LINE_KEY);
+                if (inputValidatorCommandLine != null) {
+                    problem.setInputValidatorCommandLine(inputValidatorCommandLine);
+                }
+
+              
 
                 problemList.addElement(problem);
             }
         }
 
         return (Problem[]) problemList.toArray(new Problem[problemList.size()]);
+    }
+
+    public String getInputValidatorDir(String baseDirectoryName, Problem problem) {
+
+        // from https://clics.ecs.baylor.edu/index.php/Problem_format
+//        squares/input_format_validators/squares_input_checker1.py
+//        squares/input_format_validators/squares_input_checker2/check.c
+//        squares/input_format_validators/squares_input_checker2/data.h
+        
+        return baseDirectoryName + File.separator + problem.getShortName() + File.separator + "input_format_validators"; 
     }
 
     /**
@@ -1457,14 +1475,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     private Problem addClicsValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
-
+  
         problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         
         problem.setReadInputDataFromSTDIN(true);
 
-        if (problem.getValidatorProgramName() == null) {
-            problem.setOutputValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
-        }
+//        problem.setValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
 
         // if we use the internal Java CCS validator use this.
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
@@ -1479,17 +1495,103 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
              * If file is there load it
              */
             if (new File(validatorName).isFile()) {
-                problemDataFiles.setOutputValidatorFile(new SerializedFile(validatorName));
+                problemDataFiles.setInputValidatorFile(new SerializedFile(validatorName));
             }
         } catch (Exception e) {
             throw new YamlLoadException("Unable to load validator for problem " + problem.getShortName() + ": " + validatorName, e);
         }
 
-        // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
+      String inpuFormattValidatorName = findInputValidator(baseDirectoryName, problem);
         
+        try {
+            /**
+             * If file is there load it
+             */
+            if (inpuFormattValidatorName != null && new File(inpuFormattValidatorName).isFile()) {
+                SerializedFile serializedFile = new SerializedFile(inpuFormattValidatorName);
+                problemDataFiles.setInputValidatorFile(serializedFile);
+                problem.setInputValidatorProgramName(serializedFile.getName());
+            }
+        } catch (Exception e) {
+            throw new YamlLoadException("Unable to load input format validator for problem " + problem.getShortName() + ": " + inpuFormattValidatorName, e);
+        }
+
         return problem;
     }
+    
 
+    /**
+     * Get file directory entries with relative dir path
+     *  
+     * @param directory - directory to search and to prepend onto the matching filenames
+     * @return
+     */
+    // SOMEDAY move this to Utilities class
+    
+    public static String[] getFileEntries(String directory) {
+        ArrayList<String> list = new ArrayList<>();
+        File[] files = new File(directory).listFiles();
+
+        for (File file : files) {
+            if (file.isFile()) {
+                list.add(directory + File.separator + file.getName());
+            }
+        }
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    protected String findInputValidator(String baseDirectoryName, Problem problem) {
+
+        String inputValidatorDir = getInputValidatorDir(baseDirectoryName, problem);
+
+        String inputValidatorFilename = null;
+        
+        if (new File(inputValidatorDir).isDirectory()) {
+            // there is a input format validator dir
+
+            // search for validator
+            String[] filenames = getFileEntries(inputValidatorDir);
+
+            if (filenames.length == 1) {
+                // only found one file
+                inputValidatorFilename = filenames[0];
+            } else if (filenames.length > 1){
+
+                ArrayList<String> validatorList = new ArrayList<String>();
+
+                // Loop through files looking for potential validator programs
+
+                for (String name : filenames) {
+                    if ("build".equalsIgnoreCase(name)) {
+                        // Cannot be build 
+                    } else {
+                        
+                        if (Utilities.isExecutableExtension(name)){
+                            validatorList.add(name);
+                        }
+                    }
+                }
+
+                if (validatorList.size() == 1) {
+                    inputValidatorFilename = validatorList.get(0);
+                } else {
+                    
+                    for (String string : validatorList) {
+                        System.out.println("debug 22 "+Utilities.getCurrentDirectory() + File.separator + string);
+                    }
+                    YamlLoadException yex = new YamlLoadException("Too many input format validators found for " + problem.getShortName() + " found " + validatorList.size());
+                    throw yex;
+                }
+            }
+        }
+
+        return inputValidatorFilename;
+    }
+
+
+    
+
+     
     @Override
     public void loadPc2ProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles2, String dataFileName, String answerFileName) {
 

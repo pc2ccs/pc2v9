@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import junit.framework.TestSuite;
 
+import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
@@ -2226,6 +2227,102 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         assertEquals(4.0011122, settings.getFloatAbsoluteTolerance());
         assertEquals(4.0042354, settings.getFloatRelativeTolerance());
+    }
+    
+    /**
+     * Test load input validator command line and validator. 
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testLoadInputValidator() throws Exception {
+        
+//        String inputYamlFilenameOld = getProblemSetYamlTestFileName();
+//        editFile(inputYamlFilenameOld);
+        
+//        String datadir = getDataDirectory();
+//        startExplorer(datadir);
+        
+        String inputDir = getDataDirectory(this.getName());
+        ensureDirectory(inputDir);
+//        startExplorer(inputDir);
+        
+//        short-name: apl
+//        short-name: barcodes
+//        short-name: biobots
+//        short-name: castles
+//        short-name: channel
+
+        String configDir = inputDir + File.separator + IContestLoader.CONFIG_DIRNAME;
+        
+//        startExplorer(configDir);
+        
+        IInternalContest contest = loader.fromYaml(null, configDir);
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+        assertEquals("Number of problems", 5, problems.length);
+
+        String[] validatorNames = { //
+                //
+                
+                "", //
+                "", //
+                "", //
+                "", //
+                "", //
+                "", //
+        };
+        
+        String[] validatorCommandLine = {
+                //
+                "", //
+                "", //
+                "", //
+                "", //
+                "", //
+                "", //
+        };
+        
+//        String INPUT_VALIDATOR_NAME_KEY = "inputValidatorName";
+//        String INPUT_VALIDATOR_COMMAND_LINE_KEY = "inputValidatorCommandLine";
+        
+        int idx = 0;
+        for (Problem problem2 : problems) {
+            assertNotNull("Expected problem short name ", problem2.getShortName());
+            
+            String expectedInputValidatorName = validatorNames[idx];
+            String expectedInputValidatorCommandLine = validatorCommandLine[idx];
+            idx ++;
+           
+            assertEquals("Expected input validator name ", expectedInputValidatorName, problem2.getInputValidatorProgramName());
+            assertEquals("Expected input validator command ", expectedInputValidatorCommandLine, problem2.getInputValidatorCommandLine());
+        }
+    }
+    
+    public void testfindInputValidator() throws Exception {
+        
+        String dataDir = getDataDirectory(this.getName());
+        ensureDirectory(dataDir);
+        
+        String shortDirName = "one";
+        Problem problem = new Problem("Title 1");
+        problem.setShortName(shortDirName);
+        
+        String inputFormatValidatorDir =  snake.getInputValidatorDir(dataDir, problem  ); 
+        ensureDirectory(inputFormatValidatorDir);
+//        startExplorer(inputFormatValidatorDir);
+        
+        String validatorProgramName = snake.findInputValidator(dataDir, problem);
+        
+        String expected = "testdata/ContestSnakeYAMLLoaderTest/testfindInputValidator/one/input_format_validators/one.sh";
+        
+        assertEquals("Expecting input dir name ", expected, toUnixFS(validatorProgramName));
+        
+    }
+
+    private String toUnixFS(String path) {
+        return path.replace('\\', '/');
     }
 }
 
