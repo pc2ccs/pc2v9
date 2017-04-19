@@ -1,18 +1,11 @@
 package edu.csus.ecs.pc2.core.util;
 
-import junit.framework.TestCase;
-
 /**
- * Unit tests for CommaSeparatedValueParser.
+ * Unit tests 
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: CommaSeparatedValueParserTest.java 245 2011-10-02 17:37:03Z laned $
  */
-
-// TODO CLEANUP - uncomment additional tests.
-
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/core/util/CommaSeparatedValueParserTest.java $
-public class CommaSeparatedValueParserTest extends TestCase {
+public class CommaSeparatedValueParserTest extends AbstractTestCase {
 
     private boolean debugMode = false;
 
@@ -27,14 +20,16 @@ public class CommaSeparatedValueParserTest extends TestCase {
     public void testSimpleCSV() {
 
         String[] exampleStrings = { //
-        "foo", // 1
+                // 
+                "foo", // 1
                 ";foo;,;bar;", // 2
                 ";;,;;,;;,;;,;;", // 5 with no spaces after ,
                 ";one;,;two;,;three;", // 3
         };
 
         int[] expectedFieldCounts = { //
-        1, //
+                //
+                1, //
                 2, //
                 5, //
                 3, //
@@ -66,20 +61,20 @@ public class CommaSeparatedValueParserTest extends TestCase {
         }
         
         // There should only be the characters within the double quotes
+        // so the spaces after the , should be trimmed.
         
-        // TODO CLEANUP uncomment and pass this test
-//        field2 = " the second field ";
-//        
-//        actualString = "\"first\",      \""+field2+"\"";
-//        fields = CommaSeparatedValueParser.parseLine(actualString);
-//        
-//        if (debugMode) {
-//            if (!field2.equals(fields[1])) {
-//                System.err.println("Expected '" + field2 + "' got '" + fields[1] + "'");
-//            }
-//        } else {
-//            assertEquals("Expected fields to be identical", field2, fields[1]);
-//        }
+        field2 = " the second field ";
+        
+        String inputString = "\"first\",      \""+field2+"\"";
+        
+        try {
+            fields = CommaSeparatedValueParser.parseLine(inputString);
+            fail("Expecting parsing Exception (expected comma) thrown for '" + inputString + "'");
+        } catch (Exception e) {
+            // expecting exception
+            String expectedMessage = "String missing closing double quote '\"first\",      \" the second field \"'";
+            assertEquals(expectedMessage, e.getMessage());
+        }
     }
 
     /**
@@ -99,7 +94,8 @@ public class CommaSeparatedValueParserTest extends TestCase {
         };
 
         int[] expectedFieldCounts = { //
-        1, //
+                //
+                1, //
                 3, //
         };
 
@@ -110,7 +106,8 @@ public class CommaSeparatedValueParserTest extends TestCase {
     public void testCSVFormal() throws Exception {
 
         String[] exampleStrings = { //
-        "foo", // 1
+                //
+                "foo", // 1
                 ";foo;,;bar;", // 2
                 "foo,bar", // 2
                 "foo,;bar;", // 2
@@ -206,18 +203,6 @@ public class CommaSeparatedValueParserTest extends TestCase {
         }
     }
 
-    private void customAssertFalse(String message, boolean expected) {
-
-        if (!expected) {
-            if (debugMode) {
-                System.err.println(message);
-            } else {
-                assertTrue(message, expected);
-            }
-
-        }
-    }
-
     /**
      * Test missing comma in input string.
      * 
@@ -230,9 +215,10 @@ public class CommaSeparatedValueParserTest extends TestCase {
         String actualString = "\"first\"second";
         try {
             CommaSeparatedValueParser.parseLine(actualString);
-            customAssertFalse("Improper parse, expecting Exception, missing comma", true);
+            fail("Improper parse, expecting Exception, missing comma for "+actualString);
         } catch (Exception e) {
-            ok();
+            String expectedMessage = "String missing closing double quote '\"first\"second'";
+            assertEquals(expectedMessage, e.getMessage());
         }
 
         // Missing command between first and second fields
@@ -240,71 +226,76 @@ public class CommaSeparatedValueParserTest extends TestCase {
         actualString = "first\"second\"";
         try {
             CommaSeparatedValueParser.parseLine(actualString);
-            customAssertFalse("Improper parse, expecting Exception, missing comma", true);
+            fail("Improper parse, expecting Exception, missing comma for "+actualString);
         } catch (Exception e) {
-            ok();
+            String expectedMessage = "String missing closing double quote 'first\"second\"'";
+            assertEquals(expectedMessage, e.getMessage());
         }
     }
 
-    // TODO CLEANUP pass this test
-//    /**
-//     * Missing double quote on field.
-//     * 
-//     * @throws Exception
-//     */
-//    public void testMissingClosingQuotes() throws Exception {
-//
-//        // Missing closing double quote for second field.
-//
-//        String actualString = "\"first\",\"second , \"third field\", \"fourth field\"";
-//        
-//        try {
-//            CommaSeparatedValueParser.parseLine(actualString);
-//            customAssertFalse("Expecting Exception thrown for no closing double quote '" + actualString + "'", false);
-//        } catch (Exception e) {
-//            ok();
-//        }
-//
-//        actualString = "abc,\"fignaught , ponter"; // missing trailing double quote
-//        try {
-//            CommaSeparatedValueParser.parseLine(actualString);
-//            customAssertFalse("Expecting Exception thrown for no closing double quote '" + actualString + "'", false);
-//        } catch (Exception e) {
-//            ok();
-//        }
-//    }
+    /**
+     * Missing double quote on field.
+     * 
+     * @throws Exception
+     */
+    public void testMissingClosingQuotes() throws Exception {
 
-    // TODO CLEANUP pass this test
-//    /**
-//     * Missing commas between fields.
-//     */
-//    public void testMissingClosingQuotesTwo() {
-//
-//        String[] sampleStrings = { //
-//        "first;second;,;third;", // missing comma between first and second
-//                "first,;second;third", // missing comma between second and third
-//        };
-//
-//        for (int i = 0; i < sampleStrings.length; i++) {
-//
-//            String actualString = sampleStrings[i].replaceAll(";", QUOTE);
-//
-//            try {
-//                CommaSeparatedValueParser.parseLine(actualString);
-//                customAssertFalse("Expecting parsing Exception (expected comma) thrown for '" + actualString + "'", false);
-//            } catch (Exception e) {
-//                ok();
-//            }
-//        }
-//    }
+        // Missing closing double quote for second field.
+
+        String actualString = "\"first\",\"second , \"third field\", \"fourth field\"";
+        
+        try {
+            CommaSeparatedValueParser.parseLine(actualString);
+            fail("Expecting Exception thrown for no closing double quote '" + actualString + "'");
+        } catch (Exception e) {
+            String expectedMessage = "String missing closing double quote '\"first\",\"second , \"third field\", \"fourth field\"'";
+            assertEquals(expectedMessage, e.getMessage());
+        }
+
+        actualString = "abc,\"fignaught , ponter"; // missing trailing double quote
+        try {
+            CommaSeparatedValueParser.parseLine(actualString);
+            fail("Expecting Exception thrown for no closing double quote '" + actualString + "'");
+        } catch (Exception e) {
+            
+            String expectedMessage = "String missing closing double quote 'abc,\"fignaught , ponter'";
+            assertEquals(expectedMessage, e.getMessage());
+        }
+    }
 
     /**
-     * Placeholder method to avoid cruise control warnings.
-     * 
+     * Missing commas between fields.
      */
-    // TODO what is the proper way to indicate that a block is a NOP ?
-    private void ok() {
-        assertTrue("Expected Exception", true); // this is valid
+    public void testMissingClosingQuotesTwo() {
+
+        String[] sampleStrings = { //
+                "first;second;,;third;", // missing comma between first and second
+                "first,;second;third", // missing comma between second and third
+        };
+        
+        String [] expected = { //
+                //
+                "String missing closing double quote 'first\"second\",\"third\"'",
+                "String missing closing double quote 'first,\"second\"third'", //
+        };
+
+        for (int i = 0; i < sampleStrings.length; i++) {
+
+            String inputString = sampleStrings[i].replaceAll(";", QUOTE);
+            
+            try {
+                CommaSeparatedValueParser.parseLine(inputString);
+                fail("Expecting parsing Exception (expected comma) thrown for '" + inputString + "'");
+            } catch (Exception e) {
+                String expectedMessage = expected[i];
+//                writeQuotedString("", e.getMessage());
+                assertEquals(expectedMessage, e.getMessage());
+            }
+        }
+    }
+
+    protected void writeQuotedString(String string, String message) {
+        System.out.println(string + "\""+message.replaceAll("\"", "\\\\\"")+"\"");
     }
 
 }

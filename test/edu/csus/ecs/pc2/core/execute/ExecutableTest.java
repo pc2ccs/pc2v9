@@ -547,6 +547,10 @@ public class ExecutableTest extends AbstractTestCase {
      */
     public void testPC2ValidatorIgnoreCaseOption() throws Exception {
         
+        if (isFastJUnitTesting()){
+            return;
+        }
+        
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem to ignore case and use straight "diff" on validation
@@ -598,7 +602,11 @@ public class ExecutableTest extends AbstractTestCase {
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testPC2ValidatorIgnoreWhitespaceOption() throws Exception {
-        
+
+        if (isFastJUnitTesting()){
+            return;
+        }
+
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem to use PC2 Validator with options "ignore case" and use straight "diff" on validation
@@ -649,6 +657,10 @@ public class ExecutableTest extends AbstractTestCase {
      */
     public void testClicsValidatorCaseSensitiveOption() throws Exception {
         
+        if (isFastJUnitTesting()){
+            return;
+        }
+        
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem to ignore case
@@ -697,6 +709,10 @@ public class ExecutableTest extends AbstractTestCase {
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testClicsValidatorSpaceSensitiveOption() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
         
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
@@ -747,6 +763,10 @@ public class ExecutableTest extends AbstractTestCase {
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testClicsValidatorRelativeToleranceOption() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
         
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
@@ -826,6 +846,10 @@ public class ExecutableTest extends AbstractTestCase {
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testClicsValidatorAbsoluteToleranceOption() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
         
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
@@ -1740,6 +1764,11 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     public void testMiddleFailure() throws Exception {
+        
+        if (isFastJUnitTesting()){
+            return;
+        }
+        
         String sumitFilename = getSamplesSourceFilename("wrap_failure.java");
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();

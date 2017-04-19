@@ -6,10 +6,7 @@ import java.util.Vector;
  * CSV Parser.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public final class CommaSeparatedValueParser {
     private static final char COMMA_CHAR = 44;
     private static final String COMMA_STRING = String.valueOf(COMMA_CHAR);
@@ -28,20 +25,31 @@ public final class CommaSeparatedValueParser {
             throw new IllegalArgumentException("null String not allowed");
         }
         
-        String[] array = new String[1];
-        array[0] = "";
-        int fieldCount = 1;
+//        String[] array = new String[1];
+//        array[0] = "";
+//        int fieldCount = 1;
+        
+        /**
+         * Current field content.
+         */
         String currentField = "";
         Vector<String> v = new Vector<String>();
         int i;
+        
+        /**
+         * Parsing position inside a quote.
+         */
+        
         boolean inQuote = false;
         char current;
         char next;
         int length = line.length();
         @SuppressWarnings("unused")
         int ignoredTerminatingQuote = 0; // SOMEDAY can this be removed?
+        
         for (i = 0; i < line.length(); i++) {
             current = line.charAt(i);
+            
             if (current == '"') {
                 if (inQuote) {
                     if (i + 1 >= length) {
@@ -64,6 +72,10 @@ public final class CommaSeparatedValueParser {
                     }
                 } else { // not inquote
                     inQuote = true;
+                    
+                    // remove all text previous to a quote, this 
+                    // is field information between the , and the first "
+                    currentField = "";
                 }
             } else { // not a doublequote
                 if (current == COMMA_CHAR) {
@@ -72,7 +84,7 @@ public final class CommaSeparatedValueParser {
                     } else {
                         // store
                         v.addElement(currentField);
-                        fieldCount++;
+//                        fieldCount++;
                         currentField = "";
                     }
                 } else { // not a comma
@@ -80,23 +92,31 @@ public final class CommaSeparatedValueParser {
                 }
             }
         }
+        
+        if (inQuote){
+            throw new Exception("String missing closing double quote '"+line+"'");
+        }
         // store the last fieldCount
         v.addElement(currentField);
-        array = new String[fieldCount];
-        if (fieldCount != v.size()) {
-            // TODO review this Exception
-            new Exception("Incorrect number of fields (found " +  fieldCount +", but expected " + v.size() + ")");
-        }
-        Object o;
-        for (i = 0; i < v.size(); i++) {
-            o = v.elementAt(i);
-            if (o != null) {
-                array[i] = (String) o;
-            } else {
-                array[i] = "";
-            }
-        }
-        return array;
+        
+        return (String[]) v.toArray(new String[v.size()]);
+        
+      // old code to convert Vector into String[]
+//        array = new String[fieldCount];
+//        if (fieldCount != v.size()) {
+//            // TODO review this Exception
+//            new Exception("Incorrect number of fields (found " +  fieldCount +", but expected " + v.size() + ")");
+//        }
+//        Object o;
+//        for (i = 0; i < v.size(); i++) {
+//            o = v.elementAt(i);
+//            if (o != null) {
+//                array[i] = (String) o;
+//            } else {
+//                array[i] = "";
+//            }
+//        }
+//        return array;
     }
 
     /**
