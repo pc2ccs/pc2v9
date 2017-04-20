@@ -1445,6 +1445,16 @@ public class Problem implements IElementObject {
     }
     
     /**
+     * Returns the number of {@link InputValidationResult}s currently stored in this Problem;
+     */
+    public int getNumInputValidationResults() {
+        if (this.inputValidationResults == null) {
+            this.inputValidationResults = new Vector<InputValidationResult>();
+        }
+        return this.inputValidationResults.size();
+    }
+    
+    /**
      * Adds the specified {@link InputValidationResult} to the current set of Input Validation Results
      * for the Problem.
      * 
