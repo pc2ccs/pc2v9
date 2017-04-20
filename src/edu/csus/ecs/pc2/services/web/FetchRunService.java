@@ -54,8 +54,6 @@ public class FetchRunService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response fetchRun(@PathParam("id") String runID) {
         
-        serverReplied = false;
-        
         //create a dummy hardcoded run for testing
 //        String fakeRun = "[{\"runID\":" + runID + ",\"filename\":\"a.java\",\"content\":\"<base64_string>\"},{\"filename\":\"helper.java\",\"content\":\"<base64_string>\"}]" ;
         
