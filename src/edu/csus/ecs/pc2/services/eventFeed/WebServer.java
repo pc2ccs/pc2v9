@@ -47,6 +47,7 @@ import sun.security.x509.X509CertInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.services.web.FetchRunService;
 import edu.csus.ecs.pc2.services.web.LanguageService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
 import edu.csus.ecs.pc2.services.web.ScoreboardService;
@@ -86,6 +87,8 @@ public class WebServer implements UIPlugin {
     public static final String STARTTIME_SERVICE_ENABLED_KEY = "enableStartTime";
 
     public static final String TEAMS_SERVICE_ENABLED_KEY = "enableTeams";
+    
+    public static final String FETCH_RUN_SERVICE_ENABLED_KEY = "enableFetchRun";
 
     private Properties wsProperties = new Properties();
 
@@ -339,6 +342,11 @@ public class WebServer implements UIPlugin {
         if (getBooleanProperty(TEAMS_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new TeamService(getContest(), getController()));
             showMessage("Starting /teams web service");
+        }
+
+        if (getBooleanProperty(FETCH_RUN_SERVICE_ENABLED_KEY, false)) {
+            resConfig.register(new FetchRunService(getContest(), getController()));
+            showMessage("Starting /fetchRun web service");
         }
 
         return resConfig;

@@ -64,6 +64,7 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox chckbxTeams;
 
     private WebServer webServer = null;
+    private JCheckBox chckbxFetchRuns;
 
     /**
      * Constructs a new WebServerPane.
@@ -157,6 +158,8 @@ public class WebServerPane extends JPanePlugin {
         properties.put(WebServer.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(chckbxStarttime.isSelected()));
 
         properties.put(WebServer.TEAMS_SERVICE_ENABLED_KEY, Boolean.toString(chckbxTeams.isSelected()));
+        
+        properties.put(WebServer.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(chckbxFetchRuns.isSelected()));
 
         getWebServer().startWebServer(getContest(), getController(), properties);
 
@@ -276,6 +279,12 @@ public class WebServerPane extends JPanePlugin {
             gbc_chckbxStarttime.gridx = 1;
             gbc_chckbxStarttime.gridy = 4;
             centerPanel.add(getChckbxStarttime(), gbc_chckbxStarttime);
+            GridBagConstraints gbc_chckbxFetchRuns = new GridBagConstraints();
+            gbc_chckbxFetchRuns.anchor = GridBagConstraints.WEST;
+            gbc_chckbxFetchRuns.insets = new Insets(0, 0, 5, 0);
+            gbc_chckbxFetchRuns.gridx = 2;
+            gbc_chckbxFetchRuns.gridy = 4;
+            centerPanel.add(getChckbxFetchRuns(), gbc_chckbxFetchRuns);
 
         }
         return centerPanel;
@@ -321,6 +330,7 @@ public class WebServerPane extends JPanePlugin {
         getChckbxTeams().setEnabled(!serverRunning);
         getChckbxLanguages().setEnabled(!serverRunning);
         getChckbxStarttime().setEnabled(!serverRunning);
+        getChckbxFetchRuns().setEnabled(!serverRunning);
     }
 
     private JCheckBox getChckbxScoreboard() {
@@ -387,4 +397,11 @@ public class WebServerPane extends JPanePlugin {
         return webServer;
     }
 
+    private JCheckBox getChckbxFetchRuns() {
+        if (chckbxFetchRuns == null) {
+        	chckbxFetchRuns = new JCheckBox("/fetchRun");
+        	chckbxFetchRuns.setSelected(true);
+        }
+        return chckbxFetchRuns;
+    }
 }
