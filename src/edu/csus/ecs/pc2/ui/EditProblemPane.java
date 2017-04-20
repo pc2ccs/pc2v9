@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -2358,40 +2359,60 @@ public class EditProblemPane extends JPanePlugin {
         //default to "files on disk" as file source (the ButtonGroup will automatically de-select the other buttons)
         getFilesOnDiskInFolderRadioButton().setSelected(true);
         
-        //clear the results table
-        //TODO: probably should be saving the results of a previous Input Validation run (if any) in the problem, and loading THOSE here
-        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(null);
+        //update the results table:
+        //get the number of previous results stored in the problem
+        int numResults = prob.getNumInputValidationResults();
+        
+        //create an array with one element for each result
+        InputValidationResult [] prevResults = new InputValidationResult [numResults];
+        
+        //get an iterator over the previous results
+        Iterator<InputValidationResult> prevResultsIter = prob.getInputValidationResults().iterator();
+        
+        //copy each previous result into the array
+        int i=0;
+        while (prevResultsIter.hasNext()){
+            prevResults[i++] = prevResultsIter.next();
+        }
+        
+        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(prevResults);
         ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
         //set the Status message based on the status in the specified problem
         InputValidationStatus problemValidationStatus = prob.getInputValidationStatus();
         Color color ;
         String msg ;
-        switch (problemValidationStatus) {
-            case NOT_TESTED:
-                msg = "<No Input Validation test run yet>";
-                color = Color.BLACK;
-                break;
-            case PASSED:
-                msg = "All input data files PASSED validation";
-                color = Color.GREEN;
-                break;
-            case FAILED:
-                msg = "One or more input data files FAILED validation";
-                color = Color.red;
-                break;
-            case ERROR:
-                msg = "Error occurred during input validation; check logs";
-                color = Color.YELLOW;
-                break;
-            default:
-                msg = "This should never be displayed";
-                color = Color.ORANGE;
+        if (problemValidationStatus == null) {
+            msg = "Internal error: problem validation status is null";
+            color = Color.MAGENTA;
+            getLog().log(Log.SEVERE, "Problem has null Input Validation Status; shouldn't be possible");
+        } else {
+            switch (problemValidationStatus) {
+                case NOT_TESTED:
+                    msg = "<No Input Validation test run yet>";
+                    color = Color.BLACK;
+                    break;
+                case PASSED:
+                    msg = "All input data files PASSED validation";
+                    color = Color.GREEN;
+                    break;
+                case FAILED:
+                    msg = "One or more input data files FAILED validation";
+                    color = Color.red;
+                    break;
+                case ERROR:
+                    msg = "Error occurred during input validation; check logs";
+                    color = Color.YELLOW;
+                    break;
+                default:
+                    msg = "This should never be displayed; please notify PC2 Developers";
+                    color = Color.ORANGE;
+            }
         }
                 
         getInputValidationResultSummaryTextLabel().setText(msg);
         getInputValidationResultSummaryTextLabel().setForeground(color);
-        setInputValidationStatus(prob.getInputValidationStatus());  //note: validation status variable is not displayed on the GUI
+        setInputValidationStatus(problemValidationStatus);  //note: validation status variable is not displayed on the GUI
 
     }
     
