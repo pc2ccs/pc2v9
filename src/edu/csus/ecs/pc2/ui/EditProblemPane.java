@@ -2382,31 +2382,37 @@ public class EditProblemPane extends JPanePlugin {
         InputValidationStatus problemValidationStatus = prob.getInputValidationStatus();
         Color color ;
         String msg ;
-        switch (problemValidationStatus) {
-            case NOT_TESTED:
-                msg = "<No Input Validation test run yet>";
-                color = Color.BLACK;
-                break;
-            case PASSED:
-                msg = "All input data files PASSED validation";
-                color = Color.GREEN;
-                break;
-            case FAILED:
-                msg = "One or more input data files FAILED validation";
-                color = Color.red;
-                break;
-            case ERROR:
-                msg = "Error occurred during input validation; check logs";
-                color = Color.YELLOW;
-                break;
-            default:
-                msg = "This should never be displayed";
-                color = Color.ORANGE;
+        if (problemValidationStatus == null) {
+            msg = "Internal error: problem validation status is null";
+            color = Color.MAGENTA;
+            getLog().log(Log.SEVERE, "Problem has null Input Validation Status; shouldn't be possible");
+        } else {
+            switch (problemValidationStatus) {
+                case NOT_TESTED:
+                    msg = "<No Input Validation test run yet>";
+                    color = Color.BLACK;
+                    break;
+                case PASSED:
+                    msg = "All input data files PASSED validation";
+                    color = Color.GREEN;
+                    break;
+                case FAILED:
+                    msg = "One or more input data files FAILED validation";
+                    color = Color.red;
+                    break;
+                case ERROR:
+                    msg = "Error occurred during input validation; check logs";
+                    color = Color.YELLOW;
+                    break;
+                default:
+                    msg = "This should never be displayed; please notify PC2 Developers";
+                    color = Color.ORANGE;
+            }
         }
                 
         getInputValidationResultSummaryTextLabel().setText(msg);
         getInputValidationResultSummaryTextLabel().setForeground(color);
-        setInputValidationStatus(prob.getInputValidationStatus());  //note: validation status variable is not displayed on the GUI
+        setInputValidationStatus(problemValidationStatus);  //note: validation status variable is not displayed on the GUI
 
     }
     
