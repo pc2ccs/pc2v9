@@ -10,6 +10,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -67,6 +69,7 @@ public class FetchRunService {
         
         run = null;
         try {
+            //search the local list of runs for the requested run
             Run [] runs = contest.getRuns();
             for (int i=0; i<runs.length; i++) {
                 if (runs[i].getNumber() == Integer.parseInt(runID)) {
@@ -74,11 +77,16 @@ public class FetchRunService {
                     break;
                 }
             }
+            //check if we found the requested run in the list or not
             if (run == null) {
+                
                 //not found
                 controller.getLog().log(Log.INFO, "Unable to fetch run " + runID + " from server: not found");
-                return Response.noContent().build();
+                return Response.status(Status.NOT_FOUND).build();
+                
             } else {
+                
+                //we found the run in the list; try getting it from the server
                 controller.getLog().log(Log.INFO, "Requesting run " + runID + " from server");
                 controller.checkOutRun(run, true, false);  //checkoutRun(run, isReadOnlyRequest, isComputerJudgedRequest)
                 
@@ -97,8 +105,17 @@ public class FetchRunService {
 
                     if (run != null && runFiles != null) {
                         controller.getLog().log(Log.INFO, "Returning runFiles: " + runFiles.toString());
-                        return Response.ok(runFiles, MediaType.APPLICATION_JSON).build();
+                        
+                        //map the runFiles object into JSON
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String runFileJSON = objectMapper.writeValueAsString(runFiles);
+                        System.err.println(runFileJSON);
+                        
+                        //return the JSON version of runFiles
+                        return Response.ok(runFileJSON, MediaType.APPLICATION_JSON).build();
+                        
                     } else {
+                        
                         controller.getLog().log(Log.INFO, "Returned run or runFiles was null; returning 'NOT_FOUND'");
                         return Response.status(Status.NOT_FOUND).build();
                     }
