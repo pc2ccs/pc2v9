@@ -10,8 +10,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -21,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.exports.ccs.RunFilesJSON;
 
 
 /**
@@ -106,13 +105,19 @@ public class FetchRunService {
                     if (run != null && runFiles != null) {
                         controller.getLog().log(Log.INFO, "Returning runFiles: " + runFiles.toString());
                         
-                        //map the runFiles object into JSON
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        String runFileJSON = objectMapper.writeValueAsString(runFiles);
-                        System.err.println(runFileJSON);
+                        //map the runFiles object into JSON 
+                        // (the problem with this approach is that it produces JSON for the ENTIRE CLASS, which is not what the CLICS spec requires...)
+//                        ObjectMapper objectMapper = new ObjectMapper();
+//                        String runFileJSON = objectMapper.writeValueAsString(runFiles);
                         
-                        //return the JSON version of runFiles
-                        return Response.ok(runFileJSON, MediaType.APPLICATION_JSON).build();
+                        //use the internal PC2 class to generate a CLICS-specific JSON representation of the RunFiles object
+                        RunFilesJSON jsonGenerator = new RunFilesJSON();
+                        String json = jsonGenerator.createJSON(runFiles);
+
+                        System.err.println(json);
+                        
+                        //return the JSON version of runFiles (the submission files)
+                        return Response.ok(json, MediaType.APPLICATION_JSON).build();
                         
                     } else {
                         
