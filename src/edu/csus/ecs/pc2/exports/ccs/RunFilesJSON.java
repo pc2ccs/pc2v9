@@ -1,8 +1,9 @@
 package edu.csus.ecs.pc2.exports.ccs;
 
-import java.util.Base64;
+
 import java.util.List;
 
+import edu.csus.ecs.pc2.convert.Base64;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
@@ -49,7 +50,8 @@ public class RunFilesJSON {
             buffer.append(",");     
             
             byte[] mainFileBuf = mainFile.getBuffer();
-            String encoded = Base64.getEncoder().encodeToString(mainFileBuf);
+
+            String encoded = Base64.encode(mainFileBuf);
             buffer.append(pair("content", encoded));
             
             buffer.append("}");
@@ -68,7 +70,7 @@ public class RunFilesJSON {
                 buffer.append(",");
 
                 byte[] otherFileBuf = otherFiles[i].getBuffer();
-                String encoded = Base64.getEncoder().encodeToString(otherFileBuf);
+                String encoded = Base64.encode(otherFileBuf);
                 buffer.append(pair("content", encoded));
 
                 buffer.append("}");
