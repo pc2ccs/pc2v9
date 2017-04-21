@@ -87,8 +87,12 @@ public class FetchRunService {
                 
                 //we found the run in the list; try getting it from the server
                 controller.getLog().log(Log.INFO, "Requesting run " + runID + " from server");
+                
                 controller.checkOutRun(run, true, false);  //checkoutRun(run, isReadOnlyRequest, isComputerJudgedRequest)
                 
+                //the following might be better -- but it requires adding "Fetch_Run" permission to the Feeder account (or changing the account defaults).
+//                controller.fetchRun(run);
+               
                 int waitedMS = 0;
                 serverReplied = false;
                 
