@@ -4,17 +4,19 @@ rem Purpose: start pc2 command line submitter/lister
 rem Author : pc2@ecs.csus.edu
 rem $HeadURL$
 
+set params=
+
 rem Windows 2000 and beyond syntax
 set PC2BIN=%~dp0
-if exist %PC2BIN%\pc2env.bat goto :continue
+if exist %PC2BIN%\pc2env.bat goto :loop
 
 rem fallback to path (or current directory)
 set PC2BIN=%0\..
-if exist %PC2BIN%\pc2env.bat goto :continue
+if exist %PC2BIN%\pc2env.bat goto :loop
 
 rem else rely on PC2INSTALL variable
 set PC2BIN=%PC2INSTALL%\bin
-if exist %PC2BIN%\pc2env.bat goto :continue
+if exist %PC2BIN%\pc2env.bat goto :loop
 
 echo.
 echo ERROR: Could not locate scripts.
@@ -25,10 +27,17 @@ echo.
 pause
 goto :end
 
+:loop
+if %1. == . goto :continue
+set params=%params% %1
+shift
+goto :loop
+
 :continue
 call %PC2BIN%\pc2env.bat
+
 set CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
-java -Xms64M -Xmx768M -cp %pc2_classpath% %CLASSNAME% %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Xms64M -Xmx768M -cp %pc2_classpath% %CLASSNAME% %params%
 
 :end
 rem eof pc2submit.bat $Id$
