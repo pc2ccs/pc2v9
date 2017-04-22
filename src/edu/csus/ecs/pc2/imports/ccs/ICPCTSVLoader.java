@@ -48,6 +48,9 @@ public final class ICPCTSVLoader {
     // 7 Country USA string ISO 3166-1 alpha-3
 
     private static final int TEAM_TSV_FIELDS = 7;
+    // plus 
+    // 8 institute id "INST-" + integer
+    private static final int TEAM2_TSV_FIELDS = 8;
 
     // From CCS Specification
 
@@ -122,7 +125,7 @@ public final class ICPCTSVLoader {
             // fields = lines[i].split("\t");
             fields = TabSeparatedValueParser.parseLine(lines[i]);
 
-            if (fields.length != TEAM_TSV_FIELDS && i == 1) {
+            if (!(fields.length == TEAM_TSV_FIELDS || fields.length == TEAM2_TSV_FIELDS) && i == 1) {
                 throw new InvalidFileFormat("Expected " + TEAM_TSV_FIELDS + " fields, found " + fields.length + " is this a valid team.tsv file? (" + filename + ")");
             }
 
@@ -136,8 +139,8 @@ public final class ICPCTSVLoader {
 
     private static Account accountFromFields(String[] fields, int accountCount, String originalLine) throws InvaildNumberFields, InvalidValueException {
         
-        if (fields.length != TEAM_TSV_FIELDS) {
-            throw new InvaildNumberFields("Expected " + TEAM_TSV_FIELDS + " fields, found " + fields.length + " invalid team.tsv line: " + originalLine);
+        if (!(fields.length == TEAM_TSV_FIELDS || fields.length == TEAM2_TSV_FIELDS)) {
+            throw new InvaildNumberFields("Expected " + TEAM_TSV_FIELDS + " (or "+ TEAM2_TSV_FIELDS + ") fields, found " + fields.length + " invalid team.tsv line: " + originalLine);
         }
         
         int fieldnum = 0;
@@ -148,6 +151,10 @@ public final class ICPCTSVLoader {
         String schoolName = fields[fieldnum++];
         String schoolShortName = fields[fieldnum++];
         String countryCode = fields[fieldnum++];
+        String institutionCode = "";
+        if (fields.length == TEAM2_TSV_FIELDS) {
+            institutionCode = fields[fieldnum++];
+        }
 
         // 1 Team number 22 integer
         // 2 Reservation ID 24314 integer
@@ -191,6 +198,9 @@ public final class ICPCTSVLoader {
         account.setTeamName(teamName);
         account.setExternalId(reservationIdStr);
         account.setCountryCode(countryCode);
+        if (institutionCode.equals("")) {
+            account.setInstitutionCode(institutionCode);
+        }
         
         if (groupNumber != 0){
             /**

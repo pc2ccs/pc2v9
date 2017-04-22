@@ -54,6 +54,15 @@ public class ICPCTSVLoaderTest extends AbstractTestCase {
 
     }
 
+    public void testTeams2load() throws Exception {
+        String groupFile = "systest11.groups.tsv";
+        String teamFileName = "systest11.teams.tsv";
+        ICPCTSVLoader.loadGroups(findTestDataFile(groupFile));
+        Account[] accounts = ICPCTSVLoader.loadAccounts(findTestDataFile(teamFileName));
+        
+        assertNotEquals("Missing InstituionCode", "", accounts[0].getInstitutionCode());
+    }
+    
     public void testNegativeTeamLoad() throws Exception {
 
         try {
