@@ -1,0 +1,175 @@
+#!/usr/bin/python3
+
+import urllib.request
+import base64
+import ssl
+import sys
+import json
+import argparse
+import csv
+import time
+import tempfile
+import os
+import sqlite3
+import subprocess
+import shutil
+
+# TODO customize here
+# TODO these really should be in a config file
+# set to "" on unix
+pc2submitpath="\\pc2-9.5build\\bin\\"
+pc2submitbat=".bat"
+host="localhost"
+user="admin"
+password="adm1n"
+httpsport=8443
+# done customizing
+
+PC2SUBMIT_SUCCESS_EXIT_CODE = 5
+# key=teamnum (as string) value=password dictionary
+# populated by load_accounts
+accounts = {}
+existing = {}
+problemslabelshortname = {}
+problems = {}
+languages = {}
+def load_accounts(file):
+   with open(file, "r") as fh:
+      for line in csv.reader(fh, dialect="excel-tab"):
+        if line[0] == "team":
+          password = line[3]
+          teamnum = line[2][5:].lstrip('0')
+          # note this stores the key as a string
+#          accounts[teamnum] = '"{0}"'.format(password)
+          accounts[teamnum] = password
+
+def load_problems(file):
+   with open(file, "r") as fh:
+      for line in fh:
+        if 'letter: ' in line:
+          letter = line[line.index(':')+1:-1].lstrip(" ")
+        if 'short-name: ' in line:
+          shortname = line[line.index(':')+1:-1].lstrip(" ")
+          problemslabelshortname[letter]=shortname
+
+
+"""
+Converts time like 0:03:07.756 outputting the time in milliseconds
+"""
+def convert_time(intime):
+  # input line 0:03:07.756
+  index = intime.index(':')
+  hour = int(intime[0:index],10)
+  intime = intime[index+1:]
+  index = intime.index(':') 
+  minute = int(intime[0:index],10)
+  intime = intime[index+1:]
+  index = intime.index('.') 
+  second = int(intime[0:index],10)
+  intime = intime[index+1:]
+  millisec = int(intime)
+  return((((hour*60+minute)*60)+second)*1000+millisec)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', action="store_true", help="clean db, import all runs")
+parser.add_argument('cdp_dir', help="cdp dir with config subdir")
+args = parser.parse_args()
+load_accounts(args.cdp_dir+"/config/accounts.tsv")
+load_problems(args.cdp_dir+"/config/problemset.yaml")
+
+authKey = base64.b64encode(str.encode("{0}:{1}".format(user,password)))
+url="https://{0}:{1}/contest".format(host,httpsport)
+headers = {"Content-Type":"application/json", "Authorization":"Basic {0}".format(authKey.decode())}
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
+def get_files(id):
+   file_args = "-m"         
+   files=""
+   file_url="https://{0}:{1}/submissionFiles/{2}".format(host, httpsport, id)
+   file_req = urllib.request.Request(file_url, headers=headers)
+   file_response = urllib.request.urlopen(file_req, context=ctx)
+   for line in file_response:
+      # remove [] from front/back
+      fjj = json.loads(line[1:-1])
+      if 'filename' not in fjj:
+         print('Error missing filename')
+         continue
+      filename = fjj['filename']
+      content = fjj['content']
+      open(filename,'wb').write(base64.b64decode(content))
+      # TODO handle spaces in filename
+      files  = files + ' ' + filename
+      file_args = file_args+' '+filename
+   if files:
+      file_args = file_args+files
+   return(file_args)
+
+
+with tempfile.TemporaryDirectory() as tmpdirname:
+  olddir=os.getcwd()
+  try:
+    shutil.copy("pc2v9.ini", tmpdirname)
+  except:
+     print("Could not copy pc2v9.ini from {} to {}".format(olddir, tmpdirname))
+  os.chdir(tmpdirname)
+  req = urllib.request.Request(url, headers=headers)
+  response = urllib.request.urlopen(req, context=ctx)
+  i = 0
+  for line in response:
+     i = i + 1
+     try:
+       # line is byte string ending with \n
+       # decode seems add another \n too, strip it
+       lineString=(line.decode('UTF-8')[0:-1])
+       jj = json.loads(line)
+       if 'info' in jj:
+          contestid = jj['info']['id']
+          conn = sqlite3.connect(olddir+"/"+contestid+'.db')
+          curs = conn.cursor()
+          try:
+            curs.execute('''CREATE TABLE IF NOT EXISTS runs (runid text);''')
+            if args.c:
+              curs.execute("DELETE FROM runs;")
+            for row in curs.execute("SELECT * FROM runs;"):
+              existing[row[0]]=1
+          except Exception as e:
+            print(e)
+       if 'problem' in jj:
+          problemid = jj['problem']['id']
+          problemlabel = jj['problem']['label']
+          problemname = jj['problem']['name']
+          shortname = problemslabelshortname[problemlabel]
+          problems[problemid]=shortname
+       if 'language' in jj:
+          languageid = jj['language']['id']
+          languagename = jj['language']['name']
+          languages[languageid]=languagename
+       if 'submission' in jj:
+           runid =  jj['submission']['label']
+           if runid in existing:
+             print("skipping {0}, already done".format(runid))
+             continue
+           teamid = jj['submission']['team-id']
+           contesttime = jj['submission']['contest-time']
+           time = convert_time(contesttime)
+           problemid = jj['submission']['problem-id']
+           languageid = jj['submission']['language-id']
+           file_args = get_files(runid)
+           command = "{}pc2submit{} -p {} -l {} -u {} -t {} -i {} -w {} {}".format(pc2submitpath, pc2submitbat, problems[problemid], languages[languageid], teamid, time, runid, accounts[teamid],file_args)
+           proc = subprocess.run(command.split(), shell=False, stdout=subprocess.PIPE) 
+           if proc.returncode == PC2SUBMIT_SUCCESS_EXIT_CODE:
+             print("Submitted runid {}".format(runid))
+             curs.execute('''INSERT INTO runs VALUES ({0});'''.format(runid))
+           else:
+             print("Warning: problem running {}, returned code {} output '{}'".format(command, proc.returncode, proc.stdout.decode("unicode_escape")))
+     except UnicodeDecodeError as e:
+       print("Error with {0}".format(line))
+       print(e, end='', flush=True)
+  if conn:
+    conn.commit()
+  os.chdir(olddir)
+  sys.exit(0)
+
+# :syntax=python
