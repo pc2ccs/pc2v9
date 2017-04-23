@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -315,5 +316,31 @@ public final class ICPCTSVLoader {
         }
 
         return groups;
+    }
+
+    public static HashMap<Integer, String> loadPasswordsFromAccountsTSV(String filename) throws Exception {
+        String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
+
+        HashMap<Integer, String> passwordMap = new HashMap<Integer, String>();
+        // do not care about the first line (line 0), so start with 1
+        for (int i = 1; i < lines.length; i++) {
+            String[] fields = TabSeparatedValueParser.parseLine(lines[i]);
+            if (fields[0].equals("team")) {
+                // need to parse the number out of team-\d\d\d in field 2 and the password from field 3
+                String account = fields[2];
+                int dash = account.indexOf('-');
+                if (dash > 0) {
+                    account = account.substring(dash + 1);
+                } else {
+                    account = account.substring(5);
+                }
+                System.err.println("for " + fields[2] + " found acount number '" + account + "'");
+                Integer number = new Integer(account);
+                String password = fields[3];
+                passwordMap.put(number, password);
+            }
+
+        }
+        return passwordMap;
     }
 }

@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.imports;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -36,6 +37,8 @@ public class LoadICPCTSVData implements UIPlugin {
 
     public static final String GROUPS_FILENAME = "groups.tsv";
 
+    private static final String ACCOUNTS_FILENAME = "accounts.tsv";
+
     private String teamsFilename = "";
 
     private String groupsFilename = "";
@@ -43,6 +46,8 @@ public class LoadICPCTSVData implements UIPlugin {
     private IInternalContest contest;
 
     private IInternalController controller;
+
+    private String accountsFilename = "";
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
@@ -83,6 +88,21 @@ public class LoadICPCTSVData implements UIPlugin {
             }
             
             Account[] accounts = ICPCTSVLoader.loadAccounts(teamsFilename);
+            if (!accountsFilename.equals("")) {
+                System.err.println("got accounts.tsv as "+accountsFilename);
+                HashMap<Integer, String> passwordMap = ICPCTSVLoader.loadPasswordsFromAccountsTSV(accountsFilename);
+                if (!passwordMap.isEmpty()) {
+                    for (int i = 0; i < accounts.length; i++) {
+                        Account account = accounts[i];
+                        int clientNumber = account.getClientId().getClientNumber();
+                        System.err.println("Updating team "+clientNumber);
+                        String password = passwordMap.get(new Integer(clientNumber));
+                        account.setPassword(password);
+                    }
+                }
+            } else {
+                System.err.println("accounts.tsv filename is empty still");
+            }
 
             int result = JOptionPane.YES_OPTION;
 
@@ -234,11 +254,15 @@ public class LoadICPCTSVData implements UIPlugin {
         if (filename.endsWith(TEAMS_FILENAME)) {
             teamsFilename = filename;
             groupsFilename = filename;
+            accountsFilename = filename;
             groupsFilename = groupsFilename.replaceFirst(TEAMS_FILENAME, GROUPS_FILENAME);
+            accountsFilename = accountsFilename.replaceFirst(TEAMS_FILENAME, ACCOUNTS_FILENAME);
         } else if (filename.endsWith(GROUPS_FILENAME)) {
             teamsFilename = filename;
             groupsFilename = filename;
+            accountsFilename = filename;
             teamsFilename = teamsFilename.replaceFirst(GROUPS_FILENAME, TEAMS_FILENAME);
+            accountsFilename = accountsFilename.replaceFirst(GROUPS_FILENAME, ACCOUNTS_FILENAME);
         } else {
             throw new Exception("Must select either " + TEAMS_FILENAME + " or " + GROUPS_FILENAME);
         }
