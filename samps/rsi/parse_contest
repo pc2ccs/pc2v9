@@ -58,16 +58,24 @@ Converts time like 0:03:07.756 outputting the time in milliseconds
 """
 def convert_time(intime):
   # input line 0:03:07.756
+  # or
+  # input line 0:03:07
   index = intime.index(':')
   hour = int(intime[0:index],10)
   intime = intime[index+1:]
   index = intime.index(':') 
   minute = int(intime[0:index],10)
   intime = intime[index+1:]
-  index = intime.index('.') 
-  second = int(intime[0:index],10)
-  intime = intime[index+1:]
-  millisec = int(intime)
+  # . is optional so find instead of index to avoid valueError
+  index = intime.find('.')
+  second = 0
+  millisec = 0
+  if index == -1:
+     second = int(intime[0:],10)
+  else:
+     second = int(intime[0:index],10)
+     intime = intime[index+1:]
+     millisec = int(intime)
   return((((hour*60+minute)*60)+second)*1000+millisec)
 
 parser = argparse.ArgumentParser()
@@ -92,9 +100,10 @@ def get_files(id):
    file_response = urllib.request.urlopen(file_req, context=ctx)
    for line in file_response:
       # remove [] from front/back
-      fjj = json.loads(line[1:-1])
+      # decode() was needed on my mac
+      fjj = json.loads(line[1:-1].decode())
       if 'filename' not in fjj:
-         print('Error missing filename')
+         print('Error missing filename for id {}'.format(id))
          continue
       filename = fjj['filename']
       content = fjj['content']
@@ -126,7 +135,7 @@ with tempfile.TemporaryDirectory() as tmpdirname:
        jj = json.loads(line)
        if 'info' in jj:
           contestid = jj['info']['id']
-          conn = sqlite3.connect(olddir+"/"+contestid+'.db')
+          conn = sqlite3.connect(olddir+"/"+contestid+'.db', isolation_level=None)
           curs = conn.cursor()
           try:
             curs.execute('''CREATE TABLE IF NOT EXISTS runs (runid text);''')
@@ -168,7 +177,7 @@ with tempfile.TemporaryDirectory() as tmpdirname:
        print("Error with {0}".format(line))
        print(e, end='', flush=True)
   if conn:
-    conn.commit()
+    conn.close()
   os.chdir(olddir)
   sys.exit(0)
 
