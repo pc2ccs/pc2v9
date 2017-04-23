@@ -334,7 +334,6 @@ public final class ICPCTSVLoader {
                 } else {
                     account = account.substring(5);
                 }
-                System.err.println("for " + fields[2] + " found acount number '" + account + "'");
                 Integer number = new Integer(account);
                 String password = fields[3];
                 passwordMap.put(number, password);

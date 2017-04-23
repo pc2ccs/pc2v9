@@ -89,13 +89,11 @@ public class LoadICPCTSVData implements UIPlugin {
             
             Account[] accounts = ICPCTSVLoader.loadAccounts(teamsFilename);
             if (!accountsFilename.equals("")) {
-                System.err.println("got accounts.tsv as "+accountsFilename);
                 HashMap<Integer, String> passwordMap = ICPCTSVLoader.loadPasswordsFromAccountsTSV(accountsFilename);
                 if (!passwordMap.isEmpty()) {
                     for (int i = 0; i < accounts.length; i++) {
                         Account account = accounts[i];
                         int clientNumber = account.getClientId().getClientNumber();
-                        System.err.println("Updating team "+clientNumber);
                         String password = passwordMap.get(new Integer(clientNumber));
                         account.setPassword(password);
                     }
