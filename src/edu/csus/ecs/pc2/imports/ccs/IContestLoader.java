@@ -31,6 +31,7 @@ public interface IContestLoader {
     
     String DEFAULT_PROBLEM_LATEX_FILENAME = "problem.tex";
 
+    String DEFAULT_SYSTEM_YAML_FILENAME = "system.yaml";
     
     // CDP directories
     
@@ -100,6 +101,8 @@ public interface IContestLoader {
     String PROBLEM_INPUT_KEY = "input";
 
     String AUTO_JUDGE_KEY = "auto-judging";
+
+    String CCS_TEST_MODE = "ccs-test-mode";
 
     String INPUT_KEY = "input";
 

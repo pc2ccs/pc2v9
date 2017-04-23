@@ -122,11 +122,36 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String[] contents;
         String contetYamlFilename = getContestYamlFilename(directoryName);
         try {
+            // TODO would it be easier to load all yaml files instead?
             contents = loadFileWithIncludes(directoryName, contetYamlFilename);
+            contetYamlFilename = DEFAULT_SYSTEM_YAML_FILENAME;
+            if (new File(directoryName + File.separator + contetYamlFilename).exists()) {
+                String[] lines = Utilities.loadFile(directoryName + File.separator + contetYamlFilename);
+                contents = concat(contents, lines);
+            }
+            contetYamlFilename = DEFAULT_PROBLEM_SET_YAML_FILENAME;
+            if (new File(directoryName + File.separator + contetYamlFilename).exists()) {
+                String[] lines = Utilities.loadFile(directoryName + File.separator + contetYamlFilename);
+                contents = concat(contents, lines);
+            }
+            contetYamlFilename = "system.pc2.yaml";
+            if (new File(directoryName + File.separator + contetYamlFilename).exists()) {
+                String[] lines = Utilities.loadFile(directoryName + File.separator + contetYamlFilename);
+                contents = concat(contents, lines);
+            }
         } catch (IOException e) {
             throw new YamlLoadException(e.getMessage(), e, contetYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
+    }
+
+    private String[] concat(String[] a, String[] b) {
+        int aLen = a.length;
+        int bLen = b.length;
+        String[] c = new String[aLen + bLen];
+        System.arraycopy(a, 0, c, 0, aLen);
+        System.arraycopy(b, 0, c, aLen, bLen);
+        return c;
     }
 
     private String getContestYamlFilename(String directoryName) {
@@ -216,6 +241,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private void setTitle(IInternalContest contest, String title) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setContestTitle(title);
+    }
+
+    private void setCcsTestMode(IInternalContest contest, boolean ccsTestMode) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setCcsTestMode(ccsTestMode);
     }
 
     /**
@@ -325,6 +355,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String contestTitle = fetchValue(content, CONTEST_NAME_KEY);
         if (contestTitle != null) {
             setTitle(contest, contestTitle);
+        }
+
+        boolean ccsTestMode = fetchBooleanValue(content, CCS_TEST_MODE, false);
+        if (ccsTestMode) {
+            setCcsTestMode(contest, ccsTestMode);
         }
 
         String judgeCDPath = fetchValue(content, JUDGE_CONFIG_PATH_KEY);
