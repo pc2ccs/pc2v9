@@ -38,6 +38,8 @@ call %PC2BIN%\pc2env.bat
 
 set CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
 java -Xms64M -Xmx768M -cp %pc2_classpath% %CLASSNAME% %params%
+rem without the exit /b the errorlevel does not get returned properly
+exit /b %errorlevel%
 
 :end
 rem eof pc2submit.bat $Id$
