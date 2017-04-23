@@ -16,7 +16,7 @@ import shutil
 
 # TODO customize here
 # TODO these really should be in a config file
-# set to "" on unix
+# set to "" if in path, otherwise full path
 pc2submitpath="\\pc2-9.5build\\bin\\"
 pc2submitbat=".bat"
 host="localhost"
@@ -132,7 +132,7 @@ with tempfile.TemporaryDirectory() as tmpdirname:
        # line is byte string ending with \n
        # decode seems add another \n too, strip it
        lineString=(line.decode('UTF-8')[0:-1])
-       jj = json.loads(line)
+       jj = json.loads(line.decode())
        if 'info' in jj:
           contestid = jj['info']['id']
           conn = sqlite3.connect(olddir+"/"+contestid+'.db', isolation_level=None)
