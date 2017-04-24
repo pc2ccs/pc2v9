@@ -267,7 +267,7 @@ public class Problem implements IElementObject {
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
         clone.setTimeOutInSeconds(getTimeOutInSeconds());
         
-        //validator settings
+        //output validator settings
         clone.setValidatorType(this.getValidatorType());
         
         if (this.getPC2ValidatorSettings()!=null) {
@@ -286,11 +286,13 @@ public class Problem implements IElementObject {
             clone.setCustomValidatorSettings(null);
         }
         
+        //input validator settings
         clone.setProblemHasInputValidator(this.isProblemHasInputValidator());
         clone.setInputValidationStatus(this.getInputValidationStatus());
         clone.setInputValidatorCommandLine(StringUtilities.cloneString(this.getInputValidatorCommandLine()));
         clone.setInputValidatorProgramName(StringUtilities.cloneString(this.getInputValidatorProgramName()));
-
+        clone.setInputValidatorFilesOnDiskFolder(this.getInputValidatorFilesOnDiskFolder());
+        
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
         // TODO Implement Commands to be executed before a problem is run
