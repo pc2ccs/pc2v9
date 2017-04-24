@@ -118,7 +118,7 @@ public class FetchRunService {
                         RunFilesJSON jsonGenerator = new RunFilesJSON();
                         String json = jsonGenerator.createJSON(runFiles);
 
-                        System.err.println(json);
+//                        System.err.println(json);
                         
                         //return the JSON version of runFiles (the submission files)
                         return Response.ok(json, MediaType.APPLICATION_JSON).build();
