@@ -293,6 +293,12 @@ public class Problem implements IElementObject {
         clone.setInputValidatorProgramName(StringUtilities.cloneString(this.getInputValidatorProgramName()));
         clone.setInputValidatorFilesOnDiskFolder(this.getInputValidatorFilesOnDiskFolder());
         
+        //input validator results (which might be empty)
+        Iterable <InputValidationResult> inputValidationResults = this.getInputValidationResults();
+        for (InputValidationResult ivr : inputValidationResults) {
+            clone.addInputValidationResult(ivr);
+        }
+        
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
         // TODO Implement Commands to be executed before a problem is run
