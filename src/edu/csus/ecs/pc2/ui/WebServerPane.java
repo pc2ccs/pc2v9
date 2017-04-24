@@ -399,7 +399,7 @@ public class WebServerPane extends JPanePlugin {
 
     private JCheckBox getChckbxFetchRuns() {
         if (chckbxFetchRuns == null) {
-        	chckbxFetchRuns = new JCheckBox("/fetchRun");
+        	chckbxFetchRuns = new JCheckBox("/submission_files");
         	chckbxFetchRuns.setSelected(true);
         }
         return chckbxFetchRuns;
