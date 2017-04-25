@@ -216,24 +216,9 @@ public class RunInputValidatorsPane extends JPanePlugin  {
         //get the currently-defined problems
         Problem [] probs = getContest().getProblems();
         
-        if (probs == null) {
-            System.err.println ("Probs is null");
-        } else {
-            System.err.println("Number of Probs = " + probs.length + ":");
-            for (int i=0; i<probs.length; i++) {
-                System.err.println ("  " + probs[i].toStringDetails());
-            }
-        }
         //get the Input Validation Results for each problem (note that this could be empty for any given problem, or all problems)
         Vector<Vector<InputValidationResult>> tableData = getInputValidationResultsTableData(probs);
-        
-        System.err.println ("\nIn RunInputValidatorsPane.populateGUI(): Table Data returned from getInputValidationResultsTableData():");
-        for (int i=0; i<tableData.size(); i++) {
-            for (int j=0; j<tableData.get(i).size(); j++) {
-                System.err.println ("[" + i + "][" + j + "]: " + tableData.get(i).get(j));
-            }
-        }
-       
+               
         //put the table data into the table model
         ((AllProblemsInputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(tableData);
         
@@ -247,11 +232,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
         
         Vector<Vector<InputValidationResult>> tableData = new Vector<Vector<InputValidationResult>> ();
         
-        System.err.println ("\nIn RunInputValidatorsPane.getInputValidationResultsTableData(): ");
-        
         for (int row=0; row<probs.length; row++) {
-            
-            System.err.println ("  Problem " + probs[row] + ": Input Validation Results:  ");
             
             //add a new (empty) "row" to the temp table
             tableData.add(new Vector<InputValidationResult>());
@@ -259,7 +240,6 @@ public class RunInputValidatorsPane extends JPanePlugin  {
             //add each result for the current problem to the current row
             for (InputValidationResult result : probs[row].getInputValidationResults()) {
                 
-                System.err.print (result + ";  ");
                 tableData.get(row).add(result);  //do we need to clone the InputValidationResult? 
             }         
         }
