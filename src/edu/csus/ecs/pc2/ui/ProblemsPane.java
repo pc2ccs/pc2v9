@@ -388,7 +388,6 @@ public class ProblemsPane extends JPanePlugin {
         
         if (problems.length > 0 ) {
             getRunInputValidatorsButton().setEnabled(true);
-            System.out.println ("RunInputValidators button enabled in ProblemsPane.reloadListBox()");
         } else {
             getRunInputValidatorsButton().setEnabled(false);
         }
