@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -55,6 +56,34 @@ public class RunList implements Serializable {
     
     public RunList() {
         saveToDisk = false;
+        nextRunNumber = getINIBaseRunNumber();
+       
+    }
+
+    private int getINIBaseRunNumber() {
+        int retVal ;
+        if (IniFile.isFilePresent()) {
+            try {
+                String baseNum = IniFile.getValue("server.baseRunNumber") ;
+                if (baseNum == null || baseNum.equals("")) {
+                    retVal = 1; 
+                } else {
+                    //SOMEDAY: remove the following line and log a message instead
+                    System.out.println ("Found server.baseRunNumber in .ini file: '" + baseNum + "'");
+                    retVal = Integer.parseInt(baseNum);
+                    if (retVal < 1) {
+                        throw new NumberFormatException("Negative base not allowed: " + baseNum);
+                    }
+                }
+            } catch (NumberFormatException e) {
+                System.err.println ("Illegal base run number value in INI file: '" + IniFile.getValue("server.baseRunNumber") + "'");
+                retVal = 1;
+            }
+        } else {
+            retVal = 1;
+        }
+        
+        return retVal;
     }
 
     /**
@@ -63,6 +92,7 @@ public class RunList implements Serializable {
      * @param dirname
      */
     public RunList(IStorage storage) {
+        this();
         this.storage = storage;
         saveToDisk = true;
     }
@@ -161,7 +191,7 @@ public class RunList implements Serializable {
      */
     public void clear() throws IOException, ClassNotFoundException, FileSecurityException {
         runHash = new Hashtable<String, Run>(200);
-        nextRunNumber = 1;
+        nextRunNumber = getINIBaseRunNumber();
         writeToDisk();
 
     }
