@@ -63,15 +63,28 @@ public class FetchRunService {
             return Response.status(Status.FORBIDDEN).build();
         }
 
-        //create a dummy hardcoded run for testing
-//        String fakeRun = "[{\"runID\":" + runID + ",\"filename\":\"a.java\",\"content\":\"<base64_string>\"},{\"filename\":\"helper.java\",\"content\":\"<base64_string>\"}]" ;
+        //make sure we got a valid integer runID
+        int intRunID ;
+        if (runID == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Missing runID parameter").build();
+        } else {
+            try {
+                intRunID = Integer.parseInt(runID);
+                if (intRunID <= 0) {
+                    return Response.status(Status.BAD_REQUEST).entity("Invalid runID (must be positive)").build();
+                }
+            } catch (NumberFormatException e) {
+                return Response.status(Status.BAD_REQUEST).entity("Malformed runID").build();
+            }
+        }
         
+        //if we get here we know the user has provided a valid runID greater than zero
         run = null;
         try {
             //search the local list of runs for the requested run
             Run [] runs = contest.getRuns();
             for (int i=0; i<runs.length; i++) {
-                if (runs[i].getNumber() == Integer.parseInt(runID)) {
+                if (runs[i].getNumber() == intRunID) {
                     run = runs[i];
                     break;
                 }
