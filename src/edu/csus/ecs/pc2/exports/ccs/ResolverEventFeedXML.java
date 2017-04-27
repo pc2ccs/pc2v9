@@ -577,9 +577,10 @@ public class ResolverEventFeedXML {
 //  </team>
         
         int teamId =  account.getClientId().getClientNumber();
+        String teamIdString =  useDefaultIfEmpty(account.getExternalId(), "4242" + teamId);
         
         XMLUtilities.addChild(memento, "external-id", useDefaultIfEmpty(account.getExternalId(), "4242" + teamId));
-        XMLUtilities.addChild(memento, "id", teamId);
+        XMLUtilities.addChild(memento, "id", teamIdString);
         XMLUtilities.addChild(memento, "name", account.getDisplayName());
         
         XMLUtilities.addChild(memento, "nationality", account.getCountryCode());
@@ -841,8 +842,11 @@ public class ResolverEventFeedXML {
 //    <time>2872.860</time>
 //    <timestamp>1414215455.740</timestamp>
 //  </run
+        
+        Account acct = contest.getAccount(run.getSubmitter());
 
-        XMLUtilities.addChild(memento, "team",  run.getSubmitter().getClientNumber());
+//        XMLUtilities.addChild(memento, "team",  run.getSubmitter().getClientNumber());
+        XMLUtilities.addChild(memento, "team",  acct.getExternalId());
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(run.getElapsedMS()));
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
 
