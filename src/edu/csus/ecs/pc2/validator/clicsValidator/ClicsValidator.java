@@ -301,7 +301,7 @@ public class ClicsValidator {
                                 outputFailure(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: judge's answer contains '" + printableString(judgeByte) 
                                     + "' but team's output contains '" + printableString(teamByte) + "'");
                             } catch (Exception e) {
-                                System.err.println ("ClicsValidator: " + "Error outputting validator feedback answer file");
+                                System.err.println ("ClicsValidator: " + "Error outputing validator feedback answer file");
                                 return CLICS_VALIDATOR_ERROR_EXIT_CODE;                                                                            
                             }
                             return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
@@ -316,7 +316,7 @@ public class ClicsValidator {
                             outputFailure(CLICS_INCORRECT_OUTPUT_FORMAT_MSG, "Space change error: team's output contains extra whitespace char '" 
                                     + printableString((byte)teamOutputPushbackIS.read()) + "'");
                         } catch (Exception e) {
-                            System.err.println ("ClicsValidator: " + "Error outputting validator feedback answer file");
+                            System.err.println ("ClicsValidator: " + "Error outputing validator feedback answer file");
                             return CLICS_VALIDATOR_ERROR_EXIT_CODE;                                            
                         }
                         return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
@@ -328,7 +328,7 @@ public class ClicsValidator {
                 }
             } //end if isSpaceSensitive
                     
-            //if we get here, either we're not in case-sensitive mode, or we are but the above code has stripped matching leading whitespace
+            //if we get here, either we're not in space-sensitive mode, or we are but the above code has stripped matching leading whitespace
             // from both the judge's answer and the team's output streams; in either case we're ready to compare the next things in the streams.
             
             //make sure the judge isn't at EOF (because if so there's nothing left to compare)
@@ -368,27 +368,46 @@ public class ClicsValidator {
                 return CLICS_VALIDATOR_ERROR_EXIT_CODE;
             }
             
-            //go back and skip the next whitespace (if in case-sensitive mode), then process the next token
+            //go back and skip the next whitespace (if not in space-sensitive mode), then process the next token
             
         }//end while(true) 
         
-        //we get here when there's no more input in the judge's answer stream
-        //check if team is at EOF
-        try {
-            if (teamOutputPushbackIS.read()!= EOF) {
+        //we get here when there's no more input in the judge's answer stream;
+        //check if the team is also at EOF
+        if (peek(teamOutputPushbackIS) != EOF) {
+
+            // the team is not at EOF; get whatever's next in the team output (note that getNextToken() skips leading whitespace, if any...)
+            String nextTeamToken = getNextToken(teamOutputPushbackIS);
+
+            //check if the team output contained anything more other than whitespace
+            if (nextTeamToken != null && !nextTeamToken.equals("")) {
+                // the team has trailing non-whitespace output
                 try {
-                    outputFailure(CLICS_EXCESSIVE_OUTPUT_MSG, "Team has trailing output beyond what judge answer file contains");
+                    outputFailure(CLICS_EXCESSIVE_OUTPUT_MSG, "Excessive output: '" + nextTeamToken + "'");
                 } catch (Exception e) {
-                    System.err.println ("ClicsValidator: " + "Error outputting validator feedback answer file");
-                    return CLICS_VALIDATOR_ERROR_EXIT_CODE;                                            
+                    System.err.println("ClicsValidator: " + "Error outputing validator feedback answer file");
+                    return CLICS_VALIDATOR_ERROR_EXIT_CODE;
                 }
                 return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
+
+            } else {
+                //the team has trailing whitespace (only); check whether that's ok
+                if (isSpaceSensitive) {
+                    try {
+                        outputFailure(CLICS_EXCESSIVE_OUTPUT_MSG, "Excessive output: team has trailing whitespace in space-sensitive mode");
+                    } catch (Exception e) {
+                        System.err.println("ClicsValidator: " + "Error outputing validator feedback answer file");
+                        return CLICS_VALIDATOR_ERROR_EXIT_CODE;
+                    }
+                    return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
+
+                    
+                }
             }
-        } catch (IOException e) {
-            System.err.println ("ClicsValidator: " + "IOException processing team input stream (stdin): " + e.getMessage());
-            e.printStackTrace();
         }
+
         
+        //if we get here then both the team and judge streams are at EOF and the team output has correctly matched the judge's answer
         try {
             outputSuccess(CLICS_CORRECT_ANSWER_MSG);
         } catch (Exception e) {

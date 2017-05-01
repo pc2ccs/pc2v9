@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
+import org.junit.Test;
+
 import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -25,6 +27,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
         super(name);
     }
     
+    @Test
     public void testMissingJudgeDataFile() throws Exception {
         
         String dataDir = getDataDirectory() + File.separator;
@@ -60,6 +63,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
         
     }
     
+    @Test
     public void testMissingJudgeAnswerFile() throws Exception {
     
         String dataDir = getDataDirectory() + File.separator;
@@ -100,6 +104,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
                 + judgeAnswerFileName + "' is missing", validator);
     }
     
+    @Test
     public void testMissingFeedbackDir() throws Exception {
         
         String dataDir = getDataDirectory() + File.separator;
@@ -147,6 +152,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
+    @Test
     public void testInstanceMatchWithNoOptions() throws Exception {
 
         String dataDir = getDataDirectory() + File.separator;
@@ -179,6 +185,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
+    @Test
     public void testInstanceHandleCaseSensitivity() throws Exception {
 
         String dataDir = getDataDirectory() + File.separator;
@@ -218,6 +225,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
+    @Test
     public void testInstanceHandleSpaceSensitivity() throws Exception {
 
         String dataDir = getDataDirectory() + File.separator;
@@ -273,6 +281,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
+    @Test
     public void testInstanceHandleFloatAbsoluteTolerance() throws Exception {
 
         String dataDir = getDataDirectory() + File.separator;
@@ -322,6 +331,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
+    @Test
     public void testInstanceHandleFloatRelativeTolerance() throws Exception {
 
         String dataDir = getDataDirectory() + File.separator;
@@ -370,6 +380,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
+    @Test
     public void testInstanceHandleScientificNotation() throws Exception {
 
         String dataDir = getDataDirectory() + File.separator;
@@ -412,6 +423,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
+    @Test
     public void testInstanceHandleTeamNonWhitespaceExcessiveOutput() throws Exception {
 
         String dataDir = getDataDirectory() + File.separator;
@@ -452,6 +464,7 @@ public class ClicsValidatorTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
+    @Test
     public void testInstanceHandleTeamTrailingWhitespace() throws Exception {
 
         String dataDir = getDataDirectory() + File.separator;
@@ -729,6 +742,8 @@ public class ClicsValidatorTest extends AbstractTestCase {
         suite.addTest(new ClicsValidatorTest("testInstanceHandleFloatAbsoluteTolerance"));        
         suite.addTest(new ClicsValidatorTest("testInstanceHandleScientificNotation"));        
         suite.addTest(new ClicsValidatorTest("testInstanceHandleFloatRelativeTolerance"));        
+        suite.addTest(new ClicsValidatorTest("testInstanceHandleTeamTrailingWhitespace"));        
+        suite.addTest(new ClicsValidatorTest("testInstanceHandleTeamNonWhitespaceExcessiveOutput"));        
 
         return suite;
     }
