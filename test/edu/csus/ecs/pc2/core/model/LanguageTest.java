@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.core.model;
 
-import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -109,15 +108,4 @@ public class LanguageTest extends AbstractTestCase {
 
     }
 
-    public static TestSuite suiteA() {
-        
-        TestSuite suite = new TestSuite("LanguageTest");
-        String singletonTestName = null;
-        singletonTestName = "testsetCompileCommandLine";
-        
-        suite.addTest(new LanguageTest(singletonTestName));
-        return suite;
-    }
-
-    
 }

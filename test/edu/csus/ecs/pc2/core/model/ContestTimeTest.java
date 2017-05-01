@@ -1,7 +1,5 @@
 package edu.csus.ecs.pc2.core.model;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -177,13 +175,5 @@ public class ContestTimeTest extends AbstractTestCase {
 
         assertEquals("Remaining seconds ", contestTime.getRemainingMS() / Constants.MS_PER_SECONDS, contestTime.getRemainingSecs());
         assertEquals("Remaining minutes  ", contestTime.getRemainingMS() / Constants.MS_PER_MINUTE, contestTime.getRemainingSecs() / Constants.SECONDS_PER_MINUTE);
-    }
-
-    public static Test suite() {
-        TestSuite suite = new TestSuite("ContestTimeTest");
-        suite.addTest(new ContestTimeTest("testElapsedStartStopInContest"));
-        suite.addTest(new ContestTimeTest("testTimeElements"));
-        suite.addTest(new ContestTimeTest("testElapsedStartStop"));
-        return suite;
     }
 }

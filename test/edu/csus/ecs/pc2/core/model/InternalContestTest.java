@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Vector;
 
-import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -637,41 +636,5 @@ public class InternalContestTest extends AbstractTestCase {
         ;
 
         return (buffer.toString());
-    }
-
-    /**
-     * Test Suite.
-     * 
-     * This only works under JUnit 3.
-     * 
-     * @return suite of tests.
-     */
-    public static TestSuite suiteTest() {
-//        public static TestSuite suite() {
-
-        // HOWTO Create a test suite
-
-        TestSuite suite = new TestSuite("InternalContestTest");
-
-        String singletonTestName = "";
-//        singletonTestName = "testJudgementAcronymsPopulated";
-
-        if (!"".equals(singletonTestName)) {
-            suite.addTest(new InternalContestTest("testJudgementAcronymsPopulated"));
-
-        } else {
-            suite.addTest(new InternalContestTest("testGeneralCategoryCreation"));
-            suite.addTest(new InternalContestTest("testClone"));
-            suite.addTest(new InternalContestTest("testCloneComplex"));
-            suite.addTest(new InternalContestTest("testDoubleClone"));
-            suite.addTest(new InternalContestTest("testRunsClone"));
-            suite.addTest(new InternalContestTest("testGeneralCategoryCreation"));
-            suite.addTest(new InternalContestTest("testClone"));
-            suite.addTest(new InternalContestTest("testCloneComplex"));
-            suite.addTest(new InternalContestTest("testDoubleClone"));
-            suite.addTest(new InternalContestTest("testRunsClone"));
-            suite.addTest(new InternalContestTest("testJudgementAcronymsPopulated"));
-        }
-        return suite;
     }
 }

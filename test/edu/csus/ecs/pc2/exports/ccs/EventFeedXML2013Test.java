@@ -971,45 +971,5 @@ public class EventFeedXML2013Test extends AbstractTestCase {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
-
-//    /**
-//     * Test Suite.
-//     * 
-//     * This only works under JUnit 3.
-//     * 
-//     * @return suite of tests.
-//     */
-//    public static TestSuite suite() {
-//
-//        TestSuite suite = new TestSuite("EventFeedXML2013Test");
-//
-//        String singletonTestName = "";
-////        singletonTestName = "testExternalId";
-//
-//        if (!"".equals(singletonTestName)) {
-//            suite.addTest(new EventFeedXML2013Test(singletonTestName));
-//        } else {
-//
-//            suite.addTest(new EventFeedXML2013Test("testContestElement"));
-//            suite.addTest(new EventFeedXML2013Test("testInfoElement"));
-//            suite.addTest(new EventFeedXML2013Test("testLanguageElement"));
-//            suite.addTest(new EventFeedXML2013Test("testRegionElement"));
-//            suite.addTest(new EventFeedXML2013Test("testJudgementElement"));
-//            suite.addTest(new EventFeedXML2013Test("testProblemElement"));
-//            suite.addTest(new EventFeedXML2013Test("testTeamElement"));
-//            suite.addTest(new EventFeedXML2013Test("testClarElement"));
-//            suite.addTest(new EventFeedXML2013Test("testRunElement"));
-//            suite.addTest(new EventFeedXML2013Test("testFinalizedElement"));
-//            suite.addTest(new EventFeedXML2013Test("testStartupElement"));
-//            suite.addTest(new EventFeedXML2013Test("testToXML"));
-//            suite.addTest(new EventFeedXML2013Test("testTestCase"));
-//            suite.addTest(new EventFeedXML2013Test("testIsYounger"));
-//            suite.addTest(new EventFeedXML2013Test("testDeletedRuns"));
-//            suite.addTest(new EventFeedXML2013Test("testExternalId"));
-//
-//        }
-//        return suite;
-//    }
 }
