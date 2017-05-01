@@ -109,8 +109,8 @@ public class FetchRunService {
                 int waitedMS = 0;
                 serverReplied = false;
                 
-                //wait for callback to run listener -- but only for up to 10 sec
-                while (!serverReplied && waitedMS < 10000) {
+                //wait for callback to run listener -- but only for up to 30 sec
+                while (!serverReplied && waitedMS < 30000) {
                     Thread.sleep(100);
                     waitedMS += 100;
                 }
@@ -205,15 +205,17 @@ public class FetchRunService {
                             controller.getLog().log(Log.INFO, "Reply from server: " + "Run Status=" + event.getAction()
                                                     + "; run=" + event.getRun() + ";  runFiles=" + event.getRunFiles());
                             
-                            aRun = event.getRun();
-                            aRunFiles = event.getRunFiles();                          
+                            run = event.getRun();
+                            runFiles = event.getRunFiles();    
+                            
                         } else {
+                            
                             ClientId toClient = event.getSentToClientId() ;
                             ClientId myID = contest.getClientId();
 
                             controller.getLog().log(Log.INFO, "Event not for me: sent to " + toClient + " but my ID is " + myID);
 
-                            //this needs to be reconsidered; why are we continuing when the event wasn't sent to us?  (Why wasn't it sent to us?)
+                            //TODO:  this needs to be reconsidered; why are we continuing when the event wasn't sent to us?  (Why wasn't it sent to us?)
                             run = event.getRun();
                             runFiles = event.getRunFiles();
                         }
@@ -222,6 +224,8 @@ public class FetchRunService {
             } else {
                 //run from server was null
                 controller.getLog().log(Log.INFO, "Run received from server was null");
+                run = null;
+                runFiles = null;
             }
             
             
