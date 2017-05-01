@@ -406,7 +406,105 @@ public class ClicsValidatorTest extends AbstractTestCase {
         
     }
 
-    
+    /**
+     * This tests whether the validator, run as a class instance, correctly rejects team output which matches the judge's
+     * data file but then has additional non-whitespace data.
+     * 
+     * @throws Exception
+     */
+    public void testInstanceHandleTeamNonWhitespaceExcessiveOutput() throws Exception {
+
+        String dataDir = getDataDirectory() + File.separator;
+        assertDirectoryExists(dataDir, "Missing data directory");
+        
+        String judgeDataFileName = dataDir + "defaultJudgeData.in";
+        assertFileExists(judgeDataFileName, "judge's data file");
+        
+        String judgeAnswerFileName = dataDir + "defaultJudgeAnswer.ans";
+        assertFileExists(judgeAnswerFileName, "judge's answer file");
+        
+        String feedbackDir = getOutputDataDirectory();
+        assertDirectoryExists(feedbackDir, "feedback output directory");
+        
+        String teamOutputFileName = dataDir + "teamOutputWithExcessiveOutput.out";
+        assertFileExists(teamOutputFileName, "team output file");
+
+        String []options = {""};
+        
+        System.out.println();
+        int retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleTeamNonWhitespaceExcessiveOutput(): with no options, Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE, retCode);
+        
+        options = new String [1];
+        options[0] = "space_change_sensitive";
+            
+        System.out.println();
+        retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleTeamNonWhitespaceExcessiveOutput(): with 'space_change_sensitive' option, Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE, retCode);
+                
+    }
+
+    /**
+     * This tests whether the validator, run as a class instance, correctly accepts (in non-space-sensitive mode) team output which matches the judge's
+     * data file but then has additional trailing whitespace, and also correctly rejects similar trailing whitespace output in space-sensitive mode.
+     * 
+     * @throws Exception
+     */
+    public void testInstanceHandleTeamTrailingWhitespace() throws Exception {
+
+        String dataDir = getDataDirectory() + File.separator;
+        assertDirectoryExists(dataDir, "Missing data directory");
+        
+        String judgeDataFileName = dataDir + "defaultJudgeData.in";
+        assertFileExists(judgeDataFileName, "judge's data file");
+        
+        String judgeAnswerFileName = dataDir + "defaultJudgeAnswer.ans";
+        assertFileExists(judgeAnswerFileName, "judge's answer file");
+        
+        String feedbackDir = getOutputDataDirectory();
+        assertDirectoryExists(feedbackDir, "feedback output directory");
+        
+        String teamOutputFileName = dataDir + "teamOutputWithExtraEOL.out";
+        assertFileExists(teamOutputFileName, "team output file");
+
+        String []options = {""};
+        
+        System.out.println();
+        int retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleTeamTrailingWhitespace(): with no options and one extra EOL in team output, Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE, retCode);
+        
+        options = new String [1];
+        options[0] = "space_change_sensitive";
+            
+        System.out.println();
+        retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleTeamTrailingWhitespace(): with 'space_change_sensitive' option and one extra EOL in team output, Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE, retCode);
+        
+        teamOutputFileName = dataDir + "teamOutputWithTwoExtraEOLs.out";
+        assertFileExists(teamOutputFileName, "team output file");
+
+        options = new String [1];
+        options[0] = "";
+        
+        System.out.println();
+        retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleTeamTrailingWhitespace(): with no options and two extra EOLs in team output, Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE, retCode);
+        
+        options = new String [1];
+        options[0] = "space_change_sensitive";
+            
+        System.out.println();
+        retCode = runValidatorInstanced(judgeDataFileName, judgeAnswerFileName, feedbackDir, options, teamOutputFileName);
+        System.out.println ("testInstanceHandleTeamTrailingWhitespace(): with 'space_change_sensitive' option and two extra EOLs in team output, Validator returned: " + retCode);
+        assertEquals(ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE, retCode);
+        
+    }
+
     //additional tests needed:
     //  testInstanceHandleWithinRelativeButNotAbsoluteTolerance()
     //  testInstanceHandleWithinAbsoluteButNotRelativeTolerance()
