@@ -13,8 +13,6 @@ import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import junit.framework.TestSuite;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -1040,42 +1038,4 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     }
 
-    /**
-     * Test Suite.
-     * 
-     * This only works under JUnit 3.
-     * 
-     * @return suite of tests.
-     */
-    public static TestSuite suiteA() {
-
-        TestSuite suite = new TestSuite("ResolverEventFeedXMLTest");
-
-        String singletonTestName = "";
-        // singletonTestName = "testExternalId";
-
-        if (!"".equals(singletonTestName)) {
-            suite.addTest(new ResolverEventFeedXMLTest(singletonTestName));
-        } else {
-
-            suite.addTest(new ResolverEventFeedXMLTest("testContestElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testInfoElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testLanguageElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testRegionElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testJudgementElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testProblemElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testTeamElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testClarElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testRunElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testFinalizedElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testStartupElement"));
-            suite.addTest(new ResolverEventFeedXMLTest("testToXML"));
-            suite.addTest(new ResolverEventFeedXMLTest("testTestCase"));
-            suite.addTest(new ResolverEventFeedXMLTest("testIsYounger"));
-            suite.addTest(new ResolverEventFeedXMLTest("testDeletedRuns"));
-            suite.addTest(new ResolverEventFeedXMLTest("testExternalId"));
-
-        }
-        return suite;
-    }
 }

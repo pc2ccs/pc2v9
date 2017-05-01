@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.core.execute;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -412,24 +411,4 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         assertNotEquals("pc2.jar (path to) not found", path, ExecuteUtilities.DEFAULT_PC2_JAR_PATH);
     }
     
-    // Directions: uncomment suite to execute single test
-    public static TestSuite suiteNotUsed() {
-//    public static TestSuite suite() {
-
-        TestSuite suite = new TestSuite("ExecuteUtilitiesTest");
-
-        String singletonTestName = "";
-        singletonTestName = "testEmptySubstituteStringTest";
-      
-
-        if (!"".equals(singletonTestName)) {
-            suite.addTest(new ExecuteUtilitiesTest(singletonTestName));
-        } else {
-            
-            suite.addTest(new ExecuteUtilitiesTest("testLastEntries"));
-            
-        }
-        return suite;
-    }
-
 }

@@ -1739,40 +1739,4 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
         return buf.toString();
 
     }
-
-    // public static TestSuite suite() {
-    //
-    // TestSuite suite = new TestSuite("NSATL");
-    // // String singletonTestName = null;
-    //
-    // // suite.addTest(new ExecutablePluginTest(singletonTestName));
-    //
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testNoData"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testOneRunUnjudged"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testMixedjudged"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testOneRunJudged"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testFiveRunsJudged"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseOne"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseOneGroupRanks"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseOneA"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testNoBeforeYesSameElapsed"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseTwo"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseThree"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardCaseFour"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboard55"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboard55Groups"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testNoYes"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testScoreboardForBeingJudgedState"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testTieBreakerSubmissionTime"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testSendToTeams"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testAltScoring"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testZZZZEOCSettings"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testgetRuns"));
-    // suite.addTest ( new NewScoringAlgorithmTestLong("testRankings1028"));
-    //
-    //
-    //
-    // return suite;
-    //
-    // }
 }

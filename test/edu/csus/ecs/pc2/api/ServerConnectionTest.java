@@ -1094,19 +1094,6 @@ public class ServerConnectionTest extends AbstractTestCase {
 //        }
 //    }
 
-//    // public static TestSuite NotUsedSuite() {
-//    public static TestSuite suite() {
-//
-//        TestSuite suite = new TestSuite(ServerConnectionTest.class);
-//
-//        String singletonTestName = "";
-//        singletonTestName = "addAccountTest";
-//        suite.addTest(new ServerConnectionTest(singletonTestName));
-//
-//        return suite;
-//    }
-
-    
     public boolean isServerRunning() {
         return serverRunning;
     }

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestSuite;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -1696,29 +1695,6 @@ public class ExecutableTest extends AbstractTestCase {
 
         problem.setDataFileName(inArray[0].getName());
         problem.setAnswerFileName(ansArray[0].getName());
-    }
-
-    /**
-     * Test Suite.
-     * 
-     * This only works under JUnit 3.
-     * 
-     * @return suite of tests.
-     */
-    public static TestSuite suiteA() {
-
-        TestSuite suite = new TestSuite("ExecutableTest");
-        String singletonTestName = null;
-        // singletonTestName = "testMultipleTestCaseFromSTDIN";
-        // singletonTestName = "testMultipleTestCaseFailTest2";
-        // singletonTestName = "testMultipleTestCaseFromFile";
-        // singletonTestName = "testFindPC2Jar";
-        singletonTestName = "testHello";
-        singletonTestName = "testMultipleTestCaseFromInternalFile";
-        singletonTestName = "testMultipleTestCaseFromExternalFile";
-
-        suite.addTest(new ExecutableTest(singletonTestName));
-        return suite;
     }
 
     /**
