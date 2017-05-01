@@ -284,6 +284,10 @@ public class EditProblemPane extends JPanePlugin {
     
     private InputValidationStatus inputValidationStatus = InputValidationStatus.NOT_TESTED;
 
+    private boolean showMissingInputValidatorWarningOnAddProblem = true;
+
+    private boolean showMissingInputValidatorWarningOnUpdateProblem = true;
+
     /**
      * Constructs an EditProblemPane with default settings.
      * 
@@ -446,14 +450,22 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
 
-        if (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals("")) {
+        if (showMissingInputValidatorWarningOnAddProblem && (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals(""))) {
             //no input validator defined; issue a warning
-            String warning = "You are attempting to specify a Problem which has no Input Data Validator." 
+            String warning = "You are attempting to add a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
                     + "\nJudge's data files meet the Problem Specification."
                     + "\n\nAre you sure you want to do this?"
-                    + "\n";
-            int response = JOptionPane.showConfirmDialog(getParentFrame(), warning, "No Input Validator specified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                    + "\n\n";
+            
+            JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+            checkbox.setFont(new Font(Font.SANS_SERIF,Font.PLAIN, 10));
+            Object[] params = {warning, checkbox};
+            
+            int response = JOptionPane.showConfirmDialog(getParentFrame(), params, "No Input Validator specified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (checkbox.isSelected()) {
+                showMissingInputValidatorWarningOnAddProblem  = false ;
+            }
             if (!(response == JOptionPane.YES_OPTION)) {
                 return;
             }
@@ -1439,13 +1451,22 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
         
-        if (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals("")) {
+        if (showMissingInputValidatorWarningOnUpdateProblem && (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals(""))) {
             //no input validator defined; issue a warning
-            String warning = "You are attempting to specify a Problem which has no Input Data Validator." 
+            String warning = "You are attempting to update a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
                     + "\nJudge's data files meet the Problem Specification."
-                    + "\n\nAre you sure you want to do this?";
-            int response = JOptionPane.showConfirmDialog(getParentFrame(), warning, "No Input Validator specified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                    + "\n\nAre you sure you want to do this?"
+                    + "\n\n";
+            
+            JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+            checkbox.setFont(new Font(Font.SANS_SERIF,Font.PLAIN, 10));
+            Object[] params = {warning, checkbox};
+            
+            int response = JOptionPane.showConfirmDialog(getParentFrame(), params, "No Input Validator specified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (checkbox.isSelected()) {
+                showMissingInputValidatorWarningOnUpdateProblem  = false ;
+            }
             if (!(response == JOptionPane.YES_OPTION)) {
                 return;
             }
