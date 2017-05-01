@@ -33,10 +33,23 @@ public class Base64 {
 				} else
 					b3 = bytes[i++];
 			}
-			byte c1 = (byte) (b1 >> 2);
-			byte c2 = (byte) (((b1 & 0x3) << 4) | (b2 >> 4));
-			byte c3 = (byte) (((b2 & 0xf) << 2) | (b3 >> 6));
+			
+
+			//the following section has updates which are necessary because the original version of this class was designed
+			// only to encode objects of type String, wherein every byte has a positive value.
+			//Expanding the code to support Base64 encoding of arbitrary byte arrays requires dealing with Java's sign-extension
+			// when using the >> (right-bit-shift) operator
+//			byte c1 = (byte) (b1 >> 2);                //original code; fails to deal with sign extension
+			byte c1 = (byte) ((b1 & 0x00FC) >> 2);     //&0xFC masks off upper sign bits of the 16-bit byte storage 
+			
+//			byte c2 = (byte) (((b1 & 0x3) << 4) | (b2 >> 4));
+			byte c2 = (byte) (((b1 & 0x3) << 4) | ((b2 & 0x00FF) >> 4));
+			
+//			byte c3 = (byte) (((b2 & 0xf) << 2) | (b3 >> 6));
+			byte c3 = (byte) (((b2 & 0xf) << 2) | ((b3 & 0x00FF) >> 6));
+			
 			byte c4 = (byte) (b3 & 0x3f);
+			
 			encodedString += base64Array[c1];
 			encodedString += base64Array[c2];
 			switch (pad) {
