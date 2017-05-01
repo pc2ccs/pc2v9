@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import junit.framework.TestSuite;
-
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
@@ -1679,54 +1677,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     }
 
-    /**
-     * The list of the tests to run/test.
-     *
-     * JUnit3 only use.
-     *
-     * @return list of classes to test.
-     */
-
-    public static TestSuite suiteNotUsed() {
-        // public static TestSuite suite() {
-        /**
-         * This is a way to test a single test method using JUnit3
-         */
-
-        TestSuite suite = new TestSuite(TEST_CLASS_NAME);
-
-        String singletonTestName = "";
-        // singletonTestName = "testYamlWriteAndLoad";
-        singletonTestName = "testLoadLanguages";
-        singletonTestName = "testLoader";
-
-        if (!"".equals(singletonTestName)) {
-            suite.addTest(new ContestSnakeYAMLLoaderTest(singletonTestName));
-        } else {
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testGetTitle"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testLoaderMethods"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testLoader"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testProblemLoader"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testLoadClarCategories"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testLoadSites"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testGeneralAnswsers"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testgetSectionLines"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testgetFileNames"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testgetProblemsFromLetters"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testgetAutoJudgeSettings"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testAutoJudgeSettingsTwo"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testAutoJudgeSettingsAll"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testAllJudges"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testReplayLoad"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testLatextProblem"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testGetBooleanValue"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testValidatorKeys"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testMultipleDataSets"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("atestIncludeFile"));
-            suite.addTest(new ContestSnakeYAMLLoaderTest("testLoadProblemSet"));
-        }
-        return suite;
-    }
 
     public void testSetManualJudge() throws Exception {
 

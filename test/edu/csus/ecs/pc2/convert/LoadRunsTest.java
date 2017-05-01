@@ -615,24 +615,4 @@ public class LoadRunsTest extends AbstractTestCase {
 
     }
 
-    // public static TestSuite suite() {
-    // //
-    // TestSuite suite = new TestSuite("LoadRunsTest");
-    //
-    // String singletonTestName = "";
-    // // singletonTestName = "testLoadCDP";
-    // singletonTestName = "testLoadContestRuns";
-    // // singletonTestName = "testLoadEFRuns";
-    //
-    //
-    // if (!"".equals(singletonTestName)) {
-    // suite.addTest(new LoadRunsTest(singletonTestName));
-    // } else {
-    //
-    // suite.addTest(new LoadRunsTest("testLoadEFRuns"));
-    // suite.addTest(new LoadRunsTest("testLoadContestRuns"));
-    //
-    // }
-    // return suite;
-    // }
 }
