@@ -47,14 +47,13 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -66,6 +65,9 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.ui.cellRenderer.CheckBoxCellRenderer;
+import edu.csus.ecs.pc2.ui.cellRenderer.PassFailCellRenderer;
+import edu.csus.ecs.pc2.ui.cellRenderer.RightJustifiedCellRenderer;
 
 /**
  * Multiple data set viewer pane.
@@ -1187,7 +1189,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         localResultsTable.getColumn(columnNames[COLUMN.DATASET_NUM.ordinal()]).setCellRenderer(centerRenderer);
        
         //set our own checkbox renderer (don't know how to add an ActionListener to the default checkboxes
-        localResultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setCellRenderer(new CheckBoxRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setCellRenderer(new CheckBoxCellRenderer());
 
         // set a LinkRenderer on those cells containing links
         localResultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_VIEW.ordinal()]).setCellRenderer(new LinkRenderer());
@@ -1201,7 +1203,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         localResultsTable.getColumn(columnNames[COLUMN.RESULT.ordinal()]).setCellRenderer(new PassFailCellRenderer());
 
         // render Time column right-justified
-        localResultsTable.getColumn(columnNames[COLUMN.TIME.ordinal()]).setCellRenderer(new RightJustifyRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.TIME.ordinal()]).setCellRenderer(new RightJustifiedCellRenderer());
 
         // force table column widths to nice values
 //         resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
@@ -1578,76 +1580,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
     }
 
-    /**
-     * 
-     * @author ICPC
-     *
-     */
-    public class PassFailCellRenderer extends DefaultTableCellRenderer {
 
-        private static final long serialVersionUID = 1L;
 
-        public void setValue(Object value) {
-            String testResult = ((JLabel) value).getText();
-            if (!currentProblem.isValidatedProblem()) {
-                setBackground(Color.yellow);
-                setText("(No Validator)");
-            } else if (testResult.equalsIgnoreCase("Pass")) {
-                setBackground(Color.green);
-                setForeground(Color.black);
-                setText("Pass");
-            } else if (testResult.equalsIgnoreCase("Fail")) {
-                setBackground(Color.red);
-                setForeground(Color.white);
-                setText("Fail");
-            } else {
-                // illegal value
-                setBackground(Color.yellow);
-                setText("??");
-                log = getController().getLog();
-                log.log(Log.SEVERE, "MTSV PassFailCellRenderer: unknown pass/fail result: ", value);
-            }
-            setHorizontalAlignment(SwingConstants.LEFT);
-            setBorder(new EmptyBorder(0, 30, 0, 0));
-        }
 
-    }
-
-    /**
-     * 
-     * @author ICPC
-     *
-     */
-    public class CheckBoxRenderer extends JCheckBox implements TableCellRenderer {
-
-        private static final long serialVersionUID = 1L;
-
-        public CheckBoxRenderer() {
-            setHorizontalAlignment(SwingConstants.CENTER);
-        }
-
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setSelected((Boolean)value);
-            return this;
-        }
-    }
-
-    /**
-     * A cell renderer for displaying right-justified values but with some margin space.
-     * @author John
-     *
-     */
-    public class RightJustifyRenderer extends DefaultTableCellRenderer {
-
-        private static final long serialVersionUID = 1L;
-
-        public void setValue(Object value) {
-            setHorizontalAlignment(SwingConstants.RIGHT);
-            setBorder(new EmptyBorder(0, 0, 0, 30));
-            setText((String) value);
-        }
-
-    }
 
     public void setData(Run run, RunFiles runFiles, Problem problem, ProblemDataFiles problemDataFiles) {
 
