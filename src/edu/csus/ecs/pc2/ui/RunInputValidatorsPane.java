@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -19,18 +18,18 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.ProblemInputValidationResults;
+import edu.csus.ecs.pc2.ui.cellRenderer.CheckBoxCellRenderer;
+import edu.csus.ecs.pc2.ui.cellRenderer.PassFailCellRenderer;
 
 /**
  * A pane for running the input validators for currently defined problems and displaying the results.
@@ -87,7 +86,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
             msgPanel = new JPanel();
             msgPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-            JLabel msgPanelLabel = new JLabel("\"\"");
+            JLabel msgPanelLabel = new JLabel("");
             msgPanelLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             msgPanel.add(msgPanelLabel);
         }
@@ -160,6 +159,9 @@ public class RunInputValidatorsPane extends JPanePlugin  {
             // change the header font
             JTableHeader header = resultsTable.getTableHeader();
             header.setFont(new Font("Dialog", Font.BOLD, 12));
+            
+            // render Select column as a checkbox
+            resultsTable.getColumn("Select").setCellRenderer(new CheckBoxCellRenderer());
             
             // render Result column as Pass/Fail on Green/Red background
             resultsTable.getColumn("Overall Result").setCellRenderer(new PassFailCellRenderer());
@@ -289,34 +291,6 @@ public class RunInputValidatorsPane extends JPanePlugin  {
                 }
             }
         });
-    }
-    public class PassFailCellRenderer extends DefaultTableCellRenderer {
-
-        private static final long serialVersionUID = 1L;
-
-        public void setValue(Object value) {
-            if (value instanceof Boolean) {
-                boolean passed = (Boolean) value;
-                if (passed) {
-                    setBackground(Color.green);
-                    setForeground(Color.black);
-                    setText("Pass");
-                } else {
-                    setBackground(Color.red);
-                    setForeground(Color.white);
-                    setText("Fail");
-                }
-            } else {
-                // illegal value
-                setBackground(Color.yellow);
-                setText("??");
-                getController().getLog().log(Log.SEVERE, "EditProblem.PassFailCellRenderer: unknown pass/fail result: ", value);
-            }
-            setHorizontalAlignment(SwingConstants.CENTER);
-            setBorder(new EmptyBorder(0, 0, 0, 0));
-
-        }
-
     }
 
 }
