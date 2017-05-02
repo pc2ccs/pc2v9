@@ -1,11 +1,14 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
 
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.ProblemInputValidationResults;
 
@@ -75,19 +78,34 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
         }
         
         ProblemInputValidationResults probResults = results.get(row);
+        Problem prob = probResults.getProblem();
 
 //        colNames = { "Select", "Problem", "Overall Result", "Pass/Fail Count", "Failed Files...", "Input Validator", "I.V. Command" };
         switch (column) {
             case 0:
+                //"Select" column
                 obj = new Boolean(true);
                 break;
             case 1:
-                obj = probResults.getProblem().getShortName();
+                //"Problem" column
+                obj = prob.getShortName();
                 break;
             case 2:
-                obj = probResults.getProblem().getInputValidationStatus();
+                //"Overall Result" column
+                InputValidationStatus status = probResults.getProblem().getInputValidationStatus(); 
+                switch (status) {
+                    case FAILED:
+                        obj = new Boolean(false);
+                        break;
+                    case PASSED:
+                        obj = new Boolean(true);
+                        break;
+                    default:
+                        obj = "??";
+                }
                 break;
             case 3:
+                //"Pass/Fail Count" column
                 //go through all the results for the problem in the specified row, tallying passed/failed results
                 int passed = 0;
                 int failed = 0;
@@ -103,6 +121,7 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
                 obj = "" + passed + "/" + failed;
                 break;
             case 4:
+                //"Failed Files..." column
                 //go through all the results for the problem in the specified row, finding the names of all failed files
                 String retStr = "";
                 Iterable<InputValidationResult> results2 = probResults.getResults();
@@ -115,13 +134,39 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
                         }
                     }
                 }
-                obj = retStr;
+                obj = retStr.equals("") ? "<N/A>" : retStr;
+                break;
+            case 5:
+                //"Input Validator" column
+                if (prob.isProblemHasInputValidator() && prob.getInputValidatorProgramName() != null) {
+                    obj = getBaseName(prob.getInputValidatorProgramName());
+                } else {
+                    obj = "<none>";
+                }
+                break;
+            case 6: 
+                //"I.V. Command" column
+                if (prob.isProblemHasInputValidator() && prob.getInputValidatorCommandLine() != null) {
+                    obj = getBaseName(prob.getInputValidatorCommandLine());
+                } else {
+                    obj = "<none>";
+                }
                 break;
             default:
                 break;
 
         }
         return obj;
+    }
+
+    private String getBaseName(String fileName) {
+        int index = fileName.lastIndexOf(File.separatorChar);
+        if (index == -1) {
+            //no file separator found; return original string
+            return fileName;
+        } else {
+            return fileName.substring(index+1);
+        }
     }
 
     /**
