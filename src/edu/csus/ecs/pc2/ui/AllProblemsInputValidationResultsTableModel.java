@@ -1,9 +1,13 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
+
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
+import edu.csus.ecs.pc2.core.model.inputValidation.ProblemInputValidationResults;
 
 public class AllProblemsInputValidationResultsTableModel extends DefaultTableModel {
 
@@ -13,7 +17,7 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
 
     private static Vector<String> columnNames = new Vector<String>(Arrays.asList(colNames));
     
-    private Vector< Vector<InputValidationResult> > results ;
+    private Vector<ProblemInputValidationResults>  results ;
 
     
     /**
@@ -22,7 +26,7 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
      * @param results a table containing one row for each problem, with each row containing one {@link InputValidationResults} for each
      *      judge's input data file in the problem
      */
-    public AllProblemsInputValidationResultsTableModel(Vector <Vector<InputValidationResult>> results) {
+    public AllProblemsInputValidationResultsTableModel(Iterable<ProblemInputValidationResults> results) {
         super(null, columnNames);
         setResults(results);
     }
@@ -33,13 +37,30 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
         setRowCount(0);
     }
 
-    public void setResults(Vector <Vector<InputValidationResult>> results) {
+    /**
+     * Stores the specified {@link ProblemInputValidationResults} in this TableModel.
+     * 
+     * @param results the Input Validation Results to store
+     */
+    public void setResults(Iterable<ProblemInputValidationResults> results) {
+        
+        //create an empty Vector to hold the problem results
+        this.results = new Vector<ProblemInputValidationResults>() ;
+        
         if (results != null){
-            setRowCount(results.size());
-            this.results = results;
+            
+            //copy all the problem results to the vector
+            Iterator<ProblemInputValidationResults> itr = results.iterator();
+            while (itr.hasNext()) {
+                this.results.add(itr.next());
+            }
+            //mark the size of the table according to how many problems/problemResults we got
+            setRowCount(this.results.size());
+            
         } else {
+            //we got a null Iterable; we have no results data
             setRowCount(0);
-            this.results = null;
+
         }
     }
     
@@ -49,7 +70,11 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
 
         Object obj = "Unknown";
 
-        Vector<InputValidationResult> probResults = results.get(row);
+        if (row >= this.results.size()) {
+            return "Unknown";
+        }
+        
+        ProblemInputValidationResults probResults = results.get(row);
 
 //        colNames = { "Select", "Problem", "Overall Result", "Pass/Fail Count", "Failed Files...", "Input Validator", "I.V. Command" };
         switch (column) {
@@ -57,19 +82,19 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
                 obj = new Boolean(true);
                 break;
             case 1:
-                //all the InputValidationResults in the specified row should be for the same Problem; get the Problem name out of the 1st element
-                obj = probResults.get(0).getProblem().getShortName();
+                obj = probResults.getProblem().getShortName();
                 break;
             case 2:
-                //the Input Validation status for the problem should be the same for all Results in the specified row
-                obj = probResults.get(0).getProblem().getInputValidationStatus();
+                obj = probResults.getProblem().getInputValidationStatus();
                 break;
             case 3:
                 //go through all the results for the problem in the specified row, tallying passed/failed results
                 int passed = 0;
                 int failed = 0;
-                for (int i=0; i<probResults.size(); i++) {
-                    if (probResults.get(i).isPassed()) {
+                Iterable<InputValidationResult> results1 = probResults.getResults();
+                for (InputValidationResult result : results1) {
+                    
+                    if (result.isPassed()) {
                         passed++;
                     } else {
                         failed++;
@@ -80,12 +105,13 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
             case 4:
                 //go through all the results for the problem in the specified row, finding the names of all failed files
                 String retStr = "";
-                for (int i=0; i<probResults.size(); i++) {
-                    if (!probResults.get(i).isPassed()) {
+                Iterable<InputValidationResult> results2 = probResults.getResults();
+                for (InputValidationResult result : results2) {
+                    if (!result.isPassed()) {
                         if (retStr.equals("")) {
-                            retStr = probResults.get(i).getFullPathFilename();
+                            retStr = result.getFullPathFilename();
                         } else {
-                            retStr += ";" + probResults.get(i).getFullPathFilename();
+                            retStr += ";" + result.getFullPathFilename();
                         }
                     }
                 }
@@ -105,7 +131,7 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
      */
     @Override
     public void removeRow(int row) {
-        Vector< Vector<InputValidationResult> > newResults = new Vector< Vector<InputValidationResult>>() ;
+        Vector< ProblemInputValidationResults>  newResults = new Vector< ProblemInputValidationResults>() ;
 
         for (int i=0; i<row; i++) {
             newResults.add(results.get(i));
@@ -118,7 +144,11 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
         super.removeRow(row);
     }
     
-    public Vector< Vector<InputValidationResult> > getResults() {
+    /**
+     * Returns a {@link Iterable} version of the current {@link ProblemInputValidationResults} stored in the Table Model.
+     * @return the current ProblemInputValidationResults
+     */
+    public Iterable<ProblemInputValidationResults> getResults() {
         return results;
     }
 }

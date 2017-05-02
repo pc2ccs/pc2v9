@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.ui;
+package edu.csus.ecs.pc2.core.model.inputValidation;
 
 import java.io.Serializable;
 

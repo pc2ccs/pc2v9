@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.ui.InputValidationResult;
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 
 /**
  * This class provides support for running (executing) CLICS-compliant Input Validators.

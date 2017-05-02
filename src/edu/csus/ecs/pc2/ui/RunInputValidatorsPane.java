@@ -29,6 +29,8 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
+import edu.csus.ecs.pc2.core.model.inputValidation.ProblemInputValidationResults;
 
 /**
  * A pane for running the input validators for currently defined problems and displaying the results.
@@ -85,7 +87,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
             msgPanel = new JPanel();
             msgPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-            JLabel msgPanelLabel = new JLabel("<Messages here>");
+            JLabel msgPanelLabel = new JLabel("\"\"");
             msgPanelLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             msgPanel.add(msgPanelLabel);
         }
@@ -217,7 +219,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
         Problem [] probs = getContest().getProblems();
         
         //get the Input Validation Results for each problem (note that this could be empty for any given problem, or all problems)
-        Vector<Vector<InputValidationResult>> tableData = getInputValidationResultsTableData(probs);
+        Vector<ProblemInputValidationResults> tableData = getInputValidationResultsTableData(probs);
                
         //put the table data into the table model
         ((AllProblemsInputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(tableData);
@@ -228,20 +230,23 @@ public class RunInputValidatorsPane extends JPanePlugin  {
     }
 
     
-    private Vector< Vector<InputValidationResult>> getInputValidationResultsTableData(Problem [] probs) {
+    private Vector<ProblemInputValidationResults> getInputValidationResultsTableData(Problem [] probs) {
         
-        Vector<Vector<InputValidationResult>> tableData = new Vector<Vector<InputValidationResult>> ();
+        Vector<ProblemInputValidationResults> tableData = new Vector<ProblemInputValidationResults> ();
         
-        for (int row=0; row<probs.length; row++) {
-            
-            //add a new (empty) "row" to the temp table
-            tableData.add(new Vector<InputValidationResult>());
-            
-            //add each result for the current problem to the current row
-            for (InputValidationResult result : probs[row].getInputValidationResults()) {
+        for (int prob=0; prob<probs.length; prob++) {
+            if (probs[prob].isProblemHasInputValidator()) {
                 
-                tableData.get(row).add(result);  //do we need to clone the InputValidationResult? 
-            }         
+                ProblemInputValidationResults result = new ProblemInputValidationResults(probs[prob]);
+                
+                // add each result for the current problem to the current row
+                for (InputValidationResult res : probs[prob].getInputValidationResults()) {
+
+                    result.addResult(res); // do we need to clone the InputValidationResult?
+                }
+                
+                tableData.add(result);
+            }
         }
         
         return tableData;
