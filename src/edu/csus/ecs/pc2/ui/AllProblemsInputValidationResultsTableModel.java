@@ -134,7 +134,7 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
                         }
                     }
                 }
-                obj = retStr.equals("") ? "<N/A>" : retStr;
+                obj = retStr.equals("") ? "<none>" : retStr;
                 break;
             case 5:
                 //"Input Validator" column
