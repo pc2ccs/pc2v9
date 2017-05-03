@@ -19,6 +19,7 @@ import javax.swing.table.JTableHeader;
 
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.ui.cellRenderer.PassFailCellRenderer;
+import java.awt.FlowLayout;
 
 /**
  * This class defines a JPanel for displaying the results of running an Input Validator on a set of Input Data files
@@ -65,6 +66,10 @@ public class InputValidationResultPane extends JPanePlugin {
     private JPanel getInputValidationResultSummaryPanel() {
         if (inputValidationResultSummaryPanel == null) {
             inputValidationResultSummaryPanel = new JPanel();
+            inputValidationResultSummaryPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            FlowLayout flowLayout = (FlowLayout) inputValidationResultSummaryPanel.getLayout();
+            flowLayout.setHgap(10);
+            flowLayout.setAlignment(FlowLayout.LEFT);
             inputValidationResultSummaryPanel.add(getInputValidationResultsSummaryLabel());
             inputValidationResultSummaryPanel.add(getInputValidationResultSummaryTextLabel());
         }
