@@ -43,11 +43,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -57,8 +55,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -70,10 +66,10 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
-import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
-import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
@@ -253,13 +249,12 @@ public class EditProblemPane extends JPanePlugin {
 
     //the panel holding the "use custom validator" radio button and the corresponding options panel
     private JPanel customValidatorPanel = null;
-    private Component horizontalStrut_1;
     private JPanel customValidatorOptionsSubPanel;
-      private JLabel customValidatorProgramNameLabel;
-      private JTextField customValidatorProgramNameTextField;
-      private JButton chooseValidatorProgramButton = null;
-      private JLabel customValidatorCommandLineLabel = null;
-      private JTextField customValidatorCommandLineTextField = null;
+    private JLabel customValidatorProgramNameLabel;
+    private JTextField customValidatorProgramNameTextField;
+    private JButton chooseValidatorProgramButton = null;
+    private JLabel customValidatorCommandLineLabel = null;
+    private JTextField customValidatorCommandLineTextField = null;
 
     
     private Component horizontalStrut;    
@@ -270,19 +265,17 @@ public class EditProblemPane extends JPanePlugin {
     private Component verticalStrut_4;
     private Component verticalStrut_5;
     private JPanel pc2ValidatorPanel;
-    private Component horizontalStrut_2;
+
     private JPanel pc2ValidatorOptionsSubPanel;
-      private JLabel pc2ValidatorOptionComboBoxLabel;
-      private JComboBox<String> pc2ValidatorOptionComboBox;
-      private JCheckBox pc2ValidatorIgnoreCaseCheckBox;
+    private JLabel pc2ValidatorOptionComboBoxLabel;
+    private JComboBox<String> pc2ValidatorOptionComboBox;
+    private JCheckBox pc2ValidatorIgnoreCaseCheckBox;
 
     private JLabel lblWhatsThisCLICSValidator;
 
     //a temporary variables to track changes in the command line
     private String localPC2InterfaceCustomValidatorCommandLine;
     private String localClicsInterfaceCustomValidatorCommandLine;
-    
-    private InputValidationResultsTableModel inputValidationResultsTableModel = new InputValidationResultsTableModel();
     
     private InputValidationStatus inputValidationStatus = InputValidationStatus.NOT_TESTED;
 
@@ -305,7 +298,7 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(544, 681));
+        this.setSize(new Dimension(776, 681));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -452,7 +445,9 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
 
-        if (showMissingInputValidatorWarningOnAddProblem && (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals(""))) {
+        if (showMissingInputValidatorWarningOnAddProblem && 
+                (getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText() == null || 
+                 getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().equals(""))) {
             //no input validator defined; issue a warning
             String warning = "You are attempting to add a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
@@ -1206,7 +1201,7 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setProblemHasInputValidator(false);    // start with a default assumption of no Input Validator
 
         // get the Input Validator file name (if any) from the GUI
-        String guiInputValidatorFileName = getInputValidatorProgramNameTextField().getText().trim();
+        String guiInputValidatorFileName = getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().trim();
 
         if (guiInputValidatorFileName != null && guiInputValidatorFileName.trim().length() > 0) {
             // there is an input validator file name in the GUI
@@ -1262,11 +1257,11 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         //Input Validator Command...
-        String inputValCommand = getInputValidatorCommandTextField().getText();
+        String inputValCommand = getDefineInputValidatorPane().getInputValidatorCommandTextField().getText();
         checkProblem.setInputValidatorCommandLine(inputValCommand);
         
         //Input Validator "files from disk" test folder...
-        String inputValFilesOnDiskFolder = getInputValidatorFilesOnDiskTextField().getText();
+        String inputValFilesOnDiskFolder = getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText();
         checkProblem.setInputValidatorFilesOnDiskFolder(inputValFilesOnDiskFolder);
         
         //Status of running an Input Validator
@@ -1453,7 +1448,9 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
         
-        if (showMissingInputValidatorWarningOnUpdateProblem && (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals(""))) {
+        if (showMissingInputValidatorWarningOnUpdateProblem && 
+                (getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText() == null || 
+                 getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().equals(""))) {
             //no input validator defined; issue a warning
             String warning = "You are attempting to update a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
@@ -1736,8 +1733,12 @@ public class EditProblemPane extends JPanePlugin {
         
         //verify that if an Input Validator program has been specified, there is a command specified to invoke it.
         // (Note that the reverse is NOT required; it would be legal to specify an Input Validator command with no explicit program name)
-        if (getInputValidatorProgramNameTextField().getText() != null && !getInputValidatorProgramNameTextField().getText().equals("")) {
-            if (getInputValidatorCommandTextField().getText() == null || getInputValidatorCommandTextField().getText().equals("")) {
+        if (getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText() != null && 
+                !(getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().equals("")) ) {
+            
+            if (getDefineInputValidatorPane().getInputValidatorCommandTextField().getText() == null || 
+                    getDefineInputValidatorPane().getInputValidatorCommandTextField().getText().equals("")) {
+                
                 showMessage("An Input Validator Program has been specified; you must also specify an Input Validator command line"); 
                 return false;
             }
@@ -2337,50 +2338,56 @@ public class EditProblemPane extends JPanePlugin {
         //fill in the input validator program name 
         String inputValidatorProg = prob.getInputValidatorProgramName();
         if (inputValidatorProg != null) {
-            getInputValidatorProgramNameTextField().setText(inputValidatorProg);
+            getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setText(inputValidatorProg);
         } else {
-            getInputValidatorProgramNameTextField().setText("");
+            getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setText("");
         }
         //update the tooltip to reflect the name in the text field
-        if (getInputValidatorProgramNameTextField().getText() == null || getInputValidatorProgramNameTextField().getText().equals("")) {
+        if (getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText() == null || 
+                getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().equals("")) {
             //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
-            getInputValidatorProgramNameTextField().setToolTipText(null);
+            getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setToolTipText(null);
         } else {
-            getInputValidatorProgramNameTextField().setToolTipText(getInputValidatorProgramNameTextField().getText());
+            getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setToolTipText(
+                    getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText());
         }
         
         //fill in the input validator command
         String inputValidatorCmd = prob.getInputValidatorCommandLine();
         if (inputValidatorCmd != null) {
-            getInputValidatorCommandTextField().setText(inputValidatorCmd);
+            getDefineInputValidatorPane().getInputValidatorCommandTextField().setText(inputValidatorCmd);
         } else {
-            getInputValidatorCommandTextField().setText("");
+            getDefineInputValidatorPane().getInputValidatorCommandTextField().setText("");
         }
         //update the tooltip to reflect the name in the text field
-        if (getInputValidatorCommandTextField().getText() == null || getInputValidatorCommandTextField().getText().equals("")) {
+        if (getDefineInputValidatorPane().getInputValidatorCommandTextField().getText() == null || 
+                getDefineInputValidatorPane().getInputValidatorCommandTextField().getText().equals("")) {
             //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
-            getInputValidatorCommandTextField().setToolTipText(null);
+            getDefineInputValidatorPane().getInputValidatorCommandTextField().setToolTipText(null);
         } else {
-            getInputValidatorCommandTextField().setToolTipText(getInputValidatorCommandTextField().getText());
+            getDefineInputValidatorPane().getInputValidatorCommandTextField().setToolTipText(
+                    getDefineInputValidatorPane().getInputValidatorCommandTextField().getText());
         }
         
         //fill in the "Validate files on disk" field
         String filesOnDiskFolder = prob.getInputValidatorFilesOnDiskFolder() ;
         if (filesOnDiskFolder != null) {
-            getInputValidatorFilesOnDiskTextField().setText(filesOnDiskFolder);
+            getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setText(filesOnDiskFolder);
         } else {
-            getInputValidatorFilesOnDiskTextField().setText("");
+            getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setText("");
         }
         //update the files on disk tooltip to reflect the name in the files on disk text field
-        if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
+        if (getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText() == null || 
+                getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText().equals("")) {
             //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
-            getInputValidatorFilesOnDiskTextField().setToolTipText(null);
+            getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setToolTipText(null);
         } else {
-            getInputValidatorFilesOnDiskTextField().setToolTipText(getInputValidatorFilesOnDiskTextField().getText());
+            getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setToolTipText(
+                    getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText());
         }
 
         //default to "files on disk" as file source (the ButtonGroup will automatically de-select the other buttons)
-        getFilesOnDiskInFolderRadioButton().setSelected(true);
+        getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().setSelected(true);
         
         //update the results table:
         //get the number of previous results stored in the problem
@@ -2398,8 +2405,8 @@ public class EditProblemPane extends JPanePlugin {
             prevResults[i++] = prevResultsIter.next();
         }
         
-        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(prevResults);
-        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).setResults(prevResults);
+        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
         //set the Status message based on the status in the specified problem
         InputValidationStatus problemValidationStatus = prob.getInputValidationStatus();
@@ -2433,8 +2440,8 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
                 
-        getInputValidationResultSummaryTextLabel().setText(msg);
-        getInputValidationResultSummaryTextLabel().setForeground(color);
+        getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setText(msg);
+        getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setForeground(color);
         setInputValidationStatus(problemValidationStatus);  //note: validation status variable is not displayed on the GUI
 
     }
@@ -3224,41 +3231,21 @@ public class EditProblemPane extends JPanePlugin {
     private final ButtonGroup validatorStandardButtonGroup = new ButtonGroup();
     private JLabel lblWhatsThisPC2ValStd;
     private JLabel lblWhatsThisCLICSValStd;
-    private JPanel inputValidatorPane;
-    private JLabel inputValidatorProgramNameLabel;
-    private JTextField inputValidatorProgramNameTextField;
-    private JLabel lblInputValidatorInvocation;
-    private JTextField inputValidatorCommandTextField;
-    private JButton validateInputDataButton;
-    private JPanel defineInputValidatorPanel;
-    private JPanel executeInputValidatorPanel;
-    private JPanel inputValidatorDataFilesPanel;
-    private JRadioButton filesPreviouslyLoadedRadioButton;
-    private JRadioButton filesJustLoadedRadioButton;
-    private JTextField inputValidatorFilesOnDiskTextField;
-    private JButton chooseInputFilesButton;
-    private JButton chooseInputValidatorProgramButton;
-    private JPanel inputValidationResultDetailsPanel;
-    private JScrollPane resultsScrollPane;
-    private JTable resultsTable;
-    private JPanel inputValidationResultSummaryPanel;
-    private JLabel inputValidationResultsSummaryLabel;
-    private JLabel inputValidationResultSummaryTextLabel;
-    private JPanel inputValidationResultPanel;
-    private Component verticalStrut_6;
-    private Component verticalStrut_7;
-    private Component verticalStrut_8;
-    private Component verticalStrut_9;
-    private Component verticalStrut_10;
-    private Component verticalStrut_11;
-    private JRadioButton filesOnDiskInFolderRadioButton;
-    private Component horizontalStrut_3;
-    private Component horizontalStrut_4;
-    private final ButtonGroup inputFileLocationButtonGroup = new ButtonGroup();
+    
+    private InputValidatorPane inputValidatorPane;
+
+    private Component horizontalStrut_1;
+    private Component horizontalStrut_2;
 
     private boolean inputValidatorHasBeenRun;
 
     private InputValidationResult[] results;
+
+    private DefineInputValidatorPane defineInputValidatorPane;
+
+    private ExecuteInputValidatorPane executeInputValidatorPane;
+
+    private InputValidationResultPane inputValidationResultPane;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -3836,18 +3823,17 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     private void initializeInputValidatorTabFields() {
-        getInputValidatorProgramNameTextField().setText("");
-        getInputValidatorProgramNameTextField().setToolTipText("");
-        getInputValidatorCommandTextField().setText("");
-        getInputValidatorCommandTextField().setToolTipText("");
-        getInputValidatorFilesOnDiskTextField().setText("");
-        getInputValidatorFilesOnDiskTextField().setToolTipText("");
-        getFilesOnDiskInFolderRadioButton().setSelected(true);  //button group will init others "not selected"
-        getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
-        getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
-//        getInputValidatorResultsTable().setModel(new InputValidationResultsTableModel()); //for some reason this removes the custom pass/fail cell renderer...
-        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(null);
-        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setText("");
+        getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setToolTipText("");
+        getDefineInputValidatorPane().getInputValidatorCommandTextField().setText("");
+        getDefineInputValidatorPane().getInputValidatorCommandTextField().setToolTipText("");
+        getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setText("");
+        getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setToolTipText("");
+        getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().setSelected(true);  //button group will init others "not selected"
+        getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
+        getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
+        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).setResults(null);
+        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
 
     }
 
@@ -4476,13 +4462,6 @@ public class EditProblemPane extends JPanePlugin {
         return customValidatorOptionsSubPanel;
     }
     
-    private Component getHorizontalStrut_1() {
-        if (horizontalStrut_1 == null) {
-        	horizontalStrut_1 = Box.createHorizontalStrut(20);
-        	horizontalStrut_1.setPreferredSize(new Dimension(35, 0));
-        }
-        return horizontalStrut_1;
-    }
     
     private JLabel getCustomValidatorExecutableProgramLabel() {
         if (customValidatorProgramNameLabel == null) {
@@ -4576,13 +4555,6 @@ public class EditProblemPane extends JPanePlugin {
             });
         }
         return usePC2ValidatorRadioButton;
-    }
-    private Component getHorizontalStrut_2() {
-        if (horizontalStrut_2 == null) {
-        	horizontalStrut_2 = Box.createHorizontalStrut(20);
-        	horizontalStrut_2.setPreferredSize(new Dimension(35, 0));
-        }
-        return horizontalStrut_2;
     }
     private JPanel getPc2ValidatorOptionsSubPanel() {
         if (pc2ValidatorOptionsSubPanel == null) {
@@ -4909,68 +4881,9 @@ public class EditProblemPane extends JPanePlugin {
     
     private JPanel getInputValidatorPane() {
         if (inputValidatorPane == null) {
-        	inputValidatorPane = new JPanel();
-        	inputValidatorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-        	inputValidatorPane.setLayout(new BoxLayout(inputValidatorPane, BoxLayout.Y_AXIS));
-        	inputValidatorPane.add(getVerticalStrut_8());
-        	
-        	inputValidatorPane.add(getDefineInputValidatorPanel());
-        	inputValidatorPane.add(getVerticalStrut_9());
-        	inputValidatorPane.add(getExecuteInputValidatorPanel());
-        	inputValidatorPane.add(getVerticalStrut_10());
-        	inputValidatorPane.add(getInputValidationResultPanel());
-        	inputValidatorPane.add(getVerticalStrut_6());
+        	inputValidatorPane = new InputValidatorPane();
         }
         return inputValidatorPane;
-    }
-    private JLabel getInputValidatorProgramNameLabel() {
-        if (inputValidatorProgramNameLabel == null) {
-        	inputValidatorProgramNameLabel = new JLabel("Input Validator Program: ");
-        	inputValidatorProgramNameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        	inputValidatorProgramNameLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        	inputValidatorProgramNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        	inputValidatorProgramNameLabel.setToolTipText("The name, including the full path to it, of the program to be used to validate input data");
-        }
-        return inputValidatorProgramNameLabel;
-    }
-    private JTextField getInputValidatorProgramNameTextField() {
-        if (inputValidatorProgramNameTextField == null) {
-        	inputValidatorProgramNameTextField = new JTextField();
-        	inputValidatorProgramNameTextField.setPreferredSize(new Dimension(300, 25));
-        	inputValidatorProgramNameTextField.setMinimumSize(new Dimension(300, 25));
-        	inputValidatorProgramNameTextField.setColumns(50);
-        	inputValidatorProgramNameTextField.setText("");
-        	inputValidatorProgramNameTextField.setToolTipText("");
-        }
-        return inputValidatorProgramNameTextField;
-    }
-    private JLabel getLblInputValidatorInvocation() {
-        if (lblInputValidatorInvocation == null) {
-        	lblInputValidatorInvocation = new JLabel("Input Validator command:");
-        	lblInputValidatorInvocation.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        	lblInputValidatorInvocation.setToolTipText("The command to be used to invoke the Input Validator");
-        	lblInputValidatorInvocation.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        }
-        return lblInputValidatorInvocation;
-    }
-    private JTextField getInputValidatorCommandTextField() {
-        if (inputValidatorCommandTextField == null) {
-        	inputValidatorCommandTextField = new JTextField();
-        	inputValidatorCommandTextField.setPreferredSize(new Dimension(300, 25));
-        	inputValidatorCommandTextField.setMinimumSize(new Dimension(300, 25));
-        	inputValidatorCommandTextField.setColumns(50);
-        	inputValidatorCommandTextField.setText("");
-        	inputValidatorCommandTextField.setToolTipText("");
-        	
-        	inputValidatorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
-                    updateRunValidatorButtonState();
-                }
-            });
-
-        }
-        return inputValidatorCommandTextField;
     }
     
     /**
@@ -4981,19 +4894,21 @@ public class EditProblemPane extends JPanePlugin {
         boolean enableButton = true ;
         
         //don't enable the button if there's no validator command defined
-        if (getInputValidatorCommandTextField().getText() == null || getInputValidatorCommandTextField().getText().equals("")) {
+        if (getDefineInputValidatorPane().getInputValidatorCommandTextField().getText() == null || 
+                getDefineInputValidatorPane().getInputValidatorCommandTextField().getText().equals("")) {
             enableButton = false;
         }
         
         //don't enable the button if "Files on disk in folder" is selected but there's no folder specified
-        if (getFilesOnDiskInFolderRadioButton().isSelected()) {
-            if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
+        if (getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().isSelected()) {
+            if (getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText() == null || 
+                    getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText().equals("")) {
                 enableButton = false;
             }
         }
         
         //don't enable the button if "Files just loaded via 'input data files' pane" is selected but there's no files on the MTSOV pane
-        if (getFilesJustLoadedRadioButton().isSelected()) {
+        if (getExecuteInputValidatorPane().getFilesJustLoadedRadioButton().isSelected()) {
             if (getMultipleDataSetPane().getTestDataSetsListBox().getModel().getRowCount() <= 0) {
                 //there are no data rows in the MTSOVPane table
                 enableButton = false ;               
@@ -5001,7 +4916,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         // don't enable the button if "Files previously loaded into PC2" is selected but there's no data files loaded
-        if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
+        if (getExecuteInputValidatorPane().getFilesPreviouslyLoadedRadioButton().isSelected()) {
             
             //make sure we have a problem from which we can possibly load data files
             if (problem != null) {
@@ -5026,23 +4941,25 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         //set the button-enabled condition based on the above determinations
-        getRunInputValidatorButton().setEnabled(enableButton);
+        getExecuteInputValidatorPane().getRunInputValidatorButton().setEnabled(enableButton);
         
         //update the tooltip to match the current state
         if (enableButton) {
-            getRunInputValidatorButton().setToolTipText("Run the defined Input Validator command using the specified set of Input Data files");
+            getExecuteInputValidatorPane().getRunInputValidatorButton().setToolTipText("Run the defined Input Validator command using the specified set of Input Data files");
         } else {
             //there must be something blocking permission to run the input validator; set the tooltip to indicate the condition(s)
             String toolTip = "";
             
             //check for the required validator command line
-            if (getInputValidatorCommandTextField() == null || getInputValidatorCommandTextField().getText().equals("")) {
+            if (getDefineInputValidatorPane().getInputValidatorCommandTextField() == null || 
+                    getDefineInputValidatorPane().getInputValidatorCommandTextField().getText().equals("")) {
                 toolTip += "No Input Validator Command defined";
             }
             
             //check whether, if files are coming from a disk folder, there is a folder defined
-            if (getFilesOnDiskInFolderRadioButton().isSelected()) {
-                if (getInputValidatorFilesOnDiskTextField().getText() == null || getInputValidatorFilesOnDiskTextField().getText().equals("")) {
+            if (getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().isSelected()) {
+                if (getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText() == null || 
+                        getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText().equals("")) {
                     if (toolTip.equals("")) {
                         toolTip = "No Input File folder defined";
                     } else {
@@ -5052,7 +4969,7 @@ public class EditProblemPane extends JPanePlugin {
             }
             
             //check whether, if files are coming from the Load Data Files pane, there are files in that pane
-            if (getFilesJustLoadedRadioButton().isSelected()) {
+            if (getExecuteInputValidatorPane().getFilesJustLoadedRadioButton().isSelected()) {
                 if (getMultipleDataSetPane().getTestDataSetsListBox().getRowCount() <= 0) {
                     if (toolTip.equals("")) {
                         toolTip = "No Input Files defined on Input Data Files pane";
@@ -5063,7 +4980,7 @@ public class EditProblemPane extends JPanePlugin {
             }
             
             //check whether, if files are coming from those previously loaded, there actually ARE files loaded
-            if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
+            if (getExecuteInputValidatorPane().getFilesPreviouslyLoadedRadioButton().isSelected()) {
                 
                 //make sure we have a problem from which we can possibly load data files
                 if (problem == null || getContest().getProblemDataFile(getProblem()) == null 
@@ -5085,23 +5002,10 @@ public class EditProblemPane extends JPanePlugin {
                 getLog().log(Log.WARNING, "Empty Run Validator button tooltip when this shouldn't be possible");
             }
             
-            getRunInputValidatorButton().setToolTipText(toolTip);
+            getExecuteInputValidatorPane().getRunInputValidatorButton().setToolTipText(toolTip);
         }
 
     }
-    private JButton getRunInputValidatorButton() {
-        if (validateInputDataButton == null) {
-        	validateInputDataButton = new JButton("Run Input Validator");
-        	validateInputDataButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        runInputDataValidationTest() ;
-        	        enableUpdateButton();
-        	    }
-        	});
-        }
-        return validateInputDataButton;
-    }
-    
     /**
      * Runs the Input Validator specified in the GUI, using the GUI-specified Input Validator Command, against 
      */
@@ -5114,7 +5018,7 @@ public class EditProblemPane extends JPanePlugin {
         String executeDir = getExecuteDirectoryName();        
   
         //TODO: need to save the Serialized File in the model (but don't do that in this method - do it in the Add/Update button handler)
-        SerializedFile validatorProg = new SerializedFile(getInputValidatorProgramNameTextField().getText());
+        SerializedFile validatorProg = new SerializedFile(getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText());
         try {
             Utilities.checkSerializedFileError(validatorProg);
         } catch (Exception e) {
@@ -5133,14 +5037,14 @@ public class EditProblemPane extends JPanePlugin {
             inputValidatorHasBeenRun = true;
         } catch (ExecuteException e) {
             JOptionPane.showMessageDialog(this, "Error running Input Validator: \n" + e.getMessage() + "\nCheck logs for further details", "Input Validator Error", JOptionPane.WARNING_MESSAGE);
-            getInputValidationResultSummaryTextLabel().setText("Errror Running Input Validator");
-            getInputValidationResultSummaryTextLabel().setForeground(Color.RED);
+            getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setText("Errror Running Input Validator");
+            getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setForeground(Color.RED);
             setInputValidationStatus(InputValidationStatus.ERROR);
         }
             
         //update the results table
-        ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(results);
-        ((AbstractTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).setResults(results);
+        ((AbstractTableModel) getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
         //adjust the column widths in the updated table
 //        getInputValidatorResultsTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -5160,8 +5064,8 @@ public class EditProblemPane extends JPanePlugin {
             String resultSummaryString = allPassed ? "All Input Data Files passed validation"
                                                     : "One or more Input Data Files FAILED validation";
             Color color = allPassed ? Color.green : Color.red;
-            getInputValidationResultSummaryTextLabel().setText(resultSummaryString);
-            getInputValidationResultSummaryTextLabel().setForeground(color);
+            getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setText(resultSummaryString);
+            getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setForeground(color);
             if (allPassed) {
                 setInputValidationStatus(InputValidationStatus.PASSED);   
             } else {
@@ -5188,7 +5092,8 @@ public class EditProblemPane extends JPanePlugin {
         SerializedFile [] retArray = null;
         
         //check if the files are coming from either the MSTOVPane or from a folder
-        if (getFilesOnDiskInFolderRadioButton().isSelected() || getFilesJustLoadedRadioButton().isSelected()) {
+        if (getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().isSelected() || 
+                getExecuteInputValidatorPane().getFilesJustLoadedRadioButton().isSelected()) {
 
             //get the names of the data files to be validated
             String [] inputFileNames = getInputFileNames();
@@ -5216,7 +5121,7 @@ public class EditProblemPane extends JPanePlugin {
                 }
             }
             
-        } else if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
+        } else if (getExecuteInputValidatorPane().getFilesPreviouslyLoadedRadioButton().isSelected()) {
             //get the Serialized Judge's Data files out of the contest model and return that
             
             retArray = originalProblemDataFiles.getJudgesDataFiles();
@@ -5247,9 +5152,9 @@ public class EditProblemPane extends JPanePlugin {
 
         String [] retVal = null;
         
-        if (getFilesOnDiskInFolderRadioButton().isSelected()) {
+        if (getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().isSelected()) {
             //read the specified folder and return the names of files in that folder
-            String folderName = getInputValidatorFilesOnDiskTextField().getText();
+            String folderName = getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText();
             if (folderName != null && !folderName.trim().equals("")) {
                 
                 File folderPath = new File(folderName);
@@ -5263,7 +5168,7 @@ public class EditProblemPane extends JPanePlugin {
                 }
             }
             
-        } else if (getFilesJustLoadedRadioButton().isSelected()) {
+        } else if (getExecuteInputValidatorPane().getFilesJustLoadedRadioButton().isSelected()) {
             
             //read the MTSOVPane data table and return the files in that table (if any)
             JTable inputDataFilesTable = getMultipleDataSetPane().getTestDataSetsListBox();
@@ -5291,7 +5196,7 @@ public class EditProblemPane extends JPanePlugin {
                 }
             }
             
-        } else if (getFilesPreviouslyLoadedRadioButton().isSelected()) {
+        } else if (getExecuteInputValidatorPane().getFilesPreviouslyLoadedRadioButton().isSelected()) {
             
             //reach into the Problem (if defined) and get the judge's data files (if any)
             if (problem != null) {
@@ -5374,8 +5279,8 @@ public class EditProblemPane extends JPanePlugin {
 
     private String getInputValidatorCommandLine() {
        
-        String progName = getInputValidatorProgramNameTextField().getText();
-        String cmd = getInputValidatorCommandTextField().getText();
+        String progName = getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText();
+        String cmd = getDefineInputValidatorPane().getInputValidatorCommandTextField().getText();
         
         cmd = replaceString(cmd, "{:inputvalidator}", progName);
         cmd = replaceString(cmd, "{:basename}", Utilities.basename(removeExtension(progName)));
@@ -5419,370 +5324,41 @@ public class EditProblemPane extends JPanePlugin {
     }
 
 
-    private JPanel getDefineInputValidatorPanel() {
-        if (defineInputValidatorPanel == null) {
-            
-        	defineInputValidatorPanel = new JPanel();
-        	defineInputValidatorPanel.setBorder(new TitledBorder(null, "Define Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        	
-        	GridBagLayout gbl_defineInputValidatorPanel = new GridBagLayout();
-        	gbl_defineInputValidatorPanel.columnWidths = new int[] {20, 60, 60};
-        	gbl_defineInputValidatorPanel.rowHeights = new int[]{20, 20};
-        	gbl_defineInputValidatorPanel.columnWeights = new double[]{0.0, 0.0, 0.0};
-        	gbl_defineInputValidatorPanel.rowWeights = new double[]{0.0, 1.0};
-        	defineInputValidatorPanel.setLayout(gbl_defineInputValidatorPanel);
-        	
-        	GridBagConstraints gbc_inputValidatorProgramNameLabel = new GridBagConstraints();
-        	gbc_inputValidatorProgramNameLabel.anchor = GridBagConstraints.EAST;
-        	gbc_inputValidatorProgramNameLabel.insets = new Insets(0, 20, 5, 0);
-        	gbc_inputValidatorProgramNameLabel.gridx = 0;
-        	gbc_inputValidatorProgramNameLabel.gridy = 0;
-        	defineInputValidatorPanel.add(getInputValidatorProgramNameLabel(), gbc_inputValidatorProgramNameLabel);
-        	
-        	GridBagConstraints gbc_inputValidatorProgramNameTextField = new GridBagConstraints();
-        	gbc_inputValidatorProgramNameTextField.anchor = GridBagConstraints.WEST;
-        	gbc_inputValidatorProgramNameTextField.insets = new Insets(0, 0, 5, 5);
-        	gbc_inputValidatorProgramNameTextField.gridx = 1;
-        	gbc_inputValidatorProgramNameTextField.gridy = 0;
-        	defineInputValidatorPanel.add(getInputValidatorProgramNameTextField(), gbc_inputValidatorProgramNameTextField);
-        	
-        	GridBagConstraints gbc_chooseInputValidatorProgramButton = new GridBagConstraints();
-        	gbc_chooseInputValidatorProgramButton.anchor = GridBagConstraints.WEST;
-        	gbc_chooseInputValidatorProgramButton.insets = new Insets(0, 0, 0, 5);
-        	gbc_chooseInputValidatorProgramButton.gridx = 2;
-        	gbc_chooseInputValidatorProgramButton.gridy = 0;
-        	defineInputValidatorPanel.add(getChooseInputValidatorProgramButton(), gbc_chooseInputValidatorProgramButton);
-        	
-        	GridBagConstraints gbc_lblInputValidatorInvocation = new GridBagConstraints();
-        	gbc_lblInputValidatorInvocation.anchor = GridBagConstraints.EAST;
-        	gbc_lblInputValidatorInvocation.insets = new Insets(0, 20, 5, 0);
-        	gbc_lblInputValidatorInvocation.gridx = 0;
-        	gbc_lblInputValidatorInvocation.gridy = 1;
-        	defineInputValidatorPanel.add(getLblInputValidatorInvocation(), gbc_lblInputValidatorInvocation);
-        	
-        	GridBagConstraints gbc_inputValidatorCommandTextField = new GridBagConstraints();
-        	gbc_inputValidatorCommandTextField.insets = new Insets(0, 0, 5, 5);
-        	gbc_inputValidatorCommandTextField.anchor = GridBagConstraints.WEST;
-        	gbc_inputValidatorCommandTextField.gridx = 1;
-        	gbc_inputValidatorCommandTextField.gridy = 1;
-        	defineInputValidatorPanel.add(getInputValidatorCommandTextField(), gbc_inputValidatorCommandTextField);
+    private DefineInputValidatorPane getDefineInputValidatorPane() {
+        if (defineInputValidatorPane == null) {
+            defineInputValidatorPane = new DefineInputValidatorPane();
+            defineInputValidatorPane.setContestAndController(this.getContest(), this.getController());
         }
-        return defineInputValidatorPanel;
-    }
-    private JPanel getExecuteInputValidatorPanel() {
-        if (executeInputValidatorPanel == null) {
-        	executeInputValidatorPanel = new JPanel();
-        	executeInputValidatorPanel.setBorder(new TitledBorder(null, "Execute Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        	executeInputValidatorPanel.setLayout(new BoxLayout(executeInputValidatorPanel, BoxLayout.X_AXIS));
-        	executeInputValidatorPanel.add(getHorizontalStrut_3());
-        	executeInputValidatorPanel.add(getRunInputValidatorButton());
-        	executeInputValidatorPanel.add(getHorizontalStrut_4());
-        	executeInputValidatorPanel.add(getInputValidatorDataFilesPanel());
-        }
-        return executeInputValidatorPanel;
-    }
-    private JPanel getInputValidatorDataFilesPanel() {
-        if (inputValidatorDataFilesPanel == null) {
-        	inputValidatorDataFilesPanel = new JPanel();
-        	inputValidatorDataFilesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        	inputValidatorDataFilesPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Input Data Files to Validate:", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        	GridBagLayout gbl_inputValidatorDataFilesPanel = new GridBagLayout();
-        	gbl_inputValidatorDataFilesPanel.columnWidths = new int[] {50, 200, 50};
-        	gbl_inputValidatorDataFilesPanel.rowHeights = new int[] {25, 25, 25};
-        	gbl_inputValidatorDataFilesPanel.columnWeights = new double[]{0.0, 0.0, 0.0};
-        	gbl_inputValidatorDataFilesPanel.rowWeights = new double[]{0.0, 0.0, 0.0};
-        	inputValidatorDataFilesPanel.setLayout(gbl_inputValidatorDataFilesPanel);
-        	GridBagConstraints gbc_filesPreviouslyLoadedRadioButton = new GridBagConstraints();
-        	gbc_filesPreviouslyLoadedRadioButton.gridwidth = 2;
-        	gbc_filesPreviouslyLoadedRadioButton.anchor = GridBagConstraints.WEST;
-        	gbc_filesPreviouslyLoadedRadioButton.insets = new Insets(0, 0, 5, 5);
-        	gbc_filesPreviouslyLoadedRadioButton.gridx = 0;
-        	gbc_filesPreviouslyLoadedRadioButton.gridy = 0;
-        	inputValidatorDataFilesPanel.add(getFilesPreviouslyLoadedRadioButton(), gbc_filesPreviouslyLoadedRadioButton);
-        	GridBagConstraints gbc_filesJustLoadedRadioButton = new GridBagConstraints();
-        	gbc_filesJustLoadedRadioButton.gridwidth = 2;
-        	gbc_filesJustLoadedRadioButton.anchor = GridBagConstraints.WEST;
-        	gbc_filesJustLoadedRadioButton.insets = new Insets(0, 0, 5, 5);
-        	gbc_filesJustLoadedRadioButton.gridx = 0;
-        	gbc_filesJustLoadedRadioButton.gridy = 1;
-        	inputValidatorDataFilesPanel.add(getFilesJustLoadedRadioButton(), gbc_filesJustLoadedRadioButton);
-        	GridBagConstraints gbc_filesOnDiskInFolderRadioButton = new GridBagConstraints();
-        	gbc_filesOnDiskInFolderRadioButton.anchor = GridBagConstraints.WEST;
-        	gbc_filesOnDiskInFolderRadioButton.insets = new Insets(0, 0, 0, 5);
-        	gbc_filesOnDiskInFolderRadioButton.gridx = 0;
-        	gbc_filesOnDiskInFolderRadioButton.gridy = 2;
-        	inputValidatorDataFilesPanel.add(getFilesOnDiskInFolderRadioButton(), gbc_filesOnDiskInFolderRadioButton);
-        	GridBagConstraints gbc_inputValidatorFilesOnDiskTextField = new GridBagConstraints();
-        	gbc_inputValidatorFilesOnDiskTextField.anchor = GridBagConstraints.WEST;
-        	gbc_inputValidatorFilesOnDiskTextField.insets = new Insets(0, 0, 5, 5);
-        	gbc_inputValidatorFilesOnDiskTextField.gridx = 1;
-        	gbc_inputValidatorFilesOnDiskTextField.gridy = 2;
-        	inputValidatorDataFilesPanel.add(getInputValidatorFilesOnDiskTextField(), gbc_inputValidatorFilesOnDiskTextField);
-        	GridBagConstraints gbc_chooseInputFilesButton = new GridBagConstraints();
-        	gbc_chooseInputFilesButton.insets = new Insets(0, 0, 0, 5);
-        	gbc_chooseInputFilesButton.gridx = 2;
-        	gbc_chooseInputFilesButton.gridy = 2;
-        	inputValidatorDataFilesPanel.add(getChooseInputFilesButton(), gbc_chooseInputFilesButton);
-        }
-        return inputValidatorDataFilesPanel;
-    }
-    private JRadioButton getFilesPreviouslyLoadedRadioButton() {
-        if (filesPreviouslyLoadedRadioButton == null) {
-        	filesPreviouslyLoadedRadioButton = new JRadioButton("Files previously loaded into PC2");
-        	filesPreviouslyLoadedRadioButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-                    enableUpdateButton();
-                    updateRunValidatorButtonState();
-        	    }
-        	});
-        	inputFileLocationButtonGroup.add(filesPreviouslyLoadedRadioButton);
-        	filesPreviouslyLoadedRadioButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-        }
-        return filesPreviouslyLoadedRadioButton;
-    }
-    private JRadioButton getFilesJustLoadedRadioButton() {
-        if (filesJustLoadedRadioButton == null) {
-        	filesJustLoadedRadioButton = new JRadioButton("Files just loaded via \"Input Data Files\" pane");
-        	filesJustLoadedRadioButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-                    enableUpdateButton();
-                    updateRunValidatorButtonState();
-        	    }
-        	});
-        	inputFileLocationButtonGroup.add(filesJustLoadedRadioButton);
-        }
-        return filesJustLoadedRadioButton;
-    }
-    private JTextField getInputValidatorFilesOnDiskTextField() {
-        if (inputValidatorFilesOnDiskTextField == null) {
-        	inputValidatorFilesOnDiskTextField = new JTextField();
-        	inputValidatorFilesOnDiskTextField.setMinimumSize(new Dimension(300, 25));
-        	inputValidatorFilesOnDiskTextField.setPreferredSize(new Dimension(300, 25));
-        	inputValidatorFilesOnDiskTextField.setColumns(50);
-            
-        	inputValidatorFilesOnDiskTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
-                    updateRunValidatorButtonState();
-                }
-            });
-
-        }
-        return inputValidatorFilesOnDiskTextField;
+        return defineInputValidatorPane;
     }
     
-    private JButton getChooseInputValidatorProgramButton() {
-        if (chooseInputValidatorProgramButton == null) {
-            chooseInputValidatorProgramButton = new JButton("Choose...");
-            chooseInputValidatorProgramButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (selectFile(getInputValidatorProgramNameTextField(), "Select Input Validator")) {
-                        getInputValidatorProgramNameTextField().setToolTipText((getInputValidatorProgramNameTextField().getText()));
-                        enableUpdateButton();
-                    }
-                }
-            });
+    private ExecuteInputValidatorPane getExecuteInputValidatorPane() {
+        if (executeInputValidatorPane == null) {
+        	executeInputValidatorPane = new ExecuteInputValidatorPane();
         }
-        return chooseInputValidatorProgramButton;
+        return executeInputValidatorPane;
     }
     
-    /**
-     * A button allowing the user to choose the directory from which Input Data Files to be validated
-     * are to be loaded.
-     * 
-     * @return A JButton which displays a chooser dialog
-     */
-    private JButton getChooseInputFilesButton() {
-        if (chooseInputFilesButton == null) {
-        	chooseInputFilesButton = new JButton("Choose...");
-        	chooseInputFilesButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        String directory = selectDirectory(getInputValidatorFilesOnDiskTextField(),"Select Input File Folder");
-                    if (directory != null && !directory.equals("")) {
-                        getInputValidatorFilesOnDiskTextField().setText(directory);
-                        getInputValidatorFilesOnDiskTextField().setToolTipText(directory);
-                        enableUpdateButton();
-                        updateRunValidatorButtonState();
-                    }
-        	    }
-        	});
+    private InputValidationResultPane getInputValidationResultPane() {
+        if (inputValidationResultPane == null) {
+            inputValidationResultPane = new InputValidationResultPane();
         }
-        return chooseInputFilesButton;
+        return inputValidationResultPane;
     }
     
-    private JPanel getInputValidationResultDetailsPanel() {
-        if (inputValidationResultDetailsPanel == null) {
-        	inputValidationResultDetailsPanel = new JPanel();
-        	inputValidationResultDetailsPanel.setLayout(new BorderLayout(0, 0));
-        	inputValidationResultDetailsPanel.add(getInputValidatorResultsScrollPane(), BorderLayout.CENTER);        	
+    private Component getHorizontalStrut_1() {
+        if (horizontalStrut_1 == null) {
+        	horizontalStrut_1 = Box.createHorizontalStrut(20);
         }
-        return inputValidationResultDetailsPanel;
+        return horizontalStrut_1;
     }
-    private JScrollPane getInputValidatorResultsScrollPane() {
-        if (resultsScrollPane == null) {
-        	resultsScrollPane = new JScrollPane();
-        	resultsScrollPane.setViewportView(getInputValidatorResultsTable());
+    private Component getHorizontalStrut_2() {
+        if (horizontalStrut_2 == null) {
+        	horizontalStrut_2 = Box.createHorizontalStrut(20);
         }
-        return resultsScrollPane;
-    }
-    private JTable getInputValidatorResultsTable() {
-        if (resultsTable == null) {
-        	resultsTable = new JTable(inputValidationResultsTableModel);
-        	
-            //set the desired options on the table
-        	resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        	resultsTable.setFillsViewportHeight(true);
-        	resultsTable.setRowSelectionAllowed(false);
-        	resultsTable.getTableHeader().setReorderingAllowed(false);
-
-        	//code from MultipleDataSetPane:
-            // insert a renderer that will center cell contents
-            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-
-            for (int i = 0; i < resultsTable.getColumnCount(); i++) {
-                resultsTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-            }
-            resultsTable.setDefaultRenderer(String.class, centerRenderer);
-//
-//            // also center column headers (which use a different CellRenderer)
-            //(this code came from MultipleDataSetPane, but the JTable here already has centered headers...
-//            ((DefaultTableCellRenderer) testDataSetsListBox.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
-
-            // change the header font
-            JTableHeader header = resultsTable.getTableHeader();
-            header.setFont(new Font("Dialog", Font.BOLD, 12));
-            
-            // render Result column as Pass/Fail on Green/Red background
-            resultsTable.getColumn("Result").setCellRenderer(new PassFailCellRenderer());
-
-
-        }
-        return resultsTable;
-    }
-    private JPanel getInputValidationResultSummaryPanel() {
-        if (inputValidationResultSummaryPanel == null) {
-        	inputValidationResultSummaryPanel = new JPanel();
-        	inputValidationResultSummaryPanel.add(getInputValidationResultsSummaryLabel());
-        	inputValidationResultSummaryPanel.add(getInputValidationResultSummaryTextLabel());
-        }
-        return inputValidationResultSummaryPanel;
-    }
-    private JLabel getInputValidationResultsSummaryLabel() {
-        if (inputValidationResultsSummaryLabel == null) {
-        	inputValidationResultsSummaryLabel = new JLabel("Most Recent Status: ");
-        }
-        return inputValidationResultsSummaryLabel;
-    }
-    private JLabel getInputValidationResultSummaryTextLabel() {
-        if (inputValidationResultSummaryTextLabel == null) {
-        	inputValidationResultSummaryTextLabel = new JLabel("<No Input Validation test run yet>");
-        	inputValidationResultSummaryTextLabel.setForeground(Color.black);
-        }
-        return inputValidationResultSummaryTextLabel;
-    }
-    private JPanel getInputValidationResultPanel() {
-        if (inputValidationResultPanel == null) {
-        	inputValidationResultPanel = new JPanel();
-        	inputValidationResultPanel.setBorder(new TitledBorder(null, "Input Validation Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        	inputValidationResultPanel.setLayout(new BoxLayout(inputValidationResultPanel, BoxLayout.Y_AXIS));
-        	inputValidationResultPanel.add(getVerticalStrut_7());
-        	inputValidationResultPanel.add(getInputValidationResultSummaryPanel());
-        	inputValidationResultPanel.add(getVerticalStrut_11());
-        	inputValidationResultPanel.add(getInputValidationResultDetailsPanel());
-        }
-        return inputValidationResultPanel;
-    }
-    private Component getVerticalStrut_6() {
-        if (verticalStrut_6 == null) {
-        	verticalStrut_6 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_6;
-    }
-    private Component getVerticalStrut_7() {
-        if (verticalStrut_7 == null) {
-        	verticalStrut_7 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_7;
-    }
-    private Component getVerticalStrut_8() {
-        if (verticalStrut_8 == null) {
-        	verticalStrut_8 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_8;
-    }
-    private Component getVerticalStrut_9() {
-        if (verticalStrut_9 == null) {
-        	verticalStrut_9 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_9;
-    }
-    private Component getVerticalStrut_10() {
-        if (verticalStrut_10 == null) {
-        	verticalStrut_10 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_10;
-    }
-    private Component getVerticalStrut_11() {
-        if (verticalStrut_11 == null) {
-        	verticalStrut_11 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_11;
-    }
-    private JRadioButton getFilesOnDiskInFolderRadioButton() {
-        if (filesOnDiskInFolderRadioButton == null) {
-        	filesOnDiskInFolderRadioButton = new JRadioButton("Files on disk in folder:");
-        	filesOnDiskInFolderRadioButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        enableUpdateButton();
-        	        updateRunValidatorButtonState();
-        	    }
-        	});
-        	inputFileLocationButtonGroup.add(filesOnDiskInFolderRadioButton);
-        }
-        return filesOnDiskInFolderRadioButton;
-    }
-    private Component getHorizontalStrut_3() {
-        if (horizontalStrut_3 == null) {
-        	horizontalStrut_3 = Box.createHorizontalStrut(20);
-        }
-        return horizontalStrut_3;
-    }
-    private Component getHorizontalStrut_4() {
-        if (horizontalStrut_4 == null) {
-        	horizontalStrut_4 = Box.createHorizontalStrut(20);
-        }
-        return horizontalStrut_4;
+        return horizontalStrut_2;
     }
     
-    public class PassFailCellRenderer extends DefaultTableCellRenderer {
-
-        private static final long serialVersionUID = 1L;
-
-        public void setValue(Object value) {
-            if (value instanceof Boolean) {
-                boolean passed = (Boolean) value;
-                if (passed) {
-                    setBackground(Color.green);
-                    setForeground(Color.black);
-                    setText("Pass");
-                } else {
-                    setBackground(Color.red);
-                    setForeground(Color.white);
-                    setText("Fail");
-                }
-            } else {
-                // illegal value
-                setBackground(Color.yellow);
-                setText("??");
-                getController().getLog().log(Log.SEVERE, "EditProblem.PassFailCellRenderer: unknown pass/fail result: ", value);
-            }
-            setHorizontalAlignment(SwingConstants.CENTER);
-            setBorder(new EmptyBorder(0, 0, 0, 0));
-
-        }
-
-    }
 
 } 
 
