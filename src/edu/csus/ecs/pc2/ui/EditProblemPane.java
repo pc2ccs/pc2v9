@@ -2423,7 +2423,6 @@ public class EditProblemPane extends JPanePlugin {
                     color = Color.GREEN;
                     break;
                 case FAILED:
-                    //TODO: count the NUMBER of failures and set msg to "x of y failed"
                     int totalCount = 0;
                     int failCount = 0;
                     for (InputValidationResult res : prob.getInputValidationResults()) {
@@ -2440,7 +2439,7 @@ public class EditProblemPane extends JPanePlugin {
                     color = Color.YELLOW;
                     break;
                 default:
-                    msg = "This should never be displayed; please notify PC2 Developers";
+                    msg = "This message should never be displayed; please notify PC2 Developers";
                     color = Color.ORANGE;
             }
         }
