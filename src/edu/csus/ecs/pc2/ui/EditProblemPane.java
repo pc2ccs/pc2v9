@@ -2423,7 +2423,16 @@ public class EditProblemPane extends JPanePlugin {
                     color = Color.GREEN;
                     break;
                 case FAILED:
-                    msg = "One or more input data files FAILED validation";
+                    //TODO: count the NUMBER of failures and set msg to "x of y failed"
+                    int totalCount = 0;
+                    int failCount = 0;
+                    for (InputValidationResult res : prob.getInputValidationResults()) {
+                        if (!res.isPassed()) {
+                            failCount++ ;
+                        }
+                        totalCount++ ;
+                    }
+                    msg = "" + failCount + " of " + totalCount + " input data files FAILED validation";
                     color = Color.red;
                     break;
                 case ERROR:
