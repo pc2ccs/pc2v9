@@ -50,8 +50,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
 import edu.csus.ecs.pc2.core.Constants;
@@ -2480,15 +2478,6 @@ public class EditProblemPane extends JPanePlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
-            mainTabbedPane.addChangeListener(new ChangeListener() {
-                public void stateChanged(ChangeEvent e) {
-                    JTabbedPane sourceTabbedPane = (JTabbedPane) e.getSource();
-                    int index = sourceTabbedPane.getSelectedIndex();
-                    if (sourceTabbedPane.getTitleAt(index).equals("Input Validator")) {
-                        updateRunValidatorButtonState();
-                    }
-                }
-            });
             mainTabbedPane.setPreferredSize(new Dimension(500, 600));
             mainTabbedPane.insertTab("Input Validator", null, getInputValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Input Data Files", null, getMultipleDataSetPane(), null, 0);
@@ -3045,7 +3034,6 @@ public class EditProblemPane extends JPanePlugin {
 
     
     private void enableInputValidatorTabComponents() {
-        updateRunValidatorButtonState();
         inputValidatorHasBeenRun = false ;
     }
     
@@ -4847,126 +4835,6 @@ public class EditProblemPane extends JPanePlugin {
         return inputValidatorPane;
     }
     
-    /**
-     * Sets the "Run Input Validator" button enabled or disabled according to whether all attributes necessary to run the
-     * Input Validator have been specified.
-     */
-    private void updateRunValidatorButtonState() {
-        boolean enableButton = true ;
-        
-        //don't enable the button if there's no validator command defined
-        if (getDefineInputValidatorPane().getInputValidatorCommandTextField().getText() == null || 
-                getDefineInputValidatorPane().getInputValidatorCommandTextField().getText().equals("")) {
-            enableButton = false;
-        }
-        
-        //don't enable the button if "Files on disk in folder" is selected but there's no folder specified
-        if (getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().isSelected()) {
-            if (getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText() == null || 
-                    getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText().equals("")) {
-                enableButton = false;
-            }
-        }
-        
-        //don't enable the button if "Files just loaded via 'input data files' pane" is selected but there's no files on the MTSOV pane
-        if (getExecuteInputValidatorPane().getFilesJustLoadedRadioButton().isSelected()) {
-            if (getMultipleDataSetPane().getTestDataSetsListBox().getModel().getRowCount() <= 0) {
-                //there are no data rows in the MTSOVPane table
-                enableButton = false ;               
-            }
-        }
-        
-        // don't enable the button if "Files previously loaded into PC2" is selected but there's no data files loaded
-        if (getExecuteInputValidatorPane().getFilesPreviouslyLoadedRadioButton().isSelected()) {
-            
-            //make sure we have a problem from which we can possibly load data files
-            if (problem != null) {
-                
-                // make sure the problem in the contest model has data files
-                ProblemDataFiles pdf = getContest().getProblemDataFile(getProblem());
-                if (pdf != null) {
-                    //make sure the data files contain judge's answer files
-                    SerializedFile[] answerFiles = pdf.getJudgesAnswerFiles();
-                    if (answerFiles == null || answerFiles.length <= 0) {
-                        //problem has no judge's answer files; don't enable Run button
-                        enableButton = false;
-                    }
-                } else {
-                    //problem has no data files; don't enable Run button
-                    enableButton = false;
-                }
-            } else {
-                //problem is null; don't enable Run button
-                enableButton = false ;
-            }
-        }
-        
-        //set the button-enabled condition based on the above determinations
-        getExecuteInputValidatorPane().getRunInputValidatorButton().setEnabled(enableButton);
-        
-        //update the tooltip to match the current state
-        if (enableButton) {
-            getExecuteInputValidatorPane().getRunInputValidatorButton().setToolTipText("Run the defined Input Validator command using the specified set of Input Data files");
-        } else {
-            //there must be something blocking permission to run the input validator; set the tooltip to indicate the condition(s)
-            String toolTip = "";
-            
-            //check for the required validator command line
-            if (getDefineInputValidatorPane().getInputValidatorCommandTextField() == null || 
-                    getDefineInputValidatorPane().getInputValidatorCommandTextField().getText().equals("")) {
-                toolTip += "No Input Validator Command defined";
-            }
-            
-            //check whether, if files are coming from a disk folder, there is a folder defined
-            if (getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().isSelected()) {
-                if (getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText() == null || 
-                        getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText().equals("")) {
-                    if (toolTip.equals("")) {
-                        toolTip = "No Input File folder defined";
-                    } else {
-                        toolTip += "; no Input File folder defined"; 
-                    }
-                }
-            }
-            
-            //check whether, if files are coming from the Load Data Files pane, there are files in that pane
-            if (getExecuteInputValidatorPane().getFilesJustLoadedRadioButton().isSelected()) {
-                if (getMultipleDataSetPane().getTestDataSetsListBox().getRowCount() <= 0) {
-                    if (toolTip.equals("")) {
-                        toolTip = "No Input Files defined on Input Data Files pane";
-                    } else {
-                        toolTip += "; no Input Files defined on Input Data Files pane"; 
-                    }
-                }
-            }
-            
-            //check whether, if files are coming from those previously loaded, there actually ARE files loaded
-            if (getExecuteInputValidatorPane().getFilesPreviouslyLoadedRadioButton().isSelected()) {
-                
-                //make sure we have a problem from which we can possibly load data files
-                if (problem == null || getContest().getProblemDataFile(getProblem()) == null 
-                        || getContest().getProblemDataFile(getProblem()).getJudgesDataFiles() == null
-                        || getContest().getProblemDataFile(getProblem()).getJudgesDataFiles().length <= 0) {
-                    if (toolTip.equals("")) {
-                        toolTip = "No Input Files saved in current problem";
-                    } else {
-                        toolTip += "; no Input Files saved in current problem"; 
-                    }
-                }
-            }
-            
-            if (!toolTip.equals("")) {
-                toolTip += "; cannot run Input Validator";
-            } else {
-                //we shouldn't be able to get here; the tooltip shouldn't be empty if 'enable' was false (there must be some condition
-                // suppressing the enable, so why didn't we pick it up in the above set of 'if' statements??)
-                getLog().log(Log.WARNING, "Empty Run Validator button tooltip when this shouldn't be possible");
-            }
-            
-            getExecuteInputValidatorPane().getRunInputValidatorButton().setToolTipText(toolTip);
-        }
-
-    }
     private InputValidationStatus getInputValidationStatus() {
         return this.inputValidationStatus;
     }
