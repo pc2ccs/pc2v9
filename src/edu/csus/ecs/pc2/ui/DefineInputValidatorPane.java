@@ -8,6 +8,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -35,6 +37,8 @@ public class DefineInputValidatorPane extends JPanePlugin {
     private JTextField inputValidatorCommandTextField;
     
     private JButton chooseInputValidatorProgramButton;
+
+    private JPanePlugin parentPane;
 
     
     public DefineInputValidatorPane() {
@@ -104,6 +108,17 @@ public class DefineInputValidatorPane extends JPanePlugin {
             inputValidatorProgramNameTextField.setColumns(50);
             inputValidatorProgramNameTextField.setText("");
             inputValidatorProgramNameTextField.setToolTipText("");
+            inputValidatorProgramNameTextField.addKeyListener(new KeyAdapter() {
+                public void keyPressed(KeyEvent event) {
+                    JPanePlugin parent = getParentPane();
+                    if (parent != null && parent instanceof InputValidatorPane) {
+                        JPanePlugin grandParent = ((InputValidatorPane)parent).getParentPane();
+                        if (grandParent != null && grandParent instanceof EditProblemPane) {
+                            ((EditProblemPane)grandParent).enableUpdateButton();
+                        }
+                    }
+                }
+            });
         }
         return inputValidatorProgramNameTextField;
     }
@@ -164,6 +179,14 @@ public class DefineInputValidatorPane extends JPanePlugin {
     public String getPluginTitle() {
 
         return "Define Input Validator Pane";
+    }
+
+    public void setParentPane(JPanePlugin parentPane) {
+        this.parentPane = parentPane;
+    }
+    
+    public JPanePlugin getParentPane() {
+        return this.parentPane;
     }
 
 }
