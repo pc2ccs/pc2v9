@@ -4831,6 +4831,7 @@ public class EditProblemPane extends JPanePlugin {
         if (inputValidatorPane == null) {
         	inputValidatorPane = new InputValidatorPane();
         	inputValidatorPane.setContestAndController(getContest(), getController());
+        	inputValidatorPane.setParentPane(this);
         }
         return inputValidatorPane;
     }
