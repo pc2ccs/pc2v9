@@ -621,7 +621,6 @@ public class ProblemsPane extends JPanePlugin {
                     updateProblemRow(event.getProblem());
                     updateRunInputValidatorsProblemRow(event.getProblem());
                     getRunInputValidatorsButton().setEnabled(true);
-                    System.out.println ("RunInputValidators button enabled in ProblemsPane.ProblemListenerImplementation.problemAdded()");
                 }
             });
         }
@@ -865,7 +864,7 @@ public class ProblemsPane extends JPanePlugin {
 
     private JButton getRunInputValidatorsButton() {
         if (runInputValidatorsButton == null) {
-        	runInputValidatorsButton = new JButton("Run Input Validators");
+        	runInputValidatorsButton = new JButton("Run Input Validators...");
         	runInputValidatorsButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        runInputValidators();
