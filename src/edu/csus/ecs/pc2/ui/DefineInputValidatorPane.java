@@ -140,20 +140,8 @@ public class DefineInputValidatorPane extends JPanePlugin {
             inputValidatorProgramNameTextField.setToolTipText("");
             inputValidatorProgramNameTextField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent event) {
-                    System.err.println ("key pressed in DefineInputValidator");
-                    JPanePlugin parent = getParentPane();
-                    if (parent != null && parent instanceof InputValidatorPane) {
-                        JPanePlugin grandParent = ((InputValidatorPane)parent).getParentPane();
-                        if (grandParent != null && grandParent instanceof EditProblemPane) {
-                            ((EditProblemPane)grandParent).enableUpdateButton();
-                        } else {
-                            System.err.println ("No grandparent pane (EditProblemPane) in DefineInputValidatorPane");
-                            getController().getLog().warning("No grandparent pane (EditProblemPane) in DefineInputValidatorPane");
-                        }
-                    } else {
-                        System.err.println ("No parent pane in DefineInputValidator");
-                        getController().getLog().warning("No parent pane in DefineInputValidator");
-                    }
+                    System.err.println ("key pressed in DefineInputValidatorPane.getInputValidatorProgramNameTextField");
+                    enableUpdateButton();
                 }
             });
         }
@@ -181,7 +169,7 @@ public class DefineInputValidatorPane extends JPanePlugin {
             
             inputValidatorCommandTextField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent event) {
-                    System.err.println ("key pressed in DefineInputValidator");
+                    System.err.println ("key pressed in DefineInputValidatorPane.getInputValidatorCommandTextField");
                     enableUpdateButton();
                 }
             });
@@ -223,15 +211,15 @@ public class DefineInputValidatorPane extends JPanePlugin {
                 ((EditProblemPane)grandParent).enableUpdateButton();
             } else {
                 System.err.println ("No grandparent pane (EditProblemPane) accessible from DefineInputValidatorPane; cannot enable Add/Update button");
-                getController().getLog().warning("No grandparent pane (EditProblemPane) accessible from  DefineInputValidatorPane -- cannot enable Add/Update button");
+                getController().getLog().warning("No grandparent pane (EditProblemPane) accessible from  DefineInputValidatorPane; cannot enable Add/Update button");
             }
         } else {
-            System.err.println ("No parent pane in DefineInputValidator; cannot enable Add/Update button");
-            getController().getLog().warning("No parent pane in DefineInputValidator; cannot enable Add/Update button");
+            System.err.println ("No parent pane in DefineInputValidatorPane; cannot enable Add/Update button");
+            getController().getLog().warning("No parent pane in DefineInputValidatorPane; cannot enable Add/Update button");
         }
     }
     
-    
+   
     /**
      * Displays a FileChooser dialog for selecting a file. If a file is actually selected then the method updates 
      * the specified JTextField.
