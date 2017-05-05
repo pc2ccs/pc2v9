@@ -1235,11 +1235,11 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
         
-        //update Input Validator settings from GUI:
-        
-        //Input Validator program...
-        checkProblem.setProblemHasInputValidator(false);    // start with a default assumption of no Input Validator
+        //update Input Validator Program settings from GUI
+        // start with a default assumption of no Input Validator
+        checkProblem.setProblemHasInputValidator(false);    
         checkProblem.setInputValidatorProgramName("");
+        checkProblem.setInputValidatorCommandLine("");
 
         // get the Input Validator file name (if any) from the GUI
         String guiInputValidatorFileName = getInputValidatorPane().getInputValidatorProgramName().trim();
@@ -1314,9 +1314,14 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
-        //Input Validator Command...
+        //update Input Validator Command from GUI
+        // Note that a problem is deemed to "have an Input Validator" if it has EITHER an Input Validator Program name
+        // OR an Input Validator Command line (or both)
         String inputValCommand = getInputValidatorPane().getInputValidatorCommand();
-        checkProblem.setInputValidatorCommandLine(inputValCommand);
+        if (inputValCommand != null && !inputValCommand.equals("")) {
+            checkProblem.setInputValidatorCommandLine(inputValCommand);
+            checkProblem.setProblemHasInputValidator(true);            
+        }
                 
         //Status of running an Input Validator
         checkProblem.setInputValidationStatus(this.getInputValidationStatus());
