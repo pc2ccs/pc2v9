@@ -584,10 +584,16 @@ public class EditProblemPane extends JPanePlugin {
         System.err.println ("EditProblemPane.enableUpdateButton() called; checking whether to enable update button...");
         if (problem != null) {
 
+            //This try/catch supports the ability for the user to enter GUI data which is "temporarily invalid".  
+            // For example, this method is called on every keystroke while entering file names, but those file names might
+            // be invalid until the entire name is entered.  Calls to method getProblemFromFields() will throw InvalidFieldValue
+            // in such cases; this will be caught (and ignored).  A final check for validity occurs when either the Add or Update
+            // button is pressed; that is the place truly invalid fields are dealt with.
             try {
                 //get the new version of the problem from the GUI
                 Problem changedProblem = getProblemFromFields(null, newProblemDataFiles);
                 
+                //see if the problem as specified in the GUI has changed; enable the Update button and update the tooltip if so
                 if (!problem.isSameAs(changedProblem) || getMultipleDataSetPane().hasChanged(originalProblemDataFiles)) {
                     enableButton = true;
                     updateToolTip = "Problem changed";
@@ -961,7 +967,7 @@ public class EditProblemPane extends JPanePlugin {
      * 
      * @throws InvalidFieldValue if any of the fields in the GUI are incomplete or illegally set
      */
-    public Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
+    private Problem getProblemFromFields(Problem checkProblem, ProblemDataFiles dataFiles) {
         
         SerializedFile outputValidatorSF = null ;
         
@@ -1027,7 +1033,7 @@ public class EditProblemPane extends JPanePlugin {
             
             String fileName = inputDataFileLabel.getText();
             if (fileName == null || fileName.trim().length() == 0) {
-                throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
+                throw new InvalidFieldValue("'Problem Requires Input Data' is checked; you must select an input data file ");
             }
 
             if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
@@ -1037,8 +1043,13 @@ public class EditProblemPane extends JPanePlugin {
             if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
 
-                if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (adding)");
+                //Check for SerializedFile error/exception
+                try {
+                    if (Utilities.serializedFileError(serializedFile) || serializedFile.getBuffer() == null) {
+                        throw new InvalidFieldValue("Unable to read file ' " + fileName + " ' while adding problem; choose data file again");
+                    }
+                } catch (Exception e) {
+                    throw new InvalidFieldValue("Error reading file ' " + fileName + " ': " + e.getMessage() + " while adding problem; choose data file again");                    
                 }
 
                 checkProblem.setDataFileName(serializedFile.getName());
@@ -1085,8 +1096,13 @@ public class EditProblemPane extends JPanePlugin {
             if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
 
-                if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (adding)");
+                //Check for SerializedFile error/exception
+                try {
+                    if (Utilities.serializedFileError(serializedFile) || serializedFile.getBuffer() == null) {
+                        throw new InvalidFieldValue("Unable to read file ' " + fileName + " ' while adding problem; choose answer file again");
+                    }
+                } catch (Exception e) {
+                    throw new InvalidFieldValue("Error reading file ' " + fileName + " ': " + e.getMessage() + " while adding problem; choose answer file again");                    
                 }
 
                 checkProblem.setAnswerFileName(serializedFile.getName());
@@ -1101,10 +1117,23 @@ public class EditProblemPane extends JPanePlugin {
                     // TODO this is not MTS safe
                     SerializedFile serializedFile = originalProblemDataFiles.getJudgesAnswerFile();
                     if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
+                        
                         // they've added a new file
                         serializedFile = new SerializedFile(fileName);
+                        
+                        //Check for SerializedFile error/exception
+                        try {
+                            if (Utilities.serializedFileError(serializedFile) || serializedFile.getBuffer() == null) {
+                                throw new InvalidFieldValue("Unable to read file ' " + fileName + " ' while adding problem; choose answer file again");
+                            }
+                        } catch (Exception e) {
+                            throw new InvalidFieldValue("Error reading file ' " + fileName + " ': " + e.getMessage() + " while adding problem; choose answer file again");                    
+                        }
+                        
+                        //the file serialized ok; check its OS-dependent file format
                         checkFileFormat(serializedFile);
                     } else {
+                        //there was already a serializedFile in the problem; verify it is still up-to-date
                         serializedFile = freshenIfNeeded(serializedFile, fileName);
                     }
                     lastAnsFile = serializedFile;
@@ -1145,22 +1174,22 @@ public class EditProblemPane extends JPanePlugin {
         // (the PC2 and CLICS Validators use internal PC2 classes and don't need a separate SerializedFile)
         if (getUseCustomValidatorRadioButton().isSelected()) {
 
-            String guiValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
+            String guiOutputValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
 
-            if (guiValidatorFileName == null || guiValidatorFileName.trim().length() <= 0) {
+            if (guiOutputValidatorFileName == null || guiOutputValidatorFileName.trim().length() <= 0) {
                 // missing required custom validator name
                 throw new InvalidFieldValue("Missing required Custom Validator program name");
             } else {
-                guiValidatorFileName = guiValidatorFileName.trim();
+                guiOutputValidatorFileName = guiOutputValidatorFileName.trim();
             }
 
             if (!isEditingExistingProblem) {
                 
-                outputValidatorSF = new SerializedFile(guiValidatorFileName); 
+                outputValidatorSF = new SerializedFile(guiOutputValidatorFileName); 
 
                 if (outputValidatorSF == null || outputValidatorSF.getBuffer() == null  ||  (outputValidatorSF.getErrorMessage() != null && outputValidatorSF.getErrorMessage() != "")) {
 
-                    String msg = "Unable to read file '" + guiValidatorFileName + "' while adding new Problem; choose validator file again";
+                    String msg = "Unable to read file '" + guiOutputValidatorFileName + "' while adding new Problem; choose validator file again";
                     if (outputValidatorSF.getErrorMessage()!=null) {
                         msg += "\n (Error Message = \"" + outputValidatorSF.getErrorMessage() + "\")";
                     }
@@ -1174,16 +1203,28 @@ public class EditProblemPane extends JPanePlugin {
             } else {
 
               // we're editing an existing problem
+              // get the output validator file from the problem data files
               outputValidatorSF = originalProblemDataFiles.getOutputValidatorFile();
-              if (outputValidatorSF == null || !outputValidatorSF.getAbsolutePath().equals(guiValidatorFileName)) {
-                  // they've added a new file
-                  outputValidatorSF = new SerializedFile(guiValidatorFileName);
+              if (outputValidatorSF == null || !outputValidatorSF.getAbsolutePath().equals(guiOutputValidatorFileName)) {
+                  
+                  // they've added a new file; try Serializing it
+                  outputValidatorSF = new SerializedFile(guiOutputValidatorFileName);
+                  
+                  //Check for serialization error/exception
+                  try {
+                      if (Utilities.serializedFileError(outputValidatorSF) || outputValidatorSF.getBuffer() == null) {
+                          throw new InvalidFieldValue("Unable to read file ' " + guiOutputValidatorFileName + " ' while adding problem; choose Output Validator file again");
+                      }
+                  } catch (Exception e) {
+                      throw new InvalidFieldValue("Error reading file ' " + guiOutputValidatorFileName + " ': " + e.getMessage() + " while adding problem; choose Output Validator file again");                    
+                  }
+                  
                   checkFileFormat(outputValidatorSF);
               } else {
-                  outputValidatorSF = freshenIfNeeded(outputValidatorSF, guiValidatorFileName);
+                  outputValidatorSF = freshenIfNeeded(outputValidatorSF, guiOutputValidatorFileName);
               }
             
-              //put the Custom Validator SerializedFile into the Problem
+              //put the Custom Output Validator SerializedFile into the Problem
               checkProblem.setOutputValidatorProgramName(outputValidatorSF.getAbsolutePath()) ;
               newProblemDataFiles.setOutputValidatorFile(outputValidatorSF);
             }
@@ -1213,7 +1254,7 @@ public class EditProblemPane extends JPanePlugin {
                 inputValidatorSF = new SerializedFile(guiInputValidatorFileName);
 
                 // check the SerializedFile for validity (i.e. that it Serialized without error)
-                if (inputValidatorSF == null || inputValidatorSF.getBuffer() == null || (inputValidatorSF.getErrorMessage() != null && inputValidatorSF.getErrorMessage() != "")) {
+                if (inputValidatorSF == null || inputValidatorSF.getBuffer() == null || (inputValidatorSF.getErrorMessage() != null && !inputValidatorSF.getErrorMessage().equals(""))) {
 
                     // error constructing a SerializedFile from the specified input validator name
                     String msg = "Unable to read file '" + guiInputValidatorFileName + "' while adding new Problem; choose input validator file again";
@@ -1244,7 +1285,7 @@ public class EditProblemPane extends JPanePlugin {
                     
                     //Check to see that creating the SerializedFile didn't generate any errors
                     try {
-                        if (!Utilities.checkSerializedFileError(inputValidatorSF)) {
+                        if (Utilities.serializedFileError(inputValidatorSF)) {
                             String msg = "Unable to read file ' " + guiInputValidatorFileName + " ' while updating Problem; choose input validator file again";
                             if (inputValidatorSF.getErrorMessage() != null) {
                                 msg += "\n (Error Message = \"" + inputValidatorSF.getErrorMessage() + "\")";
@@ -1252,7 +1293,7 @@ public class EditProblemPane extends JPanePlugin {
                             throw new InvalidFieldValue(msg);
                         }
                     } catch (Exception e) {
-                        //checkSerializedFile threw an exception -- i.e., it forwarded an exception from the SerializedFile
+                        //serializedFileError threw an exception -- i.e., it forwarded an exception from the SerializedFile
                         String msg = "Exception reading file ' " + guiInputValidatorFileName + " ' while updating Problem: " + e.getMessage();
                         throw new InvalidFieldValue(msg);
                     }
