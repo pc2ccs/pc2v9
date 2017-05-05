@@ -1198,6 +1198,7 @@ public class EditProblemPane extends JPanePlugin {
         
         //Input Validator program...
         checkProblem.setProblemHasInputValidator(false);    // start with a default assumption of no Input Validator
+        checkProblem.setInputValidatorProgramName("");
 
         // get the Input Validator file name (if any) from the GUI
         String guiInputValidatorFileName = getInputValidatorPane().getInputValidatorProgramName().trim();
@@ -1238,7 +1239,24 @@ public class EditProblemPane extends JPanePlugin {
 
                 if (inputValidatorSF == null || !inputValidatorSF.getAbsolutePath().equals(guiInputValidatorFileName)) {
                     // either there was no IV already in the problem, or they've specified a file which is different
+                    // In either case, we need to get a SerializedFile for the name specified in the GUI
                     inputValidatorSF = new SerializedFile(guiInputValidatorFileName);
+                    
+                    //Check to see that creating the SerializedFile didn't generate any errors
+                    try {
+                        if (!Utilities.checkSerializedFileError(inputValidatorSF)) {
+                            String msg = "Unable to read file ' " + guiInputValidatorFileName + " ' while updating Problem; choose input validator file again";
+                            if (inputValidatorSF.getErrorMessage() != null) {
+                                msg += "\n (Error Message = \"" + inputValidatorSF.getErrorMessage() + "\")";
+                            }
+                            throw new InvalidFieldValue(msg);
+                        }
+                    } catch (Exception e) {
+                        //checkSerializedFile threw an exception -- i.e., it forwarded an exception from the SerializedFile
+                        String msg = "Exception reading file ' " + guiInputValidatorFileName + " ' while updating Problem: " + e.getMessage();
+                        throw new InvalidFieldValue(msg);
+                    }
+                    
                     checkFileFormat(inputValidatorSF);
                 } else {
                     // they've specified a file in the GUI which has already been Serialized and placed in the problem;
