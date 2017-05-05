@@ -440,8 +440,8 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (showMissingInputValidatorWarningOnAddProblem && 
-                (getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText() == null || 
-                 getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().equals(""))) {
+                (getInputValidatorPane().getInputValidatorProgramName() == null || 
+                 getInputValidatorPane().getInputValidatorProgramName().equals(""))) {
             //no input validator defined; issue a warning
             String warning = "You are attempting to add a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
@@ -581,6 +581,7 @@ public class EditProblemPane extends JPanePlugin {
         boolean enableButton = false;
         String updateToolTip = "";
 
+        System.err.println ("EditProblemPane.enableUpdateButton() called; checking whether to enable update button...");
         if (problem != null) {
 
             try {
@@ -1153,7 +1154,7 @@ public class EditProblemPane extends JPanePlugin {
                 
                 outputValidatorSF = new SerializedFile(guiValidatorFileName); 
 
-                if (outputValidatorSF.getBuffer() == null  ||  (outputValidatorSF.getErrorMessage() != null && outputValidatorSF.getErrorMessage() != "")) {
+                if (outputValidatorSF == null || outputValidatorSF.getBuffer() == null  ||  (outputValidatorSF.getErrorMessage() != null && outputValidatorSF.getErrorMessage() != "")) {
 
                     String msg = "Unable to read file '" + guiValidatorFileName + "' while adding new Problem; choose validator file again";
                     if (outputValidatorSF.getErrorMessage()!=null) {
@@ -1195,7 +1196,7 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setProblemHasInputValidator(false);    // start with a default assumption of no Input Validator
 
         // get the Input Validator file name (if any) from the GUI
-        String guiInputValidatorFileName = getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().trim();
+        String guiInputValidatorFileName = getInputValidatorPane().getInputValidatorProgramName().trim();
 
         if (guiInputValidatorFileName != null && guiInputValidatorFileName.trim().length() > 0) {
             // there is an input validator file name in the GUI
@@ -1207,12 +1208,12 @@ public class EditProblemPane extends JPanePlugin {
                 inputValidatorSF = new SerializedFile(guiInputValidatorFileName);
 
                 // check the SerializedFile for validity (i.e. that it Serialized without error)
-                if (inputValidatorSF.getBuffer() == null || (inputValidatorSF.getErrorMessage() != null && inputValidatorSF.getErrorMessage() != "")) {
+                if (inputValidatorSF == null || inputValidatorSF.getBuffer() == null || (inputValidatorSF.getErrorMessage() != null && inputValidatorSF.getErrorMessage() != "")) {
 
                     // error constructing a SerializedFile from the specified input validator name
                     String msg = "Unable to read file '" + guiInputValidatorFileName + "' while adding new Problem; choose input validator file again";
-                    if (outputValidatorSF.getErrorMessage() != null) {
-                        msg += "\n (Error Message = \"" + outputValidatorSF.getErrorMessage() + "\")";
+                    if (inputValidatorSF.getErrorMessage() != null) {
+                        msg += "\n (Error Message = \"" + inputValidatorSF.getErrorMessage() + "\")";
                     }
                     throw new InvalidFieldValue(msg);
 
@@ -1251,13 +1252,9 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         //Input Validator Command...
-        String inputValCommand = getDefineInputValidatorPane().getInputValidatorCommandTextField().getText();
+        String inputValCommand = getInputValidatorPane().getInputValidatorCommand();
         checkProblem.setInputValidatorCommandLine(inputValCommand);
-        
-        //Input Validator "files from disk" test folder...
-        String inputValFilesOnDiskFolder = getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText();
-        checkProblem.setInputValidatorFilesOnDiskFolder(inputValFilesOnDiskFolder);
-        
+                
         //Status of running an Input Validator
         checkProblem.setInputValidationStatus(this.getInputValidationStatus());
         
@@ -1443,8 +1440,8 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         if (showMissingInputValidatorWarningOnUpdateProblem && 
-                (getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText() == null || 
-                 getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().equals(""))) {
+                (getInputValidatorPane().getInputValidatorProgramName() == null || 
+                 getInputValidatorPane().getInputValidatorProgramName().equals(""))) {
             //no input validator defined; issue a warning
             String warning = "You are attempting to update a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
@@ -1727,11 +1724,11 @@ public class EditProblemPane extends JPanePlugin {
         
         //verify that if an Input Validator program has been specified, there is a command specified to invoke it.
         // (Note that the reverse is NOT required; it would be legal to specify an Input Validator command with no explicit program name)
-        if (getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText() != null && 
-                !(getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().equals("")) ) {
+        if (getInputValidatorPane().getInputValidatorProgramName() != null && 
+                !(getInputValidatorPane().getInputValidatorProgramName().equals("")) ) {
             
-            if (getDefineInputValidatorPane().getInputValidatorCommandTextField().getText() == null || 
-                    getDefineInputValidatorPane().getInputValidatorCommandTextField().getText().equals("")) {
+            if (getInputValidatorPane().getInputValidatorCommand() == null || 
+                    getInputValidatorPane().getInputValidatorCommand().equals("")) {
                 
                 showMessage("An Input Validator Program has been specified; you must also specify an Input Validator command line"); 
                 return false;
@@ -2332,57 +2329,35 @@ public class EditProblemPane extends JPanePlugin {
         //fill in the input validator program name 
         String inputValidatorProg = prob.getInputValidatorProgramName();
         if (inputValidatorProg != null) {
-            getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setText(inputValidatorProg);
+            getInputValidatorPane().setInputValidatorProgramName(inputValidatorProg);
         } else {
-            getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setText("");
+            getDefineInputValidatorPane().setInputValidatorProgramName("");
         }
         //update the tooltip to reflect the name in the text field
-        if (getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText() == null || 
-                getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText().equals("")) {
+        if (getInputValidatorPane().getInputValidatorProgramName() == null || 
+                getInputValidatorPane().getInputValidatorProgramName().equals("")) {
             //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
-            getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setToolTipText(null);
+            getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
         } else {
-            getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setToolTipText(
-                    getDefineInputValidatorPane().getInputValidatorProgramNameTextField().getText());
+            getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorProgramName());
         }
         
         //fill in the input validator command
         String inputValidatorCmd = prob.getInputValidatorCommandLine();
         if (inputValidatorCmd != null) {
-            getDefineInputValidatorPane().getInputValidatorCommandTextField().setText(inputValidatorCmd);
+            getInputValidatorPane().setInputValidatorCommand(inputValidatorCmd);
         } else {
-            getDefineInputValidatorPane().getInputValidatorCommandTextField().setText("");
+            getInputValidatorPane().setInputValidatorCommand("");
         }
-        //update the tooltip to reflect the name in the text field
-        if (getDefineInputValidatorPane().getInputValidatorCommandTextField().getText() == null || 
-                getDefineInputValidatorPane().getInputValidatorCommandTextField().getText().equals("")) {
+        //update the tooltip to reflect the name in the command text field
+        if (getInputValidatorPane().getInputValidatorCommand() == null || 
+                getInputValidatorPane().getInputValidatorCommand().equals("")) {
             //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
-            getDefineInputValidatorPane().getInputValidatorCommandTextField().setToolTipText(null);
+            getInputValidatorPane().setInputValidatorCommandToolTipText(null);
         } else {
-            getDefineInputValidatorPane().getInputValidatorCommandTextField().setToolTipText(
-                    getDefineInputValidatorPane().getInputValidatorCommandTextField().getText());
+            getInputValidatorPane().setInputValidatorCommandToolTipText(getInputValidatorPane().getInputValidatorCommand());
         }
-        
-        //fill in the "Validate files on disk" field
-        String filesOnDiskFolder = prob.getInputValidatorFilesOnDiskFolder() ;
-        if (filesOnDiskFolder != null) {
-            getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setText(filesOnDiskFolder);
-        } else {
-            getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setText("");
-        }
-        //update the files on disk tooltip to reflect the name in the files on disk text field
-        if (getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText() == null || 
-                getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText().equals("")) {
-            //set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
-            getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setToolTipText(null);
-        } else {
-            getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setToolTipText(
-                    getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().getText());
-        }
-
-        //default to "files on disk" as file source (the ButtonGroup will automatically de-select the other buttons)
-        getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().setSelected(true);
-        
+                
         //update the results table:
         //get the number of previous results stored in the problem
         int numResults = prob.getNumInputValidationResults();
@@ -3191,8 +3166,6 @@ public class EditProblemPane extends JPanePlugin {
 
     private DefineInputValidatorPane defineInputValidatorPane;
 
-    private ExecuteInputValidatorPane executeInputValidatorPane;
-
     private InputValidationResultPane inputValidationResultPane;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
@@ -3771,13 +3744,12 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     private void initializeInputValidatorTabFields() {
-        getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setText("");
-        getDefineInputValidatorPane().getInputValidatorProgramNameTextField().setToolTipText("");
-        getDefineInputValidatorPane().getInputValidatorCommandTextField().setText("");
-        getDefineInputValidatorPane().getInputValidatorCommandTextField().setToolTipText("");
-        getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setText("");
-        getExecuteInputValidatorPane().getInputValidatorFilesOnDiskTextField().setToolTipText("");
-        getExecuteInputValidatorPane().getFilesOnDiskInFolderRadioButton().setSelected(true);  //button group will init others "not selected"
+        
+        getInputValidatorPane().setInputValidatorProgramName("");
+        getInputValidatorPane().setInputValidatorProgramNameToolTipText("");
+        getInputValidatorPane().setInputValidatorCommand("");
+        getInputValidatorPane().setInputValidatorCommandToolTipText("");
+
         getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
         getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
         ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).setResults(null);
@@ -4827,7 +4799,7 @@ public class EditProblemPane extends JPanePlugin {
         return lblWhatsThisCLICSValStd;
     }
     
-    private JPanel getInputValidatorPane() {
+    private InputValidatorPane getInputValidatorPane() {
         if (inputValidatorPane == null) {
         	inputValidatorPane = new InputValidatorPane();
         	inputValidatorPane.setContestAndController(getContest(), getController());
@@ -4932,20 +4904,12 @@ public class EditProblemPane extends JPanePlugin {
         return buf.toString();
     }
 
-
     private DefineInputValidatorPane getDefineInputValidatorPane() {
         if (defineInputValidatorPane == null) {
             defineInputValidatorPane = new DefineInputValidatorPane();
             defineInputValidatorPane.setContestAndController(this.getContest(), this.getController());
         }
         return defineInputValidatorPane;
-    }
-    
-    private ExecuteInputValidatorPane getExecuteInputValidatorPane() {
-        if (executeInputValidatorPane == null) {
-        	executeInputValidatorPane = new ExecuteInputValidatorPane();
-        }
-        return executeInputValidatorPane;
     }
     
     private InputValidationResultPane getInputValidationResultPane() {
