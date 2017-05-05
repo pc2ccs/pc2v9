@@ -49,6 +49,8 @@ public class InputValidationResultPane extends JPanePlugin {
     private JTable resultsTable;
     
     private InputValidationResultsTableModel inputValidationResultsTableModel = new InputValidationResultsTableModel();
+
+    private JPanePlugin parentPane;
     
     
     public InputValidationResultPane() {
@@ -161,6 +163,15 @@ public class InputValidationResultPane extends JPanePlugin {
     @Override
     public String getPluginTitle() {
         return "Input Validation Result Pane";
+    }
+
+    public void setParentPane(JPanePlugin parentPane) {
+       this.parentPane = parentPane;
+        
+    }
+    
+    public JPanePlugin getParentPane() {
+        return this.parentPane;
     }
 
 }
