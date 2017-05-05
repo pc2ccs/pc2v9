@@ -124,21 +124,29 @@ public class InputValidatorRunner {
         SerializedFile stderrResults = new SerializedFile(stderrFilePath);
         
         //NOTE: the SerializedFile constructor doesn't throw exceptions; it just "sets a message"
-        // Need to query the SerializedFiles to make sure there are no "messages" or exceptions
+        // Check the stdoutResults SerializedFile to make sure there are no "messages" or exceptions
         try {
-            Utilities.checkSerializedFileError(stdoutResults);
+            if (Utilities.serializedFileError(stdoutResults)) {
+                throw new RuntimeException("Error creating SerializedFile from file ' " + stdoutFilePath + " '");
+            }
         } catch (ExecuteException e) {
-//            System.err.println ("Exception constructing SerializedFile containing validator stdout: " + e.getMessage());
+            System.err.println ("Exception constructing SerializedFile containing validator stdout: " + e.getMessage());
             throw e;
         } catch (Exception e) {
-//            System.err.println ("Exception constructing SerializedFile containing validator stdout: " + e.getMessage());
+            System.err.println ("Exception constructing SerializedFile containing validator stdout: " + e.getMessage());
             throw e;
-            
         }
+        
+        // check the stderrResults SerializedFile to make sure there are no "messages" or exceptions
         try {
-            Utilities.checkSerializedFileError(stderrResults);
+            if (Utilities.serializedFileError(stderrResults)) {
+                throw new RuntimeException("Error creating SerializedFile from file ' " + stderrFilePath + " '");
+            }
         } catch (ExecuteException e) {
-            System.err.println ("Exception constructing SerializedFile containing validator stderr: " + e.getMessage());
+            System.err.println("Exception constructing SerializedFile containing validator stderr: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+             System.err.println ("Exception constructing SerializedFile containing validator stderr: " + e.getMessage());
             throw e;
         }
 
