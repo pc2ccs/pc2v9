@@ -206,9 +206,13 @@ public class DefineInputValidatorPane extends JPanePlugin {
     private void enableUpdateButton() {
         JPanePlugin parent = getParentPane();
         if (parent != null && parent instanceof InputValidatorPane) {
-            JPanePlugin grandParent = ((InputValidatorPane)parent).getParentPane();
+            final JPanePlugin grandParent = ((InputValidatorPane)parent).getParentPane();
             if (grandParent != null && grandParent instanceof EditProblemPane) {
-                ((EditProblemPane)grandParent).enableUpdateButton();
+                SwingUtilities.invokeLater( new Runnable() {
+                    public void run () {
+                        ((EditProblemPane)grandParent).enableUpdateButton();
+                    }
+               });
             } else {
                 System.err.println ("No grandparent pane (EditProblemPane) accessible from DefineInputValidatorPane; cannot enable Add/Update button");
                 getController().getLog().warning("No grandparent pane (EditProblemPane) accessible from  DefineInputValidatorPane; cannot enable Add/Update button");
