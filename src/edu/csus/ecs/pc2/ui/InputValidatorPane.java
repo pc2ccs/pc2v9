@@ -7,9 +7,8 @@ import javax.swing.BoxLayout;
 
 /**
  * This class defines a plugin pane (a JPanel) containing components for 
- * (1) defining an Input Validator program name and Invocation Command,
- * (2) Executing an input validator, and
- * (3) Viewing the results of an input validator execution.
+ * (1) defining an Input Validator program name and Invocation Command, and
+ * (2) Viewing the results of an input validator execution.
  * 
  * @author pc2@ecs.csus.edu
  *
@@ -18,13 +17,15 @@ public class InputValidatorPane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
 
-    private Component defineInputValidatorPane;
+    private DefineInputValidatorPane defineInputValidatorPane;
 
-    private Component inputValidationResultPanel;
+    private InputValidationResultPane inputValidationResultPane;
 
     private Component verticalStrut_1;
     private Component verticalStrut_3;
     private Component verticalStrut_4;
+
+    private JPanePlugin parentPane;
 
     public InputValidatorPane() {
         
@@ -37,22 +38,54 @@ public class InputValidatorPane extends JPanePlugin {
         this.add(getInputValidationResultPanel());
         this.add(getVerticalStrut_3());
     }
+    
+    /**
+     * Returns the Input Validator Program Name currently entered in this InputValidatorPane.
+     * 
+     * @return a String containing the Input Validator Program Name
+     */
+    public String getInputValidatorProgramName() {
+        String progName = getDefineInputValidatorPanel().getInputValidatorProgramName();
+        return progName;
+    }
+    
+    /**
+     * Sets the Input Validator Program name displayed in this InputValidatorPane to the specified text.
+     * 
+     * @param inputValidatorProg a String containing the Input Validator Program name
+     */
+    public void setInputValidatorProgramName(String progName) {
+       getDefineInputValidatorPanel().setInputValidatorProgramName(progName);
 
-    private Component getDefineInputValidatorPanel() {
+    }
+    
+    /**
+     * Returns the Input Validator Command currently entered into this InputValidatorPane.
+     * 
+     * @return a String containing the command to be used to invoke the Input Validator
+     */
+    public String getInputValidatorCommand() {
+        String command = getDefineInputValidatorPanel().getInputValidatorCommand();
+        return command;
+    }
+
+    private DefineInputValidatorPane getDefineInputValidatorPanel() {
         if (defineInputValidatorPane == null) {
             defineInputValidatorPane = new DefineInputValidatorPane();
-            ((JPanePlugin) defineInputValidatorPane).setContestAndController(this.getContest(), this.getController());
+            defineInputValidatorPane.setContestAndController(this.getContest(), this.getController());
+            defineInputValidatorPane.setParentPane(this);
         }
         return defineInputValidatorPane;
     }
     
 
-    private Component getInputValidationResultPanel() {
-        if (inputValidationResultPanel == null) {
-            inputValidationResultPanel = new InputValidationResultPane();
-            ((JPanePlugin) inputValidationResultPanel).setContestAndController(this.getContest(), this.getController());
+    private InputValidationResultPane getInputValidationResultPanel() {
+        if (inputValidationResultPane == null) {
+            inputValidationResultPane = new InputValidationResultPane();
+            inputValidationResultPane.setContestAndController(this.getContest(), this.getController());
+            inputValidationResultPane.setParentPane(this);
         }
-        return inputValidationResultPanel;
+        return inputValidationResultPane;
     }
 
     private Component getVerticalStrut_1() {
@@ -82,4 +115,44 @@ public class InputValidatorPane extends JPanePlugin {
 
         return "Input Validator Pane";
     }
+
+    public void setParentPane(JPanePlugin parentPane) {
+        this.parentPane = parentPane; 
+    }
+    
+    public JPanePlugin getParentPane() {
+        return this.parentPane;
+    }
+
+    /**
+     * Sets the ToolTip text for the InputValidatorProgramName displayed in this InputValidatorPane.
+     * 
+     * @param text the ToolTip text to set
+     */
+    public void setInputValidatorProgramNameToolTipText(String text) {
+        getDefineInputValidatorPanel().setInputValidatorProgramNameToolTipText(text);
+        
+    }
+
+    /**
+     * Sets the Input Validator Command displayed in this InputValidatorPane to the specified value.
+     * 
+     * @param command a String containing the command used to invoke the Input Validator
+     */
+    public void setInputValidatorCommand(String command) {
+        getDefineInputValidatorPanel().setInputValidatorCommand(command);
+        
+    }
+
+    /**
+     * Sets the ToolTip text for the Input Validator Command displayed in this InputValidatorPane.
+     * 
+     * @param text the ToolTip text to set
+     */
+    public void setInputValidatorCommandToolTipText(String text) {
+        getDefineInputValidatorPanel().setInputValidatorCommandToolTipText(text);
+        
+    }
+
+
 }
