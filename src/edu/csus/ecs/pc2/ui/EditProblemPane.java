@@ -39,6 +39,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -277,6 +278,10 @@ public class EditProblemPane extends JPanePlugin {
 
     private boolean showMissingInputValidatorWarningOnUpdateProblem = true;
 
+    private boolean showMissingInputValidatorProgramNameOnUpdateProblem = true;
+
+    private boolean showMissingInputValidatorProgramNameOnAddProblem = true;
+
     /**
      * Constructs an EditProblemPane with default settings.
      * 
@@ -440,20 +445,20 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (showMissingInputValidatorWarningOnAddProblem && 
-                (getInputValidatorPane().getInputValidatorProgramName() == null || 
-                 getInputValidatorPane().getInputValidatorProgramName().equals(""))) {
+                (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) && 
+                (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+
             //no input validator defined; issue a warning
-            String warning = "You are attempting to add a Problem which has no Input Data Validator." 
+            String msg = "You are attempting to add a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
                     + "\nJudge's data files meet the Problem Specification."
                     + "\n\nAre you sure you want to do this?"
                     + "\n\n";
             
             JCheckBox checkbox = new JCheckBox("Do not show this message again.");
-            checkbox.setFont(new Font(Font.SANS_SERIF,Font.PLAIN, 10));
-            Object[] params = {warning, checkbox};
             
-            int response = JOptionPane.showConfirmDialog(getParentFrame(), params, "No Input Validator specified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            int response = displayWarningDialogWithCheckbox(getParentFrame(), msg, checkbox, "No Input Validator specified");
+            
             if (checkbox.isSelected()) {
                 showMissingInputValidatorWarningOnAddProblem  = false ;
             }
@@ -462,6 +467,27 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
+        //check the condition of missing Input Validator Program name even though there is an Input Validator Command defined
+        if (showMissingInputValidatorProgramNameOnAddProblem  && 
+                (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) &&
+                (getInputValidatorPane().getInputValidatorCommand() != null || !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+            //no input validator program defined; issue a warning
+            String message = "You are attempting to add a problem which has an Input Data Validator command but no Input Validator Program name." 
+                    + "\n\nAre you sure this is what you intended to do?"
+                    + "\n\n";
+            
+            JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+            
+            int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator Program Name specified");
+            
+            if (checkbox.isSelected()) {
+                showMissingInputValidatorProgramNameOnAddProblem  = false ;
+            }
+            if (!(response == JOptionPane.YES_OPTION)) {
+                return;
+            }
+        }
+        
 
         Problem newProblem = null;
         try {
@@ -1507,21 +1533,21 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
         
+        //check the condition of missing both Input Validator Program AND Input Validator Command
         if (showMissingInputValidatorWarningOnUpdateProblem && 
-                (getInputValidatorPane().getInputValidatorProgramName() == null || 
-                 getInputValidatorPane().getInputValidatorProgramName().equals(""))) {
-            //no input validator defined; issue a warning
-            String warning = "You are attempting to update a Problem which has no Input Data Validator." 
+                (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) &&
+                (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+            //no input validator entries defined; issue a warning
+            String message = "You are attempting to update a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
                     + "\nJudge's data files meet the Problem Specification."
                     + "\n\nAre you sure you want to do this?"
                     + "\n\n";
             
             JCheckBox checkbox = new JCheckBox("Do not show this message again.");
-            checkbox.setFont(new Font(Font.SANS_SERIF,Font.PLAIN, 10));
-            Object[] params = {warning, checkbox};
             
-            int response = JOptionPane.showConfirmDialog(getParentFrame(), params, "No Input Validator specified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator specified");
+            
             if (checkbox.isSelected()) {
                 showMissingInputValidatorWarningOnUpdateProblem  = false ;
             }
@@ -1529,7 +1555,29 @@ public class EditProblemPane extends JPanePlugin {
                 return;
             }
         }
-
+        
+        //check the condition of missing Input Validator Program name even though there is an Input Validator Command defined
+        if (showMissingInputValidatorProgramNameOnUpdateProblem  && 
+                (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) &&
+                (getInputValidatorPane().getInputValidatorCommand() != null || !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+            //no input validator program defined; issue a warning
+            String message = "You are attempting to update a problem with an Input Data Validator command but no Input Validator Program name." 
+                    + "\n\nAre you sure this is what you intended to do?"
+                    + "\n\n";
+            
+            JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+            
+            int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator Program Name specified");
+            
+            if (checkbox.isSelected()) {
+                showMissingInputValidatorProgramNameOnUpdateProblem  = false ;
+            }
+            if (!(response == JOptionPane.YES_OPTION)) {
+                return;
+            }
+        }
+        
+        
         //all the GUI fields are valid; create a new Problem from them
         Problem newProblem = null;
 
@@ -4965,6 +5013,33 @@ public class EditProblemPane extends JPanePlugin {
 
         return outString;
 
+    }
+    
+    /**
+     * Displays the specified message in a modal YES_NO_CANCEL JOptionPane with a WARNING_MESSAGE icon and with the specified title,
+     * and with the specified JCheckBox displayed on the dialog.  Since the caller provides the checkbox, the caller can determine 
+     * after the dialog returns whether or not the user checked the checkbox.  This is useful for displaying things like message boxes
+     * with a "Do not show this again" checkbox.  Note that it is the CALLER's responsibility to implement logic to avoid displaying the
+     * message dialog in the future.
+     * 
+     * The value returned by this method is exactly the value returned by the displayed JOptionPane, which is determined by the button
+     * the user uses to close the dialog (Yes, No, or Cancel).
+     * 
+     * @param parentFrame a JFrame which is the parent associated with the displayed JOptionPane
+     * @param msg the message to be displayed in the dialog
+     * @param checkbox a JCheckBox to be displayed on the dialog, with message text set by the caller
+     * @param title the title to be displayed on the dialog
+     * 
+     * @return either JOptionPane.YES, JOptionPane.NO, or JOptionPane.CANCEL 
+     */
+    private int displayWarningDialogWithCheckbox (JFrame parentFrame, String msg, JCheckBox checkbox, String title) {
+        
+        checkbox.setFont(new Font(Font.SANS_SERIF,Font.PLAIN, 10));
+        Object[] params = {msg, checkbox};
+        
+        int response = JOptionPane.showConfirmDialog(parentFrame, params, title, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        return response;
     }
 
 
