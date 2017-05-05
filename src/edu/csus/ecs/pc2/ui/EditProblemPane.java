@@ -1761,9 +1761,9 @@ public class EditProblemPane extends JPanePlugin {
         //try to serialize the specified file
         SerializedFile sf = new SerializedFile(fileName);
         
-        //check to see if any errors occured during serialization
+        //check to see if any errors occurred during serialization
         if (sf != null && sf.getBuffer() != null && (sf.getErrorMessage() == null || sf.getErrorMessage().equals("")) && 
-                (sf.getException() != null )) {
+                (sf.getException() == null )) {
             return true;
         } else {
             return false;
