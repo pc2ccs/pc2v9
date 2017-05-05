@@ -1396,36 +1396,41 @@ public final class Utilities {
     }
     
     /**
-     * Checks the specified SerializedFile for error messages and/or exceptions. 
+     * Checks the specified {@link SerializedFile} for error messages and/or exceptions. 
      * This method is provided because the SerializedFile class does not throw exceptions when errors occur (such as its
      * constructor encountering a "File Not Found" condition). Rather, the SerializedFile class simply sets an "error message" 
      * and records the "exception" within the SerializedFile object. This method throws any exception found in the specified 
-     * SerializedFile, or returns false if there is an error message (but no exception).
+     * SerializedFile, or returns true if there is an error message (but no exception). It returns false if the specified
+     * Serialized
      * 
      * @param serFile
      *            the SerializedFile to be checked
      * 
-     * @return true if the SerializedFile contains no error message or exceptions; false if it contains an error message or is null
+     * @return true if the SerializedFile contains an error message or exceptions; false if the SerializedFile contains no error message or is null
      * 
      * @throws Exception
      *             if any exception is found in the SerializedFile object
      */
-    public static boolean checkSerializedFileError(SerializedFile serFile) throws Exception {
+    public static boolean serializedFileError(SerializedFile serFile) throws Exception {
 
+        //if the SerializedFile is null then it cannot have errors or exceptions
         if (serFile == null) {
             return false;
         }
 
+        //if the SerializedFile has an exception, throw it (which should have been done in the SerializedFile class in the first place...)
         if (serFile.getException() != null) {
             Exception e = serFile.getException();
             throw e;
         }
 
+        //if the SerializedFile has a non-null, non-empty error message, there is an error with the file -- return true
         if (serFile.getErrorMessage() != null && !serFile.getErrorMessage().equals("")) {
-            return false;
+            return true;
         }
 
-        return true;
+        //if we get here then the SerializedFile is not null and it has no exceptions or error messages
+        return false;
     }
 
     
