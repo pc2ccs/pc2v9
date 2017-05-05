@@ -12,10 +12,15 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
+
+import edu.csus.ecs.pc2.core.log.Log;
 
 /**
  * This class defines a JPanel containing textfield components for entering the file name of an Input Validator Program
@@ -39,6 +44,8 @@ public class DefineInputValidatorPane extends JPanePlugin {
     private JButton chooseInputValidatorProgramButton;
 
     private JPanePlugin parentPane;
+
+    private String lastDirectory;
 
     
     public DefineInputValidatorPane() {
@@ -89,6 +96,29 @@ public class DefineInputValidatorPane extends JPanePlugin {
 
     }
     
+    /**
+     * Returns the Input Validator Program name contained in this DefineInputValidator panel.
+     * 
+     * @return a String containing the Input Validator Name, or null or the empty string if no Input Validator Program has been defined 
+     */
+    public String getInputValidatorProgramName() {
+        return getInputValidatorProgramNameTextField().getText();
+    }
+    
+    /**
+     * Sets the Input Validator Program name displayed in this DefineInputValidatorPane to the specified text.
+     * 
+     * @param progname a String containing the Input Validator Program name
+     */
+    public void setInputValidatorProgramName(String progName) {
+        getInputValidatorProgramNameTextField().setText(progName);
+        
+    }
+    
+    public String getInputValidatorCommand() {
+        return getInputValidatorCommandTextField().getText();
+    }
+    
     private JLabel getInputValidatorProgramNameLabel() {
         if (inputValidatorProgramNameLabel == null) {
             inputValidatorProgramNameLabel = new JLabel("Input Validator Program: ");
@@ -100,7 +130,7 @@ public class DefineInputValidatorPane extends JPanePlugin {
         return inputValidatorProgramNameLabel;
     }
     
-    public JTextField getInputValidatorProgramNameTextField() {
+    private JTextField getInputValidatorProgramNameTextField() {
         if (inputValidatorProgramNameTextField == null) {
             inputValidatorProgramNameTextField = new JTextField();
             inputValidatorProgramNameTextField.setPreferredSize(new Dimension(300, 25));
@@ -110,12 +140,19 @@ public class DefineInputValidatorPane extends JPanePlugin {
             inputValidatorProgramNameTextField.setToolTipText("");
             inputValidatorProgramNameTextField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent event) {
+                    System.err.println ("key pressed in DefineInputValidator");
                     JPanePlugin parent = getParentPane();
                     if (parent != null && parent instanceof InputValidatorPane) {
                         JPanePlugin grandParent = ((InputValidatorPane)parent).getParentPane();
                         if (grandParent != null && grandParent instanceof EditProblemPane) {
                             ((EditProblemPane)grandParent).enableUpdateButton();
+                        } else {
+                            System.err.println ("No grandparent pane (EditProblemPane) in DefineInputValidatorPane");
+                            getController().getLog().warning("No grandparent pane (EditProblemPane) in DefineInputValidatorPane");
                         }
+                    } else {
+                        System.err.println ("No parent pane in DefineInputValidator");
+                        getController().getLog().warning("No parent pane in DefineInputValidator");
                     }
                 }
             });
@@ -133,7 +170,7 @@ public class DefineInputValidatorPane extends JPanePlugin {
         return lblInputValidatorInvocation;
     }
     
-    public JTextField getInputValidatorCommandTextField() {
+    private JTextField getInputValidatorCommandTextField() {
         if (inputValidatorCommandTextField == null) {
             inputValidatorCommandTextField = new JTextField();
             inputValidatorCommandTextField.setPreferredSize(new Dimension(300, 25));
@@ -142,14 +179,12 @@ public class DefineInputValidatorPane extends JPanePlugin {
             inputValidatorCommandTextField.setText("");
             inputValidatorCommandTextField.setToolTipText("");
             
-            inputValidatorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
-                    System.err.println ("DefineInputValidatorPane.getInputValidatorCommandTextField(): fixme");
-//  FIXME                  enableUpdateButton();
-//  FIXME                 updateRunValidatorButtonState();
+            inputValidatorCommandTextField.addKeyListener(new KeyAdapter() {
+                public void keyPressed(KeyEvent event) {
+                    System.err.println ("key pressed in DefineInputValidator");
+                    enableUpdateButton();
                 }
             });
-
         }
         return inputValidatorCommandTextField;
     }
@@ -163,17 +198,87 @@ public class DefineInputValidatorPane extends JPanePlugin {
             chooseInputValidatorProgramButton.addActionListener(new ActionListener() {
                 
                 public void actionPerformed(ActionEvent e) {
-                    System.err.println ("DefineInputValidatorPane.getChooseInputValidatorProgramButton(): fixme");
-//                    if (selectFile(getInputValidatorProgramNameTextField(), "Select Input Validator")) {
-//                        getInputValidatorProgramNameTextField().setToolTipText((getInputValidatorProgramNameTextField().getText()));
-//                        enableUpdateButton();
-//                    }
+                    if (selectFile(getInputValidatorProgramNameTextField(), "Select Input Validator")) {
+                        getInputValidatorProgramNameTextField().setToolTipText((getInputValidatorProgramNameTextField().getText()));
+                        if (getInputValidatorProgramNameTextField().getText() != null && getInputValidatorProgramNameTextField().getText().endsWith(".class")) {
+                            getInputValidatorCommandTextField().setText("java {:basename}");
+                        }
+                        enableUpdateButton();
+                    }
                 }
             });
         }
         return chooseInputValidatorProgramButton;
     }
     
+
+    /**
+     * Calls enableUpdateButton() in the grandparent EditProblemPane if that pane exists.
+     */
+    private void enableUpdateButton() {
+        JPanePlugin parent = getParentPane();
+        if (parent != null && parent instanceof InputValidatorPane) {
+            JPanePlugin grandParent = ((InputValidatorPane)parent).getParentPane();
+            if (grandParent != null && grandParent instanceof EditProblemPane) {
+                ((EditProblemPane)grandParent).enableUpdateButton();
+            } else {
+                System.err.println ("No grandparent pane (EditProblemPane) accessible from DefineInputValidatorPane; cannot enable Add/Update button");
+                getController().getLog().warning("No grandparent pane (EditProblemPane) accessible from  DefineInputValidatorPane -- cannot enable Add/Update button");
+            }
+        } else {
+            System.err.println ("No parent pane in DefineInputValidator; cannot enable Add/Update button");
+            getController().getLog().warning("No parent pane in DefineInputValidator; cannot enable Add/Update button");
+        }
+    }
+    
+    
+    /**
+     * Displays a FileChooser dialog for selecting a file. If a file is actually selected then the method updates 
+     * the specified JTextField.
+     * 
+     * @param textField -- a JTextField whose value will be updated if a file is chosen
+     * @param dialogTitle
+     *            title for file chooser
+     * @return True if a file was select and the JTextField updated
+     * @throws Exception
+     */
+    private boolean selectFile(JTextField textField, String dialogTitle) {
+        boolean result = false;
+        // toolTip should always have the full path
+        String oldFile = textField.getToolTipText();
+        String startDir;
+        if (oldFile == null || oldFile.equalsIgnoreCase("")) {
+            startDir = lastDirectory;
+        } else {
+            startDir = oldFile;
+        }
+        JFileChooser chooser = new JFileChooser(startDir);
+        if (dialogTitle != null) {
+            chooser.setDialogTitle(dialogTitle);
+        }
+        try {
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                lastDirectory = chooser.getCurrentDirectory().toString();
+                textField.setText(chooser.getSelectedFile().getCanonicalFile().toString());
+                result = true;
+            }
+        } catch (Exception e) {
+            showMessage("Error getting selected file, try again: \n" + e.getMessage());
+            getLog().log(Log.INFO, "Error getting selected file: ", e);
+            result = false;
+        }
+        chooser = null;
+        return result;
+    }
+
+    public void showMessage(final String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(null, message);
+            }
+        });
+    }
 
     @Override
     public String getPluginTitle() {
@@ -188,5 +293,29 @@ public class DefineInputValidatorPane extends JPanePlugin {
     public JPanePlugin getParentPane() {
         return this.parentPane;
     }
+
+    public void setInputValidatorProgramNameToolTipText(String text) {
+        getInputValidatorCommandTextField().setToolTipText(text);
+    }
+
+    /**
+     * Sets the Input Validator Command displayed in this DefineInputValidator panel to the specified String.
+     * 
+     * @param command the Input Validator Command to set
+     */
+    public void setInputValidatorCommand(String command) {
+        getInputValidatorCommandTextField().setText(command);
+        
+    }
+
+    /**
+     * Sets the ToolTip text for the Input Validator Command displayed in this DefineInputValidatorPane.
+     * 
+     * @param text the ToolTip text to set
+     */
+    public void setInputValidatorCommandToolTipText(String text) {
+        getInputValidatorCommandTextField().setToolTipText(text);
+    }
+
 
 }
