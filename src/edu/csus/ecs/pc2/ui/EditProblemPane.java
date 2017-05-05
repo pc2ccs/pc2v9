@@ -1020,9 +1020,11 @@ public class EditProblemPane extends JPanePlugin {
             throw new InvalidFieldValue("Invalid problem short name");
         }
 
-        //update problems which require data files
+        //check if GUI indicates problem requires data files
         if (getProblemRequiresDataCheckBox().isSelected()) {
 
+            //get problem data file info from GUI
+            
             String fileName = inputDataFileLabel.getText();
             if (fileName == null || fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
@@ -1066,9 +1068,11 @@ public class EditProblemPane extends JPanePlugin {
             checkProblem.setDataFileName(null);
         }
 
-        //update problems for which the judges have provided an Answer File
+        //check if GUI indicates problem has judge's answer files
         if (judgesHaveAnswerFiles.isSelected()) {
 
+            //get judge's answer file info from GUI
+            
             String fileName = answerFileNameLabel.getText();
             if (fileName == null || fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
