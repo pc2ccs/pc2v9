@@ -1726,6 +1726,13 @@ public class EditProblemPane extends JPanePlugin {
 
         }
         
+        //verify that any Input Validator Program specified is a legitimate serializable file
+        String inputValidatorProgName = getInputValidatorPane().getInputValidatorProgramName();
+        if (!verifyInputValidatorProgram(inputValidatorProgName)) {
+            showMessage ("Unable to access Input Validator Program '" + inputValidatorProgName + "'; please enter a valid program file name");
+            return false;
+        }
+        
         //verify that if an Input Validator program has been specified, there is a command specified to invoke it.
         // (Note that the reverse is NOT required; it would be legal to specify an Input Validator command with no explicit program name)
         if (getInputValidatorPane().getInputValidatorProgramName() != null && 
@@ -1742,6 +1749,26 @@ public class EditProblemPane extends JPanePlugin {
         return true;
     }
 
+    /**
+     * Verifies that the specified filename represents a valid file which can be turned into a {@link SerializedFile}.
+     * 
+     * @param fileName a String containing a file name
+     * 
+     * @return true if the specified file can be successfully serialized; false otherwise
+     */
+    private boolean verifyInputValidatorProgram(String fileName) {
+        
+        //try to serialize the specified file
+        SerializedFile sf = new SerializedFile(fileName);
+        
+        //check to see if any errors occured during serialization
+        if (sf != null && sf.getBuffer() != null && (sf.getErrorMessage() == null || sf.getErrorMessage().equals("")) && 
+                (sf.getException() != null )) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     /**
      * Checks to ensure the fileName exists, is a file, and is readable.
      * <P>
