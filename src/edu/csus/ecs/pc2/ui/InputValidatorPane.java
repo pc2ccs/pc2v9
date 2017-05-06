@@ -191,10 +191,9 @@ public class InputValidatorPane extends JPanePlugin {
         	runInputValidatorButton.addActionListener(new ActionListener() {
         	    
         	    public void actionPerformed(ActionEvent e) {
-        	        System.err.println ("Run Input Validator button pressed...");
+
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run () {
-                            System.err.println ("Run Input Validator runnable task invoked...");
                             if (okToRunInputValidator()) {
                                 spawnInputValidatorRunnerThread();
                             } else {

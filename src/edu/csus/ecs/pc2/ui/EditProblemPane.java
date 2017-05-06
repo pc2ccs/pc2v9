@@ -609,7 +609,6 @@ public class EditProblemPane extends JPanePlugin {
         boolean enableButton = false;
         String updateToolTip = "";
 
-        System.err.println ("EditProblemPane.enableUpdateButton() called; checking whether to enable update button...");
         if (problem != null) {
 
             //This try/catch supports the ability for the user to enter GUI data which is "temporarily invalid".  
