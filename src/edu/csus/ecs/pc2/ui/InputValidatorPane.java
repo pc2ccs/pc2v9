@@ -8,6 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.table.AbstractTableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.ExecuteException;
@@ -15,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.validator.inputValidator.InputValidatorRunner;
 
 import java.awt.event.ActionListener;
@@ -196,7 +198,8 @@ public class InputValidatorPane extends JPanePlugin {
                             if (okToRunInputValidator()) {
                                 spawnInputValidatorRunnerThread();
                             } else {
-                                JOptionPane.showMessageDialog(null, "Cannot run Input Validator", "Inadequate Data Available", JOptionPane.INFORMATION_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "Missing Input Validator Command or Judge's Data files; cannot run Input Validator", 
+                                        "Missing Data", JOptionPane.INFORMATION_MESSAGE);
                             }
                         }
                     });
@@ -285,6 +288,11 @@ public class InputValidatorPane extends JPanePlugin {
                     System.err.println ("     executeDir = " + executeDir);
                     System.err.println ("     num data files = " + dataFiles.length);
                    
+                    //clear the results table in preparation for adding new results
+                    ((InputValidationResultsTableModel)getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).setResults(null);
+                    ((AbstractTableModel) getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+                   
+
                     for (int fileNum = 0; fileNum < dataFiles.length; fileNum++) {
                         SerializedFile dataFile = dataFiles[fileNum];
                         
@@ -344,8 +352,17 @@ public class InputValidatorPane extends JPanePlugin {
         worker.execute();
     }
     
+    /**
+     * Adds the specified Input Validation execution result to the Input Validation Results table in this InputValidatorPane.
+     * 
+     * @param result the result to be added to the table
+     */
     private void addToResultTable(InputValidationResult result) {
-        System.err.println ("Would have added the following to the Results Table: " + result.toString());
+        System.err.println ("Adding the following to the Results Table: " + result.toString());
+        
+        ((InputValidationResultsTableModel)getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).addRow(result);
+        ((InputValidationResultsTableModel)getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        
     }
     
     
