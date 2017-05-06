@@ -233,6 +233,11 @@ public class InputValidatorPane extends JPanePlugin {
         }
     }
 
+    /**
+     * Verifies that there are judge's data files against which we can run an Input Validator.
+     * 
+     * @return true if there is one or more Judge's Data Files stored in the Data Files pane
+     */
     private boolean problemHasInputDataFiles() {
         JPanePlugin parent = getParentPane();
         if (parent != null && parent instanceof EditProblemPane) {
