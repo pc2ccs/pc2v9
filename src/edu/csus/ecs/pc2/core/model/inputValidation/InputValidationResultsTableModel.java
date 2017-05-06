@@ -6,8 +6,6 @@ import java.util.Vector;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import edu.csus.ecs.pc2.core.Utilities;
-
 /**
  * This class defines a {@link TableModel} for a table holding {@link InputValidationResult}s.
  * 
@@ -20,7 +18,7 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
 
     private static Vector<String> columnNames = new Vector<String>(Arrays.asList(colNames));
     
-    private InputValidationResult [] results ;
+    private Vector<InputValidationResult> results ;
 
     private static final long serialVersionUID = 1L;
     
@@ -30,17 +28,18 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
     }
     
     public InputValidationResultsTableModel() {
-        super(null, columnNames);
-        setRowCount(0);
+        this(null);
     }
 
     public void setResults(InputValidationResult [] results) {
+        this.results = new Vector<InputValidationResult>();
         if (results != null){
+            for (int i=0; i<results.length; i++) {
+                this.results.add(results[i]);
+            }
             setRowCount(results.length);
-            this.results = results;
         } else {
             setRowCount(0);
-            this.results = null;
         }
     }
 
@@ -49,21 +48,20 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
 
         Object obj = "Unknown";
 
-        //code from TestCaseTableModel, from which this file was cloned:
         switch (column) {
             case 0:
-                obj = results[row].getFullPathFilename();
+                obj = results.get(row).getFullPathFilename();
                 break;
             case 1:
-                obj = results[row].isPassed();
+                obj = results.get(row).isPassed();
                 break;
             case 2:
                 //TODO: need to return a string which can be used as a LINK to the file
-                obj = results[row].getValidatorStdOut();
+                obj = results.get(row).getValidatorStdOut();
                 break;
             case 3:
                 //TODO: need to return a string which can be used as a LINK to the file
-                obj = results[row].getValidatorStdErr();
+                obj = results.get(row).getValidatorStdErr();
                 break;
             default:
                 break;
@@ -79,37 +77,19 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
      */
     @Override
     public void removeRow(int row) {
-        InputValidationResult [] newResults = new InputValidationResult [results.length-1];
-        for (int i=0; i<row; i++) {
-            newResults[i] = results[i];
-        }
-        for (int i=row+1; i<results.length; i++) {
-            newResults[i-1] = results[i];
-        }
-        results = newResults;
-
+        results.remove(row);
         super.removeRow(row);
     }
     
-    @Override
-    public void addRow(Object [] rowData ){
-        super.addRow(rowData);
-    }
-    
     public void addRow (InputValidationResult result) {
-        
-        Object [] objResult = new Object[4];
-        objResult[0] = Utilities.basename(result.getFullPathFilename());
-        objResult[1] = result.isPassed();
-        objResult[2] = result.getValidatorStdOut().getName();
-        objResult[3] = result.getValidatorStdErr().getName();
-        
-        super.addRow(objResult);
-        
+        results.add(result);
+        Vector<InputValidationResult> newRow = new Vector<InputValidationResult>();
+        newRow.add(result);
+        super.addRow(newRow);
     }
     
     
-    public InputValidationResult [] getResults() {
+    public Iterable<InputValidationResult> getResults() {
         return results;
     }
 
