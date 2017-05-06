@@ -4,6 +4,20 @@ import java.awt.Component;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
+import edu.csus.ecs.pc2.core.execute.ExecuteException;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
+import edu.csus.ecs.pc2.validator.inputValidator.InputValidatorRunner;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.util.List;
 
 /**
  * This class defines a plugin pane (a JPanel) containing components for 
@@ -26,6 +40,9 @@ public class InputValidatorPane extends JPanePlugin {
     private Component verticalStrut_4;
 
     private JPanePlugin parentPane;
+    private JButton runInputValidatorButton;
+    private Component verticalStrut_5;
+
 
     public InputValidatorPane() {
         
@@ -34,6 +51,8 @@ public class InputValidatorPane extends JPanePlugin {
         add(getVerticalStrut_4());
 
         this.add(getDefineInputValidatorPanel());
+        add(getVerticalStrut_5());
+        add(getRunInputValidatorButton());
         this.add(getVerticalStrut_1());
         this.add(getInputValidationResultPanel());
         this.add(getVerticalStrut_3());
@@ -154,5 +173,161 @@ public class InputValidatorPane extends JPanePlugin {
         
     }
 
+    private JButton getRunInputValidatorButton() {
+        if (runInputValidatorButton == null) {
+        	runInputValidatorButton = new JButton("Run Input Validator");
+        	runInputValidatorButton.addActionListener(new ActionListener() {
+        	    
+        	    public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run () {
+                            if (okToRunInputValidator()) {
+                                spawnInputValidatorRunnerThread();
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Cannot run Input Validator", "Inadequate Data Available", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                        }
+                    });
+        	    }
+        	});
+        }
+        return runInputValidatorButton;
+    }
+    
+    /**
+     * Verifies that all conditions necessary to run the Input Validator associated with this InputValidatorPane are true.
+     * These include that there is an Input Validator Command line and that there are Input Data Files on which the command can operate.
+     * 
+     * @return true if it is ok to run the Input Validator; false if not
+     */
+    private boolean okToRunInputValidator() {
+        return false;
+    }
+    
+    /**
+     * Spawns a separate {@link SwingWorker} thread to run the Input Validator.
+     * 
+     * The worker thread publishes each separate InputValidationResult as it is generated, and when all results
+     * have been generated it assigns the collection of results to a global array for access by the done() method.
+     * 
+     * See https://docs.oracle.com/javase/tutorial/uiswing/concurrency/interim.html for details on how SwingWorker threads publish results.
+     */
+    private void spawnInputValidatorRunnerThread() {
 
+        SwingWorker<InputValidationResult[], InputValidationResult> worker = new SwingWorker<InputValidationResult[], InputValidationResult>() {
+
+            @Override
+            public InputValidationResult[] doInBackground() throws Exception {
+
+                JPanePlugin parent = getParentPane();
+                if (parent instanceof EditProblemPane) {
+                    
+                    EditProblemPane editProbPane = (EditProblemPane) parent;
+                    SerializedFile[] dataFiles = editProbPane.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles();
+
+                    final InputValidationResult[] validationResults = new InputValidationResult[dataFiles.length];
+
+                    SerializedFile validatorProg = new SerializedFile(getInputValidatorProgramName());
+                    
+                    Problem prob = editProbPane.getProblem();
+                    
+                    String executeDir = editProbPane.getExecuteDirectoryName();
+                    
+                    for (int fileNum = 0; fileNum < dataFiles.length; fileNum++) {
+                        SerializedFile dataFile = dataFiles[fileNum];
+                        
+                        //need to figure out how to run each of these calls on a separate thread and return intermediate results...
+                        // this might need to be done here, or else in method runInputValidator()...
+                        validationResults[fileNum] = runInputValidator(prob, validatorProg, getInputValidatorCommand(), dataFile, executeDir);
+                        
+                        publish(validationResults[fileNum]);
+
+                    }
+                    
+                    return validationResults;
+                    
+                } else {
+                    return null;
+                }
+
+            }
+
+            //this code would be used if we were going to wait for the entire batch of InputValidationResults to be finished;
+            // however, we're expecting results to be "published" as they are generated
+//            @Override
+//            public void done() {
+//                try {
+//                    validationResults = get();
+//                } catch (InterruptedException ignore) {
+//                }
+//                catch (java.util.concurrent.ExecutionException e) {
+//                    String why = null;
+//                    Throwable cause = e.getCause();
+//                    if (cause != null) {
+//                        why = cause.getMessage();
+//                    } else {
+//                        why = e.getMessage();
+//                    }
+//                    System.err.println("Error retrieving validation results: " + why);
+//                }
+//            }
+            
+            @Override
+            public void process(List<InputValidationResult> resultList) {
+                //display the results (which may be partial) in the InputValidatorPane's InputValidationResults table
+                for (InputValidationResult result : resultList) {
+                    addToResultTable(result);
+                }
+            }
+        };
+
+
+        worker.execute();
+    }
+    
+    private void addToResultTable(InputValidationResult result) {
+        System.err.println ("Would have added the following to the Results Table: " + result.toString());
+    }
+    
+    
+    /**
+     * Runs the specified Input Validator Program using the specified parameters.
+     * 
+     * NOTE: TODO: this should be done on a separate thread.
+     * 
+     * @param problem the Contest Problem associated with the Input Validator
+     * @param validatorProg the Input Validator Program to be run
+     * @param validatorCommand the command used to run the Input Validator Program
+     * @param dataFile the data file to be passed to the Input Validator as input to be validated
+     * @param executeDir the execution directory to be used (in which to run the Input Validator Program
+     * 
+     * @return an InputValidationResult
+     * 
+     * @throws ExecutionException if an ExecutionException occurs during execution of the Input Validator
+     * @throws Exception if an Exception other than ExecutionException occurs during execution of the Input Validator
+     */
+    private InputValidationResult runInputValidator(Problem problem, SerializedFile validatorProg, String validatorCommand, SerializedFile dataFile, String executeDir) throws Exception {
+
+        InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
+        InputValidationResult result = null;
+        try {
+            runner.runInputValidator(problem, validatorProg, validatorCommand, executeDir, dataFile);
+        } catch (ExecuteException e) {
+            getController().getLog().warning("Exeception executing Input Validator: " + e.getMessage());
+            throw e;
+        } catch (Exception e1) {
+            getController().getLog().warning("Exeception executing Input Validator: " + e1.getMessage());
+            throw e1;
+        }
+        
+        return result;
+    }
+        
+
+    private Component getVerticalStrut_5() {
+        if (verticalStrut_5 == null) {
+        	verticalStrut_5 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_5;
+    }
 }
