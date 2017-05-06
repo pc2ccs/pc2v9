@@ -255,8 +255,8 @@ public class InputValidatorPane extends JPanePlugin {
     /**
      * Spawns a separate {@link SwingWorker} thread to run the Input Validator.
      * 
-     * The worker thread publishes each separate InputValidationResult as it is generated, and when all results
-     * have been generated it assigns the collection of results to a global array for access by the done() method.
+     * The worker thread publishes each separate InputValidationResult as it is generated; each published result
+     * is automatically picked up and handled by the worker's process() method.
      * 
      * See https://docs.oracle.com/javase/tutorial/uiswing/concurrency/interim.html for details on how SwingWorker threads publish results.
      */
@@ -264,45 +264,53 @@ public class InputValidatorPane extends JPanePlugin {
 
         SwingWorker<InputValidationResult[], InputValidationResult> worker = new SwingWorker<InputValidationResult[], InputValidationResult>() {
 
+            /**
+             * This method is invoked when the Worker thread's execute() method is called.  The method runs the Input Validator in the background
+             * against all the judge's input data files currently defined on the EditProblemPane's Input Data Files pane, publishing each result
+             * as it finishes.
+             */
             @Override
             public InputValidationResult[] doInBackground() throws Exception {
 
-                System.err.println ("In SwingWorker.doInBackground()");
+                //determine what Type will receive the results
                 JPanePlugin parent = getParentPane();
+                
                 if (parent instanceof EditProblemPane) {
                     
+                    //we're going to publish results to an EditProblemPane
                     EditProblemPane editProbPane = (EditProblemPane) parent;
                     
+                    //get each of the data files from the EditProblemPane's Input Data Files tab
                     SerializedFile[] dataFiles = editProbPane.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles();
 
+                    //an array to hold the results as they are created
                     final InputValidationResult[] validationResults = new InputValidationResult[dataFiles.length];
 
+                    //get the Input Validator Program to be run
                     SerializedFile validatorProg = new SerializedFile(getInputValidatorProgramName());
                     
+                    //get the problem for which the data files apply
                     Problem prob = editProbPane.getProblem();
                     
+                    //get the execution directory being used by the EditProblemPane 
                     String executeDir = editProbPane.getExecuteDirectoryName();
-                    
-                    System.err.println ("     problem = " + prob.toStringDetails());
-                    System.err.println ("     validatorProg = " + validatorProg.getName());
-                    System.err.println ("     executeDir = " + executeDir);
-                    System.err.println ("     num data files = " + dataFiles.length);
-                   
+
+
                     //clear the results table in preparation for adding new results
                     ((InputValidationResultsTableModel)getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).setResults(null);
                     ((AbstractTableModel) getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
                    
-
+                    //run the Input Validator on each data file
                     for (int fileNum = 0; fileNum < dataFiles.length; fileNum++) {
+                        
+                        //get the next data file
                         SerializedFile dataFile = dataFiles[fileNum];
                         
-                        System.err.println ("       file " + (fileNum+1) + ": " + dataFile.getName());
-                        
-                        //need to figure out how to run each of these calls on a separate thread and return intermediate results...
+                        //should figure out how to run each of these calls on a separate thread and still return intermediate results...
                         // this might need to be done here, or else in method runInputValidator()...
                         validationResults[fileNum] = runInputValidator(prob, validatorProg, getInputValidatorCommand(), dataFile, executeDir);
                         
-                        System.err.println ("Publishing ' " + validationResults[fileNum] + " '");
+                        //publish the validator result for the current data file, to be picked up by the process() method (below)
                         publish(validationResults[fileNum]);
 
                     }
@@ -310,8 +318,10 @@ public class InputValidatorPane extends JPanePlugin {
                     return validationResults;
                     
                 } else {
-                    
-                    System.err.println ("doInBackground() is returning null");
+                    //the parent is not an EditProblemPane; the current code doesn't support returning results to any other Type
+                    getController().getLog().warning("Attempted to return Input Validator results to a " + parent.getClass() 
+                            + "; currently only EditProblemPane is supported for receiving results");
+                    System.err.println ("Warning: attempt to assign Input Validator results to an unsupported type: " + parent.getClass());
                     return null;
                 }
 
@@ -337,18 +347,22 @@ public class InputValidatorPane extends JPanePlugin {
 //                }
 //            }
             
+            
+            /**
+             * This method is called by the Worker thread's publish() method each time one or more results are finished.
+             * The input to the method is a list of results which have been completed since the last call to this method.
+             * This method adds each published result to the results table, by calling addToResultTable().
+             */
             @Override
             public void process(List<InputValidationResult> resultList) {
                 //display the results (which may be partial) in the InputValidatorPane's InputValidationResults table
                 
-                System.err.println ("SwingWorker.process() invoked with result list " + resultList);
                 for (InputValidationResult result : resultList) {
                     addToResultTable(result);
                 }
             }
         };
 
-        System.err.println ("Calling SwingWorker.execute()");
         worker.execute();
     }
     
@@ -358,7 +372,6 @@ public class InputValidatorPane extends JPanePlugin {
      * @param result the result to be added to the table
      */
     private void addToResultTable(InputValidationResult result) {
-        System.err.println ("Adding the following to the Results Table: " + result.toString());
         
         ((InputValidationResultsTableModel)getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).addRow(result);
         ((InputValidationResultsTableModel)getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
