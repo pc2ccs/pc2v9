@@ -146,7 +146,7 @@ public class EditProblemPane extends JPanePlugin {
 
     private JButton answerBrowseButton = null;
 
-    private JLabel inputDataFileLabel = null;
+    protected JLabel inputDataFileLabel = null;
 
     private JLabel answerFileNameLabel = null;
 
