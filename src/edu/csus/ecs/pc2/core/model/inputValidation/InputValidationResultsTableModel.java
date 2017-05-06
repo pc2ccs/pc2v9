@@ -6,6 +6,8 @@ import java.util.Vector;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import edu.csus.ecs.pc2.core.Utilities;
+
 /**
  * This class defines a {@link TableModel} for a table holding {@link InputValidationResult}s.
  * 
@@ -88,6 +90,24 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
 
         super.removeRow(row);
     }
+    
+    @Override
+    public void addRow(Object [] rowData ){
+        super.addRow(rowData);
+    }
+    
+    public void addRow (InputValidationResult result) {
+        
+        Object [] objResult = new Object[4];
+        objResult[0] = Utilities.basename(result.getFullPathFilename());
+        objResult[1] = result.isPassed();
+        objResult[2] = result.getValidatorStdOut().getName();
+        objResult[3] = result.getValidatorStdErr().getName();
+        
+        super.addRow(objResult);
+        
+    }
+    
     
     public InputValidationResult [] getResults() {
         return results;
