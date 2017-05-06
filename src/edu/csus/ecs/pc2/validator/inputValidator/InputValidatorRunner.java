@@ -79,6 +79,10 @@ public class InputValidatorRunner {
 
         String cmdline = replaceString(validatorCommand, "{:validator}", validatorProg.getAbsolutePath());
         cmdline = replaceString(cmdline, "{:basename}", validatorProg.getName());
+        
+        if (cmdline.startsWith("java") && cmdline.endsWith(".class")) {
+            cmdline = replaceString (cmdline, ".class", "");
+        }
 
         Utilities.insureDir(executeDir);
         clearDirectory(executeDir);
