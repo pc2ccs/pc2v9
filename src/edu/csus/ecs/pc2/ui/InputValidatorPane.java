@@ -11,6 +11,7 @@ import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteException;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -243,11 +244,18 @@ public class InputValidatorPane extends JPanePlugin {
     private boolean problemHasInputDataFiles() {
         JPanePlugin parent = getParentPane();
         if (parent != null && parent instanceof EditProblemPane) {
-            EditProblemPane epp = (EditProblemPane) parent ;
-            if (epp.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles().length>0) {
+            EditProblemPane epp = (EditProblemPane) parent;
+            // check for data files on the Input Data Files tab
+            if (epp.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles().length > 0) {
                 return true;
+            } else {
+                // there's no data files on the Input Data Files tab; check to see if they've entered a single data file on the General tab
+                if (epp.inputDataFileLabel != null && epp.inputDataFileLabel.getText() != null && epp.inputDataFileLabel.getText().equals("")) {
+                    return true;
+                }
             }
-        } 
+        }
+        //no data files were found anywhere (or the parent isn't an EditProblemPane)
         return false;
     }
 
@@ -277,22 +285,87 @@ public class InputValidatorPane extends JPanePlugin {
                 if (parent instanceof EditProblemPane) {
                     
                     //we're going to publish results to an EditProblemPane
-                    EditProblemPane editProbPane = (EditProblemPane) parent;
+                    EditProblemPane epp = (EditProblemPane) parent;
                     
-                    //get each of the data files from the EditProblemPane's Input Data Files tab
-                    SerializedFile[] dataFiles = editProbPane.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles();
+                    //get the data files from the EditProblemPane's Input Data Files tab
+                    SerializedFile[] dataFiles = epp.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles();
+                    
+                    // make sure we got some data files
+                    boolean found = false;
+                    if (dataFiles != null && dataFiles.length > 0) {
+                        found = true;
+                    } else {
 
-                    //an array to hold the results as they are created
+                        // no files found on the Input Data Files tab; see if perhaps there is a single data file name defined on the General tab
+                        if (epp.inputDataFileLabel != null && !epp.inputDataFileLabel.getText().equals("")) {
+
+                            // there is a file name on the General tab; try getting that file (whose full name is stored in the ToolTip)
+                            String fileName = epp.inputDataFileLabel.getToolTipText();
+                            if (fileName != null && !fileName.equals("")) {
+
+                                try {
+                                    SerializedFile sf = new SerializedFile(fileName);
+
+                                    // check for serialization error (which will throw any exception found in the SerializedFile)
+                                    if (Utilities.serializedFileError(sf)) {
+                                        getController().getLog().warning("Error obtaining SerializedFile for data file ' " + fileName
+                                                + " ' -- cannot run Input Validator");
+                                        System.err.println("Error obtaining SerializedFile for data file ' " + fileName + " ' (from General tab)");
+                                        return null;
+                                    } else {
+                                        // we got a valid SerializedFile from the General tab; use that
+                                        dataFiles = new SerializedFile[1];
+                                        dataFiles[1] = sf;
+                                        found = true;
+                                    }
+                                } catch (Exception e) {
+                                    getController().getLog().warning("Exception obtaining SerializedFile for data file ' " + fileName + " ' : " + e.getMessage());
+                                    System.err.println("Exception obtaining SerializedFile for data file ' " + fileName + " ' : " + e.getMessage());
+                                    return null;
+                                }
+                            }
+
+                        }
+                    }
+
+                    if (!found) {
+                        // we found no data files on either tab
+                        getController().getLog().warning("No data files found -- cannot run Input Validator");
+                        System.err.println("Warning: No data files found -- cannot run Input Validator");
+                        return null;
+                    }
+
+                    //if we get here we know we have data files to process...
+                    
+                    //create an array to hold the results as they are created
                     final InputValidationResult[] validationResults = new InputValidationResult[dataFiles.length];
 
-                    //get the Input Validator Program to be run
-                    SerializedFile validatorProg = new SerializedFile(getInputValidatorProgramName());
+                    //get the name of the Input Validator Program to be run
+                    String valProgName = getInputValidatorProgramName();
+                    
+                    //create a SerializedFile for the validator program
+                    SerializedFile validatorProg;
+                    try {
+                        validatorProg = new SerializedFile(valProgName);
+
+                        // check for serialization error (which will throw any exception found in the SerializedFile)
+                        if (Utilities.serializedFileError(validatorProg)) {
+                            getController().getLog().warning("Error obtaining SerializedFile for validator program file ' " + validatorProg
+                                    + " ' -- cannot run Input Validator");
+                            System.err.println("Error obtaining SerializedFile for validator program file ' " + validatorProg + " '");
+                            return null;
+                        } 
+                    } catch (Exception e) {
+                        getController().getLog().warning("Exception obtaining SerializedFile for validator program file ' " + valProgName + " ' : " + e.getMessage());
+                        System.err.println("Exception obtaining SerializedFile for validator program file ' " + valProgName + " ' : " + e.getMessage());
+                        return null;
+                    }
                     
                     //get the problem for which the data files apply
-                    Problem prob = editProbPane.getProblem();
+                    Problem prob = epp.getProblem();
                     
                     //get the execution directory being used by the EditProblemPane 
-                    String executeDir = editProbPane.getExecuteDirectoryName();
+                    String executeDir = epp.getExecuteDirectoryName();
 
 
                     //clear the results table in preparation for adding new results
