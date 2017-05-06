@@ -309,6 +309,8 @@ public class EditProblemPane extends JPanePlugin {
         addWindowListeners();
 
         getMultipleDataSetPane().setContestAndController(inContest, inController);
+        
+        getInputValidatorPane().setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
