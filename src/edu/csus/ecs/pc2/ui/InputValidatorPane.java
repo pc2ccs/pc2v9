@@ -9,7 +9,9 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.ExecuteException;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
@@ -56,6 +58,14 @@ public class InputValidatorPane extends JPanePlugin {
         this.add(getVerticalStrut_1());
         this.add(getInputValidationResultPanel());
         this.add(getVerticalStrut_3());
+    }
+    
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        super.setContestAndController(inContest, inController);
+
+        getDefineInputValidatorPanel().setContestAndController(inContest, inController);
+        getInputValidationResultPanel().setContestAndController(inContest, inController);
     }
     
     /**
@@ -179,8 +189,10 @@ public class InputValidatorPane extends JPanePlugin {
         	runInputValidatorButton.addActionListener(new ActionListener() {
         	    
         	    public void actionPerformed(ActionEvent e) {
+        	        System.err.println ("Run Input Validator button pressed...");
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run () {
+                            System.err.println ("Run Input Validator runnable task invoked...");
                             if (okToRunInputValidator()) {
                                 spawnInputValidatorRunnerThread();
                             } else {
@@ -201,9 +213,37 @@ public class InputValidatorPane extends JPanePlugin {
      * @return true if it is ok to run the Input Validator; false if not
      */
     private boolean okToRunInputValidator() {
-        return false;
+        if (problemHasInputValidatorCommand() && problemHasInputDataFiles()) {
+            return true;
+        } else {
+            return false;
+        }
     }
     
+    /**
+     * Verifies that this InputValidatorPane has a command for running the Input Validator.
+     * 
+     * @return true if the Input Validator command is a non-null, non-empty String; false otherwise
+     */
+    private boolean problemHasInputValidatorCommand() {
+        if (getInputValidatorCommand() != null && !getInputValidatorCommand().equals("")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean problemHasInputDataFiles() {
+        JPanePlugin parent = getParentPane();
+        if (parent != null && parent instanceof EditProblemPane) {
+            EditProblemPane epp = (EditProblemPane) parent ;
+            if (epp.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles().length>0) {
+                return true;
+            }
+        } 
+        return false;
+    }
+
     /**
      * Spawns a separate {@link SwingWorker} thread to run the Input Validator.
      * 
@@ -219,10 +259,12 @@ public class InputValidatorPane extends JPanePlugin {
             @Override
             public InputValidationResult[] doInBackground() throws Exception {
 
+                System.err.println ("In SwingWorker.doInBackground()");
                 JPanePlugin parent = getParentPane();
                 if (parent instanceof EditProblemPane) {
                     
                     EditProblemPane editProbPane = (EditProblemPane) parent;
+                    
                     SerializedFile[] dataFiles = editProbPane.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles();
 
                     final InputValidationResult[] validationResults = new InputValidationResult[dataFiles.length];
@@ -233,13 +275,21 @@ public class InputValidatorPane extends JPanePlugin {
                     
                     String executeDir = editProbPane.getExecuteDirectoryName();
                     
+                    System.err.println ("     problem = " + prob.toStringDetails());
+                    System.err.println ("     validatorProg = " + validatorProg.getName());
+                    System.err.println ("     executeDir = " + executeDir);
+                    System.err.println ("     num data files = " + dataFiles.length);
+                   
                     for (int fileNum = 0; fileNum < dataFiles.length; fileNum++) {
                         SerializedFile dataFile = dataFiles[fileNum];
+                        
+                        System.err.println ("       file " + (fileNum+1) + ": " + dataFile.getName());
                         
                         //need to figure out how to run each of these calls on a separate thread and return intermediate results...
                         // this might need to be done here, or else in method runInputValidator()...
                         validationResults[fileNum] = runInputValidator(prob, validatorProg, getInputValidatorCommand(), dataFile, executeDir);
                         
+                        System.err.println ("Publishing ' " + validationResults[fileNum] + " '");
                         publish(validationResults[fileNum]);
 
                     }
@@ -247,6 +297,8 @@ public class InputValidatorPane extends JPanePlugin {
                     return validationResults;
                     
                 } else {
+                    
+                    System.err.println ("doInBackground() is returning null");
                     return null;
                 }
 
@@ -275,13 +327,15 @@ public class InputValidatorPane extends JPanePlugin {
             @Override
             public void process(List<InputValidationResult> resultList) {
                 //display the results (which may be partial) in the InputValidatorPane's InputValidationResults table
+                
+                System.err.println ("SwingWorker.process() invoked with result list " + resultList);
                 for (InputValidationResult result : resultList) {
                     addToResultTable(result);
                 }
             }
         };
 
-
+        System.err.println ("Calling SwingWorker.execute()");
         worker.execute();
     }
     
@@ -311,7 +365,7 @@ public class InputValidatorPane extends JPanePlugin {
         InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
         InputValidationResult result = null;
         try {
-            runner.runInputValidator(problem, validatorProg, validatorCommand, executeDir, dataFile);
+            result = runner.runInputValidator(problem, validatorProg, validatorCommand, executeDir, dataFile);
         } catch (ExecuteException e) {
             getController().getLog().warning("Exeception executing Input Validator: " + e.getMessage());
             throw e;
