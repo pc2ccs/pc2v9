@@ -169,7 +169,6 @@ public class DefineInputValidatorPane extends JPanePlugin {
             
             inputValidatorCommandTextField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent event) {
-                    System.err.println ("key pressed in DefineInputValidatorPane.getInputValidatorCommandTextField");
                     enableUpdateButton();
                 }
             });

@@ -29,7 +29,6 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -2476,6 +2475,12 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void initializeInputValidatorTabFields (Problem prob, ProblemDataFiles probDataFiles) {
         
+        if (prob == null) {
+            getController().getLog().severe("Attempt to initialize Input Validator tab fields from a null problem!");
+            System.err.println ("Internal error: attempt to initialize Input Validator tab fields from a null problem!");
+            throw new RuntimeException("Attempt to initialize Input Validator tab fields from a null problem!");
+        }
+        
         //fill in the input validator program name 
         String inputValidatorProg = prob.getInputValidatorProgramName();
         if (inputValidatorProg != null) {
@@ -2483,6 +2488,7 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             getInputValidatorPane().setInputValidatorProgramName("");
         }
+        
         //update the tooltip to reflect the name in the text field
         if (getInputValidatorPane().getInputValidatorProgramName() == null || 
                 getInputValidatorPane().getInputValidatorProgramName().equals("")) {
@@ -2499,6 +2505,7 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             getInputValidatorPane().setInputValidatorCommand("");
         }
+        
         //update the tooltip to reflect the name in the command text field
         if (getInputValidatorPane().getInputValidatorCommand() == null || 
                 getInputValidatorPane().getInputValidatorCommand().equals("")) {
@@ -2509,85 +2516,42 @@ public class EditProblemPane extends JPanePlugin {
         }
                 
         //update the results table:
-        //get the number of previous results stored in the problem
+        //get the number of results stored in the problem
         int numResults = prob.getNumInputValidationResults();
         
         //create an array with one element for each result
-        InputValidationResult [] prevResults = new InputValidationResult [numResults];
-        
-        //get an iterator over the previous results
-        Iterator<InputValidationResult> prevResultsIter = prob.getInputValidationResults().iterator();
-        
-        //copy each previous result into the array
-        int i=0;
-        while (prevResultsIter.hasNext()){
-            prevResults[i++] = prevResultsIter.next();
+        InputValidationResult [] probInputValidationResults = new InputValidationResult [numResults];
+                
+        //copy each result into the array
+        int i = 0;
+        for (InputValidationResult res : prob.getInputValidationResults()) {
+            probInputValidationResults[i++] = res;
         }
         
-        ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).setResults(prevResults);
-        ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        //put the results into the GUI table
+        ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResults);
+        ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
         
         //set the Status message based on the status in the specified problem
-        updateInputValidationStatusMessage(prob);
+        updateInputValidationStatusMessage(probInputValidationResults);
         
         getInputValidatorPane().setInputValidatorHasBeenRun(false);
                 
         setInputValidationStatus(prob.getInputValidationStatus());  //note: validation status variable is not displayed on the GUI
-
     }
     
     /**
-     * Sets the Input Validation Status message on the InputValdiationResults pane.
+     * Sets the Input Validation Status message on the Input Validator pane.
      * 
-     * @param prob the problem containing the Input Validation Results
+     * @param results an array contain the Input Validation Result values which determine what the status message should display
      */
-    protected void updateInputValidationStatusMessage(Problem prob) {
+    protected void updateInputValidationStatusMessage(InputValidationResult [] results) {
         
-        InputValidationStatus problemValidationStatus = prob.getInputValidationStatus();
+        getInputValidatorPane().updateInputValidationStatusMessage(results);
         
-        Color color ;
-        String msg ;
-        if (problemValidationStatus == null) {
-            msg = "Internal error: problem validation status is null";
-            color = Color.MAGENTA;
-            getLog().log(Log.SEVERE, "Problem has null Input Validation Status; shouldn't be possible");
-        } else {
-            switch (problemValidationStatus) {
-                case NOT_TESTED:
-                    msg = "<No Input Validation test run yet>";
-                    color = Color.BLACK;
-                    break;
-                case PASSED:
-                    msg = "All input data files PASSED validation";
-                    color = Color.GREEN;
-                    break;
-                case FAILED:
-                    int totalCount = 0;
-                    int failCount = 0;
-                    for (InputValidationResult res : prob.getInputValidationResults()) {
-                        if (!res.isPassed()) {
-                            failCount++ ;
-                        }
-                        totalCount++ ;
-                    }
-                    msg = "" + failCount + " of " + totalCount + " input data files FAILED validation";
-                    color = Color.red;
-                    break;
-                case ERROR:
-                    msg = "Error occurred during input validation; check logs";
-                    color = Color.YELLOW;
-                    break;
-                default:
-                    msg = "This message should never be displayed; please notify PC2 Developers: pc2@ecs.csus.edu";
-                    color = Color.ORANGE;
-            }
-        }
-        getInputValidatorPane().getInputValidationResultPanel().getInputValidationResultSummaryTextLabel().setText(msg);
-        getInputValidatorPane().getInputValidationResultPanel().getInputValidationResultSummaryTextLabel().setForeground(color);
-
     }
-    
 
+    
     /**
      * update/enable Update button.
      * 
@@ -3908,10 +3872,10 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidatorPane().setInputValidatorCommand("");
         getInputValidatorPane().setInputValidatorCommandToolTipText("");
 
-        getInputValidatorPane().getInputValidationResultPanel().getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
-        getInputValidatorPane().getInputValidationResultPanel().getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
-        ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).setResults(null);
-        ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        getInputValidatorPane().setInputValidationSummaryMessageText("<No Input Validation test run yet>");
+        getInputValidatorPane().setInputValidationSummaryMessageColor(Color.BLACK);
+        ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(null);
+        ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
         
         getInputValidatorPane().setInputValidatorHasBeenRun(false);
 
@@ -5104,6 +5068,83 @@ public class EditProblemPane extends JPanePlugin {
         return horizontalStrut_2;
     }
     
+    //** THE FOLLOWING METHODS WERE PROTOTYPES AND MAY NOT BE USEFUL ANY MORE...
+    // ON THE OTHER HAND, THEY PROBABLY NEED TO BE CONSIDERING FOR BEING CALLED FROM addProblem()/updateProblem()...
+    
+    /**
+     * Updates the Input Validation Status for the current problem to reflect the state of the specified result.
+     * 
+     * If the received result is null the problem Input Validation Status is set to "ERROR".
+     */
+    @SuppressWarnings("unused")
+    private void updateProblemValidationStatus(Problem prob, InputValidationResult result) {
+        
+        if (prob == null) {
+            getController().getLog().warning("updateProblemValidationStatus() called with null problem");
+            return;
+        } else {
+            //verify we received a valid InputValidationResult
+            if (result == null) {
+                
+                //an error must have occurred (that's the only reason we should be called with "null"
+                prob.setInputValidationStatus(InputValidationStatus.ERROR);
+                getController().getLog().info("Received null validation result; updating problem validation status to 'Error'"); 
+                
+            } else {
+                //update the problem status based on combining the existing status with the new result status
+                InputValidationStatus currentProblemStatus = prob.getInputValidationStatus();
+                InputValidationStatus resultStatus = result.isPassed() ? InputValidationStatus.PASSED : InputValidationStatus.FAILED;
+                InputValidationStatus newStatus = getNewStatus(currentProblemStatus, resultStatus);
+                getProblem().setInputValidationStatus(newStatus);
+            }
+        }
+    }
+    
+    /**
+     * Returns a new InputValidationStatus for a problem based on combining the current problem Input Validation Status with the specified new status,
+     * assumed to be the result of having tested a new input data file by running an Input Validator on the input data file.
+     * 
+     * @param currentStatus the Input Validation Status currently assigned to the problem
+     * @param newStatus a new Input Validation Result status to be merged with the current status
+     * 
+     * @return the InputValidationStatus which should be assigned to the problem based on its current status and the received new Input Validator run status
+     */
+    private InputValidationStatus getNewStatus(InputValidationStatus currentStatus, InputValidationStatus newStatus) {
+        
+        InputValidationStatus retStatus = null;
+        
+        //verify the newStatus is a legit value
+        switch (newStatus) {
+            case NOT_TESTED:
+            case PASSED:
+            case FAILED:
+            case ERROR:
+                break;
+            default:
+                getController().getLog().severe("Unknown InputValidationStatus: " + newStatus);
+                System.err.println ("This message ('Unknown Input Validation Status') should never appear - please notify the PC^2 Development Team: pc2@ecs.csus.edu");
+                return null;
+        }
+        
+        //the new status is legit; check the current status
+        switch (currentStatus) {
+            // for both the Not_Tested and the (previously) Passed states, the new result is going to become the overall status
+            case NOT_TESTED:
+            case PASSED:
+                retStatus = newStatus; 
+                break;
+            //if the CURRENT status is "Failed" or "Error", then the new result is not going to change that status
+            case FAILED:
+            case ERROR:
+                retStatus = currentStatus;
+                break;
+            default:
+                getController().getLog().severe("Unknown InputValidationStatus: " + currentStatus);
+                System.err.println ("This message ('Unknown Input Validation Status') should never appear - please notify the PC^2 Development Team: pc2@ecs.csus.edu");
+        }
+        
+        return retStatus;
+    }
 
 } 
 

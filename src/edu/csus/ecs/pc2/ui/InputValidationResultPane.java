@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Font;
 
 import javax.swing.Box;
@@ -17,9 +18,10 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
+import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.ui.cellRenderer.PassFailCellRenderer;
-import java.awt.FlowLayout;
 
 /**
  * This class defines a JPanel for displaying the results of running an Input Validator on a set of Input Data files
@@ -85,7 +87,7 @@ public class InputValidationResultPane extends JPanePlugin {
         return inputValidationResultsSummaryLabel;
     }
     
-    public JLabel getInputValidationResultSummaryTextLabel() {
+    private JLabel getInputValidationResultSummaryTextLabel() {
         if (inputValidationResultSummaryTextLabel == null) {
             inputValidationResultSummaryTextLabel = new JLabel("<No Input Validation test run yet>");
             inputValidationResultSummaryTextLabel.setForeground(Color.black);
@@ -110,7 +112,7 @@ public class InputValidationResultPane extends JPanePlugin {
         return resultsScrollPane;
     }
     
-    public JTable getInputValidatorResultsTable() {
+    protected JTable getInputValidatorResultsTable() {
         if (resultsTable == null) {
             resultsTable = new JTable(inputValidationResultsTableModel);
             
@@ -167,11 +169,85 @@ public class InputValidationResultPane extends JPanePlugin {
 
     public void setParentPane(JPanePlugin parentPane) {
        this.parentPane = parentPane;
-        
     }
     
     public JPanePlugin getParentPane() {
         return this.parentPane;
+    }
+
+    public void setInputValidationSummaryMessageText(String msg) {
+       getInputValidationResultSummaryTextLabel().setText(msg);
+    }
+
+    public void setInputValidationSummaryMessageColor(Color color) {
+        getInputValidationResultSummaryTextLabel().setForeground(color);
+    }
+
+    /**
+     * Examines the provided array of {@link InputValidationResult} values and sets the Status Message label text correspondingly.
+     * 
+     * @param runResults
+     *            an array of InputValidationStatus values
+     */
+    public void updateInputValidationStatusMessage(InputValidationResult[] runResults) {
+
+        Color color = Color.BLACK;
+        String msg = "<No Input Validation test run yet>";
+
+        if (runResults != null && runResults.length > 0) {
+
+            // there are some results; see if there were any failures
+            boolean foundFailure = false;
+            for (InputValidationResult res : runResults) {
+                if (!res.isPassed()) {
+                    foundFailure = true;
+                    break;
+                }
+            }
+            
+            InputValidationStatus overallStatus ;
+            if (foundFailure) {
+                overallStatus = InputValidationStatus.FAILED;
+            } else {
+                overallStatus = InputValidationStatus.PASSED;
+            }
+
+            switch (overallStatus) {
+
+                case PASSED:
+                    msg = "All input data files PASSED validation";
+                    color = new Color(0x00, 0xb3, 0x00); // green, but with some shading
+                    break;
+                    
+                case FAILED:
+                    int totalCount = 0;
+                    int failCount = 0;
+                    for (InputValidationResult res : runResults) {
+                        if (!res.isPassed()) {
+                            failCount++;
+                        }
+                        totalCount++;
+                    }
+                    msg = "" + failCount + " of " + totalCount + " input data files FAILED validation";
+                    color = Color.red;
+                    break;
+                    
+                case ERROR:
+                case NOT_TESTED:
+                    msg = "Error occurred during input validation result display; check logs";
+                    color = Color.YELLOW;
+                    getController().getLog().severe("Unexpected error in computing Input Validation Status: found status '" + overallStatus + "' when "
+                            + "only 'PASSED' or 'FAILED' should be possible");
+                    break;
+                default:
+                    msg = "This message should never be displayed; please notify PC2 Developers: pc2@ecs.csus.edu";
+                    color = Color.ORANGE;
+            }
+        }
+
+        getInputValidationResultSummaryTextLabel().setText(msg);
+        getInputValidationResultSummaryTextLabel().setForeground(color);
+
     }
 
 }

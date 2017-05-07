@@ -1,6 +1,11 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -15,15 +20,10 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteException;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.validator.inputValidator.InputValidatorRunner;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.util.List;
 
 /**
  * This class defines a plugin pane (a JPanel) containing components for 
@@ -60,11 +60,11 @@ public class InputValidatorPane extends JPanePlugin {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         add(getVerticalStrut_4());
 
-        this.add(getDefineInputValidatorPanel());
+        this.add(getDefineInputValidatorPane());
         add(getVerticalStrut_5());
         add(getRunInputValidatorButton());
         this.add(getVerticalStrut_1());
-        this.add(getInputValidationResultPanel());
+        this.add(getInputValidationResultPane());
         this.add(getVerticalStrut_3());
     }
     
@@ -72,8 +72,8 @@ public class InputValidatorPane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
-        getDefineInputValidatorPanel().setContestAndController(inContest, inController);
-        getInputValidationResultPanel().setContestAndController(inContest, inController);
+        getDefineInputValidatorPane().setContestAndController(inContest, inController);
+        getInputValidationResultPane().setContestAndController(inContest, inController);
     }
     
     /**
@@ -82,7 +82,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @return a String containing the Input Validator Program Name
      */
     public String getInputValidatorProgramName() {
-        String progName = getDefineInputValidatorPanel().getInputValidatorProgramName();
+        String progName = getDefineInputValidatorPane().getInputValidatorProgramName();
         return progName;
     }
     
@@ -92,7 +92,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @param inputValidatorProg a String containing the Input Validator Program name
      */
     public void setInputValidatorProgramName(String progName) {
-       getDefineInputValidatorPanel().setInputValidatorProgramName(progName);
+       getDefineInputValidatorPane().setInputValidatorProgramName(progName);
 
     }
     
@@ -102,11 +102,11 @@ public class InputValidatorPane extends JPanePlugin {
      * @return a String containing the command to be used to invoke the Input Validator
      */
     public String getInputValidatorCommand() {
-        String command = getDefineInputValidatorPanel().getInputValidatorCommand();
+        String command = getDefineInputValidatorPane().getInputValidatorCommand();
         return command;
     }
 
-    private DefineInputValidatorPane getDefineInputValidatorPanel() {
+    private DefineInputValidatorPane getDefineInputValidatorPane() {
         if (defineInputValidatorPane == null) {
             defineInputValidatorPane = new DefineInputValidatorPane();
             defineInputValidatorPane.setContestAndController(this.getContest(), this.getController());
@@ -116,7 +116,7 @@ public class InputValidatorPane extends JPanePlugin {
     }
     
 
-    protected InputValidationResultPane getInputValidationResultPanel() {
+    private InputValidationResultPane getInputValidationResultPane() {
         if (inputValidationResultPane == null) {
             inputValidationResultPane = new InputValidationResultPane();
             inputValidationResultPane.setContestAndController(this.getContest(), this.getController());
@@ -167,7 +167,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @param text the ToolTip text to set
      */
     public void setInputValidatorProgramNameToolTipText(String text) {
-        getDefineInputValidatorPanel().setInputValidatorProgramNameToolTipText(text);
+        getDefineInputValidatorPane().setInputValidatorProgramNameToolTipText(text);
         
     }
 
@@ -177,7 +177,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @param command a String containing the command used to invoke the Input Validator
      */
     public void setInputValidatorCommand(String command) {
-        getDefineInputValidatorPanel().setInputValidatorCommand(command);
+        getDefineInputValidatorPane().setInputValidatorCommand(command);
         
     }
 
@@ -187,7 +187,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @param text the ToolTip text to set
      */
     public void setInputValidatorCommandToolTipText(String text) {
-        getDefineInputValidatorPanel().setInputValidatorCommandToolTipText(text);
+        getDefineInputValidatorPane().setInputValidatorCommandToolTipText(text);
         
     }
 
@@ -345,7 +345,7 @@ public class InputValidatorPane extends JPanePlugin {
                     //if we get here we know we have data files to process...
                     
                     //create an array to hold the results as they are created
-                    final InputValidationResult[] validationResults = new InputValidationResult[dataFiles.length];
+                    InputValidationResult[] validationResults = new InputValidationResult[dataFiles.length];
 
                     //get the name of the Input Validator Program to be run
                     String valProgName = getInputValidatorProgramName();
@@ -375,8 +375,8 @@ public class InputValidatorPane extends JPanePlugin {
                     String executeDir = epp.getExecuteDirectoryName();
 
                     //clear the results table in preparation for adding new results
-                    ((InputValidationResultsTableModel)getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).setResults(null);
-                    ((AbstractTableModel) getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+                    ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).setResults(null);
+                    ((AbstractTableModel) getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
                    
                     //run the Input Validator on each data file
                     for (int fileNum = 0; fileNum < dataFiles.length; fileNum++) {
@@ -393,7 +393,6 @@ public class InputValidatorPane extends JPanePlugin {
 
                         } catch (Exception e) {
                             getController().getLog().warning("Exception running Input Validator ' " + validatorProg.getName() + " ' : " + e.getMessage());
-                            updateProblemValidationStatus(null);
                         }
                         
                         //publish the validator result for the current data file, to be picked up by the process() method (below)
@@ -423,6 +422,7 @@ public class InputValidatorPane extends JPanePlugin {
             public void done() {
                 try {
                     runResults = get();
+                    updateInputValidationSummaryText(runResults);
                 } catch (InterruptedException ignore) {
                 }
                 catch (java.util.concurrent.ExecutionException e) {
@@ -448,9 +448,9 @@ public class InputValidatorPane extends JPanePlugin {
                 //display the results (which may be partial) in the InputValidatorPane's InputValidationResults table
                 
                 for (InputValidationResult result : resultList) {
-                    addToResultTable(result);
-//                    addToProblem(result);
-                    updateProblemValidationStatus(result);
+                    addResultToTable(result);
+//                    addResultToProblem(result);   //we don't want to do this until Add/Update is pressed
+//                    updateProblemValidationStatus(result);    // ditto ""
                 }
             }
         };
@@ -463,98 +463,21 @@ public class InputValidatorPane extends JPanePlugin {
      * 
      * @param result the result to be added to the table
      */
-    private void addToResultTable(InputValidationResult result) {
+    private void addResultToTable(InputValidationResult result) {
         
-        ((InputValidationResultsTableModel)getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).addRow(result);
-        ((InputValidationResultsTableModel)getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).addRow(result);
+        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
     }
     
     /**
-     * Adds the specified 
+     * Updates the Input Validation Results summary message to match the results contained in the received array of {@link InputValidationResult}s. 
      */
-    
-    /**
-     * Updates the Input Validation Status for the current problem to reflect the state of the specified result.
-     * 
-     * If the received result is null the problem Input Validation Status is set to "ERROR".
-     */
-    private void updateProblemValidationStatus(InputValidationResult result) {
-
-        //make sure the parent pane containing the status is an EditProblemPane
-        JPanePlugin parent = getParentPane() ;
-        if (parent != null && parent instanceof EditProblemPane) {
-            
-            //we're updating an EditProblemPane 
-            EditProblemPane epp = (EditProblemPane) parent;
-   
-            //verify we received a valid InputValidationResult
-            if (result == null) {
-                
-                //an error must have occurred (that's the only reason we should be called with "null"
-                epp.getProblem().setInputValidationStatus(InputValidationStatus.ERROR);
-                
-            } else {
-                //update the problem status based on combining the existing status with the new result status
-                InputValidationStatus currentProblemStatus = epp.getProblem().getInputValidationStatus();
-                InputValidationStatus resultStatus = result.isPassed() ? InputValidationStatus.PASSED : InputValidationStatus.FAILED;
-                InputValidationStatus newStatus = getNewStatus(currentProblemStatus, resultStatus);
-                epp.getProblem().setInputValidationStatus(newStatus);
-
-                epp.updateInputValidationStatusMessage(result.getProblem());
-            }
-
-        } else {
-            getController().getLog().warning("Attempt to update status label when parent pane is not an EditProblemPane (not supported)");
-            System.err.println ("Attempt to update status label when parent pane is not an EditProblemPane (not supported)");
-        }
+    private void updateInputValidationSummaryText(InputValidationResult [] runResults) {
+        getInputValidationResultPane().updateInputValidationStatusMessage(runResults);
     }
     
-    /**
-     * Returns a new InputValidationStatus for a problem based on combining the current problem Input Validation Status with the specified new status,
-     * assumed to be the result of having tested a new input data file by running an Input Validator on the input data file.
-     * 
-     * @param currentStatus the Input Validation Status currently assigned to the problem
-     * @param newStatus a new Input Validation Result status to be merged with the current status
-     * 
-     * @return the InputValidationStatus which should be assigned to the problem based on its current status and the received new Input Validator run status
-     */
-    private InputValidationStatus getNewStatus(InputValidationStatus currentStatus, InputValidationStatus newStatus) {
-        
-        InputValidationStatus retStatus = null;
-        
-        //verify the newStatus is a legit value
-        switch (newStatus) {
-            case NOT_TESTED:
-            case PASSED:
-            case FAILED:
-            case ERROR:
-                break;
-            default:
-                getController().getLog().severe("Unknown InputValidationStatus: " + newStatus);
-                System.err.println ("This message (Unknown Input Validation Status) should never appear - please notify the PC^2 Development Team: pc2@ecs.csus.edu");
-                return null;
-        }
-        
-        //the new status is legit; check the current status
-        switch (currentStatus) {
-            // for both the Not_Tested and the (previously) Passed states, the new result is going to become the overall status
-            case NOT_TESTED:
-            case PASSED:
-                retStatus = newStatus; 
-                break;
-            //if the CURRENT status is "Failed" or "Error", then the new result is not going to change that status
-            case FAILED:
-            case ERROR:
-                retStatus = currentStatus;
-                break;
-            default:
-                getController().getLog().severe("Unknown InputValidationStatus: " + currentStatus);
-                System.err.println ("This message (Unknown Input Validation Status) should never appear - please notify the PC^2 Development Team: pc2@ecs.csus.edu");
-        }
-        
-        return retStatus;
-    }
+    
     
     /**
      * Runs the specified Input Validator Program using the specified parameters.
@@ -613,5 +536,21 @@ public class InputValidatorPane extends JPanePlugin {
 
     public InputValidationResult[] getRunResults() {
         return this.runResults ;
+    }
+
+    public void setInputValidationSummaryMessageText(String msg) {
+        getInputValidationResultPane().setInputValidationSummaryMessageText(msg);
+    }
+
+    public void setInputValidationSummaryMessageColor(Color color) {
+        getInputValidationResultPane().setInputValidationSummaryMessageColor(color);
+    }
+
+    public void updateInputValidationStatusMessage(InputValidationResult[] results) {
+        getInputValidationResultPane().updateInputValidationStatusMessage(results);
+    }
+
+    public InputValidationResultsTableModel getResultsTableModel() {
+        return (InputValidationResultsTableModel) getInputValidationResultPane().getInputValidatorResultsTable().getModel();
     }
 }
