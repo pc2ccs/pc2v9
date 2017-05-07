@@ -2479,7 +2479,7 @@ public class EditProblemPane extends JPanePlugin {
         if (inputValidatorProg != null) {
             getInputValidatorPane().setInputValidatorProgramName(inputValidatorProg);
         } else {
-            getDefineInputValidatorPane().setInputValidatorProgramName("");
+            getInputValidatorPane().setInputValidatorProgramName("");
         }
         //update the tooltip to reflect the name in the text field
         if (getInputValidatorPane().getInputValidatorProgramName() == null || 
@@ -2522,8 +2522,8 @@ public class EditProblemPane extends JPanePlugin {
             prevResults[i++] = prevResultsIter.next();
         }
         
-        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).setResults(prevResults);
-        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).setResults(prevResults);
+        ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
         //set the Status message based on the status in the specified problem
         updateInputValidationStatusMessage(prob);
@@ -2578,8 +2578,8 @@ public class EditProblemPane extends JPanePlugin {
                     color = Color.ORANGE;
             }
         }
-        getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setText(msg);
-        getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setForeground(color);
+        getInputValidatorPane().getInputValidationResultPanel().getInputValidationResultSummaryTextLabel().setText(msg);
+        getInputValidatorPane().getInputValidationResultPanel().getInputValidationResultSummaryTextLabel().setForeground(color);
 
     }
     
@@ -3322,10 +3322,6 @@ public class EditProblemPane extends JPanePlugin {
     private boolean inputValidatorHasBeenRun;
 
     private InputValidationResult[] results;
-
-    private DefineInputValidatorPane defineInputValidatorPane;
-
-    private InputValidationResultPane inputValidationResultPane;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -3909,10 +3905,10 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidatorPane().setInputValidatorCommand("");
         getInputValidatorPane().setInputValidatorCommandToolTipText("");
 
-        getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
-        getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
-        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).setResults(null);
-        ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        getInputValidatorPane().getInputValidationResultPanel().getInputValidationResultSummaryTextLabel().setText("<No Input Validation test run yet>");
+        getInputValidatorPane().getInputValidationResultPanel().getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
+        ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).setResults(null);
+        ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
 
     }
 
@@ -5004,6 +5000,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         return (result);
     }
+    
     /**
      * Return string minus last extension. <br>
      * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
@@ -5024,7 +5021,6 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         return outString;
-
     }
     
     /**
@@ -5088,21 +5084,6 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         return buf.toString();
-    }
-
-    private DefineInputValidatorPane getDefineInputValidatorPane() {
-        if (defineInputValidatorPane == null) {
-            defineInputValidatorPane = new DefineInputValidatorPane();
-            defineInputValidatorPane.setContestAndController(this.getContest(), this.getController());
-        }
-        return defineInputValidatorPane;
-    }
-    
-    private InputValidationResultPane getInputValidationResultPane() {
-        if (inputValidationResultPane == null) {
-            inputValidationResultPane = new InputValidationResultPane();
-        }
-        return inputValidationResultPane;
     }
     
     private Component getHorizontalStrut_1() {
