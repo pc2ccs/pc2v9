@@ -561,14 +561,15 @@ public class EditProblemPane extends JPanePlugin {
         newProblem.setInputValidationStatus(this.getInputValidationStatus());
         
         //if an Input Validator was run, add the results to the problem
-        if (inputValidatorHasBeenRun) {
-            if (results != null) {
+        if (getInputValidatorPane().isInputValidatorHasBeenRun()) {
+            InputValidationResult [] runResults = getInputValidatorPane().getRunResults() ;
+            if (runResults != null) {
                 newProblem.clearInputValidationResults();
-                for (int i=0; i<results.length; i++) {
+                for (int i=0; i<runResults.length; i++) {
                     //update the Problem in the current result (it would not have been filled in when adding a problem; it was null)
-                    results[i].setProblem(newProblem);
+                    runResults[i].setProblem(newProblem);
                     //put the updated result into the problem
-                    newProblem.addInputValidationResult(results[i]);                    
+                    newProblem.addInputValidationResult(runResults[i]);                    
                 }
             } else {
                 getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
@@ -869,7 +870,7 @@ public class EditProblemPane extends JPanePlugin {
                         
                     }
                     
-                    if (inputValidatorHasBeenRun) {
+                    if (getInputValidatorPane().isInputValidatorHasBeenRun()) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
                             updateToolTip = "Input Validator Run";
@@ -1669,11 +1670,12 @@ public class EditProblemPane extends JPanePlugin {
         newProblem.setInputValidationStatus(this.getInputValidationStatus());
         
         //if an Input Validator was run, add the results to the problem
-        if (inputValidatorHasBeenRun) {
-            if (results != null) {
+        if (getInputValidatorPane().isInputValidatorHasBeenRun()) {
+            InputValidationResult [] runResults = getInputValidatorPane().getRunResults() ;
+            if (runResults != null) {
                 newProblem.clearInputValidationResults();
-                for (int i=0; i<results.length; i++) {
-                    newProblem.addInputValidationResult(results[i]);                    
+                for (int i=0; i<runResults.length; i++) {
+                    newProblem.addInputValidationResult(runResults[i]);                    
                 }
             } else {
                 getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
@@ -2527,6 +2529,8 @@ public class EditProblemPane extends JPanePlugin {
         
         //set the Status message based on the status in the specified problem
         updateInputValidationStatusMessage(prob);
+        
+        getInputValidatorPane().setInputValidatorHasBeenRun(false);
                 
         setInputValidationStatus(prob.getInputValidationStatus());  //note: validation status variable is not displayed on the GUI
 
@@ -3168,7 +3172,10 @@ public class EditProblemPane extends JPanePlugin {
 
     
     private void enableInputValidatorTabComponents() {
-        inputValidatorHasBeenRun = false ;
+        getInputValidatorPane().setInputValidatorHasBeenRun(false);
+        
+        //TODO: this method should also disable the "Run Input Validator" button -- but the issue under what conditions
+        // it should subsequently be ENABLED...
     }
     
     protected void enableOutputValidatorTabComponents() {
@@ -3318,10 +3325,6 @@ public class EditProblemPane extends JPanePlugin {
 
     private Component horizontalStrut_1;
     private Component horizontalStrut_2;
-
-    private boolean inputValidatorHasBeenRun;
-
-    private InputValidationResult[] results;
     
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -3909,6 +3912,8 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidatorPane().getInputValidationResultPanel().getInputValidationResultSummaryTextLabel().setForeground(Color.BLACK);
         ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).setResults(null);
         ((InputValidationResultsTableModel)getInputValidatorPane().getInputValidationResultPanel().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        
+        getInputValidatorPane().setInputValidatorHasBeenRun(false);
 
     }
 
