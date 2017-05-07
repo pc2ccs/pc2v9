@@ -40,6 +40,8 @@ public class InputValidatorPane extends JPanePlugin {
     private DefineInputValidatorPane defineInputValidatorPane;
 
     private InputValidationResultPane inputValidationResultPane;
+    
+    private boolean inputValidatorHasBeenRun;
 
     private Component verticalStrut_1;
     private Component verticalStrut_3;
@@ -48,6 +50,8 @@ public class InputValidatorPane extends JPanePlugin {
     private JPanePlugin parentPane;
     private JButton runInputValidatorButton;
     private Component verticalStrut_5;
+
+    private InputValidationResult[] runResults;
 
 
     public InputValidatorPane() {
@@ -264,7 +268,8 @@ public class InputValidatorPane extends JPanePlugin {
      * Spawns a separate {@link SwingWorker} thread to run the Input Validator.
      * 
      * The worker thread publishes each separate InputValidationResult as it is generated; each published result
-     * is automatically picked up and handled by the worker's process() method.
+     * is automatically picked up and handled by the worker's process() method.  Once the worker thread completes it 
+     * assigns the results to a global variable which is accessible by external clients via an accessor.
      * 
      * See https://docs.oracle.com/javase/tutorial/uiswing/concurrency/interim.html for details on how SwingWorker threads publish results.
      */
@@ -273,9 +278,10 @@ public class InputValidatorPane extends JPanePlugin {
         SwingWorker<InputValidationResult[], InputValidationResult> worker = new SwingWorker<InputValidationResult[], InputValidationResult>() {
 
             /**
-             * This method is invoked when the Worker thread's execute() method is called.  The method runs the Input Validator in the background
-             * against all the judge's input data files currently defined on the EditProblemPane's Input Data Files pane, publishing each result
-             * as it finishes.
+             * This method is invoked when the Worker thread's execute() method is called which happens below, after the worker thread has been constructed.
+             * The method runs the Input Validator in the background against all the judge's input data files currently defined on the EditProblemPane's 
+             * Input Data Files pane, publishing each result as it finishes.  When the method is finished it returns an array of all InputValidationResults; 
+             * this array is accessible by the Worker thread's done() method (via a call to get()).
              */
             @Override
             public InputValidationResult[] doInBackground() throws Exception {
@@ -382,6 +388,9 @@ public class InputValidatorPane extends JPanePlugin {
                         // this might need to be done here, or else in method runInputValidator()...
                         try {
                             validationResults[fileNum] = runInputValidator(prob, validatorProg, getInputValidatorCommand(), dataFile, executeDir);
+                            inputValidatorHasBeenRun = true;
+                            epp.enableUpdateButton();
+
                         } catch (Exception e) {
                             getController().getLog().warning("Exception running Input Validator ' " + validatorProg.getName() + " ' : " + e.getMessage());
                             updateProblemValidationStatus(null);
@@ -404,25 +413,29 @@ public class InputValidatorPane extends JPanePlugin {
 
             }
 
-            //this code would be used if we were going to wait for the entire batch of InputValidationResults to be finished;
-            // however, we're expecting results to be "published" as they are generated
-//            @Override
-//            public void done() {
-//                try {
-//                    validationResults = get();
-//                } catch (InterruptedException ignore) {
-//                }
-//                catch (java.util.concurrent.ExecutionException e) {
-//                    String why = null;
-//                    Throwable cause = e.getCause();
-//                    if (cause != null) {
-//                        why = cause.getMessage();
-//                    } else {
-//                        why = e.getMessage();
-//                    }
-//                    System.err.println("Error retrieving validation results: " + why);
-//                }
-//            }
+            /**
+             * This method is invoked by the Worker thread when it is completely finished with its doInBackground task(s). 
+             * Calling get() fetches the set of data returned by the Worker thread's doInBackground() method -- that is,
+             * an array of InputValidationResults.  This method saves those results so they can be accessed by external code
+             * via the {@link #getRunResults()} method.
+             */
+            @Override
+            public void done() {
+                try {
+                    runResults = get();
+                } catch (InterruptedException ignore) {
+                }
+                catch (java.util.concurrent.ExecutionException e) {
+                    String why = null;
+                    Throwable cause = e.getCause();
+                    if (cause != null) {
+                        why = cause.getMessage();
+                    } else {
+                        why = e.getMessage();
+                    }
+                    System.err.println("Error retrieving validation results: " + why);
+                }
+            }
             
             
             /**
@@ -582,5 +595,23 @@ public class InputValidatorPane extends JPanePlugin {
         	verticalStrut_5 = Box.createVerticalStrut(20);
         }
         return verticalStrut_5;
+    }
+
+    /**
+     * @return the inputValidatorHasBeenRun
+     */
+    public boolean isInputValidatorHasBeenRun() {
+        return inputValidatorHasBeenRun;
+    }
+
+    /**
+     * @param inputValidatorHasBeenRun the inputValidatorHasBeenRun to set
+     */
+    public void setInputValidatorHasBeenRun(boolean inputValidatorHasBeenRun) {
+        this.inputValidatorHasBeenRun = inputValidatorHasBeenRun;
+    }
+
+    public InputValidationResult[] getRunResults() {
+        return this.runResults ;
     }
 }
