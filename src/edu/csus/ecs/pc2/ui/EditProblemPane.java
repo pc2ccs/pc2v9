@@ -2526,7 +2526,21 @@ public class EditProblemPane extends JPanePlugin {
         ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
         //set the Status message based on the status in the specified problem
+        updateInputValidationStatusMessage(prob);
+                
+        setInputValidationStatus(prob.getInputValidationStatus());  //note: validation status variable is not displayed on the GUI
+
+    }
+    
+    /**
+     * Sets the Input Validation Status message on the InputValdiationResults pane.
+     * 
+     * @param prob the problem containing the Input Validation Results
+     */
+    protected void updateInputValidationStatusMessage(Problem prob) {
+        
         InputValidationStatus problemValidationStatus = prob.getInputValidationStatus();
+        
         Color color ;
         String msg ;
         if (problemValidationStatus == null) {
@@ -2560,17 +2574,14 @@ public class EditProblemPane extends JPanePlugin {
                     color = Color.YELLOW;
                     break;
                 default:
-                    msg = "This message should never be displayed; please notify PC2 Developers";
+                    msg = "This message should never be displayed; please notify PC2 Developers: pc2@ecs.csus.edu";
                     color = Color.ORANGE;
             }
         }
-                
         getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setText(msg);
         getInputValidationResultPane().getInputValidationResultSummaryTextLabel().setForeground(color);
-        setInputValidationStatus(problemValidationStatus);  //note: validation status variable is not displayed on the GUI
 
     }
-    
     
 
     /**
