@@ -29,10 +29,7 @@ public class DevelopmentPane extends JPanePlugin {
     private ContestPreloadPane contestPreloadPane = new ContestPreloadPane();
 
     private ContestClockAllPane contestClockAllPane = new ContestClockAllPane();
-
-    private RunInputValidatorsPane runInputValidatorsPane;
     
-
     public DevelopmentPane() {
         super();
         setLayout(new BorderLayout(0, 0));
