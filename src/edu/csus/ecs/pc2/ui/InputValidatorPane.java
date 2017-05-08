@@ -275,10 +275,11 @@ public class InputValidatorPane extends JPanePlugin {
      */
     private void spawnInputValidatorRunnerThread() {
 
+        //define a SwingWorker thread to run the Input Validator in the background against each of the data files
         SwingWorker<InputValidationResult[], InputValidationResult> worker = new SwingWorker<InputValidationResult[], InputValidationResult>() {
 
             /**
-             * This method is invoked when the Worker thread's execute() method is called which happens below, after the worker thread has been constructed.
+             * This method is invoked when the Worker thread's execute() method is called (which happens below, after the worker thread has been constructed).
              * The method runs the Input Validator in the background against all the judge's input data files currently defined on the EditProblemPane's 
              * Input Data Files pane, publishing each result as it finishes.  When the method is finished it returns an array of all InputValidationResults; 
              * this array is accessible by the Worker thread's done() method (via a call to get()).
@@ -413,6 +414,22 @@ public class InputValidatorPane extends JPanePlugin {
             }
 
             /**
+             * This method is called by the Worker thread's publish() method each time one or more results are finished.
+             * The input to the method is a list of results which have been completed since the last call to this method.
+             * This method adds each published result to the results table, by calling addToResultTable().
+             */
+            @Override
+            public void process(List<InputValidationResult> resultList) {
+                //display the results (which may be partial) in the InputValidatorPane's InputValidationResults table
+                
+                for (InputValidationResult result : resultList) {
+                    addResultToTable(result);
+//                    addResultToProblem(result);   //we don't want to do this until Add/Update is pressed
+//                    updateProblemValidationStatus(result);    // ditto ""
+                }
+            }
+            
+            /**
              * This method is invoked by the Worker thread when it is completely finished with its doInBackground task(s). 
              * Calling get() fetches the set of data returned by the Worker thread's doInBackground() method -- that is,
              * an array of InputValidationResults.  This method saves those results so they can be accessed by external code
@@ -436,25 +453,10 @@ public class InputValidatorPane extends JPanePlugin {
                     System.err.println("Error retrieving validation results: " + why);
                 }
             }
-            
-            
-            /**
-             * This method is called by the Worker thread's publish() method each time one or more results are finished.
-             * The input to the method is a list of results which have been completed since the last call to this method.
-             * This method adds each published result to the results table, by calling addToResultTable().
-             */
-            @Override
-            public void process(List<InputValidationResult> resultList) {
-                //display the results (which may be partial) in the InputValidatorPane's InputValidationResults table
-                
-                for (InputValidationResult result : resultList) {
-                    addResultToTable(result);
-//                    addResultToProblem(result);   //we don't want to do this until Add/Update is pressed
-//                    updateProblemValidationStatus(result);    // ditto ""
-                }
-            }
-        };
 
+        };  //end of SwingWorker definition
+
+        //start the SwingWorker thread running the Input Validator in the background against all data files
         worker.execute();
     }
     
