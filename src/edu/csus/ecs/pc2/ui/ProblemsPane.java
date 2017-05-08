@@ -872,6 +872,7 @@ public class ProblemsPane extends JPanePlugin {
         	    }
         	});
         	runInputValidatorsButton.setEnabled(false);
+        	runInputValidatorsButton.setVisible(false); // hide for Master branch until fully working
         	runInputValidatorsButton.setToolTipText("Execute the Input Validator for each problem against the data files defined for that problem");
         }
         return runInputValidatorsButton;
