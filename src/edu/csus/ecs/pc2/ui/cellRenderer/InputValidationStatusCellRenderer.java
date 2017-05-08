@@ -30,10 +30,6 @@ public class InputValidationStatusCellRenderer extends DefaultTableCellRenderer 
     private static final long serialVersionUID = 1L;
 
     public void setValue(Object value) {
-        
-        // default values
-        setBackground(Color.yellow);
-        setText("??");
 
         if (value instanceof InputValidationStatus) {
             
