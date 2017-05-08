@@ -32,7 +32,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.ProblemInputValidationResults;
 import edu.csus.ecs.pc2.ui.cellRenderer.CheckBoxCellRenderer;
-import edu.csus.ecs.pc2.ui.cellRenderer.PassFailCellRenderer;
+import edu.csus.ecs.pc2.ui.cellRenderer.InputValidationStatusCellRenderer;
 
 /**
  * A pane for running the input validators for currently defined problems and displaying the results.
@@ -167,7 +167,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
             resultsTable.getColumn("Select").setCellRenderer(new CheckBoxCellRenderer());
             
             // render Result column as Pass/Fail on Green/Red background
-            resultsTable.getColumn("Overall Result").setCellRenderer(new PassFailCellRenderer());
+            resultsTable.getColumn("Overall Result").setCellRenderer(new InputValidationStatusCellRenderer());
 
 
         }
