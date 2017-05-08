@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.ui.cellRenderer.MCLBInputValidationStatusCellRenderer;
 
 import java.awt.Dimension;
 
@@ -210,7 +211,7 @@ public class ProblemsPane extends JPanePlugin {
         // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Short", "Time Limit", "SVTJ", "Output Validator", "O.V. Command", "Input Validation", "I.V. Command" };
 
         int numberColumns = problemListBox.getColumnCount();
-        Object[] c = new String[numberColumns];
+        Object[] c = new Object[numberColumns];
         int i = 0;
 
         String name = problem.getDisplayName();
@@ -269,8 +270,11 @@ public class ProblemsPane extends JPanePlugin {
         c[i++] = validatorCommandLine ;
         
 //        c[i++] = inputValidatorProgramName;
-        InputValidationStatus ivStatus = problem.getInputValidationStatus();
-        c[i++] = ivStatus.toString();    
+
+//        InputValidationStatus ivStatus = problem.getInputValidationStatus();
+//        c[i++] = ivStatus.toString();  
+        
+        c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getInputValidationStatus());
         
         String inputValidatorCommandLine = "";
         if (problem.isProblemHasInputValidator()) {
