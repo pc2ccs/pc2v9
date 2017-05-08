@@ -469,7 +469,7 @@ public class EditProblemPane extends JPanePlugin {
         //check the condition of missing Input Validator Program name even though there is an Input Validator Command defined
         if (showMissingInputValidatorProgramNameOnAddProblem  && 
                 (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) &&
-                (getInputValidatorPane().getInputValidatorCommand() != null || !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+                (getInputValidatorPane().getInputValidatorCommand() != null && !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
             //no input validator program defined; issue a warning
             String message = "You are attempting to add a problem which has an Input Data Validator command but no Input Validator Program name." 
                     + "\n\nAre you sure this is what you intended to do?"
@@ -1558,7 +1558,7 @@ public class EditProblemPane extends JPanePlugin {
         //check the condition of missing Input Validator Program name even though there is an Input Validator Command defined
         if (showMissingInputValidatorProgramNameOnUpdateProblem  && 
                 (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) &&
-                (getInputValidatorPane().getInputValidatorCommand() != null || !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+                (getInputValidatorPane().getInputValidatorCommand() != null && !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
             //no input validator program defined; issue a warning
             String message = "You are attempting to update a problem with an Input Data Validator command but no Input Validator Program name." 
                     + "\n\nAre you sure this is what you intended to do?"
