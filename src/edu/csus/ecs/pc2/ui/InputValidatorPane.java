@@ -56,6 +56,8 @@ public class InputValidatorPane extends JPanePlugin {
 
     private InputValidationResult[] runResults;
 
+    private InputValidationResult[] accumulatingResults;
+
 
     public InputValidatorPane() {
         
@@ -381,6 +383,9 @@ public class InputValidatorPane extends JPanePlugin {
                     //clear the results table in preparation for adding new results
                     ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).setResults(null);
                     ((AbstractTableModel) getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+                    
+                    //clear the result accumulator
+                    accumulatingResults = null;
                    
                     //run the Input Validator on each data file
                     for (int fileNum = 0; fileNum < dataFiles.length; fileNum++) {
@@ -427,6 +432,8 @@ public class InputValidatorPane extends JPanePlugin {
                 
                 for (InputValidationResult result : resultList) {
                     addResultToTable(result);
+                    addResultToAccumulatedList(result);
+                    updateInputValidationSummaryText(accumulatingResults);
 //                    addResultToProblem(result);   //we don't want to do this until Add/Update is pressed
 //                    updateProblemValidationStatus(result);    // ditto ""
                 }
@@ -475,6 +482,21 @@ public class InputValidatorPane extends JPanePlugin {
         ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).addRow(result);
         ((InputValidationResultsTableModel)getInputValidationResultPane().getInputValidatorResultsTable().getModel()).fireTableDataChanged();
         
+    }
+    
+    private void addResultToAccumulatedList(InputValidationResult newResult) {
+        if (accumulatingResults == null || accumulatingResults.length <= 0) {
+            accumulatingResults = new InputValidationResult [1];
+            accumulatingResults[0] = newResult;
+        } else {
+            InputValidationResult [] temp = new InputValidationResult [accumulatingResults.length+1];
+            int i=0;
+            for (InputValidationResult res : accumulatingResults) {
+                temp[i++] = res;
+            }
+            temp[i] = newResult;
+            accumulatingResults = temp;
+        }
     }
     
     /**
