@@ -216,7 +216,7 @@ public class InputValidationResultPane extends JPanePlugin {
 
                 case PASSED:
                     msg = "All input data files PASSED validation";
-                    color = new Color(0x00, 0xb3, 0x00); // green, but with some shading
+                    color = new Color(0x00, 0xC0, 0x00); // green, but with some shading
                     break;
                     
                 case FAILED:
