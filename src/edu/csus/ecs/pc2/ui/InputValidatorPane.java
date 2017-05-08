@@ -513,7 +513,7 @@ public class InputValidatorPane extends JPanePlugin {
             }
     }
     
-    private void setInputValidationStatus(InputValidationStatus newStatus) {
+    protected void setInputValidationStatus(InputValidationStatus newStatus) {
         this.inputValidationStatus = newStatus;
     }
     
@@ -523,7 +523,7 @@ public class InputValidatorPane extends JPanePlugin {
      * 
      * @return the Input Validation Status for this pane
      */
-    public InputValidationStatus getInputValidationStatus() {
+    protected InputValidationStatus getInputValidationStatus() {
         return this.inputValidationStatus;
     }
     
