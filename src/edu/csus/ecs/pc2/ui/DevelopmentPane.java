@@ -30,6 +30,9 @@ public class DevelopmentPane extends JPanePlugin {
 
     private ContestClockAllPane contestClockAllPane = new ContestClockAllPane();
 
+    private RunInputValidatorsPane runInputValidatorsPane;
+    
+
     public DevelopmentPane() {
         super();
         setLayout(new BorderLayout(0, 0));
@@ -50,6 +53,8 @@ public class DevelopmentPane extends JPanePlugin {
         tabbedPane.addTab("Log Settings", null, logSettingsPane, null);
 
         tabbedPane.addTab("Options", null, optionsPane, null);
+        
+        tabbedPane.addTab("Run Validators", null, getRunInputValidatorsPane(), null);
     }
 
     @Override
@@ -67,6 +72,14 @@ public class DevelopmentPane extends JPanePlugin {
         contestPreloadPane.setContestAndController(inContest, inController);
         contestScheduledStartClockPane.setContestAndController(inContest, inController);
         contestClockAllPane.setContestAndController(inContest, inController);
+    }
+    
+    private JPanePlugin getRunInputValidatorsPane() {
+        
+        if (runInputValidatorsPane == null) {
+            runInputValidatorsPane = new RunInputValidatorsPane();
+        }
+        return runInputValidatorsPane ;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
