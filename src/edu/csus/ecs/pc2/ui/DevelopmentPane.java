@@ -54,7 +54,6 @@ public class DevelopmentPane extends JPanePlugin {
 
         tabbedPane.addTab("Options", null, optionsPane, null);
         
-        tabbedPane.addTab("Run Validators", null, getRunInputValidatorsPane(), null);
     }
 
     @Override
@@ -74,12 +73,5 @@ public class DevelopmentPane extends JPanePlugin {
         contestClockAllPane.setContestAndController(inContest, inController);
     }
     
-    private JPanePlugin getRunInputValidatorsPane() {
-        
-        if (runInputValidatorsPane == null) {
-            runInputValidatorsPane = new RunInputValidatorsPane();
-        }
-        return runInputValidatorsPane ;
-    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
