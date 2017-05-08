@@ -66,7 +66,7 @@ public class InputValidationStatusCellRenderer extends DefaultTableCellRenderer 
                     
                 default:
                     //this should never happen
-                    setBackground(Color.yellow);
+                    setBackground(Color.ORANGE);
                     setForeground(Color.black);
                     setText("????");                      
                     
@@ -78,7 +78,9 @@ public class InputValidationStatusCellRenderer extends DefaultTableCellRenderer 
             //we received an Object that wasn't an InputValidationStatus
             setBackground(Color.yellow);
             setForeground(Color.black);
-            setText("????");                      
+            setText("????");   
+            
+            System.err.println ("Warning: InputValidationStatusCellRenderer asked to render unsupported type '" + value.getClass() + "'");
         }
         
         setHorizontalAlignment(SwingConstants.CENTER);
