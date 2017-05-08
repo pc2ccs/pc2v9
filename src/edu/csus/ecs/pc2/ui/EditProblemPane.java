@@ -271,8 +271,6 @@ public class EditProblemPane extends JPanePlugin {
     private String localPC2InterfaceCustomValidatorCommandLine;
     private String localClicsInterfaceCustomValidatorCommandLine;
     
-    private InputValidationStatus inputValidationStatus = InputValidationStatus.NOT_TESTED;
-
     private boolean showMissingInputValidatorWarningOnAddProblem = true;
 
     private boolean showMissingInputValidatorWarningOnUpdateProblem = true;
@@ -4933,11 +4931,11 @@ public class EditProblemPane extends JPanePlugin {
     }
     
     private InputValidationStatus getInputValidationStatus() {
-        return this.inputValidationStatus;
+        return getInputValidatorPane().getInputValidationStatus();
     }
     
-    private void setInputValidationStatus(InputValidationStatus result) {
-        this.inputValidationStatus = result;
+    private void setInputValidationStatus(InputValidationStatus status) {
+        getInputValidatorPane().setInputValidationStatus(status);
     }
 
 
