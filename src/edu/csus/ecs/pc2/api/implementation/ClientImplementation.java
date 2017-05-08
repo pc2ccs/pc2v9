@@ -27,10 +27,13 @@ public class ClientImplementation implements IClient {
     private ClientType clientType;
 
     private ElementId elementId;
+    
+    private ClientId clientId;
 
     private boolean displayableOnScoreboard = false;
     
     public ClientImplementation(ClientId clientId, IInternalContest contest) {
+        this.clientId = clientId;
         Account account = contest.getAccount(clientId);
         if (account != null) {
             shortName = clientId.getName();
@@ -103,5 +106,13 @@ public class ClientImplementation implements IClient {
     
     public boolean isDisplayableOnScoreboard() {
         return displayableOnScoreboard;
+    }
+    
+    public ElementId getElementId() {
+        return elementId;
+    }
+    
+    public ClientId getClientId() {
+        return clientId;
     }
 }
