@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.execute.ExecuteException;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.validator.inputValidator.InputValidatorRunner;
@@ -42,6 +43,8 @@ public class InputValidatorPane extends JPanePlugin {
     private InputValidationResultPane inputValidationResultPane;
     
     private boolean inputValidatorHasBeenRun;
+
+    private InputValidationStatus inputValidationStatus = InputValidationStatus.NOT_TESTED;
 
     private Component verticalStrut_1;
     private Component verticalStrut_3;
@@ -440,6 +443,7 @@ public class InputValidatorPane extends JPanePlugin {
                 try {
                     runResults = get();
                     updateInputValidationSummaryText(runResults);
+                    updateInputValidationStatus(runResults);
                 } catch (InterruptedException ignore) {
                 }
                 catch (java.util.concurrent.ExecutionException e) {
@@ -458,7 +462,8 @@ public class InputValidatorPane extends JPanePlugin {
 
         //start the SwingWorker thread running the Input Validator in the background against all data files
         worker.execute();
-    }
+        
+    } //end method spawnInputValidatorRunnerThread()
     
     /**
      * Adds the specified Input Validation execution result to the Input Validation Results table in this InputValidatorPane.
@@ -477,6 +482,49 @@ public class InputValidatorPane extends JPanePlugin {
      */
     private void updateInputValidationSummaryText(InputValidationResult [] runResults) {
         getInputValidationResultPane().updateInputValidationStatusMessage(runResults);
+    }
+    
+    /**
+     * Updates the Input Validator Run Status flag in this InputValidatorPane.  Note that this does NOT update the Problem; just the local
+     * status flag.  The Problem only gets updated when Add or Update is pressed on the EditProblemPane.
+     * 
+     * If the received InputValidationResult array is null or empty, no change is made in the current status.
+     * Otherwise, if all the results in the array are "Passed" then the status is set to Passed; if one or more results in
+     * the array are "Failed" then the status is set to Failed.
+     * 
+     * @param runResults an array of InputValidationResults from having run an Input Validator
+     */
+    private void updateInputValidationStatus (InputValidationResult [] runResults) {
+        
+        if (runResults != null && runResults.length > 0) {
+
+            boolean foundFailure = false;
+            for (InputValidationResult res : runResults) {
+                if (!res.isPassed()) {
+                    foundFailure = true;
+                    break;
+                }
+            }
+            
+            if (foundFailure) {
+                setInputValidationStatus(InputValidationStatus.FAILED);
+            } else {
+                setInputValidationStatus(InputValidationStatus.PASSED);        }
+            }
+    }
+    
+    private void setInputValidationStatus(InputValidationStatus newStatus) {
+        this.inputValidationStatus = newStatus;
+    }
+    
+    /**
+     * Returns the {@link InputValidationStatus} for this {@link InputValidatorPane}.  The returned value indicates whether an
+     * Input Validator has been run, and if so whether all runs passed or not.
+     * 
+     * @return the Input Validation Status for this pane
+     */
+    public InputValidationStatus getInputValidationStatus() {
+        return this.inputValidationStatus;
     }
     
     
