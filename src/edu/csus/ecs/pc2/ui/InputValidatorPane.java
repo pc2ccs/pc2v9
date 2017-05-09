@@ -440,7 +440,9 @@ public class InputValidatorPane extends JPanePlugin {
                 //display the results (which may be partial) in the InputValidatorPane's InputValidationResults table
                 
                 for (InputValidationResult result : resultList) {
-                    addResultToTable(result);
+                    if (!getInputValidationResultPane().getShowOnlyFailedFilesCheckbox().isSelected() || !result.isPassed()) {
+                        addResultToTable(result);                        
+                    }
                     addResultToAccumulatedList(result);
                     updateInputValidationSummaryText(accumulatingResults);
 //                    addResultToProblem(result);   //we don't want to do this until Add/Update is pressed
