@@ -132,8 +132,6 @@ public class SubmitJudgment {
                 fatalError("No file specified after -F option ");
             }
             
-            System.out.println("debug 22 "+propertiesFileName);
-
             if (!(new File(propertiesFileName).exists())) {
                 fatalError(propertiesFileName + " does not exist (pwd: " + Utilities.getCurrentDirectory() + ")", null);
             }
@@ -150,11 +148,6 @@ public class SubmitJudgment {
         if (debugMode) {
             arguments.dumpArgs(System.err);
         }
-        
-        System.out.println("debug 22 here ");
-        
-        arguments.dumpArgs(System.err); // debug 22
-        
         
 //        timeStamp = 0;
         checkArg = arguments.isOptPresent("--check");
@@ -387,25 +380,21 @@ public class SubmitJudgment {
                 
                 waitForRunJudgementConfirmation(runliEventListener, 2);
 
-                run = runliEventListener.getRun();
-
                 if (runliEventListener.getRun() != null) {
                     // got a run
                     success = true;
                     
-                    // TODO revise confirmation message
-
-                    System.out.println("Submission confirmation: Run " + run.getNumber() + ", problem " + run.getProblem().getName() + //
+                    System.out.println("Run " + run.getNumber() + " judgement updated now is " + run.getJudgementName() + " for  " + run.getNumber() + ", problem " + run.getProblem().getName() + //
                             ", for team " + run.getTeam().getDisplayName() + //
                             " (" + run.getTeam().getLoginName() + ")");
-                    if (debugMode){
-                        System.out.println("Run "+run.getNumber()+" submitted at "+run.getSubmissionTime()+" minutes");
+
+                    if (debugMode) {
+                        System.out.println("Run " + run.getNumber() + " submitted at " + run.getSubmissionTime() + " minutes");
                     }
                 } 
                 // no else
                 
                 serverConnection.logoff();
-
             } catch (Exception e) {
                 System.err.println("Run " + runId + " was not changed.  " + e.getMessage());
                 if (debugMode) {
@@ -667,7 +656,6 @@ public class SubmitJudgment {
 
         public void runDeleted(IRun run) {
             // ignore
-
         }
 
         public void runCheckedOut(IRun run, boolean isFinal) {
@@ -677,13 +665,13 @@ public class SubmitJudgment {
 
         public void runJudged(IRun run, boolean isFinal) {
             // ignore
-        }
-
-        public void runUpdated(IRun run, boolean isFinal) {
             if (run.getNumber() == runId){
                 updatedRun = run;
             }
+        }
 
+        public void runUpdated(IRun run, boolean isFinal) {
+            // ignore
         }
 
         public void runCompiling(IRun run, boolean isFinal) {
@@ -701,6 +689,7 @@ public class SubmitJudgment {
         public void runJudgingCanceled(IRun run, boolean isFinal) {
             // ignore
         }
+
 
         public void run() {
             // ignore
