@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -655,5 +656,9 @@ public class InputValidatorPane extends JPanePlugin {
 
     public InputValidationResultsTableModel getResultsTableModel() {
         return (InputValidationResultsTableModel) getInputValidationResultPane().getInputValidatorResultsTable().getModel();
+    }
+    
+    public JCheckBox getShowOnlyFailedFilesCheckbox() {
+        return getInputValidationResultPane().getShowOnlyFailedFilesCheckbox();
     }
 }

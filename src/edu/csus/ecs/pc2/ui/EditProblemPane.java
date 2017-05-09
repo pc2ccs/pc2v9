@@ -2538,7 +2538,13 @@ public class EditProblemPane extends JPanePlugin {
         probInputValidationResultsFailed = Arrays.copyOfRange(tmpProbInputValidationResultsFailed, 0, i);
         
         //put the results into the GUI table
-        ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResultsFailed);
+        if (probInputValidationResultsFailed.length == 0) {
+            ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResults);
+            getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(false);
+        } else {
+            ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResultsFailed);
+            getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(true);
+        }
         ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
         
         //put results into global var used for updating the table
@@ -2546,7 +2552,7 @@ public class EditProblemPane extends JPanePlugin {
        
         //set the Status message based on the status in the specified problem
         updateInputValidationStatusMessage(probInputValidationResults);
-        
+       
         if (prob.getNumInputValidationResults() > 0) {
             getInputValidatorPane().setInputValidatorHasBeenRun(true);
         } else {
@@ -3892,6 +3898,9 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidatorPane().setInputValidationSummaryMessageColor(Color.BLACK);
         ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(null);
         ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
+        //put results into global var used for updating the table
+        getInputValidatorPane().setRunResults(null);
+
         
         getInputValidatorPane().setInputValidatorHasBeenRun(false);
 
