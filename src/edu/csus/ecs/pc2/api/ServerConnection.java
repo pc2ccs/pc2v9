@@ -333,7 +333,7 @@ public class ServerConnection {
             controller.updateRun(runToUpdate, judgementRecord, runFiles);
             
         } catch (Exception e) {
-            throw new Exception("Unable to submit run " + e.getLocalizedMessage());
+            throw new Exception("Unable to submit run " + e.getLocalizedMessage(), e.getCause());
         }
 
     }

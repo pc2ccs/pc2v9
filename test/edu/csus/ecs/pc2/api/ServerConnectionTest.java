@@ -374,7 +374,14 @@ public class ServerConnectionTest extends AbstractTestCase {
         try {
             IContest contest = connection.login(user, user);
             IRun run = findRun(contest, runId);
+            assertNotNull("Run id "+runId+" not in contest", run);
+            
+//            RunImplementation runImplementation = (RunImplementation) run;
+//            assertNotNull("Run id "+runId+" not in contest", runImplementation);
+            
+            
             IJudgement judgement = findJudgement(contest, ja);
+            assertNotNull("Judgement "+ja+" not in contest", judgement);
             connection.submitRunJudgement(run, judgement);
             System.out.println("debug 22 A "+new Date());
             Thread.sleep(1000 * 3);
