@@ -140,7 +140,6 @@ public class DefineInputValidatorPane extends JPanePlugin {
             inputValidatorProgramNameTextField.setToolTipText("");
             inputValidatorProgramNameTextField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent event) {
-                    System.err.println ("key pressed in DefineInputValidatorPane.getInputValidatorProgramNameTextField");
                     enableUpdateButton();
                 }
             });
