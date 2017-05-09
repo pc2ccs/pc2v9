@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -206,7 +207,12 @@ public class InputValidatorPane extends JPanePlugin {
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run () {
                             if (okToRunInputValidator()) {
+                                
+                                getRunInputValidatorButton().setEnabled(false);  //this is set back true when the spawner finishes, via a call to cleanup()
+                                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                                
                                 spawnInputValidatorRunnerThread();
+                                
                             } else {
                                 JOptionPane.showMessageDialog(null, "Missing Input Validator Command or Judge's Data files; cannot run Input Validator", 
                                         "Missing Data", JOptionPane.INFORMATION_MESSAGE);
@@ -284,7 +290,7 @@ public class InputValidatorPane extends JPanePlugin {
         SwingWorker<InputValidationResult[], InputValidationResult> worker = new SwingWorker<InputValidationResult[], InputValidationResult>() {
 
             /**
-             * This method is invoked when the Worker thread's execute() method is called (which happens below, after the worker thread has been constructed).
+             * Method doInBackground() is invoked when the Worker thread's execute() method is called (which happens below, after the worker thread has been constructed).
              * The method runs the Input Validator in the background against all the judge's input data files currently defined on the EditProblemPane's 
              * Input Data Files pane, publishing each result as it finishes.  When the method is finished it returns an array of all InputValidationResults; 
              * this array is accessible by the Worker thread's done() method (via a call to get()).
@@ -395,18 +401,21 @@ public class InputValidatorPane extends JPanePlugin {
                         
                         //should figure out how to run each of these calls on a separate thread and still return intermediate results...
                         // this might need to be done here, or else in method runInputValidator()...
+                        // One thing to worry about:  each call to runInputValidator() uses the (same?) execute directory; that can cause collisions
+                        //  with the files which are being created therein (e.g. the stdout.pc2 and stderr.pc2 files)
                         try {
+                            //run the input validator
                             validationResults[fileNum] = runInputValidator(prob, validatorProg, getInputValidatorCommand(), dataFile, executeDir);
+                            
                             inputValidatorHasBeenRun = true;
                             epp.enableUpdateButton();
+                            
+                            //publish the validator result for the current data file, to be picked up by the process() method (below)
+                            publish(validationResults[fileNum]);
 
                         } catch (Exception e) {
                             getController().getLog().warning("Exception running Input Validator ' " + validatorProg.getName() + " ' : " + e.getMessage());
                         }
-                        
-                        //publish the validator result for the current data file, to be picked up by the process() method (below)
-                        publish(validationResults[fileNum]);
-
                     }
                     
                     return validationResults;
@@ -443,15 +452,19 @@ public class InputValidatorPane extends JPanePlugin {
              * This method is invoked by the Worker thread when it is completely finished with its doInBackground task(s). 
              * Calling get() fetches the set of data returned by the Worker thread's doInBackground() method -- that is,
              * an array of InputValidationResults.  This method saves those results so they can be accessed by external code
-             * via the {@link #getRunResults()} method.
+             * via the {@link #getRunResults()} method.  The method also updates the GUI based on the results, and finally 
+             * calls cleanup() to restore the GUI state.
              */
             @Override
             public void done() {
                 try {
                     runResults = get();
-                    updateInputValidationSummaryText(runResults);
-                    updateInputValidationStatus(runResults);
-                } catch (InterruptedException ignore) {
+                    if (runResults != null && runResults.length > 0) {
+                        updateInputValidationSummaryText(runResults);
+                        updateInputValidationStatus(runResults);                        
+                    }
+                } catch (InterruptedException e) {
+                    getController().getLog().warning("Exception in SwingWorker.done(): " + e.getMessage());
                 }
                 catch (java.util.concurrent.ExecutionException e) {
                     String why = null;
@@ -462,6 +475,9 @@ public class InputValidatorPane extends JPanePlugin {
                         why = e.getMessage();
                     }
                     System.err.println("Error retrieving validation results: " + why);
+                    getController().getLog().warning("Exception in SwingWorker.done(): " + e.getMessage());
+                } finally {
+                    cleanup();
                 }
             }
 
@@ -471,6 +487,15 @@ public class InputValidatorPane extends JPanePlugin {
         worker.execute();
         
     } //end method spawnInputValidatorRunnerThread()
+    
+    /**
+     * This method is called when spawnInputValidatorRunnerThread() finishes.
+     * Its job is to restore the GUI state, including resetting the cursor and reenabling the RunInputValidator button.
+     */
+    private void cleanup() {
+        getRunInputValidatorButton().setEnabled(true);
+        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    }
     
     /**
      * Adds the specified Input Validation execution result to the Input Validation Results table in this InputValidatorPane.
@@ -554,7 +579,7 @@ public class InputValidatorPane extends JPanePlugin {
     /**
      * Runs the specified Input Validator Program using the specified parameters.
      * 
-     * NOTE: TODO: this should be done on a separate thread.
+     * NOTE: TODO: this should be done on a separate thread. However, see the note in spawnInputValidatorRunnerThread() about collisions in folders...
      * 
      * @param problem the Contest Problem associated with the Input Validator
      * @param validatorProg the Input Validator Program to be run
