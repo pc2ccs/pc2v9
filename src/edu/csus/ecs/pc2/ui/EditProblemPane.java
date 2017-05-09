@@ -3896,6 +3896,7 @@ public class EditProblemPane extends JPanePlugin {
 
         getInputValidatorPane().setInputValidationSummaryMessageText("<No Input Validation test run yet>");
         getInputValidatorPane().setInputValidationSummaryMessageColor(Color.BLACK);
+        getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(false);
         ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(null);
         ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
         //put results into global var used for updating the table
