@@ -268,7 +268,6 @@ public class InputValidationResultPane extends JPanePlugin {
             
             showOnlyFailedRunsCheckbox.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
-        	        System.err.println ("Show only failed files checkbox activated - not fully implemented yet");
         	        SwingUtilities.invokeLater(new Runnable() {
         	            public void run () {
         	                JPanePlugin parent = getParentPane();
