@@ -239,6 +239,7 @@ public class SubmitJudgment {
     }
     
     
+    @SuppressWarnings("unused")
     private void printMissingArguments(String[] args, String[] requiredOpts) {
 
         ParseArguments parseArguments = new ParseArguments(args, requiredOpts);
@@ -359,11 +360,8 @@ public class SubmitJudgment {
         boolean success = false;
 
         try {
-            
-            
-
             checkRequiredParams();
-
+            
             serverConnection = new ServerConnection();
 
             contest = serverConnection.login(login, password);
@@ -409,8 +407,8 @@ public class SubmitJudgment {
                 serverConnection.logoff();
 
             } catch (Exception e) {
-                System.err.println("Unable to change run judgement: " + e.getMessage());
-                if (debugMode){
+                System.err.println("Run " + runId + " was not changed.  " + e.getMessage());
+                if (debugMode) {
                     e.printStackTrace();
                 }
             }
@@ -489,7 +487,7 @@ public class SubmitJudgment {
         }
 
         if (!done) {
-            throw new Exception("Timed out ("+totalTime+" ms) waiting for run submission confirm - contact staff ");
+            throw new Exception("Timed out ("+totalTime+" ms) waiting for run update confirmation for run "+runId+" - contact staff ");
         }
     }
 
@@ -658,7 +656,10 @@ public class SubmitJudgment {
      */
     protected class RunEventListener implements IRunEventListener, Runnable {
 
-        private IRun submittedRun = null;
+        /**
+         * Updated judgement for this run.
+         */
+        private IRun updatedRun = null;
 
         public void runSubmitted(IRun run) {
             // ignore
@@ -679,7 +680,9 @@ public class SubmitJudgment {
         }
 
         public void runUpdated(IRun run, boolean isFinal) {
-            // TODO check/handle if judgement done for run
+            if (run.getNumber() == runId){
+                updatedRun = run;
+            }
 
         }
 
@@ -704,7 +707,7 @@ public class SubmitJudgment {
         }
 
         public IRun getRun() {
-            return submittedRun;
+            return updatedRun;
         }
     }
     

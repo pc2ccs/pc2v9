@@ -327,9 +327,8 @@ public class ServerConnection {
             JudgementRecord judgementRecord = new JudgementRecord(internaljudgement.getElementId(), clientId, solved, true);
             
             runToUpdate.setStatus(Run.RunStates.JUDGED);
-            runToUpdate.addJudgement(judgementRecord);
             
-            RunResultFiles runFiles = new RunResultFiles(runToUpdate, runToUpdate.getProblemId(), judgementRecord, null);
+            RunResultFiles runFiles = null;
             controller.updateRun(runToUpdate, judgementRecord, runFiles);
             
         } catch (Exception e) {
