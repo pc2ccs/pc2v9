@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.ui.admin;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -57,6 +59,9 @@ public class SubmitJudgment {
      */
     private static final int SUCCESS_EXIT_CODE = 5;
 
+    // TODO move to Constants
+    private static final String FILE_OPTION_STRING = "-F";
+
 //    private static final String NL = System.getProperty("line.separator");
 
     private String[] allCCSOptions = new String[0];
@@ -80,7 +85,7 @@ public class SubmitJudgment {
     private String judgementAcronym;
 
     public SubmitJudgment(String[] args) throws CommandLineErrorException {
-        loadCCSVariables(args, getAllCCSOptions());
+        loadProgramVariables(args, getAllCCSOptions());
     }
 
     /**
@@ -103,7 +108,14 @@ public class SubmitJudgment {
         }
     }
 
-    private void loadCCSVariables(String[] args, String[] opts) throws CommandLineErrorException {
+    /**
+     * Load program variables from command line arguments.
+     * 
+     * @param args
+     * @param opts
+     * @throws CommandLineErrorException
+     */
+    private void loadProgramVariables(String[] args, String[] opts) throws CommandLineErrorException {
 
         ParseArguments arguments = new ParseArguments(args, opts);
         
@@ -112,11 +124,37 @@ public class SubmitJudgment {
             System.exit(4);
         }
 
+        if (arguments.isOptPresent(FILE_OPTION_STRING)) {
+            String propertiesFileName = arguments.getOptValue(FILE_OPTION_STRING);
+            
+            if (propertiesFileName == null){
+                arguments.dumpArgs(System.err);
+                fatalError("No file specified after -F option ");
+            }
+            
+            System.out.println("debug 22 "+propertiesFileName);
+
+            if (!(new File(propertiesFileName).exists())) {
+                fatalError(propertiesFileName + " does not exist (pwd: " + Utilities.getCurrentDirectory() + ")", null);
+            }
+
+            try {
+                arguments.overRideOptions(propertiesFileName);
+            } catch (IOException e) {
+                fatalError("Unable to read file " + propertiesFileName, e);
+            }
+        }
+
         debugMode = arguments.isOptPresent("--debug");
 
         if (debugMode) {
             arguments.dumpArgs(System.err);
         }
+        
+        System.out.println("debug 22 here ");
+        
+        arguments.dumpArgs(System.err); // debug 22
+        
         
 //        timeStamp = 0;
         checkArg = arguments.isOptPresent("--check");
@@ -201,7 +239,6 @@ public class SubmitJudgment {
     }
     
     
-    @SuppressWarnings("unused") // TODO remove this when printMissingArguments is used
     private void printMissingArguments(String[] args, String[] requiredOpts) {
 
         ParseArguments parseArguments = new ParseArguments(args, requiredOpts);
@@ -406,9 +443,13 @@ public class SubmitJudgment {
             throw new LoginFailureException("No password specified");
         }
         
-        // TODO no run id specified
-        // TODO no JA specified
+        if (runId == 0) {
+            throw new LoginFailureException("No run id specified");
+        }
         
+        if (judgementAcronym == null || judgementAcronym.length() == 0) {
+            throw new LoginFailureException("No judgement acronym specified");
+        }
     }
 
     /**
@@ -699,6 +740,7 @@ public class SubmitJudgment {
         list.add("-t");
         list.add("-i");
         list.add("-j");
+        list.add("-F");
         allCCSOptions = (String[]) list.toArray(new String[list.size()]);
         return allCCSOptions;
     }
@@ -718,4 +760,31 @@ public class SubmitJudgment {
     public boolean isShowAllMissingOptions() {
         return showAllMissingOptions;
     }
+    
+    /**
+     * Fatal error - log error and show user message before exiting.
+     * 
+     * @param message
+     * @param ex
+     */
+    protected void fatalError(String message, Exception ex) {
+
+        if (ex != null) {
+            ex.printStackTrace(System.err);
+        }
+        System.err.println(message);
+
+        System.exit(4);
+
+    }
+
+    /**
+     * 
+     * @see #fatalError(String, Exception)
+     * @param message
+     */
+    protected void fatalError(String message) {
+        fatalError(message, null);
+    }
+
 }
