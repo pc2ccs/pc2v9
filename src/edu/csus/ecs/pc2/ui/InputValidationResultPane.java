@@ -5,15 +5,21 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
@@ -53,6 +59,8 @@ public class InputValidationResultPane extends JPanePlugin {
     private InputValidationResultsTableModel inputValidationResultsTableModel = new InputValidationResultsTableModel();
 
     private JPanePlugin parentPane;
+    private JCheckBox showOnlyFailedRunsCheckbox;
+    private Component horizontalStrut_1;
     
     
     public InputValidationResultPane() {
@@ -76,6 +84,8 @@ public class InputValidationResultPane extends JPanePlugin {
             flowLayout.setAlignment(FlowLayout.LEFT);
             inputValidationResultSummaryPanel.add(getInputValidationResultsSummaryLabel());
             inputValidationResultSummaryPanel.add(getInputValidationResultSummaryTextLabel());
+            inputValidationResultSummaryPanel.add(getHorizontalStrut_1());
+            inputValidationResultSummaryPanel.add(getShowOnlyFailedFilesCheckbox());
         }
         return inputValidationResultSummaryPanel;
     }
@@ -251,4 +261,52 @@ public class InputValidationResultPane extends JPanePlugin {
 
     }
 
+    protected JCheckBox getShowOnlyFailedFilesCheckbox() {
+        if (showOnlyFailedRunsCheckbox == null) {
+        	showOnlyFailedRunsCheckbox = new JCheckBox("Show only failed input files");
+        	showOnlyFailedRunsCheckbox.setSelected(true);
+        	showOnlyFailedRunsCheckbox.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        System.err.println ("Show only failed files checkbox activated - not fully implemented yet");
+        	        SwingUtilities.invokeLater(new Runnable() {
+        	            public void run () {
+        	                JPanePlugin parent = getParentPane();
+        	                if (parent instanceof InputValidatorPane) {
+        	                    InputValidationResult [] results = ((InputValidatorPane) parent).getRunResults();
+        	                    InputValidationResult [] updatedResults = Arrays.copyOf(results,results.length);
+        	                    if (getShowOnlyFailedFilesCheckbox().isSelected()) {
+        	                        //set all passed results to null
+        	                        for (int i=0; i<updatedResults.length; i++) {
+        	                            if (updatedResults[i].isPassed()) {
+        	                                updatedResults[i]=null;
+        	                            }
+        	                        }
+        	                        //remove nulls
+        	                        System.err.println ("   Not yet removing passed files");
+        	                        List<InputValidationResult> updatedList = Arrays.asList(updatedResults);
+        	                        for (InputValidationResult res : updatedList) {
+        	                            if (res == null) {
+        	                                updatedList.remove(res);
+        	                            }
+        	                        }
+        	                        updatedResults = (InputValidationResult[]) updatedList.toArray();
+        	                    }
+        	                    ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(updatedResults);
+                                ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        	                } else {
+        	                    getController().getLog().warning("InputValidationResultPane parent not an InputValidatorPane; cannot obtain results to update table");
+        	                }
+        	            }
+        	        });
+        	    }
+        	});
+        }
+        return showOnlyFailedRunsCheckbox;
+    }
+    private Component getHorizontalStrut_1() {
+        if (horizontalStrut_1 == null) {
+        	horizontalStrut_1 = Box.createHorizontalStrut(20);
+        }
+        return horizontalStrut_1;
+    }
 }
