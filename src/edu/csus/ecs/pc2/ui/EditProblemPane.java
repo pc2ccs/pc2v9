@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.swing.Box;
@@ -445,7 +446,8 @@ public class EditProblemPane extends JPanePlugin {
 
         if (showMissingInputValidatorWarningOnAddProblem && 
                 (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) && 
-                (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+                (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) &&
+                (getProblemRequiresDataCheckBox().isSelected())) {
 
             //no input validator defined; issue a warning
             String msg = "You are attempting to add a Problem which has no Input Data Validator." 
@@ -1535,7 +1537,8 @@ public class EditProblemPane extends JPanePlugin {
         //check the condition of missing both Input Validator Program AND Input Validator Command
         if (showMissingInputValidatorWarningOnUpdateProblem && 
                 (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) &&
-                (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+                (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) && 
+                (getProblemRequiresDataCheckBox().isSelected())) {
             //no input validator entries defined; issue a warning
             String message = "You are attempting to update a Problem which has no Input Data Validator." 
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
@@ -2518,22 +2521,37 @@ public class EditProblemPane extends JPanePlugin {
         int numResults = prob.getNumInputValidationResults();
         
         //create an array with one element for each result
+        InputValidationResult [] tmpProbInputValidationResultsFailed = new InputValidationResult [numResults];
         InputValidationResult [] probInputValidationResults = new InputValidationResult [numResults];
-                
-        //copy each result into the array
+        
+        //copy each failed result into the array (because we're defaulting to only showing failures)
         int i = 0;
+        int j = 0;
         for (InputValidationResult res : prob.getInputValidationResults()) {
-            probInputValidationResults[i++] = res;
+            if (!res.isPassed()) {
+                tmpProbInputValidationResultsFailed[i++] = res;
+            }
+            probInputValidationResults[j++] = res;
         }
+      
+        InputValidationResult [] probInputValidationResultsFailed = new InputValidationResult [i];
+        probInputValidationResultsFailed = Arrays.copyOfRange(tmpProbInputValidationResultsFailed, 0, i);
         
         //put the results into the GUI table
-        ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResults);
+        ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResultsFailed);
         ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
         
+        //put results into global var used for updating the table
+        getInputValidatorPane().setRunResults(probInputValidationResults);
+       
         //set the Status message based on the status in the specified problem
         updateInputValidationStatusMessage(probInputValidationResults);
         
-        getInputValidatorPane().setInputValidatorHasBeenRun(false);
+        if (prob.getNumInputValidationResults() > 0) {
+            getInputValidatorPane().setInputValidatorHasBeenRun(true);
+        } else {
+            getInputValidatorPane().setInputValidatorHasBeenRun(false);
+        }
                 
         setInputValidationStatus(prob.getInputValidationStatus());  //note: validation status variable is not displayed on the GUI
     }
