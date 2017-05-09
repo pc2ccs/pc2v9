@@ -48,25 +48,29 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
 
         Object obj = "Unknown";
 
-        switch (column) {
-            case 0:
-                obj = results.get(row).getFullPathFilename();
-                break;
-            case 1:
-                obj = results.get(row).isPassed();
-                break;
-            case 2:
-                //TODO: need to return a string which can be used as a LINK to the file
-                obj = results.get(row).getValidatorStdOut();
-                break;
-            case 3:
-                //TODO: need to return a string which can be used as a LINK to the file
-                obj = results.get(row).getValidatorStdErr();
-                break;
-            default:
-                break;
+        if (results != null && results.get(row) != null) {
 
+            switch (column) {
+                case 0:
+                    obj = results.get(row).getFullPathFilename();
+                    break;
+                case 1:
+                    obj = results.get(row).isPassed();
+                    break;
+                case 2:
+                    // TODO: need to return a string which can be used as a LINK to the file
+                    obj = results.get(row).getValidatorStdOut();
+                    break;
+                case 3:
+                    // TODO: need to return a string which can be used as a LINK to the file
+                    obj = results.get(row).getValidatorStdErr();
+                    break;
+                default:
+                    break;
+
+            }
         }
+        
         return obj;
     }
 
