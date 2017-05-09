@@ -39,22 +39,12 @@ public class SubmitJudgment {
 
     private String password;
 
-//    private String languageTitle;
-
-//    private String problemTitle;
-
     private IContest contest;
-
-//    private IProblem submittedProblem;
 
     private ILanguage submittedLanguage;
 
     private IClient submittingUser;
 
-//    private String[] otherFiles = new String[0];
-
-//    private String mainSubmissionFileName;
-    
     public static final String[] CCS_REQUIRED_OPTIONS_LIST = {"-l", "-m", "-p", "-u", "-w" };
     
     private RunEventListener runliEventListener = new RunEventListener();
@@ -80,52 +70,14 @@ public class SubmitJudgment {
      * --check option.
      * 
      */
+    @SuppressWarnings("unused")
     private boolean checkArg = false; // TODO implement
 
-    /**
-     * Filename for source to be submitted.
-     */
-//    private String submittedFileName;
-
     private boolean debugMode = false;
-
-    // old code
-//    /**
-//     * Override elapsed time for run (contest time for run), only used in test mode
-//     */
-//    private long timeStamp;
 
     private long runId;
     
     private String judgementAcronym;
-
-    // old code
-//    /**
-//     * Submit a clarification flag.
-//     */
-//    private boolean submittingClarification = false;
-//
-//    private String questionText;
-
-//    public SubmitJudgment() {
-//
-//    }
-//
-//    public SubmitJudgment(String login) {
-//        super();
-//        setLoginPassword(login, null);
-//    }
-//
-//    /**
-//     * Login with login and password.
-//     * 
-//     * @param login
-//     * @param password
-//     */
-//    public SubmitJudgment(String login, String password) {
-//        super();
-//        setLoginPassword(login, password);
-//    }
 
     public SubmitJudgment(String[] args) throws CommandLineErrorException {
         loadCCSVariables(args, getAllCCSOptions());
@@ -150,41 +102,6 @@ public class SubmitJudgment {
 
         }
     }
-// old code
-//    protected void loadVariables(String[] args) throws CommandLineErrorException {
-//
-//// old code        
-////        if (args.length == 0 || args[0].equals("--helpCCS")) {
-////            usageCCS();
-////            System.exit(4);
-////        }
-//        
-//        /**
-//         * If any of the CCS options are present then validate that all
-//         * CCS options are present.
-//         */
-//        
-//        if (hasAnyCCSArguments (args, getAllCCSOptions())){
-//            int numberMissingCCSArguments = numberMissingArguments(args, getAllCCSOptions(), CCS_REQUIRED_OPTIONS_LIST);
-//            
-//            if (numberMissingCCSArguments > 0){
-//                
-//                if (showAllMissingOptions) {
-//                    printMissingArguments(args,CCS_REQUIRED_OPTIONS_LIST);
-//                }
-//                throw new CommandLineErrorException("Missing required command line argument(s)");
-//            }
-//            
-//            loadCCSVariables(args, getAllCCSOptions());
-//            
-//        } else {
-//            
-//            String[] opts = { "--login", "--password"};
-//            loadPC2Variables(args, opts);
-//        }
-//    }
-
-
 
     private void loadCCSVariables(String[] args, String[] opts) throws CommandLineErrorException {
 
@@ -211,9 +128,6 @@ public class SubmitJudgment {
         String cmdLinePassword = arguments.getOptValue("-w");
 
         setLoginPassword(cmdLineLogin, cmdLinePassword);
-// old code
-//        // -p <problem short-name>
-//        problemTitle = arguments.getOptValue("-p");
 
         if (arguments.isOptPresent("--list")) {
             listInfo();
@@ -223,26 +137,6 @@ public class SubmitJudgment {
             System.exit(SUCCESS_EXIT_CODE);
         } else {
             
-// old code
-//            // -p <problem short-name>
-//            problemTitle = arguments.getOptValue("-p");
-//
-//            // -l <language short-name> (optional)
-//            if (arguments.isOptPresent("-l")) {
-//                    languageTitle = arguments.getOptValue("-l");
-//            }
-//            
-//            // -t (optional) <contest-time for submission>
-//          
-//            String runTimeString = arguments.getOptValue("-t");
-//            try {
-//                if (arguments.isOptPresent("-t")){
-//                    timeStamp = Long.parseLong(runTimeString);
-//                }
-//            } catch (Exception e) {
-//                throw new CommandLineErrorException("Invalid number after -t '"+runTimeString+"'", e);
-//            }
-
             // -i runid       -  run id for submission
             
             String runIdString = arguments.getOptValue("-i");
@@ -260,158 +154,11 @@ public class SubmitJudgment {
                 judgementAcronym = arguments.getOptValue("-j");
             }
 
-// old code
-//            // -m <main source filename>
-//            mainSubmissionFileName = arguments.getOptValue("-m");
-//            
-//            otherFiles = getOtherFiles (mainSubmissionFileName, arguments.getArgList());
-//            
-//            requireFile(mainSubmissionFileName, "main source filename");
-//            
-//            for (String name : otherFiles) {
-//                requireFile(name, "other source filename");
-//            }
-//        }
-
             if (password == null) {
                 password = login;
             }
         }
     }
-
-    // old code
-//    /**
-//     * Returns additional/other files.
-//     * 
-//     * if main filename in filelist then will not 
-//     * 
-//     * @param mainFileName
-//     * @param argList
-//     * @return 
-//     */
-//    private String[] getOtherFiles(String mainFileName, String[] argList) {
-//
-//        String [] outList = new String[0];
-//        
-//        /** 
-//         * If first argList is main file name remove main file name from list
-//         */
-//        if (argList.length > 0) {
-//            
-//            if (argList[0].equals(mainFileName)) {
-//                
-//                if (argList.length > 1) {
-//                    // Copy rest of list (do not copy first element)
-//                    
-//                    outList = new String[argList.length - 1];
-//                    System.arraycopy(argList, 1, outList, 0, argList.length - 1);
-//                } else {
-//                    outList = argList;
-//                }
-//                
-//            } else {
-//                outList = argList;
-//            }
-//            
-//        } // else return list
-//        
-//        return outList;
-//    }
-//
-//    private void requireFile(String sourceFile, String description) throws CommandLineErrorException {
-//        if (! new File(sourceFile).isFile()){
-//            throw new CommandLineErrorException(description+" missing ("+sourceFile+")");
-//        } 
-//    }
-
-    // old code
-//    private void loadPC2Variables(String[] args, String[] opts) {
-//        
-//        ParseArguments arguments = new ParseArguments(args, opts);
-//        
-//        debugMode = arguments.isOptPresent("--debug");
-//        
-//        if (debugMode){
-//            arguments.dumpArgs(System.err);
-//        }
-//        
-//        checkArg = arguments.isOptPresent("--check");
-//        
-//        submittingClarification = arguments.isOptPresent("--clar");
-//        
-//        String cmdLineLogin = null;
-//        
-//        String cmdLinePassword = null;
-//
-//        if (arguments.isOptPresent("--login")) {
-//            cmdLineLogin = arguments.getOptValue("--login");
-//        }
-//
-//        if (arguments.isOptPresent("--password")) {
-//            cmdLinePassword = arguments.getOptValue("--password");
-//        }
-//
-//        setLoginPassword(cmdLineLogin, cmdLinePassword);
-//        
-//        if (submittingClarification) {
-//            problemTitle =  arguments.getArg(0);
-//            if (arguments.getArgCount() > 1) {
-//                questionText = arguments.getArg(1);
-//                if (questionText.startsWith("@")){
-//                    questionText = loadQuestionFile (questionText.substring(1));
-//                    if (questionText == null){
-//                        System.err.println("Error - could not read question from file '"+questionText.substring(1));
-//                        System.exit(4);
-//                    }
-//                }
-//            } else {
-//                System.err.println("Error - missing question");
-//                System.exit(4);
-//            }
-//        } else if (arguments.isOptPresent("--list")) {
-//            listInfo();
-//            System.exit(SUCCESS_EXIT_CODE);
-//        } else if (arguments.isOptPresent("--listruns")) {
-//            listRuns();
-//            System.exit(SUCCESS_EXIT_CODE);
-//        } else {
-//            
-//            mainSubmissionFileName = arguments.getArg(0);
-//
-//            if (mainSubmissionFileName == null) {
-//                System.err.println("Error - missing filename");
-//                System.exit(4);
-//            }
-//
-//            if (arguments.getArgCount() > 1) {
-//                problemTitle = arguments.getArg(1);
-//            }
-//
-//            if (arguments.getArgCount() > 2) {
-//                languageTitle = arguments.getArg(2);
-//            }
-//        }
-//
-//    }
-// old code
-//    /**
-//     * Load a file into a string, add line.separator between lines.
-//     * 
-//     * @param filename
-//     * @return null if cannot load file, else a single string with line.separator between lines.
-//     */
-//    private String loadQuestionFile(String filename) {
-//        
-//        try {
-//            String [] lines = Utilities.loadFile(filename);
-//            if (lines.length == 0){
-//                return null;
-//            }
-//            return StringUtilities.join(NL, lines);
-//        } catch (IOException e) {
-//            return null;
-//        }
-//    }
 
     protected boolean hasAnyCCSArguments(String[] args, String[] requiredOpts) {
 
@@ -542,57 +289,6 @@ public class SubmitJudgment {
             System.out.println(s);
         }
     }
-// old code
-//    private void usagePC2() {
-//        String[] usagePC2 = { //
-//        "Usage Submitter [--help|--list|--listruns|--check] --login loginname [--password password] filename [problem [language]]", //
-//                "Usage Submitter [-F propfile] [--help|--list|--listruns|--check] filename [problem [language]]", //
-//                "Usage Submitter [-F propfile] [--clar] problem question", //
-//                "Usage Submitter [options] filename1[,filename2[,filename3[,...]]] [problem [language]]", //
-//                  "", //
-//                "Submit filename for problem and language.  If problem or language", //
-//                "not specified the program will guess which problem and language", //
-//                "based on the file name.", //
-//                "", //
-//                "--help   this listing", //
-//                "", //      
-//                "--helpCCS  CCS testing usagePC2 info", //
-//                "", //
-//                "--clar   submit a clarification (by default submits a run)", //
-//                "", //
-//                "--check  login and check parameters: list problem, language and files that would be submitted.", //
-//                "", //
-//                "--list   list problem and languages", //
-//                "", //
-//                "--listruns list run info for the user", //
-//                "", //
-//                "On success exit code will be " + SUCCESS_EXIT_CODE, //
-//                "Any other exit code is an error.", //
-//                "", //
-//        };
-//
-//        for (String s : usagePC2) {
-//            System.out.println(s);
-//        }
-//    }
-//
-//    public void submitRun(String mainfilename, String problemName, String languageName) {
-//        mainSubmissionFileName = mainfilename;
-//        problemTitle = problemName;
-//        languageTitle = languageName;
-//        submitRun();
-//    }
-// old code
-//    private String getProblemNameFromLetter(char letter) {
-//        try {
-//            letter = Character.toUpperCase(letter);
-//            int idx = letter - 'A';
-//            IProblem[] problems = contest.getProblems();
-//            return problems[idx].getName();
-//        } catch (Exception e) {
-//            return new Character(letter).toString();
-//        }
-//    }
     
     private IJudgement findJudgement(IContest contest, String ja) {
         IJudgement[] judgements = contest.getJudgements();
@@ -860,93 +556,6 @@ public class SubmitJudgment {
 
         System.out.println();
     }
-// old code
-//    /**
-//     * Submit run.
-//     * 
-//     * @param problemTitle2
-//     * @param languageTitle2
-//     * @param fileNames filename or comma delimited file list
-//     * @throws Exception
-//     */
-//    private void submitTheRun(String problemTitle2, String languageTitle2, String mainFileName, String [] additionalFilenames) throws Exception {
-//
-//        submittedProblem = null;
-//
-//        submittedLanguage = null;
-//        
-//        if (languageTitle2 == null) {
-//            languageTitle2 = getLanguageFromFilename(mainFileName);
-//        }
-//
-//        ILanguage language = matchLanguage(languageTitle2);
-//
-//        if (languageTitle2 == null) {
-//            throw new Exception("Could not determine Language based on filename '" + mainFileName + "'");
-//        }
-//
-//        if (language == null) {
-//            throw new Exception("Could not match language '" + languageTitle2 + "'");
-//        }
-//
-//        if (problemTitle2 == null) {
-//            problemTitle2 = getProblemNameFromFilename(mainFileName);
-//        }
-//        if (problemTitle2 != null && problemTitle2.length() == 1) {
-//            problemTitle2 = getProblemNameFromLetter(problemTitle2.charAt(0));
-//        }
-//
-//        IProblem problem = matchProblem(problemTitle2);
-//
-//        if (problemTitle2 == null) {
-//            throw new Exception("Could not determine Problem based on filename '" + mainFileName + "'");
-//        }
-//
-//        if (problem == null) {
-//            throw new Exception("Could not match problem '" + problemTitle2 + "'");
-//        }
-//
-//        if (checkArg) {
-//
-//            System.out.println("For   : " + contest.getMyClient().getLoginName() + " - " + contest.getMyClient().getDisplayName());
-//            System.out.println("File  : " + mainFileName);
-//
-//            for (String name : additionalFilenames) {
-//                System.out.println(" file : " + name);
-//            }
-//            System.out.println("Prob  : " + problem.getName());
-//            System.out.println("Lang  : " + language.getName());
-//            System.out.println();
-//            
-//            boolean success = true;
-//            
-//            if (! new File(mainFileName).isFile()){
-//                System.err.println("Error - file does not exist '"+mainFileName+"'");
-//                success = false;
-//            }
-//            
-//            for (String name : additionalFilenames) {
-//                if (! new File(name).isFile()){
-//                    System.err.println("Error - file does not exist '"+name+"'");
-//                    success = false;
-//                } 
-//            }
-//            
-//            if (success){
-//                System.exit(SUCCESS_EXIT_CODE);
-//            } else {
-//                System.exit(3);
-//            }
-//
-//        } else {
-//
-//            serverConnection.submitRun(problem, language, mainFileName, additionalFilenames, timeStamp, runId);
-//
-//            submittedProblem = problem;
-//            submittedLanguage = language;
-//            submittingUser = contest.getMyClient();
-//        }
-//    }
 
     /**
      * Find IProblem that matches the title.
@@ -992,32 +601,15 @@ public class SubmitJudgment {
 
         return null;
     }
-// old code
-//    private ILanguage matchLanguage(String languageTitle2) {
-//        for (ILanguage language : contest.getLanguages()) {
-//            if (language.getName().equalsIgnoreCase(languageTitle2)) {
-//                return language;
-//            }
-//        }
-//        return null;
-//    }
 
     public ILanguage getSubmittedLanguage() {
         return submittedLanguage;
     }
 
-// old code   public IClient getSubmittedUser() {
-//        return submittingUser;
-//    }
-    
     public IClient getSubmittingUser() {
         return submittingUser;
     }
     
-// old code   public IProblem getSubmittedProblem() {
-//        return submittedProblem;
-//    }
-
     /**
      * Listen for run events.
      * 
@@ -1095,127 +687,7 @@ public class SubmitJudgment {
         }
         
     }
-// old code
-//    public static void main(String[] args) {
-//        
-//        try {
-//            SubmitJudgment submitter = new SubmitJudgment(args);
-//            if (submitter.isSubmittingClarification()){
-//                submitter.submitClarification();
-//            } else {
-//                submitter.submitRun();
-//            }
-//        } catch (CommandLineErrorException e) {
-//            System.err.println("Error on command line: "+e.getMessage());
-//        } catch (Exception e){
-//            System.err.println("Error submitting run "+e.getMessage());
-//            e.printStackTrace(System.err);
-//        }
-//        
-//    }
-//   old code
-//    private boolean isSubmittingClarification() {
-//        return submittingClarification;
-//    }
-  
-//    / old code
-//    private void submitClarification() {
-//
-//        boolean success = false;
-//
-//        try {
-//
-//            checkRequiredParams();
-//
-//            serverConnection = new ServerConnection();
-//
-//            contest = serverConnection.login(login, password);
-//            
-//            System.out.println("For: " + contest.getMyClient().getDisplayName() + " (" + contest.getMyClient().getLoginName() + ")");
-//            System.out.println();
-//
-//            try {
-//
-//                submitTheClarification (problemTitle, questionText);
-//                
-//                success = true;
-//                
-//                serverConnection.logoff();
-//
-//            } catch (Exception e) {
-//                System.err.println("Unable to submit clarification: " + e.getMessage());
-//                if (debugMode){
-//                    e.printStackTrace();
-//                }
-//            }
-//  
-//        } catch (LoginFailureException e) {
-//            System.out.println("Unable to login: " + e.getMessage());
-//            if (debugMode){
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        if (success) {
-//            System.exit(SUCCESS_EXIT_CODE);
-//        } else {
-//            System.exit(4);
-//        }
-//    }
     
-    
-    // old code
-//    private void submitTheClarification(String problemTitle2, String question) throws Exception {
-//
-//        submittedProblem = null;
-//
-//        if (problemTitle2 != null && problemTitle2.length() == 1) {
-//            problemTitle2 = getProblemNameFromLetter(problemTitle2.charAt(0));
-//        }
-//
-//        IProblem problem = matchProblem(problemTitle2);
-//
-//        if (problem == null) {
-//            throw new Exception("Could not match problem '" + problemTitle2 + "'");
-//        }
-//
-//        if (checkArg) {
-//
-//            System.out.println("For   : " + contest.getMyClient().getLoginName() + " - " + contest.getMyClient().getDisplayName());
-//            System.out.println("Prob  : " + problem.getName());
-//            System.out.println();
-//            
-//            boolean success = true;
-//            
-//            if (question == null){
-//                System.err.println("Error - no question specified ");
-//                success = false;
-//            } else {
-//                System.out.println("Question : "+question);
-//                System.out.println();
-//            }
-//            
-//            if (success){
-//                System.out.println("Clarification submitted");
-//                System.exit(SUCCESS_EXIT_CODE);
-//            } else {
-//                System.exit(3);
-//            }
-//
-//        } else {
-//            System.out.println("Prob  : " + problem.getName());
-//            System.out.println();
-//            System.out.println("Question : "+StringUtilities.trunc(question, 55));
-//            System.out.println();
-//            
-//            if (question == null){
-//                System.err.println("Error - no question specified ");
-//            } else {
-//                serverConnection.submitClarification(problem, question);
-//            }
-//
-//        }
-//    }
 
     /**
      * Return all optional and required CCS options.
