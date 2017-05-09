@@ -31,8 +31,6 @@ import edu.csus.ecs.pc2.core.model.ClientId;
  * 
  * @author pc2@ecs.csus.edu
  */
-
-// $HeadURL$
 public class SubmitJudgment {
 
     private ServerConnection serverConnection = null;
@@ -43,11 +41,9 @@ public class SubmitJudgment {
 
     private IContest contest;
 
-    private ILanguage submittedLanguage;
-
     private IClient submittingUser;
 
-    public static final String[] CCS_REQUIRED_OPTIONS_LIST = {"-l", "-m", "-p", "-u", "-w" };
+    public static final String[] CCS_REQUIRED_OPTIONS_LIST = {"-l", "-t", "-m", "-p", "-u", "-w" };
     
     private RunEventListener runliEventListener = new RunEventListener();
 
@@ -58,6 +54,8 @@ public class SubmitJudgment {
      * or elsewhere a zero exit code could be returned.
      */
     private static final int SUCCESS_EXIT_CODE = 5;
+    
+    private static final int FAILURE_EXIT_CODE = 4;
 
     // TODO move to Constants
     private static final String FILE_OPTION_STRING = "-F";
@@ -80,9 +78,19 @@ public class SubmitJudgment {
 
     private boolean debugMode = false;
 
+    /**
+     * Run number to be judged.
+     */
     private long runId;
     
     private String judgementAcronym;
+
+    /**
+     * Team for run to be judged
+     */
+    private String teamIdString;
+    
+    private int teamId= 0;
 
     public SubmitJudgment(String[] args) throws CommandLineErrorException {
         loadProgramVariables(args, getAllCCSOptions());
@@ -91,9 +99,11 @@ public class SubmitJudgment {
     /**
      * Expand shortcut names.
      * 
+     * ex. 1 - team1, j2 = judge2, etc.
+     * 
      * @param loginName
      */
-    private void setLoginPassword(String loginName, String inPassword) {
+    private void loginShortcutExpansion(String loginName, String inPassword) {
 
         ClientId id = InternalController.loginShortcutExpansion(1, loginName);
         if (id != null) {
@@ -121,7 +131,7 @@ public class SubmitJudgment {
         
         if (args.length == 0) {
             usage();
-            System.exit(4);
+            System.exit(FAILURE_EXIT_CODE);
         }
 
         if (arguments.isOptPresent(FILE_OPTION_STRING)) {
@@ -152,13 +162,13 @@ public class SubmitJudgment {
 //        timeStamp = 0;
         checkArg = arguments.isOptPresent("--check");
 
-        // -u <team id>
+        // -u loginname   - user login
         String cmdLineLogin = arguments.getOptValue("-u");
 
-        // -w <team password>
+        // -w password    - user password
         String cmdLinePassword = arguments.getOptValue("-w");
 
-        setLoginPassword(cmdLineLogin, cmdLinePassword);
+        loginShortcutExpansion(cmdLineLogin, cmdLinePassword);
 
         if (arguments.isOptPresent("--list")) {
             listInfo();
@@ -167,6 +177,7 @@ public class SubmitJudgment {
             listRuns();
             System.exit(SUCCESS_EXIT_CODE);
         } else {
+            
             
             // -i runid       -  run id for submission
             
@@ -184,10 +195,36 @@ public class SubmitJudgment {
             if (arguments.isOptPresent("-j")) {
                 judgementAcronym = arguments.getOptValue("-j");
             }
+            
+            // -t team_id     - team id for the run
+            if (arguments.isOptPresent("-t")) {
+                teamIdString = arguments.getOptValue("-t");
+                
+                teamId = toInt(teamIdString, 0);
+                if (teamId < 1 ){
+                    throw new CommandLineErrorException("Invalid team number after -t '"+teamIdString+"'");
+                }
+            }
 
             if (password == null) {
                 password = login;
             }
+        }
+    }
+
+    /**
+     * Convert to int.
+     * 
+     * @param string integer in a string
+     * @param defaultValue
+     * @return defaultValue if parse error.
+     */
+    private int toInt(String string, int defaultValue) {
+
+        try {
+            return Integer.parseInt(string.trim());
+        } catch (Exception e) {
+            return defaultValue;
         }
     }
 
@@ -292,7 +329,7 @@ public class SubmitJudgment {
     private static void usage() {
         String[] usageMessage = { //
                 "", //
-                "Usage SubmitJudgement [-F propfile] -i runid -u loginname -w password -j judgement_acronym", //
+                "Usage SubmitJudgement [-F propfile] -i runid -u loginname -w password -j judgement_acronym -t team_id ", //
                 "Usage SubmitJudgement [--help|--list|--listruns|--check] options", //
                 "", //
                 "Submit judgement acronym for run.  ", //
@@ -304,6 +341,8 @@ public class SubmitJudgment {
                 "-w password    - user password", //
                 "", //
                 "-i runid       - run id for run to be updated ", //
+                "", //
+                "-t team_id     - team id for the run", //
                 "", //
                 "-j acro         - judgement for run, (judgement acronym)", //
                 "", //
@@ -369,7 +408,12 @@ public class SubmitJudgment {
                 if (run == null) {
                     throw new Exception("No run " + runId + " exists in contest.   No such run.");
                 }
-
+                
+                int accountNumber = run.getTeam().getAccountNumber();
+                if (run.getTeam().getAccountNumber() != teamId){
+                    throw new Exception("Team number does not match run, expected "+accountNumber+" got '"+teamIdString+"'");
+                }
+                
                 IJudgement judgement = findJudgement(contest, judgementAcronym);
                 
                 if (judgement == null) {
@@ -379,18 +423,18 @@ public class SubmitJudgment {
                 serverConnection.submitRunJudgement(run, judgement);
                 
                 waitForRunJudgementConfirmation(runliEventListener, 2);
+                
 
-                if (runliEventListener.getRun() != null) {
+                IRun newRun = runliEventListener.getRun();
+
+                if (newRun != null) {
                     // got a run
                     success = true;
                     
-                    System.out.println("Run " + run.getNumber() + " judgement updated now is " + run.getJudgementName() + " for  " + run.getNumber() + ", problem " + run.getProblem().getName() + //
-                            ", for team " + run.getTeam().getDisplayName() + //
-                            " (" + run.getTeam().getLoginName() + ")");
-
-                    if (debugMode) {
-                        System.out.println("Run " + run.getNumber() + " submitted at " + run.getSubmissionTime() + " minutes");
-                    }
+                    System.out.println("Run " + newRun.getNumber() + " judgement updated now is '" + newRun.getJudgementName() //
+                            + "', problem " + newRun.getProblem().getName() + //
+                            ", for team: " + newRun.getTeam().getDisplayName() + //
+                            " (" + newRun.getTeam().getLoginName() + ")");
                 } 
                 // no else
                 
@@ -412,7 +456,7 @@ public class SubmitJudgment {
         if (success) {
             System.exit(SUCCESS_EXIT_CODE);
         } else {
-            System.exit(4);
+            System.exit(FAILURE_EXIT_CODE);
         }
     }
 
@@ -437,6 +481,11 @@ public class SubmitJudgment {
         if (judgementAcronym == null || judgementAcronym.length() == 0) {
             throw new LoginFailureException("No judgement acronym specified");
         }
+        
+        if (teamId == 0) {
+            throw new LoginFailureException("No team id specified");
+        }
+
     }
 
     /**
@@ -630,10 +679,6 @@ public class SubmitJudgment {
         return null;
     }
 
-    public ILanguage getSubmittedLanguage() {
-        return submittedLanguage;
-    }
-
     public IClient getSubmittingUser() {
         return submittingUser;
     }
@@ -704,7 +749,7 @@ public class SubmitJudgment {
         
         if (args.length == 0 || args[0].equals("--help")) {
             usage();;
-            System.exit(4);
+            System.exit(FAILURE_EXIT_CODE);
         }
         
         try {
@@ -766,7 +811,7 @@ public class SubmitJudgment {
         }
         System.err.println(message);
 
-        System.exit(4);
+        System.exit(FAILURE_EXIT_CODE);
 
     }
 
