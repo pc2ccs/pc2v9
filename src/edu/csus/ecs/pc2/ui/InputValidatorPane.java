@@ -637,6 +637,10 @@ public class InputValidatorPane extends JPanePlugin {
         return this.runResults ;
     }
 
+    public void setRunResults(InputValidationResult[] inRunResults) {
+        this.runResults = inRunResults;
+    }
+
     public void setInputValidationSummaryMessageText(String msg) {
         getInputValidationResultPane().setInputValidationSummaryMessageText(msg);
     }

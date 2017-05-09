@@ -7,8 +7,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -265,35 +265,46 @@ public class InputValidationResultPane extends JPanePlugin {
         if (showOnlyFailedRunsCheckbox == null) {
         	showOnlyFailedRunsCheckbox = new JCheckBox("Show only failed input files");
         	showOnlyFailedRunsCheckbox.setSelected(true);
-        	showOnlyFailedRunsCheckbox.addActionListener(new ActionListener() {
+            
+            showOnlyFailedRunsCheckbox.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        System.err.println ("Show only failed files checkbox activated - not fully implemented yet");
         	        SwingUtilities.invokeLater(new Runnable() {
         	            public void run () {
         	                JPanePlugin parent = getParentPane();
         	                if (parent instanceof InputValidatorPane) {
+        	                    
+        	                    //get the results of the latest run from the parent
         	                    InputValidationResult [] results = ((InputValidatorPane) parent).getRunResults();
-        	                    InputValidationResult [] updatedResults = Arrays.copyOf(results,results.length);
-        	                    if (getShowOnlyFailedFilesCheckbox().isSelected()) {
-        	                        //set all passed results to null
-        	                        for (int i=0; i<updatedResults.length; i++) {
-        	                            if (updatedResults[i].isPassed()) {
-        	                                updatedResults[i]=null;
-        	                            }
-        	                        }
-        	                        //remove nulls
-        	                        System.err.println ("   Not yet removing passed files");
-        	                        List<InputValidationResult> updatedList = Arrays.asList(updatedResults);
-        	                        for (InputValidationResult res : updatedList) {
-        	                            if (res == null) {
-        	                                updatedList.remove(res);
-        	                            }
-        	                        }
-        	                        updatedResults = (InputValidationResult[]) updatedList.toArray();
-        	                    }
-        	                    ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).setResults(updatedResults);
-                                ((InputValidationResultsTableModel)getInputValidatorResultsTable().getModel()).fireTableDataChanged();
-        	                } else {
+        	                    
+        	                    if (results != null && results.length > 0) {
+        	                        
+                                    //make a copy so we don't wipe out the parent's results
+                                    InputValidationResult[] updatedResults = Arrays.copyOf(results, results.length);
+
+                                    //if we are only going to show failed results, make a new array containing only failed results
+                                    if (getShowOnlyFailedFilesCheckbox().isSelected()) {
+                                        ArrayList<InputValidationResult> failedResultsList = new ArrayList<InputValidationResult>();
+                                        for (int i = 0; i < updatedResults.length; i++) {
+                                            if (!updatedResults[i].isPassed()) {
+                                                failedResultsList.add(updatedResults[i]);
+                                            }
+                                        }
+                                        updatedResults = new InputValidationResult [failedResultsList.size()];
+                                        for (int i=0; i<updatedResults.length; i++) {
+                                            updatedResults[i] = failedResultsList.get(i);
+                                        }
+                                    }
+                                    
+                                    //put the updated results in the table model and redraw the table
+                                    ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).setResults(updatedResults);
+                                    ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+                                    
+                                } else {
+                                    getController().getLog().info("ShowOnlyFailedFiles checkbox selected but found no run results to display");
+                                }
+                                
+                            } else {
         	                    getController().getLog().warning("InputValidationResultPane parent not an InputValidatorPane; cannot obtain results to update table");
         	                }
         	            }
