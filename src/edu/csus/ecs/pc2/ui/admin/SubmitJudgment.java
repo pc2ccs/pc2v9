@@ -42,12 +42,13 @@ public class SubmitJudgment {
 
     private IClient submittingUser;
 
-    public static final String[] REQUIRED_OPTIONS_LIST = { //
-        "--login", "--password",  // pc2 login password
-        "-u", // team id 
-        "-i", "-j", "-F", 
+    public static final String[] REQUIRED_OPTIONS_LIST = {
+            //
+            "--login", "--password", // pc2 login password
+            "-u", // team id 
+            "-i", "-j", "-F",
     };
-    
+
     private RunEventListener runliEventListener = new RunEventListener();
 
     /**
@@ -57,13 +58,13 @@ public class SubmitJudgment {
      * or elsewhere a zero exit code could be returned.
      */
     private static final int SUCCESS_EXIT_CODE = 5;
-    
+
     private static final int FAILURE_EXIT_CODE = 4;
 
     // TODO move to Constants
     private static final String FILE_OPTION_STRING = "-F";
 
-//    private static final String NL = System.getProperty("line.separator");
+    //    private static final String NL = System.getProperty("line.separator");
 
     /**
      * print all missing options if command line error.
@@ -83,15 +84,15 @@ public class SubmitJudgment {
      * Run number to be judged.
      */
     private long runId;
-    
+
     private String judgementAcronym;
 
     /**
      * Team for run to be judged
      */
     private String teamIdString;
-    
-    private int teamId= 0;
+
+    private int teamId = 0;
 
     public SubmitJudgment(String[] args) throws CommandLineErrorException {
         loadProgramVariables(args, REQUIRED_OPTIONS_LIST);
@@ -115,7 +116,6 @@ public class SubmitJudgment {
             if (password == null) {
                 password = login;
             }
-
         }
     }
 
@@ -129,7 +129,7 @@ public class SubmitJudgment {
     private void loadProgramVariables(String[] args, String[] opts) throws CommandLineErrorException {
 
         ParseArguments arguments = new ParseArguments(args, opts);
-        
+
         if (args.length == 0) {
             usage();
             System.exit(FAILURE_EXIT_CODE);
@@ -137,12 +137,12 @@ public class SubmitJudgment {
 
         if (arguments.isOptPresent(FILE_OPTION_STRING)) {
             String propertiesFileName = arguments.getOptValue(FILE_OPTION_STRING);
-            
-            if (propertiesFileName == null){
+
+            if (propertiesFileName == null) {
                 arguments.dumpArgs(System.err);
                 fatalError("No file specified after -F option ");
             }
-            
+
             if (!(new File(propertiesFileName).exists())) {
                 fatalError(propertiesFileName + " does not exist (pwd: " + Utilities.getCurrentDirectory() + ")", null);
             }
@@ -159,53 +159,50 @@ public class SubmitJudgment {
         if (debugMode) {
             arguments.dumpArgs(System.err);
         }
-        
-//        timeStamp = 0;
+
+        //        timeStamp = 0;
         checkArg = arguments.isOptPresent("--check");
-        
+
         // --login loginname - user login 
         String cmdLineLogin = arguments.getOptValue("--login");
-        if (cmdLineLogin == null){
+        if (cmdLineLogin == null) {
             throw new CommandLineErrorException("Missing login");
         }
-        
+
         // --password password - user password
         String cmdLinePassword = arguments.getOptValue("--password");
 
         loginShortcutExpansion(cmdLineLogin, cmdLinePassword);
 
-        {            
-            // -i runid       -  run id for submission
-            
-            String runIdString = arguments.getOptValue("-i");
-            try {
-                if (arguments.isOptPresent("-i")){
-                    runId = Long.parseLong(runIdString);
-                }
-            } catch (Exception e) {
-                throw new CommandLineErrorException("Invalid number after -i '"+runIdString+"'", e);
-            }
-      
+        // -i runid       -  run id for submission
 
-            // -j acro         - judgement for run, (judgement acronym)
-            
-            if (arguments.isOptPresent("-j")) {
-                judgementAcronym = arguments.getOptValue("-j");
+        String runIdString = arguments.getOptValue("-i");
+        try {
+            if (arguments.isOptPresent("-i")) {
+                runId = Long.parseLong(runIdString);
             }
-            
-            // -u team_id      - team id for the run
-            if (arguments.isOptPresent("-u")) {
-                teamIdString = arguments.getOptValue("-u");
-                
-                teamId = toInt(teamIdString, 0);
-                if (teamId < 1 ){
-                    throw new CommandLineErrorException("Invalid team number after -t '"+teamIdString+"'");
-                }
-            }
+        } catch (Exception e) {
+            throw new CommandLineErrorException("Invalid number after -i '" + runIdString + "'", e);
+        }
 
-            if (password == null) {
-                password = login;
+        // -j acro         - judgement for run, (judgement acronym)
+
+        if (arguments.isOptPresent("-j")) {
+            judgementAcronym = arguments.getOptValue("-j");
+        }
+
+        // -u team_id      - team id for the run
+        if (arguments.isOptPresent("-u")) {
+            teamIdString = arguments.getOptValue("-u");
+
+            teamId = toInt(teamIdString, 0);
+            if (teamId < 1) {
+                throw new CommandLineErrorException("Invalid team number after -t '" + teamIdString + "'");
             }
+        }
+
+        if (password == null) {
+            password = login;
         }
     }
 
@@ -228,7 +225,7 @@ public class SubmitJudgment {
     protected boolean hasAnyCCSArguments(String[] args, String[] requiredOpts) {
 
         ParseArguments parseArguments = new ParseArguments(args, requiredOpts);
-        
+
         for (String s : args) {
             if (parseArguments.isRequiredOptPresent(s)) {
                 return true;
@@ -250,22 +247,21 @@ public class SubmitJudgment {
      * @return if any option is present, and any other is not present return count.
      */
     protected int numberMissingArguments(String[] args, String[] allOptions, String[] requiredOptions) {
-        
+
         int count = 0;
-        
+
         ParseArguments parseArguments = new ParseArguments(args, allOptions);
-        
-        for (String s : requiredOptions){
-            if (! parseArguments.isOptPresent(s)){
-                count ++;
-            } else if (! parseArguments.optHasValue(s)){
-                count ++;
+
+        for (String s : requiredOptions) {
+            if (!parseArguments.isOptPresent(s)) {
+                count++;
+            } else if (!parseArguments.optHasValue(s)) {
+                count++;
             }
         }
         return count;
     }
-    
-    
+
     @SuppressWarnings("unused")
     private void printMissingArguments(String[] args, String[] requiredOpts) {
 
@@ -279,19 +275,6 @@ public class SubmitJudgment {
             }
         }
     }
-//
-//    private String getLanguageFromFilename(String filename2) {
-//
-//        if (filename2.endsWith(".java")) {
-//            return findLanguageName("Java");
-//        } else if (filename2.endsWith(".cpp")) {
-//            return findLanguageName("C++");
-//        } else if (filename2.endsWith(".c")) {
-//            return findLanguageName("C");
-//        } else {
-//            return languageTitle;
-//        }
-//    }
 
     protected String findLanguageName(String string) {
 
@@ -322,10 +305,10 @@ public class SubmitJudgment {
             return baseName;
         }
     }
-    
+
     private static void usage() {
         String[] usageMessage = { //
-                "", //
+        "", //
                 "Usage SubmitJudgement [-F propfile] --login loginname --password password -i runid -j judgement_acronym -u team_id ", //
                 "", //
                 "Submit judgement (acronym) for run.", //
@@ -352,7 +335,7 @@ public class SubmitJudgment {
             System.out.println(s);
         }
     }
-    
+
     private IJudgement findJudgement(IContest contest, String ja) {
         IJudgement[] judgements = contest.getJudgements();
         for (IJudgement iJudgement : judgements) {
@@ -383,7 +366,7 @@ public class SubmitJudgment {
     public void submitJudgement(String[] args) throws CommandLineErrorException {
 
         boolean success = false;
-        
+
         try {
             checkRequiredParams();
         } catch (Exception e) {
@@ -391,51 +374,50 @@ public class SubmitJudgment {
         }
 
         try {
-            
+
             serverConnection = new ServerConnection();
 
             contest = serverConnection.login(login, password);
             contest.addRunListener(runliEventListener);
-            
+
             System.out.println("For: " + contest.getMyClient().getDisplayName() + " (" + contest.getMyClient().getLoginName() + ")");
             System.out.println();
 
             try {
-                
+
                 IRun run = findRun(contest, runId);
                 if (run == null) {
                     throw new Exception("No run " + runId + " exists in contest.   No such run.");
                 }
-                
+
                 int accountNumber = run.getTeam().getAccountNumber();
-                if (run.getTeam().getAccountNumber() != teamId){
-                    throw new Exception("Team number does not match run, expected team "+accountNumber+" got '"+teamIdString+"'");
+                if (run.getTeam().getAccountNumber() != teamId) {
+                    throw new Exception("Team number does not match run, expected team " + accountNumber + " got '" + teamIdString + "'");
                 }
-                
+
                 IJudgement judgement = findJudgement(contest, judgementAcronym);
-                
+
                 if (judgement == null) {
                     throw new Exception("No judgement acronym found in contest for '" + judgementAcronym + "'");
                 }
-                
+
                 serverConnection.submitRunJudgement(run, judgement);
-                
+
                 waitForRunJudgementConfirmation(runliEventListener, 2);
-                
 
                 IRun newRun = runliEventListener.getRun();
 
                 if (newRun != null) {
                     // got a run
                     success = true;
-                    
+
                     System.out.println("Run " + newRun.getNumber() + " judgement updated now is '" + newRun.getJudgementName() //
                             + "', problem " + newRun.getProblem().getName() + //
                             ", for team: " + newRun.getTeam().getDisplayName() + //
                             " (" + newRun.getTeam().getLoginName() + ")");
-                } 
+                }
                 // no else
-                
+
                 serverConnection.logoff();
             } catch (Exception e) {
                 System.err.println("Run " + runId + " was not changed.  " + e.getMessage());
@@ -443,10 +425,10 @@ public class SubmitJudgment {
                     e.printStackTrace();
                 }
             }
-  
+
         } catch (LoginFailureException e) {
             System.out.println("Unable to login: " + e.getMessage());
-            if (debugMode){
+            if (debugMode) {
                 e.printStackTrace();
             }
         }
@@ -508,7 +490,7 @@ public class SubmitJudgment {
                 done = true;
             }
 
-            if (! done && (new Date().getTime() > timeLimit)) {
+            if (!done && (new Date().getTime() > timeLimit)) {
                 break;
             }
             System.out.print("");
@@ -516,13 +498,13 @@ public class SubmitJudgment {
 
         long totalTime = new Date().getTime() - startTime;
 
-        if (debugMode){
+        if (debugMode) {
             System.out.println(totalTime + " ms");
             System.out.println();
         }
 
         if (!done) {
-            throw new Exception("Timed out ("+totalTime+" ms) waiting for run update confirmation for run "+runId+" - contact staff ");
+            throw new Exception("Timed out (" + totalTime + " ms) waiting for run update confirmation for run " + runId + " - contact staff ");
         }
     }
 
@@ -541,12 +523,12 @@ public class SubmitJudgment {
 
             try {
                 listInfo(contest);
-                
+
                 serverConnection.logoff();
 
             } catch (Exception e) {
                 e.printStackTrace();
-                if (debugMode){
+                if (debugMode) {
                     e.printStackTrace();
                 }
 
@@ -554,7 +536,7 @@ public class SubmitJudgment {
 
         } catch (LoginFailureException e1) {
             System.out.println("Unable to login: " + e1.getMessage());
-            if (debugMode){
+            if (debugMode) {
                 e1.printStackTrace();
             }
         }
@@ -573,11 +555,11 @@ public class SubmitJudgment {
             serverConnection = new ServerConnection();
 
             contest = serverConnection.login(login, password);
-            
+
             System.out.println();
             System.out.println(contest.getContestTitle());
             System.out.println();
-            System.out.println("For: "+contest.getMyClient().getDisplayName()+" ("+contest.getMyClient().getLoginName()+")");
+            System.out.println("For: " + contest.getMyClient().getDisplayName() + " (" + contest.getMyClient().getLoginName() + ")");
             System.out.println();
 
             IRun[] runs = contest.getRuns();
@@ -595,7 +577,7 @@ public class SubmitJudgment {
             }
         } catch (LoginFailureException e1) {
             System.out.println("Unable to login: " + e1.getMessage());
-            if (debugMode){
+            if (debugMode) {
                 e1.printStackTrace();
             }
         }
@@ -643,7 +625,7 @@ public class SubmitJudgment {
     private IProblem matchProblem(String problemTitle2) {
 
         // check full name
-        
+
         for (IProblem problem : contest.getProblems()) {
             if (problem.getName().equalsIgnoreCase(problemTitle2)) {
                 return problem;
@@ -656,18 +638,18 @@ public class SubmitJudgment {
         char let = 'A';
 
         // check letter
-        
+
         for (IProblem problem : contest.getProblems()) {
             if (problem.getName().equalsIgnoreCase(Character.toString(let))) {
                 return problem;
             }
             let++;
         }
-        
+
         // check start name
 
         for (IProblem problem : contest.getProblems()) {
-            
+
             if (problem.getName().toLowerCase().startsWith(problemTitle2.toLowerCase())) {
                 return problem;
             }
@@ -679,7 +661,7 @@ public class SubmitJudgment {
     public IClient getSubmittingUser() {
         return submittingUser;
     }
-    
+
     /**
      * Listen for run events.
      * 
@@ -707,7 +689,7 @@ public class SubmitJudgment {
 
         public void runJudged(IRun run, boolean isFinal) {
             // ignore
-            if (run.getNumber() == runId){
+            if (run.getNumber() == runId) {
                 updatedRun = run;
             }
         }
@@ -732,7 +714,6 @@ public class SubmitJudgment {
             // ignore
         }
 
-
         public void run() {
             // ignore
         }
@@ -741,43 +722,28 @@ public class SubmitJudgment {
             return updatedRun;
         }
     }
-    
+
     public static void main(String[] args) {
-        
+
         if (args.length == 0 || args[0].equals("--help")) {
-            usage();;
+            usage();
+            ;
             System.exit(FAILURE_EXIT_CODE);
         }
-        
+
         try {
             SubmitJudgment submitter = new SubmitJudgment(args);
-            
+
             submitter.submitJudgement(args);
-            
+
         } catch (CommandLineErrorException e) {
-            System.err.println("Error on command line: "+e.getMessage());
-        } catch (Exception e){
-            System.err.println("Error submitting run "+e.getMessage());
+            System.err.println("Error on command line: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error submitting run " + e.getMessage());
             e.printStackTrace(System.err);
         }
-        
-    }
-    
 
-//    /**
-//     * Return all optional and required CCS options.
-//     * 
-//     * @return list of -t, -i, -w, etc.
-//     */
-//    public String[] getAllCCSOptions() {
-//        ArrayList<String> list = new ArrayList<String>(Arrays.asList(CCS_REQUIRED_OPTIONS_LIST));
-//        list.add("-t");
-//        list.add("-i");
-//        list.add("-j");
-//        list.add("-F");
-//        allCCSOptions = (String[]) list.toArray(new String[list.size()]);
-//        return allCCSOptions;
-//    }
+    }
 
     /**
      * 
@@ -786,6 +752,7 @@ public class SubmitJudgment {
     public void setShowAllMissingOptions(boolean showAllMissingOptions) {
         this.showAllMissingOptions = showAllMissingOptions;
     }
+
     /**
      * 
      * @see #setShowAllMissingOptions(boolean).
@@ -794,7 +761,7 @@ public class SubmitJudgment {
     public boolean isShowAllMissingOptions() {
         return showAllMissingOptions;
     }
-    
+
     /**
      * Fatal error - log error and show user message before exiting.
      * 
