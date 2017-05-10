@@ -210,6 +210,7 @@ public class InputValidatorPane extends JPanePlugin {
                             if (okToRunInputValidator()) {
                                 
                                 getRunInputValidatorButton().setEnabled(false);  //this is set back true when the spawner finishes, via a call to cleanup()
+                                getShowOnlyFailedFilesCheckbox().setEnabled(false);
                                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                                 
                                 spawnInputValidatorRunnerThread();
@@ -497,6 +498,7 @@ public class InputValidatorPane extends JPanePlugin {
      */
     private void cleanup() {
         getRunInputValidatorButton().setEnabled(true);
+        getShowOnlyFailedFilesCheckbox().setEnabled(true);
         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }
     
