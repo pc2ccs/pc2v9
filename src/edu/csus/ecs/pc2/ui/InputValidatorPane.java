@@ -200,31 +200,35 @@ public class InputValidatorPane extends JPanePlugin {
 
     private JButton getRunInputValidatorButton() {
         if (runInputValidatorButton == null) {
-        	runInputValidatorButton = new JButton("Run Input Validator");
-        	runInputValidatorButton.addActionListener(new ActionListener() {
-        	    
-        	    public void actionPerformed(ActionEvent e) {
+            runInputValidatorButton = new JButton("Run Input Validator");
+            runInputValidatorButton.addActionListener(new ActionListener() {
 
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run () {
-                            if (okToRunInputValidator()) {
-                                
-                                getRunInputValidatorButton().setEnabled(false);  //this is set back true when the spawner finishes, via a call to cleanup()
-                                getShowOnlyFailedFilesCheckbox().setEnabled(false);
-                                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                                
-                                spawnInputValidatorRunnerThread();
-                                
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Missing Input Validator Command or Judge's Data files; cannot run Input Validator", 
-                                        "Missing Data", JOptionPane.INFORMATION_MESSAGE);
-                            }
-                        }
-                    });
-        	    }
-        	});
+                public void actionPerformed(ActionEvent e) {
+                    runInputValidator();
+                }
+            });
         }
         return runInputValidatorButton;
+    }
+    
+    protected void runInputValidator() {
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run () {
+                if (okToRunInputValidator()) {
+                    
+                    getRunInputValidatorButton().setEnabled(false);  //this is set back true when the spawner finishes, via a call to cleanup()
+                    getShowOnlyFailedFilesCheckbox().setEnabled(false);
+                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    
+                    spawnInputValidatorRunnerThread();
+                    
+                } else {
+                    JOptionPane.showMessageDialog(null, "Missing Input Validator Command or Judge's Data files; cannot run Input Validator", 
+                            "Missing Data", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
     }
     
     /**
