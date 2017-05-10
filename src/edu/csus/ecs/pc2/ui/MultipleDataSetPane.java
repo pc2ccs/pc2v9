@@ -475,9 +475,24 @@ public class MultipleDataSetPane extends JPanePlugin {
 
         // Populate general data and answer files too
         editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
+        
+        //update the Input Validator status
         getEditProblemPane().getInputValidatorPane().setRunResults(null);
         getEditProblemPane().getInputValidatorPane().updateResultsTable();
+        
+        if (inputValidatorIsDefined()) {
+            int result = JOptionPane.showConfirmDialog(this, "Do you want to run the Input Validator on the new input data files?", "Run Input Validator? ", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (result == JOptionPane.YES_OPTION) {
+                getEditProblemPane().getInputValidatorPane().runInputValidator();
+            }
+        }
         getEditProblemPane().enableUpdateButton();
+    }
+    
+    private boolean inputValidatorIsDefined() {
+        //TODO: implement me!
+        System.err.println ("Warning: MultipleDataSetPane is not correctly checking for Input Validators!");
+        return true;
     }
 
     private JButton getBtnLoad() {
