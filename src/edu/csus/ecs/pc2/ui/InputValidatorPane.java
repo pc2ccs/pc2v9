@@ -237,7 +237,7 @@ public class InputValidatorPane extends JPanePlugin {
      * 
      * @return true if it is ok to run the Input Validator; false if not
      */
-    private boolean okToRunInputValidator() {
+    protected boolean okToRunInputValidator() {
         if (problemHasInputValidatorCommand() && problemHasInputDataFiles()) {
             return true;
         } else {

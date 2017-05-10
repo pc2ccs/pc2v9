@@ -492,9 +492,11 @@ public class MultipleDataSetPane extends JPanePlugin {
     }
     
     private boolean inputValidatorIsDefined() {
-        //TODO: implement me!
-        System.err.println ("Warning: MultipleDataSetPane is not correctly checking for Input Validators!");
-        return true;
+        if (getEditProblemPane().getInputValidatorPane().okToRunInputValidator()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private JButton getBtnLoad() {
