@@ -274,7 +274,11 @@ public class ProblemsPane extends JPanePlugin {
 //        InputValidationStatus ivStatus = problem.getInputValidationStatus();
 //        c[i++] = ivStatus.toString();  
         
-        c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getInputValidationStatus());
+        if (problem.isProblemHasInputValidator()) {
+            c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getInputValidationStatus());
+        } else {
+            c[i++] = "   N/A   ";
+        }
         
         String inputValidatorCommandLine = "";
         if (problem.isProblemHasInputValidator()) {
