@@ -19,6 +19,8 @@ import shutil
 # set to "" if in path, otherwise full path
 pc2submitpath="\\pc2-9.5build\\bin\\"
 pc2submitbat=".bat"
+pc2submitpath=""
+pc2submitbat=""
 host="localhost"
 user="admin"
 password="adm1n"
@@ -29,7 +31,10 @@ PC2SUBMIT_SUCCESS_EXIT_CODE = 5
 # key=teamnum (as string) value=password dictionary
 # populated by load_accounts
 accounts = {}
-existing = {}
+existingRuns = {}
+existingJudgements = {}
+haveJudgementForRun = {}
+runToTeamId = {}
 problemslabelshortname = {}
 problems = {}
 languages = {}
@@ -38,7 +43,12 @@ def load_accounts(file):
       for line in csv.reader(fh, dialect="excel-tab"):
         if line[0] == "team":
           password = line[3]
-          teamnum = line[2][5:].lstrip('0')
+          # sometimes it is team- other times just team
+          if '-' in line[2]:
+             endindex=5
+          else:
+             endindex=4
+          teamnum = line[2][endindex:].lstrip('0')
           # note this stores the key as a string
 #          accounts[teamnum] = '"{0}"'.format(password)
           accounts[teamnum] = password
@@ -47,23 +57,34 @@ def load_problems(file):
    with open(file, "r") as fh:
       for line in fh:
         if 'letter: ' in line:
-          letter = line[line.index(':')+1:-1].lstrip(" ")
+          letter = line[line.index(':')+1:-1].strip(" ")
         if 'short-name: ' in line:
           shortname = line[line.index(':')+1:-1].lstrip(" ")
           problemslabelshortname[letter]=shortname
 
+def SearchPath(name, path=None):
+   """Search PATH for a binary.
 
-"""
-Converts time like 0:03:07.756 outputting the time in milliseconds
-"""
+   """
+   path = path or os.environ['PATH']
+   for dir in path.split(os.pathsep):
+      binpath = os.path.join(dir, name)
+      if os.path.exists(binpath):
+         return os.path.abspath(binpath)
+   return None
+
+
 def convert_time(intime):
+  """Converts time like 0:03:07.756 outputting the time in milliseconds
+
+  """
   # input line 0:03:07.756
   # or
   # input line 0:03:07
   index = intime.index(':')
   hour = int(intime[0:index],10)
   intime = intime[index+1:]
-  index = intime.index(':') 
+  index = intime.index(':')
   minute = int(intime[0:index],10)
   intime = intime[index+1:]
   # . is optional so find instead of index to avoid valueError
@@ -78,12 +99,25 @@ def convert_time(intime):
      millisec = int(intime)
   return((((hour*60+minute)*60)+second)*1000+millisec)
 
+opts = "opts.pc2admin"
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', action="store_true", help="clean db, import all runs")
 parser.add_argument('cdp_dir', help="cdp dir with config subdir")
 args = parser.parse_args()
 load_accounts(args.cdp_dir+"/config/accounts.tsv")
 load_problems(args.cdp_dir+"/config/problemset.yaml")
+
+#pc2env_location = SearchPath('pc2env')
+pc2home = os.path.dirname(SearchPath(os.path.join('..','pc2v9.ini')))
+# only set this if we found pc2home
+baseSubmitJudgement = None
+if pc2home:
+   if os.path.isfile(opts):
+      baseSubmitJudgement = "java -cp {}/lib/pc2.jar edu.csus.ecs.pc2.ui.admin.SubmitJudgment -F {}".format(pc2home, opts)
+      print("baseSubmitJudgement={}".format(baseSubmitJudgement))
+   else:
+      print("Error found pc2home, but no {} found".format(opts))
+      sys.exit(1)
 
 authKey = base64.b64encode(str.encode("{0}:{1}".format(user,password)))
 url="https://{0}:{1}/contest".format(host,httpsport)
@@ -93,7 +127,7 @@ ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
 def get_files(id):
-   file_args = "-m"         
+   file_args = "-m"
    files=""
    file_url="https://{0}:{1}/submissionFiles/{2}".format(host, httpsport, id)
    file_req = urllib.request.Request(file_url, headers=headers)
@@ -120,8 +154,10 @@ with tempfile.TemporaryDirectory() as tmpdirname:
   olddir=os.getcwd()
   try:
     shutil.copy("pc2v9.ini", tmpdirname)
+    shutil.copy(opts, tmpdirname)
+    print("Using pc2v9.ini and {} from {}".format(opts,olddir))
   except:
-     print("Could not copy pc2v9.ini from {} to {}".format(olddir, tmpdirname))
+     print("Could not copy pc2v9.ini/{} from {} to {}".format(opts, olddir, tmpdirname))
   os.chdir(tmpdirname)
   req = urllib.request.Request(url, headers=headers)
   response = urllib.request.urlopen(req, context=ctx)
@@ -142,7 +178,7 @@ with tempfile.TemporaryDirectory() as tmpdirname:
             if args.c:
               curs.execute("DELETE FROM runs;")
             for row in curs.execute("SELECT * FROM runs;"):
-              existing[row[0]]=1
+              existingRuns[row[0]]=1
           except Exception as e:
             print(e)
        if 'problem' in jj:
@@ -157,22 +193,58 @@ with tempfile.TemporaryDirectory() as tmpdirname:
           languages[languageid]=languagename
        if 'submission' in jj:
            runid =  jj['submission']['label']
-           if runid in existing:
-             print("skipping {0}, already done".format(runid))
-             continue
            teamid = jj['submission']['team-id']
-           contesttime = jj['submission']['contest-time']
-           time = convert_time(contesttime)
-           problemid = jj['submission']['problem-id']
-           languageid = jj['submission']['language-id']
-           file_args = get_files(runid)
-           command = "{}pc2submit{} -p {} -l {} -u {} -t {} -i {} -w {} {}".format(pc2submitpath, pc2submitbat, problems[problemid], languages[languageid], teamid, time, runid, accounts[teamid],file_args)
-           proc = subprocess.run(command.split(), shell=False, stdout=subprocess.PIPE) 
-           if proc.returncode == PC2SUBMIT_SUCCESS_EXIT_CODE:
-             print("Submitted runid {}".format(runid))
-             curs.execute('''INSERT INTO runs VALUES ({0});'''.format(runid))
+           # HACK for multisite to single site
+           if teamid[0:2] == "20" and len(teamid) == 4:
+              teamid_real = teamid[2:]
            else:
-             print("Warning: problem running {}, returned code {} output '{}'".format(command, proc.returncode, proc.stdout.decode("unicode_escape")))
+              teamid_real = teamid
+           runToTeamId[runid] = teamid_real
+           if runid in existingRuns:
+             print("skipping {0}, already submitted".format(runid))
+           else:
+             contesttime = jj['submission']['contest-time']
+             time = convert_time(contesttime)
+             problemid = jj['submission']['problem-id']
+             languageid = jj['submission']['language-id']
+             language = languages[languageid].replace(' ','_')
+#             language = "'{}'".format(languages[languageid])
+             try:
+                file_args = get_files(runid)
+             except:
+                print("Error processing run id {} (get files failed)".format(runid))
+                continue
+             command = "{}pc2submit{} -p {} -l {} -u {} -t {} -i {} -w {} {}".format(pc2submitpath, pc2submitbat, problems[problemid], language, teamid_real, time, runid, accounts[teamid],file_args)
+             proc = subprocess.run(command.split(), shell=False, stdout=subprocess.PIPE)
+             if proc.returncode == PC2SUBMIT_SUCCESS_EXIT_CODE:
+               print("Submitted runid {}".format(runid))
+               curs.execute('''INSERT INTO runs VALUES ({0});'''.format(runid))
+             else:
+               print("Warning: problem running {}, returned code {} output '{}'".format(command, proc.returncode, proc.stdout.decode("unicode_escape")))
+           if runid in haveJudgementForRun:
+              command = "{} -u {} -i {} -j {}".format(baseSubmitJudgement, runToTeamId[runid],  runid, haveJudgementForRun[runid])
+              proc = subprocess.run(command.split(), shell=False, stdout=subprocess.PIPE)
+              if proc.returncode == PC2SUBMIT_SUCCESS_EXIT_CODE:
+                 print("Submitted judgement for runid {}".format(runid))
+                 existingJudgements[runid] = 1
+              else:
+                 print("Warning: problem running {}, returned code {} output '{}'".format(command, proc.returncode, proc.stdout.decode("unicode_escape")))
+       if 'submission-judgement' in jj and baseSubmitJudgement:
+           runid =  jj['submission-judgement']['submission-id']
+           if runid in existingJudgements:
+             print("skipping {0}, already judged".format(runid))
+             continue
+           judgementid =  jj['submission-judgement']['judgement-type-id']
+           if runid in runToTeamId:
+              command = "{} -u {} -i {} -j {}".format(baseSubmitJudgement, runToTeamId[runid],  runid, judgementid)
+              proc = subprocess.run(command.split(), shell=False, stdout=subprocess.PIPE)
+              if proc.returncode == PC2SUBMIT_SUCCESS_EXIT_CODE:
+                 print("Submitted judgement for runid {}".format(runid))
+              else:
+                 print("Warning: problem running {}, returned code {} output '{}'".format(command, proc.returncode, proc.stdout.decode("unicode_escape")))
+           else:
+               # save it for the submission
+               haveJudgementForRun[runid] = judgementid
      except UnicodeDecodeError as e:
        print("Error with {0}".format(line))
        print(e, end='', flush=True)
