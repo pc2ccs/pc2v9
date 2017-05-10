@@ -2,7 +2,6 @@ package edu.csus.ecs.pc2.ui.admin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -43,7 +42,11 @@ public class SubmitJudgment {
 
     private IClient submittingUser;
 
-    public static final String[] CCS_REQUIRED_OPTIONS_LIST = {"-l", "-t", "-m", "-p", "-u", "-w" };
+    public static final String[] REQUIRED_OPTIONS_LIST = { //
+        "--login", "--password",  // pc2 login password
+        "-u", // team id 
+        "-i", "-j", "-F", 
+    };
     
     private RunEventListener runliEventListener = new RunEventListener();
 
@@ -62,8 +65,6 @@ public class SubmitJudgment {
 
 //    private static final String NL = System.getProperty("line.separator");
 
-    private String[] allCCSOptions = new String[0];
-    
     /**
      * print all missing options if command line error.
      */
@@ -93,7 +94,7 @@ public class SubmitJudgment {
     private int teamId= 0;
 
     public SubmitJudgment(String[] args) throws CommandLineErrorException {
-        loadProgramVariables(args, getAllCCSOptions());
+        loadProgramVariables(args, REQUIRED_OPTIONS_LIST);
     }
 
     /**
@@ -161,24 +162,19 @@ public class SubmitJudgment {
         
 //        timeStamp = 0;
         checkArg = arguments.isOptPresent("--check");
-
-        // -u loginname   - user login
-        String cmdLineLogin = arguments.getOptValue("-u");
-
-        // -w password    - user password
-        String cmdLinePassword = arguments.getOptValue("-w");
+        
+        // --login loginname - user login 
+        String cmdLineLogin = arguments.getOptValue("--login");
+        if (cmdLineLogin == null){
+            throw new CommandLineErrorException("Missing login");
+        }
+        
+        // --password password - user password
+        String cmdLinePassword = arguments.getOptValue("--password");
 
         loginShortcutExpansion(cmdLineLogin, cmdLinePassword);
 
-        if (arguments.isOptPresent("--list")) {
-            listInfo();
-            System.exit(SUCCESS_EXIT_CODE);
-        } else if (arguments.isOptPresent("--listruns")) {
-            listRuns();
-            System.exit(SUCCESS_EXIT_CODE);
-        } else {
-            
-            
+        {            
             // -i runid       -  run id for submission
             
             String runIdString = arguments.getOptValue("-i");
@@ -189,6 +185,7 @@ public class SubmitJudgment {
             } catch (Exception e) {
                 throw new CommandLineErrorException("Invalid number after -i '"+runIdString+"'", e);
             }
+      
 
             // -j acro         - judgement for run, (judgement acronym)
             
@@ -196,9 +193,9 @@ public class SubmitJudgment {
                 judgementAcronym = arguments.getOptValue("-j");
             }
             
-            // -t team_id     - team id for the run
-            if (arguments.isOptPresent("-t")) {
-                teamIdString = arguments.getOptValue("-t");
+            // -u team_id      - team id for the run
+            if (arguments.isOptPresent("-u")) {
+                teamIdString = arguments.getOptValue("-u");
                 
                 teamId = toInt(teamIdString, 0);
                 if (teamId < 1 ){
@@ -329,30 +326,26 @@ public class SubmitJudgment {
     private static void usage() {
         String[] usageMessage = { //
                 "", //
-                "Usage SubmitJudgement [-F propfile] -i runid -u loginname -w password -j judgement_acronym -t team_id ", //
-                "Usage SubmitJudgement [--help|--list|--listruns|--check] options", //
+                "Usage SubmitJudgement [-F propfile] --login loginname --password password -i runid -j judgement_acronym -u team_id ", //
                 "", //
-                "Submit judgement acronym for run.  ", //
+                "Submit judgement (acronym) for run.", //
                 "", //
                 "--help         - this listing", //
                 "", //
-                "-u loginname   - user login ", //
+                "--login loginname - user login ", //
                 "", //
-                "-w password    - user password", //
+                "--password password - user password", //
                 "", //
-                "-i runid       - run id for run to be updated ", //
+                "-i runid        - run id for run to be updated ", //
                 "", //
-                "-t team_id     - team id for the run", //
+                "-u team_id      - team id for the run", //
                 "", //
                 "-j acro         - judgement for run, (judgement acronym)", //
                 "", //
-                "--listruns     - list run info for the user", //
-                "", //
-                "filelist       - list of files including main file", //
+                "-F propfile     - load options from propfile", //
                 "", //
                 "On success exit code will be " + SUCCESS_EXIT_CODE, //
                 "Any other exit code is an error.", //
-                "", //
         };
 
         for (String s : usageMessage) {
@@ -390,9 +383,14 @@ public class SubmitJudgment {
     public void submitJudgement(String[] args) throws CommandLineErrorException {
 
         boolean success = false;
-
+        
         try {
             checkRequiredParams();
+        } catch (Exception e) {
+            fatalError("Error on command line: " + e.getMessage());
+        }
+
+        try {
             
             serverConnection = new ServerConnection();
 
@@ -411,7 +409,7 @@ public class SubmitJudgment {
                 
                 int accountNumber = run.getTeam().getAccountNumber();
                 if (run.getTeam().getAccountNumber() != teamId){
-                    throw new Exception("Team number does not match run, expected "+accountNumber+" got '"+teamIdString+"'");
+                    throw new Exception("Team number does not match run, expected team "+accountNumber+" got '"+teamIdString+"'");
                 }
                 
                 IJudgement judgement = findJudgement(contest, judgementAcronym);
@@ -473,19 +471,18 @@ public class SubmitJudgment {
         if (password == null) {
             throw new LoginFailureException("No password specified");
         }
-        
+
         if (runId == 0) {
             throw new LoginFailureException("No run id specified");
         }
-        
+
         if (judgementAcronym == null || judgementAcronym.length() == 0) {
             throw new LoginFailureException("No judgement acronym specified");
         }
-        
+
         if (teamId == 0) {
             throw new LoginFailureException("No team id specified");
         }
-
     }
 
     /**
@@ -767,20 +764,20 @@ public class SubmitJudgment {
     }
     
 
-    /**
-     * Return all optional and required CCS options.
-     * 
-     * @return list of -t, -i, -w, etc.
-     */
-    public String[] getAllCCSOptions() {
-        ArrayList<String> list = new ArrayList<String>(Arrays.asList(CCS_REQUIRED_OPTIONS_LIST));
-        list.add("-t");
-        list.add("-i");
-        list.add("-j");
-        list.add("-F");
-        allCCSOptions = (String[]) list.toArray(new String[list.size()]);
-        return allCCSOptions;
-    }
+//    /**
+//     * Return all optional and required CCS options.
+//     * 
+//     * @return list of -t, -i, -w, etc.
+//     */
+//    public String[] getAllCCSOptions() {
+//        ArrayList<String> list = new ArrayList<String>(Arrays.asList(CCS_REQUIRED_OPTIONS_LIST));
+//        list.add("-t");
+//        list.add("-i");
+//        list.add("-j");
+//        list.add("-F");
+//        allCCSOptions = (String[]) list.toArray(new String[list.size()]);
+//        return allCCSOptions;
+//    }
 
     /**
      * 
