@@ -4949,7 +4949,7 @@ public class EditProblemPane extends JPanePlugin {
         return lblWhatsThisCLICSValStd;
     }
     
-    private InputValidatorPane getInputValidatorPane() {
+    protected InputValidatorPane getInputValidatorPane() {
         if (inputValidatorPane == null) {
         	inputValidatorPane = new InputValidatorPane();
         	inputValidatorPane.setContestAndController(getContest(), getController());

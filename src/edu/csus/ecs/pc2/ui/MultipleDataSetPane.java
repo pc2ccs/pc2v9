@@ -475,6 +475,8 @@ public class MultipleDataSetPane extends JPanePlugin {
 
         // Populate general data and answer files too
         editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
+        getEditProblemPane().getInputValidatorPane().setRunResults(null);
+        getEditProblemPane().getInputValidatorPane().updateResultsTable();
         getEditProblemPane().enableUpdateButton();
     }
 

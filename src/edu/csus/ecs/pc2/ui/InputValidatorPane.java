@@ -663,4 +663,8 @@ public class InputValidatorPane extends JPanePlugin {
     public JCheckBox getShowOnlyFailedFilesCheckbox() {
         return getInputValidationResultPane().getShowOnlyFailedFilesCheckbox();
     }
+
+    public void updateResultsTable() {
+        getInputValidationResultPane().updateResultsTable(runResults);
+    }
 }

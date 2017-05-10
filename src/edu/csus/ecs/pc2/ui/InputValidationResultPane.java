@@ -319,4 +319,12 @@ public class InputValidationResultPane extends JPanePlugin {
         }
         return horizontalStrut_1;
     }
+
+
+    public void updateResultsTable(InputValidationResult[] runResults) {
+        //put the results in the table model and redraw the table
+        ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).setResults(runResults);
+        ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        updateInputValidationStatusMessage(runResults);
+    }
 }
