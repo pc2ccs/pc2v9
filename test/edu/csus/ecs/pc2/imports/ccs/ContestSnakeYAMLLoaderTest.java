@@ -51,8 +51,6 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
-    private static final String TEST_CLASS_NAME = "ContestSnakeYAMLLoaderTest";
-
     private static final String YYYY_MM_DD_FORMAT1 = "yyyy-MM-dd HH:mm";
 
     // generica contest loader
