@@ -481,7 +481,9 @@ public class MultipleDataSetPane extends JPanePlugin {
         getEditProblemPane().getInputValidatorPane().updateResultsTable();
         
         if (inputValidatorIsDefined()) {
-            int result = JOptionPane.showConfirmDialog(this, "Do you want to run the Input Validator on the new input data files?", "Run Input Validator? ", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            String msg = "Do you want to run the Input Validator on the new input data files?"
+                    + "\n\n (If Yes, run results will appear on the Input Validator tab.)\n";
+            int result = JOptionPane.showConfirmDialog(this, msg, "Run Input Validator? ", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
                 getEditProblemPane().getInputValidatorPane().runInputValidator();
             }

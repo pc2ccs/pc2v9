@@ -2604,7 +2604,7 @@ public class EditProblemPane extends JPanePlugin {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new Dimension(500, 600));
             mainTabbedPane.insertTab("Input Validator", null, getInputValidatorPane(), null, 0);
-            mainTabbedPane.insertTab("Input Data Files", null, getMultipleDataSetPane(), null, 0);
+            mainTabbedPane.insertTab("Test Data Files", null, getMultipleDataSetPane(), null, 0);
             mainTabbedPane.insertTab("Output Validator", null, getOutputValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Judging Type", null, getJudgingTypePanel(), null, 0);
             mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);
