@@ -16,15 +16,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.font.TextAttribute;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.Box;
@@ -66,6 +63,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.ui.cellRenderer.CheckBoxCellRenderer;
+import edu.csus.ecs.pc2.ui.cellRenderer.LinkRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.PassFailCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.RightJustifiedCellRenderer;
 
@@ -1188,7 +1186,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         localResultsTable.getColumn(columnNames[COLUMN.DATASET_NUM.ordinal()]).setCellRenderer(centerRenderer);
        
-        //set our own checkbox renderer (don't know how to add an ActionListener to the default checkboxes
+        //set our own checkbox renderer (don't know how to add an ActionListener to the default checkboxes)
         localResultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setCellRenderer(new CheckBoxCellRenderer());
 
         // set a LinkRenderer on those cells containing links
@@ -1279,28 +1277,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
-     * 
-     * @author ICPC
-     *
-     */
-    public class LinkRenderer extends DefaultTableCellRenderer {
-
-        private static final long serialVersionUID = 1L;
-
-        public void setValue(Object value) {
-            setForeground(Color.BLUE);
-            setText(((JLabel) value).getText());
-            Font font = getFont();
-            Map<TextAttribute, Object> map = 
-                    new HashMap<TextAttribute, Object>(font.getAttributes());
-            map.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-            setFont(font.deriveFont(map));
-            setHorizontalAlignment(SwingConstants.CENTER);
-        }
-
-    }
-
-    /**
      * Pops up a viewer window for the file defined at the specified row/col in the results table.
      * 
      * @param row
@@ -1323,6 +1299,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             // we are viewing one file, make sure it will only have the 1 tab
             currentViewer = null;
         }
+        
         // and make sure its in the right mode
         getCurrentViewer().setViewerCommand(currentViewerCmd);
 
