@@ -255,14 +255,18 @@ public class InputValidationResultPane extends JPanePlugin {
                 try {
                     if (Utilities.serializedFileError(file)) {
                         getController().getLog().warning("Error obtaining SerializedFile for file ' " + res.getFullPathFilename() + " '");
+                        System.err.println ("Error constructing SerializedFile (see log)");
                         file = null;
                     }
                 } catch (Exception e) {
                     getController().getLog().getLogger().log(Log.SEVERE, "Error obtaining SerializedFile for file ' " + res.getFullPathFilename() + " '", e);
+                    System.err.println ("Exception constructing SerializedFile (see log): " + e.getMessage());
                     file = null;
                 }
                 break;
             case 1:
+                getController().getLog().getLogger().log(Log.SEVERE, "Got a mouse click on an unclickable table cell!");
+                System.err.println ("Internal error: got a mouse click on a cell that shouldn't be clickable");
                 file = null;
                 break;
             case 2:
