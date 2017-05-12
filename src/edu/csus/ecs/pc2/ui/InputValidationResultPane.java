@@ -7,6 +7,10 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -24,9 +28,13 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
+import edu.csus.ecs.pc2.ui.cellRenderer.LinkCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.PassFailCellRenderer;
 
 /**
@@ -57,6 +65,17 @@ public class InputValidationResultPane extends JPanePlugin {
     private JTable resultsTable;
     
     private InputValidationResultsTableModel inputValidationResultsTableModel = new InputValidationResultsTableModel();
+    
+    /**
+     * list of columns
+     */
+    enum COLUMN {
+        FILE_NAME, RESULT, VALIDATOR_OUTPUT, VALIDATOR_ERR
+    };
+
+    // define the column headers for the table of results
+    private String[] columnNames = { "File", "Result", "Validator StdOut", "Validator StdErr" };
+
 
     private JPanePlugin parentPane;
     private JCheckBox showOnlyFailedRunsCheckbox;
@@ -146,6 +165,24 @@ public class InputValidationResultPane extends JPanePlugin {
             //(this code came from MultipleDataSetPane, but the JTable here already has centered headers...
 //            ((DefaultTableCellRenderer) testDataSetsListBox.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 
+            //render file-name, std-out, and std-err file names as clickable links
+            resultsTable.getColumn(columnNames[COLUMN.FILE_NAME.ordinal()]).setCellRenderer(new LinkCellRenderer());
+            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkCellRenderer());
+            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkCellRenderer());
+
+            // add a listener to allow users to click an output or data file name and display it
+            resultsTable.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    JTable targetTable = (JTable) e.getSource();
+                    int row = targetTable.getSelectedRow();
+                    int column = targetTable.getSelectedColumn();
+                    
+                    if (column == COLUMN.FILE_NAME.ordinal() || column == COLUMN.VALIDATOR_OUTPUT.ordinal() || column == COLUMN.VALIDATOR_ERR.ordinal()) {
+                        viewFile(targetTable, row, column);
+                    } 
+                }
+            });
+
             // change the header font
             JTableHeader header = resultsTable.getTableHeader();
             header.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -156,6 +193,90 @@ public class InputValidationResultPane extends JPanePlugin {
 
         }
         return resultsTable;
+    }
+
+//    private void viewFile(SerializedFile file, String title) {
+    private void viewFile(JTable table, int row, int col) {
+
+        SerializedFile file = getFileForTableCell(table,row,col);
+        if (file == null) {
+            System.err.println("Got a null SerializedFile for table cell (" + row + "," + col + ")");
+            return;
+        }
+
+        // get the execution directory being used by the EditProblemPane
+        String executeDir;
+        JPanePlugin parent = getParentPane();
+        if (parent instanceof InputValidatorPane) {
+            
+            JPanePlugin grandParent = ((InputValidatorPane) parent).getParentPane();
+            if (grandParent instanceof EditProblemPane) {
+                
+                JPanePlugin epp = grandParent;
+                executeDir = ((EditProblemPane) epp).getExecuteDirectoryName();
+
+                Utilities.insureDir(executeDir);
+                String targetFileName = executeDir + File.separator + file.getName();
+                MultipleFileViewer viewer = new MultipleFileViewer(getController().getLog());
+                String title;
+
+                //write the SerializedFile to the execute directory
+                try {
+                    file.writeFile(targetFileName);
+
+                    if (new File(targetFileName).isFile()) {
+                        title = file.getName();
+                        viewer.addFilePane(title, targetFileName);
+                        viewer.setVisible(true);
+                    } else {
+                        title = "Error accessing file";
+                        viewer.addTextPane(title, "Could not access file ' " + file.getName() + " '");
+                        viewer.setVisible(true);
+                    }
+                } catch (IOException e) {
+                    title = "Error during file access";
+                    viewer.addTextPane(title, "Could not create file at " + targetFileName + "Exception " + e.getMessage());
+                    viewer.setVisible(true);
+                }
+            } else {
+                getController().getLog().severe("Grandparent of InputValidationResultPane is not an EditProblemPane; not supported"); 
+            }
+        } else {
+            getController().getLog().severe("Parent of InputValidationResultPane is not an InputValidatorPane; not supported");
+        }
+    }
+    
+    private SerializedFile getFileForTableCell(JTable table, int row, int col) {
+        InputValidationResult res = ((InputValidationResultsTableModel)table.getModel()).getResultAt(row);
+        SerializedFile file ;
+        switch (col) {
+            case 0:
+                file = new SerializedFile(res.getFullPathFilename());
+                try {
+                    if (Utilities.serializedFileError(file)) {
+                        getController().getLog().warning("Error obtaining SerializedFile for file ' " + res.getFullPathFilename() + " '");
+                        file = null;
+                    }
+                } catch (Exception e) {
+                    getController().getLog().getLogger().log(Log.SEVERE, "Error obtaining SerializedFile for file ' " + res.getFullPathFilename() + " '", e);
+                    file = null;
+                }
+                break;
+            case 1:
+                file = null;
+                break;
+            case 2:
+                file = res.getValidatorStdOut();
+                break;
+            case 3:
+                file = res.getValidatorStdErr();
+                break;
+            default:
+                getController().getLog().severe("Undefined JTable column");
+                return null;
+        }
+        return file;
+
     }
 
     private Component getVerticalStrut_1() {
