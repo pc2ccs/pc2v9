@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model.inputValidation;
 import java.util.Arrays;
 import java.util.Vector;
 
+import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -52,18 +53,21 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
 
             switch (column) {
                 case 0:
-                    obj = results.get(row).getFullPathFilename();
+//                    obj = results.get(row).getFullPathFilename();
+                    obj = new JLabel(results.get(row).getFullPathFilename());
                     break;
                 case 1:
                     obj = results.get(row).isPassed();
                     break;
                 case 2:
                     // TODO: need to return a string which can be used as a LINK to the file
-                    obj = results.get(row).getValidatorStdOut();
+//                    obj = results.get(row).getValidatorStdOut();
+                    obj = (new JLabel(results.get(row).getValidatorStdOut().getName()));
                     break;
                 case 3:
                     // TODO: need to return a string which can be used as a LINK to the file
                     obj = results.get(row).getValidatorStdErr();
+                    obj = (new JLabel(results.get(row).getValidatorStdErr().getName()));
                     break;
                 default:
                     break;
@@ -95,6 +99,10 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
     
     public Iterable<InputValidationResult> getResults() {
         return results;
+    }
+
+    public InputValidationResult getResultAt(int row) {
+        return results.get(row);
     }
 
 }
