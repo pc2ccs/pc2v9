@@ -54,6 +54,7 @@ public class InputValidatorRunner {
      * Runs the specified validator using the specified command, in the specified execution directory, feeding the 
      * specified data file to the validator as input and returning an {@link InputValidationResult} containing the results of
      * the validator execution.
+     * @param seqNum a sequence number used to give generated files unique names
      * 
      * @param problem the {@link Problem} associated with the validator program being run
      * @param validator a SerializedFile containing the validator program
@@ -67,7 +68,7 @@ public class InputValidatorRunner {
      * @throws {@link ExecuteException} if an exception occurs running the specified validator command 
      * @throws Exception if an exception occurs in serializing the validator execution stdout or stderr output
      */
-    public InputValidationResult runInputValidator(Problem problem, SerializedFile validatorProg, String validatorCommand,
+    public InputValidationResult runInputValidator(int seqNum, Problem problem, SerializedFile validatorProg, String validatorCommand,
             String executeDir, SerializedFile dataFile) throws ExecuteException, Exception {
 
         if (validatorProg == null || validatorCommand == null || executeDir == null || dataFile == null) {
@@ -108,8 +109,8 @@ public class InputValidatorRunner {
         int msTimeout = 30000;
 
         String stdinFilename = dataFile.getName();
-        String stdoutFilename = "runnerStdout.pc2";
-        String stderrFilename = "runnerStderr.pc2";
+        String stdoutFilename = "runnerStdout" + seqNum + ".pc2";
+        String stderrFilename = "runnerStderr" + seqNum + ".pc2";
 
         String stdinFilePath = executeDir + File.separator + stdinFilename;
         String stdoutFilePath = executeDir + File.separator + stdoutFilename;
@@ -188,7 +189,7 @@ public class InputValidatorRunner {
         for (int i=0; i<dataFiles.length; i++) {
             
             try {
-                results[i] = runInputValidator(problem, validator, validatorCommand, executeDir, dataFiles[i]);
+                results[i] = runInputValidator(i, problem, validator, validatorCommand, executeDir, dataFiles[i]);
             } catch (ExecuteException e) {
 //                System.err.println("ExecuteException running input validator: " + e.getMessage());
                 throw e;

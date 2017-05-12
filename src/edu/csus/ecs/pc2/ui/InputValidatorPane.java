@@ -411,7 +411,7 @@ public class InputValidatorPane extends JPanePlugin {
                         //  with the files which are being created therein (e.g. the stdout.pc2 and stderr.pc2 files)
                         try {
                             //run the input validator
-                            validationResults[fileNum] = runInputValidator(prob, validatorProg, getInputValidatorCommand(), dataFile, executeDir);
+                            validationResults[fileNum] = runInputValidator(fileNum+1, prob, validatorProg, getInputValidatorCommand(), dataFile, executeDir);
                             
                             inputValidatorHasBeenRun = true;
                             epp.enableUpdateButton();
@@ -589,6 +589,7 @@ public class InputValidatorPane extends JPanePlugin {
      * Runs the specified Input Validator Program using the specified parameters.
      * 
      * NOTE: TODO: this should be done on a separate thread. However, see the note in spawnInputValidatorRunnerThread() about collisions in folders...
+     * @param seqNum a sequence number for associating with generated file names
      * 
      * @param problem the Contest Problem associated with the Input Validator
      * @param validatorProg the Input Validator Program to be run
@@ -601,12 +602,12 @@ public class InputValidatorPane extends JPanePlugin {
      * @throws ExecutionException if an ExecutionException occurs during execution of the Input Validator
      * @throws Exception if an Exception other than ExecutionException occurs during execution of the Input Validator
      */
-    private InputValidationResult runInputValidator(Problem problem, SerializedFile validatorProg, String validatorCommand, SerializedFile dataFile, String executeDir) throws Exception {
+    private InputValidationResult runInputValidator(int seqNum, Problem problem, SerializedFile validatorProg, String validatorCommand, SerializedFile dataFile, String executeDir) throws Exception {
 
         InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
         InputValidationResult result = null;
         try {
-            result = runner.runInputValidator(problem, validatorProg, validatorCommand, executeDir, dataFile);
+            result = runner.runInputValidator(seqNum, problem, validatorProg, validatorCommand, executeDir, dataFile);
         } catch (ExecuteException e) {
             getController().getLog().warning("Exeception executing Input Validator: " + e.getMessage());
             throw e;
