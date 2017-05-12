@@ -2534,15 +2534,15 @@ public class EditProblemPane extends JPanePlugin {
             probInputValidationResults[j++] = res;
         }
       
-        InputValidationResult [] probInputValidationResultsFailed = new InputValidationResult [i];
-        probInputValidationResultsFailed = Arrays.copyOfRange(tmpProbInputValidationResultsFailed, 0, i);
+        InputValidationResult [] probFailedInputValidationResults = new InputValidationResult [i];
+        probFailedInputValidationResults = Arrays.copyOfRange(tmpProbInputValidationResultsFailed, 0, i);
         
         //put the results into the GUI table
-        if (probInputValidationResultsFailed.length == 0) {
+        if (probFailedInputValidationResults.length == 0) {
             ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResults);
             getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(false);
         } else {
-            ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResultsFailed);
+            ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probFailedInputValidationResults);
             getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(true);
         }
         ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
