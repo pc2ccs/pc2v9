@@ -55,19 +55,20 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
                 case 0:
 //                    obj = results.get(row).getFullPathFilename();
                     obj = new JLabel(results.get(row).getFullPathFilename());
+                    System.err.println ("File name: " + ((JLabel)obj).getText());
                     break;
                 case 1:
                     obj = results.get(row).isPassed();
                     break;
                 case 2:
-                    // TODO: need to return a string which can be used as a LINK to the file
 //                    obj = results.get(row).getValidatorStdOut();
                     obj = (new JLabel(results.get(row).getValidatorStdOut().getName()));
+                    System.err.println ("File name: " + ((JLabel)obj).getText());
                     break;
                 case 3:
-                    // TODO: need to return a string which can be used as a LINK to the file
-                    obj = results.get(row).getValidatorStdErr();
+//                    obj = results.get(row).getValidatorStdErr();
                     obj = (new JLabel(results.get(row).getValidatorStdErr().getName()));
+                    System.err.println ("File name: " + ((JLabel)obj).getText());
                     break;
                 default:
                     break;
