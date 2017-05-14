@@ -274,7 +274,7 @@ public class InputValidatorPane extends JPanePlugin {
                 return true;
             } else {
                 // there's no data files on the Input Data Files tab; check to see if they've entered a single data file on the General tab
-                if (epp.inputDataFileLabel != null && epp.inputDataFileLabel.getText() != null && epp.inputDataFileLabel.getText().equals("")) {
+                if (epp.inputDataFileLabel != null && epp.inputDataFileLabel.getText() != null && !epp.inputDataFileLabel.getText().equals("")) {
                     return true;
                 }
             }
