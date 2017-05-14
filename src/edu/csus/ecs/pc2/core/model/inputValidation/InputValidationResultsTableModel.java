@@ -55,7 +55,7 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
                 case 0:
 //                    obj = results.get(row).getFullPathFilename();
                     obj = new JLabel(results.get(row).getFullPathFilename());
-                    System.err.println ("File name: " + ((JLabel)obj).getText());
+                    System.err.println ("InputValidationResultsTableModel.getValueAt(" + row + "," + column + "): File name =  " + ((JLabel)obj).getText());
                     break;
                 case 1:
                     obj = results.get(row).isPassed();
@@ -63,12 +63,12 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
                 case 2:
 //                    obj = results.get(row).getValidatorStdOut();
                     obj = (new JLabel(results.get(row).getValidatorStdOut().getName()));
-                    System.err.println ("File name: " + ((JLabel)obj).getText());
+                    System.err.println ("InputValidationResultsTableModel.getValueAt(" + row + "," + column + "): File name =  " + ((JLabel)obj).getText());
                     break;
                 case 3:
 //                    obj = results.get(row).getValidatorStdErr();
                     obj = (new JLabel(results.get(row).getValidatorStdErr().getName()));
-                    System.err.println ("File name: " + ((JLabel)obj).getText());
+                    System.err.println ("InputValidationResultsTableModel.getValueAt(" + row + "," + column + "): File name =  " + ((JLabel)obj).getText());
                     break;
                 default:
                     break;
