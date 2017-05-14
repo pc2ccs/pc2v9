@@ -268,7 +268,8 @@ public class InputValidatorPane extends JPanePlugin {
         if (parent != null && parent instanceof EditProblemPane) {
             EditProblemPane epp = (EditProblemPane) parent;
             // check for data files on the Input Data Files tab
-            if (epp.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles() != null &&
+            if (epp.getMultipleDataSetPane().getProblemDataFiles() != null &&
+                    epp.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles() != null &&
                     epp.getMultipleDataSetPane().getProblemDataFiles().getJudgesDataFiles().length > 0) {
                 return true;
             } else {
