@@ -7,6 +7,8 @@ import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import edu.csus.ecs.pc2.core.Utilities;
+
 /**
  * This class defines a {@link TableModel} for a table holding {@link InputValidationResult}s.
  * 
@@ -54,8 +56,8 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
             switch (column) {
                 case 0:
 //                    obj = results.get(row).getFullPathFilename();
-                    obj = new JLabel(results.get(row).getFullPathFilename());
-                    System.err.println ("InputValidationResultsTableModel.getValueAt(" + row + "," + column + "): File name =  " + ((JLabel)obj).getText());
+                    String shortName = Utilities.basename(results.get(row).getFullPathFilename());
+                    obj = new JLabel(shortName);
                     break;
                 case 1:
                     obj = results.get(row).isPassed();
@@ -63,12 +65,10 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
                 case 2:
 //                    obj = results.get(row).getValidatorStdOut();
                     obj = (new JLabel(results.get(row).getValidatorStdOut().getName()));
-                    System.err.println ("InputValidationResultsTableModel.getValueAt(" + row + "," + column + "): File name =  " + ((JLabel)obj).getText());
                     break;
                 case 3:
 //                    obj = results.get(row).getValidatorStdErr();
                     obj = (new JLabel(results.get(row).getValidatorStdErr().getName()));
-                    System.err.println ("InputValidationResultsTableModel.getValueAt(" + row + "," + column + "): File name =  " + ((JLabel)obj).getText());
                     break;
                 default:
                     break;
