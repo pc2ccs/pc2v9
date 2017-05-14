@@ -2521,10 +2521,13 @@ public class EditProblemPane extends JPanePlugin {
         int numResults = prob.getNumInputValidationResults();
         
         //create an array with one element for each result
-        InputValidationResult [] tmpProbInputValidationResultsFailed = new InputValidationResult [numResults];
         InputValidationResult [] probInputValidationResults = new InputValidationResult [numResults];
         
-        //copy each failed result into the array (because we're defaulting to only showing failures)
+        //create a second array to hold (just) results which failed
+        InputValidationResult [] tmpProbInputValidationResultsFailed = new InputValidationResult [numResults];
+        
+        //copy each result into the corresponding array
+        
         int i = 0;
         int j = 0;
         for (InputValidationResult res : prob.getInputValidationResults()) {
@@ -2534,14 +2537,17 @@ public class EditProblemPane extends JPanePlugin {
             probInputValidationResults[j++] = res;
         }
       
+        //construct a new array limited to just failed results (truncate the extra slots in the above failed-results array)
         InputValidationResult [] probFailedInputValidationResults = new InputValidationResult [i];
         probFailedInputValidationResults = Arrays.copyOfRange(tmpProbInputValidationResultsFailed, 0, i);
         
         //put the results into the GUI table
         if (probFailedInputValidationResults.length == 0) {
+            //there were no failed results; put the (all-successful) results into the GUI and un-select the show-only-failed checkbox
             ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResults);
             getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(false);
         } else {
+            //put the failed results into the table and select the show-only-failed checkbox
             ((InputValidationResultsTableModel)getInputValidatorPane().getResultsTableModel()).setResults(probFailedInputValidationResults);
             getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(true);
         }
