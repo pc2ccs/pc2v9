@@ -155,7 +155,8 @@ public class InputValidatorRunner {
             throw e;
         }
 
-        return new InputValidationResult(problem, Utilities.basename(stdinFilename), passed, stdoutResults, stderrResults);
+//        return new InputValidationResult(problem, Utilities.basename(stdinFilename), passed, stdoutResults, stderrResults);
+        return new InputValidationResult(problem, dataFile.getAbsolutePath(), passed, stdoutResults, stderrResults);
 
     }
     
