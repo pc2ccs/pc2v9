@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
@@ -81,8 +82,8 @@ public class ProblemsReport implements IReport {
 
         printWriter.println();
 
-        printWriter.println("        Using validator : " + problem.isValidatedProblem());
-        printWriter.println("        Using validator : " + problem.getValidatorType().toString());
+        printWriter.println(" Using output validator : " + problem.isValidatedProblem());
+        printWriter.println(" Using output validator : " + problem.getValidatorType().toString());
         
         printWriter.println("         Validator name : " + problem.getValidatorProgramName());
 
@@ -104,6 +105,22 @@ public class ProblemsReport implements IReport {
 
         printWriter.print(" customValidatorSettings: ");
         splitPad(printWriter, ";", " customValidatorSettings> ", nullSafeString(problem.getCustomValidatorSettings()),";");
+    
+        printWriter.println();
+
+        //input validator settings
+
+        printWriter.println("    Has input validator : " + problem.isProblemHasInputValidator());
+        printWriter.println("        input validator : " + problem.getInputValidatorProgramName());
+        printWriter.println("    input validator cmd : " + problem.getInputValidatorCommandLine());
+
+        // null safe print of enum
+        String validationStatus = "null";
+        InputValidationStatus status = problem.getInputValidationStatus();
+        if (status != null) {
+            validationStatus = status.toString();
+        }
+        printWriter.println(" input validator status : " + validationStatus);
         
         printWriter.println();
 
@@ -254,6 +271,8 @@ public class ProblemsReport implements IReport {
             return "Internal";
         }
     }
+
+
     
 
     public void writeReport(PrintWriter printWriter) {

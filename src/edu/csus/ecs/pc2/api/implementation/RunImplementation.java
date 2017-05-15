@@ -446,4 +446,8 @@ public class RunImplementation implements IRun {
             return null;
         }
     }
+    
+    public ElementId getElementId() {
+        return elementId;
+    }
 }

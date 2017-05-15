@@ -8,9 +8,12 @@ import java.util.Set;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.api.implementation.ClientImplementation;
 import edu.csus.ecs.pc2.api.implementation.Contest;
+import edu.csus.ecs.pc2.api.implementation.JudgementImplementation;
 import edu.csus.ecs.pc2.api.implementation.LanguageImplementation;
 import edu.csus.ecs.pc2.api.implementation.ProblemImplementation;
+import edu.csus.ecs.pc2.api.implementation.RunImplementation;
 import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -24,11 +27,15 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
@@ -287,6 +294,53 @@ public class ServerConnection {
             throw new NotLoggedInException ("Not logged in");
         }
     }
+    
+    /**
+     * Submit run judgement for a run.
+     * 
+     * @param run The run to add a judgement to.
+     * @param judgement the judgement to add to run.
+     * @throws Exception
+     */
+    public void submitRunJudgement(IRun run, IJudgement judgement) throws Exception {
+
+        checkWhetherLoggedIn();
+        
+        checkIsAllowed (Permission.Type.EDIT_ACCOUNT, "User not allowed to edit/judge a run");
+  
+        try {
+            
+            RunImplementation runImplementation = (RunImplementation) run;
+            Run runToUpdate = internalContest.getRun(runImplementation.getElementId());
+            
+            JudgementImplementation judgementImplementation = (JudgementImplementation) judgement;
+            Judgement internaljudgement = internalContest.getJudgement(judgementImplementation.getElementId());
+
+            if (internaljudgement == null){
+                throw new Exception("No such judgement for "+judgement);
+            }
+            
+            ClientImplementation clientImplementation = (ClientImplementation) getMyClient();
+            ClientId clientId = clientImplementation.getClientId();
+            
+            boolean solved = isYesJudgement(internaljudgement);
+            JudgementRecord judgementRecord = new JudgementRecord(internaljudgement.getElementId(), clientId, solved, true);
+            
+            runToUpdate.setStatus(Run.RunStates.JUDGED);
+            
+            RunResultFiles runFiles = null;
+            controller.updateRun(runToUpdate, judgementRecord, runFiles);
+            
+        } catch (Exception e) {
+            throw new Exception("Unable to submit run " + e.getLocalizedMessage(), e.getCause());
+        }
+
+    }
+    
+    private boolean isYesJudgement(Judgement judgement) {
+        return Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym()); 
+    }
+   
 
     /**
      * Submit a run.

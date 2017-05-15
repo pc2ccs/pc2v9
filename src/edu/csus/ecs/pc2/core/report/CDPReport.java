@@ -428,16 +428,20 @@ public class CDPReport implements IReport {
         HashMap<String, RunFiles> list = new HashMap<>();
 
         // TODO Check that if on server whether grabs runs directly.
-        // This may be a server only feature, for now.
+        // This works only on server until the fetch run todo's below are done.
         
         if (allRunsNotPresent(runs)){
             /**
              * Request set of runs from server. Wait for runs to arrive. Consider caching runs. return runs.
              */
-            System.err.println("NOT IMPLEMENTED getRunFiles when not all runs are present");
-            // TODO code for Admin to get Source files 
-            // send packet to controller
-            // wait for run source to be received, then continue
+            System.err.println("(TODO) NOT IMPLEMENTED CDPReport.getRunFiles used when not all runs are present, run on server");
+            // TODO code for Admin to get Source files - NOT IMPLEMENTED
+            /**
+             * To code:
+             * 1 - send fetch packet to server
+             * 2 - wait until all source is present before writing report
+             * 3 - test multi-site too. 
+             */
         }
 
         /**
@@ -532,9 +536,7 @@ public class CDPReport implements IReport {
 
     private void writeSubmissionInfo(IInternalContest inContest, String runDirectory, Run run, RunFiles files) throws FileNotFoundException {
 
-        String infoFilename = runDirectory + File.separator + "run.properties";
-        // TODO add ExportYAML.RUN_PROPERTIES_FILENAME
-        // String infoFilename = runDirectory + File.separator + ExportYAML.RUN_PROPERTIES_FILENAME;
+        String infoFilename = runDirectory + File.separator + ExportYAML.RUN_PROPERTIES_FILENAME;
 
         PrintWriter writer = new PrintWriter(new FileOutputStream(infoFilename, false), true);
 

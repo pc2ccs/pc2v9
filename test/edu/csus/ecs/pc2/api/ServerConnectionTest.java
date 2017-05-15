@@ -41,11 +41,8 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * as a program.  In the main method there are a number of tests that typically
  * require a server to be started.  For a list see the usage (--help option).
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-
-// $HeadURL$
 public class ServerConnectionTest extends AbstractTestCase {
     
     /**
@@ -184,7 +181,6 @@ public class ServerConnectionTest extends AbstractTestCase {
         while (curTime < maxtime && contoller.getSaveProblem() == null) {
             Thread.sleep(500);
             curTime = new Date().getTime();
-            System.out.println("debug 22" + new Date() + " problem " + contoller.getSaveProblem());
         }
 
         return contoller.getSaveProblem();
@@ -255,8 +251,6 @@ public class ServerConnectionTest extends AbstractTestCase {
         public IInternalContest getInternalContest(){
             return this.internalContest;
         }
-        
-        
     }
 
     /**
@@ -304,6 +298,22 @@ public class ServerConnectionTest extends AbstractTestCase {
 
                     new ServerConnectionTest().shutdownAllServers();
 
+                } else if ("addj".equalsIgnoreCase(firstArg)) {
+
+                    System.out.println("addj - test submitRunJudgement method, ");
+
+                    // addj j3 5 AC
+                    // addj 5 CE
+                    // addj 5 WA
+                    String loginName = getArg(args, 1);
+                    ClientId clientId = InternalController.loginShortcutExpansion(1, loginName);
+                    long runId = Integer.parseInt(getArg(args, 2));
+                    String ja = getArg(args, 3);
+
+                    String login = clientId.getName();
+                    System.out.println("debug 22 "+login+"," +runId+","+ ja);
+                    new ServerConnectionTest().submitRunJudgement(login, runId, ja);
+
                 } else if ("settime".equalsIgnoreCase(firstArg)) {
 
                     // settime 4:10:00 10:11 3:59:49
@@ -320,9 +330,7 @@ public class ServerConnectionTest extends AbstractTestCase {
                     
                     new ServerConnectionTest().setContetLength(contestLength);
                     
-                } else
-
-                    if (args[0].equalsIgnoreCase("--help")) {
+                } else if (args[0].equalsIgnoreCase("--help")) {
                         System.out.println("ServerConnectionTest [--help] [login|addA|addP]");
                         System.out.println("ServerConnectionTest settime length elapsed remaining");
                         System.out.println("ServerConnectionTest setlen length");
@@ -341,11 +349,14 @@ public class ServerConnectionTest extends AbstractTestCase {
                         System.out.println();
                         System.out.println("When passes test prints: PASSED Test ");
                         System.exit(30);
-                    } else {
+                    } else if ("login".equalsIgnoreCase(firstArg)) {
 
                         // run test login 
 
                         new ServerConnectionTest().testLogin(firstArg, firstArg);
+                    } else {
+                        System.err.println("No such option "+args[0]);
+                        System.exit(44);
                     }
                 
                 System.out.println("PASSED Test.");
@@ -354,6 +365,56 @@ public class ServerConnectionTest extends AbstractTestCase {
             e.printStackTrace(System.err);
         }
 
+    }
+
+    private void submitRunJudgement(String user, long runId, String ja) throws NotLoggedInException {
+
+        ServerConnection connection = new ServerConnection();
+
+        try {
+            IContest contest = connection.login(user, user);
+            IRun run = findRun(contest, runId);
+            assertNotNull("Run id "+runId+" not in contest", run);
+            
+//            RunImplementation runImplementation = (RunImplementation) run;
+//            assertNotNull("Run id "+runId+" not in contest", runImplementation);
+            
+            
+            IJudgement judgement = findJudgement(contest, ja);
+            assertNotNull("Judgement "+ja+" not in contest", judgement);
+            connection.submitRunJudgement(run, judgement);
+            System.out.println("debug 22 A "+new Date());
+            Thread.sleep(1000 * 3);
+            System.out.println("debug 22 B "+new Date());
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        } finally {
+            connection.logoff();
+        }
+
+    }
+
+    private IJudgement findJudgement(IContest contest, String ja) {
+        IJudgement[] judgements = contest.getJudgements();
+        for (IJudgement iJudgement : judgements) {
+            if (iJudgement.getAcronym().equals(ja)) {
+                return iJudgement;
+            }
+        }
+        return null;
+    }
+
+    private IRun findRun(IContest contest, long runId) {
+        IRun[] runs = contest.getRuns();
+        for (IRun iRun : runs) {
+            if (iRun.getNumber() == runId)
+            {
+                return iRun;
+            }
+        }
+
+        return null;
     }
 
     private void setContetLength(long contestLengthSeconds) throws NotLoggedInException {
