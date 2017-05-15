@@ -25,6 +25,13 @@ public interface IJudgement {
     String getName();
 
     /**
+     * Get the judgement acronym.
+     * 
+     * @return A string containing the judgement acronym.
+     */
+    String getAcronym();
+
+    /**
      * Check whether this Judgement is the same as some other Judgement.
      * <P>
      * Determination of whether two Judgements are equal is based on whether they refer to the

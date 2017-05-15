@@ -6,7 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +23,7 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.AutoJudgeSettingComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -50,8 +53,6 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
-
-    private static final String TEST_CLASS_NAME = "ContestSnakeYAMLLoaderTest";
 
     private static final String YYYY_MM_DD_FORMAT1 = "yyyy-MM-dd HH:mm";
 
@@ -2269,6 +2270,129 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         assertEquals("Expecting input dir name ", expected, toUnixFS(validatorProgramName));
         
+    }
+
+    /**
+     * Load all sample contests/cdps.
+     * 
+     * 
+     * 
+     * @throws Throwable
+     */
+    public void testLoadAllSampleCDPS() throws Throwable {
+
+        String[] contestDirs = getSampleContestsDirs();
+
+        assertTrue("Expecting at least one sample contest directory ", contestDirs.length > 0);
+
+        for (String directoryName : contestDirs) {
+
+            assertDirectoryExists(directoryName);
+            try {
+                IInternalContest contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+
+                Problem[] problems = contest.getProblems();
+                assertTrue("Expecting at least one problem in contest in " + directoryName, problems.length > 0);
+
+            } catch (YamlLoadException e) {
+                System.err.println("Failed to load config from " + directoryName + " " + e.getCause().getMessage());
+                throw e.getCause();
+            }
+
+        }
+
+    }
+    
+    public void testSampleCDP() throws Throwable {
+        
+        String directoryName = getRootInputTestDataDirectory() + File.separator + "samplecdp";
+        
+        assertDirectoryExists(directoryName);
+//        startExplorer(directoryName);
+        
+        IInternalContest contest;
+        
+        try {
+            contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+
+            Problem[] problems = contest.getProblems();
+            assertEquals("Expecting number of problems " + directoryName, 13, problems.length );
+
+        } catch (YamlLoadException e) {
+            System.err.println("Failed to load config from " + directoryName + " " + e.getCause().getMessage());
+            throw e.getCause();
+        }
+        
+        Vector<Account> accounts = contest.getAccounts(Type.TEAM);
+        Collections.sort(accounts, new AccountComparator());
+        
+        int teamAccountNumber = 1;
+        for (Account account : accounts) {
+            assertEquals("Account number ", teamAccountNumber, account.getClientId().getClientNumber());
+            teamAccountNumber++;
+        }
+    }
+
+    /**
+     * 
+     * @param directoryName
+     * @param extension
+     * @return
+     */
+    public String[] getFileNames(String directoryName, String extension) {
+
+        ArrayList<String> list = new ArrayList<String>();
+        File dir = new File(directoryName);
+
+        String[] entries = dir.list();
+        if (entries == null) {
+            return new String[0];
+        }
+        Arrays.sort(entries);
+
+        for (String name : entries) {
+            if (name.endsWith(extension)) {
+                list.add(name);
+            }
+        }
+
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    public String[] getDirNames(String directoryName) {
+
+        ArrayList<String> list = new ArrayList<String>();
+        File dir = new File(directoryName);
+
+        File[] files = dir.listFiles();
+        if (files == null) {
+            return new String[0];
+        }
+        Arrays.sort(files);
+        for (File file : files) {
+            if (file.isDirectory()) {
+                list.add(directoryName + file.separator + file.getName());
+            }
+        }
+
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * Directory names for sample contests.
+     * @return list of directory names.
+     */
+    private String[] getSampleContestsDirs() {
+        
+        String sampContestDir = getSampleContestsDirectory();
+
+        String[] sampContestDirNames = getDirNames(sampContestDir);
+        
+        return sampContestDirNames;
+    }
+
+    private String getSampleContestsDirectory() {
+        return "samps" + File.separator + "contests";
     }
 
     private String toUnixFS(String path) {

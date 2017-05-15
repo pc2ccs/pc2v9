@@ -317,6 +317,16 @@ public final class ICPCTSVLoader {
 
         return groups;
     }
+    
+    protected  static String extractTeamNumber (String accountString){
+        int dash = accountString.indexOf('-');
+        if (dash > 0) {
+            accountString = accountString.substring(dash + 1);
+        } else {
+            accountString = accountString.substring(4);
+        }
+        return accountString;
+    }
 
     public static HashMap<Integer, String> loadPasswordsFromAccountsTSV(String filename) throws Exception {
         String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
@@ -327,13 +337,7 @@ public final class ICPCTSVLoader {
             String[] fields = TabSeparatedValueParser.parseLine(lines[i]);
             if (fields[0].equals("team")) {
                 // need to parse the number out of team-\d\d\d in field 2 and the password from field 3
-                String account = fields[2];
-                int dash = account.indexOf('-');
-                if (dash > 0) {
-                    account = account.substring(dash + 1);
-                } else {
-                    account = account.substring(5);
-                }
+                String account = extractTeamNumber(fields[2]);
                 Integer number = new Integer(account);
                 String password = fields[3];
                 passwordMap.put(number, password);

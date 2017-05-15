@@ -41,15 +41,14 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
  * Creates contest.yaml and problem.yaml files along with all the data files per the CCS specification.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: ExportYAML.java 223 2011-09-02 02:13:59Z laned $
  */
-
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/export/ExportYAML.java $
 public class ExportYAML {
 
     private static final String PAD4 = "    ";
 
     private static final String PAD2 = "  ";
+
+    public static final String RUN_PROPERTIES_FILENAME = "run.properties";
 
     private String dateTimeFormat = "yyyy-MM-dd HH:mm:ss z";
 

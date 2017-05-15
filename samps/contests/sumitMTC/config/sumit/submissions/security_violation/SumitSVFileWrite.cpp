@@ -1,39 +1,32 @@
-
 //
-// File:    isumit.cpp
-// Purpose: to sum the integers from stdin
+// File:    SumitSVFileWrite.cpp
+// Purpose: to output Hello World then write to a file
 // Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
 //
-// $Id$
-//
 
-//  TODO  write to file 
-//
-
-#include <fstream>
+// basic file operations
 #include <iostream>
+#include <fstream>
 using namespace std;
+
+int writeFile ()
+{
+  ofstream myfile;
+  cout << "Hello World\n";
+  cout << "Writing to file sample.output.file.txt\n";
+  cout.flush();
+  myfile.open ("sample.output.file.txt");
+  myfile << "Writing this to a file.\n";
+  myfile << "Writing this to a file.\n";
+  myfile << "Writing this to a file.\n";
+  myfile << "Writing this to a file.\n";
+  myfile.close();
+  return 0;
+}
 
 main ()
 {
-	int num;
-	int sum;
-
-		sum = 0;
-
-	cin >> num;
-	while(num != 0)
-	{
-		if (num > 0)
-		{
-			sum += num;
-		}
-		cin >> num;
-	}
-
-	sum += 1000;
-
-	cout << "The sum of the integers is " << sum << endl;
+  writeFile();
 }
 
-// eof isumit.c $Id$
+// eof SumitSVFileWrite.cpp

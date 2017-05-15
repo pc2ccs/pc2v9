@@ -6,17 +6,17 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 
 /**
  * API IJudgement implementation.  
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ *
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-
-// $HeadURL$
 public class JudgementImplementation implements IJudgement {
 
     private String name;
     private ElementId elementId;
+    String acronym;
 
     public JudgementImplementation(Judgement judgement) {
+        acronym = judgement.getAcronym();
         name = judgement.getDisplayName();
         elementId = judgement.getElementId();
     }
@@ -44,4 +44,12 @@ public class JudgementImplementation implements IJudgement {
         return elementId.toString().hashCode();
     }
 
+    public ElementId getElementId() {
+        return elementId;
+    }
+    
+    @Override
+    public String getAcronym() {
+        return acronym;
+    }
 }

@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.list.FileComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
@@ -148,9 +149,9 @@ public class CDPReportTest extends AbstractTestCase {
 
         assertDirectoryExists(runDirname);
 
-        String infoFilename = runDirname + File.separator + "run.properties";
+//        String infoFilename = runDirname + File.separator + "run.properties";
         // TODO add ExportYAML.RUN_PROPERTIES_FILENAME
-        // String infoFilename = runDirectory + File.separator + ExportYAML.RUN_PROPERTIES_FILENAME;
+         String infoFilename = runDirname + File.separator + ExportYAML.RUN_PROPERTIES_FILENAME;
 
         assertFileExists(infoFilename);
 
