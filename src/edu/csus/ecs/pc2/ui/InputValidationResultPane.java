@@ -148,7 +148,8 @@ public class InputValidationResultPane extends JPanePlugin {
             //set the desired options on the table
             resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             resultsTable.setFillsViewportHeight(true);
-            resultsTable.setRowSelectionAllowed(false);
+            resultsTable.setRowSelectionAllowed(true);
+            resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             resultsTable.getTableHeader().setReorderingAllowed(false);
 
             //code from MultipleDataSetPane:
@@ -172,14 +173,15 @@ public class InputValidationResultPane extends JPanePlugin {
 
             // add a listener to allow users to click an output or data file name and display it
             resultsTable.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
+                public void mousePressed(MouseEvent e) {
                     JTable targetTable = (JTable) e.getSource();
-                    int row = targetTable.getSelectedRow();
-                    int column = targetTable.getSelectedColumn();
-                    
-                    if (column == COLUMN.FILE_NAME.ordinal() || column == COLUMN.VALIDATOR_OUTPUT.ordinal() || column == COLUMN.VALIDATOR_ERR.ordinal()) {
+//                    int row = targetTable.getSelectedRow();
+//                    int column = targetTable.getSelectedColumn();
+                    int row = targetTable.rowAtPoint(e.getPoint());
+                    int column = targetTable.columnAtPoint(e.getPoint());
+                    if (row >= 0 && row < targetTable.getRowCount()) {
                         viewFiles(targetTable, row, column);
-                    } 
+                    }
                 }
             });
 
