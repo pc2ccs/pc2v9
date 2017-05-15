@@ -136,7 +136,7 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Short", "Time Limit", "SVTJ", "Output Validator", "O.V. Command", "Input Validation", "I.V. Command" };
+            Object[] cols = { "Problem Name", "# Test Cases",  "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command",  };
             problemListBox.addColumns(cols);
 
             /**
@@ -197,6 +197,7 @@ public class ProblemsPane extends JPanePlugin {
         
     }
 
+    @SuppressWarnings("unused")
     private String yesNoString(boolean b) {
         if (b) {
             return "Yes";
@@ -209,18 +210,23 @@ public class ProblemsPane extends JPanePlugin {
         // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
         // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Prog", "Validator Command Line" };
         // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Short", "Time Limit", "SVTJ", "Output Validator", "O.V. Command", "Input Validation", "I.V. Command" };
+//        Object[] cols = { "Problem Name", "# Test Cases",  "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command",  };
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new Object[numberColumns];
         int i = 0;
 
+        //problem name
         String name = problem.getDisplayName();
         if (! problem.isActive()){
             name = "[HIDDEN] "+name;
         }
         c[i++] = name;
-        c[i++] = problem.getDataFileName();
-        c[i++] = problem.getAnswerFileName();
+        
+        //num test cases
+        c[i++] = problem.getNumberTestCases();
+        
+        //input method
         String inputMethod = "";
         if (problem.isReadInputDataFromSTDIN()) {
             inputMethod = "STDIN";
@@ -230,6 +236,8 @@ public class ProblemsPane extends JPanePlugin {
             inputMethod = "(none)";
         }
         c[i++] = inputMethod;
+        
+        //judging type
         String judgingType = "";
         if (problem.isComputerJudged()){
             judgingType = "Computer";
@@ -245,46 +253,40 @@ public class ProblemsPane extends JPanePlugin {
             judgingType = "Manual";
         }
         c[i++] = judgingType;
+        
+        //problem short name
         c[i++] = problem.getShortName();
+        
+        //problem time limit
         c[i++] = Integer.toString(problem.getTimeOutInSeconds());
-        c[i++] = yesNoString(problem.isShowValidationToJudges());
         
-        //set validator column value
-//        String validatorName = problem.getValidatorProgramName();
-//        if (problem.isValidatedProblem()) {
-//            if (! problem.isUsingPC2Validator()) {
-//                validatorName = problem.getValidatorCommandLine();
-//            }
-//        }
-        
-        String validatorProgramName = "<none>";
-        if (problem.isValidatedProblem()) {
-            validatorProgramName = problem.getValidatorProgramName();
-        }
-        c[i++] = validatorProgramName;
-        
-        String validatorCommandLine = "";
-        if (problem.isValidatedProblem()) {
-            validatorCommandLine = problem.getValidatorCommandLine();
-        }
-        c[i++] = validatorCommandLine ;
-        
-//        c[i++] = inputValidatorProgramName;
-
-//        InputValidationStatus ivStatus = problem.getInputValidationStatus();
-//        c[i++] = ivStatus.toString();  
-        
+        //input validation status
         if (problem.isProblemHasInputValidator()) {
             c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getInputValidationStatus());
         } else {
             c[i++] = "   N/A   ";
         }
         
+        //input validator command line
         String inputValidatorCommandLine = "";
         if (problem.isProblemHasInputValidator()) {
             inputValidatorCommandLine = problem.getInputValidatorCommandLine();
         }
         c[i++] = inputValidatorCommandLine;
+        
+        //output validator program
+        String validatorProgramName = "<none>";
+        if (problem.isValidatedProblem()) {
+            validatorProgramName = problem.getValidatorProgramName();
+        }
+        c[i++] = validatorProgramName;
+        
+        //output validator command line
+        String validatorCommandLine = "";
+        if (problem.isValidatedProblem()) {
+            validatorCommandLine = problem.getValidatorCommandLine();
+        }
+        c[i++] = validatorCommandLine ; 
         
         return c;
     }
@@ -320,20 +322,6 @@ public class ProblemsPane extends JPanePlugin {
         if (problem.getInputValidationStatus() == InputValidationStatus.NOT_TESTED || problem.getInputValidationStatus() == InputValidationStatus.ERROR) {
             retStr = "N/A";
         } else {
-    //TODO: this should return a string of the form  "x/y", where x = count of passed tests and y = count of failed tests.
-    //   However, the results are not currently being stored in the problem...
-//            int passed = 0;
-//            int failed = 0;
-//            InputValidationResult[] results = problem.getInputValidationResults();
-//            for (int i = 0; i < results.length; i++) {
-//                if (results[i].isPassed()) {
-//                    passed++;
-//                } else {
-//                    failed++;
-//                }
-//            }
-//            retStr = "" + passed + "/" + failed;
-            
             retStr = "?/?";
         }
         
