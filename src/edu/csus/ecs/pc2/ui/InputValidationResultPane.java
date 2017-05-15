@@ -179,7 +179,7 @@ public class InputValidationResultPane extends JPanePlugin {
 //                    int column = targetTable.getSelectedColumn();
                     int row = targetTable.rowAtPoint(e.getPoint());
                     int column = targetTable.columnAtPoint(e.getPoint());
-                    if (row >= 0 && row < targetTable.getRowCount()) {
+                    if (row >= 0 && row < targetTable.getRowCount() && e.getClickCount()<2) {
                         viewFiles(targetTable, row, column);
                     }
                 }
