@@ -178,7 +178,7 @@ public class InputValidationResultPane extends JPanePlugin {
                     int column = targetTable.getSelectedColumn();
                     
                     if (column == COLUMN.FILE_NAME.ordinal() || column == COLUMN.VALIDATOR_OUTPUT.ordinal() || column == COLUMN.VALIDATOR_ERR.ordinal()) {
-                        viewFile(targetTable, row, column);
+                        viewFiles(targetTable, row);
                     } 
                 }
             });
@@ -195,13 +195,38 @@ public class InputValidationResultPane extends JPanePlugin {
         return resultsTable;
     }
 
-//    private void viewFile(SerializedFile file, String title) {
-    private void viewFile(JTable table, int row, int col) {
 
-        SerializedFile file = getFileForTableCell(table,row,col);
-        if (file == null) {
-            System.err.println("Got a null SerializedFile for table cell (" + row + "," + col + ")");
-            return;
+    /**
+     * Displays the files listed in the Input Validation Results table File, StdOut, and StdErr columns in a single MultiFileViewer frame.
+     * 
+     * 
+     * @param table the JTable from which the data is obtained
+     * @param row the table row whose data is to be displayed
+     */
+    private void viewFiles(JTable table, int row) {
+
+        //get the data file from the table
+        int col = table.getColumn(columnNames[COLUMN.FILE_NAME.ordinal()]).getModelIndex();
+        SerializedFile dataFile = getFileForTableCell(table,row,col);
+        if (dataFile == null) {
+            System.err.println("Got a null SerializedFile for Input Validator Results data file (table cell (" + row + "," + col + "))");
+            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults data file (table cell (" + row + "," + col + "))");
+        }
+
+        //get the stdout file from the table
+        col = table.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).getModelIndex();
+        SerializedFile stdOutFile = getFileForTableCell(table,row,col);
+        if (stdOutFile == null) {
+            System.err.println("Got a null SerializedFile for Input Validator Results stdout file (table cell (" + row + "," + col + "))");
+            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stdout file  (table cell (" + row + "," + col + "))");
+        }
+
+        //get the stderr file from the table
+        col = table.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).getModelIndex();
+        SerializedFile stdErrFile = getFileForTableCell(table,row,col);
+        if (stdErrFile == null) {
+            System.err.println("Got a null SerializedFile for Input Validator Results stderr file (table cell (" + row + "," + col + "))");
+            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stderr file (table cell (" + row + "," + col + "))");
         }
 
         // get the execution directory being used by the EditProblemPane
@@ -216,28 +241,86 @@ public class InputValidationResultPane extends JPanePlugin {
                 executeDir = ((EditProblemPane) epp).getExecuteDirectoryName();
 
                 Utilities.insureDir(executeDir);
-                String targetFileName = executeDir + File.separator + file.getName();
                 MultipleFileViewer viewer = new MultipleFileViewer(getController().getLog());
                 String title;
+                
+                boolean outputPaneAdded = false;
+                
+                if (dataFile != null) {
+                    //display the data file in a viewer pane
+                    String dataFileName = executeDir + File.separator + dataFile.getName();
+                    try {
+                        //write the data file to the execute directory
+                        dataFile.writeFile(dataFileName);
 
-                //write the SerializedFile to the execute directory
-                try {
-                    file.writeFile(targetFileName);
-
-                    if (new File(targetFileName).isFile()) {
-                        title = file.getName();
-                        viewer.addFilePane(title, targetFileName);
-                        viewer.setVisible(true);
-                    } else {
-                        title = "Error accessing file";
-                        viewer.addTextPane(title, "Could not access file ' " + file.getName() + " '");
-                        viewer.setVisible(true);
+                        //add the data file to the viewer frame
+                        if (new File(dataFileName).isFile()) {
+                            title = dataFile.getName();
+                            viewer.addFilePane(title, dataFileName);
+                        } else {
+                            title = "Error accessing file";
+                            viewer.addTextPane(title, "Could not access file ' " + dataFile.getName() + " '");
+                        }
+                    } catch (IOException e) {
+                        title = "Error during file access";
+                        viewer.addTextPane(title, "Could not create file " + dataFileName + "Exception " + e.getMessage());
                     }
-                } catch (IOException e) {
-                    title = "Error during file access";
-                    viewer.addTextPane(title, "Could not create file at " + targetFileName + "Exception " + e.getMessage());
-                    viewer.setVisible(true);
+                    outputPaneAdded = true;
                 }
+                
+                if (stdOutFile != null) {
+                    //display the stdout file in a viewer pane
+                    String stdOutFileName = executeDir + File.separator + stdOutFile.getName();
+                    try {
+                        //write the stdout file to the execute directory
+                        stdOutFile.writeFile(stdOutFileName);
+
+                        //add the stdout file to the viewer frame
+                        if (new File(stdOutFileName).isFile()) {
+                            title = stdOutFile.getName();
+                            viewer.addFilePane(title, stdOutFileName);
+                        } else {
+                            title = "Error accessing file";
+                            viewer.addTextPane(title, "Could not access file ' " + stdOutFile.getName() + " '");
+                        }
+                    } catch (IOException e) {
+                        title = "Error during file access";
+                        viewer.addTextPane(title, "Could not create file " + stdOutFileName + "Exception " + e.getMessage());
+                    }
+                    outputPaneAdded = true;
+                }
+                
+                if (stdErrFile != null) {
+                    //display the stderr file in a viewer pane
+                    String stdErrFileName = executeDir + File.separator + stdErrFile.getName();
+                    try {
+                        //write the stderr file to the execute directory
+                        stdErrFile.writeFile(stdErrFileName);
+
+                        //add the stderr file to the viewer frame
+                        if (new File(stdErrFileName).isFile()) {
+                            title = stdErrFile.getName();
+                            viewer.addFilePane(title, stdErrFileName);
+                        } else {
+                            title = "Error accessing file";
+                            viewer.addTextPane(title, "Could not access file ' " + stdErrFile.getName() + " '");
+                        }
+                    } catch (IOException e) {
+                        title = "Error during file access";
+                        viewer.addTextPane(title, "Could not create file " + stdErrFileName + "Exception " + e.getMessage());
+                    }
+                    outputPaneAdded = true;
+                }
+                
+                //check if we actually added anything
+                if (outputPaneAdded) {
+                    //show the viewer containing the files
+                    viewer.setVisible(true);
+                } else {
+                    getController().getLog().warning("Found no Input Validation Result files to add to MultiFileViewer");
+                    System.err.println ("Request to display results files but found no Input Validation Result files to add to MultiFileViewer");
+                }
+                
             } else {
                 getController().getLog().severe("Grandparent of InputValidationResultPane is not an EditProblemPane; not supported"); 
             }
