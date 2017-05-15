@@ -105,5 +105,10 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
     public InputValidationResult getResultAt(int row) {
         return results.get(row);
     }
+    
+    @Override
+    public boolean isCellEditable(int row, int col) {
+        return false;
+    }
 
 }
