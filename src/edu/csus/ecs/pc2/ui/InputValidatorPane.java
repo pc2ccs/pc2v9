@@ -224,8 +224,17 @@ public class InputValidatorPane extends JPanePlugin {
                     spawnInputValidatorRunnerThread();
                     
                 } else {
-                    JOptionPane.showMessageDialog(null, "Missing Input Validator Command or Judge's Data files; cannot run Input Validator", 
-                            "Missing Data", JOptionPane.INFORMATION_MESSAGE);
+                    //determine why it's not ok to run the Input Validator and display an appropriate message
+                    if (!problemHasInputValidatorCommand()) {
+                        JOptionPane.showMessageDialog(null, "Missing Input Validator Command; cannot run Input Validator",
+                                "Missing Command", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        if (!problemHasInputDataFiles()) {
+                            JOptionPane.showMessageDialog(null, "No Judge's Data Files defined; cannot run Input Validator",
+                                    "Missing Data Files", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                    
                 }
             }
         });
@@ -234,6 +243,7 @@ public class InputValidatorPane extends JPanePlugin {
     /**
      * Verifies that all conditions necessary to run the Input Validator associated with this InputValidatorPane are true.
      * These include that there is an Input Validator Command line and that there are Input Data Files on which the command can operate.
+     * If any condition exists which would stop the Input Validator from being run, a dialog is displayed to the user.
      * 
      * @return true if it is ok to run the Input Validator; false if not
      */
