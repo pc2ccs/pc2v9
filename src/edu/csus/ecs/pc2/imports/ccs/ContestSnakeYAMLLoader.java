@@ -1583,6 +1583,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return (String[]) list.toArray(new String[list.size()]);
     }
 
+
     protected String findInputValidator(String baseDirectoryName, Problem problem) {
 
         String inputValidatorDir = getInputValidatorDir(baseDirectoryName, problem);
@@ -1605,8 +1606,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // Loop through files looking for potential validator programs
 
                 for (String name : filenames) {
-                    if ("build".equalsIgnoreCase(name)) {
+                    
+                    if (name.toLowerCase().endsWith("build")) {
                         // Cannot be build 
+                    } else if (name.toLowerCase().endsWith("readme")) {
+                        // Cannot be README
                     } else {
                         
                         if (Utilities.isExecutableExtension(name)){
@@ -1618,22 +1622,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (validatorList.size() == 1) {
                     inputValidatorFilename = validatorList.get(0);
                 } else {
+                    inputValidatorFilename = validatorList.get(0);
 
                     for (String string : validatorList) {
-                        System.out.println("debug 22 "+Utilities.getCurrentDirectory() + File.separator + string);
+                        System.out.println("Warning dup input format validator " + Utilities.getCurrentDirectory() + File.separator + string);
                     }
-                    YamlLoadException yex = new YamlLoadException("Too many input format validators found for " + problem.getShortName() + " found " + validatorList.size());
-                    throw yex;
+                    System.out.println("Using: " + inputValidatorFilename);
+//                    YamlLoadException yex = new YamlLoadException("Too many input format validators found for " + problem.getShortName() + " found " + validatorList.size());
+//                    throw yex;
                 }
             }
         }
 
         return inputValidatorFilename;
     }
-
-
-    
-
      
     @Override
     public void loadPc2ProblemFiles(IInternalContest contest, String dataFileBaseDirectory, Problem problem, ProblemDataFiles problemDataFiles2, String dataFileName, String answerFileName) {
