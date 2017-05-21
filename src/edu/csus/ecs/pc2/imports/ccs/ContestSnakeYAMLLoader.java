@@ -1021,6 +1021,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public Language[] getLanguages(String[] yamlLines) {
         ArrayList<Language> languageList = new ArrayList<Language>();
+        
+//        System.out.println(Utilities.join("\n",  yamlLines));
 
         Map<String, Object> yamlContent = loadYaml(null, yamlLines);
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, LANGUAGE_KEY);
@@ -1042,11 +1044,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                     if (compilerName == null && lookedupLanguage != null) {
                         language = lookedupLanguage;
+                        compilerName = language.getCompileCommandLine();
                         language.setDisplayName(name);
-                    } else if (compilerName == null) {
-                        throw new YamlLoadException("Language \"" + name + "\" missing compiler command line");
-                    } else {
+                    } else   {
 
+                    	if (compilerName == null){
+                    	    compilerName = fetchValue(map, "compiler");
+                    	}
                         String compilerArgs = fetchValue(map, "compiler-args");
                         String interpreter = fetchValue(map, "runner");
                         String interpreterArgs = fetchValue(map, "runner-args");
@@ -1072,6 +1076,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                             }
                         }
                         language.setProgramExecuteCommandLine(programExecuteCommandLine);
+                    }
+                    
+                    if (compilerName == null) {
+                        throw new YamlLoadException("Language \"" + name + "\" missing compiler command line");
                     }
 
                     boolean active = fetchBooleanValue(map, "active", true);
@@ -1610,7 +1618,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (validatorList.size() == 1) {
                     inputValidatorFilename = validatorList.get(0);
                 } else {
-                    
+
                     for (String string : validatorList) {
                         System.out.println("debug 22 "+Utilities.getCurrentDirectory() + File.separator + string);
                     }
