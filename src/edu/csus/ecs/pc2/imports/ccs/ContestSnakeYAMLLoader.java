@@ -1621,7 +1621,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 if (validatorList.size() == 1) {
                     inputValidatorFilename = validatorList.get(0);
-                } else {
+                } else if (validatorList.size() > 1) {
                     inputValidatorFilename = validatorList.get(0);
 
                     for (String string : validatorList) {
