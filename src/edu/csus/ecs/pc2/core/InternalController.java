@@ -2227,7 +2227,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void sendPacketToClients(Packet packet, ClientType.Type type) {
 
         ClientId[] clientIds = contest.getLocalLoggedInClients(type);
-
+        
         for (ClientId clientId : clientIds) {
             if (isThisSite(clientId.getSiteNumber())) {
                 ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
@@ -2849,6 +2849,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     overRideUIName = "edu.csus.ecs.pc2.ui.server.ServerModule";
                 } else if (isJudge(client)) {
                     overRideUIName = "edu.csus.ecs.pc2.ui.judge.AutoJudgeModule";
+                } else if (isScoreboard(client)){
+                    overRideUIName = "edu.csus.ecs.pc2.ui.board.ScoreboardModule";
                 } else if (isEventFeeder(client)) {
                     overRideUIName = "edu.csus.ecs.pc2.services.eventFeed.EventFeederModule"; 
                 } else {
@@ -2910,6 +2912,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private boolean isJudge(ClientId clientId) {
         return clientId.getClientType().equals(ClientType.Type.JUDGE);
+    }
+    
+    private boolean isScoreboard(ClientId clientId) {
+        return clientId.getClientType().equals(ClientType.Type.SCOREBOARD);
     }
 
     private ClientId getServerClientId() {
