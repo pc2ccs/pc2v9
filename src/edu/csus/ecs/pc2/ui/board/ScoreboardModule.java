@@ -30,8 +30,10 @@ import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -85,12 +87,14 @@ public class ScoreboardModule implements UIPlugin {
         controller = inController;
         log = controller.getLog();
 
+
         if (Utilities.isDebugMode())
         {
             if (inController instanceof InternalController) {
                 // add console logger
                 InternalController cont = (InternalController) inController;
                 cont.addConsoleLogging();
+                log.info("--debug, added appender to stdout");
             }
         }
         
@@ -110,6 +114,7 @@ public class ScoreboardModule implements UIPlugin {
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
         getContest().addBalloonSettingsListener(new BalloonSettingsListenerImplementation());
+        getContest().addLanguageListener(new LanguageListenerImlementation());
 
     }
 
@@ -402,7 +407,7 @@ public class ScoreboardModule implements UIPlugin {
     public class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            // ignore
+            generateOutput();
         }
 
         public void refreshRuns(RunEvent event) {
@@ -416,7 +421,6 @@ public class ScoreboardModule implements UIPlugin {
         public void runRemoved(RunEvent event) {
             generateOutput();
         }
-
     }
 
     public class BalloonSettingsListenerImplementation implements IBalloonSettingsListener {
@@ -483,5 +487,40 @@ public class ScoreboardModule implements UIPlugin {
 
     public IInternalController getController() {
         return controller;
+    }
+    
+    class LanguageListenerImlementation implements ILanguageListener{
+
+        @Override
+        public void languageAdded(LanguageEvent event) {
+            generateOutput();        }
+
+        @Override
+        public void languageChanged(LanguageEvent event) {
+            generateOutput();          
+        }
+
+        @Override
+        public void languageRemoved(LanguageEvent event) {
+            generateOutput();
+            
+        }
+
+        @Override
+        public void languagesAdded(LanguageEvent event) {
+            generateOutput();
+            
+        }
+
+        @Override
+        public void languagesChanged(LanguageEvent event) {
+            generateOutput();
+            
+        }
+
+        @Override
+        public void languageRefreshAll(LanguageEvent event) {
+            // ignored
+        }
     }
 }
