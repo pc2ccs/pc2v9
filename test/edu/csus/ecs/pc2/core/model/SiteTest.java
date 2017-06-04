@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.RomanNumeral;
 
 /**
  * Site JUnit Test.
@@ -94,6 +95,74 @@ public class SiteTest extends TestCase {
         
         pattern = Site.LONG_NAME_PATTERN;
         assertEquals("Site Four", "" + site4.format(pattern));
+    }
+    
+    
+    
+    /**
+     * Test add proxy and is proxy.
+     * @throws Exception
+     */
+    public void testAddProxy() throws Exception {
+
+        int siteCount = 12;
+
+        IInternalContest contest = new SampleContest().createStandardContest();
+
+        for (int i = 4; i < siteCount + 1; i++) {
+            if (i != contest.getSiteNumber()) {
+                Site site = createSite(i, "Site " + getNumber(i), null, 0);
+                contest.addSite(site);
+            }
+        }
+        
+        assertEquals(siteCount, contest.getSites().length);
+        
+        Site lastSite = contest.getSites()[siteCount-1];
+        
+        assertFalse(lastSite.isProxyFor(5));
+        
+        lastSite.addProxySite(5);
+        assertTrue(lastSite.isProxyFor(5));
+        
+        lastSite.addProxySite(6);
+        assertTrue(lastSite.isProxyFor(6));
+        
+        assertEquals("Expecting proxy sites ", 2, lastSite.getProxySites().length);
+        
+        assertFalse(lastSite.isProxyFor(2));
+        
+        assertTrue(lastSite.isProxyFor(5));
+        assertTrue(lastSite.isProxyFor(6));
+        
+        lastSite.removeAllProxies();
+        assertFalse(lastSite.isProxyFor(5));
+        assertFalse(lastSite.isProxyFor(6));
+        
+        Site thisSite = contest.getSite(contest.getSiteNumber());
+        assertNotNull(thisSite);
+        
+        // Proxy all other sites
+        for (int i = 1; i < siteCount + 1; i++) {
+            thisSite.addProxySite(i);
+        }
+        
+        assertEquals("proxied sites ", siteCount-1, thisSite.getProxySites().length);
+        
+        assertTrue(thisSite.isProxyFor(5));
+        assertTrue(thisSite.isProxyFor(6));
+        assertTrue(thisSite.isProxyFor(lastSite.getSiteNumber()));
+        
+        // must not be proxy for ourselves
+        assertFalse(thisSite.isProxyFor(contest.getSiteNumber()));
+        
+        // proxies for all sites for this site.
+        assertEquals("Expecting proxy sites ", siteCount - 1, thisSite.getProxySites().length);
+    }
+
+    private String getNumber(int i) {
+        RomanNumeral roman = new RomanNumeral(i);
+        return roman.toString();
     }
 
 }

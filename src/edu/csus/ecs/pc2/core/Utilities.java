@@ -1498,5 +1498,20 @@ public final class Utilities {
         }
         return false;
     }
-    
+
+    /**
+     * Convert from int array to list.
+     * @param proxySites
+     * @return
+     */
+    public static List<Integer> arrayToList(int[] proxySites) {
+
+        List<Integer> list = new ArrayList<Integer>();
+        for (int i = 0; i < proxySites.length; i++) {
+            list.add(proxySites[i]);
+        }
+
+        return list;
+    }
+
 }
