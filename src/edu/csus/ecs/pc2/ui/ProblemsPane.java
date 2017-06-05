@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +12,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import com.ibm.webrunner.j2mclb.Alignment;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -29,10 +32,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.ui.cellRenderer.MCLBCenteredStringCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.MCLBInputValidationStatusCellRenderer;
-
-import java.awt.Dimension;
 
 /**
  * View Problems.
@@ -139,6 +139,13 @@ public class ProblemsPane extends JPanePlugin {
 
             Object[] cols = { "Problem Name", "# Test Cases",  "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command",  };
             problemListBox.addColumns(cols);
+            
+            problemListBox.getColumnInfo(1).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(2).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(3).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(4).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(5).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(6).setAlignment(Alignment.CENTER);
 
             /**
              * No sorting at this time, the only way to know what order the problems are is to NOT sort them. Later we can add a sorter per ProblemDisplayList somehow.
@@ -225,7 +232,8 @@ public class ProblemsPane extends JPanePlugin {
         c[i++] = name;
         
         //num test cases
-        c[i++] = new MCLBCenteredStringCellRenderer(new Integer(problem.getNumberTestCases()).toString());
+//        c[i++] = new MCLBCenteredStringCellRenderer(new Integer(problem.getNumberTestCases()).toString());
+        c[i++] =new Integer(problem.getNumberTestCases()).toString();
         
         //input method
         String inputMethod = "";
@@ -236,7 +244,8 @@ public class ProblemsPane extends JPanePlugin {
         } else {
             inputMethod = "(none)";
         }
-        c[i++] = new MCLBCenteredStringCellRenderer(inputMethod);
+//        c[i++] = new MCLBCenteredStringCellRenderer(inputMethod);
+        c[i++] = inputMethod;
         
         //judging type
         String judgingType = "";
@@ -253,19 +262,23 @@ public class ProblemsPane extends JPanePlugin {
         } else {
             judgingType = "Manual";
         }
-        c[i++] = new MCLBCenteredStringCellRenderer(judgingType);
-        
+//        c[i++] = new MCLBCenteredStringCellRenderer(judgingType);
+        c[i++] = judgingType;
+       
         //problem short name
-        c[i++] = new MCLBCenteredStringCellRenderer(problem.getShortName());
+//        c[i++] = new MCLBCenteredStringCellRenderer(problem.getShortName());
+        c[i++] = problem.getShortName();
         
         //problem time limit
-        c[i++] = new MCLBCenteredStringCellRenderer(Integer.toString(problem.getTimeOutInSeconds()));
+//        c[i++] = new MCLBCenteredStringCellRenderer(Integer.toString(problem.getTimeOutInSeconds()));
+        c[i++] =Integer.toString(problem.getTimeOutInSeconds());
         
         //input validation status
         if (problem.isProblemHasInputValidator()) {
             c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getInputValidationStatus());
         } else {
-            c[i++] = new MCLBCenteredStringCellRenderer("<none>");
+//            c[i++] = new MCLBCenteredStringCellRenderer("<none>");
+            c[i++] = "<none>";
         }
         
         //input validator command line
