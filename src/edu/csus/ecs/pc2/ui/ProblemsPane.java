@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.ui.cellRenderer.MCLBCenteredStringCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.MCLBInputValidationStatusCellRenderer;
 
 import java.awt.Dimension;
@@ -224,7 +225,7 @@ public class ProblemsPane extends JPanePlugin {
         c[i++] = name;
         
         //num test cases
-        c[i++] = problem.getNumberTestCases();
+        c[i++] = new MCLBCenteredStringCellRenderer(new Integer(problem.getNumberTestCases()).toString());
         
         //input method
         String inputMethod = "";
@@ -235,7 +236,7 @@ public class ProblemsPane extends JPanePlugin {
         } else {
             inputMethod = "(none)";
         }
-        c[i++] = inputMethod;
+        c[i++] = new MCLBCenteredStringCellRenderer(inputMethod);
         
         //judging type
         String judgingType = "";
@@ -252,19 +253,19 @@ public class ProblemsPane extends JPanePlugin {
         } else {
             judgingType = "Manual";
         }
-        c[i++] = judgingType;
+        c[i++] = new MCLBCenteredStringCellRenderer(judgingType);
         
         //problem short name
-        c[i++] = problem.getShortName();
+        c[i++] = new MCLBCenteredStringCellRenderer(problem.getShortName());
         
         //problem time limit
-        c[i++] = Integer.toString(problem.getTimeOutInSeconds());
+        c[i++] = new MCLBCenteredStringCellRenderer(Integer.toString(problem.getTimeOutInSeconds()));
         
         //input validation status
         if (problem.isProblemHasInputValidator()) {
             c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getInputValidationStatus());
         } else {
-            c[i++] = "   N/A   ";
+            c[i++] = new MCLBCenteredStringCellRenderer("<none>");
         }
         
         //input validator command line
