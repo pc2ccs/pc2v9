@@ -2,7 +2,6 @@
 
 rem Purpose: run a report about pc2 information
 rem Author : pc2@ecs.csus.edu
-rem $HeadURL$
 
 rem Windows 2000 and beyond syntax
 set PC2BIN=%~dp0
@@ -28,7 +27,8 @@ goto :end
 :continue
 call %PC2BIN%\pc2env.bat
 
-java -Xms64M -Xmx768M -cp %pc2_classpath% edu.csus.ecs.pc2.core.report.Reports %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Xms64M -Xmx768M -cp "%libdir%\*"  edu.csus.ecs.pc2.core.report.Reports %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
-rem eof pc2report.bat $Id$
+rem eof pc2report.bat 
+
