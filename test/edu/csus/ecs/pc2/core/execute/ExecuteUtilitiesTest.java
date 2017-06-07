@@ -173,12 +173,13 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:languageletter};A", // 
                 "{:languagename};java", // 
                 "{:languagename};java", // 
-                "{:mainfile};Sumit.java", // 
+                "{:mainfile};Sumit.java", //
                 "{:outfile};teams.output.txt", // 
                 "{:problem};1", // 
                 "{:problemletter};A", // 
                 "{:siteid};2", // 
                 "{:teamid};1", // 
+                "{files};Sumit.java", // 
                 "{:timelimit};30", // 
                 "{:validator};edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
                 "{:pc2home};"+ExecuteUtilities.getPC2Home(), // 
@@ -215,7 +216,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
             String expected = fields[1];
 
             String actual = executeUtilities.substituteAllStrings(input);
-            assertEquals("Expecting substitution", expected, actual);
+            assertEquals("Expecting substitution for '"+input+"'", expected, actual);
 
 //            System.out.println("\"" + input + ";" + actual + "\", // ");
 
