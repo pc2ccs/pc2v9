@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -7,9 +8,7 @@ import java.util.Properties;
  * Single Site Definition.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-// $HeadURL$
 public class Site implements IElementObject {
 
     /**
@@ -48,6 +47,8 @@ public class Site implements IElementObject {
     private boolean active = true;
 
     private String password;
+
+    private int [] proxySites = null;
 
     public Site(String displayName, int siteNumber) {
         super();
@@ -213,6 +214,85 @@ public class Site implements IElementObject {
     public int hashCode() {
         // use elementId to be consistent with equals()
         return elementId.hashCode();
+    }
+    
+    /**
+     * Is this site a proxy for another site?
+     * @param siteNumber
+     * @return true if proxy, otherwise false
+     */
+    public boolean isProxyFor (Site site){
+        
+        if (site == null){
+            return false;
+        }
+        
+        return isProxyFor(site.getSiteNumber());
+    }
+    
+    /**
+     * Is this site a proxy for another site?
+     * @param siteNumber
+     * @return true if proxy, otherwise false
+     */
+    public boolean isProxyFor (int siteNumber){
+        
+        if (proxySites == null){
+            return false;
+        }
+        
+        if (proxySites.length == 1 && proxySites[0] == siteNumber) {
+            return true;
+        }
+
+        for (int siteNum : proxySites) {
+            if (siteNum == siteNumber) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public int[] getProxySites() {
+        return proxySites;
+    }
+
+    /**
+     * Add another site as a proxy site for this site.
+     * 
+     * @param siteNumber
+     */
+    public void addProxySite(int siteNumber) {
+        if (!isProxyFor(siteNumber)) {
+            // Can't proxy oneself, that would be bad
+            if (siteNumber != getSiteNumber()) {
+
+                if (proxySites == null) {
+                    proxySites = new int[1];
+                    proxySites[0] = siteNumber;
+                } else {
+                    int[] newlist = Arrays.copyOf(proxySites, proxySites.length + 1);
+                    newlist[proxySites.length] = siteNumber;
+                    proxySites = newlist;
+
+                }
+            }
+        }
+    }
+
+    public void setProxySites(int[] proxySites) {
+        this.proxySites = proxySites;
+    }
+
+    /**
+     * Remove all proxies.
+     * 
+     * Remove all proxy sites from this site.
+     * 
+     */
+    public void removeAllProxies() {
+        proxySites = null;
     }
 
 }

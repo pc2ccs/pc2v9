@@ -2390,6 +2390,26 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         return sampContestDirNames;
     }
+    
+    public void testCLICSLanguageLoad() throws Exception {
+        
+        String [] section = {
+                //
+                "languages:", //
+                " - name: Python 2", //
+                "   compiler: /usr/bin/python2", //
+                "   compiler-args: -m py_compile {files}", //
+                "   runner: /usr/bin/pypy", //
+                "", //
+
+        };
+        
+        IInternalContest contest = loader.fromYaml(null, section, null, false);
+        Language[] languages = contest.getLanguages();
+        
+        assertEquals(1,languages.length);
+        
+    }
 
     private String getSampleContestsDirectory() {
         return "samps" + File.separator + "contests";
