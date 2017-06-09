@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -2332,6 +2333,82 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             teamAccountNumber++;
         }
     }
+    
+    
+    /**
+     * Test pc2 validator section: validator
+     * @throws Exception
+     */
+    public void testpc2ValidatorSection() throws Exception {
+        
+        String [] section = {
+                IContestLoader.VALIDATOR_KEY + ":", //
+                "   validatorProg: pc2.jar edu.csus.ecs.pc2.validator.Validator", //
+                "   validatorCmd: \"{:validator} {:infile} {:outfile} {:ansfile} {:resfile}  -pc2 1 true\"", //
+                "   usingInternal: true", //
+                "   validatorOption: 1", //
+        };
+        
+        
+        Map<String, Object> content = snake.loadYaml(null, section);
+
+        Problem problem = createNewProblem(this.getName());
+        snake.assignValidatorSettings(content, problem);
+        
+        assertEquals("validator type",  VALIDATOR_TYPE.PC2VALIDATOR, problem.getValidatorType());
+        assertEquals("validator program name", Constants.PC2_VALIDATOR_NAME, problem.getValidatorProgramName());
+    }
+    
+
+    /**
+     * Test pc2 validator key: validator_flags
+     * @throws Exception
+     */
+    public void test3pc2ValidatorFlags() throws Exception {
+        
+        String [] section = {
+                IContestLoader.VALIDATOR_FLAGS_KEY + ": float_tolerance 1e-6", //
+        };
+        
+        Map<String, Object> content = snake.loadYaml(null, section);
+
+        Problem problem = createNewProblem(this.getName());
+        snake.assignValidatorSettings(content, problem);
+        
+        assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
+        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
+        
+        // huh
+    }
+    
+    /**
+     * Test CLICS validator key: validator
+     * @throws Exception
+     */
+    public void testCLICSValidatorOptions() throws Exception {
+        
+        String [] section = {
+                IContestLoader.VALIDATOR_KEY + ": float_tolerance 1e-6", //
+        };
+        
+        Map<String, Object> content = snake.loadYaml(null, section);
+
+        Problem problem = createNewProblem(this.getName());
+        snake.assignValidatorSettings(content, problem);
+        
+        assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
+
+        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
+        
+    }
+    
+    private Problem createNewProblem(String name) {
+        Problem problem = new Problem(name);
+        problem.setShortName(name);
+        problem.setLetter("Z");
+        return problem;
+    }
+
 
     /**
      * 

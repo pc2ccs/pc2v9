@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
@@ -905,22 +906,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             loadPc2ProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, dataFileName, answerFileName);
         } else {
             loadCCSProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles);
-
-            // validator_flags: options are: [case_sensitive] [space_change_sensitive] [float_absolute_tolerance FLOAT] [float_tolerance FLOAT]
-            // ex. validator_flags: float_tolerance 1e-6
-            
-            String validatorFlags = fetchValue(content, IContestLoader.VALIDATOR_FLAGS_KEY);
-            
-            if (validatorFlags != null && validatorFlags.trim().length() > 0) {
-                try {
-                    ClicsValidatorSettings settings = new ClicsValidatorSettings(validatorFlags);
-                    problem.setCLICSValidatorSettings(settings);
-                } catch (RuntimeException e) {
-                    throw new YamlLoadException("For problem " + problem.getShortName() + ", invalid validator flags '" + validatorFlags + "' " + e.getMessage(), e.getCause());
-                }
-            }
         }
 
+        // 
+        assignValidatorSettings (content, problem);
+        
         Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
         Integer timeOut = fetchIntValue(limitsContent, TIMEOUT_KEY);
         if (timeOut != null) {
@@ -962,6 +952,88 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // if (sendPreliminary){
         // problem.setPrelimaryNotification(true);
         // }
+
+    }
+
+    /**
+     * Assign validator config settings.
+     * 
+     * @param content
+     * @param problem
+     */
+    protected void assignValidatorSettings(Map<String, Object> content, Problem problem) {
+
+        // PC2 CLICS validator section 
+        //    validator:
+        //        validatorProg: pc2.jar edu.csus.ecs.pc2.validator.Validator
+        //        validatorCmd: "{:validator} {:infile} {:outfile} {:ansfile} {:resfile}  -pc2 1 true"
+        //        usingInternal: true
+        //        validatorOption: 1
+
+        Object object = content.get(VALIDATOR_KEY);
+
+        if (object instanceof LinkedHashMap) {
+            
+            // Handle validator yaml section
+
+            @SuppressWarnings("rawtypes")
+            LinkedHashMap map = (LinkedHashMap) object; // fetchList(content, VALIDATOR_KEY);
+
+            problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+
+            String validatorProg = fetchValue(map, "validatorProg");
+            problem.setOutputValidatorProgramName(validatorProg);
+
+            String validatorCmd = fetchValue(map, "validatorCmd");
+            //            String usingInternal = fetchValue(map, "usingInternal");
+            String validatorOption = fetchValue(map, "validatorOption");
+
+            PC2ValidatorSettings settings = new PC2ValidatorSettings();
+            if (validatorOption != null) {
+                settings.setWhichPC2Validator(Integer.parseInt(validatorOption));
+            }
+
+            settings.setIgnoreCaseOnValidation(true);
+
+            if (validatorCmd != null) {
+                settings.setValidatorCommandLine(validatorCmd);
+            }
+            problem.setPC2ValidatorSettings(settings);
+
+            return; // ===================  RETURN 
+        }
+
+        // PC2 CLICS validator flags 
+        // validator_flags: options are: [case_sensitive] [space_change_sensitive] [float_absolute_tolerance FLOAT] [float_tolerance FLOAT]
+        // ex. validator_flags: float_tolerance 1e-6
+
+        String validatorFlags = fetchValue(content, IContestLoader.VALIDATOR_FLAGS_KEY);
+        if (validatorFlags != null && validatorFlags.trim().length() > 0) {
+
+            try {
+                ClicsValidatorSettings settings = new ClicsValidatorSettings(validatorFlags);
+                problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+                problem.setCLICSValidatorSettings(settings);
+            } catch (RuntimeException e) {
+                throw new YamlLoadException("For problem " + problem.getShortName() + ", invalid validator flags '" + validatorFlags + "' " + e.getMessage(), e.getCause());
+            }
+
+        }
+
+        // CLICS validator 
+        // validator: options are: [case_sensitive] [space_change_sensitive] [float_absolute_tolerance FLOAT] [float_tolerance FLOAT]
+        // ex. validator: float_tolerance 1e-6
+
+        String validatorParameters = fetchValue(content, IContestLoader.VALIDATOR_KEY);
+        if (validatorParameters != null && validatorParameters.trim().length() > 0) {
+            try {
+                ClicsValidatorSettings settings = new ClicsValidatorSettings(validatorParameters);
+                problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+                problem.setCLICSValidatorSettings(settings);
+            } catch (RuntimeException e) {
+                throw new YamlLoadException("For problem " + problem.getShortName() + ", invalid validator flags '" + validatorParameters + "' " + e.getMessage(), e.getCause());
+            }
+        }
 
     }
 
