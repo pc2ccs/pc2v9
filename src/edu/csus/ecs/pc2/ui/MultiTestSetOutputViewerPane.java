@@ -28,6 +28,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -243,7 +244,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(568, 363));
+        this.setSize(new Dimension(646, 363));
         this.add(getCenterPanel(), java.awt.BorderLayout.CENTER);
 
         // TODO Bug 918
@@ -589,7 +590,12 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
         // construct a dropdown list of available comparators and add it to the panel
         String [] comparators = getAvailableComparatorsList();
-        pulldownSelectComparator = new JComboBox<String>(comparators);
+        //the WindowBuilder GUI builder tool doesn't support the following:
+        //pulldownSelectComparator = new JComboBox<String>(comparators);
+        //so we'll do it the long way:
+        pulldownSelectComparator = new JComboBox<String>();
+        pulldownSelectComparator.setModel(new DefaultComboBoxModel<String>(comparators));
+        
         pulldownSelectComparator.setEnabled(false);
         panelSelectComparator.add(pulldownSelectComparator);
 
@@ -645,7 +651,13 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         chooseViewerPanel.add(panel);
 
         // add a drop-down list of available viewers
-        pulldownSelectViewer = new JComboBox<String>(getAvailableViewersList());
+        
+        //the WindowBuilder GUI builder tool doesn't support the following:
+        //pulldownSelectViewer = new JComboBox<String>(getAvailableViewersList());
+        //so we'll do it the long way:
+        pulldownSelectViewer = new JComboBox<String>();
+        pulldownSelectViewer.setModel(new DefaultComboBoxModel<String>(getAvailableViewersList()));
+
         pulldownSelectViewer.setEnabled(false);
         panel.add(pulldownSelectViewer);
 
@@ -825,7 +837,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     currentComparator.dispose();
                 }
                 Window parentFrame = SwingUtilities.getWindowAncestor(btnClose);
-                parentFrame.dispose();
+                if (parentFrame != null) {
+                    parentFrame.dispose();                    
+                }
             }
         });
         resultsPaneFooterPanel.add(btnClose);
