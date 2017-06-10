@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.imports.ContestXML;
-import edu.csus.ecs.pc2.core.list.ReportNameByComparator;
+import edu.csus.ecs.pc2.core.list.ReportComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -295,7 +295,8 @@ public class ReportPane extends JPanePlugin {
         }
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
-        Arrays.sort(listOfReports, new ReportNameByComparator());
+        
+        Arrays.sort(listOfReports,new ReportComparator());
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -341,6 +342,8 @@ public class ReportPane extends JPanePlugin {
     private void refreshReportComboBox() {
 
         getReportsComboBox().removeAllItems();
+        
+        Arrays.sort(listOfReports,new ReportComparator());
 
         for (IReport report : listOfReports) {
             getReportsComboBox().addItem(report.getReportTitle());
