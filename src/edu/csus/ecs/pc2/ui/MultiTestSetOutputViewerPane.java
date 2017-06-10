@@ -49,6 +49,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
@@ -76,7 +78,7 @@ import edu.csus.ecs.pc2.ui.cellRenderer.RightJustifiedCellRenderer;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/AutoJudgeSettingsPane.java $
-public class MultiTestSetOutputViewerPane extends JPanePlugin {
+public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableModelListener {
 
     private static final long serialVersionUID = 7363093989131251458L;
 
@@ -100,7 +102,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     /**
      * list of columns
      */
-    enum COLUMN {
+    protected enum COLUMN {
         SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, 
             JUDGE_OUTPUT, JUDGE_DATA, VALIDATOR_OUTPUT, VALIDATOR_ERR
     };
@@ -124,8 +126,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private JTextField textUserSpecifyViewer;
 
     private JComboBox<String> pulldownSelectViewer;
-
-    private JButton btnCompareSelected;
 
     private JTable resultsTable;
 
@@ -151,16 +151,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
 
     private MultipleFileViewer currentViewer;
     
-    /**
-     * @return the currentViewer
-     */
-    public MultipleFileViewer getCurrentViewer() {
-        if (currentViewer == null) {
-            currentViewer = new MultipleFileViewer(getController().getLog());
-        }
-        return currentViewer;
-    }
-
     private MultiFileComparator currentComparator ;
 
     private JScrollPane resultsScrollPane;
@@ -228,6 +218,36 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     private String[] currentValidatorOutputFileNames;
 
     private String[] currentValidatorStderrFileNames;
+
+    private JPanel resultsPane;
+
+    private JPanel optionsPane;
+
+    private JPanel choosersPanel;
+
+    private JPanel chooseCompareProgramPanel;
+
+    private JPanel chooseViewerProgramPanel;
+
+    private JPanel optionsButtonPanel;
+
+    private JButton btnRestoreDefaults;
+
+    private JPanel resultsPaneHeaderPanel;
+
+    private JPanel resultsPaneButtonPanel;
+
+    private JCheckBox showFailuresOnlyCheckBox;
+
+    private JButton selectAllButton;
+
+    private JButton unselectAllButton;
+
+    private JButton compareSelectedButton;
+
+    private JButton optionsPaneCloseButton;
+
+    private JButton resultsPaneCloseButton;
 
     /**
      * Constructs an instance of a plugin pane for viewing multi-testset output values.
@@ -336,7 +356,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes and returns the center panel (JPanel) containing the 
+     * This method initializes and returns a JPanel containing a 
      * JTabbedPane holding the output results and options panes. Note that the method
      * does not fill in any live data; that cannot be done until the View Pane's
      * "setData()" method has been invoked, which doesn't happen until after construction
@@ -345,39 +365,332 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPanel() {
+        
         if (centerPanel == null) {
-            BorderLayout borderLayout = new BorderLayout();
-            borderLayout.setVgap(0);
+            
             centerPanel = new JPanel();
-            centerPanel.setLayout(borderLayout);
+            BorderLayout cpBorderLayout = new BorderLayout();
+            cpBorderLayout.setVgap(0);
+            centerPanel.setLayout(cpBorderLayout);
 
-            getMultiTestSetTabbedPane().setName("multiTestSetTabbedPane");
-            getMultiTestSetTabbedPane().setBorder(new LineBorder(new Color(0, 0, 0)));
             centerPanel.add(getMultiTestSetTabbedPane(), BorderLayout.CENTER);
 
+
+        }
+        return centerPanel;
+    }
+    
+    /** Returns a JTabbedPane containing the various tabs 
+     * for the MultiTestSet results display.
+     * 
+     * @return the multiTestSetTabbedPane JTabbedPane
+     */
+    public JTabbedPane getMultiTestSetTabbedPane() {
+        
+        if (multiTestSetTabbedPane == null) {
+            
+            multiTestSetTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+            multiTestSetTabbedPane.setName("multiTestSetTabbedPane");
+            getMultiTestSetTabbedPane().setBorder(new LineBorder(new Color(0, 0, 0)));
+            
             // add a tab with a JPanel that will display the results for the test cases
-            JPanel resultsPane = new JPanel();
-            resultsPane.setName("ViewDataSets");
-            getMultiTestSetTabbedPane().addTab("Data Set Results", null, resultsPane, 
+            multiTestSetTabbedPane.addTab("Data Set Results", null, getResultsPane(), 
                     "Show the results of this submission for each test data set");
+
+            // add a tab with a JPanel that will display options for managing the display of data for the test cases
+            multiTestSetTabbedPane.addTab("Options", null, getOptionsPane(), "Set options for tools used to display test set results");
+
+        }
+        return multiTestSetTabbedPane;
+    }
+
+    /**
+     * Defines and returns a JPanel containing a Header Panel describing the current run, a JTable displaying
+     * test case results for the Run, and a button panel with various control Buttons.
+     * 
+     * @return the Results Pane JPanel
+     */
+    private JPanel getResultsPane() {
+        
+        if (resultsPane == null) {
+            
+            resultsPane = new JPanel();
+            resultsPane.setName("ViewDataSets");
             resultsPane.setLayout(new BorderLayout(0, 0));
 
             // add a header for holding labels to the results panel
-            final JButton btnClose = getResultsPaneHeaderPanel(resultsPane);
-
-            // add a tab that will display options for managing the display of data for the test cases
-            JPanel optionsPane = new JPanel();
-            getMultiTestSetTabbedPane().addTab("Options", null, optionsPane, "Set options for tools used to display test set results");
+            resultsPane.add(getResultsPaneHeaderPanel(),BorderLayout.NORTH);
+            
+            //add a scrollpane holding the actual test set results
+            resultsPane.add(getResultsScrollPane(), BorderLayout.CENTER);
+            
+            //add a button panel at the bottom
+            resultsPane.add(getResultsPaneButtonPanel(), BorderLayout.SOUTH);
+        }
+        return resultsPane;
+        
+    }
+    
+    /**
+     * Returns a JPanel containing options for specifying the current "compare program" and the
+     * current "viewer program", along with a button panel with various control Buttons.
+     * 
+     * @return the Options Pane JPanel
+     */
+    private JPanel getOptionsPane() {
+        
+        if (optionsPane == null ) {
+            
+            optionsPane = new JPanel();
             optionsPane.setLayout(new BorderLayout(0, 0));
 
             // add a panel that will hold the various chooser options
-            JPanel panelFooterButtons = getPanelFooterButtons(optionsPane);
+            optionsPane.add(getChoosersPanel(), BorderLayout.CENTER);
+            
+            //add a button panel to the bottom of the options pane
+            optionsPane.add(getOptionsButtonPanel(),BorderLayout.SOUTH);
+        }
+        
+        return optionsPane;
+    }
+    
 
-            currentViewerCmd = lastViewer;
-            currentComparatorCmd = lastComparator;
-            // initialize
-            enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
+    /**
+     * Defines and returns a panel containing various "Choosers" -- one for choosing the Comparator Program,
+     * one for choosing the Viewer Program -- along with a button panel for activating chooser options.
+     * 
+     * @return a ChoosersPanel JPanel
+     */
+    private JPanel getChoosersPanel() {
+        
+        if (choosersPanel == null) {
+            
+            choosersPanel = new JPanel();
+            choosersPanel.setLayout (new FlowLayout());
 
+            // add a panel that will support choosing the comparator tool to be used
+            choosersPanel.add(getChooseComparatorProgramPanel());
+            
+            //put some space between the comparator and viewer panels
+            Component horizontalStrut = Box.createHorizontalStrut(20);
+            horizontalStrut.setMinimumSize(new Dimension(40, 0));
+            choosersPanel.add(horizontalStrut);
+
+            //add a panel that will support choosing the viewer program to be used
+            choosersPanel.add(getChooseViewerProgramPanel());
+        }
+        
+        return choosersPanel;
+    }
+            
+    /**
+     * Defines a JPanel containing the components supporting choosing a Compare Program.
+     * 
+     * @return the Choose Compare Program JPanel
+     */
+    private JPanel getChooseComparatorProgramPanel() {
+        
+        if (chooseCompareProgramPanel == null) {
+            
+            //define the compare-program chooser panel
+            chooseCompareProgramPanel = new JPanel();
+            chooseCompareProgramPanel.setBounds(new Rectangle(0, 0, 0, 20));
+            chooseCompareProgramPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseCompareProgramPanel.setPreferredSize(new Dimension(220, 200));
+            chooseCompareProgramPanel.setBorder(new TitledBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)),
+                "Choose Compare Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            chooseCompareProgramPanel.setLayout(new BoxLayout(chooseCompareProgramPanel, BoxLayout.Y_AXIS));
+
+            //add some space at the top of the panel
+            Component verticalStrut = Box.createVerticalStrut(20);
+            verticalStrut.setMinimumSize(new Dimension(0, 10));
+            verticalStrut.setPreferredSize(new Dimension(0, 15));
+            chooseCompareProgramPanel.add(verticalStrut);
+
+            //add a button to choose the internal built-in comparator
+            rdbtnInternalCompareProgram = new JRadioButton("Built-in Comparator");
+            rdbtnInternalCompareProgram.setSelected(true);
+            buttonGroup.add(rdbtnInternalCompareProgram);
+            chooseCompareProgramPanel.add(rdbtnInternalCompareProgram);
+
+            // add a button to enable selection from a list of predefined external comparators
+            rdbtnPulldownCompareList = new JRadioButton("Select");
+            chooseCompareProgramPanel.add(rdbtnPulldownCompareList);
+            buttonGroup.add(rdbtnPulldownCompareList);
+
+            // add a panel to hold the pulldown list of predefined external comparators
+            JPanel selectComparatorPanel = new JPanel();
+            FlowLayout flowLayout = (FlowLayout) selectComparatorPanel.getLayout();
+            flowLayout.setAlignOnBaseline(true);
+            selectComparatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseCompareProgramPanel.add(selectComparatorPanel);
+
+            // construct a dropdown list of available comparators and add it to the panel
+            String [] comparators = getAvailableComparatorsList();
+            //the WindowBuilder GUI builder tool doesn't support the following:
+            //pulldownSelectComparator = new JComboBox<String>(comparators);
+            //so we'll do it the long way:
+            pulldownSelectComparator = new JComboBox<String>();
+            pulldownSelectComparator.setModel(new DefaultComboBoxModel<String>(comparators));
+            selectComparatorPanel.add(pulldownSelectComparator);
+        
+            //disable the pulldown by default
+            pulldownSelectComparator.setEnabled(false);
+
+            //add a button to enable user-specified compare program
+            rdbtnSpecifyCompareProgram = new JRadioButton("User Specified");
+            chooseCompareProgramPanel.add(rdbtnSpecifyCompareProgram);
+            buttonGroup.add(rdbtnSpecifyCompareProgram);
+        
+            // add a panel to hold the user-specified comparator text box
+            JPanel userSpecifiedComparatorPanel = new JPanel();
+            FlowLayout flowLayout_1 = (FlowLayout) userSpecifiedComparatorPanel.getLayout();
+            flowLayout_1.setAlignOnBaseline(true);
+            userSpecifiedComparatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseCompareProgramPanel.add(userSpecifiedComparatorPanel);
+
+            // add a text box for the user to specify a comparator
+            textUserSpecifyComparator = new JTextField();
+            textUserSpecifyComparator.setEnabled(false);
+            userSpecifiedComparatorPanel.add(textUserSpecifyComparator);
+            textUserSpecifyComparator.setColumns(15);
+        }
+        
+        return chooseCompareProgramPanel;
+    }
+
+
+    /**
+     * Defines a JPanel containing the components supporting choosing a Viewer Program.
+     * 
+     * @return the Choose Viewer Program JPanel
+     */
+    private JPanel getChooseViewerProgramPanel() {
+
+        if (chooseViewerProgramPanel == null) {
+
+            // create a panel to hold the various components allowing choice of viewers
+            chooseViewerProgramPanel = new JPanel();
+            chooseViewerProgramPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseViewerProgramPanel.setPreferredSize(new Dimension(220, 200));
+            chooseViewerProgramPanel.setBorder(new TitledBorder(null, "Choose Viewer Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            chooseViewerProgramPanel.setLayout(new BoxLayout(chooseViewerProgramPanel, BoxLayout.Y_AXIS));
+
+            // add some space at the top of the panel
+            Component verticalStrut_1 = Box.createVerticalStrut(20);
+            verticalStrut_1.setPreferredSize(new Dimension(0, 15));
+            verticalStrut_1.setMinimumSize(new Dimension(0, 10));
+            chooseViewerProgramPanel.add(verticalStrut_1);
+
+            // add a button to select the built-in viewer program
+            rdbtnInternalViewerProgram = new JRadioButton("Built-in Viewer");
+            rdbtnInternalViewerProgram.setSelected(true);
+            rdbtnInternalViewerProgram.setPreferredSize(new Dimension(117, 23));
+            rdbtnInternalViewerProgram.setMinimumSize(new Dimension(117, 23));
+            rdbtnInternalViewerProgram.setMaximumSize(new Dimension(117, 23));
+            buttonGroup_1.add(rdbtnInternalViewerProgram);
+            chooseViewerProgramPanel.add(rdbtnInternalViewerProgram);
+
+            // add a button to enable selection of the viewer program from a list
+            rdbtnPulldownViewerList = new JRadioButton("Select");
+            buttonGroup_1.add(rdbtnPulldownViewerList);
+            chooseViewerProgramPanel.add(rdbtnPulldownViewerList);
+
+            // add a panel to hold the drop-down list of available viewers
+            JPanel panel = new JPanel();
+            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseViewerProgramPanel.add(panel);
+
+            // add a drop-down list of available viewers to the panel
+            // the WindowBuilder GUI builder tool doesn't support the following:
+            // pulldownSelectViewer = new JComboBox<String>(getAvailableViewersList());
+            // so we'll do it the long way:
+            pulldownSelectViewer = new JComboBox<String>();
+            pulldownSelectViewer.setModel(new DefaultComboBoxModel<String>(getAvailableViewersList()));
+            panel.add(pulldownSelectViewer);
+
+            // set the pulldown disabled by default
+            pulldownSelectViewer.setEnabled(false);
+
+            // add a button to enable selection of a user-specified viewer program
+            rdbtnSpecifyViewerProgram = new JRadioButton("User Specified");
+            buttonGroup_1.add(rdbtnSpecifyViewerProgram);
+            chooseViewerProgramPanel.add(rdbtnSpecifyViewerProgram);
+
+            // add a panel to hold the text box defining the user-specified viewer program
+            JPanel panel_1 = new JPanel();
+            panel_1.setEnabled(false);
+            chooseViewerProgramPanel.add(panel_1);
+
+            // add a text field for the user to specify a viewer
+            textUserSpecifyViewer = new JTextField();
+            textUserSpecifyViewer.setEnabled(false);
+            panel_1.add(textUserSpecifyViewer);
+            textUserSpecifyViewer.setColumns(15);
+        }
+        return chooseViewerProgramPanel;
+    }
+
+    /**
+     * Defines a panel holding buttons for the Options pane tab.
+     * 
+     * @return the Options Pane button panel
+     */
+    private JPanel getOptionsButtonPanel() {
+        
+        if (optionsButtonPanel == null) {
+            
+            // define the panel to hold control buttons
+            optionsButtonPanel = new JPanel();
+
+            // add a control button to restore defaults
+            optionsButtonPanel.add(getRestoreDefaultsButton());
+
+            Component horizontalGlue_4 = Box.createHorizontalGlue();
+            horizontalGlue_4.setPreferredSize(new Dimension(20, 20));
+            optionsButtonPanel.add(horizontalGlue_4);
+
+            optionsButtonPanel.add(getUpdateButton());
+
+            Component horizontalGlue_5 = Box.createHorizontalGlue();
+            horizontalGlue_5.setPreferredSize(new Dimension(20, 20));
+            optionsButtonPanel.add(horizontalGlue_5);
+
+            optionsButtonPanel.add(getCancelButton());
+            
+            Component horizontalGlue_6 = Box.createHorizontalGlue();
+            horizontalGlue_6.setPreferredSize(new Dimension(20, 20));
+            optionsButtonPanel.add(horizontalGlue_6);
+
+            // add a button to dismiss the frame
+            optionsButtonPanel.add(getOptionsPaneCloseButton());
+
+            addOptionsButtonHandlers();
+        }
+        
+        return optionsButtonPanel;
+    }
+    
+    /**
+     * Returns the RestoreDefaults button.
+     * @return a JButton
+     */
+    private JButton getRestoreDefaultsButton() {
+        if (btnRestoreDefaults == null) {
+            btnRestoreDefaults = new JButton("Restore Defaults");
+        }
+        return btnRestoreDefaults;
+    }
+    
+    /**
+     * Returns the Update button.
+     * @return a JButton
+     */
+    private JButton getUpdateButton() {
+        if (btnUpdate == null) {
+            btnUpdate = new JButton("Update");
+            btnUpdate.setEnabled(false);
+            
             btnUpdate.addActionListener(new ActionListener() {
                 
                 @Override
@@ -397,6 +710,20 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     getController().updateClientSettings(clientSettings);
                 }
             });
+        }
+        return btnUpdate;
+    }
+    
+    /**
+     * Returns the Cancel button.
+     * @return a JButton
+     */
+    private JButton getCancelButton() {
+        if (btnCancel == null) {
+            btnCancel = new JButton("Cancel");
+            btnCancel.setEnabled(false);
+            
+            //add an action handler for the Cancel button
             btnCancel.addActionListener(new ActionListener() {
                 
                 @Override
@@ -412,440 +739,504 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                     currentViewerCmd = lastViewer;
                 }
             });
-            
-            rdbtnInternalCompareProgram.addItemListener(new ItemListener() {
-                
-                @Override
-                public void itemStateChanged(ItemEvent arg0) {
-                    if (rdbtnInternalCompareProgram.isSelected()) {
-                        currentComparatorCmd = "";
-                        enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
-                        ctype = TYPES.INTERNAL;
-                    }
-                }
-
-            });
-            // this is comparator 2
-            rdbtnPulldownCompareList.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent e) {
-                    if (rdbtnPulldownCompareList.isSelected()) {
-                        pulldownSelectComparator.setEnabled(true);
-                        ctype = TYPES.LIST;
-                    } else {
-                        pulldownSelectComparator.setEnabled(false);
-                    }
-                    currentComparatorCmd = (String) pulldownSelectComparator.getSelectedItem();
-                    enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
-                }
-            });
-            // this is comparator 3
-            rdbtnSpecifyCompareProgram.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent e) {
-                    if (rdbtnSpecifyCompareProgram.isSelected()) {
-                        textUserSpecifyComparator.setEnabled(true);
-                        currentComparatorCmd = textUserSpecifyComparator.getText();
-                        ctype = TYPES.USER;
-                    } else {
-                        textUserSpecifyComparator.setEnabled(false);
-                    }
-                    enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
-                }
-            });
-            rdbtnInternalViewerProgram.addItemListener(new ItemListener() {
-                
-                @Override
-                public void itemStateChanged(ItemEvent arg0) {
-                    if (rdbtnInternalViewerProgram.isSelected()) {
-                        currentViewerCmd = "";
-                        vtype = TYPES.INTERNAL;
-                    }
-                    enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
-                }
-            });
-            // this is viewer 2
-            rdbtnPulldownViewerList.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent e) {
-                    if (rdbtnPulldownViewerList.isSelected()) {
-                        currentViewerCmd = (String) pulldownSelectViewer.getSelectedItem();
-                        pulldownSelectViewer.setEnabled(true);
-                        vtype = TYPES.LIST;
-                    } else {
-                        pulldownSelectViewer.setEnabled(false);
-                    }
-                    enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
-                }
-            });
-            // this is viewer 3
-            rdbtnSpecifyViewerProgram.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent e) {
-                    if (rdbtnSpecifyViewerProgram.isSelected()) {
-                        textUserSpecifyViewer.setEnabled(true);
-                        vtype = TYPES.USER;
-                        currentViewerCmd = textUserSpecifyViewer.getText();
-                    } else {
-                        textUserSpecifyViewer.setEnabled(false);
-                    }
-                    enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
-                }
-            });
-
-            textUserSpecifyViewer.addKeyListener(new KeyListener() {
-                
-                @Override
-                public void keyTyped(KeyEvent arg0) {
-                    // unused
-                }
-                
-                @Override
-                public void keyReleased(KeyEvent arg0) {
-                    if (vtype == TYPES.USER) {
-                        currentViewerCmd = textUserSpecifyViewer.getText();
-                        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
-                    }
-                }
-                
-                @Override
-                public void keyPressed(KeyEvent arg0) {
-                    // unused
-                }
-            });
-            textUserSpecifyComparator.addKeyListener(new KeyListener() {
-                
-                @Override
-                public void keyTyped(KeyEvent arg0) {
-                    // unused
-                }
-                
-                @Override
-                public void keyReleased(KeyEvent arg0) {
-                    if (ctype == TYPES.USER) {
-                        currentComparatorCmd = textUserSpecifyComparator.getText();
-                        enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
-                    }
-                }
-                
-                @Override
-                public void keyPressed(KeyEvent arg0) {
-                    // unused
-                }
-            });
-
-            Component horizontalGlue_6 = Box.createHorizontalGlue();
-            horizontalGlue_6.setPreferredSize(new Dimension(20, 20));
-            panelFooterButtons.add(horizontalGlue_6);
-
-            // add a button to dismiss the frame
-            JButton btnClose_1 = new JButton("Close");
-            btnClose_1.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (getMultiTestSetTabbedPane().getSelectedIndex() > 0) {
-                        getMultiTestSetTabbedPane().setSelectedIndex(0);
-                    } else {
-                        Window parentFrame = SwingUtilities.getWindowAncestor(btnClose);
-                        parentFrame.dispose();
-                    }
-                }
-            });
-            panelFooterButtons.add(btnClose_1);
-
         }
-        return centerPanel;
+        return btnCancel;
     }
-
-    private JPanel getPanelFooterButtons(JPanel optionsPane) {
-        JPanel panelChoosers = new JPanel();
-        optionsPane.add(panelChoosers, BorderLayout.CENTER);
-
-        // add a panel that will support choosing the comparator tool to be used
-        JPanel chooseComparatorPanel = new JPanel();
-        panelChoosers.add(chooseComparatorPanel);
-        chooseComparatorPanel.setBounds(new Rectangle(0, 0, 0, 20));
-        chooseComparatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chooseComparatorPanel.setPreferredSize(new Dimension(220, 200));
-        chooseComparatorPanel.setBorder(new TitledBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)),
-                "Choose Compare Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        chooseComparatorPanel.setLayout(new BoxLayout(chooseComparatorPanel, BoxLayout.Y_AXIS));
-
-        Component verticalStrut = Box.createVerticalStrut(20);
-        verticalStrut.setMinimumSize(new Dimension(0, 10));
-        verticalStrut.setPreferredSize(new Dimension(0, 15));
-        chooseComparatorPanel.add(verticalStrut);
-
-        rdbtnInternalCompareProgram = new JRadioButton("Built-in Comparator");
-        rdbtnInternalCompareProgram.setSelected(true);
-        buttonGroup.add(rdbtnInternalCompareProgram);
-        chooseComparatorPanel.add(rdbtnInternalCompareProgram);
-
-        // add a button to select from a list of available comparators
-        rdbtnPulldownCompareList = new JRadioButton("Select");
-        chooseComparatorPanel.add(rdbtnPulldownCompareList);
-        buttonGroup.add(rdbtnPulldownCompareList);
-
-        // add a panel to hold the pulldown list which allows a user to select a comparator
-        JPanel panelSelectComparator = new JPanel();
-        FlowLayout flowLayout = (FlowLayout) panelSelectComparator.getLayout();
-        flowLayout.setAlignOnBaseline(true);
-        panelSelectComparator.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chooseComparatorPanel.add(panelSelectComparator);
-
-        // construct a dropdown list of available comparators and add it to the panel
-        String [] comparators = getAvailableComparatorsList();
-        //the WindowBuilder GUI builder tool doesn't support the following:
-        //pulldownSelectComparator = new JComboBox<String>(comparators);
-        //so we'll do it the long way:
-        pulldownSelectComparator = new JComboBox<String>();
-        pulldownSelectComparator.setModel(new DefaultComboBoxModel<String>(comparators));
         
-        pulldownSelectComparator.setEnabled(false);
-        panelSelectComparator.add(pulldownSelectComparator);
-
-        rdbtnSpecifyCompareProgram = new JRadioButton("User Specified");
-        chooseComparatorPanel.add(rdbtnSpecifyCompareProgram);
-        buttonGroup.add(rdbtnSpecifyCompareProgram);
+    private void addOptionsButtonHandlers() {
         
-        // add a panel to hold the user-specified comparator text box
-        JPanel panelSpecifyComparator = new JPanel();
-        FlowLayout flowLayout_1 = (FlowLayout) panelSpecifyComparator.getLayout();
-        flowLayout_1.setAlignOnBaseline(true);
-        panelSpecifyComparator.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chooseComparatorPanel.add(panelSpecifyComparator);
-
-        // add a text box for the user to specify the comparator
-        textUserSpecifyComparator = new JTextField();
-        textUserSpecifyComparator.setEnabled(false);
-        panelSpecifyComparator.add(textUserSpecifyComparator);
-        textUserSpecifyComparator.setColumns(15);
-
-        Component horizontalStrut = Box.createHorizontalStrut(20);
-        horizontalStrut.setMinimumSize(new Dimension(40, 0));
-        panelChoosers.add(horizontalStrut);
-
-        // create a panel to hold the various components allowing choice of viewers
-        JPanel chooseViewerPanel = new JPanel();
-        chooseViewerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panelChoosers.add(chooseViewerPanel);
-        chooseViewerPanel.setPreferredSize(new Dimension(220, 200));
-        chooseViewerPanel.setBorder(new TitledBorder(null, "Choose Viewer Program", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        chooseViewerPanel.setLayout(new BoxLayout(chooseViewerPanel, BoxLayout.Y_AXIS));
-
-        Component verticalStrut_1 = Box.createVerticalStrut(20);
-        verticalStrut_1.setPreferredSize(new Dimension(0, 15));
-        verticalStrut_1.setMinimumSize(new Dimension(0, 10));
-        chooseViewerPanel.add(verticalStrut_1);
-
-        rdbtnInternalViewerProgram = new JRadioButton("Built-in Viewer");
-        rdbtnInternalViewerProgram.setSelected(true);
-        rdbtnInternalViewerProgram.setPreferredSize(new Dimension(117, 23));
-        rdbtnInternalViewerProgram.setMinimumSize(new Dimension(117, 23));
-        rdbtnInternalViewerProgram.setMaximumSize(new Dimension(117, 23));
-        buttonGroup_1.add(rdbtnInternalViewerProgram);
-        chooseViewerPanel.add(rdbtnInternalViewerProgram);
-
-        rdbtnPulldownViewerList = new JRadioButton("Select");
-        buttonGroup_1.add(rdbtnPulldownViewerList);
-        chooseViewerPanel.add(rdbtnPulldownViewerList);
-
-        // add a panel to hold the drop-down list of available viewers
-        JPanel panel = new JPanel();
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chooseViewerPanel.add(panel);
-
-        // add a drop-down list of available viewers
+        currentViewerCmd = lastViewer;
+        currentComparatorCmd = lastComparator;
         
-        //the WindowBuilder GUI builder tool doesn't support the following:
-        //pulldownSelectViewer = new JComboBox<String>(getAvailableViewersList());
-        //so we'll do it the long way:
-        pulldownSelectViewer = new JComboBox<String>();
-        pulldownSelectViewer.setModel(new DefaultComboBoxModel<String>(getAvailableViewersList()));
+        //initialize the Update and Cancel buttons
+        enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
 
-        pulldownSelectViewer.setEnabled(false);
-        panel.add(pulldownSelectViewer);
-
-        rdbtnSpecifyViewerProgram = new JRadioButton("User Specified");
-        buttonGroup_1.add(rdbtnSpecifyViewerProgram);
-        chooseViewerPanel.add(rdbtnSpecifyViewerProgram);
-
-        // add a panel to hold the text box
-        JPanel panel_1 = new JPanel();
-        panel_1.setEnabled(false);
-        chooseViewerPanel.add(panel_1);
-
-        // add a text field for the user to specify a viewer
-        textUserSpecifyViewer = new JTextField();
-        textUserSpecifyViewer.setEnabled(false);
-        panel_1.add(textUserSpecifyViewer);
-        textUserSpecifyViewer.setColumns(15);
-
-        // add a footer panel to hold control buttons
-        JPanel panelFooterButtons = new JPanel();
-        optionsPane.add(panelFooterButtons, BorderLayout.SOUTH);
-
-        // add a control button to restore defaults
-        JButton btnRestoreDefaults = new JButton("Restore Defaults");
-        panelFooterButtons.add(btnRestoreDefaults);
-
-        Component horizontalGlue_4 = Box.createHorizontalGlue();
-        horizontalGlue_4.setPreferredSize(new Dimension(20, 20));
-        panelFooterButtons.add(horizontalGlue_4);
-
-        btnUpdate = new JButton("Update");
-        btnUpdate.setEnabled(false);
-        panelFooterButtons.add(btnUpdate);
-
-        Component horizontalGlue_5 = Box.createHorizontalGlue();
-        horizontalGlue_5.setPreferredSize(new Dimension(20, 20));
-        panelFooterButtons.add(horizontalGlue_5);
-
-        btnCancel = new JButton("Cancel");
-        btnCancel.setEnabled(false);
-        panelFooterButtons.add(btnCancel);
-        return panelFooterButtons;
-    }
-
-    private JButton getResultsPaneHeaderPanel(JPanel resultsPane) {
-        JPanel resultsPaneHeaderPanel = new JPanel();
-        resultsPaneHeaderPanel.setBorder(new LineBorder(Color.BLUE, 2));
-        resultsPane.add(resultsPaneHeaderPanel, BorderLayout.NORTH);
-
-        resultsPaneHeaderPanel.add(getRunIDLabel());
-
-        Component horizontalGlue_1 = Box.createHorizontalGlue();
-        horizontalGlue_1.setPreferredSize(new Dimension(20, 20));
-        resultsPaneHeaderPanel.add(horizontalGlue_1);
-
-        // add a label to the header showing the Problem for which this set of test results applies
-        resultsPaneHeaderPanel.add(getProblemTitleLabel());
-
-        Component horizontalGlue = Box.createHorizontalGlue();
-        horizontalGlue.setPreferredSize(new Dimension(20, 20));
-        resultsPaneHeaderPanel.add(horizontalGlue);
-
-        // add a label to the header showing the Team for which this set of test results applies
-        // TODO: replace the following label text with the Team Name and Number from the current submission
-        resultsPaneHeaderPanel.add(getTeamNumberLabel());
-
-        Component horizontalGlue_2 = Box.createHorizontalGlue();
-        horizontalGlue_2.setPreferredSize(new Dimension(20, 20));
-        resultsPaneHeaderPanel.add(horizontalGlue_2);
-
-        resultsPaneHeaderPanel.add(getLanguageLabel());
-
-        Component horizontalGlue_8 = Box.createHorizontalGlue();
-        horizontalGlue_8.setPreferredSize(new Dimension(20, 20));
-        resultsPaneHeaderPanel.add(horizontalGlue_8);
-
-        // add a label to the header showing the total number of test cases for this problem
-        resultsPaneHeaderPanel.add(getNumTestCasesLabel());
-
-        Component horizontalGlue_7 = Box.createHorizontalGlue();
-        horizontalGlue_7.setPreferredSize(new Dimension(20, 20));
-        resultsPaneHeaderPanel.add(horizontalGlue_7);
-
-        resultsPaneHeaderPanel.add(getNumFailedTestCasesLabel());
-
-        // add a scrollpane to hold the table of results
-        resultsScrollPane = new JScrollPane();
-        resultsPane.add(resultsScrollPane, BorderLayout.CENTER);
-
-        // create an (empty) table of results and put it in the scrollpane
-        resultsTable = new JTable(12,7);
-        resultsTable.setValueAt(true, 0, 0);
-        resultsScrollPane.setViewportView(resultsTable);
-
-        // add a footer panel containing control buttons
-        JPanel resultsPaneFooterPanel = new JPanel();
-        resultsPane.add(resultsPaneFooterPanel, BorderLayout.SOUTH);
-
-        // add a control button to invoke comparison of the team and judge output files for selected row(s)
-        btnCompareSelected = new JButton("Compare Selected");
-        btnCompareSelected.setToolTipText("Show comparison between Team and Judge output for selected row(s)");
-        btnCompareSelected.setEnabled(true);
-        btnCompareSelected.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // display a comparison between the Team and Judge output in the selected table row(s)
-                compareFiles( getSelectedRowNums() );
+        //add a state-change handler to the "select built-in compare program" radio button
+        rdbtnInternalCompareProgram.addItemListener(new ItemListener() {
+            
+            @Override
+            public void itemStateChanged(ItemEvent arg0) {
+                if (rdbtnInternalCompareProgram.isSelected()) {
+                    currentComparatorCmd = "";
+                    enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
+                    ctype = TYPES.INTERNAL;
+                }
             }
-        });
 
-        //add a checkbox whose action is to allow filtering to show failed runs only
-        JCheckBox chkboxShowFailuresOnly = new JCheckBox("Show Failures Only", false);
-        chkboxShowFailuresOnly.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) { 
-                if (((JCheckBox) (e.getSource())).isSelected()) {
-                    loadTableWithFailedTestCases();
+        });
+        
+        // add a state-change handler to the "select compare program from list" radio button
+        rdbtnPulldownCompareList.addItemListener(new ItemListener() {
+            
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (rdbtnPulldownCompareList.isSelected()) {
+                    pulldownSelectComparator.setEnabled(true);
+                    ctype = TYPES.LIST;
                 } else {
-                    loadTableWithAllTestCases();
+                    pulldownSelectComparator.setEnabled(false);
                 }
-            }
-
-        });
-
-        resultsPaneFooterPanel.add(chkboxShowFailuresOnly);
-
-        Component horizontalStrut_1 = Box.createHorizontalStrut(20);
-        resultsPaneFooterPanel.add(horizontalStrut_1);
-
-        final JButton btnSelectAll = new JButton("Select All");
-        btnSelectAll.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // mark every checkbox in the "Select" column of the results table as "Selected" 
-                TableModel tm = resultsTable.getModel();
-                if (tm != null) {
-                    int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
-                    for (int row = 0; row < tm.getRowCount(); row++) {
-                        tm.setValueAt(new Boolean(true), row, col);
-                    }
-                    btnCompareSelected.setEnabled(true);
-                }
+                currentComparatorCmd = (String) pulldownSelectComparator.getSelectedItem();
+                enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
             }
         });
-        resultsPaneFooterPanel.add(btnSelectAll);
         
-        Component horizontalStrut_3 = Box.createHorizontalStrut(20);
-        resultsPaneFooterPanel.add(horizontalStrut_3);
+        // add a state-change listener to the "select user-specified compare program" radio button
+        rdbtnSpecifyCompareProgram.addItemListener(new ItemListener() {
+            
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (rdbtnSpecifyCompareProgram.isSelected()) {
+                    textUserSpecifyComparator.setEnabled(true);
+                    currentComparatorCmd = textUserSpecifyComparator.getText();
+                    ctype = TYPES.USER;
+                } else {
+                    textUserSpecifyComparator.setEnabled(false);
+                }
+                enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
+            }
+        });
         
-        JButton btnUnselectAll = new JButton("Unselect All");
-        btnUnselectAll.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // mark every checkbox in the "Select" column of the results table as "Unselected" 
-                TableModel tm = resultsTable.getModel();
-                if (tm != null) {
-                    int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
-                    for (int row = 0; row < tm.getRowCount(); row++) {
-                        tm.setValueAt(new Boolean(false), row, col);
-                    }
-                    btnCompareSelected.setEnabled(false);
+        // add a state-change listener to the "select build-in viewer program" radio button
+        rdbtnInternalViewerProgram.addItemListener(new ItemListener() {
+            
+            @Override
+            public void itemStateChanged(ItemEvent arg0) {
+                if (rdbtnInternalViewerProgram.isSelected()) {
+                    currentViewerCmd = "";
+                    vtype = TYPES.INTERNAL;
                 }
+                enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
             }
         });
-        resultsPaneFooterPanel.add(btnUnselectAll);
-
-        Component horizontalStrut_2 = Box.createHorizontalStrut(20);
-        resultsPaneFooterPanel.add(horizontalStrut_2);
-        btnCompareSelected.setEnabled(true);
-        resultsPaneFooterPanel.add(btnCompareSelected);
-
-        Component horizontalGlue_3 = Box.createHorizontalGlue();
-        horizontalGlue_3.setPreferredSize(new Dimension(20, 20));
-        resultsPaneFooterPanel.add(horizontalGlue_3);
-
-        // add a control button to dismiss the frame
-        final JButton btnClose = new JButton("Close");
-        btnClose.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (currentComparator != null) {
-                    currentComparator.dispose();
+        
+        // add a state-change listener to the "select viewer program from list" radio button
+        rdbtnPulldownViewerList.addItemListener(new ItemListener() {
+            
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (rdbtnPulldownViewerList.isSelected()) {
+                    currentViewerCmd = (String) pulldownSelectViewer.getSelectedItem();
+                    pulldownSelectViewer.setEnabled(true);
+                    vtype = TYPES.LIST;
+                } else {
+                    pulldownSelectViewer.setEnabled(false);
                 }
-                Window parentFrame = SwingUtilities.getWindowAncestor(btnClose);
-                if (parentFrame != null) {
-                    parentFrame.dispose();                    
-                }
+                enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
             }
         });
-        resultsPaneFooterPanel.add(btnClose);
-        return btnClose;
+        
+        // add a state-change listener to the "select user-specified viewer program" radio button
+        rdbtnSpecifyViewerProgram.addItemListener(new ItemListener() {
+            
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (rdbtnSpecifyViewerProgram.isSelected()) {
+                    textUserSpecifyViewer.setEnabled(true);
+                    vtype = TYPES.USER;
+                    currentViewerCmd = textUserSpecifyViewer.getText();
+                } else {
+                    textUserSpecifyViewer.setEnabled(false);
+                }
+                enableUpdateCancel(currentComparatorCmd,currentViewerCmd);
+            }
+        });
+
+        //add keylisteners to update the Update and Cancel buttons when the user types in the Choose Viewer textbox
+        textUserSpecifyViewer.addKeyListener(new KeyListener() {
+            
+            @Override
+            public void keyTyped(KeyEvent arg0) {
+                // unused
+            }
+            
+            @Override
+            public void keyReleased(KeyEvent arg0) {
+                if (vtype == TYPES.USER) {
+                    currentViewerCmd = textUserSpecifyViewer.getText();
+                    enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
+                }
+            }
+            
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+                // unused
+            }
+        });
+        
+        //add keylisteners to update the Update and Cancel buttons when the user types in the Choose Compare Program textbox
+        textUserSpecifyComparator.addKeyListener(new KeyListener() {
+            
+            @Override
+            public void keyTyped(KeyEvent arg0) {
+                // unused
+            }
+            
+            @Override
+            public void keyReleased(KeyEvent arg0) {
+                if (ctype == TYPES.USER) {
+                    currentComparatorCmd = textUserSpecifyComparator.getText();
+                    enableUpdateCancel(currentComparatorCmd, currentViewerCmd);
+                }
+            }
+            
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+                // unused
+            }
+        });
+    }
+
+    
+    /**
+     * Defines a header panel for the results pane containing information about the run whose results are being displayed.
+     * Note that this accessor does not fill in actual data; that cannot be done until the Test Results pane is populated
+     * via a call to {@link #setData(Run, RunFiles, Problem, ProblemDataFiles)}. 
+     * 
+     * @return a JPanel containing run information
+     */
+    private JPanel getResultsPaneHeaderPanel() {
+        
+        if (resultsPaneHeaderPanel == null) {
+            
+            resultsPaneHeaderPanel = new JPanel();
+            resultsPaneHeaderPanel.setBorder(new LineBorder(Color.BLUE, 2));
+
+            resultsPaneHeaderPanel.add(getRunIDLabel());
+
+            Component horizontalGlue_1 = Box.createHorizontalGlue();
+            horizontalGlue_1.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue_1);
+
+            // add a label to the header showing the Problem for which this set of test results applies
+            resultsPaneHeaderPanel.add(getProblemTitleLabel());
+
+            Component horizontalGlue = Box.createHorizontalGlue();
+            horizontalGlue.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue);
+
+            // add a label to the header showing the Team for which this set of test results applies
+            resultsPaneHeaderPanel.add(getTeamNumberLabel());
+
+            Component horizontalGlue_2 = Box.createHorizontalGlue();
+            horizontalGlue_2.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue_2);
+
+            resultsPaneHeaderPanel.add(getLanguageLabel());
+
+            Component horizontalGlue_8 = Box.createHorizontalGlue();
+            horizontalGlue_8.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue_8);
+
+            // add a label to the header showing the total number of test cases for this problem
+            resultsPaneHeaderPanel.add(getNumTestCasesLabel());
+
+            Component horizontalGlue_7 = Box.createHorizontalGlue();
+            horizontalGlue_7.setPreferredSize(new Dimension(20, 20));
+            resultsPaneHeaderPanel.add(horizontalGlue_7);
+
+            resultsPaneHeaderPanel.add(getNumFailedTestCasesLabel());
+        }
+        return resultsPaneHeaderPanel;
+    }
+
+    /**
+     * Returns a {@link JScrollPane} containing a {@link JTable} for holding test case results.
+     * @return
+     */
+    private JScrollPane getResultsScrollPane() {
+        
+        if (resultsScrollPane == null) {
+            
+            // add a scrollpane to hold the table of results
+            resultsScrollPane = new JScrollPane();
+
+            // create an (empty) table of results and put it in the scrollpane
+            resultsTable = new JTable(12,7);
+            resultsTable.setValueAt(true, 0, 0);
+            resultsScrollPane.setViewportView(resultsTable);
+        }
+        return resultsScrollPane;
     }
     
+    /**
+     * Returns a JPanel containing control buttons for the Results Pane.
+     * @return the resultsPaneButtonPanel
+     */
+    private JPanel getResultsPaneButtonPanel() {
+        
+        if (resultsPaneButtonPanel == null) {
+            
+            resultsPaneButtonPanel = new JPanel();
+
+            //add a checkbox to allow filtering between all test cases and only failed test cases
+            resultsPaneButtonPanel.add(getShowFailuresOnlyCheckbox());
+
+            //add space
+            Component horizontalStrut_1 = Box.createHorizontalStrut(20);
+            resultsPaneButtonPanel.add(horizontalStrut_1);
+
+            //add a button to select all test cases in the grid
+            resultsPaneButtonPanel.add(getSelectAllButton());
+            
+            //add space
+            Component horizontalStrut_3 = Box.createHorizontalStrut(20);
+            resultsPaneButtonPanel.add(horizontalStrut_3);
+            
+            //add a button to unselect all the test cases in the grid
+            resultsPaneButtonPanel.add(getUnselectAllButton());
+
+            //add space
+            Component horizontalStrut_2 = Box.createHorizontalStrut(20);
+            resultsPaneButtonPanel.add(horizontalStrut_2);
+            
+            // add a control button to invoke comparison of the team and judge output files for selected row(s)
+            resultsPaneButtonPanel.add(getCompareSelectedButton());
+
+            //add space
+            Component horizontalGlue_3 = Box.createHorizontalGlue();
+            horizontalGlue_3.setPreferredSize(new Dimension(20, 20));
+            resultsPaneButtonPanel.add(horizontalGlue_3);
+
+            // add a control button to dismiss the frame
+            resultsPaneButtonPanel.add(getResultsPaneCloseButton());
+        }
+        return resultsPaneButtonPanel;
+    }
+    
+    /**
+     * Defines a checkbox whose action is to allow filtering to show either all test cases or only failed test cases.
+     * @return the ShowFailuresOnly JCheckBox
+     */
+    private JCheckBox getShowFailuresOnlyCheckbox() {
+        
+        if (showFailuresOnlyCheckBox == null) {
+            
+            showFailuresOnlyCheckBox = new JCheckBox("Show Failures Only", false);
+            showFailuresOnlyCheckBox.addActionListener(new ActionListener() {
+                
+                @Override
+                public void actionPerformed(ActionEvent e) { 
+                    if (((JCheckBox) (e.getSource())).isSelected()) {
+                        loadTableWithFailedTestCases();
+                    } else {
+                        loadTableWithAllTestCases();
+                    }
+                    updateCompareSelectedButton();
+                }
+    
+            });
+        }
+        return showFailuresOnlyCheckBox;
+    }
+    
+    /**
+     * Returns a JButton whose action is to select all test cases in the results grid.
+     * @return the Select All JButton
+     */
+    private JButton getSelectAllButton() {
+        
+        if (selectAllButton == null) {
+            
+            selectAllButton = new JButton("Select All");
+            selectAllButton.addActionListener(new ActionListener() {
+                
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // mark every checkbox in the "Select" column of the results table as "Selected" 
+                    TableModel tm = resultsTable.getModel();
+                    if (tm != null) {
+                        int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
+                        for (int row = 0; row < tm.getRowCount(); row++) {
+                            tm.setValueAt(new Boolean(true), row, col);
+                        }
+                        updateCompareSelectedButton();
+                    }
+                }
+            });
+        }
+        return selectAllButton;
+    }
+    
+    /**
+     * Returns a JButton whose action is to unselect all test cases in the results grid.
+     * @return the Unselect All JButton
+     */
+    private JButton getUnselectAllButton() {
+        
+        if (unselectAllButton == null) {
+            
+            unselectAllButton = new JButton("Unselect All");
+            unselectAllButton.addActionListener(new ActionListener() {
+                
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // mark every checkbox in the "Select" column of the results table as "Unselected" 
+                    TableModel tm = resultsTable.getModel();
+                    if (tm != null) {
+                        int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
+                        for (int row = 0; row < tm.getRowCount(); row++) {
+                            tm.setValueAt(new Boolean(false), row, col);
+                        }
+                        //disable compare button when there are no test cases selected!
+                        updateCompareSelectedButton();
+                    }
+                }
+            });
+        }
+        return unselectAllButton;
+    }
+    
+    /**
+     * Returns a JButton whose action is to open a comparator to compare all selected test cases in the results grid.
+     * @return the Compare Selected JButton
+     */
+    private JButton getCompareSelectedButton() {
+        
+        if (compareSelectedButton == null) {
+            
+            compareSelectedButton = new JButton("Compare Selected");
+            compareSelectedButton.setToolTipText("Show comparison between Team and Judge output for selected row(s)");
+            
+            compareSelectedButton.addActionListener(new ActionListener() {
+                
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //insure there are some selected rows (it shouldn't be possible to get here if not - the button shouldn't have been enabled)
+                    int [] selectedRowNums = getSelectedRowNums();
+                    if (selectedRowNums.length <= 0) {
+                        getController().getLog().log(Log.SEVERE, "Compare Selected button enabled when there are no selected table data rows to compare! ");
+                        throw new RuntimeException("Compare Selected button enabled when there are no selected table data rows to compare! ");
+                    } else {
+                        // display a comparison between the Team and Judge output in the selected table row(s)
+                        compareFiles( selectedRowNums );
+                    }
+                }
+            });
+
+            //disable the compare button by default -- it should only be enabled when the grid is populated (and there are selected test cases)
+            compareSelectedButton.setEnabled(false);
+        }
+        return compareSelectedButton;
+    }
+     
+    /**
+     * Returns a JButton whose action is to depends on whether it is invoked from the Options pane or the Results pane.
+     * If invoked from the Options pane, it simply makes the Results pane the active pane.
+     * If invoked from the Results pane, it closes any open child windows (such as a {@link MultiFileComparator}), and
+     * then disposes this MultiTestSetOutputViewerPane's parent window.
+     * 
+     * Note that the Close button appears on both the Options pane and the Results pane -- but it is the same button,
+     * not two different instances (this is a result of the Singleton pattern implementation).
+     * 
+     * Addendum:  the above was the INTENT, and it is legal in Java/Swing to code it that way.  However, doing so generates 
+     * an error in the WindowBuilder (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=341111).  As a result, the code was
+     * refactored to provide two distinct Close buttons: one for the Options pane and a different one for the Results pane.
+     * 
+     * @return the Close JButton
+     */
+   private JButton getOptionsPaneCloseButton() {
+        if (optionsPaneCloseButton == null) {
+            optionsPaneCloseButton = new JButton("Close");
+            
+            //add an action handler for the Close button
+            optionsPaneCloseButton.addActionListener(new ActionListener() {
+                
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //check if we're closing the Options pane
+                    if (getMultiTestSetTabbedPane().getSelectedIndex() > 0) {
+                        //yes; just go back to the Test Results pane
+                        getMultiTestSetTabbedPane().setSelectedIndex(0);
+                    } else {
+                        //no; we're closing the Test Results pane -- get rid of any child panes
+                        if (currentComparator != null) {
+                            currentComparator.dispose();
+                        }
+                        Window parentFrame = SwingUtilities.getWindowAncestor(optionsPaneCloseButton);
+                        if (parentFrame != null) {
+                            parentFrame.dispose();                    
+                        }
+                    }
+                }
+            });
+        }
+        return optionsPaneCloseButton;
+    }
+   
+   /**
+    * Returns a JButton whose action is to depends on whether it is invoked from the Options pane or the Results pane.
+    * If invoked from the Options pane, it simply makes the Results pane the active pane.
+    * If invoked from the Results pane, it closes any open child windows (such as a {@link MultiFileComparator}), and
+    * then disposes this MultiTestSetOutputViewerPane's parent window.
+    * 
+    * Note that the Close button appears on both the Options pane and the Results pane -- but it is the same button,
+    * not two different instances (this is a result of the Singleton pattern implementation).
+    * 
+    * Addendum:  the above was the INTENT, and it is legal in Java/Swing to code it that way.  However, doing so generates 
+    * an error in the WindowBuilder (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=341111).  As a result, the code was
+    * refactored to provide two distinct Close buttons: one for the Options pane and a different one for the Results pane.
+    * 
+    * @return the Close JButton
+    */
+  private JButton getResultsPaneCloseButton() {
+       if (resultsPaneCloseButton == null) {
+           resultsPaneCloseButton = new JButton("Close");
+           
+           //add an action handler for the Close button
+           resultsPaneCloseButton.addActionListener(new ActionListener() {
+               
+               @Override
+               public void actionPerformed(ActionEvent e) {
+                   //check if we're closing the Options pane
+                   if (getMultiTestSetTabbedPane().getSelectedIndex() > 0) {
+                       //yes; just go back to the Test Results pane
+                       getMultiTestSetTabbedPane().setSelectedIndex(0);
+                   } else {
+                       //no; we're closing the Test Results pane -- get rid of any child panes
+                       if (currentComparator != null) {
+                           currentComparator.dispose();
+                       }
+                       Window parentFrame = SwingUtilities.getWindowAncestor(resultsPaneCloseButton);
+                       if (parentFrame != null) {
+                           parentFrame.dispose();                    
+                       }
+                   }
+               }
+           });
+       }
+       return resultsPaneCloseButton;
+   }
+  
+   /**
+    * Checks the current Results JTable and enables the "Compare Selected" button if there is at least one row selected
+    * (that is, with a check in the left-most column's checkbox); if there is no selected (checked) row, the button is
+    * disabled.
+    */
+   public void updateCompareSelectedButton() {
+       getCompareSelectedButton().setEnabled(false);
+       if (resultsTable != null) {
+           for (int i=0; i<resultsTable.getRowCount(); i++) {
+               if ((Boolean)resultsTable.getValueAt(i, COLUMN.SELECT_CHKBOX.ordinal())){
+                   //found at least one selected row
+                   getCompareSelectedButton().setEnabled(true);
+                   break;
+               }
+           }
+       }
+   }
+    
+
+    /**
+     * @return the currentViewer
+     */
+    public MultipleFileViewer getCurrentViewer() {
+        if (currentViewer == null) {
+            currentViewer = new MultipleFileViewer(getController().getLog());
+        }
+        return currentViewer;
+    }
+
     /**
      * Returns an array of ints containing the table row numbers of those rows whose 
      * "Select" checkbox is checked.
@@ -986,9 +1377,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
                 }
                 
                 resultsTable = getResultsTable(testCases);
-                resultsScrollPane.setViewportView(resultsTable);
+                getResultsScrollPane().setViewportView(resultsTable);
+                
+                updateCompareSelectedButton();
             }
-
 
         });
 
@@ -1166,6 +1558,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         //create the results table
         TableModel tableModel = new TestCaseResultsTableModel(testCases, columnNames) ;
         
+        tableModel.addTableModelListener(this);
+        
 //        System.out.println ("Table model contains:");
 //        System.out.println ("--------------");
 //        for (int row=0; row<tableModel.getRowCount(); row++) {
@@ -1189,7 +1583,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
             @Override
             // insure "compare" button is only enabled when at least one table row is selected
             public void valueChanged(ListSelectionEvent e) {
-                btnCompareSelected.setEnabled(getSelectedRowNums().length>0);
+                compareSelectedButton.setEnabled(getSelectedRowNums().length>0);
             }
         });
         
@@ -1243,6 +1637,22 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
     
     /**
+     * Invoked when table data changes; checks to see if the change took place in the "Select" column and if so
+     * updates the Compare Selected button (enables or disables it as necessary).
+     * 
+     * @param e the TableModelEvent describing the change in the table model
+     */
+    public void tableChanged(TableModelEvent e) {
+        int column = e.getColumn();
+        TableModel model = (TableModel)e.getSource();
+        String columnName = model.getColumnName(column);
+        if (columnName == columnNames[COLUMN.SELECT_CHKBOX.ordinal()]) {
+            updateCompareSelectedButton();
+        };
+    }
+
+    
+    /**
      * Returns an array of Strings listing the names of available (known) output viewer tools.
      * 
      * @return a String array of viewer tool names
@@ -1257,7 +1667,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
     }
 
     /**
-     * this update the btnUpdate/btnCancel as appropriate
+     * This method updates the state of the Update & Cancel buttons as appropriate.
      * 
      * @param theCurrentComparatorCmd
      * @param theCurrentViewerCmd
@@ -1571,10 +1981,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
         }
     }
 
-
-
-
-
     public void setData(Run run, RunFiles runFiles, Problem problem, ProblemDataFiles problemDataFiles) {
 
         this.currentRun = run;
@@ -1603,16 +2009,6 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin {
      */
     public void setTeamOutputFileNames(String [] filenames){
         this.currentTeamOutputFileNames = filenames ;
-    }
-
-    /**
-     * @return the multiTestSetTabbedPane
-     */
-    public JTabbedPane getMultiTestSetTabbedPane() {
-        if (multiTestSetTabbedPane == null) {
-            multiTestSetTabbedPane = new JTabbedPane(JTabbedPane.TOP);
-        }
-        return multiTestSetTabbedPane;
     }
 
     public void setValidatorOutputFileNames(String[] filenames) {
