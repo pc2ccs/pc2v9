@@ -19,10 +19,7 @@ import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
  * Loads group and teams.tsv files into Group and Account lists.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public final class ICPCTSVLoader {
 
     private ICPCTSVLoader() {
@@ -199,7 +196,7 @@ public final class ICPCTSVLoader {
         account.setTeamName(teamName);
         account.setExternalId(reservationIdStr);
         account.setCountryCode(countryCode);
-        if (institutionCode.equals("")) {
+        if (!institutionCode.equals("")) {
             account.setInstitutionCode(institutionCode);
         }
         
