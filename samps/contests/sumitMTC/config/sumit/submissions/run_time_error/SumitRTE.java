@@ -1,46 +1,51 @@
-import java.io.*;
+import java.util.Date;
 
-//
-// File:    SumitRTE.java
-// Purpose: to prodce a RTE (may not be possible in Java)
-// Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
-// 
-// Thu Nov 03 13:57:01 2016
-// 
-// $Id: isumit.java 1962 2009-11-25 03:42:12Z boudreat $
-//
-
-public class SumitRTE {
-
-    public static void main(String[] args) 
+/**
+ * Sumit that will cause a TLE.
+ * 
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+ */
+public class SumitTLE {
+    public static void main(String[] args)
     {
-	try
-	{	
-		BufferedReader br = new BufferedReader ( new InputStreamReader (System.in), 1);
-		
-		String line;
-		int sum = 0;
-		int rv = 0;
-		while((line = br.readLine()) != null) 
-		{			
-			rv = new Integer(line.trim()).intValue();
-			if (rv > 0)
-				sum = sum + rv;
-			// System.out.println(line);
-		}
+        try
+        {
+            //          BufferedReader br = new BufferedReader(new InputStreamReader(System.in), 1);
+            //
+            //          String line;
+            //          int sum = 0;
+            //          int rv = 0;
+            //          while ((line = br.readLine()) != null)
+            //          {
+            //              rv = new Integer(line.trim()).intValue();
+            //              if (rv > 0)
+            //              {
+            //                  sum = sum + rv;
+            //              }
+            //          }
+            //
+            //
+            //          System.out.print("The sum of the integers is ");
+            //          System.out.println(sum);
 
-		System.out.print("The sum of the integers is ");
-		System.out.println(sum);
-	}
-	catch(Exception e)
-	{
-		System.out.println("Possible trouble reading stdin");
-		System.out.println("Message: "+ e.getMessage());
-	}			
+            // Then do a nice loop and print date every 30 seconds
 
-		System.exit(66);  // non zero exit code
+            long pauseMS = 30 * 1000; // 30 seconds
 
+            System.out.println("Started at " + new Date());
+
+            while (true)
+            {
+                Thread.sleep(pauseMS);
+                System.out.println(new Date());
+            }
+
+        } catch (Exception e)
+        {
+            System.out.println("Possible trouble reading stdin");
+            System.out.println("Message: " + e.getMessage());
+        }
     }
 }
 
-// eof isumit.java $Id: isumit.java 1962 2009-11-25 03:42:12Z boudreat $
+// eof SumitTLE.java
