@@ -322,7 +322,7 @@ public class Executable extends Plugin implements IExecutable {
                         String errorMessage = "";
                         if (executionData.getCompileResultCode() == 1 || executionData.getExecutionException() != null) {
                             // compiler missing
-                            errorMessage = "Unable to find/execute copmiler using the command \"" + substituteAllStrings(run, language.getCompileCommandLine());
+                            errorMessage = "Unable to find/execute compiler using the command \"" + substituteAllStrings(run, language.getCompileCommandLine());
                             errorMessage += "\", contact staff";
                         } else {
                             // expected output missing
