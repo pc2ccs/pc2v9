@@ -1047,13 +1047,9 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         checkProblem.setUsingExternalDataFiles(getMultipleDataSetPane().isUsingExternalDataFiles());
-
         checkProblem.setTimeOutInSeconds(getIntegerValue(getTimeOutTextField().getText()));
-
         checkProblem.setLetter(getProblemLetterTextField().getText());
-
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
-
         checkProblem.setShortName(getShortNameTextfield().getText());
         if (!checkProblem.isValidShortName()) {
             throw new InvalidFieldValue("Invalid problem short name");
@@ -1064,14 +1060,7 @@ public class EditProblemPane extends JPanePlugin {
 
             // get problem data file info from GUI
 
-            String fileName = inputDataFileLabel.getText();
-            if (fileName == null || fileName.trim().length() == 0) {
-                throw new InvalidFieldValue("'Problem Requires Input Data' is checked; you must select an input data file ");
-            }
-
-            if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
-                fileName = inputDataFileLabel.getToolTipText() + "";
-            }
+            String fileName = getFileNameFromLabel(inputDataFileLabel,"Problem Requires Input Data", "input data");
 
             if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
@@ -1084,10 +1073,8 @@ public class EditProblemPane extends JPanePlugin {
                 } catch (Exception e) {
                     throw new InvalidFieldValue("Error reading file ' " + fileName + " ': " + e.getMessage() + " while adding problem; choose data file again");
                 }
-
                 checkProblem.setDataFileName(serializedFile.getName());
                 lastDataFile = serializedFile;
-
             } else {
                 // we're editing an existing problem
                 if (originalProblemDataFiles.getJudgesDataFiles().length < 2) {
@@ -1100,7 +1087,6 @@ public class EditProblemPane extends JPanePlugin {
                     } else {
                         serializedFile = freshenIfNeeded(serializedFile, fileName);
                     }
-
                     checkProblem.setDataFileName(serializedFile.getName());
                     lastDataFile = serializedFile;
                 } else if (originalProblemDataFiles.getJudgesDataFiles().length > 1) {
@@ -1114,18 +1100,8 @@ public class EditProblemPane extends JPanePlugin {
 
         // check if GUI indicates problem has judge's answer files
         if (judgesHaveAnswerFiles.isSelected()) {
-
             // get judge's answer file info from GUI
-
-            String fileName = answerFileNameLabel.getText();
-            if (fileName == null || fileName.trim().length() == 0) {
-                throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
-            }
-
-            if (fileName.trim().length() != answerFileNameLabel.getToolTipText().length()) {
-                fileName = answerFileNameLabel.getToolTipText() + "";
-            }
-
+            String fileName = getFileNameFromLabel(answerFileNameLabel,"Judges Have Provided Answer File", "judge answer");
             if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
 
@@ -1185,17 +1161,7 @@ public class EditProblemPane extends JPanePlugin {
 
         // set the flag indicating which output validator (if any) is being used in the Problem
         VALIDATORTYPE validatorType;
-        if (getUseNOValidatatorRadioButton().isSelected()) {
-            validatorType = VALIDATORTYPE.NONE;
-        } else if (getUsePC2ValidatorRadioButton().isSelected()) {
-            validatorType = VALIDATORTYPE.PC2VALIDATOR;
-        } else if (getUseCLICSValidatorRadioButton().isSelected()) {
-            validatorType = VALIDATORTYPE.CLICSVALIDATOR;
-        } else if (getUseCustomValidatorRadioButton().isSelected()) {
-            validatorType = VALIDATORTYPE.CUSTOMVALIDATOR;
-        } else {
-            throw new InvalidFieldValue("Illegal settings in validator selection buttons");
-        }
+        validatorType = getValidatorTypeFromUI();
         checkProblem.setValidatorType(validatorType);
 
         // update settings in the Problem for each type of output validator:
@@ -1206,43 +1172,31 @@ public class EditProblemPane extends JPanePlugin {
         // if Custom Validator is selected, make sure we have a SerializedFile for the Validator
         // (the PC2 and CLICS Validators use internal PC2 classes and don't need a separate SerializedFile)
         if (getUseCustomValidatorRadioButton().isSelected()) {
-
             String guiOutputValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
-
             if (guiOutputValidatorFileName == null || guiOutputValidatorFileName.trim().length() <= 0) {
                 // missing required custom validator name
                 throw new InvalidFieldValue("Missing required Custom Validator program name");
             } else {
                 guiOutputValidatorFileName = guiOutputValidatorFileName.trim();
             }
-
             if (!isEditingExistingProblem) {
-
                 outputValidatorSF = new SerializedFile(guiOutputValidatorFileName);
-
                 if (outputValidatorSF == null || outputValidatorSF.getBuffer() == null || (outputValidatorSF.getErrorMessage() != null && outputValidatorSF.getErrorMessage() != "")) {
-
                     String msg = "Unable to read file '" + guiOutputValidatorFileName + "' while adding new Problem; choose validator file again";
                     if (outputValidatorSF.getErrorMessage() != null) {
                         msg += "\n (Error Message = \"" + outputValidatorSF.getErrorMessage() + "\")";
                     }
                     throw new InvalidFieldValue(msg);
-
                 } else {
-
                     checkProblem.setOutputValidatorProgramName(outputValidatorSF.getAbsolutePath());
                 }
-
             } else {
-
                 // we're editing an existing problem
                 // get the output validator file from the problem data files
                 outputValidatorSF = originalProblemDataFiles.getOutputValidatorFile();
                 if (outputValidatorSF == null || !outputValidatorSF.getAbsolutePath().equals(guiOutputValidatorFileName)) {
-
                     // they've added a new file; try Serializing it
                     outputValidatorSF = new SerializedFile(guiOutputValidatorFileName);
-
                     // Check for serialization error/exception
                     try {
                         if (Utilities.serializedFileError(outputValidatorSF) || outputValidatorSF.getBuffer() == null) {
@@ -1251,18 +1205,15 @@ public class EditProblemPane extends JPanePlugin {
                     } catch (Exception e) {
                         throw new InvalidFieldValue("Error reading file ' " + guiOutputValidatorFileName + " ': " + e.getMessage() + " while adding problem; choose Output Validator file again");
                     }
-
                     checkFileFormat(outputValidatorSF);
                 } else {
                     outputValidatorSF = freshenIfNeeded(outputValidatorSF, guiOutputValidatorFileName);
                 }
-
                 // put the Custom Output Validator SerializedFile into the Problem
                 checkProblem.setOutputValidatorProgramName(outputValidatorSF.getAbsolutePath());
                 newProblemDataFiles.setOutputValidatorFile(outputValidatorSF);
             }
         }
-
         // update misc settings from GUI
         checkProblem.setShowValidationToJudges(getShowValidatorToJudgesCheckBox().isSelected());
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
@@ -1407,6 +1358,34 @@ public class EditProblemPane extends JPanePlugin {
 
         return checkProblem;
 
+    }
+
+    private String getFileNameFromLabel(JLabel label, String title, String details) {
+        String fileName = label.getText();
+        if (fileName == null || fileName.trim().length() == 0) {
+            throw new InvalidFieldValue("'"+title+"' is checked; you must select an "+details+" file ");
+        }
+
+        if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
+            fileName = inputDataFileLabel.getToolTipText() + "";
+        }
+        return fileName;
+    }
+
+    private VALIDATORTYPE getValidatorTypeFromUI() {
+        VALIDATORTYPE validatorType;
+        if (getUseNOValidatatorRadioButton().isSelected()) {
+            validatorType = VALIDATORTYPE.NONE;
+        } else if (getUsePC2ValidatorRadioButton().isSelected()) {
+            validatorType = VALIDATORTYPE.PC2VALIDATOR;
+        } else if (getUseCLICSValidatorRadioButton().isSelected()) {
+            validatorType = VALIDATORTYPE.CLICSVALIDATOR;
+        } else if (getUseCustomValidatorRadioButton().isSelected()) {
+            validatorType = VALIDATORTYPE.CUSTOMVALIDATOR;
+        } else {
+            throw new InvalidFieldValue("Illegal settings in validator selection buttons");
+        }
+        return validatorType;
     }
 
     /**
