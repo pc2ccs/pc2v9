@@ -1870,11 +1870,7 @@ public class EditProblemPane extends JPanePlugin {
         SerializedFile sf = new SerializedFile(fileName);
 
         // check to see if any errors occurred during serialization
-        if (sf != null && sf.getBuffer() != null && (sf.getErrorMessage() == null || sf.getErrorMessage().equals("")) && (sf.getException() == null)) {
-            return true;
-        } else {
-            return false;
-        }
+        return (sf != null && sf.getBuffer() != null && (sf.getErrorMessage() == null || sf.getErrorMessage().equals("")) && (sf.getException() == null));
     }
 
     /**

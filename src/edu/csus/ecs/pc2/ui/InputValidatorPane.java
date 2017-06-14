@@ -248,11 +248,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @return true if it is ok to run the Input Validator; false if not
      */
     protected boolean okToRunInputValidator() {
-        if (problemHasInputValidatorCommand() && problemHasInputDataFiles()) {
-            return true;
-        } else {
-            return false;
-        }
+        return (problemHasInputValidatorCommand() && problemHasInputDataFiles());
     }
 
     /**
@@ -261,11 +257,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @return true if the Input Validator command is a non-null, non-empty String; false otherwise
      */
     private boolean problemHasInputValidatorCommand() {
-        if (getInputValidatorCommand() != null && !getInputValidatorCommand().equals("")) {
-            return true;
-        } else {
-            return false;
-        }
+        return (getInputValidatorCommand() != null && !getInputValidatorCommand().equals(""));
     }
 
     /**
