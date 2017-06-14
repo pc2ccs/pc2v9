@@ -603,10 +603,8 @@ public class CustomJavaClicsInterfaceValidator {
                     return false;
                 }
             }
-        }
-
-        // we're not using float tolerance checking (or we don't have a float from the judge at this moment)
-        else if (isCaseSensitive) {
+        } else if (isCaseSensitive) {
+            // we're not using float tolerance checking (or we don't have a float from the judge at this moment)
             // check if judge and team tokens are equal, including case
             if (judgeToken.equals(teamToken)) {
                 return true;
@@ -620,11 +618,8 @@ public class CustomJavaClicsInterfaceValidator {
                 }
                 return false;
             }
-
-        }
-
-        // we're not using case-sensitivity
-        else if (judgeToken.equalsIgnoreCase(teamToken)) {
+        } else if (judgeToken.equalsIgnoreCase(teamToken)) {
+            // we're not using case-sensitivity
             return true;
         } else {
             try {

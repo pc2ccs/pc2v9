@@ -282,18 +282,12 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
                             int width = getCellDataWidth(row, column);
                             updateTableColumn(column, width);
                         }
-                    }
-
-                    // Could be an increase of decrease so check all rows
-
-                    else {
+                    } else {
+                        // Could be an increase of decrease so check all rows
                         adjustColumn(column);
                     }
-                }
-
-                // The update affected more than one column so adjust all columns
-
-                else {
+                } else {
+                    // The update affected more than one column so adjust all columns
                     adjustColumns();
                 }
             }
