@@ -12,7 +12,12 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
-
+/**
+ * Actually runs the program.
+ * 
+ * @author ICPC
+ *
+ */
 public class ProgramRunner {
 
     

@@ -310,6 +310,12 @@ public class ScoreboardModule implements UIPlugin {
         return contest.getSiteNumber() == siteNumber;
     }
 
+    /**
+     * Problem listener
+     * 
+     * @author ICPC
+     *
+     */
     public class ProblemListenerImplementation implements IProblemListener {
 
         public void problemAdded(ProblemEvent event) {
@@ -330,6 +336,12 @@ public class ScoreboardModule implements UIPlugin {
 
     }
 
+    /**
+     * Account Listener
+     * 
+     * @author ICPC
+     *
+     */
     public class AccountListenerImplementation implements IAccountListener {
 
         public void accountAdded(AccountEvent accountEvent) {
@@ -353,6 +365,12 @@ public class ScoreboardModule implements UIPlugin {
         }
     }
 
+    /**
+     * ContestTime listener
+     * 
+     * @author ICPC
+     *
+     */
     class ContestTimeListenerImplementation implements IContestTimeListener {
 
         public void contestTimeAdded(ContestTimeEvent event) {
@@ -417,6 +435,12 @@ public class ScoreboardModule implements UIPlugin {
         }
     }
 
+    /**
+     * BalloonSettings listener
+     * 
+     * @author ICPC
+     *
+     */
     public class BalloonSettingsListenerImplementation implements IBalloonSettingsListener {
 
         public void balloonSettingsAdded(BalloonSettingsEvent event) {
@@ -436,6 +460,12 @@ public class ScoreboardModule implements UIPlugin {
         }
     }
 
+    /**
+     * a ContestInformation Listener
+     * 
+     * @author ICPC
+     *
+     */
     class ContestInformationListenerImplementation implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
@@ -483,6 +513,11 @@ public class ScoreboardModule implements UIPlugin {
         return controller;
     }
 
+    /**
+     * a Language listener
+     * @author ICPC
+     *
+     */
     class LanguageListenerImlementation implements ILanguageListener {
 
         @Override

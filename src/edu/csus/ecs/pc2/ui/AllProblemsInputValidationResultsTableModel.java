@@ -12,6 +12,12 @@ import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.ProblemInputValidationResults;
 
+/**
+ * Table Model for All Problems Input Validation Results
+ * 
+ * @author ICPC
+ *
+ */
 public class AllProblemsInputValidationResultsTableModel extends DefaultTableModel {
 
     private static final long serialVersionUID = 1L;

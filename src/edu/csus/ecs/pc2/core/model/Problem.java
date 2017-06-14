@@ -122,6 +122,11 @@ public class Problem implements IElementObject {
     private String inputValidatorCommandLine = "";
     private String inputValidatorFilesOnDiskFolderName = "";   
 
+    /**
+     * enum of inputValidation Statuses
+     * @author ICPC
+     *
+     */
     public enum InputValidationStatus {
         /**
          * An Input Validator has been run on the data files in this problem and they all passed.
