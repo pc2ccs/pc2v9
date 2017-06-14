@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.validator.customValidator;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,68 +10,69 @@ import java.io.PrintWriter;
 import java.util.Vector;
 
 /**
- * A Custom Validator using the PC2 Validator Interface.
- * Based on the PC2 "Internal" validator.
- * Compares team output with judge's answer file and outputs a XML file with a judgement and other information.
+ * A Custom Validator using the PC2 Validator Interface. Based on the PC2 "Internal" validator. Compares team output with judge's answer file and outputs a XML file with a judgement and other
+ * information.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
-
 
 public class CustomJavaPC2InterfaceValidator {
 
     // System.out.println("Usage: java Validator <inputfile name> <outputfile
     // name> <answerfile name> <resultfile name> <-pc2> [options] icflag");
 
-    //Input data file name.
+    // Input data file name.
     private String inputFileName;
 
-    //Output file name.
+    // Output file name.
     private String outputFileName;
 
-	//Answer file name.
+    // Answer file name.
     private String answerFileName;
 
-    //results output file name.
+    // results output file name.
     private String resultFileName;
 
-     //PC2 comparison option.
+    // PC2 comparison option.
     private String pc2Option = "1";
 
-     //Case insensitive comparison.
+    // Case insensitive comparison.
     private boolean ignoreCaseFlag = false;
 
-     //Yes judgement.
+    // Yes judgement.
     public static final String JUDGEMENT_YES = "accepted";
 
-     //Presentation Error. (A format difference white space, etc.).
+    // Presentation Error. (A format difference white space, etc.).
     public static final String JUDGEMENT_NO_PRESENTATION_ERROR = "No - Presentation Error";
 
-     //Wrong answer. During compare, the output data/answer did not match.
+    // Wrong answer. During compare, the output data/answer did not match.
     public static final String JUDGEMENT_NO_WRONG_ANSWER = "No - Wrong Answer";
 
-     //Runtime error. Before compare, checks for EXITCODE.TXT
+    // Runtime error. Before compare, checks for EXITCODE.TXT
     public static final String JUDGEMENT_NO_RUNTIME_ERROR = "No - Run-time Error";
 
-     //Indeterminant. Covers all judgments
+    // Indeterminant. Covers all judgments
     public static final String JUDGEMENT_NO_INDETERMINANT = "No - Indeterminant";
 
-     //Additional description
+    // Additional description
     private String extraValidatorDifference = "";
 
     private boolean debugFlag = false;
-    
+
     private boolean allowFatalExit = true;
 
-     //prints more info, like EOF line counts.
+    // prints more info, like EOF line counts.
     private boolean verbose = false;
 
-    //Used by render judgements.
+    // Used by render judgements.
     private static final String REGULAR_DIFF = "1";
+
     private static final String IGNORE_WHITESPACE_HEAD = "2";
+
     // private static final String IGNORE_LEADING_WHITESPACE = "3";
     private static final String IGNORE_ALL_WHITESPACE = "4";
+
     private static final String IGNORE_EMPTY_LINES = "5";
 
     private void usage() {
@@ -208,7 +208,7 @@ public class CustomJavaPC2InterfaceValidator {
 
         String outputLine;
         String answerLine;
-        
+
         if (ignoreLeadingWhitespace || ignoreBlankLines) {
             outputLine = readPastBlankLines(outputFile);
             answerLine = readPastBlankLines(answerFile);
@@ -357,7 +357,7 @@ public class CustomJavaPC2InterfaceValidator {
 
     private void fatalError(String message, int exitCode) {
         System.err.println("Error: " + message);
-        if (allowFatalExit){
+        if (allowFatalExit) {
             System.exit(exitCode);
         }
     }
@@ -462,7 +462,7 @@ public class CustomJavaPC2InterfaceValidator {
 
         if (args.length == 0) {
             printUsage();
-            if (allowFatalExit){
+            if (allowFatalExit) {
                 System.exit(0);
             }
         }
@@ -470,9 +470,9 @@ public class CustomJavaPC2InterfaceValidator {
             printUsage();
             System.exit(4);
         }
-        
+
         int numberOfArgs = args.length;
-        
+
         if (args[argNum].equals("--nofatal")) {
             allowFatalExit = false;
             argNum++;
@@ -567,18 +567,20 @@ public class CustomJavaPC2InterfaceValidator {
         }
 
     }
-    
+
     /**
      * return validator command with input command
-     * @param whichCommand command line option for validator
+     * 
+     * @param whichCommand
+     *            command line option for validator
      * @return internal validator command line
      */
     public String getInternalValidatorCommandLine(int whichCommand, boolean ignoreCase) {
 
         String javaCmd = "java edu.csus.ecs.pc2.validator.Validator";
         String commandLine = null;
-        
-        commandLine = javaCmd  + " {:infile} {:outfile} {:ansfile} {:resfile} -pc2 " + whichCommand;
+
+        commandLine = javaCmd + " {:infile} {:outfile} {:ansfile} {:resfile} -pc2 " + whichCommand;
 
         if (ignoreCase) {
             commandLine = commandLine + " true";
@@ -588,19 +590,20 @@ public class CustomJavaPC2InterfaceValidator {
 
         return commandLine;
     }
-    
+
     public boolean isAllowFatalExit() {
         return allowFatalExit;
     }
 
     /**
      * 
-     * @param allowFatalExit if false not exit on fatal error
+     * @param allowFatalExit
+     *            if false not exit on fatal error
      */
     public void setAllowFatalExit(boolean allowFatalExit) {
         this.allowFatalExit = allowFatalExit;
     }
-    
+
     public boolean isVerbose() {
         return verbose;
     }

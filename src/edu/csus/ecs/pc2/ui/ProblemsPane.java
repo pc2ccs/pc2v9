@@ -68,15 +68,17 @@ public class ProblemsPane extends JPanePlugin {
     private EditProblemFrame editProblemFrame = null;
 
     private JButton reportButton = null;
+
     private JPanel centerPanel;
 
     private JButton setJudgesDataPathButton;
 
     private EditJudgesDataFilePathFrame editCDPPathFrame;
+
     private JButton runInputValidatorsButton;
 
     private RunInputValidatorsFrame runInputValidatorsFrame;
-    
+
     /**
      * This method initializes
      * 
@@ -137,9 +139,9 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "# Test Cases",  "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command",  };
+            Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", };
             problemListBox.addColumns(cols);
-            
+
             problemListBox.getColumnInfo(1).setAlignment(Alignment.CENTER);
             problemListBox.getColumnInfo(2).setAlignment(Alignment.CENTER);
             problemListBox.getColumnInfo(3).setAlignment(Alignment.CENTER);
@@ -185,24 +187,22 @@ public class ProblemsPane extends JPanePlugin {
             }
         });
     }
-    
+
     public void updateRunInputValidatorsProblemRow(final Problem problem) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                
-                //build a row of InputValidatorResults for the specified problem
+
+                // build a row of InputValidatorResults for the specified problem
                 Object[] rowData = buildRunInputValidatorsResultsProblemRow(problem);
-                
-                //add the row to the InputValidatorResults table model in the RunInputValidators pane
-                ((AllProblemsInputValidationResultsTableModel)(getRunInputValidatorsFrame().getRunInputValidatorsPane()
-                        .getInputValidatorResultsTable().getModel())).addRow(rowData);
-                
-                //tell the table to update
-                ((AllProblemsInputValidationResultsTableModel)(getRunInputValidatorsFrame().getRunInputValidatorsPane()
-                        .getInputValidatorResultsTable().getModel())).fireTableDataChanged();
+
+                // add the row to the InputValidatorResults table model in the RunInputValidators pane
+                ((AllProblemsInputValidationResultsTableModel) (getRunInputValidatorsFrame().getRunInputValidatorsPane().getInputValidatorResultsTable().getModel())).addRow(rowData);
+
+                // tell the table to update
+                ((AllProblemsInputValidationResultsTableModel) (getRunInputValidatorsFrame().getRunInputValidatorsPane().getInputValidatorResultsTable().getModel())).fireTableDataChanged();
             }
         });
-        
+
     }
 
     @SuppressWarnings("unused")
@@ -217,25 +217,26 @@ public class ProblemsPane extends JPanePlugin {
     protected Object[] buildProblemRow(Problem problem) {
         // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
         // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Prog", "Validator Command Line" };
-        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Short", "Time Limit", "SVTJ", "Output Validator", "O.V. Command", "Input Validation", "I.V. Command" };
-//        Object[] cols = { "Problem Name", "# Test Cases",  "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command",  };
+        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Short", "Time Limit", "SVTJ", "Output Validator", "O.V. Command", "Input Validation", "I.V.
+        // Command" };
+        // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", };
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new Object[numberColumns];
         int i = 0;
 
-        //problem name
+        // problem name
         String name = problem.getDisplayName();
-        if (! problem.isActive()){
-            name = "[HIDDEN] "+name;
+        if (!problem.isActive()) {
+            name = "[HIDDEN] " + name;
         }
         c[i++] = name;
-        
-        //num test cases
-//        c[i++] = new MCLBCenteredStringCellRenderer(new Integer(problem.getNumberTestCases()).toString());
-        c[i++] =new Integer(problem.getNumberTestCases()).toString();
-        
-        //input method
+
+        // num test cases
+        // c[i++] = new MCLBCenteredStringCellRenderer(new Integer(problem.getNumberTestCases()).toString());
+        c[i++] = new Integer(problem.getNumberTestCases()).toString();
+
+        // input method
         String inputMethod = "";
         if (problem.isReadInputDataFromSTDIN()) {
             inputMethod = "STDIN";
@@ -244,97 +245,97 @@ public class ProblemsPane extends JPanePlugin {
         } else {
             inputMethod = "(none)";
         }
-//        c[i++] = new MCLBCenteredStringCellRenderer(inputMethod);
+        // c[i++] = new MCLBCenteredStringCellRenderer(inputMethod);
         c[i++] = inputMethod;
-        
-        //judging type
+
+        // judging type
         String judgingType = "";
-        if (problem.isComputerJudged()){
+        if (problem.isComputerJudged()) {
             judgingType = "Computer";
-            if (problem.isManualReview()){
+            if (problem.isManualReview()) {
                 judgingType = "Computer+Manual";
-                if (problem.isPrelimaryNotification()){
+                if (problem.isPrelimaryNotification()) {
                     judgingType = "Computer+Manual/Notify";
                 }
             }
-        } else if (problem.isValidatedProblem()){
+        } else if (problem.isValidatedProblem()) {
             judgingType = "Manual w/Val.";
         } else {
             judgingType = "Manual";
         }
-//        c[i++] = new MCLBCenteredStringCellRenderer(judgingType);
+        // c[i++] = new MCLBCenteredStringCellRenderer(judgingType);
         c[i++] = judgingType;
-       
-        //problem short name
-//        c[i++] = new MCLBCenteredStringCellRenderer(problem.getShortName());
+
+        // problem short name
+        // c[i++] = new MCLBCenteredStringCellRenderer(problem.getShortName());
         c[i++] = problem.getShortName();
-        
-        //problem time limit
-//        c[i++] = new MCLBCenteredStringCellRenderer(Integer.toString(problem.getTimeOutInSeconds()));
-        c[i++] =Integer.toString(problem.getTimeOutInSeconds());
-        
-        //input validation status
+
+        // problem time limit
+        // c[i++] = new MCLBCenteredStringCellRenderer(Integer.toString(problem.getTimeOutInSeconds()));
+        c[i++] = Integer.toString(problem.getTimeOutInSeconds());
+
+        // input validation status
         if (problem.isProblemHasInputValidator()) {
             c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getInputValidationStatus());
         } else {
-//            c[i++] = new MCLBCenteredStringCellRenderer("<none>");
+            // c[i++] = new MCLBCenteredStringCellRenderer("<none>");
             c[i++] = "<none>";
         }
-        
-        //input validator command line
+
+        // input validator command line
         String inputValidatorCommandLine = "";
         if (problem.isProblemHasInputValidator()) {
             inputValidatorCommandLine = problem.getInputValidatorCommandLine();
         }
         c[i++] = inputValidatorCommandLine;
-        
-        //output validator program
+
+        // output validator program
         String validatorProgramName = "<none>";
         if (problem.isValidatedProblem()) {
             validatorProgramName = problem.getValidatorProgramName();
         }
         c[i++] = validatorProgramName;
-        
-        //output validator command line
+
+        // output validator command line
         String validatorCommandLine = "";
         if (problem.isValidatedProblem()) {
             validatorCommandLine = problem.getValidatorCommandLine();
         }
-        c[i++] = validatorCommandLine ; 
-        
+        c[i++] = validatorCommandLine;
+
         return c;
     }
-    
-    private Object [] buildRunInputValidatorsResultsProblemRow(Problem problem) {
-        //from AllProblemsInputValidationResultsTableModel:
+
+    private Object[] buildRunInputValidatorsResultsProblemRow(Problem problem) {
+        // from AllProblemsInputValidationResultsTableModel:
         // String[] colNames = { "Select", "Problem", "Overall Result", "Pass/Fail Count", "Failed Files...", "Input Validator", "I.V. Command" };
-        
-        int numberColumns = ((AllProblemsInputValidationResultsTableModel)(getRunInputValidatorsFrame().getRunInputValidatorsPane().getInputValidatorResultsTable().getModel())).getColumnCount();
+
+        int numberColumns = ((AllProblemsInputValidationResultsTableModel) (getRunInputValidatorsFrame().getRunInputValidatorsPane().getInputValidatorResultsTable().getModel())).getColumnCount();
 
         Object[] c = new Object[numberColumns];
         int i = 0;
-        
+
         c[i++] = new Boolean(true);
-        
+
         c[i++] = problem.getShortName();
 
         c[i++] = problem.getInputValidationStatus();
-        
+
         c[i++] = getPassFailCount(problem);
-        
+
         c[i++] = "<unknown>";
-        
+
         if (problem.isProblemHasInputValidator()) {
             c[i++] = problem.getInputValidatorProgramName();
         } else {
             c[i++] = "<none>";
         }
-        
-        c[i++] = problem.getInputValidatorCommandLine() ;
-        
+
+        c[i++] = problem.getInputValidatorCommandLine();
+
         return c;
     }
-    
+
     private String getPassFailCount(Problem problem) {
         String retStr = "";
         if (problem.getInputValidationStatus() == InputValidationStatus.NOT_TESTED || problem.getInputValidationStatus() == InputValidationStatus.ERROR) {
@@ -342,7 +343,7 @@ public class ProblemsPane extends JPanePlugin {
         } else {
             retStr = "?/?";
         }
-        
+
         return retStr;
     }
 
@@ -368,7 +369,7 @@ public class ProblemsPane extends JPanePlugin {
                 if (pdf != null) {
                     newProblemDataFiles = pdf.copy(newProblem);
                 }
-                
+
                 // just bring up the ui, let the user add/cancel the copied problem
                 editProblemFrame.setProblemCopy(newProblem, newProblemDataFiles);
                 editProblemFrame.setVisible(true);
@@ -376,19 +377,12 @@ public class ProblemsPane extends JPanePlugin {
             }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to clone problem, check log ("+e.getMessage()+")");
+            showMessage("Unable to clone problem, check log (" + e.getMessage() + ")");
         }
     }
- 
+
     private String promptForProblemName(String problemName) {
-        String s = (String)JOptionPane.showInputDialog(
-                this,
-                "Enter new name:\n",
-                "Copying problem '"+problemName+"'",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                null,
-                null);
+        String s = (String) JOptionPane.showInputDialog(this, "Enter new name:\n", "Copying problem '" + problemName + "'", JOptionPane.QUESTION_MESSAGE, null, null, null);
 
         return s;
     }
@@ -400,8 +394,8 @@ public class ProblemsPane extends JPanePlugin {
         for (Problem problem : problems) {
             addProblemRow(problem);
         }
-        
-        if (problems.length > 0 ) {
+
+        if (problems.length > 0) {
             getRunInputValidatorsButton().setEnabled(true);
         } else {
             getRunInputValidatorsButton().setEnabled(false);
@@ -421,7 +415,7 @@ public class ProblemsPane extends JPanePlugin {
 
         editProblemFrame.setContestAndController(inContest, inController);
         runInputValidatorsFrame.setContestAndController(inContest, inController);
-       
+
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
@@ -436,11 +430,10 @@ public class ProblemsPane extends JPanePlugin {
             }
         });
     }
-    
-    
+
     protected void enableUpdateButtons() {
 
-//        boolean enabled = !StringUtilities.stringSame(savedJudgeCDPLocation, judgeCDPLocationTextField.getText());
+        // boolean enabled = !StringUtilities.stringSame(savedJudgeCDPLocation, judgeCDPLocationTextField.getText());
 
     }
 
@@ -498,7 +491,7 @@ public class ProblemsPane extends JPanePlugin {
         }
         return copyButton;
     }
-    
+
     /**
      * This method initializes editButton
      * 
@@ -520,9 +513,9 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected void editSelectedProblem() {
-        
-//        showStackTrace();
-//        System.out.println ("Begin ProblemsPane.editSelectedProblem()...");
+
+        // showStackTrace();
+        // System.out.println ("Begin ProblemsPane.editSelectedProblem()...");
 
         int selectedIndex = problemListBox.getSelectedIndex();
         if (selectedIndex == -1) {
@@ -536,7 +529,7 @@ public class ProblemsPane extends JPanePlugin {
 
             ProblemDataFiles newProblemDataFiles = getController().getProblemDataFiles(problemToEdit);
 
-//            System.out.println ("ProblemDataFiles = " + newProblemDataFiles);
+            // System.out.println ("ProblemDataFiles = " + newProblemDataFiles);
 
             // bring up the ui, let the user add/cancel the copied problem
             editProblemFrame.setProblemCopy(problemToEdit, newProblemDataFiles);
@@ -552,7 +545,7 @@ public class ProblemsPane extends JPanePlugin {
             showMessage("Unable to edit problem, check log (" + e.getMessage() + ")");
         }
 
-//        System.out.println ("End ProblemsPane.editSelectedProblem()...");
+        // System.out.println ("End ProblemsPane.editSelectedProblem()...");
 
     }
 
@@ -577,49 +570,49 @@ public class ProblemsPane extends JPanePlugin {
     private void showMessage(final String string) {
         JOptionPane.showMessageDialog(this, string, "Problems pane message", JOptionPane.INFORMATION_MESSAGE);
     }
-    
+
     /**
      * 
      * @author ICPC
      *
      */
     class ContestInformationListenerImplementation implements IContestInformationListener {
-        
+
         @Override
         public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
             // ignore
-            
+
         }
-        
+
         @Override
         public void contestInformationRemoved(ContestInformationEvent event) {
             // ignore
-            
+
         }
-        
+
         @Override
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
-//            SwingUtilities.invokeLater(new Runnable() {
-//                public void run() {
-//                    refreshJudgesCDPField();
-//                }
-//            });
-            
+            // SwingUtilities.invokeLater(new Runnable() {
+            // public void run() {
+            // refreshJudgesCDPField();
+            // }
+            // });
+
         }
-        
+
         @Override
         public void contestInformationChanged(ContestInformationEvent event) {
-//            SwingUtilities.invokeLater(new Runnable() {
-//                public void run() {
-//                    refreshJudgesCDPField();
-//                }
-//            });
+            // SwingUtilities.invokeLater(new Runnable() {
+            // public void run() {
+            // refreshJudgesCDPField();
+            // }
+            // });
         }
-        
+
         @Override
         public void contestInformationAdded(ContestInformationEvent event) {
             // ignore
-            
+
         }
     }
 
@@ -661,44 +654,44 @@ public class ProblemsPane extends JPanePlugin {
                 public void run() {
                     populateGUI();
                 }
-            }); 
+            });
         }
     }
-    
-    protected void populateGUI() {
-        
-        // Assumption - this is run on the Swing Thread
-        
-        reloadListBox();
-//        refreshJudgesCDPField();
-    }
-    
-//    private void refreshJudgesCDPField() {
-//
-//        // Assumption - this is run on the Swing Thread
-//        try {
-//            savedJudgeCDPLocation = getJudgeCDPLocation();
-//            judgeCDPLocationTextField.setText(savedJudgeCDPLocation);
-//            enableUpdateButtons();
-//        } catch (Exception e) {
-//            getLog().log(Log.WARNING, "Problem fetching judges CDP Location ", e);
-//        }
-//
-//    }
 
-//    private String getJudgeCDPLocation() {
-//
-//        String value = null;
-//
-//        ContestInformation info = getContest().getContestInformation();
-//        if (info != null) {
-//            value = info.getJudgeCDPBasePath();
-//        }
-//        if (value == null){
-//            value = "";
-//        }
-//        return value;
-//    }
+    protected void populateGUI() {
+
+        // Assumption - this is run on the Swing Thread
+
+        reloadListBox();
+        // refreshJudgesCDPField();
+    }
+
+    // private void refreshJudgesCDPField() {
+    //
+    // // Assumption - this is run on the Swing Thread
+    // try {
+    // savedJudgeCDPLocation = getJudgeCDPLocation();
+    // judgeCDPLocationTextField.setText(savedJudgeCDPLocation);
+    // enableUpdateButtons();
+    // } catch (Exception e) {
+    // getLog().log(Log.WARNING, "Problem fetching judges CDP Location ", e);
+    // }
+    //
+    // }
+
+    // private String getJudgeCDPLocation() {
+    //
+    // String value = null;
+    //
+    // ContestInformation info = getContest().getContestInformation();
+    // if (info != null) {
+    // value = info.getJudgeCDPBasePath();
+    // }
+    // if (value == null){
+    // value = "";
+    // }
+    // return value;
+    // }
 
     /**
      * Account Listener Implementation.
@@ -786,7 +779,7 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected void viewReports() {
-        Utilities.viewReport(new ProblemsReport() , "Problems Report ", getContest(), getController());
+        Utilities.viewReport(new ProblemsReport(), "Problems Report ", getContest(), getController());
     }
 
     private JPanel getCenterPanel() {
@@ -797,35 +790,34 @@ public class ProblemsPane extends JPanePlugin {
         }
         return centerPanel;
     }
-    
-//    private void updateContestInformation() {
-//        ContestInformation contestInformation = getFromFields();
-//        getController().updateContestInformation(contestInformation);
-//    }
-//
-//    private ContestInformation getFromFields() {
-//        
-//        ContestInformation newInfo = getContest().getContestInformation();
-//        return newInfo;
-//    }
-    
+
+    // private void updateContestInformation() {
+    // ContestInformation contestInformation = getFromFields();
+    // getController().updateContestInformation(contestInformation);
+    // }
+    //
+    // private ContestInformation getFromFields() {
+    //
+    // ContestInformation newInfo = getContest().getContestInformation();
+    // return newInfo;
+    // }
+
     private JButton getSetJudgesDataPathButton() {
         if (setJudgesDataPathButton == null) {
             setJudgesDataPathButton = new JButton("Set Judge's Data Path");
-            setJudgesDataPathButton.setMnemonic(KeyEvent.VK_S);            
+            setJudgesDataPathButton.setMnemonic(KeyEvent.VK_S);
             setJudgesDataPathButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     editJudgesDataFilePath();
-                    }
+                }
             });
             setJudgesDataPathButton.setToolTipText("Specify a path to external data files on the Judge machines");
         }
         return setJudgesDataPathButton;
     }
-    
+
     /**
-     * Displays a frame which allows the user to edit the currently-defined CDP paths
-     * on both the Admin machine and the Judge's machines.
+     * Displays a frame which allows the user to edit the currently-defined CDP paths on both the Admin machine and the Judge's machines.
      */
     private void editJudgesDataFilePath() {
         getEditCDPFrame().setContestAndController(getContest(), getController());
@@ -833,7 +825,8 @@ public class ProblemsPane extends JPanePlugin {
         getEditCDPFrame().setVisible(true);
     }
 
-    /** Returns a singleton instance of the Frame used to edit the CDP path(s).
+    /**
+     * Returns a singleton instance of the Frame used to edit the CDP path(s).
      * 
      * @return the EditCDPPathFrame
      */
@@ -841,9 +834,9 @@ public class ProblemsPane extends JPanePlugin {
         if (editCDPPathFrame == null) {
             editCDPPathFrame = new EditJudgesDataFilePathFrame();
         }
-        return editCDPPathFrame ;
+        return editCDPPathFrame;
     }
-    
+
     /**
      * Returns a singleton instance of the Frame used to display the results of running the input validators.
      * 
@@ -853,48 +846,46 @@ public class ProblemsPane extends JPanePlugin {
         if (runInputValidatorsFrame == null) {
             runInputValidatorsFrame = new RunInputValidatorsFrame();
         }
-        return runInputValidatorsFrame ;
+        return runInputValidatorsFrame;
     }
 
     /**
-     * Displays the class, method, and line number of the method that called this method, 
-     * along with the same information for the method that called THAT method.
+     * Displays the class, method, and line number of the method that called this method, along with the same information for the method that called THAT method.
      */
     @SuppressWarnings("unused")
     private void showStackTrace() {
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        
+
         String callingClassName = stackTraceElements[2].getClassName();
         String callingMethodName = stackTraceElements[2].getMethodName();
         int callingMethodLineNumber = stackTraceElements[2].getLineNumber();
-        System.out.println ("\nIn " + callingClassName + "." + callingMethodName + "(line " + callingMethodLineNumber + ")");
+        System.out.println("\nIn " + callingClassName + "." + callingMethodName + "(line " + callingMethodLineNumber + ")");
 
         callingClassName = stackTraceElements[3].getClassName();
         callingMethodName = stackTraceElements[3].getMethodName();
         callingMethodLineNumber = stackTraceElements[3].getLineNumber();
-        System.out.println ("called from " + callingClassName + "." + callingMethodName + "(line " + callingMethodLineNumber + ")");
-        
+        System.out.println("called from " + callingClassName + "." + callingMethodName + "(line " + callingMethodLineNumber + ")");
+
     }
-    
 
     private JButton getRunInputValidatorsButton() {
         if (runInputValidatorsButton == null) {
-        	runInputValidatorsButton = new JButton("Run Input Validators...");
-        	runInputValidatorsButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        runInputValidators();
-        	    }
-        	});
-        	runInputValidatorsButton.setEnabled(false);
-        	runInputValidatorsButton.setVisible(false); // hide for Master branch until fully working
-        	runInputValidatorsButton.setToolTipText("Execute the Input Validator for each problem against the data files defined for that problem");
+            runInputValidatorsButton = new JButton("Run Input Validators...");
+            runInputValidatorsButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    runInputValidators();
+                }
+            });
+            runInputValidatorsButton.setEnabled(false);
+            runInputValidatorsButton.setVisible(false); // hide for Master branch until fully working
+            runInputValidatorsButton.setToolTipText("Execute the Input Validator for each problem against the data files defined for that problem");
         }
         return runInputValidatorsButton;
     }
-    
+
     private void runInputValidators() {
         getRunInputValidatorsFrame().setContestAndController(getContest(), getController());
         getRunInputValidatorsFrame().setVisible(true);
     }
-    
-} 
+
+}

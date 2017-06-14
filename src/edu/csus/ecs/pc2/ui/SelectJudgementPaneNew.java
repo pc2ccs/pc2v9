@@ -154,7 +154,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JButton viewOutputsButton = null;
 
     private GregorianCalendar startTimeCalendar;
-    
+
     private long executeTimeMS = 0;
 
     private MultiTestSetOutputViewerFrame multiTestSetOutputViewerFrame = null;
@@ -168,7 +168,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * saved validator output names
      */
     private List<String> saveValidatorOutputFileNames = null;
-    
+
     /**
      * saved validator stderr names
      */
@@ -177,6 +177,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel additionalInfoLabel;
 
     private JLabel additionalInfoTextLabel;
+
     private JLabel addtionalInfoMoreButtonLabel;
 
     /**
@@ -196,11 +197,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         BorderLayout borderLayout = new BorderLayout();
         borderLayout.setVgap(10);
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(800,400));
+        this.setSize(new java.awt.Dimension(800, 400));
 
-        this.setMaximumSize(new java.awt.Dimension(32767,32767));
-        this.setMinimumSize(new java.awt.Dimension(800,100));
-        this.setPreferredSize(new java.awt.Dimension(800,400));
+        this.setMaximumSize(new java.awt.Dimension(32767, 32767));
+        this.setMinimumSize(new java.awt.Dimension(800, 100));
+        this.setPreferredSize(new java.awt.Dimension(800, 400));
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
         this.add(getMainPanel(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
@@ -213,11 +214,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         displayTeamName = new DisplayTeamName();
         displayTeamName.setContestAndController(inContest, inController);
 
-        //getComputerJudgementPanel().setContestAndController(getContest(), getController());
-        //getManualRunResultsPanel().setContestAndController(getContest(), getController());
+        // getComputerJudgementPanel().setContestAndController(getContest(), getController());
+        // getManualRunResultsPanel().setContestAndController(getContest(), getController());
 
         initializePermissions();
-        
+
         getContest().addJudgementListener(new JudgementListenerImplementation());
     }
 
@@ -280,9 +281,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             acceptChosenSelectionButton.setText("Accept Selected");
             acceptChosenSelectionButton.setEnabled(false);
             acceptChosenSelectionButton.setActionCommand("Ok");
-            acceptChosenSelectionButton.setBounds(new java.awt.Rectangle(480,120,152,26));
+            acceptChosenSelectionButton.setBounds(new java.awt.Rectangle(480, 120, 152, 26));
             acceptChosenSelectionButton.setLocation(new Point(555, 130));
-            acceptChosenSelectionButton.setSize(new java.awt.Dimension(165,37));
+            acceptChosenSelectionButton.setSize(new java.awt.Dimension(165, 37));
             acceptChosenSelectionButton.setMnemonic(java.awt.event.KeyEvent.VK_O);
             acceptChosenSelectionButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -322,17 +323,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 String message = "You selected '" + manualJudgement + "'\n but the validator returned '" + validatorAnswer.getText() + "'."
                         + "\nDid you intend to assign a different result than the validator?" + "\n(Click Yes to accept your selection; click No to cancel)";
                 int result = JOptionPane.showConfirmDialog(this, message);
-                /*               
-                 *          Rather than forcing "no" to mean "cancel", a better option is to allow the user to choose
-                 *          between Yes, No, and Cancel as different meanings.  The following code will display an OptionPane
-                 *          with three different options; the "message" above needs to be changed, and the CALLING CODE
-                 *          needs to be changed to get back an indication of which of the three options was selected (rather
-                 *          than a boolean...)
-                 *           Object [] options = new Object [] {new JButton("Yes, accept my selection"), 
-                 new JButton("No, accept validator recommendation"),
-                 new JButton("Cancel")};
-                 int result = JOptionPane.showOptionDialog(this, message, "Confirm Change", JOptionPane.YES_NO_CANCEL_OPTION, 
-                 JOptionPane.QUESTION_MESSAGE, null, options, null );
+                /*
+                 * Rather than forcing "no" to mean "cancel", a better option is to allow the user to choose between Yes, No, and Cancel as different meanings. The following code will display an
+                 * OptionPane with three different options; the "message" above needs to be changed, and the CALLING CODE needs to be changed to get back an indication of which of the three options
+                 * was selected (rather than a boolean...) Object [] options = new Object [] {new JButton("Yes, accept my selection"), new JButton("No, accept validator recommendation"), new
+                 * JButton("Cancel")}; int result = JOptionPane.showOptionDialog(this, message, "Confirm Change", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null );
                  */
                 if (result != JOptionPane.YES_OPTION) {
                     return false;
@@ -350,8 +345,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (multiTestSetOutputViewerFrame != null) {
             multiTestSetOutputViewerFrame.dispose();
         }
-        //getManualRunResultsPanel().closeViewerWindows();
-        //getComputerJudgementPanel().closeViewerWindows();
+        // getManualRunResultsPanel().closeViewerWindows();
+        // getComputerJudgementPanel().closeViewerWindows();
     }
 
     private void closeViewer(IFileViewer fileViewer) {
@@ -363,24 +358,24 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     protected void updateRun() {
         try {
             Run newRun = getRunFromFields();
-    
+
             enableUpdateButtons(false);
             closeViewerWindows();
-    
+
             JudgementRecord judgementRecord = null;
             RunResultFiles newRunResultFiles = null;
-    
+
             if (judgementChanged()) {
                 newRun.setStatus(RunStates.JUDGED);
-    
+
                 boolean solved = getJudgementComboBox().getSelectedIndex() == 0;
                 Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
-    
+
                 judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
                 judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
                 TimeZone tz = TimeZone.getTimeZone("GMT");
                 GregorianCalendar cal = new GregorianCalendar(tz);
-    
+
                 long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
                 long totalSeconds = milliDiff / 1000;
                 judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
@@ -389,9 +384,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 // grab most recent active judgement
                 judgementRecord = newRun.getJudgementRecord();
             }
-    
+
             JudgeView.setAlreadyJudgingRun(false);
-    
+
             ExecutionData executionData = null;
             if (executable != null) {
                 executionData = executable.getExecutionData();
@@ -399,16 +394,16 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                     judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
                 }
             }
-    
+
             newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
-    
+
             getController().submitRunJudgement(newRun, judgementRecord, newRunResultFiles);
-    
+
             if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
             }
         } catch (Exception e) {
-            log.log(Log.WARNING,"updateRun()", e);
+            log.log(Log.WARNING, "updateRun()", e);
         }
     }
 
@@ -504,14 +499,14 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
             String teamName = getTeamDisplayName(theRun.getSubmitter());
 
-            //populate the Run Info panel fields
+            // populate the Run Info panel fields
             runInfoLabel.setText("Run " + theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ") from " + teamName);
             statusLabel.setText(run.getStatus().toString());
             elapsedTimeLabel.setText(new Long(run.getElapsedMins()).toString());
             problemNameLabel.setText(getContest().getProblem(run.getProblemId()).toString());
             languageNameLabel.setText(getContest().getLanguage(run.getLanguageId()).toString());
-            
-            //show the View Source button 
+
+            // show the View Source button
             getViewSourceButton().setVisible(true);
 
             // get the computer-assigned preliminary judgement record (if any)
@@ -529,9 +524,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                         }
                     }
                 }
-            } 
-            
-            //if there is a result matching the computer judgement (validator), show it 
+            }
+
+            // if there is a result matching the computer judgement (validator), show it
             if (matchingResult != null) {
                 // RunResultsFiles.getValidationResults() returns null for the Undetermined case
                 String judgement = computerJudgement.getValidatorResultString();
@@ -553,8 +548,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 // if we do not runFiles yet, do not allow view Outputs.
                 getViewOutputsButton().setEnabled(false);
             }
-        } else { //the run was null
-            
+        } else { // the run was null
+
             getAcceptChosenSelectionButton().setVisible(false);
 
             runInfoLabel.setText("Could not get run");
@@ -562,7 +557,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             elapsedTimeLabel.setText("");
             problemNameLabel.setText("");
             languageNameLabel.setText("");
-            
+
             getViewSourceButton().setVisible(false);
             showValidatorControls(false);
 
@@ -598,8 +593,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
 
         for (Judgement judgement : getContest().getJudgements()) {
-            
-            if (judgement.isActive()){
+
+            if (judgement.isActive()) {
                 getJudgementComboBox().addItem(judgement);
                 if (judgement.getElementId().equals(judgementId)) {
                     selectedIndex = index;
@@ -622,7 +617,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getJudgementComboBox().setEnabled(b && runFiles != null);
         getCancelButton().setEnabled(b);
         getAcceptValidatorJudgementButton().setEnabled(b);
-//        getViewOutputsButton().setEnabled(b);
+        // getViewOutputsButton().setEnabled(b);
         getAcceptChosenSelectionButton().setEnabled(b && getJudgementComboBox().getSelectedIndex() != -1);
     }
 
@@ -638,8 +633,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getViewSourceButton().setEnabled(runFiles != null);
         getJudgementComboBox().setEnabled(runFiles != null);
         getNotifyTeamCheckBox().setEnabled(runFiles != null);
-        
-        //can only accept chosen selection if a selection was made
+
+        // can only accept chosen selection if a selection was made
         getAcceptChosenSelectionButton().setEnabled(editedText);
 
     }
@@ -664,9 +659,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     private void enableOutputsButton(boolean b) {
-//            getViewOutputsButton().setEnabled(b);
+        // getViewOutputsButton().setEnabled(b);
     }
-    
+
     private boolean judgementChanged() {
         if (run.isJudged()) {
 
@@ -689,68 +684,68 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private JPanel getRunInfoPanel() {
         if (runInfoPanel == null) {
-            TitledBorder titledBorder1 = BorderFactory.createTitledBorder(null, "Run Information", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-                    new Font("Dialog", Font.BOLD, 18), new Color(51, 51, 51));
+            TitledBorder titledBorder1 = BorderFactory.createTitledBorder(null, "Run Information", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 18),
+                    new Color(51, 51, 51));
             titledBorder1.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
             titledBorder1.setTitleFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
             runInfoLabel = new JLabel();
-            runInfoLabel.setBounds(new java.awt.Rectangle(146,21,330,20));
+            runInfoLabel.setBounds(new java.awt.Rectangle(146, 21, 330, 20));
             runInfoLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             runInfoLabel.setText("            ");
             elapsedTimeLabel = new JLabel();
             elapsedTimeLabel.setText("<unknown>");
             elapsedTimeLabel.setSize(new java.awt.Dimension(180, 19));
-            elapsedTimeLabel.setLocation(new java.awt.Point(95,75));
-            elapsedTimeLabel.setBounds(new java.awt.Rectangle(473,52,102,25));
+            elapsedTimeLabel.setLocation(new java.awt.Point(95, 75));
+            elapsedTimeLabel.setBounds(new java.awt.Rectangle(473, 52, 102, 25));
             elapsedTimeLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             elapsedTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             languageNameLabel = new JLabel();
             languageNameLabel.setText("<unknown>");
             languageNameLabel.setSize(new java.awt.Dimension(211, 19));
-            languageNameLabel.setLocation(new java.awt.Point(385,75));
-            languageNameLabel.setBounds(new java.awt.Rectangle(177,82,199,26));
+            languageNameLabel.setLocation(new java.awt.Point(385, 75));
+            languageNameLabel.setBounds(new java.awt.Rectangle(177, 82, 199, 26));
             languageNameLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             languageNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             problemNameLabel = new JLabel();
             problemNameLabel.setText("<unknown>");
             problemNameLabel.setSize(new java.awt.Dimension(212, 19));
-            problemNameLabel.setLocation(new java.awt.Point(385,45));
-            problemNameLabel.setBounds(new java.awt.Rectangle(177,51,215,26));
+            problemNameLabel.setLocation(new java.awt.Point(385, 45));
+            problemNameLabel.setBounds(new java.awt.Rectangle(177, 51, 215, 26));
             problemNameLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             problemNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             elapsedTitleLabel = new JLabel();
             elapsedTitleLabel.setText("Time: ");
-            elapsedTitleLabel.setLocation(new java.awt.Point(25,75));
+            elapsedTitleLabel.setLocation(new java.awt.Point(25, 75));
             elapsedTitleLabel.setSize(new java.awt.Dimension(58, 19));
-            elapsedTitleLabel.setBounds(new java.awt.Rectangle(404,52,58,26));
+            elapsedTitleLabel.setBounds(new java.awt.Rectangle(404, 52, 58, 26));
             elapsedTitleLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             elapsedTitleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             languageTitleLabel = new JLabel();
             languageTitleLabel.setText("Language: ");
-            languageTitleLabel.setLocation(new java.awt.Point(295,75));
+            languageTitleLabel.setLocation(new java.awt.Point(295, 75));
             languageTitleLabel.setSize(new java.awt.Dimension(77, 19));
-            languageTitleLabel.setBounds(new java.awt.Rectangle(83,81,90,28));
+            languageTitleLabel.setBounds(new java.awt.Rectangle(83, 81, 90, 28));
             languageTitleLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             languageTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             problemTitleLabel = new JLabel();
             problemTitleLabel.setText("Problem: ");
-            problemTitleLabel.setLocation(new java.awt.Point(295,45));
+            problemTitleLabel.setLocation(new java.awt.Point(295, 45));
             problemTitleLabel.setSize(new java.awt.Dimension(80, 19));
-            problemTitleLabel.setBounds(new java.awt.Rectangle(82,52,90,23));
+            problemTitleLabel.setBounds(new java.awt.Rectangle(82, 52, 90, 23));
             problemTitleLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             problemTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             statusTitleLabel = new JLabel();
             statusTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            statusTitleLabel.setLocation(new java.awt.Point(11,43));
-            statusTitleLabel.setSize(new java.awt.Dimension(75,23));
-            statusTitleLabel.setBounds(new java.awt.Rectangle(399,85,62,26));
+            statusTitleLabel.setLocation(new java.awt.Point(11, 43));
+            statusTitleLabel.setSize(new java.awt.Dimension(75, 23));
+            statusTitleLabel.setBounds(new java.awt.Rectangle(399, 85, 62, 26));
             statusTitleLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             statusTitleLabel.setText("Status: ");
             statusLabel = new JLabel();
             statusLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-            statusLabel.setSize(new java.awt.Dimension(191,21));
-            statusLabel.setLocation(new java.awt.Point(95,45));
-            statusLabel.setBounds(new java.awt.Rectangle(472,85,219,25));
+            statusLabel.setSize(new java.awt.Dimension(191, 21));
+            statusLabel.setLocation(new java.awt.Point(95, 45));
+            statusLabel.setBounds(new java.awt.Rectangle(472, 85, 219, 25));
             statusLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             statusLabel.setText("<unknown>");
             runInfoPanel = new JPanel();
@@ -789,9 +784,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             executeButton = new JButton();
             executeButton.setText("Execute Run");
             executeButton.setActionCommand("Execute");
-            executeButton.setBounds(new java.awt.Rectangle(60,120,129,26));
+            executeButton.setBounds(new java.awt.Rectangle(60, 120, 129, 26));
             executeButton.setLocation(new Point(60, 130));
-            executeButton.setSize(new java.awt.Dimension(131,36));
+            executeButton.setSize(new java.awt.Dimension(131, 36));
             executeButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
             executeButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             executeButton.addActionListener(new java.awt.event.ActionListener() {
@@ -852,13 +847,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     protected void executeRun() {
-        
+
         executeTimeMS = 0;
         System.gc();
 
         executable = new Executable(getContest(), getController(), run, runFiles);
 
-        //getManualRunResultsPanel().clear();
+        // getManualRunResultsPanel().clear();
         setEnabledButtonStatus(false);
         executable.execute();
         saveOutputFileNames = executable.getTeamsOutputFilenames();
@@ -884,7 +879,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (executable.isValidationSuccess()) {
             String results = executable.getValidationResults();
             if (results != null && results.trim().length() > 1) {
-                
+
                 if (results.equalsIgnoreCase("accepted") || results.equalsIgnoreCase("yes")) {
                     results = getContest().getJudgements()[0].getDisplayName();
                 }
@@ -896,7 +891,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 Judgement yesJudgement = getContest().getJudgements()[0];
                 if (yesJudgement.getElementId().equals(elementId)) {
                     solved = true;
-                } 
+                }
                 judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), solved, true);
                 judgementRecord.setValidatorResultString(results);
 
@@ -921,10 +916,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
         }
 
-//        RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
-        //getManualRunResultsPanel().populatePane(rrf, "Manual Results");
-        //getManualRunResultsPanel().setVisible(true);
-                
+        // RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
+        // getManualRunResultsPanel().populatePane(rrf, "Manual Results");
+        // getManualRunResultsPanel().setVisible(true);
+
         enableOutputsButton(true);
         setEnabledButtonStatus(true);
     }
@@ -1091,9 +1086,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (judgementComboBox == null) {
             judgementComboBox = new JComboBox<Judgement>();
             judgementComboBox.setMinimumSize(new java.awt.Dimension(150, 25));
-            judgementComboBox.setBounds(new java.awt.Rectangle(225,120,225,25));
+            judgementComboBox.setBounds(new java.awt.Rectangle(225, 120, 225, 25));
             judgementComboBox.setLocation(new Point(225, 130));
-            judgementComboBox.setSize(new java.awt.Dimension(271,33));
+            judgementComboBox.setSize(new java.awt.Dimension(271, 33));
             judgementComboBox.setPreferredSize(new java.awt.Dimension(150, 25));
             judgementComboBox.setMaximumRowCount(15);
             judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1231,9 +1226,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             acceptValidatorJudgementButton = new JButton();
             acceptValidatorJudgementButton.setText("Accept Validator");
             acceptValidatorJudgementButton.setPreferredSize(new java.awt.Dimension(150, 26));
-            acceptValidatorJudgementButton.setBounds(new java.awt.Rectangle(479,46,150,26));
-            acceptValidatorJudgementButton.setSize(new java.awt.Dimension(167,34));
-            acceptValidatorJudgementButton.setLocation(new java.awt.Point(554,27));
+            acceptValidatorJudgementButton.setBounds(new java.awt.Rectangle(479, 46, 150, 26));
+            acceptValidatorJudgementButton.setSize(new java.awt.Dimension(167, 34));
+            acceptValidatorJudgementButton.setLocation(new java.awt.Point(554, 27));
             acceptValidatorJudgementButton.setForeground(Color.BLUE);
             acceptValidatorJudgementButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1248,12 +1243,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         validatorAnswerLabel.setVisible(showControls);
         validatorAnswer.setVisible(showControls);
         getAcceptValidatorJudgementButton().setVisible(showControls);
-        
+
         ExecutionData executionData = getExecutionData();
-       
-        //only set "additional info" fields visible if there is additional info to show
+
+        // only set "additional info" fields visible if there is additional info to show
         if (showControls) {
-            if (executionData != null && executionData.getAdditionalInformation() != null && executionData.getAdditionalInformation().trim().length() > 0){
+            if (executionData != null && executionData.getAdditionalInformation() != null && executionData.getAdditionalInformation().trim().length() > 0) {
                 additionalInfoLabel.setVisible(true);
                 additionalInfoTextLabel.setVisible(true);
                 additionalInfoTextLabel.setText(executionData.getAdditionalInformation());
@@ -1272,9 +1267,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private ElementId getValidatorResultElementID(String results) {
         // Try to find result text in judgement list
-        //  (start with a default of a non-variable-scoring "no" judgment)
+        // (start with a default of a non-variable-scoring "no" judgment)
         ElementId elementId = getContest().getJudgements()[2].getElementId();
-        
+
         for (Judgement judgement : getContest().getJudgements()) {
             if (judgement.getDisplayName().equals(results)) {
                 elementId = judgement.getElementId();
@@ -1376,12 +1371,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     protected void viewOutputs() {
-        
-//        if (executableFileViewer != null) {
-//            executableFileViewer.setVisible(true);
-//        } else {
-//            JOptionPane.showMessageDialog(this, "No output yet!");
-//        }
+
+        // if (executableFileViewer != null) {
+        // executableFileViewer.setVisible(true);
+        // } else {
+        // JOptionPane.showMessageDialog(this, "No output yet!");
+        // }
 
         sendTeamOutputFileNames();
         sendValidatorOutputFileNames();
@@ -1468,7 +1463,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (mainPanel == null) {
             mainPanel = new JPanel();
             mainPanel.setLayout(new BorderLayout());
-            mainPanel.setPreferredSize(new java.awt.Dimension(700,300));
+            mainPanel.setPreferredSize(new java.awt.Dimension(700, 300));
             mainPanel.add(getRunInfoPanel(), java.awt.BorderLayout.NORTH);
             mainPanel.add(getAssignJudgementPanel(), java.awt.BorderLayout.CENTER);
         }
@@ -1482,27 +1477,21 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private JPanel getAssignJudgementPanel() {
         if (assignJudgementPanel == null) {
-            TitledBorder titledBorder = BorderFactory.createTitledBorder(
-                    BorderFactory.createLineBorder(Color.blue, 2), 
-                    "Assign Judgement", 
-                    TitledBorder.DEFAULT_JUSTIFICATION, 
-                    TitledBorder.DEFAULT_POSITION, 
-                    new Font("Dialog", Font.BOLD, 16), 
-                    new Color(51, 51, 51)
-            );
-            titledBorder.setBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.blue,1));
+            TitledBorder titledBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.blue, 2), "Assign Judgement", TitledBorder.DEFAULT_JUSTIFICATION,
+                    TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 16), new Color(51, 51, 51));
+            titledBorder.setBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.blue, 1));
             selectJudgementCheckboxLabel = new JLabel();
             selectJudgementCheckboxLabel.setLocation(new Point(252, 110));
             selectJudgementCheckboxLabel.setBounds(new Rectangle(252, 110, 212, 19));
             selectJudgementCheckboxLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             selectJudgementCheckboxLabel.setText("Select Judgement");
             validatorAnswer = new JLabel();
-            validatorAnswer.setBounds(new java.awt.Rectangle(299,30,196,31));
+            validatorAnswer.setBounds(new java.awt.Rectangle(299, 30, 196, 31));
             validatorAnswer.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             validatorAnswer.setForeground(Color.RED);
             validatorAnswer.setText("<unknown>");
             validatorAnswerLabel = new JLabel();
-            validatorAnswerLabel.setBounds(new java.awt.Rectangle(75,30,211,30));
+            validatorAnswerLabel.setBounds(new java.awt.Rectangle(75, 30, 211, 30));
             validatorAnswerLabel.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
             validatorAnswerLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             validatorAnswerLabel.setText("Validator Recommends: ");
@@ -1510,7 +1499,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
             assignJudgementPanel = new JPanel();
             assignJudgementPanel.setLayout(null);
-            assignJudgementPanel.setPreferredSize(new java.awt.Dimension(700,300));
+            assignJudgementPanel.setPreferredSize(new java.awt.Dimension(700, 300));
             assignJudgementPanel.setMaximumSize(new java.awt.Dimension(1280, 1280));
             assignJudgementPanel.setBorder(titledBorder);
             assignJudgementPanel.add(getExecuteButton(), null);
@@ -1521,19 +1510,19 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             assignJudgementPanel.add(validatorAnswerLabel, null);
             assignJudgementPanel.add(validatorAnswer, null);
             assignJudgementPanel.add(selectJudgementCheckboxLabel, null);
-            
+
             additionalInfoLabel = new JLabel("Additional Info:");
             additionalInfoLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             additionalInfoLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
             additionalInfoLabel.setFont(new Font("Dialog", Font.BOLD, 13));
             additionalInfoLabel.setBounds(149, 71, 110, 14);
             assignJudgementPanel.add(additionalInfoLabel);
-            
+
             additionalInfoTextLabel = new JLabel("<none>");
             additionalInfoTextLabel.setFont(new Font("Dialog", Font.PLAIN, 12));
             additionalInfoTextLabel.setBounds(269, 71, 211, 14);
             assignJudgementPanel.add(additionalInfoTextLabel);
-            
+
             assignJudgementPanel.add(getAdditionalInfoMoreButtonLabel());
         }
         return assignJudgementPanel;
@@ -1578,7 +1567,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
         return viewOutputsButton;
     }
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -1604,46 +1593,45 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             reloadComboBoxes();
         }
     }
+
     private JLabel getAdditionalInfoMoreButtonLabel() {
         if (addtionalInfoMoreButtonLabel == null) {
-        	addtionalInfoMoreButtonLabel = new JLabel("More...");
-        	addtionalInfoMoreButtonLabel.addMouseListener(new MouseAdapter() {
-        	    @Override
-        	    public void mouseClicked(MouseEvent e) {
-                    JOptionPane.showMessageDialog(null, "<html><body><p style='width: 400px;'>" 
-                                    +  getExecutionData().getAdditionalInformation()
-                                    + "</p></body></html>", 
-                                    "Validator Additional Information", JOptionPane.PLAIN_MESSAGE, null);
-        	    }
-        	});
-        	addtionalInfoMoreButtonLabel.setForeground(Color.BLUE);
-        	addtionalInfoMoreButtonLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
-        	addtionalInfoMoreButtonLabel.setBounds(479, 71, 46, 14);
+            addtionalInfoMoreButtonLabel = new JLabel("More...");
+            addtionalInfoMoreButtonLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, "<html><body><p style='width: 400px;'>" + getExecutionData().getAdditionalInformation() + "</p></body></html>",
+                            "Validator Additional Information", JOptionPane.PLAIN_MESSAGE, null);
+                }
+            });
+            addtionalInfoMoreButtonLabel.setForeground(Color.BLUE);
+            addtionalInfoMoreButtonLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+            addtionalInfoMoreButtonLabel.setBounds(479, 71, 46, 14);
         }
         return addtionalInfoMoreButtonLabel;
     }
 
     protected ExecutionData getExecutionData() {
-        
+
         ExecutionData executionData = null;
-        
-        if (executable != null){
+
+        if (executable != null) {
             executionData = executable.getExecutionData();
         } else {
 
             try {
                 RunResultFiles[] files = getContest().getRunResultFiles(run);
-                if (files != null && files.length > 0){
-                    RunResultFiles runResultFiles = files[files.length-1];
-                    if (runResultFiles != null){
+                if (files != null && files.length > 0) {
+                    RunResultFiles runResultFiles = files[files.length - 1];
+                    if (runResultFiles != null) {
                         executionData = runResultFiles.getExecutionData();
                     }
                 }
             } catch (Exception e) {
-                log.log(Log.WARNING, "Cannot get RunResultFiles for run "+run, e);
+                log.log(Log.WARNING, "Cannot get RunResultFiles for run " + run, e);
             }
         }
         return executionData;
-        
+
     }
 } // @jve:decl-index=0:visual-constraint="10,10"

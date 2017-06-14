@@ -64,6 +64,7 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox chckbxTeams;
 
     private WebServer webServer = null;
+
     private JCheckBox chckbxFetchRuns;
 
     /**
@@ -158,15 +159,13 @@ public class WebServerPane extends JPanePlugin {
         properties.put(WebServer.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(chckbxStarttime.isSelected()));
 
         properties.put(WebServer.TEAMS_SERVICE_ENABLED_KEY, Boolean.toString(chckbxTeams.isSelected()));
-        
+
         properties.put(WebServer.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(chckbxFetchRuns.isSelected()));
 
         getWebServer().startWebServer(getContest(), getController(), properties);
 
         updateGUI();
     }
-
-
 
     private void showMessage(String string) {
         JOptionPane.showMessageDialog(this, string);
@@ -197,7 +196,7 @@ public class WebServerPane extends JPanePlugin {
      * restarted. (However, need to consider what happens if the user selects a different set of services to be enabled...)
      */
     protected void stopWebServer() {
-        
+
         getWebServer().stop();
         updateGUI();
     }
@@ -310,7 +309,7 @@ public class WebServerPane extends JPanePlugin {
     private void updateGUI() {
 
         boolean serverRunning = getWebServer().isServerRunning();
-        
+
         getStartButton().setEnabled(!serverRunning);
         getStopButton().setEnabled(serverRunning);
         updateWebServerSettings(serverRunning);
@@ -389,9 +388,9 @@ public class WebServerPane extends JPanePlugin {
         }
         return chckbxTeams;
     }
-    
+
     protected WebServer getWebServer() {
-        if (webServer == null){
+        if (webServer == null) {
             webServer = new WebServer();
         }
         return webServer;
@@ -399,8 +398,8 @@ public class WebServerPane extends JPanePlugin {
 
     private JCheckBox getChckbxFetchRuns() {
         if (chckbxFetchRuns == null) {
-        	chckbxFetchRuns = new JCheckBox("/submission_files");
-        	chckbxFetchRuns.setSelected(true);
+            chckbxFetchRuns = new JCheckBox("/submission_files");
+            chckbxFetchRuns.setSelected(true);
         }
         return chckbxFetchRuns;
     }
