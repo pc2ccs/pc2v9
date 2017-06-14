@@ -349,10 +349,8 @@ public class Executable extends Plugin implements IExecutable {
                         fileViewer.addTextPane("Error during compile", errorMessage);
                     } // else they will get a tab hopefully showing something wrong
                 }
-            }
-
-            // if we get here, this is a Judged Run (not a Team Test Run)
-            else if (compileProgram()) {
+            } else if (compileProgram()) {
+                // if we get here, this is a Judged Run (not a Team Test Run)
 
                 // compile succeeded; proceed to execution
 
@@ -1006,10 +1004,8 @@ public class Executable extends Plugin implements IExecutable {
                     executionData.setValidationSuccess(true);
                 }
             }
-        }
-
-        //check if the Validator was using the "CLICS Validator Interface" Standard
-        else if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
+        } else if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
+            //check if the Validator was using the "CLICS Validator Interface" Standard
 
             //it was using the CLICS Validator Interface, check the results file(s)
             try {
