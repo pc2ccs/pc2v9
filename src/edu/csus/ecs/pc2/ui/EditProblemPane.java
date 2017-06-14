@@ -3398,47 +3398,47 @@ public class EditProblemPane extends JPanePlugin {
             gbl_clicsValidatorOptionsSubPanel.rowWeights = new double[] { 0.0, 0.0 };
             clicsValidatorOptionsSubPanel.setLayout(gbl_clicsValidatorOptionsSubPanel);
 
-            GridBagConstraints gbc_CaseSensitiveCheckBox = new GridBagConstraints();
-            gbc_CaseSensitiveCheckBox.fill = GridBagConstraints.BOTH;
-            gbc_CaseSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_CaseSensitiveCheckBox.gridx = 0;
-            gbc_CaseSensitiveCheckBox.gridy = 0;
-            clicsValidatorOptionsSubPanel.add(getCLICSValidatorCaseSensitiveCheckBox(), gbc_CaseSensitiveCheckBox);
+            GridBagConstraints gbc_caseSensitiveCheckBox = new GridBagConstraints();
+            gbc_caseSensitiveCheckBox.fill = GridBagConstraints.BOTH;
+            gbc_caseSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
+            gbc_caseSensitiveCheckBox.gridx = 0;
+            gbc_caseSensitiveCheckBox.gridy = 0;
+            clicsValidatorOptionsSubPanel.add(getCLICSValidatorCaseSensitiveCheckBox(), gbc_caseSensitiveCheckBox);
 
-            GridBagConstraints gbc_FloatRelativeToleranceCheckBox = new GridBagConstraints();
-            gbc_FloatRelativeToleranceCheckBox.fill = GridBagConstraints.BOTH;
-            gbc_FloatRelativeToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_FloatRelativeToleranceCheckBox.gridx = 1;
-            gbc_FloatRelativeToleranceCheckBox.gridy = 0;
-            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceCheckBox(), gbc_FloatRelativeToleranceCheckBox);
+            GridBagConstraints gbc_floatRelativeToleranceCheckBox = new GridBagConstraints();
+            gbc_floatRelativeToleranceCheckBox.fill = GridBagConstraints.BOTH;
+            gbc_floatRelativeToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
+            gbc_floatRelativeToleranceCheckBox.gridx = 1;
+            gbc_floatRelativeToleranceCheckBox.gridy = 0;
+            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceCheckBox(), gbc_floatRelativeToleranceCheckBox);
 
-            GridBagConstraints gbc_FloatRelativeToleranceTextField = new GridBagConstraints();
-            gbc_FloatRelativeToleranceTextField.insets = new Insets(0, 0, 5, 5);
-            gbc_FloatRelativeToleranceTextField.fill = GridBagConstraints.BOTH;
-            gbc_FloatRelativeToleranceTextField.gridx = 2;
-            gbc_FloatRelativeToleranceTextField.gridy = 0;
-            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceTextField(), gbc_FloatRelativeToleranceTextField);
+            GridBagConstraints gbc_floatRelativeToleranceTextField = new GridBagConstraints();
+            gbc_floatRelativeToleranceTextField.insets = new Insets(0, 0, 5, 5);
+            gbc_floatRelativeToleranceTextField.fill = GridBagConstraints.BOTH;
+            gbc_floatRelativeToleranceTextField.gridx = 2;
+            gbc_floatRelativeToleranceTextField.gridy = 0;
+            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceTextField(), gbc_floatRelativeToleranceTextField);
 
-            GridBagConstraints gbc_SpaceSensitiveCheckBox = new GridBagConstraints();
-            gbc_SpaceSensitiveCheckBox.fill = GridBagConstraints.BOTH;
-            gbc_SpaceSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_SpaceSensitiveCheckBox.gridx = 0;
-            gbc_SpaceSensitiveCheckBox.gridy = 1;
-            clicsValidatorOptionsSubPanel.add(getCLICSSpaceSensitiveCheckBox(), gbc_SpaceSensitiveCheckBox);
+            GridBagConstraints gbc_spaceSensitiveCheckBox = new GridBagConstraints();
+            gbc_spaceSensitiveCheckBox.fill = GridBagConstraints.BOTH;
+            gbc_spaceSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
+            gbc_spaceSensitiveCheckBox.gridx = 0;
+            gbc_spaceSensitiveCheckBox.gridy = 1;
+            clicsValidatorOptionsSubPanel.add(getCLICSSpaceSensitiveCheckBox(), gbc_spaceSensitiveCheckBox);
 
-            GridBagConstraints gbc_FloatAbsoluteToleranceCheckBox = new GridBagConstraints();
-            gbc_FloatAbsoluteToleranceCheckBox.anchor = GridBagConstraints.WEST;
-            gbc_FloatAbsoluteToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_FloatAbsoluteToleranceCheckBox.gridx = 1;
-            gbc_FloatAbsoluteToleranceCheckBox.gridy = 1;
-            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceCheckBox(), gbc_FloatAbsoluteToleranceCheckBox);
+            GridBagConstraints gbc_floatAbsoluteToleranceCheckBox = new GridBagConstraints();
+            gbc_floatAbsoluteToleranceCheckBox.anchor = GridBagConstraints.WEST;
+            gbc_floatAbsoluteToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
+            gbc_floatAbsoluteToleranceCheckBox.gridx = 1;
+            gbc_floatAbsoluteToleranceCheckBox.gridy = 1;
+            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceCheckBox(), gbc_floatAbsoluteToleranceCheckBox);
 
-            GridBagConstraints gbc_FloatAbsoluteToleranceTextField = new GridBagConstraints();
-            gbc_FloatAbsoluteToleranceTextField.insets = new Insets(0, 0, 5, 5);
-            gbc_FloatAbsoluteToleranceTextField.fill = GridBagConstraints.BOTH;
-            gbc_FloatAbsoluteToleranceTextField.gridx = 2;
-            gbc_FloatAbsoluteToleranceTextField.gridy = 1;
-            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceTextField(), gbc_FloatAbsoluteToleranceTextField);
+            GridBagConstraints gbc_floatAbsoluteToleranceTextField = new GridBagConstraints();
+            gbc_floatAbsoluteToleranceTextField.insets = new Insets(0, 0, 5, 5);
+            gbc_floatAbsoluteToleranceTextField.fill = GridBagConstraints.BOTH;
+            gbc_floatAbsoluteToleranceTextField.gridx = 2;
+            gbc_floatAbsoluteToleranceTextField.gridy = 1;
+            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceTextField(), gbc_floatAbsoluteToleranceTextField);
         }
         return clicsValidatorOptionsSubPanel;
     }
@@ -4501,12 +4501,12 @@ public class EditProblemPane extends JPanePlugin {
             customValidatorOptionsSubPanel.add(getCustomValidatorCommandLineTextField(), gbc_customValidatorCommandLineTextField);
 
             // add the Custom Validator Interface label to the subpanel
-            GridBagConstraints gbc_CustomValidatorInterfaceLabel = new GridBagConstraints();
-            gbc_CustomValidatorInterfaceLabel.anchor = GridBagConstraints.EAST;
-            gbc_CustomValidatorInterfaceLabel.insets = new Insets(0, 0, 5, 5);
-            gbc_CustomValidatorInterfaceLabel.gridx = 0;
-            gbc_CustomValidatorInterfaceLabel.gridy = 2;
-            customValidatorOptionsSubPanel.add(getCustomValidatorInterfaceLabel(), gbc_CustomValidatorInterfaceLabel);
+            GridBagConstraints gbc_customValidatorInterfaceLabel = new GridBagConstraints();
+            gbc_customValidatorInterfaceLabel.anchor = GridBagConstraints.EAST;
+            gbc_customValidatorInterfaceLabel.insets = new Insets(0, 0, 5, 5);
+            gbc_customValidatorInterfaceLabel.gridx = 0;
+            gbc_customValidatorInterfaceLabel.gridy = 2;
+            customValidatorOptionsSubPanel.add(getCustomValidatorInterfaceLabel(), gbc_customValidatorInterfaceLabel);
 
             // add the "Use PC2 Validator Interface" radio button to the subpanel
             GridBagConstraints gbc_rdbtnUsePc2Standard = new GridBagConstraints();
@@ -4516,12 +4516,12 @@ public class EditProblemPane extends JPanePlugin {
             customValidatorOptionsSubPanel.add(getUsePC2ValStdRadioButton(), gbc_rdbtnUsePc2Standard);
 
             // add the "What's This" icon for the PC2 Validator Standard Interface radio button to the subpanel
-            GridBagConstraints gbc_label_WhatsThisPC2ValStd = new GridBagConstraints();
-            gbc_label_WhatsThisPC2ValStd.anchor = GridBagConstraints.WEST;
-            gbc_label_WhatsThisPC2ValStd.insets = new Insets(0, 0, 5, 0);
-            gbc_label_WhatsThisPC2ValStd.gridx = 2;
-            gbc_label_WhatsThisPC2ValStd.gridy = 2;
-            customValidatorOptionsSubPanel.add(getLabelWhatsThisPC2ValStd(), gbc_label_WhatsThisPC2ValStd);
+            GridBagConstraints gbc_labelWhatsThisPC2ValStd = new GridBagConstraints();
+            gbc_labelWhatsThisPC2ValStd.anchor = GridBagConstraints.WEST;
+            gbc_labelWhatsThisPC2ValStd.insets = new Insets(0, 0, 5, 0);
+            gbc_labelWhatsThisPC2ValStd.gridx = 2;
+            gbc_labelWhatsThisPC2ValStd.gridy = 2;
+            customValidatorOptionsSubPanel.add(getLabelWhatsThisPC2ValStd(), gbc_labelWhatsThisPC2ValStd);
 
             // add the "Use CLICS Validator Interface" radio button to the subpanel
             GridBagConstraints gbc_rdbtnUseClicsStandard = new GridBagConstraints();
@@ -4531,11 +4531,11 @@ public class EditProblemPane extends JPanePlugin {
             customValidatorOptionsSubPanel.add(getUseClicsValStdRadioButton(), gbc_rdbtnUseClicsStandard);
 
             // add the "What's This" icon for the CLICS Validator Standard Interface radio button to the subpanel
-            GridBagConstraints gbc_label_WhatsThisCLICSValStd = new GridBagConstraints();
-            gbc_label_WhatsThisCLICSValStd.anchor = GridBagConstraints.WEST;
-            gbc_label_WhatsThisCLICSValStd.gridx = 2;
-            gbc_label_WhatsThisCLICSValStd.gridy = 3;
-            customValidatorOptionsSubPanel.add(getLabelWhatsThisCLICSValStd(), gbc_label_WhatsThisCLICSValStd);
+            GridBagConstraints gbc_labelWhatsThisCLICSValStd = new GridBagConstraints();
+            gbc_labelWhatsThisCLICSValStd.anchor = GridBagConstraints.WEST;
+            gbc_labelWhatsThisCLICSValStd.gridx = 2;
+            gbc_labelWhatsThisCLICSValStd.gridy = 3;
+            customValidatorOptionsSubPanel.add(getLabelWhatsThisCLICSValStd(), gbc_labelWhatsThisCLICSValStd);
         }
         return customValidatorOptionsSubPanel;
     }
