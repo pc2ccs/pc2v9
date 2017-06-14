@@ -28,8 +28,9 @@ public class Base64 {
                 if (i >= bytes.length) {
                     b3 = 0;
                     pad = 1;
-                } else
+                } else {
                     b3 = bytes[i++];
+                }
             }
 
             // the following section has updates which are necessary because the original version of this class was designed

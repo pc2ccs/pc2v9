@@ -82,8 +82,9 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     public void adjustColumn(final int column) {
         TableColumn tableColumn = table.getColumnModel().getColumn(column);
 
-        if (!tableColumn.getResizable())
+        if (!tableColumn.getResizable()) {
             return;
+        }
 
         int columnHeaderWidth = getColumnHeaderWidth(column);
         int columnDataWidth = getColumnDataWidth(column);
@@ -96,8 +97,9 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
      * Calculated the width based on the column name
      */
     private int getColumnHeaderWidth(int column) {
-        if (!isColumnHeaderIncluded)
+        if (!isColumnHeaderIncluded) {
             return 0;
+        }
 
         TableColumn tableColumn = table.getColumnModel().getColumn(column);
         Object value = tableColumn.getHeaderValue();
@@ -115,8 +117,9 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
      * Calculate the width based on the widest cell renderer for the given column.
      */
     private int getColumnDataWidth(int column) {
-        if (!isColumnDataIncluded)
+        if (!isColumnDataIncluded) {
             return 0;
+        }
 
         int preferredWidth = 0;
         int maxWidth = table.getColumnModel().getColumn(column).getMaxWidth();
@@ -126,8 +129,9 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
             // We've exceeded the maximum width, no need to check other rows
 
-            if (preferredWidth >= maxWidth)
+            if (preferredWidth >= maxWidth) {
                 break;
+            }
         }
 
         return preferredWidth;
@@ -152,8 +156,9 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     private void updateTableColumn(int column, int width) {
         final TableColumn tableColumn = table.getColumnModel().getColumn(column);
 
-        if (!tableColumn.getResizable())
+        if (!tableColumn.getResizable()) {
             return;
+        }
 
         width += spacing;
 
@@ -254,8 +259,9 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     // Implement the TableModelListener
     //
     public void tableChanged(final TableModelEvent e) {
-        if (!isColumnDataIncluded)
+        if (!isColumnDataIncluded) {
             return;
+        }
 
         // Needed when table is sorted.
 
@@ -351,16 +357,18 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
                 int[] columns = table.getSelectedColumns();
 
                 for (int i = 0; i < columns.length; i++) {
-                    if (isAdjust)
+                    if (isAdjust) {
                         adjustColumn(columns[i]);
-                    else
+                    } else {
                         restoreColumn(columns[i]);
+                    }
                 }
             } else {
-                if (isAdjust)
+                if (isAdjust) {
                     adjustColumns();
-                else
+                } else {
                     restoreColumns();
+                }
             }
         }
     }
