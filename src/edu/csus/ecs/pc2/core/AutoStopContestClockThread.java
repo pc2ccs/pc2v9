@@ -125,10 +125,10 @@ public class AutoStopContestClockThread extends Thread {
     /**
      * Set period to check for end of contest.
      * 
-     * @param delayMs
+     * @param millis
      */
-    public void setSleepMs(long delayMs) {
-        this.delayMs = delayMs;
+    public void setSleepMs(long millis) {
+        this.delayMs = millis;
     }
 
     /**

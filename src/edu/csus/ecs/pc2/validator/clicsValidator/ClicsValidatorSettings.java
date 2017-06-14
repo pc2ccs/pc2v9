@@ -202,10 +202,10 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
 
     /**
      * Sets the case-sensitivity option.
-     * @param isCaseSensitive the case-sensitivity value to set
+     * @param caseSensitive the case-sensitivity value to set
      */
-    public void setCaseSensitive(boolean isCaseSensitive) {
-        this.isCaseSensitive = isCaseSensitive;
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.isCaseSensitive = caseSensitive;
     }
 
     /**
@@ -217,10 +217,10 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
 
     /**
      * Sets the space-sensitivity option.
-     * @param isSpaceSensitive the space-sensitivity value to set
+     * @param spaceSensitive the space-sensitivity value to set
      */
-    public void setSpaceSensitive(boolean isSpaceSensitive) {
-        this.isSpaceSensitive = isSpaceSensitive;
+    public void setSpaceSensitive(boolean spaceSensitive) {
+        this.isSpaceSensitive = spaceSensitive;
     }
 
     /**

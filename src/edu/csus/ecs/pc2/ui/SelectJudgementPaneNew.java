@@ -1622,9 +1622,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             try {
                 RunResultFiles[] files = getContest().getRunResultFiles(run);
                 if (files != null && files.length > 0) {
-                    RunResultFiles runResultFiles = files[files.length - 1];
-                    if (runResultFiles != null) {
-                        executionData = runResultFiles.getExecutionData();
+                    RunResultFiles runResultFilesSlice = files[files.length - 1];
+                    if (runResultFilesSlice != null) {
+                        executionData = runResultFilesSlice.getExecutionData();
                     }
                 }
             } catch (Exception e) {

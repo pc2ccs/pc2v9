@@ -201,32 +201,32 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     /**
      * Indicates whether to include the header in the width calculation
      */
-    public void setColumnHeaderIncluded(boolean isColumnHeaderIncluded) {
-        this.isColumnHeaderIncluded = isColumnHeaderIncluded;
+    public void setColumnHeaderIncluded(boolean columnHeaderIncluded) {
+        this.isColumnHeaderIncluded = columnHeaderIncluded;
     }
 
     /**
      * Indicates whether to include the model data in the width calculation
      */
-    public void setColumnDataIncluded(boolean isColumnDataIncluded) {
-        this.isColumnDataIncluded = isColumnDataIncluded;
+    public void setColumnDataIncluded(boolean columnDataIncluded) {
+        this.isColumnDataIncluded = columnDataIncluded;
     }
 
     /**
      * Indicates whether columns can only be increased in size
      */
-    public void setOnlyAdjustLarger(boolean isOnlyAdjustLarger) {
-        this.isOnlyAdjustLarger = isOnlyAdjustLarger;
+    public void setOnlyAdjustLarger(boolean onlyAdjustLarger) {
+        this.isOnlyAdjustLarger = onlyAdjustLarger;
     }
 
     /**
      * Indicate whether changes to the model should cause the width to be dynamically recalculated.
      */
-    public void setDynamicAdjustment(boolean isDynamicAdjustment) {
+    public void setDynamicAdjustment(boolean dynamicAdjustment) {
         // May need to add or remove the TableModelListener when changed
 
-        if (this.isDynamicAdjustment != isDynamicAdjustment) {
-            if (isDynamicAdjustment) {
+        if (this.isDynamicAdjustment != dynamicAdjustment) {
+            if (dynamicAdjustment) {
                 table.addPropertyChangeListener(this);
                 table.getModel().addTableModelListener(this);
             } else {
@@ -235,7 +235,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
             }
         }
 
-        this.isDynamicAdjustment = isDynamicAdjustment;
+        this.isDynamicAdjustment = dynamicAdjustment;
     }
 
     //

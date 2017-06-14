@@ -1377,11 +1377,11 @@ public class Executable extends Plugin implements IExecutable {
      * 
      * @param resultsFileName
      *            the name of the file containing the results
-     * @param log
+     * @param aLog
      *            the Log to be used for logging
      */
-    private void updateCustomPC2InterfaceValidatorResults(String resultsFileName, Log log) {
-        updatePC2ValidatorResults(resultsFileName, log);
+    private void updateCustomPC2InterfaceValidatorResults(String resultsFileName, Log aLog) {
+        updatePC2ValidatorResults(resultsFileName, aLog);
     }
 
     /**
@@ -1397,11 +1397,11 @@ public class Executable extends Plugin implements IExecutable {
      *            the path to the feedback directory
      * @param feedbackFileBaseName
      *            the base name for feedback files in the feedback directory
-     * @param log
+     * @param aLog
      *            the Log to be used for logging
      */
-    private void updateCustomClicsInterfaceValidatorResults(int exitcode, String feedbackDirPath, Log log) {
-        updateClicsValidatorResults(exitcode, feedbackDirPath, log);
+    private void updateCustomClicsInterfaceValidatorResults(int exitcode, String feedbackDirPath, Log aLog) {
+        updateClicsValidatorResults(exitcode, feedbackDirPath, aLog);
     }
 
     /**
