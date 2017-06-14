@@ -1,7 +1,7 @@
 package edu.csus.ecs.pc2.convert;
 
 public class Base64 {
-	private static final char[] base64Array = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+	private static final char[] BASE64ARRAY = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
 			'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
 			'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5',
 			'6', '7', '8', '9', '+', '/' };
@@ -50,15 +50,15 @@ public class Base64 {
 			
 			byte c4 = (byte) (b3 & 0x3f);
 			
-			encodedString += base64Array[c1];
-			encodedString += base64Array[c2];
+			encodedString += BASE64ARRAY[c1];
+			encodedString += BASE64ARRAY[c2];
 			switch (pad) {
 				case 0:
-					encodedString += base64Array[c3];
-					encodedString += base64Array[c4];
+					encodedString += BASE64ARRAY[c3];
+					encodedString += BASE64ARRAY[c4];
 					break;
 				case 1:
-					encodedString += base64Array[c3];
+					encodedString += BASE64ARRAY[c3];
 					encodedString += "=";
 					break;
 				case 2:
