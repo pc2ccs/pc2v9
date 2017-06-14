@@ -66,31 +66,30 @@ public class ICPCTSVLoaderTest extends AbstractTestCase {
     }
     
     
-    // TOOD Unit test for bug 1229
-//    /**
-//     * Test 7th and 8th column for teams.tsv.
-//     * 
-//     * Bug 1229 
-//     * @throws Exception
-//     */
-//    public void testLoad78fields() throws Exception {
-//        
-//        String configDir = getTestSampleContestDirectory("sumitMTC") + File.separator + IContestLoader.CONFIG_DIRNAME;
-//        assertDirectoryExists(configDir);
-//        
-////        startExplorer(configDir);
-//
-//        String groupFile = configDir + File.separator + "groups.tsv";
-//        String teamFileName = configDir + File.separator + "teams.tsv";
-//        
-////        editFile(teamFileName);
-//        
-//        ICPCTSVLoader.loadGroups(groupFile);
-//        Account[] accounts = ICPCTSVLoader.loadAccounts(teamFileName);
-//
-//        assertEquals("Missing CountryCode", "USA", accounts[0].getCountryCode());
-//        assertEquals("Missing InstituionCode", "XXX", accounts[0].getInstitutionCode());
-//    }
+    /**
+     * Test 7th and 8th column for teams.tsv.
+     * 
+     * Bug 1229 
+     * @throws Exception
+     */
+    public void testLoad78fields() throws Exception {
+        
+        String configDir = getTestSampleContestDirectory("sumitMTC") + File.separator + IContestLoader.CONFIG_DIRNAME;
+        assertDirectoryExists(configDir);
+        
+//        startExplorer(configDir);
+
+        String groupFile = configDir + File.separator + "groups.tsv";
+        String teamFileName = configDir + File.separator + "teams.tsv";
+        
+//        editFile(teamFileName);
+        
+        ICPCTSVLoader.loadGroups(groupFile);
+        Account[] accounts = ICPCTSVLoader.loadAccounts(teamFileName);
+
+        assertEquals("Missing CountryCode", "USA", accounts[0].getCountryCode());
+        assertEquals("Missing InstituionCode", "XXX", accounts[0].getInstitutionCode());
+    }
 
     private String getTestSampleContestDirectory(String contestDirName) {
 
