@@ -976,8 +976,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             
             // Handle validator yaml section
 
-            @SuppressWarnings("rawtypes")
-            LinkedHashMap map = (LinkedHashMap) object; // fetchList(content, VALIDATOR_KEY);
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<String,Object> map = (LinkedHashMap<String,Object>) object; // fetchList(content, VALIDATOR_KEY);
 
             problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
 
