@@ -93,18 +93,18 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  */
 public class CustomJavaClicsInterfaceValidator {
 
-    static public final int CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE = 42;
-    static public final int CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE = 43;
-    static public final int CLICS_VALIDATOR_ERROR_EXIT_CODE = -39;
+    public static final int CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE = 42;
+    public static final int CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE = 43;
+    public static final int CLICS_VALIDATOR_ERROR_EXIT_CODE = -39;
     
     //the judgement messages which can be returned in the "judgement.txt" feedback file in the feedback directory
-    static public final String CLICS_INCOMPLETE_OUTPUT_MSG = "Incomplete output";
-    static public final String CLICS_EXCESSIVE_OUTPUT_MSG = "Excessive output";
-    static public final String CLICS_INCORRECT_OUTPUT_FORMAT_MSG = "Incorrect output format";
-    static public final String CLICS_WRONG_ANSWER_MSG = "Wrong Answer";
-    static public final String CLICS_CORRECT_ANSWER_MSG = "accepted";
+    public static final String CLICS_INCOMPLETE_OUTPUT_MSG = "Incomplete output";
+    public static final String CLICS_EXCESSIVE_OUTPUT_MSG = "Excessive output";
+    public static final String CLICS_INCORRECT_OUTPUT_FORMAT_MSG = "Incorrect output format";
+    public static final String CLICS_WRONG_ANSWER_MSG = "Wrong Answer";
+    public static final String CLICS_CORRECT_ANSWER_MSG = "accepted";
         
-    static public final int EOF = -1;
+    public static final int EOF = -1;
     
     static Log log = null;
     
