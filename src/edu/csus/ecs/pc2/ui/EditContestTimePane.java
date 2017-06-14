@@ -350,13 +350,12 @@ public class EditContestTimePane extends JPanePlugin {
             if (result == JOptionPane.YES_OPTION) {
                 handleUpdate();
 
-                if (getParentFrame() != null) {
-                    getParentFrame().setVisible(false);
-                }
             } else if (result == JOptionPane.NO_OPTION) {
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
+            } else {
+                //must have been Cancel; do nothing -- leave the parent frame visible for the user to contemplate
             }
         } else {
             // Close
