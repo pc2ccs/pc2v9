@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -1284,7 +1284,7 @@ public class SampleContest {
 
    public void addInternalValidator(IInternalContest contest, Problem problem, int optionNumber) {
         
-       problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+       problem.setValidatorType(VALIDATORTYPE.PC2VALIDATOR);
        
        PC2ValidatorSettings settings = new PC2ValidatorSettings();
        settings.setWhichPC2Validator(optionNumber);
@@ -1379,7 +1379,7 @@ public class SampleContest {
      */
     public void setClicsValidation(IInternalContest contest, String validatorParameters, Problem problem) {
 
-        problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        problem.setValidatorType(VALIDATORTYPE.CLICSVALIDATOR);
         problem.setOutputValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
         
         problem.setReadInputDataFromSTDIN(true);

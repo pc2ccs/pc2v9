@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.packet.Packet;
@@ -637,7 +637,7 @@ public class ServerConnectionTest extends AbstractTestCase {
             File dataFile = new File(data);
             File answerFile = new File(answer);
             
-            connection.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATOR_TYPE.NONE, null);
+            connection.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATORTYPE.NONE, null);
             
             Thread.sleep(1000); // sleep so packet can be sent/processed
             
@@ -663,7 +663,7 @@ public class ServerConnectionTest extends AbstractTestCase {
         
         File dataFile = new File(data);
         File answerFile = new File(answer);
-        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATOR_TYPE.NONE, null);
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATORTYPE.NONE, null);
         
         Packet[] list = special.getPacketList();
         assertEquals("Expecting packets sent", 1, list.length);
@@ -771,7 +771,7 @@ public class ServerConnectionTest extends AbstractTestCase {
         properties.put(APIConstants.JUDGING_TYPE, APIConstants.COMPUTER_JUDGING_ONLY);
         properties.put(APIConstants.VALIDATOR_PROGRAM, "/home/pc2/validdiff");
         
-        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATOR_TYPE.CUSTOMVALIDATOR, properties);
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATORTYPE.CUSTOMVALIDATOR, properties);
         
         Packet[] list = special.getPacketList();
         assertEquals("Expecting packets sent", 1, list.length);
@@ -828,7 +828,7 @@ public class ServerConnectionTest extends AbstractTestCase {
 
         Properties properties = new Properties();
         
-        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATOR_TYPE.NONE, properties);
+        tester.addProblem("Sumit Add Problem", "sumit2", dataFile, answerFile, VALIDATORTYPE.NONE, properties);
         
         Packet[] list = special.getPacketList();
         assertEquals("Expecting packets sent", 1, list.length);

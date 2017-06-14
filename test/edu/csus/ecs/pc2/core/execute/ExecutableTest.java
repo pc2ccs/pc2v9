@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -190,7 +190,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     protected void setupUsingPC2Validator(Problem problem) {
 
-        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+        problem.setValidatorType(VALIDATORTYPE.PC2VALIDATOR);
         problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
         problem.setOutputValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
@@ -207,7 +207,7 @@ public class ExecutableTest extends AbstractTestCase {
     
     protected void setupMockPC2Validator(Problem problem) {
 
-        problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
+        problem.setValidatorType(VALIDATORTYPE.CUSTOMVALIDATOR);
         assertFalse("Not Expecting using pc2 validator", problem.isUsingPC2Validator());
         String mockValidatorCommandLine = "java {:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
         problem.setValidatorCommandLine(mockValidatorCommandLine + " -pc2 " + problem.getPC2ValidatorSettings().getWhichPC2Validator() 
@@ -609,7 +609,7 @@ public class ExecutableTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem to use PC2 Validator with options "ignore case" and use straight "diff" on validation
-        iSumitProblem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+        iSumitProblem.setValidatorType(VALIDATORTYPE.PC2VALIDATOR);
         iSumitProblem.getPC2ValidatorSettings().setIgnoreCaseOnValidation(true);
         iSumitProblem.getPC2ValidatorSettings().setWhichPC2Validator(1);
         
@@ -663,7 +663,7 @@ public class ExecutableTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem to ignore case
-        iSumitProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        iSumitProblem.setValidatorType(VALIDATORTYPE.CLICSVALIDATOR);
         iSumitProblem.getClicsValidatorSettings().setCaseSensitive(false);
         
         //submit ISumit, which should succeed
@@ -716,7 +716,7 @@ public class ExecutableTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem to ignore spacing
-        iSumitProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        iSumitProblem.setValidatorType(VALIDATORTYPE.CLICSVALIDATOR);
         iSumitProblem.getClicsValidatorSettings().setSpaceSensitive(false);
         
         //submit ISumit, which should succeed
@@ -770,7 +770,7 @@ public class ExecutableTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem state to ignore tolerances
-        iSumitFloatOutputProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        iSumitFloatOutputProblem.setValidatorType(VALIDATORTYPE.CLICSVALIDATOR);
         iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatRelativeTolerance();
         iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatAbsoluteTolerance();
         
@@ -853,7 +853,7 @@ public class ExecutableTest extends AbstractTestCase {
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem state to ignore tolerances
-        iSumitFloatOutputProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+        iSumitFloatOutputProblem.setValidatorType(VALIDATORTYPE.CLICSVALIDATOR);
         iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatAbsoluteTolerance();
         iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatRelativeTolerance();
         

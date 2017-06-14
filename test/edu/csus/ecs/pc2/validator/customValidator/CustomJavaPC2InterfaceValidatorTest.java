@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -307,7 +307,7 @@ public class CustomJavaPC2InterfaceValidatorTest extends AbstractTestCase {
     protected void setupValidator(Problem problem, ProblemDataFiles problemDataFiles) throws FileNotFoundException {
 
         //mark the problem as using a Custom Validator
-        problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
+        problem.setValidatorType(VALIDATORTYPE.CUSTOMVALIDATOR);
         
         String validatorCommand = Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 1 true";
 

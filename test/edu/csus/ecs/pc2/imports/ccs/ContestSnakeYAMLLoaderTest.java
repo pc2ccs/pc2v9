@@ -31,7 +31,7 @@ import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -2355,7 +2355,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Problem problem = createNewProblem(this.getName());
         snake.assignValidatorSettings(content, problem);
         
-        assertEquals("validator type",  VALIDATOR_TYPE.PC2VALIDATOR, problem.getValidatorType());
+        assertEquals("validator type",  VALIDATORTYPE.PC2VALIDATOR, problem.getValidatorType());
         assertEquals("validator program name", Constants.PC2_VALIDATOR_NAME, problem.getValidatorProgramName());
     }
     
@@ -2375,7 +2375,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Problem problem = createNewProblem(this.getName());
         snake.assignValidatorSettings(content, problem);
         
-        assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
+        assertEquals("validator type",  VALIDATORTYPE.CLICSVALIDATOR, problem.getValidatorType());
         assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
         
         // huh
@@ -2396,7 +2396,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Problem problem = createNewProblem(this.getName());
         snake.assignValidatorSettings(content, problem);
         
-        assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
+        assertEquals("validator type",  VALIDATORTYPE.CLICSVALIDATOR, problem.getValidatorType());
 
         assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
         

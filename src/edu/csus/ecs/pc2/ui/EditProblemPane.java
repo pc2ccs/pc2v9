@@ -61,7 +61,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
@@ -1184,15 +1184,15 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setReadInputDataFromSTDIN(getStdinRadioButton().isSelected());
 
         // set the flag indicating which output validator (if any) is being used in the Problem
-        VALIDATOR_TYPE validatorType;
+        VALIDATORTYPE validatorType;
         if (getUseNOValidatatorRadioButton().isSelected()) {
-            validatorType = VALIDATOR_TYPE.NONE;
+            validatorType = VALIDATORTYPE.NONE;
         } else if (getUsePC2ValidatorRadioButton().isSelected()) {
-            validatorType = VALIDATOR_TYPE.PC2VALIDATOR;
+            validatorType = VALIDATORTYPE.PC2VALIDATOR;
         } else if (getUseCLICSValidatorRadioButton().isSelected()) {
-            validatorType = VALIDATOR_TYPE.CLICSVALIDATOR;
+            validatorType = VALIDATORTYPE.CLICSVALIDATOR;
         } else if (getUseCustomValidatorRadioButton().isSelected()) {
-            validatorType = VALIDATOR_TYPE.CUSTOMVALIDATOR;
+            validatorType = VALIDATORTYPE.CUSTOMVALIDATOR;
         } else {
             throw new InvalidFieldValue("Illegal settings in validator selection buttons");
         }
@@ -2362,7 +2362,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         // get what type of validator (if any) is specified in the problem
-        VALIDATOR_TYPE validatorType = inProblem.getValidatorType();
+        VALIDATORTYPE validatorType = inProblem.getValidatorType();
 
         // enable the corresponding validator selection radio button (the ButtonGroup will disable all the others)
         switch (validatorType) {
