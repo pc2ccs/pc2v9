@@ -3,14 +3,11 @@ package edu.csus.ecs.pc2.ui.cellRenderer;
 import java.awt.Color;
 import java.awt.Font;
 
-import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
-import edu.csus.ecs.pc2.ui.MCLB;
 
 /**
  * This class provides support for rendering {@link InputValidationStatus} values in {@link MCLB} cells.

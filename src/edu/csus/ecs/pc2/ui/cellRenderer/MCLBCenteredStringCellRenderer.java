@@ -2,14 +2,10 @@ package edu.csus.ecs.pc2.ui.cellRenderer;
 
 import java.awt.Component;
 
-import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-
-import edu.csus.ecs.pc2.ui.MCLB;
 
 /**
  * This class provides support for rendering String values centered in {@link MCLB} cells.
