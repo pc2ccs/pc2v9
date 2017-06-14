@@ -7,6 +7,7 @@
 package edu.csus.ecs.pc2.validator.clicsValidator;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import edu.csus.ecs.pc2.core.Constants;
 
@@ -376,10 +377,15 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
         if (this.isFloatRelativeToleranceSpecified() && this.getFloatRelativeTolerance()!=other.getFloatRelativeTolerance()) {
             return false;
         }
-        
+        // remember to update hashCode if new fields are added here
        
         return true;
         
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(validatorProgramName,validatorCommandLine,isCaseSensitive,isSpaceSensitive,isFloatAbsoluteToleranceSpecified,isFloatRelativeToleranceSpecified);
     }
     
     /**

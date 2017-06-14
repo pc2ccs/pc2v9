@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.validator.pc2Validator;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import edu.csus.ecs.pc2.core.Constants;
 
@@ -169,9 +170,14 @@ public class PC2ValidatorSettings implements Cloneable, Serializable {
         if (!(this.ignoreCaseOnValidation == other.ignoreCaseOnValidation)) {
             return false;
         }
+        // remember to update hashCode if new fields are added here
 
         return true;
 
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(validatorProgramName,validatorCommandLine,whichPC2Validator,ignoreCaseOnValidation);
+    }
 }
