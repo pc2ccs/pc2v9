@@ -56,7 +56,8 @@ public class ExecuteInputValidatorPane extends JPanePlugin {
             
             inputValidatorDataFilesPanel = new JPanel();
             inputValidatorDataFilesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            inputValidatorDataFilesPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Input Data Files to Validate:", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+            inputValidatorDataFilesPanel
+                    .setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Input Data Files to Validate:", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
             GridBagLayout gbl_inputValidatorDataFilesPanel = new GridBagLayout();
             gbl_inputValidatorDataFilesPanel.columnWidths = new int[] {50, 200, 50};
             gbl_inputValidatorDataFilesPanel.rowHeights = new int[] {25, 25, 25};
