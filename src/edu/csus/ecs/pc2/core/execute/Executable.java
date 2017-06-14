@@ -939,9 +939,6 @@ public class Executable extends Plugin implements IExecutable {
                 log.info("validator process returned exit code " + exitcode);
                 executionData.setExecuteExitValue(exitcode);
                 process.destroy();
-            } else {
-                log.warning("Validator process is null");
-                return false;
             }
 
             stdoutlog.close();
