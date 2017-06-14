@@ -6,7 +6,6 @@ import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;

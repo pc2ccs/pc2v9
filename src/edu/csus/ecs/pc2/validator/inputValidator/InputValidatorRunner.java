@@ -6,7 +6,6 @@ import java.io.IOException;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecuteException;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.execute.ProgramRunner;

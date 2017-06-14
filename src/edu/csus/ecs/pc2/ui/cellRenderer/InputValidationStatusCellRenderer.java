@@ -5,7 +5,6 @@ import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 

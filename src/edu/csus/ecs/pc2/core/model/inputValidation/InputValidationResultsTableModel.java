@@ -5,7 +5,6 @@ import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 import edu.csus.ecs.pc2.core.Utilities;
 

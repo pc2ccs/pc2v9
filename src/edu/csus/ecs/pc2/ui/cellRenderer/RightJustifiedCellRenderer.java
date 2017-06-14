@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.ui.cellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 /**
  * A {@link TableCellRenderer} for displaying right-justified values but with some margin space.
