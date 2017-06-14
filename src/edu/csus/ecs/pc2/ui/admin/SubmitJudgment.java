@@ -727,7 +727,6 @@ public class SubmitJudgment {
 
         if (args.length == 0 || args[0].equals("--help")) {
             usage();
-            ;
             System.exit(FAILURE_EXIT_CODE);
         }
 

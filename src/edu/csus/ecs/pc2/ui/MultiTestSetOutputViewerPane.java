@@ -1648,7 +1648,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
         String columnName = model.getColumnName(column);
         if (columnName == columnNames[COLUMN.SELECT_CHKBOX.ordinal()]) {
             updateCompareSelectedButton();
-        };
+        }
     }
 
     

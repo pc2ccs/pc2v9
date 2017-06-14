@@ -66,7 +66,7 @@ public class AutoStopContestClockThread extends Thread {
                 try {
                     Thread.sleep(delayMs);
                 } catch (Exception ex2) {
-                    ; // ignore
+                    ex2.printStackTrace(); // ignore
                 }
 
                 if (contestTime.isPastEndOfContest())

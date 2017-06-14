@@ -4779,7 +4779,7 @@ public class EditProblemPane extends JPanePlugin {
         
         PC2ValidatorSettings settings = new PC2ValidatorSettings();
         
-        settings.setIgnoreCaseOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());;
+        settings.setIgnoreCaseOnValidation(getPc2ValidatorIgnoreCaseCheckBox().isSelected());
         settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
         settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
         settings.setWhichPC2Validator(getPc2ValidatorOptionComboBox().getSelectedIndex());
