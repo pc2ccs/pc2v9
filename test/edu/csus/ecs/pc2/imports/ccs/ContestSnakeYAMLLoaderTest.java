@@ -2448,7 +2448,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Arrays.sort(files);
         for (File file : files) {
             if (file.isDirectory()) {
-                list.add(directoryName + file.separator + file.getName());
+                list.add(directoryName + File.separator + file.getName());
             }
         }
 
