@@ -492,11 +492,7 @@ public class MultipleDataSetPane extends JPanePlugin {
     }
     
     private boolean inputValidatorIsDefined() {
-        if (getEditProblemPane().getInputValidatorPane().okToRunInputValidator()) {
-            return true;
-        } else {
-            return false;
-        }
+        return (getEditProblemPane().getInputValidatorPane().okToRunInputValidator());
     }
 
     private JButton getBtnLoad() {
