@@ -338,7 +338,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
         private boolean isAdjust;
 
-        public ColumnAction(boolean isSelectedColumn, boolean isAdjust) {
+        ColumnAction(boolean isSelectedColumn, boolean isAdjust) {
             this.isSelectedColumn = isSelectedColumn;
             this.isAdjust = isAdjust;
         }
@@ -377,7 +377,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
         private boolean isToggleLarger;
 
-        public ToggleAction(boolean isToggleDynamic, boolean isToggleLarger) {
+        ToggleAction(boolean isToggleDynamic, boolean isToggleLarger) {
             this.isToggleDynamic = isToggleDynamic;
             this.isToggleLarger = isToggleLarger;
         }
