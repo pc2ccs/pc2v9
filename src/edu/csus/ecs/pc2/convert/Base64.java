@@ -62,6 +62,8 @@ public class Base64 {
                 case 2:
                     encodedString += "==";
                     break;
+                default:
+                    break;
             }
         }
         return encodedString;
