@@ -299,8 +299,8 @@ public class Problem implements IElementObject {
         clone.setInputValidatorFilesOnDiskFolder(this.getInputValidatorFilesOnDiskFolder());
         
         //input validator results (which might be empty)
-        Iterable <InputValidationResult> inputValidationResults = this.getInputValidationResults();
-        for (InputValidationResult ivr : inputValidationResults) {
+        Iterable <InputValidationResult> inputVResults = this.getInputValidationResults();
+        for (InputValidationResult ivr : inputVResults) {
             clone.addInputValidationResult(ivr);
         }
         

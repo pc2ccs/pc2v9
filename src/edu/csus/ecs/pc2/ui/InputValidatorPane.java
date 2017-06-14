@@ -530,8 +530,8 @@ public class InputValidatorPane extends JPanePlugin {
     /**
      * Updates the Input Validation Results summary message to match the results contained in the received array of {@link InputValidationResult}s.
      */
-    private void updateInputValidationSummaryText(InputValidationResult[] runResults) {
-        getInputValidationResultPane().updateInputValidationStatusMessage(runResults);
+    private void updateInputValidationSummaryText(InputValidationResult[] runResultsArray) {
+        getInputValidationResultPane().updateInputValidationStatusMessage(runResultsArray);
     }
 
     /**
@@ -541,15 +541,15 @@ public class InputValidatorPane extends JPanePlugin {
      * If the received InputValidationResult array is null or empty, no change is made in the current status. Otherwise, if all the results in the array are "Passed" then the status is set to Passed;
      * if one or more results in the array are "Failed" then the status is set to Failed.
      * 
-     * @param runResults
+     * @param runResultsArray
      *            an array of InputValidationResults from having run an Input Validator
      */
-    private void updateInputValidationStatus(InputValidationResult[] runResults) {
+    private void updateInputValidationStatus(InputValidationResult[] runResultsArray) {
 
-        if (runResults != null && runResults.length > 0) {
+        if (runResultsArray != null && runResultsArray.length > 0) {
 
             boolean foundFailure = false;
-            for (InputValidationResult res : runResults) {
+            for (InputValidationResult res : runResultsArray) {
                 if (!res.isPassed()) {
                     foundFailure = true;
                     break;

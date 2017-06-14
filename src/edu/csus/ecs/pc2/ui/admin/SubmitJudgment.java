@@ -333,8 +333,8 @@ public class SubmitJudgment {
         }
     }
 
-    private IJudgement findJudgement(IContest contest, String ja) {
-        IJudgement[] judgements = contest.getJudgements();
+    private IJudgement findJudgement(IContest aContest, String ja) {
+        IJudgement[] judgements = aContest.getJudgements();
         for (IJudgement iJudgement : judgements) {
             if (iJudgement.getAcronym().equals(ja)) {
                 return iJudgement;
@@ -343,10 +343,10 @@ public class SubmitJudgment {
         return null;
     }
 
-    private IRun findRun(IContest contest, long runId) {
-        IRun[] runs = contest.getRuns();
+    private IRun findRun(IContest aContest, long aRunId) {
+        IRun[] runs = aContest.getRuns();
         for (IRun iRun : runs) {
-            if (iRun.getNumber() == runId) {
+            if (iRun.getNumber() == aRunId) {
                 return iRun;
             }
         }

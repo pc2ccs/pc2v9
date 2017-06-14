@@ -7,6 +7,7 @@
 package edu.csus.ecs.pc2.validator.clicsValidator;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import edu.csus.ecs.pc2.core.Constants;
 
@@ -202,10 +203,10 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
 
     /**
      * Sets the case-sensitivity option.
-     * @param isCaseSensitive the case-sensitivity value to set
+     * @param caseSensitive the case-sensitivity value to set
      */
-    public void setCaseSensitive(boolean isCaseSensitive) {
-        this.isCaseSensitive = isCaseSensitive;
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.isCaseSensitive = caseSensitive;
     }
 
     /**
@@ -217,10 +218,10 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
 
     /**
      * Sets the space-sensitivity option.
-     * @param isSpaceSensitive the space-sensitivity value to set
+     * @param spaceSensitive the space-sensitivity value to set
      */
-    public void setSpaceSensitive(boolean isSpaceSensitive) {
-        this.isSpaceSensitive = isSpaceSensitive;
+    public void setSpaceSensitive(boolean spaceSensitive) {
+        this.isSpaceSensitive = spaceSensitive;
     }
 
     /**
@@ -376,10 +377,15 @@ public class ClicsValidatorSettings implements Serializable, Cloneable {
         if (this.isFloatRelativeToleranceSpecified() && this.getFloatRelativeTolerance()!=other.getFloatRelativeTolerance()) {
             return false;
         }
-        
+        // remember to update hashCode if new fields are added here
        
         return true;
         
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(validatorProgramName,validatorCommandLine,isCaseSensitive,isSpaceSensitive,isFloatAbsoluteToleranceSpecified,isFloatRelativeToleranceSpecified);
     }
     
     /**

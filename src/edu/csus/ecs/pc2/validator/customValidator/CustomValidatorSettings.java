@@ -16,6 +16,7 @@
 package edu.csus.ecs.pc2.validator.customValidator;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import edu.csus.ecs.pc2.core.Constants;
 
@@ -208,10 +209,15 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
                 return false;
             }
         }
-        
+        // remember to update hashCode if new fields are added here
 
         return true;
         
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(customValidatorProgramName,usePC2ValidatorInterface,useCLICSValidatorInterface,customPC2InterfaceValidatorCommandLine,customCLICSInterfaceValidatorCommandLine);
     }
     
     /**

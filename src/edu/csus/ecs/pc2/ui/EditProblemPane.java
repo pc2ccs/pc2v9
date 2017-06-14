@@ -1047,13 +1047,9 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         checkProblem.setUsingExternalDataFiles(getMultipleDataSetPane().isUsingExternalDataFiles());
-
         checkProblem.setTimeOutInSeconds(getIntegerValue(getTimeOutTextField().getText()));
-
         checkProblem.setLetter(getProblemLetterTextField().getText());
-
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
-
         checkProblem.setShortName(getShortNameTextfield().getText());
         if (!checkProblem.isValidShortName()) {
             throw new InvalidFieldValue("Invalid problem short name");
@@ -1064,14 +1060,7 @@ public class EditProblemPane extends JPanePlugin {
 
             // get problem data file info from GUI
 
-            String fileName = inputDataFileLabel.getText();
-            if (fileName == null || fileName.trim().length() == 0) {
-                throw new InvalidFieldValue("'Problem Requires Input Data' is checked; you must select an input data file ");
-            }
-
-            if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
-                fileName = inputDataFileLabel.getToolTipText() + "";
-            }
+            String fileName = getFileNameFromLabel(inputDataFileLabel,"Problem Requires Input Data", "input data");
 
             if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
@@ -1084,10 +1073,8 @@ public class EditProblemPane extends JPanePlugin {
                 } catch (Exception e) {
                     throw new InvalidFieldValue("Error reading file ' " + fileName + " ': " + e.getMessage() + " while adding problem; choose data file again");
                 }
-
                 checkProblem.setDataFileName(serializedFile.getName());
                 lastDataFile = serializedFile;
-
             } else {
                 // we're editing an existing problem
                 if (originalProblemDataFiles.getJudgesDataFiles().length < 2) {
@@ -1100,7 +1087,6 @@ public class EditProblemPane extends JPanePlugin {
                     } else {
                         serializedFile = freshenIfNeeded(serializedFile, fileName);
                     }
-
                     checkProblem.setDataFileName(serializedFile.getName());
                     lastDataFile = serializedFile;
                 } else if (originalProblemDataFiles.getJudgesDataFiles().length > 1) {
@@ -1114,18 +1100,8 @@ public class EditProblemPane extends JPanePlugin {
 
         // check if GUI indicates problem has judge's answer files
         if (judgesHaveAnswerFiles.isSelected()) {
-
             // get judge's answer file info from GUI
-
-            String fileName = answerFileNameLabel.getText();
-            if (fileName == null || fileName.trim().length() == 0) {
-                throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
-            }
-
-            if (fileName.trim().length() != answerFileNameLabel.getToolTipText().length()) {
-                fileName = answerFileNameLabel.getToolTipText() + "";
-            }
-
+            String fileName = getFileNameFromLabel(answerFileNameLabel,"Judges Have Provided Answer File", "judge answer");
             if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
 
@@ -1185,17 +1161,7 @@ public class EditProblemPane extends JPanePlugin {
 
         // set the flag indicating which output validator (if any) is being used in the Problem
         VALIDATORTYPE validatorType;
-        if (getUseNOValidatatorRadioButton().isSelected()) {
-            validatorType = VALIDATORTYPE.NONE;
-        } else if (getUsePC2ValidatorRadioButton().isSelected()) {
-            validatorType = VALIDATORTYPE.PC2VALIDATOR;
-        } else if (getUseCLICSValidatorRadioButton().isSelected()) {
-            validatorType = VALIDATORTYPE.CLICSVALIDATOR;
-        } else if (getUseCustomValidatorRadioButton().isSelected()) {
-            validatorType = VALIDATORTYPE.CUSTOMVALIDATOR;
-        } else {
-            throw new InvalidFieldValue("Illegal settings in validator selection buttons");
-        }
+        validatorType = getValidatorTypeFromUI();
         checkProblem.setValidatorType(validatorType);
 
         // update settings in the Problem for each type of output validator:
@@ -1206,43 +1172,31 @@ public class EditProblemPane extends JPanePlugin {
         // if Custom Validator is selected, make sure we have a SerializedFile for the Validator
         // (the PC2 and CLICS Validators use internal PC2 classes and don't need a separate SerializedFile)
         if (getUseCustomValidatorRadioButton().isSelected()) {
-
             String guiOutputValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
-
             if (guiOutputValidatorFileName == null || guiOutputValidatorFileName.trim().length() <= 0) {
                 // missing required custom validator name
                 throw new InvalidFieldValue("Missing required Custom Validator program name");
             } else {
                 guiOutputValidatorFileName = guiOutputValidatorFileName.trim();
             }
-
             if (!isEditingExistingProblem) {
-
                 outputValidatorSF = new SerializedFile(guiOutputValidatorFileName);
-
                 if (outputValidatorSF == null || outputValidatorSF.getBuffer() == null || (outputValidatorSF.getErrorMessage() != null && outputValidatorSF.getErrorMessage() != "")) {
-
                     String msg = "Unable to read file '" + guiOutputValidatorFileName + "' while adding new Problem; choose validator file again";
                     if (outputValidatorSF.getErrorMessage() != null) {
                         msg += "\n (Error Message = \"" + outputValidatorSF.getErrorMessage() + "\")";
                     }
                     throw new InvalidFieldValue(msg);
-
                 } else {
-
                     checkProblem.setOutputValidatorProgramName(outputValidatorSF.getAbsolutePath());
                 }
-
             } else {
-
                 // we're editing an existing problem
                 // get the output validator file from the problem data files
                 outputValidatorSF = originalProblemDataFiles.getOutputValidatorFile();
                 if (outputValidatorSF == null || !outputValidatorSF.getAbsolutePath().equals(guiOutputValidatorFileName)) {
-
                     // they've added a new file; try Serializing it
                     outputValidatorSF = new SerializedFile(guiOutputValidatorFileName);
-
                     // Check for serialization error/exception
                     try {
                         if (Utilities.serializedFileError(outputValidatorSF) || outputValidatorSF.getBuffer() == null) {
@@ -1251,18 +1205,15 @@ public class EditProblemPane extends JPanePlugin {
                     } catch (Exception e) {
                         throw new InvalidFieldValue("Error reading file ' " + guiOutputValidatorFileName + " ': " + e.getMessage() + " while adding problem; choose Output Validator file again");
                     }
-
                     checkFileFormat(outputValidatorSF);
                 } else {
                     outputValidatorSF = freshenIfNeeded(outputValidatorSF, guiOutputValidatorFileName);
                 }
-
                 // put the Custom Output Validator SerializedFile into the Problem
                 checkProblem.setOutputValidatorProgramName(outputValidatorSF.getAbsolutePath());
                 newProblemDataFiles.setOutputValidatorFile(outputValidatorSF);
             }
         }
-
         // update misc settings from GUI
         checkProblem.setShowValidationToJudges(getShowValidatorToJudgesCheckBox().isSelected());
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
@@ -1407,6 +1358,34 @@ public class EditProblemPane extends JPanePlugin {
 
         return checkProblem;
 
+    }
+
+    private String getFileNameFromLabel(JLabel label, String title, String details) {
+        String fileName = label.getText();
+        if (fileName == null || fileName.trim().length() == 0) {
+            throw new InvalidFieldValue("'"+title+"' is checked; you must select an "+details+" file ");
+        }
+
+        if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
+            fileName = inputDataFileLabel.getToolTipText() + "";
+        }
+        return fileName;
+    }
+
+    private VALIDATORTYPE getValidatorTypeFromUI() {
+        VALIDATORTYPE validatorType;
+        if (getUseNOValidatatorRadioButton().isSelected()) {
+            validatorType = VALIDATORTYPE.NONE;
+        } else if (getUsePC2ValidatorRadioButton().isSelected()) {
+            validatorType = VALIDATORTYPE.PC2VALIDATOR;
+        } else if (getUseCLICSValidatorRadioButton().isSelected()) {
+            validatorType = VALIDATORTYPE.CLICSVALIDATOR;
+        } else if (getUseCustomValidatorRadioButton().isSelected()) {
+            validatorType = VALIDATORTYPE.CUSTOMVALIDATOR;
+        } else {
+            throw new InvalidFieldValue("Illegal settings in validator selection buttons");
+        }
+        return validatorType;
     }
 
     /**
@@ -3398,47 +3377,47 @@ public class EditProblemPane extends JPanePlugin {
             gbl_clicsValidatorOptionsSubPanel.rowWeights = new double[] { 0.0, 0.0 };
             clicsValidatorOptionsSubPanel.setLayout(gbl_clicsValidatorOptionsSubPanel);
 
-            GridBagConstraints gbc_CaseSensitiveCheckBox = new GridBagConstraints();
-            gbc_CaseSensitiveCheckBox.fill = GridBagConstraints.BOTH;
-            gbc_CaseSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_CaseSensitiveCheckBox.gridx = 0;
-            gbc_CaseSensitiveCheckBox.gridy = 0;
-            clicsValidatorOptionsSubPanel.add(getCLICSValidatorCaseSensitiveCheckBox(), gbc_CaseSensitiveCheckBox);
+            GridBagConstraints gbc_caseSensitiveCheckBox = new GridBagConstraints();
+            gbc_caseSensitiveCheckBox.fill = GridBagConstraints.BOTH;
+            gbc_caseSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
+            gbc_caseSensitiveCheckBox.gridx = 0;
+            gbc_caseSensitiveCheckBox.gridy = 0;
+            clicsValidatorOptionsSubPanel.add(getCLICSValidatorCaseSensitiveCheckBox(), gbc_caseSensitiveCheckBox);
 
-            GridBagConstraints gbc_FloatRelativeToleranceCheckBox = new GridBagConstraints();
-            gbc_FloatRelativeToleranceCheckBox.fill = GridBagConstraints.BOTH;
-            gbc_FloatRelativeToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_FloatRelativeToleranceCheckBox.gridx = 1;
-            gbc_FloatRelativeToleranceCheckBox.gridy = 0;
-            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceCheckBox(), gbc_FloatRelativeToleranceCheckBox);
+            GridBagConstraints gbc_floatRelativeToleranceCheckBox = new GridBagConstraints();
+            gbc_floatRelativeToleranceCheckBox.fill = GridBagConstraints.BOTH;
+            gbc_floatRelativeToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
+            gbc_floatRelativeToleranceCheckBox.gridx = 1;
+            gbc_floatRelativeToleranceCheckBox.gridy = 0;
+            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceCheckBox(), gbc_floatRelativeToleranceCheckBox);
 
-            GridBagConstraints gbc_FloatRelativeToleranceTextField = new GridBagConstraints();
-            gbc_FloatRelativeToleranceTextField.insets = new Insets(0, 0, 5, 5);
-            gbc_FloatRelativeToleranceTextField.fill = GridBagConstraints.BOTH;
-            gbc_FloatRelativeToleranceTextField.gridx = 2;
-            gbc_FloatRelativeToleranceTextField.gridy = 0;
-            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceTextField(), gbc_FloatRelativeToleranceTextField);
+            GridBagConstraints gbc_floatRelativeToleranceTextField = new GridBagConstraints();
+            gbc_floatRelativeToleranceTextField.insets = new Insets(0, 0, 5, 5);
+            gbc_floatRelativeToleranceTextField.fill = GridBagConstraints.BOTH;
+            gbc_floatRelativeToleranceTextField.gridx = 2;
+            gbc_floatRelativeToleranceTextField.gridy = 0;
+            clicsValidatorOptionsSubPanel.add(getFloatRelativeToleranceTextField(), gbc_floatRelativeToleranceTextField);
 
-            GridBagConstraints gbc_SpaceSensitiveCheckBox = new GridBagConstraints();
-            gbc_SpaceSensitiveCheckBox.fill = GridBagConstraints.BOTH;
-            gbc_SpaceSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_SpaceSensitiveCheckBox.gridx = 0;
-            gbc_SpaceSensitiveCheckBox.gridy = 1;
-            clicsValidatorOptionsSubPanel.add(getCLICSSpaceSensitiveCheckBox(), gbc_SpaceSensitiveCheckBox);
+            GridBagConstraints gbc_spaceSensitiveCheckBox = new GridBagConstraints();
+            gbc_spaceSensitiveCheckBox.fill = GridBagConstraints.BOTH;
+            gbc_spaceSensitiveCheckBox.insets = new Insets(0, 0, 5, 5);
+            gbc_spaceSensitiveCheckBox.gridx = 0;
+            gbc_spaceSensitiveCheckBox.gridy = 1;
+            clicsValidatorOptionsSubPanel.add(getCLICSSpaceSensitiveCheckBox(), gbc_spaceSensitiveCheckBox);
 
-            GridBagConstraints gbc_FloatAbsoluteToleranceCheckBox = new GridBagConstraints();
-            gbc_FloatAbsoluteToleranceCheckBox.anchor = GridBagConstraints.WEST;
-            gbc_FloatAbsoluteToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
-            gbc_FloatAbsoluteToleranceCheckBox.gridx = 1;
-            gbc_FloatAbsoluteToleranceCheckBox.gridy = 1;
-            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceCheckBox(), gbc_FloatAbsoluteToleranceCheckBox);
+            GridBagConstraints gbc_floatAbsoluteToleranceCheckBox = new GridBagConstraints();
+            gbc_floatAbsoluteToleranceCheckBox.anchor = GridBagConstraints.WEST;
+            gbc_floatAbsoluteToleranceCheckBox.insets = new Insets(0, 0, 5, 5);
+            gbc_floatAbsoluteToleranceCheckBox.gridx = 1;
+            gbc_floatAbsoluteToleranceCheckBox.gridy = 1;
+            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceCheckBox(), gbc_floatAbsoluteToleranceCheckBox);
 
-            GridBagConstraints gbc_FloatAbsoluteToleranceTextField = new GridBagConstraints();
-            gbc_FloatAbsoluteToleranceTextField.insets = new Insets(0, 0, 5, 5);
-            gbc_FloatAbsoluteToleranceTextField.fill = GridBagConstraints.BOTH;
-            gbc_FloatAbsoluteToleranceTextField.gridx = 2;
-            gbc_FloatAbsoluteToleranceTextField.gridy = 1;
-            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceTextField(), gbc_FloatAbsoluteToleranceTextField);
+            GridBagConstraints gbc_floatAbsoluteToleranceTextField = new GridBagConstraints();
+            gbc_floatAbsoluteToleranceTextField.insets = new Insets(0, 0, 5, 5);
+            gbc_floatAbsoluteToleranceTextField.fill = GridBagConstraints.BOTH;
+            gbc_floatAbsoluteToleranceTextField.gridx = 2;
+            gbc_floatAbsoluteToleranceTextField.gridy = 1;
+            clicsValidatorOptionsSubPanel.add(getFloatAbsoluteToleranceTextField(), gbc_floatAbsoluteToleranceTextField);
         }
         return clicsValidatorOptionsSubPanel;
     }
@@ -4501,12 +4480,12 @@ public class EditProblemPane extends JPanePlugin {
             customValidatorOptionsSubPanel.add(getCustomValidatorCommandLineTextField(), gbc_customValidatorCommandLineTextField);
 
             // add the Custom Validator Interface label to the subpanel
-            GridBagConstraints gbc_CustomValidatorInterfaceLabel = new GridBagConstraints();
-            gbc_CustomValidatorInterfaceLabel.anchor = GridBagConstraints.EAST;
-            gbc_CustomValidatorInterfaceLabel.insets = new Insets(0, 0, 5, 5);
-            gbc_CustomValidatorInterfaceLabel.gridx = 0;
-            gbc_CustomValidatorInterfaceLabel.gridy = 2;
-            customValidatorOptionsSubPanel.add(getCustomValidatorInterfaceLabel(), gbc_CustomValidatorInterfaceLabel);
+            GridBagConstraints gbc_customValidatorInterfaceLabel = new GridBagConstraints();
+            gbc_customValidatorInterfaceLabel.anchor = GridBagConstraints.EAST;
+            gbc_customValidatorInterfaceLabel.insets = new Insets(0, 0, 5, 5);
+            gbc_customValidatorInterfaceLabel.gridx = 0;
+            gbc_customValidatorInterfaceLabel.gridy = 2;
+            customValidatorOptionsSubPanel.add(getCustomValidatorInterfaceLabel(), gbc_customValidatorInterfaceLabel);
 
             // add the "Use PC2 Validator Interface" radio button to the subpanel
             GridBagConstraints gbc_rdbtnUsePc2Standard = new GridBagConstraints();
@@ -4516,12 +4495,12 @@ public class EditProblemPane extends JPanePlugin {
             customValidatorOptionsSubPanel.add(getUsePC2ValStdRadioButton(), gbc_rdbtnUsePc2Standard);
 
             // add the "What's This" icon for the PC2 Validator Standard Interface radio button to the subpanel
-            GridBagConstraints gbc_label_WhatsThisPC2ValStd = new GridBagConstraints();
-            gbc_label_WhatsThisPC2ValStd.anchor = GridBagConstraints.WEST;
-            gbc_label_WhatsThisPC2ValStd.insets = new Insets(0, 0, 5, 0);
-            gbc_label_WhatsThisPC2ValStd.gridx = 2;
-            gbc_label_WhatsThisPC2ValStd.gridy = 2;
-            customValidatorOptionsSubPanel.add(getLabelWhatsThisPC2ValStd(), gbc_label_WhatsThisPC2ValStd);
+            GridBagConstraints gbc_labelWhatsThisPC2ValStd = new GridBagConstraints();
+            gbc_labelWhatsThisPC2ValStd.anchor = GridBagConstraints.WEST;
+            gbc_labelWhatsThisPC2ValStd.insets = new Insets(0, 0, 5, 0);
+            gbc_labelWhatsThisPC2ValStd.gridx = 2;
+            gbc_labelWhatsThisPC2ValStd.gridy = 2;
+            customValidatorOptionsSubPanel.add(getLabelWhatsThisPC2ValStd(), gbc_labelWhatsThisPC2ValStd);
 
             // add the "Use CLICS Validator Interface" radio button to the subpanel
             GridBagConstraints gbc_rdbtnUseClicsStandard = new GridBagConstraints();
@@ -4531,11 +4510,11 @@ public class EditProblemPane extends JPanePlugin {
             customValidatorOptionsSubPanel.add(getUseClicsValStdRadioButton(), gbc_rdbtnUseClicsStandard);
 
             // add the "What's This" icon for the CLICS Validator Standard Interface radio button to the subpanel
-            GridBagConstraints gbc_label_WhatsThisCLICSValStd = new GridBagConstraints();
-            gbc_label_WhatsThisCLICSValStd.anchor = GridBagConstraints.WEST;
-            gbc_label_WhatsThisCLICSValStd.gridx = 2;
-            gbc_label_WhatsThisCLICSValStd.gridy = 3;
-            customValidatorOptionsSubPanel.add(getLabelWhatsThisCLICSValStd(), gbc_label_WhatsThisCLICSValStd);
+            GridBagConstraints gbc_labelWhatsThisCLICSValStd = new GridBagConstraints();
+            gbc_labelWhatsThisCLICSValStd.anchor = GridBagConstraints.WEST;
+            gbc_labelWhatsThisCLICSValStd.gridx = 2;
+            gbc_labelWhatsThisCLICSValStd.gridy = 3;
+            customValidatorOptionsSubPanel.add(getLabelWhatsThisCLICSValStd(), gbc_labelWhatsThisCLICSValStd);
         }
         return customValidatorOptionsSubPanel;
     }
