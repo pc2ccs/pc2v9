@@ -46,6 +46,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * A non-GUI Scoreboard Module.
+ * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class ScoreboardModule implements UIPlugin {
@@ -87,9 +88,7 @@ public class ScoreboardModule implements UIPlugin {
         controller = inController;
         log = controller.getLog();
 
-
-        if (Utilities.isDebugMode())
-        {
+        if (Utilities.isDebugMode()) {
             if (inController instanceof InternalController) {
                 // add console logger
                 InternalController cont = (InternalController) inController;
@@ -97,7 +96,7 @@ public class ScoreboardModule implements UIPlugin {
                 log.info("--debug, added appender to stdout");
             }
         }
-        
+
         VersionInfo versionInfo = new VersionInfo();
         log.info(versionInfo.getSystemName());
         log.info(versionInfo.getSystemVersionInfo());
@@ -117,7 +116,6 @@ public class ScoreboardModule implements UIPlugin {
         getContest().addLanguageListener(new LanguageListenerImlementation());
 
     }
-
 
     private void startScoreboard() {
 
@@ -139,16 +137,16 @@ public class ScoreboardModule implements UIPlugin {
         try {
             log.info(" generateOutput() - create HTML ");
             Properties scoringProperties = getScoringProperties();
-       String saXML = algo.getStandings(getContest(), scoringProperties, log);
+            String saXML = algo.getStandings(getContest(), scoringProperties, log);
             generateOutput(saXML);
         } catch (Exception e) {
-            log.log(Log.WARNING, "Exception generating scoreboard output " + e.getMessage(),e);
+            log.log(Log.WARNING, "Exception generating scoreboard output " + e.getMessage(), e);
         }
     }
 
     private void generateOutput(String xmlString) {
-        
-//        log.info( " generateOutput(xmlString)");
+
+        // log.info( " generateOutput(xmlString)");
 
         File inputDir = new File(xslDir);
         if (!inputDir.isDirectory()) {
@@ -384,9 +382,9 @@ public class ScoreboardModule implements UIPlugin {
             contestTimeChanged(event);
         }
 
-        /** This method exists to support differentiation between manual and automatic starts,
-         * in the event this is desired in the future.
-         * Currently it just delegates the handling to the contestStarted() method.
+        /**
+         * This method exists to support differentiation between manual and automatic starts, in the event this is desired in the future. Currently it just delegates the handling to the
+         * contestStarted() method.
          */
         @Override
         public void contestAutoStarted(ContestTimeEvent event) {
@@ -469,9 +467,9 @@ public class ScoreboardModule implements UIPlugin {
         return (dateFormatter.format(new Date()));
     }
 
-    //    private void showMessage(final String string) {
-    //        getLog().info(string);
-    //    }
+    // private void showMessage(final String string) {
+    // getLog().info(string);
+    // }
 
     public Log getLog() {
         return log;
@@ -484,34 +482,35 @@ public class ScoreboardModule implements UIPlugin {
     public IInternalController getController() {
         return controller;
     }
-    
-    class LanguageListenerImlementation implements ILanguageListener{
+
+    class LanguageListenerImlementation implements ILanguageListener {
 
         @Override
         public void languageAdded(LanguageEvent event) {
-            generateOutput();        }
+            generateOutput();
+        }
 
         @Override
         public void languageChanged(LanguageEvent event) {
-            generateOutput();          
+            generateOutput();
         }
 
         @Override
         public void languageRemoved(LanguageEvent event) {
             generateOutput();
-            
+
         }
 
         @Override
         public void languagesAdded(LanguageEvent event) {
             generateOutput();
-            
+
         }
 
         @Override
         public void languagesChanged(LanguageEvent event) {
             generateOutput();
-            
+
         }
 
         @Override

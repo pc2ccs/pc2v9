@@ -8,7 +8,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 /**
  * Auto Shutdown Thread.
  * 
- * This thread can be used to stop a contest 
+ * This thread can be used to stop a contest
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
@@ -47,21 +47,17 @@ public class AutoStopContestClockThread extends Thread {
      * Starts loop to detect end of contest and if contest running stop contest clock.
      * 
      * <P>
-     * Runs a loop that waits until the end of the contest and
-     * then issues a stop contest, until that stop contest works.
+     * Runs a loop that waits until the end of the contest and then issues a stop contest, until that stop contest works.
      * <P>
-     * This assumes that the contest will halt at the end, if the
-     * contest does not halt at the end, then do not use this.
+     * This assumes that the contest will halt at the end, if the contest does not halt at the end, then do not use this.
      */
 
     @Override
-    public void run()
-    {
+    public void run() {
 
         running = true;
 
-        while (running)
-        {
+        while (running) {
             try {
                 try {
                     Thread.sleep(delayMs);
@@ -69,8 +65,7 @@ public class AutoStopContestClockThread extends Thread {
                     ex2.printStackTrace(); // ignore
                 }
 
-                if (contestTime.isPastEndOfContest())
-                {
+                if (contestTime.isPastEndOfContest()) {
                     try {
 
                         int siteNumber = contestTime.getSiteNumber();
@@ -84,8 +79,7 @@ public class AutoStopContestClockThread extends Thread {
                     }
                 }
 
-                if (!contestTime.isContestRunning())
-                {
+                if (!contestTime.isContestRunning()) {
                     info("AutoShutdown - thread stopped, contest stopped");
                     running = false;
                 }
@@ -98,8 +92,7 @@ public class AutoStopContestClockThread extends Thread {
 
     private void warning(String message, Exception exception) {
 
-        if (!controller.isUsingGUI())
-        {
+        if (!controller.isUsingGUI()) {
             System.err.println(new Date() + " Warning - " + message);
             exception.printStackTrace(System.err);
         }
@@ -116,8 +109,7 @@ public class AutoStopContestClockThread extends Thread {
 
     private void info(String string) {
 
-        if (!controller.isUsingGUI())
-        {
+        if (!controller.isUsingGUI()) {
             System.out.println(new Date() + " " + string);
         }
 
@@ -141,6 +133,7 @@ public class AutoStopContestClockThread extends Thread {
 
     /**
      * MS between checks for end of contest.
+     * 
      * @return
      */
     public long getSleepMs() {

@@ -45,17 +45,15 @@ public class SubmitJudgment {
     public static final String[] REQUIRED_OPTIONS_LIST = {
             //
             "--login", "--password", // pc2 login password
-            "-u", // team id 
-            "-i", "-j", "-F",
-    };
+            "-u", // team id
+            "-i", "-j", "-F", };
 
     private RunEventListener runliEventListener = new RunEventListener();
 
     /**
      * Successful run exit code.
      *
-     * Using a non-zero exit code because if there is a problem in the JVM
-     * or elsewhere a zero exit code could be returned.
+     * Using a non-zero exit code because if there is a problem in the JVM or elsewhere a zero exit code could be returned.
      */
     private static final int SUCCESS_EXIT_CODE = 5;
 
@@ -64,7 +62,7 @@ public class SubmitJudgment {
     // TODO move to Constants
     private static final String FILE_OPTION_STRING = "-F";
 
-    //    private static final String NL = System.getProperty("line.separator");
+    // private static final String NL = System.getProperty("line.separator");
 
     /**
      * print all missing options if command line error.
@@ -160,10 +158,10 @@ public class SubmitJudgment {
             arguments.dumpArgs(System.err);
         }
 
-        //        timeStamp = 0;
+        // timeStamp = 0;
         checkArg = arguments.isOptPresent("--check");
 
-        // --login loginname - user login 
+        // --login loginname - user login
         String cmdLineLogin = arguments.getOptValue("--login");
         if (cmdLineLogin == null) {
             throw new CommandLineErrorException("Missing login");
@@ -174,7 +172,7 @@ public class SubmitJudgment {
 
         loginShortcutExpansion(cmdLineLogin, cmdLinePassword);
 
-        // -i runid       -  run id for submission
+        // -i runid - run id for submission
 
         String runIdString = arguments.getOptValue("-i");
         try {
@@ -185,13 +183,13 @@ public class SubmitJudgment {
             throw new CommandLineErrorException("Invalid number after -i '" + runIdString + "'", e);
         }
 
-        // -j acro         - judgement for run, (judgement acronym)
+        // -j acro - judgement for run, (judgement acronym)
 
         if (arguments.isOptPresent("-j")) {
             judgementAcronym = arguments.getOptValue("-j");
         }
 
-        // -u team_id      - team id for the run
+        // -u team_id - team id for the run
         if (arguments.isOptPresent("-u")) {
             teamIdString = arguments.getOptValue("-u");
 
@@ -209,7 +207,8 @@ public class SubmitJudgment {
     /**
      * Convert to int.
      * 
-     * @param string integer in a string
+     * @param string
+     *            integer in a string
      * @param defaultValue
      * @return defaultValue if parse error.
      */
@@ -237,13 +236,11 @@ public class SubmitJudgment {
     /**
      * Scans command line, if missing options returns count of missing arguments.
      * 
-     * If any one of the required opts is present and any other option is
-     * missing then will return the number of missing required options
-     * and values for those options.
+     * If any one of the required opts is present and any other option is missing then will return the number of missing required options and values for those options.
      * 
      * @param args
      * @param requiredOpts
-     * @param requiredOptions 
+     * @param requiredOptions
      * @return if any option is present, and any other is not present return count.
      */
     protected int numberMissingArguments(String[] args, String[] allOptions, String[] requiredOptions) {
@@ -308,7 +305,7 @@ public class SubmitJudgment {
 
     private static void usage() {
         String[] usageMessage = { //
-        "", //
+                "", //
                 "Usage SubmitJudgement [-F propfile] --login loginname --password password -i runid -j judgement_acronym -u team_id ", //
                 "", //
                 "Submit judgement (acronym) for run.", //
@@ -349,8 +346,7 @@ public class SubmitJudgment {
     private IRun findRun(IContest contest, long runId) {
         IRun[] runs = contest.getRuns();
         for (IRun iRun : runs) {
-            if (iRun.getNumber() == runId)
-            {
+            if (iRun.getNumber() == runId) {
                 return iRun;
             }
         }
@@ -360,8 +356,9 @@ public class SubmitJudgment {
 
     /**
      * Submit a run.
-     * @param args 
-     * @throws CommandLineErrorException 
+     * 
+     * @param args
+     * @throws CommandLineErrorException
      */
     public void submitJudgement(String[] args) throws CommandLineErrorException {
 
@@ -471,7 +468,8 @@ public class SubmitJudgment {
      * Waits for run judgement confirmation.
      * 
      * @param listener
-     * @param seconds seconds to wait for response
+     * @param seconds
+     *            seconds to wait for response
      * @throws Exception
      */
     private void waitForRunJudgementConfirmation(RunEventListener listener, int seconds) throws Exception {
@@ -746,7 +744,8 @@ public class SubmitJudgment {
 
     /**
      * 
-     * @param showAllMissingOptions true means when exception show messages
+     * @param showAllMissingOptions
+     *            true means when exception show messages
      */
     public void setShowAllMissingOptions(boolean showAllMissingOptions) {
         this.showAllMissingOptions = showAllMissingOptions;
