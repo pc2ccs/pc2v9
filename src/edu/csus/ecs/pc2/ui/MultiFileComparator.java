@@ -188,7 +188,7 @@ public class MultiFileComparator extends JFrame  {
                         if (index == -1) {
                             index = 0;
                             source.setSelectedIndex(index);
-                        } else {
+//                        } else {
 //                            int testCaseNum = new Integer((String)(model.getElementAt(index)));
 //                            System.out.println ("MFC.lstTestCases.valueChanged(): Test Case Number = " + testCaseNum);
                         }

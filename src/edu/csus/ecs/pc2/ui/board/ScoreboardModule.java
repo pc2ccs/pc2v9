@@ -220,11 +220,7 @@ public class ScoreboardModule implements UIPlugin {
                             outputFile.delete();
                             if (!output.renameTo(outputFile)) {
                                 log.warning("Could not create " + outputFile.getCanonicalPath());
-                            } else {
-//                                log.finest("rename2 to " + outputFile.getCanonicalPath() + " succeeded.");
                             }
-                        } else {
-//                            log.finest("rename to " + outputFile.getCanonicalPath() + " succeeded.");
                         }
                     } else {
                         // 0 length file

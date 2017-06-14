@@ -1678,11 +1678,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // Loop through files looking for potential validator programs
 
                 for (String name : filenames) {
-                    
                     if (name.toLowerCase().endsWith("build")) {
-                        // Cannot be build 
+                        // Cannot be build
+                        continue;
                     } else if (name.toLowerCase().endsWith("readme")) {
                         // Cannot be README
+                        continue;
                     } else {
                         
                         if (Utilities.isExecutableExtension(name)){
