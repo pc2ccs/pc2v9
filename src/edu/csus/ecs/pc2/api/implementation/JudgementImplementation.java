@@ -13,7 +13,7 @@ public class JudgementImplementation implements IJudgement {
 
     private String name;
     private ElementId elementId;
-    String acronym;
+    private String acronym;
 
     public JudgementImplementation(Judgement judgement) {
         acronym = judgement.getAcronym();

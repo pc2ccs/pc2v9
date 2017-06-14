@@ -37,9 +37,8 @@ public class FetchRunService {
     
     private Run run;
     private RunFiles runFiles;
-    boolean serverReplied;
-    Action runStatus ;
-
+    private boolean serverReplied;
+    
     public FetchRunService(IInternalContest inContest, IInternalController inController) {
         super();
         this.contest = inContest;
@@ -194,7 +193,6 @@ public class FetchRunService {
                     // RUN_NOT_AVAILABLE is undirected (sentToClient is null)
                     if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
                         
-                        runStatus = Action.RUN_NOT_AVAILABLE;
                         controller.getLog().log(Log.INFO, "Reply from server: requested run not available");
                         
                     } else {

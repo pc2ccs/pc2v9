@@ -106,7 +106,7 @@ public class CustomJavaClicsInterfaceValidator {
         
     public static final int EOF = -1;
     
-    static Log log = null;
+    private static Log log = null;
     
     private String judgeDataFile = null;
     private String judgeAnswerFile = null;
