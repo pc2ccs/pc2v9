@@ -104,7 +104,7 @@ public class ClicsValidator {
     public static final String CLICS_JUDGEMENT_FEEDBACK_FILE_NAME = "judgement.txt";
     public static final String CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME = "judgementdetails.txt";
     
-    static public final int EOF = -1;
+    public static final int EOF = -1;
     
     private String judgeDataFile = null;
     private String judgeAnswerFile = null;
