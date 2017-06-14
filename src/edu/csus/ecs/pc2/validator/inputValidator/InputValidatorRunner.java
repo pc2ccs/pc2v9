@@ -122,7 +122,10 @@ public class InputValidatorRunner {
            throw new ExecuteException("Error executing Input Validator command '" + cmdline + "': \n" + e.getMessage());
         }
 
-        boolean passed = exitCode == Constants.INPUT_VALIDATOR_SUCCESS_EXIT_CODE ? true : false;
+        boolean passed = false;
+        if (exitCode == Constants.INPUT_VALIDATOR_SUCCESS_EXIT_CODE) {
+            passed = true;
+        }
         
         SerializedFile stdoutResults = new SerializedFile(stdoutFilePath);
         SerializedFile stderrResults = new SerializedFile(stderrFilePath);

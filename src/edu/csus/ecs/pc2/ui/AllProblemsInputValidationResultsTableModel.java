@@ -134,7 +134,11 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
                         }
                     }
                 }
-                obj = retStr.equals("") ? "<none>" : retStr;
+                if (retStr.equals("")) {
+                    obj = "<none>";
+                } else {
+                    obj = retStr;
+                }
                 break;
             case 5:
                 //"Input Validator" column

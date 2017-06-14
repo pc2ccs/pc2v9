@@ -324,7 +324,11 @@ public class ProblemsPane extends JPanePlugin {
         
         c[i++] = "<unknown>";
         
-        c[i++] = problem.isProblemHasInputValidator() ? problem.getInputValidatorProgramName() : "<none>";
+        if (problem.isProblemHasInputValidator()) {
+            c[i++] = problem.getInputValidatorProgramName();
+        } else {
+            c[i++] = "<none>";
+        }
         
         c[i++] = problem.getInputValidatorCommandLine() ;
         

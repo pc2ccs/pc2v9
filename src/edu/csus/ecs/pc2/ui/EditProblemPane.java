@@ -5125,7 +5125,10 @@ public class EditProblemPane extends JPanePlugin {
             } else {
                 //update the problem status based on combining the existing status with the new result status
                 InputValidationStatus currentProblemStatus = prob.getInputValidationStatus();
-                InputValidationStatus resultStatus = result.isPassed() ? InputValidationStatus.PASSED : InputValidationStatus.FAILED;
+                InputValidationStatus resultStatus = InputValidationStatus.FAILED;
+                if (result.isPassed()) {
+                    resultStatus = InputValidationStatus.PASSED;
+                }
                 InputValidationStatus newStatus = getNewStatus(currentProblemStatus, resultStatus);
                 getProblem().setInputValidationStatus(newStatus);
             }
