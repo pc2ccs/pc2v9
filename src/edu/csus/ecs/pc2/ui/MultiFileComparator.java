@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -249,10 +250,12 @@ public class MultiFileComparator extends JFrame  {
         String [] noData = new String [] {"<no test case selected>"};
         lstTeamOutput = new JList<String>();
         lstTeamOutput.setListData(noData);
+        lstTeamOutput.setFont(new Font("Monospaced",Font.BOLD,14));
         splitPaneOutputViews.setLeftComponent(lstTeamOutput);
         
         lstJudgesOutput = new JList<String>();
         lstJudgesOutput.setListData(noData);
+        lstJudgesOutput.setFont(new Font("Monospaced",Font.BOLD,14));
         splitPaneOutputViews.setRightComponent(lstJudgesOutput);
     }
     
