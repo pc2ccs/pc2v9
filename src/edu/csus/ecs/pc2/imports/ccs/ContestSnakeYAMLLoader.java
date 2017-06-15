@@ -441,21 +441,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     }
                 }
             }
-            
-            Object maxOutputSize = fetchObjectValue(content, MAX_OUTPUT_SIZE_K_KEY);
-            if (maxOutputSize != null){
+        }
+        
+        Object maxOutputSize = fetchObjectValue(content, MAX_OUTPUT_SIZE_K_KEY);
+        if (maxOutputSize != null){
 
-                if (maxOutputSize instanceof Integer){
-                    int maxSizeInK = ((Integer) maxOutputSize).intValue();
-                    if (maxSizeInK > 0){
-                        setMaxOutputSize (contest, maxSizeInK * 1000);
-                    } else {
-                        throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
-                    }
-                } 
-                else {
-                    throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must an integer", null, contestFileName);
+            if (maxOutputSize instanceof Integer){
+                int maxSizeInK = ((Integer) maxOutputSize).intValue();
+                if (maxSizeInK > 0){
+                    setMaxOutputSize (contest, maxSizeInK * 1000);
+                } else {
+                    throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
                 }
+            } 
+            else {
+                throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must an integer", null, contestFileName);
             }
         }
 
