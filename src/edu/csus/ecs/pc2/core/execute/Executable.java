@@ -2104,6 +2104,7 @@ public class Executable extends Plugin implements IExecutable {
                 return origString;
             }
             newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
+            newString = replaceString(newString, "{files}", runFiles.getMainFile().getName());
             newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
 
             String validatorCommand = null;
