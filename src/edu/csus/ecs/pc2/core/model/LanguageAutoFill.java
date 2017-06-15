@@ -94,7 +94,7 @@ public final class LanguageAutoFill {
                     "{:basename}", "." + fs + "{:basename}", KYLIXCPPTITLE, "" };
             return dVals;
         } else if (key.equals(CSHARPTITLE)) {
-            String[] dVals = { CSHARPTITLE, "msc  {:mainfile}", //
+            String[] dVals = { CSHARPTITLE, "csc {:mainfile}", //
                     "{:basename}.exe", "mono {:basename}.exe", CSHARPTITLE, "" };
             return dVals;
         } else if (key.equals(MSCTITLE)) {

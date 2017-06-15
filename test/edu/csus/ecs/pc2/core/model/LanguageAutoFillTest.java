@@ -135,5 +135,19 @@ public class LanguageAutoFillTest extends TestCase {
         printDefs();
 
     }
+    
+    /**
+     * Test auto fill for C# compiler.
+     * 
+     * Bug 1134.
+     * 
+     * @throws Exception
+     */
+    public void testMscCompilerCmdLine() throws Exception {
+        
+        String[] fields = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.CSHARPTITLE);
+        assertEquals("Expecting compiler command line ", "csc {:mainfile}", fields[1]);
+        
+    }
 
 }
