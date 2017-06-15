@@ -57,6 +57,8 @@ public interface IContestLoader {
     String SHORT_NAME_KEY = "short-name";
 
     String CONTEST_START_TIME_KEY = "start-time";
+    
+    String MAX_OUTPUT_SIZE_K_KEY = "max-output-size-K";
 
     String CONTEST_DURATION_KEY = "duration";
 

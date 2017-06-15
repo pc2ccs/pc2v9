@@ -31,7 +31,6 @@ import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -41,6 +40,7 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -2487,6 +2487,58 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(1,languages.length);
         
     }
+    
+    /**
+     * Test max-output-size-K.
+     *  
+     * Bug 1149.
+     * 
+     * @throws Exception
+     */
+    public void testImportMayFileSize() throws Exception {
+        
+        String [] section = {
+                //
+                "max-output-size-K:  128",
+                "", //
+        };
+        
+        IInternalContest contest = loader.fromYaml(null, section, null, false);
+        
+        ContestInformation info = contest.getContestInformation();
+        assertNotNull("Expecting ContestInformation ", info);
+        assertEquals("Expected max file size ",128000,info.getMaxFileSize());
+    }
+
+    
+    /**
+     * Test invalid max-output-size-K.
+     *  
+     * Bug 1149.
+     * 
+     * @throws Exception
+     */
+    public void testImportMayFileSizeErrorHandling() throws Exception {
+        
+        String [] data = //
+            {
+                "max-output-size-K:  0", //
+                "max-output-size-K:  -21",
+            };
+        
+        for (String line : data) {
+            String [] section = { line };
+            try {
+                loader.fromYaml(null, section, null, false);
+                System.err.println("Expecting exception when loading yaml line: "+line);
+                fail("Expecting exception when loading yaml line: "+line);
+            } catch (YamlLoadException e) {
+                assertTrue("Expecting exception staring with phrase", e.getMessage().startsWith("Invalid max-output-size-K value"));
+            }
+        }
+        
+    }
+
 
     private String getSampleContestsDirectory() {
         return "samps" + File.separator + "contests";
