@@ -112,6 +112,11 @@ public class AutoJudgingMonitor implements UIPlugin {
      */
     private static final long serialVersionUID = 2774495762012789107L;
     
+    /**
+     * @wbp.parser.constructor
+     * @wbp.parser.entryPoint
+     */
+
     public AutoJudgingMonitor() {
         this(false);
     }
@@ -402,7 +407,7 @@ public class AutoJudgingMonitor implements UIPlugin {
             notifyMessager.updateStatusLabel("Judging run");
 
         } catch (Exception e) {
-            info("Exception logged ", e);
+            warn("Exception logged ", e);
         }
 
         System.gc();
@@ -485,7 +490,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                 // Something went wrong either during validation or execution
                 // Unable to validate result: Undetermined
 
-                info("Run compiled but failed to validate " + fetchedRun);
+                warn("Run compiled but failed to validate " + fetchedRun);
 
                 //  default to a non-variable-scoring "no" judgment
                 ElementId elementId = contest.getJudgements()[2].getElementId();
@@ -495,12 +500,12 @@ public class AutoJudgingMonitor implements UIPlugin {
             }
 
         } catch (Exception e) {
-            info("Exception during execute/validating run " + fetchedRun, e);
+            warn("Exception during execute/validating run " + fetchedRun, e);
         }
 
         if (judgementRecord == null) {
 
-            info("Problem judging run " + fetchedRun + " unable to create judgement record");
+            warn("Problem judging run " + fetchedRun + " unable to create judgement record");
             notifyMessager.updateStatusLabel("Problem judging run");
             // Cancel the run, hope for better luck.
 
@@ -783,14 +788,22 @@ public class AutoJudgingMonitor implements UIPlugin {
     }
 
     public void info(String s) {
-        controller.getLog().warning(s);
+        controller.getLog().info(s);
         if (! usingGui){
             System.out.println(s);
         }
       
     }
 
-    public void info(String s, Exception exception) {
+    public void warn(String s) {
+        controller.getLog().warning(s);
+        if (! usingGui){
+            System.err.println(s);
+        }
+      
+    }
+
+    public void warn(String s, Exception exception) {
         controller.getLog().log(Log.WARNING, s, exception);
         System.err.println(Thread.currentThread().getName() + " " + s);
         System.err.flush();
