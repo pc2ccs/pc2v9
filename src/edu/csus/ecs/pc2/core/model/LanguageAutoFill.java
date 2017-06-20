@@ -6,10 +6,8 @@ package edu.csus.ecs.pc2.core.model;
  * List of language (titles) {@link #getLanguageList()}, to
  * get individual values {@link #getAutoFillValues(String)}.
  *
- * @version $Id$
  * @author pc2@ecs.csus.edu
  */
-
 public final class LanguageAutoFill {
 
     public static final String JAVATITLE = "Java";
@@ -38,7 +36,7 @@ public final class LanguageAutoFill {
     
     public static final String PYTHON3TITLE = "Python 3";
     
-    public static final String CSHARPTITLE = "C#";
+    public static final String CSHARPTITLE = "Mono C#";
 
     /**
      * Constant string for an interpreted language.
@@ -94,7 +92,7 @@ public final class LanguageAutoFill {
                     "{:basename}", "." + fs + "{:basename}", KYLIXCPPTITLE, "" };
             return dVals;
         } else if (key.equals(CSHARPTITLE)) {
-            String[] dVals = { CSHARPTITLE, "csc {:mainfile}", //
+            String[] dVals = { CSHARPTITLE, "mcs {:mainfile}", //
                     "{:basename}.exe", "mono {:basename}.exe", CSHARPTITLE, "" };
             return dVals;
         } else if (key.equals(MSCTITLE)) {

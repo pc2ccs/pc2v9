@@ -146,7 +146,11 @@ public class LanguageAutoFillTest extends TestCase {
     public void testMscCompilerCmdLine() throws Exception {
         
         String[] fields = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.CSHARPTITLE);
-        assertEquals("Expecting compiler command line ", "csc {:mainfile}", fields[1]);
+        assertEquals("Expecting compiler command line ", "mcs {:mainfile}", fields[1]);
+
+        fields = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.CSHARPTITLE);
+        assertEquals("Expecting compiler command line ", "Mono C#", fields[0]);
+        
         
     }
 
