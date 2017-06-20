@@ -453,8 +453,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 } else {
                     throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
                 }
-            } 
-            else {
+            } else {
                 throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must an integer", null, contestFileName);
             }
         }

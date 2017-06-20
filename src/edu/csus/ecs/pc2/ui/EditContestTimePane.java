@@ -354,7 +354,7 @@ public class EditContestTimePane extends JPanePlugin {
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
-            } else {
+//            } else {
                 //must have been Cancel; do nothing -- leave the parent frame visible for the user to contemplate
             }
         } else {
