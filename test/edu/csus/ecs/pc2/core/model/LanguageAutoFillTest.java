@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
+
 import junit.framework.TestCase;
 
 /**
@@ -71,16 +73,16 @@ public class LanguageAutoFillTest extends TestCase {
     }
     
     /**
-     * Test C#.
+     * Test Mono C#.
      * 
      * Bug 1134 unit test.
      * 
      * @throws Exception
      */
-    public void testCSharpDef() throws Exception {
-        Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.CSHARPTITLE);
+    public void testMonoCSharpDef() throws Exception {
+        Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.MONOCSHARPTITLE);
 
-        String[] values = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.CSHARPTITLE);
+        String[] values = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.MONOCSHARPTITLE);
 
         assertEquals("interpreted ", false, language.isInterpreted());
 
@@ -92,11 +94,33 @@ public class LanguageAutoFillTest extends TestCase {
         
     }
 
+    /**
+     * Test Microsoft C#.
+     * 
+     * Bug 1263 unit test.
+     * 
+     * @throws Exception
+     */
+    public void testMSCSharpDef() throws Exception {
+        Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.MSCSHARPTITLE);
+
+        String[] values = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.MSCSHARPTITLE);
+
+        assertEquals("interpreted ", false, language.isInterpreted());
+
+        assertEquals("lang name ", values[0], language.getDisplayName());
+
+        assertEquals("lang execute ", values[3], language.getProgramExecuteCommandLine());
+        
+        assertEquals("lang execute ", "." + File.separator + "{:basename}.exe", language.getProgramExecuteCommandLine());
+        
+    }
+
     public static void printDefs() {
 
         String[] keys = { LanguageAutoFill.JAVATITLE, LanguageAutoFill.DEFAULTTITLE, //
                 LanguageAutoFill.GNUCPPTITLE, LanguageAutoFill.GNUCTITLE, LanguageAutoFill.PERLTITLE, //
-                LanguageAutoFill.MSCTITLE, LanguageAutoFill.CSHARPTITLE,
+                LanguageAutoFill.MSCTITLE, LanguageAutoFill.MONOCSHARPTITLE,
                 LanguageAutoFill.KYLIXTITLE, LanguageAutoFill.KYLIXCPPTITLE, // 
                 LanguageAutoFill.FPCTITLE // 
         };
@@ -137,19 +161,36 @@ public class LanguageAutoFillTest extends TestCase {
     }
     
     /**
-     * Test auto fill for C# compiler.
+     * Test auto fill for Mono C# compiler.
      * 
      * Bug 1134.
      * 
      * @throws Exception
      */
-    public void testMscCompilerCmdLine() throws Exception {
+    public void testMonoCsCompilerCmdLine() throws Exception {
         
-        String[] fields = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.CSHARPTITLE);
+        String[] fields = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.MONOCSHARPTITLE);
         assertEquals("Expecting compiler command line ", "mcs {:mainfile}", fields[1]);
 
-        fields = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.CSHARPTITLE);
+        fields = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.MONOCSHARPTITLE);
         assertEquals("Expecting compiler command line ", "Mono C#", fields[0]);
+        
+        
+    }
+    /**
+     * Test auto fill for Microsoft C# compiler.
+     * 
+     * Bug 1263.
+     * 
+     * @throws Exception
+     */
+    public void testMSCsCompilerCmdLine() throws Exception {
+        
+        String[] fields = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.MSCSHARPTITLE);
+        assertEquals("Expecting compiler command line ", "csc {:mainfile}", fields[1]);
+
+        fields = LanguageAutoFill.getAutoFillValues(LanguageAutoFill.MSCSHARPTITLE);
+        assertEquals("Expecting compiler command line ", "Microsoft C#", fields[0]);
         
         
     }

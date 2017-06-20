@@ -36,7 +36,9 @@ public final class LanguageAutoFill {
     
     public static final String PYTHON3TITLE = "Python 3";
     
-    public static final String CSHARPTITLE = "Mono C#";
+    public static final String MONOCSHARPTITLE = "Mono C#";
+    
+    public static final String MSCSHARPTITLE = "Microsoft C#";
 
     /**
      * Constant string for an interpreted language.
@@ -46,7 +48,7 @@ public final class LanguageAutoFill {
     private static final String NULL_LANGUAGE_NAME = "";
 
     private static String[] languageList = { DEFAULTTITLE, JAVATITLE, //
-            GNUCPPTITLE, GNUCTITLE, CSHARPTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, PYTHON3TITLE, RUBYTITLE, //
+            GNUCPPTITLE, GNUCTITLE, MONOCSHARPTITLE, MSCSHARPTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, PYTHON3TITLE, RUBYTITLE, //
             MSCTITLE, KYLIXTITLE, KYLIXCPPTITLE, FPCTITLE };
 
     /**
@@ -91,9 +93,13 @@ public final class LanguageAutoFill {
             String[] dVals = { KYLIXCPPTITLE, "bc++ -A  {:mainfile}", //
                     "{:basename}", "." + fs + "{:basename}", KYLIXCPPTITLE, "" };
             return dVals;
-        } else if (key.equals(CSHARPTITLE)) {
-            String[] dVals = { CSHARPTITLE, "mcs {:mainfile}", //
-                    "{:basename}.exe", "mono {:basename}.exe", CSHARPTITLE, "" };
+        } else if (key.equals(MONOCSHARPTITLE)) {
+            String[] dVals = { MONOCSHARPTITLE, "mcs {:mainfile}", //
+                    "{:basename}.exe", "mono {:basename}.exe", MONOCSHARPTITLE, "" };
+            return dVals;
+        } else if (key.equals(MSCSHARPTITLE)) {
+            String[] dVals = { MSCSHARPTITLE, "csc {:mainfile}", //
+                    "{:basename}.exe", "." + fs + "{:basename}.exe", MSCSHARPTITLE, "" };
             return dVals;
         } else if (key.equals(MSCTITLE)) {
             String[] dVals = { MSCTITLE, "cl.exe {:mainfile}", //
