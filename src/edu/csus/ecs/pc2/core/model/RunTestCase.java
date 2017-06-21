@@ -24,6 +24,8 @@ public class RunTestCase implements IElementObject, IGetDate{
     
     private boolean active = true;
     
+    private boolean validated = false;
+    
     public static final String TESTCASE_RECORD_ID = "TestCase";
     
     /**
@@ -168,5 +170,13 @@ public class RunTestCase implements IElementObject, IGetDate{
         ret += "time(ms)=" + elapsedMS + "]";
         
         return ret ;
+    }
+
+    public boolean isValidated() {
+        return validated;
+    }
+
+    public void setValidated(boolean validated) {
+        this.validated = validated;
     }
 }

@@ -49,6 +49,10 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
                 if (result) {
                     resultString = "Pass";
                 }
+                result = testCases[row].isValidated();
+                if (!result) {
+                    resultString = "N/A"; // this will be overwritten by PassFailCellRenderer
+                }
                 JLabel resultLabel = new JLabel(resultString);
                 
                 //elapsed time of test case

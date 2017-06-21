@@ -1364,7 +1364,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
                 if (!currentProblem.isValidatedProblem()) {
                     // problem is not validated, cannot be failed or passed
                     getNumFailedTestCasesLabel().setForeground(Color.black);
-                    getNumFailedTestCasesLabel().setText("");
+                    getNumFailedTestCasesLabel().setText("No validator set");
                 } else  if (failedCount > 0) {
                     getNumFailedTestCasesLabel().setForeground(Color.red);
                     getNumFailedTestCasesLabel().setText("Failed:  " + failedCount);

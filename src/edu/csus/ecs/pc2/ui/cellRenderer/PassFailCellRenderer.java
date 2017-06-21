@@ -38,7 +38,7 @@ public class PassFailCellRenderer extends DefaultTableCellRenderer {
         
         // default values
         setBackground(Color.yellow);
-        setText("??");
+        setText("<No Validator>");
 
         if (value instanceof Boolean) {
             boolean passed = (Boolean) value;
