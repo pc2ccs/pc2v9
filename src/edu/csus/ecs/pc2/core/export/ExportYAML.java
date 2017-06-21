@@ -161,6 +161,7 @@ public class ExportYAML {
 
         contestWriter.println("# " + IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": false");
 
+        // TODO this belongs in system.pc2.yaml
         String judgeCDPBasePath = info.getJudgeCDPBasePath();
         if (! StringUtilities.isEmpty(judgeCDPBasePath)){
             contestWriter.println(IContestLoader.JUDGE_CONFIG_PATH_KEY +": "+judgeCDPBasePath);
@@ -169,6 +170,7 @@ public class ExportYAML {
         contestWriter.println();
 
         // TODO CCS write default clar
+        // TODO rest belongs in system.yaml
 
         // default-clars:
         // - No comment, read problem statement.
@@ -231,13 +233,9 @@ public class ExportYAML {
 
             contestWriter.println();
         }
-
-        Problem[] problems = contest.getProblems();
+        // end of system.yaml stuff
         
-        /**
-         * Write problem section to contest.yaml
-         */
-        writeProblemSetYaml(contestWriter, contest, directoryName, IContestLoader.PROBLEMS_KEY, problems);
+        Problem[] problems = contest.getProblems();
         
         /**
          * Write problemset.yaml file. 
@@ -257,6 +255,7 @@ public class ExportYAML {
         problemSetWriter.close();
         problemSetWriter = null;
 
+        // TODO this should go to system.pc2.yaml
         Vector<Account> accountVector = contest.getAccounts(ClientType.Type.JUDGE);
         Account[] judgeAccounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(judgeAccounts, new AccountComparator());
