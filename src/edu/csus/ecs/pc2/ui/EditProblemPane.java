@@ -1366,8 +1366,8 @@ public class EditProblemPane extends JPanePlugin {
             throw new InvalidFieldValue("'"+title+"' is checked; you must select an "+details+" file ");
         }
 
-        if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
-            fileName = inputDataFileLabel.getToolTipText() + "";
+        if (fileName.trim().length() != label.getToolTipText().length()) {
+            fileName = label.getToolTipText() + "";
         }
         return fileName;
     }
