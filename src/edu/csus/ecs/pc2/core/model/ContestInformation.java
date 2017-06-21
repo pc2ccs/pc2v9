@@ -239,6 +239,9 @@ public class ContestInformation implements Serializable{
             if (! StringUtilities.stringSame(externalYamlPath, contestInformation.externalYamlPath)) {
                 return false;
             }
+            if (!StringUtilities.stringSame(freezeTime, contestInformation.freezeTime)) {
+                return false;
+            }
             if (! StringUtilities.stringSame(rsiCommand, contestInformation.rsiCommand)) {
                 return false;
             }

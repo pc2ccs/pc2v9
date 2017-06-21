@@ -37,15 +37,9 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * Update contest information.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class ContestInformationPane extends JPanePlugin {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -8408469113380938482L;
 
     private JPanel buttonPanel = null;
@@ -107,6 +101,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField startTimeTextField;
 
     private JLabel startTimeLabel;
+    private JTextField contestFreezeLengthtextField;
 
     /**
      * This method initializes
@@ -123,7 +118,7 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(641, 520));
+        this.setSize(new Dimension(641, 570));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
     }
@@ -187,8 +182,35 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(getStartTimeLabel(), null);
             centerPane.add(getStartTimeTextField(), null);
             
+            
+  
+            centerPane.add(getContestFreezeLengthtextField());
+            
+            JLabel contestFreezeTimeLabel = new JLabel();
+            contestFreezeTimeLabel.setText("Contest Freeze Length");
+            contestFreezeTimeLabel.setSize(new Dimension(175, 27));
+            contestFreezeTimeLabel.setLocation(new Point(21, 215));
+            contestFreezeTimeLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
+            contestFreezeTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            contestFreezeTimeLabel.setBounds(78, 475, 175, 27);
+            centerPane.add(contestFreezeTimeLabel);
+            
         }
         return centerPane;
+    }
+
+    private JTextField getContestFreezeLengthtextField() {
+        if (contestFreezeLengthtextField == null) {
+            contestFreezeLengthtextField = new JTextField();
+            contestFreezeLengthtextField.setBounds(new Rectangle(233, 172, 122, 29));
+            contestFreezeLengthtextField.setBounds(270, 474, 122, 29);
+            contestFreezeLengthtextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return contestFreezeLengthtextField;
     }
 
     private JTextField getStartTimeTextField() {
@@ -317,6 +339,8 @@ public class ContestInformationPane extends JPanePlugin {
         }
 
         contestInformation.setScoringProperties(changedScoringProperties);
+        
+        contestInformation.setFreezeTime(contestFreezeLengthtextField.getText());
 
         return (contestInformation);
     }
@@ -367,6 +391,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
                 getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
                 getMaxFieldSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
+                getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
                 getRunSubmissionInterfaceCommandTextField().setText(contestInformation.getRsiCommand());
                 if (contestInformation.getRsiCommand() == null || "".equals(contestInformation.getRsiCommand().trim())) {
                     String cmd = "# /usr/local/bin/sccsrs " + CommandVariableReplacer.OPTIONS + " " + CommandVariableReplacer.FILELIST;

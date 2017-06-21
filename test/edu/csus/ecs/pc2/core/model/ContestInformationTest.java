@@ -6,13 +6,11 @@ import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
- * Tests for Contest Information.
+ * Unit Tests.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ContestInformationTest extends TestCase {
 
     protected void setUp() throws Exception {
@@ -109,5 +107,25 @@ public class ContestInformationTest extends TestCase {
         assertFalse("Expecting not same properties", contestInformation1.isSameAs(contestInformation2));
 
     }
+    
+    
+    /**
+     * Test isSameAs for freeze time 
+     */
+    public void testFreezeTimeisSameAs() throws Exception {
 
+        ContestInformation info = new ContestInformation();
+        ContestInformation info2 = new ContestInformation();
+
+        assertTrue("Contest info identical ", info.isSameAs(info2));
+
+        info.setFreezeTime("2:00:00");
+        assertFalse("Expeced Freeze time changed ", info.isSameAs(info2));
+
+        info2.setFreezeTime("2:00:00");
+        assertTrue("Expeced Freeze time changed ", info.isSameAs(info2));
+
+        info2.setFreezeTime("1:23:00");
+        assertFalse("Expeced Freeze time changed ", info.isSameAs(info2));
+    }
 }
