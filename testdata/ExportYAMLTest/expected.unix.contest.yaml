@@ -79,43 +79,6 @@ languages:
     use-judge-cmd: false
     judge-exec-cmd: '{:basename}.exe'
 
-problemset:
-  - letter: A
-    short-name: sumit
-    name: 'Sumit'
-    color: Alice Blue
-    load-data-files: true
-
-  - letter: B
-    short-name: quadrangles
-    name: 'Quadrangles'
-    color: Antique White
-    load-data-files: true
-
-  - letter: C
-    short-name: routing
-    name: 'Routing'
-    color: Aqua
-    load-data-files: true
-
-  - letter: D
-    short-name: faulty
-    name: 'Faulty Towers'
-    color: Aquamarine
-    load-data-files: true
-
-  - letter: E
-    short-name: london
-    name: 'London Bridge'
-    color: Azure
-    load-data-files: true
-
-  - letter: F
-    short-name: finnigans
-    name: 'Finnigans Bluff'
-    color: Beige
-    load-data-files: true
-
 sites:
   - number: 1
     name: 'Site 1'
