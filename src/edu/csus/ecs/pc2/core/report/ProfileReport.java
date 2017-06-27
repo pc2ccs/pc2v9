@@ -104,7 +104,7 @@ public class ProfileReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Profile";
+        return "Profile Information";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -114,7 +114,7 @@ public class ProfileReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Profile Report";
+        return "Profile Information Report";
     }
 
     public Filter getFilter() {
