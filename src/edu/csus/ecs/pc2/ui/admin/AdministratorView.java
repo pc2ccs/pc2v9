@@ -251,7 +251,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 addUIPlugin(getConfigureContestTabbedPane(), "ICPC", icpcPane);
                 
                 ImportDataPane importDataPane = new ImportDataPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Import CCS", importDataPane);
+                addUIPlugin(getConfigureContestTabbedPane(), "Import Config", importDataPane);
 
                 JudgementsPane judgementsPanel = new JudgementsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Judgements", judgementsPanel);

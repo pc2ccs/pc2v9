@@ -130,8 +130,8 @@ public class ICPCLoadPane extends JPanePlugin {
     private JButton getImportAccountsButton() {
         if (importAccountsButton == null) {
             importAccountsButton = new JButton();
-            importAccountsButton.setText("Import Accounts");
-            importAccountsButton.setToolTipText("Load ICPC accounts CVS file");
+            importAccountsButton.setText("Import CMS team tab files");
+            importAccountsButton.setToolTipText("Load ICPC CMS PC2_Team.tab file");
             importAccountsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // load the accounts
@@ -237,8 +237,9 @@ public class ICPCLoadPane extends JPanePlugin {
     private JButton getImportSitesButton() {
         if (importSitesButton == null) {
             importSitesButton = new JButton();
-            importSitesButton.setText("Import Sites ");
-            importSitesButton.setToolTipText("Load ICPC sites CSV files");
+//            huh;
+            importSitesButton.setText("Import PC2_Site.tab");
+            importSitesButton.setToolTipText("Load CMS PC2_Site.tab and PC2_Contest.tab");
             importSitesButton.setMnemonic(KeyEvent.VK_S);
             importSitesButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -363,8 +364,8 @@ public class ICPCLoadPane extends JPanePlugin {
     private JButton getImportTSVButton() {
         if (importTSVButton == null) {
             importTSVButton = new JButton();
-            importTSVButton.setText("Import TSV ");
-            importTSVButton.setToolTipText("Load ICPC TSV teams, groups and contest files");
+            importTSVButton.setText("Import CMS tsv files");
+            importTSVButton.setToolTipText("Load ICPC CMS contest.tsv, teams.tsv and groups.tsv");
             importTSVButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     loadTSVFiles();
