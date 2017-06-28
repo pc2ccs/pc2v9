@@ -215,7 +215,7 @@ public class ICPCLoadPane extends JPanePlugin {
             log.throwing("ICPCPane", "changeDisplayFormat", e);
         }
         if (importData == null && !gotData) {
-            JOptionPane.showMessageDialog(this, "Please 'Import Accounts' icpc account data first.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please 'Import CMS team tab files' icpc account data first.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (importData != null && importData.getAccounts() != null) {

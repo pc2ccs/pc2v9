@@ -178,15 +178,15 @@ public class ResultsFileTest extends TestCase {
                 "36,17,B,141,Yes", // solved
                 "37,18,A,150,Yes", // solved
                 "38,19,A,158,Yes", // solved
-                "39,20,B,164,Yes", // solved
+//                "39,20,B,164,Yes", // solved
                 "40,1,A,174,Yes", // solved
                 "41,2,A,182,Yes", // solved
-                "42,3,B,189,Yes", // solved
-                "43,4,A,198,Yes", // solved
+//                "42,3,B,189,Yes", // solved
+//                "43,4,A,198,Yes", // solved
                 "44,5,A,205,Yes", // solved
-                "45,6,B,208,Yes", // solved
+//                "45,6,B,208,Yes", // solved
                 "46,7,A,210,Yes", // solved
-                "47,8,A,219,Yes", // solved
+//                "47,8,A,219,Yes", // solved
                 "48,9,B,227,Yes", // solved
                 "49,10,A,234,Yes", // solved
                 "50,11,A,243,Yes", // solved
@@ -211,14 +211,14 @@ public class ResultsFileTest extends TestCase {
                 "2032;10;Bronze Medal;1", // results 
                 "2033;11;Bronze Medal;1", // results 
                 "2034;12;Bronze Medal;1", // results 
-                "2035;13;Honorable;1", // results 
-                "2036;14;Honorable;1", // results 
-                "2037;15;Honorable;1", // results 
-                "2039;16;Honorable;1", // results 
-                "2022;17;Honorable;1", // results 
-                "2023;18;Honorable;1", // results 
-                "2025;19;Honorable;1", // results 
-                "2027;20;Honorable;1", // results 
+                "2035;13;Ranked;1", // results 
+                "2036;13;Ranked;1", // results 
+                "2037;13;Ranked;1", // results 
+                "2022;;Honorable;0", // results 
+                "2023;;Honorable;0", // results 
+                "2025;;Honorable;0", // results 
+                "2027;;Honorable;0", // results 
+                "2039;;Honorable;0", // results 
         };
 
         ResultsFile resultsFile = new ResultsFile();
@@ -287,6 +287,8 @@ public class ResultsFileTest extends TestCase {
                 "25,15,A,65,Yes", // solved
                 "26,19,B,75,Yes", // solved
                 "27,19,A,85,Yes", // solved
+                "28,3,B,99,Yes", // solved
+                "29,4,A,130,Yes" // solved
         };
 
         // Reservation Id; rank ; medal; solved
@@ -304,15 +306,15 @@ public class ResultsFileTest extends TestCase {
                 "2032;9;Bronze Medal;1", // results 
                 "2033;10;Bronze Medal;1", // results 
                 "2034;11;Bronze Medal;1", // results 
-                "2022;12;Bronze Medal;0", // results 
-                "2023;12;Bronze Medal;0", // results 
-                "2025;12;Bronze Medal;0", // results 
-                "2027;12;Bronze Medal;0", // results 
-                "2028;12;Bronze Medal;0", // results 
-                "2035;12;Bronze Medal;0", // results 
-                "2036;12;Bronze Medal;0", // results 
-                "2037;12;Bronze Medal;0", // results 
-                "2039;12;Bronze Medal;0", // results 
+                "2022;12;Bronze Medal;1", // results 
+                "2023;13;Ranked;1", // results 
+                "2025;;Honorable;0", // results 
+                "2027;;Honorable;0", // results 
+                "2028;;Honorable;0", // results 
+                "2035;;Honorable;0", // results 
+                "2036;;Honorable;0", // results 
+                "2037;;Honorable;0", // results 
+                "2039;;Honorable;0", // results 
         };
 
         // for medal ranks 3, 6, 10

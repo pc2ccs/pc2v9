@@ -185,7 +185,13 @@ public class ProfileSavePane extends JPanePlugin {
         getCopyClarificationsCheckBox().setSelected(! selected);
         getCopyContestSettingsCheckBox().setSelected(selected);
         getCopyGroupsCheckBox().setSelected(selected);
+
         getCopyJudgementsCheckbox().setSelected(selected);
+
+        // temporary fix for June Release 2017
+        getCopyJudgementsCheckbox().setSelected(true);
+        getCopyJudgementsCheckbox().setEnabled(false);
+        
         getCopyLanguagesCheckBox().setSelected(selected);
         getCopyProblemsCheckBox().setSelected(! selected);
         getCopyRunsCheckBox().setSelected(! selected);
@@ -329,6 +335,10 @@ public class ProfileSavePane extends JPanePlugin {
         settings.setCopyCategories(getCopyCategoriesCheckBox().isSelected());
         settings.setCopyContestSettings(getCopyContestSettingsCheckBox().isSelected());
         settings.setCopyGroups(getCopyGroupsCheckBox().isSelected());
+
+        // temporary fix for June Release 2017
+        getCopyJudgementsCheckbox().setSelected(true);
+
         settings.setCopyJudgements(getCopyJudgementsCheckbox().isSelected());
         settings.setCopyLanguages(getCopyLanguagesCheckBox().isSelected());
         settings.setCopyNotifications(getCopyNotificationsCheckBox().isSelected());
@@ -699,6 +709,10 @@ public class ProfileSavePane extends JPanePlugin {
             checkBoxPane.add(getCopyRunsCheckBox(), null);
             checkBoxPane.add(getCopyContestSettingsCheckBox(), null);
             checkBoxPane.add(getCopyJudgementsCheckbox(), null);
+            // temporary fix for June Release 2017
+            getCopyJudgementsCheckbox().setSelected(true);
+            getCopyJudgementsCheckbox().setEnabled(false);
+
             checkBoxPane.add(getCopyGroupsCheckBox(), null);
             checkBoxPane.add(getCopyAccountsCheckBox(), null);
             checkBoxPane.add(getCopyNotificationsCheckBox(), null);

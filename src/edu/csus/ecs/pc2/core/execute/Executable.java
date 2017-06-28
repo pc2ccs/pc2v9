@@ -1841,6 +1841,12 @@ public class Executable extends Plugin implements IExecutable {
                         exitCodeFile.close();
                     }
                 }
+            } else {
+                // exit was clean, clear old EXIT_CODE_FILENAME if it exist
+                File exit_file = new File(EXIT_CODE_FILENAME);
+                if (exit_file.exists()) {
+                    exit_file.delete();
+                }
             }
             if (executionData.getExecuteStderr() != null) {
                 byte[] errBuff = executionData.getExecuteStderr().getBuffer();

@@ -33,6 +33,8 @@ public class ResultsFile {
 
     public static final String RESULTS_FILENAME = "results.tsv";
 
+    private static final String RANKED = "Ranked";
+
     private FinalizeData finalizeData = null;
 
     public void setFinalizeData(FinalizeData finalizeData) {
@@ -50,6 +52,35 @@ public class ResultsFile {
         return createTSVFileLines(contest,DEFAULT_RESULT_FIELD_NAME);
     }
     
+    /**
+     * Input is a sorted ranking list.  What is the median number of problems solved.
+     * copied from DefaultScoringAlgorithm, maybe it should be a common location?
+     * @param srArray
+     * @return median number of problems solved
+     */
+    private int getMedian(StandingsRecord[] srArray) {
+        int median;
+        if (srArray == null || srArray.length == 0) {
+            median = 0;
+        } else {
+            if (srArray.length == 1) {
+                median = srArray[0].getNumberSolved();
+            } else {
+                if (srArray.length % 2 == 0) {
+                    // even number of entries
+                    int high, low;
+                    low = srArray[srArray.length/2-1].getNumberSolved();
+                    high = srArray[(srArray.length+1)/2].getNumberSolved();
+                    median = (low + high) /2;
+                } else {
+                    // odd number
+                    median = srArray[(srArray.length+1)/2-1].getNumberSolved();
+                }
+            }
+        }
+        return median;
+    }
+
     /**
      * Create CCS restuls.tsv file contents.
      * 
@@ -81,7 +112,11 @@ public class ResultsFile {
 
         // return ranked teams
         StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
-
+        int median = getMedian(standingsRecords);
+        // TODO finalizeData really needs a B instead of getBronzeRank
+        int lastMedalRank = finalizeData.getBronzeRank();
+        int lastSolvedNum = 0;
+        int rankNumber = 0;
         for (StandingsRecord record : standingsRecords) {
 
             Account account = contest.getAccount(record.getClientId());
@@ -96,10 +131,23 @@ public class ResultsFile {
             // 6 Time of the last submission 233 integer
 
             String reservationId = account.getExternalId();
-            String award = getAwardMedal(record.getRankNumber(), finalizeData);
-
+            boolean ranked = false;
+            if (record.getNumberSolved() >= median) {
+                ranked = true;
+            }
+            String award = getAwardMedal(record.getRankNumber(), finalizeData, ranked);
+            String rank = "";
+            if (!"honorable".equalsIgnoreCase(award)) {
+                if (record.getRankNumber() > lastMedalRank && (lastSolvedNum == 0 ||  lastSolvedNum  < record.getNumberSolved())) {
+                    lastSolvedNum = record.getNumberSolved();
+                    rankNumber = record.getRankNumber();
+                } else if (record.getRankNumber() > lastMedalRank && lastSolvedNum == record.getNumberSolved()) {
+                    record.setRankNumber(rankNumber);
+                }
+                rank = Integer.toString(record.getRankNumber());
+            }
             lines.addElement(reservationId + TAB //
-                    + record.getRankNumber() + TAB //
+                    + rank + TAB //
                     + award + TAB  // 
                     + record.getNumberSolved() //
                     + TAB + record.getPenaltyPoints() + TAB //
@@ -122,7 +170,7 @@ public class ResultsFile {
      * @return
      */
 
-    private String getAwardMedal(int rankNumber, FinalizeData data) {
+    private String getAwardMedal(int rankNumber, FinalizeData data, boolean ranked) {
 
         // TODO CCS determine how to assign bronze and ranked
 
@@ -132,6 +180,8 @@ public class ResultsFile {
             return SILVER;
         } else if (rankNumber <= data.getBronzeRank()) {
             return BRONZE;
+        } else if (ranked) {
+            return RANKED;
         } else {
             return HONORABLE;
         }
