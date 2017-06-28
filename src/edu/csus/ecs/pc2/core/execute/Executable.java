@@ -1843,7 +1843,7 @@ public class Executable extends Plugin implements IExecutable {
                 }
             } else {
                 // exit was clean, clear old EXIT_CODE_FILENAME if it exist
-                File exitFile = new File(EXIT_CODE_FILENAME);
+                File exitFile = new File(prefixExecuteDirname(EXIT_CODE_FILENAME));
                 if (exitFile.exists()) {
                     exitFile.delete();
                 }
