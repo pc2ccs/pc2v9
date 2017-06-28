@@ -248,6 +248,7 @@ public class ProfilesPane extends JPanePlugin {
             buttonPane.setLayout(flowLayout);
             buttonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             buttonPane.add(getNewButton(), null);
+            getNewButton().setEnabled(false);
             buttonPane.add(getCloneButton(), null);
             buttonPane.add(getSwitchButton(), null);
             buttonPane.add(getResetContestButton(), null);
