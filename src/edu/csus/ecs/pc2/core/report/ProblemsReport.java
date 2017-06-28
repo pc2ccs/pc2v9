@@ -113,6 +113,23 @@ public class ProblemsReport implements IReport {
         printWriter.println("    Has input validator : " + problem.isProblemHasInputValidator());
         printWriter.println("        input validator : " + problem.getInputValidatorProgramName());
         printWriter.println("    input validator cmd : " + problem.getInputValidatorCommandLine());
+        
+        if (problemDataFiles == null) {
+            printWriter.println("   input validator file: No file (contents saved) ");
+        } else {
+            SerializedFile inputFormatValidatorFile = problemDataFiles.getInputValidatorFile();
+            if (inputFormatValidatorFile == null) {
+                printWriter.println("   input validator file: No file (contents saved) ");
+            } else {
+                byte[] bytes = inputFormatValidatorFile.getBuffer();
+                int fsize = bytes.length;
+                if (bytes != null) {
+                    fsize = bytes.length;
+                }
+                printWriter.println("   input validator file: " + inputFormatValidatorFile.getName() + " " + fsize + " bytes ");
+                printWriter.println("   input validator name: " + inputFormatValidatorFile.getAbsolutePath());
+            }
+        }
 
         // null safe print of enum
         String validationStatus = "null";
