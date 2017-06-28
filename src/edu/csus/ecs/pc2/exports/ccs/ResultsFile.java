@@ -114,8 +114,8 @@ public class ResultsFile {
         StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
         int median = getMedian(standingsRecords);
         // TODO finalizeData really needs a B instead of getBronzeRank
-        int last_medal_rank = finalizeData.getBronzeRank();
-        int last_solved_num = 0;
+        int lastMedalRank = finalizeData.getBronzeRank();
+        int lastSolvedNum = 0;
         int rankNumber = 0;
         for (StandingsRecord record : standingsRecords) {
 
@@ -138,10 +138,10 @@ public class ResultsFile {
             String award = getAwardMedal(record.getRankNumber(), finalizeData, ranked);
             String rank = "";
             if (!"honorable".equalsIgnoreCase(award)) {
-                if (record.getRankNumber() > last_medal_rank && (last_solved_num == 0 ||  last_solved_num  < record.getNumberSolved())) {
-                    last_solved_num = record.getNumberSolved();
+                if (record.getRankNumber() > lastMedalRank && (lastSolvedNum == 0 ||  lastSolvedNum  < record.getNumberSolved())) {
+                    lastSolvedNum = record.getNumberSolved();
                     rankNumber = record.getRankNumber();
-                } else if (record.getRankNumber() > last_medal_rank && last_solved_num == record.getNumberSolved()) {
+                } else if (record.getRankNumber() > lastMedalRank && lastSolvedNum == record.getNumberSolved()) {
                     record.setRankNumber(rankNumber);
                 }
                 rank = Integer.toString(record.getRankNumber());
