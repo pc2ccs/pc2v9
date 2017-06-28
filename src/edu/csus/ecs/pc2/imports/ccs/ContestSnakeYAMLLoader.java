@@ -141,6 +141,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contents = concat(contents, lines);
             }
         } catch (IOException e) {
+            e.printStackTrace(); // debug 22
             throw new YamlLoadException(e.getMessage(), e, contetYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
@@ -1639,8 +1640,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
              */
             if (inpuFormattValidatorName != null && new File(inpuFormattValidatorName).isFile()) {
                 SerializedFile serializedFile = new SerializedFile(inpuFormattValidatorName);
+
                 problemDataFiles.setInputValidatorFile(serializedFile);
-                problem.setInputValidatorProgramName(serializedFile.getName());
+
+                String basename = serializedFile.getName();
+                problem.setInputValidatorCommandLine(basename);
+                if (basename.toLowerCase().endsWith(".bat") || basename.toLowerCase().endsWith(".cmd")) {
+                    problem.setInputValidatorCommandLine("cmd /c " + basename);
+                }
+                if (basename.toLowerCase().endsWith(".class")) {
+                    basename = basename.replaceFirst(".class", "");
+                    problem.setInputValidatorCommandLine("java " + basename);
+                }
+
+                problem.setInputValidatorProgramName(serializedFile.getAbsolutePath());
+                problem.setProblemHasInputValidator(true);
             }
         } catch (Exception e) {
             throw new YamlLoadException("Unable to load input format validator for problem " + problem.getShortName() + ": " + inpuFormattValidatorName, e);
@@ -1708,6 +1722,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 if (validatorList.size() == 1) {
                     inputValidatorFilename = validatorList.get(0);
+                    
                 } else if (validatorList.size() > 1) {
                     inputValidatorFilename = validatorList.get(0);
 

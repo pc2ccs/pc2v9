@@ -2283,8 +2283,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     public void testLoadAllSampleCDPS() throws Throwable {
 
         String[] contestDirs = getSampleContestsDirs();
+        
+        assertDirectoryExists(Utilities.getCurrentDirectory() + File.separator + getSampleContestsDirectory());
 
-        assertTrue("Expecting at least one sample contest directory ", contestDirs.length > 0);
+        assertTrue("Expecting at least one sample contest directory at " + getSampleContestsDirectory(), contestDirs.length > 0);
 
         for (String directoryName : contestDirs) {
 
@@ -2462,9 +2464,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     private String[] getSampleContestsDirs() {
         
         String sampContestDir = getSampleContestsDirectory();
-
         String[] sampContestDirNames = getDirNames(sampContestDir);
-        
         return sampContestDirNames;
     }
     
@@ -2536,9 +2536,55 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 assertTrue("Expecting exception staring with phrase", e.getMessage().startsWith("Invalid max-output-size-K value"));
             }
         }
-        
+    }
+    
+    /**
+     * Test load of input format validator.
+     * 
+     * @throws Exception
+     */
+    public void testLoadInputFormatValidator() throws Exception {
+
+        IInternalContest con = loadSampleContest(null, "sumitMTC");
+        assertNotNull(con);
+
+        // expecting input format validator defined
+
+        Problem[] problems = con.getProblems();
+        assertEquals("Problem couhnt ", 1, problems.length);
+
+        String ifvfilename = "samps/contests/sumitMTC/config/sumit/input_format_validators/valid.bat";
+        assertFileExists(ifvfilename);
+
+        Problem p = problems[0];
+        assertEquals("InValCmdLine", "cmd /c valid.bat", p.getInputValidatorCommandLine());
+
+        String expProgFileName = unixifyPath(Utilities.getCurrentDirectory() + File.separator + ifvfilename);
+        assertEquals("ProgName", expProgFileName, unixifyPath(p.getInputValidatorProgramName()));
+
+        ProblemDataFiles pdf = con.getProblemDataFile(p);
+        SerializedFile file = pdf.getInputValidatorFile();
+        assertNotNull(" getInputValidatorFile ", file);
+
     }
 
+    private String unixifyPath(String string) {
+        return Utilities.unixifyPath(string);
+    }
+
+    private IInternalContest loadSampleContest(IInternalContest contest, String sampleName) throws Exception {
+        String configDir = getTestSampleContestDirectory(sampleName) + File.separator + IContestLoader.CONFIG_DIRNAME;
+        try {
+            return loader.fromYaml(contest, configDir);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw e;
+        }
+    }
+
+    private String getTestSampleContestDirectory(String dirname) {
+        return getSampleContestsDirectory() + File.separator + dirname;
+    }
 
     private String getSampleContestsDirectory() {
         return "samps" + File.separator + "contests";
