@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import java.awt.Dimension;
 
 /**
  * View Judgement Frame.
@@ -54,7 +55,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(700,329));
+        this.setSize(new Dimension(1024, 329));
         this.setContentPane(getMainPanel());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Run Judgements");
