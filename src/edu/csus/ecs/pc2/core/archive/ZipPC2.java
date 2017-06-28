@@ -156,6 +156,8 @@ public class ZipPC2 {
                 addDirToList(dirEntryName);
             } else if (dirEntryName.startsWith("execute")) {
                 addDirToList(dirEntryName);
+            } else if (dirEntryName.startsWith("inputValidate")) {
+                addDirToList(dirEntryName);
             } else if (dirEntryName.equalsIgnoreCase("reports")) {
                 addDirToList(dirEntryName);
             } else if (dirEntryName.equalsIgnoreCase("old")) {
