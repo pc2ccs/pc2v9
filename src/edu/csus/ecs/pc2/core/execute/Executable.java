@@ -1795,8 +1795,10 @@ public class Executable extends Plugin implements IExecutable {
             stdoutCollector.join();
             stderrCollector.join();
 
+            boolean terminatedByOperator = false;
             if (executionTimer != null) {
                 executionTimer.stopTimer();
+                terminatedByOperator = executionTimer.isTerminatedByOperator();
                 executionData.setRunTimeLimitExceeded(executionTimer.isRunTimeLimitExceeded());
                 if (executionTimer.isRunTimeLimitExceeded()) {
                     log.info("Run exceeded problem time limit of " + problem.getTimeOutInSeconds() + " secs: actual run time = " + executionData.getExecuteTimeMS() + " msec;  Run = " + run);
@@ -1808,6 +1810,12 @@ public class Executable extends Plugin implements IExecutable {
                 log.info("execution process returned exit code " + process.exitValue());
                 executionData.setExecuteExitValue(returnValue);
                 process.destroy();
+                
+                //if the process generated a Runtime Error and did NOT exceed time limit, add error msg to team output
+                if (!executionData.isRunTimeLimitExceeded() && !terminatedByOperator && returnValue != 0) {
+                    String msg = "Note: program exited with non-zero exit code '" + returnValue + "'" + NL;
+                    stdoutlog.write(msg.getBytes());
+                }
             }
 
             stdoutlog.close();

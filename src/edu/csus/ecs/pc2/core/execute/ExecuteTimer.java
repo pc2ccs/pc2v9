@@ -52,7 +52,7 @@ public class ExecuteTimer extends Thread implements
 
     private boolean runTimeLimitExceeded = false;
 
-    private boolean otherContactStaff = false;
+    private boolean terminatedByOperator = false;
 
     private Log log = null;
 
@@ -383,8 +383,8 @@ public class ExecuteTimer extends Thread implements
     /**
      * @return boolean
      */
-    public boolean isOtherContactStaff() {
-        return otherContactStaff;
+    public boolean isTerminatedByOperator() {
+        return terminatedByOperator;
     }
 
     /**
@@ -418,7 +418,7 @@ public class ExecuteTimer extends Thread implements
     }
 
     private void setOtherContactStaff(boolean newOtherContactStaff) {
-        otherContactStaff = newOtherContactStaff;
+        terminatedByOperator = newOtherContactStaff;
     }
 
     public void setProc(java.lang.Process newProc) {
