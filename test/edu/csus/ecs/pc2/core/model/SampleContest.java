@@ -12,6 +12,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.Constants;
@@ -1789,6 +1790,65 @@ public class SampleContest {
             account.setAliasName(GIRL_NAMES[idx]);
             idx++;
         }
+    }
+    
+    // copied from https://stackoverflow.com/questions/40074840/reading-a-csv-file-into-a-array
+    public static String[] loadStringArrayFromCSV(String fileName) {
+        File file= new File(fileName);
+
+        List<String> lines = new ArrayList<>();
+        Scanner inputStream;
+
+        try{
+            inputStream = new Scanner(file);
+
+            while(inputStream.hasNext()){
+                String line= inputStream.next();
+                lines.add(line);
+            }
+
+            inputStream.close();
+        }catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return lines.toArray(new String[lines.size()]);
+    }
+    /*
+     * converts a results.tsv into a semi-colon delimited list
+     */
+    public static String[] loadExpectedResultsFromTSV(String filename) {
+        File file = new File(filename);
+        List<String> lines = new ArrayList<>();
+        Scanner inputStream;
+
+        try{
+            inputStream = new Scanner(file);
+            inputStream.useDelimiter("\n");
+
+            int linenum = 0;
+            while(inputStream.hasNext()){
+                linenum++;
+                String line= inputStream.next();
+                if (linenum == 1) {
+                    continue;
+                }
+                String[] split = line.split("\t");
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < split.length; i++) {
+                    sb.append(split[i]+";");
+                }
+                sb.deleteCharAt(sb.lastIndexOf(";")); // remove trailing ;
+                lines.add(sb.toString());
+            }
+
+            inputStream.close();
+        }catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return lines.toArray(new String[lines.size()]);
+        
     }
     
     /**

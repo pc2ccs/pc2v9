@@ -1,14 +1,18 @@
 package edu.csus.ecs.pc2.exports.ccs;
 
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.scoring.FinalsStandingsRecordComparator;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
 
@@ -37,6 +41,8 @@ public class ResultsFile {
 
     private FinalizeData finalizeData = null;
 
+    private FinalsStandingsRecordComparator comparator;
+    
     public void setFinalizeData(FinalizeData finalizeData) {
         this.finalizeData = finalizeData;
     }
@@ -117,8 +123,22 @@ public class ResultsFile {
         int lastMedalRank = finalizeData.getBronzeRank();
         int lastSolvedNum = 0;
         int rankNumber = 0;
-        for (StandingsRecord record : standingsRecords) {
+        // resort standingsRecord based on lastMedalRank and median
+        Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
+        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        AccountList accountList = new AccountList();
+        for (Account account : accounts) {
+            accountList.add(account);
+        }
+        comparator = new FinalsStandingsRecordComparator();
+        comparator.setCachedAccountList(accountList);
+        comparator.setLastRank(lastMedalRank);
+        comparator.setMedian(median);
+        Arrays.sort(standingsRecords, comparator);
 
+        int realRank = 0;
+        for (StandingsRecord record : standingsRecords) {
+            realRank++;
             Account account = contest.getAccount(record.getClientId());
 
             // Then follow several lines with the following format (one per team).
@@ -138,10 +158,11 @@ public class ResultsFile {
             String award = getAwardMedal(record.getRankNumber(), finalizeData, ranked);
             String rank = "";
             if (!"honorable".equalsIgnoreCase(award)) {
-                if (record.getRankNumber() > lastMedalRank && (lastSolvedNum == 0 ||  lastSolvedNum  < record.getNumberSolved())) {
+                if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
                     lastSolvedNum = record.getNumberSolved();
-                    rankNumber = record.getRankNumber();
-                } else if (record.getRankNumber() > lastMedalRank && lastSolvedNum == record.getNumberSolved()) {
+                    rankNumber = realRank;
+                    record.setRankNumber(realRank);
+                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
                     record.setRankNumber(rankNumber);
                 }
                 rank = Integer.toString(record.getRankNumber());
