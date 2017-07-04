@@ -2539,7 +2539,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     }
     
     /**
-     * Test load of input format validator.
+     * Test load of input format validator using sumitMTC sample.
      * 
      * @throws Exception
      */
@@ -2552,15 +2552,19 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         Problem[] problems = con.getProblems();
         assertEquals("Problem couhnt ", 1, problems.length);
+        
+        String valiatorFileName = "valid.bat";
 
-        String ifvfilename = "samps/contests/sumitMTC/config/sumit/input_format_validators/valid.bat";
+        String ifvfilename = "samps/contests/sumitMTC/config/sumit/input_format_validators/"+valiatorFileName;
         assertFileExists(ifvfilename);
 
         Problem p = problems[0];
         assertEquals("InValCmdLine", "cmd /c valid.bat", p.getInputValidatorCommandLine());
 
-        String expProgFileName = unixifyPath(Utilities.getCurrentDirectory() + File.separator + ifvfilename);
+//        String expProgFileName = unixifyPath(Utilities.getCurrentDirectory() + File.separator + ifvfilename);
+        String expProgFileName = unixifyPath(valiatorFileName);
         assertEquals("ProgName", expProgFileName, unixifyPath(p.getInputValidatorProgramName()));
+
 
         ProblemDataFiles pdf = con.getProblemDataFile(p);
         SerializedFile file = pdf.getInputValidatorFile();

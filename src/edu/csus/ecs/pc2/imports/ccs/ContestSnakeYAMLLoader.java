@@ -1653,7 +1653,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     problem.setInputValidatorCommandLine("java " + basename);
                 }
 
-                problem.setInputValidatorProgramName(serializedFile.getAbsolutePath());
+                // set validator name to short filename
+                problem.setInputValidatorProgramName(serializedFile.getName());
                 problem.setProblemHasInputValidator(true);
             }
         } catch (Exception e) {
