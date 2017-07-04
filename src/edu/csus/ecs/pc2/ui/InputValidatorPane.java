@@ -88,6 +88,7 @@ public class InputValidatorPane extends JPanePlugin {
      * Returns the Input Validator Program Name currently entered in this InputValidatorPane.
      * 
      * @return a String containing the Input Validator Program Name
+     * @deprecated use DefineInputValidatorPane#getInputValidatorFile
      */
     public String getInputValidatorProgramName() {
         String progName = getDefineInputValidatorPane().getInputValidatorProgramName();
@@ -99,6 +100,7 @@ public class InputValidatorPane extends JPanePlugin {
      * 
      * @param inputValidatorProg
      *            a String containing the Input Validator Program name
+     # @deprecated use DefineInputValidatorPane#setInputValidatorFile
      */
     public void setInputValidatorProgramName(String progName) {
         getDefineInputValidatorPane().setInputValidatorProgramName(progName);
@@ -321,7 +323,7 @@ public class InputValidatorPane extends JPanePlugin {
                     if (dataFiles != null && dataFiles.length > 0) {
                         found = true;
                     } else {
-
+                        
                         // no files found on the Input Data Files tab; see if perhaps there is a single data file name defined on the General tab
                         if (epp.inputDataFileLabel != null && !epp.inputDataFileLabel.getText().equals("")) {
 
@@ -365,24 +367,30 @@ public class InputValidatorPane extends JPanePlugin {
                     // create an array to hold the results as they are created
                     InputValidationResult[] validationResults = new InputValidationResult[dataFiles.length];
 
-                    // get the name of the Input Validator Program to be run
-                    String valProgName = getInputValidatorProgramName();
-
-                    // create a SerializedFile for the validator program
-                    SerializedFile validatorProg;
-                    try {
-                        validatorProg = new SerializedFile(valProgName);
-
-                        // check for serialization error (which will throw any exception found in the SerializedFile)
-                        if (Utilities.serializedFileError(validatorProg)) {
-                            getController().getLog().warning("Error obtaining SerializedFile for validator program file ' " + validatorProg + " ' -- cannot run Input Validator");
-                            System.err.println("Error obtaining SerializedFile for validator program file ' " + validatorProg + " '");
-                            return null;
-                        }
-                    } catch (Exception e) {
-                        getController().getLog().warning("Exception obtaining SerializedFile for validator program file ' " + valProgName + " ' : " + e.getMessage());
-                        System.err.println("Exception obtaining SerializedFile for validator program file ' " + valProgName + " ' : " + e.getMessage());
-                        return null;
+//                    // get the name of the Input Validator Program to be run
+//                    String valProgName = getInputValidatorProgramName();
+//                    // create a SerializedFile for the validator program
+//                    SerializedFile validatorProg;
+//                    try {
+//                        validatorProg = new SerializedFile(valProgName);
+//
+//                        // check for serialization error (which will throw any exception found in the SerializedFile)
+//                        if (Utilities.serializedFileError(validatorProg)) {
+//                            getController().getLog().warning("Error obtaining SerializedFile for validator program file ' " + validatorProg + " ' -- cannot run Input Validator");
+//                            System.err.println("Error obtaining SerializedFile for validator program file ' " + validatorProg + " '");
+//                            return null;
+//                        }
+//                    } catch (Exception e) {
+//                        getController().getLog().warning("Exception obtaining SerializedFile for validator program file ' " + valProgName + " ' : " + e.getMessage());
+//                        System.err.println("Exception obtaining SerializedFile for validator program file ' " + valProgName + " ' : " + e.getMessage());
+//                        return null;
+//                    }
+                    
+                    SerializedFile validatorProg = epp.getInputValidatorPane().getInputValidatorFile();
+                    if (validatorProg == null) {
+                        System.err.println("No input validator (serializedFile) defined ");
+                        getController().getLog().warning("No input validator (serializedFile) defined ");
+                        throw new Exception("No input validator (serializedFile) defined ");
                     }
 
                     // get the problem for which the data files apply
@@ -672,5 +680,13 @@ public class InputValidatorPane extends JPanePlugin {
 
     public void updateResultsTable() {
         getInputValidationResultPane().updateResultsTable(runResults);
+    }
+
+    public SerializedFile getInputValidatorFile() {
+        return getDefineInputValidatorPane().getInputValidatorFile();
+    }
+    
+    public void setInputValidatorFile(SerializedFile inputValidatorFile) {
+        getDefineInputValidatorPane().setInputValidatorFile(inputValidatorFile);
     }
 }

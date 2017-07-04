@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * This class defines a JPanel containing textfield components for entering the file name of an Input Validator Program
@@ -46,7 +47,8 @@ public class DefineInputValidatorPane extends JPanePlugin {
     private JPanePlugin parentPane;
 
     private String lastDirectory;
-
+    
+    private SerializedFile inputValidatorFile;
     
     public DefineInputValidatorPane() {
 
@@ -99,10 +101,15 @@ public class DefineInputValidatorPane extends JPanePlugin {
     /**
      * Returns the Input Validator Program name contained in this DefineInputValidator panel.
      * 
-     * @return a String containing the Input Validator Name, or null or the empty string if no Input Validator Program has been defined 
+     * @return a String containing the Input Validator Name, or null or the empty string if no Input Validator Program has been defined
+     * @deprecated  Use {@link #getInputValidatorFile()}
      */
     public String getInputValidatorProgramName() {
         return getInputValidatorProgramNameTextField().getText();
+    }
+    
+    public SerializedFile getInputValidatorFile() {
+        return inputValidatorFile;
     }
     
     /**
@@ -112,7 +119,15 @@ public class DefineInputValidatorPane extends JPanePlugin {
      */
     public void setInputValidatorProgramName(String progName) {
         getInputValidatorProgramNameTextField().setText(progName);
-        
+    }
+    
+    public void setInputValidatorFile(SerializedFile inputValidatorFile) {
+        this.inputValidatorFile = inputValidatorFile;
+        if (inputValidatorFile == null){
+            getInputValidatorProgramNameTextField().setText("");
+        } else {
+            getInputValidatorProgramNameTextField().setText(inputValidatorFile.getName());
+        }
     }
     
     public String getInputValidatorCommand() {
@@ -185,11 +200,19 @@ public class DefineInputValidatorPane extends JPanePlugin {
                 
                 public void actionPerformed(ActionEvent e) {
                     if (selectFile(getInputValidatorProgramNameTextField(), "Select Input Validator")) {
-                        getInputValidatorProgramNameTextField().setToolTipText((getInputValidatorProgramNameTextField().getText()));
-                        if (getInputValidatorProgramNameTextField().getText() != null && getInputValidatorProgramNameTextField().getText().endsWith(".class")) {
-                            getInputValidatorCommandTextField().setText("java {:basename}");
+                        String fullFilePath = getInputValidatorProgramNameTextField().getText();
+                        try {
+                            getInputValidatorProgramNameTextField().setToolTipText((fullFilePath));
+                            if (getInputValidatorProgramNameTextField().getText() != null && getInputValidatorProgramNameTextField().getText().endsWith(".class")) {
+                                getInputValidatorCommandTextField().setText("java {:basename}");
+                            }
+                            enableUpdateButton();
+                        } catch (Exception e2) {
+                            showMessage(null, "Unable to load Input Validator file: " + fullFilePath, "Error loading " + fullFilePath + " " + e2.getMessage());
+                            e2.printStackTrace();
                         }
-                        enableUpdateButton();
+                        inputValidatorFile = new SerializedFile(fullFilePath);
+
                     }
                 }
             });
