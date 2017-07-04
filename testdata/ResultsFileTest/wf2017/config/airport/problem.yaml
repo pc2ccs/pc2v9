@@ -1,0 +1,194 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:17 PDT
+--- 
+
+name: 'Airport Construction'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 001.in
+datafile: 001.ans
+
+validator_flags: float_absolute_tolerance 1.0E-6 float_relative_tolerance 1.0E-6
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/001.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/002.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/003.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/004.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/005.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/006.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/007.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/008.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/009.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/010.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/011.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/012.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/013.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/014.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/015.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/016.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/017.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/018.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/019.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/020.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/021.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/022.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/023.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/024.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/025.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/026.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/027.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/028.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/029.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/030.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/031.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/032.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/033.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/034.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/035.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/036.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/037.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/038.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/039.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/040.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/041.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/042.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/043.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/044.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/045.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/046.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/047.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/048.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/049.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/050.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/051.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/052.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/053.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/054.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/055.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/056.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/057.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/058.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/059-randvert.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/060-grid-17x17.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/061-grid-17x17.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/062-grid-17x17.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/063-grid-17x17.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/064-grid-3x200.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/065-grid-200x3.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/066-grid-3x1000.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/067-grid-1000x3.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/068-grid-4x200.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/069-grid-200x4.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/070-grid-4x750.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/071-grid-750x4.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/080-bruce-stair20.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/081-bruce-stair200.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/091-martin-collinear.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/092-martin-throughvertices.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/092b-martin-throughvertices.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/093-martin-inside.in
+#     wrote (D)reports/yaml07.03.17.648/airport/data/secret/094-martin-outside.in
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/001.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/002.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/003.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/004.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/005.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/006.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/007.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/008.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/009.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/010.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/011.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/012.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/013.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/014.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/015.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/016.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/017.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/018.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/019.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/020.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/021.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/022.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/023.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/024.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/025.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/026.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/027.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/028.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/029.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/030.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/031.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/032.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/033.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/034.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/035.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/036.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/037.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/038.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/039.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/040.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/041.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/042.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/043.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/044.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/045.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/046.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/047.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/048.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/049.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/050.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/051.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/052.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/053.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/054.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/055.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/056.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/057.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/058.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/059-randvert.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/060-grid-17x17.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/061-grid-17x17.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/062-grid-17x17.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/063-grid-17x17.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/064-grid-3x200.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/065-grid-200x3.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/066-grid-3x1000.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/067-grid-1000x3.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/068-grid-4x200.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/069-grid-200x4.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/070-grid-4x750.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/071-grid-750x4.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/080-bruce-stair20.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/081-bruce-stair200.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/091-martin-collinear.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/092-martin-throughvertices.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/092b-martin-throughvertices.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/093-martin-inside.ans
+#     wrote (A)reports/yaml07.03.17.648/airport/data/secret/094-martin-outside.ans
+

@@ -1,0 +1,252 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:17 PDT
+--- 
+
+name: 'Money for Nothing'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 001w.in
+datafile: 001w.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/001w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/002w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/003w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/004w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/005w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/006w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/007w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/008w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/009w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/010w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/011w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/012w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/013w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/014w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/015w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/016w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/017w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/018w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/019w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/020w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/021w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/022w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/023w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/024w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/025w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/026w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/027w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/028w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/029w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/030w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/031w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/032w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/033w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/034w.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/035o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/036o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/037o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/038o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/039o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/040o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/041o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/042o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/043o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/044o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/045o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/046o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/047o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/048o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/049o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/050o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/051o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/052o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/053o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/054o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/055o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/056o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/057o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/058o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/059o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/060o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/061o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/062o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/063o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/064o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/065o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/066o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/067o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/068o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/069o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/070o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/071o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/072o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/073o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/074o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/075o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/076o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/077o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/078o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/079o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/080o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/081o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/082o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/083o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/084o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/085o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/086o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/087o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/088o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/089o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/090o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/091o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/092o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/093o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/094o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/095o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/096o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/097o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/098o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/099o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/100o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/101o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/102o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/103o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/104o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/105o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/106o.in
+#     wrote (D)reports/yaml07.03.17.648/money/data/secret/107o.in
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/001w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/002w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/003w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/004w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/005w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/006w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/007w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/008w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/009w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/010w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/011w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/012w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/013w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/014w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/015w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/016w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/017w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/018w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/019w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/020w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/021w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/022w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/023w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/024w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/025w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/026w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/027w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/028w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/029w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/030w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/031w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/032w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/033w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/034w.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/035o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/036o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/037o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/038o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/039o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/040o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/041o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/042o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/043o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/044o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/045o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/046o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/047o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/048o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/049o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/050o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/051o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/052o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/053o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/054o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/055o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/056o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/057o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/058o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/059o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/060o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/061o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/062o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/063o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/064o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/065o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/066o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/067o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/068o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/069o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/070o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/071o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/072o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/073o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/074o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/075o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/076o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/077o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/078o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/079o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/080o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/081o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/082o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/083o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/084o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/085o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/086o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/087o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/088o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/089o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/090o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/091o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/092o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/093o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/094o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/095o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/096o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/097o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/098o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/099o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/100o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/101o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/102o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/103o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/104o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/105o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/106o.ans
+#     wrote (A)reports/yaml07.03.17.648/money/data/secret/107o.ans
+

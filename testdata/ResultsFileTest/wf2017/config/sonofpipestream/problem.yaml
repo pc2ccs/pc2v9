@@ -1,0 +1,186 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:18 PDT
+--- 
+
+name: 'Son of Pipe Stream'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 001-small.in
+datafile: 001-small.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/001-small.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/002-small.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/003-small.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/004-small.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/005-small.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/006-small.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/007-small.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/008-small.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/009-flow-not-acyclic.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/010-circular-1.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/011-circular-2.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/012-cut-graph-1a.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/013-cut-graph-1b.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/014-cut-graph-1.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/015-cut-graph-2a.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/016-cut-graph-2b.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/017-cut-graph-2.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/018-cut-graph-3a.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/019-cut-graph-3b.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/020-cut-graph-3.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/021-cut-graph-4a.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/022-cut-graph-4b.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/023-cut-graph-4.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/024-cut-graph-5a.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/025-cut-graph-5b.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/026-cut-graph-5.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/027-cut-graph-6a.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/028-cut-graph-6b.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/029-cut-graph-6.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/030-cut-graph-7a.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/031-cut-graph-7b.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/032-cut-graph-7.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/033-cut-graph-8a.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/034-cut-graph-8b.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/035-cut-graph-8.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/036-cut-graph-9a.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/037-cut-graph-9b.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/038-cut-graph-9.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/039-linear-1.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/040-linear-2.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/041-max-edges.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/042-gnp-0.1.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/043-gnp-0.2.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/044-gnp-0.3.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/045-gnp-0.4.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/046-gnp-0.5.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/047-gnp-0.6.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/048-gnp-0.7.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/049-gnp-0.8.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/050-gnp-0.9.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/051-max-pipes1.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/052-max-pipes2.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/053-paths-a-max.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/054-paths-a-min.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/055-skew-01.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/056-skew-02.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/057-skew-03.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/058-skew-04.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/059-skew-05.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/060-skew-06.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/061-skew-07.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/062-skew-08.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/063-skew-09.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/064-skew-10.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/065-skew-11.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/066-skew-12.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/067-anti-dfs.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/068-anti-dfs.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/069-anti-dfs.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/070-anti-dfs.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/071-anti-dfs.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/072-anti-dfs.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/073-anti-dfs.in
+#     wrote (D)reports/yaml07.03.17.648/sonofpipestream/data/secret/074-anti-dfs.in
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/001-small.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/002-small.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/003-small.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/004-small.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/005-small.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/006-small.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/007-small.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/008-small.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/009-flow-not-acyclic.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/010-circular-1.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/011-circular-2.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/012-cut-graph-1a.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/013-cut-graph-1b.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/014-cut-graph-1.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/015-cut-graph-2a.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/016-cut-graph-2b.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/017-cut-graph-2.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/018-cut-graph-3a.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/019-cut-graph-3b.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/020-cut-graph-3.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/021-cut-graph-4a.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/022-cut-graph-4b.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/023-cut-graph-4.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/024-cut-graph-5a.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/025-cut-graph-5b.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/026-cut-graph-5.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/027-cut-graph-6a.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/028-cut-graph-6b.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/029-cut-graph-6.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/030-cut-graph-7a.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/031-cut-graph-7b.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/032-cut-graph-7.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/033-cut-graph-8a.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/034-cut-graph-8b.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/035-cut-graph-8.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/036-cut-graph-9a.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/037-cut-graph-9b.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/038-cut-graph-9.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/039-linear-1.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/040-linear-2.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/041-max-edges.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/042-gnp-0.1.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/043-gnp-0.2.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/044-gnp-0.3.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/045-gnp-0.4.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/046-gnp-0.5.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/047-gnp-0.6.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/048-gnp-0.7.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/049-gnp-0.8.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/050-gnp-0.9.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/051-max-pipes1.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/052-max-pipes2.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/053-paths-a-max.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/054-paths-a-min.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/055-skew-01.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/056-skew-02.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/057-skew-03.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/058-skew-04.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/059-skew-05.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/060-skew-06.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/061-skew-07.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/062-skew-08.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/063-skew-09.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/064-skew-10.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/065-skew-11.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/066-skew-12.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/067-anti-dfs.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/068-anti-dfs.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/069-anti-dfs.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/070-anti-dfs.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/071-anti-dfs.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/072-anti-dfs.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/073-anti-dfs.ans
+#     wrote (A)reports/yaml07.03.17.648/sonofpipestream/data/secret/074-anti-dfs.ans
+

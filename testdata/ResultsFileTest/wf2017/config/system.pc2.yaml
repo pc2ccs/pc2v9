@@ -1,0 +1,26 @@
+# 
+# Purpose: custom settings for WF 2017
+# Tue May 23 21:56:54 MDT 2017
+# laned
+
+# Shadow mode
+ccs-test-mode: true
+
+# do not load files into pc2, keep them external 
+
+load-data-files: false
+
+accounts:
+  - account: ADMINISTRATOR
+    site: 1
+    count: 2
+
+  - account: JUDGE
+    site: 1
+    count: 12
+
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+
+# eof 

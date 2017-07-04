@@ -1,0 +1,202 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:17 PDT
+--- 
+
+name: 'Replicate Replicate Rfplicbte'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 01.1x1.in
+datafile: 01.1x1.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/01.1x1.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/02.3x3.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/03.3x3.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/04.3x3.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/05.3x3.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/06.3x3.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/07.3x3.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/08.square.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/09.icpc.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/10.icpc_error.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/11.invader.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/12.invader_error.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/13.cat.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/14.cat_error.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/15.triforce.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/16.triforce_error.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/17.big.noiters.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/18.big.oniter.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/19.manyiters.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/20.manyiters.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/21.big.initsparse.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/22.big.initsparse.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/23.big.initsparse.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/24.big.initsparse.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/25.big.initfull.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/26.big.initfull.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/27.faraway_error.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/28.big.diag.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/29.big.diag.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/30.big.diag.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/31.big.diag.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/32.big.diag.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/33.big.diag.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/34.manyerrs.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/35.manyerrs.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/36.br_corner_errors.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/37.bl_corner_errors.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/38.tr_corner_errors.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/39.tl_corner_errors.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/40.mid_errors.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/41.far_errors.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/42.tall.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/43.tall.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/44.tall.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/45.wide.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/46.wide.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/47.wide.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/48.random_37_23_11.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/49.random_44_25_9.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/50.random_48_37_12.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/51.random_20_26_2.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/52.random_45_23_8.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/53.random_21_42_7.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/54.random_32_40_7.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/55.random_36_27_8.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/56.random_16_40_7.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/57.random_32_27_3.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/58.random_230_111_43.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/59.random_222_274_69.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/60.random_254_295_18.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/61.random_148_230_21.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/62.random_260_198_59.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/63.random_158_104_28.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/64.random_57_214_26.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/65.random_242_209_37.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/66.random_300_97_19.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/67.random_283_234_80.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/68-onecell01.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/69-onecell02.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/70-onecell03.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/71-onecell04.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/72-onecell05.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/73-fourcell01.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/74-fourcell02.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/75-fourcell03.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/76-fourcell04.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/77-fourcell05.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/78-plus01.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/79-plus02.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/80-plus03.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/81-plus04.in
+#     wrote (D)reports/yaml07.03.17.648/replicate/data/secret/82-plus05.in
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/01.1x1.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/02.3x3.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/03.3x3.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/04.3x3.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/05.3x3.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/06.3x3.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/07.3x3.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/08.square.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/09.icpc.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/10.icpc_error.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/11.invader.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/12.invader_error.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/13.cat.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/14.cat_error.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/15.triforce.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/16.triforce_error.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/17.big.noiters.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/18.big.oniter.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/19.manyiters.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/20.manyiters.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/21.big.initsparse.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/22.big.initsparse.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/23.big.initsparse.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/24.big.initsparse.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/25.big.initfull.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/26.big.initfull.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/27.faraway_error.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/28.big.diag.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/29.big.diag.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/30.big.diag.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/31.big.diag.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/32.big.diag.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/33.big.diag.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/34.manyerrs.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/35.manyerrs.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/36.br_corner_errors.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/37.bl_corner_errors.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/38.tr_corner_errors.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/39.tl_corner_errors.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/40.mid_errors.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/41.far_errors.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/42.tall.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/43.tall.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/44.tall.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/45.wide.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/46.wide.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/47.wide.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/48.random_37_23_11.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/49.random_44_25_9.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/50.random_48_37_12.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/51.random_20_26_2.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/52.random_45_23_8.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/53.random_21_42_7.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/54.random_32_40_7.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/55.random_36_27_8.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/56.random_16_40_7.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/57.random_32_27_3.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/58.random_230_111_43.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/59.random_222_274_69.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/60.random_254_295_18.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/61.random_148_230_21.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/62.random_260_198_59.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/63.random_158_104_28.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/64.random_57_214_26.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/65.random_242_209_37.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/66.random_300_97_19.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/67.random_283_234_80.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/68-onecell01.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/69-onecell02.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/70-onecell03.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/71-onecell04.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/72-onecell05.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/73-fourcell01.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/74-fourcell02.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/75-fourcell03.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/76-fourcell04.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/77-fourcell05.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/78-plus01.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/79-plus02.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/80-plus03.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/81-plus04.ans
+#     wrote (A)reports/yaml07.03.17.648/replicate/data/secret/82-plus05.ans
+

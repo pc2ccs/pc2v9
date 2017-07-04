@@ -1,0 +1,62 @@
+# Problem set configuration
+problems:
+  - letter:     A
+    short-name: airport
+    color:      Lime Green
+    rgb:        '#9be300'
+
+  - letter:     B
+    short-name: clue
+    color:      Burgundy
+    rgb:        '#d4656b'
+
+  - letter:     C
+    short-name: improbable
+    color:      Blue
+    rgb:        '#3b9afe'
+
+  - letter:     D
+    short-name: money
+    color:      White
+    rgb:        '#ffffff'
+
+  - letter:     E
+    short-name: speed
+    color:      Orange
+    rgb:        '#ef9530'
+
+  - letter:     F
+    short-name: posterize
+    color:      Navy
+    rgb:        '#3078a8'
+
+  - letter:     G
+    short-name: replicate
+    color:      Red
+    rgb:        '#f5362d'
+
+  - letter:     H
+    short-name: scenery
+    color:      Dark Green
+    rgb:        '#0cb14a'
+
+  - letter:     I
+    short-name: secretchamber
+    color:      Light Pink
+    rgb:        '#f7a9c5'
+
+  - letter:     J
+    short-name: sonofpipestream
+    color:      Purple
+    rgb:        '#7e49c2'
+
+  - letter:     K
+    short-name: tarotshamboast
+    color:      Yellow
+    rgb:        '#fff407'
+
+  - letter:     L
+    short-name: visual
+    color:      Dark Pink
+    rgb:        '#f2717f'
+

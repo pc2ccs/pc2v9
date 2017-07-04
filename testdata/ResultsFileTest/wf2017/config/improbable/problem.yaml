@@ -1,0 +1,94 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:17 PDT
+--- 
+
+name: 'Mission Improbable'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 01-zeros.in
+datafile: 01-zeros.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/01-zeros.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/02-zerocol.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/03-zerorow.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/04-chain.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/05-raise.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/06-tall.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/07-wide.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/08.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/10-rand.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/11-rand.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/12-rand.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/13-rand.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/14-rand.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/15-rand.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/20-maximum.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/21-maxvalues.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/22-bigchain.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/23-slow.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/24-slow2.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/25-slow.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/26-slow2.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/30-josse-height-zero-or-one.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/31-josse-edge-case-1-by-1.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/32-josse-edge-case-1-by-C.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/33-josse-bipartite-edge-cover.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/34-josse-same-height.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/35-josse-distinct-maxima.in
+#     wrote (D)reports/yaml07.03.17.648/improbable/data/secret/36-josse-path-inverted.in
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/01-zeros.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/02-zerocol.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/03-zerorow.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/04-chain.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/05-raise.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/06-tall.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/07-wide.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/08.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/10-rand.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/11-rand.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/12-rand.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/13-rand.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/14-rand.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/15-rand.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/20-maximum.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/21-maxvalues.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/22-bigchain.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/23-slow.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/24-slow2.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/25-slow.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/26-slow2.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/30-josse-height-zero-or-one.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/31-josse-edge-case-1-by-1.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/32-josse-edge-case-1-by-C.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/33-josse-bipartite-edge-cover.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/34-josse-same-height.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/35-josse-distinct-maxima.ans
+#     wrote (A)reports/yaml07.03.17.648/improbable/data/secret/36-josse-path-inverted.ans
+

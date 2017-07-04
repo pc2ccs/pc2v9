@@ -1,0 +1,114 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:17 PDT
+--- 
+
+name: 'Posterize'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 01.in
+datafile: 01.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/01.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/02.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/03.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/04.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/05.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/06.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/07.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/08.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/09.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/10.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/11.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/12.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/13.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/14.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/15.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/16.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/17.maxans.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/18.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/19.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/20.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/21.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/22.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/23.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/24.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/25.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/26.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/27.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/28.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/29.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/30.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/31.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/32.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/33.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/34.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/35.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/36.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/37.in
+#     wrote (D)reports/yaml07.03.17.648/posterize/data/secret/38.in
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/01.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/02.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/03.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/04.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/05.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/06.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/07.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/08.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/09.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/10.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/11.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/12.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/13.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/14.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/15.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/16.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/17.maxans.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/18.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/19.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/20.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/21.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/22.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/23.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/24.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/25.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/26.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/27.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/28.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/29.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/30.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/31.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/32.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/33.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/34.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/35.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/36.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/37.ans
+#     wrote (A)reports/yaml07.03.17.648/posterize/data/secret/38.ans
+

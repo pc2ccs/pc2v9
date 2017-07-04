@@ -1,0 +1,132 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:17 PDT
+--- 
+
+name: 'Get a Clue!'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 000.manydifferent_noinfo.in
+datafile: 000.manydifferent_noinfo.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/000.manydifferent_noinfo.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/001.c01a.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/002.c01b.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/003.c03.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/004.c04.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/005.c05.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/006.c06.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/007.c07.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/008.c08.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/009.c10.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/010.c12.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/011.c13.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/012.c14.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/013.c15.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/014.c16.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/015.c17.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/016.c19.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/017.c20.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/018.c21.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/019.c22.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/020.c23.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/021.c24.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/022.c25.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/023.c26.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/024.c27.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/025.c28.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/026.c29.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/027.c30.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/028.clue02.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/029.clue03.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/030.random001.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/031.random002.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/032.random003.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/033.random004.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/034.random005.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/035.random006.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/036.random007.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/037.random008.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/038.random009.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/039.random010.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/040.random036.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/041.random043.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/042.alldashescomplete.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/043.alldashesincomplete.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/044.fiftysame.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/045.noletters.in
+#     wrote (D)reports/yaml07.03.17.648/clue/data/secret/046.manydifferent_noinfo.in
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/000.manydifferent_noinfo.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/001.c01a.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/002.c01b.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/003.c03.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/004.c04.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/005.c05.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/006.c06.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/007.c07.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/008.c08.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/009.c10.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/010.c12.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/011.c13.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/012.c14.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/013.c15.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/014.c16.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/015.c17.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/016.c19.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/017.c20.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/018.c21.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/019.c22.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/020.c23.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/021.c24.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/022.c25.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/023.c26.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/024.c27.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/025.c28.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/026.c29.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/027.c30.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/028.clue02.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/029.clue03.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/030.random001.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/031.random002.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/032.random003.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/033.random004.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/034.random005.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/035.random006.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/036.random007.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/037.random008.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/038.random009.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/039.random010.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/040.random036.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/041.random043.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/042.alldashescomplete.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/043.alldashesincomplete.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/044.fiftysame.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/045.noletters.ans
+#     wrote (A)reports/yaml07.03.17.648/clue/data/secret/046.manydifferent_noinfo.ans
+

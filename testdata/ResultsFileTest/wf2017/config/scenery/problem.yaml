@@ -1,0 +1,204 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:17 PDT
+--- 
+
+name: 'Scenery'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 001-gjst.in
+datafile: 001-gjst.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/001-gjst.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/002-gjst_perturbNo.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/003-manychoices_yesBarely.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/004-manychoices_no.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/005-two-same-short.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/006-two-same-long.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/007-t1_no.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/008-t1_yes.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/009-stack-5-last.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/010-stack-5-first.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/011-stack-5-imp.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/012-sequence-5.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/013-sequence-5-imp.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/014-no_duplicates.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/015-yes_duplicates.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/016-start1-pos.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/017-start1-imp.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/018-start3-pos.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/019-start3-imp.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/020-one-short.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/021-one-long.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/022-gjst-reverse.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/023-gjst_perturbNo-reverse.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/024-sequence-1000.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/025-sequence-1000-imp.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/026-antiDK.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/027-antiDK-reverse.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/028-onufry1.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/029-onufry2.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/030-onufry3.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/031-yes_largetimes.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/032-dk1.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/033-dk2.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/034-dk3.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/035-random-newmax.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/036-yes_10000_10000_a.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/037-no_10000_10000_b.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/038-stack-oldmax-last.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/039-stack-oldmax-imp.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/040-stack-oldmax-first.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/041-random-oldmax.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/042-no_10000_100_a.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/043-yes_10000_100_a.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/044-yesBarely_10000_100_a.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/045-yesBarely_1000_100_a.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/046-yesBarely_1000_200_a.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/047-yesBarely_1000_200_b.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/048-manychoicesA.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/049-manychoicesB.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/050-manychoicesC.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/051-manychoicesD.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/052-manychoicesE.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/053-manychoicesF.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/054-manychoicesG.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/055-manychoicesH.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/056-manychoicesI.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/057-manychoicesJ.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/058-manychoicesK.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/059_manychoices_yesBarely_b.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/060_manychoices_no_b.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/061_manychoices_yesBarely_c.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/062_manychoices_no_c.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/063_random_oldmax.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/064_random_oldmax.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/065_manychoices_yesBarely_d.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/066_manychoices_no_d.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/067_manychoices_yesBarely_e.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/068_manychoices_no_e.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/069-no_1000_50_a.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/070-yes_1000_50_a.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/071-yesBarely_1000_50_a.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/072-no_1000_50_b.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/073-yes_1000_50_b.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/074-yesBarely_1000_50_b.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/075-no_random_10000_100.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/076-yes_random_10000_100.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/077-yesBarely_random_10000_100.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/078_manychoices_no_f.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/079_manychoices_yesBarely_f.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/080_manychoices_no_g.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/081_manychoices_yesBarely_g.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/082_manychoices_no_h.in
+#     wrote (D)reports/yaml07.03.17.648/scenery/data/secret/083_manychoices_yesBarely_h.in
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/001-gjst.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/002-gjst_perturbNo.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/003-manychoices_yesBarely.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/004-manychoices_no.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/005-two-same-short.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/006-two-same-long.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/007-t1_no.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/008-t1_yes.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/009-stack-5-last.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/010-stack-5-first.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/011-stack-5-imp.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/012-sequence-5.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/013-sequence-5-imp.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/014-no_duplicates.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/015-yes_duplicates.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/016-start1-pos.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/017-start1-imp.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/018-start3-pos.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/019-start3-imp.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/020-one-short.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/021-one-long.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/022-gjst-reverse.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/023-gjst_perturbNo-reverse.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/024-sequence-1000.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/025-sequence-1000-imp.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/026-antiDK.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/027-antiDK-reverse.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/028-onufry1.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/029-onufry2.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/030-onufry3.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/031-yes_largetimes.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/032-dk1.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/033-dk2.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/034-dk3.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/035-random-newmax.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/036-yes_10000_10000_a.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/037-no_10000_10000_b.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/038-stack-oldmax-last.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/039-stack-oldmax-imp.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/040-stack-oldmax-first.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/041-random-oldmax.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/042-no_10000_100_a.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/043-yes_10000_100_a.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/044-yesBarely_10000_100_a.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/045-yesBarely_1000_100_a.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/046-yesBarely_1000_200_a.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/047-yesBarely_1000_200_b.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/048-manychoicesA.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/049-manychoicesB.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/050-manychoicesC.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/051-manychoicesD.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/052-manychoicesE.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/053-manychoicesF.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/054-manychoicesG.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/055-manychoicesH.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/056-manychoicesI.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/057-manychoicesJ.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/058-manychoicesK.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/059_manychoices_yesBarely_b.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/060_manychoices_no_b.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/061_manychoices_yesBarely_c.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/062_manychoices_no_c.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/063_random_oldmax.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/064_random_oldmax.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/065_manychoices_yesBarely_d.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/066_manychoices_no_d.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/067_manychoices_yesBarely_e.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/068_manychoices_no_e.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/069-no_1000_50_a.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/070-yes_1000_50_a.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/071-yesBarely_1000_50_a.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/072-no_1000_50_b.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/073-yes_1000_50_b.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/074-yesBarely_1000_50_b.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/075-no_random_10000_100.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/076-yes_random_10000_100.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/077-yesBarely_random_10000_100.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/078_manychoices_no_f.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/079_manychoices_yesBarely_f.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/080_manychoices_no_g.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/081_manychoices_yesBarely_g.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/082_manychoices_no_h.ans
+#     wrote (A)reports/yaml07.03.17.648/scenery/data/secret/083_manychoices_yesBarely_h.ans
+

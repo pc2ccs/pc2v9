@@ -1,0 +1,184 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:18 PDT
+--- 
+
+name: 'Tarot Sham Boast'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 001_random.in
+datafile: 001_random.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/001_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/002_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/003_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/004_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/005_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/006_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/007_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/008_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/009_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/010_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/011_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/012_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/013_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/014_lastdiffer.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/015_lastdiffer.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/016_lastdiffer.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/017_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/018_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/019_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/020_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/021_interesting.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/022_interesting.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/023_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/024_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/025_interesting.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/026_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/027_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/028_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/029_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/030_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/031_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/032_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/033_lastdiffer.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/034_interesting.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/035_interesting.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/036_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/037_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/038_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/039_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/040_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/041_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/042_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/043_random.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/044_equaloverlap.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/045_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/046_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/047_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/048_oner.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/049_lastdiffer.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/050_interesting.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/051_interesting.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/052_thuemorse.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/053_binaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/054_binaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/055_binaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/056_binaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/057_binaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/058_binaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/059_binaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/060_binaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/061_binaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/062_ternaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/063_ternaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/064_ternaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/065_ternaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/066_ternaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/067_ternaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/068_ternaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/069_ternaryties.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/070_powers.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/071_powers.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/072_powers.in
+#     wrote (D)reports/yaml07.03.17.648/tarotshamboast/data/secret/073_powers.in
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/001_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/002_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/003_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/004_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/005_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/006_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/007_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/008_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/009_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/010_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/011_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/012_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/013_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/014_lastdiffer.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/015_lastdiffer.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/016_lastdiffer.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/017_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/018_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/019_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/020_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/021_interesting.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/022_interesting.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/023_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/024_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/025_interesting.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/026_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/027_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/028_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/029_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/030_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/031_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/032_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/033_lastdiffer.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/034_interesting.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/035_interesting.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/036_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/037_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/038_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/039_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/040_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/041_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/042_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/043_random.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/044_equaloverlap.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/045_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/046_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/047_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/048_oner.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/049_lastdiffer.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/050_interesting.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/051_interesting.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/052_thuemorse.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/053_binaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/054_binaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/055_binaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/056_binaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/057_binaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/058_binaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/059_binaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/060_binaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/061_binaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/062_ternaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/063_ternaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/064_ternaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/065_ternaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/066_ternaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/067_ternaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/068_ternaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/069_ternaryties.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/070_powers.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/071_powers.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/072_powers.ans
+#     wrote (A)reports/yaml07.03.17.648/tarotshamboast/data/secret/073_powers.ans
+

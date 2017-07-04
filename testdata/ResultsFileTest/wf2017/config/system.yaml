@@ -1,0 +1,40 @@
+#
+# File:     system.yaml
+# Purpose:  World Finals System settings
+#
+
+event-feed-port:   4713
+
+default-clars:
+  - No comment, read problem statement.
+
+clar-categories:
+  - Unassigned
+  - Judges
+  - SysOps
+  - Operations
+
+languages:
+ - name: Java
+   compiler: /usr/bin/javac
+   compiler-args: -encoding UTF-8 -sourcepath . -d . {files}
+   runner: /usr/bin/java
+   runner-args: -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m
+
+ - name: C++
+   compiler: /usr/bin/g++
+   compiler-args: -g -O2 -std=gnu++14 -static {files}
+
+ - name: C
+   compiler: /usr/bin/gcc
+   compiler-args: -g -O2 -std=gnu11 -static {files} -lm
+
+ - name: Python 2
+   compiler: /usr/bin/python2
+   compiler-args: -m py_compile {files}
+   runner: /usr/bin/pypy
+
+ - name: Python 3
+   compiler: /usr/bin/python3
+   compiler-args: -m py_compile {files}
+   runner: /usr/bin/python3

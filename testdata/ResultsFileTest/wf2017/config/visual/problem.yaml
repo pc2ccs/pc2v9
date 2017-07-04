@@ -1,0 +1,224 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:18 PDT
+--- 
+
+name: 'Visual Python++'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 001-single.in
+datafile: 001-single.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/001-single.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/001MXY-single.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/002-reversed.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/002MXY-reversed.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/003-touch-inner.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/003MXY-touch-inner.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/003MYX-touch-inner.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/003YX-touch-inner.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/004-touch-outer.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/004MXY-touch-outer.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/004MYX-touch-outer.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/004YX-touch-outer.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/005-touch-zero.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/005MXY-touch-zero.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/005MYX-touch-zero.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/005YX-touch-zero.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/006-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/006MXY-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/006MYX-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/006YX-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/007-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/007MXY-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/007MYX-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/007YX-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/008-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/008MXY-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/008MYX-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/008YX-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/009-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/009MXY-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/009MYX-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/009YX-rand-20-20-20.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/010-rand-100-50-50.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/011-rand-100-50-50.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/012-rand-100-50-50.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/013-rand-100-50-50.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/014-rand-100000-1000000000-1000000000.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/015-rand-100000-1000000000-1000000000.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/016-inside.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/016MXY-inside.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/016MYX-inside.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/016YX-inside.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/017-across-same.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/017MXY-across-same.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/017MYX-across-same.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/017YX-across-same.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/018-across-misc.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/018MXY-across-misc.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/018MYX-across-misc.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/018YX-across-misc.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/019.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/020.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/021.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/022.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/023.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/024.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/025.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/026.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/027.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/028.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/029.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/030.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/031.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/032.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/033.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/034.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/035.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/036.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/037.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/038.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/039.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/040.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/041.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/042-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/043-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/044-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/045-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/046-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/047-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/048-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/049-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/050-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/051-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/052-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/053-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/054-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/055-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/056-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/057-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/058-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/059-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/060-tree.in
+#     wrote (D)reports/yaml07.03.17.648/visual/data/secret/061-tree.in
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/001-single.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/001MXY-single.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/002-reversed.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/002MXY-reversed.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/003-touch-inner.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/003MXY-touch-inner.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/003MYX-touch-inner.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/003YX-touch-inner.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/004-touch-outer.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/004MXY-touch-outer.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/004MYX-touch-outer.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/004YX-touch-outer.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/005-touch-zero.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/005MXY-touch-zero.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/005MYX-touch-zero.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/005YX-touch-zero.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/006-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/006MXY-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/006MYX-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/006YX-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/007-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/007MXY-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/007MYX-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/007YX-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/008-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/008MXY-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/008MYX-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/008YX-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/009-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/009MXY-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/009MYX-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/009YX-rand-20-20-20.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/010-rand-100-50-50.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/011-rand-100-50-50.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/012-rand-100-50-50.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/013-rand-100-50-50.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/014-rand-100000-1000000000-1000000000.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/015-rand-100000-1000000000-1000000000.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/016-inside.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/016MXY-inside.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/016MYX-inside.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/016YX-inside.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/017-across-same.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/017MXY-across-same.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/017MYX-across-same.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/017YX-across-same.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/018-across-misc.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/018MXY-across-misc.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/018MYX-across-misc.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/018YX-across-misc.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/019.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/020.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/021.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/022.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/023.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/024.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/025.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/026.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/027.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/028.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/029.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/030.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/031.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/032.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/033.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/034.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/035.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/036.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/037.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/038.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/039.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/040.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/041.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/042-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/043-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/044-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/045-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/046-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/047-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/048-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/049-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/050-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/051-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/052-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/053-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/054-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/055-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/056-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/057-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/058-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/059-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/060-tree.ans
+#     wrote (A)reports/yaml07.03.17.648/visual/data/secret/061-tree.ans
+

@@ -1,0 +1,12 @@
+#
+# File:     contest.yaml
+# Purpose:  World Finals 2017
+#
+#
+---
+name:                     2017 ACM ICPC World Finals
+short-name:               2017 ACM ICPC World Finals
+start-time:               2017-05-24T09:00:00-06:00
+duration:                 5:00:00
+scoreboard-freeze-length: 1:00:00
+penalty-time:             20

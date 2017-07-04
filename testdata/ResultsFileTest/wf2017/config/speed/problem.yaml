@@ -1,0 +1,70 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 01:31 UTC) Java ver 1.8.0_131 build 4628 Windows 10 10.0 (amd64) 
+# Created: 2017-07-03 19:09:17 PDT
+--- 
+
+name: 'Need for Speed'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: false
+
+datafile: 01.in
+datafile: 01.ans
+
+validator_flags: float_absolute_tolerance 1.0E-6 float_relative_tolerance 1.0E-6
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: true
+    manual-review: false
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/01.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/02.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/03.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/04.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/05.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/06.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/07.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/08.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/09.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/10.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/11.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/12.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/13.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/14.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/15.in
+#     wrote (D)reports/yaml07.03.17.648/speed/data/secret/16.in
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/01.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/02.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/03.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/04.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/05.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/06.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/07.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/08.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/09.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/10.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/11.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/12.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/13.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/14.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/15.ans
+#     wrote (A)reports/yaml07.03.17.648/speed/data/secret/16.ans
+
