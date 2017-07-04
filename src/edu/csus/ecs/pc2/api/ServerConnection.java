@@ -32,7 +32,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
@@ -557,7 +557,7 @@ public class ServerConnection {
      */
     protected void setPC2ValidatorDefaults(Problem problem) {
 
-        problem.setValidatorType(VALIDATORTYPE.PC2VALIDATOR);
+        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
         
         PC2ValidatorSettings settings = new PC2ValidatorSettings();
         
@@ -579,7 +579,7 @@ public class ServerConnection {
      */
     protected void setClicsValidatorDefaults(Problem problem) {
 
-        problem.setValidatorType(VALIDATORTYPE.CLICSVALIDATOR);
+        problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         
         ClicsValidatorSettings settings = new ClicsValidatorSettings();
         
@@ -596,7 +596,7 @@ public class ServerConnection {
      */
     protected void setCustomValidatorDefaults(Problem problem) {
 
-        problem.setValidatorType(VALIDATORTYPE.CUSTOMVALIDATOR);
+        problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
         
         CustomValidatorSettings settings = new CustomValidatorSettings();
         
@@ -622,7 +622,7 @@ public class ServerConnection {
      * @param problemProperties
      *            - optional properties, for a list of keys see {@link #getProblemPropertyNames()}, null is allowed.
      */
-    public void addProblem(String title, String shortName, File judgesDataFile, File judgesAnswerFile, VALIDATORTYPE validator, Properties problemProperties) {
+    public void addProblem(String title, String shortName, File judgesDataFile, File judgesAnswerFile, VALIDATOR_TYPE validator, Properties problemProperties) {
 
         checkNotEmpty("Problem title", title);
         checkNotEmpty("Problem short name", shortName);
@@ -649,7 +649,7 @@ public class ServerConnection {
         
         if (judgingType==null) {
             //null means we will default to manual judging, but we can't do that if a validator was specified
-            if (!(validator==VALIDATORTYPE.NONE)) {
+            if (!(validator==VALIDATOR_TYPE.NONE)) {
                 throw new IllegalArgumentException("Problem cannot have a validator if no judging type is specified in the properties (because the default is 'manual judging')");
             } else {
                 //no judging type specified; default to manual judging
@@ -660,12 +660,12 @@ public class ServerConnection {
         //when we get here, judgingType and validator are both known != null
         
         //we cannot have manual judging and also have a validator
-        if (judgingType.equals(APIConstants.MANUAL_JUDGING_ONLY) && validator!=VALIDATORTYPE.NONE) {
+        if (judgingType.equals(APIConstants.MANUAL_JUDGING_ONLY) && validator!=VALIDATOR_TYPE.NONE) {
             throw new IllegalArgumentException("Problem cannot have a validator when manual judging is specified (or defaulted to)");            
         }
         
         //if we DON'T have manual judging, we MUST have a validator
-        if ( (!judgingType.equals(APIConstants.MANUAL_JUDGING_ONLY)) && (validator==VALIDATORTYPE.NONE) )  {
+        if ( (!judgingType.equals(APIConstants.MANUAL_JUDGING_ONLY)) && (validator==VALIDATOR_TYPE.NONE) )  {
             throw new IllegalArgumentException("Problem cannot be specified as computer judged (i.e., 'not manual judged') unless a validator is specified");            
         }
         
@@ -719,7 +719,7 @@ public class ServerConnection {
                 }
                 break;
             case NONE:
-                problem.setValidatorType(VALIDATORTYPE.NONE);
+                problem.setValidatorType(VALIDATOR_TYPE.NONE);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown Validator Type: '" + validator + "'");

@@ -46,7 +46,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -997,7 +997,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             @SuppressWarnings("unchecked")
             LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) object; // fetchList(content, VALIDATOR_KEY);
 
-            problem.setValidatorType(VALIDATORTYPE.PC2VALIDATOR);
+            problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
 
             String validatorProg = fetchValue(map, "validatorProg");
             problem.setOutputValidatorProgramName(validatorProg);
@@ -1030,7 +1030,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             try {
                 ClicsValidatorSettings settings = new ClicsValidatorSettings(validatorFlags);
-                problem.setValidatorType(VALIDATORTYPE.CLICSVALIDATOR);
+                problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
                 problem.setCLICSValidatorSettings(settings);
             } catch (RuntimeException e) {
                 throw new YamlLoadException("For problem " + problem.getShortName() + ", invalid validator flags '" + validatorFlags + "' " + e.getMessage(), e.getCause());
@@ -1046,7 +1046,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (validatorParameters != null && validatorParameters.trim().length() > 0) {
             try {
                 ClicsValidatorSettings settings = new ClicsValidatorSettings(validatorParameters);
-                problem.setValidatorType(VALIDATORTYPE.CLICSVALIDATOR);
+                problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
                 problem.setCLICSValidatorSettings(settings);
             } catch (RuntimeException e) {
                 throw new YamlLoadException("For problem " + problem.getShortName() + ", invalid validator flags '" + validatorParameters + "' " + e.getMessage(), e.getCause());
@@ -1064,7 +1064,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public Problem addDefaultPC2Validator(Problem problem, int optionNumber) {
 
-        problem.setValidatorType(VALIDATORTYPE.PC2VALIDATOR);
+        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
 
         PC2ValidatorSettings settings = new PC2ValidatorSettings();
         settings.setWhichPC2Validator(optionNumber);
@@ -1281,7 +1281,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (overrideValidatorCommandLine != null) {
                     validatorCommandLine = overrideValidatorCommandLine;
                 }
-                problem.setValidatorType(VALIDATORTYPE.PC2VALIDATOR);
+                problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
                 problem.setValidatorCommandLine(validatorCommandLine);
 
                 String inputValidatorCommandLine = fetchValue(map, INPUT_VALIDATOR_COMMAND_LINE_KEY);
@@ -1607,7 +1607,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private Problem addClicsValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
 
-        problem.setValidatorType(VALIDATORTYPE.CLICSVALIDATOR);
+        problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
 
         problem.setReadInputDataFromSTDIN(true);
 

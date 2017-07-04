@@ -88,7 +88,7 @@ public class Problem implements IElementObject {
     /**
      * This enum defines the types of Validators which a Problem can have.
      */
-    public enum VALIDATORTYPE {
+    public enum VALIDATOR_TYPE {
         /**
          * The Problem has no associated Validator; it is not a Validated Problem.
          */
@@ -108,7 +108,7 @@ public class Problem implements IElementObject {
         }
     
     //The type of output validator associated with this Problem.
-    private VALIDATORTYPE validatorType = VALIDATORTYPE.NONE ;
+    private VALIDATOR_TYPE validatorType = VALIDATOR_TYPE.NONE ;
     
     //the settings for each possible type of output validator used by the problem
     private PC2ValidatorSettings pc2ValidatorSettings ;
@@ -377,7 +377,7 @@ public class Problem implements IElementObject {
         retStr += "; readInputDataFromSTDIN=" + readInputDataFromSTDIN;
         retStr += "; timeOutInSeconds=" + timeOutInSeconds;
         
-        boolean validatedProblem = getValidatorType()==VALIDATORTYPE.NONE;
+        boolean validatedProblem = getValidatorType()==VALIDATOR_TYPE.NONE;
         retStr += "; validatedProblem=" + validatedProblem;
         retStr += "; validatorType=" + getValidatorType();
         retStr += "; pc2ValidatorSettings=" + getPC2ValidatorSettings();
@@ -509,13 +509,13 @@ public class Problem implements IElementObject {
 
     /**
      * Returns the state variable indicating what type of Validator this Problem is using.
-     * The returned value will be an element of the enumerated type {@link edu.csus.ecs.pc2.core.VALIDATORTYPE.VALIDATOR_TYPE};
+     * The returned value will be an element of the enumerated type {@link edu.csus.ecs.pc2.core.Problem.VALIDATOR_TYPE};
      * note that this enumeration includes "NONE" to indicate that a Problem has no Validator attached.
      * 
-     * @see {@link edu.csus.ecs.pc2.core.VALIDATORTYPE.VALIDATOR_TYPE}
+     * @see {@link edu.csus.ecs.pc2.core.Problem.VALIDATOR_TYPE}
      * @see {@link #isValidatedProblem()}
      */
-    public VALIDATORTYPE getValidatorType() {
+    public VALIDATOR_TYPE getValidatorType() {
         return this.validatorType;
     }
     
@@ -525,10 +525,10 @@ public class Problem implements IElementObject {
      * 
      * @see #isValidatedProblem()
      * 
-     * @param valType a {@link edu.csus.ecs.pc2.core.model.Problem.VALIDATORTYPE} indicating the 
+     * @param valType a {@link edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE} indicating the 
      *              type of validator used by this Problem
      */
-    public void setValidatorType(VALIDATORTYPE valType) {
+    public void setValidatorType(VALIDATOR_TYPE valType) {
         this.validatorType = valType;
     }
     /**
@@ -538,7 +538,7 @@ public class Problem implements IElementObject {
      * @return true if the Problem is using the PC2Validator
      */
     public boolean isUsingPC2Validator() {
-        return getValidatorType()==VALIDATORTYPE.PC2VALIDATOR;
+        return getValidatorType()==VALIDATOR_TYPE.PC2VALIDATOR;
     }
 
     /**
@@ -548,7 +548,7 @@ public class Problem implements IElementObject {
      * @return true if the Problem is using the CLICS Validator
      */
     public boolean isUsingCLICSValidator() {
-        return getValidatorType()==VALIDATORTYPE.CLICSVALIDATOR;
+        return getValidatorType()==VALIDATOR_TYPE.CLICSVALIDATOR;
     }
 
     /**
@@ -558,14 +558,14 @@ public class Problem implements IElementObject {
      * @return true if the Problem is using a Custom validator
      */
     public boolean isUsingCustomValidator() {
-        return getValidatorType()==VALIDATORTYPE.CUSTOMVALIDATOR;
+        return getValidatorType()==VALIDATOR_TYPE.CUSTOMVALIDATOR;
     }
 
     /**
      * @return whether this Problem has a validator or not.
      */
     public boolean isValidatedProblem() {
-        return ! (getValidatorType()==VALIDATORTYPE.NONE);
+        return ! (getValidatorType()==VALIDATOR_TYPE.NONE);
     }
 
     /**
