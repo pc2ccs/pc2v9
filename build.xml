@@ -79,7 +79,7 @@
         value="${date.english} ${time.english}" />
 
     <!-- version is used in the jar manifest & in package.xml -->
-    <property name="version" value="9.5.0"/>
+    <property name="version" value="9.6.0"/>
 
     <path id="project.classpath">
         <pathelement location="${build.prod.dir}"/>
