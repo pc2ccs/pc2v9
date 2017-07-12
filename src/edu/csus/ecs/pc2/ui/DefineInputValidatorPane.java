@@ -127,7 +127,7 @@ public class DefineInputValidatorPane extends JPanePlugin {
         this.inputValidatorFile = inputValidatorFile;
         if (inputValidatorFile == null){
             getInputValidatorProgramNameTextField().setText("");
-            getInputValidatorProgramNameTextField().setToolTipText("");
+            getInputValidatorProgramNameTextField().setToolTipText(null);
         } else {
             getInputValidatorProgramNameTextField().setText(inputValidatorFile.getName());
             getInputValidatorProgramNameTextField().setToolTipText(inputValidatorFile.getAbsolutePath());
@@ -156,7 +156,7 @@ public class DefineInputValidatorPane extends JPanePlugin {
             inputValidatorProgramNameTextField.setMinimumSize(new Dimension(300, 25));
             inputValidatorProgramNameTextField.setColumns(50);
             inputValidatorProgramNameTextField.setText("");
-            inputValidatorProgramNameTextField.setToolTipText("");
+            inputValidatorProgramNameTextField.setToolTipText(null);
             inputValidatorProgramNameTextField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent event) {
                     enableUpdateButton();
@@ -183,7 +183,7 @@ public class DefineInputValidatorPane extends JPanePlugin {
             inputValidatorCommandTextField.setMinimumSize(new Dimension(300, 25));
             inputValidatorCommandTextField.setColumns(50);
             inputValidatorCommandTextField.setText("");
-            inputValidatorCommandTextField.setToolTipText("");
+            inputValidatorCommandTextField.setToolTipText(null);
             
             inputValidatorCommandTextField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent event) {
