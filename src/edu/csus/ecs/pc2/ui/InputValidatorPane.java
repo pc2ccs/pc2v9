@@ -100,7 +100,7 @@ public class InputValidatorPane extends JPanePlugin {
      * 
      * @param inputValidatorProg
      *            a String containing the Input Validator Program name
-     # @deprecated use DefineInputValidatorPane#setInputValidatorFile
+     * @deprecated use DefineInputValidatorPane#setInputValidatorFile
      */
     public void setInputValidatorProgramName(String progName) {
         getDefineInputValidatorPane().setInputValidatorProgramName(progName);
