@@ -114,19 +114,23 @@ public class DefineInputValidatorPane extends JPanePlugin {
     
     /**
      * Sets the Input Validator Program name displayed in this DefineInputValidatorPane to the specified text.
+     * Also sets the tooltip for the display textbox to match the specified Input Validator Program name.
      * 
      * @param progname a String containing the Input Validator Program name
      */
     public void setInputValidatorProgramName(String progName) {
         getInputValidatorProgramNameTextField().setText(progName);
+        getInputValidatorProgramNameTextField().setToolTipText(progName);
     }
     
     public void setInputValidatorFile(SerializedFile inputValidatorFile) {
         this.inputValidatorFile = inputValidatorFile;
         if (inputValidatorFile == null){
             getInputValidatorProgramNameTextField().setText("");
+            getInputValidatorProgramNameTextField().setToolTipText("");
         } else {
             getInputValidatorProgramNameTextField().setText(inputValidatorFile.getName());
+            getInputValidatorProgramNameTextField().setToolTipText(inputValidatorFile.getAbsolutePath());
         }
     }
     
