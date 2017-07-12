@@ -551,6 +551,10 @@ public class EditProblemPane extends JPanePlugin {
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
             return;
+        } catch (Exception e) {
+            showMessage("Exeception while adding Problem; see log."); 
+            getLog().throwing("EditProblemPane", "addProblem()", e);
+            return;
         }
 
         if (!newProblem.getElementId().equals(newProblemDataFiles.getProblemId())) {
@@ -1654,7 +1658,12 @@ public class EditProblemPane extends JPanePlugin {
             JOptionPane.showMessageDialog(this, e.getMessage());
             // showMessage(e.getMessage());
             return;
+        } catch (Exception e) {
+            showMessage("Exeception while updating Problem; see log."); 
+            getLog().throwing("EditProblemPane", "updateProblem()", e);
+            return;
         }
+
 
         // add a Problem Letter to the problem if it doesn't have one (note: problem letter is not displayed in the GUI)
         if (newProblem.getLetter() == null || newProblem.getLetter().length() == 0) {
@@ -1710,7 +1719,9 @@ public class EditProblemPane extends JPanePlugin {
 
         newProblemDataFiles = multipleDataSetPane.getProblemDataFiles();
         
-        newProblemDataFiles.setInputValidatorFile(inputValidatorPane.getInputValidatorFile());
+        if (newProblemDataFiles != null) {
+            newProblemDataFiles.setInputValidatorFile(inputValidatorPane.getInputValidatorFile());
+        }
 
         if (debug22EditProblem) {
             Utilities.dump(newProblemDataFiles, "debug 22 in getProblemDataFilesFromFields");
@@ -1735,7 +1746,7 @@ public class EditProblemPane extends JPanePlugin {
         // verify that if the PC2 Validator is selected, an option has been chosen
         if (getUsePC2ValidatorRadioButton().isSelected()) {
             if (getPc2ValidatorOptionComboBox().getSelectedIndex() < 1) {
-                showMessage("PC^2 Validator is selected; you must select a Validator Mode option (\"Validator\" tab)");
+                showMessage("PC^2 Validator is selected; you must select a Validator Mode option (\"Output Validator\" tab)");
                 return false;
             }
         }
@@ -4232,7 +4243,8 @@ public class EditProblemPane extends JPanePlugin {
 
             showFilesDiff(fileNameOne, fileNameTwo);
         } catch (Exception e) {
-            e.printStackTrace(); // debug 22
+            showMessage("Exeception while exporting Problem; see log."); 
+            getLog().throwing("EditProblemPane", "saveAndCompare()", e);
         }
 
     }
@@ -4320,6 +4332,10 @@ public class EditProblemPane extends JPanePlugin {
             Utilities.viewReport(singleProblemReport, "Problem Report " + getProblemNameTextField().getText(), getContest(), getController());
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
+            return;
+        } catch (Exception e) {
+            showMessage("Exeception while viewing Problem report; see log."); 
+            getLog().throwing("EditProblemPane", "viewProblemReport()", e);
             return;
         }
 
