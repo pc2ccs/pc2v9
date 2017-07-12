@@ -2520,8 +2520,8 @@ public class EditProblemPane extends JPanePlugin {
         // update the tooltip to reflect the name in the text field
 //        if (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) {
         if (getInputValidatorPane().getInputValidatorFile() == null){
-            // set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
-            getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
+            // set the tooltip as empty-string (otherwise we get a little sliver of a null tooltip)
+            getInputValidatorPane().setInputValidatorProgramNameToolTipText("");
         } else {
 //            getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorProgramName());
             getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorFile().getAbsolutePath());
@@ -2537,8 +2537,8 @@ public class EditProblemPane extends JPanePlugin {
 
         // update the tooltip to reflect the name in the command text field
         if (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) {
-            // set the tooltip null (otherwise we get a little sliver of an empty-string tooltip)
-            getInputValidatorPane().setInputValidatorCommandToolTipText(null);
+            // set the tooltip as empty-string (otherwise we get a little sliver of a null tooltip)
+            getInputValidatorPane().setInputValidatorCommandToolTipText("");
         } else {
             getInputValidatorPane().setInputValidatorCommandToolTipText(getInputValidatorPane().getInputValidatorCommand());
         }
