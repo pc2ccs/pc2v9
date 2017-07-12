@@ -2100,9 +2100,9 @@ public class EditProblemPane extends JPanePlugin {
             problemRequiresDataCheckBox.setSelected(false);
 
             inputDataFileLabel.setText("");
-            inputDataFileLabel.setToolTipText("");
+            inputDataFileLabel.setToolTipText(null);
             answerFileNameLabel.setText("");
-            answerFileNameLabel.setToolTipText("");
+            answerFileNameLabel.setToolTipText(null);
 
         }
 
@@ -2315,8 +2315,8 @@ public class EditProblemPane extends JPanePlugin {
         answerFileNameLabel.setText(inProblem.getAnswerFileName());
 
         // set ToolTips for input data and judge's answer labels to defaults
-        inputDataFileLabel.setToolTipText("");
-        answerFileNameLabel.setToolTipText("");
+        inputDataFileLabel.setToolTipText(null);
+        answerFileNameLabel.setToolTipText(null);
 
         // update ToolTips from ProblemDataFiles if available
         if (inProblemDataFiles != null) {
@@ -2516,13 +2516,14 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             getInputValidatorPane().setInputValidatorFile(null);
             getInputValidatorPane().setInputValidatorProgramName("");
+            getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
         }
 
         // update the tooltip to reflect the name in the text field
 //        if (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) {
         if (getInputValidatorPane().getInputValidatorFile() == null){
-            // set the tooltip as empty-string (otherwise we get a little sliver of a null tooltip)
-            getInputValidatorPane().setInputValidatorProgramNameToolTipText("");
+            // set the tooltip as null (otherwise we get a little sliver of a empty-string tooltip)
+            getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
         } else {
 //            getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorProgramName());
             getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorFile().getAbsolutePath());
@@ -2538,8 +2539,8 @@ public class EditProblemPane extends JPanePlugin {
 
         // update the tooltip to reflect the name in the command text field
         if (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) {
-            // set the tooltip as empty-string (otherwise we get a little sliver of a null tooltip)
-            getInputValidatorPane().setInputValidatorCommandToolTipText("");
+            // set the tooltip as null (otherwise we get a little sliver of a empty-string tooltip)
+            getInputValidatorPane().setInputValidatorCommandToolTipText(null);
         } else {
             getInputValidatorPane().setInputValidatorCommandToolTipText(getInputValidatorPane().getInputValidatorCommand());
         }
@@ -3902,12 +3903,12 @@ public class EditProblemPane extends JPanePlugin {
         stdinRadioButton.setSelected(true);
         fileRadioButton.setSelected(false);
         inputDataFileLabel.setText("");
-        inputDataFileLabel.setToolTipText("");
+        inputDataFileLabel.setToolTipText(null);
 
         // answer files options:
         getJudgesHaveAnswerFilesCheckbox().setSelected(false);
         answerFileNameLabel.setText("");
-        answerFileNameLabel.setToolTipText("");
+        answerFileNameLabel.setToolTipText(null);
 
         // misc options:
         getDoShowOutputWindowCheckBox().setSelected(true);
@@ -3933,10 +3934,10 @@ public class EditProblemPane extends JPanePlugin {
     private void initializeInputValidatorTabFields() {
 
         getInputValidatorPane().setInputValidatorProgramName("");
-        getInputValidatorPane().setInputValidatorProgramNameToolTipText("");
+        getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
         getInputValidatorPane().setInputValidatorFile(null);
         getInputValidatorPane().setInputValidatorCommand("");
-        getInputValidatorPane().setInputValidatorCommandToolTipText("");
+        getInputValidatorPane().setInputValidatorCommandToolTipText(null);
 
         getInputValidatorPane().setInputValidationSummaryMessageText("<No Input Validation test run yet>");
         getInputValidatorPane().setInputValidationSummaryMessageColor(Color.BLACK);
@@ -3971,7 +3972,7 @@ public class EditProblemPane extends JPanePlugin {
         // clear custom validator options
         getUseCustomValidatorRadioButton().setSelected(false);
         getCustomValidatorExecutableProgramTextField().setText("");
-        getCustomValidatorExecutableProgramTextField().setToolTipText("");
+        getCustomValidatorExecutableProgramTextField().setToolTipText(null);
 
         localPC2InterfaceCustomValidatorCommandLine = Constants.DEFAULT_PC2_VALIDATOR_COMMAND;
         localClicsInterfaceCustomValidatorCommandLine = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
