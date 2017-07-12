@@ -2514,6 +2514,7 @@ public class EditProblemPane extends JPanePlugin {
         if (inputValidatorProg != null) {
             getInputValidatorPane().setInputValidatorProgramName(inputValidatorProg);
         } else {
+            getInputValidatorPane().setInputValidatorFile(null);
             getInputValidatorPane().setInputValidatorProgramName("");
         }
 
@@ -3933,6 +3934,7 @@ public class EditProblemPane extends JPanePlugin {
 
         getInputValidatorPane().setInputValidatorProgramName("");
         getInputValidatorPane().setInputValidatorProgramNameToolTipText("");
+        getInputValidatorPane().setInputValidatorFile(null);
         getInputValidatorPane().setInputValidatorCommand("");
         getInputValidatorPane().setInputValidatorCommandToolTipText("");
 
