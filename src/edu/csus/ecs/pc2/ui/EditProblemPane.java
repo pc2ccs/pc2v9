@@ -3058,7 +3058,7 @@ public class EditProblemPane extends JPanePlugin {
         // toolTip should always have the full path
         String oldFile = label.getToolTipText();
         String startDir;
-        if (oldFile.equalsIgnoreCase("")) {
+        if (oldFile == null || oldFile.equalsIgnoreCase("")) {
             startDir = lastDirectory;
         } else {
             startDir = oldFile;
