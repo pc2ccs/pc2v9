@@ -1759,7 +1759,7 @@ public class EditProblemPane extends JPanePlugin {
                 try {
                     Float.parseFloat(text);
                 } catch (NumberFormatException | NullPointerException e) {
-                    showMessage("CLICS Validator 'Float Relative Tolerance' is selected; you must specify a valid tolerance (\"Validator\" tab)");
+                    showMessage("CLICS Validator 'Float Relative Tolerance' is selected; you must specify a valid tolerance (\"Output Validator\" tab)");
                     return false;
                 }
             }
@@ -1769,7 +1769,7 @@ public class EditProblemPane extends JPanePlugin {
                 try {
                     Float.parseFloat(text);
                 } catch (NumberFormatException | NullPointerException e) {
-                    showMessage("CLICS Validator 'Float Absolute Tolerance' is selected; you must specify a valid tolerance (\"Validator\" tab)");
+                    showMessage("CLICS Validator 'Float Absolute Tolerance' is selected; you must specify a valid tolerance (\"Output Validator\" tab)");
                     return false;
                 }
             }
@@ -1778,7 +1778,7 @@ public class EditProblemPane extends JPanePlugin {
         // verify that if a Custom Validator has been selected, there is a Validator Program specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
             if (getCustomValidatorExecutableProgramTextField().getText() == null || getCustomValidatorExecutableProgramTextField().getText().trim().length() < 1) {
-                showMessage("\"Use Custom Validator\" is selected; you must specify Validator executable program (\"Validator\" tab)");
+                showMessage("\"Use Custom Validator\" is selected; you must specify Validator executable program (\"Output Validator\" tab)");
                 return false;
             }
         }
@@ -1786,7 +1786,7 @@ public class EditProblemPane extends JPanePlugin {
         // verify that if a Custom Validator has been selected, there is a Validator Command specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
             if (getCustomValidatorCommandLineTextField().getText() == null || getCustomValidatorCommandLineTextField().getText().trim().length() < 1) {
-                showMessage("\"Use Custom Validator\" is selected; you must specify Validator Command Line (\"Validator\" tab)");
+                showMessage("\"Use Custom Validator\" is selected; you must specify Validator Command Line (\"Output Validator\" tab)");
                 return false;
             }
         }
@@ -1794,7 +1794,7 @@ public class EditProblemPane extends JPanePlugin {
         // verify that if a Custom Validator has been selected, exactly one Validator Interface has been specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
             if (!(getUseClicsValStdRadioButton().isSelected() ^ getUsePC2ValStdRadioButton().isSelected())) { // ^ == XOR
-                showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Validator\" tab)");
+                showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Output Validator\" tab)");
                 return false;
             }
         }
