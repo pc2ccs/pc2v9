@@ -494,17 +494,8 @@ public class Executable extends Plugin implements IExecutable {
                 programGeneratedOutput = true;
             }
 
-            if (!programGeneratedOutput) {
+            if (executionData.isCompileSuccess() && !programGeneratedOutput) {
                 String message = "PC2: execution of program did not generate any output";
-
-                if (!executionData.isCompileSuccess()) {
-                    String errorMessage = "Unable to find/execute compiler using command: " + language.getCompileCommandLine();
-                    if (executionData.getExecutionException() != null) {
-                        errorMessage += NL + executionData.getExecutionException().getMessage();
-                    }
-                    message += NL + errorMessage;
-                }
-
                 fileViewer.addTextPane("Program output", message);
             }
 
