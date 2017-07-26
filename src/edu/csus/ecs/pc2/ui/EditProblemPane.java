@@ -1757,7 +1757,7 @@ public class EditProblemPane extends JPanePlugin {
             if (getFloatRelativeToleranceCheckBox().isSelected()) {
                 String text = getFloatRelativeToleranceTextField().getText();
                 try {
-                    Float.parseFloat(text);
+                    Double.parseDouble(text);
                 } catch (NumberFormatException | NullPointerException e) {
                     showMessage("CLICS Validator 'Float Relative Tolerance' is selected; you must specify a valid tolerance (\"Output Validator\" tab)");
                     return false;
@@ -1767,7 +1767,7 @@ public class EditProblemPane extends JPanePlugin {
             if (getFloatAbsoluteToleranceCheckBox().isSelected()) {
                 String text = getFloatAbsoluteToleranceTextField().getText();
                 try {
-                    Float.parseFloat(text);
+                    Double.parseDouble(text);
                 } catch (NumberFormatException | NullPointerException e) {
                     showMessage("CLICS Validator 'Float Absolute Tolerance' is selected; you must specify a valid tolerance (\"Output Validator\" tab)");
                     return false;
@@ -3566,7 +3566,12 @@ public class EditProblemPane extends JPanePlugin {
             floatRelativeToleranceTextField.setToolTipText("Enter the relative tolerance for floating point numbers");
             floatRelativeToleranceTextField.setMaximumSize(new Dimension(100, 20));
             floatRelativeToleranceTextField.setColumns(20);
-            floatRelativeToleranceTextField.setEnabled(false);
+            floatRelativeToleranceTextField.setEditable(false);
+            floatRelativeToleranceTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return floatRelativeToleranceTextField;
     }
@@ -3602,6 +3607,11 @@ public class EditProblemPane extends JPanePlugin {
             floatAbsoluteToleranceTextField.setMaximumSize(new Dimension(100, 20));
             floatAbsoluteToleranceTextField.setColumns(10);
             floatAbsoluteToleranceTextField.setEnabled(false);
+            floatAbsoluteToleranceTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return floatAbsoluteToleranceTextField;
     }
@@ -4859,8 +4869,7 @@ public class EditProblemPane extends JPanePlugin {
             try {
                 absTol = Double.parseDouble(getFloatAbsoluteToleranceTextField().getText());
             } catch (NumberFormatException e) {
-                showMessage("Invalid absolute tolerance value");
-                throw new InvalidFieldValue("Invalid absolute tolerance value");
+                absTol = 0;
             }
             settings.setFloatAbsoluteTolerance(absTol);
 
@@ -4874,8 +4883,7 @@ public class EditProblemPane extends JPanePlugin {
             try {
                 relTol = Double.parseDouble(getFloatRelativeToleranceTextField().getText());
             } catch (NumberFormatException e) {
-                showMessage("Invalid relative tolerance value");
-                throw new InvalidFieldValue("Invalid relative tolerance value");
+                relTol = 0;
             }
             settings.setFloatRelativeTolerance(relTol);
 
