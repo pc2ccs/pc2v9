@@ -3373,7 +3373,9 @@ public class EditProblemPane extends JPanePlugin {
         getFloatAbsoluteToleranceCheckBox().setEnabled(enableComponents);
         getFloatRelativeToleranceCheckBox().setEnabled(enableComponents);
         getFloatAbsoluteToleranceTextField().setEnabled(enableComponents);
+        getFloatAbsoluteToleranceTextField().setEditable(getFloatAbsoluteToleranceCheckBox().isSelected());
         getFloatRelativeToleranceTextField().setEnabled(enableComponents);
+        getFloatRelativeToleranceTextField().setEditable(getFloatRelativeToleranceCheckBox().isSelected());
     }
 
     /**
@@ -3548,6 +3550,7 @@ public class EditProblemPane extends JPanePlugin {
             floatRelativeToleranceCheckBox.setSelected(false);
             floatRelativeToleranceCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    getFloatRelativeToleranceTextField().setEditable(floatRelativeToleranceCheckBox.isSelected());
                     enableUpdateButton();
                 }
             });
@@ -3588,6 +3591,7 @@ public class EditProblemPane extends JPanePlugin {
             floatAbsoluteToleranceCheckBox.setSelected(false);
             floatAbsoluteToleranceCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    getFloatAbsoluteToleranceTextField().setEditable(floatAbsoluteToleranceCheckBox.isSelected());
                     enableUpdateButton();
                 }
             });
@@ -3605,8 +3609,8 @@ public class EditProblemPane extends JPanePlugin {
             floatAbsoluteToleranceTextField = new JTextField();
             floatAbsoluteToleranceTextField.setToolTipText("Enter the absolute tolerance for floating point numbers");
             floatAbsoluteToleranceTextField.setMaximumSize(new Dimension(100, 20));
-            floatAbsoluteToleranceTextField.setColumns(10);
-            floatAbsoluteToleranceTextField.setEnabled(false);
+            floatAbsoluteToleranceTextField.setColumns(20);
+            floatAbsoluteToleranceTextField.setEditable(false);
             floatAbsoluteToleranceTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
