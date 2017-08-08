@@ -1,0 +1,41 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9 () Java ver 1.8.0_25 build  Windows 7 6.1 (amd64) 
+# Created: 2017-08-07 20:11:15 PDT
+--- 
+
+name: 'Hello no input comp + man pc2'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: true
+
+# todo - bug datafile and answerfile are backwards during yaml parse
+# use-internal-validator: true
+datafile: hello.ans
+answerfile:  hello.in
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator'
+    validatorCmd: '{:validator} {:infile} {:outfile} {:ansfile} {:resfile} '
+    usingInternal: true
+    validatorOption: 1
+
+    use-internal-validator: true
+
+judging-type:
+    computer-judged: true
+    manual-review: true
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (A)c:/tmp/valtest/hello/data/secret/hello.ans
+

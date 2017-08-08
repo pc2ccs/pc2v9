@@ -1,0 +1,54 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9 () Java ver 1.8.0_25 build  Windows 7 6.1 (amd64) 
+# Created: 2017-08-07 20:11:15 PDT
+--- 
+
+name: 'Sumit file comp + manual file pc2val'
+source: 
+author: 
+license: 
+rights_owner: 
+
+load-data-files: true
+
+# todo - bug datafile and answerfile are backwards during yaml parse
+# use-internal-validator: true
+datafile: sumit.ans
+answerfile:  sumit.in
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator'
+    validatorCmd: '{:validator} {:infile} {:outfile} {:ansfile} {:resfile} '
+    usingInternal: true
+    validatorOption: 1
+
+    use-internal-validator: true
+
+judging-type:
+    computer-judged: false
+    manual-review: true
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: false
+
+#     wrote (D)c:/tmp/valtest/sumit3/data/secret/sumit.in
+#     wrote (D)c:/tmp/valtest/sumit3/data/secret/sumit1.in
+#     wrote (D)c:/tmp/valtest/sumit3/data/secret/sumit2.in
+#     wrote (D)c:/tmp/valtest/sumit3/data/secret/sumit3.in
+#     wrote (D)c:/tmp/valtest/sumit3/data/secret/sumit4.in
+#     wrote (D)c:/tmp/valtest/sumit3/data/secret/sumit5.in
+#     wrote (D)c:/tmp/valtest/sumit3/data/secret/sumit6.in
+#     wrote (A)c:/tmp/valtest/sumit3/data/secret/sumit.ans
+#     wrote (A)c:/tmp/valtest/sumit3/data/secret/sumit1.ans
+#     wrote (A)c:/tmp/valtest/sumit3/data/secret/sumit2.ans
+#     wrote (A)c:/tmp/valtest/sumit3/data/secret/sumit3.ans
+#     wrote (A)c:/tmp/valtest/sumit3/data/secret/sumit4.ans
+#     wrote (A)c:/tmp/valtest/sumit3/data/secret/sumit5.ans
+#     wrote (A)c:/tmp/valtest/sumit3/data/secret/sumit6.ans
+

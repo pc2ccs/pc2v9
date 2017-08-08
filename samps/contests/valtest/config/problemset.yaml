@@ -1,0 +1,98 @@
+# Contest Configuration, Problem Set, version 1.0 
+# PC^2 Version: Version 9 () Java ver 1.8.0_25 build  Windows 7 6.1 (amd64) 
+# Created: 2017-08-07 20:11:15 PDT
+problems:
+  - letter: A
+    short-name: sumit
+    name: 'I Sumit stdin Comp+Man clics'
+    load-data-files: false
+#     14 data files written
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit.in
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit1.in
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit2.in
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit3.in
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit4.in
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit5.in
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit6.in
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit.ans
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit1.ans
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit2.ans
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit3.ans
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit4.ans
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit5.ans
+#     wrote c:/tmp/valtest/sumit/data/secret/sumit6.ans
+
+  - letter: B
+    short-name: sumit2
+    name: 'Sumit file manual pc2 val'
+    load-data-files: true
+#     14 data files written
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit.in
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit1.in
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit2.in
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit3.in
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit4.in
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit5.in
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit6.in
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit.ans
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit1.ans
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit2.ans
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit3.ans
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit4.ans
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit5.ans
+#     wrote c:/tmp/valtest/sumit2/data/secret/sumit6.ans
+
+  - letter: C
+    short-name: sumit3
+    name: 'Sumit file comp + manual file pc2val'
+    load-data-files: false
+#     14 data files written
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit.in
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit1.in
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit2.in
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit3.in
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit4.in
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit5.in
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit6.in
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit.ans
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit1.ans
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit2.ans
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit3.ans
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit4.ans
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit5.ans
+#     wrote c:/tmp/valtest/sumit3/data/secret/sumit6.ans
+
+  - letter: D
+    short-name: sumit4
+    name: 'I Sumit stdin Man clics'
+    load-data-files: false
+#     14 data files written
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit.in
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit1.in
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit2.in
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit3.in
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit4.in
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit5.in
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit6.in
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit.ans
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit1.ans
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit2.ans
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit3.ans
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit4.ans
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit5.ans
+#     wrote c:/tmp/valtest/sumit4/data/secret/sumit6.ans
+
+  - letter: E
+    short-name: hello
+    name: 'Hello no input man clics'
+    load-data-files: true
+#     1 data files written
+#     wrote c:/tmp/valtest/hello/data/secret/hello.ans
+
+  - letter: F
+    short-name: hello
+    name: 'Hello no input comp + man pc2'
+    load-data-files: true
+#     1 data files written
+#     wrote c:/tmp/valtest/hello/data/secret/hello.ans
+
