@@ -1936,6 +1936,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 "ccs1", //
                 "ccs2", //
                 "sumithello", //
+                "valtest", //
+                
 // Doug's Local test directories
 //                "c:\\test\\cdps\\sum1\\config\\contest.yaml", //
 //                "/test/cdps/spring2015/config/contest.yaml", //
@@ -2551,7 +2553,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // expecting input format validator defined
 
         Problem[] problems = con.getProblems();
-        assertEquals("Problem couhnt ", 1, problems.length);
+        assertEquals("Problem count ", 1, problems.length);
         
         String valiatorFileName = "valid.bat";
 
@@ -2584,6 +2586,80 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             e.printStackTrace(System.err);
             throw e;
         }
+    }
+    
+    /**
+     * Validate and test contents for valtest sample contest.
+     * 
+     * @throws Exception
+     */
+    public void testLoadValidatorTestSampleContest() throws Exception {
+        IInternalContest contest = loadSampleContest(null, "valtest");
+        
+        assertNotNull(contest);
+        
+        Problem[] problems = contest.getProblems();
+        assertEquals("Problem count ", 6, problems.length);
+        
+        for (Problem problem : problems) {
+            assertTrue("Expecting using validator for "+problem, problem.isValidatedProblem());
+        }
+        
+        Language[] langs = contest.getLanguages();
+        assertEquals("Language count ", 6, problems.length);
+        
+        String [] langnames = {
+                // 
+                "Java", // 
+                "GNU C", // 
+                "GNU C++", // 
+                "Python2", // 
+                "Python3", // 
+                "C#", // 
+        };
+        
+        int i = 0;
+        for (Language language : langs) {
+            assertEquals(langnames[i], language.getDisplayName());
+            i++;
+        }
+        
+        String [] validatorNames = { 
+                //
+                "edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator", // 
+                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
+                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
+                "edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator", // 
+                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
+                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
+        };
+        
+        int totalProblemFiles = 0;
+        i = 0;
+        for (Problem problem : problems) {
+            ProblemDataFiles pdf = contest.getProblemDataFile(problem);
+            totalProblemFiles += pdf.getJudgesAnswerFiles().length + pdf.getJudgesDataFiles().length;
+
+            String validatorName = problem.getValidatorProgramName();
+            assertEquals("Expecting validator cmd line for "+problem.getDataFileName(), validatorNames[i], validatorName);
+            i++;
+        }
+
+        assertEquals("All problems data files count ", 36, totalProblemFiles );
+        
+        String title = "Mini Contest Validator Combos";
+        assertEquals("contest title", title, contest.getContestInformation().getContestTitle());
+        
+    }
+
+    /**
+     * Quote string, output string for use in String [].
+     * 
+     * @param string
+     * @return output: "string", //
+     */
+    protected String qs(String string) {
+        return "\"" + string + "\", // ";
     }
 
     private String getTestSampleContestDirectory(String dirname) {
