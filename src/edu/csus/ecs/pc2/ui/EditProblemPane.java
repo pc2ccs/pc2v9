@@ -34,6 +34,7 @@ import java.util.Date;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -3253,13 +3254,17 @@ public class EditProblemPane extends JPanePlugin {
 
     private JLabel getLblWhatsThisCLICSValidator() {
         if (lblWhatsThisCLICSValidator == null) {
-            // lblWhatsThis = new JLabel("<What's This?>");
-            // lblWhatsThis.setForeground(Color.blue);
-
-            ImageIcon iconImage = (ImageIcon) UIManager.getIcon("OptionPane.questionIcon");
-            Image image = iconImage.getImage();
-            lblWhatsThisCLICSValidator = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
-            lblWhatsThisCLICSValidator.setToolTipText("What's This? (click for additional information");
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                //the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                lblWhatsThisCLICSValidator = new JLabel("<What's This?>");
+                lblWhatsThisCLICSValidator.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage(); 
+                lblWhatsThisCLICSValidator = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
+            
+            lblWhatsThisCLICSValidator.setToolTipText("What's This? (click for additional information)");
             lblWhatsThisCLICSValidator.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
@@ -4981,21 +4986,25 @@ public class EditProblemPane extends JPanePlugin {
     private JLabel getLabelWhatsThisPC2ValStd() {
         if (lblWhatsThisPC2ValStd == null) {
 
-            // lblWhatsThisPC2ValStd = new JLabel("<What's This?>");
-            // lblWhatsThisPC2ValStd.setForeground(Color.blue);
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                lblWhatsThisPC2ValStd = new JLabel("<What's This?>");
+                lblWhatsThisPC2ValStd.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage();
+                lblWhatsThisPC2ValStd = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
 
-            ImageIcon iconImage = (ImageIcon) UIManager.getIcon("OptionPane.questionIcon");
-            Image image = iconImage.getImage();
-            lblWhatsThisPC2ValStd = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
             lblWhatsThisPC2ValStd.setToolTipText("What's This? (click for additional information)");
-
             lblWhatsThisPC2ValStd.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     JOptionPane.showMessageDialog(null, whatsThisPC2ValStdMessage, "PC^2 Validator Interface Standard", JOptionPane.INFORMATION_MESSAGE, null);
                 }
             });
-            lblWhatsThisPC2ValStd.setBorder(new EmptyBorder(0, 0, 0, 0));
+            lblWhatsThisPC2ValStd.setBorder(new EmptyBorder(0, 15, 0, 0));
+            
         }
         return lblWhatsThisPC2ValStd;
     }
@@ -5003,21 +5012,24 @@ public class EditProblemPane extends JPanePlugin {
     private JLabel getLabelWhatsThisCLICSValStd() {
         if (lblWhatsThisCLICSValStd == null) {
 
-            // lblWhatsThisCLICSValStd = new JLabel("<What's This?>");
-            // lblWhatsThisCLICSValStd.setForeground(Color.blue);
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                lblWhatsThisCLICSValStd = new JLabel("<What's This?>");
+                lblWhatsThisCLICSValStd.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage();
+                lblWhatsThisCLICSValStd = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
 
-            ImageIcon iconImage = (ImageIcon) UIManager.getIcon("OptionPane.questionIcon");
-            Image image = iconImage.getImage();
-            lblWhatsThisCLICSValStd = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
-            lblWhatsThisCLICSValStd.setToolTipText("What's This?  (click for additional information)");
-
+            lblWhatsThisCLICSValStd.setToolTipText("What's This? (click for additional information)");
             lblWhatsThisCLICSValStd.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     JOptionPane.showMessageDialog(null, whatsThisCLICSValStdMessage, "CLICS Validator Interface Standard", JOptionPane.INFORMATION_MESSAGE, null);
                 }
             });
-            lblWhatsThisCLICSValStd.setBorder(new EmptyBorder(0, 0, 0, 0));
+            lblWhatsThisCLICSValStd.setBorder(new EmptyBorder(0, 15, 0, 0));
         }
         return lblWhatsThisCLICSValStd;
     }
