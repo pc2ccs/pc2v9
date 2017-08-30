@@ -794,10 +794,14 @@ public class ClicsValidator {
             return false;
         }
         
-        File dataFile = new File(judgeDataFile);
-        if (!dataFile.exists() || !dataFile.canRead()) {
-            System.err.println ("ClicsValidator: " + "judge data file '" + judgeDataFile + "' doesn't exist or isn't readable");
-            return false;
+        //pc2 passes in "-" if {:infile} is empty (i.e. the problem has no data file); ignore it
+        if (!judgeDataFile.trim().equals("-")) {
+            //there is some kind of data file name; verify the file exists
+            File dataFile = new File(judgeDataFile);
+            if (!dataFile.exists() || !dataFile.canRead()) {
+                System.err.println ("ClicsValidator: " + "judge data file '" + judgeDataFile + "' doesn't exist or isn't readable");
+                return false;
+            }
         }
         
         File answerFile = new File(judgeAnswerFile);
