@@ -39,6 +39,10 @@ public final class LanguageAutoFill {
     public static final String MONOCSHARPTITLE = "Mono C#";
     
     public static final String MSCSHARPTITLE = "Microsoft C#";
+    
+    public static final String WINDOWS_KOTLINTITLE = "Kotlin (Windows)";
+    
+    public static final String UNIX_KOTLINTITLE = "Kotlin (Linux/MacOS)";
 
     /**
      * Constant string for an interpreted language.
@@ -48,8 +52,9 @@ public final class LanguageAutoFill {
     private static final String NULL_LANGUAGE_NAME = "";
 
     private static String[] languageList = { DEFAULTTITLE, JAVATITLE, //
-            GNUCPPTITLE, GNUCTITLE, MONOCSHARPTITLE, MSCSHARPTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, PYTHON3TITLE, RUBYTITLE, //
-            MSCTITLE, KYLIXTITLE, KYLIXCPPTITLE, FPCTITLE };
+            GNUCPPTITLE, GNUCTITLE, MONOCSHARPTITLE, MSCSHARPTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, PYTHON3TITLE, 
+            RUBYTITLE, //
+            MSCTITLE, KYLIXTITLE, KYLIXCPPTITLE, FPCTITLE, WINDOWS_KOTLINTITLE, UNIX_KOTLINTITLE };
 
     /**
      * Constructor is private as this is a utility class which
@@ -154,7 +159,19 @@ public final class LanguageAutoFill {
                     "ruby {:mainfile}", RUBYTITLE, INTERPRETER_VALUE };
             return dVals;
             
-        } else {
+        } else if (key.equals(WINDOWS_KOTLINTITLE)) {
+
+            String[] dVals = { WINDOWS_KOTLINTITLE, "cmd /c kotlinc {:mainfile} -include-runtime -d {:basename}.jar", "{:basename}.jar", //
+                    "java -jar {:basename}.jar", WINDOWS_KOTLINTITLE, "" };
+            return dVals;
+
+        } else if (key.equals(UNIX_KOTLINTITLE)) {
+
+            String[] dVals = { UNIX_KOTLINTITLE, "kotlinc {:mainfile} -include-runtime -d {:basename}.jar", "{:basename}.jar", //
+                    "java -jar {:basename}.jar", UNIX_KOTLINTITLE, "" };
+            return dVals;
+
+       } else {
             // default / DEFAULTTITLE
 
             String[] dVals = { NULL_LANGUAGE_NAME, "<Compiler> {:mainfile}", "{:basename}.exe", 
