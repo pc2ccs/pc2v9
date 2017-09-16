@@ -16,18 +16,13 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Site;
 
 /**
- * Print all sites info.
+ * Print all sites' info.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class SitesReport implements IReport {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -678566641915204942L;
 
     private IInternalContest contest;
@@ -64,6 +59,15 @@ public class SitesReport implements IReport {
 
         printWriter.println("    host                : " + hostName);
         printWriter.println("    port                : " + port);
+
+        printWriter.println("    has proxy           : " + site.hasProxy());
+        if (site.hasProxy()) {
+            printWriter.println("    proxy               : " + site.getMyProxy());
+
+        } else {
+
+            printWriter.println("    proxy               : (none)");
+        }
     }
 
     public void writeReport(PrintWriter printWriter) {

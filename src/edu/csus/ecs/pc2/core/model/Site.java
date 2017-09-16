@@ -30,6 +30,8 @@ public class Site implements IElementObject {
     public static final String LONG_NAME_PATTERN = "%L";
     public static final String SHORT_NAME_PATTERN = "%S";
 
+    private static final int NO_PROXY_SITE_ASSINGED = -1;
+
     /**
      * Title for the Site.
      */
@@ -49,6 +51,13 @@ public class Site implements IElementObject {
     private String password;
 
     private int [] proxySites = null;
+    
+    /**
+     * Proxy host for this site.
+     * 
+     * All incoming and outgoing packets must go through this site.
+     */
+    private int myProxy = NO_PROXY_SITE_ASSINGED;
 
     public Site(String displayName, int siteNumber) {
         super();
@@ -143,6 +152,7 @@ public class Site implements IElementObject {
         newSite.elementId = elementId;
         newSite.active = active;
         newSite.password = new String(password);
+        newSite.myProxy = myProxy;
 
         String[] keys = connectionInfo.keySet().toArray(new String[connectionInfo.size()]);
         for (String key : keys) {
@@ -166,6 +176,9 @@ public class Site implements IElementObject {
                 return false;
             }
             if (!password.equals(site.getPassword())) {
+                return false;
+            }
+            if (myProxy != site.myProxy){
                 return false;
             }
 
@@ -293,6 +306,44 @@ public class Site implements IElementObject {
      */
     public void removeAllProxies() {
         proxySites = null;
+    }
+    
+    /**
+     * Does this site have a proxy?
+     * @see #getProxySites()
+     * @return true if has proxy assigned
+     */
+    public boolean hasProxy() {
+        return myProxy != NO_PROXY_SITE_ASSINGED;
+    }
+    
+    /**
+     * Un-proxy site.
+     * 
+     * The opposite of {@link #setMyProxy(int)}, this removes
+     * the proxy site for this site.
+     */
+    public void unsetProxy () {
+        myProxy = NO_PROXY_SITE_ASSINGED;
+    }
+    
+    /**
+     * Set a proxy to another site.
+     * Use {@link #unsetProxy()} to remove proxy site assignment. 
+     * @see #unsetProxy()
+     * @param myProxy
+     */
+    public void setMyProxy(int myProxy) {
+        this.myProxy = myProxy;
+    }
+    
+    /**
+     * Get my current proxy site.
+     * 
+     * @return {@value #NO_PROXY_SITE_ASSINGED} if no proxy assigned, else return proxy site number.
+     */
+    public int getMyProxy() {
+        return myProxy;
     }
 
 }

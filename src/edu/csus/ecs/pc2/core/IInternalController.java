@@ -249,6 +249,10 @@ public interface IInternalController {
      */
     boolean isUsingGUI();
 
+    /**
+     * Update site in contest, send site update packet to other servers and admins.
+     * @param newSite updated site info.
+     */
     void updateSite(Site newSite);
 
     void updateProblem(Problem problem);

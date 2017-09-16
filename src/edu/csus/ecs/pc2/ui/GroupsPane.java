@@ -126,7 +126,8 @@ public class GroupsPane extends JPanePlugin {
                     Object[] objects = buildGroupRow(group, rowNumber);
                     groupListBox.addRow(objects, group.getElementId());
                 } else {
-                    Object[] objects = buildGroupRow(group, rowNumber);
+                    // the id is one more then the rowNumber
+                    Object[] objects = buildGroupRow(group, rowNumber + 1);
                     groupListBox.replaceRow(objects, rowNumber);
                 }
                 groupListBox.autoSizeAllColumns();

@@ -134,7 +134,7 @@ public class SitesPane extends JPanePlugin {
         if (siteListBox == null) {
             siteListBox = new MCLB();
 
-            Object[] cols = { "Site Number", "Site Title", "Password", "IP", "Port" };
+            Object[] cols = { "Site Number", "Site Title", "Password", "IP", "Port", "Proxy" };
 
             siteListBox.addColumns(cols);
 
@@ -276,7 +276,7 @@ public class SitesPane extends JPanePlugin {
                 } else {
                     if (!newSite.isSameAs(getContest().getSite(newSite.getSiteNumber()))) {
                         getController().updateSite(newSite);
-                    }
+                    } 
                 }
             }
             enableUpdateButtons(false);
@@ -311,12 +311,15 @@ public class SitesPane extends JPanePlugin {
      * Duplicate site names <br>
      * Duplicate IP and port combinations.<br>
      * 
-     * @param inSiteList
+     * @param inSiteList site list from Pane
      * @return null if passes all validations, otherwire returns a nice error message.
      */
     private String validateSites(SiteList inSiteList) {
+        
+        Site[] sites = inSiteList.getList();
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+        
         if (inSiteList.size() > 1) {
-            Site[] sites = inSiteList.getList();
             for (int s1 = 0; s1 < sites.length - 1; s1++) {
                 Site site1 = sites[s1];
                 for (int s2 = s1 + 1; s2 < sites.length; s2++) {
@@ -362,8 +365,47 @@ public class SitesPane extends JPanePlugin {
                     if (conInfo1.trim().equals(conInfo2.trim())) {
                         return "Duplicate IP and port values are not allowed, for " + site1 + " and " + site2;
                     }
+                    
+                    // check for valid my proxy
+
+                    if (site1.getMyProxy() == site1.getSiteNumber()) {
+                        return ("For site " + site1.getSiteNumber() + " proxy cannot be itself " + site1.getMyProxy());
+                    }
+
                 }
             }
+        }
+        
+        for (int s1 = 0; s1 < sites.length; s1++) {
+            Site site1 = sites[s1];
+            
+            if (site1.hasProxy()) {
+                
+                // check for valid proxy site number
+                
+                if (site1.getMyProxy() < 1){
+                    return "Site "+site1.getSiteNumber()+" Invalid proxy (must be 1 or greater)";
+                }
+                
+                if (site1.getMyProxy() > siteList.size()){
+                    return "Site "+site1.getSiteNumber()+" Invalid proxy (no such site "+site1.getMyProxy() +")";
+                }
+                
+                
+                // check for circular reference, one level deep
+                
+                Site proxySite = sites[site1.getMyProxy()-1];
+                
+                if (proxySite.getSiteNumber() == site1.getSiteNumber()) {
+                    // circular reference
+                    return ("Cannot assign site " + site1.getMyProxy() + " as proxy for " + proxySite.getDisplayName() + ", circular reference");
+                }
+                
+                // Maybe someday go more than one level deep to check for circular references.
+            }
+            
+            
+            
         }
         return null;
     }
@@ -396,25 +438,37 @@ public class SitesPane extends JPanePlugin {
 
         Object[] objects = siteListBox.getRow(i);
 
-        // Object[] cols = { "Site Number", "Site Title", "Password", "IP", "Port" };
+        // Object[] cols = { "Site Number", "Site Title", "Password", "IP", "Port", "Proxy" };
         // Integer siteNumberInteger = ((Integer) objects[0]);
         String siteTitle = ((JTextField) objects[1]).getText();
         String password = ((JTextField) objects[2]).getText();
         String hostName = ((JTextField) objects[3]).getText();
         String portString = ((JTextField) objects[4]).getText();
         int port = Integer.parseInt(portString);
+        String proxySiteId = ((JTextField) objects[5]).getText();
 
         ElementId siteId = (ElementId) siteListBox.getKeys()[i];
-        Site site = (Site) siteList.get(siteId);
+        Site origSite = (Site) siteList.get(siteId);
+        Site site = origSite.clone();
         site.setDisplayName(siteTitle);
         site.setPassword(password);
-
+        
+        if (isEmpty(proxySiteId)){
+            site.unsetProxy();
+        } else {
+            site.setMyProxy(Integer.parseInt(proxySiteId));
+        }
+        
         Properties props = new Properties();
         props.put(Site.IP_KEY, hostName);
         props.put(Site.PORT_KEY, "" + port);
         site.setConnectionInfo(props);
 
         return site;
+    }
+
+    private boolean isEmpty(String proxySiteId) {
+        return proxySiteId == null || proxySiteId.trim().length() == 0;
     }
 
     /**
@@ -453,6 +507,13 @@ public class SitesPane extends JPanePlugin {
         textField.setDocument(new IntegerDocument());
         textField.setText(port); // had to re-add port because IntegerDocument cleared it out.
         obj[4] = textField;
+        
+        textField = createJTextField(port, false);
+        textField.setDocument(new IntegerDocument());
+        if (site.hasProxy()){
+            textField.setText(Integer.toString(site.getMyProxy())); // had to re-add proxy site because IntegerDocument cleared it out.
+        }
+        obj[5] = textField;
 
         return obj;
     }

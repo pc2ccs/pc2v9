@@ -29,7 +29,7 @@ main ()
 		cin >> num;
 	}
 
-	cout << "The sum of the positive integers is " << sum << endl;
+	cout << "The sum of the integers is " << sum << endl;
 }
 
 // eof isumit.c $Id$

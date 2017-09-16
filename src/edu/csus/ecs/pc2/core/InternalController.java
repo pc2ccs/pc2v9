@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -123,10 +124,9 @@ import edu.csus.ecs.pc2.ui.UIPluginList;
  * <P>
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-// $HeadURL$
 public class InternalController implements IInternalController, ITwoToOne, IBtoA {
+
 
     private static final String INI_FILENAME_OPTION_STRING = "--ini";
 
@@ -215,6 +215,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * port is optional.
      */
     private static final String REMOTE_SERVER_KEY = "server.remoteServer";
+    
+    /**
+     * Key in the .ini that indicates whether this site wants to be proxied.
+     * 
+     * Example:  server.proxyme=true
+     */
+    private static final String PROXY_ME_SERVER_KEY = "server.proxyme";
 
     /**
      * Host/IP for the client to contact.
@@ -298,7 +305,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private static final String PORT_OPTION_STRING = "--port";
 
+    /**
+     * Remote server to login to.
+     */
     private static final String REMOTE_SERVER_OPTION_STRING = "--remoteServer";
+
+    /**
+     * Proxy this server, used with {{@link #REMOTE_SERVER_OPTION_STRING}}
+     */
+    private static final String PROXYME_OPTION_STRING = "--proxyme";
 
     private static final Object FIRST_SERVER_OPTION_STRING = "--first";
 
@@ -389,15 +404,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * 
-     * @param siteNumber
-     * @param packet
+     * @param inSiteNumber site number for client to send to
+     * @param packet info to send
      */
-    public void sendToRemoteServer(int siteNumber, Packet packet) {
+    public void sendToRemoteServer(int inSiteNumber, Packet packet) {
 
+        if (packet.getSourceId() != null && (packet.getOriginalSourceId().getSiteNumber() == inSiteNumber)) {
+            info("sendToRemoteServer packet from same site as sending to, skipping");
+            return;
+        }
+        Site remoteSite = lookupRemoteServer(inSiteNumber);
+        int siteNumber = remoteSite.getSiteNumber();
+        
         ClientId clientId = new ClientId(siteNumber, Type.SERVER, 0);
-
+        
         ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
-        info("sendToRemoteServer " + clientId + " " + packet + " " + connectionHandlerID);
+        info("sendToRemoteServer " + clientId + " at "+siteNumber+" " + packet + " " + connectionHandlerID);
 
         Type type = packet.getSourceId().getClientType();
         if ((!type.equals(Type.ADMINISTRATOR)) && (!type.equals(Type.SERVER))) {
@@ -685,8 +707,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
 
                 info("Contacted using connection id " + remoteServerConnectionHandlerID);
-
-                sendLoginRequestFromServerToServer(connectionManager, remoteServerConnectionHandlerID, clientId, password);
+                
+                boolean loggingInSiteRequestsToBeProxy = getBooleanValue(getINIValue(PROXY_ME_SERVER_KEY), false);
+                
+                if (parseArguments.isOptPresent(PROXYME_OPTION_STRING)){
+                    loggingInSiteRequestsToBeProxy = true;
+                }
+                
+                sendLoginRequestFromServerToServer(connectionManager, remoteServerConnectionHandlerID, clientId, password, loggingInSiteRequestsToBeProxy);
 
             } else {
 
@@ -715,6 +743,34 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("Contacting server at " + remoteHostName + ":" + remoteHostPort + " as " + clientId);
             sendLoginRequest(connectionManager, clientId, id, password);
         }
+    }
+    
+    /**
+     * For input string return boolean value.
+     * 
+     * Does a trim and case in-sensitive match on the list: yes, no, true, false
+     * 
+     * @param string true/false string/value
+     * @param defaultBoolean if matches none in list returns this values
+     */
+    public boolean getBooleanValue(String string, boolean defaultBoolean) {
+
+        boolean value = defaultBoolean;
+
+        if (string != null && string.length() > 0) {
+            string = string.trim();
+            if ("yes".equalsIgnoreCase(string)) {
+                value = true;
+            } else if ("no".equalsIgnoreCase(string)) {
+                value = false;
+            } else if ("true".equalsIgnoreCase(string)) {
+                value = true;
+            } else if ("false".equalsIgnoreCase(string)) {
+                value = false;
+            }
+        }
+
+        return value;
     }
 
     /**
@@ -1227,18 +1283,32 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      *            from clientid
      * @param password
      *            site password
+     * @param proxyMe if true, this site acts as a proxy for the site logging in.
      */
-    private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID targetConnectionHandlerID, ClientId clientId, String password) {
+    private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID targetConnectionHandlerID, ClientId clientId, String password, boolean proxyMe) {
+        
+        
         try {
             info("sendLoginRequestFromServerToServer ConId start - sending from " + clientId);
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
             String joeLoginName = password;
-            Packet loginPacket = PacketFactory.createLoginRequest(clientId, joeLoginName, password, serverClientId);
+            Packet loginPacket = PacketFactory.createLoginRequest(clientId, joeLoginName, password, serverClientId, proxyMe);
             manager.send(loginPacket, targetConnectionHandlerID);
             info("sendLoginRequestFromServerToServer ConId end - packet sent.");
         } catch (TransportException e) {
             info("Exception sendLoginRequestFromServerToServer ", e);
         }
+        
+        
+//        info("sendLoginRequestFromServerToServer ConId start - sending from " + clientId + " proxyMe = " + proxyMe);
+//        ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
+//        String joeLoginName = password;
+//        try {
+//            manager.send(loginPacket, targetConnectionHandlerID);
+//            info("sendLoginRequestFromServerToServer ConId end - packet sent.");
+//        } catch (Exception e) {
+//            info("sendLoginRequestFromServerToServer ConId end - packet not sent.", e);
+//        }
     }
 
     /**
@@ -1295,6 +1365,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
                     String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
+                    boolean requestProxy = false;
+                    Boolean requestedProxy = PacketFactory.getBooleanValue(packet, PacketFactory.REQUEST_LOGIN_AS_PROXY);
+                    if (requestedProxy != null) {
+                        requestProxy = requestedProxy.booleanValue();
+                    }
+                    
                     try {
 
                         /**
@@ -1307,6 +1383,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             clientId = new ClientId(contest.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
+                        
+                        if (requestProxy){
+                            if (isServer(packet.getSourceId())){
+                                /**
+                                 * Bug 1246 - requesting to be a proxy
+                                 */
+                                sendSiteUpdateSetProxy (packet.getSourceId(), contest.getSiteNumber());
+                            }
+                        }
+                        
                         sendLoginSuccess(clientId, connectionHandlerID);
 
                         // Send login notification to users.
@@ -1423,14 +1509,29 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                              */
                             // on site 2 login to site 1, site 2 reports LOGIN on login to site1
                             processPacket(packet, connectionHandlerID);
+                        } else if (packet.getType().equals(PacketType.Type.LOGIN) && contest.getSite(contest.getSiteNumber()).hasProxy() && packet.getDestinationId().getSiteNumber() == 0) {
+                            /**
+                             * This is probably coming from our proxy 
+                             */
+                            processPacket(packet, connectionHandlerID);
+                        } else if (contest.isLocalLoggedIn(packet.getDestinationId()) && contest.getSite(contest.getSiteNumber()).getMyProxy() == packet.getDestinationId().getSiteNumber()) {
+                            /**
+                             * This is coming from our proxy 
+                             */
+                            processPacket(packet, connectionHandlerID);
+                        } else if (contest.isRemoteLoggedIn(packet.getSourceId()) && packet.getSourceId().getClientType() == ClientType.Type.SERVER) {
+                            /*
+                             * This is coming from a proxied server
+                             */
+                            processPacket(packet, connectionHandlerID);
                         } else {
-                            System.err.println("Security Violation Packet from non-logged in server" + packet);
-                            info("Note: security violation in packet: Packet from non-logged in server"+ packet);
+                            System.err.println("Security Violation Packet from non-logged in server " + packet);
+                            info("Note: Security violation in packet: Packet from non-logged in server "+ packet);
                             log.info("Security Violation for packet " + packet);
                        }
                         return;
                     } else {
-                        System.err.println("Security Violation Packet from non-logged in server" + packet);
+                        System.err.println("Security violation Packet from non-logged in server " + packet);
                         info("Note: security violation in packet: Packet from non-logged in server "+packet);
                         log.info("Security Violation for packet " + packet);
                     }
@@ -1449,6 +1550,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("Exception in receiveObject ", e);
         }
         info("receiveObject end   got " + object.getClass().getName());
+    }
+
+    /**
+     * Assign proxy, send updated Site to all connected sites.
+     * 
+     * @param siteToBeProxied client/site to be proxied
+     * @param proxySiteNumber proxy site for siteToBeProxied
+     */
+    private void sendSiteUpdateSetProxy(ClientId siteToBeProxied, int proxySiteNumber) {
+        
+        // assign proxy 
+         Site site = contest.getSite(siteToBeProxied.getSiteNumber());
+         site.setMyProxy(proxySiteNumber);
+         
+         updateSite(site);
+        
     }
 
     private String[] removeFirstElement(String[] stringArray) {
@@ -2203,26 +2320,38 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void sendToServers(Packet packet) {
 
-        ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
+        ClientId[] clientIds1 = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
+        ClientId[] clientIds2 = contest.getRemoteLoggedInClients(ClientType.Type.SERVER);
+        ClientId[] clientIds = Arrays.copyOf(clientIds1, clientIds1.length + clientIds2.length);
+        System.arraycopy(clientIds2, 0, clientIds, clientIds1.length, clientIds2.length);
 
         if (clientIds.length > 0) {
             outgoingPacket(packet);
         }
 
+        int fromSite = -1;
+        if (packet != null) {
+            if (packet.getOriginalSourceId() != null) {
+                fromSite = packet.getOriginalSourceId().getSiteNumber();
+            }
+        }
         for (ClientId clientId : clientIds) {
-            ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
             boolean isThisServer = isThisSite(clientId.getSiteNumber());
-            if (!isThisServer) {
-                // Send to other servers
-                sendToClient(connectionHandlerID, packet);
+            // do not send to ourselves and
+            // do not send to the site we got the packet
+            if (!isThisServer && !(fromSite == clientId.getSiteNumber())) {
+                // Send to other servers, after cloning and modifying the dest
+                Packet packetClone = PacketFactory.clonePacket(packet.getSourceId(), clientId, packet);
+                sendToRemoteServer(clientId.getSiteNumber(), packetClone);
             }
         }
     }
 
     /**
-     * Send packet to all this sites logged in clients.
+     * Send packet to all clients  logged into this site that are a particular clienttype
      * 
      * @param packet
+     * @param type client type
      */
     private void sendPacketToClients(Packet packet, ClientType.Type type) {
 
@@ -2795,7 +2924,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     "[--skipini] " + //
                     "[" + INI_FILENAME_OPTION_STRING + " filename] [" + //
                     CONTEST_PASSWORD_OPTION + " <pass>] [" + NO_GUI_OPTION_STRING + "] "+ //
-                    " [" + MAIN_UI_OPTION + " classname]", // 
+                    "[" + REMOTE_SERVER_OPTION_STRING + " <remoteHostname> --proxyme]" + //
+                    "[" + MAIN_UI_OPTION + " classname]", // 
                     "", //
                     "See http://pc2.ecs.csus.edu/wiki/Command_Line for more information", // 
             };
@@ -3067,7 +3197,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 return;
             }
 
-            Site remoteSite = contest.getSite(inSiteNumber);
+            Site remoteSite = lookupRemoteServer(inSiteNumber);
+            
             Site localSite = contest.getSite(contest.getSiteNumber());
             String localPassword = localSite.getPassword();
 
@@ -3076,10 +3207,27 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             int portNumber = Integer.parseInt(portStr);
 
             info("Send login request to Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
-            ConnectionHandlerID connectionHandlerID = connectionManager.connectToServer(hostName, portNumber);
+            ConnectionHandlerID connectionHandlerID = null;
+            if (localSite.hasProxy()) {
+                // if we have a proxy, it is our remote server, so use that.
+                connectionHandlerID = remoteServerConnectionHandlerID;
+            } else {
+                // remoteSite may have changed from inSiteNumber, check to see if we
+                // already know the connectionHandlerID for the server.
+                ClientId clientId = new ClientId(remoteSite.getSiteNumber(), ClientType.Type.SERVER, 0);
+                connectionHandlerID = contest.getConnectionHandleID(clientId);
+                // do not exist, or is a fake handle
+                if (connectionHandlerID == null || connectionHandlerID.toString().startsWith("FauxSite")) {
+                    // connect to the server directly
+                    connectionHandlerID = connectionManager.connectToServer(hostName, portNumber);
+                } else {
+                    info("Used cached connectionHandlerID for "+remoteSite+" of "+connectionHandlerID);
+                }
+            }
 
-            info("Contacted Site " + remoteSite.getSiteNumber() + " using connection id " + connectionHandlerID);
-            sendLoginRequestFromServerToServer(connectionManager, connectionHandlerID, getServerClientId(), localPassword);
+            info("Contacted Site " + inSiteNumber + " (via " + remoteSite.getSiteNumber() + ") using connection id " + connectionHandlerID);
+            sendLoginRequestFromServerToServer(connectionManager, connectionHandlerID, getServerClientId(), localPassword, false);
+            
         } else if (contest.isAllowed(Permission.Type.ALLOWED_TO_RECONNECT_SERVER)) {
             // Send the reconnection request to our server
 
@@ -3090,9 +3238,43 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             System.err.println(" Non-admin Tried to send reconnection request " + inSiteNumber + ", ignored");
             log.log(Log.DEBUG, " Non-admin Tried to send reconnection request " + inSiteNumber + ", ignored");
             return;
-
         }
 
+    }
+
+    /**
+     * Determine which site to send this packet to.
+     * 
+     * This handles packets sent via proxy.
+     * 
+     * @param inSiteNumber destination site
+     * @return site to send packet to.
+     */
+    protected Site lookupRemoteServer(int inSiteNumber) {
+
+        /**
+         * Site to send packet to.
+         */
+        Site site = contest.getSite(inSiteNumber);
+        Site mySite = contest.getSite(contest.getSiteNumber());
+        
+        // if the destination has a proxy 
+        if (site.hasProxy()) {
+
+            /**
+             * Send to proxy.
+             */
+            if (contest.getSiteNumber() != site.getMyProxy()) {
+                // Current Site is NOT proxy for target site, send to proxy
+                site = contest.getSite(site.getMyProxy());
+            } // else this is the proxy site for the destination site - send to that site
+
+        } else if (mySite.hasProxy()) {
+            site = contest.getSite(mySite.getMyProxy());
+        }// else no proxys, send to site
+        
+        System.out.println("debug 22 lookupRemoteServer for site "+inSiteNumber+" use site "+site);
+        return site;
     }
 
     /**
@@ -3146,14 +3328,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 sendToScoreboards(packet);
 
             } catch (IOException e) {
-                // SOMEDAY Handle exception better
-                e.printStackTrace();
+                error("Error updating site " + site, e);
             } catch (ClassNotFoundException e) {
-                // SOMEDAY Handle exception better
-                e.printStackTrace();
+                error("Error updating site " + site, e);
             } catch (FileSecurityException e) {
-                // SOMEDAY Handle exception better
-                e.printStackTrace();
+                error("Error updating site " + site, e);
             }
 
         } else {
@@ -3852,6 +4031,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (isServer()) {
 
             if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || contest.isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
+                shutdownProxys(requestor); // shutdown my proxys
 
                 try {
                     ContestSummaryReports contestReports = new ContestSummaryReports();
@@ -3900,6 +4080,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || contest.isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
 
             if (siteNumber == contest.getSiteNumber()) {
+                shutdownProxys(requestor); // shutdown my proxys
                 shutdownServer(requestor); // This site shut it down
             } else {
                 ClientId serverId = getServerClientId(siteNumber);
@@ -3909,6 +4090,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         } else {
             throw new SecurityException("User " + requestor + " not allowed to shutdown remote servers");
+        }
+    }
+
+    private void shutdownProxys(ClientId requestor) {
+        // we need to know who the packet is from (do not send it back to them)
+        int fromSite = requestor.getSiteNumber();
+        Site[] sites = contest.getSites();
+        for (Site site : sites) {
+            // skip myself and who the packet came from
+            if (site.getSiteNumber() == contest.getSiteNumber() || site.getSiteNumber() == fromSite) {
+                continue;
+            }
+            // we are a proxy for this site
+            if (site.getMyProxy() == contest.getSiteNumber()) {
+                int siteNumber = site.getSiteNumber();
+                ClientId serverId = getServerClientId(siteNumber);
+                Packet shutdownPacket = PacketFactory.createShutdownPacket(requestor, serverId, siteNumber);
+                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(serverId);
+                sendToClient(connectionHandlerID, shutdownPacket);
+            }
         }
     }
 

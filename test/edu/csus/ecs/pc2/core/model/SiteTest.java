@@ -5,12 +5,9 @@ import java.util.Properties;
 import junit.framework.TestCase;
 
 /**
- * Site JUnit Test.
+ * Unit Test.
  * @author pc2@ecs.csus.edu
- * 
  */
-
-// $HeadURL$
 public class SiteTest extends TestCase {
 
     protected void setUp() throws Exception {
@@ -94,6 +91,31 @@ public class SiteTest extends TestCase {
         
         pattern = Site.LONG_NAME_PATTERN;
         assertEquals("Site Four", "" + site4.format(pattern));
+    }
+    
+    /**
+     * add test for my proxy accessors.
+     * 
+     * 
+     * @throws Exception
+     */
+    public void testhasProxy() throws Exception {
+        
+        String name = "Site Four";
+        Site site4 = createSite(4, name, null, 0);
+        
+        assertFalse("no proxy "+site4, site4.hasProxy());
+        
+        site4.setMyProxy(2);
+        
+        assertTrue("no proxy "+site4, site4.hasProxy());
+        
+        assertEquals("expected proxy site number ", 2, site4.getMyProxy());
+        
+        site4.unsetProxy();
+        
+        assertFalse("unset proxy "+site4, site4.hasProxy());
+        
     }
     
     

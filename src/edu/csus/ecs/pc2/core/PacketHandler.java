@@ -117,6 +117,23 @@ public class PacketHandler {
             PacketFactory.dumpPacket(System.out, packet, "handlePacket");
         }
         
+        // for a server that is not us, and we are a server
+        if (contest != null && isServer() && !isThisSite(packet.getDestinationId())) {
+            int siteNumber = packet.getDestinationId().getSiteNumber();
+            Site destSite = contest.getSite(siteNumber);
+            Site sourceSite = contest.getSite(packet.getOriginalSourceId().getSiteNumber());
+            // for a destSite that has a proxy and we are the proxier. Only if we have a valid contest & site
+            if (destSite != null && destSite.hasProxy() && destSite.getMyProxy() == contest.getSiteNumber()) {
+                controller.sendToRemoteServer(siteNumber, packet);
+                info("handlePacket forwarded from " + sourceSite.getSiteNumber() + " to site "+siteNumber);
+                return;
+            } else if (sourceSite != null && sourceSite.hasProxy() && sourceSite.getMyProxy() == contest.getSiteNumber()) {
+                // we are a proxy for this site, forward it to the destination
+                controller.sendToRemoteServer(siteNumber, packet);
+                info("handlePacket forwarded for site " + sourceSite.getSiteNumber() + " to site "+siteNumber);
+                return;
+            }
+        }
         ClientId fromId = packet.getSourceId();
 
         Clarification clarification;
@@ -1442,7 +1459,7 @@ public class PacketHandler {
             if (!isThisSite(run)) {
                 
                 ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
-                if (contest.isLocalLoggedIn(serverClientId)) {
+                if (contest.isLocalLoggedIn(serverClientId) || contest.isRemoteLoggedIn(serverClientId)) {
 
                     // send request to remote server
                     Packet fetchRunPacket = PacketFactory.createFetchRun(serverClientId, whoRequestsRunId, run, serverClientId);
@@ -1864,7 +1881,7 @@ public class PacketHandler {
             if (!isThisSite(run)) {
 
                 ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
-                if (contest.isLocalLoggedIn(serverClientId)) {
+                if (contest.isLocalLoggedIn(serverClientId) || contest.isRemoteLoggedIn(serverClientId)) {
 
                     // send request to remote server
                     Packet requestPacket = PacketFactory.createRunRejudgeRequest(contest.getClientId(), serverClientId, run, whoRequestsRunId);
@@ -3355,7 +3372,7 @@ public class PacketHandler {
             if (!isThisSite(clarification)) {
 
                 ClientId serverClientId = new ClientId(clarification.getSiteNumber(), ClientType.Type.SERVER, 0);
-                if (contest.isLocalLoggedIn(serverClientId)) {
+                if (contest.isLocalLoggedIn(serverClientId) || contest.isRemoteLoggedIn(serverClientId)) {
 
                     // send request to remote server
                     Packet requestPacket = PacketFactory.clonePacket(contest.getClientId(), serverClientId, packet);
@@ -3431,7 +3448,7 @@ public class PacketHandler {
             if (!isThisSite(run)) {
 
                 ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
-                if (contest.isLocalLoggedIn(serverClientId)) {
+                if (contest.isLocalLoggedIn(serverClientId) || contest.isRemoteLoggedIn(serverClientId)) {
 
                     // send request to remote server
                     Packet requestPacket = PacketFactory.createRunRequest(contest.getClientId(), serverClientId, run, whoRequestsRunId, readOnly, computerJudge);

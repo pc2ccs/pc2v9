@@ -33,6 +33,12 @@ public class Packet implements Serializable {
     private static final long serialVersionUID = 2586415213109586805L;
 
     private ClientId sourceId = null;
+    
+    /**
+     * The originalSourceId when the packet is created.
+     * Should be protected when cloned.
+     */
+    private ClientId originalSourceId = null;
 
     private ClientId destinationId = null;
 
@@ -57,6 +63,7 @@ public class Packet implements Serializable {
     // TODO change this back to protected, soon.
     public Packet(PacketType.Type type, ClientId source, ClientId destination, Serializable content) {
         sourceId = source;
+        originalSourceId = source;
         destinationId = destination;
         this.content = content;
         this.type = type;
@@ -75,6 +82,7 @@ public class Packet implements Serializable {
      */
     protected Packet(PacketType.Type type, ClientId source, ClientId destination) {
         sourceId = source;
+        originalSourceId = source;
         destinationId = destination;
         this.content = null;
         this.type = type;
@@ -139,6 +147,14 @@ public class Packet implements Serializable {
         } catch (UnknownHostException e) {
             StaticLog.log("Problem setting IP", e);
         }
+    }
+
+    public ClientId getOriginalSourceId() {
+        return originalSourceId;
+    }
+
+    public void setOriginalSourceId(ClientId originalSourceId) {
+        this.originalSourceId = originalSourceId;
     }
 
     public String getHostAddress() {

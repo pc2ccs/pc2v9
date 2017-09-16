@@ -353,6 +353,8 @@ public final class PacketFactory {
      * List of files submitted by team.
      */
     public static final String TEAM_RUN_SOURCE_FILES_LIST = "TEAM_RUN_SOURCE_FILES_LIST";
+
+    public static final String REQUEST_LOGIN_AS_PROXY = "REQUEST_LOGIN_AS_PROXY";
     
     
     /**
@@ -374,10 +376,24 @@ public final class PacketFactory {
      * @return a {@link PacketType.Type#LOGIN_REQUEST} packet.
      */
     public static Packet createLoginRequest(ClientId source, String loginName, String password, ClientId destination) {
+        return createLoginRequest(source, loginName, password, destination, false);
+    }
+    
+    /**
+     * 
+     * @param source
+     * @param loginName
+     * @param password
+     * @param destination
+     * @param proxiedSite true means proxy my site, use the site that is logged into as my proxy.
+     * @return
+     */
+    public static Packet createLoginRequest(ClientId source, String loginName, String password, ClientId destination, boolean proxiedSite) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
         prop.put(LOGIN, loginName);
         prop.put(PASSWORD, password);
+        prop.put(REQUEST_LOGIN_AS_PROXY, new Boolean(proxiedSite));
         return createPacket(PacketType.Type.LOGIN_REQUEST, source, destination, prop);
     }
     
@@ -511,8 +527,9 @@ public final class PacketFactory {
      */
     public static void dumpPacket(Log log, Packet packet, String message) {
 
-        log.info("Packet " + packet.getType() + " (Seq #" + packet.getPacketNumber() + " ) " + message);
-        log.info("  From: " + packet.getSourceId() + " (" + packet.getHostName() + " @ " + packet.getHostAddress() + ")" + " (Contest Id: " + packet.getContestIdentifier() + ")");
+        log.info("Packet " + packet.getType() + " (Seq #" + packet.getPacketNumber() + ", o#"+packet.getOriginalPacketNumber() +" ) " + message);
+        log.info("  From: " + packet.getSourceId() + ", o" + packet.getOriginalSourceId() + " (" + packet.getHostName() + " @ " + packet.getHostAddress() + ")" + " (Contest Id: "
+                + packet.getContestIdentifier() + ")");
         log.info("    To: " + packet.getDestinationId());
         Object obj = packet.getContent();
         if (obj instanceof Properties) {
@@ -537,8 +554,9 @@ public final class PacketFactory {
      * @param message 
      */
     public static void dumpPacket(PrintStream pw, Packet packet, String message) {
-        pw.println("Packet " + packet.getType() + " (Seq #" + packet.getPacketNumber() + " ) " + message);
-        pw.println("  From: " + packet.getSourceId() + " (" + packet.getHostName() + " @ " + packet.getHostAddress() + ")" + " (Contest Id: " + packet.getContestIdentifier() + ")");
+        pw.println("Packet " + packet.getType() + " (Seq #" + packet.getPacketNumber() + ", o#" + packet.getOriginalPacketNumber() + " ) " + message);
+        pw.println("  From: " + packet.getSourceId() + ", o" + packet.getOriginalSourceId() + " (" + packet.getHostName() + " @ " + packet.getHostAddress() + ")" + " (Contest Id: "
+                + packet.getContestIdentifier() + ")");
         pw.println("    To: " + packet.getDestinationId());
         Object obj = packet.getContent();
         if (obj instanceof Properties) {
@@ -1924,6 +1942,7 @@ public final class PacketFactory {
     public static Packet clonePacket(ClientId source, ClientId destination, Packet packet) {
         Packet newPacket = createPacket(packet.getType(), source, destination, (Properties) packet.getContent());
         newPacket.setOriginalPacketNumber(packet.getOriginalPacketNumber());
+        newPacket.setOriginalSourceId(packet.getOriginalSourceId());
         return newPacket;
     }
     
@@ -1941,6 +1960,7 @@ public final class PacketFactory {
     public static Packet clonePacket(PacketType.Type type, ClientId source, ClientId destination, Packet packet) {
         Packet newPacket = createPacket(type, source, destination, (Properties) packet.getContent());
         newPacket.setOriginalPacketNumber(packet.getOriginalPacketNumber());
+        newPacket.setOriginalSourceId(packet.getOriginalSourceId());
         return newPacket;
     }
 

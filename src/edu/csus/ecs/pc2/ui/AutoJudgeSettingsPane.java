@@ -180,7 +180,8 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
 
         int[] selectedIndex = getSelectedProblemsIndex ();
         for (int row : selectedIndex) {
-            Problem problem = (Problem) getProblemListMCLB().getRowKey(row);
+            ElementId elementId = (ElementId) getProblemListMCLB().getRowKey(row);
+            Problem problem = getContest().getProblem(elementId);
             if (problem != null) {
                 if (problem.isComputerJudged()) {
                     filter.addProblem(problem);
@@ -436,7 +437,7 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
             if (canBeAutoJudged(problem)) {
                 boolean problemSelected = filter.isFilteringProblems() && filter.matchesProblem(problem.getElementId());
                 Object[] row = buildProblemRow(problem, problemSelected);
-                getProblemListMCLB().addRow(row, problem);
+                getProblemListMCLB().addRow(row, problem.getElementId());
             }
         }
         
