@@ -3554,7 +3554,10 @@ public class PacketHandler {
 
         loader.addRemoteRunsToModel(contest, controller, packet);
         
-        sendRequestForRunfFiles (packet, remoteSiteNumber);
+        // bug 1295 only send this request if we are a server
+        if (isServer()) {
+            sendRequestForRunfFiles (packet, remoteSiteNumber);
+        }
 
         loader.addRemoteClarificationsToModel(contest, controller, packet, remoteSiteNumber);
 
