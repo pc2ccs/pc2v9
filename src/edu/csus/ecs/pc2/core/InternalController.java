@@ -1395,6 +1395,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         
                         sendLoginSuccess(clientId, connectionHandlerID);
 
+                        // bug 1296 need to ask server to send it's settings....
+                        // now that the server has actually logged in here,
+                        // we need to send the server a request for it's settings
+                        if (isServer(packet.getSourceId())){
+                            Packet sendPacket = PacketFactory.createRequestRemoteDataPacket(contest.getClientId(), packet.getSourceId());
+                            sendToRemoteServer(packet.getSourceId().getSiteNumber(), sendPacket);
+                        }
+
                         // Send login notification to users.
 
                         Packet loginConfirmedPacket = PacketFactory.createLogin(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId, getClientSettings(clientId));
