@@ -1395,14 +1395,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         
                         sendLoginSuccess(clientId, connectionHandlerID);
 
-                        // bug 1296 need to ask server to send it's settings....
-                        // now that the server has actually logged in here,
-                        // we need to send the server a request for it's settings
-                        if (isServer(packet.getSourceId())){
-                            Packet sendPacket = PacketFactory.createRequestRemoteDataPacket(contest.getClientId(), packet.getSourceId());
-                            sendToRemoteServer(packet.getSourceId().getSiteNumber(), sendPacket);
-                        }
-
                         // Send login notification to users.
 
                         Packet loginConfirmedPacket = PacketFactory.createLogin(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId, getClientSettings(clientId));
@@ -1508,6 +1500,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                                 info("Updating this server's settings from remote server specific settings from " + clientId + " @ " + connectionHandlerID);
  
                                 packetHandler.loadSettingsFromRemoteServer(new ContestLoader(), packet, connectionHandlerID);
+                                
+                                info("Sending this server's settings to remote server " + packet.getSourceId() + " @ " + connectionHandlerID);
+                                // Send settings packet to the server we logged into
+                                sendToClient(packetHandler.createContestSettingsPacket(packet.getSourceId()));
+                                
+                                info("Sending a request for all run files to remote server " + packet.getSourceId() + " @ " + connectionHandlerID);
+                                packetHandler.sendRequestForRunfFiles (packet, packet.getSourceId().getSiteNumber());
                       
                             }
 
