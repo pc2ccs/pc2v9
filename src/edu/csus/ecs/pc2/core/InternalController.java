@@ -714,7 +714,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     loggingInSiteRequestsToBeProxy = true;
                 }
                 
-                sendLoginRequestFromServerToServer(connectionManager, remoteServerConnectionHandlerID, clientId, password, loggingInSiteRequestsToBeProxy);
+                sendLoginRequestFromServerToServer(connectionManager, remoteServerConnectionHandlerID, clientId, password, loggingInSiteRequestsToBeProxy, 0);
 
             } else {
 
@@ -1284,13 +1284,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * @param password
      *            site password
      * @param proxyMe if true, this site acts as a proxy for the site logging in.
+     * @param targetSiteNumber the target/destination site number for this login request
      */
-    private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID targetConnectionHandlerID, ClientId clientId, String password, boolean proxyMe) {
+    private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID targetConnectionHandlerID, ClientId clientId, String password, boolean proxyMe, int targetSiteNumber) {
         
         
         try {
             info("sendLoginRequestFromServerToServer ConId start - sending from " + clientId);
-            ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
+            ClientId serverClientId = new ClientId(targetSiteNumber, Type.SERVER, 0);
             String joeLoginName = password;
             Packet loginPacket = PacketFactory.createLoginRequest(clientId, joeLoginName, password, serverClientId, proxyMe);
             manager.send(loginPacket, targetConnectionHandlerID);
@@ -3233,7 +3234,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             info("Contacted Site " + inSiteNumber + " (via " + remoteSite.getSiteNumber() + ") using connection id " + connectionHandlerID);
-            sendLoginRequestFromServerToServer(connectionManager, connectionHandlerID, getServerClientId(), localPassword, false);
+            sendLoginRequestFromServerToServer(connectionManager, connectionHandlerID, getServerClientId(), localPassword, false, inSiteNumber);
             
         } else if (contest.isAllowed(Permission.Type.ALLOWED_TO_RECONNECT_SERVER)) {
             // Send the reconnection request to our server
