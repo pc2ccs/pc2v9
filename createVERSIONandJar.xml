@@ -167,7 +167,9 @@ To Use this:
                 <attribute name="Main-Class" value="edu.csus.ecs.pc2.Starter"/>
 			</manifest>
 		</jar>
-		
+		<copy todir="${dist.dir}">
+			<fileset dir="${vendor.lib.dir}"/>
+		</copy>
 		<tstamp>
 			<format property="longdate" pattern="EEEE, MMMM dd yyyy" timezone="UTC" />
 		</tstamp>
