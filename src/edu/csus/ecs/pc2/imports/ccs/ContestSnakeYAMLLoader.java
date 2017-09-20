@@ -503,7 +503,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         Site[] sites = getSites(yamlLines);
         for (Site site : sites) {
-            contest.addSite(site);
+            Site existingSite = contest.getSite(site.getSiteNumber());
+            if (existingSite == null) {
+                contest.addSite(site);
+            } else {
+                // updateSite works by elementId, so we have to modify the existing object
+                existingSite.setDisplayName(site.getDisplayName());
+                existingSite.setPassword(site.getPassword());
+                Properties props = new Properties();
+                props.put(Site.IP_KEY, site.getConnectionInfo().getProperty(Site.IP_KEY));
+                props.put(Site.PORT_KEY, site.getConnectionInfo().getProperty(Site.PORT_KEY));
+                existingSite.setConnectionInfo(props);
+                contest.updateSite(existingSite);
+            }
         }
 
         String[] categories = loadGeneralClarificationAnswers(yamlLines);
