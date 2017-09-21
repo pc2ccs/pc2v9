@@ -391,6 +391,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
         info("sendToClient (send) " + packet.getDestinationId() + " " + packet + " " + connectionHandlerID);
+        if (connectionHandlerID == null) {
+            // client has already been logged off, nobody to send to.
+            return;
+        }
         try {
             packet.setContestIdentifier(contest.getContestIdentifier().toString());
             connectionManager.send(packet, connectionHandlerID);
@@ -2335,8 +2339,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void sendToServers(Packet packet) {
 
-        ClientId[] clientIds1 = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
-        ClientId[] clientIds2 = contest.getRemoteLoggedInClients(ClientType.Type.SERVER);
+        // do remotes first, for proxies this mean they are shutdown before the server
+        // doing the proxying.
+        ClientId[] clientIds1 = contest.getRemoteLoggedInClients(ClientType.Type.SERVER);
+        ClientId[] clientIds2 = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
         ClientId[] clientIds = Arrays.copyOf(clientIds1, clientIds1.length + clientIds2.length);
         System.arraycopy(clientIds2, 0, clientIds, clientIds1.length, clientIds2.length);
 
