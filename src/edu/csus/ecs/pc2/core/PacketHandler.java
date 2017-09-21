@@ -117,23 +117,13 @@ public class PacketHandler {
             PacketFactory.dumpPacket(System.out, packet, "handlePacket");
         }
         
-        // for a server that is not us, and we are a server
-        if (contest != null && isServer() && !isThisSite(packet.getDestinationId())) {
-            int siteNumber = packet.getDestinationId().getSiteNumber();
-            Site destSite = contest.getSite(siteNumber);
-            Site sourceSite = contest.getSite(packet.getOriginalSourceId().getSiteNumber());
-            // for a destSite that has a proxy and we are the proxier. Only if we have a valid contest & site
-            if (destSite != null && destSite.hasProxy() && destSite.getMyProxy() == contest.getSiteNumber()) {
-                controller.sendToRemoteServer(siteNumber, packet);
-                info("handlePacket forwarded from " + sourceSite.getSiteNumber() + " to site "+siteNumber);
-                return;
-            } else if (sourceSite != null && sourceSite.hasProxy() && sourceSite.getMyProxy() == contest.getSiteNumber()) {
-                // we are a proxy for this site, forward it to the destination
-                controller.sendToRemoteServer(siteNumber, packet);
-                info("handlePacket forwarded for site " + sourceSite.getSiteNumber() + " to site "+siteNumber);
-                return;
-            }
+        if (forwardedToProxy(packet)){
+            
+            // Handled proxy packets (send/receive), no additional action necesary in this method.
+            return;
         }
+        
+    
         ClientId fromId = packet.getSourceId();
 
         Clarification clarification;
@@ -276,6 +266,39 @@ public class PacketHandler {
                 handleOtherPacketTypes(packetType, fromId, packet, connectionHandlerID);
         } 
     }             
+
+    /**
+     * Handle proxy packets.
+     * 
+     * Will forward packet from a proxy or will send a packet to a proxy.
+     * 
+     * @param packet
+     * @return true if packet was forwarded.
+     */
+    public boolean forwardedToProxy(Packet packet) {
+
+        // for a server that is not us, and we are a server
+        
+        if (contest != null && isServer() && !isThisSite(packet.getDestinationId())) {
+            int siteNumber = packet.getDestinationId().getSiteNumber();
+            Site destSite = contest.getSite(siteNumber);
+            Site sourceSite = contest.getSite(packet.getOriginalSourceId().getSiteNumber());
+
+            // for a destSite that has a proxy and we are the proxier. Only if we have a valid contest & site
+
+            if (destSite != null && destSite.hasProxy() && destSite.getMyProxy() == contest.getSiteNumber()) {
+                controller.sendToRemoteServer(siteNumber, packet);
+                info("forwardedToProxy forwarded from " + sourceSite.getSiteNumber() + " to site " + siteNumber);
+                return true;
+            } else if (sourceSite != null && sourceSite.hasProxy() && sourceSite.getMyProxy() == contest.getSiteNumber()) {
+                // we are a proxy for this site, forward it to the destination
+                controller.sendToRemoteServer(siteNumber, packet);
+                info("forwardedToProxy forwarded for site " + sourceSite.getSiteNumber() + " to site " + siteNumber);
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Handle packets that are not handled by {@link #handlePacket(Packet, ConnectionHandlerID)}.

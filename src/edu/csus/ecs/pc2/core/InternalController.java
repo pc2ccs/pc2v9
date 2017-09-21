@@ -1365,6 +1365,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     }
 
                 } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
+                    
+                    if (packetHandler.forwardedToProxy((packet))) {
+                        
+                        // Handled proxy packets (send/receive), no additional action necesary in this method.
+                        return;
+                    }
+                    
                     String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
                     boolean requestProxy = false;
                     Boolean requestedProxy = PacketFactory.getBooleanValue(packet, PacketFactory.REQUEST_LOGIN_AS_PROXY);
