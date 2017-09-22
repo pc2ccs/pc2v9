@@ -106,6 +106,8 @@
         </zip>
         <checksum file="${zip.path}" algorithm="MD5" fileext=".md5.txt"/>
         <checksum file="${zip.path}" algorithm="SHA" fileext=".sha1.txt"/>
+        <checksum file="${zip.path}" algorithm="SHA-256" fileext=".sha256.txt"/>
+        <checksum file="${zip.path}" algorithm="SHA-512" fileext=".sha512.txt"/>
     </target>
 
     <target name="gzip" depends="zip">
@@ -133,6 +135,8 @@
         </tar>
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
         <checksum file="${gzip.path}" algorithm="SHA" fileext=".sha1.txt"/>
+        <checksum file="${gzip.path}" algorithm="SHA-256" fileext=".sha256.txt"/>
+        <checksum file="${gzip.path}" algorithm="SHA-512" fileext=".sha512.txt"/>
     </target>
     <target name="archives" depends="init" description="public in dist, private in build">
 
