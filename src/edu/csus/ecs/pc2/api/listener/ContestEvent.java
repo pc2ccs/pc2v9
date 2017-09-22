@@ -95,7 +95,7 @@ public class ContestEvent {
 
     /**
      * Construct an event representing a change in a contest site.
-     * @param eventType
+     * @param eventType the event type
      * @param site the contest site which has changed 
      */
 
@@ -107,7 +107,7 @@ public class ContestEvent {
 
     /**
      * Construct an event representing a change in the contest title.
-     * @param eventType
+     * @param eventType the event type
      * @param contestTitle the new contest title 
      */
     public ContestEvent(EventType eventType, String contestTitle) {
@@ -118,7 +118,7 @@ public class ContestEvent {
     
     /**
      * Construct an event representing a change in a contest Group.
-     * @param eventType
+     * @param eventType the event type
      * @param group the changed contest group 
      */
     public ContestEvent(EventType eventType, IGroup group) {
@@ -129,7 +129,7 @@ public class ContestEvent {
 
     /**
      * Construct an event representing a change in a contest Client (account).
-     * @param eventType
+     * @param eventType the event type
      * @param client the changed contest client 
      */
    public ContestEvent(EventType eventType, IClient client) {
@@ -140,7 +140,7 @@ public class ContestEvent {
 
    /**
     * Construct an event representing a change in contest clock (time) information).
-    * @param eventType
+    * @param eventType the event type
     * @param contestClock the changed contest clock 
     */
    public ContestEvent(EventType eventType, IContestClock contestClock) {
@@ -151,7 +151,7 @@ public class ContestEvent {
 
    /**
     * Construct an event representing a change in a contest Judgement.
-    * @param eventType
+    * @param eventType the event type
     * @param judgement the changed Judgement 
     */
    public ContestEvent(EventType eventType, IJudgement judgement) {
@@ -162,7 +162,7 @@ public class ContestEvent {
 
    /**
     * Construct an event representing a change in a contest Language.
-    * @param eventType
+    * @param eventType the event type
     * @param language the changed contest language 
     */
     public ContestEvent(EventType eventType, ILanguage language) {
@@ -173,7 +173,7 @@ public class ContestEvent {
 
     /**
      * Construct an event representing a change in a contest Problem.
-     * @param eventType
+     * @param eventType the event type
      * @param problem the changed contest problem 
      */
     public ContestEvent(EventType eventType, IProblem problem) {
@@ -186,6 +186,7 @@ public class ContestEvent {
      * Get the client associated with events of type {@link EventType#CLIENT}.
      * 
      * @see #getEventType()
+     * @return client
      */
     public IClient getClient() {
         return client;
@@ -195,6 +196,7 @@ public class ContestEvent {
      * Get Contest Clock info associated with events of type {@link EventType#CONTEST_CLOCK}.
      * 
      * @see #getEventType()
+     * @return contestLock
      */
     public IContestClock getContestClock() {
         return contestClock;
@@ -213,6 +215,7 @@ public class ContestEvent {
      * Get the Group info associated with events of type {@link EventType#GROUP}.
      * 
      * @see #getEventType()
+     * @return group
      */
     public IGroup getGroup() {
         return group;
@@ -222,6 +225,7 @@ public class ContestEvent {
      * Get the Judgement associated with events of type {@link EventType#JUDGEMENT}.
      * 
      * @see #getEventType()
+     * @return language
      */
     public IJudgement getJudgement() {
         return judgement;
@@ -231,6 +235,7 @@ public class ContestEvent {
      * Get the Language info associated with events of type {@link EventType#LANGUAGE}.
      * 
      * @see #getEventType()
+     * @return language
      */
     public ILanguage getLanguage() {
         return language;
@@ -240,6 +245,7 @@ public class ContestEvent {
      * Get the Problem info associated with events of type {@link EventType#PROBLEM}.
      * 
      * @see #getEventType()
+     * @return Iproblem
      */
     public IProblem getProblem() {
         return problem;

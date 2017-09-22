@@ -1101,7 +1101,7 @@ public class ContestTestFrame extends JFrame {
     /**
      * Run the input report.
      * 
-     * @param source
+     * @param source APIAbstractTest object
      */
     protected void runReport(Object source) {
         if (contest == null) {

@@ -73,7 +73,7 @@ public interface IRunEventListener {
      * Invoked when a run has been checked by a judge.
      *
      * @see #runJudgingCanceled
-     * @param run
+     * @param run the run that was checked out
      * @param isFinal true if this is a action for a final Judgement.
      */
     void runCheckedOut (IRun run, boolean isFinal);

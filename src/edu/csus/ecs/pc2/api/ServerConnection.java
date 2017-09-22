@@ -225,7 +225,9 @@ public class ServerConnection {
       * @param displayName title for account/team, if null will be login name
       * @param password password for account, must not be null or emptystring (string length==0)
       * 
-      * @throws IllegalArgumentException if the account type is invalid or the password is null or empty
+      * @exception IllegalArgumentException if the account type is invalid or the password is null or empty
+      * @exception SecurityException if the user allowed to perform this action.
+      * @throws Exception throws IllegalArgumentException
       */
     public void addAccount(String accountTypeName, String displayName, String password) throws Exception {
 
@@ -263,6 +265,8 @@ public class ServerConnection {
      * @param problem  the Problem for which the clarification request is being submitted
      * @param question text of question
      * @throws NotLoggedInException if the client is not currently logged in to the server
+     * @exception SecurityException if the user allowed to perform this action.
+     * @exception NotLoggedInException if the user is not logged in.
      * @throws Exception if the specified Problem is null or the clarification request could not be submitted to the server
      */
     public void submitClarification(IProblem problem, String question) throws Exception {
@@ -300,7 +304,10 @@ public class ServerConnection {
      * 
      * @param run The run to add a judgement to.
      * @param judgement the judgement to add to run.
-     * @throws Exception
+     *
+     * @exception SecurityException if the user allowed to perform this action.
+     * @exception NotLoggedInException if the user is not logged in.
+     * @throws Exception if unable to submit run.
      */
     public void submitRunJudgement(IRun run, IJudgement judgement) throws Exception {
 
@@ -350,8 +357,12 @@ public class ServerConnection {
      * @param mainFileName the name of the main source code file
      * @param additionalFileNames an array of Strings giving the names of any additional files submitted
      * @param overrideSubmissionTimeMS an override elapsed time in ms, only works if contest information CCS test mode is set true.
+     * @param overrideRunId an override RunId, only works if contest information CCS test mode is set true.
      * 
      * @throws NotLoggedInException if the client is not currently logged in to the server
+     *
+     * @exception SecurityException if the user allowed to perform this action.
+     * @exception NotLoggedInException if the user is not logged in.
      * @throws Exception if any of the specified files cannot be found, if the Problem or Language is null, 
      *          the contest is not running, or a failure occurred while submitting the run to the server
      */
@@ -497,7 +508,10 @@ public class ServerConnection {
      * Start the contest clock.
      * 
      * If the contest clock is already started this has no effect.
-     * @throws Exception 
+     *
+     * @exception SecurityException if the user allowed to perform this action.
+     * @exception NotLoggedInException if the user is not logged in.
+     * @throws Exception if unable to start contest.
      */
     public void startContestClock() throws Exception {
         
@@ -535,7 +549,9 @@ public class ServerConnection {
      * new runs will be accepted.
      * 
      * 
-     * @throws Exception 
+     * @exception SecurityException if the user allowed to perform this action.
+     * @exception NotLoggedInException if the user is not logged in.
+     * @throws Exception if unable to stop contest
      */
     public void stopContestClock() throws Exception {
         checkWhetherLoggedIn();
@@ -742,9 +758,9 @@ public class ServerConnection {
      * 
      * if problemProperties is null then will return null
      * 
-     * @param problemProperties
-     * @param key
-     * @param defaultValue
+     * @param problemProperties the problem Propteries
+     * @param key the key to look for
+     * @param defaultValue the default value to return if the key is not found.
      * @return value if found, else returns defaultValue.
      */
     protected String getProperty(Properties problemProperties, String key, String defaultValue) {
@@ -767,7 +783,7 @@ public class ServerConnection {
     /**
      * Check property names against valid list of names.
      * 
-     * @param properties
+     * @param properties properties to validate
      * @return array of invalid/unknown keys
      */
     protected String[] validateProperties(Properties properties) {
