@@ -1,0 +1,5 @@
+site	account	scoreadjustment
+1	team1	10
+1	team2	0
+1	team3	-5
+

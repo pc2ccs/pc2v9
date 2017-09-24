@@ -162,6 +162,14 @@ public class AccountsReport implements IReport {
             printWriter.print("group ''");
         }
         printWriter.println();
+        if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
+            if (account.getScoringAdjustment() != 0) {
+                printWriter.print("scoring adjustment '" + account.getScoringAdjustment() + "'");
+            } else {
+                printWriter.print("NO scoring adjustment");
+            }
+            printWriter.println();
+        }
         String pad7 = "       ";
         
         printWriter.println(pad7 + "Country code '" + account.getCountryCode() + "'");

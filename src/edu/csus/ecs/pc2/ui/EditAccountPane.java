@@ -13,9 +13,11 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
+import javax.swing.InputVerifier;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -74,8 +76,6 @@ public class EditAccountPane extends JPanePlugin {
 
     private ListModel<Object> defaultListModel = new DefaultListModel<Object>();
 
-    // May be used sometime later.
-    @SuppressWarnings("unused")
     private Log log = null;
 
     private JSplitPane mainSplitPane = null;
@@ -131,6 +131,9 @@ public class EditAccountPane extends JPanePlugin {
     private JPanel permButtonPane = null;
 
     private JButton resetPermissionsButton = null;
+    private JTextField scoringAdjustmentTextField = null;
+
+    private JLabel scoringAdjustmentLabel = null;
 
     /**
      * This method initializes
@@ -141,13 +144,32 @@ public class EditAccountPane extends JPanePlugin {
         initialize();
     }
 
+    class NumberVerifier extends InputVerifier {
+
+        @Override
+        public boolean verify(JComponent arg0) {
+            JTextField field = (JTextField) arg0;
+            if (field.getText().trim().equals("") || field.getText().equals("-")) {
+                // empty string (hopefully edit in progress), or starting with a negative number
+                return true;
+            }
+            try {
+                Integer.parseInt(field.getText());
+            } catch (Exception e) {
+                return false;
+            }
+            return true;
+        }
+
+    }
+
     /**
      * This method initializes this
      * 
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(536, 450));
+        this.setSize(new Dimension(536, 550));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -413,6 +435,8 @@ public class EditAccountPane extends JPanePlugin {
             getSiteSelectionComboBox().setEnabled(true);
 
             getAliasTextField().setText("");
+            scoringAdjustmentTextField.setVisible(false);
+            scoringAdjustmentLabel.setVisible(false);
         } else {
 
             getAccountTextField().setText(account2.getClientId().getName());
@@ -443,6 +467,11 @@ public class EditAccountPane extends JPanePlugin {
 
             loadSiteComboBox (account2.getSiteNumber());
             getSiteSelectionComboBox().setEnabled(false);
+
+            boolean isTeam = account2.getClientId().getClientType().equals(ClientType.Type.TEAM);
+            scoringAdjustmentTextField.setText(""+account2.getScoringAdjustment());
+            scoringAdjustmentTextField.setVisible(isTeam);
+            scoringAdjustmentLabel.setVisible(isTeam);
 
         }
 
@@ -644,8 +673,28 @@ public class EditAccountPane extends JPanePlugin {
             accountDetailPane.add(siteLabel, null);
             accountDetailPane.add(aliasLabel, null);
             accountDetailPane.add(getAliasTextField(), null);
+
+            scoringAdjustmentLabel = new JLabel("Scoring Adjustment");
+            scoringAdjustmentLabel.setBounds(15, 380, 271, 20);
+            accountDetailPane.add(scoringAdjustmentLabel);
+
+            accountDetailPane.add(getScoringAdjustmentTextField(), null);
         }
         return accountDetailPane;
+    }
+
+    private JTextField getScoringAdjustmentTextField() {
+        if (scoringAdjustmentTextField == null) {
+            scoringAdjustmentTextField = new JTextField();
+            scoringAdjustmentTextField.setBounds(15, 405, 271, 22);
+            scoringAdjustmentTextField.setInputVerifier(new NumberVerifier());
+            scoringAdjustmentTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return scoringAdjustmentTextField;
     }
 
     /**
@@ -867,6 +916,11 @@ public class EditAccountPane extends JPanePlugin {
         checkAccount.setPassword(getPasswordConfirmField().getText());
 
         checkAccount.setAliasName(getAliasTextField().getText());
+        try {
+            checkAccount.setScoringAdjustment(Integer.parseInt(getScoringAdjustmentTextField().getText()));
+        } catch (NumberFormatException e) {
+            log.log(Log.DEBUG, "trouble parsing scoringAdjustement `"+getScoringAdjustmentTextField().getText()+"` "+e.getMessage());
+        }
         return checkAccount;
     }
 
@@ -1006,5 +1060,4 @@ public class EditAccountPane extends JPanePlugin {
         fakeAccount = null;
         enableUpdateButton();
     }
-
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -66,6 +66,27 @@ public class NewScoringAlgorithmTest extends TestCase {
         }
 
     }
+    
+    public void testScoringAdjustments() throws Exception {
+        SampleContest sampleContest = new SampleContest();
+
+        IInternalContest contest = sampleContest.createContest(2, 2, 6, 12, true);
+
+        NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
+
+        createJudgedRun(contest, 0, true, 12);
+
+        Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
+        account.setScoringAdjustment(-2);
+        contest.updateAccount(account);
+
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties());
+        assertEquals("scoring adjustment -2", 10, standingsRecords[0].getPenaltyPoints());
+        account.setScoringAdjustment(-15);
+        contest.updateAccount(account);
+        standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties());
+        assertEquals("scoring adjustment -15", 0, standingsRecords[0].getPenaltyPoints());
+    }
 
     /**
      * Submit and judge a run.

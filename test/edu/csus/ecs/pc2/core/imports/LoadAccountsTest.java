@@ -151,6 +151,25 @@ public class LoadAccountsTest extends AbstractTestCase {
             assertTrue("exception", false);
         }
     }
+    public void testScoreAdjustment() {
+        try {
+            LoadAccounts loadAccounts = new LoadAccounts();
+            Account[] accounts = loadAccounts.fromTSVFile(loadDir + "loadaccount" + File.separator + "accounts.scoreadjustment.txt", accountList.getList(), new Group[0]);
+            for (int i = 0; i < accounts.length; i++) {
+                Account account = accounts[i];
+                if (account.getDisplayName().equals("team1")) {
+                    assertEquals("scoreadjustment change expected", 10, account.getScoringAdjustment());
+                } else if (account.getDisplayName().equals("team2")) {
+                    assertEquals("scoreadjustment change not expected", 0, account.getScoringAdjustment());
+                } else if (account.getDisplayName().equals("team3")) {
+                    assertEquals("scoreadjustment negative change expected", -5, account.getScoringAdjustment());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue("exception", false);
+        }
+    }
     public void checkPermissions(Account[] accounts) {
         for (Account account : accounts) {
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {

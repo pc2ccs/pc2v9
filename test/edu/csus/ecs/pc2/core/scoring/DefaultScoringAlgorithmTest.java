@@ -1256,6 +1256,76 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         }
 
     }
+    
+    public void testScoreAdjustment() {
+        try {
+            InternalContest contest = new InternalContest();
+            
+            initContestData(contest);
+            
+            createJudgedRun(contest, 0, true);
+
+            Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
+            account.setScoringAdjustment(-2);
+            try {
+                DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+                String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
+                
+                // getStandings should always return a well-formed xml
+                assertFalse("getStandings returned null ", xmlString == null);
+                assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
+                
+                DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+                Document doc = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+                NodeList nodeList = doc.getElementsByTagName("teamStanding");
+                Node node = nodeList.item(0).getAttributes().getNamedItem("points");
+                assertEquals("points=", "3", node.getNodeValue());
+            } catch (Exception e) {
+                assertTrue("Error in XML output " + e.getMessage(), true);
+                e.printStackTrace();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue("exception", false);
+        }
+    }
+
+    public void testScoreAdjustment0() {
+        try {
+            InternalContest contest = new InternalContest();
+            
+            initContestData(contest);
+            
+            createJudgedRun(contest, 0, true);
+
+            Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
+            account.setScoringAdjustment(-8); // -8 is less then the 5, should return 0 not -3
+            try {
+                DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+                String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
+                
+                // getStandings should always return a well-formed xml
+                assertFalse("getStandings returned null ", xmlString == null);
+                assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
+                
+                DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+                Document doc = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+                NodeList nodeList = doc.getElementsByTagName("teamStanding");
+                Node node = nodeList.item(0).getAttributes().getNamedItem("points");
+                assertEquals("zero points=", "0", node.getNodeValue());
+            } catch (Exception e) {
+                assertTrue("Error in XML output " + e.getMessage(), true);
+                e.printStackTrace();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue("exception", false);
+        }
+    }
 
     private void scoreboardTest(int numTeams, String[] runsData, String[] rankData, Properties scoreProps) {
         scoreboardTest (numTeams, runsData, rankData, false, scoreProps);

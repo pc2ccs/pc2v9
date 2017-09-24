@@ -54,6 +54,11 @@ public class Account implements IElementObject {
     
     private PermissionList permissionList = new PermissionList();
     
+    /**
+     * The scoring adjustment (positive or negative)
+     * aka penalty time
+     */
+    private int scoringAdjustment = 0;
     
 //    public static final String DEFAULT_INSTITUTIONNAME = "undefined";
 //
@@ -253,6 +258,9 @@ public class Account implements IElementObject {
                     return false;
                 }
             }
+            if (scoringAdjustment != account.getScoringAdjustment()) {
+                return false;
+            }
             return true;
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception in isSameAs", e);
@@ -400,6 +408,8 @@ public class Account implements IElementObject {
         permissionList = account.permissionList;
 
         memberNames = StringUtilities.cloneStringArray(account.memberNames);
+
+        scoringAdjustment = account.getScoringAdjustment();
     }
 
     public void setTeamName(String teamName) {
@@ -439,6 +449,20 @@ public class Account implements IElementObject {
 
     public void setInstitutionCode(String institutionCode) {
         this.institutionCode = institutionCode;
+    }
+
+    /**
+     * @return the scoringAdjustement
+     */
+    public int getScoringAdjustment() {
+        return scoringAdjustment;
+    }
+
+    /**
+     * @param newScoringAdjustment the scoringAdjustement to set
+     */
+    public void setScoringAdjustment(int newScoringAdjustment) {
+        this.scoringAdjustment = newScoringAdjustment;
     }
     
     

@@ -387,6 +387,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     
             } // else no runs
 
+            applyScoringAdjustments(standingsRecordHash, accountList);
+
             // use TreeMap to sort
             DefaultStandingsRecordComparator src = new DefaultStandingsRecordComparator();
             src.setCachedAccountList(accountList);
@@ -411,6 +413,27 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         return xmlString;
     }
     
+    private void applyScoringAdjustments(Hashtable<String, StandingsRecord> standingsRecordHash, AccountList accountList) {
+        Account[] accounts = accountList.getList();
+        Hashtable<String, Account> accountHash = new Hashtable<String, Account>();
+        for (int i = 0; i < accounts.length; i++) {
+            Account account = accounts[i];
+            accountHash.put(account.getClientId().toString(), account);
+        }
+
+        Set<String> s = standingsRecordHash.keySet();
+        for (Iterator<String> iterator = s.iterator(); iterator.hasNext();) {
+            String key = (String) iterator.next();
+            int score_adjustment = accountHash.get(key).getScoringAdjustment();
+            StandingsRecord record = standingsRecordHash.get(key);
+            long penaltyPoints = record.getPenaltyPoints();
+            if (penaltyPoints > 0) {
+                // do not allow the points to go below 0
+                record.setPenaltyPoints(Math.max(penaltyPoints + score_adjustment, 0));
+            }
+        }
+    }
+
     private void initializePermissions(IInternalContest theContest, ClientId clientId) {
         permissionList.clearAndLoadPermissions(getPermissionList(theContest));
     }
@@ -596,6 +619,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 standingsRecordMemento.putString("teamGroupName", group.getDisplayName());
                 standingsRecordMemento.putInteger("teamGroupId", groupIndex+1);
                 standingsRecordMemento.putInteger("teamGroupExternalId", group.getGroupId());
+                standingsRecordMemento.putInteger("scoringAdjustment", account.getScoringAdjustment());
             }
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             for (int i = 0; i < problems.length; i++) {

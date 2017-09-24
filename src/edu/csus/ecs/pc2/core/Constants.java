@@ -147,7 +147,9 @@ public final class Constants {
     public static final String TEAMNAME_COLUMN_NAME = "teamname";
     
     public static final String COUNTRY_CODE_COLUMN_NAME = "countrycode";
-    
+
+    public static final String SCORING_ADJUSTMENT_COLUMN_NAME = "scoreadjustment";
+
     public static final String DEFAULT_INSTITUTIONNAME = "undefined";
 
     public static final String DEFAULT_INSTITUTIONSHORTNAME = "undefined";

@@ -54,6 +54,7 @@ public class LoadAccounts {
     private int shortSchoolNameColumn = -1;
     private int countryCodeColumn = -1;
     private int teamNameColumn = -1;
+    private int scoreAdjustmentColumn = -1;
     
     private HashMap<ClientId, Account> existingAccountsMap = new HashMap<ClientId, Account>();
     
@@ -173,6 +174,16 @@ public class LoadAccounts {
                 }
             }
         }
+        if (scoreAdjustmentColumn != -1 && values.length > scoreAdjustmentColumn && values[scoreAdjustmentColumn].length() > 0) {
+            try {
+                int newValue = Integer.parseInt(values[scoreAdjustmentColumn]);
+                account.setScoringAdjustment(newValue);
+            } catch (NumberFormatException e) {
+                String message = e.getMessage();
+                StaticLog.warning(message);
+                System.out.println("WARNING: " + message);
+            }
+        }
         return account;
     }
    
@@ -226,6 +237,7 @@ public class LoadAccounts {
             permDisplayColumn = -1;
             permLoginColumn = -1;
             permPasswordColumn = -1;
+            scoreAdjustmentColumn = -1;
             for (int i = 0; i < columns.length; i++) {
                 
                 if (Constants.SITE_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
@@ -269,6 +281,9 @@ public class LoadAccounts {
                 }
                 if (Constants.TEAMNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     teamNameColumn = i;
+                }
+                if (Constants.SCORING_ADJUSTMENT_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    scoreAdjustmentColumn = i;
                 }
             }
             if (accountColumn == -1 || siteColumn == -1) {
