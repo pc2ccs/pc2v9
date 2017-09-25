@@ -508,6 +508,10 @@ public final class PacketFactory {
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();
+                if (element.endsWith("PASSWORD")) {
+                    // this covers PASSWORD and NEW_PASSWORD
+                    continue;
+                }
                 pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName() + " " + prop.get(element));
             }
         } else {
@@ -538,6 +542,10 @@ public final class PacketFactory {
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();
+                if (element.endsWith("PASSWORD")) {
+                    // this covers PASSWORD and NEW_PASSWORD
+                    continue;
+                }
                 log.info("   key: " + element + " is: " + prop.get(element).getClass().getName() + " " + prop.get(element));
             }
         } else {
@@ -565,6 +573,10 @@ public final class PacketFactory {
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();
+                if (element.endsWith("PASSWORD")) {
+                    // this covers PASSWORD and NEW_PASSWORD
+                    continue;
+                }
                 pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName() + " " + prop.get(element));
             }
         } else {
