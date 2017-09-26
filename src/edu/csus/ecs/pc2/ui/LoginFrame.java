@@ -17,12 +17,14 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -330,6 +332,14 @@ public class LoginFrame extends JFrame implements ILoginUI {
                     attemptToLogin();
                 }
             });
+            loginButton.registerKeyboardAction(loginButton.getActionForKeyStroke(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false)),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false),
+                    JComponent.WHEN_FOCUSED);
+            loginButton.registerKeyboardAction(loginButton.getActionForKeyStroke(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true)),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true),
+                    JComponent.WHEN_FOCUSED);
         }
         return loginButton;
     }
@@ -390,6 +400,15 @@ public class LoginFrame extends JFrame implements ILoginUI {
                     promptBeforeExit();
                 }
             });
+            exitButton.registerKeyboardAction(exitButton.getActionForKeyStroke(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false)),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false),
+                    JComponent.WHEN_FOCUSED);
+            exitButton.registerKeyboardAction(exitButton.getActionForKeyStroke(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true)),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true),
+                    JComponent.WHEN_FOCUSED);
+
         }
         return exitButton;
     }

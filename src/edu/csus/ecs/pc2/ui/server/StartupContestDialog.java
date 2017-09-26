@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -20,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.text.html.HTMLEditorKit;
@@ -471,6 +473,14 @@ public class StartupContestDialog extends JDialog implements IStartupContestDial
                     attemptToLogin();
                 }
             });
+            loginButton.registerKeyboardAction(loginButton.getActionForKeyStroke(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false)),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false),
+                    JComponent.WHEN_FOCUSED);
+            loginButton.registerKeyboardAction(loginButton.getActionForKeyStroke(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true)),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true),
+                    JComponent.WHEN_FOCUSED);
         }
         return loginButton;
     }
@@ -492,6 +502,14 @@ public class StartupContestDialog extends JDialog implements IStartupContestDial
                     promptBeforeExit();
                 }
             });
+            exitButton.registerKeyboardAction(exitButton.getActionForKeyStroke(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false)),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false),
+                    JComponent.WHEN_FOCUSED);
+            exitButton.registerKeyboardAction(exitButton.getActionForKeyStroke(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true)),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true),
+                    JComponent.WHEN_FOCUSED);
         }
         return exitButton;
     }
