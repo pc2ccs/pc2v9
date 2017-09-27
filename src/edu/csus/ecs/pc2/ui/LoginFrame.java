@@ -526,7 +526,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
                 } 
             }
 
-            if (edu.csus.ecs.pc2.core.Utilities.isDebugMode() || true) {
+            if (edu.csus.ecs.pc2.core.Utilities.isDebugMode()) {
                 System.out.println ();
                 System.out.println (inFileName);
                 System.out.print ("byte[] ChecksumX = {");
