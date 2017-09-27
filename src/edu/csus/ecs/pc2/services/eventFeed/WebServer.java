@@ -47,6 +47,7 @@ import sun.security.x509.X509CertInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.services.web.EventFeedService;
 import edu.csus.ecs.pc2.services.web.FetchRunService;
 import edu.csus.ecs.pc2.services.web.LanguageService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
@@ -347,6 +348,12 @@ public class WebServer implements UIPlugin {
         if (getBooleanProperty(FETCH_RUN_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new FetchRunService(getContest(), getController()));
             showMessage("Starting /fetchRun web service");
+        }
+        
+        // TODO if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, false)) {
+        {
+            resConfig.register(new EventFeedService(getContest(), getController()));
+            showMessage("Starting /event-feed web service");
         }
 
         return resConfig;
