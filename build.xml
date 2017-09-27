@@ -189,7 +189,7 @@
 
 		<!-- include the images in the jar -->
 		<copy file="images/csus_logo.png" todir="${build.prod.dir}/images"/>
-		<copy file="images/ICPCWebtMast_small.png" todir="${build.prod.dir}/images"/>
+		<copy file="images/ICPCWebMast_small.png" todir="${build.prod.dir}/images"/>
 
 		<!-- consider doing the manifest in a separate target
              then the Version can be ommitted if not set -->
