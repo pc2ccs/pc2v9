@@ -144,6 +144,12 @@ public class EditAccountPane extends JPanePlugin {
         initialize();
     }
 
+    /**
+     * Class to verify numbers.
+     * 
+     * @author Troy
+     *
+     */
     class NumberVerifier extends InputVerifier {
 
         @Override

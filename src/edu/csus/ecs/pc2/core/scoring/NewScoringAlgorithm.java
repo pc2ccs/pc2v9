@@ -541,9 +541,9 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                 problemNumber++;
             }
             long penaltyPoints = standingsRecord.getPenaltyPoints();
-            int score_adjustment = account.getScoringAdjustment();
-            if (penaltyPoints > 0 && score_adjustment != 0) {
-                standingsRecord.setPenaltyPoints(Math.max(penaltyPoints+score_adjustment,0));
+            int scoreAdjustment = account.getScoringAdjustment();
+            if (penaltyPoints > 0 && scoreAdjustment != 0) {
+                standingsRecord.setPenaltyPoints(Math.max(penaltyPoints+scoreAdjustment,0));
             }
             standingsRecords[standRecCount] = standingsRecord;
             standRecCount++;

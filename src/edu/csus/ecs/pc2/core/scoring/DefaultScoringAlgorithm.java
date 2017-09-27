@@ -424,12 +424,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Set<String> s = standingsRecordHash.keySet();
         for (Iterator<String> iterator = s.iterator(); iterator.hasNext();) {
             String key = (String) iterator.next();
-            int score_adjustment = accountHash.get(key).getScoringAdjustment();
+            int scoreAdjustment = accountHash.get(key).getScoringAdjustment();
             StandingsRecord record = standingsRecordHash.get(key);
             long penaltyPoints = record.getPenaltyPoints();
             if (penaltyPoints > 0) {
                 // do not allow the points to go below 0
-                record.setPenaltyPoints(Math.max(penaltyPoints + score_adjustment, 0));
+                record.setPenaltyPoints(Math.max(penaltyPoints + scoreAdjustment, 0));
             }
         }
     }
