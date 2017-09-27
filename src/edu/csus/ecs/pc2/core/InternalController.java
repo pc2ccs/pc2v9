@@ -1161,17 +1161,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return newId;
     }
 
-    private void initializeFirstServer(IInternalContest contest) {
+    private void initializeFirstServer(IInternalContest inContest) {
         // only the 1st server needs these
         try {
-            contest.setupDefaultCategories();
-            Site[] sites = contest.getSites();
+            inContest.setupDefaultCategories();
+            Site[] sites = inContest.getSites();
             for (int i = 0; i < sites.length; i++) {
                 Site site = sites[i];
                 if (site.hasProxy()) {
                     site.unsetProxy();
                 }
-                contest.updateSite(site);
+                inContest.updateSite(site);
             }
         } catch (Exception e) {
             // SOMEDAY Handle exception better
