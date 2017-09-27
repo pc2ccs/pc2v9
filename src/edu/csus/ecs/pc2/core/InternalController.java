@@ -1140,9 +1140,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         try {
             initializeServer(contest);
-            // only the 1st server needs these
-            // XXX is there a better place to initialize them?
-            contest.setupDefaultCategories();
+            initializeFirstServer(contest);
         } catch (IOException e) {
             // SOMEDAY Handle exception better
             e.printStackTrace();
@@ -1161,6 +1159,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("Note site " + newId + " site " + newSiteNumber + " already logged in, ignoring ");
         }
         return newId;
+    }
+
+    private void initializeFirstServer(IInternalContest contest) {
+        // only the 1st server needs these
+        try {
+            contest.setupDefaultCategories();
+            Site[] sites = contest.getSites();
+            for (int i = 0; i < sites.length; i++) {
+                Site site = sites[i];
+                if (site.hasProxy()) {
+                    site.unsetProxy();
+                }
+                contest.updateSite(site);
+            }
+        } catch (Exception e) {
+            // SOMEDAY Handle exception better
+            e.printStackTrace();
+        }
     }
 
     private Site createFirstSite(int siteNumber, String hostName, int portNumber) {
