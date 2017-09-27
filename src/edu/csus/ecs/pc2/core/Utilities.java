@@ -63,6 +63,15 @@ public final class Utilities {
     
     public static final String FORMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss z";
 
+    /**
+     * ISO 8601 Time Date format for SimpleDateFormat.
+     */
+    public static final String ISO_8601_TIMEDATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
+
+    /**
+     * ISO 8601 Time Date format for SimpleDateFormat include milliseconds.
+     */
+    public static final String ISO_8601_TIMEDATE_FORMAT_WITH_MS = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     /**
      * CCS directory where data files are stored (under problem short name).
@@ -75,6 +84,16 @@ public final class Utilities {
     private static SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
 
     private static SimpleDateFormat formatterYYYYMMDDHHMMSS = new SimpleDateFormat(FORMAT_YYYY_MM_DD_HH_MM_SS);
+
+    /**
+     * SimpleDateFormat for iso8601
+     */
+    private static SimpleDateFormat iso8601formatter = new SimpleDateFormat(ISO_8601_TIMEDATE_FORMAT);
+
+    /**
+     * SimpleDateFormat for iso8601 including milliseconds
+     */
+    private static SimpleDateFormat iso8601formatterWithMS = new SimpleDateFormat(ISO_8601_TIMEDATE_FORMAT_WITH_MS);
 
     /**
      * List of extensions for files considered to be executable.
@@ -114,6 +133,21 @@ public final class Utilities {
     private Utilities() {
         super();
     }
+
+    /**
+     * @return the iso8601formatter
+     */
+    public static SimpleDateFormat getIso8601formatter() {
+        return iso8601formatter;
+    }
+
+    /**
+     * @return the iso8601formatterWithMS
+     */
+    public static SimpleDateFormat getIso8601formatterWithMS() {
+        return iso8601formatterWithMS;
+    }
+
 
     /**
      * Return CCS path for input data and answer file names.
