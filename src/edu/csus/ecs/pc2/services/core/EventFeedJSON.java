@@ -1,18 +1,29 @@
 package edu.csus.ecs.pc2.services.core;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Properties;
+import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
@@ -34,12 +45,25 @@ public class EventFeedJSON implements IEventSequencer {
      */
     private static final String NL = System.getProperty("line.separator");
     
-    private static final String JSON_EOLN = ", " + NL;
+    private static final String JSON_EOLN = "," + NL;
 
 
     private SimpleDateFormat iso8601formatter = new SimpleDateFormat(ISO_8601_DATE_FORMAT);
 
+    /**
+     * Is the SE judgement penalized?
+     * 
+     */
+    private boolean securityViolationApplyPenalty = true;
+
+    /**
+     * Is the CE judgement penalized?
+     */
+    private boolean compilationErrorApplyPenalty = true;
+
     public String getContestJSON(IInternalContest contest) {
+        
+        updatePenaltySettings(contest);
 
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -54,8 +78,14 @@ public class EventFeedJSON implements IEventSequencer {
         appendPair(stringBuilder, "id", getNextEventId());
         stringBuilder.append(", ");
 
-        appendPair(stringBuilder, "name", info.getContestShortName());
+        String s = info.getContestShortName();
+        if (s == null) {
+            s = info.getContestTitle();
+        }
+
+        appendPair(stringBuilder, "name", s);
         stringBuilder.append(", ");
+
         appendPair(stringBuilder, "formal_name", info.getContestTitle());
         stringBuilder.append(", ");
 
@@ -71,12 +101,17 @@ public class EventFeedJSON implements IEventSequencer {
             stringBuilder.append(", ");
         }
 
-        appendPair(stringBuilder, "penalty_time", DefaultScoringAlgorithm.getDefaultProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO));
-        stringBuilder.append(", ");
+        String penalty = DefaultScoringAlgorithm.getDefaultProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO);
+        
+        if (penalty != null && penalty.matches("[0-9]+")){
+            appendPair(stringBuilder, "penalty_time", Integer.parseInt(penalty));
+            stringBuilder.append(", ");
+        }
+        
+        // Start states array
 
-        appendPair(stringBuilder, "state", ""); // TODO what is this value ?
+        stringBuilder.append("\"state\":{");
 
-        stringBuilder.append(", ");
         appendPair(stringBuilder, "state.running", time.isContestRunning());
         stringBuilder.append(", ");
 
@@ -89,9 +124,11 @@ public class EventFeedJSON implements IEventSequencer {
         appendPair(stringBuilder, "state.frozen", isContestFrozen(contest));
         stringBuilder.append(", ");
 
-        appendPair(stringBuilder, "state.final", Boolean.toString(finalized));
+        appendPair(stringBuilder, "state.final", finalized);
+        
+        stringBuilder.append("}"); // end states array
 
-        stringBuilder.append("} ");
+        stringBuilder.append("},"+NL);
 
         return stringBuilder.toString();
     }
@@ -102,11 +139,134 @@ public class EventFeedJSON implements IEventSequencer {
         return false;
     }
 
+    /**
+     * List of judgements.
+     * 
+     */
     public String getJudgementTypeJSON(IInternalContest contest) {
+        
+        StringBuilder stringBuilder = new StringBuilder();
 
-        return null; // TODO technical deficit code this
+        Judgement[] judgements = contest.getJudgements();
+        for (Judgement judgement : judgements) {
+            stringBuilder.append(getJudgementTypeJSON(contest, judgement));
+            stringBuilder.append(JSON_EOLN);
+        }
+
+        return stringBuilder.toString();
     }
 
+    private Object getJudgementTypeJSON(IInternalContest contest, Judgement judgement) {
+        
+        /**
+         *      ID  yes     no  provided by CCS     identifier of the judgement type. Usable as a label, typically a 2-3 letter capitalized shorthand, see Problem Format
+name    string  yes     no  provided by CCS     name of the judgement
+penalty     boolean     depends     no  provided by CCS     whether this judgement causes penalty time; should be present if and only if contest:penalty_time is present
+solved 
+         */
+        
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("{ ");
+
+        appendPair(stringBuilder, "event", "judgement-type");
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "id", judgement.getAcronym()); 
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "name", judgement.getDisplayName());
+        stringBuilder.append(", ");
+        
+        boolean penalized = isPenalizedJudgement(contest, judgement);
+
+        appendPair(stringBuilder, "penalty", penalized);
+        stringBuilder.append(", ");
+        
+        boolean solved = isSolved(judgement);
+        appendPair(stringBuilder, "solved", solved);
+
+        stringBuilder.append("} ");
+
+        return stringBuilder.toString();
+    }
+
+    private boolean isSolved(Judgement judgement) {
+        return Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym());
+    }
+
+    /**
+     * Return int value for key.
+     * @param key property to lookup
+     * @param properties 
+     */
+    private int getPropIntValue(Properties properties, String key) {
+        String value = properties.getProperty(key);
+        if (value != null && value.length() > 0 && isAllDigits(value)){
+            Integer i = Integer.parseInt(value);
+            return i.intValue();
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Does the string only contain digits?  
+     * 
+     * @param value
+     * @return
+     */
+    private boolean isAllDigits(String value) {
+        return value != null && value.matches("[0-9]+");
+    }
+
+    /**
+     * Is there a point penalty for this judgement?
+     * @param contest
+     * @param judgement
+     * @return
+     */
+    private boolean isPenalizedJudgement(IInternalContest contest, Judgement judgement) {
+        
+        boolean usePenalty = true;
+        
+        if (isSolved(judgement)){
+            return false;
+        }
+        
+        if(Judgement.ACRONYM_COMPILATION_ERROR.equals(judgement.getAcronym())) {
+            usePenalty = isCEPenalty();
+        } else   if(Judgement.ACRONYM_SECURITY_VIOLATION.equals(judgement.getAcronym())) {
+            usePenalty =  isSEPenalty();
+        } // else - no elss fall through
+
+        return usePenalty;
+    }
+
+    private boolean isSEPenalty() {
+        return securityViolationApplyPenalty;
+    }
+
+    private boolean isCEPenalty() {
+        return compilationErrorApplyPenalty;
+    }
+    
+    private void updatePenaltySettings(IInternalContest contest) {
+
+        Properties properties = contest.getContestInformation().getScoringProperties();
+
+        if (properties != null) {
+            securityViolationApplyPenalty = 0 != getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_NO_SECURITY_VIOLATION);
+            compilationErrorApplyPenalty = 0 != getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_NO_COMPILATION_ERROR);
+        }
+    }
+
+    /**
+     * Get all languages JSON.
+     * 
+     * @param contest
+     * @return
+     */
     public String getLanguageJSON(IInternalContest contest) {
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -116,12 +276,21 @@ public class EventFeedJSON implements IEventSequencer {
         for (Language language : languages) {
             stringBuilder.append(getLanguageJSON(contest, language, id));
             stringBuilder.append(JSON_EOLN);
+            id++;
         }
 
         return stringBuilder.toString();
 
     }
 
+    /**
+     * get JSON for a language.
+     * 
+     * @param contest
+     * @param language
+     * @param languageNumber sequence number
+     * @return
+     */
     public String getLanguageJSON(IInternalContest contest, Language language, int languageNumber) {
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -136,7 +305,7 @@ public class EventFeedJSON implements IEventSequencer {
 
         appendPair(stringBuilder, "name", language.getDisplayName());
 
-        stringBuilder.append("} ");
+        stringBuilder.append("}");
 
         return stringBuilder.toString();
     }
@@ -150,6 +319,7 @@ public class EventFeedJSON implements IEventSequencer {
         for (Problem problem : problems) {
             stringBuilder.append(getProblemJSON(contest, problem, id));
             stringBuilder.append(JSON_EOLN);
+            id++;
         }
 
         return stringBuilder.toString();
@@ -175,16 +345,24 @@ public class EventFeedJSON implements IEventSequencer {
 
         appendPair(stringBuilder, "ordinal", problemNumber);
         stringBuilder.append(", ");
-
-        appendPair(stringBuilder, "rgb", problem.getColorRGB());
-        stringBuilder.append(", ");
-
-        appendPair(stringBuilder, "color", problem.getColorName());
-        stringBuilder.append(", ");
+        
+        String s = problem.getColorRGB();
+        if ( s != null )
+        {
+            appendPair(stringBuilder, "rgb", s);
+            stringBuilder.append(", ");
+        }
+        
+        s = problem.getColorName();
+        if ( s != null )
+        {
+            appendPair(stringBuilder, "color", s);
+            stringBuilder.append(", ");
+        }
 
         appendPair(stringBuilder, "test_data_coun", problem.getNumberTestCases());
 
-        stringBuilder.append("} ");
+        stringBuilder.append("}");
 
         return stringBuilder.toString();
     }
@@ -199,56 +377,82 @@ public class EventFeedJSON implements IEventSequencer {
 
         return null; // TODO technical deficit code this
     }
+    
+    /**
+     * Get all sites' teams.
+     * 
+     * @param contest
+     * @return
+     */
+    public Account[] getTeamAccounts(IInternalContest inContest) {
+        Vector<Account> accountVector = inContest.getAccounts(ClientType.Type.TEAM);
+        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+
+        return accounts;
+    }
 
     public String getTeamJSON(IInternalContest contest) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        Account[] accounts = getTeamAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+
+        for (Account account : accounts) {
+            stringBuilder.append(getTeamJSON(contest, account));
+            stringBuilder.append(JSON_EOLN);
+        }
         
-        return null; // TODO technical deficit code this
+        return stringBuilder.toString();
     }
     
     public String getTeamJSON(IInternalContest contest, Account account) {
         
-        /**
-         * 
-         * iid 
-name 
-organization_id 
-group_id 
-
-         */
-        
         StringBuilder stringBuilder = new StringBuilder();
-
         stringBuilder.append("{ ");
         
         ClientId clientId = account.getClientId();
-
+        
+        //    id 
+        //    icpc_id 
+        //    name 
+        //    organization_id 
+       
         appendPair(stringBuilder, "event", "team");
         stringBuilder.append(", ");
-
-        appendPair(stringBuilder, "team_id", clientId.getClientNumber());
+        
+        appendPair(stringBuilder, "id", clientId.getClientNumber()); 
         stringBuilder.append(", ");
         
-        appendPair(stringBuilder, "organization_id", "// TODO");
+        appendPair(stringBuilder, "icpc_id", account.getExternalId());
         stringBuilder.append(", ");
         
-        appendPair(stringBuilder, "organization_id", "// TODO");
-        stringBuilder.append(", ");
-
         appendPair(stringBuilder, "name", account.getDisplayName());
-        stringBuilder.append(", ");
+        
+        // TODO technical deficit - add organizational id
+//        appendPair(stringBuilder, "organization_id", "// TODO");
+//        stringBuilder.append(", ");
+        
+        //    group_id 
+        
+        ElementId elementId = account.getGroupId();
+        if (elementId != null){
+            Group group = contest.getGroup(elementId);
+            if (group != null) {
+                stringBuilder.append(", ");
+                appendPair(stringBuilder, "group", group.getGroupId());
+            }
+        }
 
-        appendPair(stringBuilder, "icpc_id", "// TODO");
-        stringBuilder.append(", ");
-
-
-        stringBuilder.append("} ");
+        //    location   //     JSON object as specified below. 
+        //    location.x 
+        //    location.y 
+        //    location.rotation 
+        
+        stringBuilder.append("}");
 
         return stringBuilder.toString();
-    
-        
-        
-        
-        
     }
 
     public String getTeamMemberJSON(IInternalContest contest) {
@@ -256,12 +460,122 @@ group_id
         return null; // TODO technical deficit code this
     }
 
+    /**
+     * Get run submission.
+     * 
+     * @param contest
+     * @return
+     */
     public String getSubmissionJSON(IInternalContest contest) {
         return null; // TODO technical deficit code this
     }
 
+    /**
+     * List of all runs' judgements..
+     * 
+     */
     public String getJudgementJSON(IInternalContest contest) {
-        return null; // TODO technical deficit code this
+
+        StringBuilder stringBuilder = new StringBuilder();
+        Run[] runs = contest.getRuns();
+        
+        Arrays.sort(runs, new RunComparator());
+        for (Run run : runs) {
+            stringBuilder.append(getJudgementJSON(contest, run));
+            stringBuilder.append(JSON_EOLN);
+        }
+
+        return stringBuilder.toString();
+    }
+
+    private String getJudgementJSON(IInternalContest contest, Run run) {
+        
+    //    id 
+    //    submission_id 
+    //    judgement_type_id 
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("{ ");
+
+        appendPair(stringBuilder, "event", "judgement");
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "id", getNextEventId()); 
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "submission_id", run.getNumber());
+        stringBuilder.append(", ");
+        
+        if (run.isJudged()){
+            ElementId judgementId = run.getJudgementRecord().getJudgementId();
+            Judgement judgement = contest.getJudgement(judgementId);
+            
+            appendPair(stringBuilder, "judgement_type_id", judgement.getAcronym());
+        } else {
+            
+            appendPairNullValue(stringBuilder, "judgement_type_id");
+        }
+
+        
+//        start_time  TIME    yes     no  provided by CCS     absolute time when judgement started
+//        start_contest_time  RELTIME     yes     no  provided by CCS     contest relative time when judgement started
+//        end_time    TIME    yes     yes     provided by CCS     absolute time when judgement completed
+//        end_contest_time    RELTIME     yes     yes     provided by CCS     contest relative time when judgement completed 
+        
+//        [{"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
+//            "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"},
+//           {"id":"189550","submission_id":"wf2017-32163123xz3133ub","judgement_type_id":null,"start_time":"2014-06-25T11:24:03.921+01",
+//            "start_contest_time":"1:24:03.921","end_time":null,"end_contest_time":null}
+//          ]
+        
+        
+        Calendar wallElapsed = calculateElapsedWalltime (contest, run);
+        
+        stringBuilder.append(", ");
+        appendPair(stringBuilder, "start_time", wallElapsed); // absolute time when judgement started ex. 2014-06-25T11:24:03.921+01
+
+        stringBuilder.append(", ");
+        appendPair(stringBuilder, "start_contest_time",  XMLUtilities.formatSeconds(run.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
+        
+        stringBuilder.append(", ");
+        appendPairNullValue(stringBuilder, "end_time");
+        
+        stringBuilder.append(", ");
+        appendPairNullValue(stringBuilder, "end_contest_time");
+
+        stringBuilder.append("}");
+
+        return stringBuilder.toString();
+    }
+
+    /**
+     * Return wall time for run.
+     * 
+     * @param contest
+     * @param run
+     * @return wall time for run.
+     */
+    private Calendar calculateElapsedWalltime(IInternalContest contest, Run run) {
+        
+        ContestTime time = contest.getContestTime();
+        if (time.getElapsedMins() > 0){
+            
+        Calendar contestStart = time.getContestStartTime();
+        
+        long ms = contestStart.getTimeInMillis();
+        
+        ms += run.getElapsedMS(); // add elapsed time
+        
+        // create wall time.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(ms);
+        return calendar;
+        
+        } else {
+            return null;
+        }
+        
     }
 
     public String getRunJSON(IInternalContest contest) {
@@ -269,12 +583,10 @@ group_id
     }
 
     public String getClarificationJSON(IInternalContest contest) {
-
         return null; // TODO technical deficit code this
     }
 
     public String getAwardJSON(IInternalContest contest) {
-
         return null; // TODO technical deficit code this
     }
 
@@ -307,15 +619,12 @@ group_id
 //        contest = new SampleContest().createStandardContest();
 
         String json = getContestJSON(contest);
-
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getJudgementTypeJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getLanguageJSON(contest);
         if (json != null) {
@@ -328,37 +637,30 @@ group_id
         json = getGroupJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getOrganizationJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getTeamJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getTeamMemberJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getSubmissionJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getJudgementJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getRunJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getClarificationJSON(contest);
         if (json != null) {
@@ -374,7 +676,6 @@ group_id
         // At this point there is a trailing , and new line, if so remove it.
 
         if (buffer.length() > 6) {
-            System.out.println("debug 22 len = " + buffer.length());
             buffer.delete(buffer.length() - JSON_EOLN.length(), buffer.length());
         }
 
@@ -403,7 +704,13 @@ group_id
     // TODO move pair methods into JsonUtilities
 
     private void appendPair(StringBuilder stringBuilder, String name, boolean booleanValue) {
-        appendPair(stringBuilder, name, Boolean.toString(booleanValue));
+        
+        stringBuilder.append("\"");
+        stringBuilder.append(name);
+        stringBuilder.append("\"");
+        stringBuilder.append(":");
+
+        stringBuilder.append(booleanValue);
     }
 
     private void appendPair(StringBuilder stringBuilder, String name, long value) {
@@ -432,8 +739,17 @@ group_id
         if (calendar != null) {
             appendPair(stringBuilder, name, iso8601formatter.format(calendar.getTime()));
         } else {
-            appendPair(stringBuilder, name, "null");
+            appendPairNullValue(stringBuilder, name);
         }
+    }
+
+    private void appendPairNullValue(StringBuilder stringBuilder, String name) {
+        stringBuilder.append("\"");
+        stringBuilder.append(name);
+        stringBuilder.append("\"");
+
+        stringBuilder.append(": null");
+        
     }
 
 }
