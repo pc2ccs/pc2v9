@@ -114,9 +114,9 @@ public class LoginFrame extends JFrame implements ILoginUI {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(628,430));
-        this.setPreferredSize(new java.awt.Dimension(628,430));
-        this.setMinimumSize(new java.awt.Dimension(628,430));
+        this.setSize(new java.awt.Dimension(628,450));
+        this.setPreferredSize(new java.awt.Dimension(628,450));
+        this.setMinimumSize(new java.awt.Dimension(628,450));
         this.setBackground(new java.awt.Color(253, 255, 255));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("PC^2 Login");
@@ -472,16 +472,18 @@ public class LoginFrame extends JFrame implements ILoginUI {
     private boolean verifyImage(String inFileName, URL url) {
         // these are the real checksums
         byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
-        byte[] icpcChecksum = { -9, -91, 66, 44, 57, 117, 47, 58, 103, -17, 31, 53, 10, 6, 100, 68, 0, 127, -103, -58};
-        // these are the checkums from java jvm under microsoft
+        // generated under Windows10 running java version "1.8.0_144" and ubuntu running "1.8.0_131"
+        byte[] icpcChecksum = {-116, -88, -24, 46, 99, 102, -94, -64, -28, -61, 51, 4, -52, -116, -23, 92, 51, -78, -90, -107};
         byte[] csusChecksum2 = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
+        // old icpc_logo.png checksum
         byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
         // these are the ibm jre checksums
         byte[] csusChecksum3 = {-46, -84, -66, 55, 82, -78, 124, 88, 68, -83, -128, -110, -19, -26, 92, -3, 76, -26, 21, 30};
+        // old icpc_logo.png checksum
         byte[] icpcChecksum3 = {41, 72, 104, 75, 73, 55, 55, 93, 32, 35, -6, -12, -96, -23, -3, -17, -119, 26, 81, -2};
         
-        // this is the jdk 1.7 checksum for icpc_banner
-        byte[] icpcChecksum4 = {35, 40, -57, -30, -7, 121, 59, 25, 3, 26, -82, -75, -65, 123, 54, -57, 39, 36, -3, 107};
+        // this is the eclipse checksum
+        byte[] icpcChecksum4 = {47, -56, 88, -115, 40, 20, 98, -6, 99, 49, -17, 37, 74, -77, 0, -74, 55, -100, 9, -118};
 
         byte[] verifyChecksum;
         
@@ -515,7 +517,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
                     case 41:
                         verifyChecksum = icpcChecksum3;
                         break;
-                    case 35:
+                    case -75:
                         verifyChecksum = icpcChecksum4;
                         break;
                     default:
@@ -524,7 +526,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
                 } 
             }
 
-            if (edu.csus.ecs.pc2.core.Utilities.isDebugMode()) {
+            if (edu.csus.ecs.pc2.core.Utilities.isDebugMode() || true) {
                 System.out.println ();
                 System.out.println (inFileName);
                 System.out.print ("byte[] ChecksumX = {");
@@ -564,7 +566,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
         if (bottomPanel == null) {
             logoICPC = new JLabel();
 
-            ImageIcon image = loadImageIconFromFile("images/icpc_banner.png");
+            ImageIcon image = loadImageIconFromFile("images/ICPCWebMast_small.png");
             logoICPC.setIcon(image);
             bottomPanel = new JPanel();
             bottomPanel.setBackground(java.awt.Color.white);
