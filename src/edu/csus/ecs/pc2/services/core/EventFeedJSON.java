@@ -39,6 +39,8 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 // TODO for all sections pass in Key rather than hard coded inside method
 public class EventFeedJSON implements IEventSequencer {
 
+    public static final String TEAM_MEMBERS_KEY = "team-members";
+
     public static final String CLARIFICATIONS_KEY = "clarifications";
 
     public static final String GROUPS_KEY = "groups";
@@ -166,7 +168,7 @@ public class EventFeedJSON implements IEventSequencer {
 
     private boolean isContestFrozen(IInternalContest contest) {
 
-        // TODO technical deficit - code this.
+        // TODO technical deficit - code isContestFrozen.
         return false;
     }
 
@@ -445,14 +447,23 @@ solved
         stringBuilder.append("}");
 
         return stringBuilder.toString();
-    
-
-
     }
 
     public String getOrganizationJSON(IInternalContest contest) {
+        
+        //    Name    Type    Required?   Nullable?   @WF     Description
+        //    id  ID  yes     no  provided by CCS     identifier of the organization
+        //    icpc_id     string  no  yes     provided by CCS     external identifier from ICPC CMS
+        //    name    string  yes     no  provided by CCS     display name of the organization
+        //    formal_name     string  no  yes     provided by CCS     full organization name if too long for normal display purposes.
+        //    country     string  no  yes     not used    ISO 3-letter code of the organization's country
+        //    url     string  no  yes     provided by CDS     URL to organization's website
+        //    twitter_hashtag     string  no  yes     provided by CDS     organization hashtag
+        //    location    object  no  yes     provided by CDS     JSON object as specified below
+        //    location.latitude   float   depends     no  provided by CDS     latitude. Required iff location is present.
+        //    location.longitude  float   depends     no  provided by CDS     longitude. Required iff location is present. 
 
-        return null; // TODO technical deficit code this
+        return null; // TODO CLICS technical deficit code getOrganizationJSON
     }
     
     /**
@@ -507,9 +518,8 @@ solved
         
         appendPair(stringBuilder, "name", account.getDisplayName());
         
-        // TODO technical deficit - add organizational id
-//        appendPair(stringBuilder, "organization_id", "// TODO");
-//        stringBuilder.append(", ");
+        appendPairNullValue(stringBuilder, "organization_id"); // TODO CLICS DATA ADD  technical deficit - add organizational id into account/model
+        stringBuilder.append(", ");
         
         //    group_id 
         
@@ -518,7 +528,7 @@ solved
             Group group = contest.getGroup(elementId);
             if (group != null) {
                 stringBuilder.append(", ");
-                appendPair(stringBuilder, "group", group.getGroupId());
+                appendPair(stringBuilder, "group_id", group.getGroupId());
             }
         }
 
@@ -532,9 +542,68 @@ solved
         return stringBuilder.toString();
     }
 
+    /**
+     * Get team member info.
+     * 
+     */
     public String getTeamMemberJSON(IInternalContest contest) {
         
-        return null; // TODO technical deficit code this
+        StringBuilder stringBuilder = new StringBuilder();
+
+        Account[] accounts = getTeamAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+
+        for (Account account : accounts) {
+            String [] names = account.getMemberNames();
+            
+            if (names.length > 0){
+                for (String teamMemberName : names) {
+                    stringBuilder.append(getTeamMemberJSON(contest, account, teamMemberName));
+                    stringBuilder.append(JSON_EOLN);    
+                }
+            }
+        }
+        
+        return stringBuilder.toString();
+    }
+
+    private String getTeamMemberJSON(IInternalContest contest, Account account, String teamMemberName) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{ ");
+
+        //      Id   ID  yes     no  provided by CDS     identifier of the team-member.
+        //      icpc_id     string  no  yes     provided by CDS     external identifier from ICPC CMS
+        //      name    string  yes     no  provided by CDS     full name of team member.
+
+        appendPair(stringBuilder, "event", TEAM_MEMBERS_KEY);
+        stringBuilder.append(", ");
+
+        appendPairNullValue(stringBuilder, "id"); // TODO CLICS DATA ADD  id needs to be added to new Account Member class and model
+        stringBuilder.append(", ");
+
+        appendPairNullValue(stringBuilder, "icpc_id"); // TODO CLICS DATA ADD  icpc_id needs to be added to new Account Member class
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "name", teamMemberName);
+        stringBuilder.append(", ");
+
+        //      sex     string  no  no  provided by CDS     one of male, female or other
+        //      team_id     ID  yes     no  provided by CDS     team of team member.
+        //      role    string  yes     no  provided by CDS     one of contestant or coach.
+
+        appendPairNullValue(stringBuilder, "sex");
+        stringBuilder.append(", ");
+
+        appendPairNullValue(stringBuilder, "team_id");
+        stringBuilder.append(", ");
+
+        appendPairNullValue(stringBuilder, "role");
+
+        stringBuilder.append("}");
+
+        return stringBuilder.toString();
+
     }
 
     /**
@@ -597,7 +666,7 @@ solved
             appendPair(stringBuilder, "contest_time",  XMLUtilities.formatSeconds(run.getElapsedMS()));
             
             stringBuilder.append(", ");
-            appendPair(stringBuilder, "entry_point", "Main"); // TODO the team's submitted executable name is not available at this time.
+            appendPair(stringBuilder, "entry_point", "Main"); // TODO CLICS DATA ADD ADD  the team's submitted executable name is not available at this time.
             
             stringBuilder.append("}");
 
@@ -674,10 +743,10 @@ solved
         appendPair(stringBuilder, "start_contest_time",  XMLUtilities.formatSeconds(run.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
         
         stringBuilder.append(", ");
-        appendPairNullValue(stringBuilder, "end_time");  // TODO CLICS - add code to save in JudgementRecord in Executable
+        appendPairNullValue(stringBuilder, "end_time");  // TODO CLICS DATA ADD - add code to save in JudgementRecord in Executable
         
         stringBuilder.append(", ");
-        appendPairNullValue(stringBuilder, "end_contest_time"); // TODO CLICKS add code to save in JudgementRecord - in Executable
+        appendPairNullValue(stringBuilder, "end_contest_time"); // TODO CLICS DATA ADD  add code to save in JudgementRecord - in Executable
 
         stringBuilder.append("}");
 
@@ -750,7 +819,7 @@ solved
         
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-            RunResultFiles files = null; // TODO fetch files.
+            RunResultFiles files = null; // TODO CLICS must fetch files to get main file name, or put mainfile name into Run
             stringBuilder.append(getRunJSON(contest, run, files));
             stringBuilder.append(JSON_EOLN);
         }
@@ -870,7 +939,7 @@ solved
             // text is 
         }
 
-        appendPair(stringBuilder, "text", clarification.getQuestion()); // TODO need to quote this string 
+        appendPair(stringBuilder, "text", clarification.getQuestion()); // TODO CLICS need to quote this string 
         stringBuilder.append(", ");
 
         Calendar wallElapsed = calculateElapsedWalltime (contest, clarification.getElapsedMS());
@@ -880,6 +949,8 @@ solved
 
         stringBuilder.append(", ");
         appendPair(stringBuilder, "start_contest_time",  XMLUtilities.formatSeconds(clarification.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
+        
+        stringBuilder.append("}");
         
         return stringBuilder.toString();
     }
@@ -891,7 +962,7 @@ solved
 //         {"id":"first-to-solve-b","citation":"First to solve problem B","team_ids":[]}
 //        ]
                 
-        return null; // TODO technical deficit code this
+        return null; // TODO CLICS - technical deficit code getAwardJSON
     }
 
     /**
@@ -969,12 +1040,10 @@ solved
         json = getClarificationJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
         json = getAwardJSON(contest);
         if (json != null) {
             buffer.append(json);
-            buffer.append(JSON_EOLN);
         }
 
         // At this point there is a trailing , and new line, if so remove it.
@@ -982,7 +1051,7 @@ solved
         if (buffer.length() > 6) {
             buffer.delete(buffer.length() - JSON_EOLN.length(), buffer.length());
         }
-
+        
         // return the collected standings as elements of a JSON array
         return "[" + buffer.toString() + "]";
     }
