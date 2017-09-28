@@ -265,6 +265,7 @@ public class ReportsTest extends AbstractTestCase {
                 "Judging Analysis Report", //
                 "JSON 2016 Scoreboard", //
                 "Contest Data Package Report/Export", //
+                "Event Feed JSON Report", //
         };
 
         IReport [] reportList = Reports.getReports();

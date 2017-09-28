@@ -57,6 +57,7 @@ import edu.csus.ecs.pc2.core.report.ContestSettingsReport;
 import edu.csus.ecs.pc2.core.report.ContestSummaryReports;
 import edu.csus.ecs.pc2.core.report.EvaluationReport;
 import edu.csus.ecs.pc2.core.report.EventFeed2013Report;
+import edu.csus.ecs.pc2.core.report.EventFeedJSONReport;
 import edu.csus.ecs.pc2.core.report.EventFeedReport;
 import edu.csus.ecs.pc2.core.report.ExportYamlReport;
 import edu.csus.ecs.pc2.core.report.ExtractPlaybackLoadFilesReport;
@@ -293,6 +294,8 @@ public class ReportPane extends JPanePlugin {
             // SOMEDAY Bug 1166 remove this isServer when added to Admin. 
             reports.add(new CDPReport());
         }
+        
+        reports.add(new EventFeedJSONReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         

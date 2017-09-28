@@ -150,6 +150,8 @@ public final class Reports {
         
         reports.add(new CDPReport());
         
+        reports.add(new EventFeedJSONReport());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }
