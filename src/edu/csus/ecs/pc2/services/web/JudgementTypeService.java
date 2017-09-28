@@ -107,10 +107,12 @@ public class JudgementTypeService {
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("{judgementId}/")
-    public Response getGroup(@PathParam("judgementId") String judgementId) {
+    public Response getJudgement(@PathParam("judgementId") String judgementId) {
         // get the groups from the contest
         Judgement[] judgements = model.getJudgements();
 
+        // so the ids match the element id.
+        judgementId = judgementId.replaceAll("_"," ");
         // get an object to map the groups descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
