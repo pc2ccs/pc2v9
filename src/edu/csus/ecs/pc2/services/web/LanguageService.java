@@ -65,6 +65,7 @@ public class LanguageService {
         // get the groups from the model
         Language[] languages = model.getLanguages();
 
+        languageId = languageId.replaceAll("_", " ");
         // get an object to map the groups descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
