@@ -57,13 +57,13 @@ public class JudgementTypeService {
             name = name.substring(5, name.length());
             Properties scoringProperties = model.getContestInformation().getScoringProperties();
             if (judgement.getAcronym().equalsIgnoreCase("ce") || name.toLowerCase().contains("compilation error")) {
-                Object result = scoringProperties.getOrDefault(DefaultScoringAlgorithm.POINTS_PER_NO_COMPILATION_ERROR, "0");
+                Object result = scoringProperties.getProperty(DefaultScoringAlgorithm.POINTS_PER_NO_COMPILATION_ERROR, "0");
                 if (result.equals("0")) {
                     penalty = false;
                 }
             }
             if (judgement.getAcronym().equalsIgnoreCase("sv") || name.toLowerCase().contains("security violation")) {
-                Object result = scoringProperties.getOrDefault(DefaultScoringAlgorithm.POINTS_PER_NO_SECURITY_VIOLATION, "0");
+                String result = scoringProperties.getProperty(DefaultScoringAlgorithm.POINTS_PER_NO_SECURITY_VIOLATION, "0");
                 if (result.equals("0")) {
                     penalty = false;
                 }
