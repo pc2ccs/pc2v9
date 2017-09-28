@@ -80,7 +80,7 @@ public class LanguageService {
 
     private void dumpLanguage(ObjectMapper mapper, ArrayNode childNode, Language language) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", language.getElementId().toString());
+        element.put("id", language.getElementId().toString().replaceAll(" ", "_"));
         element.put("name", language.getDisplayName());
         childNode.add(element);
 
