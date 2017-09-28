@@ -51,6 +51,7 @@ import edu.csus.ecs.pc2.services.web.ContestService;
 import edu.csus.ecs.pc2.services.web.FetchRunService;
 import edu.csus.ecs.pc2.services.web.GroupService;
 import edu.csus.ecs.pc2.services.web.LanguageService;
+import edu.csus.ecs.pc2.services.web.OrganizationService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
 import edu.csus.ecs.pc2.services.web.ScoreboardService;
 import edu.csus.ecs.pc2.services.web.StarttimeService;
@@ -357,6 +358,8 @@ public class WebServer implements UIPlugin {
             showMessage("Starting /contest web service");
             resConfig.register(new GroupService(getContest(),getController()));
             showMessage("Starting /groups web service");
+            resConfig.register(new OrganizationService(getContest(),getController()));
+            showMessage("Starting /organizations web service");
         }
         return resConfig;
     }
