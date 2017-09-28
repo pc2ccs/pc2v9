@@ -43,7 +43,7 @@ public class GroupService {
      */
     private void dumpGroup(ObjectMapper mapper, ArrayNode childNode, Group group) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", group.getElementId().toString().replaceAll(" ", "_"));
+        element.put("id", group.getElementId().toString());
         if (group.getGroupId() != -1) {
             element.put("icpc_id", new Integer(group.getGroupId()).toString());
         }
