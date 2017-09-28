@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
@@ -31,9 +32,31 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
+// TODO reformat code
 public class EventFeedJSON implements IEventSequencer {
 
-    private long id = 0;
+    public static final String JUDGEMENT_TYPE_KEY = "judgement-type";
+
+    public static final String TEAM_KEY = "team";
+
+    public static final String SUBMISSION_KEY = "submission";
+
+    public static final String RUN_KEY = "run";
+
+    public static final String CONTEST_KEY = "contest";
+
+    public static final String LANGUAGE_KEY = "language";
+
+    public static final String PROBLEM_KEY = "problem";
+
+    public static final String JUDGEMENT_KEY = "judgement";
+
+    /**
+     * Event Id Sequence.
+     * 
+     * @see #getNextEventId()
+     */
+    private long eventIdSequence = 0;
 
     /**
      * ISO 8601 Date format for SimpleDateFormat.
@@ -69,7 +92,7 @@ public class EventFeedJSON implements IEventSequencer {
 
         stringBuilder.append("{ ");
 
-        appendPair(stringBuilder, "event", "contest");
+        appendPair(stringBuilder, "event", CONTEST_KEY);
         stringBuilder.append(", ");
 
         ContestInformation info = contest.getContestInformation();
@@ -169,7 +192,7 @@ solved
 
         stringBuilder.append("{ ");
 
-        appendPair(stringBuilder, "event", "judgement-type");
+        appendPair(stringBuilder, "event", JUDGEMENT_TYPE_KEY);
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "id", judgement.getAcronym()); 
@@ -297,7 +320,7 @@ solved
 
         stringBuilder.append("{ ");
 
-        appendPair(stringBuilder, "event", "language");
+        appendPair(stringBuilder, "event", LANGUAGE_KEY);
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "id", languageNumber);
@@ -331,7 +354,7 @@ solved
 
         stringBuilder.append("{ ");
 
-        appendPair(stringBuilder, "event", "problem");
+        appendPair(stringBuilder, "event", PROBLEM_KEY);
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "id", problemNumber); 
@@ -419,7 +442,7 @@ solved
         //    name 
         //    organization_id 
        
-        appendPair(stringBuilder, "event", "team");
+        appendPair(stringBuilder, "event", TEAM_KEY);
         stringBuilder.append(", ");
         
         appendPair(stringBuilder, "id", clientId.getClientNumber()); 
@@ -467,7 +490,66 @@ solved
      * @return
      */
     public String getSubmissionJSON(IInternalContest contest) {
-        return null; // TODO technical deficit code this
+        
+        StringBuilder stringBuilder = new StringBuilder();
+        Run[] runs = contest.getRuns();
+        
+        Arrays.sort(runs, new RunComparator());
+        for (Run run : runs) {
+            stringBuilder.append(getJudgementJSON(contest, run));
+            stringBuilder.append(getSubmissionJSON(contest, run));
+               stringBuilder.append(JSON_EOLN);
+        }
+
+        return stringBuilder.toString();   
+        
+    }
+    
+
+    private String getSubmissionJSON(IInternalContest contest, Run run) {
+        
+        //    id 
+        //    language_id 
+        //    problem_id 
+        //    team_id 
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.append("{ ");
+
+            appendPair(stringBuilder, "event", SUBMISSION_KEY);
+            stringBuilder.append(", ");
+
+            appendPair(stringBuilder, "id", getNextEventId()); 
+            stringBuilder.append(", ");
+            
+            appendPair(stringBuilder, "language_id", getLanguageIndex(contest,  run.getLanguageId()));
+            stringBuilder.append(", ");
+            
+            appendPair(stringBuilder, "problem_id", getProblemIndex(contest, run.getProblemId()));
+            stringBuilder.append(", ");
+            
+            appendPair(stringBuilder, "team_id", run.getSubmitter().getClientNumber());
+            stringBuilder.append(", ");
+            
+            //    time 
+            //    contest_time 
+            //    entry_point 
+            
+            Calendar wallElapsed = calculateElapsedWalltime (contest, run);
+            
+            stringBuilder.append(", ");
+            appendPair(stringBuilder, "time", wallElapsed); 
+
+            stringBuilder.append(", ");
+            appendPair(stringBuilder, "contest_time",  XMLUtilities.formatSeconds(run.getElapsedMS()));
+            
+            stringBuilder.append(", ");
+            appendPair(stringBuilder, "entry_point", "Main"); // TODO the team's submitted executable name is not available at this time.
+            
+            stringBuilder.append("}");
+
+            return stringBuilder.toString();
     }
 
     /**
@@ -498,7 +580,7 @@ solved
 
         stringBuilder.append("{ ");
 
-        appendPair(stringBuilder, "event", "judgement");
+        appendPair(stringBuilder, "event", JUDGEMENT_KEY);
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "id", getNextEventId()); 
@@ -539,10 +621,10 @@ solved
         appendPair(stringBuilder, "start_contest_time",  XMLUtilities.formatSeconds(run.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
         
         stringBuilder.append(", ");
-        appendPairNullValue(stringBuilder, "end_time");
+        appendPairNullValue(stringBuilder, "end_time");  // TODO CLICS - add code to save in JudgementRecord in Executable
         
         stringBuilder.append(", ");
-        appendPairNullValue(stringBuilder, "end_contest_time");
+        appendPairNullValue(stringBuilder, "end_contest_time"); // TODO CLICKS add code to save in JudgementRecord - in Executable
 
         stringBuilder.append("}");
 
@@ -551,6 +633,8 @@ solved
 
     /**
      * Return wall time for run.
+     * 
+     * Calculates based on elapsed time plus contest start time
      * 
      * @param contest
      * @param run
@@ -578,8 +662,61 @@ solved
         
     }
 
+    /**
+     * Return test cases.
+     * 
+     * @param contest
+     */
     public String getRunJSON(IInternalContest contest) {
-        return null; // TODO technical deficit code this
+        
+        StringBuilder stringBuilder = new StringBuilder();
+        Run[] runs = contest.getRuns();
+        
+        Arrays.sort(runs, new RunComparator());
+        for (Run run : runs) {
+            RunResultFiles files = null; // TODO fetch files.
+            stringBuilder.append(getRunJSON(contest, run, files));
+            stringBuilder.append(JSON_EOLN);
+        }
+
+        return stringBuilder.toString();
+    }
+    
+
+    private String getRunJSON(IInternalContest contest, Run run, RunResultFiles files) {
+        
+        //      id  ID  yes     no  provided by CCS     identifier of the run
+        //      judgement_id    ID  yes     no  provided by CCS     identifier of the judgement this is part of
+        //      ordinal     integer     yes     no  provided by CCS     ordering of runs in the judgement (implicit from the test cases)
+
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("{ ");
+
+        appendPair(stringBuilder, "event", RUN_KEY);
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "id", run.getNumber());
+        stringBuilder.append(", ");
+        
+        appendPair(stringBuilder, "contest_time",  XMLUtilities.formatSeconds(run.getElapsedMS()));
+        stringBuilder.append(", ");
+
+
+        //      judgement_type_id   ID  yes     no  provided by CCS     the verdict of this judgement (i.e. a judgement type)
+        //      time    TIME    yes     no  provided by CCS     absolute time when run completed
+        //      contest_time    RELTIME     yes     no  provided by CCS     contest relative time when run completed 
+
+        ElementId judgementId = run.getJudgementRecord().getJudgementId();
+        Judgement judgement = contest.getJudgement(judgementId);
+        
+        appendPair(stringBuilder, "judgement_type_id", judgement.getAcronym());
+        stringBuilder.append("}");
+
+        return stringBuilder.toString();
+    
+        
     }
 
     public String getClarificationJSON(IInternalContest contest) {
@@ -696,8 +833,8 @@ solved
 
     @Override
     public String getNextEventId() {
-        id++;
-        return "pc2-" + id;
+        eventIdSequence++;
+        return "pc2-" + eventIdSequence;
     }
 
     // TODO technical deficit - move these methods
@@ -750,6 +887,48 @@ solved
 
         stringBuilder.append(": null");
         
+    }
+    
+    /**
+     * Return the language index (starting as base one).
+     * 
+     * @param contest
+     * @param elementId
+     * @return -1 if language not found or inactive, else 1 or greater rank for language.
+     */
+    public int getLanguageIndex(IInternalContest contest, ElementId elementId) {
+        int idx = 0;
+        for (Language language : contest.getLanguages()) {
+            if (language.isActive()) {
+                if (language.getElementId().equals(elementId)) {
+                    return idx + 1;
+                }
+                idx++;
+            }
+        }
+
+        return -1;
+    }
+    
+
+    
+    /**
+     * Return the problem index (starting at/base one)).
+     * 
+     * @param contest
+     * @param elementId
+     * @return -1 if problem not found or inactive, else 1 or greater as rank for problem.
+     */
+    public int getProblemIndex(IInternalContest contest, ElementId elementId) {
+        int idx = 0;
+        for (Problem problem : contest.getProblems()) {
+                if (problem.getElementId().equals(elementId)) {
+                    return idx + 1;
+                }
+                idx++;
+        }
+
+        return -1;
     }
 
 }
