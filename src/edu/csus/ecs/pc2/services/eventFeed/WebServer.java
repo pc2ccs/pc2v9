@@ -47,6 +47,7 @@ import sun.security.x509.X509CertInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.services.web.ClarificationService;
 import edu.csus.ecs.pc2.services.web.ContestService;
 import edu.csus.ecs.pc2.services.web.FetchRunService;
 import edu.csus.ecs.pc2.services.web.GroupService;
@@ -363,6 +364,8 @@ public class WebServer implements UIPlugin {
             showMessage("Starting /organizations web service");
             resConfig.register(new JudgementTypeService(getContest(),getController()));
             showMessage("Starting /judgement-types web service");
+            resConfig.register(new ClarificationService(getContest(),getController()));
+            showMessage("Starting /clarifications web service");
         }
         return resConfig;
     }
