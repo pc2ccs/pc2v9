@@ -10,6 +10,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -33,23 +34,26 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 // TODO reformat code
+// TODO for all sections pass in Key rather than hard coded inside method
 public class EventFeedJSON implements IEventSequencer {
 
-    public static final String JUDGEMENT_TYPE_KEY = "judgement-type";
+    public static final String GROUPS_KEY = "groups";
 
-    public static final String TEAM_KEY = "team";
+    public static final String JUDGEMENT_TYPE_KEY = "judgement-types";
 
-    public static final String SUBMISSION_KEY = "submission";
+    public static final String TEAM_KEY = "teams";
 
-    public static final String RUN_KEY = "run";
+    public static final String SUBMISSION_KEY = "submissions";
 
-    public static final String CONTEST_KEY = "contest";
+    public static final String RUN_KEY = "runs";
 
-    public static final String LANGUAGE_KEY = "language";
+    public static final String CONTEST_KEY = "contests";
 
-    public static final String PROBLEM_KEY = "problem";
+    public static final String LANGUAGE_KEY = "languages";
 
-    public static final String JUDGEMENT_KEY = "judgement";
+    public static final String PROBLEM_KEY = "problems";
+
+    public static final String JUDGEMENT_KEY = "judgements";
 
     /**
      * Event Id Sequence.
@@ -392,7 +396,53 @@ solved
 
     public String getGroupJSON(IInternalContest contest) {
 
-        return null; // TODO technical deficit code this
+        StringBuilder stringBuilder = new StringBuilder();
+        Group[] groups = contest.getGroups();
+        
+        Arrays.sort(groups, new GroupComparator());
+        for (Group group : groups) {
+            stringBuilder.append(getGroupJSON(contest, group));
+            stringBuilder.append(JSON_EOLN);
+        }
+
+        return stringBuilder.toString();
+    }
+
+    private Object getGroupJSON(IInternalContest contest, Group group) {
+
+        
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{ ");
+        
+        
+        //    id 
+        //    icpc_id 
+        //    name 
+        //    organization_id 
+       
+        appendPair(stringBuilder, "event", GROUPS_KEY);
+        stringBuilder.append(", ");
+        
+        appendPair(stringBuilder, "id", getNextEventId()); 
+        stringBuilder.append(", ");
+       
+//        id  ID  yes     no  provided by CCS     identifier of the group
+//        icpc_id     string  no  yes     provided by CCS     external identifier from ICPC CMS
+//        name    string  yes     no  provided by CCS     name of the group 
+        
+        
+        appendPair(stringBuilder, "icpc_id", group.getGroupId());
+        stringBuilder.append(", ");
+        
+        appendPair(stringBuilder, "name", group.getDisplayName());
+        
+
+
+        stringBuilder.append("}");
+
+        return stringBuilder.toString();
+    
+
 
     }
 
@@ -479,7 +529,7 @@ solved
     }
 
     public String getTeamMemberJSON(IInternalContest contest) {
-
+        
         return null; // TODO technical deficit code this
     }
 
@@ -496,7 +546,6 @@ solved
         
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-            stringBuilder.append(getJudgementJSON(contest, run));
             stringBuilder.append(getSubmissionJSON(contest, run));
                stringBuilder.append(JSON_EOLN);
         }
@@ -562,11 +611,12 @@ solved
         Run[] runs = contest.getRuns();
         
         Arrays.sort(runs, new RunComparator());
+        
         for (Run run : runs) {
             stringBuilder.append(getJudgementJSON(contest, run));
             stringBuilder.append(JSON_EOLN);
         }
-
+        
         return stringBuilder.toString();
     }
 
@@ -909,8 +959,6 @@ solved
 
         return -1;
     }
-    
-
     
     /**
      * Return the problem index (starting at/base one)).
