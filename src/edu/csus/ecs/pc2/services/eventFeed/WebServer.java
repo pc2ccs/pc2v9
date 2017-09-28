@@ -50,6 +50,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.services.web.ContestService;
 import edu.csus.ecs.pc2.services.web.FetchRunService;
 import edu.csus.ecs.pc2.services.web.GroupService;
+import edu.csus.ecs.pc2.services.web.JudgementTypeService;
 import edu.csus.ecs.pc2.services.web.LanguageService;
 import edu.csus.ecs.pc2.services.web.OrganizationService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
@@ -360,6 +361,8 @@ public class WebServer implements UIPlugin {
             showMessage("Starting /groups web service");
             resConfig.register(new OrganizationService(getContest(),getController()));
             showMessage("Starting /organizations web service");
+            resConfig.register(new JudgementTypeService(getContest(),getController()));
+            showMessage("Starting /judgement-types web service");
         }
         return resConfig;
     }
