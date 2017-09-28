@@ -108,7 +108,13 @@ public class EventFeedJSON implements IEventSequencer {
         ContestInformation info = contest.getContestInformation();
         ContestTime time = contest.getContestTime();
 
-        appendPair(stringBuilder, "id", getNextEventId());
+        String path = contest.getProfile().getProfilePath();
+        String contestUUID = path;
+        if (path.startsWith("profiles")){
+            contestUUID = path.substring(9);
+        }
+        
+        appendPair(stringBuilder, "id", contestUUID);
         stringBuilder.append(", ");
 
         String s = info.getContestShortName();
@@ -517,9 +523,9 @@ solved
         stringBuilder.append(", ");
         
         appendPair(stringBuilder, "name", account.getDisplayName());
+        stringBuilder.append(", ");
         
         appendPairNullValue(stringBuilder, "organization_id"); // TODO CLICS DATA ADD  technical deficit - add organizational id into account/model
-        stringBuilder.append(", ");
         
         //    group_id 
         
