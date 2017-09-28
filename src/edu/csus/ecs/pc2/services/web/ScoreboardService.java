@@ -14,7 +14,7 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
+import edu.csus.ecs.pc2.exports.ccs.ContestAPIStandingsJSON;
 /**
  * Webservice to handle scoreboard requests
  * 
@@ -43,9 +43,9 @@ public class ScoreboardService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getScoreboard(@Context SecurityContext sc) {
 
-        StandingsJSON2016 standings = new StandingsJSON2016();
+        ContestAPIStandingsJSON standings = new ContestAPIStandingsJSON();
 
-        String jsonScoreboard = "[]";
+        String jsonScoreboard;
         try {
             ContestTime contestTime = contest.getContestTime();
             // verify contest has started or user is an admin
