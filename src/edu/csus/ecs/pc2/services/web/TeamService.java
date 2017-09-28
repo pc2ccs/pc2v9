@@ -64,7 +64,7 @@ public class TeamService {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("{teamId}/")
-    public Response getLanguage(@PathParam("teamId") int teamId) {
+    public Response getTeam(@PathParam("teamId") String teamId) {
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
 
@@ -74,7 +74,7 @@ public class TeamService {
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
             // TODO multi-site with overlapping teamNumbers?
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && account.getClientId().getClientNumber() == teamId) {
+            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && new Integer(account.getClientId().getClientNumber()).toString().equals(teamId)) {
                 dumpAccount(mapper, childNode, account);
             }
         }
