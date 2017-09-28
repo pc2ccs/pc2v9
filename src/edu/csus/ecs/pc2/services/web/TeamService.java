@@ -84,7 +84,7 @@ public class TeamService {
     private void dumpAccount(ObjectMapper mapper, ArrayNode childNode, Account account) {
         ObjectNode element = mapper.createObjectNode();
         // TODO multi-site with overlapping teamNumbers?
-        element.put("id", account.getClientId().getClientNumber());
+        element.put("id", new Integer(account.getClientId().getClientNumber()).toString());
         if (notEmpty(account.getExternalId())) {
             element.put("icpc_id", account.getExternalId());
         }
