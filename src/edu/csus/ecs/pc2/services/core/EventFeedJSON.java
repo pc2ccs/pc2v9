@@ -10,9 +10,11 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
@@ -36,6 +38,8 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 // TODO reformat code
 // TODO for all sections pass in Key rather than hard coded inside method
 public class EventFeedJSON implements IEventSequencer {
+
+    public static final String CLARIFICATIONS_KEY = "clarifications";
 
     public static final String GROUPS_KEY = "groups";
 
@@ -585,9 +589,8 @@ solved
             //    contest_time 
             //    entry_point 
             
-            Calendar wallElapsed = calculateElapsedWalltime (contest, run);
+            Calendar wallElapsed = calculateElapsedWalltime (contest, run.getElapsedMS());
             
-            stringBuilder.append(", ");
             appendPair(stringBuilder, "time", wallElapsed); 
 
             stringBuilder.append(", ");
@@ -662,7 +665,7 @@ solved
 //          ]
         
         
-        Calendar wallElapsed = calculateElapsedWalltime (contest, run);
+        Calendar wallElapsed = calculateElapsedWalltime (contest, run.getElapsedMS());
         
         stringBuilder.append(", ");
         appendPair(stringBuilder, "start_time", wallElapsed); // absolute time when judgement started ex. 2014-06-25T11:24:03.921+01
@@ -681,16 +684,39 @@ solved
         return stringBuilder.toString();
     }
 
+ 
+//    private Calendar calculateElapsedWalltime(IInternalContest contest, Run run) {
+//        
+//        ContestTime time = contest.getContestTime();
+//        if (time.getElapsedMins() > 0){
+//            
+//        Calendar contestStart = time.getContestStartTime();
+//        
+//        long ms = contestStart.getTimeInMillis();
+//        
+//        ms += run.getElapsedMS(); // add elapsed time
+//        
+//        // create wall time.
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis(ms);
+//        return calendar;
+//        
+//        } else {
+//            return null;
+//        }
+//        
+//    }
+    
     /**
-     * Return wall time for run.
+     * Return wall time for input elapsed time in ms.
      * 
      * Calculates based on elapsed time plus contest start time
      * 
      * @param contest
-     * @param run
+     * @param elapsedMS - elapsed ms when submission submitted
      * @return wall time for run.
      */
-    private Calendar calculateElapsedWalltime(IInternalContest contest, Run run) {
+    private Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
         
         ContestTime time = contest.getContestTime();
         if (time.getElapsedMins() > 0){
@@ -699,7 +725,7 @@ solved
         
         long ms = contestStart.getTimeInMillis();
         
-        ms += run.getElapsedMS(); // add elapsed time
+        ms += elapsedMS; // add elapsed time
         
         // create wall time.
         Calendar calendar = Calendar.getInstance();
@@ -769,11 +795,102 @@ solved
         
     }
 
+    /**
+     * Clarification Answer.
+     * @param contest
+     * @return
+     */
     public String getClarificationJSON(IInternalContest contest) {
-        return null; // TODO technical deficit code this
+        StringBuilder stringBuilder = new StringBuilder();
+        Clarification[] clarifications = contest.getClarifications();
+        
+        Arrays.sort(clarifications, new ClarificationComparator());
+        for (Clarification clarification : clarifications) {
+            stringBuilder.append(getClarificationJSON(contest, clarification));
+            stringBuilder.append(JSON_EOLN);
+        }
+
+        return stringBuilder.toString();
+    }
+
+    private String getClarificationJSON(IInternalContest contest, Clarification clarification) {
+        
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{ ");
+        
+        
+//        Id   ID  yes     no  provided by CCS     identifier of the clarification
+//        from_team_id    ID  yes     yes     provided by CCS     identifier of team sending this clarification request, null if a clarification sent by jury
+//        to_team_id  ID  yes     yes     provided by CCS     identifier of the team receiving this reply, null if a reply to all teams or a request sent by a team
+//        reply_to_id     ID  yes     yes     provided by CCS     identifier of clarification this is in response to, otherwise null
+   
+       
+        appendPair(stringBuilder, "event", CLARIFICATIONS_KEY);
+        stringBuilder.append(", ");
+        
+        appendPair(stringBuilder, "id", clarification.getNumber()); 
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "from_team_id", clarification.getSubmitter().getClientNumber()); 
+        stringBuilder.append(", ");
+
+        if (clarification.isSendToAll()){
+            appendPairNullValue(stringBuilder, "to_team_id");
+        } else {
+            appendPair(stringBuilder, "to_team_id", clarification. getSubmitter().getClientNumber());
+        }
+        
+        stringBuilder.append(", ");
+        
+        if (clarification.isAnswered()){
+            appendPair(stringBuilder, "reply_to_id", clarification.getNumber()); // this answer is in reply to
+        } else {
+            appendPairNullValue(stringBuilder, "reply_to_id");
+        }
+        stringBuilder.append(", ");
+
+//        problem_id  ID  yes     yes     provided by CCS     identifier of associated problem, null if not associated to a problem
+//        text    string  yes     no  provided by CCS     question or reply text
+//        time    TIME    yes     no  provided by CCS     time of the question/reply
+//        contest_time    RELTIME     yes     no  provided by CCS     contest time of the question/reply 
+
+        stringBuilder.append("}");
+        
+        appendPair(stringBuilder, "problem_id", getProblemIndex(contest, clarification.getElementId()));
+        stringBuilder.append(", ");
+        
+        // Due to a design mistake in the CCS team the clarification JSON element has either
+        // an answer or a question.   There were two mistakes, first that there is on
+        // JSoN element clarifications for both the question and the answer, there should
+        // be two elements.   The second mistake is that an answer should have both
+        // question and answer to avoid a bug by the consumer where they mismatch the
+        // question and answer because those would be married on reply_to_id
+        
+        if (clarification.isAnswered()){
+            // text is 
+        }
+
+        appendPair(stringBuilder, "text", clarification.getQuestion()); // TODO need to quote this string 
+        stringBuilder.append(", ");
+
+        Calendar wallElapsed = calculateElapsedWalltime (contest, clarification.getElapsedMS());
+        
+        stringBuilder.append(", ");
+        appendPair(stringBuilder, "start_time", wallElapsed); // absolute time when judgement started ex. 2014-06-25T11:24:03.921+01
+
+        stringBuilder.append(", ");
+        appendPair(stringBuilder, "start_contest_time",  XMLUtilities.formatSeconds(clarification.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
+        
+        return stringBuilder.toString();
     }
 
     public String getAwardJSON(IInternalContest contest) {
+
+//        [{"id":"gold-medal","citation":"Gold medal winner","team_ids":["54","23","1","45"]},
+//         {"id":"first-to-solve-a","citation":"First to solve problem A","team_ids":["45"]},
+//         {"id":"first-to-solve-b","citation":"First to solve problem B","team_ids":[]}
+//        ]
+                
         return null; // TODO technical deficit code this
     }
 
