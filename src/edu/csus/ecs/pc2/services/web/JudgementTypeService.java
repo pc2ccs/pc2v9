@@ -70,7 +70,7 @@ public class JudgementTypeService {
             }
                 
         }
-        element.put("id", judgement.getElementId().toString().replaceAll(" ", "_"));
+        element.put("id", judgement.getElementId().toString());
         element.put("name", name);
         element.put("penalty", penalty);
         element.put("solved", solved);
@@ -107,12 +107,10 @@ public class JudgementTypeService {
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("{judgementId}/")
-    public Response getJudgement(@PathParam("judgementId") String judgementId) {
-        // get the groups from the contest
+    public Response getJudgementType(@PathParam("judgementId") String judgementId) {
+        // get the judgements from the contest
         Judgement[] judgements = model.getJudgements();
 
-        // so the ids match the element id.
-        judgementId = judgementId.replaceAll("_"," ");
         // get an object to map the groups descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
