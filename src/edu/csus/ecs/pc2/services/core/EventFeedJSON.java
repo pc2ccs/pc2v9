@@ -94,16 +94,25 @@ public class EventFeedJSON implements IEventSequencer {
      */
     private boolean compilationErrorApplyPenalty = true;
 
+    
     public String getContestJSON(IInternalContest contest) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{ ");
+        
+        appendPair(stringBuilder, "event", CONTEST_KEY);
+        stringBuilder.append(", ");
+        
+        stringBuilder.append(getContestJSONFields(contest));
+        stringBuilder.append("}");
+        stringBuilder.append(JSON_EOLN); 
+        return stringBuilder.toString();
+        
+    }
+    public String getContestJSONFields(IInternalContest contest) {
         
         updatePenaltySettings(contest);
 
         StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("{ ");
-
-        appendPair(stringBuilder, "event", CONTEST_KEY);
-        stringBuilder.append(", ");
 
         ContestInformation info = contest.getContestInformation();
         ContestTime time = contest.getContestTime();
@@ -167,7 +176,6 @@ public class EventFeedJSON implements IEventSequencer {
         
         stringBuilder.append("}"); // end states array
 
-        stringBuilder.append("},"+NL);
 
         return stringBuilder.toString();
     }
@@ -188,14 +196,16 @@ public class EventFeedJSON implements IEventSequencer {
 
         Judgement[] judgements = contest.getJudgements();
         for (Judgement judgement : judgements) {
+            stringBuilder.append("{ ");
             stringBuilder.append(getJudgementTypeJSON(contest, judgement));
+            stringBuilder.append("} ");
             stringBuilder.append(JSON_EOLN);
         }
 
         return stringBuilder.toString();
     }
 
-    private Object getJudgementTypeJSON(IInternalContest contest, Judgement judgement) {
+    String getJudgementTypeJSON(IInternalContest contest, Judgement judgement) {
         
         /**
          *      ID  yes     no  provided by CCS     identifier of the judgement type. Usable as a label, typically a 2-3 letter capitalized shorthand, see Problem Format
@@ -205,8 +215,6 @@ solved
          */
         
         StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("{ ");
 
         appendPair(stringBuilder, "event", JUDGEMENT_TYPE_KEY);
         stringBuilder.append(", ");
@@ -225,7 +233,6 @@ solved
         boolean solved = isSolved(judgement);
         appendPair(stringBuilder, "solved", solved);
 
-        stringBuilder.append("} ");
 
         return stringBuilder.toString();
     }
@@ -313,7 +320,13 @@ solved
         Language[] languages = contest.getLanguages();
         int id = 1;
         for (Language language : languages) {
+            stringBuilder.append("{ ");
+            
+            appendPair(stringBuilder, "event", LANGUAGE_KEY);
+            stringBuilder.append(", ");
+            
             stringBuilder.append(getLanguageJSON(contest, language, id));
+            stringBuilder.append("}");
             stringBuilder.append(JSON_EOLN);
             id++;
         }
@@ -321,6 +334,7 @@ solved
         return stringBuilder.toString();
 
     }
+ 
 
     /**
      * get JSON for a language.
@@ -334,17 +348,12 @@ solved
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("{ ");
 
-        appendPair(stringBuilder, "event", LANGUAGE_KEY);
-        stringBuilder.append(", ");
 
         appendPair(stringBuilder, "id", languageNumber);
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "name", language.getDisplayName());
-
-        stringBuilder.append("}");
 
         return stringBuilder.toString();
     }
@@ -356,7 +365,13 @@ solved
         Problem[] problems = contest.getProblems();
         int id = 1;
         for (Problem problem : problems) {
+            stringBuilder.append("{ ");
+            
+            appendPair(stringBuilder, "event", PROBLEM_KEY);
+            stringBuilder.append(", ");
+            
             stringBuilder.append(getProblemJSON(contest, problem, id));
+            stringBuilder.append("}");
             stringBuilder.append(JSON_EOLN);
             id++;
         }
@@ -368,10 +383,6 @@ solved
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("{ ");
-
-        appendPair(stringBuilder, "event", PROBLEM_KEY);
-        stringBuilder.append(", ");
 
         appendPair(stringBuilder, "id", problemNumber); 
         stringBuilder.append(", ");
@@ -401,7 +412,6 @@ solved
 
         appendPair(stringBuilder, "test_data_coun", problem.getNumberTestCases());
 
-        stringBuilder.append("}");
 
         return stringBuilder.toString();
     }

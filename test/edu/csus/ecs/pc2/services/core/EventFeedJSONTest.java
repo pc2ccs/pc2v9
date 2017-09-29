@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -379,6 +380,66 @@ public class EventFeedJSONTest extends AbstractTestCase {
         asertEqualJSON(json, "reply_to_id", "null");
 
     }
+    
+    public void testContestJSON() throws Exception {
+        EventFeedJSON eventFeedJSON = new EventFeedJSON();
+
+        IInternalContest contest = new UnitTestData().getContest();
+
+        String json = eventFeedJSON.getContestJSONFields(contest);
+        json = wrapBrackets(json);
+//        System.out.println("debug cont json = "+json);
+
+//         {"id":"Pdf9051a6-c092-4d3b-abda-04e362a60a77", "name":"Programming Contest", "formal_name":"Programming Contest", "start_time": null, "duration":"5:00:00", 
+        // "scoreboard_freeze_duration":"01:00:00", "penalty_time":20, "state":{"state.running":false, "state.frozen":false, "state.final":false}}
+
+        asertPresentJSON(json, "id");
+        asertEqualJSON(json, "name", "Programming Contest");
+        asertEqualJSON(json, "duration", "5:00:00");
+        asertEqualJSON(json, "scoreboard_freeze_duration", "01:00:00");
+        asertEqualJSON(json, "penalty_time", "20");
+        
+
+    }
+    
+    public void testProblemJSON() throws Exception {
+        EventFeedJSON eventFeedJSON = new EventFeedJSON();
+
+        IInternalContest contest = new UnitTestData().getContest();
+
+        Problem problem = contest.getProblems()[0];
+        String json = eventFeedJSON.getProblemJSON(contest, problem, 3);
+        json = wrapBrackets(json);
+
+        System.out.println("debug prob json = "+json);
+
+        // {"id":3, "label":"A", "name":"Sumit", "ordinal":3, "test_data_coun":0}
+
+        asertEqualJSON(json, "id", "3");
+        asertEqualJSON(json, "label", "A");
+        asertEqualJSON(json, "name", "Sumit");
+        asertEqualJSON(json, "ordinal", "3");
+
+    }
+    
+    
+    public void testLanguageJSON() throws Exception {
+        EventFeedJSON eventFeedJSON = new EventFeedJSON();
+
+        IInternalContest contest = new UnitTestData().getContest();
+
+        Language language = contest.getLanguages()[0];
+        String json = eventFeedJSON.getLanguageJSON(contest, language, 3);
+        json = wrapBrackets(json);
+
+//        System.out.println("debug lang json = "+json);
+        
+        //  {"id":3, "name":"Java"}
+
+        asertEqualJSON(json, "id", "3");
+        asertEqualJSON(json, "name", "Java");
+    }
+    
 
     /**
      * Assert that JSON field has value.
@@ -400,7 +461,32 @@ public class EventFeedJSONTest extends AbstractTestCase {
             assertEquals("Expected for field <" + fieldName + "> value", expectedValue, value);
 
         } catch (JsonParseException e) {
-            System.out.println("Trouble trying to check " + e.getMessage()); // TODO 
+            System.out.println("Trouble trying to check " + e.getMessage()); // TODO  better message
+            throw e;
+        }
+
+    }
+    
+    /**
+     * Assert that JSON field has a value/is preent
+     * 
+     * Parses JSON, compares expected valu eot actual value.
+     * 
+     * @param json
+     * @param fieldName - field name
+     */
+    private void asertPresentJSON(String json, String fieldName) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+
+            JsonNode rootNode = objectMapper.readTree(json);
+            String value = rootNode.path(fieldName).asText();
+            assertNotNull("Expected for field <" + fieldName + "> value",  value);
+
+        } catch (JsonParseException e) {
+            System.out.println("Trouble trying to check " + e.getMessage()); // TODO better message 
             throw e;
         }
 
