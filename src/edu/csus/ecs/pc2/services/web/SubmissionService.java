@@ -15,14 +15,18 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -48,7 +52,9 @@ import edu.csus.ecs.pc2.core.model.IRunListener;
  */
 @Path("/submissions")
 @Produces(MediaType.APPLICATION_JSON)
-public class SubmissionService {
+@Provider
+@Singleton
+public class SubmissionService implements Feature {
 
     private IInternalContest model;
 
@@ -305,6 +311,12 @@ public class SubmissionService {
         } catch (IOException e) {
             logger.throwing("SubmissionService", "deleteDir", e);
         }
+    }
+
+    @Override
+    public boolean configure(FeatureContext arg0) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

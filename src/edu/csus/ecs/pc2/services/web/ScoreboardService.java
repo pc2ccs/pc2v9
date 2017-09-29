@@ -1,12 +1,16 @@
 package edu.csus.ecs.pc2.services.web;
 
+import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.Provider;
 import javax.ws.rs.core.Response.Status;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -22,7 +26,9 @@ import edu.csus.ecs.pc2.exports.ccs.ContestAPIStandingsJSON;
  */
 @Path("/scoreboard")
 @Produces(MediaType.APPLICATION_JSON)
-public class ScoreboardService {
+@Provider
+@Singleton
+public class ScoreboardService implements Feature {
 
     private IInternalContest contest;
     private IInternalController controller;
@@ -69,5 +75,11 @@ public class ScoreboardService {
         // output the response to the requester (note that this actually returns it to Jersey,
         // which forwards it to the caller as the HTTP response).
         return Response.ok(jsonScoreboard,MediaType.APPLICATION_JSON).build();
+    }
+
+    @Override
+    public boolean configure(FeatureContext arg0) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

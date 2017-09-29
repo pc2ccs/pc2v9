@@ -8,16 +8,20 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Map;
 
+import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +50,9 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  */
 @Path("/contest")
 @Produces(MediaType.APPLICATION_JSON)
-public class ContestService {
+@Provider
+@Singleton
+public class ContestService implements Feature {
 
     private IInternalContest model;
 
@@ -462,5 +468,11 @@ public class ContestService {
         element.set("state", state);
 
         return Response.ok(element.toString(),MediaType.APPLICATION_JSON).build();
+    }
+
+    @Override
+    public boolean configure(FeatureContext arg0) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

@@ -2,12 +2,16 @@ package edu.csus.ecs.pc2.services.web;
 
 import java.util.Properties;
 
+import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -25,7 +29,9 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  */
 @Path("/judgement-types")
 @Produces(MediaType.APPLICATION_JSON)
-public class JudgementTypeService {
+@Provider
+@Singleton
+public class JudgementTypeService implements Feature {
 
     private IInternalContest model;
     @SuppressWarnings("unused")
@@ -122,5 +128,11 @@ public class JudgementTypeService {
         }
         return Response.ok(childNode.toString(),MediaType.APPLICATION_JSON).build();
     
+    }
+
+    @Override
+    public boolean configure(FeatureContext arg0) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
