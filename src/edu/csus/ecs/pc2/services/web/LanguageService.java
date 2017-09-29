@@ -62,10 +62,9 @@ public class LanguageService {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("{languageId}/")
     public Response getLanguage(@PathParam("languageId") String languageId) {
-        // get the groups from the model
+        // get the languages from the model
         Language[] languages = model.getLanguages();
 
-        languageId = languageId.replaceAll("_", " ");
         // get an object to map the groups descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
@@ -81,7 +80,7 @@ public class LanguageService {
 
     private void dumpLanguage(ObjectMapper mapper, ArrayNode childNode, Language language) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", language.getElementId().toString().replaceAll(" ", "_"));
+        element.put("id", language.getElementId().toString());
         element.put("name", language.getDisplayName());
         childNode.add(element);
 
