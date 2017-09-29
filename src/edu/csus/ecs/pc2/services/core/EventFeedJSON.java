@@ -494,7 +494,9 @@ solved
         Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
+            stringBuilder.append("{ ");
             stringBuilder.append(getTeamJSON(contest, account));
+            stringBuilder.append("}");
             stringBuilder.append(JSON_EOLN);
         }
         
@@ -504,7 +506,7 @@ solved
     public String getTeamJSON(IInternalContest contest, Account account) {
         
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{ ");
+
         
         ClientId clientId = account.getClientId();
         
@@ -543,7 +545,7 @@ solved
         //    location.y 
         //    location.rotation 
         
-        stringBuilder.append("}");
+
 
         return stringBuilder.toString();
     }
@@ -881,27 +883,26 @@ solved
         
         Arrays.sort(clarifications, new ClarificationComparator());
         for (Clarification clarification : clarifications) {
+            
+            stringBuilder.append("{ ");
+            appendPair(stringBuilder, "event", CLARIFICATIONS_KEY);
+            stringBuilder.append(", ");
             stringBuilder.append(getClarificationJSON(contest, clarification));
+            stringBuilder.append("}");
             stringBuilder.append(JSON_EOLN);
         }
 
         return stringBuilder.toString();
     }
 
-    private String getClarificationJSON(IInternalContest contest, Clarification clarification) {
+    String getClarificationJSON(IInternalContest contest, Clarification clarification) {
         
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{ ");
-        
         
 //        Id   ID  yes     no  provided by CCS     identifier of the clarification
 //        from_team_id    ID  yes     yes     provided by CCS     identifier of team sending this clarification request, null if a clarification sent by jury
 //        to_team_id  ID  yes     yes     provided by CCS     identifier of the team receiving this reply, null if a reply to all teams or a request sent by a team
 //        reply_to_id     ID  yes     yes     provided by CCS     identifier of clarification this is in response to, otherwise null
-   
-       
-        appendPair(stringBuilder, "event", CLARIFICATIONS_KEY);
-        stringBuilder.append(", ");
         
         appendPair(stringBuilder, "id", clarification.getNumber()); 
         stringBuilder.append(", ");
@@ -929,7 +930,6 @@ solved
 //        time    TIME    yes     no  provided by CCS     time of the question/reply
 //        contest_time    RELTIME     yes     no  provided by CCS     contest time of the question/reply 
 
-        stringBuilder.append("}");
         
         appendPair(stringBuilder, "problem_id", getProblemIndex(contest, clarification.getElementId()));
         stringBuilder.append(", ");
@@ -950,13 +950,12 @@ solved
 
         Calendar wallElapsed = calculateElapsedWalltime (contest, clarification.getElapsedMS());
         
-        stringBuilder.append(", ");
         appendPair(stringBuilder, "start_time", wallElapsed); // absolute time when judgement started ex. 2014-06-25T11:24:03.921+01
-
         stringBuilder.append(", ");
+        
         appendPair(stringBuilder, "start_contest_time",  XMLUtilities.formatSeconds(clarification.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
         
-        stringBuilder.append("}");
+
         
         return stringBuilder.toString();
     }
