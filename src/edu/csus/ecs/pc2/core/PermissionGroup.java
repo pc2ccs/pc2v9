@@ -146,6 +146,7 @@ public class PermissionGroup {
         feederPermissionList.addPermission(Type.VIEW_STANDINGS);
         feederPermissionList.addPermission(Type.VIEW_SUMMARY_ATTEMPTS_GRID);
         feederPermissionList.addPermission(Type.VIEW_RUN_JUDGEMENT_HISTORIES);
+        feederPermissionList.addPermission(Type.ALLOWED_TO_FETCH_RUN);
 
 
     }
