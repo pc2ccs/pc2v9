@@ -62,7 +62,10 @@ public class EventFeedJSON {
     public static final String PROBLEM_KEY = "problems";
 
     public static final String JUDGEMENT_KEY = "judgements";
-
+    
+    public static final String AWARD_KEY = "awards";
+    
+    public static final String ORGANIZATION_KEY = "organizations";
     /**
      * Start event id.
      * 
@@ -1085,58 +1088,65 @@ public class EventFeedJSON {
         StringBuffer buffer = new StringBuffer();
 
         //        contest = new SampleContest().createStandardContest();
+        
+        if (eventFeedList != null){
+            
+            appendAllJSONEvents (contest, buffer, eventFeedList);
+            
+        } else {
 
-        String json = getContestJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getJudgementTypeJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getLanguageJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getProblemJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getGroupJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getOrganizationJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getTeamJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getTeamMemberJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getSubmissionJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getJudgementJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getRunJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getClarificationJSON(contest);
-        if (json != null) {
-            buffer.append(json);
-        }
-        json = getAwardJSON(contest);
-        if (json != null) {
-            buffer.append(json);
+            String json = getContestJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getJudgementTypeJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getLanguageJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getProblemJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getGroupJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getOrganizationJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getTeamJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getTeamMemberJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getSubmissionJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getJudgementJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getRunJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getClarificationJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
+            json = getAwardJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
         }
 
         // At this point there is a trailing , and new line, if so remove it.
@@ -1147,6 +1157,81 @@ public class EventFeedJSON {
 
         // return the collected standings as elements of a JSON array
         return "[" + buffer.toString() + "]";
+    }
+
+    /**
+     * Appends named event types onto a buffer.
+     * 
+     * valid events are:  awards, clarifications, contests, groups, judgement-types, 
+     * judgements, languages, organizations, problems, runs, submissions, team-members, teams
+     * 
+     * @param contest
+     * @param buffer 
+     * @param eventlist list of events types, comma delimited 
+     * @throws IllegalArgumentException if any event in eventlist is not valid
+     */
+    private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String eventlist) throws IllegalArgumentException {
+
+        String[] events = eventlist.split(",");
+
+        for (String name : events) {
+            name = name.trim();
+
+            switch (name) {
+                case CONTEST_KEY:
+                    appendNotNull(buffer, getContestJSON(contest));
+                    break;
+                case JUDGEMENT_TYPE_KEY:
+                    appendNotNull(buffer, getJudgementTypeJSON(contest));
+                    break;
+                case LANGUAGE_KEY:
+                    appendNotNull(buffer, getLanguageJSON(contest));
+                    break;
+                case PROBLEM_KEY:
+                    appendNotNull(buffer, getProblemJSON(contest));
+                    break;
+                case GROUPS_KEY:
+                    appendNotNull(buffer, getGroupJSON(contest));
+                    break;
+                case ORGANIZATION_KEY:
+                    appendNotNull(buffer, getOrganizationJSON(contest));
+                    break;
+                case TEAM_KEY:
+                    appendNotNull(buffer, getTeamJSON(contest));
+                    break;
+                case TEAM_MEMBERS_KEY:
+                    appendNotNull(buffer, getTeamMemberJSON(contest));
+                    break;
+                case SUBMISSION_KEY:
+                    appendNotNull(buffer, getSubmissionJSON(contest));
+                    break;
+                case JUDGEMENT_KEY:
+                    appendNotNull(buffer, getJudgementJSON(contest));
+                    break;
+                case RUN_KEY:
+                    appendNotNull(buffer, getRunJSON(contest));
+                    break;
+                case CLARIFICATIONS_KEY:
+                    appendNotNull(buffer, getClarificationJSON(contest));
+                    break;
+                case AWARD_KEY:
+                    appendNotNull(buffer, getAwardJSON(contest));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown event type '" + name + "' in list " + eventlist);
+            }
+        }
+    }
+
+    /**
+     * Append to string buffer if not null.
+     * @param buffer
+     * @param awardJSON
+     */
+    private void appendNotNull(StringBuffer buffer, String string) {
+        if (string != null){
+            buffer.append(string);
+        }
     }
 
     public static String join(String delimit, List<String> list) {
