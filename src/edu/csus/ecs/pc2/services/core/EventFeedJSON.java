@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -37,7 +39,7 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  */
 // TODO reformat code
 // TODO for all sections pass in Key rather than hard coded inside method
-public class EventFeedJSON implements IEventSequencer {
+public class EventFeedJSON  {
 
     public static final String TEAM_MEMBERS_KEY = "team-members";
 
@@ -60,11 +62,27 @@ public class EventFeedJSON implements IEventSequencer {
     public static final String PROBLEM_KEY = "problems";
 
     public static final String JUDGEMENT_KEY = "judgements";
+    
+    /**
+     * Start event id.
+     * 
+     * /event-feed?events=<event_list>
+     */
+    private String startEventId = null;
+    
+    boolean pastStartEvent = true;
+    
+    /**
+     * List of events to output.
+     * 
+     */
+    private String eventFeedList = null;
+    
 
     /**
      * Event Id Sequence.
      * 
-     * @see #getNextEventId()
+     * @see #nextEventId()
      */
     private long eventIdSequence = 0;
 
@@ -96,13 +114,19 @@ public class EventFeedJSON implements IEventSequencer {
 
     
     public String getContestJSON(IInternalContest contest) {
+        
+        if (! isPastStartEvent()){
+            return null;
+        }
+        
         StringBuilder stringBuilder = new StringBuilder();
+
+        appendEventHead (stringBuilder, CONTEST_KEY, "create");
+        
         stringBuilder.append("{ ");
-        
-        appendPair(stringBuilder, "event", CONTEST_KEY);
-        stringBuilder.append(", ");
-        
         stringBuilder.append(getContestJSONFields(contest));
+        stringBuilder.append("}");
+        
         stringBuilder.append("}");
         stringBuilder.append(JSON_EOLN); 
         return stringBuilder.toString();
@@ -169,7 +193,7 @@ public class EventFeedJSON implements IEventSequencer {
             finalized = true;
         }
 
-        appendPair(stringBuilder, "state.frozen", isContestFrozen(contest));
+        appendPair(stringBuilder, "state.frozen", isContestFrozen(info, time));
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "state.final", finalized);
@@ -180,12 +204,35 @@ public class EventFeedJSON implements IEventSequencer {
         return stringBuilder.toString();
     }
 
-    private boolean isContestFrozen(IInternalContest contest) {
+   
 
-        // TODO technical deficit - code isContestFrozen.
+    /**
+     * Past frozen time?
+     */
+    private boolean isContestFrozen(ContestInformation info, ContestTime time) {
+        
+        String freeze = info.getFreezeTime();
+        
+        if (freeze != null ){
+            long ms = convertToMs (freeze);
+            return time.getElapsedMS() > ms;
+        }
+        
         return false;
     }
-
+    
+    /**
+     * Convert HH:MM:SS to ms.
+     * 
+     * @param freeze
+     * @return
+     */
+    long convertToMs(String hhmmss) {
+        long seconds = Utilities. convertStringToSeconds (hhmmss);
+        return seconds * Constants.MS_PER_SECOND;
+    }
+    
+    
     /**
      * List of judgements.
      * 
@@ -196,10 +243,19 @@ public class EventFeedJSON implements IEventSequencer {
 
         Judgement[] judgements = contest.getJudgements();
         for (Judgement judgement : judgements) {
-            stringBuilder.append("{ ");
-            stringBuilder.append(getJudgementTypeJSON(contest, judgement));
-            stringBuilder.append("} ");
-            stringBuilder.append(JSON_EOLN);
+            
+            if (isPastStartEvent()){
+                
+                appendEventHead (stringBuilder, JUDGEMENT_TYPE_KEY, "create"); 
+
+                stringBuilder.append("{ ");
+                stringBuilder.append(getJudgementTypeJSON(contest, judgement));
+                stringBuilder.append("} ");
+                
+                stringBuilder.append("} ");
+                stringBuilder.append(JSON_EOLN);
+            }
+            
         }
 
         return stringBuilder.toString();
@@ -215,9 +271,6 @@ solved
          */
         
         StringBuilder stringBuilder = new StringBuilder();
-
-        appendPair(stringBuilder, "event", JUDGEMENT_TYPE_KEY);
-        stringBuilder.append(", ");
 
         appendPair(stringBuilder, "id", judgement.getAcronym()); 
         stringBuilder.append(", ");
@@ -320,14 +373,19 @@ solved
         Language[] languages = contest.getLanguages();
         int id = 1;
         for (Language language : languages) {
-            stringBuilder.append("{ ");
             
-            appendPair(stringBuilder, "event", LANGUAGE_KEY);
-            stringBuilder.append(", ");
-            
-            stringBuilder.append(getLanguageJSON(contest, language, id));
-            stringBuilder.append("}");
-            stringBuilder.append(JSON_EOLN);
+            if (isPastStartEvent()){
+                
+                appendEventHead (stringBuilder, LANGUAGE_KEY, "create"); 
+
+                stringBuilder.append("{ ");
+                stringBuilder.append(getLanguageJSON(contest, language, id));
+                stringBuilder.append("}");
+                
+                stringBuilder.append("}");
+                stringBuilder.append(JSON_EOLN);
+            }
+
             id++;
         }
 
@@ -365,14 +423,18 @@ solved
         Problem[] problems = contest.getProblems();
         int id = 1;
         for (Problem problem : problems) {
-            stringBuilder.append("{ ");
             
-            appendPair(stringBuilder, "event", PROBLEM_KEY);
-            stringBuilder.append(", ");
-            
-            stringBuilder.append(getProblemJSON(contest, problem, id));
-            stringBuilder.append("}");
-            stringBuilder.append(JSON_EOLN);
+            if (isPastStartEvent()){
+                
+                appendEventHead (stringBuilder, PROBLEM_KEY, "create");
+
+                stringBuilder.append("{ ");
+                stringBuilder.append(getProblemJSON(contest, problem, id));
+                stringBuilder.append("}");
+                
+                stringBuilder.append("}");
+                stringBuilder.append(JSON_EOLN);
+            }
             id++;
         }
 
@@ -423,8 +485,18 @@ solved
         
         Arrays.sort(groups, new GroupComparator());
         for (Group group : groups) {
-            stringBuilder.append(getGroupJSON(contest, group));
-            stringBuilder.append(JSON_EOLN);
+            
+            if (isPastStartEvent()){
+                
+                appendEventHead (stringBuilder, GROUPS_KEY, "create");
+                
+                stringBuilder.append("{ ");
+                stringBuilder.append(getGroupJSON(contest, group));
+                stringBuilder.append("}");
+                
+                stringBuilder.append("}");
+                stringBuilder.append(JSON_EOLN);
+            }
         }
 
         return stringBuilder.toString();
@@ -434,18 +506,14 @@ solved
 
         
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{ ");
-        
         
         //    id 
         //    icpc_id 
         //    name 
         //    organization_id 
        
-        appendPair(stringBuilder, "event", GROUPS_KEY);
-        stringBuilder.append(", ");
         
-        appendPair(stringBuilder, "id", getNextEventId()); 
+        appendPair(stringBuilder, "id", group.getGroupId()); 
         stringBuilder.append(", ");
        
 //        id  ID  yes     no  provided by CCS     identifier of the group
@@ -458,9 +526,6 @@ solved
         
         appendPair(stringBuilder, "name", group.getDisplayName());
         
-
-
-        stringBuilder.append("}");
 
         return stringBuilder.toString();
     }
@@ -504,15 +569,40 @@ solved
         Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
-            stringBuilder.append("{ ");
-            stringBuilder.append(getTeamJSON(contest, account));
-            stringBuilder.append("}");
-            stringBuilder.append(JSON_EOLN);
+            
+            if (isPastStartEvent()){
+
+                appendEventHead (stringBuilder, TEAM_KEY, "create");
+                
+                stringBuilder.append("{ ");
+                stringBuilder.append(getTeamJSON(contest, account));
+                stringBuilder.append("}");
+                
+                stringBuilder.append("}");
+                stringBuilder.append(JSON_EOLN);
+            }
         }
         
         return stringBuilder.toString();
     }
     
+    private void appendEventHead(StringBuilder stringBuilder, String eventType, String op) {
+        
+        // {"type": "<event type>", "id": "<id>", "op": "<type of operation>", "data": <JSON data for element> }
+        
+        stringBuilder.append("{ ");
+        appendPair(stringBuilder, "event", eventType);
+        stringBuilder.append(", ");
+        
+        appendPair(stringBuilder, "id", getEventId(eventIdSequence));
+        stringBuilder.append(", ");
+        
+        appendPair(stringBuilder, "op", op);
+        stringBuilder.append(", ");    
+        
+        stringBuilder.append("\"data\": ");
+        
+    }
     public String getTeamJSON(IInternalContest contest, Account account) {
         
         StringBuilder stringBuilder = new StringBuilder();
@@ -525,8 +615,6 @@ solved
         //    name 
         //    organization_id 
        
-        appendPair(stringBuilder, "event", TEAM_KEY);
-        stringBuilder.append(", ");
         
         appendPair(stringBuilder, "id", clientId.getClientNumber()); 
         stringBuilder.append(", ");
@@ -576,8 +664,18 @@ solved
             
             if (names.length > 0){
                 for (String teamMemberName : names) {
-                    stringBuilder.append(getTeamMemberJSON(contest, account, teamMemberName));
-                    stringBuilder.append(JSON_EOLN);    
+                    
+                    if (isPastStartEvent()){
+                        
+                        appendEventHead(stringBuilder, TEAM_MEMBERS_KEY, "create");
+
+                        stringBuilder.append("{ ");
+                        stringBuilder.append(getTeamMemberJSON(contest, account, teamMemberName));
+                        stringBuilder.append("}");
+
+                        stringBuilder.append("}");
+                        stringBuilder.append(JSON_EOLN);
+                    }
                 }
             }
         }
@@ -588,14 +686,11 @@ solved
     private String getTeamMemberJSON(IInternalContest contest, Account account, String teamMemberName) {
 
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{ ");
 
         //      Id   ID  yes     no  provided by CDS     identifier of the team-member.
         //      icpc_id     string  no  yes     provided by CDS     external identifier from ICPC CMS
         //      name    string  yes     no  provided by CDS     full name of team member.
 
-        appendPair(stringBuilder, "event", TEAM_MEMBERS_KEY);
-        stringBuilder.append(", ");
 
         appendPairNullValue(stringBuilder, "id"); // TODO CLICS DATA ADD  id needs to be added to new Account Member class and model
         stringBuilder.append(", ");
@@ -618,7 +713,6 @@ solved
 
         appendPairNullValue(stringBuilder, "role");
 
-        stringBuilder.append("}");
 
         return stringBuilder.toString();
 
@@ -637,8 +731,18 @@ solved
         
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-            stringBuilder.append(getSubmissionJSON(contest, run));
-               stringBuilder.append(JSON_EOLN);
+            
+            if (isPastStartEvent()){
+                
+                appendEventHead (stringBuilder, SUBMISSION_KEY, "create");
+                
+                stringBuilder.append("{ ");
+                stringBuilder.append(getSubmissionJSON(contest, run));
+                stringBuilder.append("}");
+                
+                stringBuilder.append("}");
+                stringBuilder.append(JSON_EOLN);
+            }
         }
 
         return stringBuilder.toString();   
@@ -647,7 +751,7 @@ solved
     
 
     private String getSubmissionJSON(IInternalContest contest, Run run) {
-        
+
         //    id 
         //    language_id 
         //    problem_id 
@@ -655,12 +759,7 @@ solved
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            stringBuilder.append("{ ");
-
-            appendPair(stringBuilder, "event", SUBMISSION_KEY);
-            stringBuilder.append(", ");
-
-            appendPair(stringBuilder, "id", getNextEventId()); 
+            appendPair(stringBuilder, "id", run.getNumber()); 
             stringBuilder.append(", ");
             
             appendPair(stringBuilder, "language_id", getLanguageIndex(contest,  run.getLanguageId()));
@@ -686,7 +785,6 @@ solved
             stringBuilder.append(", ");
             appendPair(stringBuilder, "entry_point", "Main"); // TODO CLICS DATA ADD ADD  the team's submitted executable name is not available at this time.
             
-            stringBuilder.append("}");
 
             return stringBuilder.toString();
     }
@@ -703,8 +801,18 @@ solved
         Arrays.sort(runs, new RunComparator());
         
         for (Run run : runs) {
-            stringBuilder.append(getJudgementJSON(contest, run));
-            stringBuilder.append(JSON_EOLN);
+            
+            if (isPastStartEvent()) {
+                
+                appendEventHead (stringBuilder, JUDGEMENT_KEY, "create");
+                
+                stringBuilder.append("{ ");
+                stringBuilder.append(getJudgementJSON(contest, run));
+                stringBuilder.append("}");
+                
+                stringBuilder.append("}");
+                stringBuilder.append(JSON_EOLN);
+            }
         }
         
         return stringBuilder.toString();
@@ -718,12 +826,8 @@ solved
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("{ ");
 
-        appendPair(stringBuilder, "event", JUDGEMENT_KEY);
-        stringBuilder.append(", ");
-
-        appendPair(stringBuilder, "id", getNextEventId()); 
+        appendPair(stringBuilder, "id", run.getNumber()); 
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "submission_id", run.getNumber());
@@ -766,7 +870,6 @@ solved
         stringBuilder.append(", ");
         appendPairNullValue(stringBuilder, "end_contest_time"); // TODO CLICS DATA ADD  add code to save in JudgementRecord - in Executable
 
-        stringBuilder.append("}");
 
         return stringBuilder.toString();
     }
@@ -837,9 +940,20 @@ solved
         
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-            RunResultFiles files = null; // TODO CLICS must fetch files to get main file name, or put mainfile name into Run
-            stringBuilder.append(getRunJSON(contest, run, files));
-            stringBuilder.append(JSON_EOLN);
+            
+            if (isPastStartEvent()){
+                
+                appendEventHead (stringBuilder, RUN_KEY, "create"); 
+                
+                RunResultFiles files = null; // TODO CLICS must fetch files to get main file name, or put mainfile name into Run
+                
+                stringBuilder.append("{ ");
+                stringBuilder.append(getRunJSON(contest, run, files));
+                stringBuilder.append("}");
+                
+                stringBuilder.append("}");
+                stringBuilder.append(JSON_EOLN);
+            }
         }
 
         return stringBuilder.toString();
@@ -855,10 +969,6 @@ solved
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("{ ");
-
-        appendPair(stringBuilder, "event", RUN_KEY);
-        stringBuilder.append(", ");
 
         appendPair(stringBuilder, "id", run.getNumber());
         stringBuilder.append(", ");
@@ -875,7 +985,6 @@ solved
         Judgement judgement = contest.getJudgement(judgementId);
         
         appendPair(stringBuilder, "judgement_type_id", judgement.getAcronym());
-        stringBuilder.append("}");
 
         return stringBuilder.toString();
     
@@ -894,12 +1003,17 @@ solved
         Arrays.sort(clarifications, new ClarificationComparator());
         for (Clarification clarification : clarifications) {
             
-            stringBuilder.append("{ ");
-            appendPair(stringBuilder, "event", CLARIFICATIONS_KEY);
-            stringBuilder.append(", ");
-            stringBuilder.append(getClarificationJSON(contest, clarification));
-            stringBuilder.append("}");
-            stringBuilder.append(JSON_EOLN);
+            if (isPastStartEvent()){
+                
+                appendEventHead (stringBuilder, CLARIFICATIONS_KEY, "create"); 
+
+                stringBuilder.append("{ ");
+                stringBuilder.append(getClarificationJSON(contest, clarification));
+                stringBuilder.append("}");
+                
+                stringBuilder.append("}");
+                stringBuilder.append(JSON_EOLN);
+            }
         }
 
         return stringBuilder.toString();
@@ -1082,15 +1196,50 @@ solved
         return buffer.toString();
     }
 
-    @Override
-    public String getNextEventId() {
+    /**
+     * Get next event id.
+     */
+    public String nextEventId() {
         eventIdSequence++;
-        return "pc2-" + eventIdSequence;
+        return getEventId(eventIdSequence);
+    }
+    
+    /**
+     * get event id. 
+     * 
+     * @param sequenceNumber ascending number
+     * @return event Id
+     */
+    public String getEventId(long sequenceNumber) {
+        return "pc2-" + sequenceNumber;
+    }
+    
+    /**
+     * Increment event id and test whether past start event id.
+     * 
+     * If no {@link #startEventId} defined then returns true;
+     * If {@link #startEventId} defined will increment event id and
+     *  if that event id is equal to the new event id returns true.
+     *  
+     *  if {@link #startEventId} is found will return true on
+     *  each successive call.
+     * 
+     * @return true if no {@link #startEventId} defined, or if past {@link #startEventId} 
+     */
+    boolean isPastStartEvent() {
+
+        if (nextEventId().equals(getStartEventId()) && !pastStartEvent) {
+            pastStartEvent = true;
+        }
+        return pastStartEvent;
     }
 
     // TODO technical deficit - move these methods
     // TODO move pair methods into JsonUtilities
 
+    /**
+     * Add JSON pair to stringBuilder.
+     */
     private void appendPair(StringBuilder stringBuilder, String name, boolean booleanValue) {
         
         stringBuilder.append("\"");
@@ -1101,6 +1250,10 @@ solved
         stringBuilder.append(booleanValue);
     }
 
+    /**
+     * Add JSON pair to stringBuilder.
+     */
+
     private void appendPair(StringBuilder stringBuilder, String name, long value) {
         stringBuilder.append("\"");
         stringBuilder.append(name);
@@ -1109,6 +1262,10 @@ solved
 
         stringBuilder.append(value);
     }
+
+    /**
+     * Add JSON pair to stringBuilder.
+     */
 
     private void appendPair(StringBuilder stringBuilder, String name, String value) {
         stringBuilder.append("\"");
@@ -1122,6 +1279,10 @@ solved
         stringBuilder.append("\"");
     }
 
+    /**
+     * Add JSON pair to stringBuilder.
+     */
+
     private void appendPair(StringBuilder stringBuilder, String name, Calendar calendar) {
 
         if (calendar != null) {
@@ -1131,6 +1292,9 @@ solved
         }
     }
 
+    /**
+     * Add JSON pair with null value to stringBuilder.
+     */
     private void appendPairNullValue(StringBuilder stringBuilder, String name) {
         stringBuilder.append("\"");
         stringBuilder.append(name);
@@ -1178,6 +1342,24 @@ solved
         }
 
         return -1;
+    }
+    
+    public String getStartEventId() {
+        return startEventId;
+    }
+    
+    public void setStartEventId(String startEventId) {
+        
+        pastStartEvent = false;
+        this.startEventId = startEventId;
+    }
+    
+    public void setEventFeedList(String eventFeedList) {
+        this.eventFeedList = eventFeedList;
+    }
+    
+    public String getEventFeedList() {
+        return eventFeedList;
     }
 
 }
