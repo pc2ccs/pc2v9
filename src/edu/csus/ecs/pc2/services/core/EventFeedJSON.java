@@ -39,7 +39,7 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  */
 // TODO reformat code
 // TODO for all sections pass in Key rather than hard coded inside method
-public class EventFeedJSON  {
+public class EventFeedJSON {
 
     public static final String TEAM_MEMBERS_KEY = "team-members";
 
@@ -62,22 +62,21 @@ public class EventFeedJSON  {
     public static final String PROBLEM_KEY = "problems";
 
     public static final String JUDGEMENT_KEY = "judgements";
-    
+
     /**
      * Start event id.
      * 
      * /event-feed?events=<event_list>
      */
     private String startEventId = null;
-    
+
     boolean pastStartEvent = true;
-    
+
     /**
      * List of events to output.
      * 
      */
     private String eventFeedList = null;
-    
 
     /**
      * Event Id Sequence.
@@ -95,9 +94,8 @@ public class EventFeedJSON  {
      * New Line (EOLN).
      */
     private static final String NL = System.getProperty("line.separator");
-    
-    private static final String JSON_EOLN = "," + NL;
 
+    private static final String JSON_EOLN = "," + NL;
 
     private SimpleDateFormat iso8601formatter = new SimpleDateFormat(ISO_8601_DATE_FORMAT);
 
@@ -112,28 +110,28 @@ public class EventFeedJSON  {
      */
     private boolean compilationErrorApplyPenalty = true;
 
-    
     public String getContestJSON(IInternalContest contest) {
-        
-        if (! isPastStartEvent()){
+
+        if (!isPastStartEvent()) {
             return null;
         }
-        
+
         StringBuilder stringBuilder = new StringBuilder();
 
-        appendEventHead (stringBuilder, CONTEST_KEY, "create");
-        
+        appendEventHead(stringBuilder, CONTEST_KEY, "create");
+
         stringBuilder.append("{ ");
         stringBuilder.append(getContestJSONFields(contest));
         stringBuilder.append("}");
-        
+
         stringBuilder.append("}");
-        stringBuilder.append(JSON_EOLN); 
+        stringBuilder.append(JSON_EOLN);
         return stringBuilder.toString();
-        
+
     }
+
     public String getContestJSONFields(IInternalContest contest) {
-        
+
         updatePenaltySettings(contest);
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -143,10 +141,10 @@ public class EventFeedJSON  {
 
         String path = contest.getProfile().getProfilePath();
         String contestUUID = path;
-        if (path.startsWith("profiles")){
+        if (path.startsWith("profiles")) {
             contestUUID = path.substring(9);
         }
-        
+
         appendPair(stringBuilder, "id", contestUUID);
         stringBuilder.append(", ");
 
@@ -174,12 +172,12 @@ public class EventFeedJSON  {
         }
 
         String penalty = DefaultScoringAlgorithm.getDefaultProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO);
-        
-        if (penalty != null && penalty.matches("[0-9]+")){
+
+        if (penalty != null && penalty.matches("[0-9]+")) {
             appendPair(stringBuilder, "penalty_time", Integer.parseInt(penalty));
             stringBuilder.append(", ");
         }
-        
+
         // Start states array
 
         stringBuilder.append("\"state\":{");
@@ -197,30 +195,27 @@ public class EventFeedJSON  {
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "state.final", finalized);
-        
-        stringBuilder.append("}"); // end states array
 
+        stringBuilder.append("}"); // end states array
 
         return stringBuilder.toString();
     }
-
-   
 
     /**
      * Past frozen time?
      */
     private boolean isContestFrozen(ContestInformation info, ContestTime time) {
-        
+
         String freeze = info.getFreezeTime();
-        
-        if (freeze != null ){
-            long ms = convertToMs (freeze);
+
+        if (freeze != null) {
+            long ms = convertToMs(freeze);
             return time.getElapsedMS() > ms;
         }
-        
+
         return false;
     }
-    
+
     /**
      * Convert HH:MM:SS to ms.
      * 
@@ -228,64 +223,62 @@ public class EventFeedJSON  {
      * @return
      */
     long convertToMs(String hhmmss) {
-        long seconds = Utilities. convertStringToSeconds (hhmmss);
+        long seconds = Utilities.convertStringToSeconds(hhmmss);
         return seconds * Constants.MS_PER_SECOND;
     }
-    
-    
+
     /**
      * List of judgements.
      * 
      */
     public String getJudgementTypeJSON(IInternalContest contest) {
-        
+
         StringBuilder stringBuilder = new StringBuilder();
 
         Judgement[] judgements = contest.getJudgements();
         for (Judgement judgement : judgements) {
-            
-            if (isPastStartEvent()){
-                
-                appendEventHead (stringBuilder, JUDGEMENT_TYPE_KEY, "create"); 
+
+            if (isPastStartEvent()) {
+
+                appendEventHead(stringBuilder, JUDGEMENT_TYPE_KEY, "create");
 
                 stringBuilder.append("{ ");
                 stringBuilder.append(getJudgementTypeJSON(contest, judgement));
                 stringBuilder.append("} ");
-                
+
                 stringBuilder.append("} ");
                 stringBuilder.append(JSON_EOLN);
             }
-            
+
         }
 
         return stringBuilder.toString();
     }
 
     String getJudgementTypeJSON(IInternalContest contest, Judgement judgement) {
-        
+
         /**
          *      ID  yes     no  provided by CCS     identifier of the judgement type. Usable as a label, typically a 2-3 letter capitalized shorthand, see Problem Format
-name    string  yes     no  provided by CCS     name of the judgement
-penalty     boolean     depends     no  provided by CCS     whether this judgement causes penalty time; should be present if and only if contest:penalty_time is present
-solved 
+        name    string  yes     no  provided by CCS     name of the judgement
+        penalty     boolean     depends     no  provided by CCS     whether this judgement causes penalty time; should be present if and only if contest:penalty_time is present
+        solved 
          */
-        
+
         StringBuilder stringBuilder = new StringBuilder();
 
-        appendPair(stringBuilder, "id", judgement.getAcronym()); 
+        appendPair(stringBuilder, "id", judgement.getAcronym());
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "name", judgement.getDisplayName());
         stringBuilder.append(", ");
-        
+
         boolean penalized = isPenalizedJudgement(contest, judgement);
 
         appendPair(stringBuilder, "penalty", penalized);
         stringBuilder.append(", ");
-        
+
         boolean solved = isSolved(judgement);
         appendPair(stringBuilder, "solved", solved);
-
 
         return stringBuilder.toString();
     }
@@ -301,7 +294,7 @@ solved
      */
     private int getPropIntValue(Properties properties, String key) {
         String value = properties.getProperty(key);
-        if (value != null && value.length() > 0 && isAllDigits(value)){
+        if (value != null && value.length() > 0 && isAllDigits(value)) {
             Integer i = Integer.parseInt(value);
             return i.intValue();
         } else {
@@ -326,17 +319,17 @@ solved
      * @return
      */
     private boolean isPenalizedJudgement(IInternalContest contest, Judgement judgement) {
-        
+
         boolean usePenalty = true;
-        
-        if (isSolved(judgement)){
+
+        if (isSolved(judgement)) {
             return false;
         }
-        
-        if(Judgement.ACRONYM_COMPILATION_ERROR.equals(judgement.getAcronym())) {
+
+        if (Judgement.ACRONYM_COMPILATION_ERROR.equals(judgement.getAcronym())) {
             usePenalty = isCEPenalty();
-        } else   if(Judgement.ACRONYM_SECURITY_VIOLATION.equals(judgement.getAcronym())) {
-            usePenalty =  isSEPenalty();
+        } else if (Judgement.ACRONYM_SECURITY_VIOLATION.equals(judgement.getAcronym())) {
+            usePenalty = isSEPenalty();
         } // else - no elss fall through
 
         return usePenalty;
@@ -349,7 +342,7 @@ solved
     private boolean isCEPenalty() {
         return compilationErrorApplyPenalty;
     }
-    
+
     private void updatePenaltySettings(IInternalContest contest) {
 
         Properties properties = contest.getContestInformation().getScoringProperties();
@@ -373,15 +366,15 @@ solved
         Language[] languages = contest.getLanguages();
         int id = 1;
         for (Language language : languages) {
-            
-            if (isPastStartEvent()){
-                
-                appendEventHead (stringBuilder, LANGUAGE_KEY, "create"); 
+
+            if (isPastStartEvent()) {
+
+                appendEventHead(stringBuilder, LANGUAGE_KEY, "create");
 
                 stringBuilder.append("{ ");
                 stringBuilder.append(getLanguageJSON(contest, language, id));
                 stringBuilder.append("}");
-                
+
                 stringBuilder.append("}");
                 stringBuilder.append(JSON_EOLN);
             }
@@ -392,7 +385,6 @@ solved
         return stringBuilder.toString();
 
     }
- 
 
     /**
      * get JSON for a language.
@@ -405,8 +397,6 @@ solved
     public String getLanguageJSON(IInternalContest contest, Language language, int languageNumber) {
 
         StringBuilder stringBuilder = new StringBuilder();
-
-
 
         appendPair(stringBuilder, "id", languageNumber);
         stringBuilder.append(", ");
@@ -423,15 +413,15 @@ solved
         Problem[] problems = contest.getProblems();
         int id = 1;
         for (Problem problem : problems) {
-            
-            if (isPastStartEvent()){
-                
-                appendEventHead (stringBuilder, PROBLEM_KEY, "create");
+
+            if (isPastStartEvent()) {
+
+                appendEventHead(stringBuilder, PROBLEM_KEY, "create");
 
                 stringBuilder.append("{ ");
                 stringBuilder.append(getProblemJSON(contest, problem, id));
                 stringBuilder.append("}");
-                
+
                 stringBuilder.append("}");
                 stringBuilder.append(JSON_EOLN);
             }
@@ -445,8 +435,7 @@ solved
 
         StringBuilder stringBuilder = new StringBuilder();
 
-
-        appendPair(stringBuilder, "id", problemNumber); 
+        appendPair(stringBuilder, "id", problemNumber);
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "label", problem.getLetter()); // letter
@@ -457,23 +446,22 @@ solved
 
         appendPair(stringBuilder, "ordinal", problemNumber);
         stringBuilder.append(", ");
-        
+
         String s = problem.getColorRGB();
-        if ( s != null )
+        if (s != null)
         {
             appendPair(stringBuilder, "rgb", s);
             stringBuilder.append(", ");
         }
-        
+
         s = problem.getColorName();
-        if ( s != null )
+        if (s != null)
         {
             appendPair(stringBuilder, "color", s);
             stringBuilder.append(", ");
         }
 
         appendPair(stringBuilder, "test_data_coun", problem.getNumberTestCases());
-
 
         return stringBuilder.toString();
     }
@@ -482,18 +470,18 @@ solved
 
         StringBuilder stringBuilder = new StringBuilder();
         Group[] groups = contest.getGroups();
-        
+
         Arrays.sort(groups, new GroupComparator());
         for (Group group : groups) {
-            
-            if (isPastStartEvent()){
-                
-                appendEventHead (stringBuilder, GROUPS_KEY, "create");
-                
+
+            if (isPastStartEvent()) {
+
+                appendEventHead(stringBuilder, GROUPS_KEY, "create");
+
                 stringBuilder.append("{ ");
                 stringBuilder.append(getGroupJSON(contest, group));
                 stringBuilder.append("}");
-                
+
                 stringBuilder.append("}");
                 stringBuilder.append(JSON_EOLN);
             }
@@ -504,34 +492,30 @@ solved
 
     private Object getGroupJSON(IInternalContest contest, Group group) {
 
-        
         StringBuilder stringBuilder = new StringBuilder();
-        
+
         //    id 
         //    icpc_id 
         //    name 
         //    organization_id 
-       
-        
-        appendPair(stringBuilder, "id", group.getGroupId()); 
+
+        appendPair(stringBuilder, "id", group.getGroupId());
         stringBuilder.append(", ");
-       
-//        id  ID  yes     no  provided by CCS     identifier of the group
-//        icpc_id     string  no  yes     provided by CCS     external identifier from ICPC CMS
-//        name    string  yes     no  provided by CCS     name of the group 
-        
-        
+
+        //        id  ID  yes     no  provided by CCS     identifier of the group
+        //        icpc_id     string  no  yes     provided by CCS     external identifier from ICPC CMS
+        //        name    string  yes     no  provided by CCS     name of the group 
+
         appendPair(stringBuilder, "icpc_id", group.getGroupId());
         stringBuilder.append(", ");
-        
+
         appendPair(stringBuilder, "name", group.getDisplayName());
-        
 
         return stringBuilder.toString();
     }
 
     public String getOrganizationJSON(IInternalContest contest) {
-        
+
         //    Name    Type    Required?   Nullable?   @WF     Description
         //    id  ID  yes     no  provided by CCS     identifier of the organization
         //    icpc_id     string  no  yes     provided by CCS     external identifier from ICPC CMS
@@ -546,7 +530,7 @@ solved
 
         return null; // TODO CLICS technical deficit code getOrganizationJSON
     }
-    
+
     /**
      * Get all sites' teams.
      * 
@@ -569,68 +553,67 @@ solved
         Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
-            
-            if (isPastStartEvent()){
 
-                appendEventHead (stringBuilder, TEAM_KEY, "create");
-                
+            if (isPastStartEvent()) {
+
+                appendEventHead(stringBuilder, TEAM_KEY, "create");
+
                 stringBuilder.append("{ ");
                 stringBuilder.append(getTeamJSON(contest, account));
                 stringBuilder.append("}");
-                
+
                 stringBuilder.append("}");
                 stringBuilder.append(JSON_EOLN);
             }
         }
-        
+
         return stringBuilder.toString();
     }
-    
+
     private void appendEventHead(StringBuilder stringBuilder, String eventType, String op) {
-        
+
         // {"type": "<event type>", "id": "<id>", "op": "<type of operation>", "data": <JSON data for element> }
-        
+
         stringBuilder.append("{ ");
         appendPair(stringBuilder, "event", eventType);
         stringBuilder.append(", ");
-        
+
         appendPair(stringBuilder, "id", getEventId(eventIdSequence));
         stringBuilder.append(", ");
-        
+
         appendPair(stringBuilder, "op", op);
-        stringBuilder.append(", ");    
-        
+        stringBuilder.append(", ");
+
         stringBuilder.append("\"data\": ");
-        
+
     }
+
     public String getTeamJSON(IInternalContest contest, Account account) {
-        
+
         StringBuilder stringBuilder = new StringBuilder();
 
-        
         ClientId clientId = account.getClientId();
-        
+
         //    id 
         //    icpc_id 
         //    name 
         //    organization_id 
-       
-        
-        appendPair(stringBuilder, "id", clientId.getClientNumber()); 
+
+        appendPair(stringBuilder, "id", clientId.getClientNumber());
         stringBuilder.append(", ");
-        
+
         appendPair(stringBuilder, "icpc_id", account.getExternalId());
         stringBuilder.append(", ");
-        
+
         appendPair(stringBuilder, "name", account.getDisplayName());
         stringBuilder.append(", ");
-        
+
         appendPairNullValue(stringBuilder, "organization_id"); // TODO CLICS DATA ADD  technical deficit - add organizational id into account/model
-        
+
         //    group_id 
-        
+
         ElementId elementId = account.getGroupId();
-        if (elementId != null){
+        if (elementId != null) {
             Group group = contest.getGroup(elementId);
             if (group != null) {
                 stringBuilder.append(", ");
@@ -642,8 +625,6 @@ solved
         //    location.x 
         //    location.y 
         //    location.rotation 
-        
-
 
         return stringBuilder.toString();
     }
@@ -653,20 +634,20 @@ solved
      * 
      */
     public String getTeamMemberJSON(IInternalContest contest) {
-        
+
         StringBuilder stringBuilder = new StringBuilder();
 
         Account[] accounts = getTeamAccounts(contest);
         Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
-            String [] names = account.getMemberNames();
-            
-            if (names.length > 0){
+            String[] names = account.getMemberNames();
+
+            if (names.length > 0) {
                 for (String teamMemberName : names) {
-                    
-                    if (isPastStartEvent()){
-                        
+
+                    if (isPastStartEvent()) {
+
                         appendEventHead(stringBuilder, TEAM_MEMBERS_KEY, "create");
 
                         stringBuilder.append("{ ");
@@ -679,7 +660,7 @@ solved
                 }
             }
         }
-        
+
         return stringBuilder.toString();
     }
 
@@ -690,7 +671,6 @@ solved
         //      Id   ID  yes     no  provided by CDS     identifier of the team-member.
         //      icpc_id     string  no  yes     provided by CDS     external identifier from ICPC CMS
         //      name    string  yes     no  provided by CDS     full name of team member.
-
 
         appendPairNullValue(stringBuilder, "id"); // TODO CLICS DATA ADD  id needs to be added to new Account Member class and model
         stringBuilder.append(", ");
@@ -713,7 +693,6 @@ solved
 
         appendPairNullValue(stringBuilder, "role");
 
-
         return stringBuilder.toString();
 
     }
@@ -725,30 +704,29 @@ solved
      * @return
      */
     public String getSubmissionJSON(IInternalContest contest) {
-        
+
         StringBuilder stringBuilder = new StringBuilder();
         Run[] runs = contest.getRuns();
-        
+
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-            
-            if (isPastStartEvent()){
-                
-                appendEventHead (stringBuilder, SUBMISSION_KEY, "create");
-                
+
+            if (isPastStartEvent()) {
+
+                appendEventHead(stringBuilder, SUBMISSION_KEY, "create");
+
                 stringBuilder.append("{ ");
                 stringBuilder.append(getSubmissionJSON(contest, run));
                 stringBuilder.append("}");
-                
+
                 stringBuilder.append("}");
                 stringBuilder.append(JSON_EOLN);
             }
         }
 
-        return stringBuilder.toString();   
-        
+        return stringBuilder.toString();
+
     }
-    
 
     private String getSubmissionJSON(IInternalContest contest, Run run) {
 
@@ -757,36 +735,35 @@ solved
         //    problem_id 
         //    team_id 
 
-            StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
 
-            appendPair(stringBuilder, "id", run.getNumber()); 
-            stringBuilder.append(", ");
-            
-            appendPair(stringBuilder, "language_id", getLanguageIndex(contest,  run.getLanguageId()));
-            stringBuilder.append(", ");
-            
-            appendPair(stringBuilder, "problem_id", getProblemIndex(contest, run.getProblemId()));
-            stringBuilder.append(", ");
-            
-            appendPair(stringBuilder, "team_id", run.getSubmitter().getClientNumber());
-            stringBuilder.append(", ");
-            
-            //    time 
-            //    contest_time 
-            //    entry_point 
-            
-            Calendar wallElapsed = calculateElapsedWalltime (contest, run.getElapsedMS());
-            
-            appendPair(stringBuilder, "time", wallElapsed); 
+        appendPair(stringBuilder, "id", run.getNumber());
+        stringBuilder.append(", ");
 
-            stringBuilder.append(", ");
-            appendPair(stringBuilder, "contest_time",  XMLUtilities.formatSeconds(run.getElapsedMS()));
-            
-            stringBuilder.append(", ");
-            appendPair(stringBuilder, "entry_point", "Main"); // TODO CLICS DATA ADD ADD  the team's submitted executable name is not available at this time.
-            
+        appendPair(stringBuilder, "language_id", getLanguageIndex(contest, run.getLanguageId()));
+        stringBuilder.append(", ");
 
-            return stringBuilder.toString();
+        appendPair(stringBuilder, "problem_id", getProblemIndex(contest, run.getProblemId()));
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "team_id", run.getSubmitter().getClientNumber());
+        stringBuilder.append(", ");
+
+        //    time 
+        //    contest_time 
+        //    entry_point 
+
+        Calendar wallElapsed = calculateElapsedWalltime(contest, run.getElapsedMS());
+
+        appendPair(stringBuilder, "time", wallElapsed);
+
+        stringBuilder.append(", ");
+        appendPair(stringBuilder, "contest_time", XMLUtilities.formatSeconds(run.getElapsedMS()));
+
+        stringBuilder.append(", ");
+        appendPair(stringBuilder, "entry_point", "Main"); // TODO CLICS DATA ADD ADD  the team's submitted executable name is not available at this time.
+
+        return stringBuilder.toString();
     }
 
     /**
@@ -797,106 +774,101 @@ solved
 
         StringBuilder stringBuilder = new StringBuilder();
         Run[] runs = contest.getRuns();
-        
+
         Arrays.sort(runs, new RunComparator());
-        
+
         for (Run run : runs) {
-            
+
             if (isPastStartEvent()) {
-                
-                appendEventHead (stringBuilder, JUDGEMENT_KEY, "create");
-                
+
+                appendEventHead(stringBuilder, JUDGEMENT_KEY, "create");
+
                 stringBuilder.append("{ ");
                 stringBuilder.append(getJudgementJSON(contest, run));
                 stringBuilder.append("}");
-                
+
                 stringBuilder.append("}");
                 stringBuilder.append(JSON_EOLN);
             }
         }
-        
+
         return stringBuilder.toString();
     }
 
     private String getJudgementJSON(IInternalContest contest, Run run) {
-        
-    //    id 
-    //    submission_id 
-    //    judgement_type_id 
+
+        //    id 
+        //    submission_id 
+        //    judgement_type_id 
 
         StringBuilder stringBuilder = new StringBuilder();
 
-
-        appendPair(stringBuilder, "id", run.getNumber()); 
+        appendPair(stringBuilder, "id", run.getNumber());
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "submission_id", run.getNumber());
         stringBuilder.append(", ");
-        
-        if (run.isJudged()){
+
+        if (run.isJudged()) {
             ElementId judgementId = run.getJudgementRecord().getJudgementId();
             Judgement judgement = contest.getJudgement(judgementId);
-            
+
             appendPair(stringBuilder, "judgement_type_id", judgement.getAcronym());
         } else {
-            
+
             appendPairNullValue(stringBuilder, "judgement_type_id");
         }
 
-        
-//        start_time  TIME    yes     no  provided by CCS     absolute time when judgement started
-//        start_contest_time  RELTIME     yes     no  provided by CCS     contest relative time when judgement started
-//        end_time    TIME    yes     yes     provided by CCS     absolute time when judgement completed
-//        end_contest_time    RELTIME     yes     yes     provided by CCS     contest relative time when judgement completed 
-        
-//        [{"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
-//            "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"},
-//           {"id":"189550","submission_id":"wf2017-32163123xz3133ub","judgement_type_id":null,"start_time":"2014-06-25T11:24:03.921+01",
-//            "start_contest_time":"1:24:03.921","end_time":null,"end_contest_time":null}
-//          ]
-        
-        
-        Calendar wallElapsed = calculateElapsedWalltime (contest, run.getElapsedMS());
-        
+        //        start_time  TIME    yes     no  provided by CCS     absolute time when judgement started
+        //        start_contest_time  RELTIME     yes     no  provided by CCS     contest relative time when judgement started
+        //        end_time    TIME    yes     yes     provided by CCS     absolute time when judgement completed
+        //        end_contest_time    RELTIME     yes     yes     provided by CCS     contest relative time when judgement completed 
+
+        //        [{"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
+        //            "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"},
+        //           {"id":"189550","submission_id":"wf2017-32163123xz3133ub","judgement_type_id":null,"start_time":"2014-06-25T11:24:03.921+01",
+        //            "start_contest_time":"1:24:03.921","end_time":null,"end_contest_time":null}
+        //          ]
+
+        Calendar wallElapsed = calculateElapsedWalltime(contest, run.getElapsedMS());
+
         stringBuilder.append(", ");
         appendPair(stringBuilder, "start_time", wallElapsed); // absolute time when judgement started ex. 2014-06-25T11:24:03.921+01
 
         stringBuilder.append(", ");
-        appendPair(stringBuilder, "start_contest_time",  XMLUtilities.formatSeconds(run.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
-        
+        appendPair(stringBuilder, "start_contest_time", XMLUtilities.formatSeconds(run.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
+
         stringBuilder.append(", ");
-        appendPairNullValue(stringBuilder, "end_time");  // TODO CLICS DATA ADD - add code to save in JudgementRecord in Executable
-        
+        appendPairNullValue(stringBuilder, "end_time"); // TODO CLICS DATA ADD - add code to save in JudgementRecord in Executable
+
         stringBuilder.append(", ");
         appendPairNullValue(stringBuilder, "end_contest_time"); // TODO CLICS DATA ADD  add code to save in JudgementRecord - in Executable
-
 
         return stringBuilder.toString();
     }
 
- 
-//    private Calendar calculateElapsedWalltime(IInternalContest contest, Run run) {
-//        
-//        ContestTime time = contest.getContestTime();
-//        if (time.getElapsedMins() > 0){
-//            
-//        Calendar contestStart = time.getContestStartTime();
-//        
-//        long ms = contestStart.getTimeInMillis();
-//        
-//        ms += run.getElapsedMS(); // add elapsed time
-//        
-//        // create wall time.
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(ms);
-//        return calendar;
-//        
-//        } else {
-//            return null;
-//        }
-//        
-//    }
-    
+    //    private Calendar calculateElapsedWalltime(IInternalContest contest, Run run) {
+    //        
+    //        ContestTime time = contest.getContestTime();
+    //        if (time.getElapsedMins() > 0){
+    //            
+    //        Calendar contestStart = time.getContestStartTime();
+    //        
+    //        long ms = contestStart.getTimeInMillis();
+    //        
+    //        ms += run.getElapsedMS(); // add elapsed time
+    //        
+    //        // create wall time.
+    //        Calendar calendar = Calendar.getInstance();
+    //        calendar.setTimeInMillis(ms);
+    //        return calendar;
+    //        
+    //        } else {
+    //            return null;
+    //        }
+    //        
+    //    }
+
     /**
      * Return wall time for input elapsed time in ms.
      * 
@@ -907,25 +879,25 @@ solved
      * @return wall time for run.
      */
     private Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
-        
+
         ContestTime time = contest.getContestTime();
-        if (time.getElapsedMins() > 0){
-            
-        Calendar contestStart = time.getContestStartTime();
-        
-        long ms = contestStart.getTimeInMillis();
-        
-        ms += elapsedMS; // add elapsed time
-        
-        // create wall time.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(ms);
-        return calendar;
-        
+        if (time.getElapsedMins() > 0) {
+
+            Calendar contestStart = time.getContestStartTime();
+
+            long ms = contestStart.getTimeInMillis();
+
+            ms += elapsedMS; // add elapsed time
+
+            // create wall time.
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(ms);
+            return calendar;
+
         } else {
             return null;
         }
-        
+
     }
 
     /**
@@ -934,23 +906,23 @@ solved
      * @param contest
      */
     public String getRunJSON(IInternalContest contest) {
-        
+
         StringBuilder stringBuilder = new StringBuilder();
         Run[] runs = contest.getRuns();
-        
+
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-            
-            if (isPastStartEvent()){
-                
-                appendEventHead (stringBuilder, RUN_KEY, "create"); 
-                
+
+            if (isPastStartEvent()) {
+
+                appendEventHead(stringBuilder, RUN_KEY, "create");
+
                 RunResultFiles files = null; // TODO CLICS must fetch files to get main file name, or put mainfile name into Run
-                
+
                 stringBuilder.append("{ ");
                 stringBuilder.append(getRunJSON(contest, run, files));
                 stringBuilder.append("}");
-                
+
                 stringBuilder.append("}");
                 stringBuilder.append(JSON_EOLN);
             }
@@ -958,24 +930,20 @@ solved
 
         return stringBuilder.toString();
     }
-    
 
     private String getRunJSON(IInternalContest contest, Run run, RunResultFiles files) {
-        
+
         //      id  ID  yes     no  provided by CCS     identifier of the run
         //      judgement_id    ID  yes     no  provided by CCS     identifier of the judgement this is part of
         //      ordinal     integer     yes     no  provided by CCS     ordering of runs in the judgement (implicit from the test cases)
 
-
         StringBuilder stringBuilder = new StringBuilder();
-
 
         appendPair(stringBuilder, "id", run.getNumber());
         stringBuilder.append(", ");
-        
-        appendPair(stringBuilder, "contest_time",  XMLUtilities.formatSeconds(run.getElapsedMS()));
-        stringBuilder.append(", ");
 
+        appendPair(stringBuilder, "contest_time", XMLUtilities.formatSeconds(run.getElapsedMS()));
+        stringBuilder.append(", ");
 
         //      judgement_type_id   ID  yes     no  provided by CCS     the verdict of this judgement (i.e. a judgement type)
         //      time    TIME    yes     no  provided by CCS     absolute time when run completed
@@ -983,12 +951,11 @@ solved
 
         ElementId judgementId = run.getJudgementRecord().getJudgementId();
         Judgement judgement = contest.getJudgement(judgementId);
-        
+
         appendPair(stringBuilder, "judgement_type_id", judgement.getAcronym());
 
         return stringBuilder.toString();
-    
-        
+
     }
 
     /**
@@ -999,18 +966,18 @@ solved
     public String getClarificationJSON(IInternalContest contest) {
         StringBuilder stringBuilder = new StringBuilder();
         Clarification[] clarifications = contest.getClarifications();
-        
+
         Arrays.sort(clarifications, new ClarificationComparator());
         for (Clarification clarification : clarifications) {
-            
-            if (isPastStartEvent()){
-                
-                appendEventHead (stringBuilder, CLARIFICATIONS_KEY, "create"); 
+
+            if (isPastStartEvent()) {
+
+                appendEventHead(stringBuilder, CLARIFICATIONS_KEY, "create");
 
                 stringBuilder.append("{ ");
                 stringBuilder.append(getClarificationJSON(contest, clarification));
                 stringBuilder.append("}");
-                
+
                 stringBuilder.append("}");
                 stringBuilder.append(JSON_EOLN);
             }
@@ -1020,77 +987,74 @@ solved
     }
 
     String getClarificationJSON(IInternalContest contest, Clarification clarification) {
-        
+
         StringBuilder stringBuilder = new StringBuilder();
-        
-//        Id   ID  yes     no  provided by CCS     identifier of the clarification
-//        from_team_id    ID  yes     yes     provided by CCS     identifier of team sending this clarification request, null if a clarification sent by jury
-//        to_team_id  ID  yes     yes     provided by CCS     identifier of the team receiving this reply, null if a reply to all teams or a request sent by a team
-//        reply_to_id     ID  yes     yes     provided by CCS     identifier of clarification this is in response to, otherwise null
-        
-        appendPair(stringBuilder, "id", clarification.getNumber()); 
+
+        //        Id   ID  yes     no  provided by CCS     identifier of the clarification
+        //        from_team_id    ID  yes     yes     provided by CCS     identifier of team sending this clarification request, null if a clarification sent by jury
+        //        to_team_id  ID  yes     yes     provided by CCS     identifier of the team receiving this reply, null if a reply to all teams or a request sent by a team
+        //        reply_to_id     ID  yes     yes     provided by CCS     identifier of clarification this is in response to, otherwise null
+
+        appendPair(stringBuilder, "id", clarification.getNumber());
         stringBuilder.append(", ");
 
-        appendPair(stringBuilder, "from_team_id", clarification.getSubmitter().getClientNumber()); 
+        appendPair(stringBuilder, "from_team_id", clarification.getSubmitter().getClientNumber());
         stringBuilder.append(", ");
 
-        if (clarification.isSendToAll()){
+        if (clarification.isSendToAll()) {
             appendPairNullValue(stringBuilder, "to_team_id");
         } else {
-            appendPair(stringBuilder, "to_team_id", clarification. getSubmitter().getClientNumber());
+            appendPair(stringBuilder, "to_team_id", clarification.getSubmitter().getClientNumber());
         }
-        
+
         stringBuilder.append(", ");
-        
-        if (clarification.isAnswered()){
+
+        if (clarification.isAnswered()) {
             appendPair(stringBuilder, "reply_to_id", clarification.getNumber()); // this answer is in reply to
         } else {
             appendPairNullValue(stringBuilder, "reply_to_id");
         }
         stringBuilder.append(", ");
 
-//        problem_id  ID  yes     yes     provided by CCS     identifier of associated problem, null if not associated to a problem
-//        text    string  yes     no  provided by CCS     question or reply text
-//        time    TIME    yes     no  provided by CCS     time of the question/reply
-//        contest_time    RELTIME     yes     no  provided by CCS     contest time of the question/reply 
+        //        problem_id  ID  yes     yes     provided by CCS     identifier of associated problem, null if not associated to a problem
+        //        text    string  yes     no  provided by CCS     question or reply text
+        //        time    TIME    yes     no  provided by CCS     time of the question/reply
+        //        contest_time    RELTIME     yes     no  provided by CCS     contest time of the question/reply 
 
-        
         appendPair(stringBuilder, "problem_id", getProblemIndex(contest, clarification.getElementId()));
         stringBuilder.append(", ");
-        
+
         // Due to a design mistake in the CCS team the clarification JSON element has either
         // an answer or a question.   There were two mistakes, first that there is on
         // JSoN element clarifications for both the question and the answer, there should
         // be two elements.   The second mistake is that an answer should have both
         // question and answer to avoid a bug by the consumer where they mismatch the
         // question and answer because those would be married on reply_to_id
-        
-        if (clarification.isAnswered()){
+
+        if (clarification.isAnswered()) {
             // text is 
         }
 
         appendPair(stringBuilder, "text", clarification.getQuestion()); // TODO CLICS need to quote this string 
         stringBuilder.append(", ");
 
-        Calendar wallElapsed = calculateElapsedWalltime (contest, clarification.getElapsedMS());
-        
+        Calendar wallElapsed = calculateElapsedWalltime(contest, clarification.getElapsedMS());
+
         appendPair(stringBuilder, "start_time", wallElapsed); // absolute time when judgement started ex. 2014-06-25T11:24:03.921+01
         stringBuilder.append(", ");
-        
-        appendPair(stringBuilder, "start_contest_time",  XMLUtilities.formatSeconds(clarification.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
-        
 
-        
+        appendPair(stringBuilder, "start_contest_time", XMLUtilities.formatSeconds(clarification.getElapsedMS())); // contest relative time when judgement started. ex. 1:24:03.921
+
         return stringBuilder.toString();
     }
 
     public String getAwardJSON(IInternalContest contest) {
 
-//        [{"id":"gold-medal","citation":"Gold medal winner","team_ids":["54","23","1","45"]},
-//         {"id":"first-to-solve-a","citation":"First to solve problem A","team_ids":["45"]},
-//         {"id":"first-to-solve-b","citation":"First to solve problem B","team_ids":[]}
-//        ]
-                
+        //        [{"id":"gold-medal","citation":"Gold medal winner","team_ids":["54","23","1","45"]},
+        //         {"id":"first-to-solve-a","citation":"First to solve problem A","team_ids":["45"]},
+        //         {"id":"first-to-solve-b","citation":"First to solve problem B","team_ids":[]}
+        //        ]
+
         return null; // TODO CLICS - technical deficit code getAwardJSON
     }
 
@@ -1120,7 +1084,7 @@ solved
         //        }
         StringBuffer buffer = new StringBuffer();
 
-//        contest = new SampleContest().createStandardContest();
+        //        contest = new SampleContest().createStandardContest();
 
         String json = getContestJSON(contest);
         if (json != null) {
@@ -1180,7 +1144,7 @@ solved
         if (buffer.length() > 6) {
             buffer.delete(buffer.length() - JSON_EOLN.length(), buffer.length());
         }
-        
+
         // return the collected standings as elements of a JSON array
         return "[" + buffer.toString() + "]";
     }
@@ -1203,7 +1167,7 @@ solved
         eventIdSequence++;
         return getEventId(eventIdSequence);
     }
-    
+
     /**
      * get event id. 
      * 
@@ -1213,7 +1177,7 @@ solved
     public String getEventId(long sequenceNumber) {
         return "pc2-" + sequenceNumber;
     }
-    
+
     /**
      * Increment event id and test whether past start event id.
      * 
@@ -1241,7 +1205,7 @@ solved
      * Add JSON pair to stringBuilder.
      */
     private void appendPair(StringBuilder stringBuilder, String name, boolean booleanValue) {
-        
+
         stringBuilder.append("\"");
         stringBuilder.append(name);
         stringBuilder.append("\"");
@@ -1301,9 +1265,9 @@ solved
         stringBuilder.append("\"");
 
         stringBuilder.append(": null");
-        
+
     }
-    
+
     /**
      * Return the language index (starting as base one).
      * 
@@ -1324,7 +1288,7 @@ solved
 
         return -1;
     }
-    
+
     /**
      * Return the problem index (starting at/base one)).
      * 
@@ -1335,29 +1299,29 @@ solved
     public int getProblemIndex(IInternalContest contest, ElementId elementId) {
         int idx = 0;
         for (Problem problem : contest.getProblems()) {
-                if (problem.getElementId().equals(elementId)) {
-                    return idx + 1;
-                }
-                idx++;
+            if (problem.getElementId().equals(elementId)) {
+                return idx + 1;
+            }
+            idx++;
         }
 
         return -1;
     }
-    
+
     public String getStartEventId() {
         return startEventId;
     }
-    
+
     public void setStartEventId(String startEventId) {
-        
+
         pastStartEvent = false;
         this.startEventId = startEventId;
     }
-    
+
     public void setEventFeedList(String eventFeedList) {
         this.eventFeedList = eventFeedList;
     }
-    
+
     public String getEventFeedList() {
         return eventFeedList;
     }

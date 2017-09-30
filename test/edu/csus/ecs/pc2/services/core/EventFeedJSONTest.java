@@ -127,9 +127,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         //      System.out.println("debug JSON is:\n" + json);
 
-//        String filename = "/tmp/stuf.new.json";
-//        writeFile(new File(filename), json);
-        
+        //        String filename = "/tmp/stuf.new.json";
+        //        writeFile(new File(filename), json);
+
         validateJSON(json);
 
         String eventCounts[] = {
@@ -148,7 +148,6 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
                 EventFeedJSON.TEAM_MEMBERS_KEY + ":  300", //
         };
-        
 
         for (String line : eventCounts) {
             String[] fields = line.split(":");
@@ -164,9 +163,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     private void writeFile(File file, String string) throws FileNotFoundException, IOException {
 
-        String [] lines = { string };
+        String[] lines = { string };
         Utilities.writeLinesToFile(file.getCanonicalPath(), lines);
-        System.out.println("debug - Wrote file to "+file.getCanonicalPath());
+        System.out.println("debug - Wrote file to " + file.getCanonicalPath());
     }
 
     /**
@@ -350,10 +349,10 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getTeamJSON(contest, account[0]);
         json = wrapBrackets(json);
 
-//        System.out.println("debug team json = "+json);
+        //        System.out.println("debug team json = "+json);
 
         //  {"id":1, "icpc_id":"3001", "name":"team1", "organization_id": null}
-        
+
         asertEqualJSON(json, "id", "1");
         asertEqualJSON(json, "name", "team1");
     }
@@ -395,7 +394,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         asertEqualJSON(json, "reply_to_id", "null");
 
     }
-    
+
     public void testContestJSON() throws Exception {
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
@@ -403,9 +402,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         String json = eventFeedJSON.getContestJSONFields(contest);
         json = wrapBrackets(json);
-//        System.out.println("debug cont json = "+json);
+        //        System.out.println("debug cont json = "+json);
 
-//         {"id":"Pdf9051a6-c092-4d3b-abda-04e362a60a77", "name":"Programming Contest", "formal_name":"Programming Contest", "start_time": null, "duration":"5:00:00", 
+        //         {"id":"Pdf9051a6-c092-4d3b-abda-04e362a60a77", "name":"Programming Contest", "formal_name":"Programming Contest", "start_time": null, "duration":"5:00:00", 
         // "scoreboard_freeze_duration":"01:00:00", "penalty_time":20, "state":{"state.running":false, "state.frozen":false, "state.final":false}}
 
         asertPresentJSON(json, "id");
@@ -413,10 +412,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
         asertEqualJSON(json, "duration", "5:00:00");
         asertEqualJSON(json, "scoreboard_freeze_duration", "01:00:00");
         asertEqualJSON(json, "penalty_time", "20");
-        
 
     }
-    
+
     public void testProblemJSON() throws Exception {
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
@@ -426,7 +424,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getProblemJSON(contest, problem, 3);
         json = wrapBrackets(json);
 
-//        System.out.println("debug prob json = "+json);
+        //        System.out.println("debug prob json = "+json);
 
         // {"id":3, "label":"A", "name":"Sumit", "ordinal":3, "test_data_coun":0}
 
@@ -435,8 +433,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         asertEqualJSON(json, "name", "Sumit");
         asertEqualJSON(json, "ordinal", "3");
     }
-    
-    
+
     public void testLanguageJSON() throws Exception {
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
@@ -446,14 +443,13 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getLanguageJSON(contest, language, 3);
         json = wrapBrackets(json);
 
-//        System.out.println("debug lang json = "+json);
-        
+        //        System.out.println("debug lang json = "+json);
+
         //  {"id":3, "name":"Java"}
 
         asertEqualJSON(json, "id", "3");
         asertEqualJSON(json, "name", "Java");
     }
-    
 
     /**
      * Assert that JSON field has value.
@@ -480,11 +476,11 @@ public class EventFeedJSONTest extends AbstractTestCase {
         }
 
     }
-    
+
     private void validateJSON(String json) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
-        
+
         String filename = "/tmp/stuf.validateJSON.json";
         writeFile(new File(filename), json);
 
@@ -500,7 +496,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         }
 
     }
-    
+
     /**
      * Assert that JSON field has a value/is preent
      * 
@@ -517,7 +513,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
             JsonNode rootNode = objectMapper.readTree(json);
             String value = rootNode.path(fieldName).asText();
-            assertNotNull("Expected for field <" + fieldName + "> value",  value);
+            assertNotNull("Expected for field <" + fieldName + "> value", value);
 
         } catch (JsonParseException e) {
             System.out.println("Trouble trying to check " + e.getMessage()); // TODO better message 
@@ -525,53 +521,53 @@ public class EventFeedJSONTest extends AbstractTestCase {
         }
 
     }
-    
+
     public void testconvertToMs() throws Exception {
-        
+
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
-        
+
         long ms;
         String hhmmss;
-        
-        hhmmss ="00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
-        assertEquals("Expecting ms for "+hhmmss, 0, ms);
 
-        hhmmss ="00:00:00";
+        hhmmss = "00";
         ms = eventFeedJSON.convertToMs(hhmmss);
-        assertEquals("Expecting ms for "+hhmmss, 0, ms);
-        
-        hhmmss ="00:00:01";
-        ms = eventFeedJSON.convertToMs(hhmmss);
-        assertEquals("Expecting ms for "+hhmmss, 1000, ms);
-        
-        hhmmss ="34:00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
-        assertEquals("Expecting ms for "+hhmmss, 2040000, ms);
-        
-        hhmmss ="01:00:00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
-        assertEquals("Expecting ms for "+hhmmss, 3600000, ms);
+        assertEquals("Expecting ms for " + hhmmss, 0, ms);
 
-        hhmmss ="04:12:00";
+        hhmmss = "00:00:00";
         ms = eventFeedJSON.convertToMs(hhmmss);
-        assertEquals("Expecting ms for "+hhmmss, 15120000, ms);
+        assertEquals("Expecting ms for " + hhmmss, 0, ms);
 
-        hhmmss ="01:22:00";
+        hhmmss = "00:00:01";
         ms = eventFeedJSON.convertToMs(hhmmss);
-        assertEquals("Expecting ms for "+hhmmss, 4920000, ms);
+        assertEquals("Expecting ms for " + hhmmss, 1000, ms);
 
-        hhmmss ="45:00";
+        hhmmss = "34:00";
         ms = eventFeedJSON.convertToMs(hhmmss);
-        assertEquals("Expecting ms for "+hhmmss, 2700000, ms);
+        assertEquals("Expecting ms for " + hhmmss, 2040000, ms);
 
-        hhmmss ="01:00:00";
+        hhmmss = "01:00:00";
         ms = eventFeedJSON.convertToMs(hhmmss);
-        assertEquals("Expecting ms for "+hhmmss, 3600000, ms);
+        assertEquals("Expecting ms for " + hhmmss, 3600000, ms);
+
+        hhmmss = "04:12:00";
+        ms = eventFeedJSON.convertToMs(hhmmss);
+        assertEquals("Expecting ms for " + hhmmss, 15120000, ms);
+
+        hhmmss = "01:22:00";
+        ms = eventFeedJSON.convertToMs(hhmmss);
+        assertEquals("Expecting ms for " + hhmmss, 4920000, ms);
+
+        hhmmss = "45:00";
+        ms = eventFeedJSON.convertToMs(hhmmss);
+        assertEquals("Expecting ms for " + hhmmss, 2700000, ms);
+
+        hhmmss = "01:00:00";
+        ms = eventFeedJSON.convertToMs(hhmmss);
+        assertEquals("Expecting ms for " + hhmmss, 3600000, ms);
     }
-    
+
     public void testStartAtContestEvent() throws Exception {
-        
+
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
@@ -586,21 +582,21 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertEquals("Expected JSON length when started with event 1 (contest event) ", jsonBefore.length(), json.length());
     }
-    
+
     public void testStartAtEvent40() throws Exception {
-        
+
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
         eventFeedJSON.setStartEventId(eventFeedJSON.getEventId(40));
         String json = eventFeedJSON.createJSON(data.getContest());
 
-//        System.out.println("debug after event 40  json = "+json);
-        
+        //        System.out.println("debug after event 40  json = "+json);
+
         assertNotNull(json);
 
         assertMatchCount(501, "\"event\"", json);
-        
+
     }
 
 }
