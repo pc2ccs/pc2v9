@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -43,6 +45,8 @@ import edu.csus.ecs.pc2.core.Constants;
 public class ContestTime implements IElementObject {
 
     public static final long serialVersionUID = 6967329985187819728L;
+
+    private static final String CONTEST_TIME_WITH_MS = "HH:mm:ss.SSS";
 
     /**
      * Resume time, used in calculating elapsed time.
@@ -236,10 +240,10 @@ public class ContestTime implements IElementObject {
     }
 
     /**
-     * Format the input seconds in the form HH:MM:SS.
+     * Format the input milliseconds in the form HH:MM:SS.uuu.
      * 
      * @param milliseconds
-     * @return formatted string in form HH:MM:SS
+     * @return formatted string in form (-)?HH:MM:SS.uuu
      */
     public static String formatTimeMS(long milliseconds) {
 
@@ -249,30 +253,15 @@ public class ContestTime implements IElementObject {
             milliseconds = milliseconds * -1; // absolute value it ..
         }
 
-        long hours = milliseconds/1000 / 3600;
-        long mins = (milliseconds/1000 / 60) % 60;
-        long secs = (milliseconds/1000 % 60);
-        long milli = milliseconds - (hours*3600+mins *60 + secs)*1000;
-
-        String hourStr = new Long(hours).toString();
-        // if (hours < 10)
-        // hourStr = '0' + hourStr;
-
-        String minStr = new Long(mins).toString();
-        if (mins < 10) {
-            minStr = '0' + minStr;
-        }
-
-        String secStr = new Long(secs).toString();
-        if (secs < 10) {
-            secStr = '0' + secStr;
-        }
+        SimpleDateFormat format = new SimpleDateFormat(CONTEST_TIME_WITH_MS);
+        format.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String result = format.format(new Date(milliseconds));
 
         if (negative) {
-            hourStr = "-" + hourStr;
+            result = "-" + result;
         }
 
-        return (hourStr + ':' + minStr + ':' + secStr+'.'+milli);
+        return (result);
     }
 
     public long getContestLengthSecs() {
