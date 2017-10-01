@@ -115,7 +115,7 @@ public class SubmissionService implements Feature {
         element.put("problem_id", submission.getProblemId().toString());
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
-        element.put("contest_time", ContestTime.formatTime(submission.getElapsedMS() / 1000));
+        element.put("contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
         // TODO entry_point
         childNode.add(element);
     }
