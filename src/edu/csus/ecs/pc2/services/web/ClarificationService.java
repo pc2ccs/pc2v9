@@ -35,8 +35,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 @Singleton
 public class ClarificationService implements Feature {
 
-    private static final String ANSWER_PREPEND = "reply-";
-
     private IInternalContest model;
 
     @SuppressWarnings("unused")
@@ -55,19 +53,19 @@ public class ClarificationService implements Feature {
      * @param childNode
      * @param clarification
      */
-    private void dumpClarification(ObjectMapper mapper, ArrayNode childNode, Clarification clarification, boolean answered) {
+    private void dumpClarification(ObjectMapper mapper, ArrayNode childNode, Clarification clarification, ClarificationAnswer clarAnswer) {
         ObjectNode element = mapper.createObjectNode();
         String id = clarification.getElementId().toString();
-        if (answered) {
-            id = ANSWER_PREPEND + id;
+        if (clarAnswer != null) {
+            id = clarAnswer.getElementId().toString();
         }
         element.put("id", id);
-        if (clarification.getSubmitter().getClientType().equals(ClientType.Type.TEAM) && !answered) {
+        if (clarification.getSubmitter().getClientType().equals(ClientType.Type.TEAM) && clarAnswer == null) {
             element.put("from_team_id", new Integer(clarification.getSubmitter().getClientNumber()).toString());
         } else {
             element.set("from_team_id", null);
         }
-        if (!answered) {
+        if (clarAnswer == null) {
             // the request goes to a judge not a team
             element.set("to_team_id", null);
             element.set("reply_to_id", null);
@@ -84,18 +82,18 @@ public class ClarificationService implements Feature {
         } else {
             element.put("problem_id", clarification.getProblemId().toString());
         }
-        if (answered) {
+        if (clarAnswer != null) {
             ClarificationAnswer[] clarificationAnswers = clarification.getClarificationAnswers();
             int lastAnswer = clarificationAnswers.length - 1;
             element.put("text", clarificationAnswers[lastAnswer].getAnswer());
             String time = Utilities.getIso8601formatterWithMS().format(clarificationAnswers[lastAnswer].getDate());
             element.put("time", time);
-            element.put("contest_time", ContestTime.formatTime(clarificationAnswers[lastAnswer].getElapsedMS() / 1000));
+            element.put("contest_time", ContestTime.formatTimeMS(clarificationAnswers[lastAnswer].getElapsedMS()));
         } else {
             element.put("text", clarification.getQuestion());
             String time = Utilities.getIso8601formatterWithMS().format(clarification.getCreateDate());
             element.put("time", time);
-            element.put("contest_time", ContestTime.formatTime(clarification.getElapsedMS() / 1000));
+            element.put("contest_time", ContestTime.formatTimeMS(clarification.getElapsedMS()));
         }
         childNode.add(element);
     }
@@ -119,10 +117,13 @@ public class ClarificationService implements Feature {
         for (int i = 0; i < clarifications.length; i++) {
             Clarification clarification = clarifications[i];
             // dump the request
-            dumpClarification(mapper, childNode, clarification, false);
+            dumpClarification(mapper, childNode, clarification, null);
             if (clarification.isAnswered()) {
-                // dump the answer
-                dumpClarification(mapper, childNode, clarification, true);
+                // dump the answers
+                ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
+                for (int j = 0; j < clarAnswers.length; j++) {
+                    dumpClarification(mapper, childNode, clarification, clarAnswers[j]);
+                }
             }
         }
 
@@ -141,15 +142,21 @@ public class ClarificationService implements Feature {
         // get an object to map the groups descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
+        ClarificationAnswer[] clarAnswers = null;
         for (int i = 0; i < clarifications.length; i++) {
             Clarification clarification = clarifications[i];
-            boolean answered = false;
-            if (clarificationId.startsWith(ANSWER_PREPEND)) {
-                answered = true;
-                clarificationId = clarificationId.replaceAll(ANSWER_PREPEND, "");
-            }
             if (clarification.getElementId().toString().equals(clarificationId)) {
-                dumpClarification(mapper, childNode, clarification, answered);
+                dumpClarification(mapper, childNode, clarification, null);
+            }
+            clarAnswers = clarification.getClarificationAnswers();
+            if (clarAnswers != null) {
+                for (int j = 0; j < clarAnswers.length; j++) {
+                    ClarificationAnswer clarificationAnswer = clarAnswers[j];
+                    if (clarificationAnswer.getElementId().toString().equals(clarificationId)) {
+                        dumpClarification(mapper, childNode, clarification, clarificationAnswer);
+                        break;
+                    }                    
+                }
             }
         }
         return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();

@@ -31,6 +31,8 @@ public class ClarificationAnswer implements Serializable{
 
     private String answer;
 
+    private ElementId elementId;
+
     public ClarificationAnswer(String answer, ClientId answerClient, boolean sendToAll, ContestTime contestTime) {
         super();
 
@@ -42,6 +44,7 @@ public class ClarificationAnswer implements Serializable{
             throw new IllegalArgumentException("contestTime can not be null");
         }
 
+        setElementId(new ElementId("reply"));
         this.answer = answer;
         this.answerClient = answerClient;
         this.sendToAll = sendToAll;
@@ -78,4 +81,17 @@ public class ClarificationAnswer implements Serializable{
         return answer;
     }
 
+    /**
+     * @return the elementId
+     */
+    public ElementId getElementId() {
+        return elementId;
+    }
+
+    /**
+     * @param elementId the elementId to set
+     */
+    public void setElementId(ElementId elementId) {
+        this.elementId = elementId;
+    }
 }

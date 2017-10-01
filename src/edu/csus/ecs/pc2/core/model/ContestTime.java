@@ -235,6 +235,46 @@ public class ContestTime implements IElementObject {
         return (hourStr + ':' + minStr + ':' + secStr);
     }
 
+    /**
+     * Format the input seconds in the form HH:MM:SS.
+     * 
+     * @param milliseconds
+     * @return formatted string in form HH:MM:SS
+     */
+    public static String formatTimeMS(long milliseconds) {
+
+        boolean negative = milliseconds < 0;
+
+        if (negative) {
+            milliseconds = milliseconds * -1; // absolute value it ..
+        }
+
+        long hours = milliseconds/1000 / 3600;
+        long mins = (milliseconds/1000 / 60) % 60;
+        long secs = (milliseconds/1000 % 60);
+        long milli = milliseconds - (hours*3600+mins *60 + secs)*1000;
+
+        String hourStr = new Long(hours).toString();
+        // if (hours < 10)
+        // hourStr = '0' + hourStr;
+
+        String minStr = new Long(mins).toString();
+        if (mins < 10) {
+            minStr = '0' + minStr;
+        }
+
+        String secStr = new Long(secs).toString();
+        if (secs < 10) {
+            secStr = '0' + secStr;
+        }
+
+        if (negative) {
+            hourStr = "-" + hourStr;
+        }
+
+        return (hourStr + ':' + minStr + ':' + secStr+'.'+milli);
+    }
+
     public long getContestLengthSecs() {
         return contestLengthSecs;
     }
