@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.services.web;
 
+import java.util.Hashtable;
+
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -26,17 +28,17 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * @author ICPC
  *
  */
-@Path("/teams")
+@Path("/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
-public class TeamService implements Feature {
+public class OrganizationService implements Feature {
 
     private IInternalContest model;
     @SuppressWarnings("unused")
     private IInternalController controller;
 
-    public TeamService(IInternalContest inContest, IInternalController inController) {
+    public OrganizationService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
@@ -50,18 +52,23 @@ public class TeamService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTeams() {
+    public Response getOrganizations() {
         
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
+        // keep track of which ones we have dumped
+        Hashtable<String,Account> organizations = new Hashtable<String,Account>();
 
         // get an object to map the groups descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
-                dumpAccount(mapper, childNode, account);
+            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
+                if (!organizations.containsKey(account.getInstitutionCode())) {
+                    organizations.put(account.getInstitutionCode(), account);
+                    dumpAccount(mapper, childNode, account);
+                }
             }
         }
         return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
@@ -69,8 +76,8 @@ public class TeamService implements Feature {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    @Path("{teamId}/")
-    public Response getTeam(@PathParam("teamId") String teamId) {
+    @Path("{organizationId}/")
+    public Response getOrganization(@PathParam("organizationId") String organizationId) {
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
 
@@ -79,9 +86,9 @@ public class TeamService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-            // TODO multi-site with overlapping teamNumbers?
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && new Integer(account.getClientId().getClientNumber()).toString().equals(teamId)) {
+            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && account.getInstitutionCode().equals(organizationId)) {
                 dumpAccount(mapper, childNode, account);
+                break; // only looking for 1 id, so only dump once
             }
         }
         return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
@@ -89,17 +96,14 @@ public class TeamService implements Feature {
 
     private void dumpAccount(ObjectMapper mapper, ArrayNode childNode, Account account) {
         ObjectNode element = mapper.createObjectNode();
-        // TODO multi-site with overlapping teamNumbers?
-        element.put("id", new Integer(account.getClientId().getClientNumber()).toString());
-        if (notEmpty(account.getExternalId())) {
-            element.put("icpc_id", account.getExternalId());
+        element.put("id", account.getInstitutionCode());
+        element.put("icpc_id", account.getInstitutionCode());
+        element.put("name", account.getInstitutionShortName());
+        if (notEmpty(account.getInstitutionName())) {
+            element.put("formal_name", account.getInstitutionName());
         }
-        element.put("name", account.getTeamName());
-        if (notEmpty(account.getInstitutionCode()) && !account.getInstitutionCode().equals("undefined")) {
-            element.put("organization_id", account.getInstitutionCode());
-        }
-        if (account.getGroupId() != null) {
-            element.put("group_id", account.getGroupId().toString());
+        if (notEmpty(account.getCountryCode()) && !account.getCountryCode().equals("XXX")) {
+            element.put("country", account.getCountryCode());
         }
         // rest is provided by CDS, not CCS
         childNode.add(element);

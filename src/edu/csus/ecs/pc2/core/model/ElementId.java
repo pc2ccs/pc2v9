@@ -56,8 +56,7 @@ public class ElementId implements Serializable {
      */
     public ElementId(String name) {
         super();
-        // TODO Auto-generated constructor stub
-        this.name = name.toCharArray();
+        this.name = name.replaceAll(" ", "_").toCharArray();
         initialize();
     }
 

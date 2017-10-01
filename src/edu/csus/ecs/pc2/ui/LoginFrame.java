@@ -517,7 +517,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
                     case 41:
                         verifyChecksum = icpcChecksum3;
                         break;
-                    case -75:
+                    case 47:
                         verifyChecksum = icpcChecksum4;
                         break;
                     default:

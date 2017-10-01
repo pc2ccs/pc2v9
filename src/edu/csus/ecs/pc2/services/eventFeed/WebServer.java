@@ -47,12 +47,18 @@ import sun.security.x509.X509CertInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.services.web.ClarificationService;
+import edu.csus.ecs.pc2.services.web.ContestService;
 import edu.csus.ecs.pc2.services.web.EventFeedService;
 import edu.csus.ecs.pc2.services.web.FetchRunService;
+import edu.csus.ecs.pc2.services.web.GroupService;
+import edu.csus.ecs.pc2.services.web.JudgementTypeService;
 import edu.csus.ecs.pc2.services.web.LanguageService;
+import edu.csus.ecs.pc2.services.web.OrganizationService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
 import edu.csus.ecs.pc2.services.web.ScoreboardService;
 import edu.csus.ecs.pc2.services.web.StarttimeService;
+import edu.csus.ecs.pc2.services.web.SubmissionService;
 import edu.csus.ecs.pc2.services.web.TeamService;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -90,6 +96,8 @@ public class WebServer implements UIPlugin {
     public static final String TEAMS_SERVICE_ENABLED_KEY = "enableTeams";
     
     public static final String FETCH_RUN_SERVICE_ENABLED_KEY = "enableFetchRun";
+
+    private static final String CLICS_SERVICE_ENABLED_KEY = "enableClics";
 
     private Properties wsProperties = new Properties();
 
@@ -349,7 +357,20 @@ public class WebServer implements UIPlugin {
             resConfig.register(new FetchRunService(getContest(), getController()));
             showMessage("Starting /fetchRun web service");
         }
-        
+        if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, false)) {
+            resConfig.register(new ContestService(getContest(),getController()));
+            showMessage("Starting /contest web service");
+            resConfig.register(new GroupService(getContest(),getController()));
+            showMessage("Starting /groups web service");
+            resConfig.register(new OrganizationService(getContest(),getController()));
+            showMessage("Starting /organizations web service");
+            resConfig.register(new JudgementTypeService(getContest(),getController()));
+            showMessage("Starting /judgement-types web service");
+            resConfig.register(new ClarificationService(getContest(),getController()));
+            showMessage("Starting /clarifications web service");
+            resConfig.register(new SubmissionService(getContest(),getController()));
+            showMessage("Starting /submissions web service");
+        }
         // TODO if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, false)) {
         {
             resConfig.register(new EventFeedService(getContest(), getController()));

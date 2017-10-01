@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -43,6 +45,8 @@ import edu.csus.ecs.pc2.core.Constants;
 public class ContestTime implements IElementObject {
 
     public static final long serialVersionUID = 6967329985187819728L;
+
+    private static final String CONTEST_TIME_WITH_MS = "HH:mm:ss.SSS";
 
     /**
      * Resume time, used in calculating elapsed time.
@@ -233,6 +237,31 @@ public class ContestTime implements IElementObject {
         }
 
         return (hourStr + ':' + minStr + ':' + secStr);
+    }
+
+    /**
+     * Format the input milliseconds in the form HH:MM:SS.uuu.
+     * 
+     * @param milliseconds
+     * @return formatted string in form (-)?HH:MM:SS.uuu
+     */
+    public static String formatTimeMS(long milliseconds) {
+
+        boolean negative = milliseconds < 0;
+
+        if (negative) {
+            milliseconds = milliseconds * -1; // absolute value it ..
+        }
+
+        SimpleDateFormat format = new SimpleDateFormat(CONTEST_TIME_WITH_MS);
+        format.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String result = format.format(new Date(milliseconds));
+
+        if (negative) {
+            result = "-" + result;
+        }
+
+        return (result);
     }
 
     public long getContestLengthSecs() {

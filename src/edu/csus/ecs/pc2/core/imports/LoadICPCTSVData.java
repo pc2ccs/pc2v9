@@ -28,6 +28,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 // $HeadURL$
 public class LoadICPCTSVData implements UIPlugin {
 
+    public static final String TEAMS2_TSV = "teams2.tsv";
+
     /**
      * 
      */
@@ -81,6 +83,9 @@ public class LoadICPCTSVData implements UIPlugin {
 
         if (checkFiles(filename)) {
 
+            String instFilename = groupsFilename.replaceFirst(GROUPS_FILENAME,"institutions.tsv");
+            // this must be loaded before accounts, and no harm before groups
+            ICPCTSVLoader.loadInstitutions(instFilename);
             Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename);
             
             for (Group group : groups) {
@@ -266,6 +271,10 @@ public class LoadICPCTSVData implements UIPlugin {
         }
 
         file = new File(teamsFilename);
+        String teams2Filename = teamsFilename.replaceFirst(TEAMS_FILENAME, TEAMS2_TSV);
+        if (new File(teams2Filename).isFile()) {
+            teamsFilename = teams2Filename;
+        }
         if (!file.isFile()) {
             throw new FileNotFoundException("File not found: " + teamsFilename);
         }

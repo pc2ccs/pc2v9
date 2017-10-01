@@ -73,6 +73,7 @@ public final class ICPCTSVLoader {
     private static int siteNumber = 1;
 
     private static Group[] groups = new Group[0];
+    private static HashMap<String,String[]> institutionsMap = new HashMap<String,String[]>();
 
     /**
      * Load teams.tsv, use {@link #loadGroups(String)} first.
@@ -150,8 +151,15 @@ public final class ICPCTSVLoader {
         String schoolShortName = fields[fieldnum++];
         String countryCode = fields[fieldnum++];
         String institutionCode = "";
+        String institutionName = "";
+        String institutionFormalName = "";
         if (fields.length == TEAM2_TSV_FIELDS) {
             institutionCode = fields[fieldnum++];
+            if (institutionsMap.containsKey(institutionCode)) {
+                String[] field_array = institutionsMap.get(institutionCode);
+                institutionFormalName = field_array[1];
+                institutionName = field_array[2];
+            }
         }
 
         // 1 Team number 22 integer
@@ -198,6 +206,12 @@ public final class ICPCTSVLoader {
         account.setCountryCode(countryCode);
         if (!institutionCode.equals("")) {
             account.setInstitutionCode(institutionCode);
+            if (!institutionName.equals("")) {
+                account.setInstitutionName(institutionFormalName);
+            }
+            if (!institutionFormalName.equals("")) {
+                account.setInstitutionShortName(institutionName);
+            }
         }
         
         if (groupNumber != 0){
@@ -325,6 +339,24 @@ public final class ICPCTSVLoader {
         return accountString;
     }
 
+    public static void loadInstitutions(String filename) throws Exception {
+        String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
+
+        institutionsMap  = new HashMap<String,String[]>();
+        // do not care about the first line (line 0), so start with 1
+        for (int i = 1; i < lines.length; i++) {
+            String[] fields = TabSeparatedValueParser.parseLine(lines[i]);
+            String icpc_id = fields[0];
+            if (icpc_id.startsWith("INST-U-")) {
+                // why do these not use the same ids that are in teams.tsv....
+                icpc_id = icpc_id.replaceFirst("INST-U-", "INST-");
+            }
+//            String formalName = fields[1];
+//            String name = fields[2];
+            institutionsMap.put(icpc_id, fields);
+        }
+    }
+    
     public static HashMap<Integer, String> loadPasswordsFromAccountsTSV(String filename) throws Exception {
         String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
 
