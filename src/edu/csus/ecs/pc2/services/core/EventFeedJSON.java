@@ -781,17 +781,21 @@ public class EventFeedJSON {
         Arrays.sort(runs, new RunComparator());
 
         for (Run run : runs) {
+            
+            if (run.isJudged()){
 
-            if (isPastStartEvent()) {
+                if (isPastStartEvent()) {
 
-                appendEventHead(stringBuilder, JUDGEMENT_KEY, "create");
+                    appendEventHead(stringBuilder, JUDGEMENT_KEY, "create");
 
-                stringBuilder.append("{ ");
-                stringBuilder.append(getJudgementJSON(contest, run));
-                stringBuilder.append("}");
+                    stringBuilder.append("{ ");
+                    stringBuilder.append(getJudgementJSON(contest, run));
+                    stringBuilder.append("}");
 
-                stringBuilder.append("}");
-                stringBuilder.append(JSON_EOLN);
+                    stringBuilder.append("}");
+                    stringBuilder.append(JSON_EOLN);
+                }
+
             }
         }
 
@@ -946,16 +950,20 @@ public class EventFeedJSON {
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "contest_time", XMLUtilities.formatSeconds(run.getElapsedMS()));
-        stringBuilder.append(", ");
+        
 
         //      judgement_type_id   ID  yes     no  provided by CCS     the verdict of this judgement (i.e. a judgement type)
         //      time    TIME    yes     no  provided by CCS     absolute time when run completed
         //      contest_time    RELTIME     yes     no  provided by CCS     contest relative time when run completed 
 
-        ElementId judgementId = run.getJudgementRecord().getJudgementId();
-        Judgement judgement = contest.getJudgement(judgementId);
-
-        appendPair(stringBuilder, "judgement_type_id", judgement.getAcronym());
+        if (run.isJudged()) {
+            
+            stringBuilder.append(", ");
+            
+            ElementId judgementId = run.getJudgementRecord().getJudgementId();
+            Judgement judgement = contest.getJudgement(judgementId);
+            appendPair(stringBuilder, "judgement_type_id", judgement.getAcronym());
+        }
 
         return stringBuilder.toString();
 

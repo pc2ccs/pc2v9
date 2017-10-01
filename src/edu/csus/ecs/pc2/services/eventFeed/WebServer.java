@@ -357,7 +357,11 @@ public class WebServer implements UIPlugin {
             resConfig.register(new FetchRunService(getContest(), getController()));
             showMessage("Starting /fetchRun web service");
         }
-        if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, false)) {
+
+        // TODO restore this once the GUI shows a checkmark
+        //         if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, false)) {
+        if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, true)) {
+        
             resConfig.register(new ContestService(getContest(),getController()));
             showMessage("Starting /contest web service");
             resConfig.register(new GroupService(getContest(),getController()));
@@ -370,9 +374,6 @@ public class WebServer implements UIPlugin {
             showMessage("Starting /clarifications web service");
             resConfig.register(new SubmissionService(getContest(),getController()));
             showMessage("Starting /submissions web service");
-        }
-        // TODO if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, false)) {
-        {
             resConfig.register(new EventFeedService(getContest(), getController()));
             showMessage("Starting /event-feed web service");
         }
