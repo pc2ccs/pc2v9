@@ -401,7 +401,7 @@ public class EventFeedJSON {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        appendPair(stringBuilder, "id", languageNumber);
+        appendPair(stringBuilder, "id", Integer.toString(languageNumber));
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "name", language.getDisplayName());
@@ -438,7 +438,7 @@ public class EventFeedJSON {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        appendPair(stringBuilder, "id", problemNumber);
+        appendPair(stringBuilder, "id", Integer.toString(problemNumber));
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "label", problem.getLetter()); // letter
@@ -602,7 +602,7 @@ public class EventFeedJSON {
         //    name 
         //    organization_id 
 
-        appendPair(stringBuilder, "id", clientId.getClientNumber());
+        appendPair(stringBuilder, "id", Integer.toString(clientId.getClientNumber()));
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "icpc_id", account.getExternalId());
@@ -746,6 +746,8 @@ public class EventFeedJSON {
         appendPair(stringBuilder, "language_id", getLanguageIndex(contest, run.getLanguageId()));
         stringBuilder.append(", ");
 
+//        Problem problem = contest.getProblem(run.getProblemId());
+//        appendPair(stringBuilder, "problem_id", problem.getShortName());
         appendPair(stringBuilder, "problem_id", getProblemIndex(contest, run.getProblemId()));
         stringBuilder.append(", ");
 
@@ -1006,22 +1008,22 @@ public class EventFeedJSON {
         //        to_team_id  ID  yes     yes     provided by CCS     identifier of the team receiving this reply, null if a reply to all teams or a request sent by a team
         //        reply_to_id     ID  yes     yes     provided by CCS     identifier of clarification this is in response to, otherwise null
 
-        appendPair(stringBuilder, "id", clarification.getNumber());
+        appendPair(stringBuilder, "id", Integer.toString(clarification.getNumber()));
         stringBuilder.append(", ");
 
-        appendPair(stringBuilder, "from_team_id", clarification.getSubmitter().getClientNumber());
+        appendPair(stringBuilder, "from_team_id", Integer.toString(clarification.getSubmitter().getClientNumber()));
         stringBuilder.append(", ");
 
         if (clarification.isSendToAll()) {
             appendPairNullValue(stringBuilder, "to_team_id");
         } else {
-            appendPair(stringBuilder, "to_team_id", clarification.getSubmitter().getClientNumber());
+            appendPair(stringBuilder, "to_team_id", Integer.toString(clarification.getSubmitter().getClientNumber()));
         }
 
         stringBuilder.append(", ");
 
         if (clarification.isAnswered()) {
-            appendPair(stringBuilder, "reply_to_id", clarification.getNumber()); // this answer is in reply to
+            appendPair(stringBuilder, "reply_to_id", Integer.toString(clarification.getNumber())); // this answer is in reply to
         } else {
             appendPairNullValue(stringBuilder, "reply_to_id");
         }
@@ -1032,7 +1034,7 @@ public class EventFeedJSON {
         //        time    TIME    yes     no  provided by CCS     time of the question/reply
         //        contest_time    RELTIME     yes     no  provided by CCS     contest time of the question/reply 
 
-        appendPair(stringBuilder, "problem_id", getProblemIndex(contest, clarification.getElementId()));
+        appendPair(stringBuilder, "problem_id", Integer.toString(getProblemIndex(contest, clarification.getProblemId())));
         stringBuilder.append(", ");
 
         // Due to a design mistake in the CCS team the clarification JSON element has either

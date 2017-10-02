@@ -216,7 +216,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
     }
 
     private void assertMatchCount(int count, String regex, String json) {
-        assertEquals("Expecting to find" + regex, count, matchCount(regex, json));
+        assertEquals("Expecting to find "+count+ "matches for '" + regex+"'", count, matchCount(regex, json));
     }
 
     /**
@@ -355,6 +355,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         asertEqualJSON(json, "id", "1");
         asertEqualJSON(json, "name", "team1");
+        
+        assertMatchCountQuotedField(json, 1, "id", "1");
+        assertMatchCountQuotedField(json, 1, "icpc_id", "3001");
     }
 
     /**
@@ -384,15 +387,35 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getClarificationJSON(contest, clarification);
         json = wrapBrackets(json);
 
-        //        System.out.println("debug json = "+json);
+        int problemNumber = eventFeedJSON.getProblemIndex(contest, clarification.getProblemId());
+        assertEquals("Expected problem number ", 1, problemNumber);
 
-        //      "id":1, "from_team_id":1, "to_team_id":1, "reply_to_id": null, "problem_id":-1, "text":"Why #2? from team1", "start_time": null, "start_contest_time":"0.000"
+        // System.out.println("debug json = "+json);
+        
+        // debug json = {"id":"5", "from_team_id":"5", "to_team_id":"5", "reply_to_id": null, "problem_id":"1", "text":"Why #2? from team5", "start_time": null, "start_contest_time":"0.000"}
 
-        asertEqualJSON(json, "id", "5");
-        asertEqualJSON(json, "from_team_id", "5");
         asertEqualJSON(json, "text", "Why #2? from team5");
         asertEqualJSON(json, "reply_to_id", "null");
+        asertEqualJSON(json, "problem_id", "1" );
+        
+        assertMatchCountQuotedField(json, 1, "problem_id", "1" );
+        assertMatchCountQuotedField(json, 1, "id", "5" );
+        assertMatchCountQuotedField(json, 1, "from_team_id", "5" );
+        assertMatchCountQuotedField(json, 1, "to_team_id", "5" );
+    }
 
+    /**
+     * Assert count for expected field and value.
+     * 
+     * Surround field and value with double quotes, make into JSON.
+     *  
+     * @param matchCount number of expected match for field and value
+     * @param fieldname
+     * @param exptectedFieldValue
+     * @param json
+     */
+    private void assertMatchCountQuotedField(String json, int matchCount, String fieldname, String exptectedFieldValue) {
+        assertMatchCount(matchCount, "\"" + fieldname + "\":\"" + exptectedFieldValue + "\"", json);
     }
 
     public void testContestJSON() throws Exception {
@@ -408,6 +431,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
         // "scoreboard_freeze_duration":"01:00:00", "penalty_time":20, "state":{"state.running":false, "state.frozen":false, "state.final":false}}
 
         asertPresentJSON(json, "id");
+        asertPresentJSON(json, "name");
+        
         asertEqualJSON(json, "name", "Programming Contest");
         asertEqualJSON(json, "duration", "5:00:00");
         asertEqualJSON(json, "scoreboard_freeze_duration", "01:00:00");
@@ -424,11 +449,13 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getProblemJSON(contest, problem, 3);
         json = wrapBrackets(json);
 
-        //        System.out.println("debug prob json = "+json);
+        // System.out.println("debug prob json = "+json);
 
-        // {"id":3, "label":"A", "name":"Sumit", "ordinal":3, "test_data_coun":0}
+        // debug prob json = {"id":"3", "label":"A", "name":"Sumit", "ordinal":3, "test_data_coun":0}
 
         asertEqualJSON(json, "id", "3");
+        assertMatchCountQuotedField(json, 1, "id", "3");
+        
         asertEqualJSON(json, "label", "A");
         asertEqualJSON(json, "name", "Sumit");
         asertEqualJSON(json, "ordinal", "3");
@@ -443,11 +470,12 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getLanguageJSON(contest, language, 3);
         json = wrapBrackets(json);
 
-        //        System.out.println("debug lang json = "+json);
+        // System.out.println("debug lang json = "+json);
 
         //  {"id":3, "name":"Java"}
 
         asertEqualJSON(json, "id", "3");
+        assertMatchCountQuotedField(json, 1, "id", "3");
         asertEqualJSON(json, "name", "Java");
     }
 
