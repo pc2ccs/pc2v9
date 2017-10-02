@@ -460,6 +460,36 @@ public class EventFeedJSONTest extends AbstractTestCase {
         asertEqualJSON(json, "name", "Sumit");
         asertEqualJSON(json, "ordinal", "3");
     }
+    
+    public void testTeamMemberJSON() throws Exception{
+        EventFeedJSON eventFeedJSON = new EventFeedJSON();
+
+        IInternalContest contest = new UnitTestData().getContest();
+
+        Account account = getAccounts(contest, Type.TEAM)[8];
+        String[] names = account.getMemberNames();
+        assertNotNull(names);
+        assertNotNull(names[0]);
+        
+        String json = eventFeedJSON.getTeamMemberJSON(contest, account, names[0]);
+        json = wrapBrackets(json);
+        
+        // System.out.println("debug team name "+json);
+
+        // debug team name {"id": null, "team_id":"9", "icpc_id": null, "first_name": null, "last_name": null, "sex": null, "role": null}
+
+//        asertEqualJSON(json, "id", "3");
+//        assertMatchCountQuotedField(json, 1, "id", "3");
+        
+      asertEqualJSON(json, "team_id", "9");
+      assertMatchCountQuotedField(json, 1, "team_id", "9");
+      
+//      assertMatchCountQuotedField(json, 1, "icpc_id", "9");
+//      assertMatchCountQuotedField(json, 1, "first_name", "9");
+//      assertMatchCountQuotedField(json, 1, "last_name", "9");
+//      assertMatchCountQuotedField(json, 1, "sex", "9");
+      
+    }
 
     public void testLanguageJSON() throws Exception {
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
