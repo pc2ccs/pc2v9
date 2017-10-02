@@ -493,7 +493,7 @@ public class EventFeedJSON {
         return stringBuilder.toString();
     }
 
-    private Object getGroupJSON(IInternalContest contest, Group group) {
+    protected String getGroupJSON(IInternalContest contest, Group group) {
 
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -502,14 +502,14 @@ public class EventFeedJSON {
         //    name 
         //    organization_id 
 
-        appendPair(stringBuilder, "id", group.getGroupId());
+        appendPair(stringBuilder, "id", Integer.toString( group.getGroupId()));
         stringBuilder.append(", ");
 
         //        id  ID  yes     no  provided by CCS     identifier of the group
         //        icpc_id     string  no  yes     provided by CCS     external identifier from ICPC CMS
         //        name    string  yes     no  provided by CCS     name of the group 
 
-        appendPair(stringBuilder, "icpc_id", group.getGroupId());
+        appendPair(stringBuilder, "icpc_id", Integer.toString(group.getGroupId()));
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "name", group.getDisplayName());

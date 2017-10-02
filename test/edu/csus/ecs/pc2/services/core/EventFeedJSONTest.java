@@ -18,11 +18,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
+import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -335,7 +337,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
     }
 
     /**
-     * TEst single teams JSON line.
+     * Test single teams JSON line.
      * 
      * @throws Exception
      */
@@ -358,6 +360,35 @@ public class EventFeedJSONTest extends AbstractTestCase {
         
         assertMatchCountQuotedField(json, 1, "id", "1");
         assertMatchCountQuotedField(json, 1, "icpc_id", "3001");
+    }
+    
+    /**
+     * TEst single teams JSON line.
+     * 
+     * @throws Exception
+     */
+    public void testGroupJSON() throws Exception {
+
+        EventFeedJSON eventFeedJSON = new EventFeedJSON();
+        IInternalContest contest = new UnitTestData().getContest();
+
+        Group[] groups = contest.getGroups();
+        Arrays.sort(groups, new GroupComparator());
+
+        String json = eventFeedJSON.getGroupJSON(contest, groups[0]);
+        json = wrapBrackets(json);
+
+        // System.out.println("debug group json = "+json);
+        
+        // debug group json = {"id":1024, "icpc_id":1024, "name":"North Group"}
+
+        //  {"id":1, "icpc_id":"3001", "name":"team1", "organization_id": null}
+
+        asertEqualJSON(json, "id", "1024");
+        
+        assertMatchCountQuotedField(json, 1, "id", "1024");
+        assertMatchCountQuotedField(json, 1, "icpc_id", "1024");
+        assertMatchCountQuotedField(json, 1, "name", "North Group");
     }
 
     /**
