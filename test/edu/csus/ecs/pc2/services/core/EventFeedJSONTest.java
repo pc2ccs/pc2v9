@@ -344,22 +344,24 @@ public class EventFeedJSONTest extends AbstractTestCase {
     public void testTeamJSON() throws Exception {
 
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
-        IInternalContest contest = new SampleContest().createStandardContest();
+        IInternalContest contest = new UnitTestData().getContest();
 
         Account[] account = getAccounts(contest, Type.TEAM);
 
         String json = eventFeedJSON.getTeamJSON(contest, account[0]);
         json = wrapBrackets(json);
 
-        //        System.out.println("debug team json = "+json);
+//        System.out.println("debug team json = "+json);
 
-        //  {"id":1, "icpc_id":"3001", "name":"team1", "organization_id": null}
+        //  debug team json = {"id":"1", "icpc_id":"3001", "name":"team1", "organization_id": null, "group_id":"1024"}
 
         asertEqualJSON(json, "id", "1");
         asertEqualJSON(json, "name", "team1");
+        asertEqualJSON(json, "group_id", "1024");
         
-        assertMatchCountQuotedField(json, 1, "id", "1");
-        assertMatchCountQuotedField(json, 1, "icpc_id", "3001");
+        assertJSONStringValue(json,  "id", "1");
+        assertJSONStringValue(json,  "icpc_id", "3001");
+        assertJSONStringValue(json,  "group_id", "1024");
     }
     
     /**
@@ -386,9 +388,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         asertEqualJSON(json, "id", "1024");
         
-        assertMatchCountQuotedField(json, 1, "id", "1024");
-        assertMatchCountQuotedField(json, 1, "icpc_id", "1024");
-        assertMatchCountQuotedField(json, 1, "name", "North Group");
+        assertJSONStringValue(json,  "id", "1024");
+        assertJSONStringValue(json,  "icpc_id", "1024");
+        assertJSONStringValue(json,  "name", "North Group");
     }
 
     /**
@@ -429,14 +431,14 @@ public class EventFeedJSONTest extends AbstractTestCase {
         asertEqualJSON(json, "reply_to_id", "null");
         asertEqualJSON(json, "problem_id", "1" );
         
-        assertMatchCountQuotedField(json, 1, "problem_id", "1" );
-        assertMatchCountQuotedField(json, 1, "id", "5" );
-        assertMatchCountQuotedField(json, 1, "from_team_id", "5" );
-        assertMatchCountQuotedField(json, 1, "to_team_id", "5" );
+        assertJSONStringValue(json,  "problem_id", "1" );
+        assertJSONStringValue(json,  "id", "5" );
+        assertJSONStringValue(json,  "from_team_id", "5" );
+        assertJSONStringValue(json,  "to_team_id", "5" );
     }
 
     /**
-     * Assert count for expected field and value.
+     * Tests whether value for field is a string and value matches exptectedFieldValue.
      * 
      * Surround field and value with double quotes, make into JSON.
      *  
@@ -445,8 +447,10 @@ public class EventFeedJSONTest extends AbstractTestCase {
      * @param exptectedFieldValue
      * @param json
      */
-    private void assertMatchCountQuotedField(String json, int matchCount, String fieldname, String exptectedFieldValue) {
-        assertMatchCount(matchCount, "\"" + fieldname + "\":\"" + exptectedFieldValue + "\"", json);
+    private void assertJSONStringValue (String json, String fieldname, String exptectedFieldValue) {
+
+        String regex = "\"" + fieldname + "\":\"" + exptectedFieldValue + "\"";
+        assertEquals("Expected to find JSON string syntax, double quoted value, for field "+fieldname, 1, matchCount(regex, json));
     }
 
     public void testContestJSON() throws Exception {
@@ -485,7 +489,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         // debug prob json = {"id":"3", "label":"A", "name":"Sumit", "ordinal":3, "test_data_coun":0}
 
         asertEqualJSON(json, "id", "3");
-        assertMatchCountQuotedField(json, 1, "id", "3");
+        assertJSONStringValue(json,  "id", "3");
         
         asertEqualJSON(json, "label", "A");
         asertEqualJSON(json, "name", "Sumit");
@@ -510,15 +514,15 @@ public class EventFeedJSONTest extends AbstractTestCase {
         // debug team name {"id": null, "team_id":"9", "icpc_id": null, "first_name": null, "last_name": null, "sex": null, "role": null}
 
 //        asertEqualJSON(json, "id", "3");
-//        assertMatchCountQuotedField(json, 1, "id", "3");
+//        assertJSONStringValue(json,  "id", "3");
         
       asertEqualJSON(json, "team_id", "9");
-      assertMatchCountQuotedField(json, 1, "team_id", "9");
+      assertJSONStringValue(json,  "team_id", "9");
       
-//      assertMatchCountQuotedField(json, 1, "icpc_id", "9");
-//      assertMatchCountQuotedField(json, 1, "first_name", "9");
-//      assertMatchCountQuotedField(json, 1, "last_name", "9");
-//      assertMatchCountQuotedField(json, 1, "sex", "9");
+//      assertJSONStringValue(json,  "icpc_id", "9");
+//      assertJSONStringValue(json,  "first_name", "9");
+//      assertJSONStringValue(json,  "last_name", "9");
+//      assertJSONStringValue(json,  "sex", "9");
       
     }
 
@@ -536,7 +540,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         //  {"id":3, "name":"Java"}
 
         asertEqualJSON(json, "id", "3");
-        assertMatchCountQuotedField(json, 1, "id", "3");
+        assertJSONStringValue(json,  "id", "3");
         asertEqualJSON(json, "name", "Java");
     }
 

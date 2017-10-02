@@ -620,7 +620,7 @@ public class EventFeedJSON {
             Group group = contest.getGroup(elementId);
             if (group != null) {
                 stringBuilder.append(", ");
-                appendPair(stringBuilder, "group_id", group.getGroupId());
+                appendPair(stringBuilder, "group_id", Integer.toString(group.getGroupId()));
             }
         }
 
