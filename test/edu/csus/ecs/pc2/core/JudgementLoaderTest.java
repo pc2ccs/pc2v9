@@ -1,15 +1,21 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.File;
+
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
-import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
-public class JudgementLoaderTest extends TestCase {
-    
+/**
+ * Unit tsst.
+ * 
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+ */
+public class JudgementLoaderTest extends AbstractTestCase {
     
     /**
-     * Test Load from 
+     * Test Load from list of lines. 
      * @throws Exception
      */
     public void testLoadFromLLines() throws Exception {
@@ -112,9 +118,9 @@ public class JudgementLoaderTest extends TestCase {
                 "# eof $Id$", //
         };
         
-        for (String string : lines) {
-            System.out.println(string);
-        }
+//        for (String string : lines) {
+//            System.out.println(string);
+//        }
 
         IInternalContest contest = new InternalContest();
 
@@ -169,4 +175,42 @@ public class JudgementLoaderTest extends TestCase {
         assertEquals("Expecting judgement for " + judgement, "Accepted", judgement.toString());
     }
     
+    public String getTestSamplesDirectory() {
+        return getProjectRootDirectory() + File.separator + "samps" ;
+    }
+    
+    public String getSampleseFilename(String filename) {
+        String name = getTestSamplesDirectory() + File.separator + filename;
+        assertFileExists(name);
+        return name;
+    }
+    
+    
+    /**
+     * Load from reject.ini
+     * 
+     * Load judgements from samples {@link Constants#JUDGEMENT_INIT_FILENAME}. 
+     * 
+     * @throws Exception
+     */
+    public void testLoadFromRejectIni() throws Exception {
+        
+        String rejectIniFilename = getSampleseFilename(Constants.JUDGEMENT_INIT_FILENAME);
+        
+        IInternalContest contest = new InternalContest();
+
+        boolean loaded = new JudgementLoader().loadedJudgementsFromIni(contest, rejectIniFilename);
+
+        assertTrue("Expected judgements to be loaded ", loaded);
+
+        Judgement[] judgements = contest.getJudgements();
+        assertEquals("Expecting number of judgements ", 8, judgements.length);
+
+        Judgement judgement = judgements[1];
+        assertEquals("Expecting acronym for " + judgement, "WA001", judgement.getAcronym());
+        
+        judgement = judgements[0];
+        assertEquals("Expecting acronym for " + judgement, "AC", judgement.getAcronym());
+        assertEquals("Expecting judgement for " + judgement, "Yes", judgement.toString());
+    }
 }

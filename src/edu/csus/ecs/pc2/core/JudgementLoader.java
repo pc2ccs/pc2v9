@@ -17,9 +17,11 @@ public class JudgementLoader {
      * 
      * If finds reject.ini file, reads file. Adds Yes judgement, then prepends "No - " onto each entry from the reject.ini file and returns true.
      * 
+     * If file contains a AC acronym judgement, then that line and its judgment name are used/loaded.
+     * 
      * Returns false if cannot read reject.ini file or reject.ini file is empty (perhaps only containing comments).
      * 
-     * @return true if loaded, false if could not read file.
+     * @return true if loaded, false if could not find line or read file.
      */
     public boolean loadedJudgementsFromIni(IInternalContest contest, String filename) {
 
@@ -32,6 +34,16 @@ public class JudgementLoader {
         return false;
     }
 
+    
+    /**
+     * Load judgements.
+     * 
+     * @see #loadedJudgementsFromIni(IInternalContest, String)
+     * 
+     * @param contest
+     * @param lines
+     * @return true if loaded, false if no lines
+     */
     public boolean loadedJudgements(IInternalContest contest, String[] lines) {
 
         if (lines == null || lines.length == 0) {
