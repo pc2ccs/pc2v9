@@ -1076,6 +1076,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * 
      * If finds reject.ini file, reads file. Adds Yes judgement, then prepends "No - " onto each entry from the reject.ini file and returns true.
      * 
+     * Reads judge acronyms if present, if file contains a AC judgement then will use that
+     * text for the Yes judgement.
+     * 
      * Returns false if cannot read reject.ini file or reject.ini file is empty (perhaps only containing comments).
      * 
      * @return true if loaded, false if could not read file.
@@ -1083,24 +1086,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     protected boolean loadedJudgementsFromIni(String filename) {
 
         if (new File(filename).exists()) {
-
-            String[] lines = Utilities.loadINIFile(filename);
-
-            if (lines == null || lines.length == 0) {
-                return false;
-            }
-
-            Judgement judgement = new Judgement("Yes", Judgement.ACRONYM_ACCEPTED);
-            contest.addJudgement(judgement);
-            int offset = contest.getJudgements().length;
-
-            for (String judgementName : lines) {
-                String waNumber = String.format("%03d", offset++);
-                judgement = new Judgement("No - " + judgementName, Judgement.ACRONYM_WRONG_ANSWER+waNumber);
-                contest.addJudgement(judgement);
-            }
-
-            return true;
+            return new JudgementLoader().loadedJudgementsFromIni(contest, filename);
         }
         return false;
     }
