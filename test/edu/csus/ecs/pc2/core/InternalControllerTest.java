@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.File;
 import java.security.InvalidParameterException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -23,10 +25,8 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 /**
  * Unit Tests.
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-
 public class InternalControllerTest extends AbstractTestCase {
     
     private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server", "--nogui", "--contestpassword", "foo", "--port", "42020", "--login" , "s"};
@@ -272,5 +272,42 @@ public class InternalControllerTest extends AbstractTestCase {
 //        assertNotNull("Expecting fatal error message ", controller.getMessage());
 //        assertEquals("Expecting messsage ", "Halting server - configuration file corrupt", controller.getMessage());
 
+    }
+    
+    /**
+     * Test matching an override password
+     * @throws Exception
+     */
+    public void testMatchDevOverride() throws Exception {
+        
+        String password = "foo";
+        
+        // print digest array
+//        System.out.print("byte[] overridePassword = { ");
+//        dumpByteArray(password);
+//        System.out.println(" } ; ");
+        
+        assertTrue("Expecting true ",password.length() > 0);
+        
+//        assertTrue("match DEV override ", InternalController.matchDevOverride(password));
+//        assertTrue("Did not match override ", InternalController.matchOverride(password));
+        
+    }
+
+    /**
+     * Sump the SHA hash for the input password in a byte array.
+     * @param password
+     * @throws NoSuchAlgorithmException
+     */
+    void dumpByteArray(String password) throws NoSuchAlgorithmException {
+        
+       // byte[] overridePassword = { -108, 121, 83, 9, 106, -13, 43, 10, 47, 87, -114, 115, -38, -38, -64, -125, 41, -1, -79, -102 };
+        MessageDigest md = MessageDigest.getInstance("SHA");
+        md.reset();
+        md.update(password.getBytes());
+        byte[] digested = md.digest();
+        for (int i = 0; i < digested.length; i++) {
+            System.out.print(digested[i] + ", ");
+        }
     }
 }
