@@ -127,10 +127,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertNotNull(json);
 
-        //      System.out.println("debug JSON is:\n" + json);
-
-        //        String filename = "/tmp/stuf.new.json";
-        //        writeFile(new File(filename), json);
+//        String filename = "/tmp/stuf.new.json";
+//        writeFile(new File(filename), json);
 
         validateJSON(json);
 
@@ -617,45 +615,43 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     public void testconvertToMs() throws Exception {
 
-        EventFeedJSON eventFeedJSON = new EventFeedJSON();
-
         long ms;
         String hhmmss;
 
         hhmmss = "00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
+        ms = JSONUtilities.convertToMs(hhmmss);
         assertEquals("Expecting ms for " + hhmmss, 0, ms);
 
         hhmmss = "00:00:00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
+        ms = JSONUtilities.convertToMs(hhmmss);
         assertEquals("Expecting ms for " + hhmmss, 0, ms);
 
         hhmmss = "00:00:01";
-        ms = eventFeedJSON.convertToMs(hhmmss);
+        ms = JSONUtilities.convertToMs(hhmmss);
         assertEquals("Expecting ms for " + hhmmss, 1000, ms);
 
         hhmmss = "34:00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
+        ms = JSONUtilities.convertToMs(hhmmss);
         assertEquals("Expecting ms for " + hhmmss, 2040000, ms);
 
         hhmmss = "01:00:00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
+        ms = JSONUtilities.convertToMs(hhmmss);
         assertEquals("Expecting ms for " + hhmmss, 3600000, ms);
 
         hhmmss = "04:12:00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
+        ms = JSONUtilities.convertToMs(hhmmss);
         assertEquals("Expecting ms for " + hhmmss, 15120000, ms);
 
         hhmmss = "01:22:00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
+        ms = JSONUtilities.convertToMs(hhmmss);
         assertEquals("Expecting ms for " + hhmmss, 4920000, ms);
 
         hhmmss = "45:00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
+        ms = JSONUtilities.convertToMs(hhmmss);
         assertEquals("Expecting ms for " + hhmmss, 2700000, ms);
 
         hhmmss = "01:00:00";
-        ms = eventFeedJSON.convertToMs(hhmmss);
+        ms = JSONUtilities.convertToMs(hhmmss);
         assertEquals("Expecting ms for " + hhmmss, 3600000, ms);
     }
 
