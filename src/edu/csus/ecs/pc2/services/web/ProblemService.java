@@ -1,20 +1,23 @@
 package edu.csus.ecs.pc2.services.web;
 
+import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.Provider;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.exception.IllegalContestState;
-import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.exports.ccs.ProblemsJSON;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * WebService to handle problems
@@ -24,52 +27,75 @@ import edu.csus.ecs.pc2.exports.ccs.ProblemsJSON;
  */
 @Path("/problems")
 @Produces(MediaType.APPLICATION_JSON)
-public class ProblemService {
+@Provider
+@Singleton
+public class ProblemService implements Feature {
 
-    private IInternalContest contest;
+    private IInternalContest model;
+
+    @SuppressWarnings("unused")
     private IInternalController controller;
 
-    public ProblemService(IInternalContest contest, IInternalController controller) {
+    private JSONTool jsonTool;
+
+    public ProblemService(IInternalContest inContest, IInternalController inController) {
         super();
-        this.contest = contest;
-        this.controller = controller;
+        this.model = inContest;
+        this.controller = inController;
+        jsonTool = new JSONTool(inContest, inController);
     }
 
     /**
-     * This method returns a representation of the current contest problem set in JSON format. 
-     * The returned value is a JSON array with one problem description per array element.
+     * This method returns a representation of the current contest problems in JSON format. The returned value is a JSON array with one problems description per array element, matching the description
+     * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#.2Fproblems}.
      * 
      * @return a {@link Response} object containing the contest problems in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProblems(@Context SecurityContext sc) {
+    public Response getProblems() {
 
-        //TODO: check the SecurityContext to make sure the user is allowed to do this HTTP request...
-        
         // get the problems from the contest
-        ProblemsJSON problems = new ProblemsJSON();
+        Problem[] problems = model.getProblems();
 
-        String jsonProblems = "[]";
-        try {
-            ContestTime contestTime = contest.getContestTime();
-            if (contestTime.getElapsedMS() > 0 || sc.isUserInRole("admin")) {
-                //contest is started or user is an admin; get the contest problems
-                jsonProblems = problems.createJSON(contest);
-            } else {
-                // do not show (return) the problems if the contest has not
-                // been started and the requester is not an admin)
-                return Response.status(Status.FORBIDDEN).build();
-            }
-        } catch (IllegalContestState e) {
-            controller.getLog().log(Log.WARNING, "Problem creating problem JSON: " + e, e);
-            e.printStackTrace();
-            //return HTTP error response code containing the exception message
-            return Response.serverError().entity(e.getMessage()).build();
-            // or: return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        // get an object to map the problems descriptions into JSON form
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode childNode = mapper.createArrayNode();
+        for (int i = 0; i < problems.length; i++) {
+            Problem problem = problems[i];
+            childNode.add(jsonTool.convertToJSON(problem, i));
         }
 
-        return Response.ok(jsonProblems,MediaType.APPLICATION_JSON).build();
+        // output the response to the requester (note that this actually returns it to Jersey,
+        // which forwards it to the caller as the HTTP response).
+        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
     }
 
+    @GET
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Path("{problemId}/")
+    public Response getProblem(@PathParam("problemId") String problemId) {
+        // get the problems from the contest
+        Problem[] problems = model.getProblems();
+
+        // get an object to map the problems descriptions into JSON form
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode childNode = mapper.createArrayNode();
+        for (int i = 0; i < problems.length; i++) {
+            Problem problem = problems[i];
+            // match my elementId or shortName
+            if (problem.getElementId().toString().equals(problemId) || problemId.equals(problem.getShortName())) {
+                childNode.add(jsonTool.convertToJSON(problem, i));
+                break;
+            }
+        }
+        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+
+    }
+
+    @Override
+    public boolean configure(FeatureContext arg0) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

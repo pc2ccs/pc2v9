@@ -13,11 +13,11 @@ import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * WebService to handle languages
@@ -34,29 +34,15 @@ public class GroupService implements Feature {
     @SuppressWarnings("unused")
     private IInternalController controller;
 
+    private JSONTool jsonTool;
+
     public GroupService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
+        jsonTool = new JSONTool(inContest, inController);
     }
 
-    /**
-     * This method converts a group into a JSON object added to childNode.
-     * 
-     * @param mapper
-     * @param childNode
-     * @param group
-     */
-    private void dumpGroup(ObjectMapper mapper, ArrayNode childNode, Group group) {
-        ObjectNode element = mapper.createObjectNode();
-        element.put("id", group.getElementId().toString());
-        if (group.getGroupId() != -1) {
-            element.put("icpc_id", new Integer(group.getGroupId()).toString());
-        }
-        element.put("name", group.getDisplayName());
-        childNode.add(element);
-    }
-    
     /**
      * This method returns a representation of the current contest groups in JSON format. 
      * The returned value is a JSON array with one language description per array element, matching the
@@ -76,7 +62,7 @@ public class GroupService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < groups.length; i++) {
             Group group = groups[i];
-            dumpGroup(mapper, childNode, group);
+            childNode.add(jsonTool.convertToJSON(group));
         }
 
         // output the response to the requester (note that this actually returns it to Jersey,
@@ -97,7 +83,7 @@ public class GroupService implements Feature {
         for (int i = 0; i < groups.length; i++) {
             Group group = groups[i];
             if (group.getElementId().toString().equals(groupId)) {
-                dumpGroup(mapper, childNode, group);
+                childNode.add(jsonTool.convertToJSON(group));
             }
         }
         return Response.ok(childNode.toString(),MediaType.APPLICATION_JSON).build();

@@ -1,13 +1,17 @@
 package edu.csus.ecs.pc2.services.web;
 
+import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 import javax.ws.rs.core.SecurityContext;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -30,7 +34,9 @@ import edu.csus.ecs.pc2.exports.ccs.RunFilesJSON;
  */
 @Path("/submission_files")
 @Produces(MediaType.APPLICATION_JSON)
-public class FetchRunService {
+@Provider
+@Singleton
+public class FetchRunService implements Feature {
 
     private IInternalContest contest;
     private IInternalController controller;
@@ -233,6 +239,12 @@ public class FetchRunService {
         public void runRemoved(RunEvent event) {
             // ignore
         }
+    }
+
+    @Override
+    public boolean configure(FeatureContext arg0) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 

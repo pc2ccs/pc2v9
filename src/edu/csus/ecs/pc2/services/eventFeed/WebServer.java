@@ -84,19 +84,9 @@ public class WebServer implements UIPlugin {
 
     public static final String PORT_NUMBER_KEY = "port";
 
-    public static final String SCOREBOARD_SERVICE_ENABLED_KEY = "enableScoreboard";
-
-    public static final String PROBLEMS_SERVICE_ENABLED_KEY = "enableProblems";
-
-    public static final String LANGUAGES_SERVICE_ENABLED_KEY = "enableLanguages";
-
     public static final String STARTTIME_SERVICE_ENABLED_KEY = "enableStartTime";
 
-    public static final String TEAMS_SERVICE_ENABLED_KEY = "enableTeams";
-    
     public static final String FETCH_RUN_SERVICE_ENABLED_KEY = "enableFetchRun";
-
-    private static final String CLICS_SERVICE_ENABLED_KEY = "enableClics";
 
     private Properties wsProperties = new Properties();
 
@@ -327,49 +317,37 @@ public class WebServer implements UIPlugin {
 
         // add each of the enabled services to the config:
 
-        if (getBooleanProperty(SCOREBOARD_SERVICE_ENABLED_KEY, false)) {
-            resConfig.register(new ScoreboardService(getContest(), getController()));
-            showMessage("Starting /scoreboard web service");
-        }
-
-        if (getBooleanProperty(PROBLEMS_SERVICE_ENABLED_KEY, false)) {
-            resConfig.register(new ProblemService(getContest(), getController()));
-            showMessage("Starting /problems web service");
-        }
-
-        if (getBooleanProperty(LANGUAGES_SERVICE_ENABLED_KEY, false)) {
-            resConfig.register(new LanguageService(getContest(), getController()));
-            showMessage("Starting /languages web service");
-            }
-
         if (getBooleanProperty(STARTTIME_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new StarttimeService(getContest(), getController()));
             showMessage("Starting /starttime web service");
-        }
-
-        if (getBooleanProperty(TEAMS_SERVICE_ENABLED_KEY, false)) {
-            resConfig.register(new TeamService(getContest(), getController()));
-            showMessage("Starting /teams web service");
         }
 
         if (getBooleanProperty(FETCH_RUN_SERVICE_ENABLED_KEY, false)) {
             resConfig.register(new FetchRunService(getContest(), getController()));
             showMessage("Starting /fetchRun web service");
         }
-        if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, false)) {
-            resConfig.register(new ContestService(getContest(),getController()));
-            showMessage("Starting /contest web service");
-            resConfig.register(new GroupService(getContest(),getController()));
-            showMessage("Starting /groups web service");
-            resConfig.register(new OrganizationService(getContest(),getController()));
-            showMessage("Starting /organizations web service");
-            resConfig.register(new JudgementTypeService(getContest(),getController()));
-            showMessage("Starting /judgement-types web service");
-            resConfig.register(new ClarificationService(getContest(),getController()));
-            showMessage("Starting /clarifications web service");
-            resConfig.register(new SubmissionService(getContest(),getController()));
-            showMessage("Starting /submissions web service");
-        }
+        // contest API always enabled if the web server is started
+        resConfig.register(new ContestService(getContest(),getController()));
+        showMessage("Starting /contest web service");
+        resConfig.register(new ScoreboardService(getContest(), getController()));
+        showMessage("Starting /scoreboard web service");
+        resConfig.register(new LanguageService(getContest(), getController()));
+        showMessage("Starting /languages web service");
+        resConfig.register(new TeamService(getContest(), getController()));
+        showMessage("Starting /teams web service");
+        resConfig.register(new GroupService(getContest(),getController()));
+        showMessage("Starting /groups web service");
+        resConfig.register(new OrganizationService(getContest(),getController()));
+        showMessage("Starting /organizations web service");
+        resConfig.register(new JudgementTypeService(getContest(),getController()));
+        showMessage("Starting /judgement-types web service");
+        resConfig.register(new ClarificationService(getContest(),getController()));
+        showMessage("Starting /clarifications web service");
+        resConfig.register(new SubmissionService(getContest(),getController()));
+        showMessage("Starting /submissions web service");
+        resConfig.register(new ProblemService(getContest(), getController()));
+        showMessage("Starting /problems web service");
+
         return resConfig;
     }
 
@@ -417,15 +395,9 @@ public class WebServer implements UIPlugin {
 
         prop.put(PORT_NUMBER_KEY, DEFAULT_WEB_SERVER_PORT_NUMBER + "");
 
-        prop.put(SCOREBOARD_SERVICE_ENABLED_KEY, "yes");
-
-        prop.put(PROBLEMS_SERVICE_ENABLED_KEY, "yes");
-
-        prop.put(LANGUAGES_SERVICE_ENABLED_KEY, "yes");
-
         prop.put(STARTTIME_SERVICE_ENABLED_KEY, "yes");
 
-        prop.put(TEAMS_SERVICE_ENABLED_KEY, "yes");
+        prop.put(FETCH_RUN_SERVICE_ENABLED_KEY, "yes");
 
         return prop;
     }

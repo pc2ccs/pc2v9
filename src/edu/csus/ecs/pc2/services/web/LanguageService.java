@@ -13,14 +13,15 @@ import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * WebService to handle languages
+ * 
  * @author ICPC
  *
  */
@@ -31,19 +32,21 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 public class LanguageService implements Feature {
 
     private IInternalContest model;
-    @SuppressWarnings("unused")
+
     private IInternalController controller;
+
+    private JSONTool jsonTool;
 
     public LanguageService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
+        jsonTool = new JSONTool(model, controller);
     }
 
     /**
-     * This method returns a representation of the current model languages in JSON format. 
-     * The returned value is a JSON array with one language description per array element, matching the
-     * description at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
+     * This method returns a representation of the current model languages in JSON format. The returned value is a JSON array with one language description per array element, matching the description
+     * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
      * 
      * @return a {@link Response} object containing the model languages in JSON form
      */
@@ -59,13 +62,13 @@ public class LanguageService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < languages.length; i++) {
             Language language = languages[i];
-            dumpLanguage(mapper, childNode, language);
+            childNode.add(jsonTool.convertToJSON(language));
         }
         return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
     }
-    
+
     @GET
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{languageId}/")
     public Response getLanguage(@PathParam("languageId") String languageId) {
         // get the languages from the model
@@ -77,20 +80,11 @@ public class LanguageService implements Feature {
         for (int i = 0; i < languages.length; i++) {
             Language language = languages[i];
             if (language.getElementId().toString().equals(languageId)) {
-                dumpLanguage(mapper, childNode, language);
+                childNode.add(jsonTool.convertToJSON(language));
             }
         }
-        return Response.ok(childNode.toString(),MediaType.APPLICATION_JSON).build();
-    
-    }
+        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
 
-    private void dumpLanguage(ObjectMapper mapper, ArrayNode childNode, Language language) {
-        ObjectNode element = mapper.createObjectNode();
-        element.put("id", language.getElementId().toString());
-        element.put("name", language.getDisplayName());
-        childNode.add(element);
-
-        
     }
 
     @Override

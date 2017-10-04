@@ -2,9 +2,6 @@ package edu.csus.ecs.pc2.services.web;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Map;
 
@@ -25,7 +22,6 @@ import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.MapType;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -33,7 +29,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * WebService to handle "contest" REST endpoint as described by the CLICS wiki.
@@ -42,8 +38,7 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * "start_time":"2014-06-25T10:00:00+01","duration":"5:00:00","scoreboard_freeze_duration":"1:00:00","penalty_time":20, "state":{"running":true,"frozen":false,"final":false} } example patch request
  * data: {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45","start_time":"2014-06-25T10:00:00+01"}
  * 
- *  or
- *  {"id":"wf2016","start_time":null}
+ * or {"id":"wf2016","start_time":null}
  * 
  * @author pc2@ecs.csus.edu
  *
@@ -58,6 +53,8 @@ public class ContestService implements Feature {
 
     private IInternalController controller;
 
+    private JSONTool jsonTool;
+
     /**
      * List of the possible types of requests which might be received from clients.
      * 
@@ -71,6 +68,7 @@ public class ContestService implements Feature {
         super();
         this.model = inModel;
         this.controller = inController;
+        jsonTool = new JSONTool(model, controller);
     }
 
     /**
@@ -81,7 +79,7 @@ public class ContestService implements Feature {
      * 
      *         <pre>
      *         // PUT HTTP body is application/json:
-     * // { &quot;starttime&quot;:1265335138.26 }
+     *         // { &quot;starttime&quot;:1265335138.26 }
      * // or:
      * // { &quot;starttime&quot;:&quot;undefined&quot; }
      * // HTTP response is:
@@ -395,79 +393,11 @@ public class ContestService implements Feature {
 
         // from the CLI Wiki Contest_Start_Interface spec:
         /*
-         * {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45","name":"2014 ICPC World Finals",
-         * "formal_name":"38th Annual World Finals of the ACM International Collegiate Programming Contest",
-         * "start_time":"2014-06-25T10:00:00+01","duration":"5:00:00","scoreboard_freeze_duration":"1:00:00","penalty_time":20,
-         * "state":{"running":true,"frozen":false,"final":false}}
+         * {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45","name":"2014 ICPC World Finals", "formal_name":"38th Annual World Finals of the ACM International Collegiate Programming Contest",
+         * "start_time":"2014-06-25T10:00:00+01","duration":"5:00:00","scoreboard_freeze_duration":"1:00:00","penalty_time":20, "state":{"running":true,"frozen":false,"final":false}}
          */
-        String id = model.getContestIdentifier();
-        ContestInformation ci = model.getContestInformation();
-        String name = ci.getContestShortName();
-        String formalName = ci.getContestTitle();
-        if (name == null || name.equals("")) {
-            name = formalName;
-        }
-        String duration = model.getContestTime().getContestLengthStr();
-        String scoreboardFreezeDuration = ci.getFreezeTime();
-        String startTime = "null";
-        if (model.getContestTime().isContestStarted()) {
-            if (model.getContestTime().isContestRunning()) {
-                startTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(model.getContestTime().getContestStartTime().getTime());
-            }
-            // else startTime is null during a pause
-        } else {
-            // contest has not started, check for a scheduledStartTime
-            Calendar calendar = ci.getScheduledStartTime();
-            if (calendar != null) {
-                Date date = calendar.getTime();
-                startTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date); 
-            }
-        }
-        String penaltyTime = ci.getScoringProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO, "20");
-        boolean stateRunning = model.getContestTime().isContestRunning();
-        boolean skipStateFrozen = false;
-        boolean stateFrozen = false;
-        if (ci.getFreezeTime() != null) {
-            ci.getFreezeTime();
-            long elapsed = model.getContestTime().getElapsedSecs();
-            long length = model.getContestTime().getContestLengthSecs();
-            long freezeTime = Utilities.convertStringToSeconds(ci.getFreezeTime());
-            if ((length - elapsed) > freezeTime ) {
-                stateFrozen = false;
-            } else {
-                stateFrozen = true;
-            }
-        } else {
-            skipStateFrozen = true;
-        }
-        boolean stateFinal = false;
-        if (model.getFinalizeData() != null) {
-            stateFinal = model.getFinalizeData().isCertified();
-        }
-        
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode element = mapper.createObjectNode();
-        element.put("id", id);
-        element.put("name", name);
-        if (formalName != null && !formalName.equals("")) {
-            element.put("formal_name",formalName);
-        }
-        if (startTime.equals("null")) {
-            startTime = null;
-        }
-        element.put("start_time", startTime);
-        element.put("duration",duration);
-        element.put("scoreboard_freeze_duration",scoreboardFreezeDuration);
-        element.put("penalty_time",penaltyTime);
-        ObjectNode state = mapper.createObjectNode();
-        state.put("running",stateRunning);
-        if (!skipStateFrozen) {
-            state.put("frozen",stateFrozen);
-        }
-        state.put("final",stateFinal);
-        element.set("state", state);
 
-        return Response.ok(element.toString(),MediaType.APPLICATION_JSON).build();
+        return Response.ok(jsonTool.convertToJSON(model.getContestInformation()).toString(), MediaType.APPLICATION_JSON).build();
     }
 
     @Override

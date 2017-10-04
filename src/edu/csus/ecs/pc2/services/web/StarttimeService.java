@@ -4,15 +4,19 @@ import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.util.Map;
 
+import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 import javax.ws.rs.core.SecurityContext;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -34,7 +38,9 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  */
 @Path("/starttime")
 @Produces(MediaType.APPLICATION_JSON)
-public class StarttimeService {
+@Provider
+@Singleton
+public class StarttimeService implements Feature {
 
     private IInternalContest model;
 
@@ -396,5 +402,11 @@ public class StarttimeService {
         // output the starttime response to the requester (note that this actually returns it to Jersey,
         // which forwards it to the caller as the HTTP response).
         return Response.ok(jsonStartTime, MediaType.APPLICATION_JSON).build();
+    }
+
+    @Override
+    public boolean configure(FeatureContext arg0) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
