@@ -1,13 +1,20 @@
 package edu.csus.ecs.pc2.services.web;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.logging.Level;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.StreamingOutput;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
@@ -27,11 +34,13 @@ public class EventFeedService {
 
     private IInternalContest contest;
     private IInternalController controller;
+    private Log log;
     
     public EventFeedService(IInternalContest inContest, IInternalController inController) {
         super();
         this.contest = inContest;
         this.controller = inController;
+        this.log = inController.getLog();
         
     }
 
@@ -83,7 +92,6 @@ public class EventFeedService {
             System.out.println("debug 22 getEventFeed () ");
 
             EventFeedJSON eventFeedJSON = new EventFeedJSON();
-
             
             try {
                 jsonOutput = eventFeedJSON.createJSON(contest);
@@ -101,4 +109,51 @@ public class EventFeedService {
         // which forwards it to the caller as the HTTP response).
         return Response.ok(jsonOutput,MediaType.APPLICATION_JSON).build();
     }
+    
+    /**
+     * Streaming event feed.
+     * @return
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/stream")
+    public Response streamEventFeed() {
+
+        StreamingOutput stream = new StreamingOutput() {
+            
+            @Override
+            public void write(OutputStream os) throws IOException, WebApplicationException {
+                
+                /**
+                 * An assumption here is that the  StreamingOutput and this response is on its own 
+                 * thread. 
+                 */
+                try {
+                    
+                    EventFeedStreamer eventFeedSteamer = new EventFeedStreamer(os, contest, controller);
+                    
+                    // Start streaming events to stream/client/user
+                    eventFeedSteamer.run();
+                    
+                } catch (Exception e) {
+                    System.err.println("Warning (check log) in write " + e.getMessage());
+                    log.log(Level.WARNING,"Exception in streaming event feed write "+e.getMessage());
+                }
+
+
+                System.out.println("debug 22 DONE "+new Date());
+            }
+        };
+
+        return Response.ok(stream).build();
+    }
+    
+    public void info(String message) {
+        
+        System.out.println(new Date () + " " +message);
+        if (controller.getLog() != null){
+            controller.getLog().log(Level.INFO, message);
+        }
+    }
+    
 }
