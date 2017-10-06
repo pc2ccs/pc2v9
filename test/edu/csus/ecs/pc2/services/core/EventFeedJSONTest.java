@@ -127,8 +127,11 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertNotNull(json);
 
+        // write valid JSON to a file to test for syntax errors
+//        String validJSON = json.replaceAll("\n",  ",\n");
+//        validJSON  = "[\n" + validJSON.substring(0, validJSON.length()-2) + "\n]";
 //        String filename = "/tmp/stuf.new.json";
-//        writeFile(new File(filename), json);
+//        writeFile(new File(filename), validJSON);
 
         validateJSON(json);
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -169,4 +170,64 @@ public class JSONUtilities {
         long seconds = Utilities.convertStringToSeconds(hhmmss);
         return seconds * Constants.MS_PER_SECOND;
     }
+    
+    
+
+    // TODO old code cull
+    //    private Calendar calculateElapsedWalltime(IInternalContest contest, Run run) {
+    //        
+    //        ContestTime time = contest.getContestTime();
+    //        if (time.getElapsedMins() > 0){
+    //            
+    //        Calendar contestStart = time.getContestStartTime();
+    //        
+    //        long ms = contestStart.getTimeInMillis();
+    //        
+    //        ms += run.getElapsedMS(); // add elapsed time
+    //        
+    //        // create wall time.
+    //        Calendar calendar = Calendar.getInstance();
+    //        calendar.setTimeInMillis(ms);
+    //        return calendar;
+    //        
+    //        } else {
+    //            return null;
+    //        }
+    //        
+    //    }
+
+    
+
+    /**
+     * Return wall time for input elapsed time in ms.
+     * 
+     * Calculates based on elapsed time plus contest start time
+     * 
+     * @param contest
+     * @param elapsedMS - elapsed ms when submission submitted
+     * @return wall time for run.
+     */
+    public Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
+
+        ContestTime time = contest.getContestTime();
+        if (time.getElapsedMins() > 0) {
+
+            Calendar contestStart = time.getContestStartTime();
+
+            long ms = contestStart.getTimeInMillis();
+
+            ms += elapsedMS; // add elapsed time
+
+            // create wall time.
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(ms);
+            return calendar;
+
+        } else {
+            return null;
+        }
+
+    }
+    
+    
 }

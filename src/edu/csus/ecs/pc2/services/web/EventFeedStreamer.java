@@ -1,9 +1,6 @@
 package edu.csus.ecs.pc2.services.web;
 
-import java.io.BufferedWriter;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
@@ -95,16 +92,16 @@ public class EventFeedStreamer implements Runnable, UIPlugin {
 
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
-        Writer writer = new BufferedWriter(new OutputStreamWriter(os));
+//        Writer writer = new BufferedWriter(new OutputStreamWriter(os));
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 120; i++) {
 
             try {
                 System.out.println("debug 22 " + i + " send " + new Date());
                 String json = eventFeedJSON.getContestJSON(contest);
-                //                os.write(json.getBytes());
+                os.write(json.getBytes());
 
-                writer.write(json);
+//                writer.write(json);
                 os.flush();
                 sleep(2);
             } catch (Exception e) {

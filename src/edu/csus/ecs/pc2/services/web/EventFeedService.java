@@ -41,7 +41,6 @@ public class EventFeedService {
         this.contest = inContest;
         this.controller = inController;
         this.log = inController.getLog();
-        
     }
 
     /**
