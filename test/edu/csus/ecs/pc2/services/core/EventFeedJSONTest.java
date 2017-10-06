@@ -352,7 +352,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getTeamJSON(contest, account[0]);
         json = wrapBrackets(json);
 
-//        System.out.println("debug team json = "+json);
+        System.out.println("debug team json = "+json);
 
         //  debug team json = {"id":"1", "icpc_id":"3001", "name":"team1", "organization_id": null, "group_id":"1024"}
 

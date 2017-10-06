@@ -228,6 +228,40 @@ public class JSONUtilities {
         }
 
     }
+
+    /**
+     * Strip JSON of [{  }].
+     * 
+     * @param string
+     * @return
+     */
+    public String stripOuterJSON(String string) {
+        string = stringOuterChars(string, '[', ']');
+        string = stringOuterChars(string, '{', '}');
+        return string;
+    }
+
+    public String stringOuterChars(String string, char start, char end ) {
+        String out = string.trim();
+        if (out.charAt(0) == start) {
+            out = out.substring(1, out.length());
+        }
+        if (out.charAt(out.length() - 1) == end) {
+            out = out.substring(0, out.length() - 1);
+        }
+        return out;
+    }
+
     
-    
+    /**
+     * returns true if the value is not null and is not the empty string
+     * @param value
+     * @return true if not empty
+     */
+    public boolean notEmpty(String value) {
+        if (value != null && !value.equals("")) {
+            return true;
+        }
+        return false;
+    }
 }

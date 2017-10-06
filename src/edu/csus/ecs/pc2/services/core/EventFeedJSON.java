@@ -247,10 +247,8 @@ public class EventFeedJSON extends JSONUtilities {
 
                 appendEventHead(stringBuilder, GROUPS_KEY, "create");
 
-                stringBuilder.append("{ ");
                 stringBuilder.append(getGroupJSON(contest, group));
-                stringBuilder.append("}");
-
+                
                 stringBuilder.append("}");
                 stringBuilder.append(NL);
             }
