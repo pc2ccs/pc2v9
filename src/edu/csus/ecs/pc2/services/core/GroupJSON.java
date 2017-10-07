@@ -38,6 +38,8 @@ public class GroupJSON extends JSONUtilities {
         
         return stripOuterJSON(childNode.toString());
 
+        // TODO remove old code
+        
 //        StringBuilder stringBuilder = new StringBuilder();
 //
 //        //    id 

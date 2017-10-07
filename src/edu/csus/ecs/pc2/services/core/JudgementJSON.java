@@ -16,6 +16,19 @@ import edu.csus.ecs.pc2.core.model.Run;
 public class JudgementJSON extends JSONUtilities {
 
     public String createJSON(IInternalContest contest, Run run) {
+        
+        // TODO refactor
+        
+        //        id  ID  yes     no  CCS     identifier of the judgement
+        //        submission_id   ID  yes     no  CCS     identifier of the submission judged
+        //        judgement_type_id   ID  yes     yes     CCS     the verdict of this judgement
+        //        start_time  TIME    yes     no  CCS     absolute time when judgement started
+        
+        //        start_contest_time  RELTIME     yes     no  CCS     contest relative time when judgement started
+        //        end_time    TIME    yes     yes     CCS     absolute time when judgement completed
+        //        end_contest_time    RELTIME     yes     yes     CCS     contest relative time when judgement completed
+        
+        
         //    id 
         //    submission_id 
         //    judgement_type_id 

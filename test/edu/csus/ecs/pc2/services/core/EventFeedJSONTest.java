@@ -150,6 +150,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
                 EventFeedJSON.SUBMISSION_KEY + ": 12", //
 
                 EventFeedJSON.TEAM_MEMBERS_KEY + ":  300", //
+                
+//                EventFeedJSON.ORGANIZATION_KEY + ":  12", 
+//                EventFeedJSON.AWARD_KEY + ":  1", //
         };
 
         for (String line : eventCounts) {
@@ -352,7 +355,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getTeamJSON(contest, account[0]);
         json = wrapBrackets(json);
 
-        System.out.println("debug team json = "+json);
+//        System.out.println("debug team json = "+json);
 
         //  debug team json = {"id":"1", "icpc_id":"3001", "name":"team1", "organization_id": null, "group_id":"1024"}
 
@@ -424,7 +427,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         int problemNumber = eventFeedJSON.getProblemIndex(contest, clarification.getProblemId());
         assertEquals("Expected problem number ", 1, problemNumber);
 
-        // System.out.println("debug json = "+json);
+//         System.out.println("debug clar json = "+json);
         
         // debug json = {"id":"5", "from_team_id":"5", "to_team_id":"5", "reply_to_id": null, "problem_id":"1", "text":"Why #2? from team5", "start_time": null, "start_contest_time":"0.000"}
 
@@ -435,7 +438,12 @@ public class EventFeedJSONTest extends AbstractTestCase {
         assertJSONStringValue(json,  "problem_id", "1" );
         assertJSONStringValue(json,  "id", "5" );
         assertJSONStringValue(json,  "from_team_id", "5" );
-        assertJSONStringValue(json,  "to_team_id", "5" );
+        assertJSONNullValue(json,  "to_team_id");
+    }
+
+    private void assertJSONNullValue(String json, String fieldname) {
+        String regex = "\"" + fieldname + "\":null";
+        assertEquals("Expected to find JSON string syntax, double quoted value, for field "+fieldname, 1, matchCount(regex, json));
     }
 
     /**

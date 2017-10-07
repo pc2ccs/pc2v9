@@ -305,6 +305,15 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
+    /**
+     * Add an event prefix to the buffer.
+     * 
+     * Adds event, (event) id, and data keyword to string.
+     * 
+     * @param stringBuilder
+     * @param eventType
+     * @param op
+     */
     private void appendEventHead(StringBuilder stringBuilder, String eventType, String op) {
 
         // {"type": "<event type>", "id": "<id>", "op": "<type of operation>", "data": <JSON data for element> }
@@ -437,7 +446,6 @@ public class EventFeedJSON extends JSONUtilities {
     private String getJudgementJSON(IInternalContest contest, Run run) {
         return judgementJSON.createJSON(contest, run);
     }
-
 
     /**
      * Return test cases.

@@ -26,7 +26,8 @@ public class LanguageJSON extends JSONUtilities {
         
         return stripOuterJSON(childNode.toString());
         
-//        
+//        TODO remove old code
+        
 //        StringBuilder stringBuilder = new StringBuilder();
 //
 //        appendPair(stringBuilder, "id", Integer.toString(languageNumber));

@@ -48,7 +48,9 @@ public class TeamJSON extends JSONUtilities  {
         childNode.add(element);
         
         return stripOuterJSON(childNode.toString());
-//
+        
+//  TODO remove old code
+        
 //        StringBuilder stringBuilder = new StringBuilder();
 //
 //        ClientId clientId = account.getClientId();
