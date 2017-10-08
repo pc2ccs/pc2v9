@@ -618,4 +618,8 @@ public class EventFeedJSON extends JSONUtilities {
     public long getEventIdSequence() {
         return eventIdSequence;
     }
+    
+    public void setEventIdSequence(long eventIdSequence) {
+        this.eventIdSequence = eventIdSequence;
+    }
 }

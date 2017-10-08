@@ -113,13 +113,49 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
     private TeamJSON teamJSON = new TeamJSON();
 
     private TeamMemberJSON teamMemberJSON = new TeamMemberJSON();
-
+    
+    private EventFeedLog eventFeedLog;
 
     public EventFeedStreamer(OutputStream outputStream, IInternalContest inContest, IInternalController inController) {
         this.os = outputStream;
         this.contest = inContest;
         this.log = inController.getLog();
         registerListeners(contest);
+        
+        try {
+            eventFeedLog = new EventFeedLog(contest);
+            sendEventsFromEventFeedLog();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // TODO: handle exception
+        }
+     
+    }
+
+    /**
+     * Send all events from log to consumer.
+     * @param 
+     */
+    private void sendEventsFromEventFeedLog() {
+        
+        /**
+         * Number of lines/events in log.
+         */
+        String[] lines = eventFeedLog.getLogLines();
+        
+        try {
+            if (lines.length > 0){
+                eventFeedJSON.setEventIdSequence(lines.length);
+                for (String line : lines) {
+                    sendJSON(line);
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            // TODO: handle exception
+        }
+        
     }
 
     @Override
@@ -539,6 +575,14 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
             e.printStackTrace(System.err);
             // TODO: handle exception
         }
+        
+        try {
+            eventFeedLog.writeEvent(string);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // TODO: handle exception
+        } 
+        
     }
 
     public long getEventId() {

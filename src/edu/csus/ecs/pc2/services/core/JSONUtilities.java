@@ -321,7 +321,7 @@ public class JSONUtilities {
 
         // {"type": "<event type>", "id": "<id>", "op": "<type of operation>", "data": <JSON data for element> }
 
-        stringBuilder.append("{ ");
+        stringBuilder.append("{");
         appendPair(stringBuilder, "event", eventName);
         stringBuilder.append(", ");
 
