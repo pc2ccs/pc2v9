@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -21,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -296,6 +298,61 @@ public class JSONTool {
             element.put("rgb", problem.getColorRGB());
         }
         element.put("test_data_count", problem.getNumberTestCases());
+        return element;
+    }
+
+    /**
+     * Return wall time for input elapsed time in ms.
+     *
+     * Calculates based on elapsed time plus contest start time
+     *
+     * @param contest
+     * @param elapsedMS - elapsed ms when submission submitted
+     * @return wall time for run.
+     */
+    private Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
+
+        ContestTime time = contest.getContestTime();
+        if (time.getElapsedMins() > 0) {
+
+            Calendar contestStart = time.getContestStartTime();
+
+            long ms = contestStart.getTimeInMillis();
+
+            ms += elapsedMS; // add elapsed time
+
+            // create wall time.
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(ms);
+            return calendar;
+
+        } else {
+            return null;
+        }
+
+    }
+
+    public JsonNode convertJudgementToJSON(Run submission) {
+        // {"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
+        // "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"}
+        ObjectNode element = mapper.createObjectNode();
+        element.put("id", submission.getElementId().toString());
+        element.put("submission_id", submission.getElementId().toString());
+        // TODO I think this is suppose to be when the judge retrieves it, not the submission time.
+        element.put("start_time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
+        element.put("start_contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
+        if (submission.isJudged()) {
+            JudgementRecord judgementRecord = submission.getJudgementRecord();
+            // only print it's judgement and end times if this is the final judgement
+            if (!judgementRecord.isPreliminaryJudgement()) {
+                element.put("judgement_type_id", judgementRecord.getElementId().toString());
+                // TODO verify these times are consistent
+                Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime()*60000);
+                element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
+                // when judged is in minutes convert to milliseconds
+                element.put("end_contest_time", ContestTime.formatTimeMS(judgementRecord.getWhenJudgedTime()*60000));
+            }
+        }
         return element;
     }
 }
