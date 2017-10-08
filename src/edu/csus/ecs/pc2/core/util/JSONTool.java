@@ -6,8 +6,8 @@ package edu.csus.ecs.pc2.core.util;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.TimeZone;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
@@ -307,7 +308,8 @@ public class JSONTool {
      * Calculates based on elapsed time plus contest start time
      *
      * @param contest
-     * @param elapsedMS - elapsed ms when submission submitted
+     * @param elapsedMS
+     *            - elapsed ms when submission submitted
      * @return wall time for run.
      */
     private Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
@@ -323,6 +325,7 @@ public class JSONTool {
 
             // create wall time.
             Calendar calendar = Calendar.getInstance();
+            calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
             calendar.setTimeInMillis(ms);
             return calendar;
 
@@ -332,7 +335,7 @@ public class JSONTool {
 
     }
 
-    public JsonNode convertJudgementToJSON(Run submission) {
+    public ObjectNode convertJudgementToJSON(Run submission) {
         // {"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
         // "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"}
         ObjectNode element = mapper.createObjectNode();
@@ -348,16 +351,32 @@ public class JSONTool {
             if (!judgementRecord.isPreliminaryJudgement()) {
                 element.put("judgement_type_id", getKey(judgement));
                 // TODO verify these times are consistent
-                Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime()*60000);
+                Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
                 element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
                 // when judged is in minutes convert to milliseconds
-                element.put("end_contest_time", ContestTime.formatTimeMS(judgementRecord.getWhenJudgedTime()*60000));
+                element.put("end_contest_time", ContestTime.formatTimeMS(judgementRecord.getWhenJudgedTime() * 60000));
             }
         }
         return element;
     }
-    
+
     public String getKey(Judgement judgement) {
         return judgement.getAcronym();
+    }
+
+    public ObjectNode convertToJSON(RunTestCase[] runTestCases, int ordinal) {
+        // {"id":"1312","judgement_id":"189549","ordinal":28,"judgement_type_id":"TLE",
+        // "time":"2014-06-25T11:22:42.420+01","contest_time":"1:22:42.420"}
+        RunTestCase run = runTestCases[ordinal];
+        ObjectNode element = mapper.createObjectNode();
+        element.put("id", run.getElementId().toString());
+        element.put("judgement_id", run.getRunElementId().toString());
+        element.put("ordinal", ordinal);
+        element.put("judgement_type_id", getKey(model.getJudgement(run.getJudgementId())));
+        // TODO this is the local time on the judge
+        element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
+        // note this is the contest_time as seen on the judge
+        element.put("contest_time", ContestTime.formatTimeMS(run.getConestTimeMS()));
+        return element;
     }
 }

@@ -1505,14 +1505,16 @@ public class InternalContest implements IInternalContest {
         } // else - ok
 
         boolean manualReview = getProblem(theRun.getProblemId()).isManualReview();
-        
-        runList.updateRun(theRun, judgementRecord, manualReview); // this sets run to JUDGED
+
+        // pass in the orignal run which has the testCases
+        runList.updateRun(run, judgementRecord, manualReview); // this sets run to JUDGED and saves the testCases
         
         runResultFilesList.add(theRun, judgementRecord, runResultFiles);
         
         if (whoCheckedOut != null) {
             runCheckOutList.remove(run.getElementId());
         }
+        // the new run with testCases
         theRun = runList.get(run);
 
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, theRun, null, null);

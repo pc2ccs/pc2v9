@@ -56,6 +56,7 @@ import edu.csus.ecs.pc2.services.web.JudgementTypeService;
 import edu.csus.ecs.pc2.services.web.LanguageService;
 import edu.csus.ecs.pc2.services.web.OrganizationService;
 import edu.csus.ecs.pc2.services.web.ProblemService;
+import edu.csus.ecs.pc2.services.web.RunService;
 import edu.csus.ecs.pc2.services.web.ScoreboardService;
 import edu.csus.ecs.pc2.services.web.StarttimeService;
 import edu.csus.ecs.pc2.services.web.SubmissionService;
@@ -350,6 +351,8 @@ public class WebServer implements UIPlugin {
         showMessage("Starting /problems web service");
         resConfig.register(new JudgementService(getContest(), getController()));
         showMessage("Starting /judgements web service");
+        resConfig.register(new RunService(getContest(), getController()));
+        showMessage("Starting /runs web service");
 
         return resConfig;
     }
