@@ -27,32 +27,7 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 // TODO for all sections pass in Key rather than hard coded inside method
 public class EventFeedJSON extends JSONUtilities {
 
-    public static final String TEAM_MEMBERS_KEY = "team-members";
-
-    public static final String CLARIFICATIONS_KEY = "clarifications";
-
-    public static final String GROUPS_KEY = "groups";
-
-    public static final String JUDGEMENT_TYPE_KEY = "judgement-types";
-
-    public static final String TEAM_KEY = "teams";
-
-    public static final String SUBMISSION_KEY = "submissions";
-
-    public static final String RUN_KEY = "runs";
-
-    public static final String CONTEST_KEY = "contests";
-
-    public static final String LANGUAGE_KEY = "languages";
-
-    public static final String PROBLEM_KEY = "problems";
-
-    public static final String JUDGEMENT_KEY = "judgements";
-    
-    public static final String AWARD_KEY = "awards";
-    
-    public static final String ORGANIZATION_KEY = "organizations";
-    
+  
     private JudgementTypeJSON judgementTypeJSON = new JudgementTypeJSON();
 
     private LanguageJSON languageJSON = new LanguageJSON();
@@ -79,6 +54,14 @@ public class EventFeedJSON extends JSONUtilities {
 
     private RunJSON runJSON = new RunJSON();
     
+    
+    /**
+    * Event Id Sequence.
+    * 
+    * @see #nextEventId()
+    */
+   protected long eventIdSequence = 0;
+    
     /**
      * Start event id.
      * 
@@ -94,14 +77,6 @@ public class EventFeedJSON extends JSONUtilities {
      */
     private String eventFeedList = null;
 
-    /**
-     * Event Id Sequence.
-     * 
-     * @see #nextEventId()
-     */
-    private long eventIdSequence = 0;
-
-
     public String getContestJSON(IInternalContest contest) {
 
         if (!isPastStartEvent()) {
@@ -113,13 +88,7 @@ public class EventFeedJSON extends JSONUtilities {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        appendEventHead(stringBuilder, CONTEST_KEY, "create");
-
-        stringBuilder.append("{ ");
-        stringBuilder.append(getContestJSONFields(contest));
-        stringBuilder.append("}");
-
-        stringBuilder.append("}");
+        appendJSONEvent(stringBuilder, CONTEST_KEY, eventIdSequence, EventFeedOperation.CREATE, getContestJSONFields(contest));
         stringBuilder.append(NL);
         return stringBuilder.toString();
 
@@ -142,13 +111,7 @@ public class EventFeedJSON extends JSONUtilities {
 
             if (isPastStartEvent()) {
 
-                appendEventHead(stringBuilder, JUDGEMENT_TYPE_KEY, "create");
-
-                stringBuilder.append("{ ");
-                stringBuilder.append(getJudgementTypeJSON(contest, judgement));
-                stringBuilder.append("} ");
-
-                stringBuilder.append("} ");
+                appendJSONEvent(stringBuilder, JUDGEMENT_TYPE_KEY, eventIdSequence, EventFeedOperation.CREATE, getJudgementTypeJSON(contest, judgement));
                 stringBuilder.append(NL);
             }
 
@@ -177,13 +140,7 @@ public class EventFeedJSON extends JSONUtilities {
 
             if (isPastStartEvent()) {
 
-                appendEventHead(stringBuilder, LANGUAGE_KEY, "create");
-
-                stringBuilder.append("{ ");
-                stringBuilder.append(getLanguageJSON(contest, language, id));
-                stringBuilder.append("}");
-
-                stringBuilder.append("}");
+                appendJSONEvent(stringBuilder, LANGUAGE_KEY, eventIdSequence, EventFeedOperation.CREATE, getLanguageJSON(contest, language, id));
                 stringBuilder.append(NL);
             }
 
@@ -215,14 +172,7 @@ public class EventFeedJSON extends JSONUtilities {
         for (Problem problem : problems) {
 
             if (isPastStartEvent()) {
-
-                appendEventHead(stringBuilder, PROBLEM_KEY, "create");
-
-                stringBuilder.append("{ ");
-                stringBuilder.append(getProblemJSON(contest, problem, id));
-                stringBuilder.append("}");
-
-                stringBuilder.append("}");
+                appendJSONEvent(stringBuilder, PROBLEM_KEY, eventIdSequence, EventFeedOperation.CREATE, getProblemJSON(contest, problem, id));
                 stringBuilder.append(NL);
             }
             id++;
@@ -245,11 +195,7 @@ public class EventFeedJSON extends JSONUtilities {
 
             if (isPastStartEvent()) {
 
-                appendEventHead(stringBuilder, GROUPS_KEY, "create");
-
-                stringBuilder.append(getGroupJSON(contest, group));
-                
-                stringBuilder.append("}");
+                appendJSONEvent(stringBuilder, GROUPS_KEY, eventIdSequence, EventFeedOperation.CREATE, getGroupJSON(contest, group));
                 stringBuilder.append(NL);
             }
         }
@@ -291,13 +237,7 @@ public class EventFeedJSON extends JSONUtilities {
 
             if (isPastStartEvent()) {
 
-                appendEventHead(stringBuilder, TEAM_KEY, "create");
-
-                stringBuilder.append("{ ");
-                stringBuilder.append(getTeamJSON(contest, account));
-                stringBuilder.append("}");
-
-                stringBuilder.append("}");
+                appendJSONEvent(stringBuilder, TEAM_KEY, eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
                 stringBuilder.append(NL);
             }
         }
@@ -305,32 +245,7 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
-    /**
-     * Add an event prefix to the buffer.
-     * 
-     * Adds event, (event) id, and data keyword to string.
-     * 
-     * @param stringBuilder
-     * @param eventType
-     * @param op
-     */
-    private void appendEventHead(StringBuilder stringBuilder, String eventType, String op) {
 
-        // {"type": "<event type>", "id": "<id>", "op": "<type of operation>", "data": <JSON data for element> }
-
-        stringBuilder.append("{ ");
-        appendPair(stringBuilder, "event", eventType);
-        stringBuilder.append(", ");
-
-        appendPair(stringBuilder, "id", getEventId(eventIdSequence));
-        stringBuilder.append(", ");
-
-        appendPair(stringBuilder, "op", op);
-        stringBuilder.append(", ");
-
-        stringBuilder.append("\"data\": ");
-
-    }
 
     public String getTeamJSON(IInternalContest contest, Account account) {
         return teamJSON.createJSON(contest, account);
@@ -354,14 +269,7 @@ public class EventFeedJSON extends JSONUtilities {
                 for (String teamMemberName : names) {
 
                     if (isPastStartEvent()) {
-
-                        appendEventHead(stringBuilder, TEAM_MEMBERS_KEY, "create");
-
-                        stringBuilder.append("{ ");
-                        stringBuilder.append(getTeamMemberJSON(contest, account, teamMemberName));
-                        stringBuilder.append("}");
-
-                        stringBuilder.append("}");
+                        appendJSONEvent(stringBuilder, TEAM_MEMBERS_KEY, eventIdSequence, EventFeedOperation.CREATE, getTeamMemberJSON(contest, account, teamMemberName));
                         stringBuilder.append(NL);
                     }
                 }
@@ -391,13 +299,7 @@ public class EventFeedJSON extends JSONUtilities {
 
             if (isPastStartEvent()) {
 
-                appendEventHead(stringBuilder, SUBMISSION_KEY, "create");
-
-                stringBuilder.append("{ ");
-                stringBuilder.append(getSubmissionJSON(contest, run));
-                stringBuilder.append("}");
-
-                stringBuilder.append("}");
+                appendJSONEvent(stringBuilder, SUBMISSION_KEY, eventIdSequence, EventFeedOperation.CREATE, getSubmissionJSON(contest, run));
                 stringBuilder.append(NL);
             }
         }
@@ -427,13 +329,7 @@ public class EventFeedJSON extends JSONUtilities {
 
                 if (isPastStartEvent()) {
 
-                    appendEventHead(stringBuilder, JUDGEMENT_KEY, "create");
-
-                    stringBuilder.append("{ ");
-                    stringBuilder.append(getJudgementJSON(contest, run));
-                    stringBuilder.append("}");
-
-                    stringBuilder.append("}");
+                    appendJSONEvent(stringBuilder, JUDGEMENT_KEY, eventIdSequence, EventFeedOperation.CREATE, getJudgementJSON(contest, run));
                     stringBuilder.append(NL);
                 }
 
@@ -461,16 +357,8 @@ public class EventFeedJSON extends JSONUtilities {
         for (Run run : runs) {
 
             if (isPastStartEvent()) {
-
-                appendEventHead(stringBuilder, RUN_KEY, "create");
-
                 RunResultFiles files = null; // TODO CLICS must fetch files to get main file name, or put mainfile name into Run
-
-                stringBuilder.append("{ ");
-                stringBuilder.append(getRunJSON(contest, run, files));
-                stringBuilder.append("}");
-
-                stringBuilder.append("}");
+                appendJSONEvent(stringBuilder, RUN_KEY, eventIdSequence, EventFeedOperation.CREATE, getRunJSON(contest, run, files));
                 stringBuilder.append(NL);
             }
         }
@@ -496,13 +384,7 @@ public class EventFeedJSON extends JSONUtilities {
 
             if (isPastStartEvent()) {
 
-                appendEventHead(stringBuilder, CLARIFICATIONS_KEY, "create");
-
-                stringBuilder.append("{ ");
-                stringBuilder.append(getClarificationJSON(contest, clarification));
-                stringBuilder.append("}");
-
-                stringBuilder.append("}");
+                appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification));
                 stringBuilder.append(NL);
             }
         }
@@ -704,7 +586,7 @@ public class EventFeedJSON extends JSONUtilities {
      * 
      * @return true if no {@link #startEventId} defined, or if past {@link #startEventId} 
      */
-    boolean isPastStartEvent() {
+    public boolean isPastStartEvent() {
 
         if (nextEventId().equals(getStartEventId()) && !pastStartEvent) {
             pastStartEvent = true;
@@ -732,5 +614,8 @@ public class EventFeedJSON extends JSONUtilities {
     public String getEventFeedList() {
         return eventFeedList;
     }
-
+    
+    public long getEventIdSequence() {
+        return eventIdSequence;
+    }
 }

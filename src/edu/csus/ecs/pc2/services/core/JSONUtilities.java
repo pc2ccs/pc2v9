@@ -18,6 +18,32 @@ import edu.csus.ecs.pc2.core.model.Problem;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class JSONUtilities {
+    
+    public static final String TEAM_MEMBERS_KEY = "team-members";
+
+    public static final String CLARIFICATIONS_KEY = "clarifications";
+
+    public static final String GROUPS_KEY = "groups";
+
+    public static final String JUDGEMENT_TYPE_KEY = "judgement-types";
+
+    public static final String TEAM_KEY = "teams";
+
+    public static final String SUBMISSION_KEY = "submissions";
+
+    public static final String RUN_KEY = "runs";
+
+    public static final String CONTEST_KEY = "contests";
+
+    public static final String LANGUAGE_KEY = "languages";
+
+    public static final String PROBLEM_KEY = "problems";
+
+    public static final String JUDGEMENT_KEY = "judgements";
+    
+    public static final String AWARD_KEY = "awards";
+    
+    public static final String ORGANIZATION_KEY = "organizations";
 
     /**
      * ISO 8601 Date format for SimpleDateFormat.
@@ -264,4 +290,56 @@ public class JSONUtilities {
         }
         return false;
     }
+    
+    
+    /**
+     * get event id. 
+     * 
+     * @param sequenceNumber ascending number
+     * @return event Id
+     */
+    public String getEventId(long sequenceNumber) {
+        return "pc2-" + sequenceNumber;
+    }
+    
+    /**
+     * Add an event prefix to the buffer.
+     * 
+     * Adds event, (event) id, and data keyword to string.
+     * 
+     * @param stringBuilder
+     * @param eventType
+     * @param op
+     */
+    public String getJSONEvent(String eventName, long eventSequence, EventFeedOperation operation, String data) {
+        StringBuilder stringBuilder = new StringBuilder();
+        appendJSONEvent(stringBuilder, eventName, eventSequence, operation, data);
+        return stringBuilder.toString();
+    }
+
+    public void appendJSONEvent(StringBuilder stringBuilder, String eventName, long eventSequence, EventFeedOperation operation, String data) {
+
+        // {"type": "<event type>", "id": "<id>", "op": "<type of operation>", "data": <JSON data for element> }
+
+        stringBuilder.append("{ ");
+        appendPair(stringBuilder, "event", eventName);
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "id", getEventId(eventSequence));
+        stringBuilder.append(", ");
+
+        appendPair(stringBuilder, "op", operation.toString());
+        stringBuilder.append(", ");
+
+        stringBuilder.append("\"data\": ");
+
+        stringBuilder.append("{");
+        stringBuilder.append(data);
+        stringBuilder.append("}");
+
+        stringBuilder.append("}");
+    }
+
+
+
 }

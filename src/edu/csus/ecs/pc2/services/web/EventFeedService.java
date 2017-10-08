@@ -132,7 +132,7 @@ public class EventFeedService {
                     EventFeedStreamer eventFeedSteamer = new EventFeedStreamer(os, contest, controller);
                     
                     // Start streaming events to stream/client/user
-                    eventFeedSteamer.run();
+                    eventFeedSteamer.writeStartupEvents();
                     
                 } catch (Exception e) {
                     System.err.println("Warning (check log) in write " + e.getMessage());

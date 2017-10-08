@@ -11,6 +11,8 @@ public class OrganizationJSON {
 
     public String createJSON(IInternalContest contest) {
         
+        // SOMEDAY add code to getOrganizationJSON
+        
         //    Name    Type    Required?   Nullable?   @WF     Description
         //    id  ID  yes     no  provided by CCS     identifier of the organization
         //    icpc_id     string  no  yes     provided by CCS     external identifier from ICPC CMS

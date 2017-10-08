@@ -762,35 +762,35 @@ public class EventFeedJSONTest extends AbstractTestCase {
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
         String elist = EventFeedJSON.AWARD_KEY + "," + // 
-                EventFeedJSON.CLARIFICATIONS_KEY + "," + // 
-                EventFeedJSON.CONTEST_KEY + "," + // 
-                EventFeedJSON.GROUPS_KEY + "," + // 
-                EventFeedJSON.JUDGEMENT_KEY + "," + // 
-                EventFeedJSON.JUDGEMENT_KEY + "," + // 
-                EventFeedJSON.JUDGEMENT_TYPE_KEY + "," + // 
-                EventFeedJSON.LANGUAGE_KEY + "," + // 
-                EventFeedJSON.CONTEST_KEY + "," + // 
-                EventFeedJSON.ORGANIZATION_KEY + "," + // 
-                EventFeedJSON.TEAM_MEMBERS_KEY + "," + // 
-                EventFeedJSON.PROBLEM_KEY + "," + // 
-                EventFeedJSON.RUN_KEY + "," + // 
-                EventFeedJSON.RUN_KEY + "," + // 
-                EventFeedJSON.SUBMISSION_KEY + "," + // 
-                EventFeedJSON.CLARIFICATIONS_KEY + "," + // 
-                EventFeedJSON.TEAM_KEY + "," + // 
-                EventFeedJSON.TEAM_MEMBERS_KEY;
+                JSONUtilities.CLARIFICATIONS_KEY + "," + // 
+                JSONUtilities.CONTEST_KEY + "," + // 
+                JSONUtilities.GROUPS_KEY + "," + // 
+                JSONUtilities.JUDGEMENT_KEY + "," + // 
+                JSONUtilities.JUDGEMENT_KEY + "," + // 
+                JSONUtilities.JUDGEMENT_TYPE_KEY + "," + // 
+                JSONUtilities.LANGUAGE_KEY + "," + // 
+                JSONUtilities.CONTEST_KEY + "," + // 
+                JSONUtilities.ORGANIZATION_KEY + "," + // 
+                JSONUtilities.TEAM_MEMBERS_KEY + "," + // 
+                JSONUtilities.PROBLEM_KEY + "," + // 
+                JSONUtilities.RUN_KEY + "," + // 
+                JSONUtilities.RUN_KEY + "," + // 
+                JSONUtilities.SUBMISSION_KEY + "," + // 
+                JSONUtilities.CLARIFICATIONS_KEY + "," + // 
+                JSONUtilities.TEAM_KEY + "," + // 
+                JSONUtilities.TEAM_MEMBERS_KEY;
 
         eventFeedJSON.setEventFeedList(elist);
         String json = eventFeedJSON.createJSON(data.getContest());
         assertNotNull(json);
 
-        assertCountEvent(2, EventFeedJSON.CONTEST_KEY, json);
-        assertCountEvent(120, EventFeedJSON.CLARIFICATIONS_KEY, json);
-        assertCountEvent(600, EventFeedJSON.TEAM_MEMBERS_KEY, json);
-        assertCountEvent(120, EventFeedJSON.TEAM_KEY, json);
-        assertCountEvent(6, EventFeedJSON.LANGUAGE_KEY, json);
-        assertCountEvent(24, EventFeedJSON.JUDGEMENT_KEY, json);
-        assertCountEvent(9, EventFeedJSON.JUDGEMENT_TYPE_KEY, json);
+        assertCountEvent(2, JSONUtilities.CONTEST_KEY, json);
+        assertCountEvent(120, JSONUtilities.CLARIFICATIONS_KEY, json);
+        assertCountEvent(600, JSONUtilities.TEAM_MEMBERS_KEY, json);
+        assertCountEvent(120, JSONUtilities.TEAM_KEY, json);
+        assertCountEvent(6, JSONUtilities.LANGUAGE_KEY, json);
+        assertCountEvent(24, JSONUtilities.JUDGEMENT_KEY, json);
+        assertCountEvent(9, JSONUtilities.JUDGEMENT_TYPE_KEY, json);
     }
 
     public void testEventTypeNotFound() throws Exception {
