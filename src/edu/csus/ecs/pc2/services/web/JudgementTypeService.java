@@ -82,7 +82,7 @@ public class JudgementTypeService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < judgements.length; i++) {
             Judgement judgement = judgements[i];
-            if (judgement.getElementId().toString().equals(judgementId)) {
+            if (jsonTool.getKey(judgement).equals(judgementId)) {
                 childNode.add(jsonTool.convertToJSON(judgement));
             }
         }
