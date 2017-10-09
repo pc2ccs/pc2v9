@@ -575,7 +575,7 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     /**
-     * Increment event id and test whether past start event id.
+     * Increment event (feed) id and test whether past start event id.
      * 
      * If no {@link #startEventId} defined then returns true;
      * If {@link #startEventId} defined will increment event id and

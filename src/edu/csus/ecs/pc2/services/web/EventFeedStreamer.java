@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
@@ -26,10 +27,11 @@ import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementEvent;
+import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.services.core.ClarificationJSON;
@@ -41,12 +43,9 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.core.JudgementJSON;
 import edu.csus.ecs.pc2.services.core.JudgementTypeJSON;
 import edu.csus.ecs.pc2.services.core.LanguageJSON;
-import edu.csus.ecs.pc2.services.core.OrganizationJSON;
 import edu.csus.ecs.pc2.services.core.ProblemJSON;
-import edu.csus.ecs.pc2.services.core.RunJSON;
 import edu.csus.ecs.pc2.services.core.SubmissionJSON;
 import edu.csus.ecs.pc2.services.core.TeamJSON;
-import edu.csus.ecs.pc2.services.core.TeamMemberJSON;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -56,7 +55,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
+public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlugin {
 
     private static final long serialVersionUID = 2076470194640278897L;
 
@@ -100,21 +99,35 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
 
     private GroupJSON groupJSON = new GroupJSON();
 
-    private JudgementJSON judgementJSON = new JudgementJSON();
-
-    private OrganizationJSON organizationJSON = new OrganizationJSON();
+// TODO     private OrganizationJSON organizationJSON = new OrganizationJSON();
 
     private ProblemJSON problemJSON = new ProblemJSON();
+    
+    /**
+     * Run Judgement JSON.
+     */
+    private JudgementJSON judgementJSON = new JudgementJSON();
 
-    private RunJSON runJSON = new RunJSON();
+    /**
+     * Test Case JSON
+     */
+//  private RunJSON runJSON = new RunJSON(); // TODO add test case JSON
 
+    /**
+     * New Run JSON
+     */
     private SubmissionJSON submissionJSON = new SubmissionJSON();
 
     private TeamJSON teamJSON = new TeamJSON();
 
-    private TeamMemberJSON teamMemberJSON = new TeamMemberJSON();
+//    private TeamMemberJSON teamMemberJSON = new TeamMemberJSON(); TODO add team numbers JSON
     
     private EventFeedLog eventFeedLog;
+
+    /**
+     * Last time4 event sent to stream.
+     */
+    private long lastSent;
 
     public EventFeedStreamer(OutputStream outputStream, IInternalContest inContest, IInternalController inController) {
         this.os = outputStream;
@@ -127,7 +140,7 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
             sendEventsFromEventFeedLog();
         } catch (Exception e) {
             e.printStackTrace();
-            // TODO: handle exception
+            log.log(Log.WARNING, "Problem initializing event feed log", e);
         }
      
     }
@@ -153,7 +166,8 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
             
         } catch (Exception e) {
             e.printStackTrace();
-            // TODO: handle exception
+            log.log(Log.WARNING, "Problem sending JSON from event feed log", e);
+
         }
         
     }
@@ -194,7 +208,7 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
         inContest.addContestInformationListener(contestInformationListener);
         inContest.addContestTimeListener(contestTimeListener);
 
-        // TODO CLICS code CCS ensure that commented out listeners are not needed.
+        // SOMEDAY CLICS code CCS ensure that commented out listeners are not needed.
         // inContest.addMessageListener(new MessageListener());
         // inContest.addSiteListener(new SiteListener());
         // inContest.addConnectionListener(new ConnectionListener());
@@ -214,28 +228,41 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
     protected class AccountListener implements IAccountListener {
 
         public void accountAdded(AccountEvent accountEvent) {
-            Account account = accountEvent.getAccount();
-            if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                sendJSON(eventFeedJSON.getTeamJSON(contest, account));
+            if (eventFeedJSON.isPastStartEvent()) {
+                Account account = accountEvent.getAccount();
+                if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                    String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, teamJSON.createJSON(contest, account));
+                    sendJSON(json + NL);
+                    
+                    // TODO send team members info
+                    
+                }
             }
         }
 
-        private boolean isTeam(Account account) {
-            return account.getClientId().getClientType().equals(ClientType.Type.TEAM);
-        }
+    
 
         public void accountModified(AccountEvent accountEvent) {
-            Account account = accountEvent.getAccount();
-            if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, account));
+
+            if (eventFeedJSON.isPastStartEvent()) {
+                Account account = accountEvent.getAccount();
+                if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                    String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, teamJSON.createJSON(contest, account));
+                    sendJSON(json + NL);
+                    
+                    // TODO send team members info
+                }
             }
         }
 
         public void accountsAdded(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
             for (Account account : accounts) {
-                if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                    // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, account));
+                if (eventFeedJSON.isPastStartEvent()) {
+                    if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                        String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, teamJSON.createJSON(contest, account));
+                        sendJSON(json + NL);
+                    }
                 }
             }
         }
@@ -244,14 +271,21 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
             Account[] accounts = accountEvent.getAccounts();
             Arrays.sort(accounts, new AccountComparator());
             for (Account account : accounts) {
-                if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                    // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, account));
+                if (eventFeedJSON.isPastStartEvent()) {
+                    if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                        String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, teamJSON.createJSON(contest, account));
+                        sendJSON(json + NL);
+                    }
                 }
             }
         }
 
         public void accountsRefreshAll(AccountEvent accountEvent) {
             // ignore
+        }
+        
+        private boolean isTeam(Account account) {
+            return account.getClientId().getClientType().equals(ClientType.Type.TEAM);
         }
     }
 
@@ -262,28 +296,45 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
     protected class RunListener implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            Run run = event.getRun();
-            Account account = contest.getAccount(run.getSubmitter());
-            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
-                // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, run));
+            if (eventFeedJSON.isPastStartEvent()) {
+                Run run = event.getRun();
+                Account account = contest.getAccount(run.getSubmitter());
+                if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
+                    
+                    String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, submissionJSON.createJSON(contest, run));
+                    sendJSON(json + NL);
+                }
             }
-            // NOTE for a run auto marked as DEL there will be no 
-            // XML until the judging Completed.
         }
 
         public void runChanged(RunEvent event) {
-            Run run = event.getRun();
-            RunStates status = run.getStatus();
-            Account account = contest.getAccount(run.getSubmitter());
-            // skip emitting xml for runs that are not completed or for an account that should not be shown
-            if (!account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) || !status.equals(RunStates.JUDGED)) {
-                return;
+            if (eventFeedJSON.isPastStartEvent()) {
+                Run run = event.getRun();
+                Account account = contest.getAccount(run.getSubmitter());
+                if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
+                    
+                    if (run.isJudged()){
+                        String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, judgementJSON.createJSON(contest, run));
+                        sendJSON(json + NL);
+                    } else {
+                        String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, submissionJSON.createJSON(contest, run));
+                        sendJSON(json + NL);
+                    }
+                }
             }
-            // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, run));
         }
 
         public void runRemoved(RunEvent event) {
-            runChanged(event);
+            
+            if (eventFeedJSON.isPastStartEvent()) {
+                Run run = event.getRun();
+                Account account = contest.getAccount(run.getSubmitter());
+                if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                    
+                    String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, judgementJSON.createJSON(contest, run));
+                    sendJSON(json + NL);
+                }
+            }
         }
 
         public void refreshRuns(RunEvent event) {
@@ -292,24 +343,34 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
     }
 
     /**
-     * Clarification Listener for EventFeeder.
+     * Clarification Listener.
+     * 
      * @author pc2@ecs.csus.edu 
      */
-
     protected class ClarificationListener implements IClarificationListener {
 
         public void clarificationAdded(ClarificationEvent event) {
-//            Clarification clarification = event.getClarification();
-            // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, clarification));
+            if (eventFeedJSON.isPastStartEvent()) {
+                Clarification clarification = event.getClarification();
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, clarificationJSON.createJSON(contest, clarification));
+                sendJSON(json + NL);
+            }
         }
 
         public void clarificationChanged(ClarificationEvent event) {
-//            Clarification clarification = event.getClarification();
-            // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, clarification));
+            if (eventFeedJSON.isPastStartEvent()) {
+                Clarification clarification = event.getClarification();
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, clarificationJSON.createJSON(contest, clarification));
+                sendJSON(json + NL);
+            }
         }
 
         public void clarificationRemoved(ClarificationEvent event) {
-            // ignore
+            if (eventFeedJSON.isPastStartEvent()) {
+                Clarification clarification = event.getClarification();
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, clarificationJSON.createJSON(contest, clarification));
+                sendJSON(json + NL);
+            }
         }
 
         public void refreshClarfications(ClarificationEvent event) {
@@ -325,19 +386,30 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
     protected class ProblemListener implements IProblemListener {
 
         public void problemAdded(ProblemEvent event) {
-//            Problem problem = event.getProblem();
-//            int problemNumber = getProblemNumber(problem);
-            // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, problem, problemNumber));
+            if (eventFeedJSON.isPastStartEvent()) {
+                Problem problem = event.getProblem();
+                int problemNumber = getProblemIndex(contest, problem.getElementId());
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, problemJSON.createJSON(contest, problem, problemNumber));
+                sendJSON(json + NL);
+            }
         }
 
         public void problemChanged(ProblemEvent event) {
-//            Problem problem = event.getProblem();
-//            int problemNumber = getProblemNumber(problem);
-            // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, problem, problemNumber));
+            if (eventFeedJSON.isPastStartEvent()) {
+                Problem problem = event.getProblem();
+                int problemNumber = getProblemIndex(contest, problem.getElementId());
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, problemJSON.createJSON(contest, problem, problemNumber));
+                sendJSON(json + NL);
+            }
         }
 
         public void problemRemoved(ProblemEvent event) {
-            // ignore
+            if (eventFeedJSON.isPastStartEvent()) {
+                Problem problem = event.getProblem();
+                int problemNumber = getProblemIndex(contest, problem.getElementId());
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, problemJSON.createJSON(contest, problem, problemNumber));
+                sendJSON(json + NL);
+            }
         }
 
         public void problemRefreshAll(ProblemEvent event) {
@@ -353,41 +425,61 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
     protected class LanguageListener implements ILanguageListener {
 
         public void languageAdded(LanguageEvent event) {
-//            Language language = event.getLanguage();
-//            int languageNumber = getLanguageNumber(language);
-            // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, language, languageNumber));
+            if (eventFeedJSON.isPastStartEvent()) {
+                Language language = event.getLanguage();
+                int languageNumber = getLanguageIndex(contest, language.getElementId());
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, languageJSON.createJSON(contest, language, languageNumber));
+                sendJSON(json + NL);
+            }
         }
 
         public void languageChanged(LanguageEvent event) {
-//            Language language = event.getLanguage();
-//            int languageNumber = getLanguageNumber(language);
-            // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, language, languageNumber));
+            if (eventFeedJSON.isPastStartEvent()) {
+                Language language = event.getLanguage();
+                int languageNumber = getLanguageIndex(contest, language.getElementId());
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, languageJSON.createJSON(contest, language, languageNumber));
+                sendJSON(json + NL);
+            }
         }
 
         public void languageRemoved(LanguageEvent event) {
-            // ignore
+            if (eventFeedJSON.isPastStartEvent()) {
+                Language language = event.getLanguage();
+                int languageNumber = getLanguageIndex(contest, language.getElementId());
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, languageJSON.createJSON(contest, language, languageNumber));
+                sendJSON(json + NL);
+            }
         }
 
-        public void languageRefreshAll(LanguageEvent event) {
-            // ignore
-        }
 
         @Override
         public void languagesAdded(LanguageEvent event) {
-//            Language[] languages = event.getLanguages();
-//            for (Language language : languages) {
-////                int languageNumber = getLanguageNumber(language);
-//                // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, language, languageNumber));
-//            }
+
+            Language[] languages = event.getLanguages();
+            for (Language language : languages) {
+                if (eventFeedJSON.isPastStartEvent()) {
+                    int languageNumber = getLanguageIndex(contest, language.getElementId());
+                    String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, languageJSON.createJSON(contest, language, languageNumber));
+                    sendJSON(json + NL);
+                }
+            }
         }
 
         @Override
         public void languagesChanged(LanguageEvent event) {
-//            Language[] languages = event.getLanguages();
-//            for (Language language : languages) {
-////                int languageNumber = getLanguageNumber(language);
-//                // TODO CLICS code sendJSON(eventFeedXML.createElement(contest, language, languageNumber));
-//            }
+            Language[] languages = event.getLanguages();
+            for (Language language : languages) {
+                if (eventFeedJSON.isPastStartEvent()) {
+                    int languageNumber = getLanguageIndex(contest, language.getElementId());
+                    String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, languageJSON.createJSON(contest, language, languageNumber));
+                    sendJSON(json + NL);
+                }
+            }
+        }
+        
+
+        public void languageRefreshAll(LanguageEvent event) {
+            // ignore
         }
     }
 
@@ -485,7 +577,7 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
     }
 
     /**
-     * Listener.
+     * Contest Time Listener.
      * 
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
@@ -493,18 +585,26 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
 
         @Override
         public void contestTimeAdded(ContestTimeEvent event) {
-            contestTimeChanged(event);
+            if (eventFeedJSON.isPastStartEvent()) {
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, contestJSON.createJSON(contest));
+                sendJSON(json + NL);
+            }
         }
 
         @Override
         public void contestTimeRemoved(ContestTimeEvent event) {
-            contestTimeChanged(event);
+            if (eventFeedJSON.isPastStartEvent()) {
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, contestJSON.createJSON(contest));
+                sendJSON(json + NL);
+            }
         }
 
         @Override
         public void contestTimeChanged(ContestTimeEvent event) {
-//            ContestInformation info = contest.getContestInformation();
-            // TODO CLICS code sendJSON(eventFeedXML.createInfoElement(contest, info));
+            if (eventFeedJSON.isPastStartEvent()) {
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, contestJSON.createJSON(contest));
+                sendJSON(json + NL);
+            }
         }
 
         @Override
@@ -533,32 +633,39 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
     }
 
     /**
+     * Listener. 
      * 
-     * @author pc2@ecs.csus.edu
+     * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
     protected class ContestInformationListener implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
-//            ContestInformation info = event.getContestInformation();
-            // TODO CLICS code sendJSON(eventFeedXML.createInfoElement(contest, info));
+            if (eventFeedJSON.isPastStartEvent()) {
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, contestJSON.createJSON(contest));
+                sendJSON(json + NL);
+            }
         }
 
         public void contestInformationChanged(ContestInformationEvent event) {
-//            ContestInformation info = event.getContestInformation();
-            // TODO CLICS code sendJSON(eventFeedXML.createInfoElement(contest, info));
+            if (eventFeedJSON.isPastStartEvent()) {
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, contestJSON.createJSON(contest));
+                sendJSON(json + NL);
+            }
         }
 
         public void contestInformationRemoved(ContestInformationEvent event) {
-            // ignored
+            if (eventFeedJSON.isPastStartEvent()) {
+                String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, contestJSON.createJSON(contest));
+                sendJSON(json + NL);
+            }
         }
 
-        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
-            // SOMEDAY refresh all
+        public void contestInformationRefreshAll(ContestInformationEvent event) {
+            // ignore 
         }
 
-        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
-//            FinalizeData data = contestInformationEvent.getFinalizeData();
-            // TODO CLICS code            eventFeedRunnable.send(eventFeedXML.createFinalizeXML(contest, data));
+        public void finalizeDataChanged(ContestInformationEvent event) {
+            contestInformationChanged(event);
         }
     }
 
@@ -573,16 +680,17 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
             os.write(string.getBytes());
         } catch (Exception e) {
             e.printStackTrace(System.err);
-            // TODO: handle exception
+            log.log(Log.WARNING, "Problem trying to send JSON '"+string+"'", e);
         }
         
         try {
             eventFeedLog.writeEvent(string);
         } catch (Exception e) {
             e.printStackTrace();
-            // TODO: handle exception
+            log.log(Log.WARNING, "Problem trying to write event feed log for '"+string+"'", e);
         } 
         
+        lastSent = System.currentTimeMillis();
     }
 
     public long getEventId() {
@@ -600,6 +708,11 @@ public class EventFeedStreamer extends JSONUtilities implements UIPlugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void run() {
+        // TOOD  add TImer
     }
 
 }

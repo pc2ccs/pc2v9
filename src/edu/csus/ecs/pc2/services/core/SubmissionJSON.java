@@ -9,7 +9,9 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * Submission JSON
+ * Submission JSON - new Run submitted in contest.
+ * 
+ * "Submissions, a.k.a. attempts to solve problems in the contest." 
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */

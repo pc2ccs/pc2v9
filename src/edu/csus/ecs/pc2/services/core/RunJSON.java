@@ -8,13 +8,18 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 
 /**
- * Run JSON.
+ * Run JSON - test case.
+ * 
+ * "Runs are judgements of individual test cases of a submission."
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class RunJSON extends JSONUtilities {
 
     public String createJSON(IInternalContest contest, Run run, RunResultFiles files) {
+        
+        
+        // TODO CLICS change to ObjectMapper
 
         //      id  ID  yes     no  provided by CCS     identifier of the run
         //      judgement_id    ID  yes     no  provided by CCS     identifier of the judgement this is part of

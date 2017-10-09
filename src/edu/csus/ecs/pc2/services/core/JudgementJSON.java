@@ -9,7 +9,9 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * Judgement JSON.
+ * Judgement JSON - run judgement.
+ * 
+ * "Runs are judgements of individual test cases of a submission."
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
