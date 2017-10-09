@@ -493,12 +493,12 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getProblemJSON(contest, problem, 3);
         json = wrapBrackets(json);
 
-        // System.out.println("debug prob json = "+json);
+         System.out.println("debug prob json = "+json);
 
         // debug prob json = {"id":"3", "label":"A", "name":"Sumit", "ordinal":3, "test_data_coun":0}
 
-        asertEqualJSON(json, "id", "3");
-        assertJSONStringValue(json,  "id", "3");
+        asertEqualJSON(json, "id", "sumit");
+        assertJSONStringValue(json,  "id", "sumit");
         
         asertEqualJSON(json, "label", "A");
         asertEqualJSON(json, "name", "Sumit");

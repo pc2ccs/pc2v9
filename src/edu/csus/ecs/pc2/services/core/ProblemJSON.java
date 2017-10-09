@@ -14,7 +14,7 @@ public class ProblemJSON extends JSONUtilities {
     public String createJSON(IInternalContest contest, Problem problem, int problemNumber) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        appendPair(stringBuilder, "id", Integer.toString(problemNumber));
+        appendPair(stringBuilder, "id", problem.getShortName());
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "label", problem.getLetter()); // letter
