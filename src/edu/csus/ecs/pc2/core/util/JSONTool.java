@@ -204,7 +204,7 @@ public class JSONTool {
         String name = judgement.getDisplayName();
         Boolean solved = false;
         Boolean penalty = true;
-        if (name.equalsIgnoreCase("yes") || name.equalsIgnoreCase("accepted")) {
+        if (name.equalsIgnoreCase("yes") || name.equalsIgnoreCase("accepted") || judgement.getAcronym().equalsIgnoreCase("ac")) {
             name = "Accepted";
             solved = true;
             penalty = false;
@@ -225,7 +225,7 @@ public class JSONTool {
             }
 
         }
-        element.put("id", judgement.getElementId().toString());
+        element.put("id", getKey(judgement));
         element.put("name", name);
         element.put("penalty", penalty);
         element.put("solved", solved);
@@ -343,9 +343,10 @@ public class JSONTool {
         element.put("start_contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
         if (submission.isJudged()) {
             JudgementRecord judgementRecord = submission.getJudgementRecord();
+            Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
             // only print it's judgement and end times if this is the final judgement
             if (!judgementRecord.isPreliminaryJudgement()) {
-                element.put("judgement_type_id", judgementRecord.getElementId().toString());
+                element.put("judgement_type_id", getKey(judgement));
                 // TODO verify these times are consistent
                 Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime()*60000);
                 element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
@@ -354,5 +355,9 @@ public class JSONTool {
             }
         }
         return element;
+    }
+    
+    public String getKey(Judgement judgement) {
+        return judgement.getAcronym();
     }
 }
