@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.GroupComparator;
+import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -28,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -80,6 +82,10 @@ public class EventFeedJSONTest extends AbstractTestCase {
             for (String runInfoLine : runsData) {
                 SampleContest.addRunFromInfo(contest, runInfoLine);
             }
+            
+            Run[] runs = contest.getRuns();
+            assertEquals("Run count", 12, runs.length);
+            
 
             Problem problem = contest.getProblems()[0];
             Account judge = getFirstAccount(contest, Type.JUDGE);
@@ -161,10 +167,43 @@ public class EventFeedJSONTest extends AbstractTestCase {
             int value = Integer.parseInt(fields[1].trim());
             assertCountEvent(value, name, json);
         }
-
+        
         assertMatchCount(24, "\"judgement_type_id\"", json);
         assertMatchCount(422, "\"icpc_id\"", json);
+   
 
+    }
+    
+    public void testSubmissionJSON() throws Exception {
+        
+        UnitTestData data = new UnitTestData();
+        IInternalContest contest = data.getContest();
+        
+        EventFeedJSON eventFeedJSON = new EventFeedJSON();
+
+        Run[] runs = contest.getRuns();
+        assertEquals("Run count", 12, runs.length);
+        
+        Arrays.sort(runs, new RunComparator());
+        
+        Run run = runs[runs.length-1];
+        
+        SubmissionJSON submissionJSON = new SubmissionJSON();
+        
+//        String json = eventFeedJSON.getJSONEvent(eventFeedJSON.SUBMISSION_KEY, 22, EventFeedOperation.CREATE, submissionJSON.createJSON(contest, run));
+        String json = wrapBrackets( submissionJSON.createJSON(contest, run) );
+        
+//        System.out.println("debug submission json = "+json);
+        // debug submission json = {"id":"12","language_id":"1","problem_id":"quadrangles","team_id":"2","time":"2017-10-09T08:45:43.744-07","contest_time":"00:40:00.000"}
+
+        asertEqualJSON(json, "id", "12");
+        asertEqualJSON(json, "language_id", "1");
+        asertEqualJSON(json, "problem_id", "quadrangles");
+        assertJSONStringValue(json, "team_id", "2");
+
+        
+        
+        
     }
 
     void writeFile(File file, String string) throws FileNotFoundException, IOException {

@@ -30,7 +30,7 @@ public class SubmissionJSON extends JSONUtilities {
         element = mapper.createObjectNode();
         element.put("id", Integer.toString(run.getNumber()));
         element.put("language_id", Integer.toString(getLanguageIndex(contest, run.getLanguageId())));
-        element.put("problem_id", Integer.toString(getProblemIndex(contest, run.getProblemId())));
+        element.put("problem_id", contest.getProblem(run.getProblemId()).getShortName());
         element.put("team_id", new Integer(run.getSubmitter().getClientNumber()).toString());
         
 //    time    TIME    yes     no  CCS     timestamp of when the submission was made
