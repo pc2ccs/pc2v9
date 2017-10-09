@@ -131,8 +131,15 @@ public class EventFeedService {
                     
                     EventFeedStreamer eventFeedSteamer = new EventFeedStreamer(os, contest, controller);
                     
-                    // Start streaming events to stream/client/user
+                    // Start by sending any existing events to stream
+                    
                     eventFeedSteamer.writeStartupEvents();
+                    
+                    /**
+                     * Start new thread for eventFeedSteamer instance.
+                     */
+                    new Thread(eventFeedSteamer).start();
+                    
                     
                 } catch (Exception e) {
                     System.err.println("Warning (check log) in write " + e.getMessage());

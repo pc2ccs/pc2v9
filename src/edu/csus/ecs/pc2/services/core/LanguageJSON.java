@@ -25,16 +25,5 @@ public class LanguageJSON extends JSONUtilities {
         childNode.add(element);
         
         return stripOuterJSON(childNode.toString());
-        
-//        TODO remove old code
-        
-//        StringBuilder stringBuilder = new StringBuilder();
-//
-//        appendPair(stringBuilder, "id", Integer.toString(languageNumber));
-//        stringBuilder.append(", ");
-//
-//        appendPair(stringBuilder, "name", language.getDisplayName());
-//
-//        return stringBuilder.toString();
     }
 }

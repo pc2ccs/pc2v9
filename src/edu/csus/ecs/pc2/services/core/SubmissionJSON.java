@@ -43,37 +43,5 @@ public class SubmissionJSON extends JSONUtilities {
 //        element.put("entry_point", ContestTime.formatTimeMS(run.getElapsedMS())); // TODO add entry_point value
         
         return stripOuterJSON(element.toString());
-        
-//        
-//        
-//        StringBuilder stringBuilder = new StringBuilder();
-//
-//        appendPair(stringBuilder, "id", run.getNumber());
-//        stringBuilder.append(", ");
-//
-//        appendPair(stringBuilder, "language_id", getLanguageIndex(contest, run.getLanguageId()));
-//        stringBuilder.append(", ");
-//
-//        appendPair(stringBuilder, "problem_id", getProblemIndex(contest, run.getProblemId()));
-//        stringBuilder.append(", ");
-//
-//        appendPair(stringBuilder, "team_id", run.getSubmitter().getClientNumber());
-//        stringBuilder.append(", ");
-//
-//        //    time 
-//        //    contest_time 
-//        //    entry_point 
-//
-//        Calendar wallElapsed = calculateElapsedWalltime(contest, run.getElapsedMS());
-//
-//        appendPair(stringBuilder, "time", wallElapsed);
-//
-//        stringBuilder.append(", ");
-//        appendPair(stringBuilder, "contest_time", XMLUtilities.formatSeconds(run.getElapsedMS()));
-//
-//        stringBuilder.append(", ");
-//        appendPair(stringBuilder, "entry_point", "Main"); // TODO CLICS DATA ADD ADD  the team's submitted executable name is not available at this time.
-//
-//        return stringBuilder.toString();
     }
 }

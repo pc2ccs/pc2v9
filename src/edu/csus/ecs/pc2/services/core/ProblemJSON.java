@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
+//TODO CLICS change ProblemJSON to use ObjectMapper
 public class ProblemJSON extends JSONUtilities {
 
     public String createJSON(IInternalContest contest, Problem problem, int problemNumber) {

@@ -44,41 +44,6 @@ public class TeamMemberJSON extends JSONUtilities {
 
         return stripOuterJSON(childNode.toString());
         
-        // SOMEDATE add code when TeamMember class is creaetd and populated
-        
-//        StringBuilder stringBuilder = new StringBuilder();
-//
-//        //      Id   ID  yes     no  provided by CDS     identifier of the team-member.
-//        //      team_id  ID  yes     no  provided by CDS     team of this team member 
-//        //      icpc_id     string  no  yes     provided by CDS     external identifier from ICPC CMS
-//
-//        appendPairNullValue(stringBuilder, "id"); // TODO CLICS DATA ADD  id needs to be added to new Account Member class and model
-//        stringBuilder.append(", ");
-//
-//        appendPair(stringBuilder, "team_id", Integer.toString(account.getClientId().getClientNumber()));
-//        stringBuilder.append(", ");
-//
-//        appendPairNullValue(stringBuilder, "icpc_id"); // TODO CLICS DATA ADD  icpc_id needs to be added to new Account Member class
-//        stringBuilder.append(", ");
-//
-//        //        first_name  string  yes     no  provided by CDS     first name of team member
-//        //        last_name   string  yes     no  provided by CDS     last name of team member
-//
-//        appendPairNullValue(stringBuilder, "first_name"); // TODO CLICS DATA ADD  first_name
-//        stringBuilder.append(", ");
-//
-//        appendPairNullValue(stringBuilder, "last_name"); // TODO CLICS DATA ADD  last_name
-//        stringBuilder.append(", ");
-//
-//        //      sex     string  no  no  provided by CDS     one of male, female or other
-//        //      role    string  yes     no  provided by CDS     one of contestant or coach.
-//
-//        appendPairNullValue(stringBuilder, "sex");
-//        stringBuilder.append(", ");
-//
-//        appendPairNullValue(stringBuilder, "role");
-//
-//        return stringBuilder.toString();
-
+        // SOMEDATE add code when TeamMember class is created/used
     }
 }

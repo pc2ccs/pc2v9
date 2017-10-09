@@ -15,11 +15,10 @@ import edu.csus.ecs.pc2.core.model.Run;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
+//TODO CLICS change JudgementJSON to use ObjectMapper
 public class JudgementJSON extends JSONUtilities {
 
     public String createJSON(IInternalContest contest, Run run) {
-        
-        // TODO refactor
         
         //        id  ID  yes     no  CCS     identifier of the judgement
         //        submission_id   ID  yes     no  CCS     identifier of the submission judged

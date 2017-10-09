@@ -48,45 +48,5 @@ public class TeamJSON extends JSONUtilities  {
         childNode.add(element);
         
         return stripOuterJSON(childNode.toString());
-        
-//  TODO remove old code
-        
-//        StringBuilder stringBuilder = new StringBuilder();
-//
-//        ClientId clientId = account.getClientId();
-//
-//        //    id 
-//        //    icpc_id 
-//        //    name 
-//        //    organization_id 
-//
-//        appendPair(stringBuilder, "id", Integer.toString(clientId.getClientNumber()));
-//        stringBuilder.append(", ");
-//
-//        appendPair(stringBuilder, "icpc_id", account.getExternalId());
-//        stringBuilder.append(", ");
-//
-//        appendPair(stringBuilder, "name", account.getDisplayName());
-//        stringBuilder.append(", ");
-//
-//        appendPairNullValue(stringBuilder, "organization_id"); // TODO CLICS DATA ADD  technical deficit - add organizational id into account/model
-//
-//        //    group_id 
-//
-//        ElementId elementId = account.getGroupId();
-//        if (elementId != null) {
-//            Group group = contest.getGroup(elementId);
-//            if (group != null) {
-//                stringBuilder.append(", ");
-//                appendPair(stringBuilder, "group_id", Integer.toString(group.getGroupId()));
-//            }
-//        }
-//
-//        //    location   //     JSON object as specified below. 
-//        //    location.x 
-//        //    location.y 
-//        //    location.rotation 
-//
-//        return stringBuilder.toString();
     }
 }

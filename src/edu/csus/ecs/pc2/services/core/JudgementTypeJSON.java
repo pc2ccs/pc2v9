@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
+//TODO CLICS change JudgementTypeJSON to use ObjectMapper
 public class JudgementTypeJSON extends JSONUtilities {
     
     /**

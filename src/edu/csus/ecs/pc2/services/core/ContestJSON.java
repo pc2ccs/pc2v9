@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
+// TODO CLICS change ContestJSON to use ObjectMapper
 public class ContestJSON extends JSONUtilities {
 
     public String createJSON(IInternalContest contest) {

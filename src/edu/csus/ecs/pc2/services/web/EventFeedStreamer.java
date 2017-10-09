@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.services.web;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -58,6 +59,11 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlugin {
 
     private static final long serialVersionUID = 2076470194640278897L;
+
+    /**
+     * Number of ms be sending out keep alive new line.
+     */
+    private static final long KEEP_ALIVE_DELAY = 120 * Constants.MS_PER_SECOND;
 
     private OutputStream os;
 
@@ -707,12 +713,40 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             os.write(json.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
+            log.log(Log.WARNING, "Problem writing startup events to stream", e);
         }
     }
 
     @Override
     public void run() {
-        // TOOD  add TImer
+        
+        while (!isFinalized()) {
+            
+            sleep(30);
+            
+            if (lastSent + KEEP_ALIVE_DELAY < System.currentTimeMillis()) {
+                try {
+                    os.write(NL.getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.log(Log.WARNING, "Problem writing keep alive newline to stream", e);
+                }
+            }
+        }
     }
+
+    /**
+     * Contest finalized ?
+     * @return true if finalized else false
+     */
+    private boolean isFinalized() {
+        
+        if (contest.getFinalizeData() != null){
+            return contest.getFinalizeData().isCertified();
+        }
+        
+        return false;
+    }
+
 
 }
