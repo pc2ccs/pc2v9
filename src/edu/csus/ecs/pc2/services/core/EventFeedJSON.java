@@ -75,7 +75,7 @@ public class EventFeedJSON extends JSONUtilities {
      * List of events to output.
      * 
      */
-    private String eventFeedList = null;
+    private String eventTypeList = null;
 
     public String getContestJSON(IInternalContest contest) {
 
@@ -429,9 +429,9 @@ public class EventFeedJSON extends JSONUtilities {
 
         //        contest = new SampleContest().createStandardContest();
         
-        if (eventFeedList != null){
+        if (eventTypeList != null){
             
-            appendAllJSONEvents (contest, buffer, eventFeedList);
+            appendAllJSONEvents (contest, buffer, eventTypeList);
             
         } else {
 
@@ -499,12 +499,12 @@ public class EventFeedJSON extends JSONUtilities {
      * 
      * @param contest
      * @param buffer 
-     * @param eventlist list of events types, comma delimited 
-     * @throws IllegalArgumentException if any event in eventlist is not valid
+     * @param eventTypeList list of events types, comma delimited 
+     * @throws IllegalArgumentException if any event in eventTypeList is not valid
      */
-    private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String eventlist) throws IllegalArgumentException {
+    private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String eventTypeList) throws IllegalArgumentException {
 
-        String[] events = eventlist.split(",");
+        String[] events = eventTypeList.split(",");
 
         for (String name : events) {
             name = name.trim();
@@ -550,7 +550,7 @@ public class EventFeedJSON extends JSONUtilities {
                     appendNotNull(buffer, getAwardJSON(contest));
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown event type '" + name + "' in list " + eventlist);
+                    throw new IllegalArgumentException("Unknown event type '" + name + "' in list " + eventTypeList);
             }
         }
     }
@@ -607,12 +607,12 @@ public class EventFeedJSON extends JSONUtilities {
         this.startEventId = startEventId;
     }
 
-    public void setEventFeedList(String eventFeedList) {
-        this.eventFeedList = eventFeedList;
+    public void setEventTypeList(String eventTypeList) {
+        this.eventTypeList = eventTypeList;
     }
 
-    public String getEventFeedList() {
-        return eventFeedList;
+    public String getEventTypeList() {
+        return eventTypeList;
     }
     
     public long getEventIdSequence() {
