@@ -760,7 +760,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         for (String badbadlist : badTypeNameLists) {
             try {
-                eventFeedJSON.setEventFeedList(badbadlist);
+                eventFeedJSON.setEventTypeList(badbadlist);
                 eventFeedJSON.createJSON(data.getContest());
                 fail("Expecting IllegalArgumentException for list '" + badbadlist + "'");
             } catch (IllegalArgumentException e) {
@@ -782,7 +782,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
         String elist = EventFeedJSON.CONTEST_KEY + "," + EventFeedJSON.TEAM_KEY;
-        eventFeedJSON.setEventFeedList(elist);
+        eventFeedJSON.setEventTypeList(elist);
         String json = eventFeedJSON.createJSON(data.getContest());
         assertNotNull(json);
 
@@ -819,7 +819,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
                 JSONUtilities.TEAM_KEY + "," + // 
                 JSONUtilities.TEAM_MEMBERS_KEY;
 
-        eventFeedJSON.setEventFeedList(elist);
+        eventFeedJSON.setEventTypeList(elist);
         String json = eventFeedJSON.createJSON(data.getContest());
         assertNotNull(json);
 
@@ -840,7 +840,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
                 EventFeedJSON.CLARIFICATIONS_KEY + "," + // 
                 EventFeedJSON.CLARIFICATIONS_KEY;
 
-        eventFeedJSON.setEventFeedList(elist);
+        eventFeedJSON.setEventTypeList(elist);
         String json = eventFeedJSON.createJSON(data.getContest());
         assertNotNull(json);
 
