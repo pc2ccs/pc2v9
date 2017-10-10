@@ -5,10 +5,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,7 +55,7 @@ public class ClarificationService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getClarifications() {
+    public Response getClarifications(@Context SecurityContext sc) {
 
         // get the groups from the contest
         Clarification[] clarifications = model.getClarifications();
@@ -63,12 +65,19 @@ public class ClarificationService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < clarifications.length; i++) {
             Clarification clarification = clarifications[i];
-            // dump the request
-            childNode.add(jsonTool.convertToJSON(clarification, null));
-            if (clarification.isAnswered()) {
-                // dump the answers
-                ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
-                childNode.add(jsonTool.convertToJSON(clarification, clarAnswers[clarAnswers.length]));
+            if (sc.isUserInRole("public")) {
+                if (clarification.isSendToAll()) {
+                    ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
+                    childNode.add(jsonTool.convertToJSON(clarification, clarAnswers[clarAnswers.length - 1]));
+                }
+            } else {
+                // dump the request
+                childNode.add(jsonTool.convertToJSON(clarification, null));
+                if (clarification.isAnswered()) {
+                    // dump the answers
+                    ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
+                    childNode.add(jsonTool.convertToJSON(clarification, clarAnswers[clarAnswers.length-1]));
+                }
             }
         }
 
@@ -80,7 +89,7 @@ public class ClarificationService implements Feature {
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{clarificationId}/")
-    public Response getClarification(@PathParam("clarificationId") String clarificationId) {
+    public Response getClarification(@Context SecurityContext sc, @PathParam("clarificationId") String clarificationId) {
         // get the groups from the contest
         Clarification[] clarifications = model.getClarifications();
 
@@ -90,17 +99,33 @@ public class ClarificationService implements Feature {
         ClarificationAnswer[] clarAnswers = null;
         for (int i = 0; i < clarifications.length; i++) {
             Clarification clarification = clarifications[i];
-            if (clarification.getElementId().toString().equals(clarificationId)) {
-                childNode.add(jsonTool.convertToJSON(clarification, null));
-            }
-            clarAnswers = clarification.getClarificationAnswers();
-            if (clarAnswers != null) {
-                for (int j = 0; j < clarAnswers.length; j++) {
-                    ClarificationAnswer clarificationAnswer = clarAnswers[j];
-                    if (clarificationAnswer.getElementId().toString().equals(clarificationId)) {
-                        childNode.add(jsonTool.convertToJSON(clarification, clarificationAnswer));
-                        break;
-                    }                    
+            if (sc.isUserInRole("public")) {
+                // only look for matching answers
+                if (clarification.isSendToAll()) {
+                    clarAnswers = clarification.getClarificationAnswers();
+                    if (clarAnswers != null) {
+                        for (int j = 0; j < clarAnswers.length; j++) {
+                            ClarificationAnswer clarificationAnswer = clarAnswers[j];
+                            if (clarificationAnswer.getElementId().toString().equals(clarificationId)) {
+                                childNode.add(jsonTool.convertToJSON(clarification, clarificationAnswer));
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (clarification.getElementId().toString().equals(clarificationId)) {
+                    childNode.add(jsonTool.convertToJSON(clarification, null));
+                }
+                clarAnswers = clarification.getClarificationAnswers();
+                if (clarAnswers != null) {
+                    for (int j = 0; j < clarAnswers.length; j++) {
+                        ClarificationAnswer clarificationAnswer = clarAnswers[j];
+                        if (clarificationAnswer.getElementId().toString().equals(clarificationId)) {
+                            childNode.add(jsonTool.convertToJSON(clarification, clarificationAnswer));
+                            break;
+                        }                    
+                    }
                 }
             }
         }
