@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.services.web;
 
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Date;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -73,23 +74,23 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     
     // Listeners
 
-    private AccountListener accountListener = null;
+    private AccountListener accountListener = new AccountListener();
 
-    private RunListener runListener = null;
+    private RunListener runListener = new RunListener();
 
-    private ClarificationListener clarificationListener = null;
+    private ClarificationListener clarificationListener = new ClarificationListener();
 
-    private ProblemListener problemListener = null;
+    private ProblemListener problemListener = new ProblemListener();
 
-    private LanguageListener languageListener = null;
+    private LanguageListener languageListener = new LanguageListener();
 
-    private GroupListener groupListener = null;
+    private GroupListener groupListener = new GroupListener();
 
-    private JudgementListener judgementListener = null;
+    private JudgementListener judgementListener = new JudgementListener();
 
-    private ContestInformationListener contestInformationListener = null;
+    private ContestInformationListener contestInformationListener = new ContestInformationListener();
 
-    private ContestTimeListener contestTimeListener = null;
+    private ContestTimeListener contestTimeListener = new ContestTimeListener();
     
     private EventFeedJSON eventFeedJSON = new EventFeedJSON();
     
@@ -203,7 +204,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     }
 
     private void registerListeners(IInternalContest inContest) {
-
         inContest.addAccountListener(accountListener);
         inContest.addRunListener(runListener);
         inContest.addClarificationListener(clarificationListener);
@@ -682,6 +682,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      */
     public void sendJSON(String string) {
         
+        System.out.println(new Date() + " debug 22 Sending "+string);
+        
         try {
             os.write(string.getBytes());
         } catch (Exception e) {
@@ -697,6 +699,9 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         } 
         
         lastSent = System.currentTimeMillis();
+        
+//        System.out.println(new Date() + " debug 22 Sent at "+lastSent);
+        
     }
 
     public long getEventId() {
@@ -720,13 +725,21 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     @Override
     public void run() {
         
+        System.out.println("debug 22 run()");
         while (!isFinalized()) {
             
+//            System.out.println(new Date() + " debug 22 sleep 30 "+lastSent);
             sleep(30);
             
-            if (lastSent + KEEP_ALIVE_DELAY < System.currentTimeMillis()) {
+//            long diff = System.currentTimeMillis() - lastSent;
+//            System.out.println("debug 22 diff = "+diff+" cond = "+(lastSent + KEEP_ALIVE_DELAY < System.currentTimeMillis())+ " " + (lastSent + KEEP_ALIVE_DELAY));
+//            System.out.println("debug 22 diff = "+diff+" "+lastSent + " " + KEEP_ALIVE_DELAY +" <"+ System.currentTimeMillis());
+            
+            if (System.currentTimeMillis() > lastSent + KEEP_ALIVE_DELAY) {
                 try {
+//                    System.out.println(new Date() + " debug 22 wrote keep alive");
                     os.write(NL.getBytes());
+                    lastSent = System.currentTimeMillis();
                 } catch (Exception e) {
                     e.printStackTrace();
                     log.log(Log.WARNING, "Problem writing keep alive newline to stream", e);
