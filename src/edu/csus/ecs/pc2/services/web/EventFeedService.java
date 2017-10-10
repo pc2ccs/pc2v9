@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.services.core.EventFeedJSON;
 
 
 /**
- * Implementation of CCS REST event-feed. 
+ * Implementation of CLICS REST event-feed. 
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
@@ -43,22 +43,26 @@ public class EventFeedService {
         this.log = inController.getLog();
     }
 
+
     /**
-     * This method returns a JSON representation of the submitted run identified by {id}. 
+     * This method returns a JSON stream representation of the events occurring in the contest. 
      * 
-     * @return a {@link Response} object containing the submitted run in JSON form
+     * @param type a comma-separated query parameter identifying the type(s) of events being requested (if empty or null, indicates ALL event types)
+     * @param id the event-id of the earliest event being requested (i.e., an indication of the requested starting point in the event stream)
+     * 
+     * @return a {@link Response} object whose body contains the JSON event feed
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getEventFeed(@QueryParam("events") String eventList, @QueryParam("id") String eventId, @Context SecurityContext sc) {
+    public Response getEventFeed(@QueryParam("type") String eventTypeList, @QueryParam("id") String startintEventId, @Context SecurityContext sc) {
         
         String jsonOutput = "[]";
         
-        if (eventList != null) {
-            System.out.println("debug 22 getEventFeed with events "+eventList);
+        if (eventTypeList != null) {
+            System.out.println("debug 22 getEventFeed with event types " + eventTypeList);
 
             EventFeedJSON eventFeedJSON = new EventFeedJSON();
-            eventFeedJSON.setEventFeedList(eventList);
+            eventFeedJSON.setEventTypeList(eventTypeList);
 
             try {
                 jsonOutput = eventFeedJSON.createJSON(contest);
@@ -71,10 +75,10 @@ public class EventFeedService {
                 return Response.serverError().entity(e.getMessage()).build();
             }
 
-        } else if (eventId != null){
+        } else if (startintEventId != null){
             
             EventFeedJSON eventFeedJSON = new EventFeedJSON();
-            eventFeedJSON.setStartEventId(eventId);
+            eventFeedJSON.setStartEventId(startintEventId);
 
             try {
                 jsonOutput = eventFeedJSON.createJSON(contest);
@@ -106,9 +110,14 @@ public class EventFeedService {
         
         // output the response to the requester (note that this actually returns it to Jersey,
         // which forwards it to the caller as the HTTP response).
-        return Response.ok(jsonOutput,MediaType.APPLICATION_JSON).build();
+        return Response.ok(jsonOutput,MediaType.APPLICATION_JSON)
+              .encoding("UTF-8")
+              .header("Cache-Control", "no-cache")
+              .header("Pragma", "no-cache")
+              .build();
     }
-    
+
+
     /**
      * Streaming event feed.
      * @return
