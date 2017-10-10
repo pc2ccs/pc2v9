@@ -65,7 +65,7 @@ public class EventFeedJSON extends JSONUtilities {
     /**
      * Start event id.
      * 
-     * /event-feed?events=<event_list>
+     * /event-feed?type=<event_list>
      */
     private String startEventId = null;
 
