@@ -167,7 +167,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             if (lines.length > 0){
                 eventFeedJSON.setEventIdSequence(lines.length);
                 for (String line : lines) {
-                    sendJSON(line);
+                    sendJSON(line + NL);
                 }
             }
             
@@ -683,9 +683,11 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     public void sendJSON(String string) {
         
         System.out.println(new Date() + " debug 22 Sending "+string);
+        System.out.println(new Date() + " os = " + os);
         
         try {
             os.write(string.getBytes());
+            os.flush();
         } catch (Exception e) {
             e.printStackTrace(System.err);
             log.log(Log.WARNING, "Problem trying to send JSON '"+string+"'", e);
@@ -716,6 +718,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         try {
             String json = eventFeedJSON.createJSON(contest);
             os.write(json.getBytes());
+            os.flush();
         } catch (Exception e) {
             e.printStackTrace();
             log.log(Log.WARNING, "Problem writing startup events to stream", e);
@@ -728,17 +731,11 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         System.out.println("debug 22 run()");
         while (!isFinalized()) {
             
-//            System.out.println(new Date() + " debug 22 sleep 30 "+lastSent);
-            sleep(30);
-            
-//            long diff = System.currentTimeMillis() - lastSent;
-//            System.out.println("debug 22 diff = "+diff+" cond = "+(lastSent + KEEP_ALIVE_DELAY < System.currentTimeMillis())+ " " + (lastSent + KEEP_ALIVE_DELAY));
-//            System.out.println("debug 22 diff = "+diff+" "+lastSent + " " + KEEP_ALIVE_DELAY +" <"+ System.currentTimeMillis());
-            
             if (System.currentTimeMillis() > lastSent + KEEP_ALIVE_DELAY) {
                 try {
 //                    System.out.println(new Date() + " debug 22 wrote keep alive");
                     os.write(NL.getBytes());
+                    os.flush();
                     lastSent = System.currentTimeMillis();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -752,7 +749,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      * Contest finalized ?
      * @return true if finalized else false
      */
-    private boolean isFinalized() {
+    public boolean isFinalized() {
         
         if (contest.getFinalizeData() != null){
             return contest.getFinalizeData().isCertified();

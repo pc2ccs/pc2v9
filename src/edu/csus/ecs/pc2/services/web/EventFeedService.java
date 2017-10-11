@@ -1,20 +1,22 @@
 package edu.csus.ecs.pc2.services.web;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Date;
 import java.util.logging.Level;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.StreamingOutput;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
@@ -116,59 +118,44 @@ public class EventFeedService {
               .header("Pragma", "no-cache")
               .build();
     }
-
-
+    
+    
     /**
-     * Streaming event feed.
-     * @return
+     * Stream with events.
+     * 
+     * @param asyncResponse
+     * @param servletRequest
+     * @throws IOException
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/stream")
-    public Response streamEventFeed() {
-
-        StreamingOutput stream = new StreamingOutput() {
-            
-            @Override
-            public void write(OutputStream os) throws IOException, WebApplicationException {
-                
-                /**
-                 * An assumption here is that the  StreamingOutput and this response is on its own 
-                 * thread. 
-                 */
-                try {
-                    
-                    EventFeedStreamer eventFeedSteamer = new EventFeedStreamer(os, contest, controller);
-                    
-                    // Start by sending any existing events to stream
-                    
-                    eventFeedSteamer.writeStartupEvents();
-                    
-                    /**
-                     * Start new thread for eventFeedSteamer instance.
-                     */
-                    new Thread(eventFeedSteamer).start();
-                    
-                    
-                } catch (Exception e) {
-                    System.err.println("Warning (check log) in write " + e.getMessage());
-                    log.log(Level.WARNING,"Exception in streaming event feed write "+e.getMessage());
-                }
-
-
-                System.out.println("debug 22 DONE "+new Date());
-            }
-        };
-
-        return Response.ok(stream).build();
-    }
-    
-    public void info(String message) {
+    public void streamEventFeed(@Suspended
+    final AsyncResponse asyncResponse,
+            @Context HttpServletRequest servletRequest) throws IOException {
+        final AsyncContext asyncContext = servletRequest.getAsyncContext();
+        final ServletOutputStream s = asyncContext.getResponse().getOutputStream();
+        final EventFeedStreamer eventFeedSteamer = new EventFeedStreamer(s, contest, controller);
+        eventFeedSteamer.writeStartupEvents();
         
+        while (true) {
+            if (eventFeedSteamer.isFinalized()) {
+                break;
+            }
+            try {
+                Thread.sleep(1 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                log.log(Level.WARNING, "During sleep " +e.getMessage());
+            }
+        }
+    }
+
+    public void info(String message) {
         System.out.println(new Date () + " " +message);
         if (controller.getLog() != null){
             controller.getLog().log(Level.INFO, message);
         }
     }
-    
+ 
 }
