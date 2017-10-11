@@ -532,7 +532,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getProblemJSON(contest, problem, 3);
         json = wrapBrackets(json);
 
-         System.out.println("debug prob json = "+json);
+//         System.out.println("debug prob json = "+json);
 
         // debug prob json = {"id":"3", "label":"A", "name":"Sumit", "ordinal":3, "test_data_coun":0}
 

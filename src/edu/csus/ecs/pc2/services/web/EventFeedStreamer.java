@@ -66,6 +66,11 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      */
     private static final long KEEP_ALIVE_DELAY = 120 * Constants.MS_PER_SECOND;
 
+    /**
+     * Number of seconds between checks to send keep alive.
+     */
+    private static final int KEEP_ALIVE_QUERY_PERIOD_SECONDS = 0;
+
     private OutputStream os;
 
     private Log log;
@@ -163,10 +168,15 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
          */
         String[] lines = eventFeedLog.getLogLines();
         
+        System.out.println("debug 22 There were "+lines.length+" in event feed log.");
+        
         try {
             if (lines.length > 0){
                 eventFeedJSON.setEventIdSequence(lines.length);
                 for (String line : lines) {
+                    // TODO filter respecting EventTypeList
+                    // TODO filter respecting StartEventId
+                    
                     sendJSON(line + NL);
                 }
             }
@@ -176,7 +186,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             log.log(Log.WARNING, "Problem sending JSON from event feed log", e);
 
         }
-        
     }
 
     @Override
@@ -194,7 +203,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      * Sleep for a number of seconds.
      * @param secs
      */
-    public void sleep(int secs) {
+    public void sleepForSeconds(int secs) {
 
         try {
             Thread.sleep(secs * 1000);
@@ -682,8 +691,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      */
     public void sendJSON(String string) {
         
-        System.out.println(new Date() + " debug 22 Sending "+string);
-        System.out.println(new Date() + " os = " + os);
+        System.out.println(new Date() + " debug 22 Sending JSON "+string);
         
         try {
             os.write(string.getBytes());
@@ -702,7 +710,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         
         lastSent = System.currentTimeMillis();
         
-//        System.out.println(new Date() + " debug 22 Sent at "+lastSent);
+        System.out.println(new Date() + " debug 22 Sent at "+lastSent);
         
     }
 
@@ -717,8 +725,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         
         try {
             String json = eventFeedJSON.createJSON(contest);
-            os.write(json.getBytes());
-            os.flush();
+            sendJSON(json);
         } catch (Exception e) {
             e.printStackTrace();
             log.log(Log.WARNING, "Problem writing startup events to stream", e);
@@ -728,12 +735,26 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     @Override
     public void run() {
         
-        System.out.println("debug 22 run()");
+        System.out.println(new Date()+ " debug 22 EventFeedStreamer.run()");
+        
+        
+        // SOMEDAY - replace the keep alive code with a Timer instance.
+        
+//        long diff = (lastSent + KEEP_ALIVE_DELAY) - System.currentTimeMillis();
+//        System.out.println(new Date()+" debug keep alive in "+(diff/1000)+" seconds.  lastsent "+lastSent);
+        
+        /**
+         * Keep alive 
+         */
         while (!isFinalized()) {
+            
+            sleepForSeconds(KEEP_ALIVE_QUERY_PERIOD_SECONDS);  // sleep - give back cycles to JVM.
+//            diff = (lastSent + KEEP_ALIVE_DELAY) - System.currentTimeMillis();
+//            System.out.println(new Date()+" debug keep alive in "+(diff/1000)+" seconds.");
             
             if (System.currentTimeMillis() > lastSent + KEEP_ALIVE_DELAY) {
                 try {
-//                    System.out.println(new Date() + " debug 22 wrote keep alive");
+                    System.out.println(new Date() + " debug 22 wrote keep alive");
                     os.write(NL.getBytes());
                     os.flush();
                     lastSent = System.currentTimeMillis();
@@ -758,5 +779,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         return false;
     }
 
+    public void setEventTypeList(String eventTypeList) {
+        eventFeedJSON.setEventTypeList(eventTypeList);
+    }
+
+    public void setStartEventId(String startintEventId) {
+        eventFeedJSON.setStartEventId(startintEventId);
+    }
 
 }

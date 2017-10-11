@@ -16,13 +16,11 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.services.core.EventFeedJSON;
 
 
 /**
@@ -44,111 +42,69 @@ public class EventFeedService {
         this.controller = inController;
         this.log = inController.getLog();
     }
-
-
+    
     /**
-     * This method returns a JSON stream representation of the events occurring in the contest. 
+     * a JSON stream representation of the events occurring in the contest. 
      * 
      * @param type a comma-separated query parameter identifying the type(s) of events being requested (if empty or null, indicates ALL event types)
      * @param id the event-id of the earliest event being requested (i.e., an indication of the requested starting point in the event stream)
      * 
      * @return a {@link Response} object whose body contains the JSON event feed
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getEventFeed(@QueryParam("type") String eventTypeList, @QueryParam("id") String startintEventId, @Context SecurityContext sc) {
-        
-        String jsonOutput = "[]";
-        
-        if (eventTypeList != null) {
-            System.out.println("debug 22 getEventFeed with event types " + eventTypeList);
-
-            EventFeedJSON eventFeedJSON = new EventFeedJSON();
-            eventFeedJSON.setEventTypeList(eventTypeList);
-
-            try {
-                jsonOutput = eventFeedJSON.createJSON(contest);
-            } catch (IllegalContestState e) {
-                //log exception
-                controller.getLog().log(Log.WARNING, "Problem creating event feed JSON with events param", e);
-                e.printStackTrace(System.err);
-
-                // return HTTP error response code
-                return Response.serverError().entity(e.getMessage()).build();
-            }
-
-        } else if (startintEventId != null){
-            
-            EventFeedJSON eventFeedJSON = new EventFeedJSON();
-            eventFeedJSON.setStartEventId(startintEventId);
-
-            try {
-                jsonOutput = eventFeedJSON.createJSON(contest);
-            } catch (IllegalContestState e) {
-                //log exception
-                controller.getLog().log(Log.WARNING, "Problem creating event feed JSON ", e);
-                e.printStackTrace(System.err);
-
-                // return HTTP error response code
-                return Response.serverError().entity(e.getMessage()).build();
-            }
-            
-        } else {
-            System.out.println("debug 22 getEventFeed () ");
-
-            EventFeedJSON eventFeedJSON = new EventFeedJSON();
-            
-            try {
-                jsonOutput = eventFeedJSON.createJSON(contest);
-            } catch (IllegalContestState e) {
-                //log exception
-                controller.getLog().log(Log.WARNING, "Problem creating event feed JSON ", e);
-                e.printStackTrace(System.err);
-
-                // return HTTP error response code
-                return Response.serverError().entity(e.getMessage()).build();
-            } 
-        }
-        
-        // output the response to the requester (note that this actually returns it to Jersey,
-        // which forwards it to the caller as the HTTP response).
-        return Response.ok(jsonOutput,MediaType.APPLICATION_JSON)
-              .encoding("UTF-8")
-              .header("Cache-Control", "no-cache")
-              .header("Pragma", "no-cache")
-              .build();
-    }
-    
-    
-    /**
-     * Stream with events.
-     * 
      * @param asyncResponse
      * @param servletRequest
      * @throws IOException
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/stream")
-    public void streamEventFeed(@Suspended
-    final AsyncResponse asyncResponse,
+    public void streamEventFeed(
+            @QueryParam("type") String eventTypeList, 
+            @QueryParam("id") String startintEventId, 
+            @Suspended final AsyncResponse asyncResponse,
             @Context HttpServletRequest servletRequest) throws IOException {
+        
         final AsyncContext asyncContext = servletRequest.getAsyncContext();
         final ServletOutputStream s = asyncContext.getResponse().getOutputStream();
         final EventFeedStreamer eventFeedSteamer = new EventFeedStreamer(s, contest, controller);
+        
+        if (eventTypeList != null) {
+
+            System.out.println("starting event feed, sending only event types '"+eventTypeList+"'");
+            eventFeedSteamer.setEventTypeList(eventTypeList);
+
+        } else if (startintEventId != null){
+            
+            System.out.println("starting event feed, Feed starting at id "+startintEventId);
+            eventFeedSteamer.setStartEventId(startintEventId);
+            
+        } else {
+            System.out.println("starting event feed (no args) ");
+        }
+
         eventFeedSteamer.writeStartupEvents();
+        
+        new Thread(eventFeedSteamer).start();
         
         while (true) {
             if (eventFeedSteamer.isFinalized()) {
                 break;
             }
             try {
-                Thread.sleep(1 * 1000);
+                Thread.sleep(1 * Constants.MS_PER_SECOND);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 log.log(Level.WARNING, "During sleep " +e.getMessage());
             }
         }
+     
+        // SOMEDAY Do we need some sort of reponse code for this stream?
+        
+//        // output the response to the requester (note that this actually returns it to Jersey,
+//        // which forwards it to the caller as the HTTP response).
+//        return Response.ok(jsonOutput,MediaType.APPLICATION_JSON)
+//              .encoding("UTF-8")
+//              .header("Cache-Control", "no-cache")
+//              .header("Pragma", "no-cache")
+//              .build();
     }
 
     public void info(String message) {
