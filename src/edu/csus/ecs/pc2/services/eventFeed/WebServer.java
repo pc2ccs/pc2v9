@@ -362,6 +362,7 @@ public class WebServer implements UIPlugin {
         //         if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, false)) {
         if (getBooleanProperty(CLICS_SERVICE_ENABLED_KEY, true)) {
         
+        // contest API always enabled if the web server is started
             resConfig.register(new ContestService(getContest(),getController()));
             showMessage("Starting /contest web service");
             resConfig.register(new GroupService(getContest(),getController()));

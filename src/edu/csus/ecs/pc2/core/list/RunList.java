@@ -250,6 +250,7 @@ public class RunList implements Serializable {
         }
         
         theRun.addJudgement(judgement);
+        theRun.replaceTestCases(run.getRunTestCases());
         writeToDisk();
     }
     

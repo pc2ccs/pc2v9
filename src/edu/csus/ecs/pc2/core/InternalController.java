@@ -1854,6 +1854,32 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         return false;
     }
+    
+    /**
+     * Returns true if the password matches the hash for the override password.
+     */
+    public static boolean matchDevOverride(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA");
+            md.reset();
+            md.update(password.getBytes());
+            byte[] digested = md.digest();
+            int matchedBytes = 0;
+            byte[] overridePassword = { 74, 108, -12, -93, -43, 82, -101, -121, 3, 1, 42, -112, 121, -43, 29, 8, -95, 123, 30, -47,  };
+            for (int i = 0; i < digested.length; i++) {
+                if (digested[i] == overridePassword[i]) {
+                    matchedBytes++;
+                } else {
+                    break;
+                }
+            }
+            return (matchedBytes == overridePassword.length);
+
+        } catch (Exception ex99) {
+            StaticLog.log("Exception in matchOverride", ex99);
+        }
+        return false;
+    }
 
     protected boolean validAccountAndMatchOverride(ClientId clientId, String password) {
 

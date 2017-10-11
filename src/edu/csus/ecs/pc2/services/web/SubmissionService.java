@@ -11,7 +11,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -20,27 +19,27 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
-import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 
@@ -60,19 +59,18 @@ public class SubmissionService implements Feature {
 
     private IInternalController controller;
 
-    private Logger logger;
-
     private RunFiles runFiles = null;
 
     private boolean serverReplied = false;
+
+    private JSONTool jsonTool;
 
     public SubmissionService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
         model.addRunListener(new RunListenerImplementation());
-
-        logger = Logger.getLogger(getClass().getName());
+        jsonTool = new JSONTool(model, controller);
     }
 
     /**
@@ -102,25 +100,6 @@ public class SubmissionService implements Feature {
     }
 
     /**
-     * This method converts a group into a JSON object added to childNode.
-     * 
-     * @param mapper
-     * @param childNode
-     * @param submission
-     */
-    private void dumpSubmission(ObjectMapper mapper, ArrayNode childNode, Run submission) {
-        ObjectNode element = mapper.createObjectNode();
-        element.put("id", submission.getElementId().toString());
-        element.put("language_id", submission.getLanguageId().toString());
-        element.put("problem_id", submission.getProblemId().toString());
-        element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
-        element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
-        element.put("contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
-        // TODO entry_point
-        childNode.add(element);
-    }
-
-    /**
      * This method returns a representation of the current contest groups in JSON format. The returned value is a JSON array with one language description per array element, matching the description
      * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
      * 
@@ -138,7 +117,7 @@ public class SubmissionService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
-            dumpSubmission(mapper, childNode, submission);
+            childNode.add(jsonTool.convertToJSON(submission));
         }
 
         // output the response to the requester (note that this actually returns it to Jersey,
@@ -149,7 +128,11 @@ public class SubmissionService implements Feature {
     @GET
     @Produces("application/zip")
     @Path("{submissionId}/files/")
-    public Response getSubmissionFiles(@PathParam("submissionId") String submissionId) {
+    public Response getSubmissionFiles(@Context SecurityContext sc, @PathParam("submissionId") String submissionId) {
+        // only admin and analyst are authorized to access this endpoint
+        if (!(sc.isUserInRole("admin") || sc.isUserInRole("analyst"))) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
         // get the submissions from the contest
         Run[] runs = model.getRuns();
 
@@ -180,7 +163,7 @@ public class SubmissionService implements Feature {
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
-                            logger.throwing("SubmissionService", "getSubmissionFiles", e);
+                            controller.getLog().throwing("SubmissionService", "getSubmissionFiles", e);
                         }
                         waitedMS += 100;
                     }
@@ -225,7 +208,7 @@ public class SubmissionService implements Feature {
                             responseBuilder.header("Content-Disposition", "attachment; filename=\"files.zip\"");
                             return responseBuilder.build();
                         } catch (IOException e) {
-                            logger.throwing("SubmissionService", "getSubmissionFiles", e);
+                            controller.getLog().throwing("SubmissionService", "getSubmissionFiles", e);
                         } finally {
                             if (tmp_dir != null) {
                                 deleteDir(tmp_dir);
@@ -254,7 +237,7 @@ public class SubmissionService implements Feature {
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (submission.getElementId().toString().equals(submissionId)) {
-                dumpSubmission(mapper, childNode, submission);
+                childNode.add(jsonTool.convertToJSON(submission));
             }
         }
         return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
@@ -309,7 +292,7 @@ public class SubmissionService implements Feature {
                 }
             });
         } catch (IOException e) {
-            logger.throwing("SubmissionService", "deleteDir", e);
+            controller.getLog().throwing("SubmissionService", "deleteDir", e);
         }
     }
 

@@ -599,6 +599,7 @@ public class Executable extends Plugin implements IExecutable {
 
         RunTestCase runTestCase = new RunTestCase(run, record, testNumber, passed);
         runTestCase.setElapsedMS(executionData.getExecuteTimeMS());
+        runTestCase.setContestTimeMS(getContest().getContestTime().getElapsedMS());
         runTestCase.setValidated(isValidated());
         run.addTestCase(runTestCase);
         return passed;

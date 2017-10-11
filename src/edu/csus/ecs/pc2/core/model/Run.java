@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Arrays;
 import java.util.Vector;
 
 /**
@@ -444,4 +445,7 @@ public class Run extends Submission {
         testcases.add(runTestCase);
     }
 
+    public void replaceTestCases(RunTestCase[] runTestCases) {
+        testcases = new Vector<RunTestCase>(Arrays.asList(runTestCases));
+    }
 }

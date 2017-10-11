@@ -51,6 +51,7 @@ public class RunTestCase implements IElementObject, IGetDate{
     private long elapsedMS;
     
     private long time = new Date().getTime();
+    private long contestTimeMS;
     
     /**
      * Constructor defining a Test Case for a run.  Each Test Case saves
@@ -178,5 +179,13 @@ public class RunTestCase implements IElementObject, IGetDate{
 
     public void setValidated(boolean validated) {
         this.validated = validated;
+    }
+
+    public long getConestTimeMS() {
+        return contestTimeMS;
+    }
+
+    public void setContestTimeMS(long contestTimeMS) {
+        this.contestTimeMS = contestTimeMS;
     }
 }
