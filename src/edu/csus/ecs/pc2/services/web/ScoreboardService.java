@@ -57,7 +57,7 @@ public class ScoreboardService implements Feature {
             // verify contest has started or user is an admin
             if (contestTime.getElapsedMS() > 0 || sc.isUserInRole("admin")) {
                 //ok to return scoreboard
-                jsonScoreboard = standings.createJSON(contest,controller);
+                jsonScoreboard = standings.createJSON(contest, controller, sc.isUserInRole("public"));
             } else {
                 // do not show (return) the scoreboard if the contest has not
                 // been started and the requester is not an admin)

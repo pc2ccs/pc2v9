@@ -125,4 +125,20 @@ public final class RunUtilities {
         // Fall through condition, do not subpress
         return false;
     }
+
+    /**
+     * Determine whether judgement for Run should be suppressed.
+     * 
+     * @param run
+     * @param scoreboardFreeze in seconds
+     * @return
+     */
+    public static boolean supppressJudgement(Run run, long scoreboardFreeze) {
+        if (run.getElapsedMS()/1000 > scoreboardFreeze) {
+            // run came in after the scoreboardFreeze
+            return true;
+        }
+        // Fall through condition, do not suppress
+        return false;
+    }
 }

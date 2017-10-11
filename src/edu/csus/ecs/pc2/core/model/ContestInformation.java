@@ -138,6 +138,14 @@ public class ContestInformation implements Serializable{
 
     private String contestShortName;
 
+    /**
+     * Whether the contest is unfrozen.  Meaning the final scoreboard
+     * can be revealed (despite the scoreboad freeze).
+     * 
+     * Typically a contest is not unfrozen until the awards ceremony.
+     */
+    private boolean unfrozen = false;
+
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -248,7 +256,9 @@ public class ContestInformation implements Serializable{
             if (enableAutoRegistration != contestInformation.isEnableAutoRegistration()) {
                 return false;
             }
-            
+            if (unfrozen != contestInformation.isUnfrozen()) {
+                return false;
+            }
             //old code:
 //            if (!DateUtilities.dateSame(startDate, contestInformation.startDate)) {
 //                return false;
@@ -544,5 +554,16 @@ public class ContestInformation implements Serializable{
      */
     public String getAdminCDPBasePath() {
         return adminCDPBasePath;
+    }
+
+    public boolean isUnfrozen() {
+        return unfrozen;
+    }
+
+    /**
+     * @param unfrozen whether the contest is unfrozen
+     */
+    public void setUnfrozen(boolean unfrozen) {
+        this.unfrozen = unfrozen;
     }
 }

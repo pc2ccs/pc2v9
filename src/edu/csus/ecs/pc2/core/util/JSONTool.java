@@ -189,6 +189,11 @@ public class JSONTool {
         } else {
             skipStateFrozen = true;
         }
+        // if the contest is unfrozen, freezeTime does not matter
+        if (ci.isUnfrozen()) {
+            skipStateFrozen = false;
+            stateFrozen = false;
+        }
         boolean stateFinal = false;
         if (model.getFinalizeData() != null) {
             stateFinal = model.getFinalizeData().isCertified();

@@ -103,6 +103,8 @@ public class ContestInformationPane extends JPanePlugin {
     private JLabel startTimeLabel;
     private JTextField contestFreezeLengthtextField;
 
+    private JCheckBox chckbxUnfrozen;
+
     /**
      * This method initializes
      * 
@@ -195,8 +197,24 @@ public class ContestInformationPane extends JPanePlugin {
             contestFreezeTimeLabel.setBounds(78, 475, 175, 27);
             centerPane.add(contestFreezeTimeLabel);
             
+            JCheckBox chckbxUnfrozen = getChckbxUnfrozen();
+            centerPane.add(chckbxUnfrozen);
         }
         return centerPane;
+    }
+
+    private JCheckBox getChckbxUnfrozen() {
+        if (chckbxUnfrozen == null) {
+            chckbxUnfrozen = new JCheckBox("Unfrozen");
+            chckbxUnfrozen.setToolTipText("Unfreezing means the final results can be released to the public via the Contest API");
+            chckbxUnfrozen.setBounds(431, 474, 139, 29);
+            chckbxUnfrozen.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return chckbxUnfrozen;
     }
 
     private JTextField getContestFreezeLengthtextField() {
@@ -342,6 +360,7 @@ public class ContestInformationPane extends JPanePlugin {
         
         contestInformation.setFreezeTime(contestFreezeLengthtextField.getText());
 
+        contestInformation.setUnfrozen(getChckbxUnfrozen().isSelected());
         return (contestInformation);
     }
 
@@ -402,7 +421,8 @@ public class ContestInformationPane extends JPanePlugin {
                 //add the scheduled start time to the GUI
                 GregorianCalendar cal = contestInformation.getScheduledStartTime();
                 getStartTimeTextField().setText(getScheduledStartTimeStr(cal));   
-                
+
+                getChckbxUnfrozen().setSelected(contestInformation.isUnfrozen());
                 setContestInformation(contestInformation);
                 setEnableButtons(false);
             }

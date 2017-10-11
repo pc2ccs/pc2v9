@@ -49,11 +49,12 @@ public class ContestAPIStandingsJSON {
      * </pre>
      * 
      * @param contest - the current contest
+     * @param honorScoreboardFreeze - whether to honor the scoreboardFreezeTime (& unfrozen state).
      * @param controller - the current contest controller
      * @return a JSON string giving contest standings in 2016 format
      * @throws IllegalContestState
      */
-    public String createJSON(IInternalContest contest, IInternalController inController) throws IllegalContestState {
+    public String createJSON(IInternalContest contest, IInternalController inController, boolean honorScoreboardFreeze) throws IllegalContestState {
 
         model = contest;
         controller = inController;
@@ -73,7 +74,10 @@ public class ContestAPIStandingsJSON {
                 }
             }
 
-            StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
+            if (contest.getContestInformation().isUnfrozen()) {
+                honorScoreboardFreeze = false;
+            }
+            StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties, honorScoreboardFreeze);
 
             for (StandingsRecord sr : standingsRecords) {
                 dumpStandingRecord(mapper, childNode, sr);
