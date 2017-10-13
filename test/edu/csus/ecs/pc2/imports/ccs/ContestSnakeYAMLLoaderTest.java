@@ -282,6 +282,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         IInternalContest contest = loader.fromYaml(null, lines, getDataDirectory());
 
         assertNotNull(contest);
+        
+//        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
+        assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
+        
 
         Problem[] problems = contest.getProblems();
 
@@ -415,6 +419,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         checkPermissions(accounts);
 
+        assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
+//        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
+        
         Problem[] problems = contest.getProblems();
 
         assertEquals("Number of problems", 5, problems.length);
@@ -530,6 +537,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Number of accounts", 85, accounts.length);
 
         checkPermissions(accounts);
+        
+        assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
+//        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
         Problem[] problems = contest.getProblems();
         assertEquals("Number of problems", 5, problems.length);
@@ -636,6 +646,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // startExplorer(getDataDirectory());
 
         // editFile(getDataDirectory()+"/"+IContestLoader.DEFAULT_CONTEST_YAML_FILENAME);
+        
+        assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
+//        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
         Problem[] problems = contest.getProblems();
         assertEquals("Number of problems", 5, problems.length);
@@ -689,6 +702,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
 
         String[] basenames = { "bozo", "smart", "sumit" };
+        
+        assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
+//        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
         Problem testProblem = contest.getProblems()[2];
 
@@ -829,6 +845,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createContest(1, 1, 12, 22, true);
+        
+        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
         Problem[] contestProblems = contest.getProblems();
 
@@ -1228,6 +1246,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         // startExplorer(dirname);
         // editFile(yamlFileName);
+        
 
         assertFileExists(yamlFileName);
 
@@ -1236,6 +1255,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         IInternalContest contest = loader.fromYaml(null, lines, dirname);
 
         Problem[] problems = contest.getProblems();
+        
+        assertEquals("Judge's config path ",dirname, contest.getContestInformation().getJudgeCDPBasePath());
+//        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
         for (Problem problem : problems) {
 

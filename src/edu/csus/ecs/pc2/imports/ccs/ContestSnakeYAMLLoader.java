@@ -366,6 +366,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String judgeCDPath = fetchValue(content, JUDGE_CONFIG_PATH_KEY);
         if (judgeCDPath != null) {
             setCDPPath(contest, judgeCDPath);
+        } else {
+            setCDPPath(contest, directoryName);
         }
 
         Integer defaultTimeout = fetchIntValue(content, TIMEOUT_KEY, DEFAULT_TIME_OUT);
