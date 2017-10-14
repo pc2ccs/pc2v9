@@ -311,7 +311,7 @@ public class JSONUtilities {
         // {"type": "<event type>", "id": "<id>", "op": "<type of operation>", "data": <JSON data for element> }
 
         stringBuilder.append("{");
-        appendPair(stringBuilder, "event", eventName);
+        appendPair(stringBuilder, "type", eventName);
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "id", EventFeedJSON.getEventId(eventSequence));
@@ -322,9 +322,7 @@ public class JSONUtilities {
 
         stringBuilder.append("\"data\": ");
 
-        stringBuilder.append("{");
         stringBuilder.append(data);
-        stringBuilder.append("}");
 
         stringBuilder.append("}");
     }

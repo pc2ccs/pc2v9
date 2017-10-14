@@ -47,7 +47,7 @@ public class EventFeedJSONReport implements IReport {
 
     public void writeReport(PrintWriter printWriter) throws IllegalContestState {
       
-        EventFeedJSON efEventFeedJSON = new EventFeedJSON();
+        EventFeedJSON efEventFeedJSON = new EventFeedJSON(contest);
         
         String s = efEventFeedJSON.createJSON(contest);
         

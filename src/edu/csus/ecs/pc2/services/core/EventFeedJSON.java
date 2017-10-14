@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.services.core;
 
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
@@ -12,14 +13,17 @@ import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunResultFiles;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.web.EventFeedFilter;
 
 /**
@@ -29,42 +33,25 @@ import edu.csus.ecs.pc2.services.web.EventFeedFilter;
  */
 // TODO for all sections pass in Key rather than hard coded inside method
 public class EventFeedJSON extends JSONUtilities {
-
-  
-    private JudgementTypeJSON judgementTypeJSON = new JudgementTypeJSON();
-
-    private LanguageJSON languageJSON = new LanguageJSON();
-
-    private SubmissionJSON submissionJSON = new SubmissionJSON();
-
-    private ProblemJSON problemJSON = new ProblemJSON();
-
-    private TeamJSON teamJSON = new TeamJSON();
-
-    private OrganizationJSON organizationJSON = new OrganizationJSON();
-
-    private ContestJSON contestJSON = new ContestJSON();
-
-    private GroupJSON groupJSON = new GroupJSON();
+    /**
+     * 
+     */
+    public EventFeedJSON(IInternalContest contest) {
+        super();
+        jsonTool = new JSONTool(contest, null);
+    }
 
     private AwardJSON awardJSON = new AwardJSON();
 
-    private ClarificationJSON clarificationJSON = new ClarificationJSON();
-    
-    private JudgementJSON judgementJSON = new JudgementJSON();
-    
     private TeamMemberJSON teamMemberJSON = new TeamMemberJSON();
 
-    private RunJSON runJSON = new RunJSON();
-    
-    
     /**
-    * Event Id Sequence.
-    * 
-    * @see #nextEventId()
-    */
-   protected long eventIdSequence = 0;
-    
+     * Event Id Sequence.
+     * 
+     * @see #nextEventId()
+     */
+    protected long eventIdSequence = 0;
+
     /**
      * Start event id.
      * 
@@ -80,9 +67,9 @@ public class EventFeedJSON extends JSONUtilities {
      */
     private String eventTypeList = null;
 
-    public String getContestJSON(IInternalContest contest) {
+    private JSONTool jsonTool;
 
-        judgementTypeJSON.updatePenaltySettings(contest);
+    public String getContestJSON(IInternalContest contest) {
 
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -93,7 +80,7 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     public String getContestJSONFields(IInternalContest contest) {
-        return contestJSON.createJSON(contest);
+        return jsonTool.convertToJSON(contest.getContestInformation()).toString();
     }
 
     /**
@@ -114,7 +101,7 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     String getJudgementTypeJSON(IInternalContest contest, Judgement judgement) {
-        return judgementTypeJSON.createJSON(contest, judgement);
+        return jsonTool.convertToJSON(judgement).toString();
     }
 
     /**
@@ -145,11 +132,12 @@ public class EventFeedJSON extends JSONUtilities {
      * 
      * @param contest
      * @param language
-     * @param languageNumber sequence number
+     * @param languageNumber
+     *            sequence number
      * @return
      */
     public String getLanguageJSON(IInternalContest contest, Language language, int languageNumber) {
-        return languageJSON.createJSON(contest, language, languageNumber);
+        return jsonTool.convertToJSON(language).toString();
     }
 
     public String getProblemJSON(IInternalContest contest) {
@@ -169,7 +157,7 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     public String getProblemJSON(IInternalContest contest, Problem problem, int problemNumber) {
-        return problemJSON.createJSON(contest, problem,problemNumber);
+        return jsonTool.convertToJSON(problem, problemNumber).toString();
     }
 
     public String getGroupJSON(IInternalContest contest) {
@@ -188,12 +176,29 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     protected String getGroupJSON(IInternalContest contest, Group group) {
-        return groupJSON.createJSON(contest, group);
+        return jsonTool.convertToJSON(group).toString();
 
     }
 
     public String getOrganizationJSON(IInternalContest contest) {
-        return organizationJSON.createJSON(contest);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        // get the team accounts from the model
+        Account[] accounts = contest.getAccounts();
+        // keep track of which ones we have dumped
+        Hashtable<String, Account> organizations = new Hashtable<String, Account>();
+
+        for (Account account : accounts) {
+            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
+                if (!organizations.containsKey(account.getInstitutionCode())) {
+                    organizations.put(account.getInstitutionCode(), account);
+                    appendJSONEvent(stringBuilder, ORGANIZATION_KEY, eventIdSequence, EventFeedOperation.CREATE, jsonTool.convertOrganizationsToJSON(account).toString());
+                    stringBuilder.append(NL);
+                }
+            }
+        }
+
+        return stringBuilder.toString();
     }
 
     /**
@@ -226,10 +231,8 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
-
-
     public String getTeamJSON(IInternalContest contest, Account account) {
-        return teamJSON.createJSON(contest, account);
+        return jsonTool.convertToJSON(account).toString();
     }
 
     /**
@@ -258,7 +261,7 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     protected String getTeamMemberJSON(IInternalContest contest, Account account, String teamMemberName) {
-        return teamMemberJSON.createJSON(contest, account,teamMemberName );
+        return teamMemberJSON.createJSON(contest, account, teamMemberName);
     }
 
     /**
@@ -284,7 +287,7 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     private String getSubmissionJSON(IInternalContest contest, Run run) {
-        return submissionJSON.createJSON(contest, run);
+        return jsonTool.convertToJSON(run).toString();
     }
 
     /**
@@ -299,8 +302,8 @@ public class EventFeedJSON extends JSONUtilities {
         Arrays.sort(runs, new RunComparator());
 
         for (Run run : runs) {
-            
-            if (run.isJudged()){
+
+            if (run.isJudged()) {
 
                 appendJSONEvent(stringBuilder, JUDGEMENT_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getJudgementJSON(contest, run));
                 stringBuilder.append(NL);
@@ -311,7 +314,7 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     private String getJudgementJSON(IInternalContest contest, Run run) {
-        return judgementJSON.createJSON(contest, run);
+        return jsonTool.convertJudgementToJSON(run).toString();
     }
 
     /**
@@ -326,21 +329,26 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-
-            RunResultFiles files = null; // TODO CLICS must fetch files to get main file name, or put mainfile name into Run
-            appendJSONEvent(stringBuilder, RUN_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getRunJSON(contest, run, files));
-            stringBuilder.append(NL);
+            JudgementRecord judgementRecord = run.getJudgementRecord();
+            if (run.isJudged() && !judgementRecord.isPreliminaryJudgement()) {
+                RunTestCase[] testCases = run.getRunTestCases();
+                for (int j = 0; j < testCases.length; j++) {
+                    appendJSONEvent(stringBuilder, RUN_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getRunJSON(contest, testCases, j));
+                    stringBuilder.append(NL);
+                }
+            }
         }
 
         return stringBuilder.toString();
     }
 
-    private String getRunJSON(IInternalContest contest, Run run, RunResultFiles files) {
-        return runJSON.createJSON(contest, run, files);
+    private String getRunJSON(IInternalContest contest, RunTestCase[] runTestCases, int ordinal) {
+        return jsonTool.convertToJSON(runTestCases, ordinal).toString();
     }
 
     /**
      * Clarification Answer.
+     * 
      * @param contest
      * @return
      */
@@ -350,15 +358,20 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(clarifications, new ClarificationComparator());
         for (Clarification clarification : clarifications) {
-            appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification));
+            appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification, null));
             stringBuilder.append(NL);
+            if (clarification.isAnswered()) {
+                ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
+                appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification, clarAnswers[clarAnswers.length - 1]));
+                stringBuilder.append(NL);
+            }
         }
 
         return stringBuilder.toString();
     }
 
-    String getClarificationJSON(IInternalContest contest, Clarification clarification) {
-        return clarificationJSON.createJSON(contest, clarification);
+    String getClarificationJSON(IInternalContest contest, Clarification clarification, ClarificationAnswer clarAnswer) {
+        return jsonTool.convertToJSON(clarification, clarAnswer).toString();
 
     }
 
@@ -374,21 +387,22 @@ public class EventFeedJSON extends JSONUtilities {
 
         // fetch lines
         String json = createJSON(contest);
-        String [] lines = json.split(NL);
-        
+        String[] lines = json.split(NL);
+
         // filter
         List<String> list = EventFeedFilter.filterJson(lines, filter);
-        
-        // SOMEDAY in Java 8    return String.join(NL, list) + NL;
-        
-        String [] sa = (String[]) list.toArray(new String[list.size()]);
+
+        // SOMEDAY in Java 8 return String.join(NL, list) + NL;
+
+        String[] sa = (String[]) list.toArray(new String[list.size()]);
         return StringUtilities.join(NL, sa) + NL;
     }
-    
+
     /**
      * Returns a JSON string listing the current contest event feed
      * 
-     * @param contest - the current contest
+     * @param contest
+     *            - the current contest
      * @return a JSON string giving event feed in JSON
      * @throws IllegalContestState
      */
@@ -398,25 +412,25 @@ public class EventFeedJSON extends JSONUtilities {
             return "[]";
         }
 
-        //        Vector<Account> accountlist = contest.getAccounts(Type.TEAM);
-        //        if (accountlist.size() == 0) {
-        //            return "[]";
-        //        }
-        //        Account[] accounts = (Account[]) accountlist.toArray(new Account[accountlist.size()]);
+        // Vector<Account> accountlist = contest.getAccounts(Type.TEAM);
+        // if (accountlist.size() == 0) {
+        // return "[]";
+        // }
+        // Account[] accounts = (Account[]) accountlist.toArray(new Account[accountlist.size()]);
         //
-        //        Group[] groups = contest.getGroups();
-        //        final Map<ElementId, String> groupMap = new HashMap<ElementId, String>();
-        //        for (Group group : groups) {
-        //            groupMap.put(group.getElementId(), group.getDisplayName());
-        //        }
+        // Group[] groups = contest.getGroups();
+        // final Map<ElementId, String> groupMap = new HashMap<ElementId, String>();
+        // for (Group group : groups) {
+        // groupMap.put(group.getElementId(), group.getDisplayName());
+        // }
         StringBuffer buffer = new StringBuffer();
 
-        //        contest = new SampleContest().createStandardContest();
-        
-        if (eventTypeList != null){
-            
-            appendAllJSONEvents (contest, buffer, eventTypeList);
-            
+        // contest = new SampleContest().createStandardContest();
+
+        if (eventTypeList != null) {
+
+            appendAllJSONEvents(contest, buffer, eventTypeList);
+
         } else {
 
             String json = getContestJSON(contest);
@@ -478,13 +492,14 @@ public class EventFeedJSON extends JSONUtilities {
     /**
      * Appends named event types onto a buffer.
      * 
-     * valid events are:  awards, clarifications, contests, groups, judgement-types, 
-     * judgements, languages, organizations, problems, runs, submissions, team-members, teams
+     * valid events are: awards, clarifications, contests, groups, judgement-types, judgements, languages, organizations, problems, runs, submissions, team-members, teams
      * 
      * @param contest
-     * @param buffer 
-     * @param eventTypeList list of events types, comma delimited 
-     * @throws IllegalArgumentException if any event in eventTypeList is not valid
+     * @param buffer
+     * @param eventTypeList
+     *            list of events types, comma delimited
+     * @throws IllegalArgumentException
+     *             if any event in eventTypeList is not valid
      */
     private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String eventTypeList) throws IllegalArgumentException {
 
@@ -539,7 +554,6 @@ public class EventFeedJSON extends JSONUtilities {
         }
     }
 
-
     /**
      * Get next event id.
      */
@@ -549,9 +563,10 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     /**
-     * get event id. 
+     * get event id.
      * 
-     * @param sequenceNumber ascending number
+     * @param sequenceNumber
+     *            ascending number
      * @return event Id
      */
     public static String getEventId(long sequenceNumber) {
@@ -581,11 +596,11 @@ public class EventFeedJSON extends JSONUtilities {
     public String getEventTypeList() {
         return eventTypeList;
     }
-    
+
     public long getEventIdSequence() {
         return eventIdSequence;
     }
-    
+
     public void setEventIdSequence(long eventIdSequence) {
         this.eventIdSequence = eventIdSequence;
     }

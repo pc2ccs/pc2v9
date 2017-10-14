@@ -3,9 +3,9 @@ package edu.csus.ecs.pc2.services.web;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
-
-import org.apache.commons.collections.map.HashedMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
@@ -39,18 +40,10 @@ import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.services.core.ClarificationJSON;
-import edu.csus.ecs.pc2.services.core.ContestJSON;
+import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.core.EventFeedJSON;
 import edu.csus.ecs.pc2.services.core.EventFeedOperation;
-import edu.csus.ecs.pc2.services.core.GroupJSON;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
-import edu.csus.ecs.pc2.services.core.JudgementJSON;
-import edu.csus.ecs.pc2.services.core.JudgementTypeJSON;
-import edu.csus.ecs.pc2.services.core.LanguageJSON;
-import edu.csus.ecs.pc2.services.core.ProblemJSON;
-import edu.csus.ecs.pc2.services.core.SubmissionJSON;
-import edu.csus.ecs.pc2.services.core.TeamJSON;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -61,12 +54,11 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlugin {
-    
-    /** 
-     * Steps to provide a memento for the event feed.
-     * add a stream and filter per connection
+
+    /**
+     * Steps to provide a memento for the event feed. add a stream and filter per connection
      */
-    
+
     private static final long serialVersionUID = 2076470194640278897L;
 
     /**
@@ -82,7 +74,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     private Log log;
 
     private IInternalContest contest;
-    
+
     // Listeners
 
     private AccountListener accountListener = new AccountListener();
@@ -102,85 +94,55 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     private ContestInformationListener contestInformationListener = new ContestInformationListener();
 
     private ContestTimeListener contestTimeListener = new ContestTimeListener();
-    
-    private EventFeedJSON eventFeedJSON = new EventFeedJSON();
-    
-    private JudgementTypeJSON judgementTypeJSON = new JudgementTypeJSON();
 
-    private LanguageJSON languageJSON = new LanguageJSON();
+    private EventFeedJSON eventFeedJSON;
 
-//    private AwardJSON awardJSON = new AwardJSON();
+    // private AwardJSON awardJSON = new AwardJSON();
+    // private TeamMemberJSON teamMemberJSON = new TeamMemberJSON(); SOMEDAY add team numbers JSON
 
-    private ClarificationJSON clarificationJSON = new ClarificationJSON();
-
-    private ContestJSON contestJSON = new ContestJSON();
-
-    private GroupJSON groupJSON = new GroupJSON();
-
-// SOMEDAY     private OrganizationJSON organizationJSON = new OrganizationJSON();
-
-    private ProblemJSON problemJSON = new ProblemJSON();
-    
-    /**
-     * Run Judgement JSON.
-     */
-    private JudgementJSON judgementJSON = new JudgementJSON();
-
-    /**
-     * Test Case JSON
-     */
-//  private RunJSON runJSON = new RunJSON(); // SOMEDAY add test case JSON
-    
-    /**
-     * New Run JSON
-     */
-    private SubmissionJSON submissionJSON = new SubmissionJSON();
-
-    private TeamJSON teamJSON = new TeamJSON();
-
-//    private TeamMemberJSON teamMemberJSON = new TeamMemberJSON(); SOMEDAY add team numbers JSON
-    
     private EventFeedLog eventFeedLog;
 
     /**
      * Last time event sent to stream.
      */
     private long lastSent;
-    
+
     /**
      * Class contains output stream and Event Feed Filter
      * 
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
     protected class StreamAndFilter {
-        
+
         private OutputStream stream;
+
         private EventFeedFilter filter;
 
         public StreamAndFilter(OutputStream outputStream, EventFeedFilter filter) {
             stream = outputStream;
             this.filter = filter;
         }
-        
+
         public OutputStream getStream() {
             return stream;
         }
-        
+
         public EventFeedFilter getFilter() {
             return filter;
         }
     }
-    
+
     /**
      * Collection of StreamAndFilter.
      */
-    @SuppressWarnings("unchecked")
-    private Map<OutputStream, StreamAndFilter> streamsMap = new HashedMap();
+    private Map<OutputStream, StreamAndFilter> streamsMap = new ConcurrentHashMap<OutputStream, StreamAndFilter>();
 
     /**
      * Is a thread running for this class?
      */
     private boolean running = false;
+
+    private JSONTool jsonTool;
 
     /**
      * Add stream for future events.
@@ -190,12 +152,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      * @param outputStream
      * @param filter
      */
-    public void addStream (OutputStream outputStream, EventFeedFilter filter){
+    public void addStream(OutputStream outputStream, EventFeedFilter filter) {
         StreamAndFilter sandf = new StreamAndFilter(outputStream, filter);
         streamsMap.put(outputStream, sandf);
         System.out.println("debug 22 adding new stream");
-        System.out.println("debug 22 addStream there are "+streamsMap.size()+" streams ");
-        
+        System.out.println("debug 22 addStream there are " + streamsMap.size() + " streams ");
+
         sendEventsFromEventFeedLog(outputStream, filter);
     }
 
@@ -218,61 +180,63 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             }
         }
     }
-    
+
     public EventFeedStreamer(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.log = inController.getLog();
+        eventFeedJSON = new EventFeedJSON(contest);
+        jsonTool = new JSONTool(contest, inController);
         registerListeners(contest);
-        
+
         try {
             eventFeedLog = new EventFeedLog(contest);
-            
+
             String[] lines = eventFeedLog.getLogLines();
-            
-            if (lines.length == 0){
-                System.out.println("debug 22 writing events to "+eventFeedLog.getLogFileName());
-                // Write events to event log if no events are in log (at this time). 
+
+            if (lines.length == 0) {
+                System.out.println("debug 22 writing events to " + eventFeedLog.getLogFileName());
+                // Write events to event log if no events are in log (at this time).
                 String json = eventFeedJSON.createJSON(contest);
                 eventFeedLog.writeEvent(json);
             } else {
                 eventFeedJSON.setEventIdSequence(lines.length);
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             log.log(Log.WARNING, "Problem initializing event feed log", e);
         }
-     
+
     }
 
     /**
      * Send all events from log to client.
      * 
-     * @param stream 
-     * @param filter 
-     * @param 
+     * @param stream
+     * @param filter
+     * @param
      */
     private void sendEventsFromEventFeedLog(OutputStream stream, EventFeedFilter filter) {
-        
+
         /**
          * Number of lines/events in log.
          */
         String[] lines = eventFeedLog.getLogLines();
-        
-        System.out.println("debug 22 There were "+lines.length+" in event feed log.");
-        
+
+        System.out.println("debug 22 There were " + lines.length + " in event feed log.");
+
         try {
-            if (lines.length > 0){
-                
+            if (lines.length > 0) {
+
                 for (String line : lines) {
-                    if (filter.matchesFilter(line)){
+                    if (filter.matchesFilter(line)) {
                         stream.write(line.getBytes());
                         stream.write(NL.getBytes());
                         stream.flush();
                     }
                 }
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             log.log(Log.WARNING, "Problem sending JSON from event feed log", e);
@@ -293,6 +257,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     /**
      * Sleep for a number of seconds.
+     * 
      * @param secs
      */
     public void sleepForSeconds(int secs) {
@@ -329,7 +294,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     /**
      * Account Listener for EventFeeder.
-     * @author pc2@ecs.csus.edu 
+     * 
+     * @author pc2@ecs.csus.edu
      */
 
     protected class AccountListener implements IAccountListener {
@@ -337,7 +303,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void accountAdded(AccountEvent accountEvent) {
             Account account = accountEvent.getAccount();
             if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.CREATE, teamJSON.createJSON(contest, account));
+                String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(account).toString());
                 sendJSON(json + NL);
 
                 // SOMEDAY send team members info
@@ -349,7 +315,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
             Account account = accountEvent.getAccount();
             if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.UPDATE, teamJSON.createJSON(contest, account));
+                String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(account).toString());
                 sendJSON(json + NL);
 
                 // SOMEDAY send team members info
@@ -360,7 +326,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             Account[] accounts = accountEvent.getAccounts();
             for (Account account : accounts) {
                 if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                    String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.CREATE, teamJSON.createJSON(contest, account));
+                    String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(account).toString());
                     sendJSON(json + NL);
                 }
             }
@@ -371,7 +337,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             Arrays.sort(accounts, new AccountComparator());
             for (Account account : accounts) {
                 if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                    String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.UPDATE, teamJSON.createJSON(contest, account));
+                    String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(account).toString());
                     sendJSON(json + NL);
                 }
             }
@@ -380,7 +346,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void accountsRefreshAll(AccountEvent accountEvent) {
             // ignore
         }
-        
+
         private boolean isTeam(Account account) {
             return account.getClientId().getClientType().equals(ClientType.Type.TEAM);
         }
@@ -388,7 +354,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     /**
      * Run Listener for EventFeeder.
-     * @author pc2@ecs.csus.edu 
+     * 
+     * @author pc2@ecs.csus.edu
      */
     protected class RunListener implements IRunListener {
 
@@ -397,7 +364,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
 
-                String json = getJSONEvent(SUBMISSION_KEY, getEventId(), EventFeedOperation.CREATE, submissionJSON.createJSON(contest, run));
+                String json = getJSONEvent(SUBMISSION_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(run).toString());
                 sendJSON(json + NL);
             }
         }
@@ -407,23 +374,23 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
 
-                if (run.isJudged()){
-                    String json = getJSONEvent(JUDGEMENT_KEY, getEventId(), EventFeedOperation.UPDATE, judgementJSON.createJSON(contest, run));
+                if (run.isJudged()) {
+                    String json = getJSONEvent(JUDGEMENT_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertJudgementToJSON(run).toString());
                     sendJSON(json + NL);
                 } else {
-                    String json = getJSONEvent(SUBMISSION_KEY, getEventId(), EventFeedOperation.UPDATE, submissionJSON.createJSON(contest, run));
+                    String json = getJSONEvent(SUBMISSION_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(run).toString());
                     sendJSON(json + NL);
                 }
             }
         }
 
         public void runRemoved(RunEvent event) {
-            
+
             Run run = event.getRun();
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
 
-                String json = getJSONEvent(JUDGEMENT_KEY, getEventId(), EventFeedOperation.DELETE, judgementJSON.createJSON(contest, run));
+                String json = getJSONEvent(JUDGEMENT_KEY, getEventId(), EventFeedOperation.DELETE, "{id: \"" + run.getElementId().toString() + "}");
                 sendJSON(json + NL);
             }
         }
@@ -436,26 +403,34 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     /**
      * Clarification Listener.
      * 
-     * @author pc2@ecs.csus.edu 
+     * @author pc2@ecs.csus.edu
      */
     protected class ClarificationListener implements IClarificationListener {
 
         public void clarificationAdded(ClarificationEvent event) {
             Clarification clarification = event.getClarification();
-            String json = getJSONEvent(CLARIFICATIONS_KEY, getEventId(), EventFeedOperation.CREATE, clarificationJSON.createJSON(contest, clarification));
+            String json = getJSONEvent(CLARIFICATIONS_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(clarification, null).toString());
             sendJSON(json + NL);
         }
 
         public void clarificationChanged(ClarificationEvent event) {
             Clarification clarification = event.getClarification();
-            String json = getJSONEvent(CLARIFICATIONS_KEY, getEventId(), EventFeedOperation.UPDATE, clarificationJSON.createJSON(contest, clarification));
+            ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
+            String json = getJSONEvent(CLARIFICATIONS_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(clarification, clarAnswers[clarAnswers.length - 1]).toString());
             sendJSON(json + NL);
         }
 
         public void clarificationRemoved(ClarificationEvent event) {
             Clarification clarification = event.getClarification();
-            String json = getJSONEvent(CLARIFICATIONS_KEY, getEventId(), EventFeedOperation.DELETE, clarificationJSON.createJSON(contest, clarification));
+            String id = clarification.getElementId().toString();
+            String json = getJSONEvent(CLARIFICATIONS_KEY, getEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + id + "\"}");
             sendJSON(json + NL);
+            ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
+            if (clarAnswers != null) {
+                id = clarAnswers[clarAnswers.length - 1].getElementId().toString();
+                json = getJSONEvent(CLARIFICATIONS_KEY, getEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + id + "\"}");
+                sendJSON(json + NL);
+            }
         }
 
         public void refreshClarfications(ClarificationEvent event) {
@@ -465,7 +440,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     /**
      * Problem Listener for EventFeeder.
-     * @author pc2@ecs.csus.edu 
+     * 
+     * @author pc2@ecs.csus.edu
      */
 
     protected class ProblemListener implements IProblemListener {
@@ -473,21 +449,25 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void problemAdded(ProblemEvent event) {
             Problem problem = event.getProblem();
             int problemNumber = getProblemIndex(contest, problem.getElementId());
-            String json = getJSONEvent(PROBLEM_KEY, getEventId(), EventFeedOperation.CREATE, problemJSON.createJSON(contest, problem, problemNumber));
+            String json = getJSONEvent(PROBLEM_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(problem, problemNumber).toString());
             sendJSON(json + NL);
         }
 
         public void problemChanged(ProblemEvent event) {
             Problem problem = event.getProblem();
             int problemNumber = getProblemIndex(contest, problem.getElementId());
-            String json = getJSONEvent(PROBLEM_KEY, getEventId(), EventFeedOperation.UPDATE, problemJSON.createJSON(contest, problem, problemNumber));
+            String json = getJSONEvent(PROBLEM_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(problem, problemNumber).toString());
             sendJSON(json + NL);
         }
 
         public void problemRemoved(ProblemEvent event) {
             Problem problem = event.getProblem();
-            int problemNumber = getProblemIndex(contest, problem.getElementId());
-            String json = getJSONEvent(PROBLEM_KEY, getEventId(), EventFeedOperation.DELETE, problemJSON.createJSON(contest, problem, problemNumber));
+            String id = problem.getElementId().toString();
+            // if we have a problem shortName use it, otherwise default to the internal id
+            if (problem.getShortName() != null && !problem.getShortName().trim().equals("")) {
+                id = problem.getShortName();
+            }
+            String json = getJSONEvent(PROBLEM_KEY, getEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + id + "\"}");
             sendJSON(json + NL);
         }
 
@@ -498,40 +478,36 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     /**
      * Language Listener for EventFeeder.
-     * @author pc2@ecs.csus.edu 
+     * 
+     * @author pc2@ecs.csus.edu
      */
 
     protected class LanguageListener implements ILanguageListener {
 
         public void languageAdded(LanguageEvent event) {
             Language language = event.getLanguage();
-            int languageNumber = getLanguageIndex(contest, language.getElementId());
-            String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.CREATE, languageJSON.createJSON(contest, language, languageNumber));
+            String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(language).toString());
             sendJSON(json + NL);
         }
 
         public void languageChanged(LanguageEvent event) {
             Language language = event.getLanguage();
-            int languageNumber = getLanguageIndex(contest, language.getElementId());
-            String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.UPDATE, languageJSON.createJSON(contest, language, languageNumber));
+            String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(language).toString());
             sendJSON(json + NL);
         }
 
         public void languageRemoved(LanguageEvent event) {
             Language language = event.getLanguage();
-            int languageNumber = getLanguageIndex(contest, language.getElementId());
-            String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.DELETE, languageJSON.createJSON(contest, language, languageNumber));
+            String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + language.getElementId().toString() + "\"}");
             sendJSON(json + NL);
         }
-
 
         @Override
         public void languagesAdded(LanguageEvent event) {
 
             Language[] languages = event.getLanguages();
             for (Language language : languages) {
-                int languageNumber = getLanguageIndex(contest, language.getElementId());
-                String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.CREATE, languageJSON.createJSON(contest, language, languageNumber));
+                String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(language).toString());
                 sendJSON(json + NL);
             }
         }
@@ -540,12 +516,10 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void languagesChanged(LanguageEvent event) {
             Language[] languages = event.getLanguages();
             for (Language language : languages) {
-                int languageNumber = getLanguageIndex(contest, language.getElementId());
-                String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.UPDATE, languageJSON.createJSON(contest, language, languageNumber));
+                String json = getJSONEvent(LANGUAGE_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(language).toString());
                 sendJSON(json + NL);
             }
         }
-        
 
         public void languageRefreshAll(LanguageEvent event) {
             // ignore
@@ -554,34 +528,35 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     /**
      * Group/Region Listener for EventFeeder.
-     * @author pc2@ecs.csus.edu 
+     * 
+     * @author pc2@ecs.csus.edu
      */
 
     protected class GroupListener implements IGroupListener {
 
         public void groupAdded(GroupEvent event) {
             Group group = event.getGroup();
-            String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.CREATE, groupJSON.createJSON(contest, group));
+            String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(group).toString());
             sendJSON(json + NL);
 
         }
 
         public void groupChanged(GroupEvent event) {
             Group group = event.getGroup();
-            String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.UPDATE, groupJSON.createJSON(contest, group));
+            String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(group).toString());
             sendJSON(json + NL);
         }
 
         public void groupRemoved(GroupEvent event) {
             Group group = event.getGroup();
-            String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.DELETE, groupJSON.createJSON(contest, group));
+            String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + group.getElementId().toString() + "\"}");
             sendJSON(json + NL);
         }
 
         public void groupsAdded(GroupEvent groupEvent) {
             Group[] groups = groupEvent.getGroups();
             for (Group group : groups) {
-                String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.CREATE, groupJSON.createJSON(contest, group));
+                String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(group).toString());
                 sendJSON(json + NL);
             }
         }
@@ -589,7 +564,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void groupsChanged(GroupEvent groupEvent) {
             Group[] groups = groupEvent.getGroups();
             for (Group group : groups) {
-                String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.UPDATE, groupJSON.createJSON(contest, group));
+                String json = getJSONEvent(GROUPS_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(group).toString());
                 sendJSON(json + NL);
             }
         }
@@ -600,27 +575,28 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     }
 
     /**
-     * Judgement listener 
-     * @author pc2@ecs.csus.edu 
+     * Judgement listener
+     * 
+     * @author pc2@ecs.csus.edu
      */
 
     protected class JudgementListener implements IJudgementListener {
 
         public void judgementAdded(JudgementEvent event) {
             Judgement judgement = event.getJudgement();
-            String json = getJSONEvent(JUDGEMENT_TYPE_KEY, getEventId(), EventFeedOperation.CREATE, judgementTypeJSON.createJSON(contest, judgement));
+            String json = getJSONEvent(JUDGEMENT_TYPE_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(judgement).toString());
             sendJSON(json + NL);
         }
 
         public void judgementChanged(JudgementEvent event) {
             Judgement judgement = event.getJudgement();
-            String json = getJSONEvent(JUDGEMENT_TYPE_KEY, getEventId(), EventFeedOperation.UPDATE, judgementTypeJSON.createJSON(contest, judgement));
+            String json = getJSONEvent(JUDGEMENT_TYPE_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(judgement).toString());
             sendJSON(json + NL);
         }
 
         public void judgementRemoved(JudgementEvent event) {
             Judgement judgement = event.getJudgement();
-            String json = getJSONEvent(JUDGEMENT_TYPE_KEY, getEventId(), EventFeedOperation.UPDATE, judgementTypeJSON.createJSON(contest, judgement));
+            String json = getJSONEvent(JUDGEMENT_TYPE_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(judgement).toString());
             sendJSON(json + NL);
         }
 
@@ -638,19 +614,22 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
         @Override
         public void contestTimeAdded(ContestTimeEvent event) {
-            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, contestJSON.createJSON(contest));
+            // TODO seems we should only do this for our local site times...
+            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(contest.getContestInformation()).toString());
             sendJSON(json + NL);
         }
 
         @Override
         public void contestTimeRemoved(ContestTimeEvent event) {
-            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, contestJSON.createJSON(contest));
+            // TODO this does not seem right, is our local time ever removed?
+            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, jsonTool.convertToJSON(contest.getContestInformation()).toString());
             sendJSON(json + NL);
         }
 
         @Override
         public void contestTimeChanged(ContestTimeEvent event) {
-            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, contestJSON.createJSON(contest));
+            // TODO seems we should only do this for our local site times...
+            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(contest.getContestInformation()).toString());
             sendJSON(json + NL);
         }
 
@@ -680,29 +659,29 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     }
 
     /**
-     * Listener. 
+     * Listener.
      * 
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
     protected class ContestInformationListener implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
-            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, contestJSON.createJSON(contest));
+            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(event.getContestInformation()).toString());
             sendJSON(json + NL);
         }
 
         public void contestInformationChanged(ContestInformationEvent event) {
-            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, contestJSON.createJSON(contest));
+            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(event.getContestInformation()).toString());
             sendJSON(json + NL);
         }
 
         public void contestInformationRemoved(ContestInformationEvent event) {
-            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, contestJSON.createJSON(contest));
+            String json = getJSONEvent(CONTEST_KEY, getEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + contest.getContestIdentifier() + "\"}");
             sendJSON(json + NL);
         }
 
         public void contestInformationRefreshAll(ContestInformationEvent event) {
-            // ignore 
+            // ignore
         }
 
         public void finalizeDataChanged(ContestInformationEvent event) {
@@ -716,27 +695,27 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      * @param teamJSON
      */
     public void sendJSON(String string) {
-        
-        System.out.println(new Date() + " debug 22 Sending JSON "+string);
-        
-        System.out.println("debug 22 sendJSON: there are "+streamsMap.size()+" streams ");
-        
+
+        System.out.println(new Date() + " debug 22 Sending JSON " + string);
+
+        System.out.println("debug 22 sendJSON: there are " + streamsMap.size() + " streams ");
+
         /**
          * Send JSON to each
          */
-        for (Map.Entry<OutputStream, StreamAndFilter> entry : streamsMap.entrySet()){
-            StreamAndFilter streamAndFilter  = entry.getValue();
-            
+        for (Map.Entry<OutputStream, StreamAndFilter> entry : streamsMap.entrySet()) {
+            StreamAndFilter streamAndFilter = entry.getValue();
+
             try {
-                if (streamAndFilter.getFilter().matchesFilter(string)){
-                    System.out.println("debug 22 - sending to stream "+string);
+                if (streamAndFilter.getFilter().matchesFilter(string)) {
+                    System.out.println("debug 22 - sending to stream " + streamAndFilter.getFilter().getClient() + " data " + string);
                     OutputStream stream = streamAndFilter.getStream();
                     stream.write(string.getBytes());
                     stream.flush();
                 }
             } catch (Exception e) {
-                System.out.println("INFO Unable to send JSON in sendJSON: "+e.getCause().getMessage());
-                log.log(Log.INFO, "Problem trying to send JSON '"+string+"'", e);
+                System.out.println("INFO Unable to send JSON in sendJSON: " + e.getCause().getMessage());
+                log.log(Log.INFO, "Problem trying to send JSON '" + string + "'", e);
                 removeStream(streamAndFilter.getStream());
             }
         }
@@ -745,9 +724,9 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             eventFeedLog.writeEvent(string);
         } catch (Exception e) {
             e.printStackTrace();
-            log.log(Log.WARNING, "Problem trying to write event feed log for '"+string+"'", e);
-        } 
-        
+            log.log(Log.WARNING, "Problem trying to write event feed log for '" + string + "'", e);
+        }
+
         lastSent = System.currentTimeMillis();
 
         System.out.println("debug 22 sendJSON: there are " + streamsMap.size() + " streams ");
@@ -761,32 +740,34 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     @Override
     public void run() {
-        
+
         running = true;
-        
+
         // SOMEDAY - replace the keep alive code with a Timer instance.
-        
+
         /**
-         * Keep alive 
+         * Keep alive
          */
         while (!isFinalized() && running) {
 
-            sleepForSeconds(KEEP_ALIVE_QUERY_PERIOD_SECONDS);  // sleep - give back cycles to JVM.
+            sleepForSeconds(KEEP_ALIVE_QUERY_PERIOD_SECONDS); // sleep - give back cycles to JVM.
 
             if (System.currentTimeMillis() > lastSent + KEEP_ALIVE_DELAY) {
 
                 // Send keep alive to every running stream.
-                
-                for (Map.Entry<OutputStream, StreamAndFilter> entry : streamsMap.entrySet()){
-                    StreamAndFilter streamAndFilter  = entry.getValue();
+
+                for (Iterator<OutputStream> streams = streamsMap.keySet().iterator(); streams.hasNext();) {
+                    // for (Map.Entry<OutputStream, StreamAndFilter> entry : streamsMap.entrySet()){
+                    OutputStream stream = streams.next();
+                    StreamAndFilter streamAndFilter = streamsMap.get(stream);
 
                     try {
-                        OutputStream stream = streamAndFilter.getStream();
+                        // OutputStream stream = streamAndFilter.getStream();
                         stream.write(NL.getBytes());
                         stream.flush();
 
                     } catch (Exception e) {
-                        System.out.println("INFO Unable to send keep alive in run: "+e.getCause().getMessage());
+                        System.out.println("INFO Unable to send keep alive in run: " + e.getCause().getMessage());
                         log.log(Log.INFO, "Problem writing keep alive newline to stream", e);
                         removeStream(streamAndFilter.getStream());
                     }
@@ -795,20 +776,21 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                 lastSent = System.currentTimeMillis();
             }
         }
-        
+
         running = false;
     }
 
     /**
      * Contest finalized ?
+     * 
      * @return true if finalized else false
      */
     public boolean isFinalized() {
-        
-        if (contest.getFinalizeData() != null){
+
+        if (contest.getFinalizeData() != null) {
             return contest.getFinalizeData().isCertified();
         }
-        
+
         return false;
     }
 
@@ -821,8 +803,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     public boolean isRunning() {
         return running;
     }
-    
-    public void halt(){
+
+    public void halt() {
         running = false;
     }
 

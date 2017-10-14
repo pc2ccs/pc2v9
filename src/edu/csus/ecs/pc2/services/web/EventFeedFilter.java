@@ -15,6 +15,8 @@ public class EventFeedFilter {
     private String eventTypeList = null;
 
     private String startintEventId = null;
+
+    private String clientInfo;
     
     public EventFeedFilter(){
         this(null, null);
@@ -89,7 +91,7 @@ public class EventFeedFilter {
         // {"event":"teams", "id":"pc2-136", "op":"create", "data": {"id":"114","icpc_id":"3114","name":"team114"}}
 
         String[] fields = string.split(",");
-        String fieldValue = fields[0].replaceAll("\"", "").replace("{event:", "").trim();
+        String fieldValue = fields[0].replaceAll("\"", "").replace("{type:", "").trim();
         return EventFeedType.valueOf(fieldValue.toUpperCase().replace("-", "_"));
     }
 
@@ -138,5 +140,24 @@ public class EventFeedFilter {
 
         return "startid = " + (startintEventId == null ? "<none set>" : startintEventId) + // 
                 ", event types = " + (eventTypeList == null ? "<none set>" : eventTypeList);
+    }
+
+
+    /**
+     * Set identifying information for the client using this filter
+     * 
+     * @param string
+     */
+    public void setClient(String string) {
+        clientInfo = string;
+    }
+    
+    /**
+     * Return the identifying information for this user of this filter.
+     * 
+     * @return
+     */
+    public String getClient() {
+        return clientInfo;
     }
 }

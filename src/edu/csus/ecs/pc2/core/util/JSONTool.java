@@ -362,7 +362,9 @@ public class JSONTool {
                 element.put("judgement_type_id", getKey(judgement));
                 // TODO verify these times are consistent
                 Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
-                element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
+                if (wallElapsed != null) {
+                    element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
+                } // is null if there are no elapsedMinutes in the contest
                 // when judged is in minutes convert to milliseconds
                 element.put("end_contest_time", ContestTime.formatTimeMS(judgementRecord.getWhenJudgedTime() * 60000));
             }

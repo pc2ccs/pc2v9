@@ -28,7 +28,7 @@ public class EventFeedLogTest extends AbstractTestCase {
         //        System.out.println("debug log file "+eFeedLog.getLogFileName());
         //        editFile ( eFeedLog.getLogFileName());
 
-        EventFeedJSON efEventFeedJSON = new EventFeedJSON();
+        EventFeedJSON efEventFeedJSON = new EventFeedJSON(contest);
         String events = efEventFeedJSON.createJSON(contest);
 
         eFeedLog.writeEvent(events);

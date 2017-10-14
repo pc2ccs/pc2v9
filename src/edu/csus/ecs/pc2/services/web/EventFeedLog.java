@@ -26,64 +26,82 @@ public class EventFeedLog {
 
     private String logFileName = null;
 
+    private String filename;
+
+    private long old_file_size;
+
     /**
      * Load all events from events log
+     * 
      * @param contest
-     * @throws FileNotFoundException 
+     * @throws FileNotFoundException
      */
     public EventFeedLog(IInternalContest contest) throws FileNotFoundException {
-        
-        String filename = getEventFeedLogName(contest.getContestIdentifier());
+
+        filename = getEventFeedLogName(contest.getContestIdentifier());
         setLogFileName(filename);
-        
+
         // First read log
-        
-        try {
-            fileLines = Utilities.loadFile(filename);
-            System.out.println("debug 22 Loaded "+fileLines.length+" events from "+getLogFileName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
+
+        readLog();
+
         // open log file for write/append
         outStream = new FileOutputStream(filename, true);
     }
-    
-    private String getEventFeedLogName(String id) {
-        return logsDirectory +File.separator + "EventfeedLog_"+id+".log";
+
+    private void readLog() {
+        try {
+            fileLines = Utilities.loadFile(filename);
+            old_file_size = new File(filename).length();
+            System.out.println("debug 22 Loaded " + fileLines.length + " events from " + getLogFileName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public String [] getLogLines(){
+    private String getEventFeedLogName(String id) {
+        return logsDirectory + File.separator + "EventfeedLog_" + id + ".log";
+    }
+
+    public String[] getLogLines() {
+        synchronized (filename) {
+            long new_file_size = new File(filename).length();
+            // only need to re-read log if the file size changed
+            if (new_file_size != old_file_size) {
+                // this will also update old_file_size
+                readLog();
+            }
+        }
         return fileLines;
     }
-    
+
     /**
      * Append event to event log.
+     * 
      * @param eventString
      * @throws IOException
      */
-    void writeEvent(String eventString) throws IOException{
+    void writeEvent(String eventString) throws IOException {
         outStream.write(eventString.getBytes());
         outStream.flush();
-        System.out.println("debug 22 writeEvent "+eventString);
+        System.out.println("debug 22 writeEvent " + eventString);
     }
-    
+
     public static void setLogsDirectory(String logsDirectory) {
         EventFeedLog.logsDirectory = logsDirectory;
     }
-    
+
     void setLogFileName(String logFileName) {
         this.logFileName = logFileName;
     }
-    
+
     public String getLogFileName() {
         return logFileName;
     }
-    
-    public void close() throws IOException{
+
+    public void close() throws IOException {
         outStream.flush();
         outStream.close();
     }
-    
-    
+
 }
