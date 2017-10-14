@@ -109,10 +109,14 @@ public class JudgementService implements Feature {
     }
 
     private long getFreezeTime() {
+        // this is from end of the contest
         long freezeTime = Utilities.convertStringToSeconds(model.getContestInformation().getFreezeTime());
         if (freezeTime == -1) {
             // invalid so set to end of contest
             freezeTime = model.getContestTime().getContestLengthSecs();
+        } else {
+            // convert to end of contest
+            freezeTime = model.getContestTime().getContestLengthSecs() - freezeTime;
         }
         return freezeTime;
     }
