@@ -184,24 +184,24 @@ public class SubmissionService implements Feature {
 
                         SerializedFile mainFile = runFiles.getMainFile();
                         SerializedFile[] otherFiles = runFiles.getOtherFiles();
-                        java.nio.file.Path tmp_dir = null;
+                        java.nio.file.Path tmpDir = null;
                         try {
-                            tmp_dir = Files.createTempDirectory("subService");
-                            // dump mainFile and otherFiles to tmp_dir
+                            tmpDir = Files.createTempDirectory("subService");
+                            // dump mainFile and otherFiles to tmpDir
                             HashMap<Integer, String> filesToWrite = new HashMap<Integer, String>();
                             if (mainFile != null) {
                                 filesToWrite.put(Integer.valueOf(0), mainFile.getName());
-                                mainFile.buffer2file(mainFile.getBuffer(), tmp_dir.toAbsolutePath().toString() + File.pathSeparator + mainFile.getName());
+                                mainFile.buffer2file(mainFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + mainFile.getName());
                             }
                             if (otherFiles != null) {
                                 for (int j = 0; j < otherFiles.length; j++) {
                                     SerializedFile serializedFile = otherFiles[j];
                                     filesToWrite.put(Integer.valueOf(j + 1), serializedFile.getName());
-                                    serializedFile.buffer2file(serializedFile.getBuffer(), tmp_dir.toAbsolutePath().toString() + File.pathSeparator + serializedFile.getName());
+                                    serializedFile.buffer2file(serializedFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + serializedFile.getName());
                                 }
                             }
-                            String zipFileName = tmp_dir.toAbsolutePath().toString() + File.pathSeparator + "files.zip";
-                            createZip(submission, tmp_dir, filesToWrite, zipFileName);
+                            String zipFileName = tmpDir.toAbsolutePath().toString() + File.pathSeparator + "files.zip";
+                            createZip(submission, tmpDir, filesToWrite, zipFileName);
                             // set file (and path) to be download
                             File file = new File(zipFileName);
                             ResponseBuilder responseBuilder = Response.ok((Object) file);
@@ -210,8 +210,8 @@ public class SubmissionService implements Feature {
                         } catch (IOException e) {
                             controller.getLog().throwing("SubmissionService", "getSubmissionFiles", e);
                         } finally {
-                            if (tmp_dir != null) {
-                                deleteDir(tmp_dir);
+                            if (tmpDir != null) {
+                                deleteDir(tmpDir);
                             }
                         }
                     } else {
@@ -244,7 +244,7 @@ public class SubmissionService implements Feature {
 
     }
 
-    private void createZip(Run submission, java.nio.file.Path tmp_dir, HashMap<Integer, String> filesToWrite, String zipFileName) throws FileNotFoundException, IOException {
+    private void createZip(Run submission, java.nio.file.Path tmpDir, HashMap<Integer, String> filesToWrite, String zipFileName) throws FileNotFoundException, IOException {
         ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(zipFileName));
         String comment = "files for submission" + submission.getNumber();
         zip.setComment(comment);
@@ -252,7 +252,7 @@ public class SubmissionService implements Feature {
         for (Iterator<Integer> iterator = filesToWrite.keySet().iterator(); iterator.hasNext();) {
             Integer fileIndex = (Integer) iterator.next();
             String inputFile = filesToWrite.get(fileIndex);
-            FileInputStream in = new FileInputStream(tmp_dir + File.pathSeparator + inputFile);
+            FileInputStream in = new FileInputStream(tmpDir + File.pathSeparator + inputFile);
             ZipEntry ze = new ZipEntry(inputFile);
             zip.putNextEntry(ze);
             while (in.available() > 0) {
@@ -271,9 +271,9 @@ public class SubmissionService implements Feature {
         zip.close();
     }
 
-    private void deleteDir(java.nio.file.Path tmp_dir) {
+    private void deleteDir(java.nio.file.Path tmpDir) {
         try {
-            Files.walkFileTree(tmp_dir, new SimpleFileVisitor<java.nio.file.Path>() {
+            Files.walkFileTree(tmpDir, new SimpleFileVisitor<java.nio.file.Path>() {
                 @Override
                 public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);
