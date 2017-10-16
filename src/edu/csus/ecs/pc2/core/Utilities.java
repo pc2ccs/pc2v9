@@ -1183,6 +1183,27 @@ public final class Utilities {
         return (String[]) list.toArray(new String[list.size()]);
     }
 
+    /**
+     * If there is a freezeTime set, return the contestLength - freezeTime,
+     * else the contestLength.
+     * 
+     * @param model - contest to get info from
+     * @return The freeze time in seconds (counting up from contest Start)
+     */
+    public static long getFreezeTime(IInternalContest model) {
+        // this is from end of the contest
+        long freezeTime = Utilities.convertStringToSeconds(model.getContestInformation().getFreezeTime());
+        if (freezeTime == -1) {
+            // invalid so set to end of contest
+            freezeTime = model.getContestTime().getContestLengthSecs();
+        } else {
+            // convert to end of contest
+            freezeTime = model.getContestTime().getContestLengthSecs() - freezeTime;
+        }
+        return freezeTime;
+    }
+
+
     public static SerializedFile[] createSerializedFiles(String dataFileBaseDirectory, String[] inputFileNames, boolean externalFilesFlag) {
 
         ArrayList<SerializedFile> outfiles = new ArrayList<SerializedFile>();

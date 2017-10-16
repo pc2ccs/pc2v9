@@ -61,7 +61,7 @@ public class RunService implements Feature {
     public Response getRuns(@Context SecurityContext sc) {
         // get the runs from the contest
         Run[] runs = model.getRuns();
-        long freezeTime = getFreezeTime();
+        long freezeTime = Utilities.getFreezeTime(model);
 
         // get an object to map the runs descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
@@ -94,7 +94,7 @@ public class RunService implements Feature {
     public Response getRun(@Context SecurityContext sc, @PathParam("runId") String runId) {
         // get the runs from the contest
         Run[] runs = model.getRuns();
-        long freezeTime = getFreezeTime();
+        long freezeTime = Utilities.getFreezeTime(model);
 
         // get an object to map the runs descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
@@ -121,15 +121,6 @@ public class RunService implements Feature {
         }
         return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
 
-    }
-
-    private long getFreezeTime() {
-        long  freezeTime = Utilities.convertStringToSeconds(model.getContestInformation().getFreezeTime());
-        if (freezeTime == -1) {
-            // invalid so set to end of contest
-            freezeTime = model.getContestTime().getContestLengthSecs();
-        }
-        return freezeTime;
     }
 
     @Override

@@ -59,7 +59,7 @@ public class JudgementService implements Feature {
     public Response getJudgements(@Context SecurityContext sc) {
         // get the groups from the contest
         Run[] runs = model.getRuns();
-        long freezeTime = getFreezeTime();
+        long freezeTime = Utilities.getFreezeTime(model);
 
         // get an object to map the groups descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
@@ -86,7 +86,7 @@ public class JudgementService implements Feature {
     public Response getJudgement(@Context SecurityContext sc, @PathParam("judgementId") String judgementId) {
         // get the runs from the contest
         Run[] runs = model.getRuns();
-        long freezeTime = getFreezeTime();
+        long freezeTime = Utilities.getFreezeTime(model);
 
         // get an object to map the judgements descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
@@ -106,19 +106,6 @@ public class JudgementService implements Feature {
         }
         return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
 
-    }
-
-    private long getFreezeTime() {
-        // this is from end of the contest
-        long freezeTime = Utilities.convertStringToSeconds(model.getContestInformation().getFreezeTime());
-        if (freezeTime == -1) {
-            // invalid so set to end of contest
-            freezeTime = model.getContestTime().getContestLengthSecs();
-        } else {
-            // convert to end of contest
-            freezeTime = model.getContestTime().getContestLengthSecs() - freezeTime;
-        }
-        return freezeTime;
     }
 
     @Override
