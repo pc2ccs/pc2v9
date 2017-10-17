@@ -304,6 +304,7 @@ public class SampleContest {
         // 3 Execute command line
         // 4 is the Title again????
         // 5 isInterpreted
+        // 6 is the ID
 
         language.setCompileCommandLine(values[1]);
         language.setExecutableIdentifierMask(values[2]);
@@ -313,6 +314,7 @@ public class SampleContest {
         } else {
             language.setInterpreted(false);
         }
+        language.setID(values[6]);
     }
 
     public IInternalController createController(IInternalContest contest, boolean isServer, boolean isRemote) {

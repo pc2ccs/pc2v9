@@ -549,12 +549,13 @@ public class JSONToolTest extends AbstractTestCase {
         Language language = contest.getLanguages()[2];
         String json = eventFeedJSON.getLanguageJSON(contest, language);
 
-        // System.out.println("debug lang json = "+json);
+//         System.out.println("debug lang json = "+json);
 
-        //  {"id":3, "name":"Java"}
+        //  {"id": "java", "name":"Java"}
+        JSONTool jsonTool= new JSONTool(contest, null);
 
-        asertEqualJSON(json, "id", "3");
-        assertJSONStringValue(json,  "id", "3");
+        asertEqualJSON(json, "id", jsonTool.getLanguageId(language));
+        assertJSONStringValue(json,  "id", jsonTool.getLanguageId(language));
         asertEqualJSON(json, "name", "GNU C++ (Unix / Windows)");
     }
 

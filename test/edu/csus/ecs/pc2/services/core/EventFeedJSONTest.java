@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.web.EventFeedFilter;
 
 /**
@@ -587,9 +588,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 //        editFile(writeFile(new File("/tmp/stuf." + System.currentTimeMillis() + ".json"), json));
 
         // {"id":3, "name":"Java"}
-
-        assertEqualJSON(json, "id", "6");
-        assertJSONStringValue(json, "id", "6");
+        JSONTool jsonTool= new JSONTool(contest, null);
+        assertEqualJSON(json, "id", jsonTool.getLanguageId(language));
+        assertJSONStringValue(json, "id", jsonTool.getLanguageId(language));
         assertEqualJSON(json, "name", "APL");
     }
 

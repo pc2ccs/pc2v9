@@ -109,7 +109,7 @@ public class LanguagesPane extends JPanePlugin {
         if (languageListBox == null) {
             languageListBox = new MCLB();
 
-            Object[] cols = { "Display Name", "Compiler Command Line", "Exe Name", "Execute Command Line", "Interpreted", "Use Judges", "Judges Command Line" };
+            Object[] cols = { "Display Name", "Compiler Command Line", "Exe Name", "Execute Command Line", "Interpreted", "Use Judges", "Judges Command Line", "ID" };
             languageListBox.addColumns(cols);
             
             /**
@@ -156,7 +156,7 @@ public class LanguagesPane extends JPanePlugin {
 
     protected Object[] buildLanguageRow(Language language) {
 
-//        Object[] cols = { "Display Name", "Compiler Command Line", "Exe Name", "Execute Command Line", "Interpreted", "Use Judges", "Judges Command Line" };
+//        Object[] cols = { "Display Name", "Compiler Command Line", "Exe Name", "Execute Command Line", "Interpreted", "Use Judges", "Judges Command Line" , "ID"};
 
         int numberColumns = languageListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -172,7 +172,7 @@ public class LanguagesPane extends JPanePlugin {
         
         c[5] = Utilities.yesNoString(language.isUsingJudgeProgramExecuteCommandLine());
         c[6] = language.getJudgeProgramExecuteCommandLine();
-        
+        c[7] = language.getID();
         return c;
     }
 

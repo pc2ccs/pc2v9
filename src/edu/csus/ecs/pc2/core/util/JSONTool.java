@@ -25,7 +25,6 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
-import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * JSON for pc2 classes.
@@ -58,7 +57,7 @@ public class JSONTool {
     public ObjectNode convertToJSON(Run submission) {
         ObjectNode element = mapper.createObjectNode();
         element.put("id", submission.getElementId().toString());
-        element.put("language_id", submission.getLanguageId().toString());
+        element.put("language_id", getLanguageId(model.getLanguage(submission.getLanguageId())));
         element.put("problem_id", getProblemId(model.getProblem(submission.getProblemId())));
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
@@ -82,7 +81,7 @@ public class JSONTool {
 
     public ObjectNode convertToJSON(Language language) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", JSONUtilities.getLanguageIndexString(model, language.getElementId()));
+        element.put("id", getLanguageId(language));
         element.put("name", language.getDisplayName());
         return element;
     }
@@ -395,6 +394,14 @@ public class JSONTool {
      */
     public String getJudgementType(Judgement judgement) {
         return judgement.getAcronym();
+    }
+    
+    public String getLanguageId(Language language) {
+        String key = language.getID();
+        if (key == null || key.trim().equals("")) {
+            key = language.getElementId().toString();
+        }
+        return key;
     }
 
     public ObjectNode convertToJSON(RunTestCase[] runTestCases, int ordinal) {

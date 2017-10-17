@@ -488,7 +488,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
         public void languageRemoved(LanguageEvent event) {
             Language language = event.getLanguage();
-            String json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + language.getElementId().toString() + "\"}");
+            String json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + jsonTool.getLanguageId(language) + "\"}");
             sendJSON(json + NL);
         }
 
