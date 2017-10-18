@@ -71,7 +71,9 @@ public class EventFeedService {
             System.out.println("starting event feed, sending only event types '"+eventTypeList+"'");
             eventFeedSteamer.setEventTypeList(eventTypeList);
 
-        } else if (startintEventId != null){
+        } 
+        
+        if (startintEventId != null){
             
             System.out.println("starting event feed, Feed starting at id "+startintEventId);
             eventFeedSteamer.setStartEventId(startintEventId);

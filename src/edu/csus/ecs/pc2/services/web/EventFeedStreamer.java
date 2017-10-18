@@ -147,13 +147,14 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         this.log = inController.getLog();
         registerListeners(contest);
         
-        try {
-            eventFeedLog = new EventFeedLog(contest);
-            sendEventsFromEventFeedLog();
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.log(Log.WARNING, "Problem initializing event feed log", e);
-        }
+        // TODO add back the read from event log
+//        try {
+//            eventFeedLog = new EventFeedLog(contest);
+//            sendEventsFromEventFeedLog();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            log.log(Log.WARNING, "Problem initializing event feed log", e);
+//        }
      
     }
 
@@ -161,32 +162,32 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      * Send all events from log to consumer.
      * @param 
      */
-    private void sendEventsFromEventFeedLog() {
-        
-        /**
-         * Number of lines/events in log.
-         */
-        String[] lines = eventFeedLog.getLogLines();
-        
-        System.out.println("debug 22 There were "+lines.length+" in event feed log.");
-        
-        try {
-            if (lines.length > 0){
-                eventFeedJSON.setEventIdSequence(lines.length);
-                for (String line : lines) {
-                    // TODO filter respecting EventTypeList
-                    // TODO filter respecting StartEventId
-                    
-                    sendJSON(line + NL);
-                }
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.log(Log.WARNING, "Problem sending JSON from event feed log", e);
-
-        }
-    }
+//    private void sendEventsFromEventFeedLog() {
+//        
+//        /**
+//         * Number of lines/events in log.
+//         */
+//        String[] lines = eventFeedLog.getLogLines();
+//        
+//        System.out.println("debug 22 There were "+lines.length+" in event feed log.");
+//        
+//        try {
+//            if (lines.length > 0){
+//                eventFeedJSON.setEventIdSequence(lines.length);
+//                for (String line : lines) {
+//                    // TODO filter respecting EventTypeList
+//                    // TODO filter respecting StartEventId
+//                    
+//                    sendJSON(line + NL);
+//                }
+//            }
+//            
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            log.log(Log.WARNING, "Problem sending JSON from event feed log", e);
+//
+//        }
+//    }
 
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -700,13 +701,14 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             e.printStackTrace(System.err);
             log.log(Log.WARNING, "Problem trying to send JSON '"+string+"'", e);
         }
-        
-        try {
-            eventFeedLog.writeEvent(string);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.log(Log.WARNING, "Problem trying to write event feed log for '"+string+"'", e);
-        } 
+
+        // TODO add back write to log
+//        try {
+//            eventFeedLog.writeEvent(string);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            log.log(Log.WARNING, "Problem trying to write event feed log for '"+string+"'", e);
+//        } 
         
         lastSent = System.currentTimeMillis();
         
