@@ -49,7 +49,7 @@ import edu.csus.ecs.pc2.core.model.IRunListener;
  * @author ICPC
  *
  */
-@Path("/submissions")
+@Path("/contest/submissions")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton

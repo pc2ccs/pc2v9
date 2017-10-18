@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.util.JSONTool;
  * @author ICPC
  *
  */
-@Path("/judgement-types")
+@Path("/contest/judgement-types")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton

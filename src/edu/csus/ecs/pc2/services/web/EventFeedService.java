@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-@Path("/event-feed")
+@Path("/contest/event-feed")
 @Produces(MediaType.APPLICATION_JSON)
 public class EventFeedService {
 

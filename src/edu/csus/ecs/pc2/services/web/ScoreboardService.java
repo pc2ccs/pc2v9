@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.exports.ccs.ContestAPIStandingsJSON;
  * 
  * @author ICPC
  */
-@Path("/scoreboard")
+@Path("/contest/scoreboard")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
