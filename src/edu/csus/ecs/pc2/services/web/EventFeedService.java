@@ -22,7 +22,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
-
 /**
  * Implementation of CLICS REST event-feed. 
  * 
@@ -35,6 +34,11 @@ public class EventFeedService {
     private IInternalContest contest;
     private IInternalController controller;
     private Log log;
+    
+    /**
+     * Streamer that sends all JSON to clients (and sends keep alive). 
+     */
+    private static EventFeedStreamer eventFeedSteamer;
     
     public EventFeedService(IInternalContest inContest, IInternalController inController) {
         super();
@@ -64,27 +68,42 @@ public class EventFeedService {
         
         final AsyncContext asyncContext = servletRequest.getAsyncContext();
         final ServletOutputStream s = asyncContext.getResponse().getOutputStream();
-        final EventFeedStreamer eventFeedSteamer = new EventFeedStreamer(s, contest, controller);
+        
+        if (eventFeedSteamer == null){
+            eventFeedSteamer = new EventFeedStreamer(s, contest, controller);
+        }
+        
+        EventFeedFilter filter = new EventFeedFilter();
         
         if (eventTypeList != null) {
-
+            filter.addEventTypeList(eventTypeList);
             System.out.println("starting event feed, sending only event types '"+eventTypeList+"'");
             eventFeedSteamer.setEventTypeList(eventTypeList);
-
         } 
         
         if (startintEventId != null){
-            
+            filter.addStartintEventId(startintEventId);
             System.out.println("starting event feed, Feed starting at id "+startintEventId);
             eventFeedSteamer.setStartEventId(startintEventId);
             
         } else {
             System.out.println("starting event feed (no args) ");
         }
-
-        eventFeedSteamer.writeStartupEvents();
         
-        new Thread(eventFeedSteamer).start();
+        /**
+         * Write past events to stream.
+         */
+        eventFeedSteamer.writeStartupEvents(s);       
+        
+        eventFeedSteamer.addStream(s, filter);
+        
+        if (! eventFeedSteamer.isRunning()){
+            /**
+             * Put on thread if not running on a thread.
+             */
+            new Thread(eventFeedSteamer).start();
+        }
+        
         
         while (true) {
             if (eventFeedSteamer.isFinalized()) {

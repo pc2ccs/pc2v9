@@ -1,8 +1,12 @@
 package edu.csus.ecs.pc2.services.web;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
+import javax.servlet.ServletOutputStream;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -58,7 +62,12 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlugin {
-
+    
+    /** 
+     * Steps to provide a memento for the event feed.
+     * add a stream and filter per connection
+     */
+    
     private static final long serialVersionUID = 2076470194640278897L;
 
     /**
@@ -69,9 +78,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     /**
      * Number of seconds between checks to send keep alive.
      */
-    private static final int KEEP_ALIVE_QUERY_PERIOD_SECONDS = 0;
-
-    private OutputStream os;
+    private static final int KEEP_ALIVE_QUERY_PERIOD_SECONDS = 50;
 
     private Log log;
 
@@ -123,8 +130,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     /**
      * Test Case JSON
      */
-//  private RunJSON runJSON = new RunJSON(); // TODO add test case JSON
-
+//  private RunJSON runJSON = new RunJSON(); // SOMEDAY add test case JSON
+    
     /**
      * New Run JSON
      */
@@ -137,24 +144,79 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     private EventFeedLog eventFeedLog;
 
     /**
-     * Last time4 event sent to stream.
+     * Last time event sent to stream.
      */
     private long lastSent;
+    
+    /**
+     * Class contains output stream and Event Feed Filter
+     * 
+     * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+     */
+    protected class StreamAndFilter {
+        
+        private OutputStream stream;
+        private EventFeedFilter filter;
 
+        public StreamAndFilter(OutputStream outputStream, EventFeedFilter filter) {
+            stream = outputStream;
+            this.filter = filter;
+        }
+        
+        public OutputStream getStream() {
+            return stream;
+        }
+        
+        public EventFeedFilter getFilter() {
+            return filter;
+        }
+    }
+    
+    /**
+     * List of output streams and filters.
+     */
+    private List<StreamAndFilter> streams = new ArrayList<EventFeedStreamer.StreamAndFilter>();
+
+    /**
+     * Is a thread running for this class?
+     */
+    private boolean running = false;
+
+    public void addStream (OutputStream outputStream, EventFeedFilter filter){
+        StreamAndFilter sandf = new StreamAndFilter(outputStream, filter);
+        streams.add(sandf);
+        System.out.println("debug 22 adding new stream");
+        System.out.println("debug 22 addStream there are "+streams.size()+" streams ");
+    }
+
+    public void removeStream(OutputStream stream) {
+        for (StreamAndFilter streamAndFilter : streams) {
+            if (streamAndFilter.getStream().equals(stream)) {
+                streams.remove(streamAndFilter);
+                try {
+                    log.log(Log.INFO, "Closing client stream " + streamAndFilter.getStream());
+                    streamAndFilter.getStream().close();
+                    log.log(Log.INFO, "Closed client stream.");
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                    log.log(Log.WARNING, "Problem trying to close stream", e);
+                }
+            }
+        }
+    }
+    
     public EventFeedStreamer(OutputStream outputStream, IInternalContest inContest, IInternalController inController) {
-        this.os = outputStream;
         this.contest = inContest;
         this.log = inController.getLog();
         registerListeners(contest);
         
-        // TODO add back the read from event log
-//        try {
-//            eventFeedLog = new EventFeedLog(contest);
-//            sendEventsFromEventFeedLog();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            log.log(Log.WARNING, "Problem initializing event feed log", e);
-//        }
+        try {
+            eventFeedLog = new EventFeedLog(contest);
+//            sendEventsFromEventFeedLog(); TODO 
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.log(Log.WARNING, "Problem initializing event feed log", e);
+        }
      
     }
 
@@ -694,21 +756,33 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         
         System.out.println(new Date() + " debug 22 Sending JSON "+string);
         
-        try {
-            os.write(string.getBytes());
-            os.flush();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            log.log(Log.WARNING, "Problem trying to send JSON '"+string+"'", e);
+        System.out.println("debug 22 there are "+streams.size()+" streams ");
+        
+        /**
+         * Send JSON to each
+         */
+        for (StreamAndFilter streamAndFilter : streams) {
+            
+            try {
+                if (streamAndFilter.getFilter().matchesFilter(string)){
+                    System.out.println("debug 22 - sending to stream "+string);
+                    OutputStream stream = streamAndFilter.getStream();
+                    stream.write(string.getBytes());
+                    stream.flush();
+                }
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+                log.log(Log.WARNING, "Problem trying to send JSON '"+string+"'", e);
+                removeStream(streamAndFilter.getStream());
+            }
         }
 
-        // TODO add back write to log
-//        try {
-//            eventFeedLog.writeEvent(string);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            log.log(Log.WARNING, "Problem trying to write event feed log for '"+string+"'", e);
-//        } 
+        try {
+            eventFeedLog.writeEvent(string);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.log(Log.WARNING, "Problem trying to write event feed log for '"+string+"'", e);
+        } 
         
         lastSent = System.currentTimeMillis();
         
@@ -721,51 +795,59 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     }
 
     /**
-     * Write startup events.
+     * Write initial JSON events.
+     * 
+     * @param stream stream to write JSON to.
      */
-    public void writeStartupEvents() {
-        
+    public void writeStartupEvents(ServletOutputStream stream) {
+
         try {
             String json = eventFeedJSON.createJSON(contest);
-            sendJSON(json);
+            stream.write(json.getBytes());
+            stream.flush();
         } catch (Exception e) {
             e.printStackTrace();
             log.log(Log.WARNING, "Problem writing startup events to stream", e);
+            removeStream(stream);
         }
     }
 
     @Override
     public void run() {
         
-        System.out.println(new Date()+ " debug 22 EventFeedStreamer.run()");
-        
+        running = true;
         
         // SOMEDAY - replace the keep alive code with a Timer instance.
-        
-//        long diff = (lastSent + KEEP_ALIVE_DELAY) - System.currentTimeMillis();
-//        System.out.println(new Date()+" debug keep alive in "+(diff/1000)+" seconds.  lastsent "+lastSent);
         
         /**
          * Keep alive 
          */
-        while (!isFinalized()) {
-            
+        while (!isFinalized() && running) {
+
             sleepForSeconds(KEEP_ALIVE_QUERY_PERIOD_SECONDS);  // sleep - give back cycles to JVM.
-//            diff = (lastSent + KEEP_ALIVE_DELAY) - System.currentTimeMillis();
-//            System.out.println(new Date()+" debug keep alive in "+(diff/1000)+" seconds.");
-            
+
             if (System.currentTimeMillis() > lastSent + KEEP_ALIVE_DELAY) {
-                try {
-                    System.out.println(new Date() + " debug 22 wrote keep alive");
-                    os.write(NL.getBytes());
-                    os.flush();
-                    lastSent = System.currentTimeMillis();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    log.log(Log.WARNING, "Problem writing keep alive newline to stream", e);
+
+                // Send keep alive to every running stream.
+                
+                for (StreamAndFilter streamAndFilter : streams) {
+                    try {
+                        OutputStream stream = streamAndFilter.getStream();
+                        stream.write(NL.getBytes());
+                        stream.flush();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        log.log(Log.WARNING, "Problem writing keep alive newline to stream", e);
+                        removeStream(streamAndFilter.getStream());
+                    }
                 }
+
+                lastSent = System.currentTimeMillis();
             }
         }
+        
+        running = false;
     }
 
     /**
@@ -787,6 +869,20 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     public void setStartEventId(String startintEventId) {
         eventFeedJSON.setStartEventId(startintEventId);
+    }
+
+    /**
+     * Is running on a thread?
+     * 
+     * @see #halt()
+     * @return
+     */
+    public boolean isRunning() {
+        return running;
+    }
+    
+    public void halt(){
+        running = false;
     }
 
 }

@@ -57,6 +57,11 @@ public class EventFeedLog {
         return fileLines;
     }
     
+    /**
+     * Append event to event log.
+     * @param eventString
+     * @throws IOException
+     */
     void writeEvent(String eventString) throws IOException{
         outStream.write(eventString.getBytes());
         outStream.flush();
