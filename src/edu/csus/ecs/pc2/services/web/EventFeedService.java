@@ -67,10 +67,10 @@ public class EventFeedService {
             @Context HttpServletRequest servletRequest) throws IOException {
         
         final AsyncContext asyncContext = servletRequest.getAsyncContext();
-        final ServletOutputStream s = asyncContext.getResponse().getOutputStream();
+        final ServletOutputStream servletOutputStream = asyncContext.getResponse().getOutputStream();
         
         if (eventFeedSteamer == null){
-            eventFeedSteamer = new EventFeedStreamer(s, contest, controller);
+            eventFeedSteamer = new EventFeedStreamer(contest, controller);
         }
         
         EventFeedFilter filter = new EventFeedFilter();
@@ -89,13 +89,11 @@ public class EventFeedService {
         } else {
             System.out.println("starting event feed (no args) ");
         }
-        
+
         /**
-         * Write past events to stream.
+         * Add stream and write past events to stream.
          */
-        eventFeedSteamer.writeStartupEvents(s);       
-        
-        eventFeedSteamer.addStream(s, filter);
+        eventFeedSteamer.addStream(servletOutputStream, filter);
         
         if (! eventFeedSteamer.isRunning()){
             /**

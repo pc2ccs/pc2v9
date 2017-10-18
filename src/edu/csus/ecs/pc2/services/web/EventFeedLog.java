@@ -40,12 +40,12 @@ public class EventFeedLog {
         
         try {
             fileLines = Utilities.loadFile(filename);
+            System.out.println("debug 22 Loaded "+fileLines.length+" events from "+getLogFileName());
         } catch (Exception e) {
             e.printStackTrace();
-            // TODO: handle exception
         }
         
-        // Then open log file for write
+        // open log file for write/append
         outStream = new FileOutputStream(filename, true);
     }
     
@@ -65,6 +65,7 @@ public class EventFeedLog {
     void writeEvent(String eventString) throws IOException{
         outStream.write(eventString.getBytes());
         outStream.flush();
+        System.out.println("debug 22 writeEvent "+eventString);
     }
     
     public static void setLogsDirectory(String logsDirectory) {

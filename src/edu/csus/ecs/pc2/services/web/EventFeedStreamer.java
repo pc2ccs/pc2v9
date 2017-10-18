@@ -1,12 +1,11 @@
 package edu.csus.ecs.pc2.services.web;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 
-import javax.servlet.ServletOutputStream;
+import org.apache.commons.collections.map.HashedMap;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -118,7 +117,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     private GroupJSON groupJSON = new GroupJSON();
 
-// TODO     private OrganizationJSON organizationJSON = new OrganizationJSON();
+// SOMEDAY     private OrganizationJSON organizationJSON = new OrganizationJSON();
 
     private ProblemJSON problemJSON = new ProblemJSON();
     
@@ -139,7 +138,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     private TeamJSON teamJSON = new TeamJSON();
 
-//    private TeamMemberJSON teamMemberJSON = new TeamMemberJSON(); TODO add team numbers JSON
+//    private TeamMemberJSON teamMemberJSON = new TeamMemberJSON(); SOMEDAY add team numbers JSON
     
     private EventFeedLog eventFeedLog;
 
@@ -173,46 +172,72 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     }
     
     /**
-     * List of output streams and filters.
+     * Collection of StreamAndFilter.
      */
-    private List<StreamAndFilter> streams = new ArrayList<EventFeedStreamer.StreamAndFilter>();
+    @SuppressWarnings("unchecked")
+    private Map<OutputStream, StreamAndFilter> streamsMap = new HashedMap();
 
     /**
      * Is a thread running for this class?
      */
     private boolean running = false;
 
+    /**
+     * Add stream for future events.
+     * 
+     * Write past events to stream.
+     * 
+     * @param outputStream
+     * @param filter
+     */
     public void addStream (OutputStream outputStream, EventFeedFilter filter){
         StreamAndFilter sandf = new StreamAndFilter(outputStream, filter);
-        streams.add(sandf);
+        streamsMap.put(outputStream, sandf);
         System.out.println("debug 22 adding new stream");
-        System.out.println("debug 22 addStream there are "+streams.size()+" streams ");
+        System.out.println("debug 22 addStream there are "+streamsMap.size()+" streams ");
+        
+        sendEventsFromEventFeedLog(outputStream, filter);
     }
 
+    /**
+     * Remove stream from list of streams to send event feed JSON.
+     * 
+     * @param stream
+     */
     public void removeStream(OutputStream stream) {
-        for (StreamAndFilter streamAndFilter : streams) {
-            if (streamAndFilter.getStream().equals(stream)) {
-                streams.remove(streamAndFilter);
-                try {
-                    log.log(Log.INFO, "Closing client stream " + streamAndFilter.getStream());
-                    streamAndFilter.getStream().close();
-                    log.log(Log.INFO, "Closed client stream.");
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                    log.log(Log.WARNING, "Problem trying to close stream", e);
-                }
+
+        if (streamsMap.containsKey(stream)) {
+            try {
+                log.log(Log.INFO, "Closing client stream " + stream);
+                stream.close();
+                log.log(Log.INFO, "Closed client stream.");
+                streamsMap.remove(stream);
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+                log.log(Log.WARNING, "Problem trying to close stream", e);
             }
         }
     }
     
-    public EventFeedStreamer(OutputStream outputStream, IInternalContest inContest, IInternalController inController) {
+    public EventFeedStreamer(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.log = inController.getLog();
         registerListeners(contest);
         
         try {
             eventFeedLog = new EventFeedLog(contest);
-//            sendEventsFromEventFeedLog(); TODO 
+            
+            String[] lines = eventFeedLog.getLogLines();
+            
+            if (lines.length == 0){
+                System.out.println("debug 22 writing events to "+eventFeedLog.getLogFileName());
+                // Write events to event log if no events are in log (at this time). 
+                String json = eventFeedJSON.createJSON(contest);
+                eventFeedLog.writeEvent(json);
+            } else {
+                eventFeedJSON.setEventIdSequence(lines.length);
+            }
+            
         } catch (Exception e) {
             e.printStackTrace();
             log.log(Log.WARNING, "Problem initializing event feed log", e);
@@ -221,35 +246,39 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     }
 
     /**
-     * Send all events from log to consumer.
+     * Send all events from log to client.
+     * 
+     * @param stream 
+     * @param filter 
      * @param 
      */
-//    private void sendEventsFromEventFeedLog() {
-//        
-//        /**
-//         * Number of lines/events in log.
-//         */
-//        String[] lines = eventFeedLog.getLogLines();
-//        
-//        System.out.println("debug 22 There were "+lines.length+" in event feed log.");
-//        
-//        try {
-//            if (lines.length > 0){
-//                eventFeedJSON.setEventIdSequence(lines.length);
-//                for (String line : lines) {
-//                    // TODO filter respecting EventTypeList
-//                    // TODO filter respecting StartEventId
-//                    
-//                    sendJSON(line + NL);
-//                }
-//            }
-//            
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            log.log(Log.WARNING, "Problem sending JSON from event feed log", e);
-//
-//        }
-//    }
+    private void sendEventsFromEventFeedLog(OutputStream stream, EventFeedFilter filter) {
+        
+        /**
+         * Number of lines/events in log.
+         */
+        String[] lines = eventFeedLog.getLogLines();
+        
+        System.out.println("debug 22 There were "+lines.length+" in event feed log.");
+        
+        try {
+            if (lines.length > 0){
+                
+                for (String line : lines) {
+                    if (filter.matchesFilter(line)){
+                        stream.write(line.getBytes());
+                        stream.write(NL.getBytes());
+                        stream.flush();
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.log(Log.WARNING, "Problem sending JSON from event feed log", e);
+
+        }
+    }
 
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -312,7 +341,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                     String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.CREATE, teamJSON.createJSON(contest, account));
                     sendJSON(json + NL);
                     
-                    // TODO send team members info
+                    // SOMEDAY send team members info
                     
                 }
             }
@@ -328,7 +357,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                     String json = getJSONEvent(TEAM_KEY, getEventId(), EventFeedOperation.UPDATE, teamJSON.createJSON(contest, account));
                     sendJSON(json + NL);
                     
-                    // TODO send team members info
+                    // SOMEDAY send team members info
                 }
             }
         }
@@ -756,12 +785,13 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         
         System.out.println(new Date() + " debug 22 Sending JSON "+string);
         
-        System.out.println("debug 22 there are "+streams.size()+" streams ");
+        System.out.println("debug 22 sendJSON: there are "+streamsMap.size()+" streams ");
         
         /**
          * Send JSON to each
          */
-        for (StreamAndFilter streamAndFilter : streams) {
+        for (Map.Entry<OutputStream, StreamAndFilter> entry : streamsMap.entrySet()){
+            StreamAndFilter streamAndFilter  = entry.getValue();
             
             try {
                 if (streamAndFilter.getFilter().matchesFilter(string)){
@@ -771,8 +801,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                     stream.flush();
                 }
             } catch (Exception e) {
-                e.printStackTrace(System.err);
-                log.log(Log.WARNING, "Problem trying to send JSON '"+string+"'", e);
+                System.out.println("INFO Unable to send JSON in sendJSON: "+e.getCause().getMessage());
+                log.log(Log.INFO, "Problem trying to send JSON '"+string+"'", e);
                 removeStream(streamAndFilter.getStream());
             }
         }
@@ -785,31 +815,14 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         } 
         
         lastSent = System.currentTimeMillis();
-        
-        System.out.println(new Date() + " debug 22 Sent at "+lastSent);
-        
+
+        System.out.println("debug 22 sendJSON: there are " + streamsMap.size() + " streams ");
+        System.out.println(new Date() + " debug 22 Sent at " + lastSent);
+
     }
 
     public long getEventId() {
         return eventFeedJSON.getEventIdSequence();
-    }
-
-    /**
-     * Write initial JSON events.
-     * 
-     * @param stream stream to write JSON to.
-     */
-    public void writeStartupEvents(ServletOutputStream stream) {
-
-        try {
-            String json = eventFeedJSON.createJSON(contest);
-            stream.write(json.getBytes());
-            stream.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.log(Log.WARNING, "Problem writing startup events to stream", e);
-            removeStream(stream);
-        }
     }
 
     @Override
@@ -830,15 +843,17 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
                 // Send keep alive to every running stream.
                 
-                for (StreamAndFilter streamAndFilter : streams) {
+                for (Map.Entry<OutputStream, StreamAndFilter> entry : streamsMap.entrySet()){
+                    StreamAndFilter streamAndFilter  = entry.getValue();
+
                     try {
                         OutputStream stream = streamAndFilter.getStream();
                         stream.write(NL.getBytes());
                         stream.flush();
 
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        log.log(Log.WARNING, "Problem writing keep alive newline to stream", e);
+                        System.out.println("INFO Unable to send keep alive in run: "+e.getCause().getMessage());
+                        log.log(Log.INFO, "Problem writing keep alive newline to stream", e);
                         removeStream(streamAndFilter.getStream());
                     }
                 }
