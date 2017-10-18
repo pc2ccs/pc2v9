@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * @author ICPC
  *
  */
-@Path("/languages")
+@Path("/contest/languages")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
