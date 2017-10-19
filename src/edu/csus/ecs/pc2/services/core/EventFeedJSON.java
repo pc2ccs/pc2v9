@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -378,7 +379,10 @@ public class EventFeedJSON extends JSONUtilities {
         // filter
         List<String> list = EventFeedFilter.filterJson(lines, filter);
         
-        return String.join(NL, list) + NL;
+        // SOMEDAY in Java 8    return String.join(NL, list) + NL;
+        
+        String [] sa = (String[]) list.toArray(new String[list.size()]);
+        return StringUtilities.join(NL, sa) + NL;
     }
     
     /**
