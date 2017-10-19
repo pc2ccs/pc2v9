@@ -291,17 +291,6 @@ public class JSONUtilities {
         return false;
     }
     
-    
-    /**
-     * get event id. 
-     * 
-     * @param sequenceNumber ascending number
-     * @return event Id
-     */
-    public String getEventId(long sequenceNumber) {
-        return "pc2-" + sequenceNumber;
-    }
-    
     /**
      * Add an event prefix to the buffer.
      * 
@@ -325,7 +314,7 @@ public class JSONUtilities {
         appendPair(stringBuilder, "event", eventName);
         stringBuilder.append(", ");
 
-        appendPair(stringBuilder, "id", getEventId(eventSequence));
+        appendPair(stringBuilder, "id", EventFeedJSON.getEventId(eventSequence));
         stringBuilder.append(", ");
 
         appendPair(stringBuilder, "op", operation.toString());

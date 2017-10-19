@@ -77,15 +77,12 @@ public class EventFeedService {
         
         if (eventTypeList != null) {
             filter.addEventTypeList(eventTypeList);
-            System.out.println("starting event feed, sending only event types '"+eventTypeList+"'");
-            eventFeedSteamer.setEventTypeList(eventTypeList);
-        } 
+            System.out.println("starting event feed, sending only event types '" + eventTypeList + "'");
+        }
         
-        if (startintEventId != null){
+        if (startintEventId != null) {
             filter.addStartintEventId(startintEventId);
-            System.out.println("starting event feed, Feed starting at id "+startintEventId);
-            eventFeedSteamer.setStartEventId(startintEventId);
-            
+            System.out.println("starting event feed, Feed starting at id " + startintEventId);
         } else {
             System.out.println("starting event feed (no args) ");
         }

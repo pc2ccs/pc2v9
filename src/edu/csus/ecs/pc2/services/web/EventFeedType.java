@@ -71,4 +71,5 @@ public enum EventFeedType {
     public String toString() {
         return this.name;
     }
+    
 }

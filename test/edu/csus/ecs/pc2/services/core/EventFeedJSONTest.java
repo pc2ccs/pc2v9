@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.services.web.EventFeedFilter;
 
 /**
  * Unit Test.
@@ -179,8 +180,6 @@ public class EventFeedJSONTest extends AbstractTestCase {
         UnitTestData data = new UnitTestData();
         IInternalContest contest = data.getContest();
         
-        EventFeedJSON eventFeedJSON = new EventFeedJSON();
-
         Run[] runs = contest.getRuns();
         assertEquals("Run count", 12, runs.length);
         
@@ -200,10 +199,6 @@ public class EventFeedJSONTest extends AbstractTestCase {
         asertEqualJSON(json, "language_id", "1");
         asertEqualJSON(json, "problem_id", "quadrangles");
         assertJSONStringValue(json, "team_id", "2");
-
-        
-        
-        
     }
 
     void writeFile(File file, String string) throws FileNotFoundException, IOException {
@@ -285,7 +280,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
      * @return
      */
     private int matchEventCount(String eleementName, String json) {
-
+        
         String regex = "\"event\":\"" + eleementName + "\"";
         
         return matchCount(regex, json);
@@ -711,9 +706,16 @@ public class EventFeedJSONTest extends AbstractTestCase {
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
         String jsonBefore = new EventFeedJSON().createJSON(data.getContest());
+        
+        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(1), null);
+        eventFeedJSON.setEventIdSequence(0);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter);
 
-        eventFeedJSON.setStartEventId(eventFeedJSON.getEventId(1));
-        String json = eventFeedJSON.createJSON(data.getContest());
+//        eventFeedJSON.setEventIdSequence(0);
+//        writeFile(new File("/tmp/stuf1"), eventFeedJSON.createJSON(data.getContest()));
+//        writeFile(new File("/tmp/stuf2"), json);
+        
+//        System.out.println("debug 22 json "+json);
 
         assertNotNull(json);
 
@@ -727,8 +729,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
-        eventFeedJSON.setStartEventId(eventFeedJSON.getEventId(40));
-        String json = eventFeedJSON.createJSON(data.getContest());
+        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(40), null);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter);
 
         //        System.out.println("debug after event 40  json = "+json);
 
@@ -782,8 +784,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
         String elist = EventFeedJSON.CONTEST_KEY + "," + EventFeedJSON.TEAM_KEY;
-        eventFeedJSON.setEventTypeList(elist);
-        String json = eventFeedJSON.createJSON(data.getContest());
+        
+        EventFeedFilter filter = new EventFeedFilter(null, elist);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter);
         assertNotNull(json);
 
         assertCountEvent(1, EventFeedJSON.CONTEST_KEY, json);
@@ -800,35 +803,34 @@ public class EventFeedJSONTest extends AbstractTestCase {
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
-        String elist = EventFeedJSON.AWARD_KEY + "," + // 
+        String elist = 
+                JSONUtilities.AWARD_KEY + "," + // 
                 JSONUtilities.CLARIFICATIONS_KEY + "," + // 
                 JSONUtilities.CONTEST_KEY + "," + // 
                 JSONUtilities.GROUPS_KEY + "," + // 
                 JSONUtilities.JUDGEMENT_KEY + "," + // 
-                JSONUtilities.JUDGEMENT_KEY + "," + // 
                 JSONUtilities.JUDGEMENT_TYPE_KEY + "," + // 
                 JSONUtilities.LANGUAGE_KEY + "," + // 
-                JSONUtilities.CONTEST_KEY + "," + // 
                 JSONUtilities.ORGANIZATION_KEY + "," + // 
                 JSONUtilities.TEAM_MEMBERS_KEY + "," + // 
                 JSONUtilities.PROBLEM_KEY + "," + // 
                 JSONUtilities.RUN_KEY + "," + // 
-                JSONUtilities.RUN_KEY + "," + // 
                 JSONUtilities.SUBMISSION_KEY + "," + // 
-                JSONUtilities.CLARIFICATIONS_KEY + "," + // 
                 JSONUtilities.TEAM_KEY + "," + // 
                 JSONUtilities.TEAM_MEMBERS_KEY;
 
-        eventFeedJSON.setEventTypeList(elist);
-        String json = eventFeedJSON.createJSON(data.getContest());
+        // TODO RMeventFeedJSON.setEventTypeList(elist);
+        
+        EventFeedFilter filter = new EventFeedFilter(null, elist);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter);
         assertNotNull(json);
 
-        assertCountEvent(2, JSONUtilities.CONTEST_KEY, json);
-        assertCountEvent(120, JSONUtilities.CLARIFICATIONS_KEY, json);
-        assertCountEvent(600, JSONUtilities.TEAM_MEMBERS_KEY, json);
+        assertCountEvent(1, JSONUtilities.CONTEST_KEY, json);
+        assertCountEvent(60, JSONUtilities.CLARIFICATIONS_KEY, json);
+        assertCountEvent(300, JSONUtilities.TEAM_MEMBERS_KEY, json);
         assertCountEvent(120, JSONUtilities.TEAM_KEY, json);
         assertCountEvent(6, JSONUtilities.LANGUAGE_KEY, json);
-        assertCountEvent(24, JSONUtilities.JUDGEMENT_KEY, json);
+        assertCountEvent(12, JSONUtilities.JUDGEMENT_KEY, json);
         assertCountEvent(9, JSONUtilities.JUDGEMENT_TYPE_KEY, json);
     }
 
@@ -837,15 +839,17 @@ public class EventFeedJSONTest extends AbstractTestCase {
         EventFeedJSON eventFeedJSON = new EventFeedJSON();
 
         String elist = EventFeedJSON.AWARD_KEY + "," + // 
-                EventFeedJSON.CLARIFICATIONS_KEY + "," + // 
                 EventFeedJSON.CLARIFICATIONS_KEY;
 
-        eventFeedJSON.setEventTypeList(elist);
-        String json = eventFeedJSON.createJSON(data.getContest());
+        // TODO RMeventFeedJSON.setEventTypeList(elist);
+        
+        EventFeedFilter filter = new EventFeedFilter(null, elist);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        
         assertNotNull(json);
 
         assertCountEvent(0, EventFeedJSON.CONTEST_KEY, json);
-        assertCountEvent(120, EventFeedJSON.CLARIFICATIONS_KEY, json);
+        assertCountEvent(60, EventFeedJSON.CLARIFICATIONS_KEY, json);
         assertCountEvent(0, EventFeedJSON.TEAM_MEMBERS_KEY, json);
         assertCountEvent(0, EventFeedJSON.TEAM_KEY, json);
         assertCountEvent(0, EventFeedJSON.LANGUAGE_KEY, json);

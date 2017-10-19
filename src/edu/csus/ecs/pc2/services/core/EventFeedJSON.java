@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.services.core;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
@@ -18,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
+import edu.csus.ecs.pc2.services.web.EventFeedFilter;
 
 /**
  * Event feed information in the CLICS JSON format.
@@ -79,16 +81,11 @@ public class EventFeedJSON extends JSONUtilities {
 
     public String getContestJSON(IInternalContest contest) {
 
-        if (!isPastStartEvent()) {
-            return null;
-        }
-        
-        judgementTypeJSON.
-        updatePenaltySettings(contest);
+        judgementTypeJSON.updatePenaltySettings(contest);
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        appendJSONEvent(stringBuilder, CONTEST_KEY, eventIdSequence, EventFeedOperation.CREATE, getContestJSONFields(contest));
+        appendJSONEvent(stringBuilder, CONTEST_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getContestJSONFields(contest));
         stringBuilder.append(NL);
         return stringBuilder.toString();
 
@@ -108,13 +105,8 @@ public class EventFeedJSON extends JSONUtilities {
 
         Judgement[] judgements = contest.getJudgements();
         for (Judgement judgement : judgements) {
-
-            if (isPastStartEvent()) {
-
-                appendJSONEvent(stringBuilder, JUDGEMENT_TYPE_KEY, eventIdSequence, EventFeedOperation.CREATE, getJudgementTypeJSON(contest, judgement));
-                stringBuilder.append(NL);
-            }
-
+            appendJSONEvent(stringBuilder, JUDGEMENT_TYPE_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getJudgementTypeJSON(contest, judgement));
+            stringBuilder.append(NL);
         }
 
         return stringBuilder.toString();
@@ -138,12 +130,8 @@ public class EventFeedJSON extends JSONUtilities {
         int id = 1;
         for (Language language : languages) {
 
-            if (isPastStartEvent()) {
-
-                appendJSONEvent(stringBuilder, LANGUAGE_KEY, eventIdSequence, EventFeedOperation.CREATE, getLanguageJSON(contest, language, id));
-                stringBuilder.append(NL);
-            }
-
+            appendJSONEvent(stringBuilder, LANGUAGE_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getLanguageJSON(contest, language, id));
+            stringBuilder.append(NL);
             id++;
         }
 
@@ -171,10 +159,8 @@ public class EventFeedJSON extends JSONUtilities {
         int id = 1;
         for (Problem problem : problems) {
 
-            if (isPastStartEvent()) {
-                appendJSONEvent(stringBuilder, PROBLEM_KEY, eventIdSequence, EventFeedOperation.CREATE, getProblemJSON(contest, problem, id));
-                stringBuilder.append(NL);
-            }
+            appendJSONEvent(stringBuilder, PROBLEM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getProblemJSON(contest, problem, id));
+            stringBuilder.append(NL);
             id++;
         }
 
@@ -193,11 +179,8 @@ public class EventFeedJSON extends JSONUtilities {
         Arrays.sort(groups, new GroupComparator());
         for (Group group : groups) {
 
-            if (isPastStartEvent()) {
-
-                appendJSONEvent(stringBuilder, GROUPS_KEY, eventIdSequence, EventFeedOperation.CREATE, getGroupJSON(contest, group));
-                stringBuilder.append(NL);
-            }
+            appendJSONEvent(stringBuilder, GROUPS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getGroupJSON(contest, group));
+            stringBuilder.append(NL);
         }
 
         return stringBuilder.toString();
@@ -235,11 +218,8 @@ public class EventFeedJSON extends JSONUtilities {
 
         for (Account account : accounts) {
 
-            if (isPastStartEvent()) {
-
-                appendJSONEvent(stringBuilder, TEAM_KEY, eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
-                stringBuilder.append(NL);
-            }
+            appendJSONEvent(stringBuilder, TEAM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
+            stringBuilder.append(NL);
         }
 
         return stringBuilder.toString();
@@ -267,11 +247,8 @@ public class EventFeedJSON extends JSONUtilities {
 
             if (names.length > 0) {
                 for (String teamMemberName : names) {
-
-                    if (isPastStartEvent()) {
-                        appendJSONEvent(stringBuilder, TEAM_MEMBERS_KEY, eventIdSequence, EventFeedOperation.CREATE, getTeamMemberJSON(contest, account, teamMemberName));
-                        stringBuilder.append(NL);
-                    }
+                    appendJSONEvent(stringBuilder, TEAM_MEMBERS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamMemberJSON(contest, account, teamMemberName));
+                    stringBuilder.append(NL);
                 }
             }
         }
@@ -297,11 +274,8 @@ public class EventFeedJSON extends JSONUtilities {
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
 
-            if (isPastStartEvent()) {
-
-                appendJSONEvent(stringBuilder, SUBMISSION_KEY, eventIdSequence, EventFeedOperation.CREATE, getSubmissionJSON(contest, run));
-                stringBuilder.append(NL);
-            }
+            appendJSONEvent(stringBuilder, SUBMISSION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getSubmissionJSON(contest, run));
+            stringBuilder.append(NL);
         }
 
         return stringBuilder.toString();
@@ -327,12 +301,8 @@ public class EventFeedJSON extends JSONUtilities {
             
             if (run.isJudged()){
 
-                if (isPastStartEvent()) {
-
-                    appendJSONEvent(stringBuilder, JUDGEMENT_KEY, eventIdSequence, EventFeedOperation.CREATE, getJudgementJSON(contest, run));
-                    stringBuilder.append(NL);
-                }
-
+                appendJSONEvent(stringBuilder, JUDGEMENT_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getJudgementJSON(contest, run));
+                stringBuilder.append(NL);
             }
         }
 
@@ -356,11 +326,9 @@ public class EventFeedJSON extends JSONUtilities {
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
 
-            if (isPastStartEvent()) {
-                RunResultFiles files = null; // TODO CLICS must fetch files to get main file name, or put mainfile name into Run
-                appendJSONEvent(stringBuilder, RUN_KEY, eventIdSequence, EventFeedOperation.CREATE, getRunJSON(contest, run, files));
-                stringBuilder.append(NL);
-            }
+            RunResultFiles files = null; // TODO CLICS must fetch files to get main file name, or put mainfile name into Run
+            appendJSONEvent(stringBuilder, RUN_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getRunJSON(contest, run, files));
+            stringBuilder.append(NL);
         }
 
         return stringBuilder.toString();
@@ -381,12 +349,8 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(clarifications, new ClarificationComparator());
         for (Clarification clarification : clarifications) {
-
-            if (isPastStartEvent()) {
-
-                appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification));
-                stringBuilder.append(NL);
-            }
+            appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification));
+            stringBuilder.append(NL);
         }
 
         return stringBuilder.toString();
@@ -401,6 +365,22 @@ public class EventFeedJSON extends JSONUtilities {
         return awardJSON.createJSON(contest);
     }
 
+    public String createJSON(IInternalContest contest, EventFeedFilter filter) throws IllegalContestState {
+
+        if (contest == null) {
+            return "[]";
+        }
+
+        // fetch lines
+        String json = createJSON(contest);
+        String [] lines = json.split(NL);
+        
+        // filter
+        List<String> list = EventFeedFilter.filterJson(lines, filter);
+        
+        return String.join(NL, list) + NL;
+    }
+    
     /**
      * Returns a JSON string listing the current contest event feed
      * 
@@ -570,28 +550,12 @@ public class EventFeedJSON extends JSONUtilities {
      * @param sequenceNumber ascending number
      * @return event Id
      */
-    public String getEventId(long sequenceNumber) {
+    public static String getEventId(long sequenceNumber) {
         return "pc2-" + sequenceNumber;
     }
 
-    /**
-     * Increment event (feed) id and test whether past start event id.
-     * 
-     * If no {@link #startEventId} defined then returns true;
-     * If {@link #startEventId} defined will increment event id and
-     *  if that event id is equal to the new event id returns true.
-     *  
-     *  if {@link #startEventId} is found will return true on
-     *  each successive call.
-     * 
-     * @return true if no {@link #startEventId} defined, or if past {@link #startEventId} 
-     */
-    public boolean isPastStartEvent() {
-
-        if (nextEventId().equals(getStartEventId()) && !pastStartEvent) {
-            pastStartEvent = true;
-        }
-        return pastStartEvent;
+    public static long extractSequence(String eventId) {
+        return Long.parseLong(eventId.substring(4));
     }
 
     // TODO technical deficit - move these methods
@@ -601,13 +565,12 @@ public class EventFeedJSON extends JSONUtilities {
         return startEventId;
     }
 
-    public void setStartEventId(String startEventId) {
-
+    protected void setStartEventId(String startEventId) {
         pastStartEvent = false;
         this.startEventId = startEventId;
     }
 
-    public void setEventTypeList(String eventTypeList) {
+    protected void setEventTypeList(String eventTypeList) {
         this.eventTypeList = eventTypeList;
     }
 
