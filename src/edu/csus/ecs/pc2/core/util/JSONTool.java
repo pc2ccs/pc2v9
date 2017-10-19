@@ -140,6 +140,16 @@ public class JSONTool {
         }
         String duration = model.getContestTime().getContestLengthStr();
         String scoreboardFreezeDuration = ci.getFreezeTime();
+        if (scoreboardFreezeDuration.length() > 2) {
+            if (!scoreboardFreezeDuration.contains(":")) {
+                try {
+                    long seconds = Long.parseLong(scoreboardFreezeDuration);
+                    scoreboardFreezeDuration = ContestTime.formatTime(seconds);
+                } catch (NumberFormatException e) {
+                    System.out.println("attempting to parse "+scoreboardFreezeDuration+" failed with "+e.getMessage());
+                }
+            }
+        }
         String startTime = "null";
         if (model.getContestTime().isContestStarted()) {
             if (model.getContestTime().isContestRunning()) {
