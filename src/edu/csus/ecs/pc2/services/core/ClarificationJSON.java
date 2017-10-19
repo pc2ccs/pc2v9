@@ -19,11 +19,14 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 public class ClarificationJSON extends JSONUtilities {
     
     private ObjectMapper mapper = new ObjectMapper();
-    private ObjectNode element = mapper.createObjectNode();
-    private ArrayNode childNode = mapper.createArrayNode();
+    private ObjectNode element = null;
+    private ArrayNode childNode = null;
 
     public String createJSON(IInternalContest contest, Clarification clarification) {
 
+        element = mapper.createObjectNode();
+        childNode = mapper.createArrayNode();
+        
         // get last answer
         ClarificationAnswer clarificationAnswer = null;
         ClarificationAnswer[] answers = null;
@@ -61,7 +64,7 @@ public class ClarificationJSON extends JSONUtilities {
             } else {
                 element.put("to_team_id", new Integer(clarification.getSubmitter().getClientNumber()).toString());
             }
-            element.put("reply_to_id", clarification.getElementId().toString());
+            element.put("reply_to_id", clarification.getNumber());
         }
         
         //        problem_id  ID  yes     yes     provided by CCS     identifier of associated problem, null if not associated to a problem
