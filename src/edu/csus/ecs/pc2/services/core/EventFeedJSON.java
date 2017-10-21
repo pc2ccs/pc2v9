@@ -563,6 +563,13 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     /**
+     * Get next event sequence id.
+     */
+    public long nextEventIdSequence() {
+        return(++eventIdSequence);
+    }
+
+    /**
      * get event id.
      * 
      * @param sequenceNumber
