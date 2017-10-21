@@ -192,7 +192,7 @@ public class EventFeedJSON extends JSONUtilities {
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
                 if (!organizations.containsKey(account.getInstitutionCode())) {
                     organizations.put(account.getInstitutionCode(), account);
-                    appendJSONEvent(stringBuilder, ORGANIZATION_KEY, eventIdSequence, EventFeedOperation.CREATE, jsonTool.convertOrganizationsToJSON(account).toString());
+                    appendJSONEvent(stringBuilder, ORGANIZATION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, jsonTool.convertOrganizationsToJSON(account).toString());
                     stringBuilder.append(NL);
                 }
             }
