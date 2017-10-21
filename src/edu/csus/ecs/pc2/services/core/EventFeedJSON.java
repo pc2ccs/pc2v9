@@ -59,8 +59,6 @@ public class EventFeedJSON extends JSONUtilities {
      */
     private String startEventId = null;
 
-    boolean pastStartEvent = true;
-
     /**
      * List of events to output.
      * 
@@ -496,14 +494,14 @@ public class EventFeedJSON extends JSONUtilities {
      * 
      * @param contest
      * @param buffer
-     * @param eventTypeList
+     * @param inEventTypeList
      *            list of events types, comma delimited
      * @throws IllegalArgumentException
      *             if any event in eventTypeList is not valid
      */
-    private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String eventTypeList) throws IllegalArgumentException {
+    private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String inEventTypeList) throws IllegalArgumentException {
 
-        String[] events = eventTypeList.split(",");
+        String[] events = inEventTypeList.split(",");
 
         for (String name : events) {
             name = name.trim();
@@ -549,7 +547,7 @@ public class EventFeedJSON extends JSONUtilities {
                     appendNotNull(buffer, getAwardJSON(contest));
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown event type '" + name + "' in list " + eventTypeList);
+                    throw new IllegalArgumentException("Unknown event type '" + name + "' in list " + inEventTypeList);
             }
         }
     }
@@ -592,7 +590,6 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     protected void setStartEventId(String startEventId) {
-        pastStartEvent = false;
         this.startEventId = startEventId;
     }
 

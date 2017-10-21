@@ -25,7 +25,7 @@ public enum EventFeedOperation {
 
     private final String name;
     
-    private EventFeedOperation(String name) {
+    EventFeedOperation(String name) {
         this.name = name;
     }
     

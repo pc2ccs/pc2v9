@@ -27,15 +27,13 @@ public class ProblemJSON extends JSONUtilities {
         stringBuilder.append(", ");
 
         String s = problem.getColorRGB();
-        if (s != null)
-        {
+        if (s != null) {
             appendPair(stringBuilder, "rgb", s);
             stringBuilder.append(", ");
         }
 
         s = problem.getColorName();
-        if (s != null)
-        {
+        if (s != null) {
             appendPair(stringBuilder, "color", s);
             stringBuilder.append(", ");
         }

@@ -28,7 +28,7 @@ public class EventFeedLog {
 
     private String filename;
 
-    private long old_file_size;
+    private long oldFileSize;
 
     /**
      * Load all events from events log
@@ -52,7 +52,7 @@ public class EventFeedLog {
     private void readLog() {
         try {
             fileLines = Utilities.loadFile(filename);
-            old_file_size = new File(filename).length();
+            oldFileSize = new File(filename).length();
             System.out.println("debug 22 Loaded " + fileLines.length + " events from " + getLogFileName());
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,10 +65,10 @@ public class EventFeedLog {
 
     public String[] getLogLines() {
         synchronized (filename) {
-            long new_file_size = new File(filename).length();
+            long newFileSize = new File(filename).length();
             // only need to re-read log if the file size changed
-            if (new_file_size != old_file_size) {
-                // this will also update old_file_size
+            if (newFileSize != oldFileSize) {
+                // this will also update oldFileSize
                 readLog();
             }
         }

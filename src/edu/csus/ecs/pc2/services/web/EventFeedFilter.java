@@ -14,7 +14,7 @@ public class EventFeedFilter {
 
     private String eventTypeList = null;
 
-    private String startintEventId = null;
+    private String startingEventId = null;
 
     private String clientInfo;
     
@@ -32,30 +32,30 @@ public class EventFeedFilter {
      * <br>
      * The complete list of events are at: {@link EventFeedType}
      * 
-     * @param startintEventId start event id, null allowed to indicate to not filter
+     * @param startingEventId start event id, null allowed to indicate to not filter
      * @param eventTypeList eventtype list, null allowed to indicate to not filter
      */
     public EventFeedFilter(String startintEventId, String eventTypeList) {
         super();
-        this.startintEventId = startintEventId;
+        this.startingEventId = startintEventId;
         this.eventTypeList = eventTypeList;
     }
 
 
-    public void addEventTypeList(String eventTypeList) {
-        this.eventTypeList = eventTypeList;
+    public void addEventTypeList(String addEventTypeList) {
+        this.eventTypeList = addEventTypeList;
     }
 
-    public void addStartintEventId(String startintEventId) {
-        this.startintEventId = startintEventId;
+    public void addStartintEventId(String addStartingEventId) {
+        this.startingEventId = addStartingEventId;
     }
 
     boolean matchesFilter(String eventId, EventFeedType type) {
 
         boolean matched = true;
 
-        if (startintEventId != null) {
-            long startId = EventFeedJSON.extractSequence(startintEventId);
+        if (startingEventId != null) {
+            long startId = EventFeedJSON.extractSequence(startingEventId);
             long actual = EventFeedJSON.extractSequence(eventId);
             matched &= actual >= startId;
         }
@@ -75,7 +75,7 @@ public class EventFeedFilter {
      */
     public boolean matchesFilter(String string) {
 
-        if (startintEventId != null || eventTypeList != null) {
+        if (startingEventId != null || eventTypeList != null) {
             return matchesFilter(getEventFeedEequence(string), getEventFeedType(string));
         }
 
@@ -138,8 +138,15 @@ public class EventFeedFilter {
     @Override
     public String toString() {
 
-        return "startid = " + (startintEventId == null ? "<none set>" : startintEventId) + // 
-                ", event types = " + (eventTypeList == null ? "<none set>" : eventTypeList);
+        String strStartingEventId = startingEventId;
+        if (strStartingEventId == null) {
+            strStartingEventId = "<none set>";
+        }
+        String strEventTypeList = eventTypeList;
+        if (strEventTypeList == null) {
+            strEventTypeList = "<none set>";
+        }
+        return "startid = " + strStartingEventId + ", event types = " + strEventTypeList;
     }
 
 
