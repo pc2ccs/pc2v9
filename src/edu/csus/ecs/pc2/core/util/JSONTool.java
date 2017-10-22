@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * @author ICPC
@@ -67,7 +68,7 @@ public class JSONTool {
         ObjectNode element = mapper.createObjectNode();
         element.put("id", group.getElementId().toString());
         if (group.getGroupId() != -1) {
-            element.put("icpc_id", new Integer(group.getGroupId()).toString());
+            element.put("icpc_id", Integer.toString(group.getGroupId()));
         }
         element.put("name", group.getDisplayName());
         return element;
@@ -75,13 +76,15 @@ public class JSONTool {
 
     public ObjectNode convertToJSON(Language language) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", language.getElementId().toString());
+        element.put("id", JSONUtilities.getLanguageIndexString(model, language.getElementId()));
         element.put("name", language.getDisplayName());
         return element;
     }
 
     public ObjectNode convertToJSON(Clarification clarification, ClarificationAnswer clarAnswer) {
         ObjectNode element = mapper.createObjectNode();
+        
+        // SOMEDAY change id to a orginal
         String id = clarification.getElementId().toString();
         if (clarAnswer != null) {
             id = clarAnswer.getElementId().toString();
@@ -287,7 +290,7 @@ public class JSONTool {
         }
         return element;
     }
-
+    
     public ObjectNode convertToJSON(Problem problem, int ordinal) {
         ObjectNode element = mapper.createObjectNode();
         // {"id":"asteroids","label":"A","name":"Asteroid Rangers","ordinal":1,"color":"blue","rgb":"#00f","test_data_count":10}

@@ -113,12 +113,10 @@ public class EventFeedJSON extends JSONUtilities {
         StringBuilder stringBuilder = new StringBuilder();
 
         Language[] languages = contest.getLanguages();
-        int id = 1;
         for (Language language : languages) {
 
-            appendJSONEvent(stringBuilder, LANGUAGE_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getLanguageJSON(contest, language, id));
+            appendJSONEvent(stringBuilder, LANGUAGE_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getLanguageJSON(contest, language));
             stringBuilder.append(NL);
-            id++;
         }
 
         return stringBuilder.toString();
@@ -134,7 +132,7 @@ public class EventFeedJSON extends JSONUtilities {
      *            sequence number
      * @return
      */
-    public String getLanguageJSON(IInternalContest contest, Language language, int languageNumber) {
+    public String getLanguageJSON(IInternalContest contest, Language language) {
         return jsonTool.convertToJSON(language).toString();
     }
 
@@ -589,11 +587,11 @@ public class EventFeedJSON extends JSONUtilities {
         return startEventId;
     }
 
-    protected void setStartEventId(String startEventId) {
+    public void setStartEventId(String startEventId) {
         this.startEventId = startEventId;
     }
 
-    protected void setEventTypeList(String eventTypeList) {
+    public void setEventTypeList(String eventTypeList) {
         this.eventTypeList = eventTypeList;
     }
 
