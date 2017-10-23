@@ -1694,6 +1694,9 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
+        //set the flag indicating whether execution of problem submissions should stop on the first failed test case
+        newProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
+
         // hand the new problem to the Controller for transmission to the Server
         getController().updateProblem(newProblem, newProblemDataFiles);
 
