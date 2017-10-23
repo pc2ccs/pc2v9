@@ -1061,6 +1061,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         checkProblem.setUsingExternalDataFiles(getMultipleDataSetPane().isUsingExternalDataFiles());
+        checkProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
         checkProblem.setTimeOutInSeconds(getIntegerValue(getTimeOutTextField().getText()));
         checkProblem.setLetter(getProblemLetterTextField().getText());
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
@@ -1388,6 +1389,8 @@ public class EditProblemPane extends JPanePlugin {
         if (debug22EditProblem) {
             Utilities.dump(newProblemDataFiles, "debug 22 after populateProblemTestSetFilenames");
         }
+        
+        
 
         return checkProblem;
 
