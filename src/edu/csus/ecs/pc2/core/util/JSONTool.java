@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.core.util;
 
 import java.util.Calendar;
@@ -31,8 +28,9 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * @author ICPC
- *
+ * JSON for pc2 classes.
+ * 
+ * @author Troy Boudreau <boudreat@ecs.csus.edu>
  */
 public class JSONTool {
     private ObjectMapper mapper = new ObjectMapper();
@@ -52,6 +50,11 @@ public class JSONTool {
         this.controller = controller;
     }
 
+    /**
+     * Create JSON for submissions.
+     * 
+     * @param submission
+     */
     public ObjectNode convertToJSON(Run submission) {
         ObjectNode element = mapper.createObjectNode();
         element.put("id", submission.getElementId().toString());
@@ -60,6 +63,9 @@ public class JSONTool {
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
+        if (submission.getEntryPoint() != null){
+            element.put("entry_point", new String(submission.getEntryPoint()));
+        }
 
         return element;
     }
@@ -239,7 +245,7 @@ public class JSONTool {
             }
 
         }
-        element.put("id", getKey(judgement));
+        element.put("id", getJudgementType(judgement));
         element.put("name", name);
         element.put("penalty", penalty);
         element.put("solved", solved);
@@ -348,6 +354,11 @@ public class JSONTool {
 
     }
 
+    /**
+     * Create JSON for judgement.
+     * 
+     * @param submission
+     */
     public ObjectNode convertJudgementToJSON(Run submission) {
         // {"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
         // "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"}
@@ -362,7 +373,7 @@ public class JSONTool {
             Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
             // only print it's judgement and end times if this is the final judgement
             if (!judgementRecord.isPreliminaryJudgement()) {
-                element.put("judgement_type_id", getKey(judgement));
+                element.put("judgement_type_id", getJudgementType(judgement));
                 // TODO verify these times are consistent
                 Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
                 if (wallElapsed != null) {
@@ -375,7 +386,10 @@ public class JSONTool {
         return element;
     }
 
-    public String getKey(Judgement judgement) {
+    /**
+     * Get judgement type (acronym).
+     */
+    public String getJudgementType(Judgement judgement) {
         return judgement.getAcronym();
     }
 
@@ -387,7 +401,7 @@ public class JSONTool {
         element.put("id", run.getElementId().toString());
         element.put("judgement_id", run.getRunElementId().toString());
         element.put("ordinal", ordinal);
-        element.put("judgement_type_id", getKey(model.getJudgement(run.getJudgementId())));
+        element.put("judgement_type_id", getJudgementType(model.getJudgement(run.getJudgementId())));
         // TODO this is the local time on the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
         // note this is the contest_time as seen on the judge

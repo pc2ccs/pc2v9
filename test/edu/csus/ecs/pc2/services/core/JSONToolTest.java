@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.JSONTool;
@@ -162,6 +163,9 @@ public class JSONToolTest extends AbstractTestCase {
 
         assertMatchCount(12, "\"judgement_type_id\"", json);
         assertMatchCount(422, "\"icpc_id\"", json);
+        
+        Run[] runs = data.getContest().getRuns();
+        assertMatchCount(runs.length, "\"entry_point\"", json);
 
     }
 

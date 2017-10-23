@@ -73,7 +73,7 @@ public class JudgementTypeService implements Feature {
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{judgementId}/")
-    public Response getJudgementType(@PathParam("judgementId") String judgementId) {
+    public Response getJudgementType(@PathParam("judgementId") String judgementType) {
         // get the judgements from the contest
         Judgement[] judgements = model.getJudgements();
 
@@ -82,7 +82,7 @@ public class JudgementTypeService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < judgements.length; i++) {
             Judgement judgement = judgements[i];
-            if (jsonTool.getKey(judgement).equals(judgementId)) {
+            if (jsonTool.getJudgementType(judgement).equals(judgementType)) {
                 childNode.add(jsonTool.convertToJSON(judgement));
             }
         }
