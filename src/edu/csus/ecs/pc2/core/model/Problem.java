@@ -1022,6 +1022,10 @@ public class Problem implements IElementObject {
 //                return false;
 //            }
             
+            if (!this.isStopOnFirstFailedTestCase() == problem.isStopOnFirstFailedTestCase()) {
+                return false;
+            }
+            
             return true;
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);
