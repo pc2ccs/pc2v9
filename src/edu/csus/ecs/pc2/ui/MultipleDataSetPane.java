@@ -713,7 +713,12 @@ public class MultipleDataSetPane extends JPanePlugin {
     protected JCheckBox getChckbxStopOnFirstFailedTestCase() {
         if (chckbxStopOnFirstFailedTestCase == null) {
         	chckbxStopOnFirstFailedTestCase = new JCheckBox("Stop execution on first failed test case");
-        	chckbxStopOnFirstFailedTestCase.setToolTipText("Checking this box causes execution of submissions for this problem to terminate upon encountering the first failed test case.  Unchecking the box causes all test cases to be executed regardless of whether they pass or fail.  (Note: this does not affect the result (judgement) returned for the submission.)");
+        	chckbxStopOnFirstFailedTestCase.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        getEditProblemPane().enableUpdateButton();
+        	    }
+        	});
+        	chckbxStopOnFirstFailedTestCase.setToolTipText("Checking this box causes submissions for this problem to terminate on the first failed test case; unchecking forces all test cases to be executed whether they pass or fail.  (Note: this checkbox does not affect the result (judgement) returned for the submission.)");
         	chckbxStopOnFirstFailedTestCase.setSelected(true);
         }
         return chckbxStopOnFirstFailedTestCase;
