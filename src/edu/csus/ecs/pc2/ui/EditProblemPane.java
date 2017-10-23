@@ -596,6 +596,9 @@ public class EditProblemPane extends JPanePlugin {
                 getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
             }
         }
+        
+        //set the flag indicating whether execution of problem submissions should stop on the first failed test case
+        newProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
 
         getController().addNewProblem(newProblem, newProblemDataFiles);
 

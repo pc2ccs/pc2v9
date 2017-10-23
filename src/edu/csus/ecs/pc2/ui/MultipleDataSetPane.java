@@ -39,6 +39,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import javax.swing.JCheckBox;
 
 /**
  * Multiple Test Data set UI.
@@ -623,6 +624,8 @@ public class MultipleDataSetPane extends JPanePlugin {
             buttonPanel.add(getBtnLoad());
             buttonPanel.add(getHorizontalStrut());
             buttonPanel.add(getBtnDelete());
+            buttonPanel.add(getHorizontalStrut_1());
+            buttonPanel.add(getChckbxStopOnFirstFailedTestCase());
         }
         return buttonPanel;
     }
@@ -692,4 +695,23 @@ public class MultipleDataSetPane extends JPanePlugin {
             + "\nmust be done externally to the PC2 system, and the files must be placed at the exact location specified by the value "
             + "\nof the 'Judges Data Path' setting (see the 'Set Judge's Data Path' button on the Contest Configuration->Problems tab)."
             + "\n\nYou must choose which type of data storage you want to use for each contest problem prior to loading the data for that problem.  ";
+    private Component horizontalStrut_1;
+    private JCheckBox chckbxStopOnFirstFailedTestCase;
+    private Component getHorizontalStrut_1() {
+        if (horizontalStrut_1 == null) {
+        	horizontalStrut_1 = Box.createHorizontalStrut(20);
+        	horizontalStrut_1.setPreferredSize(new Dimension(60, 0));
+        	horizontalStrut_1.setMinimumSize(new Dimension(30, 0));
+        }
+        return horizontalStrut_1;
+    }
+    
+    
+    protected JCheckBox getChckbxStopOnFirstFailedTestCase() {
+        if (chckbxStopOnFirstFailedTestCase == null) {
+        	chckbxStopOnFirstFailedTestCase = new JCheckBox("Stop execution on first failed test case");
+        	chckbxStopOnFirstFailedTestCase.setSelected(true);
+        }
+        return chckbxStopOnFirstFailedTestCase;
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"
