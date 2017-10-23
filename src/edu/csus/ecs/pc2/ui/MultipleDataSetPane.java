@@ -184,6 +184,9 @@ public class MultipleDataSetPane extends JPanePlugin {
                 }
             }
             enableInputDataStoragePanel(enable);
+            
+            //set the StopOnFirstFailedTestCase checkbox to match what is specified in the problem
+            getChckbxStopOnFirstFailedTestCase().setSelected(problem.isStopOnFirstFailedTestCase());
         }
 
         // TODO 917 re-add auto size columns
