@@ -141,7 +141,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contents = concat(contents, lines);
             }
         } catch (IOException e) {
-            e.printStackTrace(); // debug 22
             throw new YamlLoadException(e.getMessage(), e, contetYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);

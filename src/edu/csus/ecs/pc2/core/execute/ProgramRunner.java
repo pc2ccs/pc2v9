@@ -94,8 +94,6 @@ public class ProgramRunner {
                 process = Runtime.getRuntime().exec(cmdline, env, runDir);
 
                 // TODO get field.for pid
-                //                 Field field = process.getClass().getDeclaredField("pid");
-                //                 System.out.println("debug 22 pid = "+field);
 
                 // This reads from the stdout of the child process
                 BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());

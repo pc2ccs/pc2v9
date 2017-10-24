@@ -2,7 +2,6 @@ package edu.csus.ecs.pc2.services.web;
 
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -155,9 +154,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     public void addStream(OutputStream outputStream, EventFeedFilter filter) {
         StreamAndFilter sandf = new StreamAndFilter(outputStream, filter);
         streamsMap.put(outputStream, sandf);
-        System.out.println("debug 22 adding new stream");
-        System.out.println("debug 22 addStream there are " + streamsMap.size() + " streams ");
-
         sendEventsFromEventFeedLog(outputStream, filter);
     }
 
@@ -194,7 +190,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             String[] lines = eventFeedLog.getLogLines();
 
             if (lines.length == 0) {
-                System.out.println("debug 22 writing events to " + eventFeedLog.getLogFileName());
                 // Write events to event log if no events are in log (at this time).
                 String json = eventFeedJSON.createJSON(contest);
                 eventFeedLog.writeEvent(json);
@@ -223,8 +218,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
          * Number of lines/events in log.
          */
         String[] lines = eventFeedLog.getLogLines();
-
-        System.out.println("debug 22 There were " + lines.length + " in event feed log.");
 
         try {
             if (lines.length > 0) {
@@ -697,10 +690,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      */
     public void sendJSON(String string) {
 
-        System.out.println(new Date() + " debug 22 Sending JSON " + string);
-
-        System.out.println("debug 22 sendJSON: there are " + streamsMap.size() + " streams ");
-
         /**
          * Send JSON to each
          */
@@ -709,7 +698,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
             try {
                 if (streamAndFilter.getFilter().matchesFilter(string)) {
-                    System.out.println("debug 22 - sending to stream " + streamAndFilter.getFilter().getClient() + " data " + string);
                     OutputStream stream = streamAndFilter.getStream();
                     stream.write(string.getBytes());
                     stream.flush();
@@ -729,10 +717,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         }
 
         lastSent = System.currentTimeMillis();
-
-        System.out.println("debug 22 sendJSON: there are " + streamsMap.size() + " streams ");
-        System.out.println(new Date() + " debug 22 Sent at " + lastSent);
-
     }
 
     /**

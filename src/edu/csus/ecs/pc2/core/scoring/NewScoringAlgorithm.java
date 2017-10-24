@@ -648,22 +648,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                     (securityViolationBeforeYes * getSVPenalty(properties));
         }
         
-//        if (solvingRun != null){
-//            System.out.print("Solved " + String.format("%3d -- ", points));
-//        } else {
-//            System.out.print("       ");
-//        }
-//        
-//        System.out.println("debug 22 befores = " + //
-//                runs[0].getSubmitter().getName()+ " " + //
-//                submissionsBeforeYes + " Prob =  " + //
-//                problem + " points=" + //
-//                String.format("%3d", points)+ " " + //
-//                solutionTime * getMinutePenalty(properties) +" + "+ //
-//                getYesPenalty(properties)+" + " + // 
-//                (submissionsBeforeYes * getNoPenalty(properties)) + " "+ //
-//                runs[0]);
-
         return new ProblemScoreRecord(solved, solvingRun, problem, points, solutionTime, numberSubmissions, submissionsBeforeYes, numberPending, numberJudged);
 
     }

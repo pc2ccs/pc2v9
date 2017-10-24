@@ -63,7 +63,7 @@ public class PacketMonitorPane extends JPanePlugin {
     
     private int maxLines = 500;
     
-    private Log packetLog = null; // debug 22 remove
+    private Log packetLog = null; // TODO  remove
     
     private IPacketListener listener = null;
 
@@ -150,8 +150,8 @@ public class PacketMonitorPane extends JPanePlugin {
 
         if (packetLog == null) { 
 
-            System.err.println("debug 22 - started log: " + "packetMonitorPane." + inContest.getClientId().getName());
-            getController().getLog().info("debug 22 - started log: " + "packetMonitorPane." + inContest.getClientId().getName());
+            System.err.println("debug - started log: " + "packetMonitorPane." + inContest.getClientId().getName());
+            getController().getLog().info("debug - started log: " + "packetMonitorPane." + inContest.getClientId().getName());
 
             packetLog = new Log("packetMonitorPane." + inContest.getClientId().getName());
             packetLog.info("");
@@ -454,13 +454,13 @@ public class PacketMonitorPane extends JPanePlugin {
 
         public void packetReceived(PacketEvent event) {
             // PacketFactory.dumpPacket(System.out, event.getPacket(), "PacketMonitorPane " + event.getAction().toString());
-            packetLog.info(formatLogLine("in ", event.getPacket())); // debug 22
+            packetLog.info(formatLogLine("in ", event.getPacket())); // TODO remove this line
             addRow(event.getPacket());
         }
 
         public void packetSent(PacketEvent event) {
             // PacketFactory.dumpPacket(System.out, event.getPacket(), "PacketMonitorPane " + event.getAction().toString());
-            packetLog.info(formatLogLine("out", event.getPacket())); // debug 22
+            packetLog.info(formatLogLine("out", event.getPacket())); // TODO remove this line
             addRow(event.getPacket());
         }
 

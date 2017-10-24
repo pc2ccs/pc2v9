@@ -1031,7 +1031,7 @@ public class EditProblemPane extends JPanePlugin {
         SerializedFile lastDataFile = null;
 
         if (debug22EditProblem) {
-            Utilities.dump(newProblemDataFiles, "debug 22 in getProblemFromFields start");
+            Utilities.dump(newProblemDataFiles, "debug in getProblemFromFields start");
         }
 
         /**
@@ -1057,7 +1057,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (debug22EditProblem) {
-            Utilities.dump(newProblemDataFiles, "debug 22 in getProblemFromFields after IF");
+            Utilities.dump(newProblemDataFiles, "debug  in getProblemFromFields after IF");
         }
 
         checkProblem.setUsingExternalDataFiles(getMultipleDataSetPane().isUsingExternalDataFiles());
@@ -1365,7 +1365,7 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setExternalDataFileLocation(getMultipleDataSetPane().getLoadDirectory());
 
         if (debug22EditProblem) {
-            Utilities.dump(newProblemDataFiles, "debug 22 before populateProblemTestSetFilenames");
+            Utilities.dump(newProblemDataFiles, "debug before populateProblemTestSetFilenames");
         }
 
         if (dataFiles == null) {
@@ -1387,7 +1387,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (debug22EditProblem) {
-            Utilities.dump(newProblemDataFiles, "debug 22 after populateProblemTestSetFilenames");
+            Utilities.dump(newProblemDataFiles, "debug after populateProblemTestSetFilenames");
         }
         
         
@@ -1734,7 +1734,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (debug22EditProblem) {
-            Utilities.dump(newProblemDataFiles, "debug 22 in getProblemDataFilesFromFields");
+            Utilities.dump(newProblemDataFiles, "debug in getProblemDataFilesFromFields");
         }
 
         return newProblemDataFiles;
@@ -2000,7 +2000,7 @@ public class EditProblemPane extends JPanePlugin {
 
         if (debug22EditProblem) {
             fileNameOne = createProblemReport(inProblem, problemDataFiles, "stuf1");
-            Utilities.dump(originalProblemDataFiles, "debug 22   ORIGINAL  setProblem");
+            Utilities.dump(originalProblemDataFiles, "debug   ORIGINAL  setProblem");
         }
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -2174,7 +2174,7 @@ public class EditProblemPane extends JPanePlugin {
         populatingGUI = true;
 
         if (debug22EditProblem) {
-            Utilities.dump(originalProblemDataFiles, "debug 22   ORIGINAL  populateGUI A");
+            Utilities.dump(originalProblemDataFiles, "debug   ORIGINAL  populateGUI A");
         }
 
         if (inProblem != null) {
@@ -2209,7 +2209,7 @@ public class EditProblemPane extends JPanePlugin {
         // enableJudgingTabComponents: ??
 
         if (debug22EditProblem) {
-            Utilities.dump(originalProblemDataFiles, "debug 22 ORIGINAL  populateGUI B");
+            Utilities.dump(originalProblemDataFiles, "debug ORIGINAL  populateGUI B");
         }
 
         try {
@@ -2219,7 +2219,7 @@ public class EditProblemPane extends JPanePlugin {
             showMessage(message + " check logs.");
             getLog().log(Log.WARNING, message, e);
             if (debug22EditProblem) {
-                e.printStackTrace(); // debug 22
+                e.printStackTrace(); // TODO log exception ??
             }
         }
 
@@ -2228,7 +2228,7 @@ public class EditProblemPane extends JPanePlugin {
         populatingGUI = false;
 
         if (debug22EditProblem) {
-            Utilities.dump(originalProblemDataFiles, "debug 22   ORIGINAL  populateGUI Z");
+            Utilities.dump(originalProblemDataFiles, "debug   ORIGINAL  populateGUI Z");
         }
 
     }
@@ -4241,30 +4241,30 @@ public class EditProblemPane extends JPanePlugin {
 
         try {
             if (debug22EditProblem) {
-                System.out.println("debug 22   ORIGINAL  load dump");
-                Utilities.dump(originalProblemDataFiles, "debug 22 in load orig");
+                System.out.println("debug   ORIGINAL  load dump");
+                Utilities.dump(originalProblemDataFiles, "debug in load orig");
 
                 String[] s2 = getTestDataList(originalProblemDataFiles);
-                System.out.println("debug 22 Number of   ORIGINAL  problem data files is " + s2.length);
+                System.out.println("debug Number of   ORIGINAL  problem data files is " + s2.length);
 
                 String[] s = getTestDataList(newProblemDataFiles);
-                System.out.println("debug 22 B4 Number of new problem data files is " + s.length);
+                System.out.println("debug B4 Number of new problem data files is " + s.length);
             }
 
             newProblemDataFiles = getProblemDataFilesFromFields();
 
             if (debug22EditProblem) {
                 String[] s = getTestDataList(newProblemDataFiles);
-                System.out.println("debug 22 B5 Number of new problem data files is " + s.length);
+                System.out.println("debug B5 Number of new problem data files is " + s.length);
             }
 
             Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
 
             if (debug22EditProblem) {
                 String[] s = getTestDataList(newProblemDataFiles);
-                System.out.println("debug 22 B6 Number of new problem data files is " + s.length);
+                System.out.println("debug B6 Number of new problem data files is " + s.length);
 
-                Utilities.dump(newProblemDataFiles, "debug 22 in load new");
+                Utilities.dump(newProblemDataFiles, "debug in load new");
                 System.out.flush();
             }
 

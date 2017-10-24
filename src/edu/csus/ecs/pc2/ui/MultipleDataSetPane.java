@@ -303,7 +303,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     public ProblemDataFiles getProblemDataFiles() {
         if (Utilities.isDebugMode()) {
-            dump(tableModel.getFiles(), "populateUI debug 22 C");
+            dump(tableModel.getFiles(), "populateUI");
         }
         return tableModel.getFiles();
     }
@@ -340,7 +340,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
 
         if (Utilities.isDebugMode()) {
-            System.out.println("debug 22 Are problemId's identical ?" + //
+            System.out.println("debug Are problemId's identical ?" + //
                 problemDataFiles.getProblemId().equals(originalFiles.getProblemId()));
         }
 
@@ -463,7 +463,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         problem.setUsingExternalDataFiles(externalFiles);
 
         if (Utilities.isDebugMode()) {
-            dump(problemDataFiles, "debug 22 before load");
+            dump(problemDataFiles, "debug before load");
         }
         try {
             problemDataFiles = loadDataFiles(problem, problemDataFiles, baseDirectoryName, ".in", ".ans", externalFiles);
@@ -472,7 +472,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             showMessage(this, "Import Failed", e.getMessage());
         }
         if (Utilities.isDebugMode()) {
-            dump(problemDataFiles, "debug 22 after load");
+            dump(problemDataFiles, "debug after load");
         }
 
         populateUI();

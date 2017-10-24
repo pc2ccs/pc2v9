@@ -53,7 +53,6 @@ public class EventFeedLog {
         try {
             fileLines = Utilities.loadFile(filename);
             oldFileSize = new File(filename).length();
-            System.out.println("debug 22 Loaded " + fileLines.length + " events from " + getLogFileName());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -84,7 +83,6 @@ public class EventFeedLog {
     void writeEvent(String eventString) throws IOException {
         outStream.write(eventString.getBytes());
         outStream.flush();
-        System.out.println("debug 22 writeEvent " + eventString);
     }
 
     public static void setLogsDirectory(String logsDirectory) {

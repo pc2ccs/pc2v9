@@ -724,7 +724,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         // writeFile(new File("/tmp/stuf1"), eventFeedJSON.createJSON(data.getContest()));
         // writeFile(new File("/tmp/stuf2"), json);
 
-        // System.out.println("debug 22 json "+json);
+        // System.out.println("debug  start at json "+json);
 
         assertNotNull(json);
 

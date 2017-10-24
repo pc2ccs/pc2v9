@@ -149,8 +149,8 @@ public class FilterTest extends TestCase {
         run.setElapsedMins(22);
         testCase.setElapsedMS(run.getElapsedMS());
         
-//        System.out.println("debug 22 - run      "+run.getElapsedMS());
-//        System.out.println("debug 22 - testcase "+testCase.getElapsedMS());
+//        System.out.println("debug  - run      "+run.getElapsedMS());
+//        System.out.println("debug  - testcase "+testCase.getElapsedMS());
         
         assertFalse("Should NOT match time range ", filter.matchesElapsedTime(run));
         assertFalse("Should NOT match time range ", filter.matchesElapsedTime(testCase));

@@ -332,12 +332,6 @@ public class LoadRunsTest extends AbstractTestCase {
 
     private void loadDefaultJudgements(IInternalContest contest) {
 
-        // Judgement[] judgements = contest.getJudgements();
-        // for (Judgement judgement : judgements) {
-        // System.out.println("debug 22 found "+judgement.getAcronym()+" "+judgement.getDisplayName());
-        // }
-        // System.out.println("debug 22 there are "+judgements.length+" judgements.");
-
         for (String line : acronymList) {
 
             String[] fields = line.split(";");

@@ -374,13 +374,11 @@ public class PlaybackPane extends JPanePlugin {
 
         if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
             getController().startPlayback(playbackInfo);
-            System.err.println("debug 22 started " + playbackInfo);
             return;
         }
 
         try {
             getController().startPlayback(playbackInfo);
-            System.err.println("debug 22 started " + playbackInfo);
         } catch (Exception e1) {
             e1.printStackTrace(System.err);
             logMessage("Unable to start playback " + e1.getMessage(), e1);
@@ -589,7 +587,6 @@ public class PlaybackPane extends JPanePlugin {
         playbackInfo.setMinimumPlaybackRecords(minEvents);
 
         getController().startPlayback(playbackInfo);
-        System.err.println("debug 22 stopped " + playbackInfo);
         return;
     }
 
@@ -634,7 +631,6 @@ public class PlaybackPane extends JPanePlugin {
 
         if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
             getController().startPlayback(playbackInfo);
-            System.err.println("debug 22 started "+playbackInfo);
             return;
         }
     }
@@ -819,7 +815,6 @@ public class PlaybackPane extends JPanePlugin {
                     playbackInfo.setWaitBetweenEventsMS(waitTime);
                     playbackInfo.setStarted(false);
                     getController().startPlayback(playbackInfo);
-                    System.err.println("debug 22 started "+playbackInfo);
                     return;
                 }
 

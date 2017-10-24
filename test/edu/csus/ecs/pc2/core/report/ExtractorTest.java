@@ -107,7 +107,7 @@ public class ExtractorTest extends AbstractTestCase {
         
 //        Run[] runs = contest.getRuns();
 //        for (Run run : runs) {
-//            System.out.println("debug 22 runs "+run);
+//            System.out.println("debug runs "+run);
 //        }
 
         String[] lines = extractor.getReportLines(Extractor.JSON_OPTION, contest, controller);
