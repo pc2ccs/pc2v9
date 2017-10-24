@@ -367,6 +367,9 @@ public class Executable extends Plugin implements IExecutable {
                  */
                 boolean atLeastOneTestFailed = false;
                 String failedResults = "";
+                
+                //problem indicates stop-on-first-failure
+                boolean stopOnFirstFailedTestCase = problem.isStopOnFirstFailedTestCase();
 
                 if (dataFiles == null || dataFiles.length <= 1) {
 
@@ -384,8 +387,9 @@ public class Executable extends Plugin implements IExecutable {
                     // the judged run has multiple test cases
                     log.info("Test cases: " + dataFiles.length + " for run " + run.getNumber());
 
-                    // execute the judged run against each test data set
-                    while (dataSetNumber < dataFiles.length) {
+                    // execute the judged run against each test data set until either all test cases are run
+                    // or (if the problem indicates stop on first failed test case) a test case fails
+                    while ((dataSetNumber < dataFiles.length) && ( !(stopOnFirstFailedTestCase && atLeastOneTestFailed))) {
 
                         // execute against one specific data set
                         passed = executeAndValidateDataSet(dataSetNumber);

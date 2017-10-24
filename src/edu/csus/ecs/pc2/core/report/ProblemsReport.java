@@ -62,6 +62,11 @@ public class ProblemsReport implements IReport {
         printWriter.println("       Answer file name : " + problem.getAnswerFileName());
         printWriter.println("       Read from stdin  : " + Utilities.yesNoString(problem.isReadInputDataFromSTDIN()));
         printWriter.println("       Number test cases: " + problem.getNumberTestCases());
+        String isStopOnFirstFailedTestCase = "No";
+        if (problem.isStopOnFirstFailedTestCase()) {
+            isStopOnFirstFailedTestCase = "Yes";
+        }
+        printWriter.println("       Stop on 1st fail : " + isStopOnFirstFailedTestCase);
         printWriter.println();
 
         printWriter.print("   Execution time limit : " + problem.getTimeOutInSeconds() + " seconds");

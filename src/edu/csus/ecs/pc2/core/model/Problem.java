@@ -237,6 +237,13 @@ public class Problem implements IElementObject {
     }
     
     private State state = State.ENABLED;
+    
+    /**
+     * A flag indicating whether, during execution of a submission for this problem, 
+     * execution should be terminated on the first failed test case (or rather, all test cases
+     * should be executed even when some have failed.)
+     */
+    private boolean stopOnFirstFailedTestCase = true;
 
     
     /**
@@ -1015,6 +1022,10 @@ public class Problem implements IElementObject {
 //                return false;
 //            }
             
+            if (!this.isStopOnFirstFailedTestCase() == problem.isStopOnFirstFailedTestCase()) {
+                return false;
+            }
+            
             return true;
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);
@@ -1487,5 +1498,26 @@ public class Problem implements IElementObject {
      */
     public void clearInputValidationResults() {
         this.inputValidationResults = null;
+    }
+
+    /**
+     * Returns the flag indicating whether this problem is configured to stop execution
+     * on encountering a failed test case.
+     * 
+     * @return true if execution should stop after the first failed test case; false if execution should continue
+     *              (i.e. if all test cases should be executed even if some fail).
+     */
+    public boolean isStopOnFirstFailedTestCase() {
+        return stopOnFirstFailedTestCase;
+    }
+
+    /**
+     * Sets the flag indicating whether execution of submissions for this problem should stop on encountering the first failed test case.
+     * 
+     * @param stopOnFirstFailedTestCase true indicates execution should stop on first failed test case; false indicates all test cases 
+     *          should be executed
+     */
+    public void setStopOnFirstFailedTestCase(boolean stopOnFirstFailedTestCase) {
+        this.stopOnFirstFailedTestCase = stopOnFirstFailedTestCase;
     }
 }

@@ -596,6 +596,9 @@ public class EditProblemPane extends JPanePlugin {
                 getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
             }
         }
+        
+        //set the flag indicating whether execution of problem submissions should stop on the first failed test case
+        newProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
 
         getController().addNewProblem(newProblem, newProblemDataFiles);
 
@@ -1058,6 +1061,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         checkProblem.setUsingExternalDataFiles(getMultipleDataSetPane().isUsingExternalDataFiles());
+        checkProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
         checkProblem.setTimeOutInSeconds(getIntegerValue(getTimeOutTextField().getText()));
         checkProblem.setLetter(getProblemLetterTextField().getText());
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
@@ -1385,6 +1389,8 @@ public class EditProblemPane extends JPanePlugin {
         if (debug22EditProblem) {
             Utilities.dump(newProblemDataFiles, "debug 22 after populateProblemTestSetFilenames");
         }
+        
+        
 
         return checkProblem;
 
@@ -1690,6 +1696,9 @@ public class EditProblemPane extends JPanePlugin {
                 getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
             }
         }
+
+        //set the flag indicating whether execution of problem submissions should stop on the first failed test case
+        newProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
 
         // hand the new problem to the Controller for transmission to the Server
         getController().updateProblem(newProblem, newProblemDataFiles);
@@ -2048,6 +2057,7 @@ public class EditProblemPane extends JPanePlugin {
     public MultipleDataSetPane getMultipleDataSetPane() {
         if (multipleDataSetPane == null) {
             multipleDataSetPane = new MultipleDataSetPane();
+            multipleDataSetPane.getChckbxStopOnFirstFailedTestCase().setSelected(false);
             multipleDataSetPane.setContestAndController(getContest(), getController());
             multipleDataSetPane.setParentPane(this);
         }
