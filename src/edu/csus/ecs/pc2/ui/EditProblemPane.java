@@ -2057,6 +2057,7 @@ public class EditProblemPane extends JPanePlugin {
     public MultipleDataSetPane getMultipleDataSetPane() {
         if (multipleDataSetPane == null) {
             multipleDataSetPane = new MultipleDataSetPane();
+            multipleDataSetPane.getChckbxStopOnFirstFailedTestCase().setSelected(false);
             multipleDataSetPane.setContestAndController(getContest(), getController());
             multipleDataSetPane.setParentPane(this);
         }
