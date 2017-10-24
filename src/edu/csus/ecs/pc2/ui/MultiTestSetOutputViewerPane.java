@@ -147,7 +147,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
 
     private JLabel lblNumFailedTestCases;
 
-    private JLabel lblNumTestCases;
+    private JLabel lblNumTestCasesActuallyRun;
 
     private MultipleFileViewer currentViewer;
     
@@ -248,6 +248,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
     private JButton optionsPaneCloseButton;
 
     private JButton resultsPaneCloseButton;
+    private JLabel lblTotalTestCases;
+    private Component horizontalGlue_9;
 
     /**
      * Constructs an instance of a plugin pane for viewing multi-testset output values.
@@ -264,7 +266,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(646, 363));
+        this.setSize(new Dimension(717, 363));
         this.add(getCenterPanel(), java.awt.BorderLayout.CENTER);
 
         // TODO Bug 918
@@ -927,9 +929,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
             Component horizontalGlue_8 = Box.createHorizontalGlue();
             horizontalGlue_8.setPreferredSize(new Dimension(20, 20));
             resultsPaneHeaderPanel.add(horizontalGlue_8);
+            resultsPaneHeaderPanel.add(getTotalTestCasesLabel());
+            resultsPaneHeaderPanel.add(getHorizontalGlue_9());
 
             // add a label to the header showing the total number of test cases for this problem
-            resultsPaneHeaderPanel.add(getNumTestCasesLabel());
+            resultsPaneHeaderPanel.add(getNumTestCasesActuallyRunLabel());
 
             Component horizontalGlue_7 = Box.createHorizontalGlue();
             horizontalGlue_7.setPreferredSize(new Dimension(20, 20));
@@ -1259,14 +1263,21 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
         return intArray;
     }
 
+    private JLabel getTotalTestCasesLabel() {
+        if (lblTotalTestCases == null) {
+            lblTotalTestCases = new JLabel("Total Test Cases: XXX");
+        }
+        return lblTotalTestCases;
+    }
+
     /**
      * @return
      */
-    private JLabel getNumTestCasesLabel() {
-        if (lblNumTestCases == null) {
-            lblNumTestCases = new JLabel("Test Cases: XXX");
+    private JLabel getNumTestCasesActuallyRunLabel() {
+        if (lblNumTestCasesActuallyRun == null) {
+            lblNumTestCasesActuallyRun = new JLabel("Test Cases Run: XXX");
         }
-        return lblNumTestCases;
+        return lblNumTestCasesActuallyRun;
     }
 
     /**
@@ -1346,14 +1357,18 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
                 getRunIDLabel().setText("Run ID:  " + currentRun.getNumber());
                 getLanguageLabel().setText("Language:  " + getCurrentRunLanguageName());
 
-                // get the test case results for the current run
+                //display in the GUI the total test cases configured in the problem
+                int totalTestCases = currentProblem.getNumberTestCases();
+                getTotalTestCasesLabel().setText("Total Test Cases: " + totalTestCases);
+                
+                // get the actually-run test case results for the current run
                 RunTestCase[] testCases = getCurrentTestCases(currentRun);
 
                 // fill in the test case summary information
                 if (testCases == null) {
-                    getNumTestCasesLabel().setText("Test Cases:  0");
+                    getNumTestCasesActuallyRunLabel().setText("Test Cases Run:  0");
                 } else {
-                    getNumTestCasesLabel().setText("Test Cases:  " + testCases.length);
+                    getNumTestCasesActuallyRunLabel().setText("Test Cases Run:  " + testCases.length);
 //                    System.out.println("MTSVPane.populateGUI(): loading " + testCases.length + " test cases into GUI pane...");
 //                  for (int i = 0; i < testCases.length; i++) {
 //                    System.out.println("  Test Case " + testCases[i].getTestNumber() + ": " + testCases[i]);
@@ -2019,4 +2034,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
         this.currentValidatorStderrFileNames = filenames ;
     }
 
+    private Component getHorizontalGlue_9() {
+        if (horizontalGlue_9 == null) {
+        	horizontalGlue_9 = Box.createHorizontalGlue();
+        	horizontalGlue_9.setPreferredSize(new Dimension(20, 20));
+        }
+        return horizontalGlue_9;
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"
