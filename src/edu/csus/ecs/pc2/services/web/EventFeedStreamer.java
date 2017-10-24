@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.services.web;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -797,4 +798,17 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         running = false;
     }
 
+    /**
+     * Create a snap shot of the JSON event feed.
+     */
+    public static String createEventFeedJSON(IInternalContest contest, IInternalController controller) {
+        EventFeedStreamer streamer = new EventFeedStreamer(contest, controller);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        streamer.addStream(stream, new EventFeedFilter());
+        streamer.removeStream(stream);
+        String json = new String(stream.toByteArray());
+        stream = null;
+        streamer = null;
+        return json;
+    }
 }

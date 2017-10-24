@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.services.web;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Level;
@@ -136,6 +137,24 @@ public class EventFeedService implements Feature {
     public boolean configure(FeatureContext arg0) {
         // TODO Auto-generated method stub
         return false;
+    }
+    
+    /**
+     * Create a snapshot of the JSON event feed.
+     * 
+     * @param contest
+     * @param controller
+     * @return
+     */
+    public static String createEventFeedJSON(IInternalContest contest, IInternalController controller) {
+        EventFeedStreamer streamer = new EventFeedStreamer(contest, controller);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        streamer.addStream(stream, new EventFeedFilter());
+        streamer.removeStream(stream);
+        String json = new String(stream.toByteArray());
+        stream = null;
+        streamer = null;
+        return json;
     }
 
 }
