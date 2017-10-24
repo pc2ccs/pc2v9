@@ -59,7 +59,7 @@ public class JSONTool {
         ObjectNode element = mapper.createObjectNode();
         element.put("id", submission.getElementId().toString());
         element.put("language_id", submission.getLanguageId().toString());
-        element.put("problem_id", submission.getProblemId().toString());
+        element.put("problem_id", getProblemId(model.getProblem(submission.getProblemId())));
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
@@ -282,7 +282,7 @@ public class JSONTool {
 
     public ObjectNode convertToJSON(Account account) {
         ObjectNode element = mapper.createObjectNode();
-        // TODO multi-site with overlapping teamNumbers?
+        // SOMEDAY spec should be updated for overlapping multi-site team Ids, this will need to be updated at that time
         element.put("id", new Integer(account.getClientId().getClientNumber()).toString());
         if (notEmpty(account.getExternalId())) {
             element.put("icpc_id", account.getExternalId());
@@ -300,11 +300,7 @@ public class JSONTool {
     public ObjectNode convertToJSON(Problem problem, int ordinal) {
         ObjectNode element = mapper.createObjectNode();
         // {"id":"asteroids","label":"A","name":"Asteroid Rangers","ordinal":1,"color":"blue","rgb":"#00f","test_data_count":10}
-        String id = problem.getElementId().toString();
-        // if we have a problem shortName use it, otherwise default to the internal id
-        if (notEmpty(problem.getShortName())) {
-            id = problem.getShortName();
-        }
+        String id = getProblemId(problem);
         element.put("id", id);
         element.put("label", problem.getLetter());
         element.put("name", problem.getDisplayName());
@@ -319,6 +315,15 @@ public class JSONTool {
         }
         element.put("test_data_count", problem.getNumberTestCases());
         return element;
+    }
+
+    public String getProblemId(Problem problem) {
+        String id = problem.getElementId().toString();
+        // if we have a problem shortName use it, otherwise default to the internal id
+        if (notEmpty(problem.getShortName())) {
+            id = problem.getShortName();
+        }
+        return id;
     }
 
     /**
@@ -365,7 +370,7 @@ public class JSONTool {
         ObjectNode element = mapper.createObjectNode();
         element.put("id", submission.getElementId().toString());
         element.put("submission_id", submission.getElementId().toString());
-        // TODO I think this is suppose to be when the judge retrieves it, not the submission time.
+        // SOMEDAY this is suppose to be when the judge retrieves it, not the submission time.
         element.put("start_time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("start_contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
         if (submission.isJudged()) {
@@ -374,7 +379,6 @@ public class JSONTool {
             // only print it's judgement and end times if this is the final judgement
             if (!judgementRecord.isPreliminaryJudgement()) {
                 element.put("judgement_type_id", getJudgementType(judgement));
-                // TODO verify these times are consistent
                 Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
                 if (wallElapsed != null) {
                     element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
@@ -402,7 +406,7 @@ public class JSONTool {
         element.put("judgement_id", run.getRunElementId().toString());
         element.put("ordinal", ordinal);
         element.put("judgement_type_id", getJudgementType(model.getJudgement(run.getJudgementId())));
-        // TODO this is the local time on the judge
+        // SOMEDAY get the time from the server instead of the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
         // note this is the contest_time as seen on the judge
         element.put("contest_time", ContestTime.formatTimeMS(run.getConestTimeMS()));

@@ -457,12 +457,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
         public void problemRemoved(ProblemEvent event) {
             Problem problem = event.getProblem();
-            String id = problem.getElementId().toString();
-            // if we have a problem shortName use it, otherwise default to the internal id
-            if (problem.getShortName() != null && !problem.getShortName().trim().equals("")) {
-                id = problem.getShortName();
-            }
-            String json = getJSONEvent(PROBLEM_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + id + "\"}");
+            String json = getJSONEvent(PROBLEM_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + jsonTool.getProblemId(problem) + "\"}");
             sendJSON(json + NL);
         }
 
@@ -747,7 +742,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                 // Send keep alive to every running stream.
 
                 for (Iterator<OutputStream> streams = streamsMap.keySet().iterator(); streams.hasNext();) {
-                    // for (Map.Entry<OutputStream, StreamAndFilter> entry : streamsMap.entrySet()){
                     OutputStream stream = streams.next();
                     StreamAndFilter streamAndFilter = streamsMap.get(stream);
 
@@ -757,8 +751,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                         stream.flush();
 
                     } catch (Exception e) {
-                        System.out.println("INFO Unable to send keep alive in run: " + e.getCause().getMessage());
-                        log.log(Log.INFO, "Problem writing keep alive newline to stream", e);
+                        System.out.println("INFO Unable to send keep alive in run to " + streamAndFilter.getFilter().getClient() + ": " + e.getCause().getMessage());
+                        log.log(Log.INFO, "Problem writing keep alive newline to stream to " + streamAndFilter.getFilter().getClient(), e);
                         removeStream(streamAndFilter.getStream());
                     }
                 }
