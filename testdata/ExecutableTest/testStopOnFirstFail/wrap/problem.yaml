@@ -1,0 +1,15 @@
+name: Wrapper's Delight
+source: Sacramento State Fall 2015 Contest
+author: Ted Krovetz
+license: educational
+validator_flags: space_change_sensitive case_sensitive
+
+limits:
+   timeout: 30
+
+judging-type:
+   send-prelim-judgement: true
+   manual-review: true
+
+input:
+   readFromSTDIN: true

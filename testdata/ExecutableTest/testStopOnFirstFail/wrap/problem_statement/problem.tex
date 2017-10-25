@@ -1,0 +1,27 @@
+\problemname{Wrapper's Delight}
+
+\noindent
+You work for a book publisher and are responsible for their word-wrap software. The editors have decided to change the width of the book pages and it is your task to write software that reads text  that was word-wrapped with one width and re-wrap it with another width.%
+\footnote{In this problem statement, a ``word'' is a maximum length contiguous sequence of non-whitespace characters. For example ``I--for one--will leave.'' has three words: ``I--for'', ``one--will'', and ``leave.''.}
+
+You will be given a text where each line was wrapped to be no longer than some number of characters per line. You will be given a new number of characters, and it is your job to rewrite the original text making each line contain as many words as possible, but not exceeding the new number of characters per line.
+
+The lines of text, both before and after transformation adhere to strict guidelines.
+%
+\begin{itemize}
+\item Each line begins and ends with a printable non-space character.
+\item There are no tabs, and whenever a space occurs, there is only one (ie, never two consecutive space characters on a line).
+\item Each line contains the maximum number of words that fit without the line exceeding the character limit. Words are not broken-up across lines.
+\item The last line of text does not need to use all of the characters allotted to it, but otherwise should follow the above rules.
+\end{itemize}
+
+\section*{Input}
+
+The first line has two positive integers: the first one indicates how many lines of text follow, and the second is the new maximum line width.
+
+
+\section*{Output}
+
+Your program should output the text rewrapped as specified. If it cannot be rewrapped because there is a word that is longer than the new line length limit, output only the word ``error''.
+
+\includesample{sample}
