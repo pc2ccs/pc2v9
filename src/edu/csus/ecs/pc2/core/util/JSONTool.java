@@ -56,7 +56,7 @@ public class JSONTool {
      */
     public ObjectNode convertToJSON(Run submission) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", submission.getElementId().toString());
+        element.put("id", getSubmissionId(submission));
         element.put("language_id", getLanguageId(model.getLanguage(submission.getLanguageId())));
         element.put("problem_id", getProblemId(model.getProblem(submission.getProblemId())));
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
@@ -373,7 +373,7 @@ public class JSONTool {
         // "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"}
         ObjectNode element = mapper.createObjectNode();
         element.put("id", submission.getElementId().toString());
-        element.put("submission_id", submission.getElementId().toString());
+        element.put("submission_id", getSubmissionId(submission));
         // SOMEDAY this is suppose to be when the judge retrieves it, not the submission time.
         element.put("start_time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("start_contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
@@ -392,6 +392,10 @@ public class JSONTool {
             }
         }
         return element;
+    }
+
+    public String getSubmissionId(Run submission) {
+        return Integer.toString(submission.getNumber());
     }
 
     /**

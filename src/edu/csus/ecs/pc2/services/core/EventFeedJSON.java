@@ -282,7 +282,7 @@ public class EventFeedJSON extends JSONUtilities {
 
     }
 
-    private String getSubmissionJSON(IInternalContest contest, Run run) {
+    public String getSubmissionJSON(IInternalContest contest, Run run) {
         return jsonTool.convertToJSON(run).toString();
     }
 

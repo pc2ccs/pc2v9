@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.GroupComparator;
+import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
@@ -168,6 +169,7 @@ public class JSONToolTest extends AbstractTestCase {
         assertMatchCount(runs.length, "\"entry_point\"", json);
 
     }
+    
 
     String writeFile(File file, String string) throws FileNotFoundException, IOException {
 
@@ -341,6 +343,25 @@ public class JSONToolTest extends AbstractTestCase {
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
+    }
+    
+    /**
+     * Test single teams JSON line.
+     * 
+     * @throws Exception
+     */
+    public void testSubmissionJSON() throws Exception {
+
+        IInternalContest contest = new UnitTestData().getContest();
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+
+        Run[] runs = contest.getRuns();
+        Arrays.sort(runs, new RunComparator());
+        for (Run run : runs) {
+            String json = eventFeedJSON.getSubmissionJSON(contest,run);
+            String expecteInt = Integer.toString(run.getNumber());
+            asertEqualJSON(json, "id", expecteInt);
+        }
     }
 
     /**

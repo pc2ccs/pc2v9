@@ -385,7 +385,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
 
-                String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), EventFeedOperation.DELETE, "{id: \"" + run.getElementId().toString() + "}");
+                String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), EventFeedOperation.DELETE, "{id: \"" + jsonTool.getSubmissionId(run) + "}");
                 sendJSON(json + NL);
             }
         }
