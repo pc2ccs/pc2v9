@@ -2909,7 +2909,7 @@ public class InternalContest implements IInternalContest {
 
     public void setFinalizeData(FinalizeData data) {
         finalizeData = data;
-        ContestInformationEvent event = new ContestInformationEvent(data);
+        ContestInformationEvent event = new ContestInformationEvent(contestInformation, data);
         fireContestInformationListener(event);
     }
 
