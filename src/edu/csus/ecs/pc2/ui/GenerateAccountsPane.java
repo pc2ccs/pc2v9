@@ -182,7 +182,7 @@ public class GenerateAccountsPane extends JPanePlugin {
                 number = getContest().getAccounts(ClientType.Type.ADMINISTRATOR, theSiteNumber).size();
                 genAdminLabel.setText("Administrators (" + number + ")");
                 
-                updateOtherClientsLabel();
+                updateOtherClientsLabel(theSiteNumber);
 
                 generateButton.setText("Generate Accounts for Site " + theSiteNumber);
                 generateButton.setMnemonic(KeyEvent.VK_G);
@@ -584,7 +584,7 @@ public class GenerateAccountsPane extends JPanePlugin {
             otherClientsComboBox = new JComboBox<Type>();
             otherClientsComboBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
-                    updateOtherClientsLabel();
+                    updateOtherClientsLabel(1);
                 }
             });
             otherClientsComboBox.setBounds(new java.awt.Rectangle(81, 162, 167, 20));
@@ -596,7 +596,7 @@ public class GenerateAccountsPane extends JPanePlugin {
         return otherClientsComboBox;
     }
 
-    protected void updateOtherClientsLabel() {
+    protected void updateOtherClientsLabel(int theSiteNumber) {
         
         Type accountType = (Type) otherClientsComboBox.getSelectedItem();
         
@@ -604,8 +604,7 @@ public class GenerateAccountsPane extends JPanePlugin {
             genOtherLabel.setText("(0)");
         } else {
             if (getContest() != null){
-                int thisSiteNumber = getContest().getSiteNumber();
-                int number = getContest().getAccounts(accountType, thisSiteNumber).size();
+                int number = getContest().getAccounts(accountType, theSiteNumber).size();
                 genOtherLabel.setText("("+number+")");
             }
         }
