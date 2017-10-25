@@ -243,7 +243,7 @@ public class Problem implements IElementObject {
      * execution should be terminated on the first failed test case (or rather, all test cases
      * should be executed even when some have failed.)
      */
-    private boolean stopOnFirstFailedTestCase = true;
+    private boolean stopOnFirstFailedTestCase = false;
 
     
     /**
