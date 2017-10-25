@@ -966,6 +966,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         } else {
             addDefaultPC2Validator(problem, 1);
         }
+        
+        
+        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
+        problem.setStopOnFirstFailedTestCase(stopOnFirstFail);
 
         assignJudgingType(content, problem, overrideManualReview);
 

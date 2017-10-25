@@ -121,6 +121,8 @@ public interface IContestLoader {
     String USING_PC2_VALIDATOR = "use-internal-validator";
 
     String SEND_PRELIMINARY_JUDGEMENT_KEY = "send-prelim-judgement";
+    
+    String STOP_ON_FIRST_FAILED_TEST_CASE_KEY = "stop-on-first-failed-test-case";
 
     String USE_JUDGE_COMMAND_KEY = "use-judge-cmd";
 
