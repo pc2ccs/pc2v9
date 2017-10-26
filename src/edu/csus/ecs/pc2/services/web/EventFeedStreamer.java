@@ -548,7 +548,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
         public void groupChanged(GroupEvent event) {
             Group group = event.getGroup();
-            String json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(group).toString());
+            String json;
+            if (group.isDisplayOnScoreboard()) {
+                json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(group).toString());
+            } else {
+                json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + group.getElementId().toString() + "\"}");
+            }
             sendJSON(json + NL);
         }
 
@@ -569,7 +574,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void groupsChanged(GroupEvent groupEvent) {
             Group[] groups = groupEvent.getGroups();
             for (Group group : groups) {
-                String json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(group).toString());
+                String json;
+                if (group.isDisplayOnScoreboard()) {
+                    json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(group).toString());
+                } else {
+                    json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + group.getElementId().toString() + "\"}");
+                }
                 sendJSON(json + NL);
             }
         }

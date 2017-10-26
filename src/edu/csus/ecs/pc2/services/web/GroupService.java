@@ -62,7 +62,9 @@ public class GroupService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < groups.length; i++) {
             Group group = groups[i];
-            childNode.add(jsonTool.convertToJSON(group));
+            if (group.isDisplayOnScoreboard()) {
+                childNode.add(jsonTool.convertToJSON(group));
+            }
         }
 
         // output the response to the requester (note that this actually returns it to Jersey,
@@ -82,7 +84,7 @@ public class GroupService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < groups.length; i++) {
             Group group = groups[i];
-            if (group.getElementId().toString().equals(groupId)) {
+            if (group.isDisplayOnScoreboard() && group.getElementId().toString().equals(groupId)) {
                 childNode.add(jsonTool.convertToJSON(group));
             }
         }
