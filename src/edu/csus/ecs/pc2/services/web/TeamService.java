@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
@@ -62,7 +63,7 @@ public class TeamService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
+            if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
                 childNode.add(jsonTool.convertToJSON(account));
             }
         }
@@ -82,7 +83,8 @@ public class TeamService implements Feature {
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
             // TODO multi-site with overlapping teamNumbers?
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && new Integer(account.getClientId().getClientNumber()).toString().equals(teamId)) {
+            if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && account.getClientId().getClientType().equals(ClientType.Type.TEAM)
+                    && new Integer(account.getClientId().getClientNumber()).toString().equals(teamId)) {
                 childNode.add(jsonTool.convertToJSON(account));
             }
         }

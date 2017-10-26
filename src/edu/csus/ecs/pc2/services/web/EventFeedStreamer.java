@@ -309,10 +309,14 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void accountModified(AccountEvent accountEvent) {
 
             Account account = accountEvent.getAccount();
-            if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                String json = getJSONEvent(TEAM_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(account).toString());
-                sendJSON(json + NL);
-
+            if (isTeam(account)) {
+                if (contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                    String json = getJSONEvent(TEAM_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(account).toString());
+                    sendJSON(json + NL);
+                } else {
+                    String json = getJSONEvent(TEAM_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \""+account.getClientId().getClientNumber()+"\"}");
+                    sendJSON(json + NL);
+                }
                 // SOMEDAY send team members info
             }
         }
@@ -331,9 +335,14 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             Account[] accounts = accountEvent.getAccounts();
             Arrays.sort(accounts, new AccountComparator());
             for (Account account : accounts) {
-                if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                    String json = getJSONEvent(TEAM_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(account).toString());
-                    sendJSON(json + NL);
+                if (isTeam(account)) {
+                    if (contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                        String json = getJSONEvent(TEAM_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(account).toString());
+                        sendJSON(json + NL);
+                    } else {
+                        String json = getJSONEvent(TEAM_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \""+account.getClientId().getClientNumber()+"\"}");
+                        sendJSON(json + NL);
+                    }
                 }
             }
         }
