@@ -62,7 +62,9 @@ public class LanguageService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < languages.length; i++) {
             Language language = languages[i];
-            childNode.add(jsonTool.convertToJSON(language));
+            if (language.isActive()) {
+                childNode.add(jsonTool.convertToJSON(language));
+            }
         }
         return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
     }
@@ -79,7 +81,7 @@ public class LanguageService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < languages.length; i++) {
             Language language = languages[i];
-            if (language.getElementId().toString().equals(languageId)) {
+            if (language.getElementId().toString().equals(languageId) && language.isActive()) {
                 childNode.add(jsonTool.convertToJSON(language));
             }
         }

@@ -685,7 +685,7 @@ public class EditLanguagePane extends JPanePlugin {
 
             chckbxJudgesCommandLine.setSelected(language2.isUsingJudgeProgramExecuteCommandLine());
             judgeCommandLineTextBox.setText(language2.getJudgeProgramExecuteCommandLine());
-
+            getIDTextField().setText(language2.getID());
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
 
@@ -701,6 +701,7 @@ public class EditLanguagePane extends JPanePlugin {
             getDeleteLanguageCheckbox().setSelected(false);
             getInterpretedLanguageCheckBox().setSelected(false);
             getAutoPopulateLanguageComboBox().setSelectedIndex(0);
+            getIDTextField().setText("");
 
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);

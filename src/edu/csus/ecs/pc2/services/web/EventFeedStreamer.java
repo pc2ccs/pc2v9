@@ -482,7 +482,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
         public void languageChanged(LanguageEvent event) {
             Language language = event.getLanguage();
-            String json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(language).toString());
+            String json;
+            if (language.isActive()) {
+                json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(language).toString());
+            } else {
+                json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + jsonTool.getLanguageId(language) + "\"}");
+            }
             sendJSON(json + NL);
         }
 
@@ -506,7 +511,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void languagesChanged(LanguageEvent event) {
             Language[] languages = event.getLanguages();
             for (Language language : languages) {
-                String json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(language).toString());
+                String json;
+                if (language.isActive()) {
+                    json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(language).toString());
+                } else {
+                    json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + jsonTool.getLanguageId(language) + "\"}");
+                }
                 sendJSON(json + NL);
             }
         }
