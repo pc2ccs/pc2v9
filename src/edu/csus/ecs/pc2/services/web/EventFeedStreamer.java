@@ -376,14 +376,18 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void runChanged(RunEvent event) {
             Run run = event.getRun();
             Account account = contest.getAccount(run.getSubmitter());
-            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
-
-                if (run.isJudged()) {
-                    String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertJudgementToJSON(run).toString());
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                if (run.isDeleted()) {
+                    String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + jsonTool.getSubmissionId(run) + "\"}");
                     sendJSON(json + NL);
                 } else {
-                    String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(run).toString());
-                    sendJSON(json + NL);
+                    if (run.isJudged()) {
+                        String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertJudgementToJSON(run).toString());
+                        sendJSON(json + NL);
+                    } else {
+                        String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(run).toString());
+                        sendJSON(json + NL);
+                    }
                 }
             }
         }
