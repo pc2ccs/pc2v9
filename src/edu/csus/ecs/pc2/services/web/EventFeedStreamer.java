@@ -590,7 +590,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
         public void judgementChanged(JudgementEvent event) {
             Judgement judgement = event.getJudgement();
-            String json = getJSONEvent(JUDGEMENT_TYPE_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(judgement).toString());
+            String json;
+            if (judgement.isActive()) {
+                json = getJSONEvent(JUDGEMENT_TYPE_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(judgement).toString());
+            } else {
+                json = getJSONEvent(JUDGEMENT_TYPE_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(judgement).toString());
+            }
             sendJSON(json + NL);
         }
 

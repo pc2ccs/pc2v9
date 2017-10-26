@@ -62,7 +62,9 @@ public class JudgementTypeService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < judgements.length; i++) {
             Judgement judgement = judgements[i];
-            childNode.add(jsonTool.convertToJSON(judgement));
+            if (judgement.isActive()) {
+                childNode.add(jsonTool.convertToJSON(judgement));
+            }
         }
 
         // output the response to the requester (note that this actually returns it to Jersey,
@@ -82,7 +84,7 @@ public class JudgementTypeService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < judgements.length; i++) {
             Judgement judgement = judgements[i];
-            if (jsonTool.getJudgementType(judgement).equals(judgementType)) {
+            if (jsonTool.getJudgementType(judgement).equals(judgementType) && judgement.isActive()) {
                 childNode.add(jsonTool.convertToJSON(judgement));
             }
         }
