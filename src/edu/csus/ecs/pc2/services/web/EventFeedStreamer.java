@@ -450,8 +450,13 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
         public void problemChanged(ProblemEvent event) {
             Problem problem = event.getProblem();
-            int problemNumber = getProblemIndex(contest, problem.getElementId());
-            String json = getJSONEvent(PROBLEM_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(problem, problemNumber).toString());
+            String json;
+            if (problem.isActive()) {
+                int problemNumber = getProblemIndex(contest, problem.getElementId());
+                json = getJSONEvent(PROBLEM_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(problem, problemNumber).toString());
+            } else {
+                json = getJSONEvent(PROBLEM_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + jsonTool.getProblemId(problem) + "\"}");
+            }
             sendJSON(json + NL);
         }
 
