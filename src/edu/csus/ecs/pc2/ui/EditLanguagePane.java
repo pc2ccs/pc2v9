@@ -90,7 +90,7 @@ public class EditLanguagePane extends JPanePlugin {
      */
     private JCheckBox chckbxJudgesCommandLine = null;
 
-    private JTextField id_textfield;
+    private JTextField idTextfield;
 
     /**
      * This method initializes
@@ -235,19 +235,19 @@ public class EditLanguagePane extends JPanePlugin {
     }
 
     private JTextField getIDTextField() {
-        if (id_textfield == null) {
-            id_textfield = new JTextField();
-            id_textfield.setBounds(new Rectangle(209, 278, 263, 20));
-            id_textfield.setToolTipText("ID to use in Contest API");
-            id_textfield.setName("idTextField");
-            id_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
+        if (idTextfield == null) {
+            idTextfield = new JTextField();
+            idTextfield.setBounds(new Rectangle(209, 278, 263, 20));
+            idTextfield.setToolTipText("ID to use in Contest API");
+            idTextfield.setName("idTextField");
+            idTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
 
         }
-        return id_textfield;
+        return idTextfield;
     }
 
     /**
@@ -596,7 +596,7 @@ public class EditLanguagePane extends JPanePlugin {
 
         judgeCommandLineTextBox.setText(values[3]);
         chckbxJudgesCommandLine.setSelected(false);
-        id_textfield.setText(values[4]);
+        idTextfield.setText(values[4]);
         boolean isScript = LanguageAutoFill.isInterpretedLanguage(languageToFill);
 
         getInterpretedLanguageCheckBox().setSelected(isScript);

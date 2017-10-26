@@ -197,8 +197,7 @@ public class ContestInformationPane extends JPanePlugin {
             contestFreezeTimeLabel.setBounds(78, 475, 175, 27);
             centerPane.add(contestFreezeTimeLabel);
             
-            JCheckBox chckbxUnfrozen = getChckbxUnfrozen();
-            centerPane.add(chckbxUnfrozen);
+            centerPane.add(getChckbxUnfrozen());
         }
         return centerPane;
     }

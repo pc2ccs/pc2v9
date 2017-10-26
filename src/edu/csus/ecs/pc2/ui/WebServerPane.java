@@ -43,7 +43,7 @@ public class WebServerPane extends JPanePlugin {
     private static final long serialVersionUID = -7805284416449568136L;
 
     public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = WebServer.DEFAULT_WEB_SERVER_PORT_NUMBER;
-    
+
     private static final String NL = System.getProperty("line.separator");
 
     private JPanel buttonPanel = null;
@@ -67,6 +67,7 @@ public class WebServerPane extends JPanePlugin {
     private WebServer webServer = null;
 
     private JCheckBox chckbxFetchRuns;
+
     private JButton viewJSONButton;
 
     /**
@@ -336,30 +337,31 @@ public class WebServerPane extends JPanePlugin {
         }
         return chckbxFetchRuns;
     }
+
     private JButton getViewJSONButton() {
         if (viewJSONButton == null) {
-        	viewJSONButton = new JButton("View");
-        	viewJSONButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        viewJSONEventFeed();
-        	    }
-        	});
+            viewJSONButton = new JButton("View");
+            viewJSONButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    viewJSONEventFeed();
+                }
+            });
         }
         return viewJSONButton;
     }
 
     protected void viewJSONEventFeed() {
-        
+
         try {
             SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
             String dateString = formatter.format(new Date());
-            
+
             String buildNumber = new VersionInfo().getBuildNumber();
-            
+
             MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
-            String title = "Event Feed JSON (at "+dateString+", build "+buildNumber+")";
+            String title = "Event Feed JSON (at " + dateString + ", build " + buildNumber + ")";
             String json = EventFeedStreamer.createEventFeedJSON(getContest(), getController());
-            String [] lines = json.split(NL);
+            String[] lines = json.split(NL);
             multipleFileViewer.addTextintoPane(title, lines);
             multipleFileViewer.setTitle("PC^2 Report (Build " + new VersionInfo().getBuildNumber() + ")");
             FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
@@ -368,6 +370,6 @@ public class WebServerPane extends JPanePlugin {
             e.printStackTrace(System.err);
             getLog().log(Level.WARNING, "Unable to view EF JSON", e);
         }
-        
+
     }
 }
