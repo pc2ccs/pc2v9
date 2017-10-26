@@ -26,8 +26,10 @@ import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -346,7 +348,7 @@ public class JSONToolTest extends AbstractTestCase {
     }
     
     /**
-     * Test single teams JSON line.
+     * Tests Run JSON.
      * 
      * @throws Exception
      */
@@ -365,11 +367,11 @@ public class JSONToolTest extends AbstractTestCase {
     }
 
     /**
-     * Test single teams JSON line.
+     * Test team and group JSON.
      * 
      * @throws Exception
      */
-    public void testTeamJSON() throws Exception {
+    public void testTeamAndGroupJSON() throws Exception {
 
         IInternalContest contest = new UnitTestData().getContest();
         EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
@@ -490,7 +492,8 @@ public class JSONToolTest extends AbstractTestCase {
     private void assertJSONStringValue (String json, String fieldname, String exptectedFieldValue) {
 
         String regex = "\"" + fieldname + "\":\"" + exptectedFieldValue + "\"";
-        assertEquals("Expected to find JSON string syntax, double quoted value, for field \""+fieldname+"\"", 1, matchCount(regex, json));
+//        throw new ComparisonFailure("Expected double quoted value \""+exptectedFieldValue+"\" value in json ", 1, matchCount(regex, json));
+        assertTrue("Expected to find JSON string syntax, double quoted value \""+exptectedFieldValue+"\", for field \""+fieldname+"\"", 1 == matchCount(regex, json));
     }
 
     public void testContestJSON() throws Exception {
@@ -600,7 +603,7 @@ public class JSONToolTest extends AbstractTestCase {
             assertEquals("Expected for field <" + fieldName + "> value", expectedValue, value);
 
         } catch (JsonParseException e) {
-            System.out.println("Trouble trying to check " + e.getMessage()); // TODO  better message
+            System.err.println("Unable to compare field '"+fieldName+"' for expected value '"+expectedValue+"' " + e.getMessage()); 
             throw e;
         }
 
@@ -849,5 +852,120 @@ public class JSONToolTest extends AbstractTestCase {
         assertCountEvent(0, EventFeedJSON.JUDGEMENT_KEY, json);
         assertCountEvent(0, EventFeedJSON.JUDGEMENT_TYPE_KEY, json);
     }
-}
 
+    public void testConvertToJSONGroup() throws Exception {
+
+        IInternalContest contest = new UnitTestData().getContest();JSONTool jsonTool= new JSONTool(contest, null);
+
+        Group group = new Group("Group T1");
+        group.setGroupId(2323);
+        group.setSite(contest.getSite(contest.getSiteNumber()).getElementId());
+        String json = jsonTool.convertToJSON(group).toString();
+//        System.out.println("debug group json "+json);
+        // debug json group {"id":"Group_T1-1621487835425380678","icpc_id":"2323","name":"Group T1"}
+        
+        assertJSONStringValue(json, "id", group.getElementId().toString());
+        assertJSONStringValue(json, "name", "Group T1");
+        assertJSONStringValue(json, "icpc_id", "2323");
+    }
+
+    public void testConvertToJSONClarification() throws Exception {
+
+        IInternalContest contest = new UnitTestData().getContest();
+        JSONTool jsonTool = new JSONTool(contest, null);
+
+        Clarification[] clarifications = contest.getClarifications();
+        Arrays.sort(clarifications, new ClarificationComparator());
+
+        int clarNum = 4;
+
+        Clarification clarification = clarifications[clarNum - 1];
+        String json = jsonTool.convertToJSON(clarification, null).toString();
+        //        System.out.println("debug clar 4 "+json);
+
+        // debug clar 4 {"id":"Clarification--1638909146661829105","from_team_id":"4","to_team_id":null,"reply_to_id":null,"problem_id":"Sumit-6203214424750787208", 
+        // "text":"Why #2? from team4","time":"2017-10-25T10:58:08.527-07","contest_time":"00:00:00.000"}
+
+        assertJSONStringValue(json, "id", clarification.getElementId().toString()); // SOMEDAY 
+        assertJSONStringValue(json, "from_team_id", "4");
+        assertJSONStringValue(json, "problem_id", clarification.getProblemId().toString());
+        assertJSONStringValue(json, "text", "Why #2. from team4");
+
+    }
+
+    public void testConvertToJSONContestInformation() throws Exception {
+        IInternalContest contest = new UnitTestData().getContest();
+        JSONTool jsonTool = new JSONTool(contest, null);
+        ContestInformation contestInformation = contest.getContestInformation();
+          String json = jsonTool.convertToJSON(contestInformation).toString();
+//          System.out.println("debug contest info json "+json);
+          // debug contest info json {"id":"Default.-3848727515497618657","name":"Programming Contest",
+          // "formal_name":"Programming Contest","start_time":null,"duration":"5:00:00","scoreboard_freeze_duration":"01:00:00","penalty_time":"20","state":{"running":false,"frozen":false,"final":false}}
+          
+          assertJSONStringValue(json, "id", contest.getContestIdentifier());
+          assertJSONStringValue(json, "formal_name", "Programming Contest");
+          assertJSONStringValue(json, "name", "Programming Contest");
+          
+          assertJSONStringValue(json, "penalty_time", "20");
+          
+          assertJSONBooleanValue(json, "running", false);
+          assertJSONBooleanValue(json, "frozen", false);
+          assertJSONBooleanValue(json, "final", false);
+          
+    }
+
+    public void testConvertToJSONJudgement() throws Exception {
+        IInternalContest contest = new UnitTestData().getContest();
+        JSONTool jsonTool = new JSONTool(contest, null);
+        Judgement judgement = contest.getJudgements()[4];
+
+        String json = jsonTool.convertToJSON(judgement).toString();
+        //        System.out.println("debug judgement "+json);
+        // debug judgement {"id":"WA2","name":"ave no clue","penalty":true,"solved":false}
+
+        assertJSONStringValue(json, "id", "WA2");
+        assertJSONStringValue(json, "name", "ave no clue");
+        assertJSONBooleanValue(json, "penalty", true);
+        assertJSONBooleanValue(json, "solved", false);
+
+    }
+
+    private void assertJSONBooleanValue(String json, String fieldname, boolean exptectedFieldValue) {
+        String regex = "\"" + fieldname + "\":" + exptectedFieldValue;
+        assertTrue("Expected to find JSON boolean value " + exptectedFieldValue + " for field \"" + fieldname + "\"", 1 == matchCount(regex, json));
+    }
+
+    public void testConvertToJSONAccount() throws Exception {
+        IInternalContest contest = new UnitTestData().getContest();
+        JSONTool jsonTool = new JSONTool(contest, null);
+        Account[] accounts = getTeamAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+
+        int teamNum = 5;
+
+        Account account = accounts[teamNum - 1];
+
+        String json = jsonTool.convertToJSON(account).toString();
+
+        //        System.out.println("debug team account 5"+json);
+        // debug team account 5{"id":"5","icpc_id":"3005","name":"team5","group_id":"North_Group--7306185641154577475"}
+
+        assertNotNull("Expecting json for account ", json);
+
+        assertJSONStringValue(json, "id", "5");
+        assertJSONStringValue(json, "icpc_id", "3005");
+        assertJSONStringValue(json, "name", "team5");
+        //        assertJSONStringValue(json,  "group_id", "5");  SOMEDAY REFACTOR test find and compare group_id
+
+    }
+
+    public void testConvertToJSONRunTestCase() throws Exception {
+        
+        // TODO testConvertToJSONRunTestCase
+//        IInternalContest contest = new UnitTestData().getContest();
+//        JSONTool jsonTool = new JSONTool(contest, null);
+//        String json =  jsonTool.convertToJSON(RunTestCase[] runTestCases, int ordinal) {
+//        fail();
+    }
+
+}
