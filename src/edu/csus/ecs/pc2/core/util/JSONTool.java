@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.core.util;
 
 import java.util.Calendar;
@@ -30,8 +27,9 @@ import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
- * @author ICPC
- *
+ * JSON for pc2 classes.
+ * 
+ * @author Troy Boudreau <boudreat@ecs.csus.edu>
  */
 public class JSONTool {
     private ObjectMapper mapper = new ObjectMapper();
@@ -51,14 +49,22 @@ public class JSONTool {
         this.controller = controller;
     }
 
+    /**
+     * Create JSON for submissions.
+     * 
+     * @param submission
+     */
     public ObjectNode convertToJSON(Run submission) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", submission.getElementId().toString());
-        element.put("language_id", submission.getLanguageId().toString());
-        element.put("problem_id", submission.getProblemId().toString());
+        element.put("id", getSubmissionId(submission));
+        element.put("language_id", getLanguageId(model.getLanguage(submission.getLanguageId())));
+        element.put("problem_id", getProblemId(model.getProblem(submission.getProblemId())));
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
+        if (submission.getEntryPoint() != null){
+            element.put("entry_point", new String(submission.getEntryPoint()));
+        }
 
         return element;
     }
@@ -67,7 +73,7 @@ public class JSONTool {
         ObjectNode element = mapper.createObjectNode();
         element.put("id", group.getElementId().toString());
         if (group.getGroupId() != -1) {
-            element.put("icpc_id", new Integer(group.getGroupId()).toString());
+            element.put("icpc_id", Integer.toString(group.getGroupId()));
         }
         element.put("name", group.getDisplayName());
         return element;
@@ -75,13 +81,15 @@ public class JSONTool {
 
     public ObjectNode convertToJSON(Language language) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", language.getElementId().toString());
+        element.put("id", getLanguageId(language));
         element.put("name", language.getDisplayName());
         return element;
     }
 
     public ObjectNode convertToJSON(Clarification clarification, ClarificationAnswer clarAnswer) {
         ObjectNode element = mapper.createObjectNode();
+        
+        // SOMEDAY change id to a orginal
         String id = clarification.getElementId().toString();
         if (clarAnswer != null) {
             id = clarAnswer.getElementId().toString();
@@ -181,6 +189,11 @@ public class JSONTool {
         } else {
             skipStateFrozen = true;
         }
+        // if the contest is unfrozen, freezeTime does not matter
+        if (ci.isUnfrozen()) {
+            skipStateFrozen = false;
+            stateFrozen = false;
+        }
         boolean stateFinal = false;
         if (model.getFinalizeData() != null) {
             stateFinal = model.getFinalizeData().isCertified();
@@ -236,7 +249,7 @@ public class JSONTool {
             }
 
         }
-        element.put("id", getKey(judgement));
+        element.put("id", getJudgementType(judgement));
         element.put("name", name);
         element.put("penalty", penalty);
         element.put("solved", solved);
@@ -273,7 +286,7 @@ public class JSONTool {
 
     public ObjectNode convertToJSON(Account account) {
         ObjectNode element = mapper.createObjectNode();
-        // TODO multi-site with overlapping teamNumbers?
+        // SOMEDAY spec should be updated for overlapping multi-site team Ids, this will need to be updated at that time
         element.put("id", new Integer(account.getClientId().getClientNumber()).toString());
         if (notEmpty(account.getExternalId())) {
             element.put("icpc_id", account.getExternalId());
@@ -287,15 +300,11 @@ public class JSONTool {
         }
         return element;
     }
-
+    
     public ObjectNode convertToJSON(Problem problem, int ordinal) {
         ObjectNode element = mapper.createObjectNode();
         // {"id":"asteroids","label":"A","name":"Asteroid Rangers","ordinal":1,"color":"blue","rgb":"#00f","test_data_count":10}
-        String id = problem.getElementId().toString();
-        // if we have a problem shortName use it, otherwise default to the internal id
-        if (notEmpty(problem.getShortName())) {
-            id = problem.getShortName();
-        }
+        String id = getProblemId(problem);
         element.put("id", id);
         element.put("label", problem.getLetter());
         element.put("name", problem.getDisplayName());
@@ -310,6 +319,15 @@ public class JSONTool {
         }
         element.put("test_data_count", problem.getNumberTestCases());
         return element;
+    }
+
+    public String getProblemId(Problem problem) {
+        String id = problem.getElementId().toString();
+        // if we have a problem shortName use it, otherwise default to the internal id
+        if (notEmpty(problem.getShortName())) {
+            id = problem.getShortName();
+        }
+        return id;
     }
 
     /**
@@ -345,13 +363,18 @@ public class JSONTool {
 
     }
 
+    /**
+     * Create JSON for judgement.
+     * 
+     * @param submission
+     */
     public ObjectNode convertJudgementToJSON(Run submission) {
         // {"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
         // "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"}
         ObjectNode element = mapper.createObjectNode();
         element.put("id", submission.getElementId().toString());
-        element.put("submission_id", submission.getElementId().toString());
-        // TODO I think this is suppose to be when the judge retrieves it, not the submission time.
+        element.put("submission_id", getSubmissionId(submission));
+        // SOMEDAY this is suppose to be when the judge retrieves it, not the submission time.
         element.put("start_time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("start_contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
         if (submission.isJudged()) {
@@ -359,8 +382,7 @@ public class JSONTool {
             Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
             // only print it's judgement and end times if this is the final judgement
             if (!judgementRecord.isPreliminaryJudgement()) {
-                element.put("judgement_type_id", getKey(judgement));
-                // TODO verify these times are consistent
+                element.put("judgement_type_id", getJudgementType(judgement));
                 Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
                 if (wallElapsed != null) {
                     element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
@@ -372,8 +394,23 @@ public class JSONTool {
         return element;
     }
 
-    public String getKey(Judgement judgement) {
+    public String getSubmissionId(Run submission) {
+        return Integer.toString(submission.getNumber());
+    }
+
+    /**
+     * Get judgement type (acronym).
+     */
+    public String getJudgementType(Judgement judgement) {
         return judgement.getAcronym();
+    }
+    
+    public String getLanguageId(Language language) {
+        String key = language.getID();
+        if (key == null || key.trim().equals("")) {
+            key = language.getElementId().toString();
+        }
+        return key;
     }
 
     public ObjectNode convertToJSON(RunTestCase[] runTestCases, int ordinal) {
@@ -384,8 +421,8 @@ public class JSONTool {
         element.put("id", run.getElementId().toString());
         element.put("judgement_id", run.getRunElementId().toString());
         element.put("ordinal", ordinal);
-        element.put("judgement_type_id", getKey(model.getJudgement(run.getJudgementId())));
-        // TODO this is the local time on the judge
+        element.put("judgement_type_id", getJudgementType(model.getJudgement(run.getJudgementId())));
+        // SOMEDAY get the time from the server instead of the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
         // note this is the contest_time as seen on the judge
         element.put("contest_time", ContestTime.formatTimeMS(run.getConestTimeMS()));

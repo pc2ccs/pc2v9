@@ -270,7 +270,7 @@ public class ContestTest extends AbstractTestCase {
         assertEquals("Number of JUDGED runs", 13, countRunStatus(apiContestInst, runs, RunStates.JUDGED));
         
 //        for (IRun iRun : runs) {
-//            println("debug 22 "+apiContestInst.getRunState(iRun));
+//            println("debug "+apiContestInst.getRunState(iRun));
 //        }
     }
 

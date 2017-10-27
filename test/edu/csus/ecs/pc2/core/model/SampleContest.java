@@ -304,6 +304,7 @@ public class SampleContest {
         // 3 Execute command line
         // 4 is the Title again????
         // 5 isInterpreted
+        // 6 is the ID
 
         language.setCompileCommandLine(values[1]);
         language.setExecutableIdentifierMask(values[2]);
@@ -313,6 +314,7 @@ public class SampleContest {
         } else {
             language.setInterpreted(false);
         }
+        language.setID(values[6]);
     }
 
     public IInternalController createController(IInternalContest contest, boolean isServer, boolean isRemote) {
@@ -499,6 +501,7 @@ public class SampleContest {
             Run newRun = new Run(teamId, language, problem);
             newRun.setElapsedMins(run.getElapsedMins() + 9 + i);
             newRun.setNumber(contest.getRuns().length);
+            newRun.setEntryPoint("Foo.class");
             // System.out.println("debug22Z " + run + " " + run.getProblemId() + " " + run.getLanguageId());
             runs[i] = newRun;
         }
@@ -568,6 +571,7 @@ public class SampleContest {
             run.setElapsedMins(9 + i);
             run.setNumber(++numRuns);
             run.setSiteNumber(siteNumber);
+            run.setEntryPoint("Foo.class");
             runs[i] = run;
         }
         return runs;
@@ -603,6 +607,7 @@ public class SampleContest {
         Run run = new Run(clientId, language, problem);
         run.setElapsedMins(elapsed);
         run.setNumber(++numRuns);
+        run.setEntryPoint("Foo.class");
         try {
             contest.addRun(run);
         } catch (IOException e) {
@@ -629,6 +634,7 @@ public class SampleContest {
     public Run createRun(IInternalContest contest, ClientId clientId, Problem problem) throws IOException, ClassNotFoundException, FileSecurityException {
         int numRuns = contest.getRuns().length;
         Run run = new Run(clientId, contest.getLanguages()[0], problem);
+        run.setEntryPoint("Foo.class");
         run.setElapsedMins(9 + numRuns);
         run.setNumber(++numRuns);
         AbstractTestCase test = new AbstractTestCase();
@@ -656,7 +662,8 @@ public class SampleContest {
         newRun.setDeleted(run.isDeleted());
         newRun.setNumber(contest.getRuns().length);
         newRun.setStatus(RunStates.NEW);
-
+        newRun.setEntryPoint("Foo.class");
+        
         if (cloneJudgements) {
             for (JudgementRecord judgementRecord : newRun.getAllJudgementRecords()) {
                 newRun.addJudgement(judgementRecord);
@@ -781,6 +788,7 @@ public class SampleContest {
         run.setNumber(runId);
         run.setSiteNumber(contest.getSiteNumber());
         run.setElapsedMins(elapsed);
+        run.setEntryPoint("Foo.class");
         
         JudgementRecord judgementRecord = null;
 
@@ -934,6 +942,7 @@ public class SampleContest {
 
         for (Run run : runs) {
             RunFiles runFiles = new RunFiles(run, filename);
+            run.setEntryPoint(runFiles.getMainFile().getName());
             contest.acceptRun(run, runFiles);
         }
     }
@@ -1921,6 +1930,7 @@ public class SampleContest {
         Run run = new Run(clientId, languageId, problem);
         run.setNumber(runId);
         run.setElapsedMins(elapsed);
+        run.setEntryPoint("Foo.class");
         ElementId judgementId = noJudgement.getElementId();
         if (solved) {
             judgementId = yesJudgement.getElementId();

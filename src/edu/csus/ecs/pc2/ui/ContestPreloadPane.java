@@ -247,7 +247,6 @@ public class ContestPreloadPane extends JPanePlugin {
 
         } catch (Exception e) {
             logException("Unable to load contest YAML from " + filename, e);
-            e.printStackTrace(); // TODO debug 22
             showMessage("Problem loading contest data file(s) - " + e.getMessage());
         }
 

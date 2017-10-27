@@ -153,7 +153,7 @@ public class JSONUtilities {
      * @param elementId
      * @return -1 if language not found or inactive, else 1 or greater rank for language.
      */
-    public int getLanguageIndex(IInternalContest contest, ElementId elementId) {
+    public static int getLanguageIndex(IInternalContest contest, ElementId elementId) {
         int idx = 0;
         for (Language language : contest.getLanguages()) {
             if (language.isActive()) {
@@ -166,6 +166,8 @@ public class JSONUtilities {
 
         return -1;
     }
+    
+    
 
     /**
      * Return the problem index (starting at/base one)).
@@ -174,7 +176,7 @@ public class JSONUtilities {
      * @param elementId
      * @return -1 if problem not found or inactive, else 1 or greater as rank for problem.
      */
-    public int getProblemIndex(IInternalContest contest, ElementId elementId) {
+    public static int getProblemIndex(IInternalContest contest, ElementId elementId) {
         int idx = 0;
         for (Problem problem : contest.getProblems()) {
             if (problem.getElementId().equals(elementId)) {
@@ -327,6 +329,8 @@ public class JSONUtilities {
         stringBuilder.append("}");
     }
 
-
+    public static String getLanguageIndexString(IInternalContest contest, ElementId elementId) {
+        return Integer.toString(getLanguageIndex(contest, elementId));
+    }
 
 }

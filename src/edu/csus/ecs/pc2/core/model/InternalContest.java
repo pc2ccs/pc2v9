@@ -768,6 +768,10 @@ public class InternalContest implements IInternalContest {
         Run newRun = runList.addNewRun(run); // this set the run number.
         if (runFiles != null) {
             runFilesList.add(newRun, runFiles);
+            SerializedFile file = runFiles.getMainFile();
+            if (file != null){
+                run.setEntryPoint(file.getName());
+            }
         }
         addRun(newRun);
         return newRun;
@@ -2905,7 +2909,7 @@ public class InternalContest implements IInternalContest {
 
     public void setFinalizeData(FinalizeData data) {
         finalizeData = data;
-        ContestInformationEvent event = new ContestInformationEvent(data);
+        ContestInformationEvent event = new ContestInformationEvent(contestInformation, data);
         fireContestInformationListener(event);
     }
 

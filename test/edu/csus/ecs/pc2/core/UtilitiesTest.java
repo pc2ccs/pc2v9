@@ -440,4 +440,30 @@ public class UtilitiesTest extends AbstractTestCase {
             assertFalse("Expected to be isExecutableExtension " + filename, Utilities.isExecutableExtension(filename));
         }
     }
+
+    public void testgetFileBaseName() throws Exception {
+
+        String[] testData = { //
+        // full name, basename
+                "Main.class,Main", //
+                File.separator + "Main.class,Main", //
+                File.separator + "home" + File.separator + "home" + File.separator + "Hello.class,Hello", //
+                File.separator + "home" + File.separator + "home" + File.separator + "ISumit.c,ISumit", //
+                File.separator + "home" + File.separator + "home" + File.separator + "Main,Main", //
+                File.separator + "home" + File.separator + File.separator + "tmp" + File.separator + "Main,Main", //
+                "ISumit.py,ISumit", //
+        };
+
+        for (String timeString : testData) {
+
+            String[] fields = timeString.split(",");
+
+            String filename = fields[0].trim();
+            String expected = fields[1];
+            String actual = Utilities.getFileBaseName(filename);
+
+            // System.out.println("\""+fields[0]+","+actualSeconds+"\", //");
+            assertEquals("Expected basename ", expected, actual);
+        }
+    }
 }

@@ -1766,15 +1766,19 @@ public class ExecutableTest extends AbstractTestCase {
         assertEquals("Expected validator results string", expectedValidatorResults, results);
 
         // isValidationSuccess is a reflection of whether the validator program ran, not the actual result of validation
-
     }
 
+    /**
+     * Test where all test cases are tried/tested.
+     * 
+     * @throws Exception
+     */
     public void testMiddleFailure() throws Exception {
-        
-        if (isFastJUnitTesting()){
+
+        if (isFastJUnitTesting()) {
             return;
         }
-        
+
         String sumitFilename = getSamplesSourceFilename("wrap_failure.java");
 
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
@@ -1794,9 +1798,48 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 
         Executable executable = runExecutableTest(run, runFiles, false, "No - Wrong Answer");
-        
         String noJudgement = "No - Wrong Answer";
-        assertValidationFailure(run, executable, 1, 6, noJudgement);
 
+        assertValidationFailure(run, executable, 1, 6, noJudgement);
+    }
+    
+    
+    /**
+     * Test where on first failed test case, does not test the remaining tests.
+     * @throws Exception
+     */
+    public void testStopOnFirstFail() throws Exception {
+
+        if (isFastJUnitTesting()) {
+            return;
+        }
+
+        // ensureDirectory(getDataDirectory(this.getName()));
+        // startExplorer(getDataDirectory(this.getName()));
+
+        String sumitFilename = getSamplesSourceFilename("wrap_failure.java");
+
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Problem problem = createMiddleFailure(contest, "wrap");
+
+        problem.setDataFileName("wrapper.in");
+        problem.setAnswerFileName("wrapper.ans");
+        problem.setTimeOutInSeconds(30);
+        problem.setReadInputDataFromSTDIN(true);
+
+        problem.setStopOnFirstFailedTestCase(true);  // Stop on first failure.
+
+        Run run = createRun(submitter, javaLanguage, problem, 45, 120);
+
+        assertFileExists(sumitFilename);
+        RunFiles runFiles = new RunFiles(run, sumitFilename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+
+        Executable executable = runExecutableTest(run, runFiles, false, "No - Wrong Answer");
+        String noJudgement = "No - Wrong Answer";
+
+        assertValidationFailure(run, executable, 0, 1, noJudgement);
     }
 }

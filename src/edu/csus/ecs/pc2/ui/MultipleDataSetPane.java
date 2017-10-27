@@ -303,7 +303,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     public ProblemDataFiles getProblemDataFiles() {
         if (Utilities.isDebugMode()) {
-            dump(tableModel.getFiles(), "populateUI debug 22 C");
+            dump(tableModel.getFiles(), "populateUI");
         }
         return tableModel.getFiles();
     }
@@ -340,7 +340,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
 
         if (Utilities.isDebugMode()) {
-            System.out.println("debug 22 Are problemId's identical ?" + //
+            System.out.println("debug Are problemId's identical ?" + //
                 problemDataFiles.getProblemId().equals(originalFiles.getProblemId()));
         }
 
@@ -463,7 +463,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         problem.setUsingExternalDataFiles(externalFiles);
 
         if (Utilities.isDebugMode()) {
-            dump(problemDataFiles, "debug 22 before load");
+            dump(problemDataFiles, "debug before load");
         }
         try {
             problemDataFiles = loadDataFiles(problem, problemDataFiles, baseDirectoryName, ".in", ".ans", externalFiles);
@@ -472,7 +472,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             showMessage(this, "Import Failed", e.getMessage());
         }
         if (Utilities.isDebugMode()) {
-            dump(problemDataFiles, "debug 22 after load");
+            dump(problemDataFiles, "debug after load");
         }
 
         populateUI();
@@ -700,26 +700,28 @@ public class MultipleDataSetPane extends JPanePlugin {
             + "\n\nYou must choose which type of data storage you want to use for each contest problem prior to loading the data for that problem.  ";
     private Component horizontalStrut_1;
     private JCheckBox chckbxStopOnFirstFailedTestCase;
+
     private Component getHorizontalStrut_1() {
         if (horizontalStrut_1 == null) {
-        	horizontalStrut_1 = Box.createHorizontalStrut(20);
-        	horizontalStrut_1.setPreferredSize(new Dimension(60, 0));
-        	horizontalStrut_1.setMinimumSize(new Dimension(30, 0));
+            horizontalStrut_1 = Box.createHorizontalStrut(20);
+            horizontalStrut_1.setPreferredSize(new Dimension(60, 0));
+            horizontalStrut_1.setMinimumSize(new Dimension(30, 0));
         }
         return horizontalStrut_1;
-    }
-    
+    }    
     
     protected JCheckBox getChckbxStopOnFirstFailedTestCase() {
         if (chckbxStopOnFirstFailedTestCase == null) {
-        	chckbxStopOnFirstFailedTestCase = new JCheckBox("Stop execution on first failed test case");
-        	chckbxStopOnFirstFailedTestCase.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        getEditProblemPane().enableUpdateButton();
-        	    }
-        	});
-        	chckbxStopOnFirstFailedTestCase.setToolTipText("Checking this box causes submissions for this problem to terminate on the first failed test case; unchecking forces all test cases to be executed whether they pass or fail.  (Note: this checkbox does not affect the result (judgement) returned for the submission.)");
-        	chckbxStopOnFirstFailedTestCase.setSelected(true);
+            chckbxStopOnFirstFailedTestCase = new JCheckBox("Stop execution on first failed test case");
+            chckbxStopOnFirstFailedTestCase.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    getEditProblemPane().enableUpdateButton();
+                }
+            });
+            chckbxStopOnFirstFailedTestCase.setToolTipText(
+                    "Checking this box causes submissions for this problem to terminate on the first failed test case; unchecking forces all test cases to be executed whether they pass or fail. "
+                            + "(Note: this checkbox does not affect the result (judgement) returned for the submission.)");
+            chckbxStopOnFirstFailedTestCase.setSelected(true);
         }
         return chckbxStopOnFirstFailedTestCase;
     }

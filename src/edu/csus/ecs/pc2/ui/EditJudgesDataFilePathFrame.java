@@ -161,9 +161,8 @@ public class EditJudgesDataFilePathFrame extends JFrame implements UIPlugin  {
                 log.warning(message);
             }
             
-            // TODO Figure out how strict we should be after the regionals.
-            
-            int result = FrameUtilities.yesNoCancelDialog(this, "TEMPORARY DEBUGGING THING. CDP is invalid - save anyways?", "TEMPORARY DEBUGGING THING. debug 22");
+            // TODO TODAY Figure out how strict we should be after the regionals.
+            int result = FrameUtilities.yesNoCancelDialog(this, "TEMPORARY DEBUGGING THING. CDP is invalid - save anyways?", "TEMPORARY DEBUGGING THING.");
 
             if (result == JOptionPane.YES_OPTION) {
                 return true;

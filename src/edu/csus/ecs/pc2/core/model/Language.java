@@ -64,6 +64,8 @@ public class Language implements IElementObject {
     
     private boolean interpreted = false;
 
+    private String id = "";
+
     public Language(String displayName) {
         super();
         this.displayName = displayName;
@@ -194,6 +196,9 @@ public class Language implements IElementObject {
             if (interpreted != language.isInterpreted()) {
                 return false;
             }
+            if (! StringUtilities.stringSame(id, language.getID())) {
+                return false;
+            }
             return true;
         } catch (Exception e) {
             StaticLog.log("Exception in Language.isSameAs",  e);
@@ -241,5 +246,13 @@ public class Language implements IElementObject {
     
     public boolean isUsingJudgeProgramExecuteCommandLine() {
         return usingJudgeProgramExecuteCommandLine;
+    }
+
+    public void setID(String newId) {
+        this.id = newId;
+    }
+    
+    public String getID() {
+        return id;
     }
 }

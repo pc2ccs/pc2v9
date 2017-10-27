@@ -7,6 +7,7 @@
 computer-judged: false
 manual-review: true
 send-prelim-judgement: false
+stop-on-first-failed-test-case: true
 
 name: biobots
 source: 

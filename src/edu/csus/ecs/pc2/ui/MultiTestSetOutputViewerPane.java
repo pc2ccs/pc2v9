@@ -2114,8 +2114,8 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
 
     private Component getHorizontalGlue_9() {
         if (horizontalGlue_9 == null) {
-        	horizontalGlue_9 = Box.createHorizontalGlue();
-        	horizontalGlue_9.setPreferredSize(new Dimension(20, 20));
+            horizontalGlue_9 = Box.createHorizontalGlue();
+            horizontalGlue_9.setPreferredSize(new Dimension(20, 20));
         }
         return horizontalGlue_9;
     }

@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.core.model;
 import java.util.Arrays;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.Utilities;
+
 /**
  * Submitted Run info.
  * 
@@ -109,6 +111,11 @@ public class Run extends Submission {
     private long overRideElapsedTimeMS;
 
     private int overrideNumber = 0;
+
+    /**
+     * Short/basename for submitted file.
+     */
+    private char[] entryPoint;
 
     public Run(ClientId submitter, Language languageId, Problem problemId) {
         super();
@@ -447,5 +454,31 @@ public class Run extends Submission {
 
     public void replaceTestCases(RunTestCase[] runTestCases) {
         testcases = new Vector<RunTestCase>(Arrays.asList(runTestCases));
+    }
+
+    /**
+     * Set entry point (main file name).
+     * 
+     * Strips path and strips extension.
+     * 
+     * @param name
+     */
+    public void setEntryPoint(String name) {
+        name = Utilities.getFileBaseName(name);
+        if (name != null){
+            entryPoint = name.toCharArray();
+        }
+    }
+    
+    /**
+     * Get the entry point, main file, for the submitted source(s).
+     * @return
+     */
+    public String getEntryPoint(){
+        if (entryPoint != null){
+            return new String(entryPoint);
+        }
+        
+        return null;
     }
 }

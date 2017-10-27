@@ -54,10 +54,11 @@ public class ContestInformationEvent {
         this.contestInformation = contestInformation;
     }
 
-    public ContestInformationEvent(FinalizeData data){
+    public ContestInformationEvent(ContestInformation contestInformation, FinalizeData data){
         super();
         this.action = Action.CHANGED_FINALIZED;
         this.finalizeData = data;
+        this.contestInformation = contestInformation;
     }
     
     public Action getAction() {

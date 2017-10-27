@@ -2,8 +2,13 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Vector;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -11,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -86,6 +92,62 @@ public class NewScoringAlgorithmTest extends TestCase {
         contest.updateAccount(account);
         standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties());
         assertEquals("scoring adjustment -15", 0, standingsRecords[0].getPenaltyPoints());
+    }
+
+    public void testHonorScoreboardFreezeUnfreeze() throws Exception {
+
+        SampleContest sampleContest = new SampleContest();
+
+        IInternalContest contest = sampleContest.createContest(1, 1, 2, 12, true);
+        String [] runsData = {
+                "1,1,A,1,No",  // 20 (a No before first yes)
+                "2,1,A,103,Yes",  // 3 (first yes counts Minute points but never Run Penalty points)
+                "3,1,A,105,No",  // zero -- after Yes
+                "4,1,A,107,Yes",  // zero -- after Yes
+                "5,1,A,109,No",  // zero -- after Yes
+                "6,1,B,111,No",  // zero -- not solved
+                "7,1,B,113,No",  // zero -- not solved
+                "8,2,A,241,Yes",  // 30 (minute points; no Run points on first Yes)
+                "9,2,B,255,No",  // zero -- not solved
+                "10,2,B,260,No",  // zero -- not solved
+                "11,2,B,265,No",  // zero -- not solved
+                "12,2,B,270,No",  // zero -- not solved
+                "13,2,B,275,No",  // zero -- not solved
+        };
+        for (int i = 0; i < runsData.length; i++) {
+            String runInfoLine = runsData[i];
+            SampleContest.addRunFromInfo(contest, runInfoLine);
+        }
+        NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
+        ObjectMapper mapper = new ObjectMapper();
+
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties(), true);
+        StandingsRecord standingsRecord = standingsRecords[1];
+        JsonNode rootNode = mapper.readTree(standingsRecord.toString());
+        for (Iterator<JsonNode> iterator = rootNode.findValue("listOfSummaryInfo").elements(); iterator.hasNext();) {
+            JsonNode type = (JsonNode) iterator.next();
+            long pendingRunCount = type.get("pendingRunCount").asLong();
+            long numberSubmitted = type.get("numberSubmitted").asLong();
+            assertEquals("for team 2 number submitted should equal pending run count", numberSubmitted, pendingRunCount);
+        }
+        ContestInformation ci = contest.getContestInformation();
+        ci.setUnfrozen(true);
+        contest.updateContestInformation(ci);
+        // once the contest is unfrozen the pendingRunCount should go to 0
+        standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties(), true);
+        // just look at 2nd team
+        standingsRecord = standingsRecords[1];
+        rootNode = mapper.readTree(standingsRecord.toString());
+
+        for (Iterator<Entry<String, JsonNode>> iterator = rootNode.findValue("listOfSummaryInfo").fields(); iterator.hasNext();) {
+            Entry<String, JsonNode> type = (Entry<String, JsonNode>) iterator.next();
+            if (type.getKey().equals("2")) {
+                long pendingRunCount = type.getValue().get("pendingRunCount").asLong();
+                long numberSubmitted = type.getValue().get("numberSubmitted").asLong();
+                assertEquals("once unfrozen for team 2 number submitted", 5, numberSubmitted);
+                assertEquals("once unfrozen for team 2 number pendingRunCount", 0, pendingRunCount);
+            }
+        }
     }
 
     /**

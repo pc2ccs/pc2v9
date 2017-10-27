@@ -75,6 +75,7 @@ public final class LanguageAutoFill {
      * <li>Execute command line
      * <li>Title for Language
      * <li>Interpreted language, value will be {@link #INTERPRETER_VALUE} if interpreter.
+     * <li>Id for Language
      * </ol>
      * 
      * @param key a name in the auto populate language list, see {@link #getLanguageList()}.
@@ -92,90 +93,90 @@ public final class LanguageAutoFill {
 
         if (key.equals(JAVATITLE)) {
             String[] dVals = { JAVATITLE, "javac {:mainfile}", //
-                    "{:basename}.class", "java {:basename}", JAVATITLE, "" };
+                    "{:basename}.class", "java {:basename}", JAVATITLE, "", "java" };
             return dVals;
         } else if (key.equals(KYLIXCPPTITLE)) {
             String[] dVals = { KYLIXCPPTITLE, "bc++ -A  {:mainfile}", //
-                    "{:basename}", "." + fs + "{:basename}", KYLIXCPPTITLE, "" };
+                    "{:basename}", "." + fs + "{:basename}", KYLIXCPPTITLE, "", "cpp" };
             return dVals;
         } else if (key.equals(MONOCSHARPTITLE)) {
             String[] dVals = { MONOCSHARPTITLE, "mcs {:mainfile}", //
-                    "{:basename}.exe", "mono {:basename}.exe", MONOCSHARPTITLE, "" };
+                    "{:basename}.exe", "mono {:basename}.exe", MONOCSHARPTITLE, "", "csharp" };
             return dVals;
         } else if (key.equals(MSCSHARPTITLE)) {
             String[] dVals = { MSCSHARPTITLE, "csc {:mainfile}", //
-                    "{:basename}.exe", "." + fs + "{:basename}.exe", MSCSHARPTITLE, "" };
+                    "{:basename}.exe", "." + fs + "{:basename}.exe", MSCSHARPTITLE, "", "csharp" };
             return dVals;
         } else if (key.equals(MSCTITLE)) {
             String[] dVals = { MSCTITLE, "cl.exe {:mainfile}", //
-                    "{:basename}.exe", "." + fs + "{:basename}.exe", MSCTITLE , ""};
+                    "{:basename}.exe", "." + fs + "{:basename}.exe", MSCTITLE , "", "c"};
             return dVals;
         } else if (key.equals(GNUCPPTITLE)) {
             String[] dVals = { GNUCPPTITLE, "g++ -o {:basename}.exe {:mainfile}", "{:basename}.exe", //
-                    "." + fs + "{:basename}.exe", "GNU C++", "" };
+                    "." + fs + "{:basename}.exe", "GNU C++", "", "cpp" };
             return dVals;
         } else if (key.equals(GNUCTITLE)) {
 
             String[] dVals = { GNUCTITLE, "gcc -o {:basename}.exe {:mainfile} -lm", //
-                    "{:basename}.exe", "." + fs + "{:basename}.exe", "GNU C", "" };
+                    "{:basename}.exe", "." + fs + "{:basename}.exe", "GNU C", "", "c" };
             return dVals;
         } else if (key.equals(KYLIXTITLE)) {
 
             String[] dVals = { KYLIXTITLE, "dcc {:mainfile}", "{:basename}", //
-                    "." + fs + "{:basename}", KYLIXTITLE, "" };
+                    "." + fs + "{:basename}", KYLIXTITLE, "", "cpp" };
             return dVals;
         } else if (key.equals(FPCTITLE)) {
 
             String[] dVals = { FPCTITLE, "fpc {:mainfile}", "{:basename}", //
-                    "." + fs + "{:basename}", FPCTITLE, "" };
+                    "." + fs + "{:basename}", FPCTITLE, "", "pascal" };
             return dVals;
         } else if (key.equals(PERLTITLE)) {
 
             String[] dVals = { PERLTITLE, "perl -c {:mainfile}", "{:noexe}", //
-                    "perl {:mainfile}", PERLTITLE, INTERPRETER_VALUE };
+                    "perl {:mainfile}", PERLTITLE, INTERPRETER_VALUE, "perl" };
             return dVals;
 
         } else if (key.equals(PHPTITLE)) {
 
             String[] dVals = { PHPTITLE, "php -l {:mainfile}", "{:noexe}", //
-                    "php {:mainfile}", PHPTITLE, INTERPRETER_VALUE };
+                    "php {:mainfile}", PHPTITLE, INTERPRETER_VALUE, "php" };
             return dVals;
 
         } else if (key.equals(PYTHONTITLE)) {
 
             String[] dVals = { PYTHONTITLE, "python -m py_compile {:mainfile}", "{:noexe}", //
-                    "python {:mainfile}", PYTHONTITLE, INTERPRETER_VALUE };
+                    "python {:mainfile}", PYTHONTITLE, INTERPRETER_VALUE, "python2" };
             return dVals;
 
         } else if (key.equals(PYTHON3TITLE)) {
 
             String[] dVals = { PYTHONTITLE, "python3 -m py_compile {:mainfile}", "{:noexe}", //
-                    "python3 {:mainfile}", PYTHONTITLE, INTERPRETER_VALUE };
+                    "python3 {:mainfile}", PYTHONTITLE, INTERPRETER_VALUE, "python3" };
             return dVals;
 
         } else if (key.equals(RUBYTITLE)) {
 
             String[] dVals = { RUBYTITLE, "ruby -c {:mainfile}", "{:noexe}", //
-                    "ruby {:mainfile}", RUBYTITLE, INTERPRETER_VALUE };
+                    "ruby {:mainfile}", RUBYTITLE, INTERPRETER_VALUE, "ruby" };
             return dVals;
             
         } else if (key.equals(WINDOWS_KOTLINTITLE)) {
 
             String[] dVals = { WINDOWS_KOTLINTITLE, "cmd /c kotlinc {:mainfile} -include-runtime -d {:basename}.jar", "{:basename}.jar", //
-                    "java -jar {:basename}.jar", WINDOWS_KOTLINTITLE, "" };
+                    "java -jar {:basename}.jar", WINDOWS_KOTLINTITLE, "", "kotlin" };
             return dVals;
 
         } else if (key.equals(UNIX_KOTLINTITLE)) {
 
             String[] dVals = { UNIX_KOTLINTITLE, "kotlinc {:mainfile} -include-runtime -d {:basename}.jar", "{:basename}.jar", //
-                    "java -jar {:basename}.jar", UNIX_KOTLINTITLE, "" };
+                    "java -jar {:basename}.jar", UNIX_KOTLINTITLE, "", "kotlin" };
             return dVals;
 
        } else {
             // default / DEFAULTTITLE
 
             String[] dVals = { NULL_LANGUAGE_NAME, "<Compiler> {:mainfile}", "{:basename}.exe", 
-                    "{:basename}.exe", "", "" };
+                    "{:basename}.exe", "", "", "" };
 
             return dVals;
         }
@@ -248,6 +249,12 @@ public final class LanguageAutoFill {
             
             // set Judge's same as Team's.
             language.setJudgeProgramExecuteCommandLine(values[3]);
+            if (LanguageAutoFill.INTERPRETER_VALUE.equals(values[5])) {
+                language.setInterpreted(true);
+            } else {
+                language.setInterpreted(false);
+            }
+            language.setID(values[6]);
             return language;
         } else {
             return null;

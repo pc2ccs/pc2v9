@@ -554,6 +554,7 @@ public class ExportYAML {
         problemWriter.println();
         
         problemWriter.println(IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!isExternalFiles(problemDataFiles)));
+        problemWriter.println(IContestLoader.STOP_ON_FIRST_FAILED_TEST_CASE_KEY + ": " + problem.isStopOnFirstFailedTestCase());
 
         problemWriter.println();
         String dataFile = problem.getDataFileName();
@@ -603,6 +604,7 @@ public class ExportYAML {
             // if not computer judged then MUST be manaul judged
             problemWriter.println(PAD4 + IContestLoader.MANUAL_REVIEW_KEY + ": true");
         }
+        
         problemWriter.println(PAD4 + IContestLoader.SEND_PRELIMINARY_JUDGEMENT_KEY + ": " + problem.isPrelimaryNotification());
 
         problemWriter.println();

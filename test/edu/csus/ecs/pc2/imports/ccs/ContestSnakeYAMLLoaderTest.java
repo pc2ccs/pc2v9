@@ -645,7 +645,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         debugPrint("Dir " + getDataDirectory());
         // startExplorer(getDataDirectory());
 
-        // editFile(getDataDirectory()+"/"+IContestLoader.DEFAULT_CONTEST_YAML_FILENAME);
+         // editFile(getDataDirectory()+"/"+IContestLoader.DEFAULT_CONTEST_YAML_FILENAME);
         
         assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
 //        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
@@ -697,9 +697,15 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
                 assertNotNull("Expecting judges data file name ", problem.getDataFileName());
                 assertNotNull("Expecting judges answer file name ", problem.getAnswerFileName());
-
             }
         }
+
+        Problem firstProblem = problems[2];
+//        editFile(getDataDirectory() + "/" + firstProblem.getShortName() + "/" + IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME);
+
+        assertTrue ("Expecting problem "+firstProblem.getShortName()+" set stopOnFirstFailedTestCase", firstProblem.isStopOnFirstFailedTestCase());
+        
+        assertFalse ("Expecting problem "+problems[3].getShortName()+" set stopOnFirstFailedTestCase", problems[3].isStopOnFirstFailedTestCase());
 
         String[] basenames = { "bozo", "smart", "sumit" };
         

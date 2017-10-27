@@ -35,12 +35,12 @@ public class QuickLoad implements UIPlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
         controller = inController;
-        
+
         loadContest();
     }
 
     /**
-     * Load contest values. 
+     * Load contest values.
      */
     public void loadContest() {
 
@@ -167,12 +167,14 @@ public class QuickLoad implements UIPlugin {
         // 2 Executable Identifier Mask
         // 3 Execute command line
         // 5 "interpreted" if interpreter.
+        // 6 ID for Contest API
 
         language.setCompileCommandLine(values[1]);
         language.setExecutableIdentifierMask(values[2]);
         language.setProgramExecuteCommandLine(values[3]);
         boolean isScript = LanguageAutoFill.isInterpretedLanguage(fullLanguageName);
         language.setInterpreted(isScript);
+        language.setID(values[6]);
     }
 
     /**

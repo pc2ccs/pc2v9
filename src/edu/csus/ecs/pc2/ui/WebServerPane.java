@@ -7,8 +7,13 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -18,7 +23,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
+import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
 
 /**
  * This class provides a GUI for configuring the embedded Jetty webserver. It allows specifying the port on which Jetty will listen and the REST service endpoints to which Jetty will respond. (Note
@@ -36,6 +43,8 @@ public class WebServerPane extends JPanePlugin {
     private static final long serialVersionUID = -7805284416449568136L;
 
     public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = WebServer.DEFAULT_WEB_SERVER_PORT_NUMBER;
+
+    private static final String NL = System.getProperty("line.separator");
 
     private JPanel buttonPanel = null;
 
@@ -58,6 +67,8 @@ public class WebServerPane extends JPanePlugin {
     private WebServer webServer = null;
 
     private JCheckBox chckbxFetchRuns;
+
+    private JButton viewJSONButton;
 
     /**
      * Constructs a new WebServerPane.
@@ -233,6 +244,12 @@ public class WebServerPane extends JPanePlugin {
             gbc_lblEnabledWebServices.gridx = 0;
             gbc_lblEnabledWebServices.gridy = 2;
             centerPanel.add(getLblEnabledWebServices(), gbc_lblEnabledWebServices);
+            GridBagConstraints gbc_viewJSONButton = new GridBagConstraints();
+            gbc_viewJSONButton.anchor = GridBagConstraints.WEST;
+            gbc_viewJSONButton.insets = new Insets(0, 0, 5, 0);
+            gbc_viewJSONButton.gridx = 2;
+            gbc_viewJSONButton.gridy = 2;
+            centerPanel.add(getViewJSONButton(), gbc_viewJSONButton);
             GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
             gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
             gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 5);
@@ -319,5 +336,40 @@ public class WebServerPane extends JPanePlugin {
             chckbxFetchRuns.setSelected(true);
         }
         return chckbxFetchRuns;
+    }
+
+    private JButton getViewJSONButton() {
+        if (viewJSONButton == null) {
+            viewJSONButton = new JButton("View");
+            viewJSONButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    viewJSONEventFeed();
+                }
+            });
+        }
+        return viewJSONButton;
+    }
+
+    protected void viewJSONEventFeed() {
+
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
+            String dateString = formatter.format(new Date());
+
+            String buildNumber = new VersionInfo().getBuildNumber();
+
+            MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+            String title = "Event Feed JSON (at " + dateString + ", build " + buildNumber + ")";
+            String json = EventFeedStreamer.createEventFeedJSON(getContest(), getController());
+            String[] lines = json.split(NL);
+            multipleFileViewer.addTextintoPane(title, lines);
+            multipleFileViewer.setTitle("PC^2 Report (Build " + new VersionInfo().getBuildNumber() + ")");
+            FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+            multipleFileViewer.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            getLog().log(Level.WARNING, "Unable to view EF JSON", e);
+        }
+
     }
 }

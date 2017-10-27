@@ -63,7 +63,7 @@ public enum EventFeedType {
 
     private final String name;
 
-    private EventFeedType(String name) {
+    EventFeedType(String name) {
         this.name = name;
     }
 

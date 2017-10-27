@@ -141,7 +141,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contents = concat(contents, lines);
             }
         } catch (IOException e) {
-            e.printStackTrace(); // debug 22
             throw new YamlLoadException(e.getMessage(), e, contetYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
@@ -967,6 +966,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         } else {
             addDefaultPC2Validator(problem, 1);
         }
+        
+        
+        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
+        problem.setStopOnFirstFailedTestCase(stopOnFirstFail);
 
         assignJudgingType(content, problem, overrideManualReview);
 

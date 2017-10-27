@@ -95,7 +95,7 @@ public class JSerializFilePicker extends JPanel {
             theFile = serializedFile;
         }
         
-        System.out.println("debug 22 selectAndLoadAFile "+isModified()+" " +serializedFile+" "+newSerializedFile);
+        System.out.println("debug selectAndLoadAFile "+isModified()+" " +serializedFile+" "+newSerializedFile);
 
         SerializedFile file = selectFile(theFile);
         if (file != null) {
@@ -109,7 +109,7 @@ public class JSerializFilePicker extends JPanel {
         fileNameLabel.setText(sFile.getName());
         fileNameLabel.setToolTipText(sFile.getAbsolutePath());
         
-        System.out.println("debug 22 updateFileLabel "+isModified()+" " +serializedFile+" "+newSerializedFile);
+        System.out.println("debug updateFileLabel "+isModified()+" " +serializedFile+" "+newSerializedFile);
 
     }
 
@@ -161,7 +161,7 @@ public class JSerializFilePicker extends JPanel {
 
     public SerializedFile getSerializedFile() {
         
-        System.out.println("debug 22 getSerializedFile "+isModified()+" " +serializedFile+" "+newSerializedFile);
+        System.out.println("debug getSerializedFile "+isModified()+" " +serializedFile+" "+newSerializedFile);
 
         
         if (isModified()) {

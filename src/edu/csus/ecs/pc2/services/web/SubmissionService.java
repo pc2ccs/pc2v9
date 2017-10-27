@@ -117,7 +117,9 @@ public class SubmissionService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
-            childNode.add(jsonTool.convertToJSON(submission));
+            if (!submission.isDeleted()) {
+                childNode.add(jsonTool.convertToJSON(submission));
+            }
         }
 
         // output the response to the requester (note that this actually returns it to Jersey,
@@ -236,7 +238,7 @@ public class SubmissionService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
-            if (submission.getElementId().toString().equals(submissionId)) {
+            if (!submission.isDeleted() && jsonTool.getSubmissionId(submission).equals(submissionId)) {
                 childNode.add(jsonTool.convertToJSON(submission));
             }
         }

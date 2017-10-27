@@ -33,8 +33,6 @@ public class EventFeedFilterTest extends AbstractTestCase {
 
         EventFeedJSON efJson = new EventFeedJSON(contest);
         String json = efJson.createJSON(contest);
-        // System.out.println("debug 22 standard contest json "+json);
-
         return json.split(JSONUtilities.NL);
     }
 

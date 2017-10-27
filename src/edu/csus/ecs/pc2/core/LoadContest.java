@@ -447,6 +447,13 @@ public class LoadContest {
                 language.setCompileCommandLine(values[1]);
                 language.setExecutableIdentifierMask(values[2]);
                 language.setProgramExecuteCommandLine(values[3]);
+                // values[4] is another representation of the title
+                if (LanguageAutoFill.INTERPRETER_VALUE.equals(values[5])) {
+                    language.setInterpreted(true);
+                } else {
+                    language.setInterpreted(false);
+                }
+                language.setID(values[6]);
                 contest.addLanguage(language);
                 return language;
             }

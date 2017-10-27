@@ -59,8 +59,6 @@ public class EventFeedJSON extends JSONUtilities {
      */
     private String startEventId = null;
 
-    boolean pastStartEvent = true;
-
     /**
      * List of events to output.
      * 
@@ -115,12 +113,10 @@ public class EventFeedJSON extends JSONUtilities {
         StringBuilder stringBuilder = new StringBuilder();
 
         Language[] languages = contest.getLanguages();
-        int id = 1;
         for (Language language : languages) {
 
-            appendJSONEvent(stringBuilder, LANGUAGE_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getLanguageJSON(contest, language, id));
+            appendJSONEvent(stringBuilder, LANGUAGE_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getLanguageJSON(contest, language));
             stringBuilder.append(NL);
-            id++;
         }
 
         return stringBuilder.toString();
@@ -136,7 +132,7 @@ public class EventFeedJSON extends JSONUtilities {
      *            sequence number
      * @return
      */
-    public String getLanguageJSON(IInternalContest contest, Language language, int languageNumber) {
+    public String getLanguageJSON(IInternalContest contest, Language language) {
         return jsonTool.convertToJSON(language).toString();
     }
 
@@ -192,7 +188,7 @@ public class EventFeedJSON extends JSONUtilities {
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
                 if (!organizations.containsKey(account.getInstitutionCode())) {
                     organizations.put(account.getInstitutionCode(), account);
-                    appendJSONEvent(stringBuilder, ORGANIZATION_KEY, eventIdSequence, EventFeedOperation.CREATE, jsonTool.convertOrganizationsToJSON(account).toString());
+                    appendJSONEvent(stringBuilder, ORGANIZATION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, jsonTool.convertOrganizationsToJSON(account).toString());
                     stringBuilder.append(NL);
                 }
             }
@@ -286,7 +282,7 @@ public class EventFeedJSON extends JSONUtilities {
 
     }
 
-    private String getSubmissionJSON(IInternalContest contest, Run run) {
+    public String getSubmissionJSON(IInternalContest contest, Run run) {
         return jsonTool.convertToJSON(run).toString();
     }
 
@@ -496,14 +492,14 @@ public class EventFeedJSON extends JSONUtilities {
      * 
      * @param contest
      * @param buffer
-     * @param eventTypeList
+     * @param inEventTypeList
      *            list of events types, comma delimited
      * @throws IllegalArgumentException
      *             if any event in eventTypeList is not valid
      */
-    private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String eventTypeList) throws IllegalArgumentException {
+    private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String inEventTypeList) throws IllegalArgumentException {
 
-        String[] events = eventTypeList.split(",");
+        String[] events = inEventTypeList.split(",");
 
         for (String name : events) {
             name = name.trim();
@@ -549,7 +545,7 @@ public class EventFeedJSON extends JSONUtilities {
                     appendNotNull(buffer, getAwardJSON(contest));
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown event type '" + name + "' in list " + eventTypeList);
+                    throw new IllegalArgumentException("Unknown event type '" + name + "' in list " + inEventTypeList);
             }
         }
     }
@@ -560,6 +556,13 @@ public class EventFeedJSON extends JSONUtilities {
     public String nextEventId() {
         eventIdSequence++;
         return getEventId(eventIdSequence);
+    }
+
+    /**
+     * Get next event sequence id.
+     */
+    public long nextEventIdSequence() {
+        return(++eventIdSequence);
     }
 
     /**
@@ -584,12 +587,11 @@ public class EventFeedJSON extends JSONUtilities {
         return startEventId;
     }
 
-    protected void setStartEventId(String startEventId) {
-        pastStartEvent = false;
+    public void setStartEventId(String startEventId) {
         this.startEventId = startEventId;
     }
 
-    protected void setEventTypeList(String eventTypeList) {
+    public void setEventTypeList(String eventTypeList) {
         this.eventTypeList = eventTypeList;
     }
 

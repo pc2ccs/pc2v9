@@ -3322,7 +3322,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             site = contest.getSite(mySite.getMyProxy());
         }// else no proxys, send to site
         
-        System.out.println("debug 22 lookupRemoteServer for site "+inSiteNumber+" use site "+site);
+//        System.out.println("debug lookupRemoteServer for site "+inSiteNumber+" use site "+site);
         return site;
     }
 

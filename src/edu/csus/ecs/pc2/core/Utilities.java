@@ -1569,4 +1569,25 @@ public final class Utilities {
         return list;
     }
 
+    /**
+     * return base name, strip path and extension.
+     * @param filename
+     * @return
+     */
+    public static String getFileBaseName(String filename) {
+
+        String baseFileName = filename;
+        int idx = baseFileName.lastIndexOf(File.separator);
+        if (idx > -1) {
+            baseFileName = baseFileName.substring(idx+1, baseFileName.length());
+        }
+
+        idx = baseFileName.lastIndexOf(".");
+        if (idx > -1) {
+            baseFileName = baseFileName.substring(0, idx);
+        }
+
+        return baseFileName;
+    }
+
 }

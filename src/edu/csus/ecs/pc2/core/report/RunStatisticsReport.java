@@ -56,6 +56,13 @@ public class RunStatisticsReport implements IReport {
 
         printWriter.print(contest.getProblem(run.getProblemId()) + " ");
         printWriter.print(contest.getLanguage(run.getLanguageId()) + " ");
+        
+        if (run.getEntryPoint() != null){
+            String name = new String(run.getEntryPoint());
+            printWriter.print(name + " ");
+        } else {
+            printWriter.print("(no entry point defined) ");
+        }
 
         if (run.isDeleted()) {
             printWriter.print(" DELETED ");

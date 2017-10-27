@@ -67,7 +67,9 @@ public class ProblemService implements Feature {
         if (!sc.isUserInRole("public") || model.getContestTime().isContestStarted()) {
             for (int i = 0; i < problems.length; i++) {
                 Problem problem = problems[i];
-                childNode.add(jsonTool.convertToJSON(problem, i));
+                if (problem.isActive()) {
+                    childNode.add(jsonTool.convertToJSON(problem, i));
+                }
             }
         }
         // output the response to the requester (note that this actually returns it to Jersey,
@@ -87,8 +89,8 @@ public class ProblemService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < problems.length; i++) {
             Problem problem = problems[i];
-            // match my elementId or shortName
-            if (problem.getElementId().toString().equals(problemId) || problemId.equals(problem.getShortName())) {
+            // match by ID
+            if (problem.isActive() && jsonTool.getProblemId(problem).equals(problemId)) {
                 childNode.add(jsonTool.convertToJSON(problem, i));
                 break;
             }

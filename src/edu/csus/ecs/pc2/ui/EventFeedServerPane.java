@@ -152,7 +152,6 @@ public class EventFeedServerPane extends JPanePlugin {
             server.startSocketListener(port, getContest(), filteredFeed);
         } catch (IOException e) {
             showMessage("Unable to start: "+e.getMessage());
-            e.printStackTrace(); // TODO debug 22 - remove after debugging
             getLog().log(Log.INFO,e.getMessage(),e);
         }
 

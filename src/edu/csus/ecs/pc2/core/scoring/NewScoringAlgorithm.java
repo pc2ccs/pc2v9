@@ -9,6 +9,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Plugin;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
@@ -133,8 +134,24 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         return outRecord;
     }
 
+
     @Override
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties) throws IllegalContestState {
+        return getStandingsRecords(contest, properties, false);
+    }
+
+    /**
+     * Returns sorted and ranked StandingsRecord, if honorScoreboadFreeze is true then run results
+     * from the freeze period will be hidden,  unless the contest is unfrozen.
+     * 
+     * @param contest
+     * @param properties
+     * @param honorScoreboardFreeze
+     * @return ranked StandingsRecords.
+     * @throws IllegalContestState
+     */
+
+    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties, boolean honorScoreboardFreeze) throws IllegalContestState {
         
         if (contest == null){
             throw new IllegalArgumentException("contest is null");
@@ -158,6 +175,9 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
         if (respectEOC) {
             runs = filterRunsbyEOC(getContest(), runs);
+        }
+        if(honorScoreboardFreeze) {
+            runs = filterRunsByScoreboardFreeze(getContest(), runs);
         }
 
         StandingsRecord[] standings = computeStandingStandingsRecords(runs, accounts, properties, getContest().getProblems());
@@ -186,6 +206,28 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             Run runToAdd = run;
 
             if (respectEOC && RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime)) {
+                /**
+                 * If we are suppose to suppress this judgement, then change the run to a NEW run.
+                 */
+                runToAdd = RunUtilities.createNewRun(run, contest);
+            }
+            vector.add(runToAdd);
+        }
+
+        return (Run[]) vector.toArray(new Run[vector.size()]);
+    }
+
+    private Run[] filterRunsByScoreboardFreeze(IInternalContest contest, Run[] runs) {
+
+        Vector<Run> vector = new Vector<Run>();
+        // now check EOC settings
+        long freezeTime = Utilities.getFreezeTime(contest);
+        boolean unfrozen = contest.getContestInformation().isUnfrozen();
+
+        for (Run run : runs) {
+            Run runToAdd = run;
+
+            if (!unfrozen && RunUtilities.supppressJudgement(run, freezeTime)) {
                 /**
                  * If we are suppose to suppress this judgement, then change the run to a NEW run.
                  */
@@ -648,22 +690,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                     (securityViolationBeforeYes * getSVPenalty(properties));
         }
         
-//        if (solvingRun != null){
-//            System.out.print("Solved " + String.format("%3d -- ", points));
-//        } else {
-//            System.out.print("       ");
-//        }
-//        
-//        System.out.println("debug 22 befores = " + //
-//                runs[0].getSubmitter().getName()+ " " + //
-//                submissionsBeforeYes + " Prob =  " + //
-//                problem + " points=" + //
-//                String.format("%3d", points)+ " " + //
-//                solutionTime * getMinutePenalty(properties) +" + "+ //
-//                getYesPenalty(properties)+" + " + // 
-//                (submissionsBeforeYes * getNoPenalty(properties)) + " "+ //
-//                runs[0]);
-
         return new ProblemScoreRecord(solved, solvingRun, problem, points, solutionTime, numberSubmissions, submissionsBeforeYes, numberPending, numberJudged);
 
     }

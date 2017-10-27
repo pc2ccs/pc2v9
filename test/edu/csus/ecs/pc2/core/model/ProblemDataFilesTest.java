@@ -152,10 +152,6 @@ public class ProblemDataFilesTest extends AbstractTestCase {
         
      // TODO 164 - write code to test filenames
 
-        // for (String string : list) {
-        // debugPrint("debug 22 judgeFullNames "+string);
-        // }
-
     }
 
     public void testfullJudgesAnswerFilenames() throws Exception {

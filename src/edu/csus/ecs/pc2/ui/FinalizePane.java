@@ -542,7 +542,6 @@ public class FinalizePane extends JPanePlugin {
         } catch (Exception e) {
             getLog().info("Unable to write results file " + outfilename);
             getLog().log(Level.WARNING, "Writing " + outfilename, e);
-            e.printStackTrace(); // TODO remove debug 22
             return "Unable to write " + outfilename;
         }
 

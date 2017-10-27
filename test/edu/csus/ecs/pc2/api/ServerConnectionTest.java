@@ -311,7 +311,6 @@ public class ServerConnectionTest extends AbstractTestCase {
                     String ja = getArg(args, 3);
 
                     String login = clientId.getName();
-                    System.out.println("debug 22 "+login+"," +runId+","+ ja);
                     new ServerConnectionTest().submitRunJudgement(login, runId, ja);
 
                 } else if ("settime".equalsIgnoreCase(firstArg)) {
@@ -383,9 +382,7 @@ public class ServerConnectionTest extends AbstractTestCase {
             IJudgement judgement = findJudgement(contest, ja);
             assertNotNull("Judgement "+ja+" not in contest", judgement);
             connection.submitRunJudgement(run, judgement);
-            System.out.println("debug 22 A "+new Date());
             Thread.sleep(1000 * 3);
-            System.out.println("debug 22 B "+new Date());
 
         } catch (Exception e) {
             e.printStackTrace(System.err);
