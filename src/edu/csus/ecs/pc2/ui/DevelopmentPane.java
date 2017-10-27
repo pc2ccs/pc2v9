@@ -30,6 +30,8 @@ public class DevelopmentPane extends JPanePlugin {
 
     private ContestClockAllPane contestClockAllPane = new ContestClockAllPane();
     
+    private SubmitSubmissionsPane submitSubmissionsPane = new SubmitSubmissionsPane();
+    
     public DevelopmentPane() {
         super();
         setLayout(new BorderLayout(0, 0));
@@ -38,6 +40,8 @@ public class DevelopmentPane extends JPanePlugin {
         add(tabbedPane);
 
         tabbedPane.addTab("Plugins", null, pluginPane, null);
+        
+        tabbedPane.addTab("Submitter", null, submitSubmissionsPane, null);
         
         tabbedPane.addTab("Scheduled Start Countdown", null, contestScheduledStartClockPane, null);
         
@@ -68,6 +72,7 @@ public class DevelopmentPane extends JPanePlugin {
         contestPreloadPane.setContestAndController(inContest, inController);
         contestScheduledStartClockPane.setContestAndController(inContest, inController);
         contestClockAllPane.setContestAndController(inContest, inController);
+        submitSubmissionsPane.setContestAndController(inContest, inController);
     }
     
 
