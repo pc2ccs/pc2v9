@@ -1637,10 +1637,28 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
                 int row = target.getSelectedRow();
                 int column = target.getSelectedColumn();
                 
-                if (column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || column == COLUMN.JUDGE_OUTPUT.ordinal() || column == COLUMN.JUDGE_DATA.ordinal() || column == COLUMN.VALIDATOR_OUTPUT.ordinal()
-                        || column == COLUMN.VALIDATOR_ERR.ordinal()) {
+                String resultString = "";
+                try {
+                    resultString = ((JLabel)target.getValueAt(row, COLUMN.RESULT.ordinal())).getText(); 
+                } catch (ClassCastException e1) {
+                     if (getController().getLog() != null) {
+                        getController().getLog().warning("MultiTestSetOutputViewerPane.getResultsTable(): expected to find a JLabel in resultsTable; exception: "
+                                + e1.getMessage());
+                    } else {
+                        System.err.println("MultiTestSetOutputViewerPane.getResultsTable(): expected to find a JLabel in resultsTable; exception: "
+                                + e1.getMessage());
+                    }
+                    return;
+                }
+                boolean rowRepresentsExecutedTestCase = resultString.equalsIgnoreCase("Pass") || resultString.equalsIgnoreCase("Fail");
+                
+                if ((column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() && rowRepresentsExecutedTestCase) 
+                        || column == COLUMN.JUDGE_OUTPUT.ordinal() 
+                        || column == COLUMN.JUDGE_DATA.ordinal() 
+                        || (column == COLUMN.VALIDATOR_OUTPUT.ordinal() && rowRepresentsExecutedTestCase)
+                        || (column == COLUMN.VALIDATOR_ERR.ordinal() && rowRepresentsExecutedTestCase)) {
                     viewFile(row, column);
-                } else if (column == COLUMN.TEAM_OUTPUT_COMPARE.ordinal() || e.getClickCount() > 1) {
+                } else if ((column == COLUMN.TEAM_OUTPUT_COMPARE.ordinal() || e.getClickCount() > 1) && rowRepresentsExecutedTestCase) {
                     // compare the team and judge's output in the active row
                     int[] rows = new int[] { row };
                     compareFiles(rows);
@@ -1648,7 +1666,58 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
             }
         });
 
+        //only add unexecuted test cases to the results display if we're NOT "showing failures only"
+        // (if we are "showingFailuresOnly" then there won't be any "unexecuted" test cases in the results -- only failed test cases
+        if (!getShowFailuresOnlyCheckbox().isSelected()) {
+            addAnyUnexecutedTestCasesToResultsTable(localResultsTable);
+        }
+        
         return localResultsTable;
+    }
+    
+    private void addAnyUnexecutedTestCasesToResultsTable(JTable resultsTable) {
+        
+        System.out.println ("In addAnyUnexecutedTestCasesToResultsTable...");
+        
+        //there can only be missing (unexecuted) test case results if the problem is stopOnFirstFailedTestCase
+        if (!currentProblem.isStopOnFirstFailedTestCase()) {
+            System.out.println("...problem is not StopOnFirstFailedTestCase; there cannot be any unexecuted test cases.");
+            return;
+        } 
+
+        TestCaseResultsTableModel tableModel = (TestCaseResultsTableModel) resultsTable.getModel();
+        
+        int totalTestCaseCount = currentProblem.getNumberTestCases();
+        
+        System.out.println("Total test cases defined in problem: " + totalTestCaseCount);
+        
+        //there *might* be missing test cases -- check whether this is actually so
+        int testCasesInTableModel = tableModel.getRowCount();
+        
+        System.out.println("Test case rows already in results table: " + testCasesInTableModel);
+        
+        if (totalTestCaseCount > testCasesInTableModel) {
+            //yes, there are missing cases; add them to the table
+            for (int testCaseNum=testCasesInTableModel+1; testCaseNum<=totalTestCaseCount; testCaseNum++) {
+                //add the current unexecuted test case to the table model
+                System.out.println ("...adding unexecuted test case " + testCaseNum + " to results table");
+                //build the row object and add it to the model
+                tableModel.addRow(
+                        new Boolean(false),                         //selection checkbox
+                        new String(Integer.toString(testCaseNum)),  //test case number
+                        "Not Executed",                             //result string
+                        "--  ",                                     //execution time (of which there is none since the test case wasn't executed)
+                        "",                                         //link to team output (none)
+                        "",                                         //link to team compare-with-judge label (none)
+                        "View",                                     //link to judge's data
+                        "View",                                     //link to judge's output (answer file)
+                        "",                                         //link to validator stdout (none)
+                        "" );                                       //link to validator stderr (none)
+            }
+            
+        } else {
+            System.out.println("all test cases were executed and are already in the results table.");
+        }
     }
     
     /**
@@ -1733,6 +1802,15 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
             }
             return;
         }
+        
+        //make sure this isn't a selection in a row representing an un-executed test case
+        RunTestCase[] allTestCases = getCurrentTestCases(currentRun);
+        
+        //check if the selected row was added as an "unexecuted test case"; skip it unless the click was on Judge's Output or data in that row
+        if (row >= allTestCases.length && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal() ) {
+            return;
+        }
+        
         if (getCurrentViewer() != null) {
             getCurrentViewer().dispose();
             // we are viewing one file, make sure it will only have the 1 tab

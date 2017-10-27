@@ -5,6 +5,8 @@ import java.util.Vector;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 
+import com.ibm.webrunner.j2mclb.util.TableModel;
+
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 
 /**
@@ -123,6 +125,48 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         boolean retVal = ( columnIndex == MultiTestSetOutputViewerPane.COLUMN.SELECT_CHKBOX.ordinal() );
         return retVal;
+    }
+    
+    /**
+     * Allows adding a row to the table model.
+     * This method delegates to super.add(); i.e., the add() method in {@link TableModel}.
+     */
+    public void addRow(Boolean selected, String testCaseNum, String resultString, String time, 
+            String teamOutputViewLabel, String teamOutputCompareLabel, 
+            String judgesOutputViewLabel, String judgesDataViewLabel,
+            String validatorOutputViewLabel, String validatorStderrViewLabel ) {
+        
+        //test case result (passed/failed)
+        JLabel resultLabel = new JLabel(resultString);
+                
+        //link for viewing team output
+        JLabel teamOutputViewJLabel = new JLabel(teamOutputViewLabel);
+        
+        //link for comparing team output with corresponding judge's output
+        JLabel teamOutputCompareJLabel = new JLabel(teamOutputCompareLabel);
+        
+        //link for viewing judge's output
+        JLabel judgesOutputViewJLabel = new JLabel(judgesOutputViewLabel);
+        
+        JLabel judgesDataViewJLabel = new JLabel(judgesDataViewLabel);
+        
+        // link for validator stdout
+        JLabel validatorOutputViewJLabel = new JLabel(validatorOutputViewLabel);
+        
+        // link for validator stderr
+        JLabel validatorStderrViewJLabel = new JLabel(validatorStderrViewLabel);
+
+        //build the row object and add it to the model
+        Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, time, 
+                teamOutputViewJLabel, teamOutputCompareJLabel, judgesOutputViewJLabel, 
+                judgesDataViewJLabel, validatorOutputViewJLabel, validatorStderrViewJLabel };
+
+        super.addRow(rowData);
+    }
+    
+    @Override
+    public void addRow(Object [] rowData) {
+        super.addRow(rowData);
     }
 
 }

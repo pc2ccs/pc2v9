@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui.cellRenderer;
 
 import java.awt.Color;
+import java.awt.Font;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -38,7 +39,9 @@ public class PassFailCellRenderer extends DefaultTableCellRenderer {
         
         // default values
         setBackground(Color.yellow);
-        setText("<No Validator>");
+        setText("(Not Executed)");
+        setForeground(Color.black);
+        setFont(new Font(getFont().getName(),Font.ITALIC, 12));
 
         if (value instanceof Boolean) {
             boolean passed = (Boolean) value;
@@ -73,12 +76,14 @@ public class PassFailCellRenderer extends DefaultTableCellRenderer {
     private void setPass() {
         setBackground(Color.green);
         setForeground(Color.black);
+        setFont(new Font(getFont().getName(),Font.PLAIN, 12));
         setText("Pass");
     }
     
     private void setFail() {
         setBackground(Color.red);
         setForeground(Color.white);
+        setFont(new Font(getFont().getName(),Font.ITALIC+Font.BOLD, 12));
         setText("Fail");  
     }
 
