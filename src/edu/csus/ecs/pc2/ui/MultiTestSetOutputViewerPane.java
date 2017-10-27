@@ -1428,6 +1428,9 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
 //            setTitle(oldTitle);
             return true;
         } catch (Exception e) {
+            if (getController().getLog() != null) {
+                getController().getLog().severe("MultiTestSetOutputViewerPane.loadFile(): exception " + e);
+            }
             System.err.println("MultiTestSetOutputViewerPane.loadFile(): exception " + e);
         }
         return false;
@@ -1677,11 +1680,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
     
     private void addAnyUnexecutedTestCasesToResultsTable(JTable resultsTable) {
         
-        System.out.println ("In addAnyUnexecutedTestCasesToResultsTable...");
+//        System.out.println ("In addAnyUnexecutedTestCasesToResultsTable...");
         
         //there can only be missing (unexecuted) test case results if the problem is stopOnFirstFailedTestCase
         if (!currentProblem.isStopOnFirstFailedTestCase()) {
-            System.out.println("...problem is not StopOnFirstFailedTestCase; there cannot be any unexecuted test cases.");
+//            System.out.println("...problem is not StopOnFirstFailedTestCase; there cannot be any unexecuted test cases.");
             return;
         } 
 
@@ -1689,18 +1692,18 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
         
         int totalTestCaseCount = currentProblem.getNumberTestCases();
         
-        System.out.println("Total test cases defined in problem: " + totalTestCaseCount);
+//        System.out.println("Total test cases defined in problem: " + totalTestCaseCount);
         
         //there *might* be missing test cases -- check whether this is actually so
         int testCasesInTableModel = tableModel.getRowCount();
         
-        System.out.println("Test case rows already in results table: " + testCasesInTableModel);
+//        System.out.println("Test case rows already in results table: " + testCasesInTableModel);
         
         if (totalTestCaseCount > testCasesInTableModel) {
             //yes, there are missing cases; add them to the table
             for (int testCaseNum=testCasesInTableModel+1; testCaseNum<=totalTestCaseCount; testCaseNum++) {
                 //add the current unexecuted test case to the table model
-                System.out.println ("...adding unexecuted test case " + testCaseNum + " to results table");
+//                System.out.println ("...adding unexecuted test case " + testCaseNum + " to results table");
                 //build the row object and add it to the model
                 tableModel.addRow(
                         new Boolean(false),                         //selection checkbox
@@ -1716,7 +1719,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
             }
             
         } else {
-            System.out.println("all test cases were executed and are already in the results table.");
+//            System.out.println("all test cases were executed and are already in the results table.");
         }
     }
     
