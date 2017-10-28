@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.web.EventFeedFilter;
 
@@ -164,8 +165,10 @@ public class EventFeedJSON extends JSONUtilities {
         Arrays.sort(groups, new GroupComparator());
         for (Group group : groups) {
 
-            appendJSONEvent(stringBuilder, GROUPS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getGroupJSON(contest, group));
-            stringBuilder.append(NL);
+            if (group.isDisplayOnScoreboard()) {
+                appendJSONEvent(stringBuilder, GROUPS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getGroupJSON(contest, group));
+                stringBuilder.append(NL);
+            }
         }
 
         return stringBuilder.toString();
@@ -220,8 +223,10 @@ public class EventFeedJSON extends JSONUtilities {
 
         for (Account account : accounts) {
 
-            appendJSONEvent(stringBuilder, TEAM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
-            stringBuilder.append(NL);
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                appendJSONEvent(stringBuilder, TEAM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
+                stringBuilder.append(NL);
+            }
         }
 
         return stringBuilder.toString();
