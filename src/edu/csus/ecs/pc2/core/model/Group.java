@@ -91,7 +91,7 @@ public class Group implements IElementObject {
     public Group(String displayName) {
         super();
         this.displayName = displayName;
-        elementId = new ElementId(displayName);
+        elementId = new ElementId("group");
         setSiteNumber(0);
     }
     
