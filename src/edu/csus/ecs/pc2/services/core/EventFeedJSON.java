@@ -116,8 +116,10 @@ public class EventFeedJSON extends JSONUtilities {
         Language[] languages = contest.getLanguages();
         for (Language language : languages) {
 
-            appendJSONEvent(stringBuilder, LANGUAGE_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getLanguageJSON(contest, language));
-            stringBuilder.append(NL);
+            if (language.isActive()) {
+                appendJSONEvent(stringBuilder, LANGUAGE_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getLanguageJSON(contest, language));
+                stringBuilder.append(NL);
+            }
         }
 
         return stringBuilder.toString();
@@ -144,10 +146,11 @@ public class EventFeedJSON extends JSONUtilities {
         Problem[] problems = contest.getProblems();
         int id = 1;
         for (Problem problem : problems) {
-
-            appendJSONEvent(stringBuilder, PROBLEM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getProblemJSON(contest, problem, id));
-            stringBuilder.append(NL);
-            id++;
+            if (problem.isActive()) {
+                appendJSONEvent(stringBuilder, PROBLEM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getProblemJSON(contest, problem, id));
+                stringBuilder.append(NL);
+                id++;
+            }
         }
 
         return stringBuilder.toString();
@@ -278,9 +281,10 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-
-            appendJSONEvent(stringBuilder, SUBMISSION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getSubmissionJSON(contest, run));
-            stringBuilder.append(NL);
+            if (!run.isDeleted()) {
+                appendJSONEvent(stringBuilder, SUBMISSION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getSubmissionJSON(contest, run));
+                stringBuilder.append(NL);
+            }
         }
 
         return stringBuilder.toString();
