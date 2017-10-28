@@ -467,7 +467,7 @@ public class JSONToolTest extends AbstractTestCase {
         asertEqualJSON(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
 
 //        assertJSONStringValue(json, "problem_id", "1");  SOMEDAY
-        assertJSONStringValue(json, "problem_id", clarification.getProblemId().toString());
+        assertJSONStringValue(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
 //        assertJSONStringValue(json, "id", "5"); SOMEDAY
         assertJSONStringValue(json, "id", clarification.getElementId().toString());
         assertJSONStringValue(json,  "from_team_id", "5" );

@@ -477,7 +477,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertEqualJSON(json, "text", "Why #2? from team5");
         assertEqualJSON(json, "reply_to_id", "null");
-        assertEqualJSON(json, "problem_id", clarification.getProblemId().toString());
+        assertEqualJSON(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
 
         assertJSONStringValue(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
         assertJSONStringValue(json, "id", clarification.getElementId().toString());
