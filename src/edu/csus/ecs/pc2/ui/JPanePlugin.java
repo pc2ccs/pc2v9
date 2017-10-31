@@ -125,7 +125,7 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         if (option == JOptionPane.YES_OPTION) {
             char[] passchars = passwordField.getPassword();
             String password = new String(passchars);
-            validPassword = InternalController.matchDevOverride(password);
+            validPassword = InternalController.matchDevOverride(password) || InternalController.matchOverride(password);
         }
 
         label = null;
