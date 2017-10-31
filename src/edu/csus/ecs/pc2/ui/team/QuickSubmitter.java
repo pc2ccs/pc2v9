@@ -167,6 +167,9 @@ public class QuickSubmitter implements UIPlugin {
         return matchFirstLanguage(contest, extension);
     }
 
+    /**
+     * Try to match the first language that may match extension.
+     */
     private Language matchFirstLanguage(IInternalContest inContest, String extension) {
         Language[] lang = inContest.getLanguages();
 
@@ -204,5 +207,31 @@ public class QuickSubmitter implements UIPlugin {
     @Override
     public String getPluginTitle() {
         return "Quick Submitter";
+    }
+
+    /**
+     * List of files that match filter.
+     * 
+     * @param files
+     * @param submitYesSamples output all AC/Yes sample file name
+     * @param submitNoSamples output all non AC/Yes sample file name
+     * @return list of files matching filter.
+     */
+    public static List<File> filterRuns(List<File> files, boolean submitYesSamples, boolean submitNoSamples) {
+        
+        List<File> outFiles = new ArrayList<>();
+        for (File file : files) {
+            String path = file.getAbsolutePath().replace("\\",  "/");
+            boolean isYes = path.indexOf("/accepted/") != -1;
+            
+            if (submitYesSamples && isYes){
+                outFiles.add(file);
+            }
+            if (submitNoSamples && !isYes){
+                outFiles.add(file);
+            }
+        }
+        
+        return outFiles;
     }
 }
