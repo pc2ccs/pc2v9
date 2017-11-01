@@ -71,12 +71,20 @@ public class JSONTool {
 
     public ObjectNode convertToJSON(Group group) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", group.getElementId().toString());
+        element.put("id", getGroupId(group));
         if (group.getGroupId() != -1) {
             element.put("icpc_id", Integer.toString(group.getGroupId()));
         }
         element.put("name", group.getDisplayName());
         return element;
+    }
+
+    public String getGroupId(Group group) {
+        String id = group.getElementId().toString();
+        if (group.getGroupId() != -1) {
+            id = Integer.toString(group.getGroupId());
+        }
+        return id;
     }
 
     public ObjectNode convertToJSON(Language language) {

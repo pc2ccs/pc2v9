@@ -84,7 +84,7 @@ public class GroupService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < groups.length; i++) {
             Group group = groups[i];
-            if (group.isDisplayOnScoreboard() && group.getElementId().toString().equals(groupId)) {
+            if (group.isDisplayOnScoreboard() && jsonTool.getGroupId(group).equals(groupId)) {
                 childNode.add(jsonTool.convertToJSON(group));
             }
         }

@@ -428,9 +428,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         // {"id":1, "icpc_id":"3001", "name":"team1", "organization_id": null}
 
-        assertEqualJSON(json, "id", groups[0].getElementId().toString());
+        assertEqualJSON(json, "id", "1024");
 
-        assertJSONStringValue(json, "id", groups[0].getElementId().toString());
+        assertJSONStringValue(json, "id",  "1024");
         assertJSONStringValue(json, "icpc_id", "1024");
         assertJSONStringValue(json, "name", "North Group");
     }

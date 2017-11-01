@@ -565,14 +565,14 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             if (group.isDisplayOnScoreboard()) {
                 json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(group).toString());
             } else {
-                json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + group.getElementId().toString() + "\"}");
+                json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + jsonTool.getGroupId(group) + "\"}");
             }
             sendJSON(json + NL);
         }
 
         public void groupRemoved(GroupEvent event) {
             Group group = event.getGroup();
-            String json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + group.getElementId().toString() + "\"}");
+            String json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + jsonTool.getGroupId(group) + "\"}");
             sendJSON(json + NL);
         }
 
@@ -591,7 +591,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                 if (group.isDisplayOnScoreboard()) {
                     json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(group).toString());
                 } else {
-                    json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + group.getElementId().toString() + "\"}");
+                    json = getJSONEvent(GROUPS_KEY, getNextEventId(), EventFeedOperation.DELETE, "{\"id\": \"" + jsonTool.getGroupId(group) + "\"}");
                 }
                 sendJSON(json + NL);
             }

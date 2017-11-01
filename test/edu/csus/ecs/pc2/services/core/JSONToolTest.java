@@ -420,9 +420,9 @@ public class JSONToolTest extends AbstractTestCase {
 
         //  {"id":1, "icpc_id":"3001", "name":"team1", "organization_id": null}
 
-        asertEqualJSON(json, "id", group.getElementId().toString());
+        asertEqualJSON(json, "id",  "1024");
         
-        assertJSONStringValue(json,  "id", group.getElementId().toString());
+        assertJSONStringValue(json,  "id",  "1024");
         assertJSONStringValue(json,  "icpc_id", "1024");
         assertJSONStringValue(json,  "name", "North Group");
     }
@@ -864,7 +864,7 @@ public class JSONToolTest extends AbstractTestCase {
 //        System.out.println("debug group json "+json);
         // debug json group {"id":"Group_T1-1621487835425380678","icpc_id":"2323","name":"Group T1"}
         
-        assertJSONStringValue(json, "id", group.getElementId().toString());
+        assertJSONStringValue(json, "id",  "2323");
         assertJSONStringValue(json, "name", "Group T1");
         assertJSONStringValue(json, "icpc_id", "2323");
     }
