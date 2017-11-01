@@ -182,6 +182,11 @@ public class Executable extends Plugin implements IExecutable {
      */
     private ArrayList<String> validatorStderrFilesnames = new ArrayList<String>();
 
+    private long startTimeMillis;
+    private long endTimeMillis;
+
+    private Process process;
+
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
         super.setContestAndController(inContest, inController);
@@ -1745,8 +1750,7 @@ public class Executable extends Plugin implements IExecutable {
                 autoStop = true;
             }
 
-            long startSecs = System.currentTimeMillis();
-            Process process = runProgram(cmdline, "Executing...", autoStop);
+            process = runProgram(cmdline, "Executing...", autoStop);
             if (process == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
@@ -1803,6 +1807,7 @@ public class Executable extends Plugin implements IExecutable {
 
             if (process != null) {
                 int returnValue = process.waitFor();
+                endTimeMillis = System.currentTimeMillis();
                 log.info("execution process returned exit code " + process.exitValue());
                 executionData.setExecuteExitValue(returnValue);
                 process.destroy();
@@ -1812,13 +1817,16 @@ public class Executable extends Plugin implements IExecutable {
                     String msg = "Note: program exited with non-zero exit code '" + returnValue + "'" + NL;
                     stdoutlog.write(msg.getBytes());
                 }
+            } else {
+                endTimeMillis = System.currentTimeMillis();
+                log.info("Process was null before waitFor()");
             }
 
             stdoutlog.close();
             stderrlog.close();
 
             executionData.setExecuteSucess(true);
-            executionData.setExecuteTimeMS(System.currentTimeMillis() - startSecs);
+            executionData.setExecuteTimeMS(endTimeMillis - startTimeMillis);
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
 
@@ -2279,6 +2287,7 @@ public class Executable extends Plugin implements IExecutable {
                     executionTimer.setTitle(msg);
                 }
 
+                startTimeMillis = System.currentTimeMillis();
                 process = Runtime.getRuntime().exec(cmdline, env, runDir);
 
                 // if(isJudge && executionTimer != null) {
