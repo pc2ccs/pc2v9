@@ -37,7 +37,6 @@ import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
-import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
@@ -66,7 +65,7 @@ public class ScoreboardModule implements UIPlugin {
 
     private String outputDir = "html";
 
-    private NewScoringAlgorithm algo = new NewScoringAlgorithm();
+    private DefaultScoringAlgorithm algo = new DefaultScoringAlgorithm();
 
     public String getPluginTitle() {
         return "Scoreboard (non-GUI)";

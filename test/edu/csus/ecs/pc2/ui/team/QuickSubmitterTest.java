@@ -1,5 +1,8 @@
 package edu.csus.ecs.pc2.ui.team;
 
+import java.io.File;
+import java.util.List;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -87,6 +90,27 @@ public class QuickSubmitterTest extends AbstractTestCase {
             Language lang = submitter.guessLanguage(contest, string);
             assertNotNull("Expected to match extension for file " + string, lang);
         }
+
+    }
+
+    public void testfilter() throws Exception {
+
+        List<File> files = QuickSubmitter.findAll("samps/contests/mini/config/sumit/submissions");
+//
+//        int count = 1;
+//        for (File file : files) {
+//            System.out.println("debug " + count + " " + file.getAbsolutePath());
+//            count++;
+//        }
+
+        List<File> matchingFiles = QuickSubmitter.filterRuns(files, true, false);
+        assertEquals("Expected number of yes submission files ", 7, matchingFiles.size());
+
+        matchingFiles = QuickSubmitter.filterRuns(files, false, true);
+        assertEquals("Expected number of no submission files ", 26, matchingFiles.size());
+
+        matchingFiles = QuickSubmitter.filterRuns(files, true, true);
+        assertEquals("Expected number of all submission files ", 33, matchingFiles.size());
 
     }
 

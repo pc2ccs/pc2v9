@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.team.QuickSubmitter;
 import java.awt.BorderLayout;
+import javax.swing.JCheckBox;
 
 /**
  * A UI that to submit files found in a CDP.
@@ -34,6 +35,9 @@ public class SubmitSubmissionsPane extends JPanePlugin {
     private JTextField cdptextField;
 
     private JLabel messageLabel;
+    
+    JCheckBox checkBoxSubmitYesSamples;
+    JCheckBox checkBoxSubmitFailingSamples;
 
     private QuickSubmitter submitter = new QuickSubmitter();
 
@@ -62,6 +66,19 @@ public class SubmitSubmissionsPane extends JPanePlugin {
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         messageLabel.setBounds(10, 11, 418, 32);
         centerPane.add(messageLabel);
+        
+        
+        checkBoxSubmitYesSamples = new JCheckBox("Submit Yes Samples");
+        checkBoxSubmitYesSamples.setSelected(true);
+        checkBoxSubmitYesSamples.setToolTipText("Only submit AC sample source");
+        checkBoxSubmitYesSamples.setBounds(48, 101, 265, 23);
+        centerPane.add(checkBoxSubmitYesSamples);
+        
+        checkBoxSubmitFailingSamples = new JCheckBox("Submit Failing (non-AC) Samples");
+        checkBoxSubmitFailingSamples.setSelected(true);
+        checkBoxSubmitFailingSamples.setToolTipText("Submt all non-AC (Yes) submissions");
+        checkBoxSubmitFailingSamples.setBounds(48, 137, 216, 23);
+        centerPane.add(checkBoxSubmitFailingSamples);
 
         JPanel bottomPane = new JPanel();
         FlowLayout flowLayout = (FlowLayout) bottomPane.getLayout();
@@ -71,7 +88,7 @@ public class SubmitSubmissionsPane extends JPanePlugin {
         JButton submitRunButton = new JButton("Submit");
         submitRunButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                submitAll();
+                submitSampleSubmissions();
             }
         });
         submitRunButton.setToolTipText("Edit log file ");
@@ -79,18 +96,31 @@ public class SubmitSubmissionsPane extends JPanePlugin {
 
     }
 
-    protected void submitAll() {
+    /**
+     * Submit submissions
+     */
+    protected void submitSampleSubmissions() {
         showMessage("");
 
         boolean submitall = true;
 
         if (submitall) {
             List<File> files = submitter.getAllCDPsubmissionFileNames(getContest(), cdptextField.getText());
-
+            
+            boolean submitYesSamples = checkBoxSubmitYesSamples.isSelected();
+            boolean submitNoSamples = checkBoxSubmitFailingSamples.isSelected();
+            
+            if (! submitYesSamples || ! submitNoSamples){
+                files =  submitter.filterRuns (files, submitYesSamples, submitNoSamples);
+            }
+            
+            
             int count = 1;
             for (File file : files) {
                 System.out.println("Found file " + count + " " + file.getAbsolutePath());
                 count++;
+                
+                
             }
 
             int result = FrameUtilities.yesNoCancelDialog(this, "Submit " + files.size() + " sample submissions?", "Submit CDP submissions");
@@ -135,5 +165,4 @@ public class SubmitSubmissionsPane extends JPanePlugin {
             }
         });
     }
-
 } // @jve:decl-index=0:visual-constraint="10,10"

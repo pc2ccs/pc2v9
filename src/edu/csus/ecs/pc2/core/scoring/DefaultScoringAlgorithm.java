@@ -418,7 +418,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Hashtable<String, Account> accountHash = new Hashtable<String, Account>();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-            accountHash.put(account.getClientId().toString(), account);
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                accountHash.put(account.getClientId().toString(), account);
+            }
         }
 
         Set<String> s = standingsRecordHash.keySet();

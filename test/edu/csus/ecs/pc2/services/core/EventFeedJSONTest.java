@@ -454,6 +454,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         IInternalContest contest = new UnitTestData().getContest();
         EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        JSONTool jsonTool = new JSONTool(contest, null);
 
 
         Clarification[] clarifications = contest.getClarifications();
@@ -476,9 +477,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertEqualJSON(json, "text", "Why #2? from team5");
         assertEqualJSON(json, "reply_to_id", "null");
-        assertEqualJSON(json, "problem_id", clarification.getProblemId().toString());
+        assertEqualJSON(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
 
-        assertJSONStringValue(json, "problem_id", clarification.getProblemId().toString());
+        assertJSONStringValue(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
         assertJSONStringValue(json, "id", clarification.getElementId().toString());
         assertJSONStringValue(json, "from_team_id", "5");
         assertJSONNullValue(json, "to_team_id");

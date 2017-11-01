@@ -115,7 +115,7 @@ public class JSONTool {
         if (clarification.getProblemId().equals(model.getGeneralProblem()) || model.getCategory(clarification.getProblemId()) != null) {
             element.set("problem_id", null);
         } else {
-            element.put("problem_id", clarification.getProblemId().toString());
+            element.put("problem_id", getProblemId(model.getProblem(clarification.getProblemId())));
         }
         if (clarAnswer != null) {
             ClarificationAnswer[] clarificationAnswers = clarification.getClarificationAnswers();
