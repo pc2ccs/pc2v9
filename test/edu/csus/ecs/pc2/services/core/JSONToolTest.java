@@ -382,19 +382,17 @@ public class JSONToolTest extends AbstractTestCase {
 
         String json = eventFeedJSON.getTeamJSON(contest, account);
         
-        Group group = contest.getGroup(account.getGroupId());
-
 //        System.out.println("debug team json = "+json);
 
         //  debug team json = {"id":"1", "icpc_id":"3001", "name":"team1", "organization_id": null, "group_id":"1024"}
 
         asertEqualJSON(json, "id", "1");
         asertEqualJSON(json, "name", "team1");
-        asertEqualJSON(json, "group_id", group.getElementId().toString());
-        
-        assertJSONStringValue(json,  "id", "1");
-        assertJSONStringValue(json,  "icpc_id", "3001");
-        assertJSONStringValue(json,  "group_id",group.getElementId().toString());
+        asertEqualJSON(json, "group_id", "1024");
+
+        assertJSONStringValue(json, "id", "1");
+        assertJSONStringValue(json, "icpc_id", "3001");
+        assertJSONStringValue(json, "group_id", "1024");
     }
     
     /**

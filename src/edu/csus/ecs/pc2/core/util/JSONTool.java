@@ -304,7 +304,7 @@ public class JSONTool {
             element.put("organization_id", account.getInstitutionCode());
         }
         if (account.getGroupId() != null) {
-            element.put("group_id", account.getGroupId().toString());
+            element.put("group_id", getGroupId(model.getGroup(account.getGroupId())));
         }
         return element;
     }
