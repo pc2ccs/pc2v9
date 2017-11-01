@@ -85,6 +85,15 @@ public class EventFeedJSON extends JSONUtilities {
         return jsonTool.convertToJSON(contest.getContestInformation()).toString();
     }
 
+    public String getStateJSON(IInternalContest contest) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        appendJSONEvent(stringBuilder, STATE_KEY, ++eventIdSequence, EventFeedOperation.CREATE, jsonTool.toStateJSON(contest.getContestInformation()).toString());
+        stringBuilder.append(NL);
+        return stringBuilder.toString();
+
+    }
     /**
      * List of judgements.
      * 
@@ -445,6 +454,10 @@ public class EventFeedJSON extends JSONUtilities {
             if (json != null) {
                 buffer.append(json);
             }
+            json = getStateJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
             json = getJudgementTypeJSON(contest);
             if (json != null) {
                 buffer.append(json);
@@ -519,6 +532,9 @@ public class EventFeedJSON extends JSONUtilities {
             switch (name) {
                 case CONTEST_KEY:
                     appendNotNull(buffer, getContestJSON(contest));
+                    break;
+                case STATE_KEY:
+                    appendNotNull(buffer, getStateJSON(contest));
                     break;
                 case JUDGEMENT_TYPE_KEY:
                     appendNotNull(buffer, getJudgementTypeJSON(contest));

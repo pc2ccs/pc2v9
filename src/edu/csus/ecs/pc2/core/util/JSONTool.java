@@ -171,6 +171,54 @@ public class JSONTool {
     }
 
     /**
+     * This converts ContestInformation to a /state object
+     * 
+     * @param ci
+     * @return
+     */
+    public ObjectNode toStateJSON(ContestInformation ci) {
+        ObjectNode element = mapper.createObjectNode();
+        String startTime = null;
+        if (model.getContestTime().isContestStarted()) {
+            startTime = Utilities.getIso8601formatterWithMS().format(model.getContestTime().getContestStartTime().getTime());
+            element.put("started", startTime);
+            if (model.getContestTime().isPastEndOfContest()) {
+                Calendar endedDate = calculateElapsedWalltime(model, model.getContestTime().getContestStartTime().getTimeInMillis()+model.getContestTime().getContestLengthMS());
+                if (endedDate != null) {
+                    element.put("ended", Utilities.getIso8601formatterWithMS().format(endedDate));
+                }
+            }
+            String scoreboardFreezeDuration = ci.getFreezeTime();
+            if (scoreboardFreezeDuration != null && scoreboardFreezeDuration.trim().length() > 0) {
+                long elapsed = model.getContestTime().getElapsedSecs();
+                long freezeTime = Utilities.getFreezeTime(model);
+                // FIXME this date should be stored in ContestInformation
+                if (elapsed >= freezeTime) {
+                    Calendar freezeDate = calculateElapsedWalltime(model, freezeTime * 1000);
+                    if (freezeDate != null) {
+                        element.put("frozen", Utilities.getIso8601formatterWithMS().format(freezeDate.getTime()));
+                    }
+                }
+                if (ci.isUnfrozen()) {
+                    Date thawedDate = model.getContestInformation().getThawed();
+                    if (thawedDate != null) {
+                        element.put("thawed", Utilities.getIso8601formatterWithMS().format(thawedDate));
+                    }
+                }
+            }
+            // FIXME this should only be showed if the contest is thawed for public users
+            String finalizedDate = null;
+            if (model.getFinalizeData() != null) {
+                finalizedDate = Utilities.getIso8601formatterWithMS().format(model.getFinalizeData().getCertificationDate());
+            }
+            if (finalizedDate != null) {
+                element.put("finalized", finalizedDate);
+            }
+        }
+        return element;
+    }
+
+    /**
      * This converts ContestInformation to a /contest object
      * 
      * @param ci
@@ -207,31 +255,6 @@ public class JSONTool {
             }
         }
         int penaltyTime = Integer.valueOf(ci.getScoringProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO, "20"));
-        boolean stateRunning = model.getContestTime().isContestRunning();
-        boolean skipStateFrozen = false;
-        boolean stateFrozen = false;
-        if (ci.getFreezeTime() != null) {
-            ci.getFreezeTime();
-            long elapsed = model.getContestTime().getElapsedSecs();
-            long length = model.getContestTime().getContestLengthSecs();
-            long freezeTime = Utilities.convertStringToSeconds(ci.getFreezeTime());
-            if ((length - elapsed) > freezeTime) {
-                stateFrozen = false;
-            } else {
-                stateFrozen = true;
-            }
-        } else {
-            skipStateFrozen = true;
-        }
-        // if the contest is unfrozen, freezeTime does not matter
-        if (ci.isUnfrozen()) {
-            skipStateFrozen = false;
-            stateFrozen = false;
-        }
-        boolean stateFinal = false;
-        if (model.getFinalizeData() != null) {
-            stateFinal = model.getFinalizeData().isCertified();
-        }
 
         ObjectNode element = mapper.createObjectNode();
         element.put("id", id);
@@ -246,13 +269,6 @@ public class JSONTool {
         element.put("duration", duration);
         element.put("scoreboard_freeze_duration", scoreboardFreezeDuration);
         element.put("penalty_time", penaltyTime);
-        ObjectNode state = mapper.createObjectNode();
-        state.put("running", stateRunning);
-        if (!skipStateFrozen) {
-            state.put("frozen", stateFrozen);
-        }
-        state.put("final", stateFinal);
-        element.set("state", state);
 
         return element;
     }

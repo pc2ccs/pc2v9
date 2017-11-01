@@ -359,7 +359,7 @@ public class ContestInformationPane extends JPanePlugin {
         
         contestInformation.setFreezeTime(contestFreezeLengthtextField.getText());
 
-        contestInformation.setUnfrozen(getChckbxUnfrozen().isSelected());
+        contestInformation.setThawed(getChckbxUnfrozen().isSelected());
         return (contestInformation);
     }
 

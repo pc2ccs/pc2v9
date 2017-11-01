@@ -34,7 +34,7 @@ public class EventFeedLogTest extends AbstractTestCase {
         eFeedLog.writeEvent(events);
 
         eFeedLog = new EventFeedLog(contest);
-        assertEquals(142, eFeedLog.getLogLines().length);
+        assertEquals(143, eFeedLog.getLogLines().length);
 
     }
 

@@ -111,6 +111,11 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     private long lastSent = System.currentTimeMillis();
 
     /**
+     * Last state json data that was sent out
+     */
+    private String lastStateSent = null;
+
+    /**
      * Class contains output stream and Event Feed Filter
      * 
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
@@ -231,6 +236,10 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             if (lines.length > 0) {
 
                 for (String line : lines) {
+                    if (line.startsWith("{\"type\":\"state\",")) {
+                        int beginIndex = line.indexOf("\"data\": {", 1)+ 8;
+                        lastStateSent = line.substring(beginIndex, line.length()-1);
+                    }
                     if (filter.matchesFilter(line)) {
                         stream.write(line.getBytes());
                         stream.write(NL.getBytes());
@@ -708,11 +717,31 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         public void contestInformationAdded(ContestInformationEvent event) {
             String json = getJSONEvent(CONTEST_KEY, getNextEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(event.getContestInformation()).toString());
             sendJSON(json + NL);
+            String currentState = jsonTool.toStateJSON(event.getContestInformation()).toString();
+            if (lastStateSent == null) {
+                json = getJSONEvent(STATE_KEY, getNextEventId(), EventFeedOperation.CREATE, currentState);
+                sendJSON(json + NL);
+            } else {
+                if (lastStateSent != currentState) {
+                    json = getJSONEvent(STATE_KEY, getNextEventId(), EventFeedOperation.UPDATE, currentState);
+                    sendJSON(json + NL);
+                }
+            }
         }
 
         public void contestInformationChanged(ContestInformationEvent event) {
             String json = getJSONEvent(CONTEST_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(event.getContestInformation()).toString());
             sendJSON(json + NL);
+            String currentState = jsonTool.toStateJSON(event.getContestInformation()).toString();
+            if (lastStateSent == null) {
+                json = getJSONEvent(STATE_KEY, getNextEventId(), EventFeedOperation.CREATE, currentState);
+                sendJSON(json + NL);
+            } else {
+                if (lastStateSent != currentState) {
+                    json = getJSONEvent(STATE_KEY, getNextEventId(), EventFeedOperation.UPDATE, currentState);
+                    sendJSON(json + NL);
+                }
+            }
         }
 
         public void contestInformationRemoved(ContestInformationEvent event) {

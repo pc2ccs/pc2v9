@@ -21,9 +21,9 @@ public class EventFeedFilterTest extends AbstractTestCase {
         assertEquals("startid = <none set>, event types = <none set>", filter.toString());
 
         String[] lines = getStandardContestJSON();
-        assertEquals("Expected line count ", 142, lines.length);
+        assertEquals("Expected line count ", 143, lines.length);
 
-        assertNumberEvents(142, filter, lines);
+        assertNumberEvents(143, filter, lines);
     }
 
     private String[] getStandardContestJSON() throws IllegalContestState {
