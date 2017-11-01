@@ -280,8 +280,9 @@ public class JSONTool {
     public ObjectNode convertOrganizationsToJSON(Account account) {
         // this is a hack because we do not have organizations in the Model directly.
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", account.getInstitutionCode());
-        element.put("icpc_id", account.getInstitutionCode());
+        String id = getOrganizationId(account);
+        element.put("id", id);
+        element.put("icpc_id", id);
         element.put("name", account.getInstitutionShortName());
         if (notEmpty(account.getInstitutionName())) {
             element.put("formal_name", account.getInstitutionName());
@@ -290,6 +291,17 @@ public class JSONTool {
             element.put("country", account.getCountryCode());
         }
         return element;
+    }
+
+    public String getOrganizationId(Account account) {
+        String id = account.getInstitutionCode();
+        if (id.startsWith("INST-U-")) {
+            id = id.substring(7);
+        }
+        if (id.startsWith("INST-")) {
+            id = id.substring(5);
+        }
+        return id;
     }
 
     public ObjectNode convertToJSON(Account account) {
@@ -301,7 +313,7 @@ public class JSONTool {
         }
         element.put("name", account.getTeamName());
         if (notEmpty(account.getInstitutionCode()) && !account.getInstitutionCode().equals("undefined")) {
-            element.put("organization_id", account.getInstitutionCode());
+            element.put("organization_id", getOrganizationId(account));
         }
         if (account.getGroupId() != null) {
             element.put("group_id", getGroupId(model.getGroup(account.getGroupId())));

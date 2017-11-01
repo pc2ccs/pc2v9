@@ -67,8 +67,9 @@ public class OrganizationService implements Feature {
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
-                if (!organizations.containsKey(account.getInstitutionCode())) {
-                    organizations.put(account.getInstitutionCode(), account);
+                String id = jsonTool.getOrganizationId(account);
+                if (!organizations.containsKey(id)) {
+                    organizations.put(id, account);
                     childNode.add(jsonTool.convertOrganizationsToJSON(account));
                 }
             }
@@ -88,7 +89,7 @@ public class OrganizationService implements Feature {
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && account.getInstitutionCode().equals(organizationId)) {
+            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && jsonTool.getOrganizationId(account).equals(organizationId)) {
                 childNode.add(jsonTool.convertOrganizationsToJSON(account));
                 break; // only looking for 1 id, so only dump once
             }
