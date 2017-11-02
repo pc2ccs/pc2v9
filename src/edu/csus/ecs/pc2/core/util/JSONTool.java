@@ -168,10 +168,7 @@ public class JSONTool {
         }
         String startTime = "null";
         if (model.getContestTime().isContestStarted()) {
-            if (model.getContestTime().isContestRunning()) {
-                startTime = Utilities.getIso8601formatterWithMS().format(model.getContestTime().getContestStartTime().getTime());
-            }
-            // else startTime is null during a pause
+            startTime = Utilities.getIso8601formatterWithMS().format(model.getContestTime().getContestStartTime().getTime());
         } else {
             // contest has not started, check for a scheduledStartTime
             Calendar calendar = ci.getScheduledStartTime();
