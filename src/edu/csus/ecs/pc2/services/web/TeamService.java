@@ -77,18 +77,15 @@ public class TeamService implements Feature {
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
             // TODO multi-site with overlapping teamNumbers?
             if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && account.getClientId().getClientType().equals(ClientType.Type.TEAM)
                     && new Integer(account.getClientId().getClientNumber()).toString().equals(teamId)) {
-                childNode.add(jsonTool.convertToJSON(account));
+                return Response.ok(jsonTool.convertToJSON(account).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override

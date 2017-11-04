@@ -233,17 +233,13 @@ public class SubmissionService implements Feature {
         // get the submissions from the contest
         Run[] runs = model.getRuns();
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (!submission.isDeleted() && jsonTool.getSubmissionId(submission).equals(submissionId)) {
-                childNode.add(jsonTool.convertToJSON(submission));
+                return Response.ok(jsonTool.convertToJSON(submission).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
-
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     private void createZip(Run submission, java.nio.file.Path tmpDir, HashMap<Integer, String> filesToWrite, String zipFileName) throws FileNotFoundException, IOException {

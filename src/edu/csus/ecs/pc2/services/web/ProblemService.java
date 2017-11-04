@@ -84,19 +84,14 @@ public class ProblemService implements Feature {
         // get the problems from the contest
         Problem[] problems = model.getProblems();
 
-        // get an object to map the problems descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < problems.length; i++) {
             Problem problem = problems[i];
             // match by ID
             if (problem.isActive() && jsonTool.getProblemId(problem).equals(problemId)) {
-                childNode.add(jsonTool.convertToJSON(problem, i));
-                break;
+                return Response.ok(jsonTool.convertToJSON(problem, i).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
-
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override

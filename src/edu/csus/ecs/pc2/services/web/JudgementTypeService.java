@@ -79,17 +79,13 @@ public class JudgementTypeService implements Feature {
         // get the judgements from the contest
         Judgement[] judgements = model.getJudgements();
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < judgements.length; i++) {
             Judgement judgement = judgements[i];
             if (jsonTool.getJudgementType(judgement).equals(judgementType) && judgement.isActive()) {
-                childNode.add(jsonTool.convertToJSON(judgement));
+                return Response.ok(jsonTool.convertToJSON(judgement).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
-
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override

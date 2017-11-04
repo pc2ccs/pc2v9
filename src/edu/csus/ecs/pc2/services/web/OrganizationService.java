@@ -84,17 +84,13 @@ public class OrganizationService implements Feature {
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && jsonTool.getOrganizationId(account).equals(organizationId)) {
-                childNode.add(jsonTool.convertOrganizationsToJSON(account));
-                break; // only looking for 1 id, so only dump once
+                return Response.ok(jsonTool.convertOrganizationsToJSON(account).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override

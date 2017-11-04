@@ -79,17 +79,13 @@ public class GroupService implements Feature {
         // get the groups from the contest
         Group[] groups = model.getGroups();
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < groups.length; i++) {
             Group group = groups[i];
             if (group.isDisplayOnScoreboard() && jsonTool.getGroupId(group).equals(groupId)) {
-                childNode.add(jsonTool.convertToJSON(group));
+                return Response.ok(jsonTool.convertToJSON(group).toString(),MediaType.APPLICATION_JSON).build();
             }
         }
-        return Response.ok(childNode.toString(),MediaType.APPLICATION_JSON).build();
-    
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override

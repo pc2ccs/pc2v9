@@ -88,9 +88,6 @@ public class JudgementService implements Feature {
         Run[] runs = model.getRuns();
         long freezeTime = Utilities.getFreezeTime(model);
 
-        // get an object to map the judgements descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < runs.length; i++) {
             Run run = runs[i];
             if (sc.isUserInRole("public")) {
@@ -101,11 +98,10 @@ public class JudgementService implements Feature {
             }
             // judgementId's match runId's
             if (run.getElementId().toString().equals(judgementId)) {
-                childNode.add(jsonTool.convertJudgementToJSON(run));
+                return Response.ok(jsonTool.convertJudgementToJSON(run).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
-
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override

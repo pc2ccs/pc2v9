@@ -96,9 +96,6 @@ public class RunService implements Feature {
         Run[] runs = model.getRuns();
         long freezeTime = Utilities.getFreezeTime(model);
 
-        // get an object to map the runs descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < runs.length; i++) {
             Run run = runs[i];
             if (sc.isUserInRole("public")) {
@@ -113,14 +110,12 @@ public class RunService implements Feature {
                 RunTestCase[] testCases = run.getRunTestCases();
                 for (int j = 0; j < testCases.length; j++) {
                     if (testCases[j].getElementId().toString().equals(runId)) {
-                        childNode.add(jsonTool.convertToJSON(testCases, j));
-                        break;
+                        return Response.ok(jsonTool.convertToJSON(testCases, j).toString(), MediaType.APPLICATION_JSON).build();
                     }
                 }
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
-
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override

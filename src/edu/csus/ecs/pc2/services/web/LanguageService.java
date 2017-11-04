@@ -76,17 +76,13 @@ public class LanguageService implements Feature {
         // get the languages from the model
         Language[] languages = model.getLanguages();
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < languages.length; i++) {
             Language language = languages[i];
             if (language.getElementId().toString().equals(languageId) && language.isActive()) {
-                childNode.add(jsonTool.convertToJSON(language));
+                return Response.ok(jsonTool.convertToJSON(language).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
-
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override

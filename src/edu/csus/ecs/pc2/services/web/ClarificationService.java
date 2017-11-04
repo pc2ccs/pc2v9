@@ -93,9 +93,6 @@ public class ClarificationService implements Feature {
         // get the groups from the contest
         Clarification[] clarifications = model.getClarifications();
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
         ClarificationAnswer[] clarAnswers = null;
         for (int i = 0; i < clarifications.length; i++) {
             Clarification clarification = clarifications[i];
@@ -107,29 +104,27 @@ public class ClarificationService implements Feature {
                         for (int j = 0; j < clarAnswers.length; j++) {
                             ClarificationAnswer clarificationAnswer = clarAnswers[j];
                             if (clarificationAnswer.getElementId().toString().equals(clarificationId)) {
-                                childNode.add(jsonTool.convertToJSON(clarification, clarificationAnswer));
-                                break;
+                                return Response.ok(jsonTool.convertToJSON(clarification, clarificationAnswer).toString(), MediaType.APPLICATION_JSON).build();
                             }
                         }
                     }
                 }
             } else {
                 if (clarification.getElementId().toString().equals(clarificationId)) {
-                    childNode.add(jsonTool.convertToJSON(clarification, null));
+                    return Response.ok(jsonTool.convertToJSON(clarification, null).toString(), MediaType.APPLICATION_JSON).build();
                 }
                 clarAnswers = clarification.getClarificationAnswers();
                 if (clarAnswers != null) {
                     for (int j = 0; j < clarAnswers.length; j++) {
                         ClarificationAnswer clarificationAnswer = clarAnswers[j];
                         if (clarificationAnswer.getElementId().toString().equals(clarificationId)) {
-                            childNode.add(jsonTool.convertToJSON(clarification, clarificationAnswer));
-                            break;
+                            return Response.ok(jsonTool.convertToJSON(clarification, clarificationAnswer).toString(), MediaType.APPLICATION_JSON).build();
                         }                    
                     }
                 }
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        return Response.status(Response.Status.NOT_FOUND).build();
 
     }
 
