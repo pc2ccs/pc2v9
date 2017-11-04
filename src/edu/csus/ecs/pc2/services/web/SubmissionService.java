@@ -140,7 +140,7 @@ public class SubmissionService implements Feature {
 
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
-            if (submission.getElementId().toString().equals(submissionId)) {
+            if (jsonTool.getSubmissionId(submission).equals(submissionId)) {
                 try {
                     runFiles = model.getRunFiles(submission);
                 } catch (ClassNotFoundException | IOException | FileSecurityException e2) {
@@ -223,7 +223,7 @@ public class SubmissionService implements Feature {
                 }
             }
         }
-        return Response.noContent().build();
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @GET
