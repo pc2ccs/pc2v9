@@ -279,7 +279,7 @@ public class WebServer implements UIPlugin {
 
         Constraint constraintPublic = new Constraint();
         constraintPublic.setName(Constraint.__BASIC_AUTH);
-        constraintPublic.setRoles(new String[] { "public", "balloon", "blue", "admin" });
+        constraintPublic.setRoles(new String[] { "public", "balloon", "analyst", "blue", "admin" });
         constraintPublic.setAuthenticate(true);
 
         ConstraintMapping cmRoot = new ConstraintMapping();
