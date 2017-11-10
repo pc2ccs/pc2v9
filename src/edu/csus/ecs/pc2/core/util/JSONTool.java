@@ -177,7 +177,7 @@ public class JSONTool {
                 startTime = Utilities.getIso8601formatterWithMS().format(date);
             }
         }
-        String penaltyTime = ci.getScoringProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO, "20");
+        int penaltyTime = Integer.valueOf(ci.getScoringProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO, "20"));
         boolean stateRunning = model.getContestTime().isContestRunning();
         boolean skipStateFrozen = false;
         boolean stateFrozen = false;

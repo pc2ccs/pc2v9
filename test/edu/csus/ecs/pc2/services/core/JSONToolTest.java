@@ -493,6 +493,20 @@ public class JSONToolTest extends AbstractTestCase {
 //        throw new ComparisonFailure("Expected double quoted value \""+exptectedFieldValue+"\" value in json ", 1, matchCount(regex, json));
         assertTrue("Expected to find JSON string syntax, double quoted value \""+exptectedFieldValue+"\", for field \""+fieldname+"\"", 1 == matchCount(regex, json));
     }
+    /**
+     * Tests whether value for field is a int and value matches exptectedFieldValue.
+     * 
+     * @param matchCount number of expected match for field and value
+     * @param fieldname
+     * @param exptectedFieldValue
+     * @param json
+     */
+    private void assertJSONIntValue (String json, String fieldname, int exptectedFieldValue) {
+
+        String regex = "\"" + fieldname + "\":" + exptectedFieldValue;
+//        throw new ComparisonFailure("Expected double quoted value \""+exptectedFieldValue+"\" value in json ", 1, matchCount(regex, json));
+        assertTrue("Expected to find JSON int syntax, value \""+exptectedFieldValue+"\", for field \""+fieldname+"\"", 1 == matchCount(regex, json));
+    }
 
     public void testContestJSON() throws Exception {
         IInternalContest contest = new UnitTestData().getContest();
@@ -904,7 +918,7 @@ public class JSONToolTest extends AbstractTestCase {
           assertJSONStringValue(json, "formal_name", "Programming Contest");
           assertJSONStringValue(json, "name", "Programming Contest");
           
-          assertJSONStringValue(json, "penalty_time", "20");
+          assertJSONIntValue(json, "penalty_time", 20);
           
           assertJSONBooleanValue(json, "running", false);
           assertJSONBooleanValue(json, "frozen", false);
