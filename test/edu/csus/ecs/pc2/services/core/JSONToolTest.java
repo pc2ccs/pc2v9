@@ -715,7 +715,7 @@ public class JSONToolTest extends AbstractTestCase {
         String jsonBefore = eventFeedJSON.createJSON(data.getContest());
 
         eventFeedJSON.setEventIdSequence(0);
-        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(1), null);
+        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(0), null);
         String json = eventFeedJSON.createJSON(data.getContest(), filter);
         
 //        System.out.println("debug start json "+json);
@@ -727,15 +727,15 @@ public class JSONToolTest extends AbstractTestCase {
         assertEquals("Expected JSON length when started with event 1 (contest event) ", jsonBefore.length(), json.length());
     }
 
-    public void testStartAtEvent40() throws Exception {
+    public void testStartAfterEvent39() throws Exception {
 
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
 
-        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(40), null);
+        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(39), null);
         String json = eventFeedJSON.createJSON(data.getContest(), filter);
         
-//        System.out.println("debug after event 40  json = "+json);
+//        System.out.println("debug after event 39  json = "+json);
         
 //        editFile(writeFile(new File("/tmp/stuf.ev40." + System.currentTimeMillis() + ".json"), json));
 
