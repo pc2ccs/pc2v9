@@ -32,7 +32,7 @@ public class EventFeedFilter {
      * <br>
      * The complete list of events are at: {@link EventFeedType}
      * 
-     * @param startingEventId start event id, null allowed to indicate to not filter
+     * @param startingEventId start after event id, null allowed to indicate to not filter
      * @param eventTypeList eventtype list, null allowed to indicate to not filter
      */
     public EventFeedFilter(String startintEventId, String eventTypeList) {
@@ -57,7 +57,7 @@ public class EventFeedFilter {
         if (startingEventId != null) {
             long startId = EventFeedJSON.extractSequence(startingEventId);
             long actual = EventFeedJSON.extractSequence(eventId);
-            matched &= actual >= startId;
+            matched &= actual > startId;
         }
 
         if (eventTypeList != null) {

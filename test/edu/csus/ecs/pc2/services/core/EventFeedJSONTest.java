@@ -718,7 +718,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         String jsonBefore = new EventFeedJSON(data.getContest()).createJSON(data.getContest());
 
-        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(1), null);
+        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(0), null);
         eventFeedJSON.setEventIdSequence(0);
         String json = eventFeedJSON.createJSON(data.getContest(), filter);
 
@@ -740,7 +740,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
 
-        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(40), null);
+        EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(39), null);
         String json = eventFeedJSON.createJSON(data.getContest(), filter);
 
         // System.out.println("debug after event 40 json = "+json);

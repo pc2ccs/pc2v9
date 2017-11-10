@@ -24,6 +24,7 @@ import javax.ws.rs.ext.Provider;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
@@ -94,8 +95,14 @@ public class EventFeedService implements Feature {
         }
 
         if (startintEventId != null) {
-            filter.addStartintEventId(startintEventId);
-            System.out.println("starting event feed, Feed starting at id " + startintEventId);
+            if (startintEventId.startsWith("pc2-") && Utilities.isIntegerNumber(startintEventId.substring(4))) {
+                filter.addStartintEventId(startintEventId);
+                System.out.println("starting event feed, Feed starting after id " + startintEventId);
+            } else {
+                System.err.println("NOT starting event feed (invalid startingEventId "+startintEventId+")");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid id: `"+startintEventId+"`");
+                return;
+            }
         } else {
             System.out.println("starting event feed (no args) ");
         }

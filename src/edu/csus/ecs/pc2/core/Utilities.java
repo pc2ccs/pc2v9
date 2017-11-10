@@ -12,6 +12,8 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.text.CharacterIterator;
 import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
@@ -234,6 +236,13 @@ public final class Utilities {
         return file.isDirectory();
     }
 
+    public static boolean isIntegerNumber(String s) {
+        NumberFormat formatter = NumberFormat.getInstance();
+        formatter.setParseIntegerOnly(true);
+        ParsePosition pos = new ParsePosition(0);
+        formatter.parse(s, pos);
+        return s.length() == pos.getIndex();
+    }
     /**
      * Compares 2 char arrays for equality.
      * 
