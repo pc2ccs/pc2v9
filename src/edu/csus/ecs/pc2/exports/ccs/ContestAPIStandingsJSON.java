@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.ProblemSummaryInfo;
 import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
 import edu.csus.ecs.pc2.core.scoring.SummaryRow;
+import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * Standings information in CLI 2016 JSON format.
@@ -28,6 +29,7 @@ public class ContestAPIStandingsJSON {
 
     private IInternalContest model;
     private IInternalController controller;
+    private JSONTool jsonTool;
     
     /**
      * Returns a JSON string describing the current contest standings in the format defined by the 2016 CLI JSON Scoreboard.
@@ -58,6 +60,7 @@ public class ContestAPIStandingsJSON {
 
         model = contest;
         controller = inController;
+        jsonTool = new JSONTool(model, controller);
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
@@ -115,7 +118,7 @@ public class ContestAPIStandingsJSON {
 
             if (summaryInfo != null) {
 
-                problemsNode.put("problem_id", summaryInfo.getProblemId().toString());
+                problemsNode.put("problem_id", jsonTool.getProblemId(model.getProblem(summaryInfo.getProblemId())));
 
                 //get data on submitted runs
                 int numSubmitted = summaryInfo.getNumberSubmitted();
