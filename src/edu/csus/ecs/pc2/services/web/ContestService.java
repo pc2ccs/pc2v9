@@ -214,7 +214,7 @@ public class ContestService implements Feature {
         GregorianCalendar now = new GregorianCalendar();
         // validate scheduleStartTime
         // if the contestTime has not started yet, but the scheduledStartTime was in the past
-        if (!model.getContestTime().isContestStarted() && scheduledStartTime.before(now)) {
+        if (scheduledStartTime != null && !model.getContestTime().isContestStarted() && scheduledStartTime.before(now)) {
             // then clear it
             scheduledStartTime = null;
         }
