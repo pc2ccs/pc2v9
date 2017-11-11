@@ -164,10 +164,10 @@ public class ContestService implements Feature {
         StartTimeRequestType requestType = StartTimeRequestType.ILLEGAL;
         GregorianCalendar requestedStartTime = null;
 
-        // check if we have a viable start_time string
-        if (startTimeValueString != null && startTimeValueString.length() > 0) {
+        // check if we have a start_time string
+        if (requestMap.containsKey("start_time")) {
 
-            if (startTimeValueString.trim().equalsIgnoreCase("null")) {
+            if (startTimeValueString == null || startTimeValueString.trim().equalsIgnoreCase("null")) {
 
                 requestType = StartTimeRequestType.SET_START_TO_UNDEFINED;
 
@@ -186,9 +186,9 @@ public class ContestService implements Feature {
         } else {
 
             // the starttime value was null or empty
-            controller.getLog().log(Log.WARNING, "Contest Service PATCH: JSON input contains empty starttime value");
+            controller.getLog().log(Log.WARNING, "Contest Service PATCH: JSON input does not contain empty start_time");
             // return HTTP 400 response code per CLICS spec
-            return Response.status(Status.BAD_REQUEST).entity("Empty value in starttime request").build();
+            return Response.status(Status.BAD_REQUEST).entity("Missing starttime in request").build();
         }
 
         if (requestType == StartTimeRequestType.ILLEGAL) {
