@@ -727,8 +727,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
      * 
      * @param teamJSON
      */
-    public void sendJSON(String string) {
-
+    public synchronized void sendJSON(String string) {
+        
+        long newId = eventFeedJSON.nextEventIdSequence();
+        
+        string = replaceEventId (string, newId);
+        
         /**
          * Send JSON to each
          */
@@ -758,12 +762,22 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         lastSent = System.currentTimeMillis();
     }
 
+    private String replaceEventId(String string, long newId) {
+        
+        // {"type":"languages", "id":"-1",
+        // {"type":"languages", "id":"pc2-14",
+        
+        String newString =string.replaceFirst("\"id\":\"-1\"","\"id\":\"+"+EventFeedJSON.getEventId(newId)+"\"");
+        return newString.replaceFirst("\"id\":\"pc2--1\"","\"id\":\"+"+EventFeedJSON.getEventId(newId)+"\"");
+    }
+
     /**
      * Only used be the listeners, gets the next event id
      * @return
      */
     public long getNextEventId() {
-        return eventFeedJSON.nextEventIdSequence();
+        return -1;
+        
     }
 
     @Override
