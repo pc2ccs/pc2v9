@@ -468,7 +468,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String defaultValidatorCommandLine = fetchValue(content, DEFAULT_VALIDATOR_KEY);
 
         String overrideValidatorCommandLine = fetchValue(content, OVERRIDE_VALIDATOR_KEY);
-
         if (overrideValidatorCommandLine == null) {
 
             // if no override defined, then maybe use mtsv
@@ -499,6 +498,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (loadProblemDataFiles) {
             for (Problem problem : problems) {
                 loadProblemInformationAndDataFiles(contest, directoryName, problem, overrideUsePc2Validator, manualReviewOverride);
+                if (overrideValidatorCommandLine != null){
+                    problem.setValidatorCommandLine(overrideValidatorCommandLine);
+                }
             }
         }
 
