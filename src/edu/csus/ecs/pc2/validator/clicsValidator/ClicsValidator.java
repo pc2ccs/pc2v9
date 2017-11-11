@@ -341,12 +341,19 @@ public class ClicsValidator {
             if (peek(teamOutputPushbackIS) == EOF) {
                             
                 //team is at EOF when judge is not, so team is missing output
-                try {
-                    outputFailure(CLICS_INCOMPLETE_OUTPUT_MSG, "Incomplete output (next judge token = '" + getNextToken(judgeAnswerPushbackIS) + "')");
-                } catch (Exception e) {
-                    return CLICS_VALIDATOR_ERROR_EXIT_CODE;
+                
+                //check if judge has no more tokens
+                String nextJudgeToken = getNextToken(judgeAnswerPushbackIS); 
+                if (nextJudgeToken.equals("")) {
+                    break;
+                } else {
+                    try {
+                        outputFailure(CLICS_INCOMPLETE_OUTPUT_MSG, "Incomplete output (next judge token = '" + getNextToken(judgeAnswerPushbackIS) + "')");
+                    } catch (Exception e) {
+                        return CLICS_VALIDATOR_ERROR_EXIT_CODE;
+                    }
+                    return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
                 }
-                return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE;
             }
                     
             
