@@ -767,8 +767,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         // {"type":"languages", "id":"-1",
         // {"type":"languages", "id":"pc2-14",
         
-        String newString =string.replaceFirst("\"id\":\"-1\"","\"id\":\"+"+EventFeedJSON.getEventId(newId)+"\"");
-        return newString.replaceFirst("\"id\":\"pc2--1\"","\"id\":\"+"+EventFeedJSON.getEventId(newId)+"\"");
+        String newString =string.replaceFirst("\"id\":\"-1\"","\"id\":\""+EventFeedJSON.getEventId(newId)+"\"");
+        return newString.replaceFirst("\"id\":\"pc2--1\"","\"id\":\""+EventFeedJSON.getEventId(newId)+"\"");
     }
 
     /**
