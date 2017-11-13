@@ -296,6 +296,7 @@ $this->n=$n;
 }
 }
 class java_Client {
+public $cancelProxyCreationTag;
 public $RUNTIME;
 public $result,$exception;
 public $parser;
