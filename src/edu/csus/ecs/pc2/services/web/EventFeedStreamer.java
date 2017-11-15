@@ -64,12 +64,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     /**
      * Number of ms be sending out keep alive new line.
      */
-    private static final long KEEP_ALIVE_DELAY = 120 * Constants.MS_PER_SECOND;
+    private static final long KEEP_ALIVE_DELAY = 100 * Constants.MS_PER_SECOND;
 
     /**
      * Number of seconds between checks to send keep alive.
      */
-    private static final int KEEP_ALIVE_QUERY_PERIOD_SECONDS = 50;
+    private static final int KEEP_ALIVE_QUERY_PERIOD_SECONDS = 25;
 
     private Log log;
 
@@ -105,7 +105,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     /**
      * Last time event sent to stream.
      */
-    private long lastSent;
+    private long lastSent = System.currentTimeMillis();
 
     /**
      * Class contains output stream and Event Feed Filter
@@ -194,9 +194,10 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                 // Write events to event log if no events are in log (at this time).
                 String json = eventFeedJSON.createJSON(contest);
                 eventFeedLog.writeEvent(json);
+                System.out.println("Event feed log not loaded, event id is " + eventFeedJSON.getEventIdSequence());
             } else {
-                System.out.println("debug 23 setEventIdSequence to "+lines.length); 
                 eventFeedJSON.setEventIdSequence(lines.length);
+                System.out.println("Loaded event feed log setEventIdSequence to " + eventFeedJSON.getEventIdSequence());
             }
 
         } catch (Exception e) {
