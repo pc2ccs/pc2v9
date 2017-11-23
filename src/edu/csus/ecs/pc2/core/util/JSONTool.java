@@ -55,7 +55,7 @@ public class JSONTool {
         this.model = model;
         this.controller = controller;
         
-        if (new File(INSTITUTIONS_TSV).exists()) {
+        if (institutionsMap != null && new File(INSTITUTIONS_TSV).exists()) {
             System.out.println("Loading " + INSTITUTIONS_TSV);
             try {
                 loadInstitutions(INSTITUTIONS_TSV);
@@ -86,6 +86,7 @@ public class JSONTool {
             if (icpcId.startsWith("INST-U-")) {
                 // why do these not use the same ids that are in teams.tsv....
                 icpcId = icpcId.replaceFirst("INST-U-", "INST-");
+                icpcId = icpcId.replaceFirst("INST-", "");
             }
             institutionsMap.put(icpcId, fields);
         }
