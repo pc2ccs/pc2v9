@@ -55,16 +55,19 @@ public class JSONTool {
         this.model = model;
         this.controller = controller;
         
-        if (institutionsMap != null && new File(INSTITUTIONS_TSV).exists()) {
-            System.out.println("Loading " + INSTITUTIONS_TSV);
-            try {
-                loadInstitutions(INSTITUTIONS_TSV);
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (institutionsMap == null) {
+            if (new File(INSTITUTIONS_TSV).exists()) {
+                System.out.println("Loading " + INSTITUTIONS_TSV);
+                try {
+                    loadInstitutions(INSTITUTIONS_TSV);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Loaded " + institutionsMap.size() + " items from " + INSTITUTIONS_TSV);
+            } else {
+                System.out.println("File does not exist " + INSTITUTIONS_TSV + ", ignoring");
+                institutionsMap = new HashMap<String, String[]>(); // an empty map to avoid this repeatedly
             }
-            System.out.println("Loaded " + institutionsMap.size()+ " items from " + INSTITUTIONS_TSV);
-        } else {
-            System.out.println("File does not exist "+INSTITUTIONS_TSV+", ignoring");
         }
     }
 
@@ -326,7 +329,7 @@ public class JSONTool {
         element.put("icpc_id", id);
         String institutionName = account.getInstitutionShortName();
         String institutionFormalName = account.getInstitutionName();
-        if ("undefined".equals(institutionFormalName)) {
+        if ("undefined".equals(institutionFormalName) && institutionsMap != null) {
             if (institutionsMap.containsKey(id)) {
                 String[] fieldArray = institutionsMap.get(id);
                 institutionFormalName = fieldArray[1];
