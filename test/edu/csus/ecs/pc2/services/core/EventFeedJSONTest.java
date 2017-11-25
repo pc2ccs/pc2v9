@@ -145,7 +145,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         String eventCounts[] = {
                 //
-                EventFeedJSON.CLARIFICATIONS_KEY + ": 100", //
+//                EventFeedJSON.CLARIFICATIONS_KEY + ": 100", //
+                EventFeedJSON.CLARIFICATIONS_KEY + ": 0", //
                 EventFeedJSON.CONTEST_KEY + ": 1", //
                 EventFeedJSON.GROUPS_KEY + ": 2", //
 
@@ -747,7 +748,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertNotNull(json);
 
-        assertMatchCount(529, "\"type\"", json);
+//        assertMatchCount(529, "\"type\"", json);
+        assertMatchCount(429, "\"type\"", json);
 
     }
 
@@ -836,7 +838,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
         assertNotNull(json);
 
         assertCountEvent(1, JSONUtilities.CONTEST_KEY, json);
-        assertCountEvent(100, JSONUtilities.CLARIFICATIONS_KEY, json);
+//        assertCountEvent(100, JSONUtilities.CLARIFICATIONS_KEY, json);
+        assertCountEvent(0, JSONUtilities.CLARIFICATIONS_KEY, json);
         assertCountEvent(300, JSONUtilities.TEAM_MEMBERS_KEY, json);
         assertCountEvent(120, JSONUtilities.TEAM_KEY, json);
         assertCountEvent(6, JSONUtilities.LANGUAGE_KEY, json);
@@ -859,7 +862,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
         assertNotNull(json);
 
         assertCountEvent(0, EventFeedJSON.CONTEST_KEY, json);
-        assertCountEvent(100, EventFeedJSON.CLARIFICATIONS_KEY, json);
+//        assertCountEvent(100, EventFeedJSON.CLARIFICATIONS_KEY, json);
+        assertCountEvent(0, EventFeedJSON.CLARIFICATIONS_KEY, json);
         assertCountEvent(0, EventFeedJSON.TEAM_MEMBERS_KEY, json);
         assertCountEvent(0, EventFeedJSON.TEAM_KEY, json);
         assertCountEvent(0, EventFeedJSON.LANGUAGE_KEY, json);

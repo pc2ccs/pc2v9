@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -18,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.services.core.EventFeedJSON;
 
 /**
  * Unit Test
@@ -80,7 +83,7 @@ public class EventFeedStreamerTest extends AbstractTestCase {
             sampleContest.assignSampleGroups(getContest(), "North Group", "South Group");
 
             assertEquals("Runs", 12, getContest().getRuns().length);
-
+            
         }
 
         /**
@@ -229,9 +232,48 @@ public class EventFeedStreamerTest extends AbstractTestCase {
         
         assertTrue("Expected long json ",  json.length() > 8000);
         
+        assertCountEvent(0, EventFeedJSON.CLARIFICATIONS_KEY, json); // TODO change to actual clar elemennt count
+        
+    }
+    
+    /**
+     * Expect count of elementName in JSON.
+     * 
+     * @param exepectedCount
+     * @param eleementName
+     * @param json
+     */
+    private void assertCountEvent(int exepectedCount, String eleementName, String json) {
+
+//      System.out.println("debug "+eleementName+" "+matchEventCount(eleementName, json));
+        assertEquals("For event '" + eleementName + "' expecting count", exepectedCount, matchEventCount(eleementName, json));
     }
 
+    /**
+     * Return count of events in json.
+     * 
+     * @param eleementName element to match
+     * @param json
+     * @return
+     */
+    private int matchEventCount(String eleementName, String json) {
 
-    
+        String regex = "\"type\":\"" + eleementName + "\"";
+        
+        return matchCount(regex, json);
+    }
+
+    private int matchCount(String regex, String json) {
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(json);
+
+        int count = 0;
+        while (matcher.find()) {
+            count++;
+        }
+
+        return count;
+    }
 
 }

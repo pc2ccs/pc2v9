@@ -482,10 +482,11 @@ public class EventFeedJSON extends JSONUtilities {
             if (json != null) {
                 buffer.append(json);
             }
-            json = getClarificationJSON(contest);
-            if (json != null) {
-                buffer.append(json);
-            }
+            System.out.println("debug 22 add back getClarificationJSON");
+//            json = getClarificationJSON(contest);
+//            if (json != null) {
+//                buffer.append(json);
+//            }
             json = getAwardJSON(contest);
             if (json != null) {
                 buffer.append(json);
@@ -548,7 +549,8 @@ public class EventFeedJSON extends JSONUtilities {
                     appendNotNull(buffer, getRunJSON(contest));
                     break;
                 case CLARIFICATIONS_KEY:
-                    appendNotNull(buffer, getClarificationJSON(contest));
+//                    appendNotNull(buffer, getClarificationJSON(contest));
+                    System.out.println("debug 22 add back getClarificationJSON");
                     break;
                 case AWARD_KEY:
                     appendNotNull(buffer, getAwardJSON(contest));
