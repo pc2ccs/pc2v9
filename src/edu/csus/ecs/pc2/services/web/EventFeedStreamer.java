@@ -751,7 +751,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             try {
                 if (streamAndFilter.getFilter().matchesFilter(string)) {
                     OutputStream stream = streamAndFilter.getStream();
-                    stream.write(string.getBytes());
+                    stream.write(string.getBytes("UTF-8"));
                     stream.flush();
                 }
             } catch (Exception e) {

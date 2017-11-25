@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -20,7 +22,7 @@ public class EventFeedLog {
 
     private String[] fileLines = new String[0];
 
-    private FileOutputStream outStream;
+    private OutputStreamWriter outStream;
 
     private static String logsDirectory = Log.LOG_DIRECTORY_NAME;
 
@@ -35,8 +37,9 @@ public class EventFeedLog {
      * 
      * @param contest
      * @throws FileNotFoundException
+     * @throws UnsupportedEncodingException 
      */
-    public EventFeedLog(IInternalContest contest) throws FileNotFoundException {
+    public EventFeedLog(IInternalContest contest) throws FileNotFoundException, UnsupportedEncodingException {
 
         filename = getEventFeedLogName(contest.getContestIdentifier());
         setLogFileName(filename);
@@ -46,7 +49,7 @@ public class EventFeedLog {
         readLog();
 
         // open log file for write/append
-        outStream = new FileOutputStream(filename, true);
+        outStream = new OutputStreamWriter(new FileOutputStream(filename, true), "UTF8");
     }
 
     private void readLog() {
@@ -81,7 +84,7 @@ public class EventFeedLog {
      * @throws IOException
      */
     void writeEvent(String eventString) throws IOException {
-        outStream.write(eventString.getBytes());
+        outStream.write(eventString);
         outStream.flush();
     }
 
