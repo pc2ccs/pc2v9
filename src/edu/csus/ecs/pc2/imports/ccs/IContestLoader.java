@@ -61,6 +61,8 @@ public interface IContestLoader {
     String MAX_OUTPUT_SIZE_K_KEY = "max-output-size-K";
 
     String CONTEST_DURATION_KEY = "duration";
+    
+    String AUTO_STOP_CLOCK_AT_END_KEY = "auto-stop-clock-at-end";
 
     String SCOREBOARD_FREEZE_KEY = "scoreboard-freeze";
     

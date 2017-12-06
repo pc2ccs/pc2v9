@@ -2701,5 +2701,70 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     private String toUnixFS(String path) {
         return path.replace('\\', '/');
     }
+    
+    /**
+     * Test with halt at end set.
+     * @throws Exception
+     */
+    public void testHaltAtEnd() throws Exception {
+
+        String[] lines = { // 
+        //
+                "# Contest configuration with auto stop example", // 
+                "# $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $", // 
+                "---", // 
+                "name:              ACM-ICPC World Finals 2011", // 
+                "short-name:        ICPC WF 2011", // 
+                "start-time:        2011-02-04 01:23Z", // 
+                "duration:          5:00:00", // 
+                "scoreboard-freeze: 4:00:00", // 
+                "", // 
+                "auto-stop-clock-at-end: true", // 
+                "", // 
+                "default-clars:", // 
+                "  - No comment, read problem statement.", // 
+                "  - This will be answered during the answers to questions session.", // 
+                "", // 
+                "clar-categories:", // 
+                "  - General", // 
+                "  - SysOps", // 
+                "  - Operations", //
+        };
+
+        IInternalContest contest = loader.fromYaml(null, lines, null, false);
+        assertTrue("Expecting halt at end to be set ", contest.getContestInformation().isAutoStopContest());
+    }
+    
+    /**
+     * Test with no halt at end
+     * @throws Exception
+     */
+    public void testHaltAtEndMissing() throws Exception {
+
+        String[] lines = { // 
+        //
+                "# Contest configuration with auto stop example", // 
+                "# $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $", // 
+                "---", // 
+                "name:              ACM-ICPC World Finals 2011", // 
+                "short-name:        ICPC WF 2011", // 
+                "start-time:        2011-02-04 01:23Z", // 
+                "duration:          5:00:00", // 
+                "scoreboard-freeze: 4:00:00", // 
+                "", // 
+                "default-clars:", // 
+                "  - No comment, read problem statement.", // 
+                "  - This will be answered during the answers to questions session.", // 
+                "", // 
+                "clar-categories:", // 
+                "  - General", // 
+                "  - SysOps", // 
+                "  - Operations", //
+        };
+
+        IInternalContest contest = loader.fromYaml(null, lines, null, false);
+
+        assertFalse("Expecting no halt at end", contest.getContestInformation().isAutoStopContest());
+    }
 }
 
