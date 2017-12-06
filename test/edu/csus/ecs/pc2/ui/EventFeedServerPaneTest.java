@@ -5,26 +5,13 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import junit.framework.TestCase;
-
 /**
+ * Tester for EventFeedServerPane
  * 
- * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
+public class EventFeedServerPaneTest  {
 
-// $HeadURL$
-public class EventFeedServerPaneTest extends TestCase {
-
-    /**
-     * 
-     * 
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-
-    // $HeadURL$
     protected class TestingFrame extends JFrame {
 
         /**

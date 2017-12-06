@@ -1,9 +1,7 @@
 package edu.csus.ecs.pc2.core.util;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -27,7 +25,6 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
-import edu.csus.ecs.pc2.imports.ccs.CCSListUtilities;
 
 /**
  * JSON for pc2 classes.
@@ -35,13 +32,9 @@ import edu.csus.ecs.pc2.imports.ccs.CCSListUtilities;
  * @author Troy Boudreau <boudreat@ecs.csus.edu>
  */
 public class JSONTool {
-    private static final String INSTITUTIONS_TSV = "institutions.tsv";
-
     private ObjectMapper mapper = new ObjectMapper();
 
     private IInternalContest model;
-    
-    private static HashMap<String,String[]> institutionsMap = null;
 
     @SuppressWarnings("unused")
     private IInternalController controller;
@@ -54,46 +47,6 @@ public class JSONTool {
         super();
         this.model = model;
         this.controller = controller;
-        
-        if (institutionsMap == null) {
-            if (new File(INSTITUTIONS_TSV).exists()) {
-                System.out.println("Loading " + INSTITUTIONS_TSV);
-                try {
-                    loadInstitutions(INSTITUTIONS_TSV);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                System.out.println("Loaded " + institutionsMap.size() + " items from " + INSTITUTIONS_TSV);
-            } else {
-                System.out.println("File does not exist " + INSTITUTIONS_TSV + ", ignoring");
-                institutionsMap = new HashMap<String, String[]>(); // an empty map to avoid this repeatedly
-            }
-        }
-    }
-
-    /**
-     * TODO remove this when we do not want to interface with 9.5.2
-     * 
-     * @param filename
-     * @return
-     * @throws Exception
-     */
-    public static HashMap<String, String[]> loadInstitutions(String filename) throws Exception {
-        String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
-
-        institutionsMap  = new HashMap<String,String[]>();
-        // do not care about the first line (line 0), so start with 1
-        for (int i = 1; i < lines.length; i++) {
-            String[] fields = TabSeparatedValueParser.parseLine(lines[i]);
-            String icpcId = fields[0];
-            if (icpcId.startsWith("INST-U-")) {
-                // why do these not use the same ids that are in teams.tsv....
-                icpcId = icpcId.replaceFirst("INST-U-", "INST-");
-                icpcId = icpcId.replaceFirst("INST-", "");
-            }
-            institutionsMap.put(icpcId, fields);
-        }
-        return institutionsMap;
     }
 
     /**
@@ -327,18 +280,9 @@ public class JSONTool {
         String id = getOrganizationId(account);
         element.put("id", id);
         element.put("icpc_id", id);
-        String institutionName = account.getInstitutionShortName();
-        String institutionFormalName = account.getInstitutionName();
-        if ("undefined".equals(institutionFormalName) && institutionsMap != null) {
-            if (institutionsMap.containsKey(id)) {
-                String[] fieldArray = institutionsMap.get(id);
-                institutionFormalName = fieldArray[1];
-                institutionName = fieldArray[2];
-            }
-        }
-        element.put("name", institutionName);
-        if (notEmpty(institutionFormalName)) {
-            element.put("formal_name", institutionFormalName);
+        element.put("name", account.getInstitutionShortName());
+        if (notEmpty(account.getInstitutionName())) {
+            element.put("formal_name", account.getInstitutionName());
         }
         if (notEmpty(account.getCountryCode()) && !account.getCountryCode().equals("XXX")) {
             element.put("country", account.getCountryCode());

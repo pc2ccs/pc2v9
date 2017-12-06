@@ -81,7 +81,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     private RunListener runListener = new RunListener();
 
-//    private ClarificationListener clarificationListener = new ClarificationListener();
+    private ClarificationListener clarificationListener = new ClarificationListener();
 
     private ProblemListener problemListener = new ProblemListener();
 
@@ -207,10 +207,6 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     }
     
-    boolean matchesClarification (String eventLine){
-        return eventLine.indexOf(JSONUtilities.CLARIFICATIONS_KEY) > -1;
-    }
-    
     /**
      * Send all events from log to client.
      * 
@@ -229,10 +225,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             if (lines.length > 0) {
 
                 for (String line : lines) {
-                    System.err.println("debug 22 - replace matchesClarification condition with original condition");
-//                    if (filter.matchesFilter(line)) {
-                        
-                    if (filter.matchesFilter(line) && ! matchesClarification(line)) {
+                    if (filter.matchesFilter(line)) {
                         stream.write(line.getBytes());
                         stream.write(NL.getBytes());
                         stream.flush();
@@ -275,8 +268,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     private void registerListeners(IInternalContest inContest) {
         inContest.addAccountListener(accountListener);
         inContest.addRunListener(runListener);
-//        inContest.addClarificationListener(clarificationListener);
-        System.err.println("debug 22 - RE-ADD the addClarificationListener");
+        inContest.addClarificationListener(clarificationListener);
         inContest.addProblemListener(problemListener);
         inContest.addLanguageListener(languageListener);
         inContest.addGroupListener(groupListener);

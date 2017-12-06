@@ -108,27 +108,6 @@ public class DateDifferizerTest extends TestCase {
         assertEquals("23 hours 59 minutes 59 seconds", expectedTimeString);
     }
 
-
-    public void testTwoMonths() throws Exception {
-
-        Date date = new Date();
-
-        String expectedTimeString ;
-
-        DateDifferizer diff ;
-        long newsecs ;
-
-        long diffSeconds = 2682000;
-
-        diff = new DateDifferizer(date, Calendar.MONTH, 1);
-        newsecs = diff.diffInSec();
-        assertEquals("Expecting same diff seconds for 23:59 seconds", diffSeconds, newsecs);
-
-        // Countdown format.
-        expectedTimeString = diff.toString();
-        assertEquals("1 month", expectedTimeString);
-    }
-
     public void testOneYearDiff() throws Exception {
 
         Date date = new Date();

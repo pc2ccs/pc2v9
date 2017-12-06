@@ -232,7 +232,7 @@ public class EventFeedStreamerTest extends AbstractTestCase {
         
         assertTrue("Expected long json ",  json.length() > 8000);
         
-        assertCountEvent(0, EventFeedJSON.CLARIFICATIONS_KEY, json); // TODO change to actual clar elemennt count
+        assertCountEvent(100, EventFeedJSON.CLARIFICATIONS_KEY, json); 
         
     }
     
