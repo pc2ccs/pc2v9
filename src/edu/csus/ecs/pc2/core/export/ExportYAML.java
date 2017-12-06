@@ -140,7 +140,10 @@ public class ExportYAML {
         contestWriter.println("elapsed: " + contestTime.getElapsedTimeStr());
         contestWriter.println("remaining: " + contestTime.getRemainingTimeStr());
         contestWriter.println("running: " + contestTime.isContestRunning());
-
+        
+        // PC^2 Specific
+        contestWriter.println(IContestLoader.AUTO_STOP_CLOCK_AT_END_KEY + ": " + info.isAutoStopContest());
+ 
         // start-time: 2011-02-04 01:23Z
         if (info.getScheduledStartDate() == null) {
             info.setScheduledStartDate(new Date());

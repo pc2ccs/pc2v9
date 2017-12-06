@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.export;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -19,10 +20,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
  * Test for YAML export.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: ExportYAMLTest.java 207 2011-07-08 18:32:38Z laned $
  */
-
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/export/ExportYAMLTest.java $
 public class ExportYAMLTest extends AbstractTestCase {
 
     private boolean debugMode = false;
@@ -186,17 +184,16 @@ public class ExportYAMLTest extends AbstractTestCase {
     }
     
     /**
-     * Test export and load of huh
-     * 
+     * Test freeze time.
      * 
      * @throws Exception
      */
     public void testFreezeTime() throws Exception {
 
-        String dataDirectory = getDataDirectory("testFreezeTime");
+        String dataDirectory = getDataDirectory(getName());
         ensureDirectory(dataDirectory);
 
-        String outDir = getOutputDataDirectory("testFreezeTime");
+        String outDir = getOutputDataDirectory(getName());
         ensureDirectory(outDir);
 
         //        startExplorer(dataDirectory);
@@ -234,29 +231,41 @@ public class ExportYAMLTest extends AbstractTestCase {
         if (!"/".equals(File.separator)) {
             convertToNativeFileSeperators(expectedContestYamlFile);
         }
-
-        // overwrite exptected
-//        copyFileOverwrite(actualContestYamlFile, expectedContestYamlFile);
         
 //        editFile(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
         
-        new Thread(new Runnable() {
-            public void run() {
-                
-            }
-        });
-
-        assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4, getOverrideStringCompare());
-
-        exportYAML = null;
-
         // Test Load
         
         ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
         IInternalContest contest2 = loader.fromYaml(null, outDir);
         ContestInformation info = contest2.getContestInformation();
         assertEquals(expectedFreezeTime, info.getFreezeTime());
+        
+        // REFACTOR move this file length check into its own unit test method.
+        
+        /**
+         * Instructions to create a new expected file for this unit test.
+         * 
+         * 1 - uncomment the copyFileOverwrite call
+         * 2 - run the unit test method
+         * 3 - comment the copyFileOverwrite call
+         * 4 - be sure to git commit new expected file 
+         */
+//        copyFileOverwrite(actualContestYamlFile, expectedContestYamlFile);          
+
+        /**
+         * "Expecting expected file length to match new/actual file length" 
+         */
+        // REFACTOR - add String message as first paraamter to assertFileContentsEquals
+        assertFileContentsEquals(
+                // If this assert fails and Export YAML is outputting different contest,
+                // follow the instructions above.
+                new File(expectedContestYamlFile), new File(actualContestYamlFile), 4, getOverrideStringCompare());
+
+        exportYAML = null;
+
+
 
     }
 
@@ -317,5 +326,80 @@ public class ExportYAMLTest extends AbstractTestCase {
           Problem problem = problems[problemNumber+1];
           problem.setManualReview(flag);
       }
+      
+      /**
+       * Test whether auto-stop-clock-at-end is written.
+       * 
+       * @throws Exception
+       */
+      public void testExportHalt() throws Exception {
+          
+          String outDir = getOutputDataDirectory(getName());
+          ensureDirectory(outDir);
+
+//          startExplorer(outDir);
+          
+          String cdpConfigDir = outDir;
+//          startExplorer(outDir);
+
+          IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
+          addProblemDataFiles (cdpConfigDir, contest);
+
+          ContestInformation contestInformation = contest.getContestInformation();
+          contestInformation.setAutoStopContest(true);
+          contest.updateContestInformation(contestInformation);
+
+          ExportYAML exportYAML = new ExportYAML();
+          exportYAML.exportFiles(outDir, contest);
+
+          String contestYamlFilename = outDir + File.separator+ IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+          assertFileExists(contestYamlFilename);
+
+          ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
+          IInternalContest contest2 = loader.fromYaml(null, outDir, false);
+          ContestInformation info = contest2.getContestInformation();
+          assertTrue("Expecting auto stop to be set ", info.isAutoStopContest());
+      }
+
+
+      /**
+       * Test whether auto-stop-clock-at-end is not written.
+       * 
+       * @throws Exception
+       */
+      public void testNoExportHaltAtEnd() throws Exception {
+          
+          String outDir = getOutputDataDirectory(getName());
+          ensureDirectory(outDir);
+          
+          String cdpConfigDir = outDir;
+//          startExplorer(outDir);
+
+          IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
+          addProblemDataFiles (cdpConfigDir, contest);
+
+          ExportYAML exportYAML = new ExportYAML();
+          exportYAML.exportFiles(outDir, contest);
+          
+          String contestYamlFilename = outDir + File.separator+ IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+          assertFileExists(contestYamlFilename);
+          
+              ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
+              IInternalContest contest2 = loader.fromYaml(null, outDir, false);
+              ContestInformation info = contest2.getContestInformation();
+              assertFalse("Expecting auto stop to NOT be set ", info.isAutoStopContest());
+    }
+
+    private void addProblemDataFiles(String cdpConfigDir, IInternalContest contest) throws FileNotFoundException {
+        
+        String testDirectory = getOutputDataDirectory(cdpConfigDir);
+        
+        Problem[] problems = contest.getProblems();
+
+        for (Problem problem : problems) {
+            sampleContest.addDataFiles(contest, testDirectory, problem, "sumit.in", "sumit.ans");
+        }
+
+    }
 
 }
