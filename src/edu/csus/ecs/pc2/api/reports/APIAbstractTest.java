@@ -6,11 +6,10 @@ import edu.csus.ecs.pc2.api.implementation.ScrollyFrame;
 
 /**
  * Class that supports test (print reports and other) classes.
+ * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
+// TODO refactor rename APIAbstractTest to APIAbstractPrint
 public abstract class APIAbstractTest {
 
     /**
