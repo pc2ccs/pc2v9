@@ -10,7 +10,7 @@ import javax.swing.JPanel;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-public class EventFeedServerPaneTest  {
+public class EventFeedServerPaneTester  {
 
     protected class TestingFrame extends JFrame {
 
@@ -70,7 +70,7 @@ public class EventFeedServerPaneTest  {
 
     public static void main(String[] args) {
         EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
-        new EventFeedServerPaneTest().startFrame(eventFeedServerPane);
+        new EventFeedServerPaneTester().startFrame(eventFeedServerPane);
 
     }
 
