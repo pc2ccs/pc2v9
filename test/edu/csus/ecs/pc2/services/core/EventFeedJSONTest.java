@@ -116,7 +116,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         IInternalContest contest = new SampleContest().createStandardContest();
         EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
 
-        String json = eventFeedJSON.createJSON(contest);
+        String json = eventFeedJSON.createJSON(contest, null, null);
 
         assertNotNull(json);
 
@@ -131,7 +131,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
 
-        String json = eventFeedJSON.createJSON(data.getContest());
+        String json = eventFeedJSON.createJSON(data.getContest(), null, null);
 
         assertNotNull(json);
 
@@ -716,11 +716,11 @@ public class EventFeedJSONTest extends AbstractTestCase {
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
 
-        String jsonBefore = new EventFeedJSON(data.getContest()).createJSON(data.getContest());
+        String jsonBefore = new EventFeedJSON(data.getContest()).createJSON(data.getContest(),null,null);
 
         EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(0), null);
         eventFeedJSON.setEventIdSequence(0);
-        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
 
         // eventFeedJSON.setEventIdSequence(0);
         // writeFile(new File("/tmp/stuf1"), eventFeedJSON.createJSON(data.getContest()));
@@ -741,7 +741,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
 
         EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(39), null);
-        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
 
         // System.out.println("debug after event 40 json = "+json);
 
@@ -773,7 +773,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         for (String badbadlist : badTypeNameLists) {
             try {
                 eventFeedJSON.setEventTypeList(badbadlist);
-                eventFeedJSON.createJSON(data.getContest());
+                eventFeedJSON.createJSON(data.getContest(), null, null);
                 fail("Expecting IllegalArgumentException for list '" + badbadlist + "'");
             } catch (IllegalArgumentException e) {
 
@@ -796,7 +796,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String elist = EventFeedJSON.CONTEST_KEY + "," + EventFeedJSON.TEAM_KEY;
 
         EventFeedFilter filter = new EventFeedFilter(null, elist);
-        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
         assertNotNull(json);
 
         assertCountEvent(1, EventFeedJSON.CONTEST_KEY, json);
@@ -832,7 +832,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         // TODO RMeventFeedJSON.setEventTypeList(elist);
 
         EventFeedFilter filter = new EventFeedFilter(null, elist);
-        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
         assertNotNull(json);
 
         assertCountEvent(1, JSONUtilities.CONTEST_KEY, json);
@@ -854,7 +854,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         // TODO RMeventFeedJSON.setEventTypeList(elist);
 
         EventFeedFilter filter = new EventFeedFilter(null, elist);
-        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
 
         assertNotNull(json);
 

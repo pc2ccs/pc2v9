@@ -20,6 +20,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import edu.csus.ecs.pc2.core.Constants;
@@ -73,7 +74,7 @@ public class EventFeedService implements Feature {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public void streamEventFeed(@QueryParam("type") String eventTypeList, @QueryParam("id") String startintEventId, @Suspended
-    final AsyncResponse asyncResponse, @Context HttpServletRequest servletRequest, @Context HttpServletResponse response) throws IOException {
+    final AsyncResponse asyncResponse, @Context HttpServletRequest servletRequest, @Context HttpServletResponse response, @Context SecurityContext sc) throws IOException {
 
         response.setContentType("json");
         response.setCharacterEncoding("UTF-8");
@@ -84,7 +85,7 @@ public class EventFeedService implements Feature {
         final ServletOutputStream servletOutputStream = asyncContext.getResponse().getOutputStream();
 
         if (eventFeedSteamer == null) {
-            eventFeedSteamer = new EventFeedStreamer(contest, controller);
+            eventFeedSteamer = new EventFeedStreamer(contest, controller, servletRequest, sc);
         }
 
         EventFeedFilter filter = new EventFeedFilter();
@@ -153,8 +154,8 @@ public class EventFeedService implements Feature {
      * @param controller
      * @return
      */
-    public static String createEventFeedJSON(IInternalContest contest, IInternalController controller) {
-        EventFeedStreamer streamer = new EventFeedStreamer(contest, controller);
+    public static String createEventFeedJSON(IInternalContest contest, IInternalController controller, HttpServletRequest servletRequest, SecurityContext sc) {
+        EventFeedStreamer streamer = new EventFeedStreamer(contest, controller, servletRequest, sc);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         streamer.addStream(stream, new EventFeedFilter());
         streamer.removeStream(stream);

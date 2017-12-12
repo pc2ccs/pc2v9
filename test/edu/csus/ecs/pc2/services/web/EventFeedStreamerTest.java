@@ -226,7 +226,7 @@ public class EventFeedStreamerTest extends AbstractTestCase {
         IInternalContest contest = new UnitTestData().getContest();
         IInternalController controller = new SampleContest().createController(contest, outputDir, true, false);
  
-        String json = EventFeedStreamer.createEventFeedJSON(contest, controller);
+        String json = EventFeedStreamer.createEventFeedJSON(contest, controller, null, null);
         
         assertNotNull(json);
         

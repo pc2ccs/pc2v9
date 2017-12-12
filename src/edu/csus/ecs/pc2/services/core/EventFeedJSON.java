@@ -5,6 +5,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.SecurityContext;
+
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -274,7 +277,7 @@ public class EventFeedJSON extends JSONUtilities {
      * @param contest
      * @return
      */
-    public String getSubmissionJSON(IInternalContest contest) {
+    public String getSubmissionJSON(IInternalContest contest, HttpServletRequest servletRequest, SecurityContext sc ) {
 
         StringBuilder stringBuilder = new StringBuilder();
         Run[] runs = contest.getRuns();
@@ -282,7 +285,7 @@ public class EventFeedJSON extends JSONUtilities {
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
             if (!run.isDeleted()) {
-                appendJSONEvent(stringBuilder, SUBMISSION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getSubmissionJSON(contest, run));
+                appendJSONEvent(stringBuilder, SUBMISSION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getSubmissionJSON(contest, run, servletRequest, sc));
                 stringBuilder.append(NL);
             }
         }
@@ -291,8 +294,8 @@ public class EventFeedJSON extends JSONUtilities {
 
     }
 
-    public String getSubmissionJSON(IInternalContest contest, Run run) {
-        return jsonTool.convertToJSON(run).toString();
+    public String getSubmissionJSON(IInternalContest contest, Run run, HttpServletRequest servletRequest, SecurityContext sc) {
+        return jsonTool.convertToJSON(run, servletRequest, sc).toString();
     }
 
     /**
@@ -384,14 +387,14 @@ public class EventFeedJSON extends JSONUtilities {
         return awardJSON.createJSON(contest);
     }
 
-    public String createJSON(IInternalContest contest, EventFeedFilter filter) throws IllegalContestState {
+    public String createJSON(IInternalContest contest, EventFeedFilter filter, HttpServletRequest servletRequest, SecurityContext sc) throws IllegalContestState {
 
         if (contest == null) {
             return "[]";
         }
 
         // fetch lines
-        String json = createJSON(contest);
+        String json = createJSON(contest, servletRequest, sc);
         String[] lines = json.split(NL);
 
         // filter
@@ -411,7 +414,7 @@ public class EventFeedJSON extends JSONUtilities {
      * @return a JSON string giving event feed in JSON
      * @throws IllegalContestState
      */
-    public String createJSON(IInternalContest contest) throws IllegalContestState {
+    public String createJSON(IInternalContest contest, HttpServletRequest servletRequest, SecurityContext sc) throws IllegalContestState {
 
         if (contest == null) {
             return "[]";
@@ -434,7 +437,7 @@ public class EventFeedJSON extends JSONUtilities {
 
         if (eventTypeList != null) {
 
-            appendAllJSONEvents(contest, buffer, eventTypeList);
+            appendAllJSONEvents(contest, buffer, eventTypeList, servletRequest);
 
         } else {
 
@@ -470,7 +473,7 @@ public class EventFeedJSON extends JSONUtilities {
             if (json != null) {
                 buffer.append(json);
             }
-            json = getSubmissionJSON(contest);
+            json = getSubmissionJSON(contest, servletRequest, sc);
             if (json != null) {
                 buffer.append(json);
             }
@@ -506,7 +509,7 @@ public class EventFeedJSON extends JSONUtilities {
      * @throws IllegalArgumentException
      *             if any event in eventTypeList is not valid
      */
-    private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String inEventTypeList) throws IllegalArgumentException {
+    private void appendAllJSONEvents(IInternalContest contest, StringBuffer buffer, String inEventTypeList, HttpServletRequest servletRequest) throws IllegalArgumentException {
 
         String[] events = inEventTypeList.split(",");
 
@@ -539,7 +542,7 @@ public class EventFeedJSON extends JSONUtilities {
                     appendNotNull(buffer, getTeamMemberJSON(contest));
                     break;
                 case SUBMISSION_KEY:
-                    appendNotNull(buffer, getSubmissionJSON(contest));
+                    appendNotNull(buffer, getSubmissionJSON(contest, servletRequest, null));
                     break;
                 case JUDGEMENT_KEY:
                     appendNotNull(buffer, getJudgementJSON(contest));

@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.services.web;
 
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -47,7 +48,7 @@ public class ScoreboardService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getScoreboard(@Context SecurityContext sc) {
+    public Response getScoreboard(@Context HttpServletRequest servletRequest, @Context SecurityContext sc) {
 
         ContestAPIStandingsJSON standings = new ContestAPIStandingsJSON();
 
@@ -57,7 +58,7 @@ public class ScoreboardService implements Feature {
             // verify contest has started or user is an admin
             if (contestTime.getElapsedMS() > 0 || sc.isUserInRole("admin")) {
                 //ok to return scoreboard
-                jsonScoreboard = standings.createJSON(contest, controller, sc.isUserInRole("public"));
+                jsonScoreboard = standings.createJSON(contest, controller, sc.isUserInRole("public"), servletRequest, sc);
             } else {
                 // do not show (return) the scoreboard if the contest has not
                 // been started and the requester is not an admin)

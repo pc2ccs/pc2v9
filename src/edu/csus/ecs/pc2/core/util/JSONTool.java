@@ -5,7 +5,11 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.SecurityContext;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -54,7 +58,7 @@ public class JSONTool {
      * 
      * @param submission
      */
-    public ObjectNode convertToJSON(Run submission) {
+    public ObjectNode convertToJSON(Run submission, HttpServletRequest servletRequest, SecurityContext sc) {
         ObjectNode element = mapper.createObjectNode();
         element.put("id", getSubmissionId(submission));
         element.put("language_id", getLanguageId(model.getLanguage(submission.getLanguageId())));
@@ -65,6 +69,31 @@ public class JSONTool {
         if (submission.getEntryPoint() != null){
             element.put("entry_point", new String(submission.getEntryPoint()));
         }
+        // FIXME we need separate event feeds for public and admin/analyst
+        // FIXME perhaps change sc to a boolean for public or not?
+//    	if (servletRequest != null && (sc != null && sc.isUserInRole("admin") || sc.isUserInRole("analyst"))) {
+        if (servletRequest != null) {
+            StringBuffer requestURL = servletRequest.getRequestURL();
+            int lastIndexOf = requestURL.lastIndexOf("/event-feed");
+            if (lastIndexOf != -1) {
+                // we need to replace event-feed
+                requestURL.replace(lastIndexOf, requestURL.length(), "/submissions/" + getSubmissionId(submission));
+            }
+            String reqString = requestURL.toString();
+            if (reqString.endsWith("/submissions")) {
+                requestURL.append("/" + getSubmissionId(submission));
+            }
+            if (reqString.endsWith("/submissions/")) {
+                requestURL.append(getSubmissionId(submission));
+            }
+            requestURL.append("/files");
+            ObjectMapper mapper = new ObjectMapper();
+            ArrayNode arrayNode = mapper.createArrayNode();
+            ObjectNode objectNode = mapper.createObjectNode();
+            objectNode.put("href", requestURL.toString());
+            arrayNode.add(objectNode);
+            element.set("files", arrayNode);
+    	}
 
         return element;
     }

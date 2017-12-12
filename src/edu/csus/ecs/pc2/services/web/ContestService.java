@@ -6,6 +6,7 @@ import java.util.GregorianCalendar;
 import java.util.Map;
 
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
@@ -94,7 +95,7 @@ public class ContestService implements Feature {
      */
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setStartime(@Context SecurityContext sc, String jsonInputString) {
+    public Response setStartime(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, String jsonInputString) {
 
         // DEBUG:
         // System.out.println ("Starttime PATCH: received the following request body: '" + jsonInputString + "'");

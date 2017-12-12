@@ -360,7 +360,7 @@ public class WebServerPane extends JPanePlugin {
 
             MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
             String title = "Event Feed JSON (at " + dateString + ", build " + buildNumber + ")";
-            String json = EventFeedStreamer.createEventFeedJSON(getContest(), getController());
+            String json = EventFeedStreamer.createEventFeedJSON(getContest(), getController(), null, null);
             String[] lines = json.split(NL);
             multipleFileViewer.addTextintoPane(title, lines);
             multipleFileViewer.setTitle("PC^2 Report (Build " + new VersionInfo().getBuildNumber() + ")");

@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.SecurityContext;
+
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -144,6 +147,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     private JSONTool jsonTool;
 
+    public HttpServletRequest servletRequest;
+
     /**
      * Add stream for future events.
      * 
@@ -178,9 +183,10 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
         }
     }
 
-    public EventFeedStreamer(IInternalContest inContest, IInternalController inController) {
+    public EventFeedStreamer(IInternalContest inContest, IInternalController inController, HttpServletRequest servletRequest, SecurityContext sc) {
         this.contest = inContest;
         this.log = inController.getLog();
+        this.servletRequest = servletRequest;
         eventFeedJSON = new EventFeedJSON(contest);
         jsonTool = new JSONTool(contest, inController);
         registerListeners(contest);
@@ -192,7 +198,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
             if (lines.length == 0) {
                 // Write events to event log if no events are in log (at this time).
-                String json = eventFeedJSON.createJSON(contest);
+                String json = eventFeedJSON.createJSON(contest, servletRequest, sc);
                 eventFeedLog.writeEvent(json);
                 System.out.println("Event feed log not loaded, event id is " + eventFeedJSON.getEventIdSequence());
             } else {
@@ -369,7 +375,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
 
-                String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(run).toString());
+                String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(run, servletRequest, null).toString());
                 sendJSON(json + NL);
             }
         }
@@ -386,7 +392,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                         String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertJudgementToJSON(run).toString());
                         sendJSON(json + NL);
                     } else {
-                        String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(run).toString());
+                        String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertToJSON(run, servletRequest, null).toString());
                         sendJSON(json + NL);
                     }
                 }
@@ -853,8 +859,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
     /**
      * Create a snap shot of the JSON event feed.
      */
-    public static String createEventFeedJSON(IInternalContest contest, IInternalController controller) {
-        EventFeedStreamer streamer = new EventFeedStreamer(contest, controller);
+    public static String createEventFeedJSON(IInternalContest contest, IInternalController controller, HttpServletRequest servletRequest, SecurityContext sc) {
+        EventFeedStreamer streamer = new EventFeedStreamer(contest, controller, servletRequest, sc);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         streamer.addStream(stream, new EventFeedFilter());
         streamer.removeStream(stream);
