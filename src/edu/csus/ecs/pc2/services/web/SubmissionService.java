@@ -15,6 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -31,6 +32,7 @@ import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -107,7 +109,7 @@ public class SubmissionService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getSubmissions() {
+    public Response getSubmissions(@Context HttpServletRequest servletRequest, @Context SecurityContext sc) {
 
         // get the groups from the contest
         Run[] runs = model.getRuns();
@@ -118,7 +120,8 @@ public class SubmissionService implements Feature {
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (!submission.isDeleted()) {
-                childNode.add(jsonTool.convertToJSON(submission));
+            	ObjectNode node = addFilesToJSON(submission, servletRequest, sc);
+                childNode.add(node);
             }
         }
 
@@ -226,17 +229,32 @@ public class SubmissionService implements Feature {
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
+    private ObjectNode addFilesToJSON(Run submission, HttpServletRequest servletRequest, @Context SecurityContext sc) {
+    	ObjectNode node = jsonTool.convertToJSON(submission);
+    	if (sc.isUserInRole("admin") || sc.isUserInRole("analyst")) {
+    		StringBuffer requestURL = servletRequest.getRequestURL();
+    		requestURL.append("/files");
+    		ObjectMapper mapper = new ObjectMapper();
+    		ArrayNode arrayNode = mapper.createArrayNode();
+    		ObjectNode objectNode = mapper.createObjectNode();
+    		objectNode.put("href", requestURL.toString());
+    		arrayNode.add(objectNode);
+    		node.set("files", arrayNode);
+    	}
+		return node;
+    }
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{submissionId}/")
-    public Response getSubmission(@PathParam("submissionId") String submissionId) {
+    public Response getSubmission(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("submissionId") String submissionId) {
         // get the submissions from the contest
         Run[] runs = model.getRuns();
 
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (!submission.isDeleted() && jsonTool.getSubmissionId(submission).equals(submissionId)) {
-                return Response.ok(jsonTool.convertToJSON(submission).toString(), MediaType.APPLICATION_JSON).build();
+            	ObjectNode node = addFilesToJSON(submission, servletRequest, sc);
+                return Response.ok(node.toString(), MediaType.APPLICATION_JSON).build();
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
