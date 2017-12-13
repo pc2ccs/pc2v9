@@ -111,7 +111,7 @@ public class ProfileSavePane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(526, 524));
+        this.setSize(new Dimension(526, 560));
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
 
         this.add(getCenterPane(), BorderLayout.CENTER);
@@ -450,7 +450,7 @@ public class ProfileSavePane extends JPanePlugin {
             resetContestTimeCheckBox.setToolTipText("Set elapsed time to zero");
             resetContestTimeCheckBox.setSelected(true);
             resetContestTimeCheckBox.setSize(new Dimension(192, 21));
-            resetContestTimeCheckBox.setLocation(new Point(28, 451));
+            resetContestTimeCheckBox.setLocation(new Point(28, 445));
             resetContestTimeCheckBox.setText("Reset Contest Times");
         }
         return resetContestTimeCheckBox;
