@@ -1,6 +1,6 @@
 # Contest Configuration, version 1.0 
-# PC^2 Version: Version 9 () Java ver 1.8.0_25 build  Windows 7 6.1 (amd64) 
-# Created: 2017-03-07 17:11:57 PST
+# PC^2 Version: Version 9.2 20171214 (Thursday, December 14th 2017 19:49 UTC) Java ver 1.8.0_25 build 308 Windows 7 6.1 (amd64) 
+# Created: 2017-12-14 12:02:36 PST
 --- 
 
 name: 'Programming Contest'
@@ -8,6 +8,7 @@ short-name: 'null'
 elapsed: 0:00:00
 remaining: 5:00:00
 running: false
+auto-stop-clock-at-end: false
 start-time: 
 duration: 5:00:00
 scoreboard-freeze-length: 02:00:00
