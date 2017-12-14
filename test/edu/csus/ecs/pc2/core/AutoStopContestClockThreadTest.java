@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core;
 import java.io.File;
 
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
@@ -17,7 +18,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 public class AutoStopContestClockThreadTest extends AbstractTestCase {
 
     /**
-     * Test auto stop clock site Three.
+     * Test auto stOop clock site Three.
      * @throws Exception
      */
     public void testAutoStopSite3() throws Exception {
@@ -74,23 +75,31 @@ public class AutoStopContestClockThreadTest extends AbstractTestCase {
         contest.updateContestTime(time);
         time = null;
         
+        ContestInformation info = contest.getContestInformation();
+        info.setAutoStopContest(true);
+        contest.updateContestInformation(info);
+        
         ContestTime newTime = contest.getContestTime();
         assertTrue("expect to halt at end of contest", newTime.isHaltContestAtTimeZero());
         assertEquals("Expected site number ", siteNumber, contest.getSiteNumber());
         assertEquals("Expected to be server ", ClientType.Type.SERVER, contest.getClientId().getClientType());
         assertEquals("Expected time to be from site  ", siteNumber, newTime.getSiteNumber());
+        
+        assertTrue ("Expecting to autostop ",contest.getContestInformation().isAutoStopContest());
 //        System.out.println("debug remaining time is "+newTime.getRemainingSecs()+" seconds ");
         
+        long startMS = System.currentTimeMillis() ;
         thread.start();
-
+        
         Thread.sleep(500); // sleep so thread has time to set running true
 
         assertTrue("Expect contest to be running ",thread.isRunning());
         assertTrue("Expect contest clock should be running ", contest.getContestTime().isContestRunning());
         
         Thread.sleep((remainSecs + 1) * 1000);
-
+        
+        long ms = System.currentTimeMillis() - startMS; 
+        
         assertFalse("Expect contest clock should not be running ", contest.getContestTime().isContestRunning());
-
     }
 }
