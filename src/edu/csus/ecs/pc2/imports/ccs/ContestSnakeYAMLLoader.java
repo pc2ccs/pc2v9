@@ -60,7 +60,6 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
  */
 public class ContestSnakeYAMLLoader implements IContestLoader {
 
-  
     /**
      * Full content of yaml file.
      */
@@ -384,6 +383,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (shortContestName != null) {
             setShortContestName(contest, shortContestName);
         }
+        
+        if (null != fetchValue(content, AUTO_STOP_CLOCK_AT_END_KEY)) {
+
+            // only set value if key present
+
+            boolean autoStopClockAtEnd = fetchBooleanValue(content, AUTO_STOP_CLOCK_AT_END_KEY, false);
+            setAutoStopClockAtEnd(contest, autoStopClockAtEnd);
+        }
 
         String contestLength = fetchValue(content, CONTEST_DURATION_KEY);
         if (contestLength != null) {
@@ -556,6 +563,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return contest;
 
+    }
+
+    /**
+     * 
+     * @param stop - true, auto stop at end of contest
+     */
+    private void setAutoStopClockAtEnd(IInternalContest contest, boolean stop) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setAutoStopContest(stop);
     }
 
     private void setMaxOutputSize(IInternalContest contest, int maxFileSize) {

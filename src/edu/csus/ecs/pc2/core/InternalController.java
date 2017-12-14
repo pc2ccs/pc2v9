@@ -352,6 +352,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * The object used to control contest auto-starting.
      */
     private AutoStarter autoStarter;
+    
+    private AutoStopContestClockThread autoStopContestClockThread = null;
 
     public InternalController(IInternalContest contest) {
         super();
@@ -1043,7 +1045,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         
         updateAutoStartInformation(inContest, this);
-
+        
+        updateAutoStopClockThread();
     }
 
     private void insureProfileDirectory(Profile profile) {
@@ -4343,4 +4346,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 //            System.err.println ("in updateAutoStartInformation() -- NOT A SERVER!!");
 //        }
     }
+    
+    /**
+     * Start Auto Stop Contest Clock Thread.
+     */
+    private void updateAutoStopClockThread() {
+
+        if (autoStopContestClockThread == null) {
+            autoStopContestClockThread = new AutoStopContestClockThread(this, contest);
+            autoStopContestClockThread.start();
+            
+            ContestTime time = contest.getContestTime();
+            log.info("Started auto stop clock thread, remaining time is " + time.getRemainingTimeStr());
+        }
+    }
+
 }
