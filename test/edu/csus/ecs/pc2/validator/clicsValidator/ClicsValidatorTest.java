@@ -554,8 +554,10 @@ public class ClicsValidatorTest extends AbstractTestCase {
         String []options = {""};
         
         //insure there is no "exitcode" file present
+        boolean exitCodeFileExisted = false;
         File runtimeErrorExitCodeFile = new File(ClicsValidator.PC2_RUNTIME_ERROR_EXITCODE_FILE_NAME);
         if (runtimeErrorExitCodeFile.exists()) {
+            exitCodeFileExisted = true;  //record that there was already an exitcode file present
             runtimeErrorExitCodeFile.delete();
         }
         
@@ -595,6 +597,14 @@ public class ClicsValidatorTest extends AbstractTestCase {
         String feedbackDetails = br.readLine();
         System.out.println("testInstanceHandleRuntimeError(): feedback details from Clics Validator when a runtime error occurred: " + feedbackDetails);
         br.close();
+        
+        //clean up: if there wasn't already an exitcode file present, remove the one we added
+        if (!exitCodeFileExisted) {
+            runtimeErrorExitCodeFile = new File(ClicsValidator.PC2_RUNTIME_ERROR_EXITCODE_FILE_NAME);
+            if (runtimeErrorExitCodeFile.exists()) {
+                runtimeErrorExitCodeFile.delete();
+            }
+        }
         
     }
 
