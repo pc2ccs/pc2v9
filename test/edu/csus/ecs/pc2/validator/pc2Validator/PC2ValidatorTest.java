@@ -7,6 +7,7 @@ import java.util.UUID;
 import edu.csus.ecs.pc2.core.execute.IResultsParser;
 import edu.csus.ecs.pc2.core.execute.XMLResultsParser;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator;
 
 /**
  * JUnit test cases for Validator.
@@ -28,6 +29,16 @@ public class PC2ValidatorTest extends AbstractTestCase {
 
 //    unused private static final String OUT_DIR_PATH = "testing" + File.separator + "validator" + File.separator + "output";
 
+    public PC2ValidatorTest(String name) {
+        super(name);
+        
+        //insure no "exitcode" file exists
+        File runtimeErrorExitCodeFile = new File(ClicsValidator.PC2_RUNTIME_ERROR_EXITCODE_FILE_NAME);
+        if (runtimeErrorExitCodeFile.exists()) {
+            runtimeErrorExitCodeFile.delete();
+        }
+    }
+    
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -345,6 +356,11 @@ public class PC2ValidatorTest extends AbstractTestCase {
             IResultsParser parser = new XMLResultsParser();
             // parser.setLog(log);
             boolean done = parser.parseValidatorResultsFile(resultsFileName);
+            
+            if ( parser.getException() != null){
+                parser.getException().printStackTrace();
+                throw parser.getException();
+            }
             Hashtable<String, String> results = parser.getResults();
 
             if (done && results != null && results.containsKey("outcome")) {
