@@ -3,9 +3,11 @@
  */
 package edu.csus.ecs.pc2.validator.clicsValidator;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -99,10 +101,13 @@ public class ClicsValidator {
     public static final String CLICS_EXCESSIVE_OUTPUT_MSG = "Excessive output";
     public static final String CLICS_INCORRECT_OUTPUT_FORMAT_MSG = "Incorrect output format";
     public static final String CLICS_WRONG_ANSWER_MSG = "Wrong Answer";
+    public static final String CLICS_RUNTIME_ERROR_MSG = "Runtime Error";
     public static final String CLICS_CORRECT_ANSWER_MSG = "accepted";
     
     public static final String CLICS_JUDGEMENT_FEEDBACK_FILE_NAME = "judgement.txt";
     public static final String CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME = "judgementdetails.txt";
+    
+    public static final String PC2_RUNTIME_ERROR_EXITCODE_FILE_NAME = "EXITCODE.TXT";
     
     public static final int EOF = -1;
     
@@ -237,6 +242,23 @@ public class ClicsValidator {
      */
     public int validate() {   
         
+        //check first whether there was a runtime error during execution (as denoted by the presence of file "EXITCODE.TXT")
+        String judgement = "";
+        String judgementDetails = "";
+        try {
+            if (new File(PC2_RUNTIME_ERROR_EXITCODE_FILE_NAME).exists()) {
+                //yes, an exitcode file exists so a runtime error occurred; return the appropriate response and skip any further validation
+                judgement = CLICS_RUNTIME_ERROR_MSG;
+                judgementDetails = "Runtime Error code = '" + getRuntimeErrorExitCodeFromFile(PC2_RUNTIME_ERROR_EXITCODE_FILE_NAME) + "'";
+                outputFailure(judgement, judgementDetails);
+                return CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE ;
+            } 
+        } catch (IOException e1) {
+            System.err.println("Error reading exit code file '" + PC2_RUNTIME_ERROR_EXITCODE_FILE_NAME + "'");
+            e1.printStackTrace(System.err);
+        }
+
+        
         //get input stream for reading judge's answer
         InputStream judgeAnswerIS=null;
         try {
@@ -257,6 +279,21 @@ public class ClicsValidator {
     }
     
     /**
+     * Reads and returns a line from the specified file, expected to contain a runtime error exit code.
+     * 
+     * @param exitcodeFileName the name of the file containing the runtime error exit code
+     * @return a String containing the first line of the specified file
+     * @throws IOException 
+     * @throws FileNotFoundException 
+     */
+    private String getRuntimeErrorExitCodeFromFile(String exitcodeFileName) throws FileNotFoundException, IOException {
+        BufferedReader bufferedReader = new BufferedReader (new FileReader(exitcodeFileName));
+        String exitCodeString = bufferedReader.readLine();
+        bufferedReader.close();
+        return exitCodeString;
+    }
+
+    /**
      * Causes this ClicsValidator to evaluate the team output (received on the specified input stream)
      * against the judge's answer (received on the specified input stream), 
      * and return either success or failure as defined by the static class constants.
@@ -266,7 +303,7 @@ public class ClicsValidator {
      * 
      * @return an int indicating success or failure, or an error code if an error occurred
      */
-    public int validate(InputStream judgeAnswerIS, InputStream teamOutputIS) {
+    private int validate(InputStream judgeAnswerIS, InputStream teamOutputIS) {
         
         //we need a pushback stream so we can mimic "peek()" on the judge's answer file stream
         PushbackInputStream judgeAnswerPushbackIS = new PushbackInputStream(judgeAnswerIS);
@@ -865,7 +902,7 @@ public class ClicsValidator {
             e.printStackTrace();
             System.exit (CLICS_VALIDATOR_ERROR_EXIT_CODE);
         }
-                
+        
         int result = validator.validate();
                 
         System.out.println ("Exiting Clics Validator main() with exit code " + result);
