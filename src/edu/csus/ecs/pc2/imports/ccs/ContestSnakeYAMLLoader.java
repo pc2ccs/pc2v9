@@ -1210,12 +1210,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     boolean active = fetchBooleanValue(map, "active", true);
                     language.setActive(active);
 
-                    boolean useJudgeCommand = fetchBooleanValue(map, USE_JUDGE_COMMAND_KEY, true);
+                    boolean useJudgeCommand = fetchBooleanValue(map, USE_JUDGE_COMMAND_KEY, false);
                     language.setUsingJudgeProgramExecuteCommandLine(useJudgeCommand);
 
                     String judgeExecuteCommandLine = fetchValue(map, JUDGE_EXECUTE_COMMAND_KEY);
                     if (judgeExecuteCommandLine != null) {
                         language.setJudgeProgramExecuteCommandLine(judgeExecuteCommandLine);
+                    } else {
+                        language.setUsingJudgeProgramExecuteCommandLine(false);
                     }
 
                     // TODO handle interpreted languages, seems it should be in the export

@@ -2766,5 +2766,67 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         assertFalse("Expecting no halt at end", contest.getContestInformation().isAutoStopContest());
     }
+    
+    
+    /**
+     * Test default setting for using judge command line.
+     * 
+     * Tests for languages that do not have a   use-judge-cmd: true
+     * 
+     * Bug 1278 test.
+     * 
+     * @throws Exception
+     */
+    public void testLanguageLoadJudgeCmdLine() throws Exception {
+        
+//        String configDir = getTestSampleContestDirectory( "sumitMTC") + File.separator + IContestLoader.CONFIG_DIRNAME;
+//        String yamlFile = configDir + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+//        editFile(yamlFile);
+
+        IInternalContest contest = loadSampleContest(null, "sumitMTC");
+        assertNotNull(contest);
+        
+        Language[] languages = contest.getLanguages();
+        
+        assertEquals("Expecting language count ", 7, languages.length);
+        
+        
+        for (Language language : languages) {
+            if ("Perl".equals(language.getDisplayName())){
+                assertFalse ("Expect NOT Using judges command line boolean  "+language, language.isUsingJudgeProgramExecuteCommandLine());
+            }
+        }
+    }
+    
+    /**
+     * Test default value for isUsingJudgeProgramExecuteCommandLine.
+     * 
+     * Bug 1278 test.
+     * 
+     * @throws Exception
+     */
+    public void testLanguageLoad() throws Exception {
+
+        String[] yamlLines = { //
+                "languages:", //
+                "", //
+                "  - name: Perl", //
+                "    active: true", //
+                "", //
+                "  - name: Python 2", //
+                "    compiler: /usr/bin/python2", //
+                "    compiler-args: -m py_compile {files}", //
+                "    runner: /usr/bin/pypy", //
+        };
+
+        Language[] languages = loader.getLanguages(yamlLines);
+        
+        for (Language language : languages) {
+            
+            // Default should be isUsingJudgeProgramExecuteCommandLine is false.
+            
+            assertFalse ("Expect NOT Using judges command line boolean  "+language, language.isUsingJudgeProgramExecuteCommandLine());
+        }
+    }
 }
 
