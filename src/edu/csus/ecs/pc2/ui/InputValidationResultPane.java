@@ -434,9 +434,14 @@ public class InputValidationResultPane extends JPanePlugin {
             // there are some results; see if there were any failures
             boolean foundFailure = false;
             for (InputValidationResult res : runResults) {
-                if (!res.isPassed()) {
-                    foundFailure = true;
-                    break;
+                if (res == null) {
+                    //ignore null results, but log them
+                    getController().getLog().warning("InputValidationPane SwingWorker thread returned null InputValidationResult");
+                } else {
+                    if (!res.isPassed()) {
+                        foundFailure = true;
+                        break;
+                    }
                 }
             }
 
@@ -459,10 +464,12 @@ public class InputValidationResultPane extends JPanePlugin {
                     int totalCount = 0;
                     int failCount = 0;
                     for (InputValidationResult res : runResults) {
-                        if (!res.isPassed()) {
-                            failCount++;
+                        if (res != null) {
+                            if (!res.isPassed()) {
+                                failCount++;
+                            }
+                            totalCount++;
                         }
-                        totalCount++;
                     }
                     msg = "" + failCount + " of " + totalCount + " input data files FAILED validation";
                     color = Color.red;
