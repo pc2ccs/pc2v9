@@ -1385,10 +1385,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (getMultiTestSetOutputViewerFrame().isVisible()) {
             if (getMultiTestSetOutputViewerFrame().getState() == Frame.ICONIFIED) {
                 getMultiTestSetOutputViewerFrame().setState(javax.swing.JFrame.NORMAL);
-            }
-        } else{ 
-            getMultiTestSetOutputViewerFrame().setVisible(true);
+            } 
         }
+        getMultiTestSetOutputViewerFrame().setVisible(true);
     }
 
     private MultiTestSetOutputViewerFrame getMultiTestSetOutputViewerFrame() {
