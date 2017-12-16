@@ -2828,5 +2828,27 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             assertFalse ("Expect NOT Using judges command line boolean  "+language, language.isUsingJudgeProgramExecuteCommandLine());
         }
     }
+
+    
+    public void testLoadDefaultTitle() throws Exception {
+        
+        String [] section = {
+                IContestLoader.VALIDATOR_KEY + ":", //
+                "   validatorProg: pc2.jar edu.csus.ecs.pc2.validator.Validator", //
+                "   validatorCmd: \"{:validator} {:infile} {:outfile} {:ansfile} {:resfile}  -pc2 1 true\"", //
+                "   usingInternal: true", //
+                "   validatorOption: 1", //
+        };
+        
+        
+        IInternalContest contest = snake.fromYaml(null, section, null);
+        
+        ContestInformation info = contest.getContestInformation();
+        
+        System.out.println("debug 22 info "+info.getContestTitle());
+        
+        assertNull("Expecting null for title ", info.getContestTitle());
+        
+    }
 }
 

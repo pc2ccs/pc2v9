@@ -350,6 +350,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (content == null) {
             return contest;
         }
+        
+        setTitle(contest, null);
 
         String contestTitle = fetchValue(content, CONTEST_NAME_KEY);
         if (contestTitle != null) {
