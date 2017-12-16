@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -1381,7 +1382,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         sendTeamOutputFileNames();
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
-        getMultiTestSetOutputViewerFrame().setVisible(true);
+        if (getMultiTestSetOutputViewerFrame().isVisible()) {
+            if (getMultiTestSetOutputViewerFrame().getState() == Frame.ICONIFIED) {
+                getMultiTestSetOutputViewerFrame().setState(javax.swing.JFrame.NORMAL);
+            }
+        } else{ 
+            getMultiTestSetOutputViewerFrame().setVisible(true);
+        }
     }
 
     private MultiTestSetOutputViewerFrame getMultiTestSetOutputViewerFrame() {
