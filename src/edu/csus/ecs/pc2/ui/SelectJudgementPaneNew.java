@@ -60,10 +60,8 @@ import edu.csus.ecs.pc2.ui.judge.JudgeView;
  * Select a Judgement Pane.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
@@ -549,6 +547,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 // if we do not runFiles yet, do not allow view Outputs.
                 getViewOutputsButton().setEnabled(false);
             }
+            
+            getNotifyTeamCheckBox().setSelected(true);
         } else { // the run was null
 
             getAcceptChosenSelectionButton().setVisible(false);
