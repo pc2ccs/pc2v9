@@ -67,6 +67,19 @@ public class ProblemsReport implements IReport {
             isStopOnFirstFailedTestCase = "Yes";
         }
         printWriter.println("       Stop on 1st fail : " + isStopOnFirstFailedTestCase);
+        
+        String balloonColor = problem.getColorName();
+        if (balloonColor==null || balloonColor.trim().equals("")) {
+            balloonColor = "undefined";
+        }
+        printWriter.println("       Balloon color   : " + balloonColor);
+        
+        String balloonRGB = problem.getColorRGB();
+        if (balloonRGB==null || balloonRGB.trim().equals("")) {
+            balloonRGB = "undefined";
+        }
+        printWriter.println("       Balloon RGB     : " + balloonRGB);
+        
         printWriter.println();
 
         printWriter.print("   Execution time limit : " + problem.getTimeOutInSeconds() + " seconds");
