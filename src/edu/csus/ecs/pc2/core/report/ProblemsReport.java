@@ -72,13 +72,13 @@ public class ProblemsReport implements IReport {
         if (balloonColor==null || balloonColor.trim().equals("")) {
             balloonColor = "undefined";
         }
-        printWriter.println("       Balloon color   : " + balloonColor);
+        printWriter.println("       Balloon color    : " + balloonColor);
         
         String balloonRGB = problem.getColorRGB();
         if (balloonRGB==null || balloonRGB.trim().equals("")) {
             balloonRGB = "undefined";
         }
-        printWriter.println("       Balloon RGB     : " + balloonRGB);
+        printWriter.println("       Balloon RGB      : " + balloonRGB);
         
         printWriter.println();
 
