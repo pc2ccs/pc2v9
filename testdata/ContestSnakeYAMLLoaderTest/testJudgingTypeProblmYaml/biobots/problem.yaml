@@ -1,0 +1,19 @@
+#
+# judging-type test
+#
+--- 
+
+name: biobots
+source: 
+author: 
+license: 
+rights_owner: 
+
+judging-type:
+    computer-judged: true
+    manual-review: true
+    send-prelim-judgement: true
+
+limits: 
+   timeout: 120
+

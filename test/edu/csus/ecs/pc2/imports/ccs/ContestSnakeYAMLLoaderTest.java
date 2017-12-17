@@ -212,7 +212,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 "    short-name: apl", //
                 "    color:      yellow", //
                 "    rgb:        #ffff00", //
-                "    computer-judged: false", "    manual-review: true", "    send-prelim-judgement: false", };
+                "    computer-judged: false", //
+                "    manual-review: true", //
+                "    send-prelim-judgement: false", };
 
         Problem[] problems = loader.getProblems(yamlLines, IContestLoader.DEFAULT_TIME_OUT);
         int problemIndex = 0;
@@ -2845,10 +2847,87 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         ContestInformation info = contest.getContestInformation();
         
-        System.out.println("debug 22 info "+info.getContestTitle());
-        
         assertNull("Expecting null for title ", info.getContestTitle());
         
     }
+    
+    /**
+     * test judging-typ in contest yaml.
+     * 
+     * @throws Exception
+     */
+    public void testJudgingTypeSectionProblemSet() throws Exception {
+
+        String[] yamlLines = { //
+                IContestLoader.JUDGING_TYPE_KEY + ":", //
+                "    computer-judged: false", //
+                "    manual-review: true", // 
+                "    send-prelim-judgement: false", //
+                "problemset:", //
+                "  - letter:     A", //
+                "    short-name: apl", //
+                "    color:      yellow", //
+                "    rgb:        #ffff00", //
+                };
+
+        Problem[] problems = loader.getProblems(yamlLines, IContestLoader.DEFAULT_TIME_OUT);
+        int problemIndex = 0;
+
+        Problem problem = problems[problemIndex++];
+        
+//        dumpJudgingTypes(this.getName(), problem);
+        
+        assertFalse("For problem "+problem+" expecting NOT isComputerJudged", problem.isComputerJudged());  
+        assertTrue("For problem "+problem+" expecting isManualReview", problem.isManualReview());  
+        assertFalse("For problem "+problem+" expecting NOT isPrelimaryNotification", problem.isPrelimaryNotification());  
+    }
+    
+    /**
+     * test judging-typ in problem yaml.
+     */
+    public void testJudgingTypeProblmYaml() throws Exception {
+        
+        String dataDir = getDataDirectory(this.getName());
+        
+//        String inputYamlFile = getDataDirectory("contest.yaml");
+//      System.out.println("input Filename: "+inputYamlFile);
+        
+//        ensureDirectory(dataDir);
+//        startExplorer(dataDir);
+
+      IInternalContest contest = loader.fromYaml(null, dataDir);
+        
+//        String[] yamlLines = { //
+//                IContestLoader.JUDGING_TYPE_KEY + ":", //
+//                "    computer-judged: false", //
+//                "    manual-review: true", // 
+//                "    send-prelim-judgement: false", //
+//        };
+
+        Problem[] problems = contest.getProblems();
+        int problemIndex = 0;
+
+        Problem problem = problems[problemIndex++];
+
+//        dumpJudgingTypes (this.getName(), problem);
+        
+        assertTrue("For problem "+problem+" expecting isComputerJudged", problem.isComputerJudged());  
+        assertTrue("For problem "+problem+" expecting isManualReview", problem.isManualReview());  
+        assertTrue("For problem "+problem+" expecting isPrelimaryNotification", problem.isPrelimaryNotification());  
+
+        problem = problems[problemIndex++];
+        
+        assertFalse("For problem "+problem+" expecting NOT isComputerJudged", problem.isComputerJudged());  
+        assertTrue("For problem "+problem+" expecting isManualReview", problem.isManualReview());  
+        assertFalse("For problem "+problem+" expecting NOT isPrelimaryNotification", problem.isPrelimaryNotification());  
+    }
+
+    void dumpJudgingTypes(String message, Problem problem) {
+        System.out.println("Problem '" + problem.getDisplayName() + "' comment="+message+" " + //
+                " comp " + problem.isComputerJudged() + //
+                " manual " + problem.isManualReview() + //
+                " notify " + problem.isPrelimaryNotification());
+    }
+    
 }
 

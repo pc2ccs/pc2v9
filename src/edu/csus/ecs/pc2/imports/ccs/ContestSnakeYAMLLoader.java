@@ -500,7 +500,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         /**
          * Manual Review global override.
          */
-        boolean manualReviewOverride = fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
+        boolean manualReviewOverride = false;
+        
+        @SuppressWarnings("unchecked")
+        LinkedHashMap<String, Object> judgingTypeContent = (LinkedHashMap<String, Object>) content.get(JUDGING_TYPE_KEY);
+        if (judgingTypeContent != null) {
+            manualReviewOverride = fetchBooleanValue(judgingTypeContent, MANUAL_REVIEW_KEY, false);
+        } else {
+            manualReviewOverride = fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
+        }
 
         Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
 
@@ -754,6 +762,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             return content.get(key).toString();
         }
     }
+    
+    private boolean isValuePresent (Map<String, Object> content, String key){
+        if (content == null) {
+            return false;
+        }
+        Object value = content.get(key);
+        return value != null;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -987,19 +1003,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             addDefaultPC2Validator(problem, 1);
         }
         
-        
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
         problem.setStopOnFirstFailedTestCase(stopOnFirstFail);
 
         assignJudgingType(content, problem, overrideManualReview);
-
-        boolean manualReview = fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
-        if (overrideManualReview) {
-            manualReview = true;
-        }
-
-        if (manualReview) {
-            problem.setManualReview(true);
+        
+        @SuppressWarnings("unchecked")
+        LinkedHashMap<String, Object> judgingTypeContent = (LinkedHashMap<String, Object>) content.get(JUDGING_TYPE_KEY);
+        if (judgingTypeContent != null) {
+            assignJudgingType(judgingTypeContent, problem, overrideManualReview);
         }
 
         // TODO CCS - send preliminary - add bug - fix.
@@ -1237,7 +1249,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return (Language[]) languageList.toArray(new Language[languageList.size()]);
     }
-
+    
     @SuppressWarnings("unchecked")
     @Override
     public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
@@ -1283,6 +1295,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
 
                 Problem problem = new Problem(problemTitle);
+                
+                problem.setComputerJudged(true);
 
                 int actSeconds = fetchIntValue(map, TIMEOUT_KEY, seconds);
                 problem.setTimeOutInSeconds(actSeconds);
@@ -1302,12 +1316,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setLetter(problemLetter);
                 problem.setColorName(colorName);
                 problem.setColorRGB(colorRGB);
-
-                // assign global judging type values.
-                assignDefaultJudgingTypes(yamlLines, problem, manualReviewOverride);
-
-                // assign individual judging type values.
+                
+                /**
+                 * Assign each proble default values from contest.yaml level
+                 */
+                assignJudgingType(yamlContent, problem, manualReviewOverride);
+                
+                LinkedHashMap<String, Object> judgingTypeContent = (LinkedHashMap<String, Object>) yamlContent.get(JUDGING_TYPE_KEY);
+                if (judgingTypeContent != null) {
+                    assignJudgingType(judgingTypeContent, problem, manualReviewOverride);
+                }
+                
                 assignJudgingType(map, problem, manualReviewOverride);
+                
 
                 boolean loadFilesFlag = fetchBooleanValue(map, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
                 problem.setUsingExternalDataFiles(!loadFilesFlag);
@@ -1990,19 +2011,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
     }
 
-    @Override
-    public void assignDefaultJudgingTypes(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
-
+    public void assignJudgingType(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
         Map<String, Object> map = loadYaml(null, yaml);
         assignJudgingType(map, problem, overrideManualReviewFlag);
     }
 
     /**
      * Assign individual problem judging type based on map values.
-     * 
-     * @param map
-     * @param problem
-     * @param overrideManualReviewFlag
      */
     protected void assignJudgingType(Map<String, Object> map, Problem problem, boolean overrideManualReviewFlag) {
 
@@ -2012,16 +2027,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // System.out.println("debug problem "+problem.getShortName()+" "+map);
         // }
 
-        boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
-
-        if (sendPreliminary) {
-            problem.setPrelimaryNotification(true);
+        if (isValuePresent(map, SEND_PRELIMINARY_JUDGEMENT_KEY )){
+            boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
+            problem.setPrelimaryNotification(sendPreliminary);
         }
 
-        boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, true);
-        problem.setComputerJudged(computerJudged);
+        if (isValuePresent(map, COMPUTER_JUDGING_KEY )){
+            boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, false);
+            problem.setComputerJudged(computerJudged);
+        }
+        
+        boolean manualReview  = problem.isManualReview();
 
-        boolean manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
+        if (isValuePresent(map, MANUAL_REVIEW_KEY )){
+            manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
+        }
 
         if (overrideManualReviewFlag) {
             manualReview = true;
@@ -2030,13 +2050,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (manualReview) {
             problem.setManualReview(true);
         }
-
-        // printKeyFound("debug ", map, COMPUTER_JUDGING_KEY);
-        // printKeyFound("debug ", map, MANUAL_REVIEW_KEY);
-        // printKeyFound("debug ", map, SEND_PRELIMINARY_JUDGEMENT_KEY);
-        // System.out.println("debug " + toStringTwo(problem));
-        // System.out.println();
-
     }
 
     protected void printKeyFound(String message, Map<String, Object> map, String key) {

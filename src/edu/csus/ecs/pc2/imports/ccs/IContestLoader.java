@@ -255,8 +255,6 @@ public interface IContestLoader {
 
     boolean getBooleanValue(String string, boolean defaultBoolean);
 
-    void assignDefaultJudgingTypes(String[] yaml, Problem problem, boolean overrideManualReviewFlag);
-    
     /**
      * Load contest with settings from file/CDP.
      * @param contest
