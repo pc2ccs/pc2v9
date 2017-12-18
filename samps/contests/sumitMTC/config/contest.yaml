@@ -23,6 +23,13 @@ scoreboard-freeze-length: 01:00:00
 # remaining: 5:00:00
 # running: false
 
+# Halt contest clock at end of contest
+# auto-stop-clock-at-end: true
+
+# Do not halt contest clock at end of contest, default setting
+# auto-stop-clock-at-end: false
+
+
 # default pc2 judging types
 computer-judged: true
 manual-review: true
