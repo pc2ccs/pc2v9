@@ -33,11 +33,13 @@ import edu.csus.ecs.pc2.profile.ProfileManager;
  * Command Line print PC^2 Reports.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public final class Reports {
+
+    /**
+     * Location where pc2 installed
+     */
+    private static String installDirectory = Utilities.getCurrentDirectory();
 
     private String profileName = null;
 
@@ -45,11 +47,11 @@ public final class Reports {
 
     private int siteNumber = 1;
 
-    private String directory = null;
-
     private boolean usingProfile = true;
     
     private static final String FILE_OPTION_STRING = "-F";
+    
+    private static final String DIR_OPTION_STRING = "--dir";
 
     public Reports(String profileName, char[] charArray) {
         super();
@@ -302,46 +304,15 @@ public final class Reports {
      */
     private void printReport(String arg, boolean outputXML) {
 
-        String dirName = null;
+        String dirName = getInstallDirectory();
 
         try {
-
-            if (getDirectory() == null) {
-
-                if (isUsingProfile()) {
-                    ProfileManager manager = new ProfileManager();
-                    Profile profile = null;
-
-                    if (getProfileName() == null) {
-                        profile = manager.getDefaultProfile();
-                        System.err.println("Using default profile is: " + profile.getName() + " " + profile.getProfilePath());
-                    } else {
-                        Profile[] profiles = manager.load();
-                        for (Profile checkProfile : profiles) {
-                            if (checkProfile.getContestId().equals(getProfileName())) {
-                                profile = checkProfile;
-                            }
-                        }
-                        if (profile == null) {
-                            System.err.println("No profile named " + getProfileName() + " in " + ProfileManager.PROFILE_INDEX_FILENAME);
-                            return;
-                        }
-                    }
-
-                    System.err.println("Using profile " + profile.getName() + " " + profile.getProfilePath());
-                    dirName = profile.getProfilePath();
-                } else {
-                    dirName = ".";
-                }
-
-            } else {
-                dirName = getDirectory();
-            }
+            dirName = locateProfileDirectory();
 
             dirName = dirName + File.separator + "db." + getSiteNumber();
 
             if (!new File(dirName).isDirectory()) {
-                System.err.println("Directory does not exist: " + dirName);
+                System.err.println("Expected config directory, not found dir expected " + dirName);
                 return;
             }
 
@@ -389,24 +360,63 @@ public final class Reports {
 
             }
         } catch (FileNotFoundException fnfe) {
-            System.err.println("ERROR nothing to print, no pc2 files/profiles found under " + Utilities.getCurrentDirectory());
+            System.err.println("ERROR nothing to print, no pc2 files/profiles found under " + getInstallDirectory());
+            fnfe.printStackTrace(); // debug 22
         } catch (FileSecurityException fse) {
             System.err.println("ERROR " + getFSEMsg(fse));
             System.err.println("For directory " + dirName);
-            fse.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("ERROR " + e.getMessage());
         }
     }
 
-    private void writeFile(String filename, String s) throws IOException {
+    /**
+     * Find the profile directory where config files are present.
+     * 
+     * @see #getInstallDirectory()
+     * @return the profile/config directory (which contains db.1)
+     */
+    protected String locateProfileDirectory() throws Exception {
 
+        String dirName = null;
+        
+        String profileIndexFilename = getInstallDirectory() + File.separator + ProfileManager.PROFILE_INDEX_FILENAME;
+
+        ProfileManager manager = new ProfileManager(profileIndexFilename);
+        Profile profile = null;
+
+        if (getProfileName() == null) {
+            // No profile name specified, use default profile
+            
+            profile = manager.getDefaultProfile();
+            System.err.println("Using default profile is: " + profile.getName() + " " + profile.getProfilePath());
+            
+        } else {
+            
+            // find/match profile
+            
+            Profile[] profiles = manager.load();
+            for (Profile checkProfile : profiles) {
+                if (checkProfile.getContestId().equals(getProfileName())) {
+                    profile = checkProfile;
+                }
+            }
+            if (profile == null) {
+                throw new Exception("No profile named " + getProfileName() + " in " + profileIndexFilename); // profileIndexFilename
+            }
+        }
+
+        System.err.println("Using profile " + profile.getName() + " " + profile.getProfilePath());
+        dirName = getInstallDirectory() + File.separator + profile.getProfilePath();
+
+        return dirName;
+    }
+
+    private void writeFile(String filename, String s) throws IOException {
         FileOutputStream fis = new FileOutputStream(filename, false);
         fis.write(s.getBytes());
         fis.close();
         fis = null;
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -460,14 +470,6 @@ public final class Reports {
         this.siteNumber = siteNumber;
     }
 
-    public String getDirectory() {
-        return directory;
-    }
-
-    public void setDirectory(String directory) {
-        this.directory = directory;
-    }
-    
     /**
      * Fatal error - log error and show user message before exiting.
      * 
@@ -477,7 +479,9 @@ public final class Reports {
     protected static void fatalError(String message, Exception ex) {
         
         System.err.println(message);
-        ex.printStackTrace(System.err);
+        if (ex != null){
+            ex.printStackTrace(System.err);
+        }
         System.exit(2);
     }
     
@@ -501,7 +505,7 @@ public final class Reports {
     public static void main(String[] args) {
 
         String[] requireArguementArgs = { "--contestPassword", //
-                "--profile", "--dir", "--site", FILE_OPTION_STRING };
+                "--profile", DIR_OPTION_STRING, "--site", FILE_OPTION_STRING };
 
         ParseArguments arguments = new ParseArguments(args, requireArguementArgs);
 
@@ -527,6 +531,15 @@ public final class Reports {
             } catch (IOException e) {
                 fatalError("Unable to read file " + propertiesFileName, e);
             }
+        }
+        
+        if (arguments.isOptPresent(DIR_OPTION_STRING)) {
+            String dir = arguments.getOptValue(DIR_OPTION_STRING);
+            
+            if (!(new File(dir).isDirectory())) {
+                fatalError("No such directory '"+dir+"'");
+            }
+            setInstallDirectory(dir);
         }
 
         if (arguments.isOptPresent("--list")) {
@@ -586,7 +599,10 @@ public final class Reports {
             // If only a digit, look it up in the profiles list
 
             try {
-                Profile[] list = new ProfileManager().load();
+                
+                String profileIndexFilename = getInstallDirectory() + File.separator + ProfileManager.PROFILE_INDEX_FILENAME;
+                
+                Profile[] list = new ProfileManager(profileIndexFilename).load();
 
                 int profileNumber = getInteger(name);
                 if (list.length > 0 && profileNumber - 1 < list.length) {
@@ -613,14 +629,16 @@ public final class Reports {
      * 
      */
     private static void listProfiles() {
+        
+        String profileIndexFilename = getInstallDirectory() + File.separator + ProfileManager.PROFILE_INDEX_FILENAME;
 
         try {
 
-            if (!new File(ProfileManager.PROFILE_INDEX_FILENAME).exists()) {
-                System.err.println("No profiles exist (Profile properties files does not exist: " + ProfileManager.PROFILE_INDEX_FILENAME + " )");
+            if (!new File(profileIndexFilename).exists()) {
+                System.err.println("No profiles exist (Profile properties files does not exist: " + profileIndexFilename + " )");
                 return;
             }
-            Profile[] list = new ProfileManager().load();
+            Profile[] list = new ProfileManager(profileIndexFilename).load();
 
             if (list.length > 0) {
                 int i = 1;
@@ -631,7 +649,7 @@ public final class Reports {
                 System.out.println();
             }
 
-            Profile profile = new ProfileManager().getDefaultProfile();
+            Profile profile = new ProfileManager(profileIndexFilename).getDefaultProfile();
             if (profile != null) {
                 System.out.println("Default name  : " + profile.getName() + "\n  Profile ID  : " + profile.getContestId() + "\n  Description : " + profile.getDescription() + "\n  Path        : "
                         + profile.getProfilePath());
@@ -642,6 +660,17 @@ public final class Reports {
         } catch (ProfileLoadException e) {
             e.printStackTrace(System.err);
         }
+    }
+
+    /**
+     * Directory where pc2 is installed
+     */
+    private static String getInstallDirectory() {
+        return installDirectory;
+    }
+    
+    public static void setInstallDirectory(String installDirectory) {
+        Reports.installDirectory = installDirectory;
     }
 
     /**
@@ -673,6 +702,5 @@ public final class Reports {
         contestXML.addFileInfo(mementoRoot);
 
         return mementoRoot.saveToString();
-
     }
 }
