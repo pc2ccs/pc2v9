@@ -28,7 +28,7 @@ problemset:
   - letter: A
     short-name: hello
     color: red
-    rgb: #FF0000
+    rgb: "#FF0000"
 #     2 data files written
 #     wrote reports\yaml09.18.40.546\hello\problem.yaml
 #     wrote reports\yaml09.18.40.546\hello\data\secret\hello.ans
@@ -36,7 +36,7 @@ problemset:
   - letter: B
     short-name: sumit
     color: yellow
-    rgb: #FFFF00
+    rgb: "#FFFF00"
 #     3 data files written
 #     wrote reports\yaml09.18.40.546\sumit\problem.yaml
 #     wrote reports\yaml09.18.40.546\sumit\data\secret\sumit.dat
