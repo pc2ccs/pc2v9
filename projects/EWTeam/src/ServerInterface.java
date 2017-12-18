@@ -281,9 +281,16 @@ public class ServerInterface {
 			}
 
 			public void clarificationAnswered(IClarification clar) {
-				TeamData t = teams.get(clar.getTeam().getLoginName());
-				if (t != null) {
-					t.setNewClar(clar);
+				if (clar.isSendToAll()) {
+					for (String key : teams.keySet()) {
+						TeamData t = teams.get(key);
+						t.setNewToAllClar(clar);
+					}
+				} else {
+					TeamData t = teams.get(clar.getTeam().getLoginName());
+					if (t != null) {
+						t.setNewClar(clar);
+					}
 				}
 			}
 
