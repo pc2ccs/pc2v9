@@ -68,17 +68,26 @@ public class ProblemsReport implements IReport {
         }
         printWriter.println("       Stop on 1st fail : " + isStopOnFirstFailedTestCase);
         
-        String balloonColor = problem.getColorName();
-        if (balloonColor==null || balloonColor.trim().equals("")) {
-            balloonColor = "undefined";
+        String balloonColorName = problem.getColorName();
+        if (balloonColorName==null || balloonColorName.trim().equals("")) {
+            balloonColorName = "undefined";
         }
-        printWriter.println("       Balloon color    : " + balloonColor);
+        printWriter.println("       Balloon color    : " + balloonColorName);
         
-        String balloonRGB = problem.getColorRGB();
-        if (balloonRGB==null || balloonRGB.trim().equals("")) {
-            balloonRGB = "undefined";
+        String balloonColorRGB = problem.getColorRGB();
+        if (balloonColorRGB==null || balloonColorRGB.trim().equals("")) {
+            balloonColorRGB = "undefined";
+            if (!balloonColorName.equals("undefined")) {
+                //there's no RGB but there is a color name; it might be because a YAML file didn't include quotes around the RGB hash-code...
+                balloonColorRGB += " (forgot to put quotes around RGB hashcode, e.g. \"#FF00FF\"?)";
+                if (controller!=null) {
+                    controller.getLog().warning("Problem has color name but no color RGB (forgot to put quotes around RGB hashcode, e.g. \"#FF00FF\"?)");
+                } else {
+                    System.out.println("Warning: Problem has color name but no color RGB (forgot to put quotes around RGB hashcode, e.g. \"#FF00FF\"?)");
+                }
+            }
         }
-        printWriter.println("       Balloon RGB      : " + balloonRGB);
+        printWriter.println("       Balloon RGB      : " + balloonColorRGB);
         
         printWriter.println();
 
