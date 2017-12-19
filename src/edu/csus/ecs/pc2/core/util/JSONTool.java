@@ -358,7 +358,10 @@ public class JSONTool {
             element.put("organization_id", getOrganizationId(account));
         }
         if (account.getGroupId() != null) {
-            element.put("group_id", getGroupId(model.getGroup(account.getGroupId())));
+            ArrayNode groupIds = mapper.createArrayNode();
+            // FIXME eventually accounts should have more then 1 groupId, make sure add them
+            groupIds.add(getGroupId(model.getGroup(account.getGroupId())));
+            element.set("group_ids", groupIds);
         }
         return element;
     }

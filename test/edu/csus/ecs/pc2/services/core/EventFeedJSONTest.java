@@ -400,11 +400,13 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertEqualJSON(json, "id", "1");
         assertEqualJSON(json, "name", "team1");
-        assertEqualJSON(json, "group_id", "1024");
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode readTree = mapper.readTree(json);
+        List<JsonNode> findValues = readTree.findValues("group_ids");
+        assertEquals("matching group ids", "1024", findValues.get(0).elements().next().asText());
 
         assertJSONStringValue(json, "id", "1");
         assertJSONStringValue(json, "icpc_id", "3001");
-        assertJSONStringValue(json, "group_id", "1024");
     }
 
     /**
