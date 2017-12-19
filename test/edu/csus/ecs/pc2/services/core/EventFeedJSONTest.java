@@ -747,7 +747,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertNotNull(json);
 
-        assertMatchCount(529, "\"type\"", json);
+        assertMatchCount(530, "\"type\"", json);
 
     }
 

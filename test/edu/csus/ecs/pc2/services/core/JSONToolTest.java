@@ -741,7 +741,7 @@ public class JSONToolTest extends AbstractTestCase {
 
         assertNotNull(json);
 
-        assertMatchCount(529, "\"type\"", json);
+        assertMatchCount(530, "\"type\"", json);
 
     }
     
@@ -920,9 +920,6 @@ public class JSONToolTest extends AbstractTestCase {
           
           assertJSONIntValue(json, "penalty_time", 20);
           
-          assertJSONBooleanValue(json, "running", false);
-          assertJSONBooleanValue(json, "frozen", false);
-          assertJSONBooleanValue(json, "final", false);
           
     }
 
