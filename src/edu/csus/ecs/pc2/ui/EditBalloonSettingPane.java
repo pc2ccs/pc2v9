@@ -610,7 +610,10 @@ public class EditBalloonSettingPane extends JPanePlugin {
 
             Object[] row = new Object[2];
             row[0] = problem;
-            String color = "";
+            String color = problem.getColorName();
+            if (color == null) {
+                color = "";
+            }
             if (inBalloonSettings != null){
                 color = inBalloonSettings.getColor(problem);
             }
