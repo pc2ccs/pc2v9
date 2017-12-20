@@ -13,6 +13,8 @@ import javax.swing.table.DefaultTableCellRenderer;
  * green background containing the word "Pass" or 
  * with a red background containing the word "Fail".  
  * 
+ * The primary use-case for this cell renderer is to display results for test cases.
+ * 
  * The {@link #setValue(Object)} method (which is what clients use to put a value in
  * the cell being rendered) check the type of the Object it receives, and renders the cell
  * as follows:
@@ -26,7 +28,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * as for Strings, above. 
  *
  * If the value passed to the {@link #setValue(Object)} method is anything not covered of the above-listed steps then 
- * the cell is rendered with a yellow background containing question marks.
+ * the cell is rendered with a yellow background containing the phrase "(Not executed)".
  * 
  * @author pc2@ecs.csus.edu
  *

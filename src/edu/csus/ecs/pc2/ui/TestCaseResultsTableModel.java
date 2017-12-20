@@ -8,6 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import com.ibm.webrunner.j2mclb.util.TableModel;
 
 import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.ui.MultiTestSetOutputViewerPane.COLUMN;
 
 /**
  * This class defines a table model for tables holding Test Case Results.
@@ -117,13 +118,50 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
     }
 
     /**
-     * Returns whether the specified cell is editable.
-     * The only editable cells in a Test Case model are those in the "row selected" 
-     * column; all other cells in all other columns are not editable.
+     * Returns whether the specified cell is editable, which in the case of a cell containing a checkbox means whether the checkbox can be changed.
+     * The only editable cells in a Test Case Results table are those in the "select row" 
+     * column; all other cells in all other columns are not editable.  Further, the "select row"
+     * column should only be editable (selectable) when the "Results" column contains either the string
+     * "Passed" or the string "Failed".  (This keeps "Not Executed" test cases from being selectable).
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean retVal = ( columnIndex == MultiTestSetOutputViewerPane.COLUMN.SELECT_CHKBOX.ordinal() );
+
+//        System.out.println ("TestCaseResultsTableModel.isCellEditable(): row=" + rowIndex + "; col=" + columnIndex);
+        boolean retVal = false;
+        //sanity-check the input
+        if (rowIndex>getRowCount()-1 || columnIndex>getColumnCount()-1 ) {
+            //parameters point to a cell outside the table; indicate "cell not editable"
+            retVal = false;
+            
+        } else {
+
+            int selectionColumnIndex = MultiTestSetOutputViewerPane.COLUMN.SELECT_CHKBOX.ordinal();
+            if (columnIndex != selectionColumnIndex) {
+                // columns other than the row-selection checkbox are automatically not editable)
+                retVal = false;
+            } else {
+                // the column is the row-selection checkbox column; see if the "results" column indicates this test case was actually executed                
+                String resultString = "";
+                try {
+                    resultString = ((JLabel)getValueAt(rowIndex, COLUMN.RESULT.ordinal())).getText(); 
+                    if (!resultString.equalsIgnoreCase("Pass") && !resultString.equalsIgnoreCase("Fail")) {
+                        // the result for this row is neither "pass" nor "fail"; disallow editing the row-selection cell (checkbox)
+//                        System.out.println("  Found results column string '" + resultString + "'");
+                        retVal = false;
+                    } else {
+                        // the results string is either "pass" or "fail", so the test case was executed; allow selection
+                        retVal = true;
+                    }
+                } catch (ClassCastException e1) {
+                    System.err.println("TestCaseResultsTableModel.isCellEditable(): expected to find a JLabel in resultsTable; exception: "
+                                + e1.getMessage());
+                    retVal = false;
+                }
+            }
+        }
+        
+//        System.out.println ("  returning " + retVal);
         return retVal;
     }
     
