@@ -196,7 +196,7 @@ public class ExportYAMLTest extends AbstractTestCase {
         String outDir = getOutputDataDirectory(getName());
         ensureDirectory(outDir);
 
-        //        startExplorer(dataDirectory);
+        //      startExplorer(dataDirectory);
         //        startExplorer(testDirectory);
 
         IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
@@ -228,8 +228,13 @@ public class ExportYAMLTest extends AbstractTestCase {
         stripStartTime(actualContestYamlFile);
 
         String expectedContestYamlFile = dataDirectory  + File.separator + "expected.frz.unix.contest.yaml";
+        
+        String outExpectedContestYamlfile  = outDir  + File.separator + "expected.frz.unix.contest.yaml";
+        
+        copyFileOverwrite(expectedContestYamlFile, outExpectedContestYamlfile);
+        
         if (!"/".equals(File.separator)) {
-            convertToNativeFileSeperators(expectedContestYamlFile);
+            convertToNativeFileSeperators(outExpectedContestYamlfile);
         }
         
 //        editFile(actualContestYamlFile);
@@ -261,7 +266,7 @@ public class ExportYAMLTest extends AbstractTestCase {
         assertFileContentsEquals(
                 // If this assert fails and Export YAML is outputting different contest,
                 // follow the instructions above.
-                new File(expectedContestYamlFile), new File(actualContestYamlFile), 4, getOverrideStringCompare());
+                new File(outExpectedContestYamlfile), new File(actualContestYamlFile), 4, getOverrideStringCompare());
 
         exportYAML = null;
 
