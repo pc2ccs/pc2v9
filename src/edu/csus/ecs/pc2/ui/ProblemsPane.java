@@ -369,11 +369,7 @@ public class ProblemsPane extends JPanePlugin {
                 if (pdf != null) {
                     newProblemDataFiles = pdf.copy(newProblem);
                 }
-
-                // just bring up the ui, let the user add/cancel the copied problem
-                editProblemFrame.setProblemCopy(newProblem, newProblemDataFiles);
-                editProblemFrame.setVisible(true);
-
+                getController().addNewProblem(newProblem, newProblemDataFiles);
             }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);

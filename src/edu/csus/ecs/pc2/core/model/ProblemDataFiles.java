@@ -76,8 +76,8 @@ public class ProblemDataFiles implements IElementObject {
         clone.setSiteNumber(getSiteNumber());
         
         // local fields
-        clone.elementId = elementId;
-        clone.problemId = getProblemId();
+//        clone.elementId = elementId;
+//        clone.problemId = getProblemId();
 
         clone.setOutputValidatorFile(cloneSerializedFile(getOutputValidatorFile()));
         clone.setInputValidatorFile(cloneSerializedFile(getInputValidatorFile()));
