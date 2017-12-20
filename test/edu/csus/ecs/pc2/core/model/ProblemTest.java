@@ -209,7 +209,7 @@ public class ProblemTest extends TestCase {
 
         prob.setDataFileName("data.dat");
 
-        assertEquals("Test Cases count expected ", 0, prob.getNumberTestCases());
+        assertEquals("Test Cases count expected ", 1, prob.getNumberTestCases());
 
         prob.setAnswerFileName("data.ans");
 
