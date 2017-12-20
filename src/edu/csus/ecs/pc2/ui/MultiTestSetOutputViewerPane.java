@@ -1039,22 +1039,40 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
      * @return the Select All JButton
      */
     private JButton getSelectAllButton() {
-        
+
         if (selectAllButton == null) {
-            
+
             selectAllButton = new JButton("Select All");
             selectAllButton.addActionListener(new ActionListener() {
-                
+
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    // mark every checkbox in the "Select" column of the results table as "Selected" 
+                    // mark every checkbox in the "Select" column of the results table as "Selected"
+                    // (but only if the test case has been executed)
                     TableModel tm = resultsTable.getModel();
                     if (tm != null) {
                         int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
                         for (int row = 0; row < tm.getRowCount(); row++) {
-                            tm.setValueAt(new Boolean(true), row, col);
+                            // check if the row represents a test case which was actually executed (i.e. the results column
+                            // contains either "Pass" or "Fail".
+                            boolean isExecutedTestCaseRow = false;
+                            String resultString = "";
+                            try {
+                                resultString = ((JLabel) tm.getValueAt(row, COLUMN.RESULT.ordinal())).getText();
+                                if (resultString.equalsIgnoreCase("Pass") || resultString.equalsIgnoreCase("Fail")) {
+                                    // the result for this row is either "pass" nor "fail"; allow selecting the row
+                                    isExecutedTestCaseRow = true;
+                                }
+                                tm.setValueAt(new Boolean(isExecutedTestCaseRow), row, col);
+                            } catch (ClassCastException e1) {
+                                if (getController() != null && getController().getLog() != null) {
+                                    getController().getLog().warning("Expected to find a JLabel in ResultsTableModel but got " + e1.getMessage());
+                                } else {
+                                    System.err.println("MultiTestSetOutputViewerPane: expected to find a JLabel in ResultsTableModel but got " + e1.getMessage());
+                                }
+                            }
+                            updateCompareSelectedButton();
                         }
-                        updateCompareSelectedButton();
                     }
                 }
             });
@@ -1365,7 +1383,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
                 RunTestCase[] testCases = getCurrentTestCases(currentRun);
 
                 // fill in the test case summary information
-                if (testCases == null) {
+                if (testCases == null || testCases.length==0) {
                     getNumTestCasesActuallyRunLabel().setText("Test Cases Run:  0");
                 } else {
                     getNumTestCasesActuallyRunLabel().setText("Test Cases Run:  " + testCases.length);
@@ -1375,18 +1393,20 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
 //                  }
                 }
 
+                //set the status label to the default (blank)
+                getNumFailedTestCasesLabel().setForeground(Color.black);
+                getNumFailedTestCasesLabel().setText("");
+                
                 int failedCount = getNumFailedTestCases(testCases);
+                
                 if (!currentProblem.isValidatedProblem()) {
                     // problem is not validated, cannot be failed or passed
                     getNumFailedTestCasesLabel().setForeground(Color.black);
-                    getNumFailedTestCasesLabel().setText("No validator set");
+                    getNumFailedTestCasesLabel().setText("(No validator)");
                 } else  if (failedCount > 0) {
                     getNumFailedTestCasesLabel().setForeground(Color.red);
                     getNumFailedTestCasesLabel().setText("Failed:  " + failedCount);
-                } else if (testCases == null || testCases.length == 0) {
-                    getNumFailedTestCasesLabel().setForeground(Color.ORANGE);
-                    getNumFailedTestCasesLabel().setText("ERROR");
-                } else {
+                } else if (failedCount == 0 && testCases!=null && testCases.length>0) {
                     getNumFailedTestCasesLabel().setForeground(Color.green);
                     getNumFailedTestCasesLabel().setText("ALL PASSED");
                 }
@@ -1550,9 +1570,11 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
         
         //extract failed cases into a Vector (list)
         Vector<RunTestCase> failedTestCaseList = new Vector<RunTestCase>();
-        for (int i=0; i<allTestCases.length; i++) {
-            if (!allTestCases[i].isPassed()) {
-                failedTestCaseList.add(allTestCases[i]);
+        if (allTestCases != null) {
+            for (int i = 0; i < allTestCases.length; i++) {
+                if (!allTestCases[i].isPassed()) {
+                    failedTestCaseList.add(allTestCases[i]);
+                }
             }
         }
 
@@ -1654,7 +1676,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
                     return;
                 }
                 boolean rowRepresentsExecutedTestCase = resultString.equalsIgnoreCase("Pass") || resultString.equalsIgnoreCase("Fail");
-                
+
                 if ((column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() && rowRepresentsExecutedTestCase) 
                         || column == COLUMN.JUDGE_OUTPUT.ordinal() 
                         || column == COLUMN.JUDGE_DATA.ordinal() 
@@ -1796,6 +1818,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
      *            - the column in the table: team output, judge's output, or judge's data
      */
     protected void viewFile(int row, int col) {
+        //make sure the column points to one of the "file links" in the table
         if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal() && col != COLUMN.VALIDATOR_OUTPUT.ordinal()
                 && col != COLUMN.VALIDATOR_ERR.ordinal()) {
             if (log != null) {
@@ -1806,13 +1829,19 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
             return;
         }
         
-        //make sure this isn't a selection in a row representing an un-executed test case
+        //get any results which have already been executed
         RunTestCase[] allTestCases = getCurrentTestCases(currentRun);
         
-        //check if the selected row was added as an "unexecuted test case"; skip it unless the click was on Judge's Output or data in that row
-        if (row >= allTestCases.length && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal() ) {
-            return;
+        if (allTestCases==null || row>=allTestCases.length) {
+            //the run either hasn't been executed at all (testcases=null) or the selected row is for a data set
+            // that hasn't been executed; in either case only allow viewing of Judge's Output or Data files
+
+            if (col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal() ) {
+                return;
+            }
         }
+        
+        //if we get here then the row/col represents a valid file link
         
         if (getCurrentViewer() != null) {
             getCurrentViewer().dispose();
