@@ -106,8 +106,6 @@ public class TeamData {
 		 
 		 if (!found) {
 			 clars.addLast(clar);
-		 } else {
-			 System.out.println("not found!");
 		 }
 	}
 
