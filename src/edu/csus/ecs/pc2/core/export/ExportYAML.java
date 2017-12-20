@@ -555,21 +555,25 @@ public class ExportYAML {
         problemWriter.println("rights_owner: ");
         
         problemWriter.println();
-        
+
+        problemWriter.println(IContestLoader.HIDE_PROBLEM+": "+!problem.isActive());
+        problemWriter.println(IContestLoader.HIDE_OUTPUT_WINDOW+": "+!problem.isHideOutputWindow());
+        problemWriter.println(IContestLoader.SHOW_COMPARE_WINDOW+": " + problem.isShowCompareWindow());
+        problemWriter.println(IContestLoader.SHOW_VALIDATION_RESULTS+": "+problem.isShowValidationToJudges());
         problemWriter.println(IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!isExternalFiles(problemDataFiles)));
         problemWriter.println(IContestLoader.STOP_ON_FIRST_FAILED_TEST_CASE_KEY + ": " + problem.isStopOnFirstFailedTestCase());
 
         problemWriter.println();
         String dataFile = problem.getDataFileName();
         if (dataFile != null) {
-            // answerfile: sumit.ans
+            // datafile: sumit.in
             problemWriter.println("datafile: " + dataFile);
         }
         
         String answerFileName = problem.getAnswerFileName();
-        if (dataFile != null) {
+        if (answerFileName != null) {
             // answerfile: sumit.ans
-            problemWriter.println("datafile: " + answerFileName);
+            problemWriter.println("answerfile: " + answerFileName);
         }
 
         problemWriter.println();

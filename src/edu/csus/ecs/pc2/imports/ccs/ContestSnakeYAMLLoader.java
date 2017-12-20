@@ -968,8 +968,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
         if (pc2FormatProblemYamlFile) {
-            String answerFileName = fetchValue(content, "datafile");
-            String dataFileName = fetchValue(content, "answerfile");
+            String dataFileName = fetchValue(content, "datafile");
+            String answerFileName = fetchValue(content, "answerfile");
 
             loadPc2ProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, dataFileName, answerFileName);
         } else {
@@ -1007,7 +1007,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         problem.setStopOnFirstFailedTestCase(stopOnFirstFail);
 
         assignJudgingType(content, problem, overrideManualReview);
-        
+
+        boolean hideOutputWindow = fetchBooleanValue(content, HIDE_OUTPUT_WINDOW, false);
+        problem.setHideOutputWindow(hideOutputWindow);
+
+        boolean showCompareWindow = fetchBooleanValue(content, SHOW_COMPARE_WINDOW, false);
+        problem.setShowCompareWindow(showCompareWindow);
+
+        boolean hideProblem = fetchBooleanValue(content, HIDE_PROBLEM, false);
+        problem.setActive(!hideProblem);
+
+        boolean showValidationResults = fetchBooleanValue(content, SHOW_VALIDATION_RESULTS, true);
+        problem.setShowValidationToJudges(showValidationResults);
+
         @SuppressWarnings("unchecked")
         LinkedHashMap<String, Object> judgingTypeContent = (LinkedHashMap<String, Object>) content.get(JUDGING_TYPE_KEY);
         if (judgingTypeContent != null) {
@@ -1809,8 +1821,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             syntaxError("Missing datafile for pc2 problem " + problem.getShortName());
         }
 
-        if (dataFileName == null) {
-            syntaxError("Missing datafile for pc2 problem " + problem.getShortName());
+        if (answerFileName == null) {
+            syntaxError("Missing answerfile for pc2 problem " + problem.getShortName());
         }
 
         addDataFiles(problem, problemDataFiles, dataFileBaseDirectory, dataFileName, answerFileName);
