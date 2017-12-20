@@ -1555,20 +1555,20 @@ public class InternalContest implements IInternalContest {
 
         if (theRun.getStatus().equals(RunStates.BEING_JUDGED)) {
             if (theRun.getComputerJudgementRecord() == null) {
-                run.setStatus(RunStates.NEW);
+                theRun.setStatus(RunStates.NEW);
             } else {
-                run.setStatus(RunStates.MANUAL_REVIEW);
+                theRun.setStatus(RunStates.MANUAL_REVIEW);
             }
         } else if (theRun.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
-            run.setStatus(RunStates.JUDGED);
+            theRun.setStatus(RunStates.JUDGED);
         }
         
         synchronized (runCheckOutList) {
-            runCheckOutList.remove(run.getElementId());
+            runCheckOutList.remove(theRun.getElementId());
         }
         
-        runList.updateRun(run);
-        theRun = runList.get(run);
+        runList.updateRun(theRun);
+        theRun = runList.get(theRun);
 
         RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, theRun, null, null);
         fireRunListener(runEvent);
