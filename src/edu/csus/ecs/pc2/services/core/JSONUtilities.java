@@ -35,6 +35,8 @@ public class JSONUtilities {
 
     public static final String CONTEST_KEY = "contests";
 
+    public static final String STATE_KEY = "state";
+
     public static final String LANGUAGE_KEY = "languages";
 
     public static final String PROBLEM_KEY = "problems";

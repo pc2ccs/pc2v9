@@ -23,6 +23,10 @@ public enum EventFeedType {
     /**
      *
      */
+    STATE("state"),
+    /**
+     *
+     */
     GROUPS("groups"),
     /**
      *

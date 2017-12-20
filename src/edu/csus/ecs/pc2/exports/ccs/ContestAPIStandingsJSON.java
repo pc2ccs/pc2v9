@@ -2,6 +2,9 @@ package edu.csus.ecs.pc2.exports.ccs;
 
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.SecurityContext;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -56,7 +59,7 @@ public class ContestAPIStandingsJSON {
      * @return a JSON string giving contest standings in 2016 format
      * @throws IllegalContestState
      */
-    public String createJSON(IInternalContest contest, IInternalController inController, boolean honorScoreboardFreeze) throws IllegalContestState {
+    public String createJSON(IInternalContest contest, IInternalController inController, boolean honorScoreboardFreeze, HttpServletRequest servletRequest, SecurityContext sc) throws IllegalContestState {
 
         model = contest;
         controller = inController;

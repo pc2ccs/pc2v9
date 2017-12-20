@@ -115,7 +115,7 @@ public class JSONToolTest extends AbstractTestCase {
         EventFeedJSON eventFeedJSON = new EventFeedJSON(null);
         IInternalContest contest = new SampleContest().createStandardContest();
 
-        String json = eventFeedJSON.createJSON(contest);
+        String json = eventFeedJSON.createJSON(contest, null, null, null);
 
         assertNotNull(json);
 
@@ -130,7 +130,7 @@ public class JSONToolTest extends AbstractTestCase {
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
 
-        String json = eventFeedJSON.createJSON(data.getContest());
+        String json = eventFeedJSON.createJSON(data.getContest(), null, null);
         
 //        editFile(writeFile(new File("/tmp/stuf." + System.currentTimeMillis() + ".json"), json));
 
@@ -360,7 +360,7 @@ public class JSONToolTest extends AbstractTestCase {
         Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-            String json = eventFeedJSON.getSubmissionJSON(contest,run);
+            String json = eventFeedJSON.getSubmissionJSON(contest,run, null, null);
             String expecteInt = Integer.toString(run.getNumber());
             asertEqualJSON(json, "id", expecteInt);
         }
@@ -712,11 +712,11 @@ public class JSONToolTest extends AbstractTestCase {
 
         UnitTestData data = new UnitTestData();
         EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
-        String jsonBefore = eventFeedJSON.createJSON(data.getContest());
+        String jsonBefore = eventFeedJSON.createJSON(data.getContest(), null, null);
 
         eventFeedJSON.setEventIdSequence(0);
         EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(0), null);
-        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
         
 //        System.out.println("debug start json "+json);
 
@@ -733,7 +733,7 @@ public class JSONToolTest extends AbstractTestCase {
         EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
 
         EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(39), null);
-        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
         
 //        System.out.println("debug after event 39  json = "+json);
         
@@ -741,7 +741,7 @@ public class JSONToolTest extends AbstractTestCase {
 
         assertNotNull(json);
 
-        assertMatchCount(529, "\"type\"", json);
+        assertMatchCount(530, "\"type\"", json);
 
     }
     
@@ -768,7 +768,7 @@ public class JSONToolTest extends AbstractTestCase {
         for (String badbadlist : badTypeNameLists) {
             try {
                 eventFeedJSON.setEventTypeList(badbadlist);
-                eventFeedJSON.createJSON(data.getContest());
+                eventFeedJSON.createJSON(data.getContest(), null, null);
                 fail("Expecting IllegalArgumentException for list '" + badbadlist + "'");
             } catch (IllegalArgumentException e) {
 
@@ -790,7 +790,7 @@ public class JSONToolTest extends AbstractTestCase {
 
         String elist = EventFeedJSON.CONTEST_KEY + "," + EventFeedJSON.TEAM_KEY;
         EventFeedFilter filter = new EventFeedFilter(null, elist);
-        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
         assertNotNull(json);
         
 //        System.out.println("debug valid event json "+json);
@@ -829,7 +829,7 @@ public class JSONToolTest extends AbstractTestCase {
                 EventFeedJSON.TEAM_MEMBERS_KEY;
 
         eventFeedJSON.setEventTypeList(elist);
-        String json = eventFeedJSON.createJSON(data.getContest());
+        String json = eventFeedJSON.createJSON(data.getContest(), null, null);
         assertNotNull(json);
         
         // editFile(writeFile(new File("/tmp/stuf." + System.currentTimeMillis() + ".json"), json));
@@ -851,7 +851,7 @@ public class JSONToolTest extends AbstractTestCase {
                 EventFeedJSON.CLARIFICATIONS_KEY;
 
         EventFeedFilter filter = new EventFeedFilter(null, elist);
-        String json = eventFeedJSON.createJSON(data.getContest(), filter);
+        String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
         assertNotNull(json);
 
         // editFile(writeFile(new File("/tmp/stuf." + System.currentTimeMillis() + ".json"), json));
@@ -920,9 +920,6 @@ public class JSONToolTest extends AbstractTestCase {
           
           assertJSONIntValue(json, "penalty_time", 20);
           
-          assertJSONBooleanValue(json, "running", false);
-          assertJSONBooleanValue(json, "frozen", false);
-          assertJSONBooleanValue(json, "final", false);
           
     }
 

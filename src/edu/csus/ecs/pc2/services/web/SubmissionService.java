@@ -32,7 +32,6 @@ import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -120,8 +119,7 @@ public class SubmissionService implements Feature {
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (!submission.isDeleted()) {
-            	ObjectNode node = addFilesToJSON(submission, servletRequest, sc);
-                childNode.add(node);
+                childNode.add(jsonTool.convertToJSON(submission, servletRequest, sc));
             }
         }
 
@@ -229,20 +227,6 @@ public class SubmissionService implements Feature {
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    private ObjectNode addFilesToJSON(Run submission, HttpServletRequest servletRequest, @Context SecurityContext sc) {
-    	ObjectNode node = jsonTool.convertToJSON(submission);
-    	if (sc.isUserInRole("admin") || sc.isUserInRole("analyst")) {
-    		StringBuffer requestURL = servletRequest.getRequestURL();
-    		requestURL.append("/files");
-    		ObjectMapper mapper = new ObjectMapper();
-    		ArrayNode arrayNode = mapper.createArrayNode();
-    		ObjectNode objectNode = mapper.createObjectNode();
-    		objectNode.put("href", requestURL.toString());
-    		arrayNode.add(objectNode);
-    		node.set("files", arrayNode);
-    	}
-		return node;
-    }
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{submissionId}/")
@@ -253,8 +237,7 @@ public class SubmissionService implements Feature {
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (!submission.isDeleted() && jsonTool.getSubmissionId(submission).equals(submissionId)) {
-            	ObjectNode node = addFilesToJSON(submission, servletRequest, sc);
-                return Response.ok(node.toString(), MediaType.APPLICATION_JSON).build();
+                return Response.ok(jsonTool.convertToJSON(submission, servletRequest, sc).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();

@@ -94,4 +94,21 @@ public class TeamData {
 		// newRun = a;
 	}
 
+	public void setNewToAllClar(IClarification clar) {
+		boolean found = false;
+		
+		 for (int i = 0; i < clars.size(); i++) {
+	            if (clars.get(i).getNumber() == clar.getNumber()) {
+	            	found = true;
+	            	break;
+	            }
+	        }
+		 
+		 if (!found) {
+			 clars.addLast(clar);
+		 } else {
+			 System.out.println("not found!");
+		 }
+	}
+
 }

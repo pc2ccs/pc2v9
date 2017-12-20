@@ -139,13 +139,12 @@ public class ContestInformation implements Serializable{
     private String contestShortName;
 
     /**
-     * Whether the contest is unfrozen.  Meaning the final scoreboard
+     * Whether the contest is thawed(unfrozen).  Meaning the final scoreboard
      * can be revealed (despite the scoreboad freeze).
      * 
-     * Typically a contest is not unfrozen until the awards ceremony.
+     * Typically a contest is not thawed until the awards ceremony.
      */
-    private boolean unfrozen = false;
-
+    private Date thawed = null;
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -256,7 +255,7 @@ public class ContestInformation implements Serializable{
             if (enableAutoRegistration != contestInformation.isEnableAutoRegistration()) {
                 return false;
             }
-            if (unfrozen != contestInformation.isUnfrozen()) {
+            if ((thawed == null && contestInformation.getThawed() != null) || (thawed != null && !thawed.equals(contestInformation.getThawed()))) {
                 return false;
             }
             //old code:
@@ -557,13 +556,36 @@ public class ContestInformation implements Serializable{
     }
 
     public boolean isUnfrozen() {
-        return unfrozen;
+        if (thawed == null) {
+            return false;
+        }
+        return true;
     }
 
     /**
-     * @param unfrozen whether the contest is unfrozen
+     * Returns the date the was thawed, or null if not thawed.
+     * 
+     * @return Date the contest was thawed, else null
      */
-    public void setUnfrozen(boolean unfrozen) {
-        this.unfrozen = unfrozen;
+    public Date getThawed() {
+        return thawed;
+    }
+    
+    /**
+     * @param thawed when/if the contest is thawed
+     */
+    public void setThawed(Date date) {
+        thawed = date;
+    }
+    
+    /**
+     * @param thawed whether the contest is thawed
+     */
+    public void setThawed(boolean thawed) {
+        if (thawed) {
+            this.thawed = new GregorianCalendar().getTime();
+        } else {
+            this.thawed = null;
+        }
     }
 }

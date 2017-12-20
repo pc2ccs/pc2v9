@@ -29,12 +29,12 @@ public class EventFeedLogTest extends AbstractTestCase {
         //        editFile ( eFeedLog.getLogFileName());
 
         EventFeedJSON efEventFeedJSON = new EventFeedJSON(contest);
-        String events = efEventFeedJSON.createJSON(contest);
+        String events = efEventFeedJSON.createJSON(contest, null, null);
 
         eFeedLog.writeEvent(events);
 
         eFeedLog = new EventFeedLog(contest);
-        assertEquals(142, eFeedLog.getLogLines().length);
+        assertEquals(143, eFeedLog.getLogLines().length);
 
     }
 

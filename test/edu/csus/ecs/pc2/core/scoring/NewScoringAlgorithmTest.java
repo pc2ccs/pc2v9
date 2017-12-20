@@ -131,7 +131,7 @@ public class NewScoringAlgorithmTest extends TestCase {
             assertEquals("for team 2 number submitted should equal pending run count", numberSubmitted, pendingRunCount);
         }
         ContestInformation ci = contest.getContestInformation();
-        ci.setUnfrozen(true);
+        ci.setThawed(true);
         contest.updateContestInformation(ci);
         // once the contest is unfrozen the pendingRunCount should go to 0
         standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties(), true);

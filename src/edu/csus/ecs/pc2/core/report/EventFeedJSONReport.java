@@ -49,7 +49,7 @@ public class EventFeedJSONReport implements IReport {
       
         EventFeedJSON efEventFeedJSON = new EventFeedJSON(contest);
         
-        String s = efEventFeedJSON.createJSON(contest);
+        String s = efEventFeedJSON.createJSON(contest, null, null);
         
         printWriter.print(s);
     }
