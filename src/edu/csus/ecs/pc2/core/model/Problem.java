@@ -1155,7 +1155,7 @@ public class Problem implements IElementObject {
     public int getNumberTestCases() {
         if (testCaseDataFilenames != null && testCaseDataFilenames.length > 0) {
             return testCaseDataFilenames.length;
-        } else if (getAnswerFileName() != null && getDataFileName() != null) {
+        } else if (getDataFileName() != null) {
             return 1;
         } else {
             return 0;
