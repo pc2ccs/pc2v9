@@ -337,6 +337,9 @@ public class Problem implements IElementObject {
             }
         }
         
+        clone.setColorName(getColorName());
+        clone.setColorRGB(getColorRGB());
+        
         return clone;
     }
 
