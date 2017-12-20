@@ -1029,6 +1029,14 @@ public class Problem implements IElementObject {
                 return false;
             }
             
+            if (! StringUtilities.stringSame(colorName, problem.getColorName())){
+                return false;
+            }
+            
+            if (! StringUtilities.stringSame(colorRGB, problem.getColorRGB())){
+                return false;
+            }
+            
             return true;
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);

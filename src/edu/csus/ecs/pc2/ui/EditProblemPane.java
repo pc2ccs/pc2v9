@@ -74,6 +74,7 @@ import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
+import java.awt.event.KeyAdapter;
 
 /**
  * Add/Edit Problem Pane.
@@ -596,7 +597,7 @@ public class EditProblemPane extends JPanePlugin {
                 getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
             }
         }
-        
+
         //set the flag indicating whether execution of problem submissions should stop on the first failed test case
         newProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
 
@@ -650,7 +651,7 @@ public class EditProblemPane extends JPanePlugin {
                     enableButton = true;
                     updateToolTip = "Problem changed";
                 }
-
+                
                 // see if the problem data files have changed; enable the Update button and update the tooltip if so
                 ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
                 ProblemDataFiles proposedPDF = getMultipleDataSetPane().getProblemDataFiles();
@@ -1066,6 +1067,9 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setLetter(getProblemLetterTextField().getText());
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
         checkProblem.setShortName(getShortNameTextfield().getText());
+        
+
+        
         if (!checkProblem.isValidShortName()) {
             throw new InvalidFieldValue("Invalid problem short name");
         }
@@ -1386,11 +1390,13 @@ public class EditProblemPane extends JPanePlugin {
             populateProblemTestSetFilenames(checkProblem, dataFiles);
         }
 
+        checkProblem.setColorName(balloonColorTextField.getText());
+
+        checkProblem.setColorRGB(rgbTextField.getText());
+        
         if (debug22EditProblem) {
             Utilities.dump(newProblemDataFiles, "debug after populateProblemTestSetFilenames");
         }
-        
-        
 
         return checkProblem;
 
@@ -2218,9 +2224,6 @@ public class EditProblemPane extends JPanePlugin {
             String message = "Error loading/editing problem data files: " + e.getMessage();
             showMessage(message + " check logs.");
             getLog().log(Log.WARNING, message, e);
-            if (debug22EditProblem) {
-                e.printStackTrace(); // TODO log exception ??
-            }
         }
 
         // select the general tab
@@ -2347,6 +2350,9 @@ public class EditProblemPane extends JPanePlugin {
         getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
 
         getDeleteProblemCheckBox().setSelected(!inProblem.isActive());
+        
+        balloonColorTextField.setText(inProblem.getColorName());
+        rgbTextField.setText(inProblem.getColorRGB());
     }
 
     /**
@@ -2718,6 +2724,42 @@ public class EditProblemPane extends JPanePlugin {
                 }
             });
             generalPane.add(shortNameTextfield);
+            
+            JLabel lblBalloonColor = new JLabel();
+            lblBalloonColor.setText("Balloon Color");
+            lblBalloonColor.setBounds(new Rectangle(23, 14, 179, 16));
+            lblBalloonColor.setBounds(23, 416, 84, 16);
+            generalPane.add(lblBalloonColor);
+            
+            balloonColorTextField = new JTextField();
+            balloonColorTextField.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+            balloonColorTextField.setPreferredSize(new Dimension(120, 20));
+            balloonColorTextField.setBounds(new Rectangle(220, 44, 120, 20));
+            balloonColorTextField.setBounds(117, 414, 97, 20);
+            generalPane.add(balloonColorTextField);
+            
+            JLabel lblRgbValue = new JLabel();
+            lblRgbValue.setText("RGB Value");
+            lblRgbValue.setBounds(new Rectangle(23, 14, 179, 16));
+            lblRgbValue.setBounds(302, 416, 84, 16);
+            generalPane.add(lblRgbValue);
+            
+            rgbTextField = new JTextField();
+            rgbTextField.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+            rgbTextField.setPreferredSize(new Dimension(120, 20));
+            rgbTextField.setBounds(new Rectangle(220, 44, 120, 20));
+            rgbTextField.setBounds(409, 412, 67, 20);
+            generalPane.add(rgbTextField);
         }
         return generalPane;
     }
@@ -3368,6 +3410,8 @@ public class EditProblemPane extends JPanePlugin {
     private Component horizontalStrut_1;
 
     private Component horizontalStrut_2;
+    private JTextField balloonColorTextField;
+    private JTextField rgbTextField;
 
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
@@ -4241,32 +4285,32 @@ public class EditProblemPane extends JPanePlugin {
 
         try {
             if (debug22EditProblem) {
-                System.out.println("debug   ORIGINAL  load dump");
-                Utilities.dump(originalProblemDataFiles, "debug in load orig");
+                    System.out.println("debug   ORIGINAL  load dump");
+                    Utilities.dump(originalProblemDataFiles, "debug in load orig");
 
-                String[] s2 = getTestDataList(originalProblemDataFiles);
-                System.out.println("debug Number of   ORIGINAL  problem data files is " + s2.length);
+                    String[] s2 = getTestDataList(originalProblemDataFiles);
+                    System.out.println("debug Number of   ORIGINAL  problem data files is " + s2.length);
 
-                String[] s = getTestDataList(newProblemDataFiles);
-                System.out.println("debug B4 Number of new problem data files is " + s.length);
-            }
+                    String[] s = getTestDataList(newProblemDataFiles);
+                    System.out.println("debug B4 Number of new problem data files is " + s.length);
+                }
 
-            newProblemDataFiles = getProblemDataFilesFromFields();
+                newProblemDataFiles = getProblemDataFilesFromFields();
 
-            if (debug22EditProblem) {
-                String[] s = getTestDataList(newProblemDataFiles);
-                System.out.println("debug B5 Number of new problem data files is " + s.length);
-            }
+                if (debug22EditProblem) {
+                    String[] s = getTestDataList(newProblemDataFiles);
+                    System.out.println("debug B5 Number of new problem data files is " + s.length);
+                }
 
-            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
+                Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
 
-            if (debug22EditProblem) {
-                String[] s = getTestDataList(newProblemDataFiles);
-                System.out.println("debug B6 Number of new problem data files is " + s.length);
+                if (debug22EditProblem) {
+                    String[] s = getTestDataList(newProblemDataFiles);
+                    System.out.println("debug B6 Number of new problem data files is " + s.length);
 
-                Utilities.dump(newProblemDataFiles, "debug in load new");
-                System.out.flush();
-            }
+                    Utilities.dump(newProblemDataFiles, "debug in load new");
+                    System.out.flush();
+                }
 
             String fileNameTwo = createProblemReport(newProblem, newProblemDataFiles, "stuf2");
             if (debug22EditProblem) {
@@ -5271,5 +5315,5 @@ public class EditProblemPane extends JPanePlugin {
 
         return retStatus;
     }
-
 }
+

@@ -267,5 +267,28 @@ public class ProblemTest extends TestCase {
         assertEquals("Time limit", 30, problem.getTimeOutInSeconds());
 
     }
+    
+    /**
+     * Test isSameas for balloon color and rgb.
+     * 
+     * @throws Exception
+     */
+    public void testSameAsBalloonColors() throws Exception {
+        
+        Problem p1 = getProblemAnew();
+        Problem p2 = getProblemAnew();
+
+        assertTrue("Is same As", p1.isSameAs(p2));
+        
+        p1.setColorName("White");
+        assertFalse("Expecting diff from color", p1.isSameAs(p2));
+        
+        p1 = getProblemAnew();
+        p1.setColorRGB("#444");
+        assertFalse("Expecting diff from RGB", p1.isSameAs(p2));
+        
+        assertFalse("Is not same As, null parameter", p1.isSameAs(null));
+        
+    }
 
 }
