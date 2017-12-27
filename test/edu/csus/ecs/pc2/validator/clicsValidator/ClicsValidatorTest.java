@@ -3,15 +3,16 @@ package edu.csus.ecs.pc2.validator.clicsValidator;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import org.junit.Test;
 
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import junit.framework.TestSuite;
 
 /**
  * Unit tests for CLICS Validator
@@ -822,25 +823,26 @@ public class ClicsValidatorTest extends AbstractTestCase {
 //        return process;
 //    }
 
-    public static TestSuite suite() {
-
-        TestSuite suite = new TestSuite();
-        
-        suite.addTest(new ClicsValidatorTest("testMissingJudgeDataFile"));
-        suite.addTest(new ClicsValidatorTest("testMissingJudgeAnswerFile"));
-        suite.addTest(new ClicsValidatorTest("testMissingFeedbackDir"));
-        suite.addTest(new ClicsValidatorTest("testInstanceMatchWithNoOptions"));
-        suite.addTest(new ClicsValidatorTest("testInstanceHandleCaseSensitivity"));        
-        suite.addTest(new ClicsValidatorTest("testInstanceHandleSpaceSensitivity"));        
-        suite.addTest(new ClicsValidatorTest("testInstanceHandleFloatAbsoluteTolerance"));        
-        suite.addTest(new ClicsValidatorTest("testInstanceHandleScientificNotation"));        
-        suite.addTest(new ClicsValidatorTest("testInstanceHandleFloatRelativeTolerance"));        
-        suite.addTest(new ClicsValidatorTest("testInstanceHandleTeamTrailingWhitespace"));        
-        suite.addTest(new ClicsValidatorTest("testInstanceHandleTeamNonWhitespaceExcessiveOutput"));        
-        suite.addTest(new ClicsValidatorTest("testInstanceHandleRuntimeError"));        
-
-        return suite;
-    }
+    // old code
+//    public static TestSuite suite() {
+//
+//        TestSuite suite = new TestSuite();
+//        
+//        suite.addTest(new ClicsValidatorTest("testMissingJudgeDataFile"));
+//        suite.addTest(new ClicsValidatorTest("testMissingJudgeAnswerFile"));
+//        suite.addTest(new ClicsValidatorTest("testMissingFeedbackDir"));
+//        suite.addTest(new ClicsValidatorTest("testInstanceMatchWithNoOptions"));
+//        suite.addTest(new ClicsValidatorTest("testInstanceHandleCaseSensitivity"));        
+//        suite.addTest(new ClicsValidatorTest("testInstanceHandleSpaceSensitivity"));        
+//        suite.addTest(new ClicsValidatorTest("testInstanceHandleFloatAbsoluteTolerance"));        
+//        suite.addTest(new ClicsValidatorTest("testInstanceHandleScientificNotation"));        
+//        suite.addTest(new ClicsValidatorTest("testInstanceHandleFloatRelativeTolerance"));        
+//        suite.addTest(new ClicsValidatorTest("testInstanceHandleTeamTrailingWhitespace"));        
+//        suite.addTest(new ClicsValidatorTest("testInstanceHandleTeamNonWhitespaceExcessiveOutput"));        
+//        suite.addTest(new ClicsValidatorTest("testInstanceHandleRuntimeError"));        
+//
+//        return suite;
+//    }
     
     
     
@@ -895,14 +897,30 @@ public class ClicsValidatorTest extends AbstractTestCase {
 //    }
 //    
     
-//    private int runValidator(String outFilename, String[] args) {
-//        
-//        Validator ccsValidator = new Validator();
-//        
-//        int code = ccsValidator.runValidator(args);
-//        // TODO foo
-//        return code;
-//    }
+    /**
+     * Run CLICS validator.
+     * 
+     * This runs a using the same command line args as would be used if one were
+     * running the validator on a command line.
+     *
+     * @param teamsOutputFilename
+     * @param args, array with judgeDataFile, judgeAnswerFile, feedbackDirName, (list of options)
+     * @return return code for validator, {@value ClicsValidator#CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE} or
+     * {@value ClicsValidator#CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE}
+     */
+    private int runValidator(String teamsOutputFilename, String[] args) throws FileNotFoundException {
+
+        String inJudgeDataFile = args[0];
+        String inJudgeAnswerFile = args[1];
+        String inFeedbackDirName = args[2];
+        String[] options = new String[0];
+
+        if (args.length > 3) {
+            options = Arrays.copyOfRange(args, 3, args.length);
+        }
+        
+        return  runValidatorInstanced(inJudgeDataFile, inJudgeAnswerFile, inFeedbackDirName, options, teamsOutputFilename);
+    }
 
     // TODO CCS add this test back
 //    /**
@@ -1006,5 +1024,97 @@ public class ClicsValidatorTest extends AbstractTestCase {
 //    }
     
 
+    /**
+     * Test for file missing LF at end of file with no space_change_sensitive setting/set.
+     * 
+     * Bug 1363
+     * @throws Exception
+     */
+    public void testNoLFAtEndCompare() throws Exception {
+        
+        String dataDir = getDataDirectory(this.getName());
+//        ensureDirectory(dataDir);
+//        startExplorer(dataDir);
+
+        String outDir = getOutputDataDirectory(this.getName());
+        removeDirectory(outDir);
+
+        ensureDirectory(outDir);
+
+        String feedbackDir = outDir + File.separator + "feedback";
+        ensureDirectory(feedbackDir);
+
+        /**
+         * Team output has no newline.
+         */
+        String teamsOutputDirectory = dataDir + File.separator + "nonewline.txt";
+
+        String judgesAnswerFile = dataDir + File.separator + "newline.txt";
+        
+        
+        String judgesDataFile = judgesAnswerFile;
+
+        String[] args = {
+                //
+                judgesDataFile, //
+                judgesAnswerFile, //
+                feedbackDir, //
+        };
+
+        int returnCode = runValidator(teamsOutputDirectory, args);
+        /**
+         * Test whether the validator ignored newline at end of file
+         */
+        assertEquals("Expecting validator return code ", ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE, returnCode);
+    }
+    
+    /**
+     * Test for file missing LF at end of file, with space_change_sensitive.
+     * 
+     * Bug 1363
+     * 
+     * @throws Exception
+     */
+    public void testNOEOLNSpaceChangeSensitive() throws Exception {
+        
+        String dataDir = getDataDirectory(this.getName());
+        ensureDirectory(dataDir);
+//        startExplorer(dataDir);
+
+        String outDir = getOutputDataDirectory(this.getName());
+        removeDirectory(outDir);
+
+        ensureDirectory(outDir);
+
+        String feedbackDir = outDir + File.separator + "feedback";
+        ensureDirectory(feedbackDir);
+
+        /**
+         * Team output has no newline.
+         */
+        String teamsOutputDirectory = dataDir + File.separator + "nonewline.txt";
+
+        String judgesAnswerFile = dataDir + File.separator + "newline.txt";
+        
+        
+        String judgesDataFile = judgesAnswerFile;
+
+        String[] args = {
+                //
+                judgesDataFile, //
+                judgesAnswerFile, //
+                feedbackDir, //
+                "space_change_sensitive",
+                
+        };
+
+        int returnCode = runValidator(teamsOutputDirectory, args);
+        
+        
+        /**
+         * Test whether the validator dit NOT ignore newline at end of file
+         */
+        assertEquals("Expecting validator return code ", ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE, returnCode);
+    }
 
 }
