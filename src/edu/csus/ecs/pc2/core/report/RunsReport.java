@@ -25,14 +25,10 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
- * Print Run lists.
+ * Print Runs details.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
-
 public class RunsReport implements IReport {
 
     /**
@@ -210,30 +206,48 @@ public class RunsReport implements IReport {
         
         printWriter.println();
     }
-    
+
     private void writeTestCases(PrintWriter printWriter, String pad, IInternalContest internalContest, Run run) {
-        
+
         RunTestCase[] testcases = run.getRunTestCases();
         
-        printWriter.println(pad+"There are "+testcases.length+" test cases.");
+        int numberOfTestCases = getTestCaseCount(run.getProblemId());
+
+        printWriter.println(pad + "There are " + numberOfTestCases + " test cases.");
+        
+        printWriter.println(pad + "There are " + testcases.length + " test case results.");
 
         for (RunTestCase runTestCase : testcases) {
 
             String judgement = "Undetermined";
             if (runTestCase.getJudgementId() != null) {
                 Judgement j = internalContest.getJudgement(runTestCase.getJudgementId());
-                if (j != null){ // TODO remove this if not null after July 16
-                    judgement = "["+j.getAcronym()+"] "+j.getDisplayName(); 
+                if (j != null) {
+                    judgement = "[" + j.getAcronym() + "] " + j.getDisplayName();
                 }
             }
-            printWriter.println(pad+"Test " + runTestCase.getTestNumber() + //
+            printWriter.println(pad + "Test " + runTestCase.getTestNumber() + //
                     " passes " + runTestCase.isPassed() + //
                     " at " + runTestCase.getDate() + //
                     " judgement " + judgement);
 
         }
+
+    }
+
+    /**
+     * Number of test cases for a problem
+     * @param problemElementId
+     * @return -1 if no such problem, else number of test cases.
+     */
+    private int getTestCaseCount(ElementId problemElementId) {
         
-        // TODO Auto-generated method stub
+        Problem problem = contest.getProblem(problemElementId);
+        if (problem != null){
+            return problem.getNumberTestCases();
+        }
+        
+        return -1;
         
     }
 
@@ -304,9 +318,7 @@ public class RunsReport implements IReport {
                     e.printStackTrace(printWriter);
                 }
             }
-            
         }
-        
     }
 
     private String getClientName(ClientId clientId) {
