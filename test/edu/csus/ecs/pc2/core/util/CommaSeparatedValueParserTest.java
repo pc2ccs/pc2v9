@@ -178,7 +178,6 @@ public class CommaSeparatedValueParserTest extends AbstractTestCase {
                 customAssert("Improper parse, field counts do not match for ' " + actualString + "'", expectedFieldCounts[i], parsed.length);
 
             } catch (Exception e) {
-                e.printStackTrace();
                 assertTrue("Unexpected error in parse " + e.getMessage() + " for for '" + actualString + "'", true);
             }
         }
