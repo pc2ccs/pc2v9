@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
@@ -323,7 +324,7 @@ public class ExportYAML {
 
         contestWriter.println();
 
-        ClientType.Type[] types = { ClientType.Type.TEAM, ClientType.Type.JUDGE, ClientType.Type.SCOREBOARD, };
+        ClientType.Type[] types = { ClientType.Type.TEAM, ClientType.Type.JUDGE, ClientType.Type.SCOREBOARD, Type.FEEDER, Type.ADMINISTRATOR };
 
         boolean accountHeader = false;
 
