@@ -241,8 +241,8 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                         lastStateSent = line.substring(beginIndex, line.length()-1);
                     }
                     if (filter.matchesFilter(line)) {
-                        stream.write(line.getBytes());
-                        stream.write(NL.getBytes());
+                        stream.write(line.getBytes("UTF-8"));
+                        stream.write(NL.getBytes("UTF-8"));
                         stream.flush();
                     }
                 }

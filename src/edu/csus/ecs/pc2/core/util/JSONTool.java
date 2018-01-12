@@ -128,7 +128,7 @@ public class JSONTool {
         
         // SOMEDAY change id to a orginal
         String id = clarification.getElementId().toString();
-        if (clarAnswer != null) {
+        if (clarAnswer != null && clarAnswer.getElementId() != null) {
             id = clarAnswer.getElementId().toString();
         }
         element.put("id", id);
@@ -185,7 +185,7 @@ public class JSONTool {
             if (model.getContestTime().isPastEndOfContest()) {
                 Calendar endedDate = calculateElapsedWalltime(model, model.getContestTime().getContestStartTime().getTimeInMillis()+model.getContestTime().getContestLengthMS());
                 if (endedDate != null) {
-                    element.put("ended", Utilities.getIso8601formatterWithMS().format(endedDate));
+                    element.put("ended", Utilities.getIso8601formatterWithMS().format(endedDate.getTimeInMillis()));
                 }
             }
             String scoreboardFreezeDuration = ci.getFreezeTime();
