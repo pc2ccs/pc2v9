@@ -64,10 +64,10 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
-import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.ui.cellRenderer.CheckBoxCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.LinkCellRenderer;
-import edu.csus.ecs.pc2.ui.cellRenderer.PassFailCellRenderer;
+import edu.csus.ecs.pc2.ui.cellRenderer.TestCaseResultCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.RightJustifiedCellRenderer;
 
 /**
@@ -78,7 +78,7 @@ import edu.csus.ecs.pc2.ui.cellRenderer.RightJustifiedCellRenderer;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/AutoJudgeSettingsPane.java $
-public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableModelListener {
+public class TestResultsPane extends JPanePlugin implements TableModelListener {
 
     private static final long serialVersionUID = 7363093989131251458L;
 
@@ -255,7 +255,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
      * Constructs an instance of a plugin pane for viewing multi-testset output values.
      * 
      */
-    public MultiTestSetOutputViewerPane() {
+    public TestResultsPane() {
         super();
         initialize();
     }
@@ -1380,7 +1380,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
                 getTotalTestCasesLabel().setText("Total Test Cases: " + totalTestCases);
                 
                 // get the actually-run test case results for the current run
-                RunTestCase[] testCases = getCurrentTestCases(currentRun);
+                RunTestCaseResult[] testCases = getCurrentTestCases(currentRun);
 
                 // fill in the test case summary information
                 if (testCases == null || testCases.length==0) {
@@ -1495,7 +1495,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
         }
     }
 
-    private int getNumFailedTestCases(RunTestCase[] testCases) {
+    private int getNumFailedTestCases(RunTestCaseResult[] testCases) {
         int failed = 0 ;
         if (testCases != null) {
             for (int i = 0; i < testCases.length; i++) {
@@ -1527,17 +1527,17 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
      * @param run
      * @return most recent RunTestCases
      */
-    private RunTestCase[] getCurrentTestCases(Run run) {
-        RunTestCase[] testCases = null;
-        RunTestCase[] allTestCases = run.getRunTestCases();
+    private RunTestCaseResult[] getCurrentTestCases(Run run) {
+        RunTestCaseResult[] testCases = null;
+        RunTestCaseResult[] allTestCases = run.getRunTestCases();
         // hope the lastTestCase has the highest testNumber....
         if (allTestCases != null && allTestCases.length > 0) {
-            testCases = new RunTestCase[allTestCases[allTestCases.length-1].getTestNumber()];
+            testCases = new RunTestCaseResult[allTestCases[allTestCases.length-1].getTestNumber()];
             for (int i = allTestCases.length-1; i >= 0; i--) {
-                RunTestCase runTestCase = allTestCases[i];
-                int testCaseNumIndex = runTestCase.getTestNumber()-1;
+                RunTestCaseResult runTestCaseResult = allTestCases[i];
+                int testCaseNumIndex = runTestCaseResult.getTestNumber()-1;
                 if (testCases[testCaseNumIndex] == null) {
-                    testCases[testCaseNumIndex] = runTestCase;
+                    testCases[testCaseNumIndex] = runTestCaseResult;
                     if (testCaseNumIndex == 0) {
                         break;
                     }
@@ -1553,7 +1553,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
     private void loadTableWithAllTestCases() {
         
         // get the test case results for the current run
-        RunTestCase[] allTestCases = getCurrentTestCases(currentRun);
+        RunTestCaseResult[] allTestCases = getCurrentTestCases(currentRun);
         
         //build a new table with the test cases and install it in the scrollpane
         resultsTable = getResultsTable(allTestCases);
@@ -1566,10 +1566,10 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
     private void loadTableWithFailedTestCases() {
         
         // get the test case results for the current run
-        RunTestCase[] allTestCases = getCurrentTestCases(currentRun);
+        RunTestCaseResult[] allTestCases = getCurrentTestCases(currentRun);
         
         //extract failed cases into a Vector (list)
-        Vector<RunTestCase> failedTestCaseList = new Vector<RunTestCase>();
+        Vector<RunTestCaseResult> failedTestCaseList = new Vector<RunTestCaseResult>();
         if (allTestCases != null) {
             for (int i = 0; i < allTestCases.length; i++) {
                 if (!allTestCases[i].isPassed()) {
@@ -1579,7 +1579,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
         }
 
         //convert Vector to array
-        RunTestCase[] failedTestCases =  failedTestCaseList.toArray(new RunTestCase[failedTestCaseList.size()]);
+        RunTestCaseResult[] failedTestCases =  failedTestCaseList.toArray(new RunTestCaseResult[failedTestCaseList.size()]);
 
         //build a new table with just the failed cases and install it in the scrollpane
         resultsTable = getResultsTable(failedTestCases);
@@ -1591,7 +1591,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
      * The method sets not only the table data model but also the appropriate cell renderers and 
      * action/mouse listeners for the table.
      */
-    private JTable getResultsTable(RunTestCase [] testCases) {
+    private JTable getResultsTable(RunTestCaseResult [] testCases) {
 
         final JTable localResultsTable;
 
@@ -1646,7 +1646,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
         localResultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkCellRenderer());
 
         // render Result column as Pass/Fail on Green/Red
-        localResultsTable.getColumn(columnNames[COLUMN.RESULT.ordinal()]).setCellRenderer(new PassFailCellRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.RESULT.ordinal()]).setCellRenderer(new TestCaseResultCellRenderer());
 
         // render Time column right-justified
         localResultsTable.getColumn(columnNames[COLUMN.TIME.ordinal()]).setCellRenderer(new RightJustifiedCellRenderer());
@@ -1830,7 +1830,7 @@ public class MultiTestSetOutputViewerPane extends JPanePlugin implements TableMo
         }
         
         //get any results which have already been executed
-        RunTestCase[] allTestCases = getCurrentTestCases(currentRun);
+        RunTestCaseResult[] allTestCases = getCurrentTestCases(currentRun);
         
         if (allTestCases==null || row>=allTestCases.length) {
             //the run either hasn't been executed at all (testcases=null) or the selected row is for a data set

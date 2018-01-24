@@ -17,14 +17,14 @@ import java.awt.Dimension;
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/AutoJudgeStatusFrame.java $
-public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements UIPlugin {
+public class TestResultsFrame extends javax.swing.JFrame implements UIPlugin {
 
     /**
      * 
      */
     private static final long serialVersionUID = 1253631987477621456L;
 
-    private MultiTestSetOutputViewerPane multiSetOutputViewerPane = null;
+    private TestResultsPane multiSetOutputViewerPane = null;
 
     /**
      * Constructor which initializes this Frame to contain a {@link #multiSetOutputViewerPane}.
@@ -33,7 +33,7 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
      * {@link #setVisible(boolean)} on the frame.
      * 
      */
-    public MultiTestSetOutputViewerFrame() {
+    public TestResultsFrame() {
         super();
         initialize();
     }
@@ -53,9 +53,9 @@ public class MultiTestSetOutputViewerFrame extends javax.swing.JFrame implements
         this.setLocationRelativeTo(null);
     }
 
-    public MultiTestSetOutputViewerPane getMultiTestSetOutputViewerPane() {
+    public TestResultsPane getMultiTestSetOutputViewerPane() {
         if (multiSetOutputViewerPane == null) {
-            multiSetOutputViewerPane = new MultiTestSetOutputViewerPane();
+            multiSetOutputViewerPane = new TestResultsPane();
         }
         return multiSetOutputViewerPane;
     }

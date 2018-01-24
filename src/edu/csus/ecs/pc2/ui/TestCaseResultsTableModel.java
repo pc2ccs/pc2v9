@@ -7,8 +7,8 @@ import javax.swing.table.DefaultTableModel;
 
 import com.ibm.webrunner.j2mclb.util.TableModel;
 
-import edu.csus.ecs.pc2.core.model.RunTestCase;
-import edu.csus.ecs.pc2.ui.MultiTestSetOutputViewerPane.COLUMN;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
+import edu.csus.ecs.pc2.ui.TestResultsPane.COLUMN;
 
 /**
  * This class defines a table model for tables holding Test Case Results.
@@ -26,7 +26,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
      * @param testCases - the data to go in the model
      * @param columnNames - Strings defining the table column headers
      */
-    public TestCaseResultsTableModel(RunTestCase[] testCases, Object[] columnNames) {
+    public TestCaseResultsTableModel(RunTestCaseResult[] testCases, Object[] columnNames) {
         
         //create a default table model with zero rows and columns
         super ();
@@ -36,57 +36,71 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
             super.setColumnIdentifiers(columnNames);
         }
         
-            if (testCases != null) {
-            //add the row data for each test case to the model
-            for (int row=0; row< testCases.length; row++) {
-                
-                //selection checkbox state
-                Boolean selected = new Boolean (!testCases[row].isPassed());
-                
-                //test case number (row+1)
-                String testCaseNum = new String(Integer.toString(row+1));
-                
-                //test case result (passed/failed)
-                boolean result = testCases[row].isPassed();
-                String resultString = "Fail";
-                if (result) {
-                    resultString = "Pass";
-                }
-                result = testCases[row].isValidated();
-                if (!result) {
-                    resultString = "N/A"; // this will be overwritten by PassFailCellRenderer
+//        int numTestCases ;
+//        if (testCases==null || testCases.length==0) {
+//            numTestCases = 0;
+//        } else {
+//            numTestCases = testCases.length;
+//        }
+//        System.out.println("TestCaseResultsTableModel(): numTestCases = " + numTestCases);
+        
+        if (testCases != null) {
+            // add the row data for each test case to the model
+            for (int row = 0; row < testCases.length; row++) {
+
+//                System.out.println("  Test Case " + (row + 1) + ": " + testCases[row].toString());
+
+                // selection checkbox state
+                Boolean selected = new Boolean(!testCases[row].isPassed());
+
+                // test case number (row+1)
+                String testCaseNum = new String(Integer.toString(row + 1));
+
+                // test case result: one of "No Validator", "Pass", or "Fail"
+                String resultString = "";
+                boolean probHasValidator = testCases[row].isValidated();
+                if (!probHasValidator) {
+                    resultString = "No Validator";
+                } else {
+                    //problem has a validator; see what the Validator process produced
+                    //(see comments in Executable.executeAndValidateDataSet() for an explanation of what isPassed() returns)
+                    boolean passed = testCases[row].isPassed();  
+                    if (passed) {
+                        resultString = "Pass";
+                    } else {
+                        resultString = "Fail";
+                    }
                 }
                 JLabel resultLabel = new JLabel(resultString);
-                
-                //elapsed time of test case
+
+                // elapsed time of test case
                 String time = new String(Long.toString(testCases[row].getElapsedMS()));
-                
-                //link for viewing team output
+
+                // link for viewing team output
                 JLabel teamOutputViewLabel = new JLabel("View");
-                
-                //link for comparing team output with corresponding judge's output
+
+                // link for comparing team output with corresponding judge's output
                 JLabel teamOutputCompareLabel = new JLabel("Compare");
-                
-                //link for viewing judge's output
+
+                // link for viewing judge's output
                 JLabel judgesOutputViewLabel = new JLabel("View");
-                
+
                 JLabel judgesDataViewLabel = new JLabel("View");
-                
+
                 // link for validator stdout
                 JLabel validatorOutputViewLabel = new JLabel("View");
-                
+
                 // link for validator stderr
                 JLabel validatorStderrViewLabel = new JLabel("View");
-                
-                //build the row object and add it to the model
-                Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, time, 
-                        teamOutputViewLabel, teamOutputCompareLabel, judgesOutputViewLabel, 
+
+                // build the row object and add it to the model
+                Object[] rowData = new Object[] { selected, testCaseNum, resultLabel, time,
+                        teamOutputViewLabel, teamOutputCompareLabel, judgesOutputViewLabel,
                         judgesDataViewLabel, validatorOutputViewLabel, validatorStderrViewLabel };
-    
+
                 super.addRow(rowData);
             }
         }
-
     }
 
     /**
@@ -136,7 +150,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
             
         } else {
 
-            int selectionColumnIndex = MultiTestSetOutputViewerPane.COLUMN.SELECT_CHKBOX.ordinal();
+            int selectionColumnIndex = TestResultsPane.COLUMN.SELECT_CHKBOX.ordinal();
             if (columnIndex != selectionColumnIndex) {
                 // columns other than the row-selection checkbox are automatically not editable)
                 retVal = false;

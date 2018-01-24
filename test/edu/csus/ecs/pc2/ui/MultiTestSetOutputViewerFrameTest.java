@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -96,7 +96,7 @@ public class MultiTestSetOutputViewerFrameTest extends AbstractTestCase {
         addTestCases(contest, run, numTestCases);
 
         // create an MTSV frame, load it with the data to be displayed
-        MultiTestSetOutputViewerFrame frame = new MultiTestSetOutputViewerFrame();
+        TestResultsFrame frame = new TestResultsFrame();
         frame.setContestAndController(contest, controller);
 
         try {
@@ -168,9 +168,9 @@ public class MultiTestSetOutputViewerFrameTest extends AbstractTestCase {
 
         for (int i = 0; i < numTestCases; i++) {
             Object[] testCase = testData[i % testData.length];
-            RunTestCase runTestCase = new RunTestCase(run, judgementRecord, i + 1, (boolean) testCase[0]);
-            runTestCase.setElapsedMS(new Long((Integer) testCase[1]));
-            run.addTestCase(runTestCase);
+            RunTestCaseResult runTestCaseResult = new RunTestCaseResult(run, judgementRecord, i + 1, (boolean) testCase[0]);
+            runTestCaseResult.setElapsedMS(new Long((Integer) testCase[1]));
+            run.addTestCase(runTestCaseResult);
             // System.out.println (runTestCase);
         }
     }

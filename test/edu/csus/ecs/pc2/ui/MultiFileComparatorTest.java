@@ -6,7 +6,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * MultiFileComparator testing.  Constructs a {@link MultiFileComparator} and fills it with
- * test data the same way a real client (e.g. {@link MultiTestSetOutputViewerPane}) would.
+ * test data the same way a real client (e.g. {@link TestResultsPane}) would.
  * 
  * @author John
  * 

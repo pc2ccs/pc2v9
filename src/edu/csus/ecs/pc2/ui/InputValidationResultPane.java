@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.ui.cellRenderer.LinkCellRenderer;
-import edu.csus.ecs.pc2.ui.cellRenderer.PassFailCellRenderer;
+import edu.csus.ecs.pc2.ui.cellRenderer.TestCaseResultCellRenderer;
 
 /**
  * This class defines a JPanel for displaying the results of running an Input Validator on a set of Input Data files (Judge's input data).
@@ -188,7 +188,7 @@ public class InputValidationResultPane extends JPanePlugin {
             header.setFont(new Font("Dialog", Font.BOLD, 12));
 
             // render Result column as Pass/Fail on Green/Red background
-            resultsTable.getColumn("Result").setCellRenderer(new PassFailCellRenderer());
+            resultsTable.getColumn("Result").setCellRenderer(new TestCaseResultCellRenderer());
 
         }
         return resultsTable;

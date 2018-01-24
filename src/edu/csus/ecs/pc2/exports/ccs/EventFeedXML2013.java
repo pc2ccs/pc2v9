@@ -32,7 +32,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
-import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.IMemento;
@@ -174,12 +174,12 @@ public class EventFeedXML2013 {
                 memento = mementoRoot.createChild(RUN_TAG);
                 addMemento(memento, contest, run); // add RUN
                 
-                RunTestCase[] runTestCases = getLastJudgementTestCases(run);
+                RunTestCaseResult[] runTestCases = getLastJudgementTestCases(run);
                 Arrays.sort(runTestCases, new RunTestCaseComparator());
-                for (RunTestCase runTestCase : runTestCases) {
-                    if (filter.matchesElapsedTime(runTestCase)){
+                for (RunTestCaseResult runTestCaseResult : runTestCases) {
+                    if (filter.matchesElapsedTime(runTestCaseResult)){
                         memento = mementoRoot.createChild(TESTCASE_TAG);
-                        addMemento(memento, contest, runTestCase, run); // add TESTCASE
+                        addMemento(memento, contest, runTestCaseResult, run); // add TESTCASE
                     }
                 }
             } else if ( ! run.isDeleted() && ! filter.matchesElapsedTime(run)) {
@@ -549,7 +549,7 @@ public class EventFeedXML2013 {
         return regionName;
     }
 
-    public XMLMemento createElement(IInternalContest contest, RunTestCase testCase, Run run) {
+    public XMLMemento createElement(IInternalContest contest, RunTestCaseResult testCase, Run run) {
         XMLMemento memento = XMLMemento.createWriteRoot(TESTCASE_TAG);
         addMemento(memento, contest, testCase, run);
         return memento;
@@ -562,7 +562,7 @@ public class EventFeedXML2013 {
      * @param testCase
      * @param run
      */
-    public IMemento addMemento(IMemento memento, IInternalContest contest, RunTestCase testCase, Run run) {
+    public IMemento addMemento(IMemento memento, IInternalContest contest, RunTestCaseResult testCase, Run run) {
 
 //        <testcase>
 //        <i>3</i>
@@ -865,11 +865,11 @@ public class EventFeedXML2013 {
             if (filter.matches(run)) {
                 sb.append(toXML(createElement(contest, run))); // add RUN
                 
-                RunTestCase[] runTestCases = getLastJudgementTestCases(run);
+                RunTestCaseResult[] runTestCases = getLastJudgementTestCases(run);
                 Arrays.sort(runTestCases, new RunTestCaseComparator());
-                for (RunTestCase runTestCase : runTestCases) {
-                    if (filter.matchesElapsedTime(runTestCase)){
-                        sb.append(toXML(createElement(contest, runTestCase, run))); // add TESTCASE
+                for (RunTestCaseResult runTestCaseResult : runTestCases) {
+                    if (filter.matchesElapsedTime(runTestCaseResult)){
+                        sb.append(toXML(createElement(contest, runTestCaseResult, run))); // add TESTCASE
                     }
                 }
             } else if ( ! filter.matchesElapsedTime(run)) {
@@ -894,22 +894,22 @@ public class EventFeedXML2013 {
      * Get the list of run cases for the last judgement.
      * @param run
      */
-    protected RunTestCase[] getLastJudgementTestCases(Run run) {
+    protected RunTestCaseResult[] getLastJudgementTestCases(Run run) {
         
-        ArrayList <RunTestCase> cases = new ArrayList<RunTestCase>();
+        ArrayList <RunTestCaseResult> cases = new ArrayList<RunTestCaseResult>();
         
         if (run.isJudged()){
-            RunTestCase[] runTestCases = run.getRunTestCases();
+            RunTestCaseResult[] runTestCases = run.getRunTestCases();
             JudgementRecord judgementRecord = run.getJudgementRecord();
             
-            for (RunTestCase runTestCase : runTestCases) {
-                if (runTestCase.matchesJudgement(judgementRecord)){
-                    cases.add(runTestCase);
+            for (RunTestCaseResult runTestCaseResult : runTestCases) {
+                if (runTestCaseResult.matchesJudgement(judgementRecord)){
+                    cases.add(runTestCaseResult);
                 }
             }
         }
         
-        return (RunTestCase[]) cases.toArray(new RunTestCase[cases.size()]);
+        return (RunTestCaseResult[]) cases.toArray(new RunTestCaseResult[cases.size()]);
     }
 
     /**

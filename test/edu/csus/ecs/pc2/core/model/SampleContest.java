@@ -1613,8 +1613,8 @@ public class SampleContest {
         }
         
         for (int i = 0; i < count; i++) {
-            RunTestCase runTestCase = new RunTestCase(run, judgementRecord, i+1, run.isSolved());
-            run.addTestCase (runTestCase);
+            RunTestCaseResult runTestCaseResult = new RunTestCaseResult(run, judgementRecord, i+1, run.isSolved());
+            run.addTestCase (runTestCaseResult);
         }
     }
 

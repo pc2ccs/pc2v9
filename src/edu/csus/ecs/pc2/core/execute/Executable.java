@@ -36,7 +36,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
-import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
@@ -591,6 +591,23 @@ public class Executable extends Plugin implements IExecutable {
         } else {
             passed = false;
         }
+        
+        //at this point, "passed" is true if 
+        //  the submitted program was successfully executed 
+        //  AND the problem has a validator 
+        //  AND method validateProgram() returned true (indicating the problem was correctly solved for the specified test case) 
+        //  AND the ExecutionData object for the run indicates that the submission solved the problem for the specified data case.
+        //    (the ExecutionData object indicates the program solved the problem if 
+        //       the program compiled successfully 
+        //       AND the the system was able to successfully execute the program 
+        //       AND the program did not exceed the runtime limit 
+        //       AND the validator program ran successfully 
+        //       AND there were no exceptions during Validator execution 
+        //       AND the result string returned by the Validator was "accepted".  
+        //     The ExecutionData object returns false (the problem was NOT solved) if any of these conditions is false.
+        //    )
+        //If any of the above conditions is not true, "passed" is false at this point.
+        //Note that the value of "passed" is stored in the RunTestCaseResult object (below), and this is what is returned by RunTestCaseResult.isPassed()
 
         String reason = getFailureReason();
         if (reason == null) {
@@ -606,11 +623,11 @@ public class Executable extends Plugin implements IExecutable {
         // Judgement judgement = getContest().getJudgement(record.getJudgementId());
         // log.info(" Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement = " + judgement);
 
-        RunTestCase runTestCase = new RunTestCase(run, record, testNumber, passed);
-        runTestCase.setElapsedMS(executionData.getExecuteTimeMS());
-        runTestCase.setContestTimeMS(getContest().getContestTime().getElapsedMS());
-        runTestCase.setValidated(isValidated());
-        run.addTestCase(runTestCase);
+        RunTestCaseResult runTestCaseResult = new RunTestCaseResult(run, record, testNumber, passed);
+        runTestCaseResult.setElapsedMS(executionData.getExecuteTimeMS());
+        runTestCaseResult.setContestTimeMS(getContest().getContestTime().getElapsedMS());
+        runTestCaseResult.setValidated(isValidated());
+        run.addTestCase(runTestCaseResult);
         return passed;
     }
 

@@ -156,7 +156,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private long executeTimeMS = 0;
 
-    private MultiTestSetOutputViewerFrame multiTestSetOutputViewerFrame = null;
+    private TestResultsFrame testResultsFrame = null;
 
     /**
      * Saved team output names.
@@ -341,8 +341,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         closeViewer(answerFileViewer);
         closeViewer(sourceViewer);
         // because mtsovf is not a IFileViewer
-        if (multiTestSetOutputViewerFrame != null) {
-            multiTestSetOutputViewerFrame.dispose();
+        if (testResultsFrame != null) {
+            testResultsFrame.dispose();
         }
         // getManualRunResultsPanel().closeViewerWindows();
         // getComputerJudgementPanel().closeViewerWindows();
@@ -1390,13 +1390,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getMultiTestSetOutputViewerFrame().setVisible(true);
     }
 
-    private MultiTestSetOutputViewerFrame getMultiTestSetOutputViewerFrame() {
-        if (multiTestSetOutputViewerFrame == null) {
-            multiTestSetOutputViewerFrame = new MultiTestSetOutputViewerFrame();
-            multiTestSetOutputViewerFrame.setContestAndController(getContest(), getController());
-            FrameUtilities.centerFrame(multiTestSetOutputViewerFrame);
+    private TestResultsFrame getMultiTestSetOutputViewerFrame() {
+        if (testResultsFrame == null) {
+            testResultsFrame = new TestResultsFrame();
+            testResultsFrame.setContestAndController(getContest(), getController());
+            FrameUtilities.centerFrame(testResultsFrame);
         }
-        return multiTestSetOutputViewerFrame;
+        return testResultsFrame;
     }
 
     /**
