@@ -23,10 +23,10 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
     /**
      * Constructs a Table Model for Test Case Results. The data and columnName values
      * are stored in Vectors in the DefaultTableModel parent class.
-     * @param testCases - the data to go in the model
+     * @param testCaseResults - the data to go in the model
      * @param columnNames - Strings defining the table column headers
      */
-    public TestCaseResultsTableModel(RunTestCaseResult[] testCases, Object[] columnNames) {
+    public TestCaseResultsTableModel(RunTestCaseResult[] testCaseResults, Object[] columnNames) {
         
         //create a default table model with zero rows and columns
         super ();
@@ -44,27 +44,27 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
 //        }
 //        System.out.println("TestCaseResultsTableModel(): numTestCases = " + numTestCases);
         
-        if (testCases != null) {
+        if (testCaseResults != null) {
             // add the row data for each test case to the model
-            for (int row = 0; row < testCases.length; row++) {
+            for (int row = 0; row < testCaseResults.length; row++) {
 
 //                System.out.println("  Test Case " + (row + 1) + ": " + testCases[row].toString());
 
-                // selection checkbox state
-                Boolean selected = new Boolean(!testCases[row].isPassed());
+                // selection checkbox state: default to selecting rows which failed to pass validation
+                Boolean selected = new Boolean( testCaseResults[row].isValidated() && !testCaseResults[row].isPassed());
 
                 // test case number (row+1)
                 String testCaseNum = new String(Integer.toString(row + 1));
 
                 // test case result: one of "No Validator", "Pass", or "Fail"
                 String resultString = "";
-                boolean probHasValidator = testCases[row].isValidated();
+                boolean probHasValidator = testCaseResults[row].isValidated();
                 if (!probHasValidator) {
                     resultString = "No Validator";
                 } else {
                     //problem has a validator; see what the Validator process produced
                     //(see comments in Executable.executeAndValidateDataSet() for an explanation of what isPassed() returns)
-                    boolean passed = testCases[row].isPassed();  
+                    boolean passed = testCaseResults[row].isPassed();  
                     if (passed) {
                         resultString = "Pass";
                     } else {
@@ -74,7 +74,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
                 JLabel resultLabel = new JLabel(resultString);
 
                 // elapsed time of test case
-                String time = new String(Long.toString(testCases[row].getElapsedMS()));
+                String time = new String(Long.toString(testCaseResults[row].getElapsedMS()));
 
                 // link for viewing team output
                 JLabel teamOutputViewLabel = new JLabel("View");
