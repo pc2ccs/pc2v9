@@ -43,10 +43,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * Judge GUI.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class JudgeView extends JFrame implements UIPlugin {
 
     /**
@@ -291,12 +288,23 @@ public class JudgeView extends JFrame implements UIPlugin {
                         logException(e);
                     }
                 }
+                
+                
+                /**
+                 * Start Auto Judging
+                 */
 
+                try {
+                    runsPanel.startAutoJudging();
+                } catch (Exception e) {
+                    logException(e);
+                }
+          
             }
         });
 
     }
-    
+
     public String getPluginTitle() {
         return "Judge Main GUI";
     }
