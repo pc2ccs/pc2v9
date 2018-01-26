@@ -1024,7 +1024,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                     if (((JCheckBox) (e.getSource())).isSelected()) {
                         loadTableWithFailedTestCases();
                     } else {
-                        loadTableWithAllTestCases();
+                        loadTableWithAllTestCaseResults();
                     }
                     updateCompareSelectedButton();
                 }
@@ -1380,7 +1380,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                 getTotalTestCasesLabel().setText("Total Test Cases: " + totalTestCases);
                 
                 // get the actually-run test case results for the current run
-                RunTestCaseResult[] testCases = getCurrentTestCases(currentRun);
+                RunTestCaseResult[] testCases = getCurrentTestCaseResults(currentRun);
 
                 // fill in the test case summary information
                 if (testCases == null || testCases.length==0) {
@@ -1521,13 +1521,13 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     }
 
     /**
-     * Looks at all the TestCases for a run and filters
+     * Looks at all the TestCaseResults for a run and filters
      * that list to just the most recent.
      * 
      * @param run
-     * @return most recent RunTestCases
+     * @return most recent RunTestCaseResults
      */
-    private RunTestCaseResult[] getCurrentTestCases(Run run) {
+    private RunTestCaseResult[] getCurrentTestCaseResults(Run run) {
         RunTestCaseResult[] testCases = null;
         RunTestCaseResult[] allTestCases = run.getRunTestCases();
         // hope the lastTestCase has the highest testNumber....
@@ -1550,10 +1550,10 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     /**
      * Loads the result table with data for all test cases.
      */
-    private void loadTableWithAllTestCases() {
+    private void loadTableWithAllTestCaseResults() {
         
         // get the test case results for the current run
-        RunTestCaseResult[] allTestCases = getCurrentTestCases(currentRun);
+        RunTestCaseResult[] allTestCases = getCurrentTestCaseResults(currentRun);
         
         //build a new table with the test cases and install it in the scrollpane
         resultsTable = getResultsTable(allTestCases);
@@ -1566,7 +1566,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     private void loadTableWithFailedTestCases() {
         
         // get the test case results for the current run
-        RunTestCaseResult[] allTestCases = getCurrentTestCases(currentRun);
+        RunTestCaseResult[] allTestCases = getCurrentTestCaseResults(currentRun);
         
         //extract failed cases into a Vector (list)
         Vector<RunTestCaseResult> failedTestCaseList = new Vector<RunTestCaseResult>();
@@ -1830,7 +1830,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         }
         
         //get any results which have already been executed
-        RunTestCaseResult[] allTestCases = getCurrentTestCases(currentRun);
+        RunTestCaseResult[] allTestCases = getCurrentTestCaseResults(currentRun);
         
         if (allTestCases==null || row>=allTestCases.length) {
             //the run either hasn't been executed at all (testcases=null) or the selected row is for a data set
