@@ -1645,7 +1645,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         localResultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkCellRenderer());
         localResultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkCellRenderer());
 
-        // render Result column as Pass/Fail on Green/Red
+        // render Result column as Pass/Fail on Green/Red (if the test case was validated), or else either "<No Validator>" or "(Not Executed)"
         localResultsTable.getColumn(columnNames[COLUMN.RESULT.ordinal()]).setCellRenderer(new TestCaseResultCellRenderer());
 
         // render Time column right-justified
@@ -1667,10 +1667,10 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                     resultString = ((JLabel)target.getValueAt(row, COLUMN.RESULT.ordinal())).getText(); 
                 } catch (ClassCastException e1) {
                      if (getController().getLog() != null) {
-                        getController().getLog().warning("MultiTestSetOutputViewerPane.getResultsTable(): expected to find a JLabel in resultsTable; exception: "
+                        getController().getLog().warning("TestResultsPane.getResultsTable(): expected to find a JLabel in resultsTable; exception: "
                                 + e1.getMessage());
                     } else {
-                        System.err.println("MultiTestSetOutputViewerPane.getResultsTable(): expected to find a JLabel in resultsTable; exception: "
+                        System.err.println("TestResultsPane.getResultsTable(): expected to find a JLabel in resultsTable; exception: "
                                 + e1.getMessage());
                     }
                     return;
