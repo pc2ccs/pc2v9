@@ -50,11 +50,9 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * 
  * @author pc2@ecs.csus.edu
  */
-
-// $HeadURL$
 public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     
-    private Log log = null;
+    private static Log log = null;
     
     private boolean debugMode = false;
     // alt1: 0 0 200 0 0
@@ -72,10 +70,17 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-    
-        log = createLog("DefaultScoringAlgorithmTest");
-        
-        StaticLog.setLog(log);
+
+        if (log == null) {
+
+            // Fixing: IOexception in setFileHandlers Couldn't get lock for .\testout\DefaultScoringAlgorithmTest\DefaultScoringAlgorithmTest-%u.log
+            // Now only create/use a log if no log defined, this "fixes" a problem where before
+            // there would be 23 logs created, one per method, now there is only one created.
+            // So before when there were 100 log files after 6 junt test runs, now there
+            // can be up to 10 junit test runs.
+            log = createLog("DefaultScoringAlgorithmTest");
+            StaticLog.setLog(log);
+        }
 
 //        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
         String loadFile = getSamplesSourceFilename(SUMIT_SOURCE_FILENAME);
@@ -302,8 +307,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 
      * @throws IOException 
+     * @throws RunUnavailableException 
      */
-    public void testMixedjudged() throws IOException, ClassNotFoundException, FileSecurityException {
+    public void testMixedjudged() throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         InternalContest contest = new InternalContest();
         
@@ -323,7 +329,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         checkOutputXML(contest);
     }
     
-    public void testCESVNoJudgements() throws IOException, ClassNotFoundException, FileSecurityException {
+    public void testCESVNoJudgements() throws Exception {
 
         String [] runsData = {
                 "1,1,A,1,No,No,4",  // 0 (a No before first yes Security Violation)
@@ -367,8 +373,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 
      * @throws IOException 
+     * @throws RunUnavailableException 
      */
-    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved) throws IOException, ClassNotFoundException, FileSecurityException {
+    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
         Run run = getARun(contest);
         RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
         
@@ -376,23 +383,12 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         
         ClientId who = contest.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
         
-        checkOutRun (contest, run, who);
+        SampleContest.checkOutRun(contest, run, who);
         
         Judgement judgement = contest.getJudgements()[judgementIndex]; // Judge as No
         
         JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), who, solved, false);
         contest.addRunJudgement(run, judgementRecord, null, who);
-        
-    }
-
-    private void checkOutRun(IInternalContest contest, Run run, ClientId who) {
-        // TODO REFACTOR remove this method, replace with instances of SampleContest.checkOutRun
-        
-        try {
-            SampleContest.checkOutRun(contest, run, who);
-        } catch (ClassNotFoundException | RunUnavailableException | IOException | FileSecurityException e) {
-            e.printStackTrace();
-        }
         
     }
 
@@ -405,8 +401,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 
      * @throws IOException 
+     * @throws RunUnavailableException 
      */
-    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved, int elapsedMinutes) throws IOException, ClassNotFoundException, FileSecurityException{
+    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved, int elapsedMinutes) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException{
         Run run = getARun(contest, elapsedMinutes);
         RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
         
@@ -415,7 +412,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         ClientId who = contest.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
         assertFalse ("Could not retrieve first judge ", who == null);
         
-        checkOutRun (contest,run,who);
+        SampleContest.checkOutRun(contest, run, who);
         
         Judgement judgement = contest.getJudgements()[judgementIndex]; // Judge as No
         
@@ -451,8 +448,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 
      * @throws IOException 
+     * @throws RunUnavailableException 
      */
-    public void testOneRunJudged() throws IOException, ClassNotFoundException, FileSecurityException {
+    public void testOneRunJudged() throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         InternalContest contest = new InternalContest();
         
@@ -461,6 +459,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         createJudgedRun(contest, 2, false);
 
         checkOutputXML(contest);
+        
     }
     
     /**
@@ -468,8 +467,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 
      * @throws IOException 
+     * @throws RunUnavailableException 
      */
-    public void testFiveRunsJudged() throws IOException, ClassNotFoundException, FileSecurityException {
+    public void testFiveRunsJudged() throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         InternalContest contest = new InternalContest();
         
@@ -489,9 +489,10 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * CASE (1): "When Solved, all runs before Yes".
      * 
      * Created from testing/boardtest.html
+     * @throws Exception 
      * 
      */
-    public void testScoreboardCaseOne () {
+    public void testScoreboardCaseOne () throws Exception {
         // RunID    TeamID  Prob    Time    Result
         
         String [] runsData = {
@@ -520,7 +521,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         scoreboardTest (2, runsData, rankData);
     }
     
-    public void testScoreboardCaseOneA(){
+    public void testScoreboardCaseOneA() throws Exception{
         
         // RunID    TeamID  Prob    Time    Result
         
@@ -558,8 +559,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * 
      * Both runs have same elapsed time, the tie breaker is runId.
      * Also tests when one or more Yes are after first yes 
+     * @throws Exception 
      */
-    public void testNoBeforeYesSameElapsed(){
+    public void testNoBeforeYesSameElapsed() throws Exception{
         
         // RunID    TeamID  Prob    Time    Result
         
@@ -603,8 +605,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * CASE (2): "When Solved, all No Runs".
      *
      * Created from testing/boardtest.html
+     * @throws Exception 
      */
-    public void testScoreboardCaseTwo (){
+    public void testScoreboardCaseTwo () throws Exception{
         
         // RunID    TeamID  Prob    Time    Result
         
@@ -660,8 +663,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * CASE (3):  "When Solved, All Runs"
      * 
      * Created from testing/boardtest.html
+     * @throws Exception 
      */
-    public void testScoreboardCaseThree () {
+    public void testScoreboardCaseThree () throws Exception {
         
         // RunID    TeamID  Prob    Time    Result
         
@@ -712,8 +716,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * CASE (4): "All Runs"
      * 
      * Created from testing/boardtest.html
+     * @throws Exception 
      */
-    public void testScoreboardCaseFour () {
+    public void testScoreboardCaseFour () throws Exception {
         
         // RunID    TeamID  Prob    Time    Result
         
@@ -766,9 +771,10 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
 
     /**
+     * @throws Exception 
      * 
      */
-    public void testScoreboard55 (){
+    public void testScoreboard55 () throws Exception{
 
         String [] runsData = {
                 "1,16,B,1,No",
@@ -895,8 +901,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
   
     /**
      * Test a No before a Yes, both runs same elapsed time.
+     * @throws Exception 
      */
-    public void testNoYes (){
+    public void testNoYes () throws Exception{
 
         // RunID    TeamID  Prob    Time    Result
         
@@ -925,9 +932,10 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * based on CASE (1): "When Solved, all runs before Yes".
      * 
      * Created from testing/boardtest.html
+     * @throws Exception 
      * 
      */
-    public void testScoreboardForBeingJudgedState () {
+    public void testScoreboardForBeingJudgedState () throws Exception {
         // RunID    TeamID  Prob    Time    Result
         
         String [] runsData = {
@@ -953,6 +961,8 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "2,team2,1,30"
         };
         
+//        startExplorer(getOutputDataDirectory());
+        
         InternalContest contest = new InternalContest();
         
         int numTeams = 2;
@@ -960,7 +970,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         initData(contest, numTeams, 5);
         
         for (String runInfoLine : runsData) {
-            addTheRun(contest, runInfoLine);
+            SampleContest.addRunFromInfo(contest, runInfoLine);
         }
 
         Run [] runs = contest.getRuns();
@@ -974,22 +984,12 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         confirmRanks(contest, rankData);
     }
 
-    private void addTheRun(InternalContest contest, String runInfoLine) {
-        // TODO REFACTOR - remove local method, replace method calls with SampleContest.addRunFromInfo
-
-        try {
-            SampleContest.addRunFromInfo(contest, runInfoLine);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
     /**
      * Test tie breaker down to last yes submission time. 
+     * @throws Exception 
      * 
      */
-    public void testTieBreakerSubmissionTime(){
+    public void testTieBreakerSubmissionTime() throws Exception{
 
         // Sort order:
         // Primary Sort = number of solved problems (high to low)
@@ -1036,8 +1036,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Test whether SA respects send to team 
+     * @throws Exception 
      */
-    public void testSendToTeams(){
+    public void testSendToTeams() throws Exception{
 
         // Sort order:
         // Primary Sort = number of solved problems (high to low)
@@ -1085,7 +1086,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         scoreboardTest (6, runsData, rankData, true);
     }
 
-    public void testAltScoring() {
+    public void testAltScoring() throws Exception {
         // RunID    TeamID  Prob    Time    Result
         
         String [] runsData = {
@@ -1145,8 +1146,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     }
     /**
      * This is a test for bug 691
+     * @throws Exception 
      */
-    public void testDeletedProblem() throws IOException, ClassNotFoundException, FileSecurityException {
+    public void testDeletedProblem() throws Exception {
  
         InternalContest contest = new InternalContest();
 
@@ -1181,7 +1183,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         };
 
         for (String runInfoLine : runsData) {
-            addTheRun(contest, runInfoLine);
+            SampleContest.addRunFromInfo(contest, runInfoLine);
         }
 
         Problem probA = contest.getProblems()[0];
@@ -1327,12 +1329,12 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         }
     }
 
-    private void scoreboardTest(int numTeams, String[] runsData, String[] rankData, Properties scoreProps) {
+    private void scoreboardTest(int numTeams, String[] runsData, String[] rankData, Properties scoreProps) throws Exception {
         scoreboardTest (numTeams, runsData, rankData, false, scoreProps);
          
     }
     
-    private void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo, Properties scoreProps) {
+    private void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo, Properties scoreProps) throws Exception {
         
         InternalContest contest = new InternalContest();
 
@@ -1347,7 +1349,8 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         }
         
         for (String runInfoLine : runsDataList) {
-            addTheRun(contest, runInfoLine);
+            SampleContest.addRunFromInfo(contest, runInfoLine);
+
         }
 
         confirmRanks(contest, rankDataList, scoreProps);
@@ -1415,8 +1418,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Test whether SA respects send to team 
+     * @throws Exception 
      */
-    public void testZZZZEOCSettings(){
+    public void testZZZZEOCSettings() throws Exception{
 
         // Sort order:
         // Primary Sort = number of solved problems (high to low)
@@ -1456,7 +1460,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         contest.updateContestTime(contestTime);
         JudgementNotificationsList judgementNotificationsList = new JudgementNotificationsList();
         for (String runInfoLine : runsData) {
-            addTheRun(contest, runInfoLine);
+            SampleContest.addRunFromInfo(contest, runInfoLine);
         }
 
         Run[] runs = contest.getRuns();
@@ -1491,12 +1495,13 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * @param numTeams
      * @param runsDataList
      * @param rankDataList
+     * @throws Exception 
      */
-    public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList) {
+    public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList) throws Exception {
         scoreboardTest(numTeams, runsDataList, rankDataList, false);
     }
     
-    public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo)  {
+    public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo) throws Exception  {
 
         InternalContest contest = new InternalContest();
 
@@ -1511,7 +1516,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         }
         
         for (String runInfoLine : runsDataList) {
-            addTheRun(contest, runInfoLine);
+            SampleContest.addRunFromInfo(contest, runInfoLine);
         }
 
         checkOutputXML(contest);
@@ -1597,17 +1602,6 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     protected void tearDown() throws Exception {
         super.tearDown();
-    }
-
-    public void addTheRun(IInternalContest contest, String runInfoLine) {
-        // TODO REFACTOR remove this method use SampleContest.addRunFromInfo 
-        // for test methods that use SampleContest.addRunFromInfo add throws Exception
-        try {
-            SampleContest.addRunFromInfo(contest, runInfoLine);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
     }
 
 }

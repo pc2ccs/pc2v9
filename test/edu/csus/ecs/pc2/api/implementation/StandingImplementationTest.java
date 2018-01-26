@@ -6,7 +6,6 @@ import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
-import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithmTest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -29,7 +28,7 @@ public class StandingImplementationTest extends AbstractTestCase {
         super.tearDown();
     }
 
-    public void testOneDetails() {
+    public void testOneDetails() throws Exception {
         Log log = createLog(getName());
 
         // RunID TeamID Prob Time Result
@@ -49,10 +48,8 @@ public class StandingImplementationTest extends AbstractTestCase {
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createContest(1, 5, 40, 12, true);
 
-        DefaultScoringAlgorithmTest dsaTest = new DefaultScoringAlgorithmTest();
-
         for (String runLine : runsData) {
-            dsaTest.addTheRun(contest, runLine);
+            SampleContest.addRunFromInfo(contest, runLine);
         }
 
         Contest apiContest = new Contest(contest, sample.createController(contest, true, true), log);
