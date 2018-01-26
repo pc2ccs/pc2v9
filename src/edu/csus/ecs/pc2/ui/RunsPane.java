@@ -60,10 +60,7 @@ import edu.csus.ecs.pc2.ui.judge.JudgeView;
  * View runs panel.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$$
 public class RunsPane extends JPanePlugin {
 
     /**
@@ -928,6 +925,10 @@ public class RunsPane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
+        if (bUseAutoJudgemonitor) {
+            autoJudgingMonitor.setContestAndController(getContest(), getController());
+        }
+
         log = getController().getLog();
 
         displayTeamName = new DisplayTeamName();
@@ -958,12 +959,8 @@ public class RunsPane extends JPanePlugin {
                     selectJudgementFrame.setContestAndController(getContest(), getController());
                 }
 
-                if (bUseAutoJudgemonitor) {
-                    autoJudgingMonitor.setContestAndController(getContest(), getController());
-                }
                 
                 getEditFilterFrame().setContestAndController(getContest(), getController());
-
                 
                 updateGUIperPermissions();
                 resetRunsListBoxColumns();
@@ -974,9 +971,6 @@ public class RunsPane extends JPanePlugin {
                 }
                 // this will do the checking and take us off the AWT thread as needed
                 // check this to prevent the admin has turned off aj message
-                if (isAutoJudgingEnabled()) {
-                    startAutoJudging();
-                }
             }
         });
     }
@@ -1770,7 +1764,7 @@ public class RunsPane extends JPanePlugin {
         return false;
     }
 
-    protected void startAutoJudging() {
+    public void startAutoJudging() {
         if (!bUseAutoJudgemonitor) {
             return;
         }

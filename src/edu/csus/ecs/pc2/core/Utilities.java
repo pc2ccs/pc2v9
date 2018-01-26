@@ -48,10 +48,7 @@ import edu.csus.ecs.pc2.ui.MultipleFileViewer;
  * Various common routines.
  *
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public final class Utilities {
 
     private static boolean debugMode = false;
@@ -1425,7 +1422,6 @@ public final class Utilities {
      * 
      * @return
      */
-    // TODO move to utility class
     public static String getDateTimeString() {
         return formatterYYYYMMDDHHMMSS.format(new Date());
     }
@@ -1598,5 +1594,47 @@ public final class Utilities {
 
         return baseFileName;
     }
+    
+    /**
+     * Prints a stack trace, prints stack elements which only matches pattern.
+     * 
+     * Example to only print stack trace elements with csus:
+     * <pre>
+     *    Utilities.printStackTrace(System.err,e,"csus");
+     * 
+     * prints:
+     * 
+     * java.sql.SQLException: No value specified for parameter 7
+     *    Matching: csus
+     *      at edu.csus.ecs.pc2.db.adapters.MySqlDatabaseAdapter(MySqlDatabaseAdapter.java:274)
+     *      at edu.csus.ecs.pc2.db.adapters.MySqlDatabaseAdapter(MySqlDatabaseAdapter.java:2526)
+     *      at edu.csus.ecs.pc2.db.adapters.MySqlDatabaseAdapter(MySqlDatabaseAdapter.java:2442)
+     *      at edu.csus.ecs.pc2.db.adapters.DatabaseAdapterTest(DatabaseAdapterTest.java:237)
+     * </pre>
+     * 
+     * @param printStream
+     * @param e
+     * @param pattern
+     */
+    public static void printStackTrace(PrintStream printStream, Exception e, String pattern) {
+
+        printStream.println(e.toString());
+        printStream.println("   Matching: "+pattern);
+        StackTraceElement[] st = e.getStackTrace();
+        for (StackTraceElement stackTraceElement : st) {
+
+            String className = stackTraceElement.getClassName();
+
+            if (className.indexOf(pattern) != -1) {
+                printStream.println("    at " + //
+                        className + "." + // 
+                        stackTraceElement.getMethodName()+ "(" + //
+                        stackTraceElement.getFileName() + ":" + //
+                        stackTraceElement.getLineNumber()  + ")" //
+                );
+            }
+        }
+    }
+
 
 }

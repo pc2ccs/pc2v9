@@ -8,6 +8,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.csus.ecs.pc2.core.Utilities;
+
 /**
  * Based on the Java Logging API.
  * <p>
@@ -194,9 +196,10 @@ public class Log extends Logger {
 
         } catch (IOException e) {
             System.err.println("IOexception in setFileHandlers "+e.getMessage());
+            Utilities.printStackTrace(System.err, e, "csus");
         } catch (Exception e) {
             System.err.println("exception in setFileHandlers "+e.getMessage());
-            e.printStackTrace();
+            Utilities.printStackTrace(System.err, e, "csus");
         }
 
         // setup the new handlers
