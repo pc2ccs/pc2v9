@@ -1235,17 +1235,21 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
   
    /**
     * Checks the current Results JTable and enables the "Compare Selected" button if there is at least one row selected
-    * (that is, with a check in the left-most column's checkbox); if there is no selected (checked) row, the button is
-    * disabled.
+    * (that is, with a check in the left-most column's checkbox) and which has both team and judge's output links; 
+    * if there is no selected (checked) row with both team and judge's output, the button is disabled.
     */
    public void updateCompareSelectedButton() {
        getCompareSelectedButton().setEnabled(false);
        if (resultsTable != null) {
            for (int i=0; i<resultsTable.getRowCount(); i++) {
-               if ((Boolean)resultsTable.getValueAt(i, COLUMN.SELECT_CHKBOX.ordinal())){
-                   //found at least one selected row
-                   getCompareSelectedButton().setEnabled(true);
-                   break;
+               if ((Boolean)resultsTable.getValueAt(i, COLUMN.SELECT_CHKBOX.ordinal())) {
+                   //found a selected row; check for team and judge's output links
+                   if ( !( ((JLabel)resultsTable.getValueAt(i, COLUMN.TEAM_OUTPUT_VIEW.ordinal())).getText().equals("") )
+                       && !( ((JLabel)resultsTable.getValueAt(i, COLUMN.JUDGE_OUTPUT.ordinal())).getText().equals("") ) ) {
+                       //found at least one selected row with both team and judge output links
+                       getCompareSelectedButton().setEnabled(true);
+                       break;
+                   }
                }
            }
        }
