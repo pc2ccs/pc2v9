@@ -186,7 +186,10 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
 
-//        System.out.println ("TestCaseResultsTableModel.isCellEditable(): row=" + rowIndex + "; col=" + columnIndex);
+        if (debug) {
+            System.out.println ("TestCaseResultsTableModel.isCellEditable(): row=" + rowIndex + "; col=" + columnIndex);
+        }
+        
         boolean retVal = false;
         //sanity-check the input
         if (rowIndex>getRowCount()-1 || columnIndex>getColumnCount()-1 ) {
@@ -204,12 +207,18 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
                 String resultString = "";
                 try {
                     resultString = ((JLabel)getValueAt(rowIndex, COLUMN.RESULT.ordinal())).getText(); 
-                    if (!resultString.equalsIgnoreCase("Pass") && !resultString.equalsIgnoreCase("Fail")) {
-                        // the result for this row is neither "pass" nor "fail"; disallow editing the row-selection cell (checkbox)
-//                        System.out.println("  Found results column string '" + resultString + "'");
-                        retVal = false;
+//                    if (!resultString.equalsIgnoreCase("Pass") && !resultString.equalsIgnoreCase("Fail")) {
+                    resultString = resultString.toLowerCase();
+                    
+                    if (debug) {
+                        System.out.println("  Found results column string '" + resultString + "'");
+                    }
+
+                    if (resultString.contains("not executed") ) {
+                        // the test case for this row was not executed; disallow editing the row-selection cell (checkbox)
+                       retVal = false;
                     } else {
-                        // the results string is either "pass" or "fail", so the test case was executed; allow selection
+                        // the results string is either "pass" or "fail" (or maybe "no validator"), so the test case was executed; allow selection
                         retVal = true;
                     }
                 } catch (ClassCastException e1) {
@@ -220,7 +229,9 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
             }
         }
         
-//        System.out.println ("  returning " + retVal);
+        if (debug) {
+            System.out.println ("  TestCaseResultsTableModel.isCellEditable(): returning " + retVal);
+        }
         return retVal;
     }
     

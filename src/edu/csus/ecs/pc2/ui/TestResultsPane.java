@@ -1564,6 +1564,33 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 
     /**
      * Loads the result table with data for failed test cases (only).
+     * The initial test for "failed" is to check the RunTestCase isPassed() flag, which is based on the value "passed" which is 
+     * stored in the RunTestCase when it is constructed (see @link{Executable#executeAndValidateDataSet}).
+     * This value is TRUE (meaning isPassed() returns true) if and only if: 
+     *   the submitted program was successfully executed 
+     *   AND the problem has a validator 
+     *   AND method validateProgram() returned true (indicating the problem was correctly solved for the specified test case) 
+     *   AND the ExecutionData object for the run indicates that the submission solved the problem for the specified data case.
+     *     (the ExecutionData object indicates the program solved the problem if:
+     *        the program compiled successfully 
+     *        AND the system was able to successfully execute the program 
+     *        AND the program did not exceed the runtime limit 
+     *        AND the validator program ran successfully 
+     *        AND there were no exceptions during Validator execution 
+     *        AND the result string returned by the Validator was "accepted".  
+     *      The ExecutionData object returns false (the problem was NOT solved) if any of these conditions is false.
+     *     )
+     * If any of the above conditions is not true, isPassed() returns false.
+     * 
+     * The above in turn means that test cases for runs where the Problem has no Validator will be considered "failed" (isPassed()==false)
+     * -- but this is not really what the table should contain for "failed test cases".
+     * Therefore an additional check for "isValidated()" needs to be made.
+     * 
+     * The same is true for test cases which were never executed -- they will be considered "failed" but they really shouldn't
+     * be displayed in a table of "failed test cases".
+     * TODO: currently there is no easy way to determine whether a Test Case was actually executed, unless we assume that the
+     * mere presence of a TestCaseResult indicates that it was executed...
+     * 
      */
     private void loadTableWithFailedTestCases() {
         
@@ -1574,7 +1601,9 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         Vector<RunTestCaseResult> failedTestCaseList = new Vector<RunTestCaseResult>();
         if (allTestCases != null) {
             for (int i = 0; i < allTestCases.length; i++) {
-                if (!allTestCases[i].isPassed()) {
+                //check for actual "failure" - ignoring "no validator" and "not executed" cases
+                // TODO: figure out how to implement the test for "wasExecuted"...
+                if (!allTestCases[i].isPassed() && allTestCases[i].isValidated() /* && allTestCases[i].wasExecuted() */ ) {
                     failedTestCaseList.add(allTestCases[i]);
                 }
             }
