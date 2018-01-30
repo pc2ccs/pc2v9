@@ -207,7 +207,6 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
                 String resultString = "";
                 try {
                     resultString = ((JLabel)getValueAt(rowIndex, COLUMN.RESULT.ordinal())).getText(); 
-//                    if (!resultString.equalsIgnoreCase("Pass") && !resultString.equalsIgnoreCase("Fail")) {
                     resultString = resultString.toLowerCase();
                     
                     if (debug) {
