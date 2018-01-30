@@ -106,7 +106,7 @@ public class TestCaseResultCellRenderer extends DefaultTableCellRenderer {
     private void setNotExecuted() {
         setBackground(Color.yellow);
         setForeground(Color.black);
-        setFont(new Font(getFont().getName(),Font.ITALIC+Font.BOLD, 12));
+        setFont(new Font(getFont().getName(),Font.ITALIC, 12));
         setText("(Not Executed)");  
     }
 
