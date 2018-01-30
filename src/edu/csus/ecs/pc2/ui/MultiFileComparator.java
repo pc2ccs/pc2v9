@@ -278,8 +278,13 @@ public class MultiFileComparator extends JFrame  {
 
             // update the data file name on the display
             if (currentJudgesDataFileNames != null) {
-                lblTestCaseDataFile.setText("Data file for selected Test Case: '" 
-                                        + currentJudgesDataFileNames[testCaseIndex] + "'");
+                
+                String filename = currentJudgesDataFileNames[testCaseIndex];
+                if (filename==null || filename.equals("")) {
+                    filename = "<none>";
+                }
+                lblTestCaseDataFile.setText("Data file for selected Test Case:   "  + filename);
+                
             } else {
                 //log error - bad judge's data file names
                 if (getLog() != null) {
