@@ -54,9 +54,9 @@ public class RunTestCaseResult implements IElementObject, IGetDate{
     private long contestTimeMS;
     
     /**
-     * Constructor defining a Test Case for a run.  Each Test Case saves
+     * Constructor defining a Test Case Result for a run.  Each Test Case Result saves
      * a link to the Run and JudgmentRecord with which it is associated;
-     * each Test Case is marked as the
+     * each Test Case Result is marked as the
      * indicated Test Case Number and with the indicated status (either the Run
      * passed the Test Case or it failed the Test Case).
      * @param run - the Run for which this test case applies
@@ -108,7 +108,7 @@ public class RunTestCaseResult implements IElementObject, IGetDate{
     }
 
     /**
-     * Returns true if Run to which this Test Case is attached passed this
+     * Returns true if Run to which this Test Case Result is attached passed this
      * Test Case; false otherwise.
      * @return whether the run passed this Test Case
      */

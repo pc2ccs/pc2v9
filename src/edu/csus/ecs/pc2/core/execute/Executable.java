@@ -592,14 +592,14 @@ public class Executable extends Plugin implements IExecutable {
             passed = false;
         }
         
-        //at this point, "passed" is true if 
+        //at this point, "passed" is true if: 
         //  the submitted program was successfully executed 
         //  AND the problem has a validator 
         //  AND method validateProgram() returned true (indicating the problem was correctly solved for the specified test case) 
         //  AND the ExecutionData object for the run indicates that the submission solved the problem for the specified data case.
-        //    (the ExecutionData object indicates the program solved the problem if 
+        //    (the ExecutionData object indicates the program solved the problem if:
         //       the program compiled successfully 
-        //       AND the the system was able to successfully execute the program 
+        //       AND the system was able to successfully execute the program 
         //       AND the program did not exceed the runtime limit 
         //       AND the validator program ran successfully 
         //       AND there were no exceptions during Validator execution 

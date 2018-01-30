@@ -250,6 +250,8 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     private JButton resultsPaneCloseButton;
     private JLabel lblTotalTestCases;
     private Component horizontalGlue_9;
+    
+    private boolean debug = false;
 
     /**
      * Constructs an instance of a plugin pane for viewing multi-testset output values.
@@ -1596,7 +1598,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         final JTable localResultsTable;
 
         //create the results table
-        TableModel tableModel = new TestCaseResultsTableModel(testCases, columnNames) ;
+        TableModel tableModel = new TestCaseResultsTableModel(getContest(), testCases, columnNames) ;
         
         tableModel.addTableModelListener(this);
         
@@ -1662,9 +1664,27 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                 int row = target.getSelectedRow();
                 int column = target.getSelectedColumn();
                 
-                String resultString = "";
+                if (debug) {
+                    System.out.println("Mouse clicked in cell (" + row + "," + column + ")");
+                }
+                
+                if (column<COLUMN.TEAM_OUTPUT_VIEW.ordinal() || column>COLUMN.VALIDATOR_ERR.ordinal()) {
+                    //user clicked on a column that doesn't contain a link; ignore it
+                    if (debug) {
+                        System.out.println ("... ignored");
+                    }
+                    return;
+                }
+                
+                
+//                *** the following block needs to be rewritten -- it should not be using "pass/fail" in the Results column;
+//                *** rather, it should be checking whether the Column is between "Team Output" and "Validator Std Err" (inclusive),
+//                *** and if so it should check for an empty string and if present ignore the click, if not empty THEN it should 
+//                *** decide whether to call viewFile() or compareFiles based on the column
+                
+                String labelString = "";
                 try {
-                    resultString = ((JLabel)target.getValueAt(row, COLUMN.RESULT.ordinal())).getText(); 
+                    labelString = ((JLabel)target.getValueAt(row, column)).getText(); 
                 } catch (ClassCastException e1) {
                      if (getController().getLog() != null) {
                         getController().getLog().warning("TestResultsPane.getResultsTable(): expected to find a JLabel in resultsTable; exception: "
@@ -1675,23 +1695,24 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                     }
                     return;
                 }
-                boolean rowRepresentsExecutedTestCase = resultString.equalsIgnoreCase("Pass") || resultString.equalsIgnoreCase("Fail");
-
-                if ((column == COLUMN.TEAM_OUTPUT_VIEW.ordinal() && rowRepresentsExecutedTestCase) 
-                        || column == COLUMN.JUDGE_OUTPUT.ordinal() 
-                        || column == COLUMN.JUDGE_DATA.ordinal() 
-                        || (column == COLUMN.VALIDATOR_OUTPUT.ordinal() && rowRepresentsExecutedTestCase)
-                        || (column == COLUMN.VALIDATOR_ERR.ordinal() && rowRepresentsExecutedTestCase)) {
-                    viewFile(row, column);
-                } else if ((column == COLUMN.TEAM_OUTPUT_COMPARE.ordinal() || e.getClickCount() > 1) && rowRepresentsExecutedTestCase) {
-                    // compare the team and judge's output in the active row
-                    int[] rows = new int[] { row };
-                    compareFiles(rows);
+                
+                //check whether the clicked cell has a visible string in it (only cells with legitimate links to something have non-empty strings)
+                if (!labelString.equals("")) {
+                    //check whether the string is a "file view" or a "compare" string
+                    if (labelString.equalsIgnoreCase("View")) {
+                        //view the file represented by the clicked row/col
+                        viewFile(row, column);
+                    } else if (labelString.equalsIgnoreCase("Compare")) {
+                        // compare the team and judge's output in the active row
+                        int[] rows = new int[] { row };
+                        compareFiles(rows); 
+                    }
                 }
+                //else cell was empty - ignore the the click
             }
         });
 
-        //only add unexecuted test cases to the results display if we're NOT "showing failures only"
+        //add unexecuted test cases to the results display, but only if we're NOT "showing failures only"
         // (if we are "showingFailuresOnly" then there won't be any "unexecuted" test cases in the results -- only failed test cases
         if (!getShowFailuresOnlyCheckbox().isSelected()) {
             addAnyUnexecutedTestCasesToResultsTable(localResultsTable);
@@ -1702,11 +1723,15 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     
     private void addAnyUnexecutedTestCasesToResultsTable(JTable resultsTable) {
         
-//        System.out.println ("In addAnyUnexecutedTestCasesToResultsTable...");
+        if (debug) {
+            System.out.println ("In addAnyUnexecutedTestCasesToResultsTable, checking for unexecuted test cases...");
+        }
         
         //there can only be missing (unexecuted) test case results if the problem is stopOnFirstFailedTestCase
         if (!currentProblem.isStopOnFirstFailedTestCase()) {
-//            System.out.println("...problem is not StopOnFirstFailedTestCase; there cannot be any unexecuted test cases.");
+            if (debug) {
+                System.out.println("...problem is not StopOnFirstFailedTestCase; there cannot be any unexecuted test cases.");
+            }
             return;
         } 
 
@@ -1714,7 +1739,9 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         
         int totalTestCaseCount = currentProblem.getNumberTestCases();
         
-//        System.out.println("Total test cases defined in problem: " + totalTestCaseCount);
+        if (debug) {
+            System.out.println("Total test cases defined in problem: " + totalTestCaseCount);
+        }
         
         //there *might* be missing test cases -- check whether this is actually so
         int testCasesInTableModel = tableModel.getRowCount();
@@ -1725,17 +1752,29 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             //yes, there are missing cases; add them to the table
             for (int testCaseNum=testCasesInTableModel+1; testCaseNum<=totalTestCaseCount; testCaseNum++) {
                 //add the current unexecuted test case to the table model
-//                System.out.println ("...adding unexecuted test case " + testCaseNum + " to results table");
-                //build the row object and add it to the model
+                
+                if (debug) {
+                    System.out.println ("...adding unexecuted test case " + testCaseNum + " to results table");
+                }
+                
+                //build the variable portions of the row data 
+                String viewJudgeAnswerFile = "";
+                if (currentProblem.getAnswerFileName(testCaseNum)!=null && currentProblem.getAnswerFileName(testCaseNum).length()>0) {  
+                    viewJudgeAnswerFile = "View";
+                }
+                String viewJudgeDataFile = "";
+                if (currentProblem.getDataFileName(testCaseNum)!=null && currentProblem.getDataFileName(testCaseNum).length()>0) {
+                    viewJudgeDataFile = "View";
+                }
                 tableModel.addRow(
                         new Boolean(false),                         //selection checkbox
                         new String(Integer.toString(testCaseNum)),  //test case number
                         "Not Executed",                             //result string
                         "--  ",                                     //execution time (of which there is none since the test case wasn't executed)
-                        "",                                         //link to team output (none)
-                        "",                                         //link to team compare-with-judge label (none)
-                        "View",                                     //link to judge's data
-                        "View",                                     //link to judge's output (answer file)
+                        "",                                         //link to team output (none since it wasn't executed)
+                        "",                                         //link to team compare-with-judge label (disabled since there's no team output)
+                        viewJudgeAnswerFile,                        //link to judge's output (answer file) if any
+                        viewJudgeDataFile,                          //link to judge's data if any
                         "",                                         //link to validator stdout (none)
                         "" );                                       //link to validator stderr (none)
             }
