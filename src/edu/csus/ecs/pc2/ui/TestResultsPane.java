@@ -1037,7 +1037,8 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     }
     
     /**
-     * Returns a JButton whose action is to select all test cases in the results grid.
+     * Returns a JButton whose action is to select all test cases in the results grid, excluding any rows representing
+     * test cases which were not executed.
      * @return the Select All JButton
      */
     private JButton getSelectAllButton() {
@@ -1056,13 +1057,13 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                         int col = resultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).getModelIndex();
                         for (int row = 0; row < tm.getRowCount(); row++) {
                             // check if the row represents a test case which was actually executed (i.e. the results column
-                            // contains either "Pass" or "Fail".
+                            // contains either "Pass" or "Fail" or "Not Validated" -- i.e., does NOT contain "Not Executed").
                             boolean isExecutedTestCaseRow = false;
                             String resultString = "";
                             try {
-                                resultString = ((JLabel) tm.getValueAt(row, COLUMN.RESULT.ordinal())).getText();
-                                if (resultString.equalsIgnoreCase("Pass") || resultString.equalsIgnoreCase("Fail")) {
-                                    // the result for this row is either "pass" nor "fail"; allow selecting the row
+                                resultString = ((JLabel) tm.getValueAt(row, COLUMN.RESULT.ordinal())).getText().toLowerCase();
+                                if (!resultString.contains("not executed")) {
+                                    // the result for this row is either "pass" nor "fail" (or maybe "no validator"; allow selecting the row
                                     isExecutedTestCaseRow = true;
                                 }
                                 tm.setValueAt(new Boolean(isExecutedTestCaseRow), row, col);
@@ -1070,7 +1071,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                                 if (getController() != null && getController().getLog() != null) {
                                     getController().getLog().warning("Expected to find a JLabel in ResultsTableModel but got " + e1.getMessage());
                                 } else {
-                                    System.err.println("MultiTestSetOutputViewerPane: expected to find a JLabel in ResultsTableModel but got " + e1.getMessage());
+                                    System.err.println("Expected to find a JLabel in ResultsTableModel but got " + e1.getMessage());
                                 }
                             }
                             updateCompareSelectedButton();
