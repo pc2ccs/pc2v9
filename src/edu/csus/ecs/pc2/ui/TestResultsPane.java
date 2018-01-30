@@ -1999,9 +1999,9 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             // making a separate call to setTeamOutputFileNames; make sure the client complied)
             if (currentTeamOutputFileNames == null || currentTeamOutputFileNames.length<teamOutputFileNames.length) {
                 if (log!=null) {
-                    log.warning("MTSOVPane.compareFiles(): invalid team output file names array");
+                    log.warning("TestResultsPane.compareFiles(): invalid team output file names array");
                 } else {
-                    System.err.println ("MTSOVPane.compareFiles(): invalid team output file names array");
+                    System.err.println ("TestResultsPane.compareFiles(): invalid team output file names array");
                 }
             } else {
                 //get the team output file name, which should be provided by the client as a full path
