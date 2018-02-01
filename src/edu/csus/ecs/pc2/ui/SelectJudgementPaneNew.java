@@ -541,7 +541,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             }
             if (runFiles != null) {
                 Problem problem = getContest().getProblem(run.getProblemId());
-                getMultiTestSetOutputViewerFrame().setData(run, runFiles, problem, getProblemDataFiles());
+                getTestResultsFrame().setData(run, runFiles, problem, getProblemDataFiles());
                 getViewOutputsButton().setEnabled(true);
             } else {
                 // if we do not runFiles yet, do not allow view Outputs.
@@ -867,8 +867,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
             // the run gets modified in Executable to have testCases, so resend the data
             Problem problem = getContest().getProblem(run.getProblemId());
-            getMultiTestSetOutputViewerFrame().setData(run, runFiles, problem, getProblemDataFiles());
-            getMultiTestSetOutputViewerFrame().setVisible(true);
+            getTestResultsFrame().setData(run, runFiles, problem, getProblemDataFiles());
+            getTestResultsFrame().setVisible(true);
         }
         executeTimeMS = executable.getExecutionData().getExecuteTimeMS();
 
@@ -930,7 +930,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private void sendTeamOutputFileNames() {
 
-        if (getMultiTestSetOutputViewerFrame() != null) {
+        if (getTestResultsFrame() != null) {
 
             String[] teamOutputNames = null;
 
@@ -958,7 +958,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 }
             }
 
-            getMultiTestSetOutputViewerFrame().setTeamOutputFileNames(teamOutputNames);
+            getTestResultsFrame().setTeamOutputFileNames(teamOutputNames);
         }
     }
 
@@ -967,7 +967,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private void sendValidatorOutputFileNames() {
 
-        if (getMultiTestSetOutputViewerFrame() != null) {
+        if (getTestResultsFrame() != null) {
             // start with answer files, as there should be validator output for each
             int arrayCount = getProblemDataFiles().getJudgesAnswerFiles().length;
             // but if there are more data files, then go with that count
@@ -992,7 +992,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 }
             }
 
-            getMultiTestSetOutputViewerFrame().setValidatorOutputFileNames(validatorOutputNames);
+            getTestResultsFrame().setValidatorOutputFileNames(validatorOutputNames);
         }
     }
 
@@ -1001,7 +1001,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private void sendValidatorStderrFileNames() {
 
-        if (getMultiTestSetOutputViewerFrame() != null) {
+        if (getTestResultsFrame() != null) {
             // start with answer files, as there should be validator output for each
             int arrayCount = getProblemDataFiles().getJudgesAnswerFiles().length;
             // but if there are more data files, then go with that count
@@ -1026,7 +1026,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 }
             }
 
-            getMultiTestSetOutputViewerFrame().setValidatorStderrFileNames(validatorErrFileNames);
+            getTestResultsFrame().setValidatorStderrFileNames(validatorErrFileNames);
         }
     }
 
@@ -1382,15 +1382,15 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         sendTeamOutputFileNames();
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
-        if (getMultiTestSetOutputViewerFrame().isVisible()) {
-            if (getMultiTestSetOutputViewerFrame().getState() == Frame.ICONIFIED) {
-                getMultiTestSetOutputViewerFrame().setState(javax.swing.JFrame.NORMAL);
+        if (getTestResultsFrame().isVisible()) {
+            if (getTestResultsFrame().getState() == Frame.ICONIFIED) {
+                getTestResultsFrame().setState(javax.swing.JFrame.NORMAL);
             } 
         }
-        getMultiTestSetOutputViewerFrame().setVisible(true);
+        getTestResultsFrame().setVisible(true);
     }
 
-    private TestResultsFrame getMultiTestSetOutputViewerFrame() {
+    private TestResultsFrame getTestResultsFrame() {
         if (testResultsFrame == null) {
             testResultsFrame = new TestResultsFrame();
             testResultsFrame.setContestAndController(getContest(), getController());

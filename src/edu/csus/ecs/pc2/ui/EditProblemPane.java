@@ -1381,7 +1381,7 @@ public class EditProblemPane extends JPanePlugin {
                 newProblemDataFiles.setJudgesDataFile(lastDataFile);
             }
 
-            checkProblem.addTestCaseFilenames(getName(lastAnsFile), getName(lastDataFile));
+            checkProblem.addTestCaseFilenames(getName(lastDataFile), getName(lastAnsFile));
 
             if (outputValidatorSF != null) {
                 newProblemDataFiles.setOutputValidatorFile(outputValidatorSF);
