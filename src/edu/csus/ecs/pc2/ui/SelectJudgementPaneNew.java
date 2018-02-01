@@ -926,7 +926,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     /**
-     * Send team output names to Multi Test Set Viewer.
+     * Send team output names to Test Results Viewer.
      */
     private void sendTeamOutputFileNames() {
 
@@ -934,7 +934,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
             String[] teamOutputNames = null;
 
-            // add entries from acutal team test output
+            // add entries from actual team test output
             if (saveOutputFileNames != null) {
                 int size = getProblemDataFiles().getJudgesDataFiles().length;
                 if (size < saveOutputFileNames.size()) {
@@ -953,7 +953,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 for (int i = 0; i < saveOutputFileNames.size(); i++) {
                     teamOutputNames[i] = saveOutputFileNames.get(i);
                     if (new File(teamOutputNames[i]).length() == 0) {
-                        teamOutputNames[i] = null; // null null, happily null!!
+                        teamOutputNames[i] = null; 
                     }
                 }
             }
@@ -963,7 +963,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     /**
-     * Send validator output names to Multi Test Set Viewer.
+     * Send validator output names to Test Results Viewer.
      */
     private void sendValidatorOutputFileNames() {
 
