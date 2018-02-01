@@ -161,17 +161,17 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     /**
      * Saved team output names.
      */
-    private List<String> saveOutputFileNames = null;
+    private List<String> savedTeamOutputFileNames = null;
 
     /**
      * saved validator output names
      */
-    private List<String> saveValidatorOutputFileNames = null;
+    private List<String> savedValidatorOutputFileNames = null;
 
     /**
      * saved validator stderr names
      */
-    private List<String> saveValidatorErrFileNames = null;
+    private List<String> savedValidatorErrFileNames = null;
 
     private JLabel additionalInfoLabel;
 
@@ -857,9 +857,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         // getManualRunResultsPanel().clear();
         setEnabledButtonStatus(false);
         executable.execute();
-        saveOutputFileNames = executable.getTeamsOutputFilenames();
-        saveValidatorOutputFileNames = executable.getValidatorOutputFilenames();
-        saveValidatorErrFileNames = executable.getValidatorErrFilenames();
+        savedTeamOutputFileNames = executable.getTeamsOutputFilenames();
+        savedValidatorOutputFileNames = executable.getValidatorOutputFilenames();
+        savedValidatorErrFileNames = executable.getValidatorErrFilenames();
         sendTeamOutputFileNames();
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
@@ -935,10 +935,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             String[] teamOutputNames = null;
 
             // add entries from actual team test output
-            if (saveOutputFileNames != null) {
+            if (savedTeamOutputFileNames != null) {
                 int size = getProblemDataFiles().getJudgesDataFiles().length;
-                if (size < saveOutputFileNames.size()) {
-                    size = saveOutputFileNames.size();
+                if (size < savedTeamOutputFileNames.size()) {
+                    size = savedTeamOutputFileNames.size();
                 }
                 if (size < 1) {
                     size = 1;
@@ -950,8 +950,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                     teamOutputNames[i] = null;
                 }
 
-                for (int i = 0; i < saveOutputFileNames.size(); i++) {
-                    teamOutputNames[i] = saveOutputFileNames.get(i);
+                for (int i = 0; i < savedTeamOutputFileNames.size(); i++) {
+                    teamOutputNames[i] = savedTeamOutputFileNames.get(i);
                     if (new File(teamOutputNames[i]).length() == 0) {
                         teamOutputNames[i] = null; 
                     }
@@ -964,69 +964,86 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Send validator output names to Test Results Viewer.
+     * 
+     * Copies the names from the List of validator output file names (which was saved by the execute() method)
+     * into an array, then passes the array to the Test Results frame.
      */
     private void sendValidatorOutputFileNames() {
 
         if (getTestResultsFrame() != null) {
-            // start with answer files, as there should be validator output for each
-            int arrayCount = getProblemDataFiles().getJudgesAnswerFiles().length;
-            // but if there are more data files, then go with that count
-            if (getProblemDataFiles().getJudgesDataFiles().length > arrayCount) {
-                arrayCount = getProblemDataFiles().getJudgesDataFiles().length;
+            
+            int arraySize = 0;
+            if (savedValidatorOutputFileNames!=null && savedValidatorOutputFileNames.size()>0) {
+                arraySize = savedValidatorOutputFileNames.size();
             }
-            String[] validatorOutputNames = new String[arrayCount];
+            
+            //an array to hold the validator output file names
+            String[] validatorOutputFileNames = new String[arraySize];
 
-            // null out list
-            for (int i = 0; i < validatorOutputNames.length; i++) {
-                validatorOutputNames[i] = null;
+            // null out array (probably not necessary since Java defaults object refs to null...)
+            for (int i = 0; i < validatorOutputFileNames.length; i++) {
+                validatorOutputFileNames[i] = null;
             }
 
-            // add entries from actual team test output
-            if (saveValidatorOutputFileNames != null) {
+            // add entries from actual team test case output validation results
+            if (savedValidatorOutputFileNames != null) {
 
-                for (int i = 0; i < saveValidatorOutputFileNames.size(); i++) {
-                    validatorOutputNames[i] = saveValidatorOutputFileNames.get(i);
-                    if (new File(validatorOutputNames[i]).length() == 0) {
-                        validatorOutputNames[i] = null; // null null, happily null!!
+                for (int i = 0; i < savedValidatorOutputFileNames.size(); i++) {
+                    
+                    //save the validator output file name
+                    validatorOutputFileNames[i] = savedValidatorOutputFileNames.get(i);
+                    
+                    //wipe out the entry if the file is empty (zero-length)
+                    if (new File(validatorOutputFileNames[i]).length() == 0) {
+                        validatorOutputFileNames[i] = null; 
                     }
                 }
             }
 
-            getTestResultsFrame().setValidatorOutputFileNames(validatorOutputNames);
+            getTestResultsFrame().setValidatorOutputFileNames(validatorOutputFileNames);
         }
     }
 
     /**
-     * Send validator output names to Test Results Viewer.
+     * Send validator stderr file names to Test Results Viewer.
+     * 
+     * Copies the names from the List of stderr file names (which was saved by the execute() method)
+     * into an array, then passes the array to the Test Results frame.
      */
     private void sendValidatorStderrFileNames() {
 
         if (getTestResultsFrame() != null) {
-            // start with answer files, as there should be validator output for each
-            int arrayCount = getProblemDataFiles().getJudgesAnswerFiles().length;
-            // but if there are more data files, then go with that count
-            if (getProblemDataFiles().getJudgesDataFiles().length > arrayCount) {
-                arrayCount = getProblemDataFiles().getJudgesDataFiles().length;
+            
+            int arraySize = 0;
+            if (savedValidatorErrFileNames!=null && savedValidatorErrFileNames.size()>0) {
+                arraySize = savedValidatorErrFileNames.size();
             }
-            String[] validatorErrFileNames = new String[arrayCount];
+            
+            //an array to hold the validator stderr file names
+            String[] validatorStdErrFileNames = new String[arraySize];
 
-            // null out list
-            for (int i = 0; i < validatorErrFileNames.length; i++) {
-                validatorErrFileNames[i] = null;
+            // null out array (probably not necessary since Java defaults object refs to null...)
+            for (int i = 0; i < validatorStdErrFileNames.length; i++) {
+                validatorStdErrFileNames[i] = null;
             }
 
-            // add entries from actual team test output
-            if (saveValidatorErrFileNames != null) {
+            // add entries from actual team test output validation stderr
+            if (savedValidatorErrFileNames != null) {
 
-                for (int i = 0; i < saveValidatorErrFileNames.size(); i++) {
-                    validatorErrFileNames[i] = saveValidatorErrFileNames.get(i);
-                    if (new File(validatorErrFileNames[i]).length() == 0) {
-                        validatorErrFileNames[i] = null; // null null, happily null!!
+                for (int i = 0; i < savedValidatorErrFileNames.size(); i++) {
+                    
+                    //save the validator stderr file name
+                    validatorStdErrFileNames[i] = savedValidatorErrFileNames.get(i);
+                    
+                    //wipe out the entry if the file is empty (zero-length)
+                    if (new File(validatorStdErrFileNames[i]).length() == 0) {
+                        validatorStdErrFileNames[i] = null; 
                     }
                 }
             }
 
-            getTestResultsFrame().setValidatorStderrFileNames(validatorErrFileNames);
+            getTestResultsFrame().setValidatorOutputFileNames(validatorStdErrFileNames);
+            
         }
     }
 
