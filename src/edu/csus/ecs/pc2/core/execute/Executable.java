@@ -2547,7 +2547,7 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Get filename for each team's output for each test case.
+     * Get filenames for each team's output for each test case.
      * 
      * @return the list of team output file names.
      */
@@ -2556,18 +2556,18 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Get filename for each team's output for each test case.
+     * Get filenames for each validator output for each test case.
      * 
-     * @return the list of team output file names.
+     * @return the list of validator output file names.
      */
     public List<String> getValidatorOutputFilenames() {
         return validatorOutputFilenames;
     }
 
     /**
-     * Get filename for each team's output for each test case.
+     * Get filenames for each validator stderr output for each test case.
      * 
-     * @return the list of team output file names.
+     * @return the list of validator stderr output file names.
      */
     public List<String> getValidatorErrFilenames() {
         return validatorStderrFilesnames;
