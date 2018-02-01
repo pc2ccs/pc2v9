@@ -1710,12 +1710,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                     return;
                 }
                 
-                
-//                *** the following block needs to be rewritten -- it should not be using "pass/fail" in the Results column;
-//                *** rather, it should be checking whether the Column is between "Team Output" and "Validator Std Err" (inclusive),
-//                *** and if so it should check for an empty string and if present ignore the click, if not empty THEN it should 
-//                *** decide whether to call viewFile() or compareFiles based on the column
-                
+                //get the text in the JLabel at the current row/column cell
                 String labelString = "";
                 try {
                     labelString = ((JLabel)target.getValueAt(row, column)).getText(); 
