@@ -997,7 +997,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     /**
-     * Send validator output names to Multi Test Set Viewer.
+     * Send validator output names to Test Results Viewer.
      */
     private void sendValidatorStderrFileNames() {
 
@@ -1372,12 +1372,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     protected void viewOutputs() {
-
-        // if (executableFileViewer != null) {
-        // executableFileViewer.setVisible(true);
-        // } else {
-        // JOptionPane.showMessageDialog(this, "No output yet!");
-        // }
 
         sendTeamOutputFileNames();
         sendValidatorOutputFileNames();
