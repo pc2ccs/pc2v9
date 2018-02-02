@@ -1042,7 +1042,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 }
             }
 
-            getTestResultsFrame().setValidatorOutputFileNames(validatorStdErrFileNames);
+            getTestResultsFrame().setValidatorStderrFileNames(validatorStdErrFileNames);
             
         }
     }
