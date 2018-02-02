@@ -1890,7 +1890,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal() && col != COLUMN.VALIDATOR_OUTPUT.ordinal()
                 && col != COLUMN.VALIDATOR_ERR.ordinal()) {
             if (log != null) {
-                log.log(Log.WARNING, "MTSOVPane.viewFile(): invalid column number for file viewing request: " + col);
+                log.log(Log.WARNING, "TestResultsPane.viewFile(): invalid column number for file viewing request: " + col);
             } else {
                 System.err.println ("Invalid column number for file viewing request: " + col);
             }
