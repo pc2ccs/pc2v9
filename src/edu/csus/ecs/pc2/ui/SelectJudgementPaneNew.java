@@ -150,7 +150,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private JLabel selectJudgementCheckboxLabel = null;
 
-    private JButton viewOutputsButton = null;
+    private JButton viewOutputsAndDataButton = null;
 
     private GregorianCalendar startTimeCalendar;
 
@@ -257,7 +257,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             buttonPanel.setLayout(flowLayout);
             buttonPanel.add(getExtractButton(), null);
             buttonPanel.add(getViewSourceButton(), null);
-            buttonPanel.add(getViewOutputsButton(), null);
+            buttonPanel.add(getViewOutputsAndDataButton(), null);
             buttonPanel.add(getDetailsButton(), null);
             buttonPanel.add(getCancelButton(), null);
         }
@@ -542,10 +542,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             if (runFiles != null) {
                 Problem problem = getContest().getProblem(run.getProblemId());
                 getTestResultsFrame().setData(run, runFiles, problem, getProblemDataFiles());
-                getViewOutputsButton().setEnabled(true);
+                getViewOutputsAndDataButton().setEnabled(true);
             } else {
                 // if we do not runFiles yet, do not allow view Outputs.
-                getViewOutputsButton().setEnabled(false);
+                getViewOutputsAndDataButton().setEnabled(false);
             }
             
             getNotifyTeamCheckBox().setSelected(true);
@@ -1388,7 +1388,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         fileViewer.setVisible(true);
     }
 
-    protected void viewOutputs() {
+    protected void viewOutputsAndData() {
 
         sendTeamOutputFileNames();
         sendValidatorOutputFileNames();
@@ -1569,20 +1569,20 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      *
      * @return javax.swing.JButton
      */
-    private JButton getViewOutputsButton() {
-        if (viewOutputsButton == null) {
-            viewOutputsButton = new JButton();
-            viewOutputsButton.setActionCommand("View Test Results");
-            viewOutputsButton.setEnabled(true);
-            viewOutputsButton.setToolTipText("View/Compare Test Results and data sets");
-            viewOutputsButton.setText("View Outputs & Data");
-            viewOutputsButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getViewOutputsAndDataButton() {
+        if (viewOutputsAndDataButton == null) {
+            viewOutputsAndDataButton = new JButton();
+            viewOutputsAndDataButton.setActionCommand("View Test Results");
+            viewOutputsAndDataButton.setEnabled(true);
+            viewOutputsAndDataButton.setToolTipText("View/Compare Test Results and data sets");
+            viewOutputsAndDataButton.setText("View Outputs & Data");
+            viewOutputsAndDataButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    viewOutputs();
+                    viewOutputsAndData();
                 }
             });
         }
-        return viewOutputsButton;
+        return viewOutputsAndDataButton;
     }
 
     /**
