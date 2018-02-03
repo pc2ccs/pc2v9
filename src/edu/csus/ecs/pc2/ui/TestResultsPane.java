@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.Box;
@@ -67,8 +68,8 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.ui.cellRenderer.CheckBoxCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.LinkCellRenderer;
-import edu.csus.ecs.pc2.ui.cellRenderer.TestCaseResultCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.RightJustifiedCellRenderer;
+import edu.csus.ecs.pc2.ui.cellRenderer.TestCaseResultCellRenderer;
 
 /**
  * Multiple data set viewer pane.
@@ -1394,10 +1395,6 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                     getNumTestCasesActuallyRunLabel().setText("Test Cases Run:  0");
                 } else {
                     getNumTestCasesActuallyRunLabel().setText("Test Cases Run:  " + testCases.length);
-//                    System.out.println("MTSVPane.populateGUI(): loading " + testCases.length + " test cases into GUI pane...");
-//                  for (int i = 0; i < testCases.length; i++) {
-//                    System.out.println("  Test Case " + testCases[i].getTestNumber() + ": " + testCases[i]);
-//                  }
                 }
 
                 //set the status label to the default (blank)
@@ -1630,6 +1627,11 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     private JTable getResultsTable(RunTestCaseResult [] testCases) {
 
         final JTable localResultsTable;
+        
+        if (getShowFailuresOnlyCheckbox().isSelected()) {
+            //remove non-failures from test cases
+            testCases = removeNonFailuresFromTestCaseResults(testCases);
+        }
 
         //create the results table
         TableModel tableModel = new TestCaseResultsTableModel(getContest(), testCases, columnNames) ;
@@ -1752,6 +1754,69 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         return localResultsTable;
     }
     
+    /**
+     * Returns an array containing only test case results in the received array which represent test cases which failed.
+     * 
+     * That is, removes any "passed" or "not executed" test cases (as well as any null elements) from the received array and 
+     * returns a new array containing whatever is left.
+     * 
+     * @param testCaseResults - an array of RunTestCaseResults from which non-failures are to be removed
+     * @return an array of RunTestCaseResults containing only the failed test cases in the received array, 
+     *          or returns null if the received array is null or zero-length.
+     */
+    private RunTestCaseResult[] removeNonFailuresFromTestCaseResults(RunTestCaseResult[] testCaseResults) {
+        
+        if (testCaseResults!=null && testCaseResults.length>0) {
+            
+            if (debug) {
+                System.out.println("removeNonFailuresFromTestCaseResults(): received an array containing the following test case results: [");
+                for (int i=0; i<testCaseResults.length; i++) {
+                    System.out.println("  Test Case Result: " + testCaseResults[i].toString());
+                }
+                System.out.println ("]");
+            }
+            
+            //convert to a List for easy removal (and automatic shifting of remaining elements)
+            Vector<RunTestCaseResult> testCaseResultList = new Vector<RunTestCaseResult>(Arrays.asList(testCaseResults));
+
+            Vector<RunTestCaseResult> toBeRemoved = new Vector<RunTestCaseResult>();
+            
+            //find all passed and non-validated results (non-validated means they couldn't be "passed")
+            for (RunTestCaseResult res : testCaseResultList) {
+                if (res==null || res.isPassed() || !res.isValidated()) {
+                    toBeRemoved.add(res);
+                }
+            }
+            //remove all found results from the list
+            for (RunTestCaseResult removeRes : toBeRemoved) {
+                testCaseResultList.remove(removeRes);
+            }
+            
+            RunTestCaseResult [] retArray = new RunTestCaseResult[0];
+            //return an array of the remaining TestCaseResults (i.e. the ones that "failed")
+            retArray = testCaseResultList.toArray(retArray);
+            
+            if (debug) {
+                System.out.println("removeNonFailuresFromTestCaseResults(): returning an array containing the following test case results: [");
+                for (int i=0; i<retArray.length; i++) {
+                    System.out.println("  Test Case Result: " + retArray[i].toString());
+                }
+                System.out.println ("]");
+            }
+            
+            return retArray;
+            
+        } else {
+            
+            if (debug) {
+                System.out.println("removeNonFailuresFromTestCaseResults(): returning null. ");
+            }
+
+            return null;
+        }
+        
+    }
+
     /**
      * Checks the given JTable to see whether it already contains a row for every test data case defined in the current problem;
      * adds any unexecuted (and hence missing) test cases to the table.
