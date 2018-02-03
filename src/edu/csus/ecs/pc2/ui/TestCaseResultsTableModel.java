@@ -64,8 +64,8 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
                 // selection checkbox state: default to selecting rows which failed to pass validation
                 Boolean selected = new Boolean( testCaseResults[row].isValidated() && !testCaseResults[row].isPassed());
 
-                // test case number (row+1)
-                String testCaseNum = new String(Integer.toString(row + 1));
+                // test case number (data set number + 1)
+                String testCaseNum = Integer.toString(testCaseResults[row].getTestNumber());
 
                 // test case result: one of "No Validator", "Pass", or "Fail"
                 String resultString = "";
