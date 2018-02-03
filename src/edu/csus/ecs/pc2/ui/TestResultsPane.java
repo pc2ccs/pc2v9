@@ -1971,12 +1971,14 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
      */
     private void compareFiles(int [] rows) {
         
-//        System.out.print ("MTSVPane.compareFiles(): displaying comparison of files for test case(s) ");
-//        for (int i=0; i<rows.length; i++) {
-//            System.out.print ((int) (new Integer((String)(resultsTable.getModel().getValueAt(rows[i], 1)))) + " ");
-//        }
-//        System.out.println ();
- 
+        if (debug) {
+            System.out.print("TestResultsPane.compareFiles(): displaying comparison of files for test case(s) ");
+            for (int i = 0; i < rows.length; i++) {
+                System.out.print((int) (new Integer((String) (resultsTable.getModel().getValueAt(rows[i], 1)))) + " ");
+            }
+            System.out.println();
+        }
+        
         //create arrays to hold data to be loaded into the comparator
         int [] testCases = new int [rows.length];
         String [] judgesOutputFileNames = new String [rows.length];
