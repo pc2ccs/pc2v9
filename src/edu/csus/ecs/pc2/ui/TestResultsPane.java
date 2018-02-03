@@ -1636,15 +1636,17 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         
         tableModel.addTableModelListener(this);
         
-//        System.out.println ("Table model contains:");
-//        System.out.println ("--------------");
-//        for (int row=0; row<tableModel.getRowCount(); row++) {
-//            for (int col=0; col<tableModel.getColumnCount(); col++) {
-//                System.out.print("[" + tableModel.getValueAt(row, col) + "]");
-//            }
-//            System.out.println();
-//        }
-//        System.out.println ("--------------");
+        if (debug) {
+            System.out.println("In getResultsTable(); table model contains:");
+            System.out.println("--------------");
+            for (int row = 0; row < tableModel.getRowCount(); row++) {
+                for (int col = 0; col < tableModel.getColumnCount(); col++) {
+                    System.out.print("[" + tableModel.getValueAt(row, col) + "]");
+                }
+                System.out.println();
+            }
+            System.out.println("--------------");
+        }
         
         localResultsTable = new JTable(tableModel);
         
