@@ -1750,32 +1750,34 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         return localResultsTable;
     }
     
+    /**
+     * Checks the given JTable to see whether it already contains a row for every test data case defined in the current problem;
+     * adds any unexecuted (and hence missing) test cases to the table.
+     * 
+     * @param resultsTable - a JTable expected to already contain one row for each test case which has been executed
+     */
     private void addAnyUnexecutedTestCasesToResultsTable(JTable resultsTable) {
         
         if (debug) {
-            System.out.println ("In addAnyUnexecutedTestCasesToResultsTable, checking for unexecuted test cases...");
+            System.out.println ("In addAnyUnexecutedTestCasesToResultsTable(); checking for unexecuted test cases...");
         }
-        
-        //there can only be missing (unexecuted) test case results if the problem is stopOnFirstFailedTestCase
-        if (!currentProblem.isStopOnFirstFailedTestCase()) {
-            if (debug) {
-                System.out.println("...problem is not StopOnFirstFailedTestCase; there cannot be any unexecuted test cases.");
-            }
-            return;
-        } 
 
+        //get the table model which defines the current table contents
         TestCaseResultsTableModel tableModel = (TestCaseResultsTableModel) resultsTable.getModel();
         
+        //get how many total test cases were configured into the problem
         int totalTestCaseCount = currentProblem.getNumberTestCases();
         
         if (debug) {
-            System.out.println("Total test cases defined in problem: " + totalTestCaseCount);
+            System.out.println("...total test cases defined in problem: " + totalTestCaseCount);
         }
         
-        //there *might* be missing test cases -- check whether this is actually so
+        //get how many test case rows are already in the table model
         int testCasesInTableModel = tableModel.getRowCount();
         
-//        System.out.println("Test case rows already in results table: " + testCasesInTableModel);
+        if (debug) {
+            System.out.println("...test case rows already in results table: " + testCasesInTableModel);
+        }
         
         if (totalTestCaseCount > testCasesInTableModel) {
             //yes, there are missing cases; add them to the table
@@ -1809,7 +1811,9 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             }
             
         } else {
-//            System.out.println("all test cases were executed and are already in the results table.");
+            if (debug) {
+                System.out.println("...all test cases are already in the results table.");
+            }
         }
     }
     

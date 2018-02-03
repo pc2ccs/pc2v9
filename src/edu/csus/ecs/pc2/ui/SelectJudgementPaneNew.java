@@ -1398,6 +1398,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 getTestResultsFrame().setState(javax.swing.JFrame.NORMAL);
             } 
         }
+
+        Problem problem = getContest().getProblem(run.getProblemId());
+        getTestResultsFrame().setData(run, runFiles, problem, getProblemDataFiles());
+
         getTestResultsFrame().setVisible(true);
     }
 
