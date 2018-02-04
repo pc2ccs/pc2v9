@@ -1790,6 +1790,29 @@ public class EditProblemPane extends JPanePlugin {
                 }
             }
         }
+        
+        //verify that if the CLICS validator has been selected, a Judge's Answer File has been specified
+        if (getUseCLICSValidatorRadioButton().isSelected()) {
+
+            // note: the Judge's Answer File name is displayed in a JLabel (not a textfield)
+            String answerFileName = answerFileNameLabel.getText();
+
+            // this check is outside so we can provide a specific message
+            if (answerFileName == null || answerFileName.trim().length() == 0) {
+                showMessage("\"Use CLICS validator\" is checked; you must select a Judge's Answer File (\"General\" tab)");
+                return false;
+            }
+
+            if (answerFileName.trim().length() != answerFileNameLabel.getToolTipText().length()) {
+                answerFileName = answerFileNameLabel.getToolTipText() + "";
+            }
+
+            if (!checkFile(answerFileName)) {
+                // note: if error, then checkFile will showMessage
+                return false;
+            }
+        }
+
 
         // verify that if a Custom Validator has been selected, there is a Validator Program specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
