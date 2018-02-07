@@ -1793,6 +1793,11 @@ public class EditProblemPane extends JPanePlugin {
         
         //verify that if the CLICS validator has been selected, a Judge's Answer File has been specified
         if (getUseCLICSValidatorRadioButton().isSelected()) {
+            
+            if (!getJudgesHaveAnswerFilesCheckbox().isSelected()) {
+                showMessage("\"Use CLICS validator\" is checked; you must select a Judge's Answer File (\"General\" tab)");
+                return false;
+            }
 
             // note: the Judge's Answer File name is displayed in a JLabel (not a textfield)
             String answerFileName = answerFileNameLabel.getText();
