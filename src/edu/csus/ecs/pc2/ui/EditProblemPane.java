@@ -297,9 +297,9 @@ public class EditProblemPane extends JPanePlugin {
 
     private boolean showMissingInputValidatorWarningOnAddProblem = true;
 
-//    private boolean showMissingInputValidatorWarningOnUpdateProblem = true;
-//
-//    private boolean showMissingInputValidatorProgramNameOnUpdateProblem = true;
+    // private boolean showMissingInputValidatorWarningOnUpdateProblem = true;
+    //
+    // private boolean showMissingInputValidatorProgramNameOnUpdateProblem = true;
 
     private boolean showMissingInputValidatorProgramNameOnAddProblem = true;
 
@@ -465,11 +465,10 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
 
-//        if (showMissingInputValidatorWarningOnAddProblem && (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals(""))
-//                && (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) && (getProblemRequiresDataCheckBox().isSelected())) {
+        // if (showMissingInputValidatorWarningOnAddProblem && (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals(""))
+        // && (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) && (getProblemRequiresDataCheckBox().isSelected())) {
 
-            if (showMissingInputValidatorWarningOnAddProblem && (getInputValidatorPane().getInputValidatorFile() == null)
-                    && (getProblemRequiresDataCheckBox().isSelected())) {
+        if (showMissingInputValidatorWarningOnAddProblem && (getInputValidatorPane().getInputValidatorFile() == null) && (getProblemRequiresDataCheckBox().isSelected())) {
 
             // no input validator defined; issue a warning
             String msg = "You are attempting to add a Problem which has no Input Data Validator." + "\n\nThis is usually not good practice because it provides no way to insure that the"
@@ -488,11 +487,11 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         // check the condition of missing Input Validator Program name even though there is an Input Validator Command defined
-//        if (showMissingInputValidatorProgramNameOnAddProblem && (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals(""))
-//                && (getInputValidatorPane().getInputValidatorCommand() != null && !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
-            if (showMissingInputValidatorProgramNameOnAddProblem && (getInputValidatorPane().getInputValidatorFile() == null)
-                    && (getInputValidatorPane().getInputValidatorCommand() != null && !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
-            
+        // if (showMissingInputValidatorProgramNameOnAddProblem && (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals(""))
+        // && (getInputValidatorPane().getInputValidatorCommand() != null && !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+        if (showMissingInputValidatorProgramNameOnAddProblem && (getInputValidatorPane().getInputValidatorFile() == null)
+                && (getInputValidatorPane().getInputValidatorCommand() != null && !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+
             // no input validator program defined; issue a warning
             String message = "You are attempting to add a problem which has an Input Data Validator command but no Input Validator Program name." + "\n\nAre you sure this is what you intended to do?"
                     + "\n\n";
@@ -554,7 +553,7 @@ public class EditProblemPane extends JPanePlugin {
             showMessage(e.getMessage());
             return;
         } catch (Exception e) {
-            showMessage("Exeception while adding Problem; see log."); 
+            showMessage("Exeception while adding Problem; see log.");
             getLog().throwing("EditProblemPane", "addProblem()", e);
             return;
         }
@@ -598,7 +597,7 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
-        //set the flag indicating whether execution of problem submissions should stop on the first failed test case
+        // set the flag indicating whether execution of problem submissions should stop on the first failed test case
         newProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
 
         getController().addNewProblem(newProblem, newProblemDataFiles);
@@ -651,7 +650,7 @@ public class EditProblemPane extends JPanePlugin {
                     enableButton = true;
                     updateToolTip = "Problem changed";
                 }
-                
+
                 // see if the problem data files have changed; enable the Update button and update the tooltip if so
                 ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
                 ProblemDataFiles proposedPDF = getMultipleDataSetPane().getProblemDataFiles();
@@ -1067,9 +1066,7 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setLetter(getProblemLetterTextField().getText());
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
         checkProblem.setShortName(getShortNameTextfield().getText());
-        
 
-        
         if (!checkProblem.isValidShortName()) {
             throw new InvalidFieldValue("Invalid problem short name");
         }
@@ -1079,7 +1076,7 @@ public class EditProblemPane extends JPanePlugin {
 
             // get problem data file info from GUI
 
-            String fileName = getFileNameFromLabel(inputDataFileLabel,"Problem Requires Input Data", "input data");
+            String fileName = getFileNameFromLabel(inputDataFileLabel, "Problem Requires Input Data", "input data");
 
             if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
@@ -1120,7 +1117,7 @@ public class EditProblemPane extends JPanePlugin {
         // check if GUI indicates problem has judge's answer files
         if (judgesHaveAnswerFiles.isSelected()) {
             // get judge's answer file info from GUI
-            String fileName = getFileNameFromLabel(answerFileNameLabel,"Judges Have Provided Answer File", "judge answer");
+            String fileName = getFileNameFromLabel(answerFileNameLabel, "Judges Have Provided Answer File", "judge answer");
             if (!isEditingExistingProblem) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
 
@@ -1248,93 +1245,93 @@ public class EditProblemPane extends JPanePlugin {
          * The input validator serialized file from the inputvalidatorpane
          */
         SerializedFile inputValidatorSF = getInputValidatorPane().getInputValidatorFile();
-        if (inputValidatorSF != null){
-            
+        if (inputValidatorSF != null) {
+
             checkProblem.setInputValidatorProgramName(inputValidatorSF.getName());
             newProblemDataFiles.setInputValidatorFile(inputValidatorSF);
-            
+
             // mark the problem as having an input validator
             checkProblem.setProblemHasInputValidator(true);
         } else {
             checkProblem.setInputValidatorProgramName(null);
             newProblemDataFiles.setInputValidatorFile(null);
-            
+
             // mark the problem as having an input validator
             checkProblem.setProblemHasInputValidator(false);
         }
-        
-        // get the Input Validator file name (if any) from the GUI
-//        String guiInputValidatorFileName = getInputValidatorPane().getInputValidatorProgramName().trim();
 
-// old code
-//        if (guiInputValidatorFileName != null && guiInputValidatorFileName.trim().length() > 0) {
-//            // there is an input validator file name in the GUI
-//
-//            if (!isEditingExistingProblem) {
-//
-//                // we're adding a NEW problem; get a SerializedFile corresponding to the name in the GUI
-//                inputValidatorSF = new SerializedFile(guiInputValidatorFileName);
-//
-//                // check the SerializedFile for validity (i.e. that it Serialized without error)
-//                if (inputValidatorSF == null || inputValidatorSF.getBuffer() == null || (inputValidatorSF.getErrorMessage() != null && !inputValidatorSF.getErrorMessage().equals(""))) {
-//
-//                    // error constructing a SerializedFile from the specified input validator name
-//                    String msg = "Unable to read file '" + guiInputValidatorFileName + "' while adding new Problem; choose input validator file again";
-//                    if (inputValidatorSF.getErrorMessage() != null) {
-//                        msg += "\n (Error Message = \"" + inputValidatorSF.getErrorMessage() + "\")";
-//                    }
-//                    throw new InvalidFieldValue(msg);
-//
-//                } else {
-//                    // we were able to build a SerializedFile from the GUI name; save the input validator
-//                    checkProblem.setInputValidatorProgramName(inputValidatorSF.getAbsolutePath());
-//                    newProblemDataFiles.setInputValidatorFile(inputValidatorSF);
-//
-//                    // mark the problem as having an input validator
-//                    checkProblem.setProblemHasInputValidator(true);
-//                }
-//
-//            } else {
-//
-//                // we're editing an existing problem (and we know the GUI has an Input Validator name specified);
-//                // get the input validator currently defined in the problem (if any)
-//                inputValidatorSF = originalProblemDataFiles.getInputValidatorFile();
-//
-//                if (inputValidatorSF == null || !inputValidatorSF.getAbsolutePath().equals(guiInputValidatorFileName)) {
-//                    // either there was no IV already in the problem, or they've specified a file which is different
-//                    // In either case, we need to get a SerializedFile for the name specified in the GUI
-//                    inputValidatorSF = new SerializedFile(guiInputValidatorFileName);
-//
-//                    // Check to see that creating the SerializedFile didn't generate any errors
-//                    try {
-//                        if (Utilities.serializedFileError(inputValidatorSF)) {
-//                            String msg = "Unable to read file ' " + guiInputValidatorFileName + " ' while updating Problem; choose input validator file again";
-//                            if (inputValidatorSF.getErrorMessage() != null) {
-//                                msg += "\n (Error Message = \"" + inputValidatorSF.getErrorMessage() + "\")";
-//                            }
-//                            throw new InvalidFieldValue(msg);
-//                        }
-//                    } catch (Exception e) {
-//                        // serializedFileError threw an exception -- i.e., it forwarded an exception from the SerializedFile
-//                        String msg = "Exception reading file ' " + guiInputValidatorFileName + " ' while updating Problem: " + e.getMessage();
-//                        throw new InvalidFieldValue(msg);
-//                    }
-//
-//                    checkFileFormat(inputValidatorSF);
-//                } else {
-//                    // they've specified a file in the GUI which has already been Serialized and placed in the problem;
-//                    // update it if necessary
-//                    inputValidatorSF = freshenIfNeeded(inputValidatorSF, guiInputValidatorFileName);
-//                }
-//
-//                // when we get here, inputValidatorSF contains a SerializedFile to be put into the problem
-//                checkProblem.setInputValidatorProgramName(inputValidatorSF.getAbsolutePath());
-//                newProblemDataFiles.setInputValidatorFile(inputValidatorSF);
-//
-//                // mark the problem as having an input validator
-//                checkProblem.setProblemHasInputValidator(true);
-//            }
-//        }
+        // get the Input Validator file name (if any) from the GUI
+        // String guiInputValidatorFileName = getInputValidatorPane().getInputValidatorProgramName().trim();
+
+        // old code
+        // if (guiInputValidatorFileName != null && guiInputValidatorFileName.trim().length() > 0) {
+        // // there is an input validator file name in the GUI
+        //
+        // if (!isEditingExistingProblem) {
+        //
+        // // we're adding a NEW problem; get a SerializedFile corresponding to the name in the GUI
+        // inputValidatorSF = new SerializedFile(guiInputValidatorFileName);
+        //
+        // // check the SerializedFile for validity (i.e. that it Serialized without error)
+        // if (inputValidatorSF == null || inputValidatorSF.getBuffer() == null || (inputValidatorSF.getErrorMessage() != null && !inputValidatorSF.getErrorMessage().equals(""))) {
+        //
+        // // error constructing a SerializedFile from the specified input validator name
+        // String msg = "Unable to read file '" + guiInputValidatorFileName + "' while adding new Problem; choose input validator file again";
+        // if (inputValidatorSF.getErrorMessage() != null) {
+        // msg += "\n (Error Message = \"" + inputValidatorSF.getErrorMessage() + "\")";
+        // }
+        // throw new InvalidFieldValue(msg);
+        //
+        // } else {
+        // // we were able to build a SerializedFile from the GUI name; save the input validator
+        // checkProblem.setInputValidatorProgramName(inputValidatorSF.getAbsolutePath());
+        // newProblemDataFiles.setInputValidatorFile(inputValidatorSF);
+        //
+        // // mark the problem as having an input validator
+        // checkProblem.setProblemHasInputValidator(true);
+        // }
+        //
+        // } else {
+        //
+        // // we're editing an existing problem (and we know the GUI has an Input Validator name specified);
+        // // get the input validator currently defined in the problem (if any)
+        // inputValidatorSF = originalProblemDataFiles.getInputValidatorFile();
+        //
+        // if (inputValidatorSF == null || !inputValidatorSF.getAbsolutePath().equals(guiInputValidatorFileName)) {
+        // // either there was no IV already in the problem, or they've specified a file which is different
+        // // In either case, we need to get a SerializedFile for the name specified in the GUI
+        // inputValidatorSF = new SerializedFile(guiInputValidatorFileName);
+        //
+        // // Check to see that creating the SerializedFile didn't generate any errors
+        // try {
+        // if (Utilities.serializedFileError(inputValidatorSF)) {
+        // String msg = "Unable to read file ' " + guiInputValidatorFileName + " ' while updating Problem; choose input validator file again";
+        // if (inputValidatorSF.getErrorMessage() != null) {
+        // msg += "\n (Error Message = \"" + inputValidatorSF.getErrorMessage() + "\")";
+        // }
+        // throw new InvalidFieldValue(msg);
+        // }
+        // } catch (Exception e) {
+        // // serializedFileError threw an exception -- i.e., it forwarded an exception from the SerializedFile
+        // String msg = "Exception reading file ' " + guiInputValidatorFileName + " ' while updating Problem: " + e.getMessage();
+        // throw new InvalidFieldValue(msg);
+        // }
+        //
+        // checkFileFormat(inputValidatorSF);
+        // } else {
+        // // they've specified a file in the GUI which has already been Serialized and placed in the problem;
+        // // update it if necessary
+        // inputValidatorSF = freshenIfNeeded(inputValidatorSF, guiInputValidatorFileName);
+        // }
+        //
+        // // when we get here, inputValidatorSF contains a SerializedFile to be put into the problem
+        // checkProblem.setInputValidatorProgramName(inputValidatorSF.getAbsolutePath());
+        // newProblemDataFiles.setInputValidatorFile(inputValidatorSF);
+        //
+        // // mark the problem as having an input validator
+        // checkProblem.setProblemHasInputValidator(true);
+        // }
+        // }
 
         // update Input Validator Command from GUI
         // Note that a problem is deemed to "have an Input Validator" if it has EITHER an Input Validator Program name
@@ -1393,7 +1390,7 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setColorName(balloonColorTextField.getText());
 
         checkProblem.setColorRGB(rgbTextField.getText());
-        
+
         if (debug22EditProblem) {
             Utilities.dump(newProblemDataFiles, "debug after populateProblemTestSetFilenames");
         }
@@ -1405,7 +1402,7 @@ public class EditProblemPane extends JPanePlugin {
     private String getFileNameFromLabel(JLabel label, String title, String details) {
         String fileName = label.getText();
         if (fileName == null || fileName.trim().length() == 0) {
-            throw new InvalidFieldValue("'"+title+"' is checked; you must select an "+details+" file ");
+            throw new InvalidFieldValue("'" + title + "' is checked; you must select an " + details + " file ");
         }
 
         if (fileName.trim().length() != label.getToolTipText().length()) {
@@ -1556,45 +1553,45 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         // TODO must do - handle update conditions just like Add does
-        
-//        // check the condition of missing both Input Validator Program AND Input Validator Command
-//        if (showMissingInputValidatorWarningOnUpdateProblem && (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals(""))
-//                && (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) && (getProblemRequiresDataCheckBox().isSelected())) {
-//            // no input validator entries defined; issue a warning
-//            String message = "You are attempting to update a Problem which has no Input Data Validator." + "\n\nThis is usually not good practice because it provides no way to insure that the"
-//                    + "\nJudge's data files meet the Problem Specification." + "\n\nAre you sure you want to do this?" + "\n\n";
-//
-//            JCheckBox checkbox = new JCheckBox("Do not show this message again.");
-//
-//            int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator specified");
-//
-//            if (checkbox.isSelected()) {
-//                showMissingInputValidatorWarningOnUpdateProblem = false;
-//            }
-//            if (!(response == JOptionPane.YES_OPTION)) {
-//                return;
-//            }
-//        }
-//
-//        // check the condition of missing Input Validator Program name even though there is an Input Validator Command defined
-//        if (showMissingInputValidatorProgramNameOnUpdateProblem && (getInputValidatorPane().getInputValidatorProgramName() == null 
-//                || getInputValidatorPane().getInputValidatorProgramName().equals(""))
-//                && (getInputValidatorPane().getInputValidatorCommand() != null && !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
-//            // no input validator program defined; issue a warning
-//            String message = "You are attempting to update a problem with an Input Data Validator command but no Input Validator Program name." + "\n\nAre you sure this is what you intended to do?"
-//                    + "\n\n";
-//
-//            JCheckBox checkbox = new JCheckBox("Do not show this message again.");
-//
-//            int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator Program Name specified");
-//
-//            if (checkbox.isSelected()) {
-//                showMissingInputValidatorProgramNameOnUpdateProblem = false;
-//            }
-//            if (!(response == JOptionPane.YES_OPTION)) {
-//                return;
-//            }
-//        }
+
+        // // check the condition of missing both Input Validator Program AND Input Validator Command
+        // if (showMissingInputValidatorWarningOnUpdateProblem && (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals(""))
+        // && (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) && (getProblemRequiresDataCheckBox().isSelected())) {
+        // // no input validator entries defined; issue a warning
+        // String message = "You are attempting to update a Problem which has no Input Data Validator." + "\n\nThis is usually not good practice because it provides no way to insure that the"
+        // + "\nJudge's data files meet the Problem Specification." + "\n\nAre you sure you want to do this?" + "\n\n";
+        //
+        // JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+        //
+        // int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator specified");
+        //
+        // if (checkbox.isSelected()) {
+        // showMissingInputValidatorWarningOnUpdateProblem = false;
+        // }
+        // if (!(response == JOptionPane.YES_OPTION)) {
+        // return;
+        // }
+        // }
+        //
+        // // check the condition of missing Input Validator Program name even though there is an Input Validator Command defined
+        // if (showMissingInputValidatorProgramNameOnUpdateProblem && (getInputValidatorPane().getInputValidatorProgramName() == null
+        // || getInputValidatorPane().getInputValidatorProgramName().equals(""))
+        // && (getInputValidatorPane().getInputValidatorCommand() != null && !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
+        // // no input validator program defined; issue a warning
+        // String message = "You are attempting to update a problem with an Input Data Validator command but no Input Validator Program name." + "\n\nAre you sure this is what you intended to do?"
+        // + "\n\n";
+        //
+        // JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+        //
+        // int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator Program Name specified");
+        //
+        // if (checkbox.isSelected()) {
+        // showMissingInputValidatorProgramNameOnUpdateProblem = false;
+        // }
+        // if (!(response == JOptionPane.YES_OPTION)) {
+        // return;
+        // }
+        // }
 
         // all the GUI fields are valid; create a new Problem from them
         Problem newProblem = null;
@@ -1672,11 +1669,10 @@ public class EditProblemPane extends JPanePlugin {
             // showMessage(e.getMessage());
             return;
         } catch (Exception e) {
-            showMessage("Exeception while updating Problem; see log."); 
+            showMessage("Exeception while updating Problem; see log.");
             getLog().throwing("EditProblemPane", "updateProblem()", e);
             return;
         }
-
 
         // add a Problem Letter to the problem if it doesn't have one (note: problem letter is not displayed in the GUI)
         if (newProblem.getLetter() == null || newProblem.getLetter().length() == 0) {
@@ -1703,7 +1699,7 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
-        //set the flag indicating whether execution of problem submissions should stop on the first failed test case
+        // set the flag indicating whether execution of problem submissions should stop on the first failed test case
         newProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
 
         // hand the new problem to the Controller for transmission to the Server
@@ -1734,7 +1730,7 @@ public class EditProblemPane extends JPanePlugin {
          */
 
         newProblemDataFiles = multipleDataSetPane.getProblemDataFiles();
-        
+
         if (newProblemDataFiles != null) {
             newProblemDataFiles.setInputValidatorFile(inputValidatorPane.getInputValidatorFile());
         }
@@ -1790,10 +1786,10 @@ public class EditProblemPane extends JPanePlugin {
                 }
             }
         }
-        
-        //verify that if the CLICS validator has been selected, a Judge's Answer File has been specified
+
+        // verify that if the CLICS validator has been selected, a Judge's Answer File has been specified
         if (getUseCLICSValidatorRadioButton().isSelected()) {
-            
+
             if (!getJudgesHaveAnswerFilesCheckbox().isSelected()) {
                 showMessage("\"Use CLICS validator\" is checked; you must select a Judge's Answer File (\"General\" tab)");
                 return false;
@@ -1817,7 +1813,6 @@ public class EditProblemPane extends JPanePlugin {
                 return false;
             }
         }
-
 
         // verify that if a Custom Validator has been selected, there is a Validator Program specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
@@ -1895,17 +1890,17 @@ public class EditProblemPane extends JPanePlugin {
 
         }
 
-//        // verify that any Input Validator Program specified is a legitimate serializable file
-//        String inputValidatorProgName = getInputValidatorPane().getInputValidatorProgramName();
-//        if (!checkForInputValidatorProgramSerializationErrors(inputValidatorProgName)) {
-//            showMessage("Unable to access Input Validator Program  ' " + inputValidatorProgName + " ' ; please enter a valid program file name");
-//            return false;
-//        }
+        // // verify that any Input Validator Program specified is a legitimate serializable file
+        // String inputValidatorProgName = getInputValidatorPane().getInputValidatorProgramName();
+        // if (!checkForInputValidatorProgramSerializationErrors(inputValidatorProgName)) {
+        // showMessage("Unable to access Input Validator Program ' " + inputValidatorProgName + " ' ; please enter a valid program file name");
+        // return false;
+        // }
 
         // verify that if an Input Validator program has been specified, there is a command specified to invoke it.
         // (Note that the reverse is NOT required; it would be legal to specify an Input Validator command with no explicit program name)
-//        if (getInputValidatorPane().getInputValidatorProgramName() != null && !(getInputValidatorPane().getInputValidatorProgramName().equals(""))) {
-        if (getInputValidatorPane().getInputValidatorFile() != null){
+        // if (getInputValidatorPane().getInputValidatorProgramName() != null && !(getInputValidatorPane().getInputValidatorProgramName().equals(""))) {
+        if (getInputValidatorPane().getInputValidatorFile() != null) {
 
             if (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) {
 
@@ -1917,26 +1912,26 @@ public class EditProblemPane extends JPanePlugin {
         return true;
     }
 
-//    /**
-//     * Verifies that the specified filename, if not null or empty, represents a valid file which can be turned into a {@link SerializedFile}.
-//     * 
-//     * @param fileName
-//     *            a String containing a file name
-//     * 
-//     * @return true if the specified file can be successfully serialized or if the filename is null or the empty string; false otherwise
-//     */
-//    private boolean checkForInputValidatorProgramSerializationErrors(String fileName) {
-//
-//        if (fileName == null || fileName.equals("")) {
-//            return true;
-//        }
-//
-//        // try to serialize the specified file
-//        SerializedFile sf = new SerializedFile(fileName);
-//
-//        // check to see if any errors occurred during serialization
-//        return (sf != null && sf.getBuffer() != null && (sf.getErrorMessage() == null || sf.getErrorMessage().equals("")) && (sf.getException() == null));
-//    }
+    // /**
+    // * Verifies that the specified filename, if not null or empty, represents a valid file which can be turned into a {@link SerializedFile}.
+    // *
+    // * @param fileName
+    // * a String containing a file name
+    // *
+    // * @return true if the specified file can be successfully serialized or if the filename is null or the empty string; false otherwise
+    // */
+    // private boolean checkForInputValidatorProgramSerializationErrors(String fileName) {
+    //
+    // if (fileName == null || fileName.equals("")) {
+    // return true;
+    // }
+    //
+    // // try to serialize the specified file
+    // SerializedFile sf = new SerializedFile(fileName);
+    //
+    // // check to see if any errors occurred during serialization
+    // return (sf != null && sf.getBuffer() != null && (sf.getErrorMessage() == null || sf.getErrorMessage().equals("")) && (sf.getException() == null));
+    // }
 
     /**
      * Checks to ensure the fileName exists, is a file, and is readable.
@@ -2039,14 +2034,14 @@ public class EditProblemPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                
+
                 try {
                     getInputValidatorPane().setInputValidatorFile(problemDataFiles.getInputValidatorFile());
                 } catch (Exception e) {
                     e.printStackTrace(System.err);
                     getLog().log(Log.INFO, "Could not load input validator file into Pane", e);
                 }
-                
+
                 // first clear the old ones
                 getMultipleDataSetPane().clearDataFiles();
                 // now set the new ones
@@ -2057,10 +2052,10 @@ public class EditProblemPane extends JPanePlugin {
                 } catch (CloneNotSupportedException e) {
                     e.printStackTrace();
                 }
-                
+
                 // this sets the tableModel files list, which is what the getProblemDataFiles uses
                 getMultipleDataSetPane().populateUI();
-                
+
                 populateGUI(inProblem);
 
                 // do not automatically set this to no update, the files may have changed on disk
@@ -2070,7 +2065,7 @@ public class EditProblemPane extends JPanePlugin {
                 } else {
                     enableUpdateButton();
                 }
-                
+
                 // populatingGUI = true;
                 // setForm(inProblem, problemDataFiles);
                 // getAddButton().setVisible(true);
@@ -2083,7 +2078,6 @@ public class EditProblemPane extends JPanePlugin {
 
                 // populatingGUI = false;
 
-             
             }
         });
     }
@@ -2378,7 +2372,7 @@ public class EditProblemPane extends JPanePlugin {
         getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
 
         getDeleteProblemCheckBox().setSelected(!inProblem.isActive());
-        
+
         balloonColorTextField.setText(inProblem.getColorName());
         rgbTextField.setText(inProblem.getColorRGB());
     }
@@ -2565,12 +2559,12 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         // update the tooltip to reflect the name in the text field
-//        if (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) {
-        if (getInputValidatorPane().getInputValidatorFile() == null){
+        // if (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) {
+        if (getInputValidatorPane().getInputValidatorFile() == null) {
             // set the tooltip as null (otherwise we get a little sliver of a empty-string tooltip)
             getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
         } else {
-//            getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorProgramName());
+            // getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorProgramName());
             getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorFile().getAbsolutePath());
         }
 
@@ -2752,13 +2746,13 @@ public class EditProblemPane extends JPanePlugin {
                 }
             });
             generalPane.add(shortNameTextfield);
-            
+
             JLabel lblBalloonColor = new JLabel();
             lblBalloonColor.setText("Balloon Color");
             lblBalloonColor.setBounds(new Rectangle(23, 14, 179, 16));
             lblBalloonColor.setBounds(23, 416, 84, 16);
             generalPane.add(lblBalloonColor);
-            
+
             balloonColorTextField = new JTextField();
             balloonColorTextField.addKeyListener(new KeyAdapter() {
                 @Override
@@ -2770,13 +2764,13 @@ public class EditProblemPane extends JPanePlugin {
             balloonColorTextField.setBounds(new Rectangle(220, 44, 120, 20));
             balloonColorTextField.setBounds(117, 414, 97, 20);
             generalPane.add(balloonColorTextField);
-            
+
             JLabel lblRgbValue = new JLabel();
             lblRgbValue.setText("RGB Value");
             lblRgbValue.setBounds(new Rectangle(23, 14, 179, 16));
             lblRgbValue.setBounds(302, 416, 84, 16);
             generalPane.add(lblRgbValue);
-            
+
             rgbTextField = new JTextField();
             rgbTextField.addKeyListener(new KeyAdapter() {
                 @Override
@@ -3336,14 +3330,14 @@ public class EditProblemPane extends JPanePlugin {
         if (lblWhatsThisCLICSValidator == null) {
             Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
             if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
-                //the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
                 lblWhatsThisCLICSValidator = new JLabel("<What's This?>");
                 lblWhatsThisCLICSValidator.setForeground(Color.blue);
             } else {
-                Image image = ((ImageIcon) questionIcon).getImage(); 
+                Image image = ((ImageIcon) questionIcon).getImage();
                 lblWhatsThisCLICSValidator = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
             }
-            
+
             lblWhatsThisCLICSValidator.setToolTipText("What's This? (click for additional information)");
             lblWhatsThisCLICSValidator.addMouseListener(new MouseAdapter() {
                 @Override
@@ -3438,7 +3432,9 @@ public class EditProblemPane extends JPanePlugin {
     private Component horizontalStrut_1;
 
     private Component horizontalStrut_2;
+
     private JTextField balloonColorTextField;
+
     private JTextField rgbTextField;
 
     protected void enableCustomValidatorComponents(boolean enableComponents) {
@@ -3740,7 +3736,7 @@ public class EditProblemPane extends JPanePlugin {
                     if (selectFile(getCustomValidatorExecutableProgramTextField(), "Select Validator Program")) {
                         getCustomValidatorExecutableProgramTextField().setToolTipText((getCustomValidatorExecutableProgramTextField().getText()));
                         // TODO set serializedFile
-                        
+
                         enableUpdateButton();
                     }
                 }
@@ -4313,32 +4309,32 @@ public class EditProblemPane extends JPanePlugin {
 
         try {
             if (debug22EditProblem) {
-                    System.out.println("debug   ORIGINAL  load dump");
-                    Utilities.dump(originalProblemDataFiles, "debug in load orig");
+                System.out.println("debug   ORIGINAL  load dump");
+                Utilities.dump(originalProblemDataFiles, "debug in load orig");
 
-                    String[] s2 = getTestDataList(originalProblemDataFiles);
-                    System.out.println("debug Number of   ORIGINAL  problem data files is " + s2.length);
+                String[] s2 = getTestDataList(originalProblemDataFiles);
+                System.out.println("debug Number of   ORIGINAL  problem data files is " + s2.length);
 
-                    String[] s = getTestDataList(newProblemDataFiles);
-                    System.out.println("debug B4 Number of new problem data files is " + s.length);
-                }
+                String[] s = getTestDataList(newProblemDataFiles);
+                System.out.println("debug B4 Number of new problem data files is " + s.length);
+            }
 
-                newProblemDataFiles = getProblemDataFilesFromFields();
+            newProblemDataFiles = getProblemDataFilesFromFields();
 
-                if (debug22EditProblem) {
-                    String[] s = getTestDataList(newProblemDataFiles);
-                    System.out.println("debug B5 Number of new problem data files is " + s.length);
-                }
+            if (debug22EditProblem) {
+                String[] s = getTestDataList(newProblemDataFiles);
+                System.out.println("debug B5 Number of new problem data files is " + s.length);
+            }
 
-                Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
+            Problem newProblem = getProblemFromFields(problem, newProblemDataFiles);
 
-                if (debug22EditProblem) {
-                    String[] s = getTestDataList(newProblemDataFiles);
-                    System.out.println("debug B6 Number of new problem data files is " + s.length);
+            if (debug22EditProblem) {
+                String[] s = getTestDataList(newProblemDataFiles);
+                System.out.println("debug B6 Number of new problem data files is " + s.length);
 
-                    Utilities.dump(newProblemDataFiles, "debug in load new");
-                    System.out.flush();
-                }
+                Utilities.dump(newProblemDataFiles, "debug in load new");
+                System.out.flush();
+            }
 
             String fileNameTwo = createProblemReport(newProblem, newProblemDataFiles, "stuf2");
             if (debug22EditProblem) {
@@ -4347,7 +4343,7 @@ public class EditProblemPane extends JPanePlugin {
 
             showFilesDiff(fileNameOne, fileNameTwo);
         } catch (Exception e) {
-            showMessage("Exeception while exporting Problem; see log."); 
+            showMessage("Exeception while exporting Problem; see log.");
             getLog().throwing("EditProblemPane", "saveAndCompare()", e);
         }
 
@@ -4438,7 +4434,7 @@ public class EditProblemPane extends JPanePlugin {
             showMessage(e.getMessage());
             return;
         } catch (Exception e) {
-            showMessage("Exeception while viewing Problem report; see log."); 
+            showMessage("Exeception while viewing Problem report; see log.");
             getLog().throwing("EditProblemPane", "viewProblemReport()", e);
             return;
         }
@@ -5086,7 +5082,7 @@ public class EditProblemPane extends JPanePlugin {
                 }
             });
             lblWhatsThisPC2ValStd.setBorder(new EmptyBorder(0, 15, 0, 0));
-            
+
         }
         return lblWhatsThisPC2ValStd;
     }
@@ -5344,4 +5340,3 @@ public class EditProblemPane extends JPanePlugin {
         return retStatus;
     }
 }
-
