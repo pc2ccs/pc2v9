@@ -17,6 +17,6 @@ fi
 
 CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
 
-java $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath $CLASSNAME $*
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath $CLASSNAME $*
 
 # eof pc2submit $Id$ 

@@ -15,6 +15,6 @@ else
   PC2XOPS=""
 fi
 
-java $PC2XOPS -Xms64M -Xmx768M -cp "$libdir/*" edu.csus.ecs.pc2.core.report.Reports $*
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp "$libdir/*" edu.csus.ecs.pc2.core.report.Reports $*
 
 # eof pc2report $Id$ 
