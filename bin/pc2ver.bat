@@ -27,7 +27,7 @@ goto :end
 
 :continue
 call %PC2BIN%\pc2env.bat
-java -cp %libdir%\pc2.jar edu.csus.ecs.pc2.VersionInfo
+java -Djdk.crypto.KeyAgreement.legacyKDF=true -cp %libdir%\pc2.jar edu.csus.ecs.pc2.VersionInfo
 
 :end
 rem eof pc2ver.bat $Id$

@@ -37,7 +37,7 @@ call %PC2BIN%\pc2env.bat
 
 :CheckJavaVersion
 REM Check Java architecture and set max Heap size 
-java -d64 -version 2>&1 | findstr "Error" > NUL
+java -Djdk.crypto.KeyAgreement.legacyKDF=true -d64 -version 2>&1 | findstr "Error" > NUL
 IF ERRORLEVEL 1 goto :Java64
 IF ERRORLEVEL 0 goto :Java32
 
@@ -54,7 +54,7 @@ goto :OS64
 :OS64
 cls
 Echo.
-Echo WARNING: We detected a 32 bit java running on a 64 bit OS.
+Echo WARNING: We detected a 32 bit java -Djdk.crypto.KeyAgreement.legacyKDF=true running on a 64 bit OS.
 Echo.
 Echo We recommend that you run PC^2 Server using a 64 bit version of Java to allow
 Echo for the best results.
@@ -69,7 +69,7 @@ echo "pc2server.bat" file.
 goto :startJava
 
 :startJava
-java %HeapParam% -cp "%libdir%\*" edu.csus.ecs.pc2.Starter --server %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Djdk.crypto.KeyAgreement.legacyKDF=true %HeapParam% -cp "%libdir%\*" edu.csus.ecs.pc2.Starter --server %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
 rem eof pc2server.bat $Id$

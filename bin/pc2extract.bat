@@ -27,7 +27,7 @@ goto :end
 
 :continue
 call %PC2BIN%\pc2env.bat
-java -Xms64M -Xmx768M -cp %pc2_classpath% edu.csus.ecs.pc2.core.report.Extractor %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp %pc2_classpath% edu.csus.ecs.pc2.core.report.Extractor %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
 rem eof pc2extract.bat $Id$
