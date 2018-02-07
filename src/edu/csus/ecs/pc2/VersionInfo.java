@@ -27,7 +27,6 @@ import edu.csus.ecs.pc2.core.log.Log;
  * </pre>
  * 
  * @author pc2@ecs.csus.edu.
- * @version $Id$
  * 
  */
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/VersionInfo.java$
@@ -206,8 +205,6 @@ public class VersionInfo {
         System.out.println("OS: " + osName + " " + osVer + " (" + osArch + ") ");
         System.out.println();
         System.out.println(sri.getContactEMail());
-        System.out.println();
-        System.out.println("(This class: $Id$)");
         System.out.println();
 
         System.exit(0);
