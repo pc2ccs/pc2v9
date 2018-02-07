@@ -1153,9 +1153,14 @@ public class Problem implements IElementObject {
     }
     
     public int getNumberTestCases() {
+        // this needs to look at the longest of the testCase Data and Answer Filesnames lists
         if (testCaseDataFilenames != null && testCaseDataFilenames.length > 0) {
-            return testCaseDataFilenames.length;
-        } else if (getDataFileName() != null) {
+            int count = testCaseDataFilenames.length;
+            if (testCaseAnswerFilenames != null && testCaseAnswerFilenames.length > count) {
+                count = testCaseAnswerFilenames.length;
+            }
+            return count;
+        } else if (getDataFileName() != null || getAnswerFileName() != null) {
             return 1;
         } else {
             return 0;
