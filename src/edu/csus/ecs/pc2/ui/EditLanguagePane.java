@@ -596,7 +596,7 @@ public class EditLanguagePane extends JPanePlugin {
 
         judgeCommandLineTextBox.setText(values[3]);
         chckbxJudgesCommandLine.setSelected(false);
-        idTextfield.setText(values[4]);
+        idTextfield.setText(values[6]);
         boolean isScript = LanguageAutoFill.isInterpretedLanguage(languageToFill);
 
         getInterpretedLanguageCheckBox().setSelected(isScript);
