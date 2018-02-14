@@ -69,6 +69,7 @@ public class WebServerPane extends JPanePlugin {
     private JCheckBox chckbxFetchRuns;
 
     private JButton viewJSONButton;
+    private JCheckBox chckbxClicsContestApi;
 
     /**
      * Constructs a new WebServerPane.
@@ -155,8 +156,9 @@ public class WebServerPane extends JPanePlugin {
         Properties properties = new Properties();
 
         properties.put(WebServer.PORT_NUMBER_KEY, portTextField.getText());
-        properties.put(WebServer.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(chckbxStarttime.isSelected()));
-        properties.put(WebServer.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(chckbxFetchRuns.isSelected()));
+        properties.put(WebServer.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, Boolean.toString(getChckbxClicsContestApi().isSelected()));
+        properties.put(WebServer.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxStarttime().isSelected()));
+        properties.put(WebServer.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxFetchRuns().isSelected()));
 
         getWebServer().startWebServer(getContest(), getController(), properties);
 
@@ -207,9 +209,9 @@ public class WebServerPane extends JPanePlugin {
             centerPanel = new JPanel();
             GridBagLayout gblCenterPanel = new GridBagLayout();
             gblCenterPanel.columnWidths = new int[] { 198, 57, 167, 0 };
-            gblCenterPanel.rowHeights = new int[] { 36, 23, 32, 23, 0, 0, 0 };
+            gblCenterPanel.rowHeights = new int[] { 36, 23, 32, 23, 0, 0, 0, 0 };
             gblCenterPanel.columnWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
-            gblCenterPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            gblCenterPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
             centerPanel.setLayout(gblCenterPanel);
             webServerStatusLabel = new JLabel();
             webServerStatusLabel.setFont(new Font("Dialog", Font.BOLD, 14));
@@ -244,24 +246,27 @@ public class WebServerPane extends JPanePlugin {
             gbc_lblEnabledWebServices.gridx = 0;
             gbc_lblEnabledWebServices.gridy = 2;
             centerPanel.add(getLblEnabledWebServices(), gbc_lblEnabledWebServices);
-            GridBagConstraints gbc_viewJSONButton = new GridBagConstraints();
-            gbc_viewJSONButton.anchor = GridBagConstraints.WEST;
-            gbc_viewJSONButton.insets = new Insets(0, 0, 5, 0);
-            gbc_viewJSONButton.gridx = 2;
-            gbc_viewJSONButton.gridy = 2;
-            centerPanel.add(getViewJSONButton(), gbc_viewJSONButton);
+            GridBagConstraints gbc_chckbxClicsContestApi = new GridBagConstraints();
+            gbc_chckbxClicsContestApi.insets = new Insets(0, 0, 5, 5);
+            gbc_chckbxClicsContestApi.gridx = 1;
+            gbc_chckbxClicsContestApi.gridy = 2;
+            centerPanel.add(getChckbxClicsContestApi(), gbc_chckbxClicsContestApi);
             GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
             gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
             gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 5);
             gbc_chckbxStarttime.gridx = 1;
-            gbc_chckbxStarttime.gridy = 4;
+            gbc_chckbxStarttime.gridy = 3;
             centerPanel.add(getChckbxStarttime(), gbc_chckbxStarttime);
             GridBagConstraints gbc_chckbxFetchRuns = new GridBagConstraints();
             gbc_chckbxFetchRuns.anchor = GridBagConstraints.WEST;
-            gbc_chckbxFetchRuns.insets = new Insets(0, 0, 5, 0);
-            gbc_chckbxFetchRuns.gridx = 2;
+            gbc_chckbxFetchRuns.insets = new Insets(0, 0, 5, 5);
+            gbc_chckbxFetchRuns.gridx = 1;
             gbc_chckbxFetchRuns.gridy = 4;
             centerPanel.add(getChckbxFetchRuns(), gbc_chckbxFetchRuns);
+            GridBagConstraints gbc_viewJSONButton = new GridBagConstraints();
+            gbc_viewJSONButton.gridx = 2;
+            gbc_viewJSONButton.gridy = 6;
+            centerPanel.add(getViewJSONButton(), gbc_viewJSONButton);
 
         }
         return centerPanel;
@@ -304,6 +309,7 @@ public class WebServerPane extends JPanePlugin {
         getPortTextField().setEditable(!serverRunning);
         getChckbxStarttime().setEnabled(!serverRunning);
         getChckbxFetchRuns().setEnabled(!serverRunning);
+        getChckbxClicsContestApi().setEnabled(!serverRunning);
     }
 
     private JLabel getLblEnabledWebServices() {
@@ -340,7 +346,8 @@ public class WebServerPane extends JPanePlugin {
 
     private JButton getViewJSONButton() {
         if (viewJSONButton == null) {
-            viewJSONButton = new JButton("View");
+            viewJSONButton = new JButton("View Event Feed");
+            viewJSONButton.setToolTipText("Show the data which will be output on the Event Feed API when the Webserver is started");
             viewJSONButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     viewJSONEventFeed();
@@ -371,5 +378,12 @@ public class WebServerPane extends JPanePlugin {
             getLog().log(Level.WARNING, "Unable to view EF JSON", e);
         }
 
+    }
+    private JCheckBox getChckbxClicsContestApi() {
+        if (chckbxClicsContestApi == null) {
+        	chckbxClicsContestApi = new JCheckBox("CLICS Contest API");
+        	chckbxClicsContestApi.setSelected(true);
+        }
+        return chckbxClicsContestApi;
     }
 }

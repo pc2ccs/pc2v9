@@ -144,18 +144,6 @@ public class ServicesView extends JFrame implements UIPlugin {
 //                balloonHandler.setContestAndController(contest, controller);
 
                 try {
-                    EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
-                    addUIPlugin(getMainTabbedPane(), "Event Feed", eventFeedServerPane);
-                } catch (Exception e) {
-                    if (StaticLog.getLog() != null) {
-                        StaticLog.getLog().log(Log.WARNING, "Exception", e);
-                        e.printStackTrace(System.err);
-                    } else {
-                        e.printStackTrace(System.err);
-                    }
-                }
-                
-                try {
                     WebServerPane webServerPane = new WebServerPane();
                     addUIPlugin(getMainTabbedPane(), "Web Services", webServerPane);
                 } catch (Exception e) {
@@ -166,6 +154,19 @@ public class ServicesView extends JFrame implements UIPlugin {
                         e.printStackTrace(System.err);
                     }
                 }
+                
+                try {
+                    EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
+                    addUIPlugin(getMainTabbedPane(), "Legacy Event Feed", eventFeedServerPane);
+                } catch (Exception e) {
+                    if (StaticLog.getLog() != null) {
+                        StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                        e.printStackTrace(System.err);
+                    } else {
+                        e.printStackTrace(System.err);
+                    }
+                }
+                
                 
                if (Utilities.isDebugMode()) {
                     

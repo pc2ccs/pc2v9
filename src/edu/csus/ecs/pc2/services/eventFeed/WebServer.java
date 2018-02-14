@@ -87,6 +87,8 @@ public class WebServer implements UIPlugin {
     // keys for web service properties
 
     public static final String PORT_NUMBER_KEY = "port";
+    
+    public static final String CLICS_CONTEST_API_SERVICES_ENABLED_KEY = "enableCLICSContestAPI";
 
     public static final String STARTTIME_SERVICE_ENABLED_KEY = "enableStartTime";
 
@@ -330,39 +332,55 @@ public class WebServer implements UIPlugin {
             resConfig.register(new FetchRunService(getContest(), getController()));
             showMessage("Starting /fetchRun web service");
         }
-        // contest API always enabled if the web server is started
-        resConfig.register(new ContestService(getContest(),getController()));
-        showMessage("Starting /contest web service");
-        resConfig.register(new ScoreboardService(getContest(), getController()));
-        showMessage("Starting /contest/scoreboard web service");
-        resConfig.register(new LanguageService(getContest(), getController()));
-        showMessage("Starting /contest/languages web service");
-        resConfig.register(new TeamService(getContest(), getController()));
-        showMessage("Starting /contest/teams web service");
-        resConfig.register(new GroupService(getContest(),getController()));
-        showMessage("Starting /contest/groups web service");
-        resConfig.register(new OrganizationService(getContest(),getController()));
-        showMessage("Starting /contest/organizations web service");
-        resConfig.register(new JudgementTypeService(getContest(),getController()));
-        showMessage("Starting /contest/judgement-types web service");
-        resConfig.register(new ClarificationService(getContest(),getController()));
-        showMessage("Starting /contest/clarifications web service");
-        resConfig.register(new SubmissionService(getContest(),getController()));
-        showMessage("Starting /contest/submissions web service");
-        resConfig.register(new ProblemService(getContest(), getController()));
-        showMessage("Starting /contest/problems web service");
-        resConfig.register(new JudgementService(getContest(), getController()));
-        showMessage("Starting /contest/judgements web service");
-        resConfig.register(new RunService(getContest(), getController()));
-        showMessage("Starting /contest/runs web service");
-        resConfig.register(new EventFeedService(getContest(), getController()));
-        showMessage("Starting /contest/event-feed web service");
-        resConfig.register(new StateService(getContest(), getController()));
-        showMessage("Starting /contest/state web service");
-
+        
+        // CLICS Contest API services are collective -- either all enabled or all disabled (and default to enabled if unspecified)
+        if (getBooleanProperty(CLICS_CONTEST_API_SERVICES_ENABLED_KEY, true)) {
+            
+            resConfig.register(new ContestService(getContest(), getController()));
+            showMessage("Starting /contest web service");
+            resConfig.register(new ScoreboardService(getContest(), getController()));
+            showMessage("Starting /contest/scoreboard web service");
+            resConfig.register(new LanguageService(getContest(), getController()));
+            showMessage("Starting /contest/languages web service");
+            resConfig.register(new TeamService(getContest(), getController()));
+            showMessage("Starting /contest/teams web service");
+            resConfig.register(new GroupService(getContest(), getController()));
+            showMessage("Starting /contest/groups web service");
+            resConfig.register(new OrganizationService(getContest(), getController()));
+            showMessage("Starting /contest/organizations web service");
+            resConfig.register(new JudgementTypeService(getContest(), getController()));
+            showMessage("Starting /contest/judgement-types web service");
+            resConfig.register(new ClarificationService(getContest(), getController()));
+            showMessage("Starting /contest/clarifications web service");
+            resConfig.register(new SubmissionService(getContest(), getController()));
+            showMessage("Starting /contest/submissions web service");
+            resConfig.register(new ProblemService(getContest(), getController()));
+            showMessage("Starting /contest/problems web service");
+            resConfig.register(new JudgementService(getContest(), getController()));
+            showMessage("Starting /contest/judgements web service");
+            resConfig.register(new RunService(getContest(), getController()));
+            showMessage("Starting /contest/runs web service");
+            resConfig.register(new EventFeedService(getContest(), getController()));
+            showMessage("Starting /contest/event-feed web service");
+            resConfig.register(new StateService(getContest(), getController()));
+            showMessage("Starting /contest/state web service");
+        }
+        
         return resConfig;
     }
 
+    /**
+     * Returns the value of the specified property in the global wsProperties table, or the specified boolean value if the 
+     * specified property is not found in the wsProperties table.
+     * Property values "true", "yes", "on", and "enabled" are treated as true; any other string is considered false.
+     * 
+     * @param key - a wsProperties table property key
+     * @param b - the value to be returned if key is not found in wsProperties
+     * 
+     * @return true if key is found in wsProperties and has a value which is any of "true", "yes", "on", or "enabled"; 
+     *          false if key is found in wsProperties but has any other value;
+     *          b if key is not found in wsProperties
+     */
     protected boolean getBooleanProperty(String key, boolean b) {
 
         String value = wsProperties.getProperty(key);
