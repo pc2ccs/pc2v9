@@ -1008,8 +1008,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         assignJudgingType(content, problem, overrideManualReview);
 
-        boolean hideOutputWindow = fetchBooleanValue(content, HIDE_OUTPUT_WINDOW, false);
-        problem.setHideOutputWindow(hideOutputWindow);
+        boolean showOutputWindow = fetchBooleanValue(content, SHOW_OUTPUT_WINDOW, true);
+        problem.setHideOutputWindow(!showOutputWindow);
 
         boolean showCompareWindow = fetchBooleanValue(content, SHOW_COMPARE_WINDOW, false);
         problem.setShowCompareWindow(showCompareWindow);

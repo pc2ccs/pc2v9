@@ -558,7 +558,7 @@ public class ExportYAML {
         problemWriter.println();
 
         problemWriter.println(IContestLoader.HIDE_PROBLEM+": "+!problem.isActive());
-        problemWriter.println(IContestLoader.HIDE_OUTPUT_WINDOW+": "+!problem.isHideOutputWindow());
+        problemWriter.println(IContestLoader.SHOW_OUTPUT_WINDOW+": "+!problem.isHideOutputWindow());
         problemWriter.println(IContestLoader.SHOW_COMPARE_WINDOW+": " + problem.isShowCompareWindow());
         problemWriter.println(IContestLoader.SHOW_VALIDATION_RESULTS+": "+problem.isShowValidationToJudges());
         problemWriter.println(IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!isExternalFiles(problemDataFiles)));

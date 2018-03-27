@@ -145,7 +145,7 @@ public interface IContestLoader {
     String INPUT_VALIDATOR_COMMAND_LINE_KEY = "inputValidatorCommandLine";
 
     // per problem problem.yaml settings
-    String HIDE_OUTPUT_WINDOW = "showOutputWindow";
+    String SHOW_OUTPUT_WINDOW = "showOutputWindow";
 
     String SHOW_COMPARE_WINDOW = "showCompare";
 
