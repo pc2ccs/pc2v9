@@ -598,6 +598,11 @@ public class ExportYAML {
             problemWriter.println(PAD4 + "validatorOption: " + problem.getWhichPC2Validator());
             problemWriter.println();
             problemWriter.println(PAD4 + IContestLoader.USING_PC2_VALIDATOR + ": " + problem.isUsingPC2Validator());
+            problemWriter.println(PAD4 + IContestLoader.USING_CLICS_VALIDATOR +": "+ problem.isUsingCLICSValidator());
+            problemWriter.println(PAD4 + IContestLoader.USING_CUSTOM_VALIDATOR +": "+problem.isUsingCustomValidator());
+            if (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings() != null) {
+                problemWriter.println(PAD4+ IContestLoader.USE_CLICS_CUSTOM_VALIDATOR_INTERFACE + ": " + problem.getCustomValidatorSettings().isUseClicsValidatorInterface());
+            }
             problemWriter.println();
         }
         

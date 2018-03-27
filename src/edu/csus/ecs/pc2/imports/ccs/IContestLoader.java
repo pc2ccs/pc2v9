@@ -153,6 +153,12 @@ public interface IContestLoader {
 
     String HIDE_PROBLEM = "hideProblem";
 
+    String USING_CLICS_VALIDATOR = "use-clics-validator";
+
+    String USING_CUSTOM_VALIDATOR = "use-custom-validator";
+    
+    String USE_CLICS_CUSTOM_VALIDATOR_INTERFACE = "use-clics-custom-validator-interface";
+
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 
     void dumpSerialzedFileList(Problem problem, String logPrefixId, SerializedFile[] sfList);

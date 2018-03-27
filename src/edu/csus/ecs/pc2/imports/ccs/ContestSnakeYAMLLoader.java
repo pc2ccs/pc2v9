@@ -51,6 +51,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
+import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
@@ -941,6 +942,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
+        boolean usingCustomValidator = false;
+        if (validatorContent != null) {
+            usingCustomValidator = fetchBooleanValue(validatorContent, IContestLoader.USING_CUSTOM_VALIDATOR, false);
+        }
 
         boolean pc2FormatProblemYamlFile = false;
         String usingValidator = fetchValue(validatorContent, IContestLoader.USING_PC2_VALIDATOR);
@@ -985,22 +990,24 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setTimeOutInSeconds(timeOut);
         }
 
-        if (!pc2FormatProblemYamlFile) {
-            // TODO CCS add CCS validator derived based on build script
-
-            /**
-             * - Use CCS build command to build validator ('build' script name) - add validator created by build command - add CCS run script ('run' script name)
-             */
-
-            // default-validator: /home/pc2/Desktop/codequest12_problems/default_validator
-            // override-validator: /usr/local/bin/mtsv {:problemletter} {:resfile} {:basename}
-
-            // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
-
-            addClicsValidator(problem, problemDataFiles, baseDirectoryName);
-
-        } else {
-            addDefaultPC2Validator(problem, 1);
+        if (!usingCustomValidator) {
+            if (!pc2FormatProblemYamlFile) {
+                // TODO CCS add CCS validator derived based on build script
+    
+                /**
+                 * - Use CCS build command to build validator ('build' script name) - add validator created by build command - add CCS run script ('run' script name)
+                 */
+    
+                // default-validator: /home/pc2/Desktop/codequest12_problems/default_validator
+                // override-validator: /usr/local/bin/mtsv {:problemletter} {:resfile} {:basename}
+    
+                // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
+    
+                addClicsValidator(problem, problemDataFiles, baseDirectoryName);
+    
+            } else {
+                addDefaultPC2Validator(problem, 1);
+            }
         }
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
@@ -1052,32 +1059,49 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Object object = content.get(VALIDATOR_KEY);
 
         if (object instanceof LinkedHashMap) {
-
             // Handle validator yaml section
 
             @SuppressWarnings("unchecked")
             LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) object; // fetchList(content, VALIDATOR_KEY);
 
-            problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
-
+            boolean customType = fetchBooleanValue(map, IContestLoader.USING_CUSTOM_VALIDATOR, false);
+//            boolean pc2Type = fetchBooleanValue(map, IContestLoader.USING_PC2_VALIDATOR, false);
             String validatorProg = fetchValue(map, "validatorProg");
-            problem.setOutputValidatorProgramName(validatorProg);
 
             String validatorCmd = fetchValue(map, "validatorCmd");
+            // junit does not expect NONE to be set....
+//            if (pc2Type) {
+                problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+                problem.setOutputValidatorProgramName(validatorProg);
+                String validatorOption = fetchValue(map, "validatorOption");
+
+                PC2ValidatorSettings settings = new PC2ValidatorSettings();
+                if (validatorOption != null) {
+                    settings.setWhichPC2Validator(Integer.parseInt(validatorOption));
+                }
+
+                settings.setIgnoreCaseOnValidation(true);
+
+                if (validatorCmd != null) {
+                    settings.setValidatorCommandLine(validatorCmd);
+                }
+                problem.setPC2ValidatorSettings(settings);
+//            }
+            if (customType) {
+                problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
+                problem.setOutputValidatorProgramName(validatorProg);
+                CustomValidatorSettings customSettings = new CustomValidatorSettings();
+                boolean clicsMode = fetchBooleanValue(map, IContestLoader.USE_CLICS_CUSTOM_VALIDATOR_INTERFACE, true);
+                if (clicsMode) {
+                    customSettings.setUseClicsValidatorInterface();
+                } else {
+                    customSettings.setUsePC2ValidatorInterface();
+                }
+                customSettings.setValidatorCommandLine(validatorCmd);
+                customSettings.setValidatorProgramName(validatorProg);
+                problem.setCustomValidatorSettings(customSettings);
+            }
             // String usingInternal = fetchValue(map, "usingInternal");
-            String validatorOption = fetchValue(map, "validatorOption");
-
-            PC2ValidatorSettings settings = new PC2ValidatorSettings();
-            if (validatorOption != null) {
-                settings.setWhichPC2Validator(Integer.parseInt(validatorOption));
-            }
-
-            settings.setIgnoreCaseOnValidation(true);
-
-            if (validatorCmd != null) {
-                settings.setValidatorCommandLine(validatorCmd);
-            }
-            problem.setPC2ValidatorSettings(settings);
 
             return; // =================== RETURN
         }
