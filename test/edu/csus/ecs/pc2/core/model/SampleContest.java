@@ -275,6 +275,9 @@ public class SampleContest {
             String[] fields = W3C_COLORS[problemNumber].split(";");
             balloonSettings.addColor(problem, fields[0], fields[1]);
             problemNumber++;
+            problem.setColorName(fields[0]);
+            // TODO we should add RGB too, but then testdata would need to be updated
+//            problem.setColorRGB(fields[1]);
         }
 
     }
