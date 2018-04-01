@@ -18,7 +18,6 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -397,11 +396,19 @@ public class ExportYAML {
             writer.println(PAD4 + "short-name: " + shortName);
             writer.println(PAD4 + "name: " + quote(name));
 
-            String colorName = getProblemBalloonColor(contest, problem);
+//            String colorName = getProblemBalloonColor(contest, problem);
+//            if (colorName != null) {
+//                writer.println(PAD4 + "color: " + colorName);
+//            }
+            String colorName = problem.getColorName();
             if (colorName != null) {
-                writer.println(PAD4 + "color: " + colorName);
+              writer.println(PAD4 + "color: " + colorName);
             }
             // else no color, nothing to print.
+            String colorRGB = problem.getColorRGB();
+            if (colorRGB != null && !colorRGB.equals("#null") && !colorRGB.equals("#")) {
+                writer.println(PAD4 + "rgb: "+ quote(colorRGB));
+            }
 
             writer.println(PAD4 + IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!problem.isUsingExternalDataFiles()));
 
@@ -768,14 +775,14 @@ public class ExportYAML {
         return newName;
     }
 
-    private String getProblemBalloonColor(IInternalContest contest, Problem problem) {
-        BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
-        String name = null;
-        if (balloonSettings != null) {
-            name = balloonSettings.getColor(problem);
-        }
-        return name;
-    }
+//    private String getProblemBalloonColor(IInternalContest contest, Problem problem) {
+//        BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
+//        String name = null;
+//        if (balloonSettings != null) {
+//            name = balloonSettings.getColor(problem);
+//        }
+//        return name;
+//    }
 
     protected String getRunner(String programExecuteCommandLine) {
         if (programExecuteCommandLine.startsWith("{:")) {
