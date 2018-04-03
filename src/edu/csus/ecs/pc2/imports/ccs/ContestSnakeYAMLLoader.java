@@ -1042,6 +1042,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             assignJudgingType(judgingTypeContent, problem, overrideManualReview);
         }
 
+        // override CCS standard read input data from stdin
+        Map<String, Object> problemInputContent = fetchMap(content, PROBLEM_INPUT_KEY);
+        if (problemInputContent != null) {
+            boolean readFromSTDIN = fetchBooleanValue(problemInputContent, READ_FROM_STDIN_KEY, true);
+            problem.setReadInputDataFromSTDIN(readFromSTDIN);
+        }
+
+
         // TODO CCS - send preliminary - add bug - fix.
         // boolean sendPreliminary = fetchBooleanValue(content, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
         // if (sendPreliminary){
