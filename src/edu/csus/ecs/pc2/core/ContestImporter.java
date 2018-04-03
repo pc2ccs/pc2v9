@@ -63,11 +63,11 @@ public class ContestImporter {
         ContestInformation contestInformation = null;
 
         try {
-            if (newContest.getContestInformation().getContestTitle() != null) {
-                contestInformation = newContest.getContestInformation();
-                contestInformation.setContestTitle(newContest.getContestInformation().getContestTitle());
+            contestInformation = newContest.getContestInformation();
+            if (contestInformation.isSameAs(theContest.getContestInformation())) {
+                // no changes, clear out the update
+                contestInformation = null;
             }
-
         } catch (Exception e) {
             noteList.logError("Error saving Contest Information", e);
         }

@@ -306,6 +306,9 @@ public class ContestInformation implements Serializable{
             if (!StringUtilities.stringSame(adminCDPBasePath, contestInformation.getAdminCDPBasePath())) {
                 return false;
             }
+            if (autoStopContest != contestInformation.isAutoStopContest()) {
+                return false;
+            }
             
             return true;
         } catch (Exception e) {

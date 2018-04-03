@@ -56,6 +56,7 @@ public class ContestSettingsReport implements IReport {
         printWriter.println("  Include Preliminary Judgements in Scoring Algorithm : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
         printWriter.println("  Send Notifications for Preliminary Judgements       : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
         printWriter.println("  Send Additional Run Status Information              : " + Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));
+        printWriter.println("  Stop at end of contest                              : " + Utilities.yesNoString(contestInformation.isAutoStopContest()));
         printWriter.println();
 
         printWriter.println("  Judges' Default Answer: '" + contestInformation.getJudgesDefaultAnswer() + "'");

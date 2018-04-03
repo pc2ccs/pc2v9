@@ -242,11 +242,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private void setTitle(IInternalContest contest, String title) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setContestTitle(title);
+        contest.updateContestInformation(contestInformation);
+
     }
 
     private void setCcsTestMode(IInternalContest contest, boolean ccsTestMode) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setCcsTestMode(ccsTestMode);
+        contest.updateContestInformation(contestInformation);
+
     }
 
     /**
@@ -277,6 +281,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private void setCDPPath(IInternalContest contest, String path) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setJudgeCDPBasePath(path);
+        contest.updateContestInformation(contestInformation);
+
     }
 
     // private int getIntValue(String string, int defaultNumber) {
@@ -386,9 +392,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (shortContestName != null) {
             setShortContestName(contest, shortContestName);
         }
-        
+     
         if (null != fetchValue(content, AUTO_STOP_CLOCK_AT_END_KEY)) {
-
             // only set value if key present
 
             boolean autoStopClockAtEnd = fetchBooleanValue(content, AUTO_STOP_CLOCK_AT_END_KEY, false);
@@ -583,11 +588,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private void setAutoStopClockAtEnd(IInternalContest contest, boolean stop) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setAutoStopContest(stop);
+        contest.updateContestInformation(contestInformation);
     }
 
     private void setMaxOutputSize(IInternalContest contest, int maxFileSize) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setMaxFileSize(maxFileSize);
+        contest.updateContestInformation(contestInformation);
     }
 
     public Date parseISO8601Date(String startTime) {
@@ -599,6 +606,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private void setScoreboardFreezeTime(IInternalContest contest, String scoreboardFreezeTime) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setFreezeTime(scoreboardFreezeTime);
+        contest.updateContestInformation(contestInformation);
     }
 
     private void setContestLength(IInternalContest contest, String contestLength) {
@@ -648,6 +656,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private void setShortContestName(IInternalContest contest, String shortContestName) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setContestShortName(shortContestName);
+        contest.updateContestInformation(contestInformation);
 
     }
 

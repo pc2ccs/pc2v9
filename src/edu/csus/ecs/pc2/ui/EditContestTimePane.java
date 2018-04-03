@@ -20,7 +20,9 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -65,6 +67,48 @@ public class EditContestTimePane extends JPanePlugin {
 
     private JCheckBox autoStopAtEndofContestCheckBox = null;
 
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * 
+     */
+    class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+            updateGUI(event.getContestInformation());
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+            updateGUI(event.getContestInformation());
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            // TODO Auto-generated method stub
+
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            updateGUI(contestInformationEvent.getContestInformation());
+        }
+        
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            // Not used
+        }
+
+        private void updateGUI(final ContestInformation ci) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    getAutoStopAtEndofContestCheckBox().setSelected(ci.isAutoStopContest());
+                    if (contestTime != null) {
+                        contestTime.setHaltContestAtTimeZero(ci.isAutoStopContest());
+                    }
+                }
+            });
+        }
+        
+    }
+
+
 
     /**
      * This method initializes
@@ -93,6 +137,8 @@ public class EditContestTimePane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
 
         addWindowCloserListener();
+        getContest().addContestInformationListener(new ContestInformationListenerImplementation());
+
     }
 
     private void addWindowCloserListener() {
@@ -167,11 +213,13 @@ public class EditContestTimePane extends JPanePlugin {
 
             try {
                 ContestTime changedContestTime = getContestTimeFromFields(null);
-
-                updateButtonShouldBeEnabled |= contestTime.isHaltContestAtTimeZero() == changedContestTime.isHaltContestAtTimeZero();
-                updateButtonShouldBeEnabled |= contestTime.getElapsedTimeStr().equals(changedContestTime.getElapsedTimeStr());
-                updateButtonShouldBeEnabled |= contestTime.getContestLengthStr().equals(changedContestTime.getContestLengthStr());
-                updateButtonShouldBeEnabled |= contestTime.getRemainingTimeStr().equals(changedContestTime.getRemainingTimeStr());
+                
+                if (contestTime.isHaltContestAtTimeZero() == changedContestTime.isHaltContestAtTimeZero() && contestTime.getElapsedTimeStr().equals(changedContestTime.getElapsedTimeStr())
+                        && contestTime.getContestLengthStr().equals(changedContestTime.getContestLengthStr()) && contestTime.getRemainingTimeStr().equals(changedContestTime.getRemainingTimeStr())) {
+                    updateButtonShouldBeEnabled = false;
+                } else {
+                    updateButtonShouldBeEnabled = true;
+                }
 
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
@@ -229,7 +277,7 @@ public class EditContestTimePane extends JPanePlugin {
         checkContestTime.setContestLengthSecs(contestLength);
         checkContestTime.setRemainingSecs(remainingTime);
         // elapsed is calculate in setRemainingSecs
-
+        checkContestTime.setHaltContestAtTimeZero(getAutoStopAtEndofContestCheckBox().isSelected());
         return checkContestTime;
     }
 
@@ -393,7 +441,7 @@ public class EditContestTimePane extends JPanePlugin {
                 
         //put the state of the auto-stop checkbox into the GUI
         getAutoStopAtEndofContestCheckBox().setSelected(inContestInfo.isAutoStopContest());
-
+        inContestTime.setHaltContestAtTimeZero(inContestInfo.isAutoStopContest());
         getUpdateButton().setVisible(true);
         setButtonStatesAndLabels(false);
 
