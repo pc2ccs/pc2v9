@@ -1017,6 +1017,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             } else {
                 addDefaultPC2Validator(problem, 1);
             }
+        } else {
+            // usingCustomValidor
+            String validatorProg = fetchValue(validatorContent, "validatorProg");
+            if (validatorProg != null) {
+                Problem cleanProblem = contest.getProblem(problem.getElementId());
+                ProblemDataFiles problemDataFile = contest.getProblemDataFile(problem);
+                SerializedFile validatorFile = new SerializedFile(validatorProg);
+                if (validatorFile.getSHA1sum() != null) {
+                    problemDataFile.setOutputValidatorFile(validatorFile);
+                    contest.updateProblem(cleanProblem, problemDataFile);
+                } else {
+                    System.err.println("Warning: problem "+problem.getLetter()+" - "+problem.getShortName()+" custom validator import failed: " + validatorFile.getErrorMessage());
+                }
+            }
         }
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
@@ -1063,6 +1077,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * 
      * @param content
      * @param problem
+     * @param contest 
      */
     protected void assignValidatorSettings(Map<String, Object> content, Problem problem) {
 
