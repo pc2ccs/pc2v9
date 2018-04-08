@@ -593,6 +593,7 @@ public class ContestTime implements IElementObject {
         localClockOffset = 0;
         setElapsedSecs(0);
         contestRunning = false;
+        actualTimeContestFirstStarted = null;
     }
 
     /**

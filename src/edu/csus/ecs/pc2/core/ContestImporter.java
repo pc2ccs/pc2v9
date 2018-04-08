@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -132,6 +133,12 @@ public class ContestImporter {
             if (addLangList.size() > 0) {
                 theController.addNewLanguages(addLangList.toArray(new Language[addLangList.size()]));
             }
+            ContestTime theContestTime = theContest.getContestTime();
+            ContestTime newContestTime = newContest.getContestTime();
+            // loading a new contest, reset the clock (including stops the current clock)
+            theContestTime.resetClock();
+            theContestTime.setContestLengthSecs(newContestTime.getContestLengthSecs());
+            theController.updateContestTime(theContestTime);
 
         } catch (Exception e) {
             noteList.logError("Error saving Language Information", e);
