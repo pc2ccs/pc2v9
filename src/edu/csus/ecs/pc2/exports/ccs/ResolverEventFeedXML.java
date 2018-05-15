@@ -429,6 +429,8 @@ public class ResolverEventFeedXML {
             }
             memento.createChildNode("rgb", hash+rgb);
         }
+        int count = problem.getNumberTestCases();
+        memento.createChildNode("test_data_count", String.valueOf(count));
         return memento;
     }
 
