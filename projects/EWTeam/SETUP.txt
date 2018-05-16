@@ -85,7 +85,7 @@ STARTING THE EWTeam CLIENT SERVICES
 -----------------------------------
 To start the EWTeam Client web services, go to the "lib/" directory of the EWTeam 
 installation (under the pc2team directory of the web server) and run the 
-PC2JavaServer.jar using the command:
+command:
 
       ../bin/ewrun
       
