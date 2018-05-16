@@ -87,7 +87,7 @@ To start the EWTeam Client web services, go to the "lib/" directory of the EWTea
 installation (under the pc2team directory of the web server) and run the 
 PC2JavaServer.jar using the command:
 
-      java -Xmx1600M -jar PC2JavaServer.jar
+      ../bin/ewrun
       
 This starts the Java "bridge" which manages connections between the web server
 and the PC^2 Server.  At this point teams should be able to open a browser 
