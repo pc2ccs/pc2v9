@@ -26,8 +26,11 @@ import edu.csus.ecs.pc2.api.implementation.Contest;
 import edu.csus.ecs.pc2.api.listener.ContestEvent;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 
 /**
+ * Singleton interface between PHP and PC^2 API.
+ * 
  * This class is designed to allow PHP to easily manage a collection of team
  * ServerConnection objects. ServerConnections are stored in a
  * ServerConnectionManager object, and are identified by a "teamKey" A teamKey
@@ -35,14 +38,9 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
  * 
  * ServerInterface is a Singleton, and therefore should be referenced by first
  * calling getInstance()
- * 
- * @version $Id$
  */
-
-// $HeadURL:
-// http://pc2.ecs.csus.edu/repos/pc2projects/trunk/EWUTeam/src/ServerInterface.java
-// $
 public class ServerInterface {
+	
 	public ServerConnectionManager server = new ServerConnectionManager();
 	public static ServerInterface serverInterface = new ServerInterface();
 	private static int connectionId = 0;
@@ -131,6 +129,7 @@ public class ServerInterface {
 			pc2Properties.load(new FileInputStream("pc2v9.ini"));
 			scoreboardPassword = (String) pc2Properties
 					.getProperty("scoreboard2password");
+			StaticLog.info("Found value for scoreboard2password in pc2v9.ini");
 			pc2Properties = null;
 		} catch (Exception e) {
 			throw new RuntimeException("Error loading pc2v9.ini "
@@ -158,7 +157,8 @@ public class ServerInterface {
 			return standingsArray;
 		} catch (Exception e) {
 			// couldn't get runs
-			System.out.println(e);
+			System.err.println(e);
+			StaticLog.unclassified("Error populating standings in populateStandings, couldn't get runs "+e, e);
 			return null;
 		}
 	}
@@ -177,6 +177,7 @@ public class ServerInterface {
 		} catch (Exception e) {
 			// couldn't get runs
 			System.out.println(e);
+			StaticLog.unclassified("Error in updateStandings " + e, e);
 		}
 		return;
 	}
@@ -196,6 +197,7 @@ public class ServerInterface {
 			return server.getTeam(teamkey).isLoggedIn();
 		} catch (NotLoggedInException e) {
 			// System.out.println(teamkey + " is not logged in (exception).");
+			StaticLog.unclassified("Error in isLoggedIn teamkey=" + teamkey + " " + e, e);
 			return false;
 		}
 	}
@@ -209,12 +211,14 @@ public class ServerInterface {
 			ret = (!server.getTeam(connectionID).getContest()
 					.isContestClockRunning());
 		} catch (NotLoggedInException e) {
+			StaticLog.unclassified("Error in isContestStopped connectionID=" + connectionID + " " + e, e);
 			ret = true;
 		}
 		return ret;
 	}
 
 	// log a team in
+	
 	public String login(String username, String password, String sessionId)
 			throws LoginFailureException, NotLoggedInException {
 
@@ -431,6 +435,7 @@ public class ServerInterface {
 			getTeam(teamKey).submitClarification(problem, question);
 		} catch (Exception e) {
 			// System.out.println("failed to submit clarification");
+			StaticLog.unclassified("Error in submitClarification teamKey=" + teamKey + " problemName=" + problemName + " " + e, e);
 			return;
 		}
 
@@ -445,6 +450,7 @@ public class ServerInterface {
 				if (p.getName().equals(problemName))
 					return p;
 		} catch (NotLoggedInException e) {
+			StaticLog.unclassified("Error in getClarificationProblemByName teamkey=" + teamKey + " " + e, e);
 		}
 		throw new ProblemNotFoundException();
 	}
@@ -458,6 +464,7 @@ public class ServerInterface {
 				if (p.getName().equals(problemName))
 					return p;
 		} catch (NotLoggedInException e) {
+			StaticLog.unclassified("Error in getProblemByName teamKey="+teamKey+" problemName="+problemName+" " + e, e);
 		}
 		throw new ProblemNotFoundException();
 	}
@@ -471,13 +478,14 @@ public class ServerInterface {
 				if (l.getName().equals(languageName))
 					return l;
 		} catch (NotLoggedInException e) {
+			StaticLog.unclassified("Error in getLanguageByName teamkey=" + teamKey + " languageName" + languageName + " " + e, e);
 		}
 		throw new LanguageNotFoundException();
 	}
 
 	public IRun[] getRuns(String teamKey) {
 		try {
-			// TODO: why is currentClient not used ??
+			// TODO  why is k not used ??  Remove unused variable.
 			IClient currentClient = getTeam(teamKey).getMyClient();
 			IRun[] allRuns = getTeam(teamKey).getContest().getRuns();
 			return allRuns;
@@ -496,6 +504,7 @@ public class ServerInterface {
 		} catch (Exception e) {
 			// couldn't get runs
 			System.out.println(e);
+			StaticLog.unclassified("Error in getRuns, couldn't get runs, teamkey=" + teamKey + " " + e, e);
 			return null;
 		}
 	}// end getRuns

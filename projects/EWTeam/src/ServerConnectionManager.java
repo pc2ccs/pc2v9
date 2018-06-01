@@ -1,24 +1,29 @@
 import java.security.Permission;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 
 /**
- * Stores a collection of PC^2 ServerConnections in a Java HashMap.
+ * Manages a collection of PC^2 ServerConnections (API logins).
  * 
  * Standard HashMap errors are translated to PC^2 exceptions.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class ServerConnectionManager {
+	
+	/**
+	 * List of teamKey to ServerConnection connections
+	 */
 	private HashMap<String, ServerConnection> connections;
 
 	public ServerConnectionManager() {
+		
+		// REFACTOR: should connections be initialized when the field is declared ?
 		connections = new HashMap<String, ServerConnection>();
 
 		// cause System.exit() calls to throw a security exception
@@ -27,6 +32,7 @@ public class ServerConnectionManager {
 			}
 
 			public void checkExit(int status) {
+				StaticLog.info("checkExit invoked throwing SecurityException");
 				throw new SecurityException();
 			}
 		});
@@ -42,7 +48,9 @@ public class ServerConnectionManager {
 			ServerConnection newTeam = new ServerConnection();
 			newTeam.login(username, password);
 			connections.put(teamKey, newTeam);
+			StaticLog.info("Team logged in user="+username+" key="+teamKey);
 		} catch (SecurityException e) {
+			StaticLog.info("Failed to login in addTeam,  teamKey=" + teamKey + " username=" + username + " " + e.getMessage());
 			throw new LoginFailureException("Failed to connect to server");
 		}
 
@@ -53,27 +61,38 @@ public class ServerConnectionManager {
 	// If team is not currently logged in, throws NotLoggedInException
 	public ServerConnection getTeam(String teamKey) throws NotLoggedInException {
 		ServerConnection team = connections.get(teamKey);
-		if (team == null)
-			throw new NotLoggedInException();
+		if (team == null) {
+			throw new NotLoggedInException("Team not found in ");
+		}
 		return team;
 	}
 
 	// -------------------------------------Remove Team
 	public void removeTeam(String teamKey) throws NotLoggedInException {
 		ServerConnection connectionToRemove = connections.get(teamKey);
-		if (connectionToRemove == null)
-			throw new NotLoggedInException();
-		connections.remove(teamKey);
-		connectionToRemove.logoff();
+		if (connectionToRemove == null) {
+			throw new NotLoggedInException("team key = "+teamKey);
+		}
+		
+		try {
+			connections.remove(teamKey);
+			connectionToRemove.logoff();
+		} catch (Exception e) {
+			StaticLog.getLog().log(Level.WARNING, "Trouble logging out " + teamKey, e);
+		}
 
 	}// end method:removeTeam(...);
 
+	/**
+	 * Logoff/remove all server connections
+	 */
 	public void clean() {
 		for (ServerConnection sc : connections.values()) {
 			try {
 				sc.logoff();
+				// REFACTOR: FIX in addition to logoff should this server connection be removed from the field connections ?
 			} catch (NotLoggedInException e) {
-
+				StaticLog.info("Logoff failed in clean "+e.getMessage());
 			}
 		}
 	}

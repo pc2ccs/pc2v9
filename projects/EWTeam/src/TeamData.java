@@ -5,13 +5,12 @@ import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IRun;
 
 /**
+ * Data for individual Teams.
  * 
+ * Team data cache for use by PHP.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class TeamData {
 	private IClient team;
 	// no longer need newClar or newRun, instead pop of the queues
