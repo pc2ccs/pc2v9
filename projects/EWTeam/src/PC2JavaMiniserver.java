@@ -89,7 +89,9 @@ public class PC2JavaMiniserver {
 		
 		Utilities.insureDir(directoryName);
 
-		String logFileName = "ewteam.log";
+		String logFileName = "ewteam." + getDateTimeString() + ".log";
+		
+		System.out.println("Writing to log file "+logFileName);
 
 		Log log = new Log(directoryName, logFileName);
 		StaticLog.setLog(log);
