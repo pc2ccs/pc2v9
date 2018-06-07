@@ -1662,9 +1662,16 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         localResultsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             // insure "compare" button is only enabled when at least one table row is selected
+            // and also there is judge's output for this problem
             public void valueChanged(ListSelectionEvent e) {
-                compareSelectedButton.setEnabled(getSelectedRowNums().length>0);
+                //check whether there is at least one answer file for the problem (this assumes either zero answer files or an answer file for every test case...)
+                boolean probHasJudgesOutput = currentProblem!=null && currentProblem.getAnswerFileName(1)!=null && !currentProblem.getAnswerFileName(1).equals("") ;
+                //check whether there is at least one selected row
+                boolean atleastOneRowIsSelected = getSelectedRowNums().length>0 ;
+                //set the compare button state
+                compareSelectedButton.setEnabled(probHasJudgesOutput && atleastOneRowIsSelected);
             }
+
         });
         
         //initialize column renderers based on column type
@@ -1753,7 +1760,8 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         
         return localResultsTable;
     }
-    
+
+
     /**
      * Returns an array containing only test case results in the received array which represent test cases which failed.
      * 
