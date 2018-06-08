@@ -139,25 +139,30 @@ public class SubmissionService implements Feature {
         // get the submissions from the contest
         Run[] runs = model.getRuns();
 
+        //check each submission to see if it's the one that was requested
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (jsonTool.getSubmissionId(submission).equals(submissionId)) {
-                //we found the requested Submission ID in the list of runs returned from the model; try to get the Submission (Run) itself
+                
+                //we found the requested Submission ID in the list of runs returned from the model; try to get the runfiles for Submission
+                runFiles = null;
                 try {
+                    controller.getLog().log(Log.INFO, "Requesting run files for submission " + submission.getNumber() + " from local client model");
                     runFiles = model.getRunFiles(submission);
                 } catch (ClassNotFoundException | IOException | FileSecurityException e2) {
-                    controller.getLog().throwing("SubmissionService", "getSubmissionFiles", e2);
+                    controller.getLog().log(Log.INFO, "Exception attempting to get run files for submission " 
+                            + submissionId + " from local model", e2);
                 }
+                
+                //if runFiles is still null we failed to get the runfiles from the local model
                 if (runFiles == null) {
-                    // we found the requested Submission in the run list obtained from the model, but the Submission itself wasn't in the model;
-                    //try getting it from the server
-                    controller.getLog().log(Log.INFO, "Requesting run " + submission.getNumber() + " from server");
+                    // try getting the submission from the server
+                    controller.getLog().log(Log.INFO, "No runfiles for submission " + submission.getNumber() + " found locally; requesting Submission from server");
 
-                    // the following might be better -- but it requires adding "Fetch_Run" permission to the Feeder account (or changing the account defaults).
                     try {
-                        controller.fetchRun(submission);
+                        controller.fetchRun(submission);  //note: requires having "Fetch_Run" permission for the Feeder account...
                     } catch (ClassNotFoundException | IOException | FileSecurityException e1) {
-                        controller.getLog().log(Log.INFO, "Requesting run " + submission.getNumber() + " from server");
+                        controller.getLog().log(Log.INFO, "Exception requesting submission (run)  " + submission.getNumber() + " from server: " + e1);
                     }
 
                     int waitedMS = 0;
@@ -226,6 +231,7 @@ public class SubmissionService implements Feature {
                 }
             }
         }
+        controller.getLog().log(Log.INFO, "Unable to find submission " + submissionId + "; returning 'NOT_FOUND'");
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
