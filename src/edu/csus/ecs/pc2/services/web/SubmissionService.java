@@ -101,10 +101,9 @@ public class SubmissionService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest groups in JSON format. The returned value is a JSON array with one language description per array element, matching the description
-     * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
+     * This method returns a JSON representation of all Runs (Submissions). 
      * 
-     * @return a {@link Response} object containing the contest languages in JSON form
+     * @return a {@link Response} object containing the Submissions in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -113,9 +112,10 @@ public class SubmissionService implements Feature {
         // get the groups from the contest
         Run[] runs = model.getRuns();
 
-        // get an object to map the groups descriptions into JSON form
+        // get an object which can be used to map the Submission descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
+        //put each Submission (a.k.a. "Run") into the JSON array
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (!submission.isDeleted()) {
