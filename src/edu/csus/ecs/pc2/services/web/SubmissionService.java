@@ -142,13 +142,15 @@ public class SubmissionService implements Feature {
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (jsonTool.getSubmissionId(submission).equals(submissionId)) {
+                //we found the requested Submission ID in the list of runs returned from the model; try to get the Submission (Run) itself
                 try {
                     runFiles = model.getRunFiles(submission);
                 } catch (ClassNotFoundException | IOException | FileSecurityException e2) {
                     controller.getLog().throwing("SubmissionService", "getSubmissionFiles", e2);
                 }
                 if (runFiles == null) {
-                    // we found the run in the list; try getting it from the server
+                    // we found the requested Submission in the run list obtained from the model, but the Submission itself wasn't in the model;
+                    //try getting it from the server
                     controller.getLog().log(Log.INFO, "Requesting run " + submission.getNumber() + " from server");
 
                     // the following might be better -- but it requires adding "Fetch_Run" permission to the Feeder account (or changing the account defaults).
