@@ -73,7 +73,7 @@ public class EventFeedService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public void streamEventFeed(@QueryParam("type") String eventTypeList, @QueryParam("id") String startintEventId, @Suspended
+    public void streamEventFeed(@QueryParam("types") String eventTypeList, @QueryParam("id") String startintEventId, @Suspended
     final AsyncResponse asyncResponse, @Context HttpServletRequest servletRequest, @Context HttpServletResponse response, @Context SecurityContext sc) throws IOException {
 
         response.setContentType("json");
@@ -89,7 +89,7 @@ public class EventFeedService implements Feature {
         }
 
         EventFeedFilter filter = new EventFeedFilter();
-
+        
         if (eventTypeList != null) {
             filter.addEventTypeList(eventTypeList);
             System.out.println("starting event feed, sending only event types '" + eventTypeList + "'");

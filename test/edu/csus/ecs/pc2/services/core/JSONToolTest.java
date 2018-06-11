@@ -844,6 +844,47 @@ public class JSONToolTest extends AbstractTestCase {
         assertCountEvent(24, EventFeedJSON.JUDGEMENT_KEY, json);
         assertCountEvent(9, EventFeedJSON.JUDGEMENT_TYPE_KEY, json);
     }
+    
+    
+    /**
+     * Test team and submission event types.
+     * 
+     * @throws Exception
+     */
+    public void testTeamEventType() throws Exception {
+
+        UnitTestData data = new UnitTestData();
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+
+        String elist = EventFeedJSON.SUBMISSION_KEY + "," + //
+                EventFeedJSON.TEAM_KEY;
+
+        eventFeedJSON.setEventTypeList(elist);
+        String json = eventFeedJSON.createJSON(data.getContest(), null, null);
+        assertNotNull(json);
+        
+        // editFile(writeFile(new File("/tmp/stuf." + System.currentTimeMillis() + ".json"), json));
+
+        assertCountEvent(0, EventFeedJSON.CONTEST_KEY, json);
+        assertCountEvent(0, EventFeedJSON.CLARIFICATIONS_KEY, json);
+        assertCountEvent(0, EventFeedJSON.TEAM_MEMBERS_KEY, json);
+        assertCountEvent(120, EventFeedJSON.TEAM_KEY, json);
+        assertCountEvent(0, EventFeedJSON.JUDGEMENT_TYPE_KEY, json);
+        
+        /**
+         * Run test of filter a second time.
+         */
+        
+        json = eventFeedJSON.createJSON(data.getContest(), null, null);
+        assertNotNull(json);
+        
+        assertCountEvent(0, EventFeedJSON.CONTEST_KEY, json);
+        assertCountEvent(0, EventFeedJSON.CLARIFICATIONS_KEY, json);
+        assertCountEvent(0, EventFeedJSON.TEAM_MEMBERS_KEY, json);
+        assertCountEvent(120, EventFeedJSON.TEAM_KEY, json);
+        assertCountEvent(0, EventFeedJSON.JUDGEMENT_TYPE_KEY, json);
+        
+    }
 
     public void testEventTypeNotFound() throws Exception {
         UnitTestData data = new UnitTestData();
