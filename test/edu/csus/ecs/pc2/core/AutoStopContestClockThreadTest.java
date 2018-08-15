@@ -87,8 +87,9 @@ public class AutoStopContestClockThreadTest extends AbstractTestCase {
         
         assertTrue ("Expecting to autostop ",contest.getContestInformation().isAutoStopContest());
 //        System.out.println("debug remaining time is "+newTime.getRemainingSecs()+" seconds ");
-        
-        long startMS = System.currentTimeMillis() ;
+
+        // unused
+//        long startMS = System.currentTimeMillis() ;
         thread.start();
         
         Thread.sleep(500); // sleep so thread has time to set running true
@@ -98,6 +99,7 @@ public class AutoStopContestClockThreadTest extends AbstractTestCase {
         
         Thread.sleep((remainSecs + 1) * 1000);
         
+        // unused
 //        long ms = System.currentTimeMillis() - startMS; 
         
         assertFalse("Expect contest clock should not be running ", contest.getContestTime().isContestRunning());
