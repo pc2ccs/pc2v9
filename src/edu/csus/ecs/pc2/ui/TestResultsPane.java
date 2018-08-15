@@ -1829,16 +1829,16 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
      * Checks the given JTable to see whether it already contains a row for every test data case defined in the current problem;
      * adds any unexecuted (and hence missing) test cases to the table.
      * 
-     * @param resultsTable - a JTable expected to already contain one row for each test case which has been executed
+     * @param aResultsTable - a JTable expected to already contain one row for each test case which has been executed
      */
-    private void addAnyUnexecutedTestCasesToResultsTable(JTable resultsTable) {
+    private void addAnyUnexecutedTestCasesToResultsTable(JTable aResultsTable) {
         
         if (debug) {
             System.out.println ("In addAnyUnexecutedTestCasesToResultsTable(); checking for unexecuted test cases...");
         }
 
         //get the table model which defines the current table contents
-        TestCaseResultsTableModel tableModel = (TestCaseResultsTableModel) resultsTable.getModel();
+        TestCaseResultsTableModel tableModel = (TestCaseResultsTableModel) aResultsTable.getModel();
         
         //get how many total test cases were configured into the problem
         int totalTestCaseCount = currentProblem.getNumberTestCases();

@@ -36,8 +36,9 @@ public class SubmitSubmissionsPane extends JPanePlugin {
 
     private JLabel messageLabel;
     
-    JCheckBox checkBoxSubmitYesSamples;
-    JCheckBox checkBoxSubmitFailingSamples;
+    private JCheckBox checkBoxSubmitYesSamples;
+
+    private JCheckBox checkBoxSubmitFailingSamples;
 
     private QuickSubmitter submitter = new QuickSubmitter();
 

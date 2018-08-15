@@ -152,7 +152,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
 
     private JSONTool jsonTool;
 
-    public HttpServletRequest servletRequest;
+    private HttpServletRequest servletRequest;
 
     /**
      * Add stream for future events.

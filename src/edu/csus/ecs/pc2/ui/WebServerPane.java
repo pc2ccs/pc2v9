@@ -379,10 +379,11 @@ public class WebServerPane extends JPanePlugin {
         }
 
     }
+
     private JCheckBox getChckbxClicsContestApi() {
         if (chckbxClicsContestApi == null) {
-        	chckbxClicsContestApi = new JCheckBox("CLICS Contest API");
-        	chckbxClicsContestApi.setSelected(true);
+            chckbxClicsContestApi = new JCheckBox("CLICS Contest API");
+            chckbxClicsContestApi.setSelected(true);
         }
         return chckbxClicsContestApi;
     }

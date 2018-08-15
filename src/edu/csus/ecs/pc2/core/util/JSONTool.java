@@ -66,12 +66,12 @@ public class JSONTool {
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
-        if (submission.getEntryPoint() != null){
+        if (submission.getEntryPoint() != null) {
             element.put("entry_point", new String(submission.getEntryPoint()));
         }
         // FIXME we need separate event feeds for public and admin/analyst
         // FIXME perhaps change sc to a boolean for public or not?
-//    	if (servletRequest != null && (sc != null && sc.isUserInRole("admin") || sc.isUserInRole("analyst"))) {
+        // if (servletRequest != null && (sc != null && sc.isUserInRole("admin") || sc.isUserInRole("analyst"))) {
         if (servletRequest != null) {
             StringBuffer requestURL = servletRequest.getRequestURL();
             int lastIndexOf = requestURL.lastIndexOf("/event-feed");
@@ -87,9 +87,9 @@ public class JSONTool {
                 requestURL.append(getSubmissionId(submission));
             }
             requestURL.append("/files");
-            ObjectMapper mapper = new ObjectMapper();
-            ArrayNode arrayNode = mapper.createArrayNode();
-            ObjectNode objectNode = mapper.createObjectNode();
+            ObjectMapper mymapper = new ObjectMapper();
+            ArrayNode arrayNode = mymapper.createArrayNode();
+            ObjectNode objectNode = mymapper.createObjectNode();
             objectNode.put("href", requestURL.toString());
             arrayNode.add(objectNode);
             element.set("files", arrayNode);

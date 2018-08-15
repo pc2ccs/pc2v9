@@ -59,7 +59,8 @@ public class ContestAPIStandingsJSON {
      * @return a JSON string giving contest standings in 2016 format
      * @throws IllegalContestState
      */
-    public String createJSON(IInternalContest contest, IInternalController inController, boolean honorScoreboardFreeze, HttpServletRequest servletRequest, SecurityContext sc) throws IllegalContestState {
+    public String createJSON(IInternalContest contest, IInternalController inController, boolean honorScoreboardFreeze, HttpServletRequest servletRequest, SecurityContext sc)
+            throws IllegalContestState {
 
         model = contest;
         controller = inController;

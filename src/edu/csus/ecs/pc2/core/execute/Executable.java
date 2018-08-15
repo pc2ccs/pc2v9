@@ -890,7 +890,7 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             long startTime = System.currentTimeMillis();
-            Process process = runProgram(cmdLine, msg, false);
+            process = runProgram(cmdLine, msg, false);
 
             if (process == null) {
                 executionTimer.stopTimer();
@@ -1957,7 +1957,7 @@ public class Executable extends Plugin implements IExecutable {
 
             long startSecs = System.currentTimeMillis();
 
-            Process process = runProgram(cmdline, "Compiling...", false);
+            process = runProgram(cmdline, "Compiling...", false);
             if (process == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
@@ -2287,7 +2287,7 @@ public class Executable extends Plugin implements IExecutable {
      * @return the process started.
      */
     public Process runProgram(String cmdline, String msg, boolean autoStopExecution) {
-        Process process = null;
+        process = null;
         errorString = "";
 
         executeDirectoryName = getExecuteDirectoryName();
@@ -2351,7 +2351,7 @@ public class Executable extends Plugin implements IExecutable {
                 String cmdline = "/bin/chmod +x " + filename;
                 log.config("executing chmod: '" + cmdline + "'");
 
-                Process process = Runtime.getRuntime().exec(cmdline);
+                process = Runtime.getRuntime().exec(cmdline);
                 process.waitFor();
             }
         } catch (Exception ex) {

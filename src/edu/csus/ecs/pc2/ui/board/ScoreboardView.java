@@ -247,9 +247,9 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     private void generateOutput(String xmlString) {
-		// save it so we can refresh the html after updating the xsl
-		currentXMLString = xmlString;
-		File inputDir = new File(xslDir);
+        // save it so we can refresh the html after updating the xsl
+        currentXMLString = xmlString;
+        File inputDir = new File(xslDir);
 		if (!inputDir.isDirectory()) {
 			log.warning("xslDir is not a directory");
 			return;

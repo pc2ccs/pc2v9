@@ -144,12 +144,12 @@ public class ScoreboardModule implements UIPlugin {
     }
 
     private void generateOutput(String xmlString) {
-    	// FUTUREWORK move to to a common location (currently in both Module and View)
-		File inputDir = new File(xslDir);
-		if (!inputDir.isDirectory()) {
-			log.warning("xslDir is not a directory");
-			return;
-		}
+        // FUTUREWORK move to to a common location (currently in both Module and View)
+        File inputDir = new File(xslDir);
+        if (!inputDir.isDirectory()) {
+            log.warning("xslDir is not a directory");
+            return;
+        }
 		File outputDirFile = new File(outputDir);
 		if (!outputDirFile.exists() && !outputDirFile.mkdirs()) {
 			log.warning("Could not create " + outputDirFile.getAbsolutePath() + ", defaulting to current directory");

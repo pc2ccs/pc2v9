@@ -301,7 +301,7 @@ public class ContestService implements Feature {
             theDate.setTime(Utilities.getIso8601formatterWithMS().parse(startTimeValueString));
         } catch (ParseException e) {
             try {
-            	controller.getLog().log(Log.DEBUG, "Re-parsing date without MS "+startTimeValueString);
+                controller.getLog().log(Log.DEBUG, "Re-parsing date without MS " + startTimeValueString);
                 theDate.setTime(Utilities.getIso8601formatter().parse(startTimeValueString));
             } catch (ParseException e2) {
                 controller.getLog().throwing("ContestService", "getDate", e2);

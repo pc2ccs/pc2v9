@@ -49,8 +49,7 @@ public class QuickSubmitter implements UIPlugin {
             if (f.isDirectory()) {
                 List<File> subList = findAll(f.getAbsolutePath());
                 files.addAll(subList);
-            }
-            else {
+            } else {
                 files.add(f);
             }
         }
@@ -71,13 +70,13 @@ public class QuickSubmitter implements UIPlugin {
      * 
      * Example files under config\sumit\submissions
      * 
-     * @param contest
+     * @param mycontest
      * @param cdpConfigdir CDP config/ dir
      * @return
      */
-    public List<File> getAllCDPsubmissionFileNames(IInternalContest contest, String cdpConfigdir) {
+    public List<File> getAllCDPsubmissionFileNames(IInternalContest mycontest, String cdpConfigdir) {
 
-        Problem[] problems = contest.getProblems();
+        Problem[] problems = mycontest.getProblems();
         List<File> files = new ArrayList<>();
 
         for (Problem problem : problems) {
@@ -99,11 +98,11 @@ public class QuickSubmitter implements UIPlugin {
      * @see #guessLanguage(IInternalContest, String)
      * @see #guessProblem(IInternalContest, String)
      * 
-     * @param submitFiles
+     * @param someSubmitFiles
      */
-    public void sendSubmissions(List<File> submitFiles) {
+    public void sendSubmissions(List<File> someSubmitFiles) {
 
-        for (File file : submitFiles) {
+        for (File file : someSubmitFiles) {
             try {
 
                 Language language = guessLanguage(getContest(), file.getAbsolutePath());
