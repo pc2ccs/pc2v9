@@ -111,7 +111,7 @@ public class SubmitSubmissionsPane extends JPanePlugin {
             boolean submitNoSamples = checkBoxSubmitFailingSamples.isSelected();
             
             if (! submitYesSamples || ! submitNoSamples){
-                files =  submitter.filterRuns (files, submitYesSamples, submitNoSamples);
+                files =  QuickSubmitter.filterRuns (files, submitYesSamples, submitNoSamples);
             }
             
             

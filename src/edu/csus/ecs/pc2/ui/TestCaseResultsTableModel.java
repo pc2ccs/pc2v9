@@ -5,8 +5,6 @@ import java.util.Vector;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 
-import com.ibm.webrunner.j2mclb.util.TableModel;
-
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
