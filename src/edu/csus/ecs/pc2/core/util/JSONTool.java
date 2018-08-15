@@ -93,7 +93,7 @@ public class JSONTool {
             objectNode.put("href", requestURL.toString());
             arrayNode.add(objectNode);
             element.set("files", arrayNode);
-    	}
+        }
 
         return element;
     }
@@ -125,7 +125,7 @@ public class JSONTool {
 
     public ObjectNode convertToJSON(Clarification clarification, ClarificationAnswer clarAnswer) {
         ObjectNode element = mapper.createObjectNode();
-        
+
         // SOMEDAY change id to a orginal
         String id = clarification.getElementId().toString();
         if (clarAnswer != null && clarAnswer.getElementId() != null) {
@@ -183,7 +183,7 @@ public class JSONTool {
             startTime = Utilities.getIso8601formatterWithMS().format(model.getContestTime().getContestStartTime().getTime());
             element.put("started", startTime);
             if (model.getContestTime().isPastEndOfContest()) {
-                Calendar endedDate = calculateElapsedWalltime(model, model.getContestTime().getContestStartTime().getTimeInMillis()+model.getContestTime().getContestLengthMS());
+                Calendar endedDate = calculateElapsedWalltime(model, model.getContestTime().getContestStartTime().getTimeInMillis() + model.getContestTime().getContestLengthMS());
                 if (endedDate != null) {
                     element.put("ended", Utilities.getIso8601formatterWithMS().format(endedDate.getTimeInMillis()));
                 }
@@ -239,7 +239,7 @@ public class JSONTool {
                     long seconds = Long.parseLong(scoreboardFreezeDuration);
                     scoreboardFreezeDuration = ContestTime.formatTime(seconds);
                 } catch (NumberFormatException e) {
-                    System.out.println("attempting to parse "+scoreboardFreezeDuration+" failed with "+e.getMessage());
+                    System.out.println("attempting to parse " + scoreboardFreezeDuration + " failed with " + e.getMessage());
                 }
             }
         }
@@ -365,7 +365,7 @@ public class JSONTool {
         }
         return element;
     }
-    
+
     public ObjectNode convertToJSON(Problem problem, int ordinal) {
         ObjectNode element = mapper.createObjectNode();
         // {"id":"asteroids","label":"A","name":"Asteroid Rangers","ordinal":1,"color":"blue","rgb":"#00f","test_data_count":10}
@@ -452,7 +452,7 @@ public class JSONTool {
                 if (wallElapsed != null) {
                     element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
                 } // is null if there are no elapsedMinutes in the contest
-                // when judged is in minutes convert to milliseconds
+                  // when judged is in minutes convert to milliseconds
                 element.put("end_contest_time", ContestTime.formatTimeMS(judgementRecord.getWhenJudgedTime() * 60000));
             }
         }
@@ -469,7 +469,7 @@ public class JSONTool {
     public String getJudgementType(Judgement judgement) {
         return judgement.getAcronym();
     }
-    
+
     public String getLanguageId(Language language) {
         String key = language.getID();
         if (key == null || key.trim().equals("")) {

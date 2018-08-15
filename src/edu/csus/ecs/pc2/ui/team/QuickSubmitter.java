@@ -161,9 +161,9 @@ public class QuickSubmitter implements UIPlugin {
     /**
      * Guess language based on filename.
      */
-    public Language guessLanguage(IInternalContest contest, String filename) {
+    public Language guessLanguage(IInternalContest myContest, String filename) {
         String extension = getExtension(filename);
-        return matchFirstLanguage(contest, extension);
+        return matchFirstLanguage(myContest, extension);
     }
 
     /**
