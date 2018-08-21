@@ -236,33 +236,30 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
      * Allows adding a row to the table model.
      * This method delegates to super.add(); i.e., the add() method in {@link TableModel}.
      */
-    public void addRow(Boolean selected, String testCaseNum, String resultString, String time, 
-            String teamOutputViewLabel, String teamOutputCompareLabel, 
-            String judgesOutputViewLabel, String judgesDataViewLabel,
-            String validatorOutputViewLabel, String validatorStderrViewLabel ) {
+    public void addRow(Boolean selected, String testCaseNum, TestResultsRowData data ) {
         
         //test case result (passed/failed)
-        JLabel resultLabel = new JLabel(resultString);
+        JLabel resultLabel = new JLabel(data.getResultString());
                 
         //link for viewing team output
-        JLabel teamOutputViewJLabel = new JLabel(teamOutputViewLabel);
+        JLabel teamOutputViewJLabel = new JLabel(data.getTeamOutputViewLabel());
         
         //link for comparing team output with corresponding judge's output
-        JLabel teamOutputCompareJLabel = new JLabel(teamOutputCompareLabel);
+        JLabel teamOutputCompareJLabel = new JLabel(data.getTeamsOutputCompareLabel());
         
         //link for viewing judge's output
-        JLabel judgesOutputViewJLabel = new JLabel(judgesOutputViewLabel);
+        JLabel judgesOutputViewJLabel = new JLabel(data.getJudgesOutputViewLabel());
         
-        JLabel judgesDataViewJLabel = new JLabel(judgesDataViewLabel);
+        JLabel judgesDataViewJLabel = new JLabel(data.getJudgesDataViewLabel());
         
         // link for validator stdout
-        JLabel validatorOutputViewJLabel = new JLabel(validatorOutputViewLabel);
+        JLabel validatorOutputViewJLabel = new JLabel(data.getValidatorOutputViewLabel());
         
         // link for validator stderr
-        JLabel validatorStderrViewJLabel = new JLabel(validatorStderrViewLabel);
+        JLabel validatorStderrViewJLabel = new JLabel(data.getValidatorStderrViewLabel());
 
         //build the row object and add it to the model
-        Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, time, 
+        Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, data.getTime(), 
                 teamOutputViewJLabel, teamOutputCompareJLabel, judgesOutputViewJLabel, 
                 judgesDataViewJLabel, validatorOutputViewJLabel, validatorStderrViewJLabel };
 

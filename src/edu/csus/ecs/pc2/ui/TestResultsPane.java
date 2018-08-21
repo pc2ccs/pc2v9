@@ -1872,17 +1872,19 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                 if (currentProblem.getDataFileName(testCaseNum)!=null && currentProblem.getDataFileName(testCaseNum).length()>0) {
                     viewJudgeDataFile = "View";
                 }
+//                "Not Executed",                             //result string
+//                "--  ",                                     //execution time (of which there is none since the test case wasn't executed)
+//                "",                                         //link to team output (none since it wasn't executed)
+//                "",                                         //link to team compare-with-judge label (disabled since there's no team output)
+//                viewJudgeAnswerFile,                        //link to judge's output (answer file) if any
+//                viewJudgeDataFile,                          //link to judge's data if any
+//                "",                                         //link to validator stdout (none)
+//                ""                                          //link to validator stderr (none)
+                TestResultsRowData rowData = new TestResultsRowData("Not Executed", "--  ","", "",viewJudgeAnswerFile,viewJudgeDataFile, "", "");
                 tableModel.addRow(
                         new Boolean(false),                         //selection checkbox
                         new String(Integer.toString(testCaseNum)),  //test case number
-                        "Not Executed",                             //result string
-                        "--  ",                                     //execution time (of which there is none since the test case wasn't executed)
-                        "",                                         //link to team output (none since it wasn't executed)
-                        "",                                         //link to team compare-with-judge label (disabled since there's no team output)
-                        viewJudgeAnswerFile,                        //link to judge's output (answer file) if any
-                        viewJudgeDataFile,                          //link to judge's data if any
-                        "",                                         //link to validator stdout (none)
-                        "" );                                       //link to validator stderr (none)
+                        rowData);
             }
             
         } else {
