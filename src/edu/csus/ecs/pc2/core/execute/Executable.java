@@ -188,9 +188,9 @@ public class Executable extends Plugin implements IExecutable {
 
     private Process process;
 
-    private String package_name = "";
+    private String packageName = "";
 
-    private String package_path = "";
+    private String packagePath = "";
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
@@ -1938,12 +1938,12 @@ public class Executable extends Plugin implements IExecutable {
                 controller.sendCompilingMessage(run);
             }
 
-            package_name = "";
-            package_path = "";
+            packageName = "";
+            packagePath = "";
             String programName = replaceString(language.getExecutableIdentifierMask(), "{:basename}", removeExtension(runFiles.getMainFile().getName()));
             if (runFiles.getMainFile().getName().endsWith("java")) {
-                package_name = search_for_package(prefixExecuteDirname(runFiles.getMainFile().getName()));
-                package_path = replaceString(package_name, ".", File.separator);
+                packageName = searchForPackage(prefixExecuteDirname(runFiles.getMainFile().getName()));
+                packagePath = replaceString(packageName, ".", File.separator);
             }
 
             // Check whether the team submitted a executable, if they did remove
@@ -2020,11 +2020,11 @@ public class Executable extends Plugin implements IExecutable {
 
             program = new File(prefixExecuteDirname(programName));
             if (program.exists()) {
-                if (package_path.length() > 0) {
-                    // move all .class files under package_path
-                    File path = new File(prefixExecuteDirname(package_path));
+                if (packagePath.length() > 0) {
+                    // move all .class files under packagePath
+                    File path = new File(prefixExecuteDirname(packagePath));
                     if (path.mkdirs()) {
-                        move_class_to_path(getExecuteDirectoryName(), path);
+                        moveClassToPath(getExecuteDirectoryName(), path);
                     }
                 }
                 executionData.setCompileExeFileName(programName);
@@ -2056,7 +2056,7 @@ public class Executable extends Plugin implements IExecutable {
         }
     }
 
-    private void move_class_to_path(String folderName, File path) {
+    private void moveClassToPath(String folderName, File path) {
         File folder = new File(folderName);
         File[] listOfFiles = folder.listFiles();
         for (int i = 0; i < listOfFiles.length; i++) {
@@ -2067,8 +2067,8 @@ public class Executable extends Plugin implements IExecutable {
         }
     }
 
-    private String search_for_package(String file) {
-        String package_name = "";
+    private String searchForPackage(String file) {
+        String name = "";
         Scanner scanner;
         try {
             scanner = new Scanner(new File(file));
@@ -2076,8 +2076,8 @@ public class Executable extends Plugin implements IExecutable {
                String lineFromFile = scanner.nextLine();
                if(lineFromFile.contains("package ")) { 
                    // a match!
-                   package_name = lineFromFile.substring(8);
-                   package_name = replaceString(package_name, ";", ".");
+                   name = lineFromFile.substring(8);
+                   name = replaceString(name, ";", ".");
                    break;
                }
             }
@@ -2085,7 +2085,7 @@ public class Executable extends Plugin implements IExecutable {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        return package_name;
+        return name;
     }
 
     /**
@@ -2192,7 +2192,7 @@ public class Executable extends Plugin implements IExecutable {
             newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
             newString = replaceString(newString, "{files}", runFiles.getMainFile().getName());
             newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
-            newString = replaceString(newString, "{:package}", package_name);
+            newString = replaceString(newString, "{:package}", packageName);
 
             String validatorCommand = null;
 
