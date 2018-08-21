@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 
@@ -186,6 +187,10 @@ public class Executable extends Plugin implements IExecutable {
     private long endTimeMillis;
 
     private Process process;
+
+    private String package_name = "";
+
+    private String package_path = "";
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
@@ -1933,7 +1938,13 @@ public class Executable extends Plugin implements IExecutable {
                 controller.sendCompilingMessage(run);
             }
 
+            package_name = "";
+            package_path = "";
             String programName = replaceString(language.getExecutableIdentifierMask(), "{:basename}", removeExtension(runFiles.getMainFile().getName()));
+            if (runFiles.getMainFile().getName().endsWith("java")) {
+                package_name = search_for_package(prefixExecuteDirname(runFiles.getMainFile().getName()));
+                package_path = replaceString(package_name, ".", File.separator);
+            }
 
             // Check whether the team submitted a executable, if they did remove
             // it.
@@ -2009,6 +2020,13 @@ public class Executable extends Plugin implements IExecutable {
 
             program = new File(prefixExecuteDirname(programName));
             if (program.exists()) {
+                if (package_path.length() > 0) {
+                    // move all .class files under package_path
+                    File path = new File(prefixExecuteDirname(package_path));
+                    if (path.mkdirs()) {
+                        move_class_to_path(getExecuteDirectoryName(), path);
+                    }
+                }
                 executionData.setCompileExeFileName(programName);
                 executionData.setCompileSuccess(true);
                 executionData.setCompileResultCode(0);
@@ -2036,6 +2054,38 @@ public class Executable extends Plugin implements IExecutable {
             log.log(Log.INFO, "Exception ", e);
             throw new SecurityException(e);
         }
+    }
+
+    private void move_class_to_path(String folderName, File path) {
+        File folder = new File(folderName);
+        File[] listOfFiles = folder.listFiles();
+        for (int i = 0; i < listOfFiles.length; i++) {
+            File file = listOfFiles[i];
+            if (file.getName().endsWith(".class")) {
+                file.renameTo(new File(path+File.separator+file.getName()));                
+            }
+        }
+    }
+
+    private String search_for_package(String file) {
+        String package_name = "";
+        Scanner scanner;
+        try {
+            scanner = new Scanner(new File(file));
+            while (scanner.hasNextLine()) {
+               String lineFromFile = scanner.nextLine();
+               if(lineFromFile.contains("package ")) { 
+                   // a match!
+                   package_name = lineFromFile.substring(8);
+                   package_name = replaceString(package_name, ";", ".");
+                   break;
+               }
+            }
+            scanner.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return package_name;
     }
 
     /**
@@ -2142,6 +2192,7 @@ public class Executable extends Plugin implements IExecutable {
             newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
             newString = replaceString(newString, "{files}", runFiles.getMainFile().getName());
             newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
+            newString = replaceString(newString, "{:package}", package_name);
 
             String validatorCommand = null;
 

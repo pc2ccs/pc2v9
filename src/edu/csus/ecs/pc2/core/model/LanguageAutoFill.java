@@ -93,7 +93,7 @@ public final class LanguageAutoFill {
 
         if (key.equals(JAVATITLE)) {
             String[] dVals = { JAVATITLE, "javac {:mainfile}", //
-                    "{:basename}.class", "java {:basename}", JAVATITLE, "", "java" };
+                    "{:basename}.class", "java {:package}{:basename}", JAVATITLE, "", "java" };
             return dVals;
         } else if (key.equals(KYLIXCPPTITLE)) {
             String[] dVals = { KYLIXCPPTITLE, "bc++ -A  {:mainfile}", //
