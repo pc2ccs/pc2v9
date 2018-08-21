@@ -22,12 +22,12 @@ languages:
     active: true
     compilerCmd: 'javac {:mainfile}'
     exemask: '{:basename}.class'
-    execCmd: 'java {:basename}'
+    execCmd: 'java {:package}{:basename}'
     runner: 'java'
-    runner-args: '{:basename}'
+    runner-args: '{:package}{:basename}'
     interpreted: false
     use-judge-cmd: false
-    judge-exec-cmd: 'java {:basename}'
+    judge-exec-cmd: 'java {:package}{:basename}'
 
   - name: 'Default'
     active: true

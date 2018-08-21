@@ -1628,7 +1628,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected language name ", "Java", languages[0].getDisplayName());
         assertEquals("Expected language compilerCmd ", "javac {:mainfile}", languages[0].getCompileCommandLine());
         assertEquals("Expected language exemask ", "{:basename}.class", languages[0].getExecutableIdentifierMask());
-        assertEquals("Expected language execCmd ", "java {:basename}", languages[0].getProgramExecuteCommandLine());
+        assertEquals("Expected language execCmd ", "java {:package}{:basename}", languages[0].getProgramExecuteCommandLine());
 
         assertEquals("Expected language name ", "Default", languages[1].getDisplayName());
         assertEquals("Expected language name ", "GNU C++ (Unix / Windows)", languages[2].getDisplayName());
