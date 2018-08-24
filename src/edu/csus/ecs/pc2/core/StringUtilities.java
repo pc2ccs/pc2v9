@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * String utilities.
@@ -96,6 +97,24 @@ public final class StringUtilities implements Serializable {
         for (int i = 0; i < strings.length; i++) {
             buffer.append(strings[i]);
             if (i < strings.length - 1) {
+                buffer.append(delimit);
+            }
+        }
+        return buffer.toString();
+    }
+    
+    /**
+     * Join a list of items
+     * @param delimit
+     * @param objects
+     * @return
+     */
+    public static String join(String delimit, List<?> objects) {
+     // REFACTOR for Java 1.8 replace with String.join
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < objects.size(); i++) {
+            buffer.append(objects.get(i).toString());
+            if (i < objects.size() - 1) {
                 buffer.append(delimit);
             }
         }
