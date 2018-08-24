@@ -55,6 +55,8 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * View runs panel.
@@ -150,6 +152,7 @@ public class RunsPane extends JPanePlugin {
     private JudgementNotificationsList judgementNotificationsList = null;
     
     private boolean displayConfirmation = true;
+    private JButton viewSourceButton;
 
     /**
      * This method initializes
@@ -893,6 +896,7 @@ public class RunsPane extends JPanePlugin {
 
             // Show New Runs
 
+            getViewSourceButton().setVisible(false);
             requestRunButton.setVisible(true);
             requestRunButton.setEnabled(isAllowed(Permission.Type.JUDGE_RUN));
             editRunButton.setVisible(false);
@@ -906,6 +910,7 @@ public class RunsPane extends JPanePlugin {
 
             // Show ALL Runs
 
+            getViewSourceButton().setVisible(isAllowed(Permission.Type.JUDGE_RUN));
             requestRunButton.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
             editRunButton.setVisible(isAllowed(Permission.Type.EDIT_RUN));
             extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
@@ -1014,6 +1019,7 @@ public class RunsPane extends JPanePlugin {
             buttonPanel.add(getGiveButton(), null);
             buttonPanel.add(getTakeButton(), null);
             buttonPanel.add(getEditRunButton(), null);
+            buttonPanel.add(getViewSourceButton());
             buttonPanel.add(getViewJudgementsButton(), null);
             buttonPanel.add(getRequestRunButton(), null);
             buttonPanel.add(getRejudgeRunButton(), null);
@@ -1838,6 +1844,56 @@ public class RunsPane extends JPanePlugin {
         public void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent) {
             reloadRunList();
         }
+    }
+
+    private JButton getViewSourceButton() {
+        if (viewSourceButton == null) {
+        	viewSourceButton = new JButton("View Source");
+        	viewSourceButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        showSourceForSelectedRun();
+        	    }
+        	});
+        	viewSourceButton.setToolTipText("Displays a read-only view of the source code for the currently selected run");
+        }
+        return viewSourceButton;
+    }
+    
+    /**
+     * Displays a frame containing the source code for the run (submission) which is currently selected in the Runs grid.
+     * 
+     * If no run is selected, or more than one run is selected, prompts the user to select just one run (row) in the grid
+     * and does nothing else.
+     */
+    private void showSourceForSelectedRun() {
+        //make sure judging is allowed (if we're not allowed to judge a run we shouldn't be able to view the source either)
+        if (!isAllowed(Permission.Type.JUDGE_RUN)) {
+            log.log(Log.WARNING, "Account does not have permission to JUDGE_RUN, cannot view run source.");
+            showMessage("Unable to request run, check log");
+            return;
+        }
+        int[] selectedIndexes = runListBox.getSelectedIndexes();
+
+        if (selectedIndexes.length < 1) {
+            showMessage("Please select a run ");
+            return;
+        } else if (selectedIndexes.length > 1) {
+            showMessage("Please select exactly ONE run in order to view source ");
+            return;
+        }
+
+        //we are allowed to view source and there's exactly one run selected; try to obtain the run source
+        try {
+            ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
+            Run runToView = getContest().getRun(elementId);
+
+            showMessage ("Would have displayed source for site " + runToView.getSiteNumber() + " run " + runToView.getNumber());
+            
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to show run source, check log");
+        }
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
