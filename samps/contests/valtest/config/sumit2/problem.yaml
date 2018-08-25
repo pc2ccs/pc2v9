@@ -9,6 +9,16 @@ author:
 license: 
 rights_owner: 
 
+# with commas, delimit ;
+groups: 'Canada - University of British Columbia D1;Puget Sound - University of Puget Sound D1; N. California - UC Berkeley D1; Hawaii - BYUH, Laie, Oahu D2; Northeast - EWU, Cheney/Spokane D2;'
+
+# no commas, delimit ,
+# groups: 'Canada - University of British Columbia D1,Puget Sound - University of Puget Sound D1, N. California - UC Berkeley D1' 
+
+# bad group id 334 for groups: 312544,312545,312546,312547, 334
+# groups: 312544,312545,312546,312547
+# groups: 312544;312545;312546;312547
+
 load-data-files: true
 
 # todo - bug datafile and answerfile are backwards during yaml parse
@@ -52,4 +62,5 @@ input:
 #     wrote (A)c:/tmp/valtest/sumit2/data/secret/sumit4.ans
 #     wrote (A)c:/tmp/valtest/sumit2/data/secret/sumit5.ans
 #     wrote (A)c:/tmp/valtest/sumit2/data/secret/sumit6.ans
+
 

@@ -40,6 +40,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -392,7 +393,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (shortContestName != null) {
             setShortContestName(contest, shortContestName);
         }
-     
+        
         if (null != fetchValue(content, AUTO_STOP_CLOCK_AT_END_KEY)) {
             // only set value if key present
 
@@ -579,6 +580,30 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return contest;
 
+    }
+
+    /**
+     * Find group for input string.
+     * 
+     * @param groups
+     * @param groupInfo group external id or group name
+     * @return null if no match, else the group
+     */
+    protected Group lookupGroupInfo(Group[] groups, String string) {
+
+        for (Group group : groups) {
+            if (group.getDisplayName().equals(string.trim())) {
+                return group;
+            } else {
+                int id = toInt(string, -1);
+                System.out.println("debug 22     look "+id +" vs " +group.getGroupId());
+                if (group.getGroupId() == id) {
+                    return group;
+                }
+            }
+
+        }
+        return null;
     }
 
     /**
@@ -932,6 +957,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator, boolean overrideManualReview) {
 
+        Group[] groups = contest.getGroups();  // fetch once instead of fetching for each problem (in loop)
+        
         // TODO CCS code this: do not add problem to contest model, new new parameter flag
 
         String problemDirectory = baseDirectoryName + File.separator + problem.getShortName();
@@ -1061,6 +1088,40 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (problemInputContent != null) {
             boolean readFromSTDIN = fetchBooleanValue(problemInputContent, READ_FROM_STDIN_KEY, true);
             problem.setReadInputDataFromSTDIN(readFromSTDIN);
+        }
+        
+        
+        String groupListString = fetchValue(content, GROUPS_KEY);
+        if (groupListString != null)
+        {
+            
+            if (groupListString.trim().length() == 0){
+                syntaxError("Empty group list");
+            }
+            
+            String [] fields = groupListString.split(";");
+            if (groupListString.indexOf(';') == -1){
+                fields = groupListString.split(",");
+            }
+            
+            for (String string : fields) {
+                System.out.println("debug 22  found '"+string+"'  len = "+fields.length);
+            }
+            
+            for (String groupInfo : fields) {
+                groupInfo = groupInfo.trim();
+                System.out.println("debug 22 looking up field = '"+groupInfo+"'");
+                Group group = lookupGroupInfo(groups, groupInfo);
+                if (group == null){
+                    if (groups == null || groups.length == 0){
+                        syntaxError("ERROR No groups defined. (groups.tsv not loaded?), error when trying to find group for '"+groupInfo+"' from yaml value '"+groupListString+"' ");
+                    } else {
+                        syntaxError("Undefined group '"+groupInfo+"' for group list '"+groupListString+"' ");
+                    }
+                }
+                
+                problem.addGroup(group);
+            }
         }
 
 
@@ -1335,6 +1396,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         if (list != null) {
+            
             for (Object object : list) {
 
                 Map<String, Object> map = (Map<String, Object>) object;
@@ -1416,7 +1478,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (inputValidatorCommandLine != null) {
                     problem.setInputValidatorCommandLine(inputValidatorCommandLine);
                 }
-
+                    
                 problemList.addElement(problem);
             }
         }
@@ -1461,6 +1523,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return out;
 
     }
+    
+    protected int toInt(String string, int defaultNumber) {
+
+        try {
+
+            if (string != null && string.length() > 0) {
+                return Integer.parseInt(string.trim());
+            }
+        } catch (Exception e) {
+            ; // ignore, will return default if a parsing error
+        }
+        
+        return defaultNumber;
+
+    }
 
     protected int getIntegerValue(String string, int defaultNumber) {
 
@@ -1472,6 +1549,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return number;
     }
+    
 
     protected int[] getNumberList(String numberString) {
 
@@ -2310,6 +2388,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (cdpConfigDirectory == null) {
             throw new Exception("Cannot find CDP for " + entry);
         } else {
+            
+            loadCCSTSVFiles(contest, cdpConfigDirectory);
+            
             contest = fromYaml(contest, cdpConfigDirectory.getAbsolutePath());
 
             if (contest.getSites().length == 0) {
@@ -2318,7 +2399,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contest.addSite(site);
             }
 
-            loadCCSTSVFiles(contest, cdpConfigDirectory);
+
         }
 
         return contest;

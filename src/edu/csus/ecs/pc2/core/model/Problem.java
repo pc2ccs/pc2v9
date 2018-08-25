@@ -1585,4 +1585,15 @@ public class Problem implements IElementObject {
         return (groups.size() == 0 || groups.contains(group));
     }
     
+    /**
+     * Are there no groups assigned to this problem?
+     * 
+     * @see canView
+     * @see getGroups
+     * @return true if no groups in list, false otherwise.
+     */
+    public boolean isAllView(){
+        return (groups.size() == 0);
+    }
+    
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -23,6 +24,7 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
+import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.AutoJudgeSettingComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
@@ -31,16 +33,17 @@ import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -1966,7 +1969,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 "ccs1", //
                 "ccs2", //
                 "sumithello", //
-                "valtest", //
+//                "valtest", //
                 
 // Doug's Local test directories
 //                "c:\\test\\cdps\\sum1\\config\\contest.yaml", //
@@ -2323,6 +2326,16 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         for (String directoryName : contestDirs) {
 
             assertDirectoryExists(directoryName);
+            
+            if (directoryName.endsWith("valtest")){
+
+                // Need not test valtest, that is tested in a number of other junit methods
+                // besides one must load groups.tsv before loading yaml for it to work.
+                continue;
+            }
+            
+            System.out.println("debug 22 dirname is "+directoryName);
+            
             try {
                 IInternalContest contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
 
@@ -2621,10 +2634,31 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Validate and test contents for valtest sample contest.
      * 
+     * <li>Tests groups: in problem.yaml
+     * 
      * @throws Exception
      */
     public void testLoadValidatorTestSampleContest() throws Exception {
-        IInternalContest contest = loadSampleContest(null, "valtest");
+
+        /**
+         * Contest to use as input
+         */
+        String sampleContestDirName = "valtest";
+        
+        IInternalContest contest = new InternalContest();
+        
+        /**
+         * Load groups data.
+         */
+        loadGroupsFromSampContest(contest, sampleContestDirName);
+        assertEquals("Number ground",12,contest.getGroups().length);
+        
+//        
+//        LoadICPCData loadICPCData = new LoadICPCData();
+//        loadICPCData.setContestAndController(contest, controller);
+//        
+        
+        loadSampleContest(contest, sampleContestDirName);
         
         assertNotNull(contest);
         
@@ -2680,6 +2714,21 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String title = "Mini Contest Validator Combos";
         assertEquals("contest title", title, contest.getContestInformation().getContestTitle());
         
+    }
+
+    /**
+     * Load groups from samps contest.
+     * 
+     * @param contest
+     * @param contestDirName
+     * @throws Exception 
+     */
+    private void loadGroupsFromSampContest(IInternalContest contest, String contestDirName) throws Exception {
+        String groupFile = getTestSampleContestDirectory(contestDirName) +File.separator+ IContestLoader.CONFIG_DIRNAME + File.separator + LoadICPCTSVData.GROUPS_FILENAME;
+        Group[] groups = ICPCTSVLoader.loadGroups(groupFile);
+        for (Group group : groups) {
+            contest.addGroup(group);
+        }
     }
 
     /**
@@ -2929,5 +2978,60 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 " notify " + problem.isPrelimaryNotification());
     }
     
+    /**
+     * Test loading groups into Problem.
+     * 
+     * @throws Exception
+     */
+    public void testLoadProblemGroups() throws Exception {
+        
+        /**
+         * Contest to use as input
+         */
+        String sampleContestDirName = "valtest";
+        
+        IInternalContest contest = new InternalContest();
+        
+        /**
+         * Load groups data.
+         */
+        loadGroupsFromSampContest(contest, sampleContestDirName);
+        assertEquals("Number ground",12,contest.getGroups().length);
+        
+        loadSampleContest(contest, sampleContestDirName);
+        
+        Problem[] problems = contest.getProblems();
+        assertEquals("Expecting problems ",6,problems.length);
+        
+        for (Problem problem : problems) {
+            List<Group> groups = problem.getGroups();
+            
+            System.out.println("debug 22 "+problem.getShortName()+" "+groups.size());
+            if ("sumit2".equals(problem.getShortName())){
+                assertEquals("Expecting number of groups for problem ", 5, groups.size());
+            }
+            
+            for (Group group : groups) {
+                System.out.println("problem "+problem+" has group "+group);
+            }
+        }
+    }
+    
+    
+    public void testGroupLookup() throws Exception {
+
+        // TODO write unit test
+
+//# with commas, delimit ;
+//# groups: 'Canada - University of British Columbia D1;Puget Sound - University of Puget Sound D1; N. California - UC Berkeley D1; Hawaii - BYUH, Laie, Oahu D2; Northeast - EWU, Cheney/Spokane D2;'
+//
+//# no commas, delimit ,
+//# groups: 'Canada - University of British Columbia D1,Puget Sound - University of Puget Sound D1, N. California - UC Berkeley D1' 
+//
+//# bad group id 334 for groups: 312544,312545,312546,312547, 334
+//# groups: 312544,312545,312546,312547
+//# groups: 312544;312545;312546;312547
+        
+    }
 }
 

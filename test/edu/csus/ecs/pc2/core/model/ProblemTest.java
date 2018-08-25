@@ -2,20 +2,16 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test for Problem class.
  * 
  * @author pc2@ecs.csus.edu
- * 
- * @version $Id$
  */
-
-// $HeadURL$
-public class ProblemTest extends TestCase {
+public class ProblemTest extends AbstractTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -49,7 +45,9 @@ public class ProblemTest extends TestCase {
         p2.setLetter("F");
 
         p2.setSiteNumber(4);
-
+        
+        assertTrue("Expecting that all can view this problem ",p2.isAllView());
+        
         return p2;
     }
 
@@ -290,5 +288,60 @@ public class ProblemTest extends TestCase {
         assertFalse("Is not same As, null parameter", p1.isSameAs(null));
         
     }
-
+    
+    /**
+     * Test adding groups to a problem.
+     * 
+     * @throws Exception
+     */
+    public void testAddGroup() throws Exception {
+        
+        SampleContest sample =new SampleContest();
+        IInternalContest contest = sample.createStandardContest();
+        sample.assignSampleGroups(contest, "Group Thing One", "Group Thing Two");
+        
+        Problem[] problems = contest.getProblems();
+        
+        Problem lastProbblem = problems[problems.length - 1];
+        Group[] groups = contest.getGroups();
+        
+        
+        Group group1 = groups[0];
+        
+        assertEquals("Number groups ", 2, groups.length);
+        
+        assertTrue (lastProbblem.isAllView());
+        lastProbblem.addGroup(group1);
+        
+        assertTrue (lastProbblem.canView(group1));
+        assertFalse (lastProbblem.canView(null));
+        assertFalse (lastProbblem.canView(groups[1]));
+        
+        lastProbblem.clearGroups();
+        assertTrue (lastProbblem.isAllView());
+        
+        Account[] teams = SampleContest.getTeamAccounts(contest);
+        
+        Group teamGroup = contest.getGroup(teams[0].getGroupId());
+        
+        lastProbblem.addGroup(teamGroup);
+        assertTrue (lastProbblem.canView(teamGroup));
+        
+        Problem middleProblem = problems[problems.length / 2];
+        for (Group group : groups) {
+            middleProblem.addGroup(group);
+        }
+        
+        assertFalse (middleProblem.isAllView());
+        for (Group group : groups) {
+            assertTrue (middleProblem.canView(group));
+        }
+        
+        
+//        ProblemsReport report = new ProblemsReport();
+//        IInternalController controller = sample.createController(contest, true, false);
+//        report.setContestAndController(contest, controller);
+//        report.createReportFile("sample55",  null);
+//        editFile("sample55");
+    }
 }
