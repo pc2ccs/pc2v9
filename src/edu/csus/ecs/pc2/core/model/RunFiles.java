@@ -104,6 +104,8 @@ public class RunFiles implements Serializable {
     
     /**
      * Returns a String representation of this RunFiles object consisting of a list of the names of the files in the RunFiles object.
+     * The returned string is in JSON format: an array containing two elements:  the MainFile and a sub-array containing the OtherFiles (if any;
+     * otherwise the subarray is an empty JSON array ([]) ).
      */
     @Override
     public String toString() {
@@ -145,11 +147,14 @@ public class RunFiles implements Serializable {
                     retStr += "\"";
                     first = false;
                 }
-                retStr += "]";
+
             }
             
         } 
+        //close OtherFiles list
+        retStr += "]";  
         
+        //close retStr object
         retStr += "]";
         
         return retStr ;
