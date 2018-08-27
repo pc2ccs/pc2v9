@@ -139,7 +139,7 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", };
+            Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", "Groups" };
             problemListBox.addColumns(cols);
 
             problemListBox.getColumnInfo(1).setAlignment(Alignment.CENTER);
@@ -215,11 +215,8 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected Object[] buildProblemRow(Problem problem) {
-        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator" };
-        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "short", "Time Limit", "SVTJ", "Validator Prog", "Validator Command Line" };
-        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Short", "Time Limit", "SVTJ", "Output Validator", "O.V. Command", "Input Validation", "I.V.
-        // Command" };
         // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", };
+//        Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", "Groups" };
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new Object[numberColumns];
@@ -302,6 +299,13 @@ public class ProblemsPane extends JPanePlugin {
             validatorCommandLine = problem.getValidatorCommandLine();
         }
         c[i++] = validatorCommandLine;
+        
+        String groupsSelectedText = "All";
+        if (!problem.isAllView()) {
+            groupsSelectedText = problem.getGroups().size() + " groups";
+        }
+
+        c[i++] = groupsSelectedText;
 
         return c;
     }
