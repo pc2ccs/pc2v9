@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Vector;
 
@@ -48,15 +50,16 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.ExtractRuns;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 /**
  * View runs panel.
@@ -153,6 +156,12 @@ public class RunsPane extends JPanePlugin {
     
     private boolean displayConfirmation = true;
     private JButton viewSourceButton;
+
+    private boolean serverReplied;
+
+    public Run fetchedRun;
+
+    public RunFiles fetchedRunFiles;
 
     /**
      * This method initializes
@@ -517,6 +526,60 @@ public class RunsPane extends JPanePlugin {
             if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                 showResponseToTeam(event);
             }
+            
+            //code copied from FetchRunService.RunListenerImplementation.runChanged():
+                
+                Action action = event.getAction();
+                Action details = event.getDetailedAction();
+                Run aRun = event.getRun();
+                RunFiles aRunFiles = event.getRunFiles();
+                String msg = event.getMessage();
+                
+                getController().getLog().log(Log.INFO, "RunsPane.RunListener: Action=" + action + "; DetailedAction=" + details + "; msg=" + msg
+                                        + "; run=" + aRun + "; runFiles=" + aRunFiles);
+
+                
+                if (event.getRun() != null) {
+                        
+                        // RUN_NOT_AVAILABLE is undirected (sentToClient is null)
+                        if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
+                            
+                            getController().getLog().log(Log.WARNING, "Reply from server: requested run not available");
+                            
+                        } else {
+                            
+                            //make sure this RunEvent was meant for me
+                            if (event.getSentToClientId() != null && event.getSentToClientId().equals(getContest().getClientId())) {
+                                
+                                getController().getLog().log(Log.INFO, "Reply from server: " + "Run Status=" + event.getAction()
+                                                        + "; run=" + event.getRun() + ";  runFiles=" + event.getRunFiles());
+                                
+                                fetchedRun = event.getRun();
+                                fetchedRunFiles = event.getRunFiles();    
+                                
+                            } else {
+                                
+                                ClientId toClient = event.getSentToClientId() ;
+                                ClientId myID = getContest().getClientId();
+
+                                getController().getLog().log(Log.INFO, "Event not for me: sent to " + toClient + " but my ID is " + myID);
+
+                                //TODO:  this needs to be reconsidered; why are we continuing when the event wasn't sent to us?  (Why wasn't it sent to us?)
+                                fetchedRun = event.getRun();
+                                fetchedRunFiles = event.getRunFiles();
+                            }
+                        }
+                        
+                } else {
+                    //run from server was null
+                    getController().getLog().log(Log.WARNING, "Run received from server was null");
+                    fetchedRun = null;
+                    fetchedRunFiles = null;
+                }
+                
+                
+                serverReplied = true;     
+                
         }
 
         public void runRemoved(RunEvent event) {
@@ -910,7 +973,7 @@ public class RunsPane extends JPanePlugin {
 
             // Show ALL Runs
 
-            getViewSourceButton().setVisible(isAllowed(Permission.Type.JUDGE_RUN));
+            getViewSourceButton().setVisible(isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN));
             requestRunButton.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
             editRunButton.setVisible(isAllowed(Permission.Type.EDIT_RUN));
             extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
@@ -1465,7 +1528,7 @@ public class RunsPane extends JPanePlugin {
                 viewJudgementsFrame.setRun(theRun);
                 viewJudgementsFrame.setVisible(true);
             } else {
-                showMessage("Can not display judgements for Run");
+                showMessage("Cannot display judgements for Run");
             }
 
         } catch (Exception e) {
@@ -1851,7 +1914,12 @@ public class RunsPane extends JPanePlugin {
         	viewSourceButton = new JButton("View Source");
         	viewSourceButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
-        	        showSourceForSelectedRun();
+        	        
+        	        SwingUtilities.invokeLater(new Runnable() {
+        	            public void run () {
+        	                showSourceForSelectedRun();
+        	            }
+        	        });
         	    }
         	});
         	viewSourceButton.setToolTipText("Displays a read-only view of the source code for the currently selected run");
@@ -1860,18 +1928,21 @@ public class RunsPane extends JPanePlugin {
     }
     
     /**
-     * Displays a frame containing the source code for the run (submission) which is currently selected in the Runs grid.
+     * Displays a {@link MultipleFileViewer} containing the source code for the run (submission) which is currently selected in the Runs grid.
      * 
      * If no run is selected, or more than one run is selected, prompts the user to select just one run (row) in the grid
      * and does nothing else.
      */
     private void showSourceForSelectedRun() {
-        //make sure judging is allowed (if we're not allowed to judge a run we shouldn't be able to view the source either)
-        if (!isAllowed(Permission.Type.JUDGE_RUN)) {
-            log.log(Log.WARNING, "Account does not have permission to JUDGE_RUN, cannot view run source.");
-            showMessage("Unable to request run, check log");
+
+        // make sure we're allowed to fetch a run
+        if (!isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN)) {
+            getController().getLog().log(Log.WARNING, "Account does not have the permission ALLOWED_TO_FETCH_RUN; cannot view run source.");
+            showMessage("Unable to fetch run, check log");
             return;
         }
+
+        // make sure there's exactly one run selected in the grid
         int[] selectedIndexes = runListBox.getSelectedIndexes();
 
         if (selectedIndexes.length < 1) {
@@ -1882,18 +1953,101 @@ public class RunsPane extends JPanePlugin {
             return;
         }
 
-        //we are allowed to view source and there's exactly one run selected; try to obtain the run source
+        // we are allowed to view source and there's exactly one run selected; try to obtain the run source
         try {
-            ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
-            Run runToView = getContest().getRun(elementId);
 
-            showMessage ("Would have displayed source for site " + runToView.getSiteNumber() + " run " + runToView.getNumber());
-            
+            ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
+            Run run = getContest().getRun(elementId);
+
+            // make sure we found the currently selected run
+            if (run != null) {
+
+                showMessage("Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
+                getController().getLog().log(Log.INFO, "Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
+                System.out.println("Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
+
+                // getController().checkOutRun(run, true, false); // checkoutRun(run, isReadOnlyRequest, isComputerJudgedRequest)
+
+                // request the run from the server into our client's contest model
+                getController().fetchRun(run);
+
+                // wait for the server to reply (i.e., to make a callback to the run listener) -- but only for up to 30 sec
+                int waitedMS = 0;
+                serverReplied = false;
+                while (!serverReplied && waitedMS < 30000) {
+                    Thread.sleep(100);
+                    waitedMS += 100;
+                }
+
+                if (serverReplied) {
+
+                    // get the RunFiles from the Run in the model
+//                    RunFiles runFiles = getContest().getRunFiles(run);
+                    RunFiles runFiles = fetchedRunFiles;
+
+                    if (runFiles != null) {
+
+                        // get the (serialized) source files out of the RunFiles
+                        SerializedFile mainFile = runFiles.getMainFile();
+                        SerializedFile[] otherFiles = runFiles.getOtherFiles();
+
+                        // create a MultiFileViewer in which to display the runFiles
+                        MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + fetchedRun.getSiteNumber() + " Run " + fetchedRun.getNumber());
+                        mfv.setContestAndController(getContest(), getController());
+
+                        // add the mainFile to the MFV
+                        boolean mainFilePresent = false;
+                        boolean mainFileLoadedOK = false;
+                        if (mainFile != null) {
+                            mainFilePresent = true;
+                            mainFileLoadedOK = mfv.addFilePane("Main File", mainFile);
+                        }
+
+                        // add any other files to the MFV
+                        boolean otherFilesPresent = false;
+                        boolean otherFilesLoadedOK = false;
+                        if (otherFiles != null) {
+                            otherFilesPresent = true;
+                            otherFilesLoadedOK = true;
+                            for (SerializedFile otherFile : otherFiles) {
+                                otherFilesLoadedOK &= mfv.addFilePane(otherFile.getName(), otherFile);
+                            }
+                        }
+
+                        // if we successfully added all files, show the MFV
+                        if ( (!mainFilePresent || (mainFilePresent&&mainFileLoadedOK)) && 
+                             (!otherFilesPresent || (otherFilesPresent&&otherFilesLoadedOK)) ) {
+                            mfv.setVisible(true);
+                            showMessage("");
+                        } else {
+                            getController().getLog().log(Log.WARNING, "Unable to load run source files into MultiFileViewer");
+                            showMessage("Unable to load run source files into MultiFileViewer");
+                        }
+
+                    } else {
+                        // runfiles is null
+                        getController().getLog().log(Log.WARNING, "Unable to obtain RunFiles for Site " + run.getSiteNumber() + " run " + run.getNumber());
+                        showMessage("Unable to obtain RunFiles for selected run");
+                    }
+                    
+                } else {
+                    // the server failed to reply to the fetchRun request within the time limit
+                    getController().getLog().log(Log.WARNING, "No response from server after " + waitedMS + "ms");
+                    getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " from server");
+                    showMessage("Unable to fetch selected run; check log");
+                }
+                
+            } else {
+                // getContest().getRun() returned null
+                getController().getLog().log(Log.WARNING, "Selected run not found");
+                showMessage("Selected run not found");
+            }
+
         } catch (Exception e) {
-            log.log(Log.WARNING, "Exception logged ", e);
+            getController().getLog().log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to show run source, check log");
         }
-        
+
     }
 
-} // @jve:decl-index=0:visual-constraint="10,10"
+}
