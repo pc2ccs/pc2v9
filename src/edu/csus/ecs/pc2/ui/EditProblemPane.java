@@ -17,6 +17,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -30,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -59,6 +61,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
@@ -74,16 +77,13 @@ import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
-import java.awt.event.KeyAdapter;
 
 /**
  * Add/Edit Problem Pane.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class EditProblemPane extends JPanePlugin {
 
     // TODO 917 automatic check on load when external/internal data sets changed
@@ -115,6 +115,8 @@ public class EditProblemPane extends JPanePlugin {
     private JTabbedPane mainTabbedPane = null;
 
     private JPanel generalPane = null;
+    
+    private ProblemGroupPane problemGroupPane = null;
 
     private JPanel judgingTypePane = null;
 
@@ -303,6 +305,8 @@ public class EditProblemPane extends JPanePlugin {
 
     private boolean showMissingInputValidatorProgramNameOnAddProblem = true;
 
+    private Log log;
+
     /**
      * Constructs an EditProblemPane with default settings.
      * 
@@ -332,6 +336,8 @@ public class EditProblemPane extends JPanePlugin {
         getMultipleDataSetPane().setContestAndController(inContest, inController);
 
         getInputValidatorPane().setContestAndController(inContest, inController);
+        
+        getProblemGroupPane().setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -346,6 +352,8 @@ public class EditProblemPane extends JPanePlugin {
                 debug22EditProblem = value.equalsIgnoreCase("true");
             }
         }
+        
+        log = inController.getLog();
 
     }
 
@@ -1390,6 +1398,15 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setColorName(balloonColorTextField.getText());
 
         checkProblem.setColorRGB(rgbTextField.getText());
+        
+        List<Group> groups = getProblemGroupPane().getGroups();
+        
+        checkProblem.clearGroups();
+        if (groups.size() > 0){
+            for (Group group : groups) {
+                checkProblem.addGroup(group);
+            }
+        }
 
         if (debug22EditProblem) {
             Utilities.dump(newProblemDataFiles, "debug after populateProblemTestSetFilenames");
@@ -2057,6 +2074,22 @@ public class EditProblemPane extends JPanePlugin {
                 getMultipleDataSetPane().populateUI();
 
                 populateGUI(inProblem);
+                
+                try {
+                    getProblemGroupPane().setProblem(inProblem);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logWarning("Trouble populating huh", e);
+                }
+                
+                if (problem != null){
+                    List<Group> inGroups = problem.getGroups();
+                    for (Group group : inGroups) {
+                        System.out.print("  debug 22  group="+group.getDisplayName());
+                    }
+                    System.out.println(" debug 22 All seleccted "+problem.isAllView()+" for "+problem.getDisplayName());
+                }
+
 
                 // do not automatically set this to no update, the files may have changed on disk
                 if (inProblem == null) {
@@ -2176,6 +2209,14 @@ public class EditProblemPane extends JPanePlugin {
             fileNameOne = createProblemReport(problem, originalProblemDataFiles, "stuf1");
         }
 
+        if (problem != null){
+            List<Group> inGroups = problem.getGroups();
+            for (Group group : inGroups) {
+                System.out.print("  debug 22  group="+group.getDisplayName());
+            }
+            System.out.println(" debug 22 All seleccted "+problem.isAllView()+" for "+problem.getDisplayName());
+        }
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getMultipleDataSetPane().clearDataFiles();
@@ -2189,6 +2230,8 @@ public class EditProblemPane extends JPanePlugin {
                     getMultipleDataSetPane().getInputDataStoragePanel().setEnabled(true);
                     getMultipleDataSetPane().getRdbtnCopyDataFiles().setEnabled(true);
                     getMultipleDataSetPane().getRdBtnKeepDataFilesExternal().setEnabled(true);
+                    
+                    getProblemGroupPane().setProblem(problem);
 
                 } else {
                     enableUpdateButton();
@@ -2677,6 +2720,7 @@ public class EditProblemPane extends JPanePlugin {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new Dimension(500, 600));
+            mainTabbedPane.insertTab("Groups", null, getProblemGroupPane(), null, 0);
             mainTabbedPane.insertTab("Input Validator", null, getInputValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Test Data Files", null, getMultipleDataSetPane(), null, 0);
             mainTabbedPane.insertTab("Output Validator", null, getOutputValidatorPane(), null, 0);
@@ -2684,6 +2728,16 @@ public class EditProblemPane extends JPanePlugin {
             mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);
         }
         return mainTabbedPane;
+    }
+
+    private ProblemGroupPane getProblemGroupPane() {
+
+        if (problemGroupPane == null) {
+            problemGroupPane = new ProblemGroupPane();
+            problemGroupPane.setContestAndController(getContest(), getController());
+        }
+        return problemGroupPane;
+
     }
 
     /**
@@ -5338,5 +5392,18 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         return retStatus;
+   }
+    
+    private void logWarning(String message, Exception e) {
+        if (log != null){
+            log.log(Log.WARNING, message, e);
+        } 
+
+        System.err.println(message);
+        if (e != null){
+            e.printStackTrace();
+            
+            
+        }
     }
 }
