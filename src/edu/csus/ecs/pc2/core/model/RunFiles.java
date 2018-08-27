@@ -109,12 +109,12 @@ public class RunFiles implements Serializable {
     public String toString() {
         String retStr = "";
         
-        retStr += "MainFile=";
+        retStr += "[" + "\"MainFile\"" + ":" + "\"";
         
         if (getMainFile()!=null) {
             String mainFileName = getMainFile().getName();
             if (mainFileName!=null) {
-                retStr += "'" + mainFileName + "'";
+                retStr += mainFileName ;
             } else {
                 retStr += "null";
             }
@@ -122,7 +122,9 @@ public class RunFiles implements Serializable {
             retStr += "null";
         }
         
-        retStr += "; OtherFiles=" ;
+        retStr += "\",";
+        
+        retStr += "\"OtherFiles\":[" ;
         
         if (getOtherFiles()!=null) {
             if (getOtherFiles().length>0) {
@@ -131,22 +133,24 @@ public class RunFiles implements Serializable {
                     if (file!=null) {
                         String fileName = file.getName();
                         if (!first) {
-                            retStr += ";";
+                            retStr += ",";
                         }
+                        retStr += "\"name\"" + ":\"";
                         if (fileName!=null) {
-                            retStr += "'" + fileName + "'";
+                            retStr += fileName ;
                         }
                     } else {
                         retStr += "null";
                     }
+                    retStr += "\"";
                     first = false;
                 }
-            } else {
-                retStr += "<empty>";
+                retStr += "]";
             }
-        } else {
-            retStr += "null";
-        }
+            
+        } 
+        
+        retStr += "]";
         
         return retStr ;
         
