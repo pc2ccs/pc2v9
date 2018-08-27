@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -36,6 +37,8 @@ public class ProblemGroupPane extends JPanePlugin {
 
     private JScrollPane groupsScrollPane = null;
 
+    private ButtonGroup groupsSelectedButtonGroup = null; 
+    
     /**
      * This method initializes groupListBox
      * 
@@ -52,9 +55,8 @@ public class ProblemGroupPane extends JPanePlugin {
 
         if (groupsScrollPane == null) {
             groupsScrollPane = new JScrollPane();
-            groupsScrollPane.setBounds(135, 188, 396, 369);
+            groupsScrollPane.setBounds(149, 92, 396, 369);
             groupsScrollPane.setViewportView(getGroupListBox());
-            groupsScrollPane.setBounds(135, 188, 404, 369);
         }
 
         return groupsScrollPane;
@@ -65,15 +67,16 @@ public class ProblemGroupPane extends JPanePlugin {
 
         allGroupsRadioButton = new JRadioButton("Show to all groups");
 
-        allGroupsRadioButton.setBounds(125, 85, 275, 23);
+        allGroupsRadioButton.setBounds(125, 26, 275, 23);
         add(allGroupsRadioButton);
 
         selectGroupsRadioButton = new JRadioButton("Show to only these groups");
-        selectGroupsRadioButton.setBounds(125, 129, 263, 23);
+        selectGroupsRadioButton.setBounds(125, 62, 263, 23);
         add(selectGroupsRadioButton);
+        
 
         add(getGroupsScroll());
-        
+        getValidatorChoiceButtonGroup();
     }
 
 
@@ -85,11 +88,21 @@ public class ProblemGroupPane extends JPanePlugin {
     public void setProblem(Problem problem) {
 
         groupListModel.removeAllElements(); // clear checkbox
+        
+        populateProblemGroups(problem);
 
+    }
+
+    private void populateProblemGroups(Problem problem) {
+        
         boolean allGroupsSelected = problem.isAllView();
         
-        allGroupsRadioButton.setSelected(allGroupsSelected);
-        selectGroupsRadioButton.setSelected(! allGroupsSelected);
+        System.out.println("debug 22 ProblemGroupPane.setProblem allGroupsSelected = "+allGroupsSelected);
+        
+        selectGroupsRadioButton.setSelected(true);
+        if (allGroupsSelected){
+            allGroupsRadioButton.setSelected(allGroupsSelected);
+        }
 
         Group[] groups = getContest().getGroups();
         for (Group group : groups) {
@@ -98,6 +111,7 @@ public class ProblemGroupPane extends JPanePlugin {
                 wrapperJCheckBox.setSelected(true);
             }
             else if (problem.canView(group)){
+                System.out.println("debug 22  selected "+group);
                 wrapperJCheckBox.setSelected(true);
             }
             groupListModel.addElement(wrapperJCheckBox);
@@ -123,4 +137,14 @@ public class ProblemGroupPane extends JPanePlugin {
 
         return groups;
     }
+
+    private ButtonGroup getValidatorChoiceButtonGroup() {
+        if (groupsSelectedButtonGroup == null) {
+            groupsSelectedButtonGroup = new ButtonGroup();
+            groupsSelectedButtonGroup.add(allGroupsRadioButton);
+            groupsSelectedButtonGroup.add(selectGroupsRadioButton);
+        }
+        return groupsSelectedButtonGroup;
+    }
+
 }
