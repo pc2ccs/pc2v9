@@ -101,5 +101,55 @@ public class RunFiles implements Serializable {
     public Submission getSubmission() {
         return submission;
     }
+    
+    /**
+     * Returns a String representation of this RunFiles object consisting of a list of the names of the files in the RunFiles object.
+     */
+    @Override
+    public String toString() {
+        String retStr = "";
+        
+        retStr += "MainFile=";
+        
+        if (getMainFile()!=null) {
+            String mainFileName = getMainFile().getName();
+            if (mainFileName!=null) {
+                retStr += "'" + mainFileName + "'";
+            } else {
+                retStr += "null";
+            }
+        } else {
+            retStr += "null";
+        }
+        
+        retStr += "; OtherFiles=" ;
+        
+        if (getOtherFiles()!=null) {
+            if (getOtherFiles().length>0) {
+                boolean first = true;
+                for (SerializedFile file : getOtherFiles()) {
+                    if (file!=null) {
+                        String fileName = file.getName();
+                        if (!first) {
+                            retStr += ";";
+                        }
+                        if (fileName!=null) {
+                            retStr += "'" + fileName + "'";
+                        }
+                    } else {
+                        retStr += "null";
+                    }
+                    first = false;
+                }
+            } else {
+                retStr += "<empty>";
+            }
+        } else {
+            retStr += "null";
+        }
+        
+        return retStr ;
+        
+    }
 
 }
