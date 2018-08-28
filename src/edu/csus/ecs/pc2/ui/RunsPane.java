@@ -1974,7 +1974,6 @@ public class RunsPane extends JPanePlugin {
 
                 showMessage("Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
                 getController().getLog().log(Log.INFO, "Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
-                System.out.println("Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
 
                 //the following forces a (read-only) checkout from the server; it makes more sense to first see if we already have the 
                 // necessary RunFiles and then if not to issue a "Fetch" request rather than a "checkout" request
