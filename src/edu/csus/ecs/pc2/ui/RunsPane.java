@@ -159,9 +159,9 @@ public class RunsPane extends JPanePlugin {
 
     private boolean serverReplied;
 
-    public Run fetchedRun;
+    private Run fetchedRun;
 
-    public RunFiles fetchedRunFiles;
+    private RunFiles fetchedRunFiles;
 
     protected int viewSourceThreadCounter;
 
@@ -1913,26 +1913,26 @@ public class RunsPane extends JPanePlugin {
 
     private JButton getViewSourceButton() {
         if (viewSourceButton == null) {
-        	viewSourceButton = new JButton("View Source");
-        	viewSourceButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        
-//        	        SwingUtilities.invokeLater(new Runnable() {
-//        	            public void run () {
-//        	                showSourceForSelectedRun();
-//        	            }
-//        	        });
-        	        
-        	        Thread viewSourceThread = new Thread () {
-        	            public void run() {
-        	                showSourceForSelectedRun();
-        	            }
-        	        };
-        	        viewSourceThread.setName("ViewSourceThread-" + viewSourceThreadCounter++);
-        	        viewSourceThread.start();
-        	    }
-        	});
-        	viewSourceButton.setToolTipText("Displays a read-only view of the source code for the currently selected run");
+            viewSourceButton = new JButton("View Source");
+            viewSourceButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+
+//                    SwingUtilities.invokeLater(new Runnable() {
+//                        public void run() {
+//                            showSourceForSelectedRun();
+//                        }
+//                    });
+
+                    Thread viewSourceThread = new Thread() {
+                        public void run() {
+                            showSourceForSelectedRun();
+                        }
+                    };
+                    viewSourceThread.setName("ViewSourceThread-" + viewSourceThreadCounter++);
+                    viewSourceThread.start();
+                }
+            });
+            viewSourceButton.setToolTipText("Displays a read-only view of the source code for the currently selected run");
         }
         return viewSourceButton;
     }
@@ -2064,8 +2064,8 @@ public class RunsPane extends JPanePlugin {
                         }
 
                         // if we successfully added all files, show the MFV
-                        if ( (!mainFilePresent || (mainFilePresent&&mainFileLoadedOK)) && 
-                             (!otherFilesPresent || (otherFilesPresent&&otherFilesLoadedOK)) ) {
+                        if ((!mainFilePresent || (mainFilePresent && mainFileLoadedOK)) 
+                                && (!otherFilesPresent || (otherFilesPresent && otherFilesLoadedOK))) {
                             mfv.setSelectedIndex(0);  //always make leftmost selected; normally this will be MainFile
                             mfv.setVisible(true);
                             showMessage("");
