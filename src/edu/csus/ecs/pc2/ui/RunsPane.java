@@ -2060,7 +2060,7 @@ public class RunsPane extends JPanePlugin {
                         boolean mainFileLoadedOK = false;
                         if (mainFile != null) {
                             mainFilePresent = true;
-                            mainFileLoadedOK = mfv.addFilePane("Main File", mainFile);
+                            mainFileLoadedOK = mfv.addFilePane("Main File" + " (" + mainFile.getName() + ")", mainFile);
                         }
 
                         // if we successfully added all files, show the MFV
