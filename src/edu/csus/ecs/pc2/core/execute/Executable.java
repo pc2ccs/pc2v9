@@ -2019,8 +2019,16 @@ public class Executable extends Plugin implements IExecutable {
             executionData.setCompileStderr(new SerializedFile(prefixExecuteDirname(COMPILER_STDERR_FILENAME)));
 
             program = new File(prefixExecuteDirname(programName));
-            if (program.exists()) {
-                if (packagePath.length() > 0) {
+            File programWithPackage = program;
+            if (packagePath.length() > 0) {
+                // if there is a packagePath and javac was invoked with `-d .` it will place the class
+                // under the packagePath
+                programWithPackage = new File(prefixExecuteDirname(packagePath)+File.separatorChar+programName);
+            }
+            if (program.exists() || programWithPackage.exists()) {
+                // now check if the programWithPackage does not exist
+                if (!programWithPackage.exists()) {
+                    // programWithPackage != programName we have a packagePath
                     // move all .class files under packagePath
                     File path = new File(prefixExecuteDirname(packagePath));
                     if (path.mkdirs()) {
