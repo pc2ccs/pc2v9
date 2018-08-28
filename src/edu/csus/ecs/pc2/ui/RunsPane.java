@@ -163,6 +163,8 @@ public class RunsPane extends JPanePlugin {
 
     public RunFiles fetchedRunFiles;
 
+    protected int viewSourceThreadCounter;
+
     /**
      * This method initializes
      * 
@@ -1915,11 +1917,19 @@ public class RunsPane extends JPanePlugin {
         	viewSourceButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        
-        	        SwingUtilities.invokeLater(new Runnable() {
-        	            public void run () {
+//        	        SwingUtilities.invokeLater(new Runnable() {
+//        	            public void run () {
+//        	                showSourceForSelectedRun();
+//        	            }
+//        	        });
+        	        
+        	        Thread viewSourceThread = new Thread () {
+        	            public void run() {
         	                showSourceForSelectedRun();
         	            }
-        	        });
+        	        };
+        	        viewSourceThread.setName("ViewSourceThread-" + viewSourceThreadCounter++);
+        	        viewSourceThread.start();
         	    }
         	});
         	viewSourceButton.setToolTipText("Displays a read-only view of the source code for the currently selected run");
@@ -1953,7 +1963,7 @@ public class RunsPane extends JPanePlugin {
             return;
         }
 
-        // we are allowed to view source and there's exactly one run selected; try to obtain the run source
+        // we are allowed to view source and there's exactly one run selected; try to obtain the run source and display it in a MFV 
         try {
 
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
@@ -1966,24 +1976,64 @@ public class RunsPane extends JPanePlugin {
                 getController().getLog().log(Log.INFO, "Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
                 System.out.println("Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
 
-                // getController().checkOutRun(run, true, false); // checkoutRun(run, isReadOnlyRequest, isComputerJudgedRequest)
+                //the following forces a (read-only) checkout from the server; it makes more sense to first see if we already have the 
+                // necessary RunFiles and then if not to issue a "Fetch" request rather than a "checkout" request
+//                getController().checkOutRun(run, true, false); // checkoutRun(run, isReadOnlyRequest, isComputerJudgedRequest)
 
-                // request the run from the server into our client's contest model
-                getController().fetchRun(run);
+                //check if we already have the RunFiles for the run
+                if (!getContest().isRunFilesPresent(run)) {
+                    
+                    //we don't have the files; request them from the server
+                    getController().fetchRun(run);
 
-                // wait for the server to reply (i.e., to make a callback to the run listener) -- but only for up to 30 sec
-                int waitedMS = 0;
-                serverReplied = false;
-                while (!serverReplied && waitedMS < 30000) {
-                    Thread.sleep(100);
-                    waitedMS += 100;
+                    // wait for the server to reply (i.e., to make a callback to the run listener) -- but only for up to 30 sec
+                    int waitedMS = 0;
+                    serverReplied = false;
+                    while (!serverReplied && waitedMS < 30000) {
+                        Thread.sleep(100);
+                        waitedMS += 100;
+                    }
+                
+                    //check if we got a reply from the server
+                    if (serverReplied) {
+                        
+                        //the server replied; see if we got some RunFiles
+                        if (fetchedRunFiles!=null) {
+                            
+                            //we got some RunFiles from the server; put them into the contest model
+                            getContest().updateRunFiles(run, fetchedRunFiles);
+                            
+                        } else {
+                            
+                            //we got a reply from the server but we didn't get any RunFiles
+                            getController().getLog().log(Log.WARNING, "Server failed to return RunFiles in response to fetch run request");
+                            getController().getLog().log(Log.WARNING, "Unable to fetch source files for run " + run.getNumber() + " from server");
+                            showMessage("Unable to fetch selected run; check log");
+                            return;
+                        }
+                        
+                    } else {
+                        
+                        // the server failed to reply to the fetchRun request within the time limit
+                        getController().getLog().log(Log.WARNING, "No response from server to fetch run request after " + waitedMS + "ms");
+                        getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " from server");
+                        showMessage("Unable to fetch selected run; check log");
+                        return;
+                    }
                 }
+                
+                //if we get here we know there should be RunFiles in the contest model -- but let's sanity-check that
+                if (!getContest().isRunFilesPresent(run)) {
+                    
+                    //something bad happened -- we SHOULD have RunFiles at this point!
+                    getController().getLog().log(Log.SEVERE, "Unable to find RunFiles for run " + run.getNumber() + " -- server error?");
+                    showMessage("Unable to fetch selected run; check log");
+                    return;
 
-                if (serverReplied) {
-
-                    // get the RunFiles from the Run in the model
-//                    RunFiles runFiles = getContest().getRunFiles(run);
-                    RunFiles runFiles = fetchedRunFiles;
+                } else {
+                    
+                    //get the RunFiles
+                    RunFiles runFiles = getContest().getRunFiles(run);
 
                     if (runFiles != null) {
 
@@ -2030,11 +2080,6 @@ public class RunsPane extends JPanePlugin {
                         showMessage("Unable to obtain RunFiles for selected run");
                     }
                     
-                } else {
-                    // the server failed to reply to the fetchRun request within the time limit
-                    getController().getLog().log(Log.WARNING, "No response from server after " + waitedMS + "ms");
-                    getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " from server");
-                    showMessage("Unable to fetch selected run; check log");
                 }
                 
             } else {
