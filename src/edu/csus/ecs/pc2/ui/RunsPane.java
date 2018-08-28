@@ -2044,15 +2044,7 @@ public class RunsPane extends JPanePlugin {
                         MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + fetchedRun.getSiteNumber() + " Run " + fetchedRun.getNumber());
                         mfv.setContestAndController(getContest(), getController());
 
-                        // add the mainFile to the MFV
-                        boolean mainFilePresent = false;
-                        boolean mainFileLoadedOK = false;
-                        if (mainFile != null) {
-                            mainFilePresent = true;
-                            mainFileLoadedOK = mfv.addFilePane("Main File", mainFile);
-                        }
-
-                        // add any other files to the MFV
+                        // add any other files to the MFV (these are added first so that the mainFile will appear at index 0)
                         boolean otherFilesPresent = false;
                         boolean otherFilesLoadedOK = false;
                         if (otherFiles != null) {
@@ -2063,9 +2055,18 @@ public class RunsPane extends JPanePlugin {
                             }
                         }
 
+                        // add the mainFile to the MFV
+                        boolean mainFilePresent = false;
+                        boolean mainFileLoadedOK = false;
+                        if (mainFile != null) {
+                            mainFilePresent = true;
+                            mainFileLoadedOK = mfv.addFilePane("Main File", mainFile);
+                        }
+
                         // if we successfully added all files, show the MFV
                         if ( (!mainFilePresent || (mainFilePresent&&mainFileLoadedOK)) && 
                              (!otherFilesPresent || (otherFilesPresent&&otherFilesLoadedOK)) ) {
+                            mfv.setSelectedIndex(0);  //always make leftmost selected; normally this will be MainFile
                             mfv.setVisible(true);
                             showMessage("");
                         } else {
