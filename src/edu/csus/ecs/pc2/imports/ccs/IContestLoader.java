@@ -111,6 +111,8 @@ public interface IContestLoader {
     String INPUT_KEY = "input";
 
     String PROBLEM_LOAD_DATA_FILES_KEY = "load-data-files";
+    
+    String GROUPS_KEY = "groups";
 
     String DEFAULT_VALIDATOR_KEY = "default-validator";
 

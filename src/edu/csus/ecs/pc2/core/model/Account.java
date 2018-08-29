@@ -5,6 +5,7 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
@@ -465,5 +466,12 @@ public class Account implements IElementObject {
         this.scoringAdjustment = newScoringAdjustment;
     }
     
-    
+    /**
+     * Is this account a team client type account?.
+     * 
+     * @return true if team clienttype
+     */
+    public boolean isTeam() {
+        return clientId == null || clientId.getClientType().equals(Type.TEAM);
+    }
 }

@@ -222,46 +222,7 @@ public class EditFilterPane extends JPanePlugin {
         initialize();
     }
 
-    /**
-     * Wrapper class for JCheckBox object.
-     * 
-     * for the text.
-     * This class is used to wrap the class and provide an override
-     * 
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
 
-    // $HeadURL$
-    protected class WrapperJCheckBox extends JCheckBox {
-
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 991427730095971274L;
-
-        private Object contents;
-        
-        public WrapperJCheckBox(Object object) {
-            this(object, object.toString());
-        }
-
-        public WrapperJCheckBox(Object object, String text) {
-            super();
-            contents = object;
-            setText(text);
-        }
-
-        public WrapperJCheckBox(ClientId clientId, DisplayTeamName displayTeamName) {
-            super();
-            contents = clientId;
-            setText(displayTeamName.getDisplayName(clientId));
-        }
-
-        public Object getContents() {
-            return contents;
-        }
-    }
 
     public EditFilterPane(Filter filter) {
         super();

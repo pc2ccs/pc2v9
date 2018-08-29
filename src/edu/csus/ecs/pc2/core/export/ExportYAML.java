@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
@@ -570,6 +571,14 @@ public class ExportYAML {
         problemWriter.println(IContestLoader.SHOW_VALIDATION_RESULTS+": "+problem.isShowValidationToJudges());
         problemWriter.println(IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!isExternalFiles(problemDataFiles)));
         problemWriter.println(IContestLoader.STOP_ON_FIRST_FAILED_TEST_CASE_KEY + ": " + problem.isStopOnFirstFailedTestCase());
+        
+        problemWriter.println();
+        List<Group> groups = problem.getGroups();
+        if (groups.size() == 0){
+            problemWriter.println("# " + IContestLoader.GROUPS_KEY+": ");
+        } else {
+            problemWriter.println(IContestLoader.GROUPS_KEY+": '"+StringUtilities.join(";",groups)+"'");
+        }
 
         problemWriter.println();
         String dataFile = problem.getDataFileName();

@@ -4,14 +4,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
@@ -88,6 +91,16 @@ public class ProblemsReport implements IReport {
             }
         }
         printWriter.println("       Balloon RGB      : " + balloonColorRGB);
+        
+        String groupList = "All";
+        List<Group> groups = problem.getGroups();
+        
+        if (! groups.isEmpty()){
+            // REFACTOR for Java 1.8 groupList = String.join(", ", groups);
+            groupList = StringUtilities.join(", ", groups);
+        }
+        
+        printWriter.println("   Groups who can view  : " + groupList);
         
         printWriter.println();
 

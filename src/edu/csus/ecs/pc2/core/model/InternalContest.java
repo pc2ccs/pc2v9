@@ -67,10 +67,8 @@ import edu.csus.ecs.pc2.profile.ProfileManager;
  * The InternalController should be used to check whether a Run should be cancelled. Other logic of this sort is in the InternalController, not the InternalContest.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class InternalContest implements IInternalContest {
 
     private ClientId localClientId = null;
@@ -697,6 +695,25 @@ public class InternalContest implements IInternalContest {
     }
 
     public void addProblem(Problem problem) {
+
+        // this will be null on the 1st server
+        ClientId me = getClientId();
+        if (me != null) {
+            Account account = getAccount(me);
+            if (account.isTeam() && account.getGroupId() != null) {
+                // If is a team and has been assigned a group.
+    
+                Group group = getGroup(account.getGroupId());
+                if (!problem.canView(group)) {
+                    /**
+                     * This is a team, and this team's group is not allowed to view this problem
+                     */
+                    // Do not add this problem to the list of problems.
+                    return;
+                }
+            }
+        }
+        
         problemDisplayList.add(problem);
         problemList.add(problem);
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.ADDED, problem);

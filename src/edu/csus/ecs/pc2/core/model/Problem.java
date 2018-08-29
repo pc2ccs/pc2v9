@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -245,6 +247,12 @@ public class Problem implements IElementObject {
      */
     private boolean stopOnFirstFailedTestCase = false;
 
+    /**
+     * A list of groups that can view/use this problem.
+     * 
+     * One use is to limit which teams can view a group.
+     */
+    private List<Group> groups = new ArrayList<Group>(); 
     
     /**
      * Create a problem with the display name.
@@ -339,6 +347,10 @@ public class Problem implements IElementObject {
         
         clone.setColorName(getColorName());
         clone.setColorRGB(getColorRGB());
+
+        for (Group group : groups) {
+            clone.addGroup(group);
+        }
         
         return clone;
     }
@@ -1037,6 +1049,14 @@ public class Problem implements IElementObject {
                 return false;
             }
             
+            if (! StringUtilities.stringSame(colorRGB, problem.getColorRGB())){
+                return false;
+            }
+            
+            if ( ! groups.equals(problem.getGroups())){
+                return false;
+            }
+            
             return true;
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);
@@ -1536,4 +1556,44 @@ public class Problem implements IElementObject {
     public void setStopOnFirstFailedTestCase(boolean stopOnFirstFailedTestCase) {
         this.stopOnFirstFailedTestCase = stopOnFirstFailedTestCase;
     }
+    
+    /**
+     * Set so all users can view this problem.
+     */
+    public void clearGroups(){
+        groups = new ArrayList<>();
+    }
+    
+    public void setGroups(List<Group> groups) {
+        this.groups = groups;
+    }
+    
+    public List<Group> getGroups() {
+        return groups;
+    }
+    
+    public void addGroup(Group group){
+        groups.add(group);
+    }
+    
+    /**
+     * Is this group permitted to view/use this probelm?.
+     * @param group
+     * @return
+     */
+    public boolean canView (Group group){
+        return (groups.size() == 0 || groups.contains(group));
+    }
+    
+    /**
+     * Are there no groups assigned to this problem?
+     * 
+     * @see canView
+     * @see getGroups
+     * @return true if no groups in list, false otherwise.
+     */
+    public boolean isAllView(){
+        return (groups.size() == 0);
+    }
+    
 }
