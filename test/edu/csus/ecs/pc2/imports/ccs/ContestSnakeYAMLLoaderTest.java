@@ -2334,8 +2334,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 continue;
             }
             
-            System.out.println("debug 22 dirname is "+directoryName);
-            
             try {
                 IInternalContest contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
 
@@ -3006,13 +3004,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         for (Problem problem : problems) {
             List<Group> groups = problem.getGroups();
             
-            System.out.println("debug 22 "+problem.getShortName()+" "+groups.size());
             if ("sumit2".equals(problem.getShortName())){
                 assertEquals("Expecting number of groups for problem ", 5, groups.size());
-            }
-            
-            for (Group group : groups) {
-                System.out.println("problem "+problem+" has group "+group);
             }
         }
     }

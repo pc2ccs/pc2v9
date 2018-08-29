@@ -596,7 +596,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 return group;
             } else {
                 int id = toInt(string, -1);
-                System.out.println("debug 22     look "+id +" vs " +group.getGroupId());
                 if (group.getGroupId() == id) {
                     return group;
                 }
@@ -1104,13 +1103,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 fields = groupListString.split(",");
             }
             
-            for (String string : fields) {
-                System.out.println("debug 22  found '"+string+"'  len = "+fields.length);
-            }
-            
             for (String groupInfo : fields) {
                 groupInfo = groupInfo.trim();
-                System.out.println("debug 22 looking up field = '"+groupInfo+"'");
                 Group group = lookupGroupInfo(groups, groupInfo);
                 if (group == null){
                     if (groups == null || groups.length == 0){

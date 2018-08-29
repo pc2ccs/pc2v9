@@ -88,9 +88,9 @@ public class LoadICPCTSVData implements UIPlugin {
             ICPCTSVLoader.loadInstitutions(instFilename);
             Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename);
             
-            for (Group group : groups) {
-                group.setSite(getContest().getSites()[0].getElementId());
-            }
+//            for (Group group : groups) {
+//                group.setSite(getContest().getSites()[0].getElementId());
+//            }
             
             Account[] accounts = ICPCTSVLoader.loadAccounts(teamsFilename);
             if (!accountsFilename.equals("")) {
