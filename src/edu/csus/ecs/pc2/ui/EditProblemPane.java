@@ -1401,13 +1401,14 @@ public class EditProblemPane extends JPanePlugin {
         
         List<Group> groups = getProblemGroupPane().getGroups();
         
+        
         checkProblem.clearGroups();
         if (groups.size() > 0){
             for (Group group : groups) {
                 checkProblem.addGroup(group);
             }
         }
-
+        
         if (debug22EditProblem) {
             Utilities.dump(newProblemDataFiles, "debug after populateProblemTestSetFilenames");
         }
@@ -2079,18 +2080,9 @@ public class EditProblemPane extends JPanePlugin {
                     getProblemGroupPane().setProblem(inProblem);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    logWarning("Trouble populating huh", e);
+                    logWarning("Trouble populating problemGroupPane", e);
                 }
                 
-                if (problem != null){
-                    List<Group> inGroups = problem.getGroups();
-                    for (Group group : inGroups) {
-                        System.out.print("  debug 22  group="+group.getDisplayName());
-                    }
-                    System.out.println(" debug 22 All seleccted "+problem.isAllView()+" for "+problem.getDisplayName());
-                }
-
-
                 // do not automatically set this to no update, the files may have changed on disk
                 if (inProblem == null) {
                     // new problem
@@ -2207,14 +2199,6 @@ public class EditProblemPane extends JPanePlugin {
 
         if (debug22EditProblem) {
             fileNameOne = createProblemReport(problem, originalProblemDataFiles, "stuf1");
-        }
-
-        if (problem != null){
-            List<Group> inGroups = problem.getGroups();
-            for (Group group : inGroups) {
-                System.out.print("  debug 22  group="+group.getDisplayName());
-            }
-            System.out.println(" debug 22 All seleccted "+problem.isAllView()+" for "+problem.getDisplayName());
         }
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -2341,7 +2325,7 @@ public class EditProblemPane extends JPanePlugin {
 
         problem = inProblem;
         // System.out.println (inProblem.toStringDetails());
-
+        
         originalProblemDataFiles = problemDataFiles;
 
         // General tab fields:
@@ -2358,6 +2342,8 @@ public class EditProblemPane extends JPanePlugin {
 
         // Data Files tab:
         getMultipleDataSetPane().setLoadDirectory(inProblem.getExternalDataFileLocation());
+        
+        getProblemGroupPane().setProblem(inProblem);
 
     }
 
@@ -2735,6 +2721,7 @@ public class EditProblemPane extends JPanePlugin {
         if (problemGroupPane == null) {
             problemGroupPane = new ProblemGroupPane();
             problemGroupPane.setContestAndController(getContest(), getController());
+            problemGroupPane.setParentPane(this);
         }
         return problemGroupPane;
 

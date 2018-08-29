@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -37,7 +39,9 @@ public class ProblemGroupPane extends JPanePlugin {
 
     private JScrollPane groupsScrollPane = null;
 
-    private ButtonGroup groupsSelectedButtonGroup = null; 
+    private ButtonGroup groupsSelectedButtonGroup = null;
+
+    private EditProblemPane parentPane; 
     
     /**
      * This method initializes groupListBox
@@ -66,11 +70,23 @@ public class ProblemGroupPane extends JPanePlugin {
         setLayout(null);
 
         allGroupsRadioButton = new JRadioButton("Show to all groups");
+        allGroupsRadioButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                parentPane.enableUpdateButton();
+                groupsScrollPane.setVisible(false);
+            }
+        });
 
         allGroupsRadioButton.setBounds(125, 26, 275, 23);
         add(allGroupsRadioButton);
 
         selectGroupsRadioButton = new JRadioButton("Show to only these groups");
+        selectGroupsRadioButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                parentPane.enableUpdateButton();
+                groupsScrollPane.setVisible(true);
+            }
+        });
         selectGroupsRadioButton.setBounds(125, 62, 263, 23);
         add(selectGroupsRadioButton);
         
@@ -99,26 +115,34 @@ public class ProblemGroupPane extends JPanePlugin {
         if (problem != null) {
             allGroupsSelected = problem.isAllView();
         }
-        
-        System.out.println("debug 22 ProblemGroupPane.setProblem allGroupsSelected = "+allGroupsSelected);
-        
-        selectGroupsRadioButton.setSelected(true);
-        if (allGroupsSelected){
-            allGroupsRadioButton.setSelected(allGroupsSelected);
+
+        if (allGroupsSelected) {
+            allGroupsRadioButton.setSelected(true);
+        } else {
+            selectGroupsRadioButton.setSelected(true);
         }
 
         Group[] groups = getContest().getGroups();
         for (Group group : groups) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(group);
-            if (allGroupsSelected){
+            if (allGroupsSelected) {
                 wrapperJCheckBox.setSelected(true);
             }
-            else if (problem.canView(group)){
-                System.out.println("debug 22  selected "+group);
+            else if (problem.canView(group)) {
                 wrapperJCheckBox.setSelected(true);
             }
+            
+            // TODO wrapperJCheckBox.addActionListene does not work, is not enabling/changing the update button
+            wrapperJCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    parentPane.enableUpdateButton();
+                }
+            });
+            
             groupListModel.addElement(wrapperJCheckBox);
         }
+
+        groupsScrollPane.setVisible(!allGroupsSelected);
     }
 
     public List<Group> getGroups() {
@@ -133,7 +157,6 @@ public class ProblemGroupPane extends JPanePlugin {
                 if (element.isSelected()) {
                     Group group = (Group) element.getContents();
                     groups.add(group);
-                    System.out.println("debug 22  getGroups "+group);
                 }
             }
         }
@@ -150,4 +173,11 @@ public class ProblemGroupPane extends JPanePlugin {
         return groupsSelectedButtonGroup;
     }
 
+  
+
+    public void setParentPane(EditProblemPane editProblemPane) {
+        parentPane = editProblemPane;
+        
+        
+    }
 }
