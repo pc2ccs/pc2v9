@@ -10,6 +10,8 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -132,13 +134,12 @@ public class ProblemGroupPane extends JPanePlugin {
                 wrapperJCheckBox.setSelected(true);
             }
             
-            // TODO wrapperJCheckBox.addActionListene does not work, is not enabling/changing the update button
-            wrapperJCheckBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
+            wrapperJCheckBox.addChangeListener(new ChangeListener() {
+                public void stateChanged(ChangeEvent e) {
                     parentPane.enableUpdateButton();
                 }
             });
-            
+
             groupListModel.addElement(wrapperJCheckBox);
         }
 
