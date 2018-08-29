@@ -700,7 +700,7 @@ public class InternalContest implements IInternalContest {
         ClientId me = getClientId();
         if (me != null) {
             Account account = getAccount(me);
-            if (account.isTeam() && account.getGroupId() != null) {
+            if (account != null && account.isTeam() && account.getGroupId() != null) {
                 // If is a team and has been assigned a group.
     
                 Group group = getGroup(account.getGroupId());
