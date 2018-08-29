@@ -40,11 +40,11 @@ languages:
     active: true
     compilerCmd: 'javac -encoding UTF-8 -sourcepath . -d . {:mainfile}'
     exemask: '{:basename}.class'
-    execCmd: 'java -Xss8m -Xmx1024m {:basename}'
+    execCmd: 'java -Xss8m -Xmx1024m {:package}{:basename}'
     runner: 'java'
-    runner-args: '{:basename}'
+    runner-args: '{:package}{:basename}'
     use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_java {:timelimit} {:basename}'
+    judge-exec-cmd: '/usr/bin/wrapper_java {:timelimit} {:package}{:basename}'
 
   - name: 'GNU C'
     active: true

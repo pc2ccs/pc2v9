@@ -25,12 +25,12 @@ languages:
     active: true
     compilerCmd: 'javac -encoding UTF-8 -sourcepath . -d . {:mainfile}'
     exemask: '{:basename}.class'
-    execCmd: 'java {:basename}'
+    execCmd: 'java {:package}{:basename}'
     runner: 'java'
-    runner-args: '{:basename}'
+    runner-args: '{:package}{:basename}'
     interpreted: false
     use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_java {:timelimit} {:basename}'
+    judge-exec-cmd: '/usr/bin/wrapper_java {:timelimit} {:package}{:basename}'
 
   - name: 'GNU C'
     active: true
