@@ -6,7 +6,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 
 /**
- * Provides a Wrapper for a check box. 
+ * Provides a Wrapper for a check box.
  * 
  * 
  * @author pc2@ecs.csus.edu
@@ -30,8 +30,10 @@ public class WrapperJCheckBox extends JCheckBox {
     /**
      * Create a check box with the titlt text.
      * 
-     * @param object any object
-     * @param text the text to display
+     * @param object
+     *            any object
+     * @param text
+     *            the text to display
      */
     public WrapperJCheckBox(Object object, String text) {
         super();

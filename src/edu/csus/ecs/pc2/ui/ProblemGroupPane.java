@@ -129,8 +129,7 @@ public class ProblemGroupPane extends JPanePlugin {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(group);
             if (allGroupsSelected) {
                 wrapperJCheckBox.setSelected(true);
-            }
-            else if (problem.canView(group)) {
+            } else if (problem.canView(group)) {
                 wrapperJCheckBox.setSelected(true);
             }
             

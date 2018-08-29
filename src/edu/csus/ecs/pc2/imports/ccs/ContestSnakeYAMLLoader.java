@@ -1091,33 +1091,31 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         
         
         String groupListString = fetchValue(content, GROUPS_KEY);
-        if (groupListString != null)
-        {
-            
-            if (groupListString.trim().length() == 0){
+        if (groupListString != null) {
+
+            if (groupListString.trim().length() == 0) {
                 syntaxError("Empty group list");
             }
-            
-            String [] fields = groupListString.split(";");
-            if (groupListString.indexOf(';') == -1){
+
+            String[] fields = groupListString.split(";");
+            if (groupListString.indexOf(';') == -1) {
                 fields = groupListString.split(",");
             }
-            
+
             for (String groupInfo : fields) {
                 groupInfo = groupInfo.trim();
                 Group group = lookupGroupInfo(groups, groupInfo);
-                if (group == null){
-                    if (groups == null || groups.length == 0){
-                        syntaxError("ERROR No groups defined. (groups.tsv not loaded?), error when trying to find group for '"+groupInfo+"' from yaml value '"+groupListString+"' ");
+                if (group == null) {
+                    if (groups == null || groups.length == 0) {
+                        syntaxError("ERROR No groups defined. (groups.tsv not loaded?), error when trying to find group for '" + groupInfo + "' from yaml value '" + groupListString + "' ");
                     } else {
-                        syntaxError("Undefined group '"+groupInfo+"' for group list '"+groupListString+"' ");
+                        syntaxError("Undefined group '" + groupInfo + "' for group list '" + groupListString + "' ");
                     }
                 }
-                
+
                 problem.addGroup(group);
             }
         }
-
 
         // TODO CCS - send preliminary - add bug - fix.
         // boolean sendPreliminary = fetchBooleanValue(content, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
@@ -1526,7 +1524,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 return Integer.parseInt(string.trim());
             }
         } catch (Exception e) {
-            ; // ignore, will return default if a parsing error
+            // ignore, will return default if a parsing error
         }
         
         return defaultNumber;
