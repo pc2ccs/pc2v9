@@ -95,7 +95,10 @@ public class ProblemGroupPane extends JPanePlugin {
 
     private void populateProblemGroups(Problem problem) {
         
-        boolean allGroupsSelected = problem.isAllView();
+        boolean allGroupsSelected = true;
+        if (problem != null) {
+            allGroupsSelected = problem.isAllView();
+        }
         
         System.out.println("debug 22 ProblemGroupPane.setProblem allGroupsSelected = "+allGroupsSelected);
         

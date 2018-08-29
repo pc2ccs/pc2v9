@@ -696,17 +696,21 @@ public class InternalContest implements IInternalContest {
 
     public void addProblem(Problem problem) {
 
-        Account account = getAccount(getClientId());
-        if (account.isTeam() && account.getGroupId() != null) {
-            // If is a team and has been assigned a group.
-
-            Group group = getGroup(account.getGroupId());
-            if (!problem.canView(group)) {
-                /**
-                 * This is a team, and this team's group is not allowed to view this problem
-                 */
-                // Do not add this problem to the list of problems.
-                return;
+        // this will be null on the 1st server
+        ClientId me = getClientId();
+        if (me != null) {
+            Account account = getAccount(me);
+            if (account.isTeam() && account.getGroupId() != null) {
+                // If is a team and has been assigned a group.
+    
+                Group group = getGroup(account.getGroupId());
+                if (!problem.canView(group)) {
+                    /**
+                     * This is a team, and this team's group is not allowed to view this problem
+                     */
+                    // Do not add this problem to the list of problems.
+                    return;
+                }
             }
         }
         
