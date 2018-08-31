@@ -154,6 +154,8 @@ public final class Reports {
         
         reports.add(new EventFeedJSONReport());
         
+        reports.add(new ProblemsGroupReport());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }

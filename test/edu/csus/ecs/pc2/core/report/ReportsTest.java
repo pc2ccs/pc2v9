@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.report;
 
+import java.io.File;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -9,15 +10,21 @@ import java.util.Date;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.ReportNameByComparator;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Unit Tests.
@@ -266,6 +273,7 @@ public class ReportsTest extends AbstractTestCase {
                 "JSON 2016 Scoreboard", //
                 "Contest Data Package Report/Export", //
                 "Event Feed JSON Report", //
+                "Groups for Problems Report", //
         };
 
         IReport [] reportList = Reports.getReports();
@@ -346,5 +354,116 @@ public class ReportsTest extends AbstractTestCase {
     private String getShortClassName(Class<? extends IReport> class1) {
         return class1.getName().replaceAll(".*[.]", "");
     }
+    
 
+    private String getTestSampleContestDirectory(String dirname) {
+        return getSampleContestsDirectory() + File.separator + dirname;
+    }
+
+    private String getSampleContestsDirectory() {
+        return "samps" + File.separator + "contests";
+    }
+
+
+    /**
+     * Load groups from samps contest.
+     * 
+     * @param contest
+     * @param contestDirName
+     * @throws Exception 
+     */
+    private void loadGroupsFromSampContest(IInternalContest contest, String contestDirName) throws Exception {
+        String groupFile = getTestSampleContestDirectory(contestDirName) +File.separator+ IContestLoader.CONFIG_DIRNAME + File.separator + LoadICPCTSVData.GROUPS_FILENAME;
+        Group[] groups = ICPCTSVLoader.loadGroups(groupFile);
+        for (Group group : groups) {
+            contest.addGroup(group);
+        }
+    }
+    
+
+    private IInternalContest loadSampleContest(IInternalContest contest, String sampleName) throws Exception {
+        
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        String configDir = getTestSampleContestDirectory(sampleName) + File.separator + IContestLoader.CONFIG_DIRNAME;
+        try {
+            return loader.fromYaml(contest, configDir);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw e;
+        }
+    }
+    
+    /**
+     * Test report with valtest sample contest
+     * @throws Exception
+     */
+
+    public void testProblemsGroupReport() throws Exception {
+
+        IReport report = new ProblemsGroupReport();
+        IInternalContest contest = new InternalContest();
+
+        /**
+         * Contest to use as input
+         */
+        String sampleContestDirName = "valtest";
+
+        /**
+         * Load groups data.
+         */
+        loadGroupsFromSampContest(contest, sampleContestDirName);
+
+        assertEquals("Number groups ", 12, contest.getGroups().length);
+        loadSampleContest(contest, sampleContestDirName);
+        createAndViewReport(contest, report, false);
+    }
+
+    /**
+     * Test report with empty contest
+     * @throws Exception
+     */
+
+    public void testProblemsGroupReportEmpty() throws Exception {
+
+        IReport report = new ProblemsGroupReport();
+        IInternalContest contest = new InternalContest();
+        assertEquals("Number groups ", 0, contest.getGroups().length);
+        createAndViewReport(contest, report, false);
+    }
+
+    /**
+     * Test report with internal sample contest
+     * @throws Exception
+     */
+
+    public void testProblemsGroupReportSampleContest() throws Exception {
+
+        IReport report = new ProblemsGroupReport();
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createStandardContest();
+        sampleContest.assignSampleGroups(contest, "North Group", "South Group");
+        assertEquals("Number groups ", 2, contest.getGroups().length);
+        createAndViewReport(contest, report, false);
+    }
+
+    /**
+     * Create a report based on model/contest.
+     * 
+     * @param contest
+     * @param report
+     * @param showReportWindow - edit/view report file
+     * @throws Exception
+     */
+    public void createAndViewReport(IInternalContest contest, IReport report, boolean showReportWindow) throws Exception {
+
+        IInternalController controller = new SampleContest().createController(contest, true, false);
+
+        String filename = Utilities.createReport(report, contest, controller, true);
+
+        assertFileExists(filename);
+        if (showReportWindow) {
+            editFile(filename);
+        }
+
+    }
 }

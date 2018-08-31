@@ -83,6 +83,7 @@ import edu.csus.ecs.pc2.core.report.OldRunsReport;
 import edu.csus.ecs.pc2.core.report.PasswordsReport;
 import edu.csus.ecs.pc2.core.report.PlaybackDumpReport;
 import edu.csus.ecs.pc2.core.report.PluginsReport;
+import edu.csus.ecs.pc2.core.report.ProblemsGroupReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 import edu.csus.ecs.pc2.core.report.ProfilesReport;
@@ -289,6 +290,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new JudgingAnalysisReport());
 
         reports.add(new JSON2016Report());
+        
+        reports.add(new ProblemsGroupReport());
         
         if (isServer()){
             // SOMEDAY Bug 1166 remove this isServer when added to Admin. 

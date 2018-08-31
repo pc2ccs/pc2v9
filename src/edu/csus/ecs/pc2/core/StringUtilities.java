@@ -135,15 +135,83 @@ public final class StringUtilities implements Serializable {
         return newArray;
     }
 
+    /**
+     * Truncate string with ellipsis.
+     * @param string
+     * @param maxlen
+     * @return
+     */
     public static String trunc(String string, int maxlen) {
 
-        if (string.length() <= maxlen ){
+        if (string.length() <= maxlen) {
             return string;
         } else {
-            return string.substring(0,maxlen-ELLIPSIS.length())+ELLIPSIS;
+            return string.substring(0, maxlen - ELLIPSIS.length()) + ELLIPSIS;
         }
     }
 
+    /**
+     * Add padding on left side of string to insure minFieldLength.
+     * 
+     * @param padChar
+     * @param minFieldLength
+     * @param value
+     * @return
+     */
+    public static String lpad(char padChar, int minFieldLength, int value) {
+        String v = Integer.toString(value);
+        int addchars = minFieldLength - v.length();
+        if (addchars > 0) {
+            v = new String(new char[addchars]).replace('\0', padChar) + v;
+        }
+        return v;
+    }
+    
+    /**
+     * Add padding on left side of string to insure minFieldLength.
+     * 
+     * @param padChar
+     * @param minFieldLength
+     * @param value
+     * @return
+     */
+    public static String lpad(char padChar, int minFieldLength, String string) {
+        int addchars = minFieldLength - string.length();
+        if (addchars > 0) {
+            string = new String(new char[addchars]).replace('\0', padChar) + string;
+        }
+        return string;
+    }
+    
+    /**
+     * Add padding on end of string to insure minFieldLength.
+     * 
+     * @param padChar
+     * @param minFieldLength
+     * @param value
+     * @return
+     */
+    public static String rpad(char padChar, int minFieldLength, int value) {
+        return rpad(padChar, minFieldLength, Integer.toString(value));
+    }
+    
+    /**
+     * Add padding on end of string to insure minFieldLength.
+     * 
+     * @param padChar
+     * @param minFieldLength
+     * @param value
+     * @return
+     */
+    public static String rpad(char padChar, int minFieldLength, String string) {
+        int addchars = minFieldLength - string.length();
+        if (addchars > 0) {
+            string = string + new String(new char[addchars]).replace('\0', padChar);
+        }
+        return string;
+    }
+    
+    
     /**
      * Is string empty or null?.
      * 
