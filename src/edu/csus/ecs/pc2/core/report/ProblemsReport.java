@@ -91,15 +91,17 @@ public class ProblemsReport implements IReport {
             }
         }
         printWriter.println("       Balloon RGB      : " + balloonColorRGB);
-        
-        String groupList = "All";
+
+        int groupCount = contest.getGroups().length;
+        String groupList = "All (" + groupCount + ")";
         List<Group> groups = problem.getGroups();
-        
-        if (! groups.isEmpty()){
+
+        if (!groups.isEmpty()) {
             // REFACTOR for Java 1.8 groupList = String.join(", ", groups);
-            groupList = StringUtilities.join(", ", groups);
+            groupCount = groups.size();
+            groupList = groupCount + ": " + StringUtilities.join("; ", groups);
         }
-        
+
         printWriter.println("   Groups who can view  : " + groupList);
         
         printWriter.println();

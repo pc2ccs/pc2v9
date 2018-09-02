@@ -36,6 +36,8 @@ public class ProblemGroupPane extends JPanePlugin {
      * Model containing checkboxes
      */
     private DefaultListModel<WrapperJCheckBox> groupListModel = new DefaultListModel<WrapperJCheckBox>();
+    
+    private List<WrapperJCheckBox> groupCheckBoxList = new ArrayList<>();
 
     private JCheckBoxJList groupListBox = null;
 
@@ -75,7 +77,7 @@ public class ProblemGroupPane extends JPanePlugin {
         allGroupsRadioButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 parentPane.enableUpdateButton();
-                groupsScrollPane.setVisible(false);
+                enableGroupCheckBoxes(false);
             }
         });
 
@@ -86,7 +88,7 @@ public class ProblemGroupPane extends JPanePlugin {
         selectGroupsRadioButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 parentPane.enableUpdateButton();
-                groupsScrollPane.setVisible(true);
+                enableGroupCheckBoxes(true);
             }
         });
         selectGroupsRadioButton.setBounds(125, 62, 263, 23);
@@ -98,14 +100,28 @@ public class ProblemGroupPane extends JPanePlugin {
     }
 
 
+    protected void enableGroupCheckBoxes(boolean enable) {
+
+        //        groupsScrollPane.setEnabled(enable);
+
+        //        groupListBox.setEnabled(enable);
+
+        for (WrapperJCheckBox wrapperJCheckBox : groupCheckBoxList) {
+            wrapperJCheckBox.setEnabled(enable);
+            System.out.println("debug 22  enableGroupCheckBoxes " + enable + " " + wrapperJCheckBox.getText());
+        }
+    }
+
     @Override
     public String getPluginTitle() {
         return "Problem Group Pane";
     }
 
     public void setProblem(Problem problem) {
+        
 
         groupListModel.removeAllElements(); // clear checkbox
+        groupCheckBoxList.clear();
         
         populateProblemGroups(problem);
 
@@ -123,14 +139,22 @@ public class ProblemGroupPane extends JPanePlugin {
         } else {
             selectGroupsRadioButton.setSelected(true);
         }
+        
+        System.out.println("debug 22 populateProblemGroups "+problem.isAllView());
+        
+        enableGroupCheckBoxes(true);
 
         Group[] groups = getContest().getGroups();
         for (Group group : groups) {
+            System.out.println("debug 22 populateProblemGroups "+problem.canView(group)+" "+group.getDisplayName());
+            
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(group);
             if (allGroupsSelected) {
                 wrapperJCheckBox.setSelected(true);
             } else if (problem.canView(group)) {
                 wrapperJCheckBox.setSelected(true);
+            } else {
+                wrapperJCheckBox.setSelected(false);
             }
             
             wrapperJCheckBox.addChangeListener(new ChangeListener() {
@@ -140,9 +164,10 @@ public class ProblemGroupPane extends JPanePlugin {
             });
 
             groupListModel.addElement(wrapperJCheckBox);
+            groupCheckBoxList.add(wrapperJCheckBox);
         }
-
-        groupsScrollPane.setVisible(!allGroupsSelected);
+        
+        enableGroupCheckBoxes(! allGroupsSelected);
     }
 
     public List<Group> getGroups() {
@@ -159,6 +184,11 @@ public class ProblemGroupPane extends JPanePlugin {
                     groups.add(group);
                 }
             }
+        }
+        
+        System.out.println("debug 22 group length "+groups.size());
+        for (Group group : groups) {
+            System.out.println("debug 22 group  "+group.getDisplayName());
         }
 
         return groups;
