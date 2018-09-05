@@ -46,6 +46,7 @@ import edu.csus.ecs.pc2.core.model.IJudgementListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementEvent;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -857,6 +858,24 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         // getManualRunResultsPanel().clear();
         setEnabledButtonStatus(false);
         executable.execute();
+
+        ExecutionData executionData = executable.getExecutionData();
+        if (executionData != null && executionData.getExecutionException() != null) {
+            Exception ex = executionData.getExecutionException();
+            Language lang = getContest().getLanguage(run.getLanguageId());
+
+            String command = lang.getJudgeProgramExecuteCommandLine();
+            if (command == null) {
+                command = lang.getJudgeProgramExecuteCommandLine();
+            }
+            String commandLine = executable.substituteAllStrings(run, command);
+            log.warning("Error executing command: " + commandLine);
+            log.warning("Error is: " + ex.getMessage());
+
+            JOptionPane.showMessageDialog(this,  "Error executing command: " + commandLine + "\n\n" + ex.getMessage(), "Error during execute",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         savedTeamOutputFileNames = executable.getTeamsOutputFilenames();
         savedValidatorOutputFileNames = executable.getValidatorOutputFilenames();
         savedValidatorErrFileNames = executable.getValidatorErrFilenames();
