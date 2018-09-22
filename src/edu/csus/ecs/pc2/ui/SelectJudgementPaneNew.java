@@ -62,7 +62,6 @@ import edu.csus.ecs.pc2.ui.judge.JudgeView;
  * 
  * @author pc2@ecs.csus.edu
  */
-
 public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
@@ -610,9 +609,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     /**
-     * Can be used to disable select controls during execution.
+     * Enable buttons.
      * 
-     * @param b
+     * @param b if false disable Close and other buttons, else enables those buttons.
      */
     public void setEnabledButtonStatus(boolean b) {
         getExecuteButton().setEnabled(b && runFiles != null);
@@ -623,6 +622,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getAcceptChosenSelectionButton().setEnabled(b && getJudgementComboBox().getSelectedIndex() != -1);
     }
 
+    /**
+     * Enable Update and other buttons.
+     * 
+     * @param editedText if true and run has been loaded/set enables buttons
+     */
     public void enableUpdateButtons(boolean editedText) {
         if (editedText) {
             cancelButton.setText("Cancel");
@@ -873,6 +877,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             log.warning("Error is: " + ex.getMessage());
 
             JOptionPane.showMessageDialog(this,  "Error executing command: " + commandLine + "\n\n" + ex.getMessage(), "Error during execute",JOptionPane.ERROR_MESSAGE);
+
+            setEnabledButtonStatus(true);
             return;
         }
 
