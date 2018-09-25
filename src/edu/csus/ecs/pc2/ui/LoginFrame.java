@@ -453,10 +453,11 @@ public class LoginFrame extends JFrame implements ILoginUI {
     private boolean verifyImage(String inFileName, URL url) {
         // these are the real checksums
         byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
-        byte[] icpcChecksum = { -9, -91, 66, 44, 57, 117, 47, 58, 103, -17, 31, 53, 10, 6, 100, 68, 0, 127, -103, -58};
-        // these are the checkums from java jvm under microsoft
+        // generated under Windows10 running java version "1.8.0_144" and ubuntu running "1.8.0_131"
+//        byte[] icpcChecksum = {-116, -88, -24, 46, 99, 102, -94, -64, -28, -61, 51, 4, -52, -116, -23, 92, 51, -78, -90, -107};
         byte[] csusChecksum2 = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
-        byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
+        // old icpc_logo.png checksum
+//        byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
         // these are the ibm jre checksums
         byte[] csusChecksum3 = {-46, -84, -66, 55, 82, -78, 124, 88, 68, -83, -128, -110, -19, -26, 92, -3, 76, -26, 21, 30};
         byte[] icpcChecksum3 = {41, 72, 104, 75, 73, 55, 55, 93, 32, 35, -6, -12, -96, -23, -3, -17, -119, 26, 81, -2};
@@ -464,6 +465,11 @@ public class LoginFrame extends JFrame implements ILoginUI {
         // this is the jdk 1.7 checksum for icpc_banner
         byte[] icpcChecksum4 = {35, 40, -57, -30, -7, 121, 59, 25, 3, 26, -82, -75, -65, 123, 54, -57, 39, 36, -3, 107};
 
+        // new 20180924
+        // win10 java9
+        byte[] icpcChecksum = {119, 107, 9, -52, 56, 121, 125, -115, -2, -40, 53, 86, 113, 4, 87, 42, 83, 118, 117, -2};
+        // mac java8
+        byte[] icpcChecksum2 = {-20, -110, 63, 117, -52, 4, -125, 31, 47, 92, 13, 97, 91, -28, -55, -28, 65, -106, 106, -24};
         byte[] verifyChecksum;
         
         try {
@@ -490,7 +496,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
                 } 
             } else {
                 switch (digested[0]) {
-                    case 70:
+                    case -20:
                         verifyChecksum = icpcChecksum2;
                         break;
                     case 41:

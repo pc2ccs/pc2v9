@@ -126,7 +126,7 @@ if (is_resource ( @fsockopen ( 'localhost', 50005 ) )) {
 
 	<div id="banner">
 		<a href="http://icpc.baylor.edu/"><img
-			src="../Team/images/ACM_IBM_Long_logo.PNG" style="width: 47.0%;"></a>
+			src="../Team/images/ICPCWebMast_small.png" style="width: 47.0%;"></a>
 		<a href="http://www.ecs.csus.edu/pc2/"><img
 			src="../Team/images/sac_state_logo.png" style="width: 32.0%;"></a> <a
 			href="http://www.ewu.edu/"><img id="easternLogo"
