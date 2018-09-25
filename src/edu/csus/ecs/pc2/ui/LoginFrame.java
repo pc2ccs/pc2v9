@@ -489,7 +489,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
         // win10 java9
         byte[] icpcChecksum = {119, 107, 9, -52, 56, 121, 125, -115, -2, -40, 53, 86, 113, 4, 87, 42, 83, 118, 117, -2};
         // mac java8
-        byte[] icpcChecksum2 = {64, -78, 40, -69, 7, 43, -8, -71, 18, -51, 108, 82, -4, -19, 28, -21, -29, -84, 28, 24};
+        byte[] icpcChecksum2 = {-20, -110, 63, 117, -52, 4, -125, 31, 47, 92, 13, 97, 91, -28, -55, -28, 65, -106, 106, -24};
         byte[] verifyChecksum;
         
         try {
