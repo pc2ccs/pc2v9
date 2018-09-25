@@ -473,10 +473,10 @@ public class LoginFrame extends JFrame implements ILoginUI {
         // these are the real checksums
         byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
         // generated under Windows10 running java version "1.8.0_144" and ubuntu running "1.8.0_131"
-        byte[] icpcChecksum = {-116, -88, -24, 46, 99, 102, -94, -64, -28, -61, 51, 4, -52, -116, -23, 92, 51, -78, -90, -107};
+//        byte[] icpcChecksum = {-116, -88, -24, 46, 99, 102, -94, -64, -28, -61, 51, 4, -52, -116, -23, 92, 51, -78, -90, -107};
         byte[] csusChecksum2 = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
         // old icpc_logo.png checksum
-        byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
+//        byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
         // these are the ibm jre checksums
         byte[] csusChecksum3 = {-46, -84, -66, 55, 82, -78, 124, 88, 68, -83, -128, -110, -19, -26, 92, -3, 76, -26, 21, 30};
         // old icpc_logo.png checksum
@@ -485,6 +485,11 @@ public class LoginFrame extends JFrame implements ILoginUI {
         // this is the eclipse checksum
         byte[] icpcChecksum4 = {47, -56, 88, -115, 40, 20, 98, -6, 99, 49, -17, 37, 74, -77, 0, -74, 55, -100, 9, -118};
 
+        // new 20180924
+        // win10 java9
+        byte[] icpcChecksum = {119, 107, 9, -52, 56, 121, 125, -115, -2, -40, 53, 86, 113, 4, 87, 42, 83, 118, 117, -2};
+        // mac java8
+        byte[] icpcChecksum2 = {64, -78, 40, -69, 7, 43, -8, -71, 18, -51, 108, 82, -4, -19, 28, -21, -29, -84, 28, 24};
         byte[] verifyChecksum;
         
         try {
