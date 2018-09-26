@@ -54,7 +54,7 @@ goto :OS64
 :OS64
 cls
 Echo.
-Echo WARNING: We detected a 32 bit java -Djdk.crypto.KeyAgreement.legacyKDF=true running on a 64 bit OS.
+Echo WARNING: We detected a 32 bit java running on a 64 bit OS.
 Echo.
 Echo We recommend that you run PC^2 Server using a 64 bit version of Java to allow
 Echo for the best results.
