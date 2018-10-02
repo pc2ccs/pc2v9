@@ -24,7 +24,7 @@ public class ProblemGroupPaneTest extends AbstractTestCase {
     public void testProblemPane() throws Exception {
 
         setDebugMode(false);
-        setDebugMode(true); // TODO debug 22 ;
+//        setDebugMode(true); // TODO debug 22 ;
 
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createStandardContest();
