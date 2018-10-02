@@ -28,7 +28,7 @@ goto end
 
 call %EWBIN%\ewenv.bat
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "pc2_classpath" -jar "%libdir%/PC2JavaServer.jar" %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "%pc2_classpath%" -jar "%libdir%/PC2JavaServer.jar" %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
 
