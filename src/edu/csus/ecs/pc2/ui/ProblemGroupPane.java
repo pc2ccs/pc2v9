@@ -10,6 +10,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.ListModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -37,8 +38,6 @@ public class ProblemGroupPane extends JPanePlugin {
      */
     private DefaultListModel<WrapperJCheckBox> groupListModel = new DefaultListModel<WrapperJCheckBox>();
     
-    private List<WrapperJCheckBox> groupCheckBoxList = new ArrayList<>();
-
     private JCheckBoxJList groupListBox = null;
 
     private JScrollPane groupsScrollPane = null;
@@ -100,16 +99,62 @@ public class ProblemGroupPane extends JPanePlugin {
     }
 
 
+    /**
+     * Enable or disable Group Checkboxes
+     */
     protected void enableGroupCheckBoxes(boolean enable) {
 
-        //        groupsScrollPane.setEnabled(enable);
+    	// TODO remove old attempts to disable checkboxes
+    	
+//        groupsScrollPane.setEnabled(enable);
 
-        //        groupListBox.setEnabled(enable);
-
-        for (WrapperJCheckBox wrapperJCheckBox : groupCheckBoxList) {
-            wrapperJCheckBox.setEnabled(enable);
-            System.out.println("debug 22  enableGroupCheckBoxes " + enable + " " + wrapperJCheckBox.getText());
+//        groupListBox.setEnabled(enable);
+        
+//        for (int i = 0; i < groupListModel.getSize(); i++) {
+//            
+//            WrapperJCheckBox ele0 = groupListModel.getElementAt(i);
+//            System.out.println("debug 22 A enableGroupCheckBoxes name  "+ele0.getText()+" "+ele0.isEnabled());
+//            groupListModel.getElementAt(i).setEnabled(enable);
+//            WrapperJCheckBox ele = groupListModel.getElementAt(i);
+//            System.out.println("debug 22 B enableGroupCheckBoxes name  "+ele.getText()+" "+ele.isEnabled());
+//        }
+        
+        
+//        Enumeration<WrapperJCheckBox> enumeration = groupListModel.elements();
+//        while (enumeration.hasMoreElements()) {
+//            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+//            element.setEnabled(enable);
+//        }
+//        for (int j = 0; j < groupsScrollPane.getComponentCount(); j++) {
+//            Component ele = groupsScrollPane.getComponent(j);
+//            ele.setEnabled(enable);
+//            System.out.println("debug 22  is it ? "+ele.getClass().getName());
+//        }
+        
+//        getGroupListBox().setEnabled(enable);
+//        
+//        JCheckBoxJList list = getGroupListBox();
+//        for (int i = 0; i < list.getComponentCount(); i++) {
+//            Component ele = list.getComponent(i);
+//            System.out.println("debug 22 "+ele.isEnabled()+ " " +ele.toString());
+//            ele.setEnabled(enable);
+//        }
+//        
+    	
+//        getGroupListBox().setEnabled(enable);
+        
+        ListModel<Object> list = getGroupListBox().getModel();;
+        
+        for (int i = 0; i < list.getSize(); i++) {
+            Object ele = list.getElementAt(i);
+//            System.out.println("debug 22 "+ele.getClass().getName()+ " " +ele.toString());
+            if (ele instanceof WrapperJCheckBox){
+                WrapperJCheckBox box = (WrapperJCheckBox) ele;
+                box.setEnabled(enable);
+                System.out.println("debug 22 "+enable + " " +box.isEnabled()+ " " + box.getText());
+            }
         }
+        
     }
 
     @Override
@@ -119,9 +164,7 @@ public class ProblemGroupPane extends JPanePlugin {
 
     public void setProblem(Problem problem) {
         
-
         groupListModel.removeAllElements(); // clear checkbox
-        groupCheckBoxList.clear();
         
         populateProblemGroups(problem);
 
@@ -164,7 +207,6 @@ public class ProblemGroupPane extends JPanePlugin {
             });
 
             groupListModel.addElement(wrapperJCheckBox);
-            groupCheckBoxList.add(wrapperJCheckBox);
         }
         
         enableGroupCheckBoxes(! allGroupsSelected);
