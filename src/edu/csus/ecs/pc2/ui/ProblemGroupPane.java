@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -92,7 +93,6 @@ public class ProblemGroupPane extends JPanePlugin {
         });
         selectGroupsRadioButton.setBounds(125, 62, 263, 23);
         add(selectGroupsRadioButton);
-        
 
         add(getGroupsScroll());
         getValidatorChoiceButtonGroup();
@@ -104,57 +104,25 @@ public class ProblemGroupPane extends JPanePlugin {
      */
     protected void enableGroupCheckBoxes(boolean enable) {
 
-    	// TODO remove old attempts to disable checkboxes
-    	
-//        groupsScrollPane.setEnabled(enable);
+        ListModel<Object> list = getGroupListBox().getModel();
 
-//        groupListBox.setEnabled(enable);
-        
-//        for (int i = 0; i < groupListModel.getSize(); i++) {
-//            
-//            WrapperJCheckBox ele0 = groupListModel.getElementAt(i);
-//            System.out.println("debug 22 A enableGroupCheckBoxes name  "+ele0.getText()+" "+ele0.isEnabled());
-//            groupListModel.getElementAt(i).setEnabled(enable);
-//            WrapperJCheckBox ele = groupListModel.getElementAt(i);
-//            System.out.println("debug 22 B enableGroupCheckBoxes name  "+ele.getText()+" "+ele.isEnabled());
-//        }
-        
-        
-//        Enumeration<WrapperJCheckBox> enumeration = groupListModel.elements();
-//        while (enumeration.hasMoreElements()) {
-//            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
-//            element.setEnabled(enable);
-//        }
-//        for (int j = 0; j < groupsScrollPane.getComponentCount(); j++) {
-//            Component ele = groupsScrollPane.getComponent(j);
-//            ele.setEnabled(enable);
-//            System.out.println("debug 22  is it ? "+ele.getClass().getName());
-//        }
-        
-//        getGroupListBox().setEnabled(enable);
-//        
-//        JCheckBoxJList list = getGroupListBox();
-//        for (int i = 0; i < list.getComponentCount(); i++) {
-//            Component ele = list.getComponent(i);
-//            System.out.println("debug 22 "+ele.isEnabled()+ " " +ele.toString());
-//            ele.setEnabled(enable);
-//        }
-//        
-    	
-//        getGroupListBox().setEnabled(enable);
-        
-        ListModel<Object> list = getGroupListBox().getModel();;
-        
+        if (!enable) {
+            getGroupListBox().clearSelection();
+            getGroupListBox().setForeground(Color.GRAY);
+        } else {
+            getGroupListBox().setForeground(Color.BLACK);
+        }
+
         for (int i = 0; i < list.getSize(); i++) {
             Object ele = list.getElementAt(i);
-//            System.out.println("debug 22 "+ele.getClass().getName()+ " " +ele.toString());
-            if (ele instanceof WrapperJCheckBox){
+            if (ele instanceof WrapperJCheckBox) {
                 WrapperJCheckBox box = (WrapperJCheckBox) ele;
+
                 box.setEnabled(enable);
-                System.out.println("debug 22 "+enable + " " +box.isEnabled()+ " " + box.getText());
+
             }
+
         }
-        
     }
 
     @Override
@@ -183,13 +151,10 @@ public class ProblemGroupPane extends JPanePlugin {
             selectGroupsRadioButton.setSelected(true);
         }
         
-        System.out.println("debug 22 populateProblemGroups "+problem.isAllView());
-        
         enableGroupCheckBoxes(true);
 
         Group[] groups = getContest().getGroups();
         for (Group group : groups) {
-            System.out.println("debug 22 populateProblemGroups "+problem.canView(group)+" "+group.getDisplayName());
             
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(group);
             if (allGroupsSelected) {
@@ -228,11 +193,6 @@ public class ProblemGroupPane extends JPanePlugin {
             }
         }
         
-        System.out.println("debug 22 group length "+groups.size());
-        for (Group group : groups) {
-            System.out.println("debug 22 group  "+group.getDisplayName());
-        }
-
         return groups;
     }
 

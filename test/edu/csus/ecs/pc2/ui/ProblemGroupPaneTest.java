@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Dimension;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -24,7 +25,7 @@ public class ProblemGroupPaneTest extends AbstractTestCase {
     public void testProblemPane() throws Exception {
 
         setDebugMode(false);
-//        setDebugMode(true); // TODO debug 22 ;
+        // setDebugMode(true);  // set this to true before checking in 
 
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createStandardContest();
@@ -42,6 +43,8 @@ public class ProblemGroupPaneTest extends AbstractTestCase {
 
             JPanePlugin pane;
             boolean useProbGroupPane = false;
+            useProbGroupPane = true;
+            
             if (useProbGroupPane) {
 
                 ProblemGroupPane problemGroupPane = new ProblemGroupPane();
@@ -67,7 +70,11 @@ public class ProblemGroupPaneTest extends AbstractTestCase {
             FrameUtilities.setFramePosition(frame, HorizontalPosition.LEFT, VerticalPosition.TOP);
             frame.setVisible(true);
 
-            Thread.sleep(409000);
+            if (isDebugMode()){
+                int seconds = 240;
+                System.err.println("testProblemPane: Sleeping for "+seconds+" seconds.");
+                Thread.sleep(seconds * Constants.MS_PER_SECOND);
+            }
         }
     }
 }

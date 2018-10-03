@@ -16,9 +16,21 @@ import javax.swing.JPanel;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class TestingFrameTwo extends JPanePlugin {
+    
+    
     WrapperJCheckBox chckbxNewCheckBox = new WrapperJCheckBox("New check box");
 
-    JCheckBoxJList list = new JCheckBoxJList();
+    JCheckBoxJList list = createList();
+    
+    private static final long serialVersionUID = 1680709710892814751L;
+
+    private final JPanel panel = new JPanel();
+
+    private final JPanel panel_2 = new JPanel();
+
+    private final JPanel panel_3 = new JPanel();
+
+    private final JPanel panel_1 = new JPanel();
 
     public TestingFrameTwo() {
         setLayout(new BorderLayout(0, 0));
@@ -26,7 +38,6 @@ public class TestingFrameTwo extends JPanePlugin {
         add(list);
 
         add(panel, BorderLayout.SOUTH);
-        populate(chckbxNewCheckBox);
         panel.add(chckbxNewCheckBox);
 
         JButton btnToggle = new JButton("Toggle");
@@ -57,28 +68,10 @@ public class TestingFrameTwo extends JPanePlugin {
         return new JCheckBoxJList(list);
     }
 
-    private void populate(WrapperJCheckBox wrapperJCheckBox) {
-
-    }
 
     protected void toggleEnabled(JCheckBox checkBox) {
-
         checkBox.setEnabled(!checkBox.isEnabled());
-
     }
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1680709710892814751L;
-
-    private final JPanel panel = new JPanel();
-
-    private final JPanel panel_2 = new JPanel();
-
-    private final JPanel panel_3 = new JPanel();
-
-    private final JPanel panel_1 = new JPanel();
 
     @Override
     public String getPluginTitle() {
