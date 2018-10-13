@@ -624,10 +624,7 @@ public class ServerInterface {
 	}
 
 	public String getManifestValue(String name) throws IOException {
-		URLClassLoader classLoader = (URLClassLoader) getClass()
-				.getClassLoader();
-		URL url = classLoader.findResource("META-INF/MANIFEST.MF");
-		Manifest manifest = new Manifest(url.openStream());
+		Manifest manifest = new Manifest(Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/MANIFEST.MF"));
 		Attributes attributes = manifest.getMainAttributes();
 		return attributes.getValue(name);
 	}
