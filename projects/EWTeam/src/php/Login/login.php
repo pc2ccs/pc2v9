@@ -91,9 +91,9 @@ if (is_resource ( @fsockopen ( 'localhost', 50005 ) )) {
 						</div>
 
 						<div class="hrDivider" />
-						<br/> <input type="button" style="width: 100%;"
-							value="Scoreboard"
-							onclick="location.href='../Team/ScoreboardMain.php'" /><br />
+						<br/> <a href="../Team/ScoreboardMain.php">
+                                                        <input type="button" style="width: 100%;" value="Scoreboard" />
+                                                      </a> <br />
 
 					</form>
 
@@ -117,8 +117,9 @@ if (is_resource ( @fsockopen ( 'localhost', 50005 ) )) {
 						This web interface was created by <span style="color: #cc2211;">Eastern
 							Washington University's</span> PC^2 Senior Project team and is
 						still actively being worked on and improved.  <?php if (isset($server)) { echo "Version: "; echo $server->getVersionNumber(); echo "-"; echo $server->getBuildNumber(); } ?>
-					</p> <input type="button" id="userGuide" value="User Guide"
-					onclick="location.href='../doc/pc2userguide.pdf'" /><br />
+					</p> <a href="../doc/pc2userguide.pdf">
+                                           <input type="button" id="userGuide" value="User Guide" />
+                                        </a> <br />
 				</td>
 			</tr>
 		</table>
