@@ -69,20 +69,24 @@ public class ExecuteTimer extends Thread implements
         initialize();
     }
 
+    /**   
+     * This method is entered when either the underlying Swing Timer fires an event (which happens once per second),
+     * or when the "Terminate" button on the ExecuteTimer GUI is pressed.
+     * It determines how much time has elapsed since the timer was started and updates the GUI display showing the
+     * elapsed time.  If the elapsed time has exceeded the time limit (specified when the ExecuteTimer was created)
+     * and the current client is not a team, the method changes the timer display value to red and checks to see if
+     * the ExecuteTimer was configured for "autostop"; if so, the method sets the "run time limit exceeded" flag to true
+     * and calls {@link #stopIOCollectors()} to shut down IO Collection for the process being controlled by this ExecutionTimer.
+     * Finally, if the method was invoked due to a press of the Terminate button, the method invokes connEtoC1() 
+     * (a linkage method from the original VisualAge for Java (VAJ) implementation) to perform user-termination cleanup.
+     */    
     public void actionPerformed(java.awt.event.ActionEvent e) {
-        // user code begin {1}
 
-        // entered when the execution timer fires an event, which happens once
-        // per
-        // second
+        long elapsedSecs = getElapsedSecs();
 
-        long currentTime = getElapsedSecs();
-
-        // compute the minutes and seconds elapsed (assumes execution will be <
-        // 1
-        // hour)
-        long seconds = currentTime % 60;
-        long minutes = currentTime / 60;
+        // compute the minutes and seconds elapsed (assumes execution will be < 1 hour)
+        long seconds = elapsedSecs % 60;
+        long minutes = elapsedSecs / 60;
 
         // build a string containing the time in MM:SS form
         String newTime = "";
@@ -96,13 +100,13 @@ public class ExecuteTimer extends Thread implements
         }
         newTime = newTime + seconds;
 
-        // check if time is past upper limit; if so, change to RED
-        if (currentTime > maxTime && (! isTeam())) {
-            getTimerCount().setForeground(java.awt.Color.red);
+        // check if time is past upper limit; if so, change text display to RED
+        if (elapsedSecs > maxTime && (! isTeam())) {
+            getTimerCountLabel().setForeground(java.awt.Color.red);
 
             if (doAutoStop) {
-                System.out.println("ExecuteTimer - halting run execute, time " + currentTime + " over time limit " + maxTime + " seconds limit.");
-                log.info("ExecuteTimer - halting run execute, time " + currentTime + " over time limit " + maxTime + " seconds limit.");
+                System.out.println("ExecuteTimer - halting run execute, time " + elapsedSecs + " over time limit " + maxTime + " seconds limit.");
+                log.info("ExecuteTimer - halting run execute, time " + elapsedSecs + " over time limit " + maxTime + " seconds limit.");
                 setRunTimeLimitExceeded(true);
                 stopIOCollectors();
             }
@@ -110,22 +114,17 @@ public class ExecuteTimer extends Thread implements
         }
 
         // update the on-screen display time
-        getTimerCount().setText(newTime);
+        getTimerCountLabel().setText(newTime);
 
-        // user code end
         if (e.getSource() == getbtnTerminate()) {
             connEtoC1(e);
         }
-        // user code begin {2}
-
-        // user code end
     }
 
     /**
      * This terminates the process that this timer is working
      */
-    public void btnTerminateActionPerformed(
-            java.awt.event.ActionEvent actionEvent) {
+    public void btnTerminateActionPerformed(java.awt.event.ActionEvent actionEvent) {
 
         if (doAutoStop) {
             log.config("ExecuteTimer - User hit terminate while AJ'ing.");
@@ -142,17 +141,10 @@ public class ExecuteTimer extends Thread implements
      * @param arg1
      *            java.awt.event.ActionEvent
      */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
     private void connEtoC1(java.awt.event.ActionEvent arg1) {
         try {
-            // user code begin {1}
-            // user code end
             this.btnTerminateActionPerformed(arg1);
-            // user code begin {2}
-            // user code end
         } catch (java.lang.Throwable ivjExc) {
-            // user code begin {3}
-            // user code end
             handleException(ivjExc);
         }
     }
@@ -162,7 +154,6 @@ public class ExecuteTimer extends Thread implements
      *
      * @return javax.swing.JButton
      */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
     private javax.swing.JButton getbtnTerminate() {
         if (ivjbtnTerminate == null) {
             try {
@@ -170,17 +161,20 @@ public class ExecuteTimer extends Thread implements
                 ivjbtnTerminate.setName("btnTerminate");
                 ivjbtnTerminate.setMnemonic('t');
                 ivjbtnTerminate.setText("Terminate");
-                // user code begin {1}
-                // user code end
             } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
                 handleException(ivjExc);
             }
         }
         return ivjbtnTerminate;
     }
 
+    /**
+     * Returns the number of seconds which have passed from the moment the timer's "startTime" was most recently set
+     * until now.  Note that the timer's "startTime" is set initially (to "now()") when the ExecuteTimer object is 
+     * constructed; it is reset (also to the current value of "now()") when method {@link #setStartTime()} is called.
+     * 
+     * @return a long containing the number of elapsed seconds from timer start until now
+     */
     private long getElapsedSecs() {
         long milliDiff = now().getTime().getTime()
                 - startTime.getTime().getTime();
@@ -193,7 +187,6 @@ public class ExecuteTimer extends Thread implements
      *
      * @return javax.swing.JFrame
      */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
     private javax.swing.JFrame getExecuteTimerFrame() {
         if (ivjExecuteTimerFrame == null) {
             try {
@@ -206,11 +199,7 @@ public class ExecuteTimer extends Thread implements
                 ivjExecuteTimerFrame.setCursor(new java.awt.Cursor(
                         java.awt.Cursor.DEFAULT_CURSOR));
                 getExecuteTimerFrame().setContentPane(getJFrameContentPane());
-                // user code begin {1}
-                // user code end
             } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
                 handleException(ivjExc);
             }
         }
@@ -222,7 +211,6 @@ public class ExecuteTimer extends Thread implements
      *
      * @return javax.swing.JLabel
      */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
     private javax.swing.JLabel getExecuteTimerLabel1() {
         if (ivjExecuteTimerLabel1 == null) {
             try {
@@ -239,11 +227,7 @@ public class ExecuteTimer extends Thread implements
                         .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 ivjExecuteTimerLabel1.setCursor(new java.awt.Cursor(
                         java.awt.Cursor.DEFAULT_CURSOR));
-                // user code begin {1}
-                // user code end
             } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
                 handleException(ivjExc);
             }
         }
@@ -255,7 +239,6 @@ public class ExecuteTimer extends Thread implements
      *
      * @return javax.swing.JPanel
      */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
     private javax.swing.JPanel getJFrameContentPane() {
         if (ivjJFrameContentPane == null) {
             try {
@@ -264,13 +247,9 @@ public class ExecuteTimer extends Thread implements
                 ivjJFrameContentPane
                         .setLayout(getJFrameContentPaneBorderLayout());
                 getJFrameContentPane().add(getExecuteTimerLabel1(), "North");
-                getJFrameContentPane().add(getTimerCount(), "Center");
+                getJFrameContentPane().add(getTimerCountLabel(), "Center");
                 getJFrameContentPane().add(getbtnTerminate(), "South");
-                // user code begin {1}
-                // user code end
             } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
                 handleException(ivjExc);
             }
         }
@@ -282,7 +261,6 @@ public class ExecuteTimer extends Thread implements
      *
      * @return java.awt.BorderLayout
      */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
     private java.awt.BorderLayout getJFrameContentPaneBorderLayout() {
         java.awt.BorderLayout contentPaneBorderLayout = null;
         try {
@@ -315,8 +293,7 @@ public class ExecuteTimer extends Thread implements
      *
      * @return javax.swing.JLabel
      */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private javax.swing.JLabel getTimerCount() {
+    private javax.swing.JLabel getTimerCountLabel() {
         if (ivjTimerCount == null) {
             try {
                 ivjTimerCount = new javax.swing.JLabel();
@@ -327,11 +304,7 @@ public class ExecuteTimer extends Thread implements
                         .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 ivjTimerCount.setCursor(new java.awt.Cursor(
                         java.awt.Cursor.DEFAULT_CURSOR));
-                // user code begin {1}
-                // user code end
             } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
                 handleException(ivjExc);
             }
         }
@@ -356,28 +329,20 @@ public class ExecuteTimer extends Thread implements
      * @exception java.lang.Exception
      *                The exception description.
      */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
     private void initConnections() throws java.lang.Exception {
-        // user code begin {1}
-        // user code end
         getbtnTerminate().addActionListener(this);
     }
 
     /**
      * Initialize the class.
      */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
     private void initialize() {
         try {
-            // user code begin {1}
             timer = new javax.swing.Timer(1000, this);
-            // user code end
             initConnections();
         } catch (java.lang.Throwable ivjExc) {
             handleException(ivjExc);
         }
-        // user code begin {2}
-        // user code end
     }
 
     /**
@@ -429,8 +394,12 @@ public class ExecuteTimer extends Thread implements
         runTimeLimitExceeded = newRunTimeLimitExceeded;
     }
 
+    /**
+     * Resets the timer value text in the GUI to "00:00" and resets the timer's
+     * "start time" to "now()".
+     */
     public void setStartTime() {
-        getTimerCount().setText("00:00");
+        getTimerCountLabel().setText("00:00");
         startTime = now();
 
     }
@@ -439,6 +408,12 @@ public class ExecuteTimer extends Thread implements
         getExecuteTimerLabel1().setText(msg);
     }
 
+    /**
+     * Starts the Timer object counting.  Note that calling this method automatically resets the timer's
+     * "start time" to "now()" (by calling {@link ExecuteTimer#setStartTime()}) before actually starting the
+     * time counting.  If the timer was creating with the "usingGUI" flag set to true, this method also makes
+     * the JFrame containing the timer GUI components (counter text value and "terminate" button) visible.
+     */
     public void startTimer() {
         setStartTime();
         timer.start();
@@ -471,7 +446,9 @@ public class ExecuteTimer extends Thread implements
     }
 
     /**
-     * Kills timer, iocollectors, and process.
+     * Stops the underlying Swing time used to update this ExecutionTimer object.
+     * If the ExecutionTimer is being displayed in a GUI, also makes the GUI hidden
+     * and then disposes it.
      */
     public void stopTimer() {
         timer.stop();

@@ -1378,6 +1378,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         // this will be null if we are accepting the computer judgement
         if (executable != null) {
             executionData = executable.getExecutionData();
+            judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
         }
         newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
 
