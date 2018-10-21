@@ -1795,8 +1795,20 @@ public class Executable extends Plugin implements IExecutable {
             //create a TimerTask to kill the process if it exceeds the problem time limit
             TimerTask task = new TimerTask() {
                 public void run() {
-                    System.out.println("Fired timer task to kill process at " + new Date() );
-                    process.destroy();
+                    //first step: stop the process from running further
+                    if (executionTimer != null) {
+                        executionTimer.stopIOCollectors();
+                    }
+                    //record stop information
+                    Date now = new Date();
+//                    System.out.println("Timer task to kill process fired at " + now );
+                    log.info("Timer task to kill process fired at " + now );
+                    
+                    //make sure the process is gone (the call to stopIOCollectors(), above, will call destroy() first --
+                    // but only if the executionTimer is not null)
+                    if (process != null) {
+                        process.destroy();
+                    }
                 }
             };
             
@@ -1870,7 +1882,7 @@ public class Executable extends Plugin implements IExecutable {
             //get rid of the TLE timer (whether the TLE-kill task has been fired or not)
             timeLimitKillTimer.cancel();
             
-            System.out.println("  Process run time was " + getExecutionTimeInMSecs() + "ms");
+//            System.out.println("  Process run time was " + getExecutionTimeInMSecs() + "ms");
 
             //update executionData info
             executionData.setExecuteExitValue(exitCode);
