@@ -84,7 +84,7 @@ public class ExecuteTimer extends Thread implements
 
         long elapsedSecs = getElapsedSecs();
         
-        System.out.println("Tick: elapsed = " + elapsedSecs + ";   maxtime = " + maxTime);
+//        System.out.println("Tick: elapsed = " + elapsedSecs + ";   maxtime = " + maxTime);
 
         // compute the minutes and seconds elapsed (assumes execution will be < 1 hour)
         long seconds = elapsedSecs % 60;
@@ -107,8 +107,8 @@ public class ExecuteTimer extends Thread implements
             getTimerCountLabel().setForeground(java.awt.Color.red);
 
             if (doAutoStop) {
-                System.out.println("ExecuteTimer - halting run execute, time " + elapsedSecs + " over time limit " + maxTime + " seconds limit.");
-                log.info("ExecuteTimer - halting run execute, time " + elapsedSecs + " over time limit " + maxTime + " seconds limit.");
+                System.out.println("ExecuteTimer - halting run execution, time " + elapsedSecs + " over time limit of " + maxTime + " seconds.");
+                log.info("ExecuteTimer - halting run execution, time " + elapsedSecs + " over time limit of " + maxTime + " seconds.");
                 setRunTimeLimitExceeded(true);
                 stopIOCollectors();
             }
@@ -179,7 +179,7 @@ public class ExecuteTimer extends Thread implements
      */
     private long getElapsedSecs() {
         long milliDiff = now().getTime().getTime() - startTime.getTime().getTime();
-        System.out.println("milliDiff = " + milliDiff);
+//        System.out.println("milliDiff = " + milliDiff);
         long secs = milliDiff / 1000;
         return secs;
     }
@@ -434,16 +434,15 @@ public class ExecuteTimer extends Thread implements
         stopTimer();
 
         // Stop IO Collectors
+        log.info("ExecuteTimer: halting IOCollectors");
         firstIO.haltMe();
         secondIO.haltMe();
 
         // stop the process
         if (proc != null) {
-            log.config("ExecuteTimer: attempting to destroy process");
+            log.info("ExecuteTimer: attempting to destroy process");
             proc.destroy();
-//            proc.destroyForcibly();  //requires Java 8
-            
-            //TODO: record "endTimeNanos" here?
+//            proc.destroyForcibly();  //should use this, but it requires Java 8
         }
 
     }
