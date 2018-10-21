@@ -67,9 +67,11 @@ public class IOCollector extends Thread {
         try {
             
             c = bufReader.read(cbuf);
+            //read input from the specified input stream until either something invokes haltme() (e.g. operator hits "Terminate" button),
+            // EOF is reached, or the input size from the stream exceeds maxFileSize
             while ((!stopIt) && // Stopped when someone hit terminate button
                     (c != -1) && // not EOF
-                    (offset < (maxFileSize)) // over max size
+                    (offset < (maxFileSize)) // not over max size
             ) {
                 offset += c;
                 outWriter.write(cbuf, 0, c);
@@ -83,6 +85,9 @@ public class IOCollector extends Thread {
             if (offset >= (maxFileSize)) {
                 outWriter.write((NL+"Output exceeds maximum file size " + new Long(maxFileSize).toString()+NL).getBytes());
             }
+            
+            //we only get here when the above loop terminates (EOF was reached, stopIt was true, or maxFileSize was reached).
+            //since there might still be data in the input stream, we read the rest of it (and discard it)
             try {
                 c = bufReader.read(cbuf);
                 while ((!stopIt) && // Stopped when someone hit terminate button
