@@ -16,6 +16,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 
 import javax.swing.JFileChooser;
@@ -1774,7 +1776,11 @@ public class Executable extends Plugin implements IExecutable {
                 autoStop = true;
             }
 
+            //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp 
+            /// immediately prior to actually "execing" the process.
             process = runProgram(cmdline, "Executing...", autoStop);
+            
+            //make sure we succeeded in getting the external process going
             if (process == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
@@ -1782,6 +1788,23 @@ public class Executable extends Plugin implements IExecutable {
                 executionData.setExecuteSucess(false);
                 return false;
             }
+            
+            //create a Timer to run the TLE kill task
+            Timer timeLimitKillTimer = new Timer("TLE-Timer");
+            
+            //create a TimerTask to kill the process if it exceeds the problem time limit
+            TimerTask task = new TimerTask() {
+                public void run() {
+                    System.out.println("Fired timer task to kill process at " + new Date() );
+                    process.destroy();
+                }
+            };
+            
+            //set the TLE kill task delay to the number of milliseconds allowed by the problem
+            long delay = (long) (problem.getTimeOutInSeconds() * 1000) ;
+            
+            //schedule the TLE kill task with the Timer
+            timeLimitKillTimer.schedule(task, delay);
 
             // Create a stream that reads from the stdout of the child process
             BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
@@ -1801,6 +1824,8 @@ public class Executable extends Plugin implements IExecutable {
 
             //check if problem is configured with an input data file which the team program (process) should read from stdin
             if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
+                
+                //yes, problem needs data file sent to its stdin
                 log.info("Using STDIN from file " + inputDataFileName);
 
                 //create streams for input data file and stdin for the process
@@ -1842,6 +1867,11 @@ public class Executable extends Plugin implements IExecutable {
             //timestamp the end of the process's execution
             endTimeNanos = System.nanoTime();
             
+            //get rid of the TLE timer (whether the TLE-kill task has been fired or not)
+            timeLimitKillTimer.cancel();
+            
+            System.out.println("  Process run time was " + getExecutionTimeInMSecs() + "ms");
+
             //update executionData info
             executionData.setExecuteExitValue(exitCode);
             executionData.setExecuteTimeMS(getExecutionTimeInMSecs());
@@ -2415,7 +2445,7 @@ public class Executable extends Plugin implements IExecutable {
                     executionTimer.setProc(process);
                     executionTimer.startTimer();
                 }
-
+                
             } else {
                 errorString = "Execute Directory does not exist";
                 log.config("Execute Directory does not exist");
