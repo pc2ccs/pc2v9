@@ -83,6 +83,8 @@ public class ExecuteTimer extends Thread implements
     public void actionPerformed(java.awt.event.ActionEvent e) {
 
         long elapsedSecs = getElapsedSecs();
+        
+        System.out.println("Tick: elapsed = " + elapsedSecs + ";   maxtime = " + maxTime);
 
         // compute the minutes and seconds elapsed (assumes execution will be < 1 hour)
         long seconds = elapsedSecs % 60;
@@ -176,8 +178,8 @@ public class ExecuteTimer extends Thread implements
      * @return a long containing the number of elapsed seconds from timer start until now
      */
     private long getElapsedSecs() {
-        long milliDiff = now().getTime().getTime()
-                - startTime.getTime().getTime();
+        long milliDiff = now().getTime().getTime() - startTime.getTime().getTime();
+        System.out.println("milliDiff = " + milliDiff);
         long secs = milliDiff / 1000;
         return secs;
     }
@@ -409,9 +411,10 @@ public class ExecuteTimer extends Thread implements
     }
 
     /**
-     * Starts the Timer object counting.  Note that calling this method automatically resets the timer's
+     * Resets the ExecuteTimer object's value to zero and starts it counting.  
+     * Calling this method automatically resets the ExecuteTimer's
      * "start time" to "now()" (by calling {@link ExecuteTimer#setStartTime()}) before actually starting the
-     * time counting.  If the timer was creating with the "usingGUI" flag set to true, this method also makes
+     * timer counting.  If the timer was creating with the "usingGUI" flag set to true, this method also makes
      * the JFrame containing the timer GUI components (counter text value and "terminate" button) visible.
      */
     public void startTimer() {
@@ -427,27 +430,27 @@ public class ExecuteTimer extends Thread implements
      */
     public void stopIOCollectors() {
 
-        // Stop the timer (duh!)
-
+        // Stop the underlying Swing timer and dispose the GUI (if any)
         stopTimer();
 
         // Stop IO Collectors
-
         firstIO.haltMe();
         secondIO.haltMe();
 
         // stop the process
-
         if (proc != null) {
             log.config("ExecuteTimer: attempting to destroy process");
             proc.destroy();
+//            proc.destroyForcibly();  //requires Java 8
+            
+            //TODO: record "endTimeNanos" here?
         }
 
     }
 
     /**
-     * Stops the underlying Swing time used to update this ExecutionTimer object.
-     * If the ExecutionTimer is being displayed in a GUI, also makes the GUI hidden
+     * Stops the underlying Swing timer used to update this ExecuteTimer object.
+     * If the ExecuteTimer is being displayed in a GUI, also makes the GUI hidden
      * and then disposes it.
      */
     public void stopTimer() {
