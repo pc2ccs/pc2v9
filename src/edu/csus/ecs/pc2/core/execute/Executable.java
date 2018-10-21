@@ -137,6 +137,8 @@ public class Executable extends Plugin implements IExecutable {
      */
     private static final String EXIT_CODE_FILENAME = "EXITCODE.TXT";
 
+    private static final long NANOSECS_PER_MILLISEC = 1_000_000;
+
     /**
      * Files submitted with the Run.
      */
@@ -183,8 +185,8 @@ public class Executable extends Plugin implements IExecutable {
      */
     private ArrayList<String> validatorStderrFilesnames = new ArrayList<String>();
 
-    private long startTimeMillis;
-    private long endTimeMillis;
+    private long startTimeNanos;
+    private long endTimeNanos;
 
     private Process process;
 
@@ -1614,7 +1616,7 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
-            executionTimer.startTimer();
+//            executionTimer.startTimer();    //TODO: why is this here?  method runProgram() (called below) starts the timer (which is where it should be done).
 
             if (problem.getDataFileName() != null) {
                 if (problem.isReadInputDataFromSTDIN()) {
@@ -1781,25 +1783,31 @@ public class Executable extends Plugin implements IExecutable {
                 return false;
             }
 
-            // This reads from the stdout of the child process
+            // Create a stream that reads from the stdout of the child process
             BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
-            // The reads from the stderr of the child process
+            // Create a stream that reads from the stderr of the child process
             BufferedInputStream childError = new BufferedInputStream(process.getErrorStream());
 
+            //create collectors for reading the child process's stdout and stderr output
             IOCollector stdoutCollector = new IOCollector(log, childOutput, stdoutlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
             IOCollector stderrCollector = new IOCollector(log, childError, stderrlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
 
+            //store references to the collectors in the execution timer 
             executionTimer.setIOCollectors(stdoutCollector, stderrCollector);
             executionTimer.setProc(process);
 
             stdoutCollector.start();
             stderrCollector.start();
 
+            //check if problem is configured with an input data file which the team program (process) should read from stdin
             if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
                 log.info("Using STDIN from file " + inputDataFileName);
 
+                //create streams for input data file and stdin for the process
                 BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
                 BufferedInputStream in = new BufferedInputStream(new FileInputStream(inputDataFileName));
+                
+                //copy bytes from input data file to process's stdin, 32K at a time
                 byte[] buf = new byte[32768];
                 int c;
                 try {
@@ -1810,45 +1818,62 @@ public class Executable extends Plugin implements IExecutable {
                     log.info("Caught a " + e.getMessage() + " do not be alarmed.");
                 }
 
+                //close the input data file and process stdin streams
                 in.close();
                 out.close();
             }
 
+            //wait (block this thread) until both IOCollectors terminate, which happens when either 
+            //  (1) EOF is reached on the child stdout/err,
+            //  (2) the collector is halted by the ExecuteTimer (either because the time limit was exceeded or the 
+            //      operator presses the "Terminate" button), or
+            //  (3) the collector collects maxFileSize input from the child process
             stdoutCollector.join();
             stderrCollector.join();
+
+            //when we reach here we know that both IOCollectors have terminated, which means one (or more) of the three conditions above
+            // is true: either the child has stopped producing output (generated EOF on both stdout and stderr), the timer has terminated the
+            // IOCollectors due to either a time limit or the operator pressing the "Terminate" button, or the IOCollector reached maximum
+            // output.  In all these cases we need to wait for the process to die.
+            
+            //wait for the process to finish
+            int exitCode = process.waitFor();
+            
+            //timestamp the end of the process's execution
+            endTimeNanos = System.nanoTime();
+            
+            //update executionData info
+            executionData.setExecuteExitValue(exitCode);
+            executionData.setExecuteTimeMS(getExecutionTimeInMSecs());
+            
+            boolean runTimeLimitWasExceeded = getExecutionTimeInMSecs() > problem.getTimeOutInSeconds()*1000 ;
+            executionData.setRunTimeLimitExceeded(runTimeLimitWasExceeded);
+ 
+            log.info("Child process returned exit code " + exitCode);
+            if (executionData.isRunTimeLimitExceeded()) {
+                log.info("Run exceeded problem time limit of " + problem.getTimeOutInSeconds() + " secs: actual run time = " + executionData.getExecuteTimeMS() + " msec;  Run = " + run);
+            }
 
             boolean terminatedByOperator = false;
             if (executionTimer != null) {
                 executionTimer.stopTimer();
                 terminatedByOperator = executionTimer.isTerminatedByOperator();
-                executionData.setRunTimeLimitExceeded(executionTimer.isRunTimeLimitExceeded());
-                if (executionTimer.isRunTimeLimitExceeded()) {
-                    log.info("Run exceeded problem time limit of " + problem.getTimeOutInSeconds() + " secs: actual run time = " + executionData.getExecuteTimeMS() + " msec;  Run = " + run);
-                }
+                
             }
 
-            if (process != null) {
-                int returnValue = process.waitFor();
-                endTimeMillis = System.currentTimeMillis();
-                log.info("execution process returned exit code " + process.exitValue());
-                executionData.setExecuteExitValue(returnValue);
-                process.destroy();
-                
-                //if the process generated a Runtime Error and did NOT exceed time limit, add error msg to team output
-                if (!executionData.isRunTimeLimitExceeded() && !terminatedByOperator && returnValue != 0) {
-                    String msg = "Note: program exited with non-zero exit code '" + returnValue + "'" + NL;
-                    stdoutlog.write(msg.getBytes());
-                }
-            } else {
-                endTimeMillis = System.currentTimeMillis();
-                log.info("Process was null before waitFor()");
+            process.destroy();
+
+            // if the process generated a Runtime Error and did NOT exceed time limit, add error msg to team output
+            if (!executionData.isRunTimeLimitExceeded() && !terminatedByOperator && exitCode != 0) {
+                String msg = "Note: program exited with non-zero exit code '" + exitCode + "'" + NL;
+                stdoutlog.write(msg.getBytes());
             }
 
             stdoutlog.close();
             stderrlog.close();
 
             executionData.setExecuteSucess(true);
-            executionData.setExecuteTimeMS(endTimeMillis - startTimeMillis);
+                        
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
 
@@ -1910,6 +1935,23 @@ public class Executable extends Plugin implements IExecutable {
         return passed;
     }
 
+    /**
+     * Returns the execution time of the child process; assumes that both {@link #startTimeNanos} and
+     * {@link #endTimeNanos} have been set prior to calling this method.  The method works by computing the difference
+     * between these two variables and converting it from nanoseconds to milliseconds, rounded.
+     * 
+     * @return a long containing the (rounded) millseconds of execution time
+     */
+    private long getExecutionTimeInMSecs() {
+                
+        long diffNanos = endTimeNanos - startTimeNanos ;
+        //round and convert to msecs
+        long diffMillis = (diffNanos + 500_000) / NANOSECS_PER_MILLISEC ;
+        
+        return diffMillis;
+    }
+
+    
     protected boolean isValidDataFile(Problem inProblem) {
         boolean result = false;
         if (inProblem.getDataFileName() != null && inProblem.getDataFileName().trim().length() > 0) {
@@ -1929,6 +1971,8 @@ public class Executable extends Plugin implements IExecutable {
      * Extract source file and run compile command line script.
      * 
      * @return true if executable is created.
+     * 
+     * TODO: this method needs to be updated to use the nanoTimer (see method {@link #executeProgram(int)}) 
      */
     protected boolean compileProgram() {
 
@@ -1964,7 +2008,7 @@ public class Executable extends Plugin implements IExecutable {
             BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false));
 
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
-            executionTimer.startTimer();
+            executionTimer.startTimer();    //TODO: why is this here, when method runProgram() invokes startTimer()?  (it should only be done in runProgram...)
 
             long startSecs = System.currentTimeMillis();
 
@@ -2363,7 +2407,7 @@ public class Executable extends Plugin implements IExecutable {
                     executionTimer.setTitle(msg);
                 }
 
-                startTimeMillis = System.currentTimeMillis();
+                startTimeNanos = System.nanoTime();
                 process = Runtime.getRuntime().exec(cmdline, env, runDir);
 
                 // if(isJudge && executionTimer != null) {
