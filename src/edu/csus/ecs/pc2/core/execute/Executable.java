@@ -1815,9 +1815,11 @@ public class Executable extends Plugin implements IExecutable {
             //set the TLE kill task delay to the number of milliseconds allowed by the problem
             long delay = (long) (problem.getTimeOutInSeconds() * 1000) ;
             
-            //schedule the TLE kill task with the Timer
-            timeLimitKillTimer.schedule(task, delay);
-
+            //schedule the TLE kill task with the Timer -- but only for judged runs (i.e., non-team runs)
+            if (autoStop) {
+                timeLimitKillTimer.schedule(task, delay);
+            }
+            
             // Create a stream that reads from the stdout of the child process
             BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
             // Create a stream that reads from the stderr of the child process
