@@ -1,11 +1,7 @@
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.list.AccountComparator;
-import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
@@ -57,15 +53,6 @@ public class ResultsFileTest extends AbstractTestCase {
 
         return data;
     }
-
-    public Account[] getTeamAccounts(IInternalContest contest) {
-        Vector<Account> accounts = contest.getAccounts(Type.TEAM);
-        Account[] list = (Account[]) accounts.toArray(new Account[accounts.size()]);
-        Arrays.sort(list, new AccountComparator());
-        return list;
-    }
-
-
 
     /**
      * Add runs to contest.

@@ -1,12 +1,16 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
+import java.util.List;
 
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -213,6 +217,78 @@ public class PacketHandlerTest extends AbstractTestCase {
     protected IInternalController createController(IInternalContest contest) {
         String outputTestDirectory = getOutputDataDirectory();
         return sampleContest.createController(contest, outputTestDirectory, true, false);
+    }
+  
+  
+    
+    
+    public void testgetProblemsForTeam() throws Exception {
+
+        IInternalContest contest = createContest("testFilterProblemsByTeam");
+        IInternalController controller = createController(contest);
+        
+        sampleContest.assignSampleGroups(contest,"One", "Two");
+        
+        Group[] groups = contest.getGroups();
+        assertNotNull(groups);
+        assertTrue("More than 1 group "+groups.length, groups.length > 1);
+        
+        Group group3 = new Group("Three");
+        contest.addGroup(group3);
+        
+        
+        Problem[] problems = contest.getProblems();
+        assertTrue(problems.length > 4);
+
+        PacketHandler packetHandler = new PacketHandler(controller, contest);
+        
+        Account[] teams = getTeamAccounts(contest);
+        
+        Account team = teams[0];
+        
+        Problem[] prob = packetHandler.getProblemsForTeam(contest, team.getClientId());
+        
+        assertEquals(prob.length, problems.length);
+        
+        team.setGroupId(group3.getElementId());
+        contest.updateAccount(team);
+        
+        Problem np1 = assignOnlyGroupToProblem(contest, problems[1], groups[1]);
+
+        assertFalse(np1.isAllView());
+        List<Group> np1Groups = np1.getGroups();
+        assertTrue(np1Groups.size() == 1);
+        assertEquals(groups[1], np1Groups.get(0));
+        
+        Account admin = getAdministratorAccounts(contest)[0];
+        Problem[] npl = packetHandler.getProblemsForTeam(contest, admin.getClientId());
+        assertEquals(problems.length, npl.length);
+        
+        npl = packetHandler.getProblemsForTeam(contest, team.getClientId());
+        assertEquals(problems.length-1, npl.length);
+        
+        Account team2 = teams[1];
+        team2.setGroupId(groups[1].getElementId());
+        contest.updateAccount(team2);
+        
+        npl = packetHandler.getProblemsForTeam(contest, team2.getClientId());
+        assertEquals(problems.length, npl.length);
+    }
+
+
+    /**
+     * Assign only this single group for this problem.
+     * 
+     * @param contest
+     * @param problem
+     * @param group
+     * @return 
+     */
+    private Problem assignOnlyGroupToProblem(IInternalContest contest, Problem problem, Group group) {
+        problem.clearGroups();
+        problem.addGroup(group);
+        contest.updateProblem(problem);
+        return contest.getProblem(problem.getElementId());
     }
 
 

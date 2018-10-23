@@ -348,16 +348,6 @@ public class EventFeedJSONTest extends AbstractTestCase {
     }
 
     /**
-     * Get all team accounts (all sites).
-     * 
-     */
-    public static Account[] getTeamAccounts(IInternalContest contest) {
-        // SOMEDAY move getTeamAccounts into AccountsUtility class
-
-        return getAllAccounts(contest, Type.TEAM);
-    }
-
-    /**
      * Get all first account
      */
     public static Account getFirstAccount(IInternalContest contest, ClientType.Type type) {

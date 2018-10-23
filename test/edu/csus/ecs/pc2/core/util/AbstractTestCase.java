@@ -1058,7 +1058,49 @@ public class AbstractTestCase extends TestCase {
         return accounts[randomIndex];
     }
     
-    public Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
+    /**
+     * Get all teams in sorted order.
+     * 
+     * @see AccountComparator
+     * @param contest
+     * @return
+     */
+    public static Account[] getTeamAccounts(IInternalContest contest) {
+        return getAccounts(contest, Type.TEAM);
+    }
+    
+    /**
+     * Get all admins in sorted order
+     * 
+     * @see AccountComparator
+     * @param contest
+     * @return
+     */
+    public Account[] getAdministratorAccounts(IInternalContest contest) {
+        return getAccounts(contest, Type.ADMINISTRATOR);
+    }
+
+    /**
+     * Get all judges in sorted order
+     * 
+     * @see AccountComparator
+     * @param contest
+     * @return
+     */
+    public Account[] getJudgesAccounts(IInternalContest contest) {
+        return getAccounts(contest, Type.JUDGE);
+    }
+
+    
+    /**
+     * Get all accounts for type in sorted order.
+     * 
+     * @see AccountComparator
+     * @param contest
+     * @param type
+     * @return
+     */
+    public static Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
         Vector<Account> accountVector = contest.getAccounts(type);
         Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());

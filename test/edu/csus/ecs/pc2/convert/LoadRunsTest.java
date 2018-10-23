@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -108,11 +107,6 @@ public class LoadRunsTest extends AbstractTestCase {
 
         return contest;
 
-    }
-
-    private Account[] getTeamAccounts(IInternalContest contest) {
-        Vector<Account> accounts = contest.getAccounts(Type.TEAM);
-        return (Account[]) accounts.toArray(new Account[accounts.size()]);
     }
 
     /**

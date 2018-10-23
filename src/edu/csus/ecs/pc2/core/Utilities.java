@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -1634,6 +1635,19 @@ public final class Utilities {
                 );
             }
         }
+    }
+    
+    public static void dumpProblemGroups(String message, Problem problem) {
+
+        System.out.println("Start " + message + " dumpProblemGroups ");
+        List<Group> groups = problem.getGroups();
+        System.out.println("Problem '" + problem.getDisplayName() + "' view all ? " + problem.isAllView() + " groups count " + groups.size());
+        int i = 1;
+        for (Group group : groups) {
+            System.out.println(i + " group " + group.getGroupId() + " " + group.getDisplayName());
+            i++;
+        }
+        System.out.println("End "+message + " dumpProblemGroups "+new Date());
     }
 
 

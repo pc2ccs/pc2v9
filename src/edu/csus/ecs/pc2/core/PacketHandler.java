@@ -3919,6 +3919,7 @@ public class PacketHandler {
         Run[] runs = null;
         Clarification[] clarifications = null;
         ProblemDataFiles[] problemDataFiles = new ProblemDataFiles[0];
+        Problem[] problems = new Problem[0];
         ClientSettings[] clientSettings = null;
         Account[] accounts = null;
         Site[] sites = null;
@@ -3952,6 +3953,9 @@ public class PacketHandler {
             Profile profile = inContest.getProfile();
             profiles = new Profile[1];
             profiles[0] = profile;
+            
+            problems = getProblemsForTeam (inContest, clientId);
+            
         } else {
             runs = inContest.getRuns();
             clarifications = inContest.getClarifications();
@@ -3961,6 +3965,7 @@ public class PacketHandler {
             sites = inContest.getSites();
             profiles = inContest.getProfiles();
             finalizeData = inContest.getFinalizeData();
+            problems = inContest.getProblems();
         }
 
         ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
@@ -3976,7 +3981,7 @@ public class PacketHandler {
         contestLoginSuccessData.setRemoteLoggedInUsers(getAllRemoteLoggedInUsers());
         contestLoginSuccessData.setLocalLoggedInUsers(getAllLocalLoggedInUsers());
         contestLoginSuccessData.setProblemDataFiles(problemDataFiles);
-        contestLoginSuccessData.setProblems(inContest.getProblems());
+        contestLoginSuccessData.setProblems(problems);
         contestLoginSuccessData.setRuns(runs);
         contestLoginSuccessData.setSites(sites);
         contestLoginSuccessData.setGeneralProblem(inContest.getGeneralProblem());
@@ -3998,6 +4003,65 @@ public class PacketHandler {
         }
 
         return contestLoginSuccessData;
+    }
+
+    /**
+     * Get problems that only this team can use/view based on their group.
+     * 
+     * @param inContest
+     * @param clientId
+     * @return
+     */
+    protected Problem[] getProblemsForTeam(IInternalContest inContest, ClientId clientId) {
+
+        Account account = inContest.getAccount(clientId);
+
+        ElementId groupId = account.getGroupId();
+        Group group = null;
+        if (groupId != null) {
+            group = inContest.getGroup(groupId);
+        }
+
+        if (group == null) {
+            /**
+             * Not assigned a group, they get all problems.
+             */
+            return inContest.getProblems();
+        }
+
+        Problem[] problems = inContest.getProblems();
+
+        // count the problems that this team can view.
+        int count = 0;
+        for (Problem problem : problems) {
+            if (teamCanViewProblem(problem, group)) {
+                count++;
+            }
+        }
+
+        if (count < problems.length) {
+            /**
+             * Team can only view some of the problems.
+             */
+            Problem[] teamsProblems = new Problem[count];
+            int i = 0;
+            for (Problem problem : problems) {
+                if (teamCanViewProblem(problem, group)) {
+                    teamsProblems[i] = problem;
+                    i++;
+                }
+            }
+            return teamsProblems;
+        } else {
+            /**
+             * Team can view all of the problems.
+             */
+            return problems;
+        }
+    }
+   
+    private boolean teamCanViewProblem(Problem problem, Group group) {
+        return problem.isAllView() || problem.canView(group);
     }
 
     /**

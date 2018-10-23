@@ -154,16 +154,6 @@ public class EventFeedXMLTest extends AbstractTestCase {
         }
     }
 
-    /**
-     * Return list of accounts sorted by team id.
-     * @return
-     */
-    private Account[] getTeamAccounts(IInternalContest inContest) {
-        Vector<Account> teams = inContest.getAccounts(Type.TEAM);
-        Account[] accounts = (Account[]) teams.toArray(new Account[teams.size()]);
-        Arrays.sort(accounts, new AccountComparator());
-        return accounts;
-    }
 
     public void testContestElement() throws Exception {
 
