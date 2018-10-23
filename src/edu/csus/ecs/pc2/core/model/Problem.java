@@ -1584,11 +1584,13 @@ public class Problem implements IElementObject {
      */
     public boolean canView (Group group){
         boolean view = (groups.size() == 0);
-        for (Iterator<Group> iterator = groups.iterator(); iterator.hasNext();) {
-            Group g2 = (Group) iterator.next();
-            if (group.getDisplayName().equals(g2.getDisplayName())) {
-                view = true;
-                break;
+        if (group != null) {
+            for (Iterator<Group> iterator = groups.iterator(); iterator.hasNext();) {
+                Group g2 = (Group) iterator.next();
+                if (group.getDisplayName().equals(g2.getDisplayName())) {
+                    view = true;
+                    break;
+                }
             }
         }
         return (view);
