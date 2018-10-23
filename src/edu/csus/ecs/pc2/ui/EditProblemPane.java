@@ -1401,7 +1401,6 @@ public class EditProblemPane extends JPanePlugin {
         
         List<Group> groups = getProblemGroupPane().getGroups();
         
-        
         checkProblem.clearGroups();
         if (groups.size() > 0){
             for (Group group : groups) {
@@ -2215,8 +2214,6 @@ public class EditProblemPane extends JPanePlugin {
                     getMultipleDataSetPane().getRdbtnCopyDataFiles().setEnabled(true);
                     getMultipleDataSetPane().getRdBtnKeepDataFilesExternal().setEnabled(true);
                     
-                    getProblemGroupPane().setProblem(problem);
-
                 } else {
                     enableUpdateButton();
                 }
@@ -2231,6 +2228,7 @@ public class EditProblemPane extends JPanePlugin {
         if (debug22EditProblem) {
             Utilities.dump(originalProblemDataFiles, "debug   ORIGINAL  populateGUI A");
         }
+        getProblemGroupPane().setProblem(inProblem);
 
         if (inProblem != null) {
 

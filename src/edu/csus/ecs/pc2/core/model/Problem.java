@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -1582,7 +1583,15 @@ public class Problem implements IElementObject {
      * @return
      */
     public boolean canView (Group group){
-        return (groups.size() == 0 || groups.contains(group));
+        boolean view = (groups.size() == 0);
+        for (Iterator<Group> iterator = groups.iterator(); iterator.hasNext();) {
+            Group g2 = (Group) iterator.next();
+            if (group.getDisplayName().equals(g2.getDisplayName())) {
+                view = true;
+                break;
+            }
+        }
+        return (view);
     }
     
     /**

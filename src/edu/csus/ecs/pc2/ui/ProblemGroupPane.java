@@ -157,14 +157,7 @@ public class ProblemGroupPane extends JPanePlugin {
         for (Group group : groups) {
             
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(group);
-            if (allGroupsSelected) {
-                wrapperJCheckBox.setSelected(true);
-            } else if (problem.canView(group)) {
-                wrapperJCheckBox.setSelected(true);
-            } else {
-                wrapperJCheckBox.setSelected(false);
-            }
-            
+            wrapperJCheckBox.setSelected(allGroupsSelected || problem.canView(group));
             wrapperJCheckBox.addChangeListener(new ChangeListener() {
                 public void stateChanged(ChangeEvent e) {
                     parentPane.enableUpdateButton();
