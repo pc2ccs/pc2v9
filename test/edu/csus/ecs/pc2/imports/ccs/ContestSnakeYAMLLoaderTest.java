@@ -124,7 +124,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertFalse("File missing " + yamlFilename, contents.length == 0);
 
 //        startExplorer(getDataDirectory());
-//        editFile(yamlFilename);jj
+//        editFile(yamlFilename);
 
         IInternalContest contest = loader.fromYaml(null, contents, getDataDirectory());
 
@@ -141,6 +141,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected language name ", "C", languages[1].getDisplayName());
         assertEquals("Expected language name ", "Java", languages[2].getDisplayName());
         assertEquals("Expected language name ", "Python", languages[3].getDisplayName());
+        
+        assertTrue("Expecting interpreted set for Pyton ", languages[3].isInterpreted());
 
         // for (Language language : languages){
         // writeRow(System.out, language);
@@ -1902,6 +1904,28 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
     
+    public void testLoaderWithSST() throws Exception {
+        
+        InternalContest contest = new InternalContest();
+        
+        String cdpBaseDir = "/test/cdps/systest";
+        
+        IInternalContest newContest = loader.initializeContest(contest, new File(cdpBaseDir));
+        
+        Group[] groups = newContest.getGroups();
+        
+        Account[] teams = getTeamAccounts(newContest);
+        Arrays.sort(teams, new AccountComparator());
+        
+//        for (Account account : teams) {
+//            System.out.println(account.getClientId().getClientNumber()+" "+account.getExternalId()+" "+account.getDisplayName());
+//        }
+//        
+//        for (Group group : groups) {
+//            System.out.println("debug 22 B "+group.getGroupId()+" "+group.getDisplayName());
+//        }
+    }
+    
     /**
      * Test load sample CCS contest.
      * 
@@ -1926,6 +1950,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         Language[] languages = contest.getLanguages();
         assertEquals("Number of languages", 3, languages.length);
+ 
         
         Account[] accounts = contest.getAccounts();
         assertEquals("Number of accounts", 0, accounts.length);
@@ -2528,8 +2553,40 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Language[] languages = contest.getLanguages();
         
         assertEquals(1,languages.length);
+  
+    }
+    
+    public void testInterpretedSet() throws Exception {
+        
+        
+        String [] section = {
+                //
+                "languages:", //
+                " - name: Python 2", //
+                "   compiler: /usr/bin/python2", //
+                "   compiler-args: -m py_compile {files}", //
+                "   runner: /usr/bin/pypy", //
+                "   interpreted: true", //
+                "",//
+
+        };
+        
+        IInternalContest contest = loader.fromYaml(null, section, null, false);
+        Language[] languages = contest.getLanguages();
+        
+        assertEquals(1,languages.length);
+        
+        for (Language language : languages) {
+            System.out.println("debug 22 lang name "+language.getDisplayName()+" "+language.isInterpreted());
+            System.out.println("");
+        }
+        
+        Language lang = languages[0];
+        assertTrue("Expecting interpreted to be set ",lang.isInterpreted());
         
     }
+    
+    
     
     /**
      * Test max-output-size-K.

@@ -46,6 +46,7 @@ languages:
     runner-args:
 
   - name: 'Python'
+    interpreted: true
     active: true
     compilerCmd: 'python -m py_compile {:mainfile}'
     exemask: ''

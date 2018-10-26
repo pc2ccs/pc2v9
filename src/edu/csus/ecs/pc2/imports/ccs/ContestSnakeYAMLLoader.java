@@ -1348,6 +1348,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     boolean useJudgeCommand = fetchBooleanValue(map, USE_JUDGE_COMMAND_KEY, false);
                     language.setUsingJudgeProgramExecuteCommandLine(useJudgeCommand);
 
+                    boolean isInterpreted = fetchBooleanValue(map, INTERPRETED_LANGUAGE_KEY, language.isInterpreted());
+                    language.setInterpreted(isInterpreted); 
+
                     String judgeExecuteCommandLine = fetchValue(map, JUDGE_EXECUTE_COMMAND_KEY);
                     if (judgeExecuteCommandLine != null) {
                         language.setJudgeProgramExecuteCommandLine(judgeExecuteCommandLine);
@@ -2380,6 +2383,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (cdpConfigDirectory == null) {
             throw new Exception("Cannot find CDP for " + entry);
         } else {
+            
             
             loadCCSTSVFiles(contest, cdpConfigDirectory);
             
