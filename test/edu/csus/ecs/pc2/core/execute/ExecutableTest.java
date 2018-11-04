@@ -1359,8 +1359,8 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     public void testCommentedPackageStatement() throws Exception {
-        if (isFastJUnitTesting()){
-//            return;
+        if (isFastJUnitTesting()) {
+            return;
         }
 
         String testBaseDirname = getDataDirectory(this.getName());
