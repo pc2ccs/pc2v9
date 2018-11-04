@@ -1358,6 +1358,36 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
 
+    public void testCommentedPackageStatement() throws Exception {
+        if (isFastJUnitTesting()){
+//            return;
+        }
+
+        String testBaseDirname = getDataDirectory(this.getName());
+        String srcFilename = testBaseDirname + File.separator + "PracticeA.java";
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Problem problem = createHelloProblemNoJudgesData(contest);
+
+        problem.setReadInputDataFromSTDIN(true);
+
+        assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
+
+        Run run = createRun(submitter, javaLanguage, problem, 42, 120);
+
+        assertFileExists(srcFilename);
+        RunFiles runFiles = new RunFiles(run, srcFilename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        /**
+         * If this method failes with ERROR - pc2 jar path not a directory '/software/pc2/cc/projects/pc2v9/build/prod:' then one must create pc2.jar, one can use createVERSIONandJar.xml to create
+         * pc2.jar.
+         */
+        Executable executable = runExecutableTest(run, runFiles, true, pc2YesJudgement);
+        List<String> list = executable.getTeamsOutputFilenames();
+        assertEquals("Expecting output filenames ", problem.getNumberTestCases(), list.size());
+    }
+
     public void testMultipleTestCaseFromFile() throws Exception {
 
         String sumitFilename = getSamplesSourceFilename("Sumit.java");

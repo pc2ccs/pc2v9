@@ -2170,7 +2170,7 @@ public class Executable extends Plugin implements IExecutable {
             scanner = new Scanner(new File(file));
             while (scanner.hasNextLine()) {
                String lineFromFile = scanner.nextLine();
-               if(lineFromFile.contains("package ")) { 
+               if (lineFromFile.startsWith("package ")) { 
                    // a match!
                    name = lineFromFile.substring(8);
                    name = replaceString(name, ";", ".");
