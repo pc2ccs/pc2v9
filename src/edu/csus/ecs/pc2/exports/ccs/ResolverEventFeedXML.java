@@ -579,7 +579,10 @@ public class ResolverEventFeedXML {
 //  </team>
         
         int teamId =  account.getClientId().getClientNumber();
-        String teamIdString =  useDefaultIfEmpty(account.getExternalId(), "4242" + teamId);
+        String teamIdString =  Integer.toString(teamId);
+        if (contest.getSites().length > 1) {
+            teamIdString = useDefaultIfEmpty(account.getExternalId(), "4242" + teamId);
+        }
         
         XMLUtilities.addChild(memento, "external-id", useDefaultIfEmpty(account.getExternalId(), "4242" + teamId));
         XMLUtilities.addChild(memento, "id", teamIdString);
@@ -713,7 +716,12 @@ public class ResolverEventFeedXML {
 
         String status = getStatus(clarification.isAnswered());
         XMLUtilities.addChild(memento, "status", status);
-        XMLUtilities.addChild(memento, "team", clarification.getSubmitter().getClientNumber());
+        Account acct = contest.getAccount(clarification.getSubmitter());
+        String teamId = Integer.toString(acct.getClientId().getClientNumber());
+        if (contest.getSites().length > 1) {
+            teamId = acct.getExternalId();
+        }
+        XMLUtilities.addChild(memento, "team", teamId);
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(clarification.getElapsedMS()));
         
 //    <timestamp>1414215455.760</timestamp>
@@ -848,7 +856,11 @@ public class ResolverEventFeedXML {
         Account acct = contest.getAccount(run.getSubmitter());
 
 //        XMLUtilities.addChild(memento, "team",  run.getSubmitter().getClientNumber());
-        XMLUtilities.addChild(memento, "team",  acct.getExternalId());
+        String teamId = Integer.toString(acct.getClientId().getClientNumber());
+        if (contest.getSites().length > 1) {
+            teamId = acct.getExternalId();
+        }
+        XMLUtilities.addChild(memento, "team",  teamId);
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(run.getElapsedMS()));
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
 
