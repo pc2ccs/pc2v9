@@ -33,7 +33,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
-import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.IMemento;
@@ -186,9 +186,9 @@ public class ResolverEventFeedXML {
                     memento = mementoRoot.createChild(RUN_TAG);
                     addMemento(memento, contest, run); // add RUN
                     
-                    RunTestCaseResult[] runTestCases = getLastJudgementTestCases(run);
+                    RunTestCase[] runTestCases = getLastJudgementTestCases(run);
                     Arrays.sort(runTestCases, new RunTestCaseComparator());
-                    for (RunTestCaseResult runTestCaseResult : runTestCases) {
+                    for (RunTestCase runTestCaseResult : runTestCases) {
                         if (filter.matchesElapsedTime(runTestCaseResult)){
                             memento = mementoRoot.createChild(TESTCASE_TAG);
                             addMemento(memento, contest, runTestCaseResult, run); // add TESTCASE
@@ -630,7 +630,7 @@ public class ResolverEventFeedXML {
         return regionName;
     }
 
-    public XMLMemento createElement(IInternalContest contest, RunTestCaseResult testCase, Run run) {
+    public XMLMemento createElement(IInternalContest contest, RunTestCase testCase, Run run) {
         XMLMemento memento = XMLMemento.createWriteRoot(TESTCASE_TAG);
         addMemento(memento, contest, testCase, run);
         return memento;
@@ -643,7 +643,7 @@ public class ResolverEventFeedXML {
      * @param testCase
      * @param run
      */
-    public IMemento addMemento(IMemento memento, IInternalContest contest, RunTestCaseResult testCase, Run run) {
+    public IMemento addMemento(IMemento memento, IInternalContest contest, RunTestCase testCase, Run run) {
         
         // TODO CCS validate content vs demo/sample XML
         
@@ -990,9 +990,9 @@ public class ResolverEventFeedXML {
                 if (filter.matches(run)) {
                     sb.append(toXML(createElement(contest, run))); // add RUN
                     
-                    RunTestCaseResult[] runTestCases = getLastJudgementTestCases(run);
+                    RunTestCase[] runTestCases = getLastJudgementTestCases(run);
                     Arrays.sort(runTestCases, new RunTestCaseComparator());
-                    for (RunTestCaseResult runTestCaseResult : runTestCases) {
+                    for (RunTestCase runTestCaseResult : runTestCases) {
                         if (filter.matchesElapsedTime(runTestCaseResult)){
                             sb.append(toXML(createElement(contest, runTestCaseResult, run))); // add TESTCASE
                         }
@@ -1020,22 +1020,22 @@ public class ResolverEventFeedXML {
      * Get the list of run cases for the last judgement.
      * @param run
      */
-    protected RunTestCaseResult[] getLastJudgementTestCases(Run run) {
+    protected RunTestCase[] getLastJudgementTestCases(Run run) {
         
-        ArrayList <RunTestCaseResult> cases = new ArrayList<RunTestCaseResult>();
+        ArrayList <RunTestCase> cases = new ArrayList<RunTestCase>();
         
         if (run.isJudged()){
-            RunTestCaseResult[] runTestCases = run.getRunTestCases();
+            RunTestCase[] runTestCases = run.getRunTestCases();
             JudgementRecord judgementRecord = run.getJudgementRecord();
             
-            for (RunTestCaseResult runTestCaseResult : runTestCases) {
+            for (RunTestCase runTestCaseResult : runTestCases) {
                 if (runTestCaseResult.matchesJudgement(judgementRecord)){
                     cases.add(runTestCaseResult);
                 }
             }
         }
         
-        return (RunTestCaseResult[]) cases.toArray(new RunTestCaseResult[cases.size()]);
+        return (RunTestCase[]) cases.toArray(new RunTestCase[cases.size()]);
     }
 
     /**

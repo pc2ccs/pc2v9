@@ -43,7 +43,7 @@ public class RunTestCaseTest extends TestCase {
 
         int testNumber = 5;
         boolean solved = true;
-        IGetDate dateVar = new RunTestCaseResult(run, record, testNumber, solved);
+        IGetDate dateVar = new RunTestCase(run, record, testNumber, solved);
 
         leTestGetSetDate(dateVar);
     }
@@ -66,7 +66,7 @@ public class RunTestCaseTest extends TestCase {
 
         int testNumber = 5;
         boolean solved = true;
-        RunTestCaseResult runTestCaseResult = new RunTestCaseResult(run, record, testNumber, solved);
+        RunTestCase runTestCaseResult = new RunTestCase(run, record, testNumber, solved);
 
         assertTrue("Expcting a match ", runTestCaseResult.matchesJudgement(record));
     }
